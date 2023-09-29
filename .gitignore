@@ -30,3 +30,31 @@
 *.exe
 *.out
 *.app
+
+#.vs
+
+**/.vs
+**/CMakeFiles
+
+# Ignore docs for now
+**/docs
+**/docs/*.css
+**/docs/*.scss
+**/docs/*.html
+**/docs/*.dox
+**/docs/*.dox
+# Ignore GLFW examples and tests
+lib/GLFW/examples
+lib/GLFW/tests
+
+**/bin
+**/*bin-int*
+**/out
+**/out/*
+**/build*
+**/*build*
+**/*.vcxproj*
+
+*.sln
+lib/*.sln
+**/*.sln
