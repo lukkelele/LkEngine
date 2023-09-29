@@ -1,5 +1,6 @@
 workspace "LkEngine"
     architecture "x86_64"
+    startproject "LkApplication"
 
     configurations
     {
@@ -28,13 +29,14 @@ workspace "LkEngine"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}"
 
-include "lib/GLFW/glfw.lua"
+include "LkApplication/premake5.lua"
+include "lib/glfw/glfw.lua"
 include "lib/glad/glad.lua"
 include "lib/imgui/imgui.lua"
 
 project "LkEngine"
-    location "src"
-    kind "ConsoleApp"
+    location "LkEngine"
+    kind "StaticLib"
     language "C++"
     cppdialect "C++17"
     staticruntime "off"
@@ -89,6 +91,7 @@ project "LkEngine"
         "glad",
         "opengl32",
         "ImGui",
+        -- "LkApplication"
     }
 
 	filter "system:windows"

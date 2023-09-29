@@ -6,15 +6,26 @@
 #include <string>
 #include <memory>
 #include <algorithm>
+#include <vector>
 
 
 #define ASSERT(_COND) assert(_COND)
-// Temporary logger
-#define LOG_TRACE(_MESSAGE) std::cout << _MESSAGE << std::endl
-#define LOG_DEBUG(_MESSAGE) std::cout << _MESSAGE << std::endl
-#define LOG_INFO(_MESSAGE) std::cout << _MESSAGE << std::endl
-#define LOG_WARN(_MESSAGE) std::cout << _MESSAGE << std::endl
-#define LOG_ERROR(_MESSAGE) std::cout << _MESSAGE << std::endl
+
+
+namespace LkEngine {
+
+	#define BIT_FIELD(x) (1 << x)
+	#define STRINIGFY(x) #x
+
+	// Temporary logger
+	#define LOG_TRACE(_MESSAGE) std::cout << _MESSAGE << std::endl
+	#define LOG_DEBUG(_MESSAGE) std::cout << _MESSAGE << std::endl
+	#define LOG_INFO(_MESSAGE) std::cout << _MESSAGE << std::endl
+	#define LOG_WARN(_MESSAGE) std::cout << _MESSAGE << std::endl
+	#define LOG_ERROR(_MESSAGE) std::cout << _MESSAGE << std::endl
+
+}
+
 
 #ifdef RENDERER_API_VULKAN
 #include "Vulkan/vulkan.h"

@@ -21,19 +21,6 @@ namespace LkEngine {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     
-    void Renderer::BeginFrame()
-    {
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-    }
-    
-    void Renderer::EndFrame()
-    {
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    }
-    
     // void Renderer::DrawImage(Image* _image)
     // {
     //     Image* image = static_cast<OpenGL_Image*>(_image);

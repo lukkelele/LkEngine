@@ -15,13 +15,24 @@ namespace LkEngine {
     public:
         GraphicsContext(void* _windowHandle);
         virtual ~GraphicsContext() = default;
-        virtual void Init();
-        virtual void Destroy();
-        virtual void SwapBuffers();
-        virtual void InitImGui(const std::string& glslVersion);
+
+        static GraphicsContext* Get() { return m_Context; }
+        static void BeginImGuiFrame();
+        static void EndImGuiFrame();
+
+        void Init();
+        void Destroy();
+        void SwapBuffers();
+        // GLFWwindow* GetGLFWWindow();
+        std::shared_ptr<GLFWwindow*> GetGlfwWindow();
+        void InitImGui(const std::string& glslVersion);
         void SetDarkTheme();
     
-    protected:
+    public:
+        //GLFWwindow* GlfwWindow = nullptr;
+        std::shared_ptr<GLFWwindow*> GlfwWindow = nullptr;
+    private:
+        static GraphicsContext* m_Context;
         std::shared_ptr<Window> m_Window = nullptr;
     };
 

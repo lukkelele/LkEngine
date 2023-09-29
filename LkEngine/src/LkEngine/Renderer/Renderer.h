@@ -19,8 +19,6 @@ namespace LkEngine {
         
         void Init();
         void Clear();
-        void BeginFrame();
-        void EndFrame();
 
         std::string GetGLSLVersion() { return m_GlslVersion; }
     

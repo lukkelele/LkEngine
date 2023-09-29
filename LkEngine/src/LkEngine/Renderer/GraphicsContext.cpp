@@ -5,10 +5,16 @@
 
 namespace LkEngine {
 
+	// std::shared_ptr<GraphicsContext> GraphicsContext::m_Context = nullptr;
+	GraphicsContext* GraphicsContext::m_Context = nullptr;
+
 	GraphicsContext::GraphicsContext(void* _windowHandle)
 	{
+		// m_Context = std::make_shared<GraphicsContext>(this);
+		m_Context = this;
 	    Window* window = static_cast<Window*>(_windowHandle);
 	    m_Window = std::shared_ptr<Window>(window);
+		GlfwWindow = m_Window->GetGlfwWindow();
 	}
 	
 	void GraphicsContext::Init()
@@ -30,38 +36,52 @@ namespace LkEngine {
 		glEnable(GL_LINE_SMOOTH);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-		auto& renderer = m_Window->GetRenderer();
-		InitImGui(renderer->GetGLSLVersion().c_str());
+		InitImGui(m_Window->GetGlslVersion().c_str());
 	}
-	
+
 	void GraphicsContext::Destroy()
 	{
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
+
+	std::shared_ptr<GLFWwindow*> GraphicsContext::GetGlfwWindow()
+	{
+		return GlfwWindow;
+	}
 	
 	void GraphicsContext::SwapBuffers()
 	{
-		glfwSwapBuffers(m_Window->GetGLFWWindow());
+		// glfwSwapBuffers(*m_Window->GetGlfwWindow());
 	}
 	
 	void GraphicsContext::InitImGui(const std::string& glslVersion)
 	{
 	    ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
-		// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // Enable Multi-Viewport
-		io.Fonts->AddFontFromFileTTF("../LkEngine/assets/fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
-	    ImGui_ImplGlfw_InitForOpenGL(m_Window->GetGLFWWindow(), true);
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
+		io.Fonts->AddFontFromFileTTF("assets/fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
+	    ImGui_ImplGlfw_InitForOpenGL(*m_Window->GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(glslVersion.c_str());
 	}
 	
+	void GraphicsContext::BeginImGuiFrame()
+	{
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+	}
+
+	void GraphicsContext::EndImGuiFrame()
+	{
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
 	
 	void GraphicsContext::SetDarkTheme()
 	{
-		// Setup ImGui
 		ImGui::StyleColorsDark();
 		auto& colors = ImGui::GetStyle().Colors;
 		colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };

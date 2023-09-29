@@ -4,13 +4,13 @@
 
 namespace LkEngine {
 
-    constexpr int OpenGL_Major_Version = 3;
-    constexpr int OpenGL_Minor_Version = 3;
+    constexpr int OpenGL_Major_Version = 4;
+    constexpr int OpenGL_Minor_Version = 5;
     constexpr const char* OpenGL_GLSL_33 = "#version 330";
     constexpr const char* OpenGL_GLSL_45 = "#version 450";
-    constexpr const char* OpenGL_GLSL = OpenGL_GLSL_45;
+    constexpr const char* OpenGL_GLSL = OpenGL_GLSL_33;
 
-    // Forward Declaration
+    // Forward declaration
     class Renderer;
     
     class Windows_Window : public Window
@@ -22,9 +22,7 @@ namespace LkEngine {
         void Init(const std::string& glslVersion = OpenGL_GLSL);
         void OnUpdate();
         void Exit();
-        void Clear();
-        void BeginFrame();
-        void EndFrame();
+        void PollEvents();
         bool IsVSync() const;
         void SetVSync(bool enabled);
     };

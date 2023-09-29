@@ -1,30 +1,27 @@
-#include <iostream>
+// #include "LkEngine/Core/Application.h"
 
-#include "LkEngine/Core/Window.h"
-
-
-int main()
-{
-    std::cout << "Hello world" << std::endl;
-
-    int WindowWidth = 1920;
-    int WindowHeight = 1080;
-    const char* WindowTitle = "LkEngine Window";
-
-    auto& window = LkEngine::Window::Create(WindowTitle, WindowWidth, WindowHeight);
-    window->Init("#version 330");
-    GLFWwindow* glfwWindow = window->GetGLFWWindow();
-    ASSERT(glfwWindow);
-    
-    while (!glfwWindowShouldClose(glfwWindow))
-    {
-        window->BeginFrame();
-
-
-        window->EndFrame();
-    }
-
-
-
-    return 0;
-}
+// int main()
+// {
+//     const char* WindowTitle = "LkEngine Window";
+//     int WindowWidth = 1920;
+//     int WindowHeight = 1080;
+// 
+//     LkEngine::ApplicationProperties props(
+//         WindowTitle, 
+//         WindowWidth, 
+//         WindowHeight
+//     );
+//     LkEngine::Application app(props);
+//     app.Init();
+//     GLFWwindow* glfwWindow = *app.GetGlfwWindow();
+//     ASSERT(glfwWindow);
+// 
+//     while (!glfwWindowShouldClose(glfwWindow))
+//     {
+//         app.OnUpdate();
+//     }
+//     app.Exit();
+// 
+// 
+//     return 0;
+// }
