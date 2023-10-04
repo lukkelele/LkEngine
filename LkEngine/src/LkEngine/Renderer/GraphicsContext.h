@@ -23,13 +23,11 @@ namespace LkEngine {
         void Init();
         void Destroy();
         void SwapBuffers();
-        // GLFWwindow* GetGLFWWindow();
         std::shared_ptr<GLFWwindow*> GetGlfwWindow();
         void InitImGui(const std::string& glslVersion);
         void SetDarkTheme();
     
     public:
-        //GLFWwindow* GlfwWindow = nullptr;
         std::shared_ptr<GLFWwindow*> GlfwWindow = nullptr;
     private:
         static GraphicsContext* m_Context;
