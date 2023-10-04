@@ -57,20 +57,14 @@ namespace LkEngine {
 	
 	void Windows_Window::Exit()
 	{
-		m_Context->Destroy();
-		glfwDestroyWindow(*m_GlfwWindow);
 		glfwTerminate();
+		glfwDestroyWindow(*m_GlfwWindow);
 	}
 	
 	void Windows_Window::OnUpdate()
 	{
 		glfwPollEvents();
 		glfwSwapBuffers(*m_GlfwWindow);
-	}
-	
-	void Windows_Window::PollEvents()
-	{
-		glfwPollEvents();
 	}
 	
 	void Windows_Window::SetVSync(bool enabled)

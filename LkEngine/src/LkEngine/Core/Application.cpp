@@ -32,6 +32,7 @@ namespace LkEngine {
 
     void Application::Exit()
     {
+        m_Context->Destroy();
         m_Window->Exit();
     }
 
@@ -51,10 +52,11 @@ namespace LkEngine {
             Layer* layer = *it;
             layer->OnImGuiRender();
         }
-        // GraphicsContext::EndImGuiFrame();
         ImGui::ShowMetricsWindow();
         ImGui::ShowStackToolWindow();
+        ImGui::Begin("Style");
         ImGui::ShowStyleSelector("StyleSelector");
+        ImGui::End();
         GraphicsContext::EndImGuiFrame();
 
         m_Window->OnUpdate();

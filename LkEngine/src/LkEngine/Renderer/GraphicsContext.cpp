@@ -2,15 +2,15 @@
 #include "LkEngine/Platform/Windows/Windows_Window.h"
 #include <imgui/imgui.h>
 
+#include "LkEngine/UI/UI.h"
+
 
 namespace LkEngine {
 
-	// std::shared_ptr<GraphicsContext> GraphicsContext::m_Context = nullptr;
 	GraphicsContext* GraphicsContext::m_Context = nullptr;
 
 	GraphicsContext::GraphicsContext(void* _windowHandle)
 	{
-		// m_Context = std::make_shared<GraphicsContext>(this);
 		m_Context = this;
 	    Window* window = static_cast<Window*>(_windowHandle);
 	    m_Window = std::shared_ptr<Window>(window);
@@ -41,8 +41,8 @@ namespace LkEngine {
 
 	void GraphicsContext::Destroy()
 	{
-		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
+		ImGui_ImplOpenGL3_Shutdown();
 		ImGui::DestroyContext();
 	}
 
@@ -72,10 +72,14 @@ namespace LkEngine {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+		UI::Viewport::BeginViewportBase();
 	}
 
 	void GraphicsContext::EndImGuiFrame()
 	{
+		UI::Viewport::EndViewportBase();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}

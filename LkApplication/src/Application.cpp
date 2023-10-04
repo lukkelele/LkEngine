@@ -27,17 +27,16 @@ int main()
         WindowWidth, 
         WindowHeight
     );
-    LkEngine::Application app(props);
-    app.Init();
-    GLFWwindow* glfwWindow = *app.GetGlfwWindow();
+    auto app = std::make_shared<LkEngine::Application>(props);
+    app->Init();
+    GLFWwindow* glfwWindow = *app->GetGlfwWindow();
     ASSERT(glfwWindow);
 
     while (!glfwWindowShouldClose(glfwWindow))
     {
-        app.OnUpdate();
+        app->OnUpdate();
     }
-    app.Exit();
-
+    app->Exit();
 
     return 0;
 }

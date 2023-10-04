@@ -21,11 +21,4 @@ namespace LkEngine {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     
-    // void Renderer::DrawImage(Image* _image)
-    // {
-    //     Image* image = static_cast<OpenGL_Image*>(_image);
-    //     ImTextureID textureID = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(image->GetRendererID()));
-    //     ImGui::Image(textureID, ImVec2(image->GetWidth(), image->GetHeight()));
-    // }
-
 }

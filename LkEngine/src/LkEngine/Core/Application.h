@@ -22,7 +22,6 @@ namespace LkEngine {
     class Application
     {
     public:
-        // Application(const std::string& title, uint32_t width, uint32_t height);
         Application(ApplicationProperties& props = ApplicationProperties());
         ~Application();
 

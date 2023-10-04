@@ -13,8 +13,7 @@ namespace LkEngine {
 	std::shared_ptr<Window> Window::Create(const char* title, uint32_t width, uint32_t height)
 	{
 	#ifdef PLATFORM_WINDOWS
-		std::shared_ptr<Window> window = std::make_shared<Windows_Window>(title, width, height);
-		return window;
+		return std::make_shared<Windows_Window>(title, width, height);
 	#elif defined(PLATFORM_LINUX)
 		std::shared_ptr<Window> window = std::make_shared<Linux_Window>(title, width, height);
 		return window;

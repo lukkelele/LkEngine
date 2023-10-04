@@ -7,14 +7,14 @@
 
 namespace LkEngine {
 
-    // Forward Declaration
+    // Forward declaration
     class Window;
     
     class GraphicsContext
     {
     public:
         GraphicsContext(void* _windowHandle);
-        virtual ~GraphicsContext() = default;
+        ~GraphicsContext() = default;
 
         static GraphicsContext* Get() { return m_Context; }
         static void BeginImGuiFrame();
