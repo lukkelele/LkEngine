@@ -22,7 +22,7 @@ void TestLayer::OnDetach()
 
 void TestLayer::OnImGuiRender()
 {
-    ImGui::Begin("TestLayer");
-    ImGui::Text("TestLayer::OnImGuiRender()");
-    ImGui::End();
+    // ImGui::Begin("TestLayer");
+    // ImGui::Text("TestLayer::OnImGuiRender()");
+    // ImGui::End();
 }
