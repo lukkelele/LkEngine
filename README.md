@@ -10,7 +10,6 @@ This caused some flaws in the base design that I wasn't too happy with.<br>
 <br>
 Therefore focus will not be directly targeted towards 3D rendering and physics but towards 
 2D instead.<br>
-<br>
 This is done to create a better base to expand on in the future.
 A better and more refined design on user interactability that **LukkelEngine** lacked.<br>
 <br>

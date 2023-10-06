@@ -1,6 +1,7 @@
 #pragma once
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/Core/Timer.h"
 
 
 namespace LkEngine {
@@ -47,6 +48,7 @@ namespace LkEngine {
         std::shared_ptr<Window> m_Window = nullptr;
         std::shared_ptr<Renderer> m_Renderer;
         std::shared_ptr<GraphicsContext> m_Context = nullptr;
+        Timer m_Timer;
         static Application* m_Instance;
     };
 
