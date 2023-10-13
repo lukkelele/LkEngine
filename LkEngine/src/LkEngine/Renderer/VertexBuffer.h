@@ -12,9 +12,10 @@ namespace LkEngine {
 
 		void Bind() const;
 		void Unbind() const;
+		unsigned int GetRendererID() const { return m_RendererID; }
 
 	private:
-		unsigned int m_Count = 0;
+		unsigned int m_RendererID;
 	};
 
 }

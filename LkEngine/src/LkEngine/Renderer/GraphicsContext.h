@@ -22,7 +22,6 @@ namespace LkEngine {
 
         void Init();
         void Destroy();
-        void SwapBuffers();
         std::shared_ptr<GLFWwindow*> GetGlfwWindow();
         void InitImGui(const std::string& glslVersion);
         void SetDarkTheme();

@@ -101,10 +101,9 @@ namespace LkEngine {
 		std::stringstream ss[2];
 		ShaderType type = ShaderType::NONE;
 
-		//getline()
-
 		while (getline(stream, line))
 		{
+			printf("%s\n", line.c_str());
 			if (line.find("#shader") != std::string::npos)
 			{
 				if (line.find("vertex") != std::string::npos)
@@ -119,7 +118,14 @@ namespace LkEngine {
 			}
 		}
 
-		return { ss[0].str(), ss[1].str() };
+		std::string vertex_str = ss[0].str();
+		std::string frag_str = ss[1].str();
+		if (vertex_str.empty())
+			LOG_ERROR("Parsed vertex shader is empty!");
+		if (frag_str.empty())
+			LOG_ERROR("Parsed fragment shader is empty!");
+
+		return { vertex_str, frag_str };
 	}
 
 	ShaderProgramSource Shader::ParseShaders(const std::string& vertexPath, const std::string& fragmentPath)
@@ -138,6 +144,7 @@ namespace LkEngine {
 
 		while (getline(streamVertex, line))
 		{
+			printf("%s\n", line.c_str());
 			ss[(int)type] << line << '\n';
 		}
 
@@ -145,10 +152,18 @@ namespace LkEngine {
 		type = ShaderType::FRAGMENT;
 		while (getline(streamFrag, line))
 		{
+			printf("%s\n", line.c_str());
 			ss[(int)type] << line << '\n';
 		}
 
-		return { ss[0].str(), ss[1].str() };
+		std::string vertex_str = ss[0].str();
+		std::string frag_str = ss[1].str();
+		if (vertex_str.empty())
+			LOG_ERROR("Parsed vertex shader is empty!");
+		if (frag_str.empty())
+			LOG_ERROR("Parsed fragment shader is empty!");
+
+		return { vertex_str, frag_str };
 	}
 
 	unsigned int Shader::CompileShader(unsigned int type, const std::string& source)

@@ -5,28 +5,28 @@
 
 namespace LkEngine {
 
-	VertexBuffer::VertexBuffer(const void* data, unsigned int size)
+	VertexBuffer::VertexBuffer(const void* data, unsigned int arrsize)
 	{
-		GL_CALL(glGenBuffers(1, &m_Count));
-		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_Count));
-		GL_CALL(glBufferData(GL_ARRAY_BUFFER,  size, data, GL_STATIC_DRAW));
+		GL_CALL(glGenBuffers(1, &m_RendererID));
+		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+		LK_ASSERT(sizeof(GLfloat) == sizeof(float));
+		GL_CALL(glBufferData(GL_ARRAY_BUFFER, arrsize * sizeof(float), data, GL_STATIC_DRAW));
 	}
 	 
 	VertexBuffer::~VertexBuffer() 
 	{
-		GL_CALL(glDeleteBuffers(1, &m_Count));
+		GL_CALL(glDeleteBuffers(1, &m_RendererID));
 	}
 
 	void VertexBuffer::Bind() const
 	{
-		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_Count));
+		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 
 	}
 
 	void VertexBuffer::Unbind() const
 	{
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-
 	}
 
 }

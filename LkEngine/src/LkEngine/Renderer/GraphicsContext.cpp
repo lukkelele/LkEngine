@@ -54,10 +54,6 @@ namespace LkEngine {
 		return GlfwWindow;
 	}
 	
-	void GraphicsContext::SwapBuffers()
-	{
-		// glfwSwapBuffers(*m_Window->GetGlfwWindow());
-	}
 	
 	void GraphicsContext::InitImGui(const std::string& glslVersion)
 	{
@@ -69,7 +65,6 @@ namespace LkEngine {
 
 	    ImGui_ImplGlfw_InitForOpenGL(*m_Window->GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(glslVersion.c_str());
-		// UI::Viewport::Init(); // Setup window classes and docking parameters
 		UI::Init();
 	}
 	
@@ -82,10 +77,10 @@ namespace LkEngine {
 		//--------------- Base UI ----------------
 		// UI::Viewport::BeginViewport(); // Dockspace
 		UI::BeginViewportDockSpace();
-		UI::TopBar();
-		UI::BottomBar();
-        UI::LeftSidebar();
-        UI::RightSidebar();
+		//UI::TopBar();
+		//UI::BottomBar();
+        //UI::LeftSidebar();
+        //UI::RightSidebar();
 		//----------------------------------------
 		UI::BeginMainRenderWindow(); // Drawn content
 	}
@@ -93,9 +88,7 @@ namespace LkEngine {
 	void GraphicsContext::EndImGuiFrame()
 	{
 		UI::EndMainRenderWindow();
-		// UI::Viewport::EndViewport();
 		UI::EndViewportDockSpace();
-
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}

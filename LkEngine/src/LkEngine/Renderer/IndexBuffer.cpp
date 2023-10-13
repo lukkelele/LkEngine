@@ -3,9 +3,8 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Core/Base.h"
 
-namespace LkEngine {
 
-	IndexBuffer::IndexBuffer() { }
+namespace LkEngine {
 
 	IndexBuffer::IndexBuffer(const void* data, unsigned int count)
 		: m_Count(count)

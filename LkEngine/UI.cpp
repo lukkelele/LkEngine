@@ -1,5 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/UI/UI.h"
+#include <imgui/imgui_impl_opengl3.h>
 
 
 namespace LkEngine::UI {
@@ -7,7 +8,7 @@ namespace LkEngine::UI {
     ImGuiWindowClass* UIWindowClass = nullptr;
     ImGuiWindowClass* RendererWindowClass = nullptr;
     ImGuiID MainDockSpaceID;
-    ImGuiDockNodeFlags MainDockSpaceFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton;
+    ImGuiDockNodeFlags MainDockSpaceFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_PassthruCentralNode;
     bool Initialized;
     float Sidebar_Left_Ratio = 0.15f;
     float Sidebar_Right_Ratio = 0.15f;
@@ -20,26 +21,27 @@ namespace LkEngine::UI {
         UIWindowClass = new ImGuiWindowClass();
         UIWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton;
         RendererWindowClass = new ImGuiWindowClass();
-        RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_PassthruCentralNode;
+        //RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_PassthruCentralNode;
+        RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingOverMe;
     }
-
     
     void BeginMainRenderWindow()
     {
         //ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+        //ImGuiWindowFlags flags = ImGuiWindowFlags_NoBackground;
         ImGuiWindowFlags flags = 0;
         flags |= ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse;
-        flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar;
+        flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration;
 
         ImGui::SetNextWindowClass(RendererWindowClass);
-        ImGui::SetNextWindowBgAlpha(0);
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, IM_COL32(0.0f, 0.0f, 0.0f, 0.0f));
-        ImGui::Begin(MainRenderWindow_Label, NULL, flags);
-        ImGui::PopStyleColor();
+        //ImGui::SetNextWindowBgAlpha(0);
+        //ImGui::PushStyleColor(ImGuiCol_WindowBg, IM_COL32(255.0f, 255.0f, 255.0f, 0.0f));
+        ImGui::Begin(MainRenderWindow_Label, (bool*)true, flags);
     }
 
     void EndMainRenderWindow()
     {
+        // ImGui::PopStyleColor(1);
         ImGui::End();
     }
 
@@ -139,25 +141,32 @@ namespace LkEngine::UI {
         viewport_window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
 
         ImGuiDockNodeFlags viewport_dock_flags = 0;
-        viewport_dock_flags |= ImGuiDockNodeFlags_PassthruCentralNode;
+        // viewport_dock_flags |= ImGuiDockNodeFlags_PassthruCentralNode;
+        viewport_dock_flags |= ImGuiDockNodeFlags_HiddenTabBar;
+
+       if (!Initialized)
+        {
+            ApplyDockSpaceLayout();
+            Initialized = true;
+        }
 
         ImGui::SetNextWindowPos(main_viewport->WorkPos);
         ImGui::SetNextWindowSize(main_viewport->WorkSize);
         ImGui::SetNextWindowViewport(main_viewport->ID);
         ImGui::Begin(Main_DockSpace, NULL, viewport_window_flags);
-        ImGui::DockSpace(ImGui::GetID(Main_DockSpace), ImVec2(0, 0), MainDockSpaceFlags);
-        ImGui::PopStyleVar(Viewport_StyleVarCount);
+        ImGui::DockSpace(ImGui::GetID(Main_DockSpace), ImVec2(0, 0), viewport_dock_flags);
     }
 
     void EndViewportDockSpace()
     {
         ImGui::End(); // Main_Dockspace
+        ImGui::PopStyleVar(Viewport_StyleVarCount);
         Viewport_StyleVarCount = 0;
     }
 
     void ApplyDockSpaceLayout()
     {
-        LK_ASSERT(MainDockSpaceID != NULL);
+        //LK_ASSERT(MainDockSpaceID != NULL);
         MainDockSpaceID = ImGui::GetID(Main_DockSpace);
         ImGuiIO& io = ImGui::GetIO();
         ImGuiContext& g = *GImGui;

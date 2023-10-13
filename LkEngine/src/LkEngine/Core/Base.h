@@ -13,10 +13,11 @@
 
 namespace LkEngine {
 
-	#define LK_ASSERT(_COND) assert(_COND)
-	#define BIT_FIELD(x) (1 << x)
-	#define STRINIGFY(x) #x
-	#define GL_CALL(_FUNC) (void)(_FUNC) // TODO: Add opengl call func here
+	#define LK_ASSERT(_COND)     assert(_COND)
+	#define LK_ARRAYSIZE(_ARR)   ((int)(sizeof(_ARR) / sizeof(*(_ARR))))    
+	#define BIT_FIELD(x)         (1 << x)
+	#define STRINIGFY(x)         #x
+	#define GL_CALL(_FUNC)       (void)(_FUNC) // TODO: Add opengl call func here
 
 	/* Unique pointer */
 	template<typename T>

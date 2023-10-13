@@ -4,6 +4,7 @@
 
 using namespace LkEngine;
 
+
 class TestLayer : public Layer
 {
 public:
@@ -12,10 +13,14 @@ public:
 
     void OnAttach();
     void OnDetach();
+    void OnUpdate(float ts = 0.0f);
     void OnImGuiRender();
 
 public:
-    
+    VertexArray* m_VAO = nullptr;
+    VertexBuffer* m_VBO = nullptr;
+    IndexBuffer* m_IBO = nullptr;
+    Shader* m_Shader = nullptr;
 };
 
 
