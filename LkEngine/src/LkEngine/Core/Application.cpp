@@ -57,8 +57,6 @@ namespace LkEngine {
             Layer* layer = *it;
             layer->OnImGuiRender();
         }
-        ImGui::ShowMetricsWindow();
-        ImGui::ShowStackToolWindow();
         GraphicsContext::EndImGuiFrame();
 
         m_Window->OnUpdate();

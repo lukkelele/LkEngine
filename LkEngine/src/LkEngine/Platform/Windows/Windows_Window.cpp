@@ -1,6 +1,7 @@
 #include "Platform/Windows/Windows_Window.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Core/Application.h"
+#include "LkEngine/UI/UI.h"
 
 
 namespace LkEngine {
@@ -30,7 +31,7 @@ namespace LkEngine {
 	
 		// m_GlfwWindow = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title.c_str(), nullptr, nullptr);
 		m_GlfwWindow = std::make_shared<GLFWwindow*>(glfwCreateWindow((int)m_Width, (int)m_Height, m_Title.c_str(), nullptr, nullptr));
-		ASSERT(m_GlfwWindow != nullptr);
+		LK_ASSERT(m_GlfwWindow != nullptr);
 		glfwMakeContextCurrent(*m_GlfwWindow);
 	
 		if (!GLFW_Initialized)

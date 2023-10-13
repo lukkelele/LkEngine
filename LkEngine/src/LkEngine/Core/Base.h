@@ -10,23 +10,20 @@
 #include <iostream> // temp
 
 
-#define ASSERT(_COND) assert(_COND)
-
-
 namespace LkEngine {
 
+	#define LK_ASSERT(_COND) assert(_COND)
 	#define BIT_FIELD(x) (1 << x)
 	#define STRINIGFY(x) #x
 
 	// Temporary logger
-	#define LOG_TRACE(_MESSAGE) std::cout << _MESSAGE << std::endl
-	#define LOG_DEBUG(_MESSAGE) std::cout << _MESSAGE << std::endl
-	#define LOG_INFO(_MESSAGE) std::cout << _MESSAGE << std::endl
-	#define LOG_WARN(_MESSAGE) std::cout << _MESSAGE << std::endl
-	#define LOG_ERROR(_MESSAGE) std::cout << _MESSAGE << std::endl
+	#define LOG_TRACE(_MESSAGE) std::cout << "[TRACE] " << _MESSAGE << std::endl
+	#define LOG_DEBUG(_MESSAGE) std::cout << "[DEBUG] " << _MESSAGE << std::endl
+	#define LOG_INFO(_MESSAGE)  std::cout << "[INFO] "  << _MESSAGE << std::endl
+	#define LOG_WARN(_MESSAGE)  std::cout << "[WARN] "  << _MESSAGE << std::endl
+	#define LOG_ERROR(_MESSAGE) std::cout << "[ERROR] " << _MESSAGE << std::endl
 
 }
-
 
 #ifdef RENDERER_API_VULKAN
 #include "Vulkan/vulkan.h"
