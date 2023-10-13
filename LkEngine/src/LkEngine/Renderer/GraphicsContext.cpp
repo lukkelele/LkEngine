@@ -77,11 +77,19 @@ namespace LkEngine {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-		UI::Viewport::BeginViewport();
+		//--------------- Base UI ----------------
+		UI::Viewport::BeginViewport(); // Dockspace
+		UI::TopBar();
+		UI::BottomBar();
+        UI::LeftSidebar();
+        UI::RightSidebar();
+		//----------------------------------------
+		UI::BeginMainRenderWindow(); // Drawn content
 	}
 
 	void GraphicsContext::EndImGuiFrame()
 	{
+		UI::EndMainRenderWindow();
 		UI::Viewport::EndViewport();
 
         ImGui::Render();
