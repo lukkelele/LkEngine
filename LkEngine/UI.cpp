@@ -6,6 +6,23 @@ namespace LkEngine::UI {
 
     ImGuiWindowClass* UIWindowClass = nullptr;
     ImGuiWindowClass* RendererWindowClass = nullptr;
+    ImGuiID MainDockSpaceID;
+    ImGuiDockNodeFlags MainDockSpaceFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton;
+    bool Initialized;
+    float Sidebar_Left_Ratio = 0.15f;
+    float Sidebar_Right_Ratio = 0.15f;
+    float TopBottom_Ratio = 0.82f;
+    unsigned int Viewport_StyleVarCount = 0;
+
+    void Init()
+    {
+        //MainDockSpaceFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton;
+        UIWindowClass = new ImGuiWindowClass();
+        UIWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton;
+        RendererWindowClass = new ImGuiWindowClass();
+        RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_PassthruCentralNode;
+    }
+
     
     void BeginMainRenderWindow()
     {
@@ -108,5 +125,68 @@ namespace LkEngine::UI {
         ImGui::End();
         ImGui::PopStyleVar(1);
     }
+
+    void BeginViewportDockSpace()
+    {
+        ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+        // Setup dockspace over viewport
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        Viewport_StyleVarCount += 3;
+        ImGuiWindowFlags viewport_window_flags = 0;
+        viewport_window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
+        viewport_window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+
+        ImGuiDockNodeFlags viewport_dock_flags = 0;
+        viewport_dock_flags |= ImGuiDockNodeFlags_PassthruCentralNode;
+
+        ImGui::SetNextWindowPos(main_viewport->WorkPos);
+        ImGui::SetNextWindowSize(main_viewport->WorkSize);
+        ImGui::SetNextWindowViewport(main_viewport->ID);
+        ImGui::Begin(Main_DockSpace, NULL, viewport_window_flags);
+        ImGui::DockSpace(ImGui::GetID(Main_DockSpace), ImVec2(0, 0), MainDockSpaceFlags);
+        ImGui::PopStyleVar(Viewport_StyleVarCount);
+    }
+
+    void EndViewportDockSpace()
+    {
+        ImGui::End(); // Main_Dockspace
+        Viewport_StyleVarCount = 0;
+    }
+
+    void ApplyDockSpaceLayout()
+    {
+        LK_ASSERT(MainDockSpaceID != NULL);
+        MainDockSpaceID = ImGui::GetID(Main_DockSpace);
+        ImGuiIO& io = ImGui::GetIO();
+        ImGuiContext& g = *GImGui;
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        // Reset layout
+        ImGui::DockBuilderRemoveNode(MainDockSpaceID); 
+        ImGui::DockBuilderAddNode(MainDockSpaceID, MainDockSpaceFlags);
+        ImGui::DockBuilderSetNodeSize(MainDockSpaceID, viewport->Size);
+
+        // Create layout
+        // Top / Bottom
+        auto dock_id_top = ImGui::DockBuilderSplitNode(MainDockSpaceID, ImGuiDir_Up, TopBottom_Ratio, nullptr, &MainDockSpaceID);
+        auto dock_id_bottom = MainDockSpaceID; // Bottom part is the remaining space in dockspace_ID
+        // Split the top horizontally to create the top bar
+        auto dock_id_middle = dock_id_top;
+        auto dock_id_new_top = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Up, 0.10f, nullptr, &dock_id_top);
+        // Split vertically to create sidebars
+        auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Left, Sidebar_Left_Ratio, nullptr, &dock_id_top);
+        auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);
+        auto dock_id_center = dock_id_top;  // Center part is the remaining space in dock_id_top
+
+        // Build dockspace
+        ImGui::DockBuilderDockWindow(TopBar_Label, dock_id_new_top);
+        ImGui::DockBuilderDockWindow(Sidebar_Left_Label, dock_id_left);
+        ImGui::DockBuilderDockWindow(Sidebar_Right_Label, dock_id_right);
+        ImGui::DockBuilderDockWindow(Bottom_Bar_Label, dock_id_bottom);
+        ImGui::DockBuilderDockWindow(MainRenderWindow_Label, dock_id_center);
+        ImGui::DockBuilderFinish(MainDockSpaceID);
+    }
+
 
 }

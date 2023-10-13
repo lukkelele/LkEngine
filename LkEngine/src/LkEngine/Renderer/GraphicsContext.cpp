@@ -38,7 +38,8 @@ namespace LkEngine {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 		InitImGui(m_Window->GetGlslVersion().c_str());
-		UI::Viewport::Init();
+		// UI::Viewport::Init();
+		UI::Init();
 	}
 
 	void GraphicsContext::Destroy()
@@ -68,7 +69,8 @@ namespace LkEngine {
 
 	    ImGui_ImplGlfw_InitForOpenGL(*m_Window->GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(glslVersion.c_str());
-		UI::Viewport::Init(); // Setup window classes and docking parameters
+		// UI::Viewport::Init(); // Setup window classes and docking parameters
+		UI::Init();
 	}
 	
 	void GraphicsContext::BeginImGuiFrame()
@@ -78,7 +80,8 @@ namespace LkEngine {
         ImGui::NewFrame();
 
 		//--------------- Base UI ----------------
-		UI::Viewport::BeginViewport(); // Dockspace
+		// UI::Viewport::BeginViewport(); // Dockspace
+		UI::BeginViewportDockSpace();
 		UI::TopBar();
 		UI::BottomBar();
         UI::LeftSidebar();
@@ -90,7 +93,8 @@ namespace LkEngine {
 	void GraphicsContext::EndImGuiFrame()
 	{
 		UI::EndMainRenderWindow();
-		UI::Viewport::EndViewport();
+		// UI::Viewport::EndViewport();
+		UI::EndViewportDockSpace();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
