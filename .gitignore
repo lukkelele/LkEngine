@@ -58,3 +58,5 @@ lib/GLFW/tests
 *.sln
 lib/*.sln
 **/*.sln
+**/*.ini
+*/*.ini
