@@ -1,24 +1,54 @@
+#include "LKpch.h"
 #include "LkEngine/Renderer/Renderer.h"
 
 
 namespace LkEngine {
 
-    Renderer* Renderer::m_Instance = nullptr;
-    
-    Renderer::Renderer(const std::string& glslVersion)
-        : m_GlslVersion(glslVersion)
-    {
-        m_Instance = this;
-    }
-    
-    void Renderer::Init()
-    {
-    }
-    
-    void Renderer::Clear()
-    {
-        glClearColor(0.42f, 0.20f, 0.30f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-    
+	int Renderer::DrawMode = GL_TRIANGLES;
+	glm::vec4 Renderer::BackgroundColor = { 0.50f, 0.50f, 0.50f, 1.0f };
+
+	void Renderer::Clear() 
+	{
+		auto c = BackgroundColor;
+		glClearColor(c.x, c.y, c.z, c.w);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
+	{
+		shader.Bind();
+		va.Bind();
+		ib.Bind();
+		glDrawElements(DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+	}
+
+	// Remove me
+	void Renderer::DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
+	{
+		shader.Bind();
+		va.Bind();
+		ib.Bind();
+		GL_CALL(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+	}
+
+	void Renderer::DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
+	{
+		shader.Bind();
+		va.Bind();
+		ib.Bind();
+		glDrawElements(GL_LINES, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+	}
+
+	void Renderer::DrawIndexed(const s_ptr<VertexArray>& va)
+	{
+		va->Bind();
+		unsigned int count = va->GetIndexBuffer()->GetCount();
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+	}
+
+	void Renderer::SetDrawMode(int mode)
+	{
+		DrawMode = mode;
+	}
+
 }

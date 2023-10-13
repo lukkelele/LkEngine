@@ -44,6 +44,9 @@ project "LkEngine"
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "LKpch.h"
+    pchsource "LkEngine/src/LKpch.cpp"
+
     defines
     {
 		"_GLM_WIN32",

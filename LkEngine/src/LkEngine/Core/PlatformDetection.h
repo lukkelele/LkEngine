@@ -1,4 +1,3 @@
-// Platform detection 
 #pragma once
 
 #ifdef _WIN32

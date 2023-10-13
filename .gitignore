@@ -60,3 +60,6 @@ lib/*.sln
 **/*.sln
 **/*.ini
 */*.ini
+
+
+**/*.log

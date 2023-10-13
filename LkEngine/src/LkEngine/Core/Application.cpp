@@ -1,5 +1,5 @@
+#include "LKpch.h"
 #include "LkEngine/Core/Application.h"
-
 
 
 namespace LkEngine {
@@ -10,8 +10,8 @@ namespace LkEngine {
         : m_Props(props)
     {
         m_Instance = this;
+        Logger::Init("LkEngine.log", "Core", "Client");
         m_Window = Window::Create(props.Title.c_str(), props.Width, props.Height);
-		m_Renderer = std::make_shared<Renderer>(m_Props.GlslVersion);
         m_Timer.Reset();
     }
 
@@ -21,7 +21,7 @@ namespace LkEngine {
 
     void Application::Init()
     {
-		m_Renderer->Init();
+		// m_Renderer->Init();
         m_Window->Init();
         m_Context = m_Window->GetContext();
     }
@@ -64,14 +64,12 @@ namespace LkEngine {
 
     void Application::PushLayer(Layer* layer)
     {
-        // LOG_DEBUG("Pushing layer -> {0}", layer->GetName());
         m_LayerStack.PushLayer(layer);
         layer->OnAttach();
     }
 
     void Application::PushOverlay(Layer* layer)
     {
-        // LOG_DEBUG("Pushing overlay -> {0}", layer->GetName());
         m_LayerStack.PushOverlay(layer);
         layer->OnAttach();
     }

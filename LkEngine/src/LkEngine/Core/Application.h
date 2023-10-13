@@ -1,4 +1,5 @@
 #pragma once
+#include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Timer.h"
@@ -39,16 +40,16 @@ namespace LkEngine {
         void PopOverlay(Layer* layer);
         
         std::shared_ptr<Renderer> GetRenderer() const { return m_Renderer; }
-        std::shared_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
         std::shared_ptr<GLFWwindow*> GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
+        std::shared_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
 
     private:
         ApplicationProperties m_Props;
         LayerStack m_LayerStack;
-        std::shared_ptr<Window> m_Window = nullptr;
-        std::shared_ptr<Renderer> m_Renderer;
-        std::shared_ptr<GraphicsContext> m_Context = nullptr;
         Timer m_Timer;
+        std::shared_ptr<Window> m_Window = nullptr;
+        std::shared_ptr<Renderer> m_Renderer = nullptr;
+        std::shared_ptr<GraphicsContext> m_Context = nullptr;
         static Application* m_Instance;
     };
 

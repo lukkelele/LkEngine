@@ -7,7 +7,8 @@
 #include <memory>
 #include <algorithm>
 #include <vector>
-#include <iostream> // temp
+#include <unordered_map>
+
 
 
 namespace LkEngine {
@@ -15,13 +16,25 @@ namespace LkEngine {
 	#define LK_ASSERT(_COND) assert(_COND)
 	#define BIT_FIELD(x) (1 << x)
 	#define STRINIGFY(x) #x
+	#define GL_CALL(_FUNC) (void)(_FUNC) // TODO: Add opengl call func here
 
-	// Temporary logger
-	#define LOG_TRACE(_MESSAGE) std::cout << "[TRACE] " << _MESSAGE << std::endl
-	#define LOG_DEBUG(_MESSAGE) std::cout << "[DEBUG] " << _MESSAGE << std::endl
-	#define LOG_INFO(_MESSAGE)  std::cout << "[INFO] "  << _MESSAGE << std::endl
-	#define LOG_WARN(_MESSAGE)  std::cout << "[WARN] "  << _MESSAGE << std::endl
-	#define LOG_ERROR(_MESSAGE) std::cout << "[ERROR] " << _MESSAGE << std::endl
+	/* Unique pointer */
+	template<typename T>
+	using u_ptr = std::unique_ptr<T>;
+	template<typename T, typename ... ARGS>
+	constexpr u_ptr<T> create_u_ptr(ARGS&& ... args)
+	{
+		return std::make_unique<T>(std::forward<ARGS>(args)...);
+	}
+
+	/* Shared pointer */
+	template<typename T>
+	using s_ptr = std::shared_ptr<T>;
+	template<typename T, typename ... ARGS>
+	constexpr s_ptr<T> create_s_ptr(ARGS&& ... args)
+	{
+		return std::make_shared<T>(std::forward<ARGS>(args)...);
+	}
 
 }
 

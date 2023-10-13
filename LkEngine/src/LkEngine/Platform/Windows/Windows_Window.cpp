@@ -1,3 +1,4 @@
+#include "LKpch.h"
 #include "Platform/Windows/Windows_Window.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Core/Application.h"
@@ -23,7 +24,6 @@ namespace LkEngine {
 			return;
 	
 		int glfwRes = glfwInit();
-		// printf("glfwRes: %d", glfwRes);
 	
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Set core profile
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OpenGL_Major_Version); 

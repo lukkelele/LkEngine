@@ -1,4 +1,5 @@
 #include "TestLayer.h"
+#include <iostream>
 
 
 TestLayer::TestLayer()
@@ -12,7 +13,7 @@ TestLayer::~TestLayer()
 
 void TestLayer::OnAttach()
 {
-    // using namespace LkEngine;
+    using namespace LkEngine;
     LOG_DEBUG("TestLayer::OnAttach()");
 }
 
@@ -22,7 +23,5 @@ void TestLayer::OnDetach()
 
 void TestLayer::OnImGuiRender()
 {
-    // ImGui::Begin("TestLayer");
-    // ImGui::Text("TestLayer::OnImGuiRender()");
-    // ImGui::End();
+    ImGui::Text("TestLayer::OnImGuiRender()");
 }

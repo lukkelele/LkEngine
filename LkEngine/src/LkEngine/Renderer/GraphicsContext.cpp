@@ -1,8 +1,9 @@
+#include "LKpch.h"
 #include "LkEngine/Renderer/GraphicsContext.h"
 #include "LkEngine/Platform/Windows/Windows_Window.h"
-#include <imgui/imgui.h>
-
 #include "LkEngine/UI/UI.h"
+#include <imgui/imgui.h>
+#include <imgui_impl_opengl3.h>
 
 
 namespace LkEngine {
@@ -37,6 +38,7 @@ namespace LkEngine {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 		InitImGui(m_Window->GetGlslVersion().c_str());
+		UI::Viewport::Init();
 	}
 
 	void GraphicsContext::Destroy()
