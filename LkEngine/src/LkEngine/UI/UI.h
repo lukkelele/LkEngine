@@ -20,7 +20,6 @@ namespace LkEngine::UI {
     extern ImGuiWindowClass* UIWindowClass;        
     extern ImGuiWindowClass* RendererWindowClass;   
     extern ImGuiID MainDockSpaceID;
-    extern ImGuiDockNodeFlags MainDockSpaceFlags; 
     extern unsigned int Viewport_StyleVarCount;
     extern float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;
     extern bool Initialized;

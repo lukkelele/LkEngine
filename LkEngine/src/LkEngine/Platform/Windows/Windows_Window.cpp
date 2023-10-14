@@ -42,10 +42,10 @@ namespace LkEngine {
 		}
 	
 		SetVSync(true);
-		glEnable(GL_BLEND);
+		//glEnable(GL_BLEND);
 		//glEnable(GL_DEPTH_TEST);
-		glEnable(GL_LINE_SMOOTH);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_LINE_SMOOTH);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 		if (glfwRawMouseMotionSupported())
 			glfwSetInputMode(*m_GlfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);

@@ -33,12 +33,12 @@ namespace LkEngine {
 		}
 	
 		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 		glEnable(GL_LINE_SMOOTH);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 	
 		InitImGui(m_Window->GetGlslVersion().c_str());
-		// UI::Viewport::Init();
 		UI::Init();
 	}
 
@@ -75,14 +75,14 @@ namespace LkEngine {
         ImGui::NewFrame();
 
 		//--------------- Base UI ----------------
-		// UI::Viewport::BeginViewport(); // Dockspace
 		UI::BeginViewportDockSpace();
-		//UI::TopBar();
-		//UI::BottomBar();
-        //UI::LeftSidebar();
-        //UI::RightSidebar();
-		//----------------------------------------
+		UI::TopBar();
+		UI::BottomBar();
+        UI::LeftSidebar();
+        UI::RightSidebar();
 		UI::BeginMainRenderWindow(); // Drawn content
+		//ImGui::Begin("Hello World");
+		//ImGui::End();
 	}
 
 	void GraphicsContext::EndImGuiFrame()

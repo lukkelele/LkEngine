@@ -53,4 +53,5 @@ void TestLayer::OnUpdate(float ts)
 void TestLayer::OnImGuiRender()
 {
     ImGui::Text("TestLayer::OnImGuiRender()");
+    ImGui::SeparatorText("Separator Text");
 }

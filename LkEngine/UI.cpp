@@ -8,7 +8,6 @@ namespace LkEngine::UI {
     ImGuiWindowClass* UIWindowClass = nullptr;
     ImGuiWindowClass* RendererWindowClass = nullptr;
     ImGuiID MainDockSpaceID;
-    ImGuiDockNodeFlags MainDockSpaceFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_PassthruCentralNode;
     bool Initialized;
     float Sidebar_Left_Ratio = 0.15f;
     float Sidebar_Right_Ratio = 0.15f;
@@ -17,11 +16,9 @@ namespace LkEngine::UI {
 
     void Init()
     {
-        //MainDockSpaceFlags = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton;
         UIWindowClass = new ImGuiWindowClass();
         UIWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton;
         RendererWindowClass = new ImGuiWindowClass();
-        //RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_PassthruCentralNode;
         RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingOverMe;
     }
     
@@ -36,13 +33,52 @@ namespace LkEngine::UI {
         ImGui::SetNextWindowClass(RendererWindowClass);
         //ImGui::SetNextWindowBgAlpha(0);
         //ImGui::PushStyleColor(ImGuiCol_WindowBg, IM_COL32(255.0f, 255.0f, 255.0f, 0.0f));
-        ImGui::Begin(MainRenderWindow_Label, (bool*)true, flags);
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.5, 0.5, 0.5, 1.0));
+        ImGui::Begin(MainRenderWindow_Label, NULL, flags);
+        ImGui::Text("MAIN WINDOW CONTENT");
+        ImGui::PopStyleColor(1);
     }
 
     void EndMainRenderWindow()
     {
         // ImGui::PopStyleColor(1);
         ImGui::End();
+    }
+
+    void BeginViewportDockSpace()
+    {
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+        static ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+        ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+        // Setup dockspace over viewport
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+       if (!Initialized)
+        {
+            ApplyDockSpaceLayout();
+            Initialized = true;
+        }
+        // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+        // and handle the pass-thru hole, so we ask Begin() to not render a background.
+        if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+            window_flags |= ImGuiWindowFlags_NoBackground;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::SetNextWindowPos(main_viewport->WorkPos);
+        ImGui::SetNextWindowSize(main_viewport->WorkSize);
+        ImGui::SetNextWindowViewport(main_viewport->ID);
+        ImGui::Begin(Main_DockSpace, NULL, window_flags);
+        ImGuiID dockspace_id = ImGui::GetID(Main_DockSpace);
+        ImGui::DockSpace(dockspace_id, ImVec2(0, 0), dockspace_flags);
+        ImGui::PopStyleVar(3);
+    }
+
+    void EndViewportDockSpace()
+    {
+        ImGui::End(); // Main_DockSpace
     }
 
     void TopBar()
@@ -128,52 +164,17 @@ namespace LkEngine::UI {
         ImGui::PopStyleVar(1);
     }
 
-    void BeginViewportDockSpace()
-    {
-        ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-        // Setup dockspace over viewport
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        Viewport_StyleVarCount += 3;
-        ImGuiWindowFlags viewport_window_flags = 0;
-        viewport_window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking;
-        viewport_window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
-
-        ImGuiDockNodeFlags viewport_dock_flags = 0;
-        // viewport_dock_flags |= ImGuiDockNodeFlags_PassthruCentralNode;
-        viewport_dock_flags |= ImGuiDockNodeFlags_HiddenTabBar;
-
-       if (!Initialized)
-        {
-            ApplyDockSpaceLayout();
-            Initialized = true;
-        }
-
-        ImGui::SetNextWindowPos(main_viewport->WorkPos);
-        ImGui::SetNextWindowSize(main_viewport->WorkSize);
-        ImGui::SetNextWindowViewport(main_viewport->ID);
-        ImGui::Begin(Main_DockSpace, NULL, viewport_window_flags);
-        ImGui::DockSpace(ImGui::GetID(Main_DockSpace), ImVec2(0, 0), viewport_dock_flags);
-    }
-
-    void EndViewportDockSpace()
-    {
-        ImGui::End(); // Main_Dockspace
-        ImGui::PopStyleVar(Viewport_StyleVarCount);
-        Viewport_StyleVarCount = 0;
-    }
-
     void ApplyDockSpaceLayout()
     {
         //LK_ASSERT(MainDockSpaceID != NULL);
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDocking;
         MainDockSpaceID = ImGui::GetID(Main_DockSpace);
         ImGuiIO& io = ImGui::GetIO();
         ImGuiContext& g = *GImGui;
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         // Reset layout
         ImGui::DockBuilderRemoveNode(MainDockSpaceID); 
-        ImGui::DockBuilderAddNode(MainDockSpaceID, MainDockSpaceFlags);
+        ImGui::DockBuilderAddNode(MainDockSpaceID, dockspace_flags);
         ImGui::DockBuilderSetNodeSize(MainDockSpaceID, viewport->Size);
 
         // Create layout

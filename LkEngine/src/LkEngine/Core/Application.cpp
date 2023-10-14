@@ -21,7 +21,6 @@ namespace LkEngine {
 
     void Application::Init()
     {
-		// m_Renderer->Init();
         m_Window->Init();
         m_Context = m_Window->GetContext();
     }
@@ -58,6 +57,7 @@ namespace LkEngine {
             layer->OnImGuiRender();
         }
         GraphicsContext::EndImGuiFrame();
+
 
         m_Window->OnUpdate();
     }
