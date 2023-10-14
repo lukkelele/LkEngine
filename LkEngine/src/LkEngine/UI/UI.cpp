@@ -18,17 +18,18 @@ namespace LkEngine::UI {
     void Init()
     {
         UIWindowClass = new ImGuiWindowClass();
-        UIWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoResize;
-        UIWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking;
+        UIWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton; // | ImGuiDockNodeFlags_NoResize;
+        UIWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
+        UIWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoSplit;
 
         RendererWindowClass = new ImGuiWindowClass();
-        RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoResize;
-        RendererWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking;
+        RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingInCentralNode; // | ImGuiDockNodeFlags_NoResize;
+        RendererWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
+        RendererWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoSplit;
 
         ExternalWindowClass = new ImGuiWindowClass();
-        ExternalWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoResize;
-        ExternalWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingSplitMe;
-        ExternalWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingSplitOther;
+        ExternalWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDocking;
+        ExternalWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
     }
     
     void BeginMainRenderWindow()
@@ -36,24 +37,36 @@ namespace LkEngine::UI {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
         flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
 
+        //ImGui::SetNextWindowBgAlpha(0.0f);
+        //ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+        auto& io = ImGui::GetIO();
         ImGui::SetNextWindowClass(RendererWindowClass);
-        ImGui::SetNextWindowBgAlpha(0.0f);
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
         ImGui::Begin(MainRenderWindow_Label, NULL, flags);
+
+
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_DockHierarchy))
+        {
+            LOG_INFO("Mouse is inside Window");
+            ImGui::SetNextWindowFocus();
+        }
+        ImGui::ShowDemoWindow();
     }
 
     void EndMainRenderWindow()
     {
+        //ImGui::PopStyleColor();
         ImGui::End();
-        ImGui::PopStyleColor(1);
     }
 
     void BeginViewportDockSpace()
     {
         ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-        //static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode
+            | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoDockingOverOther | ImGuiDockNodeFlags_NoDockingOverEmpty
+            | ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking;
+        //static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
         static ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
         window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
         window_flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs;
@@ -75,36 +88,11 @@ namespace LkEngine::UI {
             ApplyDockSpaceLayout();
         }
 
-        // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-        // and handle the pass-thru hole, so we ask Begin() to not render a background.
-        if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-            window_flags |= ImGuiWindowFlags_NoBackground;
-
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::SetNextWindowPos(main_viewport->WorkPos);
-        ImGui::SetNextWindowSize(main_viewport->WorkSize);
-        ImGui::SetNextWindowViewport(main_viewport->ID);
-        ImGui::SetNextWindowBgAlpha(0.0f);
-        ImGui::Begin(Main_DockSpace, NULL, window_flags);
-        ImGuiID dockspace_id = ImGui::GetID(Main_DockSpace);
-        ImGui::DockSpace(dockspace_id, ImVec2(0, 0), dockspace_flags);
+        ImGui::DockSpaceOverViewport(main_viewport, dockspace_flags, NULL);
     }
 
     void EndViewportDockSpace()
     {
-        ImGui::End(); // Main_DockSpace
-        ImGui::PopStyleVar(3);
-
-        ImGui::SetNextWindowClass(ExternalWindowClass);
-        static bool set_focus_once = false;
-        if (set_focus_once == false)
-        {
-            ImGui::SetNextWindowFocus();
-            set_focus_once = true;
-        }
-        ImGui::ShowDemoWindow();
     }
 
     void TopBar()
@@ -114,6 +102,7 @@ namespace LkEngine::UI {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
         ImGui::Begin(TopBar_Label, &top_bar_open, flags);
         ImGui::Text("Top Bar Content");
         ImGui::End();
@@ -127,6 +116,7 @@ namespace LkEngine::UI {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
         ImGui::Begin(Bottom_Bar_Label, &bottom_bar_open, flags);
         ImGui::Text("Bottom Bar");
         ImGui::End();
@@ -142,12 +132,12 @@ namespace LkEngine::UI {
         float sidebar_left_width = viewport->WorkSize.x;
         static float sidebar_left_minwidth = 140.0f;
         ImVec2 Sidebar_Left_Size = ImVec2(sidebar_left_width, sidebar_left_height);
-		auto& colors = ImGui::GetStyle().Colors;
 
-        ImGui::SetNextWindowClass(UIWindowClass);
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+        ImGui::SetNextWindowClass(UIWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height));
         ImGui::Begin(Sidebar_Left_Label, &sidebar_open, flags);
@@ -197,14 +187,13 @@ namespace LkEngine::UI {
 
     void ApplyDockSpaceLayout()
     {
-        //LK_ASSERT(MainDockSpaceID != NULL);
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoResize; // works
-        dockspace_flags |= ImGuiDockNodeFlags_NoResizeX | ImGuiDockNodeFlags_NoResizeY | ImGuiDockNodeFlags_PassthruCentralNode;
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoResize; 
+        dockspace_flags |= ImGuiDockNodeFlags_NoDockingInCentralNode;
         MainDockSpaceID = ImGui::GetID(Main_DockSpace);
         ImGuiIO& io = ImGui::GetIO();
         ImGuiContext& g = *GImGui;
         ImGuiViewport* viewport = ImGui::GetMainViewport();
-        //LastViewportSize = viewport->WorkSize; // set initially so comparison doesnt trigger false positive
+
         // Reset layout
         ImGui::DockBuilderRemoveNode(MainDockSpaceID); 
         ImGui::DockBuilderAddNode(MainDockSpaceID, dockspace_flags);
@@ -216,7 +205,7 @@ namespace LkEngine::UI {
         auto dock_id_bottom = MainDockSpaceID; // Bottom part is the remaining space in dockspace_ID
         // Split the top horizontally to create the top bar
         auto dock_id_middle = dock_id_top;
-        auto dock_id_new_top = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Up, 0.10f, nullptr, &dock_id_top);
+        auto dock_id_new_top = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Up, 0.08f, nullptr, &dock_id_top);
         // Split vertically to create sidebars
         auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Left, Sidebar_Left_Ratio, nullptr, &dock_id_top);
         auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);

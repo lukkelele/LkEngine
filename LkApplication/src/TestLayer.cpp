@@ -52,8 +52,8 @@ void TestLayer::OnUpdate(float ts)
 
 void TestLayer::OnImGuiRender()
 {
-    ImGui::Text("TestLayer::OnImGuiRender()");
-    ImGui::SeparatorText("Separator Text");
-    ImGui::Separator();
-    ImGui::Button(" Main Window Button :D ");
+    //ImGui::Text("TestLayer::OnImGuiRender()");
+    //ImGui::SeparatorText("Separator Text");
+    //ImGui::Separator();
+    //ImGui::Button(" Main Window Button :D ");
 }
