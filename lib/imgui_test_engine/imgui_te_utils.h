@@ -10,7 +10,7 @@
 #include <math.h>   // fabsf
 #include <stdint.h> // uint64_t
 #include <stdio.h>  // FILE*
-#include "imgui.h"  // ImGuiID, ImGuiKey
+#include "../imgui/imgui.h"  // ImGuiID, ImGuiKey
 class Str;          // Str<> from thirdparty/Str/Str.h
 
 //-----------------------------------------------------------------------------

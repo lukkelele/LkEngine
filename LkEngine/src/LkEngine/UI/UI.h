@@ -20,11 +20,12 @@ namespace LkEngine::UI {
 
     extern ImGuiWindowClass* UIWindowClass;        
     extern ImGuiWindowClass* RendererWindowClass;   
+    extern ImGuiWindowClass* ExternalWindowClass;   
     extern ImGuiID MainDockSpaceID;
     extern unsigned int Viewport_StyleVarCount;
     extern float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;
     extern ImVec2 LastViewportSize;
-    extern bool Initialized;
+    extern bool Initialized, ShowImGuiDemo;
 
 
     void Init();

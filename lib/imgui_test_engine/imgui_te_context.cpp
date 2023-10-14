@@ -8,8 +8,8 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_te_context.h"
-#include "imgui.h"
-#include "imgui_internal.h"
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_internal.h"
 #include "imgui_te_engine.h"
 #include "imgui_te_internal.h"
 #include "imgui_te_perftool.h"

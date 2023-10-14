@@ -1,12 +1,33 @@
 project "imgui_test_engine"
 	kind "StaticLib"
 	language "C++"
+    cppdialect "C++17"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	files 
 	{ 
+		"imgui_te_ui.h",
+		"imgui_te_ui.cpp",
+		"imgui_capture_tool.h",
+		"imgui_capture_tool.cpp",
+		"imgui_te_context.h",
+		"imgui_te_context.cpp",
+		"imgui_te_coroutine.h",
+		"imgui_te_coroutine.cpp",
+		"imgui_te_engine.h",
+		"imgui_te_engine.cpp",
+		"imgui_te_exporters.h",
+		"imgui_te_exporters.cpp",
+		"imgui_te_imconfig.h",
+		"imgui_te_internal.h",
+		"imgui_te_perftool.h",
+		"imgui_te_perftool.cpp",
+		"imgui_te_ui.h",
+		"imgui_te_ui.cpp",
+		"imgui_te_utils.h",
+		"imgui_te_utils.cpp",
 		"*.h", 
 		"*.cpp",
 		"thirdparty/**.h",
@@ -15,7 +36,9 @@ project "imgui_test_engine"
 
 	includedirs
 	{
-		"%{wks.location}/lib/imgui"
+		"lib/imgui",
+		"../imgui",
+		"${wks.location}/lib/imgui",
 	}
 
 	defines

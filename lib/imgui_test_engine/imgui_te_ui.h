@@ -11,7 +11,7 @@
 #pragma once
 
 #ifndef IMGUI_VERSION
-#include "imgui.h"      // IMGUI_API
+#include "../imgui/imgui.h"      // IMGUI_API
 #endif
 
 // Forward declarations

@@ -5,7 +5,7 @@
 #pragma once
 
 #ifndef IMGUI_VERSION
-#include "imgui.h"
+#include "../imgui/imgui.h"
 #endif
 
 //------------------------------------------------------------------------

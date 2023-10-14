@@ -55,8 +55,11 @@ namespace LkEngine {
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		io.Fonts->AddFontFromFileTTF("assets/fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
 		io.ConfigViewportsNoDecoration = false;
+		io.ConfigWindowsResizeFromEdges = false;
+		io.ConfigDockingAlwaysTabBar = false;
 
 	    ImGui_ImplGlfw_InitForOpenGL(*m_Window->GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(glslVersion.c_str());
@@ -87,6 +90,7 @@ namespace LkEngine {
 	{
 		UI::EndMainRenderWindow();
 		UI::EndViewportDockSpace();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
