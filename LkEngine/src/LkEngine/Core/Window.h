@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
-#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_glfw.h>
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/GraphicsContext.h"

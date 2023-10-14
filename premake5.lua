@@ -33,6 +33,7 @@ include "LkApplication/premake5.lua"
 include "lib/glfw/glfw.lua"
 include "lib/glad/glad.lua"
 include "lib/imgui/imgui.lua"
+--include "lib/imgui_test_engine/premake5.lua"
 
 project "LkEngine"
     location "LkEngine"
@@ -71,21 +72,21 @@ project "LkEngine"
 
     includedirs
     {
-        "src",
         "%{prj.name}",
 		"%{wks.location}/LkEngine/src",
 		"%{wks.location}/LkEngine/src/LkEngine",
 		"%{wks.location}/lib",
 		"%{wks.location}/lib/glm",
-		"%{wks.location}/lib/imgui",
-		"%{wks.location}/lib/imgui/backends",
-		"%{wks.location}/lib/imgui/examples",
 		"%{wks.location}/lib/glad",
 		"%{wks.location}/lib/glad/include",
 		"%{wks.location}/lib/stb_image",
 		"%{wks.location}/lib/GLFW/include",
 		"%{wks.location}/lib/spdlog/include",
 		"%{wks.location}/lib/stb_image",
+		"%{wks.location}/lib/imgui",
+		"%{wks.location}/lib/imgui/backends",
+		"%{wks.location}/lib/imgui/examples",
+		"%{wks.location}/lib/imgui_test_engine",
     }
 
     links
@@ -94,7 +95,6 @@ project "LkEngine"
         "glad",
         "opengl32",
         "ImGui",
-        -- "LkApplication"
     }
 
 	filter "system:windows"

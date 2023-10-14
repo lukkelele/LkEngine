@@ -3,8 +3,12 @@ project "ImGui"
 	language "C++"
     cppdialect "C++17"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	--targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	--objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+    --defines { "IMGUI_DEFINE_MATH_OPERATORS" }
 
 	files
 	{
@@ -24,15 +28,15 @@ project "ImGui"
 		"imgui_impl_opengl3.h",
         "imgui_tables.h",
         "imgui_tables.cpp",
-
-        "ImGuizmo.h",
-        "ImGuizmo.cpp"
+        --"ImGuizmo.h",
+        --"ImGuizmo.cpp"
 	}
 
     includedirs
     {
         "%{wks.location}/lib/GLFW/include",
-        "%{wks.location}/lib/glad/include"
+        "%{wks.location}/lib/glad/include",
+        --"%{wks.location}/lib/imgui_test_engine"
     }
 
 	filter "system:windows"
@@ -43,7 +47,6 @@ project "ImGui"
 		pic "On"
 		systemversion "latest"
 		staticruntime "On"
-
 
 	filter "configurations:Debug"
 		runtime "Debug"

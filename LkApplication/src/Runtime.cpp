@@ -1,3 +1,7 @@
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
+#endif
+
 #include "LkEngine/Core/Application.h"
 #include "TestLayer.h"
 

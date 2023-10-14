@@ -20,13 +20,16 @@ project "LkApplication"
 		"%{wks.location}/lib",
 		"%{wks.location}/lib/spdlog",
 		"%{wks.location}/lib/glm",
-		"%{wks.location}/lib/imgui",
-		"%{wks.location}/lib/ImGuizmo",
 		"%{wks.location}/lib/stb_image",
 		"%{wks.location}/lib/glfw/include",
 		"%{wks.location}/lib/glad/include",
 		"%{wks.location}/lib/spdlog/include",
+		"%{wks.location}/lib/imgui",
+		--"%{wks.location}/lib/ImGuizmo",
+		--"%{wks.location}/lib/imgui_test_engine",
 	}
+
+	defines { "IMGUI_DEFINE_MATH_OPERATORS" }
 
 	links
 	{ 

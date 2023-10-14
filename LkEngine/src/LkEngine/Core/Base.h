@@ -39,6 +39,10 @@ namespace LkEngine {
 
 }
 
+//#ifndef IMGUI_DEFINE_MATH_OPERATORS
+//#define IMGUI_DEFINE_MATH_OPERATORS
+//#endif
+
 #ifdef RENDERER_API_VULKAN
 #include "Vulkan/vulkan.h"
 

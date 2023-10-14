@@ -1,6 +1,5 @@
 #include "LKpch.h"
 #include "LkEngine/UI/UI.h"
-#include <imgui/imgui_impl_opengl3.h>
 
 
 namespace LkEngine::UI {

@@ -1,3 +1,4 @@
+#include "LKpch.h"
 #include "LkEngine/Input/Mouse.h"
 #include "LkEngine/Renderer/GraphicsContext.h"
 
@@ -6,7 +7,7 @@ namespace LkEngine {
 	// FIXME
 	bool Mouse::IsButtonPressed(MouseCode button)
 	{
-		GLFWwindow* window = *GraphicsContext::Get()->GlfwWindow;
+		GLFWwindow* window = *GraphicsContext::Get()->GetGlfwWindow();
 		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
 		return state == GLFW_PRESS;
 	}
@@ -14,7 +15,7 @@ namespace LkEngine {
 	std::pair<float, float> Mouse::GetMousePosition()
 	{
 		double xpos, ypos;
-		glfwGetCursorPos(*GraphicsContext::Get()->GlfwWindow, &xpos, &ypos);
+		glfwGetCursorPos(*GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
 		return std::make_pair(x, y);

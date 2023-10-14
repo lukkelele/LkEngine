@@ -33,6 +33,7 @@
 //  2016-05-07: DirectX11: Disabling depth-write.
 
 #include "imgui.h"
+#ifndef IMGUI_DISABLE
 #include "imgui_impl_dx11.h"
 
 // DirectX
@@ -594,6 +595,7 @@ void ImGui_ImplDX11_Shutdown()
     if (bd->pd3dDeviceContext)    { bd->pd3dDeviceContext->Release(); }
     io.BackendRendererName = nullptr;
     io.BackendRendererUserData = nullptr;
+    io.BackendFlags &= ~(ImGuiBackendFlags_RendererHasVtxOffset | ImGuiBackendFlags_RendererHasViewports);
     IM_DELETE(bd);
 }
 
@@ -612,7 +614,7 @@ void ImGui_ImplDX11_NewFrame()
 // If you are new to dear imgui or creating a new binding for dear imgui, it is recommended that you completely ignore this section first..
 //--------------------------------------------------------------------------------------------------------
 
-// Helper structure we store in the void* RenderUserData field of each ImGuiViewport to easily retrieve our backend data.
+// Helper structure we store in the void* RendererUserData field of each ImGuiViewport to easily retrieve our backend data.
 struct ImGui_ImplDX11_ViewportData
 {
     IDXGISwapChain*                 SwapChain;
@@ -629,7 +631,7 @@ static void ImGui_ImplDX11_CreateWindow(ImGuiViewport* viewport)
     viewport->RendererUserData = vd;
 
     // PlatformHandleRaw should always be a HWND, whereas PlatformHandle might be a higher-level handle (e.g. GLFWWindow*, SDL_Window*).
-    // Some backends will leave PlatformHandleRaw NULL, in which case we assume PlatformHandle will contain the HWND.
+    // Some backends will leave PlatformHandleRaw == 0, in which case we assume PlatformHandle will contain the HWND.
     HWND hwnd = viewport->PlatformHandleRaw ? (HWND)viewport->PlatformHandleRaw : (HWND)viewport->PlatformHandle;
     IM_ASSERT(hwnd != 0);
 
@@ -728,3 +730,7 @@ static void ImGui_ImplDX11_ShutdownPlatformInterface()
 {
     ImGui::DestroyPlatformWindows();
 }
+
+//-----------------------------------------------------------------------------
+
+#endif // #ifndef IMGUI_DISABLE
