@@ -2,20 +2,20 @@
 #include "LkEngine/Renderer/GraphicsContext.h"
 #include "LkEngine/Platform/Windows/Windows_Window.h"
 #include "LkEngine/UI/UI.h"
-#include <imgui/imgui.h>
-#include <imgui_impl_opengl3.h>
 
 
 namespace LkEngine {
 
 	GraphicsContext* GraphicsContext::m_Context = nullptr;
 
-	GraphicsContext::GraphicsContext(void* _windowHandle)
+	GraphicsContext::GraphicsContext(void* window_handle)
 	{
 		m_Context = this;
-	    Window* window = static_cast<Window*>(_windowHandle);
+	    Window* window = static_cast<Window*>(window_handle);
 	    m_Window = std::shared_ptr<Window>(window);
-		GlfwWindow = m_Window->GetGlfwWindow();
+		m_GlfwWindow = m_Window->GetGlfwWindow();
+		
+		m_MainRenderWindowSize = ImVec2(0, 0);
 	}
 	
 	void GraphicsContext::Init()
@@ -24,16 +24,11 @@ namespace LkEngine {
 		if (err == 0)
 		{
 			printf("[ERROR] Error starting GLAD");
-			return;
+			exit(EXIT_FAILURE);
 		}
-		else
-		{
-			printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
-			printf("GraphicsContext attached to window with title: %s\n", m_Window->GetTitle().c_str());
-		}
-	
+		printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 		glEnable(GL_BLEND);
-		//glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST); 
 		glEnable(GL_LINE_SMOOTH);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
@@ -51,9 +46,8 @@ namespace LkEngine {
 
 	std::shared_ptr<GLFWwindow*> GraphicsContext::GetGlfwWindow()
 	{
-		return GlfwWindow;
+		return m_GlfwWindow;
 	}
-	
 	
 	void GraphicsContext::InitImGui(const std::string& glslVersion)
 	{
@@ -62,9 +56,11 @@ namespace LkEngine {
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
 		io.Fonts->AddFontFromFileTTF("assets/fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
+		io.ConfigViewportsNoDecoration = false;
 
 	    ImGui_ImplGlfw_InitForOpenGL(*m_Window->GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(glslVersion.c_str());
+		LOG_INFO("ImGui Version: {0}", ImGui::GetVersion());
 		UI::Init();
 	}
 	
@@ -81,8 +77,10 @@ namespace LkEngine {
         UI::LeftSidebar();
         UI::RightSidebar();
 		UI::BeginMainRenderWindow(); // Drawn content
-		//ImGui::Begin("Hello World");
-		//ImGui::End();
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		m_MainRenderWindowSize = window->Size;
+		m_MainRenderWindowPos = window->Pos;
+		ImGuiViewport* viewport = window->Viewport;
 	}
 
 	void GraphicsContext::EndImGuiFrame()
@@ -92,6 +90,24 @@ namespace LkEngine {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
+
+	void GraphicsContext::HandleViewportEvents()
+	{
+		auto window = Window::Get();
+		int viewport_width, viewport_height;
+		glfwGetWindowSize(*window->GetGlfwWindow(), &viewport_width, &viewport_height);
+	}
+
+	ImVec2 GraphicsContext::GetMainRenderWindowSize()
+	{
+		return m_MainRenderWindowSize;
+	}
+
+	ImVec2 GraphicsContext::GetMainRenderWindowPos()
+	{
+		return m_MainRenderWindowPos;
+	}
+
 	
 	void GraphicsContext::SetDarkTheme()
 	{
@@ -131,5 +147,6 @@ namespace LkEngine {
 		colors[ImGuiCol_SliderGrab] = ImVec4(0.51f, 0.51f, 0.51f, 0.7f);
 		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.66f, 0.66f, 0.66f, 1.0f);
 	}
+
 
 }

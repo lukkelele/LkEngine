@@ -4,12 +4,6 @@
 
 namespace LkEngine {
 
-    constexpr int OpenGL_Major_Version = 4;
-    constexpr int OpenGL_Minor_Version = 5;
-    constexpr const char* OpenGL_GLSL_33 = "#version 330";
-    constexpr const char* OpenGL_GLSL_45 = "#version 450";
-    constexpr const char* OpenGL_GLSL = OpenGL_GLSL_33;
-
     // Forward declaration
     class Renderer;
     

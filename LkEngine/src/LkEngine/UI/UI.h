@@ -22,6 +22,7 @@ namespace LkEngine::UI {
     extern ImGuiID MainDockSpaceID;
     extern unsigned int Viewport_StyleVarCount;
     extern float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;
+    extern ImVec2 LastViewportSize;
     extern bool Initialized;
 
 

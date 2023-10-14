@@ -50,13 +50,13 @@ namespace LkEngine {
             layer->OnUpdate(ts);
         }
 
-        GraphicsContext::BeginImGuiFrame();
+        m_Context->BeginImGuiFrame();
         for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
         {
             Layer* layer = *it;
             layer->OnImGuiRender();
         }
-        GraphicsContext::EndImGuiFrame();
+        m_Context->EndImGuiFrame();
 
 
         m_Window->OnUpdate();

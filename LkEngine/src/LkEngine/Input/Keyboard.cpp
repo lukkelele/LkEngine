@@ -8,7 +8,7 @@ namespace LkEngine {
 	bool Keyboard::IsKeyPressed(KeyCode key)
 	{
 		// GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetGLFWwindow());
-		GLFWwindow* window = *GraphicsContext::Get()->GlfwWindow;
+		GLFWwindow* window = *GraphicsContext::Get()->GetGlfwWindow();
 		int keyState = glfwGetKey(window, static_cast<int32_t>(key));
 		return keyState == GLFW_PRESS;
 	}

@@ -6,9 +6,12 @@
 // #include "Platform/Linux/Linux_Window.h"
 #endif
 
+#include "LkEngine/Core/Viewport.h"
+
 
 namespace LkEngine {
 
+	Window* Window::m_Instance = nullptr;
 	bool Window::GLFW_Initialized = false;
 	
 	std::shared_ptr<Window> Window::Create(const char* title, uint32_t width, uint32_t height)
@@ -21,6 +24,17 @@ namespace LkEngine {
 	#else
 		return nullptr;
 	#endif
+	}
+
+	void Window::WindowResizeCallback(GLFWwindow* glfw_window, int width, int height)
+	{
+		LOG_DEBUG("Window resized ({0}, {1})", width, height);
+		//int pos_x, pos_y;
+		//glfwGetWindowPos(glfw_window, &pos_x, &pos_y);
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImVec2 pos = viewport->WorkPos;
+		// glViewport(pos_x, pos_y, width, height);
+		glViewport(pos.x, pos.y, width, height);
 	}
 
 }
