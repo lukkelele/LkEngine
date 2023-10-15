@@ -224,10 +224,6 @@ namespace LkEngine {
 		}
 		ImGui::PopItemWidth();
 
-		//DrawComponent<Mesh>("Mesh", entity, [](auto& component)
-		//{
-		//});
-
 		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& component)
 		{
 			/* Translation / Position */
@@ -241,10 +237,6 @@ namespace LkEngine {
 			component.Scale = scale;
 		});
 
-		//DrawComponent<Material>("Material", entity, [](auto& component)
-		//{
-		//	//UI::Property::ColorMenu(component);
-		//});
 
 	}
 

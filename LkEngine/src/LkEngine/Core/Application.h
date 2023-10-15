@@ -4,6 +4,7 @@
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/UI/UI.h"
+#include "LkEngine/Math/Math.h"
 
 
 namespace LkEngine {
@@ -40,6 +41,8 @@ namespace LkEngine {
         void PushOverlay(Layer* layer);
         void PopOverlay(Layer* layer);
         
+        uint16_t GetWidth() const { return m_Window->GetWidth(); }
+        uint16_t GetHeight() const { return m_Window->GetHeight(); }
         std::shared_ptr<Renderer> GetRenderer() const { return m_Renderer; }
         std::shared_ptr<GLFWwindow*> GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
         std::shared_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
