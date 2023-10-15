@@ -170,7 +170,7 @@ namespace LkEngine::UI {
 
         if (ImGui::TreeNode("Rendered Objects"))
         {
-            ImGui::Text("<< OBJECTS GO HERE >>");
+            ImGui::Text("<< objects here >>");
             ImGui::TreePop();
         }
 

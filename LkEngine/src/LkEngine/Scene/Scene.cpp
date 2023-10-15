@@ -36,7 +36,7 @@ namespace LkEngine {
 		LOG_INFO("(UUID) {0} : {1}", name, uuid);
 		entity.AddComponent<IDComponent>(uuid);
 		TagComponent& tag = entity.AddComponent<TagComponent>();
-		tag.tag = name.empty() ? "Entity" : name;
+		tag.Tag = name.empty() ? "Entity" : name;
 		m_EntityMap[uuid] = entity;
 		return entity;
 	}
@@ -54,7 +54,7 @@ namespace LkEngine {
 		for (auto entity : view)
 		{
 			const TagComponent& tc = view.get<TagComponent>(entity);
-			if (tc.tag == name)
+			if (tc.Tag == name)
 				return Entity{ entity , this };
 		}
 		return {};
@@ -119,13 +119,7 @@ namespace LkEngine {
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
-		// static assert	
 	}
-		template<>
-		void Scene::OnComponentAdded<Mesh>(Entity entity, Mesh& mesh)
-		{
-			LOG_INFO("{0} : MeshComponent added!", entity.GetName());
-		}
 
 		template<>
 		void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& rigidbody)
@@ -133,28 +127,5 @@ namespace LkEngine {
 			LOG_INFO("{0} : TransformComponent added!", entity.GetName());
 		}
 
-		template<>
-		void Scene::OnComponentAdded<Material>(Entity entity, Material& rigidbody)
-		{
-			LOG_INFO("{0} : MaterialComponent added!", entity.GetName());
-		}
-
-
-#ifdef LK_ENGINE_OLD_IMPL
-		template<>
-		void Scene::OnComponentAdded<BoxColliderShape>(Entity entity, BoxColliderShape& boxColliderShape)
-		{
-			// TODO: OnComponentRemoval -> remove rigidbody
-			entity.AddComponent<Rigidbody>(boxColliderShape.GetRigidbody());
-			LOG_INFO("{0} : BoxColliderShape added!", entity.GetName());
-		}
-
-		template<>
-		void Scene::OnComponentAdded<Rigidbody>(Entity entity, Rigidbody& rigidbody)
-		{
-			m_World->AddRigidbodyToWorld(rigidbody);
-			LOG_INFO("{0} : RigidbodyComponent added!", entity.GetName());
-		}
-#endif
 
 }

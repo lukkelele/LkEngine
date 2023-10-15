@@ -71,11 +71,14 @@ void TestLayer::OnImGuiRender()
 
     //ImGui::PushMultiItemsWidths(4, ImGui::CalcItemWidth());
     //ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
-    ImGui::PushMultiItemsWidths(1, ImGui::CalcItemWidth());
+    //ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 
     ImGui::SeparatorText("Rectangle Config");
+    ImGui::Dummy(ImVec2(0, 40));
+
     //ImGui::SetCursorPosX(slider_pos_x);
+    /* RED */
     ImGui::SetCursorPosX(window_size.x / 2 - ImGui::CalcTextSize("Color").x);
     ImGui::Text("Color");
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -85,20 +88,44 @@ void TestLayer::OnImGuiRender()
         ColorSlider.x = reset_color_val;
     }
     ImGui::PopStyleColor(2);
-    ImGui::PopItemWidth();
+    //ImGui::PopItemWidth();
     ImGui::SameLine();
     ImGui::SetCursorPosX(slider_pos_x);
     ImGui::SetNextItemWidth(slider_width);
     ImGui::SliderFloat("##member-ColorSlider-x", &ColorSlider.x, 0.0f, 1.0f, "%.3f", color_slider_flags);
 
+    /* GREEN */
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.135f, 0.85f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.90f, 0.135f, 0.50f));
+    if (ImGui::Button("G", button_size))
+        ColorSlider.x = reset_color_val;
+    ImGui::PopStyleColor(2);
+    //ImGui::PopItemWidth();
+    ImGui::SameLine();
     ImGui::SetCursorPosX(slider_pos_x);
     ImGui::SetNextItemWidth(slider_width);
     ImGui::SliderFloat("##member-ColorSlider-y", &ColorSlider.y, 0.0f, 1.0f,"%.3f", color_slider_flags);
 
+    /* BLUE */
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.90f, 0.90f));
+    if (ImGui::Button("B", button_size))
+        ColorSlider.z = reset_color_val;
+    ImGui::PopStyleColor(2);
+    //ImGui::PopItemWidth();
+    ImGui::SameLine();
     ImGui::SetCursorPosX(slider_pos_x);
     ImGui::SetNextItemWidth(slider_width);
     ImGui::SliderFloat("##member-ColorSlider-z", &ColorSlider.z, 0.0f, 1.0f, " %.3f", color_slider_flags);
 
+    /* ALPHA */
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.70f, 0.70f, 0.70f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.70f, 0.70f, 0.70f, 0.90f));
+    if (ImGui::Button("A", button_size))
+        ColorSlider.z = reset_color_val;
+    ImGui::PopStyleColor(2);
+    //ImGui::PopItemWidth();
+    ImGui::SameLine();
     ImGui::SetCursorPosX(slider_pos_x);
     ImGui::SetNextItemWidth(slider_width);
     ImGui::SliderFloat("##member-ColorSlider-w", &ColorSlider.w, 0.0f, 1.0f, " %.3f", color_slider_flags);

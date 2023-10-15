@@ -3,7 +3,7 @@
 //#include "LkEngine/Physics/World.h"
 //#include "LkEngine/Physics/Constraints.h"
 //#include "LkEngine/Math/Math.h"
-
+#include "LkEngine/Scene/Components.h"
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -97,7 +97,7 @@ namespace LkEngine {
 
 	void EditorLayer::DrawEntityNode(Entity entity)
 	{
-		auto& tag = entity.GetComponent<TagComponent>().tag;
+		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -199,7 +199,7 @@ namespace LkEngine {
 	{
 		if (entity.HasComponent<TagComponent>())
 		{
-			auto& tag = entity.GetComponent<TagComponent>().tag;
+			auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
@@ -231,14 +231,14 @@ namespace LkEngine {
 		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& component)
 		{
 			/* Translation / Position */
-			glm::vec3 translation = component.translation;
+			glm::vec3 translation = component.Translation;
 			//UI::Property::Vector3Control("Position", translation);
-			component.translation = translation;
+			component.Translation = translation;
 
 			/* Scale */
-			glm::vec3 scale = component.scale;
+			glm::vec3 scale = component.Scale;
 			//UI::Property::Vector3Control("Scale", scale);
-			component.scale = scale;
+			component.Scale = scale;
 		});
 
 		//DrawComponent<Material>("Material", entity, [](auto& component)

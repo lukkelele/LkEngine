@@ -52,7 +52,7 @@ namespace LkEngine {
 		}
 
 		UUID getUUID() { return GetComponent<IDComponent>().ID; }
-		const std::string& GetName() { return GetComponent<TagComponent>().tag; }
+		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
 
 		operator bool() const { return m_EntityHandle != entt::null; }
 		operator entt::entity() const { return m_EntityHandle; }
