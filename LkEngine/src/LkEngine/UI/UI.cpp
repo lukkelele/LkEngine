@@ -1,5 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/UI/UI.h"
+#include "LkEngine/Renderer/Renderer.h"
 
 
 namespace LkEngine::UI {
@@ -9,7 +10,7 @@ namespace LkEngine::UI {
     ImGuiWindowClass* ExternalWindowClass = nullptr;
     ImGuiID MainDockSpaceID;
     ImVec2 LastViewportSize = ImVec2(0, 0);
-    bool Initialized = false, ShowImGuiDemo = false;
+    bool Initialized = false, ShowImGuiDemoWindow = false;
     float Sidebar_Left_Ratio = 0.15f;
     float Sidebar_Right_Ratio = 0.15f;
     float TopBottom_Ratio = 0.82f;
@@ -39,19 +40,19 @@ namespace LkEngine::UI {
         flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
 
-        //ImGui::SetNextWindowBgAlpha(0.0f);
-        //ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
         auto& io = ImGui::GetIO();
         ImGui::SetNextWindowClass(RendererWindowClass);
-        ImGui::Begin(MainRenderWindow_Label, NULL, flags);
+        ImGui::Begin(RENDER_WINDOW, NULL, flags);
 
 
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_DockHierarchy))
         {
-            LOG_INFO("Mouse is inside Window");
-            ImGui::SetNextWindowFocus();
+            //LOG_INFO("Mouse is inside Window");
+            if (ShowImGuiDemoWindow)
+                ImGui::SetNextWindowFocus();
         }
-        ImGui::ShowDemoWindow();
+        if (ShowImGuiDemoWindow)
+            ImGui::ShowDemoWindow();
     }
 
     void EndMainRenderWindow()
@@ -103,7 +104,7 @@ namespace LkEngine::UI {
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
-        ImGui::Begin(TopBar_Label, &top_bar_open, flags);
+        ImGui::Begin(TOP_BAR, &top_bar_open, flags);
         ImGui::Text("Top Bar Content");
         ImGui::End();
     }
@@ -115,9 +116,9 @@ namespace LkEngine::UI {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
-        ImGui::Begin(Bottom_Bar_Label, &bottom_bar_open, flags);
+        ImGui::Begin(BOTTOM_BAR, &bottom_bar_open, flags);
         ImGui::Text("Bottom Bar");
         ImGui::End();
         ImGui::PopStyleVar(1);
@@ -135,20 +136,46 @@ namespace LkEngine::UI {
 
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
 
         ImGui::SetNextWindowClass(UIWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height));
-        ImGui::Begin(Sidebar_Left_Label, &sidebar_open, flags);
+        ImGui::Begin(SIDEBAR_LEFT, &sidebar_open, flags);
         ImGui::PopStyleVar(1);
-        ImGui::Text("Left Sidebar");
+
+
+        //ImGui::BeginChild("##ui-config", ImVec2(0, 0), false);
+        ImGui::SeparatorText("LkEngine Configuration");
 
         ImGui::BeginGroup();
-        if (ImGui::Button("Button 1")) {}
-        if (ImGui::Button("Button 2")) {}
-        if (ImGui::Button("Button 3")) {}
+        if (ImGui::Checkbox("Demo Window", &ShowImGuiDemoWindow))
+        {
+        }
         ImGui::EndGroup();
+
+
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        if (ImGui::TreeNode("Colors"))
+        {
+            static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
+            ImGui::Text("Background Color"); 
+            ImGui::SliderFloat("##member-ColorSlider-x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##member-ColorSlider-y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##member-ColorSlider-z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##member-ColorSlider-w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::TreePop();
+        }
+
+        if (ImGui::TreeNode("Rendered Objects"))
+        {
+            ImGui::Text("<< OBJECTS GO HERE >>");
+            ImGui::TreePop();
+        }
+
+        //ImGui::EndChild(); // ui-config
+
 
         ImGui::End();
     }
@@ -170,16 +197,8 @@ namespace LkEngine::UI {
         flags |= ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
         ImGui::SetNextWindowClass(UIWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        ImGui::Begin(Sidebar_Right_Label, &sidebar_open, flags);
+        ImGui::Begin(SIDEBAR_RIGHT, &sidebar_open, flags);
         ImGui::Text("Right Sidebar");
-
-        ImGui::BeginGroup();
-        {
-            if (ImGui::Button("Button 1")) {}
-            if (ImGui::Button("Button 2")) {}
-            if (ImGui::Button("Button 3")) {}
-        }
-        ImGui::EndGroup();
 
         ImGui::End();
         ImGui::PopStyleVar(1);
@@ -212,11 +231,11 @@ namespace LkEngine::UI {
         auto dock_id_center = dock_id_top;  // Center part is the remaining space in dock_id_top
 
         // Build dockspace
-        ImGui::DockBuilderDockWindow(TopBar_Label, dock_id_new_top);
-        ImGui::DockBuilderDockWindow(Sidebar_Left_Label, dock_id_left);
-        ImGui::DockBuilderDockWindow(Sidebar_Right_Label, dock_id_right);
-        ImGui::DockBuilderDockWindow(Bottom_Bar_Label, dock_id_bottom);
-        ImGui::DockBuilderDockWindow(MainRenderWindow_Label, dock_id_center);
+        ImGui::DockBuilderDockWindow(TOP_BAR, dock_id_new_top);
+        ImGui::DockBuilderDockWindow(SIDEBAR_LEFT, dock_id_left);
+        ImGui::DockBuilderDockWindow(SIDEBAR_RIGHT, dock_id_right);
+        ImGui::DockBuilderDockWindow(BOTTOM_BAR, dock_id_bottom);
+        ImGui::DockBuilderDockWindow(RENDER_WINDOW, dock_id_center);
         ImGui::DockBuilderFinish(MainDockSpaceID);
     }
 

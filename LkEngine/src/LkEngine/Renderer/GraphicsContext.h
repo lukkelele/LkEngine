@@ -40,6 +40,8 @@ namespace LkEngine {
         s_ptr<Window> m_Window = nullptr;
         ImVec2 m_MainRenderWindowSize;
         ImVec2 m_MainRenderWindowPos;
+        ImVec2 m_ViewportSize; // GLFW window
+        ImVec2 m_ViewportPos;  // GLFW window
     };
 
 }

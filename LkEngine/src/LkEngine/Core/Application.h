@@ -3,8 +3,7 @@
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Timer.h"
-// ImGui Test Engine
-#include <imgui_test_engine/imgui_te_engine.h>
+#include "LkEngine/UI/UI.h"
 
 
 namespace LkEngine {
@@ -53,9 +52,6 @@ namespace LkEngine {
         std::shared_ptr<Renderer> m_Renderer = nullptr;
         std::shared_ptr<GraphicsContext> m_Context = nullptr;
         static Application* m_Instance;
-
-        // Temporarily here
-        ImGuiTestEngine* m_TestEngine;
     };
 
 }

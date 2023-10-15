@@ -79,11 +79,11 @@ namespace LkEngine {
 		UI::BottomBar();
         UI::LeftSidebar();
         UI::RightSidebar();
-		UI::BeginMainRenderWindow(); // Drawn content
+
+		UI::BeginMainRenderWindow(); 
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		m_MainRenderWindowSize = window->Size;
 		m_MainRenderWindowPos = window->Pos;
-		ImGuiViewport* viewport = window->Viewport;
 	}
 
 	void GraphicsContext::EndImGuiFrame()

@@ -35,6 +35,9 @@ namespace LkEngine {
 		ImVec2 pos = viewport->WorkPos;
 		// glViewport(pos_x, pos_y, width, height);
 		glViewport(pos.x, pos.y, width, height);
+		auto window = Window::Get();
+		window->m_Width = width;
+		window->m_Height = height;
 	}
 
 }

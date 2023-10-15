@@ -23,14 +23,6 @@ namespace LkEngine {
     {
         m_Window->Init();
         m_Context = m_Window->GetContext();
-
-        // Initialize Test Engine
-        m_TestEngine = ImGuiTestEngine_CreateContext();
-        ImGuiTestEngineIO& test_io = ImGuiTestEngine_GetIO(m_TestEngine);
-        test_io.ConfigVerboseLevel = ImGuiTestVerboseLevel_Info;
-        test_io.ConfigVerboseLevelOnError = ImGuiTestVerboseLevel_Debug;
-        ImGuiTestEngine_Start(m_TestEngine, ImGui::GetCurrentContext());
-        ImGuiTestEngine_InstallDefaultCrashHandler();
     }
 
     void Application::Run()

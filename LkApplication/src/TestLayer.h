@@ -18,6 +18,9 @@ public:
     void OnImGuiRender();
 
 public:
+    glm::vec4 ColorSlider;
+    glm::vec3 RectPos;
+private:
     VertexArray* m_VAO = nullptr;
     VertexBuffer* m_VBO = nullptr;
     IndexBuffer* m_IBO = nullptr;

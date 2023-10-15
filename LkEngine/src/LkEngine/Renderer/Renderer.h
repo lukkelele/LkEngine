@@ -28,11 +28,6 @@ namespace LkEngine {
 		static void DrawIndexed(const s_ptr<VertexArray>& va);
 		static void SetDrawMode(int mode);
 
-		// Static because debugging for raycast
-		//static void DrawLine(const glm::vec3& p1, const glm::vec3& p2, const glm::mat4& viewProj, const glm::vec4& color = glm::vec4(1.0f));
-		//void DrawWireframe(Entity& entity, glm::vec4 color) const;
-		//static void DrawShape(Entity& entity);
-		//static void OnWindowResize(uint16_t width, uint16_t height);
 
 	public:
 		static int DrawMode;

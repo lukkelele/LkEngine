@@ -9,7 +9,7 @@ namespace LkEngine {
 
 	void Renderer::Clear() 
 	{
-		auto c = BackgroundColor;
+		auto& c = BackgroundColor;
 		glClearColor(c.x, c.y, c.z, c.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
@@ -22,7 +22,6 @@ namespace LkEngine {
 		glDrawElements(DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	// Remove me
 	void Renderer::DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
 	{
 		shader.Bind();

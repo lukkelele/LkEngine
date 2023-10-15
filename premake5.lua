@@ -33,7 +33,7 @@ include "LkApplication/premake5.lua"
 include "lib/glfw/glfw.lua"
 include "lib/glad/glad.lua"
 include "lib/imgui/imgui.lua"
-include "lib/imgui_test_engine/premake5.lua"
+--include "lib/imgui_test_engine/premake5.lua"
 
 project "LkEngine"
     location "LkEngine"
@@ -86,7 +86,8 @@ project "LkEngine"
 		"%{wks.location}/lib/imgui",
 		"%{wks.location}/lib/imgui/backends",
 		"%{wks.location}/lib/imgui/examples",
-		"%{wks.location}/lib/imgui_test_engine",
+		"%{wks.location}/lib/entt/src",
+		--"%{wks.location}/lib/imgui_test_engine",
     }
 
     links

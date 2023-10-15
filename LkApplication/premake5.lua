@@ -25,11 +25,8 @@ project "LkApplication"
 		"%{wks.location}/lib/glad/include",
 		"%{wks.location}/lib/spdlog/include",
 		"%{wks.location}/lib/imgui",
-		"%{wks.location}/lib/imgui_test_engine",
 		--"%{wks.location}/lib/ImGuizmo",
 	}
-
-	--defines { "IMGUI_DEFINE_MATH_OPERATORS" }
 
 	links
 	{ 
