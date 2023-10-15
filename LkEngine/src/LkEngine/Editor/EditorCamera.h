@@ -1,19 +1,17 @@
 #pragma once
-#include "LkEngine/Renderer/Camera.h"
+#include "LkEngine/Renderer/PerspectiveCamera.h"
 #include "LkEngine/Input/Keyboard.h"
 #include "LkEngine/Input/Mouse.h"
 
 namespace LkEngine {
 
-	class EditorCamera	: public Camera
+	class EditorCamera : public PerspectiveCamera
 	{
 	public:
 		EditorCamera(float FOV, float nearPlane, float farPlane);
 		~EditorCamera() = default;
 
-		void OnUpdate(float ts) override;
-		void OnImGuiRender() override;
-
+		void OnUpdate(float ts);
 	};
 
 }

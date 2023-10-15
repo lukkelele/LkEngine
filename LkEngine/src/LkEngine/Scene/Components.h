@@ -1,5 +1,4 @@
 #pragma once
-
 #include "LkEngine/Scene/Components/IDComponent.h"
 #include "LkEngine/Scene/Components/TagComponent.h"
 #include "LkEngine/Scene/Components/TransformComponent.h"
@@ -13,6 +12,11 @@ namespace LkEngine{
 	{
 	};
 
-	using AllComponents = ComponentGroup<IDComponent, TagComponent>;
+	using AllComponents = ComponentGroup<
+		IDComponent, 
+		TagComponent, 
+		TransformComponent,
+		CameraComponent
+	>;
 
 }

@@ -3,8 +3,8 @@
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Timer.h"
+#include "LkEngine/Scene/Scene.h"
 #include "LkEngine/UI/UI.h"
-#include "LkEngine/Math/Math.h"
 
 
 namespace LkEngine {
@@ -54,6 +54,7 @@ namespace LkEngine {
         std::shared_ptr<Window> m_Window = nullptr;
         std::shared_ptr<Renderer> m_Renderer = nullptr;
         std::shared_ptr<GraphicsContext> m_Context = nullptr;
+        std::shared_ptr<Scene> m_Scene = nullptr;
         static Application* m_Instance;
     };
 

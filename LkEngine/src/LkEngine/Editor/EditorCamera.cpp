@@ -26,7 +26,7 @@ namespace LkEngine {
 
 	void EditorCamera::OnUpdate(float ts)
 	{
-		hasMouseMoved = false;
+		HasMouseMoved = false;
 
 		if (m_KeyboardEnabled)
 		{
@@ -80,7 +80,7 @@ namespace LkEngine {
 					glm::angleAxis(yaw, glm::vec3(0.0f, 1.0f, 0.0f))));
 
 				m_ForwardDirection = glm::rotate(quat, m_ForwardDirection);
-				hasMouseMoved = true;
+				HasMouseMoved = true;
 			}
 
 		}
@@ -91,28 +91,6 @@ namespace LkEngine {
 		m_InverseProjection = glm::inverse(m_Projection);
 		m_InverseViewProjection = m_InverseProjection * m_InverseView;
 		m_ViewProjection = m_Projection * m_View;
-	}
-
-	void EditorCamera::OnImGuiRender()
-	{
-	 	ImGui::Begin("Editor Camera");
-
-	 	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-	 	if (ImGui::TreeNode("Draw mode"))
-	 	{
-	 		if (ImGui::MenuItem("Lines"))
-	 			Renderer::DrawMode = LK_DRAW_LINES;
-	 		else if (ImGui::MenuItem("Triangles"))
-	 			Renderer::DrawMode = LK_DRAW_TRIANGLES;
-	 		ImGui::TreePop();
-	 	}
-	 	ImGui::Separator();
-
-	 	ImGui::SliderFloat("Camera speed", &m_TravelSpeed, 0.010f, 2.0f);
-	 	ImGui::SliderFloat("FOV", &m_FOV, 25.0f, 120.0f);
-	 	ImGui::SliderFloat3("Camera position", &m_Position.x, -40.0f, 40.0f);
-
-		ImGui::End();
 	}
 
 }

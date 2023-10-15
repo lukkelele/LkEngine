@@ -23,6 +23,8 @@ namespace LkEngine {
     {
         m_Window->Init();
         m_Context = m_Window->GetContext();
+
+        m_Scene = create_s_ptr<Scene>();
     }
 
     void Application::Run()

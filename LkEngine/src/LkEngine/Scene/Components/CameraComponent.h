@@ -7,15 +7,21 @@ namespace LkEngine {
 
 	struct CameraComponent
 	{
-		enum class Type { Null = -1, FirstPerson, ThirdPerson, Ortographic };
-		Type projectionType;
-		SceneCamera camera;
+		enum class CameraType 
+		{ 
+			Null = -1, 
+			Ortographic,  // 2D
+			Perspective,  // First Person
+		};
+
+		CameraType Type;
+		SceneCamera* CameraRef;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent& other) = default;
 
-		operator SceneCamera& () { return camera; }
-		operator const SceneCamera& () const { return camera; }
+		operator SceneCamera& () { return *CameraRef; }
+		operator const SceneCamera& () const { return *CameraRef; }
 	};
 
 }

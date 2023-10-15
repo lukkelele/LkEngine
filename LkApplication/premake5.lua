@@ -24,6 +24,7 @@ project "LkApplication"
 		"%{wks.location}/lib/glfw/include",
 		"%{wks.location}/lib/glad/include",
 		"%{wks.location}/lib/spdlog/include",
+		"%{wks.location}/lib/entt/src",
 		"%{wks.location}/lib/imgui",
 		--"%{wks.location}/lib/ImGuizmo",
 	}

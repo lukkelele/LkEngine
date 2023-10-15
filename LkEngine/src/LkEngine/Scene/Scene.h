@@ -1,11 +1,9 @@
 #pragma once
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Core/UUID.h"
-#include "LkEngine/Renderer/Camera.h"
-#include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/Renderer/Renderer.h"
-#include "entt/entt.hpp"
+#include <entt/entt.hpp>
 
 
 
@@ -18,13 +16,13 @@ namespace LkEngine {
 	{
 	public:
 		Scene();
-		~Scene();
+		~Scene() = default;
 
 		void OnUpdate(float ts);
 		void OnImGuiRender();
 		const s_ptr<Camera> getCamera() const { return m_Camera; }
 
-		Entity getEntityWithUUID(UUID uuid);
+		Entity GetEntityWithUUID(UUID uuid);
 		Entity FindEntity(std::string_view name);
 		Entity CreateEntity(const std::string& name);
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name);
@@ -53,7 +51,8 @@ namespace LkEngine {
 		std::unordered_map<UUID, entt::entity> m_EntityMap;
 		s_ptr<Renderer> m_Renderer;
 		s_ptr<World> m_World;
-		s_ptr<SceneCamera> m_Camera;
+		//s_ptr<SceneCamera> m_Camera; // Rework this
+		s_ptr<Camera> m_Camera; // Rework this
 		s_ptr<EditorCamera> m_EditorCamera;
 	};
 
