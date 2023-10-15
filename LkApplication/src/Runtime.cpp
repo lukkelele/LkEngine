@@ -1,10 +1,10 @@
-#ifndef IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_DEFINE_MATH_OPERATORS
-#endif
-
-#include "LkEngine/Core/Application.h"
+//#ifndef IMGUI_DEFINE_MATH_OPERATORS
+//#define IMGUI_DEFINE_MATH_OPERATORS
+//#endif
+#include "LkEngine/Application.h"
 #include "TestLayer.h"
 
+using namespace LkEngine;
 
 class LkApplication : public LkEngine::Application
 {
@@ -14,10 +14,7 @@ public:
     {
     }
 
-    ~LkApplication()
-    {
-    }
-
+    ~LkApplication() = default;
 };
 
 

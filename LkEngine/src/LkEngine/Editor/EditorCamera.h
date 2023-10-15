@@ -5,13 +5,18 @@
 
 namespace LkEngine {
 
-	class EditorCamera : public PerspectiveCamera
+	// Basically just a 3D camera right now
+	class EditorCamera : public Camera
 	{
 	public:
+		EditorCamera();
 		EditorCamera(float FOV, float nearPlane, float farPlane);
 		~EditorCamera() = default;
 
 		void OnUpdate(float ts);
+
+		void UpdateView();
+		void UpdateProjection();
 	};
 
 }

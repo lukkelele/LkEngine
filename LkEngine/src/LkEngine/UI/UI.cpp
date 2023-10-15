@@ -1,6 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/UI/UI.h"
 #include "LkEngine/Renderer/Renderer.h"
+#include "LkEngine/Application.h"
 
 
 namespace LkEngine::UI {
@@ -239,5 +240,19 @@ namespace LkEngine::UI {
         ImGui::DockBuilderFinish(MainDockSpaceID);
     }
 
+    void AppInfo()
+    {
+        auto app = Application::Get();
+        bool keyboard_enabled = app->IsKeyboardEnabled();
+
+        // Place in right sidebar
+        ImGui::Begin(SIDEBAR_RIGHT);
+
+        ImGui::BeginChild("##app-info", ImVec2(0, 0));
+        ImGui::Text("Keyboard: %s", keyboard_enabled ? "ON" : "OFF");
+        ImGui::EndChild();
+
+        ImGui::End();
+    }
 
 }

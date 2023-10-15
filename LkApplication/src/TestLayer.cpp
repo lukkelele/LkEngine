@@ -1,7 +1,7 @@
 #include "TestLayer.h"
 #include <LkEngine/UI/UI.h>
 #include <LkEngine/Math/Math.h>
-#include <LkEngine/Core/Application.h>
+#include <LkEngine/Application.h>
 #include <LkEngine/Renderer/Camera.h>
 
 
@@ -65,6 +65,8 @@ void TestLayer::OnAttach()
     glm::mat4 identity_mat = glm::mat4(1.0f);
     m_Shader->SetUniformMat4f("u_TransformMatrix", identity_mat);
     m_Shader->Unbind();
+
+    m_Scene = create_s_ptr<Scene>();
 }
 
 void TestLayer::OnDetach()
@@ -73,19 +75,21 @@ void TestLayer::OnDetach()
 
 void TestLayer::OnUpdate(float ts)
 {
-    glm::mat4 identity_mat = glm::mat4(1.0f);
+    m_Scene->OnUpdate(ts);
+    auto camera = m_Scene->GetEditorCamera();
+    float rot = camera->GetRotation();
+    camera->UpdateView();
+    //glm::mat4 mvp = camera->GetViewProjection();
+    auto& pos = camera->GetPos();
+
     m_Shader->Bind();
     m_Shader->SetUniform4f("u_Color", ColorSlider.x, ColorSlider.y, ColorSlider.z, ColorSlider.w);
-    glm::mat4 model = Math::TransformMatrix(Translation, Rot, {1.0f, 1.0f, 1.0f});
-    printf("Translation (%f, %f, %f)\n", Translation.x, Translation.y, Translation.z);
-
-    glm::vec4 ndc_coords = Math::ConvertToNDC(Translation, model);
-    glm::vec3 ndc = { ndc_coords.x, ndc_coords.y, ndc_coords.z };
-
-    glm::mat4 mvp = Projection * identity_mat * model;
-    //glm::mat4 mvp = Projection * identity_mat * glm::vec4(ndc, 0.0f);
-
-    m_Shader->SetUniformMat4f("u_TransformMatrix", model);
+    //glm::mat4 mvp = Math::TransformMatrix(Translation, Rot, { 1.0f, 1.0f, 1.0f }); 
+    glm::mat4 mvp = Math::TransformMatrix2D(pos, rot, { 1.0f, 1.0f, 1.0f }); 
+    //printf("Translation (%f, %f, %f)\n", Translation.x, Translation.y, Translation.z);
+    // printf("MVP (%f, %f, %f)\n");
+    //glm::mat4 mvp = Projection * identity_mat * model;
+    m_Shader->SetUniformMat4f("u_TransformMatrix", mvp);
 
     Renderer::Draw(*m_VAO, *m_IBO, *m_Shader);
 }
@@ -103,6 +107,10 @@ void TestLayer::OnImGuiRender()
 
 void TestLayer::DrawPositionSliders()
 {
+    auto camera = m_Scene->GetEditorCamera();
+    camera->UpdateView();
+    auto pos = camera->GetPos();
+
     static float slider_padding_x = 32.0f;
     static float reset_color_val = 1.0f; // for each color entry in RGB
     float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
@@ -118,15 +126,20 @@ void TestLayer::DrawPositionSliders()
     ImGui::Text("Position");
     ImGui::SetCursorPosX(slider_pos_x);
     ImGui::SetNextItemWidth(slider_width);
-    ImGui::SliderFloat("##member-RectPos-x", &Translation.x, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
+    //ImGui::SliderFloat("##member-RectPos-x", &Translation.x, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
+    ImGui::SliderFloat("##member-RectPos-x", &pos.x, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
 
     ImGui::SetCursorPosX(slider_pos_x);
     ImGui::SetNextItemWidth(slider_width);
-    ImGui::SliderFloat("##member-RectPos-y", &Translation.y, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
+    //ImGui::SliderFloat("##member-RectPos-y", &Translation.y, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
+    ImGui::SliderFloat("##member-RectPos-y", &pos.y, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
 
     ImGui::SetCursorPosX(slider_pos_x);
     ImGui::SetNextItemWidth(slider_width);
-    ImGui::SliderFloat("##member-RectPos-z", &Translation.z, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
+    //ImGui::SliderFloat("##member-RectPos-z", &Translation.z, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
+    ImGui::SliderFloat("##member-RectPos-z", &pos.z, -100.0f, 100.0f, "%.2f", rectpos_slider_flags);
+
+    camera->SetPos(pos);
 
     ImGui::PopStyleVar(1);
 }

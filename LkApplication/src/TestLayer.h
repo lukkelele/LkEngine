@@ -1,6 +1,7 @@
 #pragma once
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Renderer/Renderer.h"
+#include "LkEngine/Scene/Scene.h"
 
 
 using namespace LkEngine;
@@ -40,6 +41,8 @@ private:
     VertexBuffer* m_VBO = nullptr;
     IndexBuffer* m_IBO = nullptr;
     Shader* m_Shader = nullptr;
+
+    s_ptr<Scene> m_Scene = nullptr;
 };
 
 

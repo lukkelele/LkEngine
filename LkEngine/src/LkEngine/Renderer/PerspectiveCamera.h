@@ -34,10 +34,11 @@ namespace LkEngine {
 		float GetFOV() const { return m_FOV; }
 		float GetNearClip() const { return m_NearPlane; }
 		float GetFarClip() const { return m_FarPlane; }
-		float GetRotation() { return glm::radians(m_Rotation); }
 		void SetRotation(float rot) { m_Rotation = rot; }
-		void SetFOV(float FOV) { m_FOV = FOV; UpdateProjection(); }
+		void SetFOV(float fov) { m_FOV = fov; UpdateProjection(); }
+		void SetProjection(float fov, float _near, float _far);
 		//void SetScene(Scene* scene) { m_Scene = scene; }
+		//float GetRotation() { return glm::radians(m_Rotation); }
 
 		void UpdateView();
 		void UpdateProjection();
@@ -51,10 +52,7 @@ namespace LkEngine {
 
 		float m_FOV = 50.0f;
 		float m_NearPlane = 0.10f, m_FarPlane = 1000.0f;
-		float m_TravelSpeed = 0.10f;
 		float m_Distance = 500.0f;
-		float m_Rotation = 0.0f;
-		float m_RotationSpeed = 0.0002f;
 		float m_Yaw = 0.0f, m_Pitch = 0.0f;
 		float m_YawDelta = 0.0f, m_PitchDelta = 0.0f;
 	};

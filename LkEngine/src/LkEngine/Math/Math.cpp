@@ -9,11 +9,20 @@ namespace LkEngine::Math {
         return (vec * scale_factor) / glm::length(vec);
     }
 
-	glm::mat4 TransformMatrix(glm::vec3& translation, glm::quat& rotation, glm::vec3 scale) 
+	glm::mat4 TransformMatrix(glm::vec3& translation, glm::quat& rotation, const glm::vec3& scale) 
 	{
 		return glm::translate(glm::mat4(1.0f), translation)
 			 * glm::toMat4(rotation)
 			 * glm::scale(glm::mat4(1.0f), scale);
+	}
+
+	glm::mat4 TransformMatrix2D(const glm::vec3& translation, float rot, const glm::vec3& scale)
+	{
+		glm::mat4 transform = glm::mat4(1.0f);  // initialize to identity matrix
+		transform = glm::translate(transform, translation);
+		transform = glm::rotate(transform, glm::radians(rot), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = glm::scale(transform, scale);
+		return transform;
 	}
 
 	glm::vec4 ConvertToNDC(glm::vec3& world_pos, glm::mat4& mvp)

@@ -103,7 +103,9 @@ namespace LkEngine {
 
 		while (getline(stream, line))
 		{
+	#ifdef LK_ENGINE_PRINT_SHADER
 			printf("%s\n", line.c_str());
+	#endif
 			if (line.find("#shader") != std::string::npos)
 			{
 				if (line.find("vertex") != std::string::npos)
@@ -144,7 +146,9 @@ namespace LkEngine {
 
 		while (getline(streamVertex, line))
 		{
+	#ifdef LK_ENGINE_PRINT_SHADER
 			printf("%s\n", line.c_str());
+	#endif
 			ss[(int)type] << line << '\n';
 		}
 
@@ -152,7 +156,9 @@ namespace LkEngine {
 		type = ShaderType::FRAGMENT;
 		while (getline(streamFrag, line))
 		{
+	#ifdef LK_ENGINE_PRINT_SHADER
 			printf("%s\n", line.c_str());
+	#endif
 			ss[(int)type] << line << '\n';
 		}
 

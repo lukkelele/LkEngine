@@ -4,6 +4,7 @@
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Scene/Scene.h"
+#include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/UI/UI.h"
 
 
@@ -46,6 +47,9 @@ namespace LkEngine {
         std::shared_ptr<Renderer> GetRenderer() const { return m_Renderer; }
         std::shared_ptr<GLFWwindow*> GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
         std::shared_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
+
+        bool IsKeyboardEnabled();
+        bool IsMouseEnabled();
 
     private:
         ApplicationProperties m_Props;

@@ -5,14 +5,15 @@
 
 namespace LkEngine {
 
+	enum class CameraType 
+	{ 
+		Null = -1, 
+		Ortographic,  // 2D
+		Perspective,  // First Person
+	};
+
 	struct CameraComponent
 	{
-		enum class CameraType 
-		{ 
-			Null = -1, 
-			Ortographic,  // 2D
-			Perspective,  // First Person
-		};
 
 		CameraType Type;
 		SceneCamera* CameraRef;

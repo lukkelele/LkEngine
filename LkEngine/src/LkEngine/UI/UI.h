@@ -30,6 +30,8 @@ namespace LkEngine::UI {
     void BottomBar();
     void LeftSidebar();
     void RightSidebar();
+    void AppInfo();
+
     // -- Dockspace --
     void BeginViewportDockSpace();
     void EndViewportDockSpace();

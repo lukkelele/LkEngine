@@ -14,11 +14,9 @@ namespace LkEngine {
 		ActiveScene = this;
 		//m_Camera = create_s_ptr<SceneCamera>(45.0f, 0.010f, 1000.0f);
 		m_Camera = create_s_ptr<SceneCamera>();
-		m_Camera->SetPosition(glm::vec3(0.0f, 15.0f, -46.0f));
+		//m_Camera->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+		m_EditorCamera = create_s_ptr<EditorCamera>();
 		//m_Camera->SetScene(this);
-		//m_World = create_s_ptr<World>();
-		//m_World->InitPhysics(this);
-
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -66,6 +64,8 @@ namespace LkEngine {
 
 	void Scene::OnUpdate(float ts)
 	{
+		m_Camera->OnUpdate(ts);
+		m_EditorCamera->OnUpdate(ts);
 #ifdef LK_ENGINE_OLD_IMPL
 		m_Camera->OnUpdate(ts);
 		m_World->OnUpdate(ts);
@@ -104,11 +104,10 @@ namespace LkEngine {
 	void Scene::SwitchCamera()
 	{
 		//Camera* editorCamera = dynamic_cast<Camera*>(m_EditorCamera.get());
-		if (m_Camera != m_EditorCamera)
-		{
-			LOG_DEBUG("Switching cameras");
-	
-		}
+		//if (m_Camera != m_EditorCamera)
+		//{
+		//	LOG_DEBUG("Switching cameras");
+		//}
 	}
 
 	template<typename T>

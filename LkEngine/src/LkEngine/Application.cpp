@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "LkEngine/Core/Application.h"
+#include "LkEngine/Application.h"
 
 
 namespace LkEngine {
@@ -90,6 +90,16 @@ namespace LkEngine {
 
     void Application::OnEvent(Event& e)
     {
+    }
+
+    bool Application::IsKeyboardEnabled()
+    {
+        return m_Scene->GetCamera()->IsKeyboardEnabled();
+    }
+
+    bool Application::IsMouseEnabled()
+    {
+        return m_Scene->GetCamera()->IsMouseEnabled();
     }
 
 }

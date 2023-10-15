@@ -4,12 +4,11 @@
 
 namespace LkEngine {
 
-	/* Check to see if a key is pressed */
 	bool Keyboard::IsKeyPressed(KeyCode key)
 	{
-		// GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetGLFWwindow());
 		GLFWwindow* window = *GraphicsContext::Get()->GetGlfwWindow();
 		int keyState = glfwGetKey(window, static_cast<int32_t>(key));
+		//LOG_DEBUG("IsKeyPressed({}) : {}", key, keyState == GLFW_PRESS);
 		return keyState == GLFW_PRESS;
 	}
 

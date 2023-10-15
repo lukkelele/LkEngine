@@ -3,6 +3,7 @@
 #include "LkEngine/Core/UUID.h"
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/Renderer/Renderer.h"
+#include "LkEngine/Scene/SceneCamera.h"
 #include <entt/entt.hpp>
 
 
@@ -20,7 +21,8 @@ namespace LkEngine {
 
 		void OnUpdate(float ts);
 		void OnImGuiRender();
-		const s_ptr<Camera> getCamera() const { return m_Camera; }
+		s_ptr<Camera> GetCamera() const { return m_Camera; }
+		s_ptr<Camera> GetEditorCamera() const { return m_EditorCamera; }
 
 		Entity GetEntityWithUUID(UUID uuid);
 		Entity FindEntity(std::string_view name);
@@ -51,8 +53,7 @@ namespace LkEngine {
 		std::unordered_map<UUID, entt::entity> m_EntityMap;
 		s_ptr<Renderer> m_Renderer;
 		s_ptr<World> m_World;
-		//s_ptr<SceneCamera> m_Camera; // Rework this
-		s_ptr<Camera> m_Camera; // Rework this
+		s_ptr<SceneCamera> m_Camera; 
 		s_ptr<EditorCamera> m_EditorCamera;
 	};
 

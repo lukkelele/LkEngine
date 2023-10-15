@@ -16,7 +16,7 @@ namespace LkEngine {
 		m_Pitch = glm::pi<float>() / 4.0f;
 
 		m_Projection = glm::perspectiveFov(glm::radians(m_FOV), m_ViewportWidth, m_ViewportHeight, m_NearPlane, m_FarPlane);
-		m_View = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
+		m_View = glm::translate(glm::mat4(1.0f), m_Pos) * glm::toMat4(orientation);
 		m_ViewProjection = m_Projection * m_View;
 	}
 
@@ -37,12 +37,12 @@ namespace LkEngine {
 
 	void PerspectiveCamera::UpdateView()
 	{
-		m_View = glm::lookAt(m_Position, m_Position + m_ForwardDirection, glm::vec3(0.0f, 1.0f, 0.0f));
+		m_View = glm::lookAt(m_Pos, m_Pos + m_ForwardDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
 	void PerspectiveCamera::UpdateMousePosition()
 	{
-		const glm::vec2& mousePos { Mouse::GetMouseX(), Mouse::GetMouseY() };
+		const glm::vec2& mousePos{ Mouse::GetMouseX(), Mouse::GetMouseY() };
 		m_MouseDelta = (mousePos - m_MousePos);
 		m_MousePos = mousePos;
 
@@ -67,14 +67,23 @@ namespace LkEngine {
 
 	glm::vec3 PerspectiveCamera::GetDirection()
 	{
-		glm::vec3 lookAt = m_Position + GetForwardDirection();
-		m_Direction = glm::normalize(lookAt - m_Position);
+		glm::vec3 lookAt = m_Pos + GetForwardDirection();
+		m_Direction = glm::normalize(lookAt - m_Pos);
 		return m_Direction;
 	}
 
 	glm::vec3 PerspectiveCamera::CalculatePosition() const
 	{
 		return m_Origin - GetForwardDirection() * m_Distance;
+	}
+
+	// remove
+	void PerspectiveCamera::SetProjection(float fov, float _near, float _far)
+	{
+		m_FOV = fov;
+		m_NearPlane = _near;
+		m_FarPlane = _far;
+		UpdateProjection();
 	}
 
 

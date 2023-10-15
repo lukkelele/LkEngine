@@ -80,6 +80,8 @@ namespace LkEngine {
         UI::LeftSidebar();
         UI::RightSidebar();
 
+		UI::AppInfo();
+
 		UI::BeginMainRenderWindow(); 
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		m_MainRenderWindowSize = window->Size;

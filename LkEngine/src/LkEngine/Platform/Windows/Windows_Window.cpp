@@ -1,7 +1,7 @@
 #include "LKpch.h"
-#include "Platform/Windows/Windows_Window.h"
+#include "LkEngine/Platform/Windows/Windows_Window.h"
 #include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Core/Application.h"
+#include "LkEngine/Application.h"
 #include "LkEngine/Core/Viewport.h"
 #include "LkEngine/UI/UI.h"
 
