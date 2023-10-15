@@ -26,8 +26,8 @@ project "ImGui"
 		"imgui_impl_opengl3.h",
         "imgui_tables.h",
         "imgui_tables.cpp",
-        "../imgui_test_engine/**.h",
-        "../imgui_test_engine/**.cpp",
+        --"../imgui_test_engine/**.h",
+        --"../imgui_test_engine/**.cpp",
         --"ImGuizmo.h",
         --"ImGuizmo.cpp"
 	}
@@ -36,7 +36,7 @@ project "ImGui"
     {
         "%{wks.location}/lib/GLFW/include",
         "%{wks.location}/lib/glad/include",
-        "%{wks.location}/lib/imgui_test_engine",
+        --"%{wks.location}/lib/imgui_test_engine",
     }
 
 	filter "system:windows"
