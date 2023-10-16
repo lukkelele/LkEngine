@@ -12,8 +12,8 @@
 3. [Todo](#todo)
 4. [Implementation](#implementation)
 5. [Development](#development)
-    - [LkEngine](#LkEngine-dev)
-    - [LukkelEngine (old)](#LukkelEngine-dev)
+    - [LkEngine](#lkengine-dev)
+    - [LukkelEngine (old)](#lukkelengine-dev)
 
 ## About 
 
@@ -94,7 +94,7 @@ make
 
 ## Development
 
-## LkEngine {#LkEngine-dev}
+## LkEngine {#lkengine-dev}
 ### October 16, 2023
 Got a base UI layout going with two rectangles that can be moved and have their colors changed.
 <div align="center">
@@ -106,7 +106,7 @@ Got a base UI layout going with two rectangles that can be moved and have their 
 
 <br>
 
-## LukkelEngine (old) {#LukkelEngine-dev}
+## LukkelEngine (old) {#lukkelengine-dev}
 
 ### March 19, 2023
 Improved the UI, added constraints and updated the event handling. I was in dire need to use an event system as the 
