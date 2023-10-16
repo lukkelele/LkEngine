@@ -10,9 +10,6 @@
 
 namespace LkEngine {
 
-    // Forward declaration
-    class Viewport;
-
     class Window
     {
     public:
@@ -32,7 +29,6 @@ namespace LkEngine {
         std::string GetTitle()  const { return m_Title; }
         std::string GetGlslVersion() const { return m_GlslVersion;  }
         bool IsVSync() const { return m_VSync; }
-        s_ptr<Viewport> GetViewport() { return m_Viewport; }
 
     protected:
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
@@ -43,7 +39,6 @@ namespace LkEngine {
         std::string m_Title = "";
         std::string m_GlslVersion = "";
         bool m_VSync;
-        s_ptr<Viewport> m_Viewport = nullptr;
 
         static bool GLFW_Initialized;
         static Window* m_Instance;

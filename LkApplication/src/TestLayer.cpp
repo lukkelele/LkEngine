@@ -79,24 +79,25 @@ void TestLayer::OnUpdate(float ts)
     auto camera = m_Scene->GetEditorCamera();
     float rot = camera->GetRotation();
     camera->UpdateView();
-    //glm::mat4 mvp = camera->GetViewProjection();
     auto& pos = camera->GetPos();
+
+
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) *
+        glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 0, 1));
 
     m_Shader->Bind();
     m_Shader->SetUniform4f("u_Color", ColorSlider.x, ColorSlider.y, ColorSlider.z, ColorSlider.w);
-    //glm::mat4 mvp = Math::TransformMatrix(Translation, Rot, { 1.0f, 1.0f, 1.0f }); 
     glm::mat4 mvp = Math::TransformMatrix2D(pos, rot, { 1.0f, 1.0f, 1.0f }); 
-    //printf("Translation (%f, %f, %f)\n", Translation.x, Translation.y, Translation.z);
-    // printf("MVP (%f, %f, %f)\n");
-    //glm::mat4 mvp = Projection * identity_mat * model;
-    m_Shader->SetUniformMat4f("u_TransformMatrix", mvp);
+
+    //m_Shader->SetUniformMat4f("u_TransformMatrix", mvp);
+    m_Shader->SetUniformMat4f("u_TransformMatrix", transform);
 
     Renderer::Draw(*m_VAO, *m_IBO, *m_Shader);
 }
 
 void TestLayer::OnImGuiRender()
 {
-    ImGui::Begin(LkEngine::UI::SIDEBAR_LEFT);
+    ImGui::Begin(LkEngine::SIDEBAR_LEFT);
 
     DrawColorSliders();
     DrawPositionSliders();

@@ -4,7 +4,7 @@
 #include <imgui/imgui_impl_opengl3.h>
 
 
-namespace LkEngine::UI {
+namespace LkEngine {
 
     constexpr const char* RENDER_WINDOW = "##__main-render-window";
     constexpr const char* Main_DockSpace = "##__main-dockspace";
@@ -13,29 +13,36 @@ namespace LkEngine::UI {
     constexpr const char* SIDEBAR_LEFT = "##__left-sidebar";
     constexpr const char* SIDEBAR_RIGHT = "##__right-sidebar";
 
-    extern ImGuiWindowClass* UIWindowClass;        
-    extern ImGuiWindowClass* RendererWindowClass;   
-    extern ImGuiWindowClass* ExternalWindowClass;   
-    extern ImGuiID MainDockSpaceID;
-    extern unsigned int Viewport_StyleVarCount;
-    extern float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;
-    extern ImVec2 LastViewportSize;
-    extern bool Initialized, ShowImGuiDemoWindow;
 
+    class UI
+    {
+    public:
+        UI() = default;
+        ~UI() = default;
 
-    void Init();
-    void BeginMainRenderWindow();
-    void EndMainRenderWindow();
-    void TopBar();
-    void BottomBar();
-    void LeftSidebar();
-    void RightSidebar();
-    void AppInfo();
+        static void Init();
+        static void BeginMainRenderWindow();
+        static void EndMainRenderWindow();
+        static void TopBar();
+        static void BottomBar();
+        static void LeftSidebar();
+        static void RightSidebar();
+        static void AppInfo();
 
-    // -- Dockspace --
-    void BeginViewportDockSpace();
-    void EndViewportDockSpace();
-    void ApplyDockSpaceLayout();
+        // -- Dockspace --
+        static void BeginViewportDockSpace();
+        static void EndViewportDockSpace();
+        static void ApplyDockSpaceLayout();
 
+    public:
+        static ImGuiID MainDockSpaceID, RenderWindowDockID, BottomBarDockID;
+        //static ImGuiID RenderWindowDockID;
+        static ImVec2 LastViewportSize;
+        static ImGuiWindowClass* UIWindowClass;        
+        static ImGuiWindowClass* RendererWindowClass;   
+        static ImGuiWindowClass* ExternalWindowClass;   
+        static bool Initialized, ShowImGuiDemoWindow;
+        static float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;
+    };
 
 }

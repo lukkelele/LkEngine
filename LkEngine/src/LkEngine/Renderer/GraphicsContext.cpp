@@ -90,8 +90,16 @@ namespace LkEngine {
 
 	void GraphicsContext::EndImGuiFrame()
 	{
+		auto ctx = GraphicsContext::Get();
+		auto size = ctx->GetMainRenderWindowSize();
+		auto pos = ctx->GetMainRenderWindowPos();
+		glViewport(pos.x, pos.y, size.x, size.y);
+		LOG_DEBUG("Pos: ({}, {})  Size: ({}, {})", pos.x, pos.y, size.x, size.y);
+
 		UI::EndMainRenderWindow();
+
 		UI::EndViewportDockSpace();
+
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -106,14 +114,21 @@ namespace LkEngine {
 
 	ImVec2 GraphicsContext::GetMainRenderWindowSize()
 	{
-		return m_MainRenderWindowSize;
+		ImGuiDockNode* center_node = ImGui::DockBuilderGetNode(UI::RenderWindowDockID);
+		LK_ASSERT(center_node);
+		return center_node->Size;
 	}
 
 	ImVec2 GraphicsContext::GetMainRenderWindowPos()
 	{
-		return m_MainRenderWindowPos;
+		ImGuiDockNode* center_node = ImGui::DockBuilderGetNode(UI::RenderWindowDockID);
+		ImGuiDockNode* bottom_node = ImGui::DockBuilderGetNode(UI::BottomBarDockID);
+		LK_ASSERT(center_node);
+		LK_ASSERT(bottom_node);
+		//LOG_DEBUG("Bottom Node Size: ({} {})", bottom_node->Size.x, bottom_node->Size.y);
+		ImVec2 pos = ImVec2(center_node->Pos.x, bottom_node->Size.y);
+		return pos;
 	}
-
 	
 	void GraphicsContext::SetDarkTheme()
 	{

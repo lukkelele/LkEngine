@@ -2,7 +2,6 @@
 #include "LkEngine/Platform/Windows/Windows_Window.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Application.h"
-#include "LkEngine/Core/Viewport.h"
 #include "LkEngine/UI/UI.h"
 
 
@@ -35,9 +34,6 @@ namespace LkEngine {
 		LK_ASSERT(m_GlfwWindow != nullptr);
 		glfwMakeContextCurrent(*m_GlfwWindow);
 
-		// Needs to be created before context
-		m_Viewport = std::make_shared<Viewport>(this);
-	
 		if (!GLFW_Initialized)
 		{
 			m_Context = std::make_shared<GraphicsContext>(this);
@@ -55,6 +51,9 @@ namespace LkEngine {
 		glfwSetWindowSizeCallback(*m_GlfwWindow, Window::WindowResizeCallback);
 		glfwSetWindowSizeLimits(*m_GlfwWindow, 420, 280, 2560, 1440);
 	
+		glViewport(0, 0, m_Width, m_Height);
+
+		LOG_DEBUG("[CREATED] Window ({}, {})", m_Width, m_Height);
 		GLFW_Initialized = true;
 	}
 	
@@ -66,11 +65,6 @@ namespace LkEngine {
 	
 	void Windows_Window::OnUpdate()
 	{
-		auto ctx = GraphicsContext::Get();
-		auto size = ctx->GetMainRenderWindowSize();
-		auto pos = ctx->GetMainRenderWindowPos();
-		glViewport(pos.x, pos.y, size.x, size.y);
-
 		glfwPollEvents();
 		glfwSwapBuffers(*m_GlfwWindow);
 	}

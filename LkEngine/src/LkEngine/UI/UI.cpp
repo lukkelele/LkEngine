@@ -4,20 +4,20 @@
 #include "LkEngine/Application.h"
 
 
-namespace LkEngine::UI {
+namespace LkEngine {
 
-    ImGuiWindowClass* UIWindowClass = nullptr;
-    ImGuiWindowClass* RendererWindowClass = nullptr;
-    ImGuiWindowClass* ExternalWindowClass = nullptr;
-    ImGuiID MainDockSpaceID;
-    ImVec2 LastViewportSize = ImVec2(0, 0);
-    bool Initialized = false, ShowImGuiDemoWindow = false;
-    float Sidebar_Left_Ratio = 0.15f;
-    float Sidebar_Right_Ratio = 0.15f;
-    float TopBottom_Ratio = 0.82f;
-    unsigned int Viewport_StyleVarCount = 0;
+    ImGuiWindowClass* UI::UIWindowClass = nullptr;
+    ImGuiWindowClass* UI::RendererWindowClass = nullptr;
+    ImGuiWindowClass* UI::ExternalWindowClass = nullptr;
+    ImGuiID UI::MainDockSpaceID, UI::RenderWindowDockID, UI::BottomBarDockID;
+    ImVec2 UI::LastViewportSize = ImVec2(0, 0);
+    bool UI::Initialized = false, UI::ShowImGuiDemoWindow = false;
+    float UI::Sidebar_Left_Ratio = 0.15f;
+    float UI::Sidebar_Right_Ratio = 0.15f;
+    float UI::TopBottom_Ratio = 0.82f;
 
-    void Init()
+
+    void UI::Init()
     {
         UIWindowClass = new ImGuiWindowClass();
         UIWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton; // | ImGuiDockNodeFlags_NoResize;
@@ -34,7 +34,7 @@ namespace LkEngine::UI {
         ExternalWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
     }
     
-    void BeginMainRenderWindow()
+    void UI::BeginMainRenderWindow()
     {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
@@ -56,19 +56,20 @@ namespace LkEngine::UI {
             ImGui::ShowDemoWindow();
     }
 
-    void EndMainRenderWindow()
+    void UI::EndMainRenderWindow()
     {
         //ImGui::PopStyleColor();
         ImGui::End();
     }
 
-    void BeginViewportDockSpace()
+    void UI::BeginViewportDockSpace()
     {
         ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode
-            | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoDockingOverOther | ImGuiDockNodeFlags_NoDockingOverEmpty
-            | ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking;
-        //static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        dockspace_flags |= ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
+        dockspace_flags |= ImGuiDockNodeFlags_NoDockingOverOther | ImGuiDockNodeFlags_NoDockingOverEmpty;
+        dockspace_flags |= ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking;
+
         static ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
         window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
         window_flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs;
@@ -93,11 +94,11 @@ namespace LkEngine::UI {
         ImGui::DockSpaceOverViewport(main_viewport, dockspace_flags, NULL);
     }
 
-    void EndViewportDockSpace()
+    void UI::EndViewportDockSpace()
     {
     }
 
-    void TopBar()
+    void UI::TopBar()
     {
         static bool top_bar_open = true;
         ImGui::SetNextWindowClass(UIWindowClass);
@@ -110,7 +111,7 @@ namespace LkEngine::UI {
         ImGui::End();
     }
 
-    void BottomBar()
+    void UI::BottomBar()
     {
         static bool bottom_bar_open = true;
         ImGui::SetNextWindowClass(UIWindowClass);
@@ -125,7 +126,7 @@ namespace LkEngine::UI {
         ImGui::PopStyleVar(1);
     }
 
-    void LeftSidebar()
+    void UI::LeftSidebar()
     {
         static bool sidebar_open = true;
         ImGuiContext& g = *GImGui;
@@ -174,14 +175,12 @@ namespace LkEngine::UI {
             ImGui::Text("<< objects here >>");
             ImGui::TreePop();
         }
-
         //ImGui::EndChild(); // ui-config
-
 
         ImGui::End();
     }
 
-    void RightSidebar()
+    void UI::RightSidebar()
     {
         static bool sidebar_open = true;
         ImGuiContext& g = *GImGui;
@@ -205,7 +204,7 @@ namespace LkEngine::UI {
         ImGui::PopStyleVar(1);
     }
 
-    void ApplyDockSpaceLayout()
+    void UI::ApplyDockSpaceLayout()
     {
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoResize; 
         dockspace_flags |= ImGuiDockNodeFlags_NoDockingInCentralNode;
@@ -231,6 +230,8 @@ namespace LkEngine::UI {
         auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);
         auto dock_id_center = dock_id_top;  // Center part is the remaining space in dock_id_top
 
+        RenderWindowDockID = dock_id_center;
+        BottomBarDockID = dock_id_bottom;
         // Build dockspace
         ImGui::DockBuilderDockWindow(TOP_BAR, dock_id_new_top);
         ImGui::DockBuilderDockWindow(SIDEBAR_LEFT, dock_id_left);
@@ -240,7 +241,7 @@ namespace LkEngine::UI {
         ImGui::DockBuilderFinish(MainDockSpaceID);
     }
 
-    void AppInfo()
+    void UI::AppInfo()
     {
         auto app = Application::Get();
         bool keyboard_enabled = app->IsKeyboardEnabled();
