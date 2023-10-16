@@ -104,7 +104,9 @@ namespace LkEngine {
 			//ImGui::Text("Entity: %s", entity.GetName().c_str());
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			uint32_t id = entity;
-			if (ImGui::TreeNode("Entity: %s", entity.GetName().c_str()))
+			std::string tree_node_id = fmt::format("Entity: {}##{}", entity.GetName().c_str(), id);
+			//if (ImGui::TreeNode("Entity: %s##%d", entity.GetName().c_str(), id))
+			if (ImGui::TreeNode(tree_node_id.c_str()))
 			{
 				auto& transform = entity.GetComponent<TransformComponent>();
 				if (entity.HasComponent<MeshComponent>())

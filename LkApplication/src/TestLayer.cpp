@@ -19,7 +19,6 @@ static unsigned int box_indices[6] = {
     2, 3, 0
 };
 
-
 TestLayer::TestLayer()
 {
     m_Name = "TestLayer";
@@ -72,15 +71,10 @@ void TestLayer::OnAttach()
     m_Shader->Unbind();
 
     m_Scene = create_s_ptr<Scene>();
-    //Entity& rect1 = EntityFactory::CreateRectangle("rect_1", *m_Scene, {0, 0}, {1, 1});
-    //Entity& rect2 = EntityFactory::CreateRectangle("rect_2", *m_Scene, {0, 0}, {1, 1});
-    //Entity& rect3 = EntityFactory::CreateRectangle("rect_3", *m_Scene, {0, 0}, {1, 1});
-    EntityFactory::CreateRectangle("rect_1", *m_Scene, {0, 0}, {1, 1});
-    EntityFactory::CreateRectangle("rect_2", *m_Scene, {0, 0}, {1, 1});
-    EntityFactory::CreateRectangle("rect_3", *m_Scene, {0, 0}, {1, 1});
-    //MeshComponent& mesh = rect1.GetComponent<MeshComponent>();
-    //mesh.Shader->Bind();
-    //mesh.Shader->SetUniform4f("u_Color", 1.0f, 0, 0.50f, 0.80f);
+    EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
+    EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
+    EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
+    EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
 }
 
 void TestLayer::OnDetach()
