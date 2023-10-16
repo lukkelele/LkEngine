@@ -20,7 +20,7 @@ namespace LkEngine {
 		template<typename T, typename... ARGS>
 		T& AddComponent(ARGS&&... args)
 		{
-			T& component = m_Scene->Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
+			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
 			m_Scene->OnComponentAdded<T>(*this, component);
 			return component;
 		}
@@ -28,30 +28,30 @@ namespace LkEngine {
 		template<typename T>
 		bool HasComponent()
 		{
-			return m_Scene->Registry.all_of<T>(m_EntityHandle);
+			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
 		template<typename T>
 		T& GetComponent()
 		{
 			if (HasComponent<T>())
-				return m_Scene->Registry.get<T>(m_EntityHandle);
+				return m_Scene->m_Registry.get<T>(m_EntityHandle);
 		}
 
 		template<typename T>
 		void RemoveComponent()
 		{
-			m_Scene->Registry.remove<T>(m_EntityHandle);
+			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
 		// template<typename T>
 		template<typename T, typename... ARGS>
 		void AddExistingComponent(T) 
 		{
-			m_Scene->Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
+			m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
 		}
 
-		UUID getUUID() { return GetComponent<IDComponent>().ID; }
+		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
 		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
 
 		operator bool() const { return m_EntityHandle != entt::null; }

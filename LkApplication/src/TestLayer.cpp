@@ -3,6 +3,7 @@
 #include <LkEngine/Math/Math.h>
 #include <LkEngine/Application.h>
 #include <LkEngine/Renderer/Camera.h>
+#include <LkEngine/Scene/EntityFactory.h>
 
 
 // TODO: Move to a better location to be used for geometry
@@ -41,6 +42,10 @@ TestLayer::TestLayer()
 	Pitch = glm::pi<float>() / 4.0f;
 	//Rot = glm::quat(glm::vec3(Pitch, Yaw, 0.0f));
     Rot = glm::quat();
+
+    // For testing rectangles
+    ScalerSlider1 = 1.0f;
+    ScalerSlider2 = 1.0f;
 }
 
 TestLayer::~TestLayer()
@@ -67,6 +72,10 @@ void TestLayer::OnAttach()
     m_Shader->Unbind();
 
     m_Scene = create_s_ptr<Scene>();
+    Entity& rect1 = EntityFactory::CreateRectangle("rect1", *m_Scene, {0, 0}, {1, 1});
+    MeshComponent& mesh = rect1.GetComponent<MeshComponent>();
+    mesh.Shader->Bind();
+    mesh.Shader->SetUniform4f("u_Color", 1.0f, 0, 0.50f, 0.80f);
 }
 
 void TestLayer::OnDetach()
@@ -82,17 +91,29 @@ void TestLayer::OnUpdate(float ts)
     auto& pos = camera->GetPos();
 
 
-    glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) *
-        glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 0, 1));
-
     m_Shader->Bind();
     m_Shader->SetUniform4f("u_Color", ColorSlider.x, ColorSlider.y, ColorSlider.z, ColorSlider.w);
-    glm::mat4 mvp = Math::TransformMatrix2D(pos, rot, { 1.0f, 1.0f, 1.0f }); 
+    glm::mat4 mvp = Math::TransformMatrix2D(pos, rot, { ScalerSlider1, ScalerSlider1, ScalerSlider1 }); 
+
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) 
+                          * glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 0, 1));
+    transform = glm::scale(transform, { ScalerSlider1, ScalerSlider1, ScalerSlider1 });
 
     //m_Shader->SetUniformMat4f("u_TransformMatrix", mvp);
     m_Shader->SetUniformMat4f("u_TransformMatrix", transform);
 
     Renderer::Draw(*m_VAO, *m_IBO, *m_Shader);
+
+    Entity& rect1 = m_Scene->FindEntity("rect1");
+    TransformComponent& rect_transform = rect1.GetComponent<TransformComponent>();
+    rect_transform.Scale = { ScalerSlider2, ScalerSlider2, ScalerSlider2 };
+    //LOG_DEBUG("Rect Transform Scale: {}", rect_transform.Scale.x);
+    MeshComponent& mesh = rect1.GetComponent<MeshComponent>();
+    mesh.Shader->Bind();
+    mesh.Shader->SetUniformMat4f("u_TransformMatrix", rect_transform.GetTransform());
+    LK_ASSERT_MESHCOMPONENT(mesh);
+
+    Renderer::Draw(*mesh.VAO, *mesh.IBO, *mesh.Shader);
 }
 
 void TestLayer::OnImGuiRender()
@@ -101,6 +122,11 @@ void TestLayer::OnImGuiRender()
 
     DrawColorSliders();
     DrawPositionSliders();
+
+    ImGui::Separator();
+    ImGui::SliderFloat("Scale Rect1", &ScalerSlider1, 0.01f, 2.0f, "%.2f");
+    ImGui::Separator();
+    ImGui::SliderFloat("Scale Rect2", &ScalerSlider2, 0.01f, 2.0f, "%.2f");
 
     ImGui::End();
 }

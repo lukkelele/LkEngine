@@ -26,7 +26,8 @@ namespace LkEngine {
 
 		if (m_Scene)
 		{
-			m_Scene->Registry.each([&](auto entityID)
+			auto& registry = m_Scene->GetRegistry();
+			registry.each([&](auto entityID)
 			{
 				Entity entity{ entityID, m_Scene.get() };
 				DrawEntityNode(entity);

@@ -7,25 +7,15 @@ namespace LkEngine {
 
 	class Scene;
 
-	namespace EntityProperties {
-
-		struct Cube
-		{
-		};
-
-		struct Sphere
-		{
-		};
-	}
-
 	class EntityFactory
 	{
 	public:
 		EntityFactory() = default;
 		~EntityFactory() = default;
 
-		static void CreateCube(EntityProperties::Cube props);
-		static void CreateSphere(EntityProperties::Sphere props);
+		static Entity& CreateRectangle(std::string_view name, Scene& scene, glm::vec2 xy_min, glm::vec2 xy_max);
+
+		//static Entity& CreateRectangle(Scene* scene, float width, float height, float pos_x = 0.0f, float pos_y = 0.0f);
 	};
 
 }

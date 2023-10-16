@@ -11,9 +11,9 @@
 	- [Building LkEngine](#building-lkengine)
 3. [Todo](#todo)
 4. [Implementation](#implementation)
-5. [Images and screenshots](#images-and-screenshots)
-    - [LkEngine screenshots](#lkengine-screenshots)
-    - [LukkelEngine screenshots (old)](#lukkelengine-screenshots-old)
+5. [Development](#development)
+    - [LkEngine](#LkEngine-dev)
+    - [LukkelEngine (old)](#LukkelEngine-dev)
 
 ## About 
 
@@ -22,11 +22,10 @@ Because of this, lots of focus was aimed towards things such as 3D objects and r
 This caused some flaws in the base design that I wasn't too happy with.<br>
 <br>
 That is why **LkEngine** will focus towards 2D in the beginning and when I feel as if the engine is ready I 
-will begin to implement 3D features.<br>
-This is done to create a better base to expand on in the future.
-A better and more refined design on user interactability that **LukkelEngine** lacked.<br>
+will begin to implement 3D features.
+This is done to create a better base to expand on in the future.<br>
 <br>
-When the 2D implementation is done, the goal is to create a game such as **Super Mario** or **Pokémon** 
+When the 2D implementation is done, the plan is to create a game such as **Super Mario** or **Pokémon** 
 (similar to a 'classical' Gameboy game).
 
 ## Setup and Installation
@@ -40,12 +39,23 @@ When the 2D implementation is done, the goal is to create a game such as **Super
 - ImGuizmo
 
 ### Building LkEngine
-I use premake5 because it is able to create solution files in a neat way. This allows for almost identical development on
-both Windows and Linux.
-CMake is a choice as well, there are CMakeLists.txt and lua files available for both ways.
+I use premake5 because it is able to create solution files in a neat way.[Build](build.sh)
+This allows for (almost) identical development on both Windows and Linux.
+CMake is a choice as well, there are CMakeLists.txt available but there is some configuration to do.
 <br>
 <br>
 Use the build script in the repo or execute premake5 manually in bash (or PS). 
+<br>
+Manually in Windows:
+```
+ LkEngine-repo-root:$ lib\premake-5.0\premake5.exe vs2022 
+```
+And on Linux:
+```
+$ LkEngine-repo:~$ mkdir build; cd build
+$ LkEngine-repo:/build $ ../lib/premake-5.0/premake5 gmake
+$ LkEngine-repo:/build $ make
+```
 
 ---
 
@@ -81,53 +91,60 @@ Use the build script in the repo or execute premake5 manually in bash (or PS).
 
 ---
 
-## Images and screenshots
+## Development
 
-### LkEngine screenshots
+## LkEngine {#LkEngine-dev}
+### October 16, 2023
+Got a base UI layout going with two rectangles that can be moved and have their colors changed.
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-16-10-2023_1.png" width=740 height=440>
+<p align="center">
+</p>
+</div>
 
 
 <br>
 
-### LukkelEngine screenshots (old)
+## LukkelEngine (old) {#LukkelEngine-dev}
 
 ### March 19, 2023
 Improved the UI, added constraints and updated the event handling. I was in dire need to use an event system as the 
 world physics cant really function without it. 
 
 <div align="center">
-	<img align="center" src="/doc/img/lukkelengine-03-19-3.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/lukkelengine-03-19-3.png" width=740 height=440>
 <p align="center">The cyan cube has a pivot constraint that can be added and removed with the UI (constraints menu to the left)</p>
 </div>
 
 <div align="center">
-	<img align="center" src="/doc/img/lukkelengine-03-19-2.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/lukkelengine-03-19-2.png" width=740 height=440>
 <p align="center"></p>
 </div>
 
 <div align="center">
-	<img align="center" src="/doc/img/lukkelengine-03-19-1.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/lukkelengine-03-19-1.png" width=740 height=440>
 <p align="center">Colliding objects are set to the color black whenever a valid detection takes place</p>
 </div>
 
 ### March 12, 2023
 
 <div align="center">
-	<img align="center" src="/doc/img/lukkelengine-03-12-1.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/lukkelengine-03-12-1.png" width=740 height=440>
 <p align="center"></p>
 </div>
 
 <div align="center">
-	<img align="center" src="/doc/img/lukkelengine-03-12-2bodyPicked.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/lukkelengine-03-12-2bodyPicked.png" width=740 height=440>
 <p align="center">Selected object with raycasting after clicking left mouse button</p>
 </div>
 
 <div align="center">
-	<img align="center" src="/doc/img/lukkelengine-03-12-3-changecolors.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/lukkelengine-03-12-3-changecolors.png" width=740 height=440>
 <p align="center">Changed color of selected object</p>
 </div>
 
 <div align="center">
-	<img align="center" src="/doc/img/lukkelengine-03-12-4.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/lukkelengine-03-12-4.png" width=740 height=440>
 <p align="center">View of the platform</p>
 </div>
 
@@ -136,13 +153,13 @@ world physics cant really function without it.
 ### February 26, 2023
 
 <div align="center">
-	<img align="center" src="/doc/img/engine-26-2-2023-pic1.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/engine-26-2-2023-pic1.png" width=740 height=440>
 </div>
 <p align="center">Scene overview with a cube</p>
 
 <br>
 <div align="center">
-	<img align="center" src="/doc/img/engine-26-2-2023-pic2.png" width=740 height=440>
+	<img align="center" src="/doc/img/old/engine-26-2-2023-pic2.png" width=740 height=440>
 <p align="center">The same cube but from a closer distance</p>
 </div>
 

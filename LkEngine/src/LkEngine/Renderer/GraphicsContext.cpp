@@ -94,7 +94,7 @@ namespace LkEngine {
 		auto size = ctx->GetMainRenderWindowSize();
 		auto pos = ctx->GetMainRenderWindowPos();
 		glViewport(pos.x, pos.y, size.x, size.y);
-		LOG_DEBUG("Pos: ({}, {})  Size: ({}, {})", pos.x, pos.y, size.x, size.y);
+		//LOG_DEBUG("Pos: ({}, {})  Size: ({}, {})", pos.x, pos.y, size.x, size.y);
 
 		UI::EndMainRenderWindow();
 

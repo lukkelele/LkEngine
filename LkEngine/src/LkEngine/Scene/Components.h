@@ -3,6 +3,7 @@
 #include "LkEngine/Scene/Components/TagComponent.h"
 #include "LkEngine/Scene/Components/TransformComponent.h"
 #include "LkEngine/Scene/Components/CameraComponent.h"
+#include "LkEngine/Scene/Components/MeshComponent.h"
 
 
 namespace LkEngine{
@@ -16,6 +17,7 @@ namespace LkEngine{
 		IDComponent, 
 		TagComponent, 
 		TransformComponent,
+		MeshComponent,
 		CameraComponent
 	>;
 

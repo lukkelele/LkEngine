@@ -12,9 +12,9 @@ namespace LkEngine {
     ImGuiID UI::MainDockSpaceID, UI::RenderWindowDockID, UI::BottomBarDockID;
     ImVec2 UI::LastViewportSize = ImVec2(0, 0);
     bool UI::Initialized = false, UI::ShowImGuiDemoWindow = false;
-    float UI::Sidebar_Left_Ratio = 0.15f;
-    float UI::Sidebar_Right_Ratio = 0.15f;
-    float UI::TopBottom_Ratio = 0.82f;
+    float UI::Sidebar_Left_Ratio = 0.20f;
+    float UI::Sidebar_Right_Ratio = 0.20f;
+    float UI::TopBottom_Ratio = 0.86f;
 
 
     void UI::Init()
@@ -45,7 +45,6 @@ namespace LkEngine {
         ImGui::SetNextWindowClass(RendererWindowClass);
         ImGui::Begin(RENDER_WINDOW, NULL, flags);
 
-
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_DockHierarchy))
         {
             //LOG_INFO("Mouse is inside Window");
@@ -58,7 +57,7 @@ namespace LkEngine {
 
     void UI::EndMainRenderWindow()
     {
-        //ImGui::PopStyleColor();
+
         ImGui::End();
     }
 
@@ -92,6 +91,15 @@ namespace LkEngine {
         }
 
         ImGui::DockSpaceOverViewport(main_viewport, dockspace_flags, NULL);
+
+        //ImGui::BeginMainMenuBar();
+        //if (ImGui::BeginMenu("File"))
+        //{
+        //}
+        //if (ImGui::BeginMenu("Edit"))
+        //{
+        //}
+        //ImGui::EndMainMenuBar();
     }
 
     void UI::EndViewportDockSpace()
@@ -107,7 +115,7 @@ namespace LkEngine {
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
         ImGui::Begin(TOP_BAR, &top_bar_open, flags);
-        ImGui::Text("Top Bar Content");
+
         ImGui::End();
     }
 
@@ -121,7 +129,7 @@ namespace LkEngine {
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
         ImGui::Begin(BOTTOM_BAR, &bottom_bar_open, flags);
-        ImGui::Text("Bottom Bar");
+
         ImGui::End();
         ImGui::PopStyleVar(1);
     }
@@ -148,7 +156,6 @@ namespace LkEngine {
         ImGui::PopStyleVar(1);
 
 
-        //ImGui::BeginChild("##ui-config", ImVec2(0, 0), false);
         ImGui::SeparatorText("LkEngine Configuration");
 
         ImGui::BeginGroup();
@@ -175,7 +182,6 @@ namespace LkEngine {
             ImGui::Text("<< objects here >>");
             ImGui::TreePop();
         }
-        //ImGui::EndChild(); // ui-config
 
         ImGui::End();
     }
@@ -198,7 +204,8 @@ namespace LkEngine {
         ImGui::SetNextWindowClass(UIWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         ImGui::Begin(SIDEBAR_RIGHT, &sidebar_open, flags);
-        ImGui::Text("Right Sidebar");
+
+        ImGui::ShowStyleEditor();
 
         ImGui::End();
         ImGui::PopStyleVar(1);
@@ -230,6 +237,7 @@ namespace LkEngine {
         auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);
         auto dock_id_center = dock_id_top;  // Center part is the remaining space in dock_id_top
 
+        // Store dock ID's to be able to fetch size and position of the center positioned render window
         RenderWindowDockID = dock_id_center;
         BottomBarDockID = dock_id_bottom;
         // Build dockspace
@@ -252,7 +260,6 @@ namespace LkEngine {
         ImGui::BeginChild("##app-info", ImVec2(0, 0));
         ImGui::Text("Keyboard: %s", keyboard_enabled ? "ON" : "OFF");
         ImGui::EndChild();
-
         ImGui::End();
     }
 

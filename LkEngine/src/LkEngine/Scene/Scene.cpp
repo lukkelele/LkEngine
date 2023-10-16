@@ -27,11 +27,11 @@ namespace LkEngine {
 
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
-		Entity entity = { Registry.create(), this };
-		LOG_INFO("(UUID) {0} : {1}", name, uuid);
+		Entity entity = { m_Registry.create(), this };
 		entity.AddComponent<IDComponent>(uuid);
 		TagComponent& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
+		LOG_DEBUG("Created new entity: {0} (UUID: {1})", name, uuid);
 		m_EntityMap[uuid] = entity;
 		return entity;
 	}
@@ -45,20 +45,22 @@ namespace LkEngine {
 
 	Entity Scene::FindEntity(std::string_view name)
 	{
-		auto view = Registry.view<TagComponent>();
+		auto view = m_Registry.view<TagComponent>();
 		for (auto entity : view)
 		{
 			const TagComponent& tc = view.get<TagComponent>(entity);
 			if (tc.Tag == name)
+			{
 				return Entity{ entity , this };
+			}
 		}
 		return {};
 	}
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		m_EntityMap.erase(entity.getUUID());
-		Registry.destroy(entity);
+		m_EntityMap.erase(entity.GetUUID());
+		m_Registry.destroy(entity);
 		LOG_CRITICAL("Entity successfully deleted");
 	}
 
@@ -119,6 +121,12 @@ namespace LkEngine {
 		void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& rigidbody)
 		{
 			LOG_INFO("{0} : TransformComponent added!", entity.GetName());
+		}
+
+		template<>
+		void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& mesh)
+		{
+			LOG_INFO("{0} : MeshComponent added!", entity.GetName());
 		}
 
 

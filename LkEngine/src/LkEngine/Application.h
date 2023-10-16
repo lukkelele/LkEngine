@@ -5,6 +5,7 @@
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/SceneCamera.h"
+#include "LkEngine/Scene/EntityFactory.h"
 #include "LkEngine/UI/UI.h"
 
 

@@ -36,6 +36,8 @@ public:
 
     float Yaw, Pitch;
 
+    float ScalerSlider1, ScalerSlider2;
+
 private:
     VertexArray* m_VAO = nullptr;
     VertexBuffer* m_VBO = nullptr;
