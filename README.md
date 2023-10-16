@@ -48,13 +48,14 @@ Use the build script in the repo or execute premake5 manually in bash (or PS).
 <br>
 Manually in Windows:
 ```
- LkEngine-repo-root:$ lib\premake-5.0\premake5.exe vs2022 
+ lib\premake-5.0\premake5.exe vs2022 
 ```
 And on Linux:
 ```
-$ LkEngine-repo:~$ mkdir build; cd build
-$ LkEngine-repo:/build $ ../lib/premake-5.0/premake5 gmake
-$ LkEngine-repo:/build $ make
+mkdir build
+cd build
+../lib/premake-5.0/premake5 gmake
+make
 ```
 
 ---
