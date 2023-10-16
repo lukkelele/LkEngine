@@ -26,16 +26,23 @@ namespace LkEngine {
 
 	void Window::WindowResizeCallback(GLFWwindow* glfw_window, int width, int height)
 	{
-		LOG_DEBUG("Window resized ({0}, {1})", width, height);
-		//int pos_x, pos_y;
-		//glfwGetWindowPos(glfw_window, &pos_x, &pos_y);
+		//LOG_DEBUG("Window resized ({0}, {1})", width, height);
+		int size_x, size_y;
+		glfwGetWindowSize(glfw_window, &size_x, &size_y);
+
+		auto window = Window::Get();
+		window->m_ViewportWidth = size_x;
+		window->m_ViewportHeight = size_y;
+
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImVec2 pos = viewport->WorkPos;
-		// glViewport(pos_x, pos_y, width, height);
+
 		glViewport(pos.x, pos.y, width, height);
-		auto window = Window::Get();
 		window->m_Width = width;
 		window->m_Height = height;
+
+		auto& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2(width, height);
 	}
 
 }

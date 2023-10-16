@@ -177,11 +177,6 @@ namespace LkEngine {
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNode("Rendered Objects"))
-        {
-            ImGui::Text("<< objects here >>");
-            ImGui::TreePop();
-        }
 
         ImGui::End();
     }
@@ -205,7 +200,7 @@ namespace LkEngine {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         ImGui::Begin(SIDEBAR_RIGHT, &sidebar_open, flags);
 
-        ImGui::ShowStyleEditor();
+        //ImGui::ShowStyleEditor();
 
         ImGui::End();
         ImGui::PopStyleVar(1);
@@ -257,9 +252,9 @@ namespace LkEngine {
         // Place in right sidebar
         ImGui::Begin(SIDEBAR_RIGHT);
 
-        ImGui::BeginChild("##app-info", ImVec2(0, 0));
         ImGui::Text("Keyboard: %s", keyboard_enabled ? "ON" : "OFF");
-        ImGui::EndChild();
+        
+        ImGui::Separator();
         ImGui::End();
     }
 

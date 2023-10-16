@@ -24,8 +24,10 @@ namespace LkEngine {
         virtual void SetVSync(bool enabled) = 0;
         virtual std::shared_ptr<GLFWwindow*> GetGlfwWindow() const = 0;
         virtual std::shared_ptr<GraphicsContext> GetContext() const = 0;
-        uint32_t GetWidth()  const { return m_Width; }
-        uint32_t GetHeight() const { return m_Height; }
+        uint16_t GetWidth()  const { return m_Width; }
+        uint16_t GetHeight() const { return m_Height; }
+        uint16_t GetViewportWidth()  const { return m_ViewportWidth; }
+        uint16_t GetViewportHeight() const { return m_ViewportHeight; }
         std::string GetTitle()  const { return m_Title; }
         std::string GetGlslVersion() const { return m_GlslVersion;  }
         bool IsVSync() const { return m_VSync; }
@@ -35,7 +37,8 @@ namespace LkEngine {
         //virtual void UpdateViewportSize(GLFWwindow* window, int width, int height) = 0;
     
     protected:
-        uint32_t m_Width, m_Height;
+        uint16_t m_Width, m_Height;
+        uint16_t m_ViewportWidth, m_ViewportHeight;
         std::string m_Title = "";
         std::string m_GlslVersion = "";
         bool m_VSync;

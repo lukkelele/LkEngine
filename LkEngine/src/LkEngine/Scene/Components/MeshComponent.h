@@ -38,10 +38,12 @@ namespace LkEngine {
         std::vector<Vertex> Vertices;
         std::vector<unsigned int> Indices;
 
+        // TODO: Move these and color to something else, for reuse of VAO, VBO and IBO's
         s_ptr<VertexArray> VAO = nullptr;
         s_ptr<VertexBuffer> VBO = nullptr;
         s_ptr<IndexBuffer> IBO = nullptr;
         s_ptr<Shader> Shader = nullptr;
+        glm::vec4 Color = { 0.30f , 0.630f, 0.80f, 1.0f };
     };
 
 }

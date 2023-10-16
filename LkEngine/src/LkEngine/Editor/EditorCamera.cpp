@@ -7,7 +7,7 @@ namespace LkEngine {
 
 	EditorCamera::EditorCamera()
 	{
-		LOG_DEBUG("[ CREATED ] EditorCamera");
+		LOG_DEBUG("Created EditorCamera");
 	}
 
 	EditorCamera::EditorCamera(float FOV, float nearPlane, float farPlane)

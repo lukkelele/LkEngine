@@ -3,6 +3,8 @@
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Editor/EditorCamera.h"
+#include "LkEngine/UI/UI.h"
+#include <imgui/imgui.h>
 
 
 namespace LkEngine {
@@ -12,11 +14,8 @@ namespace LkEngine {
 	Scene::Scene()
 	{
 		ActiveScene = this;
-		//m_Camera = create_s_ptr<SceneCamera>(45.0f, 0.010f, 1000.0f);
 		m_Camera = create_s_ptr<SceneCamera>();
-		//m_Camera->SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		m_EditorCamera = create_s_ptr<EditorCamera>();
-		//m_Camera->SetScene(this);
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -31,7 +30,7 @@ namespace LkEngine {
 		entity.AddComponent<IDComponent>(uuid);
 		TagComponent& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
-		LOG_DEBUG("Created new entity: {0} (UUID: {1})", name, uuid);
+		LOG_DEBUG("Created new entity: {0} (UUID: {1}, tag: {2})", name, uuid, tag.Tag);
 		m_EntityMap[uuid] = entity;
 		return entity;
 	}
@@ -68,29 +67,24 @@ namespace LkEngine {
 	{
 		m_Camera->OnUpdate(ts);
 		m_EditorCamera->OnUpdate(ts);
-#ifdef LK_ENGINE_OLD_IMPL
-		m_Camera->OnUpdate(ts);
-		m_World->OnUpdate(ts);
 
-		// If mouse has moved -> send World Mouse move event
-		if (m_Camera->hasMouseMoved)
-			m_World->MouseMoveCallback(Mouse::GetMouseX(), Mouse::GetMouseY());
-
-		if (Mouse::IsButtonPressed(MouseButton::Button0))
-			m_World->MouseButtonCallback(MouseButton::Button0, 1, Mouse::GetMouseX(), Mouse::GetMouseY());
-
-		glm::mat4 viewProj = m_Camera->GetViewProjection();
-		auto entities = Registry.view<Mesh>();
+		auto entities = m_Registry.view<TransformComponent>();
 		for (auto& ent : entities)
 		{	
 			Entity entity = { ent, this };
-			entity.OnUpdate(ts, viewProj);
-			Mesh& mesh = entity.GetComponent<Mesh>();
 
-			//m_Renderer->DrawWireframe(entity, Color::Black);
-			//m_Renderer->Draw(mesh);
+			auto& transform = entity.GetComponent<TransformComponent>();
+			if (entity.HasComponent<MeshComponent>())
+			{
+				auto& mesh = entity.GetComponent<MeshComponent>();
+				// Submit render
+				mesh.Shader->Bind();
+				mesh.Shader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
+				Renderer::Draw(mesh);
+				//Renderer::Draw(*mesh.VAO, *mesh.IBO, *mesh.Shader);
+			}
+
 		}
-	#endif
 	}
 
 	void Scene::Pause(bool paused)
@@ -101,6 +95,38 @@ namespace LkEngine {
 
 	void Scene::OnImGuiRender()
 	{
+		auto entities = m_Registry.view<TransformComponent>();
+		ImGui::Begin(SIDEBAR_RIGHT);
+		ImGui::SeparatorText("Rendered Entities");
+		for (auto& ent : entities)
+		{	
+			Entity entity = { ent, this };
+			//ImGui::Text("Entity: %s", entity.GetName().c_str());
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			uint32_t id = entity;
+			if (ImGui::TreeNode("Entity: %s", entity.GetName().c_str()))
+			{
+				auto& transform = entity.GetComponent<TransformComponent>();
+				if (entity.HasComponent<MeshComponent>())
+				{
+					auto& mesh = entity.GetComponent<MeshComponent>();
+					// Submit render
+					std::string pos_id = "Pos##" + std::to_string(id);
+					std::string scale_id = "Scale##" + std::to_string(id);
+					std::string rot_id = "Rot##" + std::to_string(id);
+					std::string color_id = "Color##" + std::to_string(id);
+					ImGui::SliderFloat2(pos_id.c_str(), &transform.Translation.x, -2.0f, 2.0f, "%.3f");
+					ImGui::SliderFloat2(scale_id.c_str(), &transform.Scale.x, -2.0f, 2.0f, "%.3f");
+					ImGui::SliderFloat2(rot_id.c_str(), &transform.Rotation.x, -6.0f, 6.0f, "%.3f"); // TODO: make to rad
+					ImGui::SliderFloat4(color_id.c_str(), &mesh.Color.x, 0.0f, 1.0f, "%.3f");
+					mesh.Shader->Bind();
+					mesh.Shader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
+					mesh.Shader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
+				}
+				ImGui::TreePop();
+			}
+		}
+		ImGui::End();
 	}
 
 	void Scene::SwitchCamera()

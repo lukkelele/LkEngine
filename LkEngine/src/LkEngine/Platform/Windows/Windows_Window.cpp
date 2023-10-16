@@ -53,7 +53,7 @@ namespace LkEngine {
 	
 		glViewport(0, 0, m_Width, m_Height);
 
-		LOG_DEBUG("[CREATED] Window ({}, {})", m_Width, m_Height);
+		LOG_DEBUG("Created Window ({}, {})", m_Width, m_Height);
 		GLFW_Initialized = true;
 	}
 	

@@ -9,7 +9,7 @@ namespace LkEngine {
 		, m_NearPlane(nearPlane)
 		, m_FarPlane(farPlane)
 	{
-		LOG_DEBUG("(Created) PerspectiveCamera, FOV: {0}", m_FOV);
+		LOG_DEBUG("New PerspectiveCamera, FOV: {0}", m_FOV);
 		const glm::quat orientation = GetOrientation();
 
 		m_Yaw = 3.0f * glm::pi<float>() / 4.0f;
@@ -22,7 +22,6 @@ namespace LkEngine {
 
 	void PerspectiveCamera::OnUpdate(float ts)
 	{
-
 	}
 
 	glm::quat PerspectiveCamera::GetOrientation() const

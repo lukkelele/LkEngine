@@ -90,14 +90,12 @@ namespace LkEngine {
 
 	void GraphicsContext::EndImGuiFrame()
 	{
-		auto ctx = GraphicsContext::Get();
-		auto size = ctx->GetMainRenderWindowSize();
-		auto pos = ctx->GetMainRenderWindowPos();
+		auto size = GetMainRenderWindowSize();
+		auto pos = GetMainRenderWindowPos();
 		glViewport(pos.x, pos.y, size.x, size.y);
 		//LOG_DEBUG("Pos: ({}, {})  Size: ({}, {})", pos.x, pos.y, size.x, size.y);
 
 		UI::EndMainRenderWindow();
-
 		UI::EndViewportDockSpace();
 
 

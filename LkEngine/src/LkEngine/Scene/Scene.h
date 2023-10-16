@@ -33,7 +33,7 @@ namespace LkEngine {
 		bool IsRunning() const { return m_IsRunning; }
 		void Pause(bool paused);
 		void SwitchCamera();
-		uint64_t GetEntityCount() const { return m_Registry.size(); }
+		uint64_t GetEntityCount() const { return m_EntityMap.size(); }
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

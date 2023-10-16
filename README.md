@@ -10,8 +10,7 @@
     - [Prerequisites](#prerequisites)
 	- [Building LkEngine](#building-lkengine)
 3. [Todo](#todo)
-4. [Implementation](#implementation)
-5. [Development](#development)
+4. [Development](#development)
     - [LkEngine](#lkengine-development)
     - [LukkelEngine (old)](#lukkelengine-old)
 
@@ -79,27 +78,29 @@ make
 <!------------------------------------------------------------>
 
 
----
-
-## Implementation
-
-
-### Application
-
-### Renderer
-
-### Layer system
 
 ---
 
-## Development
+# Development
 
 ## LkEngine Development
 ### October 16, 2023
-Got a base UI layout going with two rectangles that can be moved and have their colors changed.
+
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-16-10-2023_2.png" width=740 height=440>
+<p align="center">
+Rendering multiple rectangles that can be adjusted indivually thanks to the entity component system.
+The entity entries can be seen on the right sidebar.
+</p>
+
+</div>
+<br>
+
+
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-16-10-2023_1.png" width=740 height=440>
 <p align="center">
+Got a base UI layout going with two rectangles that can be moved and have their colors changed.
 </p>
 </div>
 

@@ -5,8 +5,7 @@
 #include "LkEngine/Renderer/IndexBuffer.h"
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Renderer/Texture.h"
-//#include "LkEngine/Renderer/Mesh.h"
-
+#include "LkEngine/Scene/Components.h"
 #include <glad/glad.h>
 
 #define LK_DRAW_TRIANGLES  GL_TRIANGLES
@@ -23,6 +22,7 @@ namespace LkEngine {
 		static void Clear();
 
 		static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
+		static void Draw(const MeshComponent& mesh);
 		static void DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawIndexed(const s_ptr<VertexArray>& va);

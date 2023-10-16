@@ -22,6 +22,15 @@ namespace LkEngine {
 		glDrawElements(DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
+	void Renderer::Draw(const MeshComponent& mesh)
+	{
+		LK_ASSERT_MESHCOMPONENT(mesh);
+		mesh.Shader->Bind();
+		mesh.VAO->Bind();
+		mesh.IBO->Bind();
+		glDrawElements(DrawMode, mesh.IBO->GetCount(), GL_UNSIGNED_INT, nullptr);
+	}
+
 	void Renderer::DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
 	{
 		shader.Bind();
