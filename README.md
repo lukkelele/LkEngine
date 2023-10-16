@@ -39,7 +39,7 @@ When the 2D implementation is done, the plan is to create a game such as **Super
 - ImGuizmo
 
 ### Building LkEngine
-I use premake5 because it is able to create solution files in a neat way.[Build](build.sh)
+I use premake5 because it is able to create solution files in a neat way.
 This allows for (almost) identical development on both Windows and Linux.
 CMake is a choice as well, there are CMakeLists.txt available but there is some configuration to do.
 <br>
