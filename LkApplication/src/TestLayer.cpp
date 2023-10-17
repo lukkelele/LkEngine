@@ -99,15 +99,6 @@ void TestLayer::OnUpdate(float ts)
     m_Shader->SetUniformMat4f("u_TransformMatrix", transform);
     Renderer::Draw(*m_VAO, *m_IBO, *m_Shader);
 
-    //Entity rect1 = m_Scene->FindEntity("rect_1");
-    //TransformComponent& rect_transform = rect1.GetComponent<TransformComponent>();
-    //rect_transform.Scale = { ScalerSlider2, ScalerSlider2, ScalerSlider2 };
-    // //LOG_DEBUG("Rect Transform Scale: {}", rect_transform.Scale.x);
-    //MeshComponent& mesh = rect1.GetComponent<MeshComponent>();
-    //mesh.Shader->Bind();
-    //mesh.Shader->SetUniformMat4f("u_TransformMatrix", rect_transform.GetTransform());
-    // LK_ASSERT_MESHCOMPONENT(mesh);
-    //Renderer::Draw(*mesh.VAO, *mesh.IBO, *mesh.Shader);
 }
 
 void TestLayer::OnImGuiRender()
@@ -233,7 +224,6 @@ void TestLayer::DrawColorSliders()
     ImGui::SetCursorPosX(slider_pos_x);
     ImGui::SetNextItemWidth(slider_width);
     ImGui::SliderFloat("##member-ColorSlider-w", &ColorSlider.w, 0.0f, 1.0f, " %.3f", color_slider_flags);
-
 
     ImGui::PopStyleVar(1);
 }

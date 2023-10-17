@@ -155,7 +155,6 @@ namespace LkEngine {
         ImGui::Begin(SIDEBAR_LEFT, &sidebar_open, flags);
         ImGui::PopStyleVar(1);
 
-
         ImGui::SeparatorText("LkEngine Configuration");
 
         ImGui::BeginGroup();
@@ -170,13 +169,12 @@ namespace LkEngine {
         {
             static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
             ImGui::Text("Background Color"); 
-            ImGui::SliderFloat("##member-ColorSlider-x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-            ImGui::SliderFloat("##member-ColorSlider-y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-            ImGui::SliderFloat("##member-ColorSlider-z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-            ImGui::SliderFloat("##member-ColorSlider-w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##member-color_slider-x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##member-color_slider-y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##member-color_slider-z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##member-color_slider-w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
             ImGui::TreePop();
         }
-
 
         ImGui::End();
     }
@@ -256,6 +254,85 @@ namespace LkEngine {
         
         ImGui::Separator();
         ImGui::End();
+    }
+
+    void UI::DrawRgbControls(uint32_t entity_id, glm::vec4& rgba)
+    {
+        glm::vec4& color_slider = rgba;
+
+        static ImGuiSliderFlags color_slider_flags = ImGuiSliderFlags_None;
+        static float slider_padding_x = 0.0f;
+        static float reset_color_val = 1.0f; // for each color entry in RGB
+        float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+
+        ImVec2 button_size = { line_height + 8.0f, line_height };
+        //ImVec2 window_size = ImGui::GetWindowDockNode()->Size;
+        ImVec2 window_size = ImGui::GetContentRegionAvail();
+        float slider_width = window_size.x - button_size.x; // -slider_padding_x;
+        float slider_pos_x = (window_size.x - slider_width) * 0.50f + button_size.x + 12.0f;
+    
+        static std::string id_x = fmt::format("##{}-entity-colorslider-x", entity_id);
+        static std::string id_y = fmt::format("##{}-entity-colorslider-y", entity_id);
+        static std::string id_z = fmt::format("##{}-entity-colorslider-z", entity_id);
+        static std::string id_w = fmt::format("##{}-entity-colorslider-w", entity_id);
+
+        ImGui::SeparatorText("RGBA");
+    
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 1, 0 });
+        /* RED */
+        //ImGui::SetCursorPosX(window_size.x / 2 - ImGui::CalcTextSize("Color").x);
+        //ImGui::Text("Color");
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.0f, 0.0f, 0.90f));
+        if (ImGui::Button("R", button_size))
+        {
+            color_slider.x = reset_color_val;
+        }
+        ImGui::PopStyleColor(2);
+        //ImGui::PopItemWidth();
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(slider_pos_x);
+        ImGui::SetNextItemWidth(slider_width);
+        ImGui::SliderFloat(id_x.c_str(), &color_slider.x, 0.0f, 1.0f, "%.3f", color_slider_flags);
+    
+        /* GREEN */
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.135f, 0.85f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.90f, 0.135f, 0.50f));
+        if (ImGui::Button("G", button_size))
+            color_slider.y = reset_color_val;
+        ImGui::PopStyleColor(2);
+        //ImGui::PopItemWidth();
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(slider_pos_x);
+        ImGui::SetNextItemWidth(slider_width);
+        ImGui::SliderFloat("##member-color_slider-y", &color_slider.y, 0.0f, 1.0f,"%.3f", color_slider_flags);
+    
+        /* BLUE */
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.90f, 0.90f));
+        if (ImGui::Button("B", button_size))
+            color_slider.z = reset_color_val;
+        ImGui::PopStyleColor(2);
+        //ImGui::PopItemWidth();
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(slider_pos_x);
+        ImGui::SetNextItemWidth(slider_width);
+        ImGui::SliderFloat("##member-color_slider-z", &color_slider.z, 0.0f, 1.0f, " %.3f", color_slider_flags);
+    
+        /* ALPHA */
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.70f, 0.70f, 0.70f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.70f, 0.70f, 0.70f, 0.90f));
+
+        if (ImGui::Button("A", button_size))
+            color_slider.z = reset_color_val;
+        ImGui::PopStyleColor(2);
+        //ImGui::PopItemWidth();
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(slider_pos_x);
+        ImGui::SetNextItemWidth(slider_width);
+        ImGui::SliderFloat("##member-color_slider-w", &color_slider.w, 0.0f, 1.0f, " %.3f", color_slider_flags);
+    
+        ImGui::PopStyleVar(1);
     }
 
 }

@@ -16,6 +16,7 @@ namespace LkEngine {
 	#define LK_ASSERT(_COND)                 assert(_COND)
 	#define LK_ARRAYSIZE(_ARR)               ((int)(sizeof(_ARR) / sizeof(*(_ARR))))    
 	#define LK_ASSERT_MESHCOMPONENT(_MESH)   LK_ASSERT(_MESH.VAO); LK_ASSERT(_MESH.IBO); LK_ASSERT(_MESH.Shader)
+	#define LK_UNUSED(_VAR)                  ((void)(_VAR))
 	#define BIT_FIELD(x)                     (1 << x)
 	#define STRINIGFY(x)                     #x
 	#define GL_CALL(_FUNC)                   (void)(_FUNC) // TODO: Add opengl call func here

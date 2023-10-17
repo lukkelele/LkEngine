@@ -13,6 +13,7 @@ namespace LkEngine {
     constexpr const char* SIDEBAR_LEFT = "##__left-sidebar";
     constexpr const char* SIDEBAR_RIGHT = "##__right-sidebar";
 
+    class Entity;
 
     class UI
     {
@@ -28,6 +29,8 @@ namespace LkEngine {
         static void LeftSidebar();
         static void RightSidebar();
         static void AppInfo();
+
+        static void DrawRgbControls(uint32_t entity_id, glm::vec4& rgba);
 
         // -- Dockspace --
         static void BeginViewportDockSpace();
