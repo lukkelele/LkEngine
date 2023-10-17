@@ -48,10 +48,76 @@ namespace LkEngine::UI {
 		{
 		}
 
-		static void PositionXYZ(uint32_t id, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+		static void PositionXYZ(uint32_t id, glm::vec3& pos, float resetValue = 0.0f, float columnWidth = 100.0f)
 		{
+			ImGui::PushID(id);
 			ImGuiIO& io = ImGui::GetIO();
 			auto boldFont = io.Fonts->Fonts[0];
+
+			ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+
+			static float min, max;
+			min = -1.50f;
+			max =  1.50f;
+
+			float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			line_height += 8.0f;
+			ImVec2 button_size = { line_height + 3.0f, line_height };
+			if (ImGui::BeginTable("##POS_XYZ", 2, flags))
+			{
+				//static float column_1_width = 32.0f;
+				static float column_1_width = button_size.x;
+				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthFixed, column_1_width);
+				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoResize);
+
+				float padding = 20.0f;
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 4));
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 0, 0, 255), 0);
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0, 0.0, 0.50, 1.0f));
+				if (ImGui::Button("X", button_size))
+				{
+				}
+				ImGui::PopStyleColor();
+				ImGui::TableSetColumnIndex(1);
+				float slider_width = ImGui::GetColumnWidth();
+				ImGui::SetNextItemWidth(slider_width);
+				ImGui::DragFloat("##pos-x", &pos.x, 0.01f, min, max, "%.3f");
+
+				// Y
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.90f, 0.26f, 1.0f));
+				if (ImGui::Button("Y", button_size))
+				{
+				}
+				ImGui::PopStyleColor();
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(slider_width);
+				ImGui::DragFloat("##pos-y", &pos.y, 0.01f, min, max, "%.3f");
+
+				// Z
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.90f, 0.55f, 0.0f, 0.9f));
+				if (ImGui::Button("Z", button_size))
+				{
+				}
+				ImGui::PopStyleColor();
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(slider_width);
+				ImGui::DragFloat("##Z", &pos.z, 0.01f, min, max, "%.3f");
+
+				ImGui::PopStyleVar(1);
+
+				ImGui::EndTable();
+			}
+			ImGui::PopStyleVar(2);
+			ImGui::PopID();
 		}
 
 		static void RGBAColor(uint32_t id, glm::vec4& color)
@@ -73,52 +139,36 @@ namespace LkEngine::UI {
 				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoResize);
 
 				float padding = 20.0f;
-				//float slider_width = ImGui::GetContentRegionAvail().x - padding;
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 4));
-				//ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-				//ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(4, 10));
 
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 0, 0, 255), 0);
-				//ImGui::PushStyleColor(ImGuiCol_TableRowBg, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0, 0.0, 0.0, 1.0f));
-				//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (column_1_width - ImGui::CalcTextSize("R").x) * 0.50f);
 				if (ImGui::Button("R", button_size))
 				{
 				}
-				//ImGui::Text("R");
 				ImGui::PopStyleColor();
 				ImGui::TableSetColumnIndex(1);
 				float slider_width = ImGui::GetColumnWidth();
 				ImGui::SetNextItemWidth(slider_width);
-				//ImGui::SliderFloat("##R", &color.r, 0.0f, 1.0f);
 				ImGui::DragFloat("##R", &color.r, 0.01f, 0.0f, 1.0f, "%.3f");
 
 				// Green
 				ImGui::TableNextRow();
-				//ImGui::PushStyleColor(ImGuiCol_TableRowBg, ImVec4(255.0f, 1.0f, 0.0f, 1.0f));
-				//ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(0, 255, 0, 255), 0);
 				ImGui::TableSetColumnIndex(0);
-				//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (column_1_width - ImGui::CalcTextSize("R").x) * 0.50f);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
 				if (ImGui::Button("G", button_size))
 				{
 				}
-				//ImGui::Text("G");
 				ImGui::PopStyleColor();
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(slider_width);
-				//ImGui::SliderFloat("##G", &color.g, 0.0f, 1.0f, "%.3f");
 				ImGui::DragFloat("##G", &color.g, 0.01f, 0.0f, 1.0f, "%.3f");
 
 				// Blue
-				//ImGui::PushStyleColor(ImGuiCol_TableRowBg, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
-				//ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(0, 0, 255, 255), 0);
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (column_1_width - ImGui::CalcTextSize("R").x) * 0.50f);
-				//ImGui::Text("B");
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
 				if (ImGui::Button("B", button_size))
 				{
@@ -126,24 +176,18 @@ namespace LkEngine::UI {
 				ImGui::PopStyleColor();
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(slider_width);
-				//ImGui::SliderFloat("##B", &color.b, 0.0f, 1.0f);
 				ImGui::DragFloat("##B", &color.b, 0.01f, 0.0f, 1.0f, "%.3f");
 
 				// Alpha
 				ImGui::TableNextRow();
-				//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 				ImGui::TableSetColumnIndex(0);
-				//ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(100, 100, 100, 255), 0);
-				//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (column_1_width - ImGui::CalcTextSize("R").x) * 0.50f);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.50f, 0.50f, 0.50f, 1.0f));
 				if (ImGui::Button("A", button_size))
 				{
 				}
-				//ImGui::Text("A");
 				ImGui::PopStyleColor();
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(slider_width);
-				//ImGui::SliderFloat("##A", &color.a, 0.0f, 1.0f);
 				ImGui::DragFloat("##A", &color.a, 0.01f, 0.0f, 1.0f, "%.3f");
 
 				ImGui::PopStyleVar(1);

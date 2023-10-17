@@ -164,6 +164,7 @@ namespace LkEngine {
 				UI::Property::PositionXYZ(entity, transform.Translation);
 				UI::Property::RGBAColor(entity, mesh.Color);
 				//UILayer::DrawRgbControls(id, mesh.Color);
+				//Renderer::Draw(mesh);
 
 				ImGui::Dummy(ImVec2(0, 10));
 				ImGui::TreePop();
