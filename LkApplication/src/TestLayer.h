@@ -18,10 +18,6 @@ public:
     void OnUpdate(float ts = 0.0f);
     void OnImGuiRender();
 
-private:
-    void DrawColorSliders();
-    void DrawPositionSliders();
-
 public:
     glm::vec3 Translation;
     glm::vec3 Scale;

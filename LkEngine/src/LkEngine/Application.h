@@ -6,7 +6,7 @@
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Scene/EntityFactory.h"
-#include "LkEngine/UI/UI.h"
+#include "LkEngine/UI/UILayer.h"
 
 
 namespace LkEngine {

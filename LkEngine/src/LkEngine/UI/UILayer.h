@@ -2,6 +2,8 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include "LkEngine/UI/Property.h"
+#include "LkEngine/Core/Layer.h"
 
 
 namespace LkEngine {
@@ -15,11 +17,15 @@ namespace LkEngine {
 
     class Entity;
 
-    class UI
+    class UILayer : public Layer
     {
     public:
-        UI() = default;
-        ~UI() = default;
+        UILayer() = default;
+        ~UILayer() = default;
+
+        void OnAttach();
+        void OnDetach();
+        void OnImGuiRender();
 
         static void Init();
         static void BeginMainRenderWindow();
@@ -41,7 +47,7 @@ namespace LkEngine {
         static ImGuiID MainDockSpaceID, RenderWindowDockID, BottomBarDockID;
         //static ImGuiID RenderWindowDockID;
         static ImVec2 LastViewportSize;
-        static ImGuiWindowClass* UIWindowClass;        
+        static ImGuiWindowClass* UILayerWindowClass;        
         static ImGuiWindowClass* RendererWindowClass;   
         static ImGuiWindowClass* ExternalWindowClass;   
         static bool Initialized, ShowImGuiDemoWindow;

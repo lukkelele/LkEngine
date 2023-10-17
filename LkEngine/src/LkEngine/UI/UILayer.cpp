@@ -1,28 +1,28 @@
 #include "LKpch.h"
-#include "LkEngine/UI/UI.h"
+#include "LkEngine/UI/UILayer.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Application.h"
 
 
 namespace LkEngine {
 
-    ImGuiWindowClass* UI::UIWindowClass = nullptr;
-    ImGuiWindowClass* UI::RendererWindowClass = nullptr;
-    ImGuiWindowClass* UI::ExternalWindowClass = nullptr;
-    ImGuiID UI::MainDockSpaceID, UI::RenderWindowDockID, UI::BottomBarDockID;
-    ImVec2 UI::LastViewportSize = ImVec2(0, 0);
-    bool UI::Initialized = false, UI::ShowImGuiDemoWindow = false;
-    float UI::Sidebar_Left_Ratio = 0.20f;
-    float UI::Sidebar_Right_Ratio = 0.20f;
-    float UI::TopBottom_Ratio = 0.86f;
+    ImGuiWindowClass* UILayer::UILayerWindowClass = nullptr;
+    ImGuiWindowClass* UILayer::RendererWindowClass = nullptr;
+    ImGuiWindowClass* UILayer::ExternalWindowClass = nullptr;
+    ImGuiID UILayer::MainDockSpaceID, UILayer::RenderWindowDockID, UILayer::BottomBarDockID;
+    ImVec2 UILayer::LastViewportSize = ImVec2(0, 0);
+    bool UILayer::Initialized = false, UILayer::ShowImGuiDemoWindow = false;
+    float UILayer::Sidebar_Left_Ratio = 0.20f;
+    float UILayer::Sidebar_Right_Ratio = 0.20f;
+    float UILayer::TopBottom_Ratio = 0.86f;
 
 
-    void UI::Init()
+    void UILayer::Init()
     {
-        UIWindowClass = new ImGuiWindowClass();
-        UIWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton; // | ImGuiDockNodeFlags_NoResize;
-        UIWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
-        UIWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoSplit;
+        UILayerWindowClass = new ImGuiWindowClass();
+        UILayerWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoCloseButton; // | ImGuiDockNodeFlags_NoResize;
+        UILayerWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
+        UILayerWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoSplit;
 
         RendererWindowClass = new ImGuiWindowClass();
         RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingInCentralNode; // | ImGuiDockNodeFlags_NoResize;
@@ -34,7 +34,7 @@ namespace LkEngine {
         ExternalWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
     }
     
-    void UI::BeginMainRenderWindow()
+    void UILayer::BeginMainRenderWindow()
     {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
@@ -55,13 +55,13 @@ namespace LkEngine {
             ImGui::ShowDemoWindow();
     }
 
-    void UI::EndMainRenderWindow()
+    void UILayer::EndMainRenderWindow()
     {
 
         ImGui::End();
     }
 
-    void UI::BeginViewportDockSpace()
+    void UILayer::BeginViewportDockSpace()
     {
         ImGuiViewport* main_viewport = ImGui::GetMainViewport();
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -102,14 +102,26 @@ namespace LkEngine {
         //ImGui::EndMainMenuBar();
     }
 
-    void UI::EndViewportDockSpace()
+    void UILayer::EndViewportDockSpace()
     {
     }
 
-    void UI::TopBar()
+    void UILayer::OnAttach()
+    {
+    }
+
+    void UILayer::OnDetach()
+    {
+    }
+
+    void UILayer::OnImGuiRender()
+    {
+    }
+
+    void UILayer::TopBar()
     {
         static bool top_bar_open = true;
-        ImGui::SetNextWindowClass(UIWindowClass);
+        ImGui::SetNextWindowClass(UILayerWindowClass);
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
@@ -119,10 +131,10 @@ namespace LkEngine {
         ImGui::End();
     }
 
-    void UI::BottomBar()
+    void UILayer::BottomBar()
     {
         static bool bottom_bar_open = true;
-        ImGui::SetNextWindowClass(UIWindowClass);
+        ImGui::SetNextWindowClass(UILayerWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
@@ -134,7 +146,7 @@ namespace LkEngine {
         ImGui::PopStyleVar(1);
     }
 
-    void UI::LeftSidebar()
+    void UILayer::LeftSidebar()
     {
         static bool sidebar_open = true;
         ImGuiContext& g = *GImGui;
@@ -149,7 +161,7 @@ namespace LkEngine {
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
 
-        ImGui::SetNextWindowClass(UIWindowClass);
+        ImGui::SetNextWindowClass(UILayerWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height));
         ImGui::Begin(SIDEBAR_LEFT, &sidebar_open, flags);
@@ -179,7 +191,7 @@ namespace LkEngine {
         ImGui::End();
     }
 
-    void UI::RightSidebar()
+    void UILayer::RightSidebar()
     {
         static bool sidebar_open = true;
         ImGuiContext& g = *GImGui;
@@ -194,7 +206,7 @@ namespace LkEngine {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
-        ImGui::SetNextWindowClass(UIWindowClass);
+        ImGui::SetNextWindowClass(UILayerWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         ImGui::Begin(SIDEBAR_RIGHT, &sidebar_open, flags);
 
@@ -204,7 +216,7 @@ namespace LkEngine {
         ImGui::PopStyleVar(1);
     }
 
-    void UI::ApplyDockSpaceLayout()
+    void UILayer::ApplyDockSpaceLayout()
     {
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoResize; 
         dockspace_flags |= ImGuiDockNodeFlags_NoDockingInCentralNode;
@@ -242,7 +254,7 @@ namespace LkEngine {
         ImGui::DockBuilderFinish(MainDockSpaceID);
     }
 
-    void UI::AppInfo()
+    void UILayer::AppInfo()
     {
         auto app = Application::Get();
         bool keyboard_enabled = app->IsKeyboardEnabled();
@@ -256,7 +268,7 @@ namespace LkEngine {
         ImGui::End();
     }
 
-    void UI::DrawRgbControls(uint32_t entity_id, glm::vec4& rgba)
+    void UILayer::DrawRgbControls(uint32_t entity_id, glm::vec4& rgba)
     {
         glm::vec4& color_slider = rgba;
 
@@ -269,19 +281,15 @@ namespace LkEngine {
         //ImVec2 window_size = ImGui::GetWindowDockNode()->Size;
         ImVec2 window_size = ImGui::GetContentRegionAvail();
         float slider_width = window_size.x - button_size.x; // -slider_padding_x;
-        float slider_pos_x = (window_size.x - slider_width) * 0.50f + button_size.x + 12.0f;
+        slider_width /= 2;
+        float slider_pos_x = (window_size.x - slider_width * 2) * 0.50f + button_size.x + 12.0f;
     
-        static std::string id_x = fmt::format("##{}-entity-colorslider-x", entity_id);
-        static std::string id_y = fmt::format("##{}-entity-colorslider-y", entity_id);
-        static std::string id_z = fmt::format("##{}-entity-colorslider-z", entity_id);
-        static std::string id_w = fmt::format("##{}-entity-colorslider-w", entity_id);
 
-        ImGui::SeparatorText("RGBA");
+        //ImGui::SeparatorText("RGBA");
+        ImGui::PushID(entity_id);
     
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 1, 0 });
         /* RED */
-        //ImGui::SetCursorPosX(window_size.x / 2 - ImGui::CalcTextSize("Color").x);
-        //ImGui::Text("Color");
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.0f, 0.0f, 0.90f));
         if (ImGui::Button("R", button_size))
@@ -293,7 +301,7 @@ namespace LkEngine {
         ImGui::SameLine();
         ImGui::SetCursorPosX(slider_pos_x);
         ImGui::SetNextItemWidth(slider_width);
-        ImGui::SliderFloat(id_x.c_str(), &color_slider.x, 0.0f, 1.0f, "%.3f", color_slider_flags);
+        ImGui::SliderFloat("##red", &color_slider.x, 0.0f, 1.0f, "%.3f", color_slider_flags);
     
         /* GREEN */
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.135f, 0.85f));
@@ -305,7 +313,7 @@ namespace LkEngine {
         ImGui::SameLine();
         ImGui::SetCursorPosX(slider_pos_x);
         ImGui::SetNextItemWidth(slider_width);
-        ImGui::SliderFloat("##member-color_slider-y", &color_slider.y, 0.0f, 1.0f,"%.3f", color_slider_flags);
+        ImGui::SliderFloat("##green", &color_slider.y, 0.0f, 1.0f,"%.3f", color_slider_flags);
     
         /* BLUE */
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
@@ -317,7 +325,8 @@ namespace LkEngine {
         ImGui::SameLine();
         ImGui::SetCursorPosX(slider_pos_x);
         ImGui::SetNextItemWidth(slider_width);
-        ImGui::SliderFloat("##member-color_slider-z", &color_slider.z, 0.0f, 1.0f, " %.3f", color_slider_flags);
+        //ImGui::SliderFloat("##member-color_slider-z", &color_slider.z, 0.0f, 1.0f, " %.3f", color_slider_flags);
+        ImGui::SliderFloat("##blue", &color_slider.z, 0.0f, 1.0f, " %.3f", color_slider_flags);
     
         /* ALPHA */
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.70f, 0.70f, 0.70f, 1.0f));
@@ -330,9 +339,12 @@ namespace LkEngine {
         ImGui::SameLine();
         ImGui::SetCursorPosX(slider_pos_x);
         ImGui::SetNextItemWidth(slider_width);
-        ImGui::SliderFloat("##member-color_slider-w", &color_slider.w, 0.0f, 1.0f, " %.3f", color_slider_flags);
+        //ImGui::SliderFloat("##member-color_slider-w", &color_slider.w, 0.0f, 1.0f, " %.3f", color_slider_flags);
+        ImGui::SliderFloat("##alpha", &color_slider.w, 0.0f, 1.0f, " %.3f", color_slider_flags);
     
         ImGui::PopStyleVar(1);
+
+        ImGui::PopID();
     }
 
 }

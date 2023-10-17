@@ -61,10 +61,10 @@ namespace LkEngine {
 		layout.Push<float>(2);
 		mesh.VAO->AddBuffer(*mesh.VBO, layout);
 		mesh.IBO = create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices));
-		mesh.Shader = create_s_ptr<Shader>("assets/shaders/basic_transform.shader");
-		mesh.Shader->Bind();
-		mesh.Shader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
-		mesh.Shader->Unbind();
+		mesh.BaseShader = create_s_ptr<Shader>("assets/shaders/basic_transform.shader");
+		mesh.BaseShader->Bind();
+		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
+		mesh.BaseShader->Unbind();
 
 		TransformComponent& transform = entity.GetComponent<TransformComponent>();
 		auto app = Application::Get();

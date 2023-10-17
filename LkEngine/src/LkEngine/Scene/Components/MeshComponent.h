@@ -3,6 +3,7 @@
 #include "LkEngine/Core/UUID.h"
 #include "LkEngine/Renderer/VertexArray.h"
 #include <glm/glm.hpp>
+#include "LkEngine/Renderer/Shader.h"
 
 
 namespace LkEngine {
@@ -42,7 +43,7 @@ namespace LkEngine {
         s_ptr<VertexArray> VAO = nullptr;
         s_ptr<VertexBuffer> VBO = nullptr;
         s_ptr<IndexBuffer> IBO = nullptr;
-        s_ptr<Shader> Shader = nullptr;
+        s_ptr<Shader> BaseShader = nullptr;
         glm::vec4 Color = { 0.30f , 0.630f, 0.80f, 1.0f };
     };
 

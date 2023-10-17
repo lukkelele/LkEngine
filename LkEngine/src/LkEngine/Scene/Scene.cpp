@@ -3,7 +3,8 @@
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Editor/EditorCamera.h"
-#include "LkEngine/UI/UI.h"
+#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/UI/Property.h"
 #include <imgui/imgui.h>
 
 
@@ -78,8 +79,9 @@ namespace LkEngine {
 			{
 				auto& mesh = entity.GetComponent<MeshComponent>();
 				// Submit render
-				mesh.Shader->Bind();
-				mesh.Shader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
+				mesh.BaseShader->Bind();
+				mesh.BaseShader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
+				mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 				Renderer::Draw(mesh);
 				//Renderer::Draw(*mesh.VAO, *mesh.IBO, *mesh.Shader);
 			}
@@ -134,69 +136,13 @@ namespace LkEngine {
 		if (!entity.HasComponent<MeshComponent>())
 			return;
 
-		uint32_t id = entity;
-		std::string pos_label = "Pos";
-		std::string scale_label = "Scale";
-		std::string rot_label = "Rotation";
-		std::string col_label = "Color";
-		ImVec2 rot_textsize = ImGui::CalcTextSize(rot_label.c_str());
-		ImVec2 scale_textsize = ImGui::CalcTextSize(scale_label.c_str());
-		ImVec2 pos_textsize = ImGui::CalcTextSize(pos_label.c_str());
-		ImVec2 col_textsize = ImGui::CalcTextSize(col_label.c_str());
 		auto& transform = entity.GetComponent<TransformComponent>();
 		auto& mesh = entity.GetComponent<MeshComponent>();
 
-        float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-        ImVec2 button_size = { line_height + 0.0f, line_height };
+		mesh.BaseShader->Bind();
+		mesh.BaseShader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
+		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 
-		ImVec2 window_size = ImGui::GetContentRegionAvail();
-		//float slider_width = 180.0f;
-        float slider_width = window_size.x - rot_textsize.x; // -slider_padding_x;
-		//float slider_width = window_size.x - rot_textsize.x;
-		float x_padding = 32.0f;
-
-		// Submit render
-		std::string pos_id = "##entity_pos##" + std::to_string(id);
-		std::string scale_id = "##entity_scale##" + std::to_string(id);
-		std::string rot_id = "##entity_rot##" + std::to_string(id);
-		std::string color_id = "##entity_color##" + std::to_string(id);
-
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 0));
-
-		ImGui::TextUnformatted("Pos");
-		ImGui::SameLine();
-		//ImGui::SetCursorPosX(2 * rot_textsize.x - pos_textsize.x);
-		ImGui::SetCursorPosX(rot_textsize.x + x_padding);
-		ImGui::PushItemWidth(slider_width);
-		ImGui::SliderFloat2(pos_id.c_str(), &transform.Translation.x, -2.0f, 2.0f, "%.3f");
-		ImGui::PopItemWidth();
-
-		ImGui::TextUnformatted("Scale");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(rot_textsize.x + x_padding);
-		ImGui::PushItemWidth(slider_width);
-		ImGui::SliderFloat2(scale_id.c_str(), &transform.Scale.x, -2.0f, 2.0f, "%.3f");
-		ImGui::PopItemWidth();
-
-		ImGui::TextUnformatted("Rotation");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(rot_textsize.x + x_padding);
-		ImGui::PushItemWidth(slider_width);
-		ImGui::SliderFloat2(rot_id.c_str(), &transform.Rotation.x, -6.0f, 6.0f, "%.3f"); // TODO: make to rad
-		ImGui::PopItemWidth();
-
-		//ImGui::TextUnformatted("Color");
-		//ImGui::SameLine();
-		//ImGui::SetCursorPosX(rot_textsize.x + x_padding);
-		//ImGui::PushItemWidth(slider_width);
-		//ImGui::SliderFloat4(color_id.c_str(), &mesh.Color.x, 0.0f, 1.0f, "%.3f");
-		//ImGui::PopItemWidth();
-
-		ImGui::PopStyleVar(1);
-
-		mesh.Shader->Bind();
-		mesh.Shader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
-		mesh.Shader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 	}
 
 	void Scene::OnImGuiRender()
@@ -209,14 +155,20 @@ namespace LkEngine {
 			Entity entity = { ent, this };
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			uint32_t id = entity;
-			std::string tree_node_id = fmt::format("Entity: {}##{}", entity.GetName().c_str(), id);
-			if (ImGui::TreeNode(tree_node_id.c_str()))
+			//std::string tree_node_id = fmt::format("Entity: {}##{}", entity.GetName().c_str(), id);
+			ImGui::PushID(id);
+			if (ImGui::TreeNode("Entity: %s", entity.GetName().c_str()))
 			{
-				HandleComponentImGui<MeshComponent>(entity);
-				UI::DrawRgbControls(id, entity.GetComponent<MeshComponent>().Color);
+				MeshComponent& mesh = entity.GetComponent<MeshComponent>();
+				TransformComponent& transform = entity.GetComponent<TransformComponent>();
+				UI::Property::PositionXYZ(entity, transform.Translation);
+				UI::Property::RGBAColor(entity, mesh.Color);
+				//UILayer::DrawRgbControls(id, mesh.Color);
+
 				ImGui::Dummy(ImVec2(0, 10));
 				ImGui::TreePop();
 			}
+			ImGui::PopID();
 		}
 		ImGui::End();
 	}
