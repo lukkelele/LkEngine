@@ -43,4 +43,20 @@ namespace LkEngine::Math {
 	}
 
 
+    glm::vec2 WorldToPos(const glm::vec3& world_pos, const glm::mat4& mat)
+    {
+        //vec_t trans;
+        //trans.TransformPoint(worldPos, mat);
+        //trans *= 0.5f / trans.w;
+        //trans += makeVect(0.5f, 0.5f);
+        //trans.y = 1.f - trans.y;
+        //trans.x *= size.x;
+        //trans.y *= size.y;
+        //trans.x += position.x;
+        //trans.y += position.y;
+        //return ImVec2(trans.x, trans.y);
+        return { 0, 0 };
+    }
+
+
 }

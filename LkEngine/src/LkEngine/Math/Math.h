@@ -10,6 +10,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/norm.hpp>
+#include <imgui/imgui.h>
 
 
 namespace LkEngine::Math {
@@ -19,5 +20,6 @@ namespace LkEngine::Math {
     glm::mat4 TransformMatrix2D(const glm::vec3& translation, float rot, const glm::vec3& scale);
     glm::vec4 ConvertToNDC(glm::vec3& world_pos, glm::mat4& mvp);
     glm::vec2 ConvertToWorldCoords(glm::vec2 ndc_coords, int window_width, int window_height);
+    glm::vec2 WorldToPos(const glm::vec3& world_pos, const glm::mat4& mat);
 
 }

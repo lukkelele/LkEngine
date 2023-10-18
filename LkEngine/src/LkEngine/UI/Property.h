@@ -59,8 +59,8 @@ namespace LkEngine::UI {
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
 			static float min, max;
-			min = -1.50f;
-			max =  1.50f;
+			min = -3.0f;
+			max =  3.0f;
 
 			float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			line_height += 8.0f;
@@ -144,7 +144,7 @@ namespace LkEngine::UI {
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 0, 0, 255), 0);
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0, 0.0, 0.0, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.830f, 0.0f, 0.0f, 1.0f));
 				if (ImGui::Button("R", button_size))
 				{
 				}
@@ -157,7 +157,7 @@ namespace LkEngine::UI {
 				// Green
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.83f, 0.0f, 1.0f));
 				if (ImGui::Button("G", button_size))
 				{
 				}

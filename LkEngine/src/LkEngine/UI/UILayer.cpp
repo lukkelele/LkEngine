@@ -9,13 +9,7 @@ namespace LkEngine {
     ImGuiWindowClass* UILayer::UILayerWindowClass = nullptr;
     ImGuiWindowClass* UILayer::RendererWindowClass = nullptr;
     ImGuiWindowClass* UILayer::ExternalWindowClass = nullptr;
-    ImGuiID UILayer::MainDockSpaceID, UILayer::RenderWindowDockID, UILayer::BottomBarDockID;
-    ImVec2 UILayer::LastViewportSize = ImVec2(0, 0);
-    bool UILayer::Initialized = false, UILayer::ShowImGuiDemoWindow = false;
-    float UILayer::Sidebar_Left_Ratio = 0.20f;
-    float UILayer::Sidebar_Right_Ratio = 0.20f;
-    float UILayer::TopBottom_Ratio = 0.86f;
-
+    bool UILayer::ShowImGuiDemoWindow = false;
 
     void UILayer::Init()
     {
@@ -44,66 +38,31 @@ namespace LkEngine {
         auto& io = ImGui::GetIO();
         ImGui::SetNextWindowClass(RendererWindowClass);
         ImGui::Begin(RENDER_WINDOW, NULL, flags);
-
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_DockHierarchy))
-        {
-            //LOG_INFO("Mouse is inside Window");
-            if (ShowImGuiDemoWindow)
-                ImGui::SetNextWindowFocus();
-        }
-        if (ShowImGuiDemoWindow)
-            ImGui::ShowDemoWindow();
     }
 
     void UILayer::EndMainRenderWindow()
     {
-
         ImGui::End();
     }
 
-    void UILayer::BeginViewportDockSpace()
+    void UILayer::Begin()
     {
-        ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-        dockspace_flags |= ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
-        dockspace_flags |= ImGuiDockNodeFlags_NoDockingOverOther | ImGuiDockNodeFlags_NoDockingOverEmpty;
-        dockspace_flags |= ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking;
+        LkEngine::DockSpace::Begin();
+    	TopBar();
+		BottomBar();
+        LeftSidebar();
+        RightSidebar();
 
-        static ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
-        window_flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMouseInputs;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
+        SceneMenu();
+		AppInfo();
 
-        if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-            window_flags |= ImGuiWindowFlags_NoBackground;
-
-        if (!Initialized)
-        {
-            ApplyDockSpaceLayout();
-            Initialized = true;
-        }
-        // Adjust viewport if window has been resized
-        ImVec2 viewport_size = main_viewport->WorkSize;
-        if (LastViewportSize.x != viewport_size.x || LastViewportSize.y != viewport_size.y)
-        {
-            LastViewportSize = viewport_size;
-            ApplyDockSpaceLayout();
-        }
-
-        ImGui::DockSpaceOverViewport(main_viewport, dockspace_flags, NULL);
-
-        //ImGui::BeginMainMenuBar();
-        //if (ImGui::BeginMenu("File"))
-        //{
-        //}
-        //if (ImGui::BeginMenu("Edit"))
-        //{
-        //}
-        //ImGui::EndMainMenuBar();
+		BeginMainRenderWindow(); 
     }
 
-    void UILayer::EndViewportDockSpace()
+    void UILayer::End()
     {
+        EndMainRenderWindow();
+        LkEngine::DockSpace::End();
     }
 
     void UILayer::OnAttach()
@@ -128,6 +87,38 @@ namespace LkEngine {
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
         ImGui::Begin(TOP_BAR, &top_bar_open, flags);
 
+        ImGui::SeparatorText("LkEngine Configuration");
+        ImGui::Checkbox("Demo Window", &ShowImGuiDemoWindow);
+
+        ImGui::SameLine();
+
+        int draw_mode = Renderer::DrawMode;
+        static int selected_draw_mode = -1;
+        std::string draw_label = fmt::format("{}", Renderer::DrawMode == LK_DRAW_TRIANGLES ? "Triangles" : "Lines");
+        ImGui::SetNextItemWidth(100);
+        if (ImGui::BeginCombo("Draw Mode", draw_label.c_str()))
+        {
+            if (ImGui::Selectable("Triangles", selected_draw_mode == 0))
+            {
+                if (Renderer::DrawMode != LK_DRAW_TRIANGLES) 
+                    Renderer::SetDrawMode(LK_DRAW_TRIANGLES);
+            }
+            if (ImGui::Selectable("Lines", selected_draw_mode == 1))
+            {
+                if (Renderer::DrawMode != LK_DRAW_LINES)
+                    Renderer::SetDrawMode(LK_DRAW_LINES);
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_DockHierarchy))
+        {
+            if (ShowImGuiDemoWindow)
+                ImGui::SetNextWindowFocus();
+        }
+        if (ShowImGuiDemoWindow)
+            ImGui::ShowDemoWindow();
+
         ImGui::End();
     }
 
@@ -135,15 +126,13 @@ namespace LkEngine {
     {
         static bool bottom_bar_open = true;
         ImGui::SetNextWindowClass(UILayerWindowClass);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
         ImGui::Begin(BOTTOM_BAR, &bottom_bar_open, flags);
 
         ImGui::End();
-        ImGui::PopStyleVar(1);
     }
 
     void UILayer::LeftSidebar()
@@ -166,15 +155,6 @@ namespace LkEngine {
         ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height));
         ImGui::Begin(SIDEBAR_LEFT, &sidebar_open, flags);
         ImGui::PopStyleVar(1);
-
-        ImGui::SeparatorText("LkEngine Configuration");
-
-        ImGui::BeginGroup();
-        if (ImGui::Checkbox("Demo Window", &ShowImGuiDemoWindow))
-        {
-        }
-        ImGui::EndGroup();
-
 
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
         if (ImGui::TreeNode("Colors"))
@@ -210,141 +190,93 @@ namespace LkEngine {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         ImGui::Begin(SIDEBAR_RIGHT, &sidebar_open, flags);
 
-        //ImGui::ShowStyleEditor();
-
         ImGui::End();
         ImGui::PopStyleVar(1);
-    }
-
-    void UILayer::ApplyDockSpaceLayout()
-    {
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoResize; 
-        dockspace_flags |= ImGuiDockNodeFlags_NoDockingInCentralNode;
-        MainDockSpaceID = ImGui::GetID(Main_DockSpace);
-        ImGuiIO& io = ImGui::GetIO();
-        ImGuiContext& g = *GImGui;
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-
-        // Reset layout
-        ImGui::DockBuilderRemoveNode(MainDockSpaceID); 
-        ImGui::DockBuilderAddNode(MainDockSpaceID, dockspace_flags);
-        ImGui::DockBuilderSetNodeSize(MainDockSpaceID, viewport->Size);
-
-        // Create layout
-        // Top / Bottom
-        auto dock_id_top = ImGui::DockBuilderSplitNode(MainDockSpaceID, ImGuiDir_Up, TopBottom_Ratio, nullptr, &MainDockSpaceID);
-        auto dock_id_bottom = MainDockSpaceID; // Bottom part is the remaining space in dockspace_ID
-        // Split the top horizontally to create the top bar
-        auto dock_id_middle = dock_id_top;
-        auto dock_id_new_top = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Up, 0.08f, nullptr, &dock_id_top);
-        // Split vertically to create sidebars
-        auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Left, Sidebar_Left_Ratio, nullptr, &dock_id_top);
-        auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);
-        auto dock_id_center = dock_id_top;  // Center part is the remaining space in dock_id_top
-
-        // Store dock ID's to be able to fetch size and position of the center positioned render window
-        RenderWindowDockID = dock_id_center;
-        BottomBarDockID = dock_id_bottom;
-        // Build dockspace
-        ImGui::DockBuilderDockWindow(TOP_BAR, dock_id_new_top);
-        ImGui::DockBuilderDockWindow(SIDEBAR_LEFT, dock_id_left);
-        ImGui::DockBuilderDockWindow(SIDEBAR_RIGHT, dock_id_right);
-        ImGui::DockBuilderDockWindow(BOTTOM_BAR, dock_id_bottom);
-        ImGui::DockBuilderDockWindow(RENDER_WINDOW, dock_id_center);
-        ImGui::DockBuilderFinish(MainDockSpaceID);
     }
 
     void UILayer::AppInfo()
     {
         auto app = Application::Get();
         bool keyboard_enabled = app->IsKeyboardEnabled();
+        bool mouse_enabled = app->IsMouseEnabled();
 
-        // Place in right sidebar
-        ImGui::Begin(SIDEBAR_RIGHT);
+        ImGui::Begin(BOTTOM_BAR);
 
+        ImGui::BeginChild("##appinfo-child");
         ImGui::Text("Keyboard: %s", keyboard_enabled ? "ON" : "OFF");
-        
-        ImGui::Separator();
+        ImGui::Text("Mouse: %s", mouse_enabled ? "ON" : "OFF");
+        ImGui::EndChild();
+
         ImGui::End();
     }
 
-    void UILayer::DrawRgbControls(uint32_t entity_id, glm::vec4& rgba)
+    void UILayer::SceneMenu()
     {
-        glm::vec4& color_slider = rgba;
+        ImGui::Begin(SIDEBAR_RIGHT);
+        ImGui::PushID(ImGui::GetID("_scene-menu"));
 
-        static ImGuiSliderFlags color_slider_flags = ImGuiSliderFlags_None;
-        static float slider_padding_x = 0.0f;
-        static float reset_color_val = 1.0f; // for each color entry in RGB
-        float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+        static const char* type_geometry = "Geometry";
+        static const char* type_rigidbody = "Rigidbody";
+        const char* entity_types[] = { type_geometry, type_rigidbody };
+        static int current_type_idx = 0;
+        const char* entity_type_preview = entity_types[current_type_idx];
+        static ImGuiComboFlags combo_flags = ImGuiComboFlags_None;
+        combo_flags |= ImGuiComboFlags_PopupAlignLeft;
 
-        ImVec2 button_size = { line_height + 8.0f, line_height };
-        //ImVec2 window_size = ImGui::GetWindowDockNode()->Size;
-        ImVec2 window_size = ImGui::GetContentRegionAvail();
-        float slider_width = window_size.x - button_size.x; // -slider_padding_x;
-        slider_width /= 2;
-        float slider_pos_x = (window_size.x - slider_width * 2) * 0.50f + button_size.x + 12.0f;
-    
+        static float rect_width = 0.20f;
+        static float rect_height = 0.40f;
 
-        //ImGui::SeparatorText("RGBA");
-        ImGui::PushID(entity_id);
-    
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 1, 0 });
-        /* RED */
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.0f, 0.0f, 0.90f));
-        if (ImGui::Button("R", button_size))
+        ImGui::SeparatorText("Scene Menu");
+        //ImGui::BeginChild("##scene-menu");
+        ImGui::BeginGroup();
+        if (ImGui::BeginCombo("Type", entity_type_preview, combo_flags))
         {
-            color_slider.x = reset_color_val;
-        }
-        ImGui::PopStyleColor(2);
-        //ImGui::PopItemWidth();
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(slider_pos_x);
-        ImGui::SetNextItemWidth(slider_width);
-        ImGui::SliderFloat("##red", &color_slider.x, 0.0f, 1.0f, "%.3f", color_slider_flags);
-    
-        /* GREEN */
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 1.0f, 0.135f, 0.85f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.90f, 0.135f, 0.50f));
-        if (ImGui::Button("G", button_size))
-            color_slider.y = reset_color_val;
-        ImGui::PopStyleColor(2);
-        //ImGui::PopItemWidth();
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(slider_pos_x);
-        ImGui::SetNextItemWidth(slider_width);
-        ImGui::SliderFloat("##green", &color_slider.y, 0.0f, 1.0f,"%.3f", color_slider_flags);
-    
-        /* BLUE */
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.90f, 0.90f));
-        if (ImGui::Button("B", button_size))
-            color_slider.z = reset_color_val;
-        ImGui::PopStyleColor(2);
-        //ImGui::PopItemWidth();
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(slider_pos_x);
-        ImGui::SetNextItemWidth(slider_width);
-        //ImGui::SliderFloat("##member-color_slider-z", &color_slider.z, 0.0f, 1.0f, " %.3f", color_slider_flags);
-        ImGui::SliderFloat("##blue", &color_slider.z, 0.0f, 1.0f, " %.3f", color_slider_flags);
-    
-        /* ALPHA */
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.70f, 0.70f, 0.70f, 1.0f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.70f, 0.70f, 0.70f, 0.90f));
+            for (int n = 0; n < LK_ARRAYSIZE(entity_types); n++)
+            {
+                const bool is_selected = (current_type_idx == n);
+                if (ImGui::Selectable(entity_types[n], is_selected))
+                    current_type_idx = n;
+                if (is_selected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
 
-        if (ImGui::Button("A", button_size))
-            color_slider.z = reset_color_val;
-        ImGui::PopStyleColor(2);
-        //ImGui::PopItemWidth();
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(slider_pos_x);
-        ImGui::SetNextItemWidth(slider_width);
-        //ImGui::SliderFloat("##member-color_slider-w", &color_slider.w, 0.0f, 1.0f, " %.3f", color_slider_flags);
-        ImGui::SliderFloat("##alpha", &color_slider.w, 0.0f, 1.0f, " %.3f", color_slider_flags);
-    
-        ImGui::PopStyleVar(1);
+            ImGui::EndCombo();
+        }
+        const char* current_type = entity_types[current_type_idx];
+
+        ImGui::Text("Item Properties");
+        // Show different menues depending on what type is to be created and added to the scene
+        if (current_type == type_geometry)
+        {
+            ImGui::Text("Rectangle");
+            ImGui::SliderFloat("Width", &rect_width, 0.01f, 1.50f, "%.2f");
+            ImGui::SliderFloat("Height", &rect_height, 0.01f, 1.50f, "%.2f");
+        }
+        if (current_type == type_rigidbody)
+        {
+        }
+
+        if (ImGui::Button("Add")) 
+        {
+            if (current_type == type_geometry)
+            {
+                auto main_node = ImGui::DockBuilderGetNode(DockSpace::RenderWindowDockID);
+                ImVec2 window_size = main_node->Size;
+                //glm::vec2 center_pos = { (window_size.x * 0.50f) - rect_width * 0.50f, (window_size.y * 0.50f) - rect_height * 0.50f };
+                //glm::vec2 p1 = { center_pos.x - rect_width, center_pos.y - rect_height };
+                //glm::vec2 p2 = { center_pos.x + rect_width, center_pos.y + rect_width };
+                glm::vec2 p1 = { -rect_width * 0.50f, -rect_width * 0.50f };
+                glm::vec2 p2 = { rect_width * 0.50f, rect_height * 0.50f };
+                EntityFactory::CreateRectangle(*Scene::ActiveScene, p1, p2);
+            }
+        }
+        ImGui::EndGroup();
+        //ImGui::EndChild();
 
         ImGui::PopID();
+        ImGui::End();
     }
 
 }

@@ -15,7 +15,7 @@ namespace LkEngine {
 		Entity(const Entity& other) = default;
 		~Entity() {}
 
-		void OnUpdate(float ts, glm::mat4 viewProj);
+		void OnUpdate(float ts);
 
 		template<typename T, typename... ARGS>
 		T& AddComponent(ARGS&&... args)
@@ -60,8 +60,6 @@ namespace LkEngine {
 		bool operator==(const Entity& other) const { return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene; }
 		bool operator!=(const Entity& other) const { return !(*this == other); }
 
-	public:
-		bool isSelected = false;
 	private:
 		entt::entity m_EntityHandle{ entt::null };
 		Scene* m_Scene = nullptr;

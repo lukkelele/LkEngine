@@ -17,8 +17,7 @@ namespace LkEngine {
 	Entity EntityFactory::CreateRectangle(Scene& scene, glm::vec2 p1_min, glm::vec2 p2_max)
 	{
 		int entityCount = scene.GetEntityCount();
-		//LOG_DEBUG("Entity Count: {}", entityCount);
-		std::string name = "rect_" + std::to_string(entityCount);
+		std::string name = "rectangle_" + std::to_string(entityCount);
 		return CreateRectangle(name, scene, p1_min, p2_max);
 	}
 
@@ -70,7 +69,9 @@ namespace LkEngine {
 		auto app = Application::Get();
 		int screen_width = app->GetWidth();   // for 'render window'
 		int screen_height = app->GetHeight(); // for 'render window'
-		float center_x = (screen_width - rect_width) * 0.50f;
+		//float center_x = (screen_width - rect_width) * 0.50f;
+		//float center_y = (screen_height - rect_height) * 0.50f;
+		float center_x = (screen_width * 0.50f) - rect_width * 0.50f;
 		float center_y = (screen_height - rect_height) * 0.50f;
 		transform.Translation.x = (2.0f * center_x) / screen_width - 1.0f;
 		transform.Translation.y = (2.0f * center_y) / screen_height - 1.0f;

@@ -2,8 +2,7 @@ workspace "LkEngine"
     architecture "x86_64"
     startproject "LkApplication"
 
-    configurations
-    {
+    configurations {
         "Debug",
 		"Release",
         "Dist"
@@ -33,7 +32,8 @@ include "LkApplication/premake5.lua"
 include "lib/glfw/glfw.lua"
 include "lib/glad/glad.lua"
 include "lib/imgui/imgui.lua"
---include "lib/imgui_test_engine/premake5.lua"
+include "lib/ImGuizmo/ImGuizmo.lua"
+
 
 project "LkEngine"
     location "LkEngine"
@@ -48,62 +48,57 @@ project "LkEngine"
     pchheader "LKpch.h"
     pchsource "LkEngine/src/LKpch.cpp"
 
-    defines
-    {
-		"_GLM_WIN32",
-		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE",
+    defines {
+        "_GLM_WIN32",
+        "_CRT_SECURE_NO_WARNINGS",
+        "GLFW_INCLUDE_NONE",
         "IMGUI_IMPL_OPENGL_LOADER_GLAD",
         "IMGUI_DEFINE_MATH_OPERATORS",
     }
 
-    files
-    { 
+    files { 
         "%{wks.location}/LkEngine/**.h",
         "%{wks.location}/LkEngine/**.cpp",
         "%{wks.location}/lib/stb_image/**.h",
         "%{wks.location}/lib/stb_image/**.cpp",
    	}
 
-    libdirs
-    {
+    libdirs {
         "%{wks.location}/lib/GLFW/lib",
     }
 
-    includedirs
-    {
+    includedirs {
         "%{prj.name}",
-		"%{wks.location}/LkEngine/src",
-		"%{wks.location}/LkEngine/src/LkEngine",
-		"%{wks.location}/lib",
-		"%{wks.location}/lib/glm",
-		"%{wks.location}/lib/glad",
-		"%{wks.location}/lib/glad/include",
-		"%{wks.location}/lib/stb_image",
-		"%{wks.location}/lib/GLFW/include",
-		"%{wks.location}/lib/spdlog/include",
-		"%{wks.location}/lib/stb_image",
-		"%{wks.location}/lib/imgui",
-		"%{wks.location}/lib/imgui/backends",
-		"%{wks.location}/lib/imgui/examples",
-		"%{wks.location}/lib/entt/src",
-		--"%{wks.location}/lib/imgui_test_engine",
+        "%{wks.location}/LkEngine/src",
+        "%{wks.location}/LkEngine/src/LkEngine",
+        "%{wks.location}/lib",
+        "%{wks.location}/lib/glm",
+        "%{wks.location}/lib/glad",
+        "%{wks.location}/lib/glad/include",
+        "%{wks.location}/lib/stb_image",
+        "%{wks.location}/lib/GLFW/include",
+        "%{wks.location}/lib/spdlog/include",
+        "%{wks.location}/lib/stb_image",
+        "%{wks.location}/lib/imgui",
+        "%{wks.location}/lib/imgui/backends",
+        "%{wks.location}/lib/imgui/examples",
+        "%{wks.location}/lib/ImGuizmo",
+        "%{wks.location}/lib/entt/src",
     }
 
-    links
-    {
+    links {
         "GLFW",
         "glad",
         "opengl32",
         "ImGui",
+        "ImGuizmo"
     }
 
 	filter "system:windows"
-		defines 
-        { 
-			"PLATFORM_WINDOWS",
-			"_IMGUI_WIN32",
-			"_CRT_SECURE_NO_WARNINGS",
+		defines { 
+            "PLATFORM_WINDOWS",
+            "_IMGUI_WIN32",
+            "_CRT_SECURE_NO_WARNINGS",
 		}
 
 	filter "configurations:Debug"

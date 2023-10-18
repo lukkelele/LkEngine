@@ -71,8 +71,8 @@ void TestLayer::OnAttach()
     m_Shader->Unbind();
 
     m_Scene = create_s_ptr<Scene>();
-    EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
-    EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
+    auto rect1 = EntityFactory::CreateRectangle(*m_Scene, {-0.50f, -0.50f}, {0.20f, 0.20f});
+    EntityFactory::CreateRectangle(*m_Scene, {-0.10f, -0.10f}, {0.30f, 0.30f});
     EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
     EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
 }
@@ -91,6 +91,5 @@ void TestLayer::OnImGuiRender()
 {
     m_Scene->OnImGuiRender();
 }
-
 
 

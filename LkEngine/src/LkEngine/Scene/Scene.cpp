@@ -5,7 +5,7 @@
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/UI/UILayer.h"
 #include "LkEngine/UI/Property.h"
-#include <imgui/imgui.h>
+#include "LkEngine/UI/Color.h"
 
 
 namespace LkEngine {
@@ -64,30 +64,6 @@ namespace LkEngine {
 		LOG_CRITICAL("Entity successfully deleted");
 	}
 
-	void Scene::OnUpdate(float ts)
-	{
-		m_Camera->OnUpdate(ts);
-		m_EditorCamera->OnUpdate(ts);
-
-		auto entities = m_Registry.view<TransformComponent>();
-		for (auto& ent : entities)
-		{	
-			Entity entity = { ent, this };
-
-			auto& transform = entity.GetComponent<TransformComponent>();
-			if (entity.HasComponent<MeshComponent>())
-			{
-				auto& mesh = entity.GetComponent<MeshComponent>();
-				// Submit render
-				mesh.BaseShader->Bind();
-				mesh.BaseShader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
-				mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
-				Renderer::Draw(mesh);
-				//Renderer::Draw(*mesh.VAO, *mesh.IBO, *mesh.Shader);
-			}
-		}
-	}
-
 	void Scene::Pause(bool paused)
 	{
 		m_Paused = paused;
@@ -121,18 +97,6 @@ namespace LkEngine {
 	template<typename T>
 	void Scene::HandleComponent(Entity& entity)
 	{
-		LK_UNUSED(entity);
-	}
-
-	template<typename T>
-	void Scene::HandleComponentImGui(Entity& entity)
-	{
-		LK_UNUSED(entity);
-	}
-
-	template<>
-	void Scene::HandleComponentImGui<MeshComponent>(Entity& entity)
-	{
 		if (!entity.HasComponent<MeshComponent>())
 			return;
 
@@ -142,31 +106,46 @@ namespace LkEngine {
 		mesh.BaseShader->Bind();
 		mesh.BaseShader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
+	}
 
+	void Scene::OnUpdate(float ts)
+	{
+		m_Camera->OnUpdate(ts);
+		m_EditorCamera->OnUpdate(ts);
+
+		auto entities = m_Registry.view<TransformComponent>();
+		for (auto& ent : entities)
+		{	
+			Entity entity = { ent, this };
+
+			auto& transform = entity.GetComponent<TransformComponent>();
+			if (entity.HasComponent<MeshComponent>())
+			{
+				entity.OnUpdate(ts);
+				auto& mesh = entity.GetComponent<MeshComponent>();
+				Renderer::Draw(entity);
+			}
+		}
 	}
 
 	void Scene::OnImGuiRender()
 	{
 		auto entities = m_Registry.view<TransformComponent>();
 		ImGui::Begin(SIDEBAR_RIGHT);
-		ImGui::SeparatorText("Rendered Entities");
+		ImGui::SeparatorText("Scene");
 		for (auto& ent : entities)
 		{	
 			Entity entity = { ent, this };
-			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			uint32_t id = entity;
-			//std::string tree_node_id = fmt::format("Entity: {}##{}", entity.GetName().c_str(), id);
+			//ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			ImGui::PushID(id);
-			if (ImGui::TreeNode("Entity: %s", entity.GetName().c_str()))
+			if (ImGui::TreeNode("%s", entity.GetName().c_str()))
 			{
 				MeshComponent& mesh = entity.GetComponent<MeshComponent>();
 				TransformComponent& transform = entity.GetComponent<TransformComponent>();
 				UI::Property::PositionXYZ(entity, transform.Translation);
 				UI::Property::RGBAColor(entity, mesh.Color);
-				//UILayer::DrawRgbControls(id, mesh.Color);
-				//Renderer::Draw(mesh);
-
-				ImGui::Dummy(ImVec2(0, 10));
+				ImGui::Dummy(ImVec2(0, 5));
 				ImGui::TreePop();
 			}
 			ImGui::PopID();

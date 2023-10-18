@@ -43,8 +43,6 @@ namespace LkEngine {
 	private:
 		template<typename T>
 		static void HandleComponent(Entity& entity);
-		template<typename T>
-		static void HandleComponentImGui(Entity& entity);
 
 	public:
 		static Scene* ActiveScene;

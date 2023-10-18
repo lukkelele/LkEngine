@@ -1,5 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Renderer.h"
+#include "LkEngine/Scene/Entity.h"
 
 
 namespace LkEngine {
@@ -12,6 +13,18 @@ namespace LkEngine {
 		auto& c = BackgroundColor;
 		glClearColor(c.x, c.y, c.z, c.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void Renderer::Draw(Entity& entity)
+	{
+		if (!entity.HasComponent<MeshComponent>())
+			return;
+		auto& mesh = entity.GetComponent<MeshComponent>();
+		mesh.BaseShader->Bind();
+		mesh.VAO->Bind();
+		mesh.IBO->Bind();
+		LOG_TRACE("Drawing: {}", entity.GetName());
+		glDrawElements(DrawMode, mesh.IBO->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 

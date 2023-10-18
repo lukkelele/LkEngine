@@ -73,15 +73,7 @@ namespace LkEngine {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-		//--------------- Base UI ----------------
-		UILayer::BeginViewportDockSpace();
-		UILayer::TopBar();
-		UILayer::BottomBar();
-        UILayer::LeftSidebar();
-        UILayer::RightSidebar();
-		UILayer::AppInfo();
-
-		UILayer::BeginMainRenderWindow(); 
+		UILayer::Begin();
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		m_MainRenderWindowSize = window->Size;
 		m_MainRenderWindowPos = window->Pos;
@@ -92,11 +84,7 @@ namespace LkEngine {
 		auto size = GetMainRenderWindowSize();
 		auto pos = GetMainRenderWindowPos();
 		glViewport(pos.x, pos.y, size.x, size.y);
-		//LOG_DEBUG("Pos: ({}, {})  Size: ({}, {})", pos.x, pos.y, size.x, size.y);
-
-		UILayer::EndMainRenderWindow();
-		UILayer::EndViewportDockSpace();
-
+		UILayer::End();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -111,15 +99,15 @@ namespace LkEngine {
 
 	ImVec2 GraphicsContext::GetMainRenderWindowSize()
 	{
-		ImGuiDockNode* center_node = ImGui::DockBuilderGetNode(UILayer::RenderWindowDockID);
+		ImGuiDockNode* center_node = ImGui::DockBuilderGetNode(LkEngine::DockSpace::RenderWindowDockID);
 		LK_ASSERT(center_node);
 		return center_node->Size;
 	}
 
 	ImVec2 GraphicsContext::GetMainRenderWindowPos()
 	{
-		ImGuiDockNode* center_node = ImGui::DockBuilderGetNode(UILayer::RenderWindowDockID);
-		ImGuiDockNode* bottom_node = ImGui::DockBuilderGetNode(UILayer::BottomBarDockID);
+		ImGuiDockNode* center_node = ImGui::DockBuilderGetNode(LkEngine::DockSpace::RenderWindowDockID);
+		ImGuiDockNode* bottom_node = ImGui::DockBuilderGetNode(LkEngine::DockSpace::BottomBarDockID);
 		LK_ASSERT(center_node);
 		LK_ASSERT(bottom_node);
 		//LOG_DEBUG("Bottom Node Size: ({} {})", bottom_node->Size.x, bottom_node->Size.y);
