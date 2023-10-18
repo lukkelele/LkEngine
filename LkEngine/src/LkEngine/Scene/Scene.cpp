@@ -54,14 +54,14 @@ namespace LkEngine {
 				return Entity{ entity , this };
 			}
 		}
-		return {};
+		return { };
 	}
 
 	void Scene::DestroyEntity(Entity entity)
 	{
 		m_EntityMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);
-		LOG_CRITICAL("Entity successfully deleted");
+		LOG_DEBUG("Entity successfully deleted");
 	}
 
 	void Scene::Pause(bool paused)
@@ -69,7 +69,6 @@ namespace LkEngine {
 		m_Paused = paused;
 		//m_World->Pause(paused);
 	}
-
 
 	void Scene::SwitchCamera()
 	{
@@ -85,13 +84,13 @@ namespace LkEngine {
 	template<>
 	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& rigidbody)
 	{
-		LOG_DEBUG("{0} - TransformComponent added", entity.GetName());
+		//LOG_DEBUG("{0} - TransformComponent added", entity.GetName());
 	}
 
 	template<>
 	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& mesh)
 	{
-		LOG_DEBUG("{0} - MeshComponent added", entity.GetName());
+		//LOG_DEBUG("{0} - MeshComponent added", entity.GetName());
 	}
 
 	template<typename T>
@@ -131,26 +130,9 @@ namespace LkEngine {
 	void Scene::OnImGuiRender()
 	{
 		auto entities = m_Registry.view<TransformComponent>();
-		ImGui::Begin(SIDEBAR_RIGHT);
-		ImGui::SeparatorText("Scene");
-		for (auto& ent : entities)
-		{	
-			Entity entity = { ent, this };
-			uint32_t id = entity;
-			//ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-			ImGui::PushID(id);
-			if (ImGui::TreeNode("%s", entity.GetName().c_str()))
-			{
-				MeshComponent& mesh = entity.GetComponent<MeshComponent>();
-				TransformComponent& transform = entity.GetComponent<TransformComponent>();
-				UI::Property::PositionXYZ(entity, transform.Translation);
-				UI::Property::RGBAColor(entity, mesh.Color);
-				ImGui::Dummy(ImVec2(0, 5));
-				ImGui::TreePop();
-			}
-			ImGui::PopID();
-		}
-		ImGui::End();
+
+		UILayer::SceneEntities(); // Left Sidebar
+		UILayer::SelectedEntityMenu(); // Right sidebar
 	}
 
 }

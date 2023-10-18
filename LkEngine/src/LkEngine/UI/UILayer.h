@@ -32,11 +32,15 @@ namespace LkEngine {
         static void RightSidebar();
         static void AppInfo();
         static void SceneMenu();
+        static void SceneEntities();
+        static void SelectedEntityMenu();
 
     public:
         static ImGuiWindowClass* UILayerWindowClass;        
         static ImGuiWindowClass* RendererWindowClass;   
         static ImGuiWindowClass* ExternalWindowClass;   
+        static std::string SelectedEntityLabel;
+        //static std::string_view SelectedEntityLabel;
         static bool ShowImGuiDemoWindow;
     };
 

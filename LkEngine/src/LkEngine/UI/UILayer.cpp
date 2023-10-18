@@ -2,6 +2,7 @@
 #include "LkEngine/UI/UILayer.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Application.h"
+#include "LkEngine/Scene/Entity.h"
 
 
 namespace LkEngine {
@@ -9,6 +10,9 @@ namespace LkEngine {
     ImGuiWindowClass* UILayer::UILayerWindowClass = nullptr;
     ImGuiWindowClass* UILayer::RendererWindowClass = nullptr;
     ImGuiWindowClass* UILayer::ExternalWindowClass = nullptr;
+    //uint32_t UILayer::SelectedEntityID = 0;
+    std::string UILayer::SelectedEntityLabel = "";
+    //std::string_view UILayer::SelectedEntityLabel = "";
     bool UILayer::ShowImGuiDemoWindow = false;
 
     void UILayer::Init()
@@ -22,6 +26,7 @@ namespace LkEngine {
         RendererWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDockingInCentralNode; // | ImGuiDockNodeFlags_NoResize;
         RendererWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
         RendererWindowClass->DockNodeFlagsOverrideSet |= ImGuiDockNodeFlags_NoSplit;
+        RendererWindowClass->ViewportFlagsOverrideSet |= ImGuiViewportFlags_NoInputs;
 
         ExternalWindowClass = new ImGuiWindowClass();
         ExternalWindowClass->DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoDocking;
@@ -54,7 +59,7 @@ namespace LkEngine {
         RightSidebar();
 
         SceneMenu();
-		AppInfo();
+		//AppInfo(); // Makes center window not see-through, should be a box in a corner of the window with app stats
 
 		BeginMainRenderWindow(); 
     }
@@ -199,20 +204,24 @@ namespace LkEngine {
         auto app = Application::Get();
         bool keyboard_enabled = app->IsKeyboardEnabled();
         bool mouse_enabled = app->IsMouseEnabled();
+        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDocking;
 
-        ImGui::Begin(BOTTOM_BAR);
+        ImGui::Begin(RENDER_WINDOW);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+        ImGui::BeginChild("##appinfo-child", ImVec2(100, 80), true, flags);
 
-        ImGui::BeginChild("##appinfo-child");
         ImGui::Text("Keyboard: %s", keyboard_enabled ? "ON" : "OFF");
         ImGui::Text("Mouse: %s", mouse_enabled ? "ON" : "OFF");
+
         ImGui::EndChild();
+        ImGui::PopStyleColor(1);
 
         ImGui::End();
     }
 
     void UILayer::SceneMenu()
     {
-        ImGui::Begin(SIDEBAR_RIGHT);
+        ImGui::Begin(SIDEBAR_LEFT);
         ImGui::PushID(ImGui::GetID("_scene-menu"));
 
         static const char* type_geometry = "Geometry";
@@ -273,9 +282,70 @@ namespace LkEngine {
             }
         }
         ImGui::EndGroup();
-        //ImGui::EndChild();
 
         ImGui::PopID();
+        ImGui::End();
+    }
+
+    void UILayer::SceneEntities()
+    {
+		ImGui::Begin(SIDEBAR_LEFT);
+		ImGui::SeparatorText("Scene");
+
+        auto& scene = *Scene::ActiveScene;
+        auto& registry = scene.GetRegistry();
+        static ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick;
+
+		auto entities = registry.view<TransformComponent>();
+        for (auto& ent : entities)
+        {
+            Entity entity = { ent, &scene };
+            bool is_selected = SelectedEntityLabel == entity.GetName();
+            std::string label = fmt::format("{}", entity.GetName());
+            if (ImGui::Selectable(label.c_str(), &is_selected, selectable_flags))
+            {
+                LOG_TRACE("Selecting {}", label);
+                SelectedEntityLabel = label;
+            }
+        }
+        ImGui::End();
+    }
+
+    void UILayer::SelectedEntityMenu()
+    {
+        auto& scene = *Scene::ActiveScene;
+        Entity entity = scene.FindEntity(SelectedEntityLabel);
+
+        if (!entity)
+            return;
+
+		ImGui::Begin(SIDEBAR_RIGHT);
+        if (entity && entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
+        {
+            ImGui::SeparatorText(SelectedEntityLabel.c_str());
+			uint32_t id = entity;
+		    ImGui::PushID(id);
+
+			MeshComponent& mesh = entity.GetComponent<MeshComponent>();
+			TransformComponent& transform = entity.GetComponent<TransformComponent>();
+            ImGui::Text("Position");
+			UI::Property::PositionXYZ(entity, transform.Translation);
+
+            static float temp_scale = 1.0f;
+            ImGui::Text("Scale");
+            ImGui::SameLine();
+            ImGui::SliderFloat("##scale", &temp_scale, 0.10f, 5.0f, "%.2f");
+
+            static float temp_rot = 0.0f;
+            ImGui::Text("Rotation");
+            ImGui::SameLine();
+            ImGui::SliderAngle("##rotation", &temp_rot, -360.0f, 360.0f, "%1.f");
+
+            ImGui::Text("Color");
+			UI::Property::RGBAColor(entity, mesh.Color);
+
+			ImGui::PopID();
+		}
         ImGui::End();
     }
 

@@ -45,11 +45,10 @@ namespace LkEngine {
 			0, 1, 2,
 			2, 3, 0
 		};
-		mesh.AddVertex(p1_min, { 0.0f, 0.0f });
-		mesh.AddVertex({ p2_max.x, p1_min.y }, { 0.0f, 0.0f });
-		mesh.AddVertex(p2_max, { 0.0f, 0.0f });
-		mesh.AddVertex({ p1_min.x, p2_max.y }, { 0.0f, 0.0f });
-
+		//mesh.AddVertex(p1_min, { 0.0f, 0.0f });
+		//mesh.AddVertex({ p2_max.x, p1_min.y }, { 0.0f, 0.0f });
+		//mesh.AddVertex(p2_max, { 0.0f, 0.0f });
+		//mesh.AddVertex({ p1_min.x, p2_max.y }, { 0.0f, 0.0f });
 		//LOG_DEBUG("Created rectangle ({}, {}) - ({}, {})", p1_min.x, p1_min.y, p2_max.x, p2_max.y);
 		float rect_width = p2_max.x - p1_min.x;
 		float rect_height = p2_max.y - p1_min.y;

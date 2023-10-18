@@ -123,6 +123,7 @@ namespace LkEngine::UI {
 		static void RGBAColor(uint32_t id, glm::vec4& color)
 		{
 			//ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_RowBg;
+			ImGui::PushID(id);
 			ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
@@ -132,7 +133,6 @@ namespace LkEngine::UI {
 			ImVec2 button_size = { line_height + 3.0f, line_height };
 			if (ImGui::BeginTable("##RGBA", 2, flags))
 			{
-				ImGui::PushID(id);
 				//static float column_1_width = 32.0f;
 				static float column_1_width = button_size.x;
 				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthFixed, column_1_width);
@@ -192,11 +192,11 @@ namespace LkEngine::UI {
 
 				ImGui::PopStyleVar(1);
 
-				ImGui::PopID();
 				ImGui::EndTable();
 			}
 			ImGui::PopStyleVar(2);
 
+			ImGui::PopID();
 		}
 
     }

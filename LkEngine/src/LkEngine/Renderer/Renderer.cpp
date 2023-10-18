@@ -23,7 +23,6 @@ namespace LkEngine {
 		mesh.BaseShader->Bind();
 		mesh.VAO->Bind();
 		mesh.IBO->Bind();
-		LOG_TRACE("Drawing: {}", entity.GetName());
 		glDrawElements(DrawMode, mesh.IBO->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
