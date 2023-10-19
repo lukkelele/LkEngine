@@ -41,8 +41,8 @@ namespace LkEngine {
         //virtual void UpdateViewportSize(GLFWwindow* window, int width, int height) = 0;
     
     protected:
-        uint16_t m_Width, m_Height;
-        uint16_t m_ViewportWidth, m_ViewportHeight;
+        uint16_t m_Width = 0, m_Height = 0;
+        uint16_t m_ViewportWidth = 0, m_ViewportHeight = 0;
         std::string m_Title = "";
         std::string m_GlslVersion = "";
         bool m_VSync;

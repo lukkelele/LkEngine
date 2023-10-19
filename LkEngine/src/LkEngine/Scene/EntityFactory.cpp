@@ -29,21 +29,22 @@ namespace LkEngine {
 		Entity entity = scene.CreateEntity(std::string(name));
 		entity.AddComponent<TransformComponent>();
 		MeshComponent mesh = MeshComponent();
+
+		auto app = Application::Get();
+		auto window = app->GetWindow();
+		float height = window->GetHeight();
+		float viewport_height = window->GetViewportHeight();
+
 		float vertices[] = {
-			p1_min.x, p1_min.y,
-			p2_max.x, p1_min.y,
-			p2_max.x, p2_max.y,
-			p1_min.x, p2_max.y
+			0.0f, 0.0f,
+			p2_max.x - p1_min.x, 0.0f,
+			p2_max.x - p1_min.x, p2_max.y - p1_min.y,
+			0.0f, p2_max.y - p1_min.y
 		};
 		unsigned int indices[] = {
 			0, 1, 2,
 			2, 3, 0
 		};
-		//mesh.AddVertex(p1_min, { 0.0f, 0.0f });
-		//mesh.AddVertex({ p2_max.x, p1_min.y }, { 0.0f, 0.0f });
-		//mesh.AddVertex(p2_max, { 0.0f, 0.0f });
-		//mesh.AddVertex({ p1_min.x, p2_max.y }, { 0.0f, 0.0f });
-		//LOG_DEBUG("Created rectangle ({}, {}) - ({}, {})", p1_min.x, p1_min.y, p2_max.x, p2_max.y);
 		float rect_width = p2_max.x - p1_min.x;
 		float rect_height = p2_max.y - p1_min.y;
 
@@ -65,10 +66,10 @@ namespace LkEngine {
 		mesh.BaseShader->Unbind();
 
 		TransformComponent& transform = entity.GetComponent<TransformComponent>();
-		//auto app = Application::Get();
+
 		entity.AddComponent<MeshComponent>(mesh);
 		transform.Translation.x = p1_min.x;
-		transform.Translation.y = p2_max.y;
+		transform.Translation.y = p1_min.y;
 
 		return entity;
 	}

@@ -13,7 +13,10 @@ namespace LkEngine {
     ImGuiWindowClass* UILayer::ExternalWindowClass = nullptr;
     //uint32_t UILayer::SelectedEntityID = 0;
     std::string UILayer::SelectedEntityLabel = "";
+    ImVec2 UILayer::SceneContentMenuSize = ImVec2(0, 500);
+    ImVec2 UILayer::SelectedEntityMenuSize = ImVec2(0, 440);
     bool UILayer::ShowImGuiDemoWindow = false;
+    bool UILayer::Initialized = false;
 
     void UILayer::Init()
     {
@@ -58,7 +61,6 @@ namespace LkEngine {
         LeftSidebar();
         RightSidebar();
 
-
 		BeginMainRenderWindow(); 
     }
 
@@ -70,6 +72,11 @@ namespace LkEngine {
 
     void UILayer::OnAttach()
     {
+        if (!Initialized)
+        {
+            Init();
+            Initialized = true;
+        }
     }
 
     void UILayer::OnDetach()
@@ -85,8 +92,8 @@ namespace LkEngine {
         ImGui::SetNextWindowClass(UILayerWindowClass);
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
-        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollWithMouse;
         ImGui::Begin(TOP_BAR, NULL, flags);
 
         ImGui::SeparatorText("LkEngine Configuration");
@@ -128,8 +135,8 @@ namespace LkEngine {
     {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
-        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollWithMouse;
         ImGui::SetNextWindowClass(UILayerWindowClass);
         ImGui::Begin(BOTTOM_BAR, NULL, flags);
 
@@ -147,8 +154,8 @@ namespace LkEngine {
 
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
-        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollWithMouse;
         ImGui::SetNextWindowClass(UILayerWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 
@@ -177,48 +184,26 @@ namespace LkEngine {
     {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
-        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollWithMouse;
 
         ImGui::SetNextWindowClass(UILayerWindowClass);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
         ImGui::Begin(SIDEBAR_RIGHT, NULL, flags);
 
-        SceneEntities();
+        SceneContentMenu();
         SelectedEntityMenu();
 
         ImGui::End();
-        ImGui::PopStyleVar(1);
-    }
-
-    // TODO: Update
-    void UILayer::AppInfo()
-    {
-        auto app = Application::Get();
-        bool keyboard_enabled = app->IsKeyboardEnabled();
-        bool mouse_enabled = app->IsMouseEnabled();
-        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDocking;
-
-        ImGui::Begin(RENDER_WINDOW);
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-        ImGui::BeginChild("##appinfo-child", ImVec2(100, 80), true, flags);
-
-        ImGui::Text("Keyboard: %s", keyboard_enabled ? "ON" : "OFF");
-        ImGui::Text("Mouse: %s", mouse_enabled ? "ON" : "OFF");
-
-        ImGui::EndChild();
-        ImGui::PopStyleColor(1);
-
-        ImGui::End();
+        ImGui::PopStyleVar(2);
     }
 
     void UILayer::SceneMenu()
     {
-        //if (!DockSpace::Sidebar_Left_Enabled)
-        //    return;
-
-        //ImGui::Begin(SIDEBAR_LEFT);
         ImGui::PushID(ImGui::GetID("_scene-menu"));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::BeginChild("##scene-menu");
 
         static const char* type_geometry = "Geometry";
         static const char* type_rigidbody = "Rigidbody";
@@ -283,8 +268,32 @@ namespace LkEngine {
         }
         ImGui::EndGroup();
 
+        ImGui::EndChild();
+        ImGui::PopStyleVar(1);
         ImGui::PopID();
-        //ImGui::End();
+    }
+
+    // TODO: Update
+    void UILayer::AppInfo()
+    {
+        auto app = Application::Get();
+        bool keyboard_enabled = app->IsKeyboardEnabled();
+        bool mouse_enabled = app->IsMouseEnabled();
+        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDocking;
+
+        ImGui::Begin(RENDER_WINDOW);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 0);
+        ImGui::BeginChild("##appinfo-child", ImVec2(100, 80), true, flags);
+
+        ImGui::Text("Keyboard: %s", keyboard_enabled ? "ON" : "OFF");
+        ImGui::Text("Mouse: %s", mouse_enabled ? "ON" : "OFF");
+
+        ImGui::EndChild();
+
+        ImGui::PopStyleVar(1);
+        ImGui::PopStyleColor(1);
+        ImGui::End();
     }
 
     void UILayer::CreateEntityMenu()
@@ -306,8 +315,11 @@ namespace LkEngine {
         ImGui::EndGroup();
     }
 
-    void UILayer::SceneEntities()
+    void UILayer::SceneContentMenu()
     {
+        ImGuiDockNode* window = ImGui::GetWindowDockNode();
+        SceneContentMenuSize.y = window->Size.y - SelectedEntityMenuSize.y;
+        ImGui::BeginChild("##scene-content-menu", SceneContentMenuSize, true);
 		ImGui::SeparatorText("Scene");
 
         auto& scene = *Scene::ActiveScene;
@@ -326,6 +338,47 @@ namespace LkEngine {
                 SelectedEntityLabel = label;
             }
         }
+        ImGui::EndChild();
+    }
+
+    void UILayer::DrawImGuizmo(Entity& entity)
+    {
+        auto& scene = *Scene::ActiveScene;
+        auto render_window = ImGui::DockBuilderGetNode(DockSpace::RenderWindowDockID);
+        auto& cam = *scene.GetActiveCamera();
+        auto& cam_pos = cam.GetPos();
+        auto& view_matrix = cam.GetView();
+        auto& proj_matrix = cam.GetProjection();
+		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
+		TransformComponent& transform = entity.GetComponent<TransformComponent>();
+        glm::mat4& transform_matrix = transform.GetTransform();
+
+        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove;
+        ImGui::SetNextWindowBgAlpha(0.0f);
+        ImGui::Begin(RENDER_WINDOW, NULL, flags);
+        ImGuizmo::SetOrthographic(true);
+        ImGuizmo::SetDrawlist();
+        float width = (float)ImGui::GetWindowWidth();
+        float height = (float)ImGui::GetWindowHeight();
+
+        float pos_x = ImGui::GetWindowPos().x;
+        float pos_y = ImGui::GetWindowPos().y;
+        //float pos_x = render_window->Size.x + render_window->Pos.x;
+        //float pos_y = render_window->Size.y + render_window->Pos.y;
+        ImGuizmo::SetRect(pos_x, pos_y, width, height);
+        //LOG_INFO("ImGuizmo: ({}, {})  Size({}, {})", pos_x, pos_y, width, height);
+
+        //glm::mat4 translation = glm::mat4(transform.Translation);
+
+        ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(proj_matrix), 
+            ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(transform_matrix));
+
+        if (ImGuizmo::IsUsing())
+        {
+            //LOG_TRACE("ImGuizmo::IsUsing()");
+
+        }
+        ImGui::End();
     }
 
     void UILayer::SelectedEntityMenu()
@@ -336,11 +389,14 @@ namespace LkEngine {
         if (!entity)
             return;
 
-		//ImGui::Begin(SIDEBAR_RIGHT);
-        ImGui::BeginChild("##selected-entity-menu");
+        ImGuiDockNode* window = ImGui::GetWindowDockNode();
+
+        ImGui::SetCursorPosY(window->Size.y - SelectedEntityMenuSize.y);
+        ImGui::BeginChild("##selected-entity-menu", SelectedEntityMenuSize, true);
         if (entity && entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
         {
             ImGui::SeparatorText(SelectedEntityLabel.c_str());
+            ImGui::Indent();
 			uint32_t id = entity;
 		    ImGui::PushID(id);
 
@@ -351,21 +407,23 @@ namespace LkEngine {
 
             static float temp_scale = 1.0f;
             ImGui::Text("Scale");
-            ImGui::SameLine();
-            ImGui::SliderFloat("##scale", &temp_scale, 0.10f, 5.0f, "%.2f");
+            ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 5.0f, "%.2f");
 
-            static float temp_rot = 0.0f;
+            static float rot = Math::Get2DRotationFromQuaternion(transform.Rotation);
             ImGui::Text("Rotation");
-            ImGui::SameLine();
-            ImGui::SliderAngle("##rotation", &temp_rot, -360.0f, 360.0f, "%1.f");
+            ImGui::SliderAngle("##rotation", &rot, -360.0f, 360.0f, "%1.f");
+            transform.Rotation = glm::angleAxis(rot, glm::vec3(0.0f, 0.0f, 1.0f));
 
             ImGui::Text("Color");
 			UI::Property::RGBAColor(entity, mesh.Color);
 
+            ImGui::Unindent();
+
+            DrawImGuizmo(entity);
+
 			ImGui::PopID();
 		}
         ImGui::EndChild();
-        //ImGui::End();
     }
 
     void UILayer::CameraControls()

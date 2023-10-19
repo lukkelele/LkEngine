@@ -36,9 +36,9 @@ namespace LkEngine {
 
         static void SceneMenu();
         static void CreateEntityMenu();
-        static void SceneEntities();
+        static void SceneContentMenu();
         static void SelectedEntityMenu();
-
+        static void DrawImGuizmo(Entity& entity);
         static void CameraControls();
 
     public:
@@ -47,7 +47,8 @@ namespace LkEngine {
         static ImGuiWindowClass* RendererWindowClass;   
         static ImGuiWindowClass* ExternalWindowClass;   
         static std::string SelectedEntityLabel;
-        static bool ShowImGuiDemoWindow;
+        static ImVec2 SceneContentMenuSize, SelectedEntityMenuSize;
+        static bool Initialized, ShowImGuiDemoWindow;
     };
 
 }

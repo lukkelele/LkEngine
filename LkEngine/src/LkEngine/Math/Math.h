@@ -29,4 +29,7 @@ namespace LkEngine::Math {
     glm::vec2 ScreenToWorld(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix);
     glm::vec2 ScreenToWorld2D(const glm::vec2& ndc, const glm::mat4& inv_proj, const TransformComponent& transform);
 
+    float Get2DRotationFromQuaternion(const glm::quat& quat);
+
+
 }

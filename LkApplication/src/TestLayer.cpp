@@ -60,6 +60,7 @@ void TestLayer::OnAttach()
     EntityFactory::CreateRectangle(*m_Scene, { 20, 20 },   { 140.0f, 140.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
+    EntityFactory::CreateRectangle(*m_Scene, { 0, 0}, { 240, 240 });
 }
 
 void TestLayer::OnDetach()

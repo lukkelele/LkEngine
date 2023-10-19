@@ -105,4 +105,20 @@ namespace LkEngine::Math {
         return glm::vec2(worldCoords.x, worldCoords.y);
     }
 
+    float Get2DRotationFromQuaternion(const glm::quat& quat)
+    {
+        glm::quat norm_quat = glm::normalize(quat);
+
+        // Compute the angle of rotation around the Z-axis
+        float angle = std::atan2(
+            2.0f * (norm_quat.w * norm_quat.z + norm_quat.x * norm_quat.y),
+            1.0f - 2.0f * (norm_quat.y * norm_quat.y + norm_quat.z * norm_quat.z)
+        );
+
+        // Convert angle from radians to degrees if needed
+        float angle_deg = glm::degrees(angle);
+
+        return angle_deg;
+    }
+
 }

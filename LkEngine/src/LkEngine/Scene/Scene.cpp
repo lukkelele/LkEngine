@@ -127,8 +127,8 @@ namespace LkEngine {
 				entity.OnUpdate(ts);
 				auto& mesh = entity.GetComponent<MeshComponent>();
 				mesh.BaseShader->Bind();
-
 				mesh.BaseShader->SetUniformMat4f("u_ViewProj", m_ActiveCamera->GetViewProjection());
+
 				Renderer::Draw(entity);
 			}
 		}
