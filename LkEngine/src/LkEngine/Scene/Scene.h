@@ -28,7 +28,7 @@ namespace LkEngine {
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name);
 		entt::registry& GetRegistry() { return m_Registry; }
 		void DestroyEntity(Entity entity);
-		s_ptr<Camera> GetCamera() const { return m_Camera; }
+		s_ptr<Camera> GetActiveCamera() const { return m_ActiveCamera; }
 		s_ptr<Camera> GetEditorCamera() const { return m_EditorCamera; }
 		s_ptr<World> GetWorld() { return m_World; }
 		bool IsRunning() const { return m_IsRunning; }
@@ -62,7 +62,8 @@ namespace LkEngine {
 		s_ptr<Renderer> m_Renderer;
 		s_ptr<World> m_World;
 
-		s_ptr<SceneCamera> m_Camera; 
+		//s_ptr<SceneCamera> m_SceneCamera; 
+		s_ptr<Camera> m_ActiveCamera; 
 		s_ptr<OrthographicCamera> m_Camera2D = nullptr;
 		s_ptr<EditorCamera> m_EditorCamera;
 

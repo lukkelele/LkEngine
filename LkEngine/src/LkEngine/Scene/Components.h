@@ -4,6 +4,7 @@
 #include "LkEngine/Scene/Components/TransformComponent.h"
 #include "LkEngine/Scene/Components/CameraComponent.h"
 #include "LkEngine/Scene/Components/MeshComponent.h"
+#include "LkEngine/Scene/Components/SpriteComponent.h"
 
 
 namespace LkEngine{
@@ -18,7 +19,8 @@ namespace LkEngine{
 		TagComponent, 
 		TransformComponent,
 		MeshComponent,
-		CameraComponent
+		CameraComponent,
+		SpriteComponent
 	>;
 
 }

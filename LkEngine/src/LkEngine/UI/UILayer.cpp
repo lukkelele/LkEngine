@@ -13,7 +13,6 @@ namespace LkEngine {
     ImGuiWindowClass* UILayer::ExternalWindowClass = nullptr;
     //uint32_t UILayer::SelectedEntityID = 0;
     std::string UILayer::SelectedEntityLabel = "";
-    //std::string_view UILayer::SelectedEntityLabel = "";
     bool UILayer::ShowImGuiDemoWindow = false;
 
     void UILayer::Init()
@@ -59,8 +58,6 @@ namespace LkEngine {
         LeftSidebar();
         RightSidebar();
 
-        SceneMenu();
-		//AppInfo(); // Makes center window not see-through, should be a box in a corner of the window with app stats
 
 		BeginMainRenderWindow(); 
     }
@@ -85,13 +82,12 @@ namespace LkEngine {
 
     void UILayer::TopBar()
     {
-        static bool top_bar_open = true;
         ImGui::SetNextWindowClass(UILayerWindowClass);
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
-        ImGui::Begin(TOP_BAR, &top_bar_open, flags);
+        ImGui::Begin(TOP_BAR, NULL, flags);
 
         ImGui::SeparatorText("LkEngine Configuration");
         ImGui::Checkbox("Demo Window", &ShowImGuiDemoWindow);
@@ -130,76 +126,72 @@ namespace LkEngine {
 
     void UILayer::BottomBar()
     {
-        static bool bottom_bar_open = true;
-        ImGui::SetNextWindowClass(UILayerWindowClass);
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
-        ImGui::Begin(BOTTOM_BAR, &bottom_bar_open, flags);
+        ImGui::SetNextWindowClass(UILayerWindowClass);
+        ImGui::Begin(BOTTOM_BAR, NULL, flags);
+
+        CameraControls();
+        ImGui::SameLine(0, 20);
+        DockWindowsMenu();
 
         ImGui::End();
     }
 
     void UILayer::LeftSidebar()
     {
-        static bool sidebar_open = true;
-        ImGuiContext& g = *GImGui;
-        ImGuiViewportP* viewport = g.Viewports[0];
-        float sidebar_left_height = viewport->WorkSize.y;
-        float sidebar_left_width = viewport->WorkSize.x;
-        static float sidebar_left_minwidth = 140.0f;
-        ImVec2 Sidebar_Left_Size = ImVec2(sidebar_left_width, sidebar_left_height);
+        if (!DockSpace::Sidebar_Left_Enabled)
+            return;
 
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
         flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
-
         ImGui::SetNextWindowClass(UILayerWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height));
-        ImGui::Begin(SIDEBAR_LEFT, &sidebar_open, flags);
-        ImGui::PopStyleVar(1);
 
+        ImGui::Begin(SIDEBAR_LEFT, NULL, flags);
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
         if (ImGui::TreeNode("Colors"))
         {
+            ImGui::PushID("##renderer-background-color");
             static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
-            ImGui::Text("Background Color"); 
-            ImGui::SliderFloat("##member-color_slider-x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-            ImGui::SliderFloat("##member-color_slider-y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-            ImGui::SliderFloat("##member-color_slider-z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-            ImGui::SliderFloat("##member-color_slider-w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::Text("Background"); 
+            ImGui::SliderFloat("##color_slider-x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##color_slider-y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##color_slider-z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::SliderFloat("##color_slider-w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+            ImGui::PopID();
             ImGui::TreePop();
         }
 
+        SceneMenu();
+
+        ImGui::PopStyleVar(1);
         ImGui::End();
     }
 
     void UILayer::RightSidebar()
     {
-        static bool sidebar_open = true;
-        ImGuiContext& g = *GImGui;
-        ImGuiViewportP* viewport = g.Viewports[0];
-
-        static float min_width = 160.0f;
-        static float width = 180.0f;
-        static float height = viewport->WorkSize.y;
-        ImVec2 LeftSidebar_Size = ImVec2(width, height);
-		auto& colors = ImGui::GetStyle().Colors;
-
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-        flags |= ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
+
         ImGui::SetNextWindowClass(UILayerWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        ImGui::Begin(SIDEBAR_RIGHT, &sidebar_open, flags);
+        ImGui::Begin(SIDEBAR_RIGHT, NULL, flags);
+
+        SceneEntities();
+        SelectedEntityMenu();
 
         ImGui::End();
         ImGui::PopStyleVar(1);
     }
 
+    // TODO: Update
     void UILayer::AppInfo()
     {
         auto app = Application::Get();
@@ -222,7 +214,10 @@ namespace LkEngine {
 
     void UILayer::SceneMenu()
     {
-        ImGui::Begin(SIDEBAR_LEFT);
+        //if (!DockSpace::Sidebar_Left_Enabled)
+        //    return;
+
+        //ImGui::Begin(SIDEBAR_LEFT);
         ImGui::PushID(ImGui::GetID("_scene-menu"));
 
         static const char* type_geometry = "Geometry";
@@ -242,7 +237,9 @@ namespace LkEngine {
 
         ImGui::SeparatorText("Scene Menu");
         //ImGui::BeginChild("##scene-menu");
+
         ImGui::BeginGroup();
+        ImGui::SeparatorText("Create-Entity-Menu");
         if (ImGui::BeginCombo("Type", entity_type_preview, combo_flags))
         {
             for (int n = 0; n < LK_ARRAYSIZE(entity_types); n++)
@@ -265,8 +262,6 @@ namespace LkEngine {
         if (current_type == type_geometry)
         {
             ImGui::Text("Rectangle");
-            //ImGui::SliderFloat("Width", &rect_width, 0.01f, 1.50f, "%.2f");
-            //ImGui::SliderFloat("Height", &rect_height, 0.01f, 1.50f, "%.2f");
             ImGui::SliderFloat("Width", &rect_width, 50.0f, 500.0f, "%.1f");
             ImGui::SliderFloat("Height", &rect_height, 50.0f, 500.0f, "%.1f");
             ImGui::SliderFloat2("Placing Point", &start_placing_point.x, 0.0f, 1000.0f, "%1.f");
@@ -281,11 +276,6 @@ namespace LkEngine {
             {
                 auto main_node = ImGui::DockBuilderGetNode(DockSpace::RenderWindowDockID);
                 ImVec2 window_size = main_node->Size;
-                //glm::vec2 center_pos = { (window_size.x * 0.50f) - rect_width * 0.50f, (window_size.y * 0.50f) - rect_height * 0.50f };
-                //glm::vec2 p1 = { center_pos.x - rect_width, center_pos.y - rect_height };
-                //glm::vec2 p2 = { center_pos.x + rect_width, center_pos.y + rect_width };
-                //glm::vec2 p1 = { -rect_width * 0.50f, -rect_width * 0.50f };
-                //glm::vec2 p2 = { rect_width * 0.50f, rect_height * 0.50f };
                 glm::vec2 p1 = { start_placing_point.x, start_placing_point.y };
                 glm::vec2 p2 = { start_placing_point.x + rect_width, start_placing_point.y + rect_height };
                 EntityFactory::CreateRectangle(*Scene::ActiveScene, p1, p2);
@@ -294,12 +284,30 @@ namespace LkEngine {
         ImGui::EndGroup();
 
         ImGui::PopID();
-        ImGui::End();
+        //ImGui::End();
+    }
+
+    void UILayer::CreateEntityMenu()
+    {
+    }
+
+    void UILayer::DockWindowsMenu()
+    {
+        ImGui::BeginGroup();
+        ImGui::PushID(ImGui::GetID("dockwindows-menu"));
+        ImGui::Text("Dock Windows");
+
+        if (ImGui::Checkbox("Right Sidebar", &DockSpace::Sidebar_Right_Enabled))
+            DockSpace::ApplyDockSpaceLayout();
+        if (ImGui::Checkbox("Left Sidebar", &DockSpace::Sidebar_Left_Enabled))
+            DockSpace::ApplyDockSpaceLayout();
+
+        ImGui::PopID();
+        ImGui::EndGroup();
     }
 
     void UILayer::SceneEntities()
     {
-		ImGui::Begin(SIDEBAR_LEFT);
 		ImGui::SeparatorText("Scene");
 
         auto& scene = *Scene::ActiveScene;
@@ -318,7 +326,6 @@ namespace LkEngine {
                 SelectedEntityLabel = label;
             }
         }
-        ImGui::End();
     }
 
     void UILayer::SelectedEntityMenu()
@@ -329,7 +336,8 @@ namespace LkEngine {
         if (!entity)
             return;
 
-		ImGui::Begin(SIDEBAR_RIGHT);
+		//ImGui::Begin(SIDEBAR_RIGHT);
+        ImGui::BeginChild("##selected-entity-menu");
         if (entity && entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
         {
             ImGui::SeparatorText(SelectedEntityLabel.c_str());
@@ -356,16 +364,21 @@ namespace LkEngine {
 
 			ImGui::PopID();
 		}
-        ImGui::End();
+        ImGui::EndChild();
+        //ImGui::End();
     }
 
-    void UILayer::CameraControls(Camera& camera)
+    void UILayer::CameraControls()
     {
+        auto& scene = *Scene::ActiveScene;
+        auto& camera = *scene.GetActiveCamera();
         auto& pos = camera.GetPos();
-        ImGui::Begin(BOTTOM_BAR);
+        //ImGui::BeginChild("##camera-controls");
+        ImGui::BeginGroup();
         ImGui::Text("Camera");
         UI::Property::PositionXYZ(camera.ID, pos);
-        ImGui::End();
+        ImGui::EndGroup();
+        //ImGui::EndChild();
     }
 
 }

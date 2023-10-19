@@ -49,7 +49,7 @@ namespace LkEngine::UI {
 		}
 
 		// 2D
-		static void PositionXY(uint32_t id, glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float columnWidth = 100.0f)
+		static void PositionXY(uint32_t id, glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
 		{
 			ImGui::PushID(id);
 			ImGuiIO& io = ImGui::GetIO();
@@ -63,12 +63,12 @@ namespace LkEngine::UI {
 			float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			line_height += 8.0f;
 			ImVec2 button_size = { line_height + 3.0f, line_height };
-			if (ImGui::BeginTable("##POS_XYZ", 2, flags))
+			if (ImGui::BeginTable("##POS_XYZ", 2, flags, ImVec2(column_width, 0)))
 			{
-				//static float column_1_width = 32.0f;
 				static float column_1_width = button_size.x;
 				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthFixed, column_1_width);
 				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoResize);
+				//ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoResize);
 
 				float padding = 20.0f;
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 4));
@@ -106,7 +106,8 @@ namespace LkEngine::UI {
 			ImGui::PopID();
 		}
 
-		static void PositionXYZ(uint32_t id, glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float columnWidth = 100.0f)
+		static void PositionXYZ(uint32_t id, glm::vec3& pos, float step = 1.0f, 
+			float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
 		{
 			ImGui::PushID(id);
 			ImGuiIO& io = ImGui::GetIO();
@@ -119,12 +120,13 @@ namespace LkEngine::UI {
 			float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			line_height += 8.0f;
 			ImVec2 button_size = { line_height + 3.0f, line_height };
-			if (ImGui::BeginTable("##POS_XYZ", 2, flags))
+			if (ImGui::BeginTable("##POS_XYZ", 2, flags, ImVec2(column_width, 0)))
 			{
 				//static float column_1_width = 32.0f;
 				static float column_1_width = button_size.x;
 				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthFixed, column_1_width);
-				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoResize);
+				//ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoResize);
+				ImGui::TableSetupColumn(NULL, ImGuiTableColumnFlags_NoResize);
 
 				float padding = 20.0f;
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 4));
@@ -139,6 +141,8 @@ namespace LkEngine::UI {
 				ImGui::PopStyleColor();
 				ImGui::TableSetColumnIndex(1);
 				float slider_width = ImGui::GetColumnWidth();
+				if (slider_width > column_width)
+					slider_width = column_width;
 				ImGui::SetNextItemWidth(slider_width);
 				ImGui::DragFloat("##pos-x", &pos.x, step, min, max, "%1.f");
 
@@ -174,7 +178,7 @@ namespace LkEngine::UI {
 			ImGui::PopID();
 		}
 
-		static void RGBAColor(uint32_t id, glm::vec4& color)
+		static void RGBAColor(uint32_t id, glm::vec4& color, float column_width = 100.0f)
 		{
 			//ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_RowBg;
 			ImGui::PushID(id);
@@ -185,7 +189,7 @@ namespace LkEngine::UI {
 			float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			line_height += 8.0f;
 			ImVec2 button_size = { line_height + 3.0f, line_height };
-			if (ImGui::BeginTable("##RGBA", 2, flags))
+			if (ImGui::BeginTable("##RGBA", 2, flags, ImVec2(column_width, 0)))
 			{
 				//static float column_1_width = 32.0f;
 				static float column_1_width = button_size.x;

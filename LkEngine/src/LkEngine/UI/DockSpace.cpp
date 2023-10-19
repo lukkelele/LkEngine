@@ -1,6 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/UI/DockSpace.h"
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/UI/UILayer.h"
 
 
 namespace LkEngine {
@@ -12,6 +13,8 @@ namespace LkEngine {
     float DockSpace::Sidebar_Left_Ratio = 0.20f;
     float DockSpace::Sidebar_Right_Ratio = 0.20f;
     float DockSpace::TopBottom_Ratio = 0.80f;
+    bool DockSpace::Sidebar_Left_Enabled = true;
+    bool DockSpace::Sidebar_Right_Enabled = true;
 
     void DockSpace::Init()
     {
@@ -65,6 +68,8 @@ namespace LkEngine {
         ImGuiContext& g = *GImGui;
         ImGuiViewport* viewport = ImGui::GetMainViewport();
 
+        ImGuiID dock_id_right, dock_id_left;
+
         // Reset layout
         ImGui::DockBuilderRemoveNode(DockSpaceID); 
         ImGui::DockBuilderAddNode(DockSpaceID, dockspace_flags);
@@ -78,8 +83,15 @@ namespace LkEngine {
         auto dock_id_middle = dock_id_top;
         auto dock_id_new_top = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Up, 0.08f, nullptr, &dock_id_top);
         // Split vertically to create sidebars
-        auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Left, Sidebar_Left_Ratio, nullptr, &dock_id_top);
-        auto dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);
+        if (Sidebar_Left_Enabled)
+            dock_id_left = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Left, Sidebar_Left_Ratio, nullptr, &dock_id_top);
+        else
+            dock_id_left = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Left, 0, nullptr, &dock_id_top);
+
+        if (Sidebar_Right_Enabled)
+            dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);
+        if (!Sidebar_Right_Enabled)
+            dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, 0, nullptr, &dock_id_top);
         auto dock_id_center = dock_id_top;  // Center part is the remaining space in dock_id_top
 
         // Store dock ID's to be able to fetch size and position of the center positioned render window

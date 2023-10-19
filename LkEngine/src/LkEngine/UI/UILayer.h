@@ -32,10 +32,14 @@ namespace LkEngine {
         static void LeftSidebar();
         static void RightSidebar();
         static void AppInfo();
+        static void DockWindowsMenu();
+
         static void SceneMenu();
+        static void CreateEntityMenu();
         static void SceneEntities();
         static void SelectedEntityMenu();
-        static void CameraControls(Camera& camera);
+
+        static void CameraControls();
 
     public:
         static float PositionStepSize;

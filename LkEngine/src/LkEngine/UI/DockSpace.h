@@ -21,14 +21,13 @@ namespace LkEngine {
         static void Init();
         static void Begin();
         static void End();
-
-    private:
         static void ApplyDockSpaceLayout();
 
     public:
         static ImVec2 LastViewportSize;
         static ImGuiID DockSpaceID, RenderWindowDockID, BottomBarDockID;
         static float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;
+        static bool Sidebar_Left_Enabled, Sidebar_Right_Enabled;
     };
 
 }

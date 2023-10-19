@@ -23,6 +23,7 @@ namespace LkEngine {
 		virtual void UpdateProjection() = 0;
 		virtual void UpdateMousePosition();
 		virtual void SetProjection() {} // FIXME
+		virtual void HandleInput(float ts);
 
 		glm::vec3& GetPos() { return m_Pos; }
 	    glm::mat4 GetView() const { return m_View; }
@@ -60,7 +61,7 @@ namespace LkEngine {
 		float m_Zoom = 1.0f;
 		float m_Rotation = 0.0f;
 		float m_RotationSpeed = 0.0002f;
-		float m_TravelSpeed = 0.0050f;
+		float m_TravelSpeed = 1.0f; // 0.10f;
 		float m_MouseSpeed = 1.0f;
 		bool m_KeyboardEnabled = true;
 		bool m_MouseEnabled = true;

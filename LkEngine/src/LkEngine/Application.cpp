@@ -94,12 +94,12 @@ namespace LkEngine {
 
     bool Application::IsKeyboardEnabled()
     {
-        return m_Scene->GetCamera()->IsKeyboardEnabled();
+        return m_Scene->GetActiveCamera()->IsKeyboardEnabled();
     }
 
     bool Application::IsMouseEnabled()
     {
-        return m_Scene->GetCamera()->IsMouseEnabled();
+        return m_Scene->GetActiveCamera()->IsMouseEnabled();
     }
 
 }

@@ -16,10 +16,11 @@ namespace LkEngine {
 	Scene::Scene()
 	{
 		ActiveScene = this;
-		m_Camera = create_s_ptr<SceneCamera>();
+		//m_Camera = create_s_ptr<SceneCamera>();
 		auto window = Window::Get();
 		float width = window->GetWidth();
 		float height = window->GetHeight();
+		m_ActiveCamera = create_s_ptr<OrthographicCamera>(0, width, 0, height);
 		m_Camera2D = create_s_ptr<OrthographicCamera>(0, width, 0, height);
 		m_EditorCamera = create_s_ptr<EditorCamera>();
 	}
@@ -112,8 +113,7 @@ namespace LkEngine {
 
 	void Scene::OnUpdate(float ts)
 	{
-		m_Camera->OnUpdate(ts);
-		m_Camera2D->OnUpdate(ts);
+		m_ActiveCamera->OnUpdate(ts);
 		//m_EditorCamera->OnUpdate(ts);
 
 		auto entities = m_Registry.view<TransformComponent>();
@@ -127,12 +127,8 @@ namespace LkEngine {
 				entity.OnUpdate(ts);
 				auto& mesh = entity.GetComponent<MeshComponent>();
 				mesh.BaseShader->Bind();
-				//glm::vec2 world_2d_coords = Math::ScreenToWorld2D({ transform.Translation.x, transform.Translation.y }, m_Camera->GetInverseProjection(), transform );
-				glm::vec2 world_2d_coords = Math::ScreenToWorld2D({ transform.Translation.x, transform.Translation.y }, m_Camera2D->GetInverseProjection(), transform );
 
-				//mesh.BaseShader->SetUniformMat4f("u_ViewProj", m_Camera->GetProjection());
-				mesh.BaseShader->SetUniformMat4f("u_ViewProj", m_Camera2D->GetViewProjection());
-				LOG_DEBUG("WORLD 2D COORDS: ({}, {})", world_2d_coords.x, world_2d_coords.y);
+				mesh.BaseShader->SetUniformMat4f("u_ViewProj", m_ActiveCamera->GetViewProjection());
 				Renderer::Draw(entity);
 			}
 		}
@@ -141,12 +137,6 @@ namespace LkEngine {
 	void Scene::OnImGuiRender()
 	{
 		auto entities = m_Registry.view<TransformComponent>();
-
-		UILayer::SceneEntities(); // Left Sidebar
-		UILayer::SelectedEntityMenu(); // Right sidebar
-
-		//UILayer::CameraControls(*m_Camera);
-		UILayer::CameraControls(*m_Camera2D);
 	}
 
 }
