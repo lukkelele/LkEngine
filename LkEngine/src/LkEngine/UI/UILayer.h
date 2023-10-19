@@ -2,6 +2,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <ImGuizmo/ImGuizmo.h>
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/UI/DockSpace.h"
@@ -34,13 +35,14 @@ namespace LkEngine {
         static void SceneMenu();
         static void SceneEntities();
         static void SelectedEntityMenu();
+        static void CameraControls(Camera& camera);
 
     public:
+        static float PositionStepSize;
         static ImGuiWindowClass* UILayerWindowClass;        
         static ImGuiWindowClass* RendererWindowClass;   
         static ImGuiWindowClass* ExternalWindowClass;   
         static std::string SelectedEntityLabel;
-        //static std::string_view SelectedEntityLabel;
         static bool ShowImGuiDemoWindow;
     };
 

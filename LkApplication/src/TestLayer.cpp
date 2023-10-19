@@ -54,27 +54,12 @@ TestLayer::~TestLayer()
 void TestLayer::OnAttach()
 {
     LOG_DEBUG("TestLayer::OnAttach()");
-    m_VAO = new VertexArray();
-    m_VBO = new VertexBuffer(box_vertices, LK_ARRAYSIZE(box_vertices));
-    m_IBO = new IndexBuffer(box_indices, LK_ARRAYSIZE(box_indices));
-
-    VertexBufferLayout layout;
-    layout.Push<float>(2);
-    m_VAO->AddBuffer(*m_VBO, layout);
-
-    //m_Shader = new Shader("assets/shaders/basic_color.shader");
-    m_Shader = new Shader("assets/shaders/basic_transform.shader");
-    m_Shader->Bind();
-    m_Shader->SetUniform4f("u_Color", ColorSlider.x, ColorSlider.y, ColorSlider.z, ColorSlider.w);
-    glm::mat4 identity_mat = glm::mat4(1.0f);
-    m_Shader->SetUniformMat4f("u_TransformMatrix", identity_mat);
-    m_Shader->Unbind();
-
     m_Scene = create_s_ptr<Scene>();
-    auto rect1 = EntityFactory::CreateRectangle(*m_Scene, {-0.50f, -0.50f}, {0.20f, 0.20f});
-    EntityFactory::CreateRectangle(*m_Scene, {-0.10f, -0.10f}, {0.30f, 0.30f});
-    EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
-    EntityFactory::CreateRectangle(*m_Scene, {0, 0}, {1, 1});
+
+    //EntityFactory::CreateRectangle(*m_Scene, { -100.0, -100.0f }, { 80.0f, 80.0f });
+    EntityFactory::CreateRectangle(*m_Scene, { 20, 20 },   { 140.0f, 140.0f });
+    EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
+    EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
 }
 
 void TestLayer::OnDetach()
@@ -84,7 +69,6 @@ void TestLayer::OnDetach()
 void TestLayer::OnUpdate(float ts)
 {
     m_Scene->OnUpdate(ts);
-
 }
 
 void TestLayer::OnImGuiRender()

@@ -7,6 +7,7 @@
 
 namespace LkEngine {
 
+    float UILayer::PositionStepSize = 5;
     ImGuiWindowClass* UILayer::UILayerWindowClass = nullptr;
     ImGuiWindowClass* UILayer::RendererWindowClass = nullptr;
     ImGuiWindowClass* UILayer::ExternalWindowClass = nullptr;
@@ -232,8 +233,12 @@ namespace LkEngine {
         static ImGuiComboFlags combo_flags = ImGuiComboFlags_None;
         combo_flags |= ImGuiComboFlags_PopupAlignLeft;
 
-        static float rect_width = 0.20f;
-        static float rect_height = 0.40f;
+        ImGuiDockNode* center_window = ImGui::DockBuilderGetNode(DockSpace::RenderWindowDockID);
+        ImVec2 window_size = center_window->Size;
+
+        static float rect_width = 100.0f;
+        static float rect_height = 150.0f;
+        static ImVec2 start_placing_point = ImVec2(0, 0);
 
         ImGui::SeparatorText("Scene Menu");
         //ImGui::BeginChild("##scene-menu");
@@ -260,8 +265,11 @@ namespace LkEngine {
         if (current_type == type_geometry)
         {
             ImGui::Text("Rectangle");
-            ImGui::SliderFloat("Width", &rect_width, 0.01f, 1.50f, "%.2f");
-            ImGui::SliderFloat("Height", &rect_height, 0.01f, 1.50f, "%.2f");
+            //ImGui::SliderFloat("Width", &rect_width, 0.01f, 1.50f, "%.2f");
+            //ImGui::SliderFloat("Height", &rect_height, 0.01f, 1.50f, "%.2f");
+            ImGui::SliderFloat("Width", &rect_width, 50.0f, 500.0f, "%.1f");
+            ImGui::SliderFloat("Height", &rect_height, 50.0f, 500.0f, "%.1f");
+            ImGui::SliderFloat2("Placing Point", &start_placing_point.x, 0.0f, 1000.0f, "%1.f");
         }
         if (current_type == type_rigidbody)
         {
@@ -276,8 +284,10 @@ namespace LkEngine {
                 //glm::vec2 center_pos = { (window_size.x * 0.50f) - rect_width * 0.50f, (window_size.y * 0.50f) - rect_height * 0.50f };
                 //glm::vec2 p1 = { center_pos.x - rect_width, center_pos.y - rect_height };
                 //glm::vec2 p2 = { center_pos.x + rect_width, center_pos.y + rect_width };
-                glm::vec2 p1 = { -rect_width * 0.50f, -rect_width * 0.50f };
-                glm::vec2 p2 = { rect_width * 0.50f, rect_height * 0.50f };
+                //glm::vec2 p1 = { -rect_width * 0.50f, -rect_width * 0.50f };
+                //glm::vec2 p2 = { rect_width * 0.50f, rect_height * 0.50f };
+                glm::vec2 p1 = { start_placing_point.x, start_placing_point.y };
+                glm::vec2 p2 = { start_placing_point.x + rect_width, start_placing_point.y + rect_height };
                 EntityFactory::CreateRectangle(*Scene::ActiveScene, p1, p2);
             }
         }
@@ -329,7 +339,7 @@ namespace LkEngine {
 			MeshComponent& mesh = entity.GetComponent<MeshComponent>();
 			TransformComponent& transform = entity.GetComponent<TransformComponent>();
             ImGui::Text("Position");
-			UI::Property::PositionXYZ(entity, transform.Translation);
+			UI::Property::PositionXY(entity, transform.Translation, PositionStepSize);
 
             static float temp_scale = 1.0f;
             ImGui::Text("Scale");
@@ -346,6 +356,15 @@ namespace LkEngine {
 
 			ImGui::PopID();
 		}
+        ImGui::End();
+    }
+
+    void UILayer::CameraControls(Camera& camera)
+    {
+        auto& pos = camera.GetPos();
+        ImGui::Begin(BOTTOM_BAR);
+        ImGui::Text("Camera");
+        UI::Property::PositionXYZ(camera.ID, pos);
         ImGui::End();
     }
 

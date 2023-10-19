@@ -4,6 +4,7 @@
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Scene/SceneCamera.h"
+#include "LkEngine/Renderer/OrthographicCamera.h"
 #include <entt/entt.hpp>
 
 
@@ -60,7 +61,9 @@ namespace LkEngine {
 		std::unordered_map<UUID, entt::entity> m_EntityMap;
 		s_ptr<Renderer> m_Renderer;
 		s_ptr<World> m_World;
+
 		s_ptr<SceneCamera> m_Camera; 
+		s_ptr<OrthographicCamera> m_Camera2D = nullptr;
 		s_ptr<EditorCamera> m_EditorCamera;
 
 		friend class Entity;

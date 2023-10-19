@@ -2,6 +2,7 @@
 #include "LkEngine/Renderer/GraphicsContext.h"
 #include "LkEngine/Platform/Windows/Windows_Window.h"
 #include "LkEngine/UI/UILayer.h"
+#include <ImGuizmo/ImGuizmo.h>
 
 
 namespace LkEngine {
@@ -72,6 +73,7 @@ namespace LkEngine {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 
 		UILayer::Begin();
 		ImGuiWindow* window = ImGui::GetCurrentWindow();

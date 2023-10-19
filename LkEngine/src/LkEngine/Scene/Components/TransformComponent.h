@@ -21,6 +21,14 @@ namespace LkEngine {
 				* glm::toMat4(Rotation)
 				* glm::scale(glm::mat4(1.0f), Scale);
 		}
-    };
+
+		glm::mat4 GetInvTransform() const
+		{
+			glm::mat4 inv_translation = glm::translate(glm::mat4(1.0f), -Translation);
+			glm::quat inv_rotation = glm::conjugate(Rotation);
+			glm::mat4 inv_scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f / Scale.x, 1.0f / Scale.y, 1.0f / Scale.z));
+			return inv_scale * glm::toMat4(inv_rotation) * inv_translation;
+		}
+	};
 
 }

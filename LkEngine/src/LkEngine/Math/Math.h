@@ -12,6 +12,9 @@
 #include <glm/gtx/norm.hpp>
 #include <imgui/imgui.h>
 
+namespace LkEngine {
+    struct TransformComponent;
+}
 
 namespace LkEngine::Math {
 
@@ -21,5 +24,9 @@ namespace LkEngine::Math {
     glm::vec4 ConvertToNDC(glm::vec3& world_pos, glm::mat4& mvp);
     glm::vec2 ConvertToWorldCoords(glm::vec2 ndc_coords, int window_width, int window_height);
     glm::vec2 WorldToPos(const glm::vec3& world_pos, const glm::mat4& mat);
+
+    glm::vec2 ScreenToWorld2D(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix);
+    glm::vec2 ScreenToWorld(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix);
+    glm::vec2 ScreenToWorld2D(const glm::vec2& ndc, const glm::mat4& inv_proj, const TransformComponent& transform);
 
 }

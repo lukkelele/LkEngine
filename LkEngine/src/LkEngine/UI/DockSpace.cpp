@@ -1,5 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/UI/DockSpace.h"
+#include "LkEngine/Core/Window.h"
+
 
 namespace LkEngine {
 
@@ -90,6 +92,12 @@ namespace LkEngine {
         ImGui::DockBuilderDockWindow(BOTTOM_BAR, dock_id_bottom);
         ImGui::DockBuilderDockWindow(RENDER_WINDOW, dock_id_center);
         ImGui::DockBuilderFinish(DockSpaceID);
+
+        auto center_node = ImGui::DockBuilderGetNode(dock_id_center);
+        ImVec2 size = center_node->Size;
+        auto window = Window::Get();
+        window->SetWidth(size.x);
+        window->SetHeight(size.y);
     }
 
 }

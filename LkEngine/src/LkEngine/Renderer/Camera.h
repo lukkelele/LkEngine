@@ -29,6 +29,8 @@ namespace LkEngine {
 	    glm::mat4 GetProjection() const { return m_Projection; }
 	    glm::mat4 GetViewProjection() const { return m_ViewProjection; }
 		glm::mat4& GetInverseViewProjection() { return m_InverseViewProjection; }
+		glm::mat4& GetInverseView() { return m_InverseView; }
+		glm::mat4& GetInverseProjection() { return m_InverseProjection; }
 		float GetScreenWidth() const { return m_ViewportWidth; }
 		float GetScreenHeight() const { return m_ViewportHeight; }
 		void SetPos(glm::vec3& pos) { m_Pos = pos; }
@@ -42,6 +44,9 @@ namespace LkEngine {
 
 		bool IsKeyboardEnabled() { return m_KeyboardEnabled; }
 		bool IsMouseEnabled() { return m_MouseEnabled; }
+
+		// Temporary! Should use CameraComponent
+		uint64_t ID = 0;
 
 	protected:
 		glm::vec3 m_Pos = { 0.0f, 0.0f, 0.0f };

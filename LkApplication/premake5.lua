@@ -26,7 +26,7 @@ project "LkApplication"
 		"%{wks.location}/lib/spdlog/include",
 		"%{wks.location}/lib/entt/src",
 		"%{wks.location}/lib/imgui",
-		--"%{wks.location}/lib/ImGuizmo",
+		"%{wks.location}/lib/ImGuizmo",
 	}
 
 	links

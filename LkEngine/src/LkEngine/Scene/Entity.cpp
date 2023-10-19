@@ -12,7 +12,7 @@ namespace LkEngine {
 
 	void Entity::OnUpdate(float ts)
 	{
-		if (!HasComponent<MeshComponent>())
+		if (!HasComponent<MeshComponent>() || !HasComponent<TransformComponent>())
 			return;
 
 		auto& transform = GetComponent<TransformComponent>();

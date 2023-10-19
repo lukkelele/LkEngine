@@ -38,10 +38,8 @@ namespace LkEngine {
         static GraphicsContext* m_Context;
         s_ptr<GLFWwindow*> m_GlfwWindow = nullptr;
         s_ptr<Window> m_Window = nullptr;
-        ImVec2 m_MainRenderWindowSize;
-        ImVec2 m_MainRenderWindowPos;
-        ImVec2 m_ViewportSize; // GLFW window
-        ImVec2 m_ViewportPos;  // GLFW window
+        ImVec2 m_ViewportSize, m_ViewportPos; // GLFW window
+        ImVec2 m_MainRenderWindowSize, m_MainRenderWindowPos;
     };
 
 }

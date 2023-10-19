@@ -28,6 +28,10 @@ namespace LkEngine {
         uint16_t GetHeight() const { return m_Height; }
         uint16_t GetViewportWidth()  const { return m_ViewportWidth; }
         uint16_t GetViewportHeight() const { return m_ViewportHeight; }
+        void SetWidth(uint16_t width) { m_Width = width; }
+        void SetHeight(uint16_t height) { m_Height = height; }
+        void SetViewportWidth(uint16_t width) { m_ViewportWidth = width; }
+        void SetViewportHeight(uint16_t height) { m_ViewportHeight = height; }
         std::string GetTitle()  const { return m_Title; }
         std::string GetGlslVersion() const { return m_GlslVersion;  }
         bool IsVSync() const { return m_VSync; }

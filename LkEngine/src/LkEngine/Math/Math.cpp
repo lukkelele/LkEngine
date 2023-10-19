@@ -1,5 +1,8 @@
 #include "LKpch.h"
 #include "LkEngine/Math/Math.h"
+#include <imgui/imgui_internal.h>
+#include "LkEngine/UI/DockSpace.h"
+#include "LkEngine/Scene/Components/TransformComponent.h"
 
 
 namespace LkEngine::Math {
@@ -58,5 +61,48 @@ namespace LkEngine::Math {
         return { 0, 0 };
     }
 
+    glm::vec2 ScreenToWorld(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix)
+    {
+        return glm::vec2();
+    }
+
+    glm::vec2 ScreenToWorld2D(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix)
+    {
+        // Convert screen coordinates to normalized device coordinates
+        auto& io = ImGui::GetIO();
+        auto window = ImGui::DockBuilderGetNode(LkEngine::DockSpace::RenderWindowDockID);
+        int width = window->Size.x;
+        int height = window->Size.y;
+        glm::vec4 clipCoords = glm::vec4(
+            2.0f * screenCoords.x / width - 1.0f,
+            1.0f - 2.0f * screenCoords.y / height, 
+            0.0f, 
+            1.0f
+        );
+
+        // Multiply by inverse projection matrix
+        glm::vec4 eyeCoords = inverseProjectionMatrix * clipCoords;
+        eyeCoords.z = -1.0f; // Point into the scene
+        eyeCoords.w = 0.0f;
+
+        // Convert to world coordinates
+        glm::vec4 worldCoords = inverseViewMatrix * eyeCoords;
+        return glm::vec2(worldCoords.x, worldCoords.y);
+    }
+
+
+    glm::vec2 ScreenToWorld2D(const glm::vec2& ndc, const glm::mat4& inv_proj, const TransformComponent& transform)
+    {
+        // Convert 2D NDC to homogeneous clip coordinates
+        glm::vec4 clipCoords(ndc.x, ndc.y, 0.0f, 1.0f);
+
+        // Convert from clip space to eye/camera space using inverse projection
+        glm::vec4 eyeCoords = inv_proj * clipCoords;
+
+        // Convert from eye/camera space to world space using inverse transform
+        glm::vec4 worldCoords = transform.GetInvTransform() * eyeCoords;
+
+        return glm::vec2(worldCoords.x, worldCoords.y);
+    }
 
 }
