@@ -35,10 +35,7 @@ namespace LkEngine {
 		void Pause(bool paused);
 		void SwitchCamera();
 		uint64_t GetEntityCount() const { return m_EntityMap.size(); }
-
-		//COMPONENT_TYPE GetEntities();
-		//template<typename COMPONENT_TYPE>
-		//entt::basic_view<entt::type_list<entt::constness_as_t<entt::storage_type_t<COMPONENT_TYPE, entt::entity, std::allocator<COMPONENT_TYPE>>, COMPONENT_TYPE>>, entt::type_list<>, void> GetEntities();
+		std::vector<Entity> GetEntities();
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);

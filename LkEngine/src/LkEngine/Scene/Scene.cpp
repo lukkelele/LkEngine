@@ -5,7 +5,7 @@
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/UI/UILayer.h"
 #include "LkEngine/UI/Property.h"
-#include "LkEngine/UI/Color.h"
+#include "LkEngine/Renderer/Color.h"
 #include "LkEngine/Core/Window.h"
 
 
@@ -68,6 +68,15 @@ namespace LkEngine {
 		m_EntityMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);
 		LOG_DEBUG("Entity successfully deleted");
+	}
+
+	std::vector<Entity> Scene::GetEntities()
+	{
+		auto view = m_Registry.view<Entity>();
+		std::vector<Entity> entities;
+		for (const auto& entity : view)
+			entities.push_back({ entity, this });
+		return entities;
 	}
 
 	void Scene::Pause(bool paused)

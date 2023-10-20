@@ -4,6 +4,7 @@
 #include "LkEngine/Application.h"
 #include <random>
 #include <chrono>
+#include "LkEngine/Renderer/Color.h"
 
 
 namespace LkEngine {
@@ -48,11 +49,7 @@ namespace LkEngine {
 		float rect_width = p2_max.x - p1_min.x;
 		float rect_height = p2_max.y - p1_min.y;
 
-		static std::mt19937 rng(std::time(0));
-		static std::uniform_int_distribution<int> dist(0, 100);
-		mesh.Color.x = (float)(dist(rng) * 0.01f);
-		mesh.Color.y = (float)(dist(rng) * 0.01f);
-		mesh.Color.z = (float)(dist(rng) * 0.01f);
+		mesh.Color = Color::Generate();
 
 		mesh.VAO = create_s_ptr<VertexArray>();
 		mesh.VBO = create_s_ptr<VertexBuffer>(vertices, LK_ARRAYSIZE(vertices));
