@@ -9,6 +9,7 @@ namespace LkEngine {
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 		glm::quat Rotation = { 1.0f, 0.0f, 0.0f, 0.0f };
+		float Rotation2D = 0.0f;
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;

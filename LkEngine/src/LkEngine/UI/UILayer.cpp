@@ -350,8 +350,8 @@ namespace LkEngine {
         auto& view_matrix = cam.GetView();
         auto& proj_matrix = cam.GetProjection();
 		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
-		TransformComponent& transform = entity.GetComponent<TransformComponent>();
-        glm::mat4& transform_matrix = transform.GetTransform();
+		TransformComponent& tc = entity.GetComponent<TransformComponent>();
+        glm::mat4& transform_matrix = tc.GetTransform();
 
         static ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove;
         ImGui::SetNextWindowBgAlpha(0.0f);
@@ -363,20 +363,25 @@ namespace LkEngine {
 
         float pos_x = ImGui::GetWindowPos().x;
         float pos_y = ImGui::GetWindowPos().y;
-        //float pos_x = render_window->Size.x + render_window->Pos.x;
-        //float pos_y = render_window->Size.y + render_window->Pos.y;
+
         ImGuizmo::SetRect(pos_x, pos_y, width, height);
-        //LOG_INFO("ImGuizmo: ({}, {})  Size({}, {})", pos_x, pos_y, width, height);
 
-        //glm::mat4 translation = glm::mat4(transform.Translation);
-
-        ImGuizmo::Manipulate(glm::value_ptr(view_matrix), glm::value_ptr(proj_matrix), 
-            ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(transform_matrix));
+        ImGuizmo::Manipulate(
+            glm::value_ptr(view_matrix), 
+            glm::value_ptr(proj_matrix), 
+            ImGuizmo::TRANSLATE, 
+            ImGuizmo::LOCAL, 
+            glm::value_ptr(transform_matrix)
+        );
 
         if (ImGuizmo::IsUsing())
         {
-            //LOG_TRACE("ImGuizmo::IsUsing()");
-
+            glm::vec3 translation, scale;
+            glm::quat rotation;
+            Math::DecomposeTransform(transform_matrix, translation, rotation, scale);
+            tc.Translation = translation;
+            tc.Scale = scale;
+            tc.Rotation = rotation;
         }
         ImGui::End();
     }
@@ -389,6 +394,7 @@ namespace LkEngine {
         if (!entity)
             return;
 
+        static uint32_t last_id = 0;
         ImGuiDockNode* window = ImGui::GetWindowDockNode();
 
         ImGui::SetCursorPosY(window->Size.y - SelectedEntityMenuSize.y);
@@ -405,22 +411,22 @@ namespace LkEngine {
             ImGui::Text("Position");
 			UI::Property::PositionXY(entity, transform.Translation, PositionStepSize);
 
+            DrawImGuizmo(entity);
+
             static float temp_scale = 1.0f;
             ImGui::Text("Scale");
             ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 5.0f, "%.2f");
 
-            static float rot = Math::Get2DRotationFromQuaternion(transform.Rotation);
             ImGui::Text("Rotation");
-            ImGui::SliderAngle("##rotation", &rot, -360.0f, 360.0f, "%1.f");
-            transform.Rotation = glm::angleAxis(rot, glm::vec3(0.0f, 0.0f, 1.0f));
+            ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
+            transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
 
             ImGui::Text("Color");
 			UI::Property::RGBAColor(entity, mesh.Color);
 
             ImGui::Unindent();
 
-            DrawImGuizmo(entity);
-
+            last_id = id;
 			ImGui::PopID();
 		}
         ImGui::EndChild();

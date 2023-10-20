@@ -31,5 +31,7 @@ namespace LkEngine::Math {
 
     float Get2DRotationFromQuaternion(const glm::quat& quat);
 
+    bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::quat& rot, glm::vec3& scale);
+
 
 }
