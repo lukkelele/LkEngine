@@ -63,15 +63,17 @@ make
 
 <!---------------------- Checklist --------------------------->
 ### General
-:black_square_button: Raycasting <br>
 :black_square_button: Shader hot reloading<br>
-:black_square_button: Collision system<br>
 
 ### 2D 
-:black_square_button: Ortographic camera<br>
-:black_square_button: Sprite rendering<br>
+:white_check_mark: Ortographic camera<br>
+:white_check_mark: Sprite rendering<br>
+:black_square_button: Collision system<br>
+:white_check_mark: Raycasting <br>
+:black_square_button: Physics <br>
 
 ### 3D
+:black_square_button: Raycasting <br>
 :black_square_button: Physics <br>
 :black_square_button: Rigidbody constraints <br>
 
@@ -83,6 +85,16 @@ make
 # Development
 
 ## LkEngine Development
+
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-20-10-2023.png" width=740 height=440>
+<p align="center">
+Rendered entities that consist of mesh, sprite and transform components. The UI has been improved.
+</p>
+
+</div>
+<br>
+
 ### October 16, 2023
 
 <div align="center">
