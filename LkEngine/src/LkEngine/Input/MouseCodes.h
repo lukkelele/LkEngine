@@ -21,7 +21,7 @@ namespace LkEngine {
 			ButtonLast   = Button7,
 			ButtonLeft   = Button0,
 			ButtonRight  = Button1,
-			ButtonMiddle = Button2
+			ButtonMiddle = Button2,
 		};
 	}
 }

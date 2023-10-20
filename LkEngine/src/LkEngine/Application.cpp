@@ -60,7 +60,6 @@ namespace LkEngine {
         }
         m_Context->EndImGuiFrame();
 
-
         m_Window->OnUpdate();
     }
 

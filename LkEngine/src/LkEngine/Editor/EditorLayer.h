@@ -7,11 +7,6 @@
 
 namespace LkEngine {
 
-	enum LK_OBJECT
-	{
-		LINE, CUBE, SPHERE
-	};
-
 	class EditorLayer
 	{
 	public:
@@ -29,9 +24,13 @@ namespace LkEngine {
 		template<typename T>
 		void DisplayAddComponentEntry(const std::string& entryName);
 
+		static void Select(Entity& entity) { SelectedEntity = entity; }
+
+	public:
+		static Entity SelectedEntity;
 	private:
+
 		s_ptr<Scene> m_Scene = nullptr;
-		static Entity m_SelectedEntity;
 
 		// 7 equals 0b111, the gizmo types are set 1 for each axis at an offset of 3 bits
 		enum GizmoType

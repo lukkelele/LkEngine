@@ -26,10 +26,16 @@ namespace LkEngine {
 
 	Entity EntityFactory::CreateRectangle(const std::string& name, Scene& scene, glm::vec2 p1_min, glm::vec2 p2_max)
 	{
+		float rect_width = p2_max.x - p1_min.x;
+		float rect_height = p2_max.y - p1_min.y;
+
 		int entityCount = scene.GetEntityCount();
 		Entity entity = scene.CreateEntity(std::string(name));
-		entity.AddComponent<TransformComponent>();
-		MeshComponent mesh = MeshComponent();
+		TransformComponent tc;
+		MeshComponent mesh;
+
+		glm::vec2 rect_size = { rect_width, rect_height };
+		SpriteComponent sprite = SpriteComponent(rect_size, Color::Generate());
 
 		auto app = Application::Get();
 		auto window = app->GetWindow();
@@ -46,11 +52,8 @@ namespace LkEngine {
 			0, 1, 2,
 			2, 3, 0
 		};
-		float rect_width = p2_max.x - p1_min.x;
-		float rect_height = p2_max.y - p1_min.y;
 
 		mesh.Color = Color::Generate();
-
 		mesh.VAO = create_s_ptr<VertexArray>();
 		mesh.VBO = create_s_ptr<VertexBuffer>(vertices, LK_ARRAYSIZE(vertices));
 		VertexBufferLayout layout;
@@ -62,11 +65,12 @@ namespace LkEngine {
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 		mesh.BaseShader->Unbind();
 
-		TransformComponent& transform = entity.GetComponent<TransformComponent>();
+		tc.Translation.x = p1_min.x;
+		tc.Translation.y = p1_min.y;
 
 		entity.AddComponent<MeshComponent>(mesh);
-		transform.Translation.x = p1_min.x;
-		transform.Translation.y = p1_min.y;
+		entity.AddComponent<TransformComponent>(tc);
+		entity.AddComponent<SpriteComponent>(sprite);
 
 		return entity;
 	}

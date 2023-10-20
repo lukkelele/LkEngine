@@ -16,7 +16,6 @@ namespace LkEngine {
 	Scene::Scene()
 	{
 		ActiveScene = this;
-		//m_Camera = create_s_ptr<SceneCamera>();
 		auto window = Window::Get();
 		float width = window->GetWidth();
 		float height = window->GetHeight();
@@ -72,7 +71,7 @@ namespace LkEngine {
 
 	std::vector<Entity> Scene::GetEntities()
 	{
-		auto view = m_Registry.view<Entity>();
+		auto view = m_Registry.view<IDComponent>();
 		std::vector<Entity> entities;
 		for (const auto& entity : view)
 			entities.push_back({ entity, this });
@@ -103,6 +102,11 @@ namespace LkEngine {
 
 	template<>
 	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& mesh)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<SpriteComponent>(Entity entity, SpriteComponent& mesh)
 	{
 	}
 

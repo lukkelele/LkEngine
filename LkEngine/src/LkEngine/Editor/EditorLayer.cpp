@@ -2,18 +2,18 @@
 #include "LkEngine/Editor/EditorLayer.h"
 //#include "LkEngine/Physics/World.h"
 //#include "LkEngine/Physics/Constraints.h"
-//#include "LkEngine/Math/Math.h"
+#include "LkEngine/Math/Math.h"
 #include "LkEngine/Scene/Components.h"
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
-//#include <imgui/ImGuizmo.h>
+#include <ImGuizmo/ImGuizmo.h>
 
 
 namespace LkEngine {
 
-	Entity EditorLayer::m_SelectedEntity;
+	Entity EditorLayer::SelectedEntity;
 
 	EditorLayer::EditorLayer(s_ptr<Scene> scene)
 		: m_Scene(scene)
@@ -34,24 +34,22 @@ namespace LkEngine {
 			});
 
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				m_SelectedEntity = {};
+				SelectedEntity = {};
 		}
 
 		ImGui::Begin("Properties");
-		if (m_SelectedEntity)
+		if (SelectedEntity)
 		{
-			DrawComponents(m_SelectedEntity);
+			DrawComponents(SelectedEntity);
 		}
 		ImGui::End(); // Properties
 
 		ImGuiTreeNodeFlags gizmoFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 		ImVec2 buttonSize(76.0f, 30.0f);
 
-
 		ImGui::End(); // Editor Menu
 
-	#ifdef LK_ENGINE_OLD_IMPL
-		if (m_SelectedEntity && m_GizmoType != -1)
+		if (SelectedEntity && m_GizmoType != -1)
 		{
 			auto window = ImGui::GetCurrentWindow();
 			ImGui::SetNextWindowViewport(window->ID);
@@ -61,14 +59,10 @@ namespace LkEngine {
 			float windowHeight = (float)ImGui::GetWindowHeight();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
-			// This should get the current primary camera, use this for now
-			auto camera = m_Scene->getCamera();
-			// Get camera view by inversing the camera transform
+			auto& camera = m_Scene->GetActiveCamera();
 			glm::mat4 cameraView = camera->GetView();
 			glm::mat4 cameraProj = camera->GetProjection();
-
-			TransformComponent& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-			Rigidbody& rb = m_SelectedEntity.GetComponent<Rigidbody>();
+			TransformComponent& tc = SelectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 transform = tc.GetTransform();
 
 			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProj), 
@@ -80,33 +74,30 @@ namespace LkEngine {
 				glm::quat rotation;
 				Math::DecomposeTransform(transform, translation, rotation, scale);
 
-				tc.translation = translation;
-				tc.rotation = rotation;
-				tc.scale = scale;
-				// Needs to be synced as the body is constantly affected by its environment
-				rb.MoveBody(translation);
+				tc.Translation = translation;
+				tc.Rotation = rotation;
+				tc.Scale = scale;
 			}
 		}
-	#endif
 	}
 
 	void EditorLayer::SelectEntity(Entity& entity)
 	{
-		if (m_SelectedEntity != entity)
-			m_SelectedEntity = entity;
+		if (SelectedEntity != entity)
+			SelectedEntity = entity;
 	}
 
 	void EditorLayer::DrawEntityNode(Entity entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = ((SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 
 		if (ImGui::IsItemClicked())
 		{
-			m_SelectedEntity = entity;
+			SelectedEntity = entity;
 		}
 
 		bool entityDeleted = false;
@@ -134,8 +125,8 @@ namespace LkEngine {
 		if (entityDeleted)
 		{
 			m_Scene->DestroyEntity(entity);
-				if (m_SelectedEntity == entity)
-					m_SelectedEntity = {};
+				if (SelectedEntity == entity)
+					SelectedEntity = {};
 		}
 
 	}
@@ -186,11 +177,11 @@ namespace LkEngine {
 	template<typename T>
 	void EditorLayer::DisplayAddComponentEntry(const std::string& entryName)
 	{
-		if (!m_SelectedEntity.HasComponent<T>())
+		if (!SelectedEntity.HasComponent<T>())
 		{
 			if (ImGui::MenuItem(entryName.c_str()))
 			{
-				m_SelectedEntity.AddComponent<T>();
+				SelectedEntity.AddComponent<T>();
 				ImGui::CloseCurrentPopup();
 			}
 		}

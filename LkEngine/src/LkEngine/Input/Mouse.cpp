@@ -1,15 +1,35 @@
 #include "LKpch.h"
 #include "LkEngine/Input/Mouse.h"
 #include "LkEngine/Renderer/GraphicsContext.h"
+#include "LkEngine/UI/DockSpace.h"
+
 
 namespace LkEngine {
 
-	// FIXME
 	bool Mouse::IsButtonPressed(MouseCode button)
 	{
 		GLFWwindow* window = *GraphicsContext::Get()->GetGlfwWindow();
 		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
 		return state == GLFW_PRESS;
+	}
+
+	glm::vec2 Mouse::GetMousePos()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(*GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
+		float x = static_cast<float>(xpos);
+		float y = static_cast<float>(ypos);
+		//LOG_DEBUG("Mouse GLFW (x, y) : ({}, {})", x, y);
+		return { x, y };
+	}
+
+	glm::vec2 Mouse::GetMousePosDockWindow()
+	{
+		auto pos = GetMousePos();
+        pos.x -= DockSpace::SidebarLeftSize.x;
+        pos.y -= DockSpace::TopBarSize.y;
+
+		return { pos.x, pos.y };
 	}
 
 	std::pair<float, float> Mouse::GetMousePosition()
@@ -23,14 +43,16 @@ namespace LkEngine {
 
 	float Mouse::GetMouseX()
 	{
-		auto [x, y] = GetMousePosition();
-		return x;
+		//auto [x, y] = GetMousePosition();
+		auto pos = GetMousePos();
+		return pos.x;
 	}
 
 	float Mouse::GetMouseY()
 	{
-		auto [x, y] = GetMousePosition();
-		return y;
+		//auto [x, y] = GetMousePosition();
+		auto pos = GetMousePos();
+		return pos.y;
 	}
 
 }

@@ -70,6 +70,8 @@ void TestLayer::OnDetach()
 void TestLayer::OnUpdate(float ts)
 {
     m_Scene->OnUpdate(ts);
+    auto mouse_pos = Mouse::GetMousePos();
+    Physics2D::Raycast(m_Scene, mouse_pos, mouse_pos);
 }
 
 void TestLayer::OnImGuiRender()

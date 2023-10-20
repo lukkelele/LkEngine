@@ -120,6 +120,11 @@ namespace LkEngine {
             ImGui::EndCombo();
         }
 
+        ImGui::SameLine();
+        auto mouse_pos = Mouse::GetMousePosDockWindow();
+        //ImGui::Text("Mouse (%1.f, %1.f)", Mouse::GetMouseX(), Mouse::GetMouseY());
+        ImGui::Text("Mouse (%1.f, %1.f)", mouse_pos.x, mouse_pos.y);
+
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_DockHierarchy))
         {
             if (ShowImGuiDemoWindow)
@@ -364,7 +369,11 @@ namespace LkEngine {
         float pos_x = ImGui::GetWindowPos().x;
         float pos_y = ImGui::GetWindowPos().y;
 
+        SpriteComponent& sprite = entity.GetComponent<SpriteComponent>();
+        pos_x += (sprite.GetWidth() * 0.50f);
+        pos_y -= (sprite.GetHeight() * 0.50f);
         ImGuizmo::SetRect(pos_x, pos_y, width, height);
+        //ImGuizmo::SetRect(pos_x, pos_y, sprite.GetWidth(), sprite.GetHeight());
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 

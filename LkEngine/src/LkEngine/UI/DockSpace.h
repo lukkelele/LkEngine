@@ -25,6 +25,7 @@ namespace LkEngine {
 
     public:
         static ImVec2 LastViewportSize;
+        static ImVec2 BottomBarSize, TopBarSize, SidebarLeftSize, SidebarRightSize;
         static ImGuiID DockSpaceID, RenderWindowDockID, BottomBarDockID;
         static float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;
         static bool Sidebar_Left_Enabled, Sidebar_Right_Enabled;

@@ -12,20 +12,12 @@ namespace LkEngine {
 		glm::vec2 Normal;
 		float Distance; // World units
 
-		//Raycast2DResult() {} // Remove when impl. is done
-
 		Raycast2DResult(Entity entity, glm::vec2 point, glm::vec2 normal, float distance)
 			: HitEntity(entity)
 			, Point(point)
 			, Normal(normal)
 			, Distance(distance) {}
 	};
-
-	//struct Box2DWorldComponent
-	//{
-	//	std::unique_ptr<b2World> World;
-	//	ContactListener2D ContactListener;
-	//};
 
 	class Physics2D
 	{

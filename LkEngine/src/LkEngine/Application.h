@@ -1,4 +1,5 @@
 #pragma once
+
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/Window.h"
@@ -7,6 +8,7 @@
 #include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Scene/EntityFactory.h"
 #include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Physics/2D/Physics2D.h"
 
 
 namespace LkEngine {
@@ -14,7 +16,8 @@ namespace LkEngine {
     struct ApplicationProperties
     {
 		std::string Title;
-		uint32_t Width, Height;
+        uint32_t Width;
+        uint32_t Height;
 		std::string Directory;
 		std::string GlslVersion;
 		ApplicationProperties(const std::string& title = "LkEngine",

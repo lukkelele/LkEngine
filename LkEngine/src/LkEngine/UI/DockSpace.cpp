@@ -6,10 +6,14 @@
 
 namespace LkEngine {
 
-    ImVec2 DockSpace::LastViewportSize = ImVec2(0, 0);
     ImGuiID DockSpace::DockSpaceID;
     ImGuiID DockSpace::RenderWindowDockID;
     ImGuiID DockSpace::BottomBarDockID;
+    ImVec2 DockSpace::LastViewportSize = ImVec2(0, 0);
+    ImVec2 DockSpace::BottomBarSize = ImVec2(0, 0);
+    ImVec2 DockSpace::TopBarSize = ImVec2(0, 0);
+    ImVec2 DockSpace::SidebarLeftSize = ImVec2(0, 0);
+    ImVec2 DockSpace::SidebarRightSize = ImVec2(0, 0);
     float DockSpace::Sidebar_Left_Ratio = 0.20f;
     float DockSpace::Sidebar_Right_Ratio = 0.20f;
     float DockSpace::TopBottom_Ratio = 0.80f;
@@ -107,6 +111,16 @@ namespace LkEngine {
 
         auto center_node = ImGui::DockBuilderGetNode(dock_id_center);
         ImVec2 size = center_node->Size;
+
+        auto top_node = ImGui::DockBuilderGetNode(dock_id_new_top);
+        auto left_sidebar_node = ImGui::DockBuilderGetNode(dock_id_left);
+        auto right_sidebar_node = ImGui::DockBuilderGetNode(dock_id_right);
+        auto bottom_node = ImGui::DockBuilderGetNode(dock_id_bottom);
+        TopBarSize = top_node->Size;
+        SidebarLeftSize = left_sidebar_node->Size;
+        SidebarRightSize = right_sidebar_node->Size;
+        BottomBarSize = bottom_node->Size;
+
         auto window = Window::Get();
         window->SetWidth(size.x);
         window->SetHeight(size.y);

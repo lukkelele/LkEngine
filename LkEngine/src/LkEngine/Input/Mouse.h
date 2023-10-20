@@ -9,7 +9,9 @@ namespace LkEngine {
 	{
 	public:
 		static bool IsButtonPressed(MouseCode button);
+		static glm::vec2 GetMousePos();
 		static std::pair<float, float> GetMousePosition();
+		static glm::vec2 GetMousePosDockWindow();
 		static float Mouse::GetMouseX();
 		static float Mouse::GetMouseY();
 	};
