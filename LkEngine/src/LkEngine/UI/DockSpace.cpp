@@ -89,6 +89,7 @@ namespace LkEngine {
         auto left_node = GetNode(SidebarLeftDockID);
         auto right_node = GetNode(SidebarRightDockID);
         auto center_node = GetNode(RenderWindowDockID);
+        auto current_node = ImGui::GetWindowDockNode();
 
         static int last_left_node_state = 0;
         static int last_right_node_state = 0;
@@ -104,8 +105,8 @@ namespace LkEngine {
         //LOG_INFO("DockSpace ID Stack: {}", g.CurrentWindow->IDStack.Size);
         //ImGuiID dockspace_hash = ImHashStr("4", 0, g.CurrentWindow->IDStack.back());
         ImGui::Begin(SIDEBAR_LEFT);
-        //ImGui::PushID(current_node->ID);
-        ImGui::PushID(4);
+        ImGui::PushID(current_node->ID);
+        //ImGui::PushID(4);
         splitter_id = ImGui::GetID("##Splitter");
         //stack_top = current_node->HostWindow->IDStack.empty() ? 0 : current_node->HostWindow->IDStack.back();
         stack_top = g.CurrentWindow->IDStack.back();
