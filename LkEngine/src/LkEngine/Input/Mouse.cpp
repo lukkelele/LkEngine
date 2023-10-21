@@ -55,4 +55,14 @@ namespace LkEngine {
 		return pos.y;
 	}
 
+	glm::vec2 Mouse::GetMousePosNormalized()
+	{
+		glm::vec2 mouse_pos = GetMousePos();
+		float window_width = DockSpace::CenterWindowSize.x;
+		float window_height = DockSpace::CenterWindowSize.y;
+		double norm_mouse_x = mouse_pos.x / window_width;
+		double norm_mouse_y = 1.0 - (mouse_pos.y / window_height);
+		return { norm_mouse_x, norm_mouse_y };
+	}
+
 }

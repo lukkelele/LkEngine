@@ -30,6 +30,10 @@ namespace LkEngine {
 			glm::mat4 inv_scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f / Scale.x, 1.0f / Scale.y, 1.0f / Scale.z));
 			return inv_scale * glm::toMat4(inv_rotation) * inv_translation;
 		}
+
+		glm::vec3 GetTranslation() const { return Translation; }
+		glm::vec3 GetScale() const { return Scale; }
+		glm::quat GetRotation() const { return Rotation; }
 	};
 
 }

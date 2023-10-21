@@ -22,7 +22,7 @@ namespace LkEngine {
 		virtual void UpdateView() = 0;
 		virtual void UpdateProjection() = 0;
 		virtual void UpdateMousePosition();
-		virtual void SetProjection() {} // FIXME
+		virtual void SetProjection(glm::mat4& proj) { m_Projection = proj; } // FIXME
 		virtual void HandleInput(float ts);
 
 		glm::vec3& GetPos() { return m_Pos; }

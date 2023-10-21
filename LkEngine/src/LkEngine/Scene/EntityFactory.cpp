@@ -43,10 +43,10 @@ namespace LkEngine {
 		float viewport_height = window->GetViewportHeight();
 
 		float vertices[] = {
-			0.0f, 0.0f,
-			p2_max.x - p1_min.x, 0.0f,
-			p2_max.x - p1_min.x, p2_max.y - p1_min.y,
-			0.0f, p2_max.y - p1_min.y
+			0.0f,         0.0f,
+			rect_width,   0.0f,
+			rect_width,   rect_height,
+			0.0f,         rect_height 
 		};
 		unsigned int indices[] = {
 			0, 1, 2,

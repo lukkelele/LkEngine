@@ -20,7 +20,7 @@ namespace LkEngine {
 		float width = window->GetWidth();
 		float height = window->GetHeight();
 		m_ActiveCamera = create_s_ptr<OrthographicCamera>(0, width, 0, height);
-		m_Camera2D = create_s_ptr<OrthographicCamera>(0, width, 0, height);
+		m_Camera2D = create_s_ptr<OrthographicCamera>(0, width, height, 0);
 		m_EditorCamera = create_s_ptr<EditorCamera>();
 	}
 

@@ -14,6 +14,7 @@ namespace LkEngine {
 		static glm::vec2 GetMousePosDockWindow();
 		static float Mouse::GetMouseX();
 		static float Mouse::GetMouseY();
+		static glm::vec2 GetMousePosNormalized();
 	};
 
 }

@@ -12,7 +12,7 @@ namespace LkEngine {
         glm::vec4 Color; 
 
         SpriteComponent(const std::string& filepath, 
-                        const glm::vec2& size = { 50.f, 50.f }, 
+                        const glm::vec2& size = { 0.0f, 0.0f }, 
                         const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
             : FilePath(filepath)
             , Size(size)
@@ -20,7 +20,7 @@ namespace LkEngine {
         {
         }
 
-        SpriteComponent(const glm::vec2& size = { 50.f, 50.f },
+        SpriteComponent(const glm::vec2& size = { 0.0f, 0.0f },
                         const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
             : FilePath("")
             , Size(size)

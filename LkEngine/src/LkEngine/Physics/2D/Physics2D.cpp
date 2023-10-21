@@ -19,41 +19,45 @@ namespace LkEngine {
                 auto& sprite = entity.GetComponent<SpriteComponent>();
                 glm::vec2 mouse_pos;
                 mouse_pos = Mouse::GetMousePos();
-                //mouse_pos = Mouse::GetMousePosDockWindow();
+                //mouse_pos = Mouse::GetMousePosNormalized();
+		        //LOG_DEBUG("Mouse NORMALIZED (x, y) : ({}, {})", mouse_pos.x, mouse_pos.y);
                 auto window = Application::Get()->GetWindow();
                 float window_width, window_height, viewport_width, viewport_height;
-                viewport_width = window->GetViewportWidth();
-                viewport_height = window->GetViewportHeight();
-                window_width = window->GetWidth();
-                window_height = window->GetHeight();
+
 
                 mouse_pos.x -= DockSpace::SidebarLeftSize.x;
-                mouse_pos.y -= DockSpace::TopBarSize.y;
-                //mouse_pos.y *= -1; // Flip because we count from (0, 0) in bottom left corner
-                //LOG_DEBUG("SidebarLeftSize.x == {}", DockSpace::SidebarLeftSize.x);
-                //LOG_DEBUG("BottomBarSize.y == {}", DockSpace::BottomBarSize.y);
-                //LOG_DEBUG("TopBarSize.y == {}", DockSpace::TopBarSize.y);
+                mouse_pos.y += DockSpace::TopBarSize.y;
 
-		        //LOG_DEBUG("Mouse 2 (x, y) : ({}, {})", mouse_pos.x, mouse_pos.y);
-                //mouse_pos.x -=
-                float quad_width, quad_height, quad_pos_x, quad_pos_y;
+                viewport_width = window->GetViewportWidth();
+                viewport_height = window->GetViewportHeight();
+                //window_width = window->GetWidth();
+                //window_height = window->GetHeight();
+                window_width = DockSpace::CenterWindowSize.x;
+                window_height = DockSpace::CenterWindowSize.y;
+
+                mouse_pos.y = window_height - mouse_pos.y;
+                float mx = mouse_pos.x / window_width;
+                float my = mouse_pos.y / window_height;
+
+                float quad_width, quad_height;
                 quad_width = sprite.Size.x;
                 quad_height = sprite.Size.y;
-                quad_pos_x = tc.Translation.x; // Min/Lowest x point
-                quad_pos_y = tc.Translation.y; // Min/Lowest y point
+                glm::vec3 quad_pos = tc.Translation;
 
-                //LOG_TRACE("Quad - Pos: ({}, {})", quad_pos_x, quad_pos_y);
 		        //LOG_DEBUG("Mouse (x, y) : ({}, {})", mouse_pos.x, mouse_pos.y);
 
-                glm::vec2 bottom_left = { quad_pos_x, window_height - quad_pos_y };
-                glm::vec2 top_right = { quad_pos_x + quad_width, window_height - (quad_pos_y + quad_height) };
-                glm::vec2 top_left = { top_right.x - quad_width, top_right.y};
-                glm::vec2 bottom_right = { quad_pos_x + quad_width, window_height - quad_height };
+                glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
+                glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
+                glm::vec2 top_left = { quad_pos.x, quad_pos.y + quad_height};
+                glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
+
+                glm::vec2 bottom_left_norm = { bottom_left.x / window_width, bottom_left.y / window_width };
+                glm::vec2 top_right_norm = { (quad_pos.x + quad_width) / window_width, (quad_pos.y + quad_height) / window_height };
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
-                    bool within_x_boundaries = (mouse_pos.x >= bottom_left.x && mouse_pos.x <= top_right.x);
-                    bool within_y_boundaries = (mouse_pos.y > top_left.y && mouse_pos.y < bottom_left.y);
+                    bool within_x_boundaries = (mouse_pos.x >= bottom_left_norm.x && mouse_pos.x <= top_right_norm.x);
+                    bool within_y_boundaries = (mouse_pos.y <= top_left.y && mouse_pos.y >= bottom_right.y);
                     if (within_x_boundaries && within_y_boundaries)
                     {
                         LOG_WARN("CONTACT DETECTED : {} -> ({}, {})", entity.GetName().c_str(), mouse_pos.x, mouse_pos.y);
@@ -62,6 +66,7 @@ namespace LkEngine {
                     else
                     {
                         //LOG_INFO("NO CONTACT");
+                        //UILayer::SelectedEntityLabel = "";
                     }
                 }
 

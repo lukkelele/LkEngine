@@ -98,7 +98,8 @@ namespace LkEngine {
 
         ImGui::SeparatorText("LkEngine Configuration");
         ImGui::Checkbox("Demo Window", &ShowImGuiDemoWindow);
-
+        ImGui::SameLine(0, 10);
+        ImGui::Checkbox("Docking Enabled", &DockSpace::DockingEnabled);
         ImGui::SameLine();
 
         int draw_mode = Renderer::DrawMode;
@@ -124,6 +125,8 @@ namespace LkEngine {
         auto mouse_pos = Mouse::GetMousePosDockWindow();
         //ImGui::Text("Mouse (%1.f, %1.f)", Mouse::GetMouseX(), Mouse::GetMouseY());
         ImGui::Text("Mouse (%1.f, %1.f)", mouse_pos.x, mouse_pos.y);
+        ImGui::SameLine();
+        ImGui::Text("Mouse normalized (%.4f, %.4f)", mouse_pos.x / DockSpace::CenterWindowSize.x, mouse_pos.y / DockSpace::CenterWindowSize.y);
 
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_DockHierarchy))
         {
@@ -149,6 +152,9 @@ namespace LkEngine {
         ImGui::SameLine(0, 20);
         DockWindowsMenu();
 
+        ImGui::SameLine(0, 50);
+        ImGui::ShowStackToolWindow();
+
         ImGui::End();
     }
 
@@ -160,7 +166,8 @@ namespace LkEngine {
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar;
-        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollWithMouse;
+        //flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollWithMouse;
+        flags |= ImGuiWindowFlags_NoScrollWithMouse;
         ImGui::SetNextWindowClass(UILayerWindowClass);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 
@@ -370,8 +377,8 @@ namespace LkEngine {
         float pos_y = ImGui::GetWindowPos().y;
 
         SpriteComponent& sprite = entity.GetComponent<SpriteComponent>();
-        pos_x += (sprite.GetWidth() * 0.50f);
-        pos_y -= (sprite.GetHeight() * 0.50f);
+        //pos_x += (sprite.GetWidth() * 0.50f);
+        //pos_y -= (sprite.GetHeight() * 0.50f);
         ImGuizmo::SetRect(pos_x, pos_y, width, height);
         //ImGuizmo::SetRect(pos_x, pos_y, sprite.GetWidth(), sprite.GetHeight());
 
