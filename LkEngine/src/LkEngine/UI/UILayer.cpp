@@ -38,6 +38,7 @@ namespace LkEngine {
     
     void UILayer::BeginMainRenderWindow()
     {
+#if 0
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
         flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs;
@@ -46,6 +47,7 @@ namespace LkEngine {
         auto& io = ImGui::GetIO();
         //ImGui::SetNextWindowClass(RendererWindowClass);
         //ImGui::Begin(RENDER_WINDOW, NULL, flags);
+#endif
     }
 
     void UILayer::EndMainRenderWindow()
@@ -70,11 +72,13 @@ namespace LkEngine {
 
     void UILayer::OnAttach()
     {
+#if 0
         if (!Initialized)
         {
             Init();
             Initialized = true;
         }
+#endif
     }
 
     void UILayer::OnDetach()
@@ -83,14 +87,17 @@ namespace LkEngine {
 
     void UILayer::OnImGuiRender()
     {
+#if 0
     	TopBar();
 		BottomBar();
         LeftSidebar();
         RightSidebar();
+#endif
     }
 
     void UILayer::TopBar()
     {
+#if 0
         ImGui::SetNextWindowClass(UILayerWindowClass);
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         //ImGui::Begin(TOP_BAR, NULL, flags);
@@ -142,10 +149,12 @@ namespace LkEngine {
             ImGui::ShowDemoWindow();
 
         ImGui::EndChild();
+#endif
     }
 
     void UILayer::BottomBar()
     {
+#if 0
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar;
@@ -161,10 +170,12 @@ namespace LkEngine {
         ImGui::ShowStackToolWindow();
 
         ImGui::EndChild();
+#endif
     }
 
     void UILayer::LeftSidebar()
     {
+#if 0
         if (!DockSpace::Sidebar_Left_Enabled)
             return;
 
@@ -194,10 +205,12 @@ namespace LkEngine {
 
         ImGui::PopStyleVar(1);
         ImGui::EndChild();
+#endif
     }
 
     void UILayer::RightSidebar()
     {
+#if 0
         static ImGuiWindowFlags flags = ImGuiWindowFlags_None;
         flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
         flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar;
@@ -214,10 +227,12 @@ namespace LkEngine {
 
         ImGui::EndChild();
         ImGui::PopStyleVar(2);
+#endif
     }
 
     void UILayer::SceneMenu()
     {
+#if 0
         ImGui::PushID(ImGui::GetID("_scene-menu"));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::BeginChild("##scene-menu");
@@ -289,11 +304,13 @@ namespace LkEngine {
         ImGui::EndChild();
         ImGui::PopStyleVar(1);
         ImGui::PopID();
+#endif
     }
 
     // TODO: Update
     void UILayer::AppInfo()
     {
+#if 0
         auto app = Application::Get();
         bool keyboard_enabled = app->IsKeyboardEnabled();
         bool mouse_enabled = app->IsMouseEnabled();
@@ -314,6 +331,7 @@ namespace LkEngine {
         ImGui::PopStyleVar(1);
         ImGui::PopStyleColor(1);
         ImGui::EndChild();
+#endif
     }
 
     void UILayer::CreateEntityMenu()
@@ -322,6 +340,7 @@ namespace LkEngine {
 
     void UILayer::DockWindowsMenu()
     {
+#if 0
         ImGui::BeginGroup();
         ImGui::PushID(ImGui::GetID("dockwindows-menu"));
         ImGui::Text("Dock Windows");
@@ -333,10 +352,12 @@ namespace LkEngine {
 
         ImGui::PopID();
         ImGui::EndGroup();
+#endif
     }
 
     void UILayer::SceneContentMenu()
     {
+#if 0
         //ImGuiDockNode* window = ImGui::GetWindowDockNode();
         auto window = Window::Get();
         SceneContentMenuSize.y = window->GetHeight() - SelectedEntityMenuSize.y;
@@ -360,11 +381,13 @@ namespace LkEngine {
             }
         }
         ImGui::EndChild();
+#endif
     }
 
 
     void UILayer::CameraControls()
     {
+#if 0
         auto& scene = *Scene::ActiveScene;
         auto& camera = *scene.GetActiveCamera();
         auto& pos = camera.GetPos();
@@ -374,6 +397,7 @@ namespace LkEngine {
         UI::Property::PositionXYZ(camera.ID, pos);
         ImGui::EndGroup();
         //ImGui::EndChild();
+#endif
     }
 
 }

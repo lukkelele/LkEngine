@@ -149,7 +149,7 @@ namespace LkEngine {
 
 	void Scene::OnImGuiRender()
 	{
-		auto entities = m_Registry.view<TransformComponent>();
+		//auto entities = m_Registry.view<TransformComponent>();
 	}
 
 }
