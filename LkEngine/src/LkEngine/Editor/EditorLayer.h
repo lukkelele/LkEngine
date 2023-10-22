@@ -37,7 +37,6 @@ namespace LkEngine {
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 		void SelectEntity(Entity& entity);
-        static void SelectedEntityMenu();
 		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
 		static void Select(Entity& entity) { SelectedEntityID = entity.GetComponent<IDComponent>().ID; }
 
@@ -47,11 +46,14 @@ namespace LkEngine {
 		void DisplayAddComponentEntry(const std::string& entryName);
 
 		void UI_HandleManualWindowResize();
+		void UI_SceneMenu();
+		void UI_SceneContent();
+        void UI_SelectedEntity();
 
 	private:
-		void RenderViewport();
+		void RenderViewport(); // TODO
 		//void RenderViewport(s_ptr<Image> img);
-        static void DrawImGuizmo(Entity& entity);
+        void DrawImGuizmo(Entity& entity);
 
 	public:
 		static uint64_t SelectedEntityID;
