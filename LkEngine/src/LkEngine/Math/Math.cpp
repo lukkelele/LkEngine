@@ -3,6 +3,7 @@
 #include <imgui/imgui_internal.h>
 #include "LkEngine/UI/DockSpace.h"
 #include "LkEngine/Scene/Components/TransformComponent.h"
+#include "LkEngine/Core/Window.h"
 
 
 namespace LkEngine::Math {
@@ -135,9 +136,9 @@ namespace LkEngine::Math {
     {
         // Convert screen coordinates to normalized device coordinates
         auto& io = ImGui::GetIO();
-        auto window = ImGui::DockBuilderGetNode(LkEngine::DockSpace::RenderWindowDockID);
-        int width = window->Size.x;
-        int height = window->Size.y;
+		auto window = Window::Get();
+        int width = window->GetWidth();
+        int height = window->GetHeight();
         glm::vec4 clipCoords = glm::vec4(
             2.0f * screenCoords.x / width - 1.0f,
             1.0f - 2.0f * screenCoords.y / height, 

@@ -6,11 +6,6 @@
 namespace LkEngine {
 
     constexpr const char* LkEngine_DockSpace = "##__main-dockspace";
-    constexpr const char* RENDER_WINDOW = "##__main-render-window";
-    constexpr const char* TOP_BAR = "##__top-bar";
-    constexpr const char* BOTTOM_BAR = "##__lower-bar";
-    constexpr const char* SIDEBAR_LEFT = "##__left-sidebar";
-    constexpr const char* SIDEBAR_RIGHT = "##__right-sidebar";
 
     class DockSpace
     {
@@ -26,7 +21,7 @@ namespace LkEngine {
         static ImGuiDockNode* GetNode(ImGuiID& id);
 
     public:
-        static ImVec2 LastViewportSize, LastCenterWindowSize;
+        //static ImVec2 LastViewportSize, LastCenterWindowSize;
         static ImVec2 BottomBarSize, TopBarSize, SidebarLeftSize, SidebarRightSize, CenterWindowSize;
         static ImGuiID DockSpaceID, RenderWindowDockID, BottomBarDockID, SidebarLeftDockID, SidebarRightDockID;
         static float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;

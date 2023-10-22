@@ -27,6 +27,12 @@ namespace LkEngine {
 	#endif
 	}
 
+	std::pair<float, float> Window::GetPos()
+	{
+
+		return std::make_pair<float, float>(0, 0); // TODO:
+	}
+
 	void Window::WindowResizeCallback(GLFWwindow* glfw_window, int width, int height)
 	{
 		//LOG_DEBUG("Window resized ({0}, {1})", width, height);
@@ -51,5 +57,6 @@ namespace LkEngine {
 		auto& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2(width, height);
 	}
+
 
 }

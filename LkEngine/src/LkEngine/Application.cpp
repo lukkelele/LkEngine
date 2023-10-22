@@ -25,6 +25,8 @@ namespace LkEngine {
         m_Context = m_Window->GetContext();
 
         m_Scene = create_s_ptr<Scene>();
+        m_EditorLayer = create_s_ptr<EditorLayer>(m_Scene);
+        m_LayerStack.PushOverlay(&*m_EditorLayer);
     }
 
     void Application::Run()
