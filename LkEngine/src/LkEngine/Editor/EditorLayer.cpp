@@ -139,7 +139,7 @@ namespace LkEngine {
 			// LEFT SIDEBAR
 			//--------------------------------------------------
 			static float sidebar_left_width = 340.0f;
-			static float sidebar_left_height = viewport->Size.y;
+			static float sidebar_left_height = m_ViewportBounds[1].y;
 			ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Once);
 			ImGui::SetNextWindowSizeConstraints(ImVec2(sidebar_left_width, sidebar_left_height), ImVec2(600, 4000));
 			ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()));
@@ -234,8 +234,10 @@ namespace LkEngine {
 				ImGui::SameLine(0, 20);
 				ImGui::Text("Mouse normalized (%.4f, %.4f)", mouse_pos.x / DockSpace::CenterWindowSize.x, mouse_pos.y / DockSpace::CenterWindowSize.y);
 				ImGui::SameLine(0, 20);
-				float scale_x = center_window_width / Window::Get()->GetViewportWidth();
-				float scale_y = center_window_height / Window::Get()->GetViewportHeight();
+				//float scale_x = center_window_width / Window::Get()->GetViewportWidth();
+				//float scale_y = center_window_height / Window::Get()->GetViewportHeight();
+				float scale_x = center_window_width / m_ViewportBounds[1].x;
+				float scale_y = center_window_height / m_ViewportBounds[1].y;
 				ImGui::Text("Mouse scaled (%.2f, %.2f)   Scale (%.2f, %.2f)", 
 				    (mouse_pos.x / center_window_size.x) / scale_x, 
 				    (mouse_pos.y / center_window_size.y) / scale_y, 
