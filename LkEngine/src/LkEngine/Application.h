@@ -7,8 +7,9 @@
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Scene/EntityFactory.h"
-#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Physics/2D/Physics2D.h"
+#include "LkEngine/UI/UILayer.h"
 
 
 namespace LkEngine {
@@ -64,6 +65,7 @@ namespace LkEngine {
         std::shared_ptr<Renderer> m_Renderer = nullptr;
         std::shared_ptr<GraphicsContext> m_Context = nullptr;
         std::shared_ptr<Scene> m_Scene = nullptr;
+        std::shared_ptr<EditorLayer> m_EditorLayer = nullptr;
         static Application* m_Instance;
     };
 

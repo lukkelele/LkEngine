@@ -35,7 +35,7 @@ namespace LkEngine {
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 	
 		InitImGui(m_Window->GetGlslVersion().c_str());
-		UILayer::Init();
+		//UILayer::Init();
 	}
 
 	void GraphicsContext::Destroy()
@@ -58,14 +58,14 @@ namespace LkEngine {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		io.Fonts->AddFontFromFileTTF("assets/fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
-		io.ConfigViewportsNoDecoration = false;
-		io.ConfigWindowsResizeFromEdges = false;
+		//io.ConfigViewportsNoDecoration = false;
+		//io.ConfigWindowsResizeFromEdges = false;
 		io.ConfigDockingAlwaysTabBar = false;
 
 	    ImGui_ImplGlfw_InitForOpenGL(*m_Window->GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(glslVersion.c_str());
 		LOG_INFO("ImGui Version: {0}", ImGui::GetVersion());
-		UILayer::Init();
+		//UILayer::Init();
 	}
 	
 	void GraphicsContext::BeginImGuiFrame()
@@ -74,20 +74,13 @@ namespace LkEngine {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
-
-		UILayer::Begin();
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
-		m_MainRenderWindowSize = window->Size;
-		m_MainRenderWindowPos = window->Pos;
 	}
 
 	void GraphicsContext::EndImGuiFrame()
 	{
-		auto size = GetMainRenderWindowSize();
-		auto pos = GetMainRenderWindowPos();
-		glViewport(pos.x, pos.y, size.x, size.y);
-		UILayer::End();
-
+		//auto size = GetMainRenderWindowSize();
+		//auto pos = GetMainRenderWindowPos();
+		//glViewport(pos.x, pos.y, size.x, size.y);
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
@@ -101,20 +94,13 @@ namespace LkEngine {
 
 	ImVec2 GraphicsContext::GetMainRenderWindowSize()
 	{
-		ImGuiDockNode* center_node = ImGui::DockBuilderGetNode(LkEngine::DockSpace::RenderWindowDockID);
-		LK_ASSERT(center_node);
-		return center_node->Size;
+		return ImVec2(m_Window->GetWidth(), m_Window->GetHeight());
 	}
 
 	ImVec2 GraphicsContext::GetMainRenderWindowPos()
 	{
-		ImGuiDockNode* center_node = ImGui::DockBuilderGetNode(LkEngine::DockSpace::RenderWindowDockID);
-		ImGuiDockNode* bottom_node = ImGui::DockBuilderGetNode(LkEngine::DockSpace::BottomBarDockID);
-		LK_ASSERT(center_node);
-		LK_ASSERT(bottom_node);
-		//LOG_DEBUG("Bottom Node Size: ({} {})", bottom_node->Size.x, bottom_node->Size.y);
-		ImVec2 pos = ImVec2(center_node->Pos.x, bottom_node->Size.y);
-		return pos;
+		auto [x, y] = m_Window->GetPos();
+		return ImVec2(x, y);
 	}
 	
 	void GraphicsContext::SetDarkTheme()

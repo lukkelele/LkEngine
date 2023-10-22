@@ -2,35 +2,37 @@
 #include "LkEngine/Renderer/Image.h"
 
 
-// TODO: Remove / Patch out
-Image::Image(std::string_view filepath)
-{
-}
+namespace LkEngine {
 
-std::shared_ptr<Image> Image::Create(std::string_view filepath)
-{
-	return nullptr;
-}
-
-uint32_t Image::BytesPerPixel(ImageFormat format)
-{
-	switch (format)
+	Image::Image(std::string_view filepath)
 	{
-		case ImageFormat::RGBA:    return 4;
-		case ImageFormat::RGBA32F: return 16;
-		case ImageFormat::None:	   return 0;
 	}
-	return 0;
-}
-
-int64_t Image::GetImageFormat(ImageFormat format)
-{
-	switch (format)
+	
+	std::shared_ptr<Image> Image::Create(std::string_view filepath)
 	{
-		case ImageFormat::RGBA:    return 4;
-		case ImageFormat::RGBA32F: return 16;
-		case ImageFormat::None:	   return 0;
+		return nullptr;
 	}
-	return 0;
-}
+	
+	uint32_t Image::BytesPerPixel(ImageFormat format)
+	{
+		switch (format)
+		{
+			case ImageFormat::RGBA:    return 4;
+			case ImageFormat::RGBA32F: return 16;
+			case ImageFormat::None:	   return 0;
+		}
+		return 0;
+	}
+	
+	int64_t Image::GetImageFormat(ImageFormat format)
+	{
+		switch (format)
+		{
+			case ImageFormat::RGBA:    return 4;
+			case ImageFormat::RGBA32F: return 16;
+			case ImageFormat::None:	   return 0;
+		}
+		return 0;
+	}
 
+}

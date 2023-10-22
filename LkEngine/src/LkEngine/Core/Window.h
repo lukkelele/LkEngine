@@ -35,10 +35,10 @@ namespace LkEngine {
         std::string GetTitle()  const { return m_Title; }
         std::string GetGlslVersion() const { return m_GlslVersion;  }
         bool IsVSync() const { return m_VSync; }
+        std::pair<float, float> GetPos();
 
     protected:
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
-        //virtual void UpdateViewportSize(GLFWwindow* window, int width, int height) = 0;
     
     protected:
         uint16_t m_Width = 0, m_Height = 0;

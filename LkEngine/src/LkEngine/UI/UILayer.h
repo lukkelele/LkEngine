@@ -37,8 +37,6 @@ namespace LkEngine {
         static void SceneMenu();
         static void CreateEntityMenu();
         static void SceneContentMenu();
-        static void SelectedEntityMenu();
-        static void DrawImGuizmo(Entity& entity);
         static void CameraControls();
 
     public:

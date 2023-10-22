@@ -2,6 +2,7 @@
 #include "LkEngine/UI/DockSpace.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Editor/EditorLayer.h"
 
 
 namespace LkEngine {
@@ -11,8 +12,8 @@ namespace LkEngine {
     ImGuiID DockSpace::BottomBarDockID;
     ImGuiID DockSpace::SidebarLeftDockID;
     ImGuiID DockSpace::SidebarRightDockID;
-    ImVec2 DockSpace::LastViewportSize = ImVec2(0, 0);
-    ImVec2 DockSpace::LastCenterWindowSize = ImVec2(0, 0);
+    //ImVec2 DockSpace::LastViewportSize = ImVec2(0, 0);
+    //ImVec2 DockSpace::LastCenterWindowSize = ImVec2(0, 0);
     ImVec2 DockSpace::BottomBarSize = ImVec2(0, 0);
     ImVec2 DockSpace::CenterWindowSize = ImVec2(0, 0);
     ImVec2 DockSpace::TopBarSize = ImVec2(0, 0);
@@ -40,7 +41,6 @@ namespace LkEngine {
         ImGuiViewport* main_viewport = ImGui::GetMainViewport();
         if (!DockingEnabled)
         {
-            LOG_INFO("DOCKING DISABLED");
             ImGui::DockSpaceOverViewport(main_viewport, ImGuiDockNodeFlags_KeepAliveOnly, NULL);
             return;
         }
@@ -64,20 +64,22 @@ namespace LkEngine {
             ApplyDockSpaceLayout();
             initialized = true;
         }
-        // Adjust viewport if window has been resized
-        ImVec2 viewport_size = main_viewport->WorkSize;
-        if (LastViewportSize.x != viewport_size.x || LastViewportSize.y != viewport_size.y)
-        {
-            LastViewportSize = viewport_size;
-            ApplyDockSpaceLayout();
-        }
-        if (LastCenterWindowSize.x != CenterWindowSize.x || LastCenterWindowSize.y != CenterWindowSize.y)
-        {
-            LastCenterWindowSize = CenterWindowSize;
-            ApplyDockSpaceLayout();
-        }
 
-        ImGui::DockSpaceOverViewport(main_viewport, dockspace_flags, NULL);
+        //ImGui::Begin(LkEngine_DockSpace, NULL, window_flags);
+        // Adjust viewport if window has been resized
+        //ImVec2 viewport_size = main_viewport->WorkSize;
+        //if (LastViewportSize.x != viewport_size.x || LastViewportSize.y != viewport_size.y)
+        //{
+        //    LastViewportSize = viewport_size;
+        //    ApplyDockSpaceLayout();
+        //}
+        //if (LastCenterWindowSize.x != CenterWindowSize.x || LastCenterWindowSize.y != CenterWindowSize.y)
+        //{
+        //    LastCenterWindowSize = CenterWindowSize;
+        //    ApplyDockSpaceLayout();
+        //}
+
+        //ImGui::DockSpaceOverViewport(main_viewport, dockspace_flags, NULL);
     }
 
     void DockSpace::End()
