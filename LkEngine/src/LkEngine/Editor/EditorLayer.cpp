@@ -20,45 +20,47 @@ namespace LkEngine {
 		m_Name = "Editor Layer";
 		m_ViewportBounds[0] = {0, 0};//;, ; {0, 0}
 		m_ViewportBounds[1] = {Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight()};//;, ; {0, 0}
+		LOG_DEBUG("Viewport Bounds[0]: ({}, {})", m_ViewportBounds[0].x, m_ViewportBounds[0].y);
+		LOG_DEBUG("Viewport Bounds[1]: ({}, {})", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
+		m_ShowStackTool = true;
 	}
 
 	void EditorLayer::OnImGuiRender()
 	{
 		auto& io = ImGui::GetIO();
 		auto& style = ImGui::GetStyle();
-
-		io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
+		//io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
 
 		static ImGuiWindowFlags core_viewport_flags = ImGuiWindowFlags_NoDocking;
 		core_viewport_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		core_viewport_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		core_viewport_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
 
 		static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
 		window_flags |= ImGuiWindowFlags_MenuBar;
 
 		static ImGuiWindowFlags sidebar_flags = ImGuiWindowFlags_NoDocking;
-		sidebar_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		sidebar_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
 		sidebar_flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		//ImGui::DockSpaceOverViewport;
+		ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
 		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
+		//LOG_TRACE("Viewport Pos and Size: ({} {})    ({} {})", viewport->Pos.x, viewport->Pos.y, viewport->Size.x, viewport->Size.y);
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
 		auto* window = static_cast<GLFWwindow*>(*Application::Get()->GetWindow()->GetGlfwWindow());
 		bool isMaximized = (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
 		ImGui::Begin(CORE_VIEWPORT, nullptr, core_viewport_flags);
 		ImGui::PopStyleColor(); // MenuBarBg
 		ImGui::PopStyleVar(2);
-
 		ImGui::PopStyleVar(2);
 
 		UI_HandleManualWindowResize();
@@ -73,88 +75,148 @@ namespace LkEngine {
 		    core_viewport_flags |= ImGuiWindowFlags_NoBackground;
 			window_flags |= ImGuiWindowFlags_NoBackground;
 		}
+
+
 		float minWinSizeX = style.WindowMinSize.x;
 		style.WindowMinSize.x = 370.0f;
 		ImGui::DockSpace(ImGui::GetID(LkEngine_DockSpace), ImVec2(0, 0), dockspace_flags);
 		style.WindowMinSize.x = minWinSizeX;
-		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		ImGui::Begin(LkEngine_DockSpace, NULL, window_flags);
+
+		ImGui::PopStyleColor(1);
 		ImGui::PopStyleVar(1);
+		//#if 0
 		{
 			// Top menubar
-			ImGui::BeginMenuBar();
-			if (ImGui::BeginMenu("File"))
+			static ImGuiWindowFlags topbar_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar;
+			topbar_flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
+			static float topbar_height = 30.0f;
+
+			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
+			ImGui::Begin("##lkengine-topbar", NULL, topbar_flags);
+			ImGui::PopStyleVar(1);
 			{
-				if (ImGui::MenuItem("New")) { }
-				ImGui::EndMenu();
+				ImGui::BeginMenuBar();
+				topbar_height = ImGui::GetFrameHeight();
+				if (ImGui::BeginMenu("File"))
+				{
+					if (ImGui::MenuItem("New")) { }
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenuBar();
 			}
-			ImGui::EndMenuBar();
+			ImGui::End();
 			//--------------------------------------------------
 
+			if (m_Scene)
+			{
+				auto& registry = m_Scene->GetRegistry();
+				registry.each([&](auto entityID)
+					{
+						Entity entity{ entityID, m_Scene.get() };
+						DrawEntityNode(entity);
+					});
+
+				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+					SelectedEntityID = {};
+			}
+			Entity SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntityID);
+
+			// Left sidebar
 			static float sidebar_left_width = 340.0f;
-			static float sidebar_left_height = ImGui::GetContentRegionAvail().y;
+			static float sidebar_left_height = viewport->Size.y;
 			ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Once);
 			ImGui::SetNextWindowSizeConstraints(ImVec2(sidebar_left_width, sidebar_left_height), ImVec2(600, 4000));
 			ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 12));
 			ImGui::Begin("Left Sidebar", nullptr, sidebar_flags);
+			ImGui::PopStyleVar(1);
 			{
 				//ImGui::SetCursorScreenPos(ImVec2(0, 100));
+				ImGui::BeginGroup();
+				ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+				if (ImGui::TreeNode("Colors"))
+				{
+				    ImGui::PushID("##lkengine-bg-color");
+				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
+				    ImGui::Text("Background"); 
+				    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::PopID();
+				    ImGui::TreePop();
+				}
+
 				ImGui::Text("Left Content");
-
-				if (m_Scene)
 				{
-					auto& registry = m_Scene->GetRegistry();
-					registry.each([&](auto entityID)
-						{
-							Entity entity{ entityID, m_Scene.get() };
-							DrawEntityNode(entity);
-						});
-
-					if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-						SelectedEntityID = {};
-				}
-				Entity SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntityID);
-				{
-					ImGui::BeginChild("Properties");
+					ImGui::Text("Properties");
+					if (SelectedEntity)
 					{
-						ImGui::Text("Properties");
-						if (SelectedEntity)
-						{
-							DrawComponents(SelectedEntity);
-						}
+						DrawComponents(SelectedEntity);
 					}
-					ImGui::EndChild(); // Properties
 				}
-
-				static ImGuiTreeNodeFlags gizmo_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-				static ImVec2 button_size(76.0f, 30.0f);
-
-				if (SelectedEntity && m_GizmoType != -1)
-				{
-					DrawImGuizmo(SelectedEntity);
-				}
+				ImGui::Button("Left button");
+				ImGui::EndGroup();
 			}
 			ImGui::End(); // Left Sidebar
 			//--------------------------------------------------
 
 			// Right sidebar
 			static float sidebar_right_width = 340.0f;
-			static float sidebar_right_height = ImGui::GetContentRegionAvail().y;
+			static float sidebar_right_height = viewport->Size.y;
 			ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
 			ImGui::SetNextWindowSizeConstraints(ImVec2(sidebar_right_width, sidebar_right_height), ImVec2(600, 4000));
 			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - sidebar_right_width, ImGui::GetCursorPosY()));
 			ImGui::Begin("##lkengine-sidebar-right", nullptr, sidebar_flags);
 			{
+				ImGui::BeginGroup();
+				if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor)) { }
+				if (ImGui::Checkbox("Stack Debugger", &m_ShowStackTool)) { }
+				ImGui::EndGroup();
+
 				ImGui::Text("Right sidebar content");
+
+				if (SelectedEntity && m_GizmoType != -1)
+				{
+					DrawImGuizmo(SelectedEntity);
+				}
+
+				if (m_ShowStackTool)
+					ImGui::ShowStackToolWindow();
+				if (m_ShowStyleEditor)
+				{
+					ImGui::Begin("Style Editor");
+					ImGui::ShowStyleEditor();
+					ImGui::End();
+				}
+
 			}
 			ImGui::End();
 			//--------------------------------------------------
 
+			// Bottom bar
+			static float bottombar_height = 180.0f;
+			ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
+			float min_width = viewport->Size.x - (sidebar_right_width + sidebar_left_width);
+			ImGui::SetNextWindowSizeConstraints(ImVec2(min_width, 180.0f), ImVec2(4000, 800));
+			ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport->Size.y - bottombar_height));
+			ImGui::Begin("##lkengine-bottombar", nullptr, sidebar_flags);
+			{
+				ImGui::Text("BottomBar content");
+				//LOG_INFO("Size == {}");
+			}
+			ImGui::End();
 
+			//--------------------------------------------------
 		}
 		ImGui::End(); // Viewport
+		ImGui::End(); // Core Viewport
 	}
 
 

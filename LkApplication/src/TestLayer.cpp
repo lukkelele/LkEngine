@@ -22,6 +22,7 @@ static unsigned int box_indices[6] = {
 TestLayer::TestLayer()
 {
     m_Name = "TestLayer";
+#if 0
     ColorSlider = { 0.0f, 0.50f, 0.35f, 1.0f };
     RectPos = { 0.0f, 0.0f, 0.0f };
 
@@ -45,6 +46,7 @@ TestLayer::TestLayer()
     // For testing rectangles
     ScalerSlider1 = 1.0f;
     ScalerSlider2 = 1.0f;
+#endif
 }
 
 TestLayer::~TestLayer()
@@ -57,8 +59,8 @@ void TestLayer::OnAttach()
     m_Scene = create_s_ptr<Scene>();
 
     //EntityFactory::CreateRectangle(*m_Scene, { -100.0, -100.0f }, { 80.0f, 80.0f });
-    EntityFactory::CreateRectangle(*m_Scene, { 20, 20 },   { 140.0f, 140.0f });
-    EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
+    //EntityFactory::CreateRectangle(*m_Scene, { 20, 20 },   { 140.0f, 140.0f });
+    //EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
     EntityFactory::CreateRectangle(*m_Scene, { 0, 0}, { 240, 240 });
 }
@@ -71,7 +73,7 @@ void TestLayer::OnUpdate(float ts)
 {
     m_Scene->OnUpdate(ts);
     auto mouse_pos = Mouse::GetMousePos();
-    Physics2D::Raycast(m_Scene, mouse_pos, mouse_pos);
+    //Physics2D::Raycast(m_Scene, mouse_pos, mouse_pos);
 }
 
 void TestLayer::OnImGuiRender()
