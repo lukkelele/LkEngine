@@ -26,6 +26,7 @@ namespace LkEngine {
     bool DockSpace::Sidebar_Left_Dragged = false;
     bool DockSpace::Sidebar_Right_Enabled = true;
     bool DockSpace::Sidebar_Right_Dragged = false;
+    bool DockSpace::ShouldUpdateDockSpace = false;
 
     void DockSpace::Init()
     {
@@ -70,7 +71,6 @@ namespace LkEngine {
             LastViewportSize = viewport_size;
             ApplyDockSpaceLayout();
         }
-        //if (last_center_window_size.x != LastCenterWindowSize.x || LastCenterWindowSize.y != CenterWindowSize.y)
         if (LastCenterWindowSize.x != CenterWindowSize.x || LastCenterWindowSize.y != CenterWindowSize.y)
         {
             LastCenterWindowSize = CenterWindowSize;
@@ -84,65 +84,6 @@ namespace LkEngine {
     {
         if (!DockingEnabled)
             return;
-
-        auto viewport = ImGui::GetMainViewport();
-        auto left_node = GetNode(SidebarLeftDockID);
-        auto right_node = GetNode(SidebarRightDockID);
-        auto center_node = GetNode(RenderWindowDockID);
-        auto current_node = ImGui::GetWindowDockNode();
-
-        static int last_left_node_state = 0;
-        static int last_right_node_state = 0;
-        //LOG_WARN("LEFT_NODE_STATE: {}       RIGHT_NODE_STATE: {}", (int)left_node->State, (int)right_node->State);
-        int left_node_state = left_node->State;
-        int right_node_state = right_node->State;
-
-        ImGuiID stack_top;
-        ImGuiID active_id = ImGui::GetActiveID();
-        ImGuiID splitter_id = ImGui::GetID("##Splitter");
-        ImGuiContext& g = *GImGui;
-
-        //LOG_INFO("DockSpace ID Stack: {}", g.CurrentWindow->IDStack.Size);
-        //ImGuiID dockspace_hash = ImHashStr("4", 0, g.CurrentWindow->IDStack.back());
-        ImGui::Begin(SIDEBAR_LEFT);
-        ImGui::PushID(current_node->ID);
-        //ImGui::PushID(4);
-        splitter_id = ImGui::GetID("##Splitter");
-        //stack_top = current_node->HostWindow->IDStack.empty() ? 0 : current_node->HostWindow->IDStack.back();
-        stack_top = g.CurrentWindow->IDStack.back();
-        active_id = ImGui::GetActiveID();
-        //Sidebar_Left_Dragged = (g.ActiveId == splitter_id);
-        ImGuiID splitter_hash = ImHashStr("##Splitter", 0, stack_top);
-        Sidebar_Left_Dragged = (g.ActiveId == splitter_hash);
-        LOG_INFO("LeftNode Splitter | active_id: {}, splitter_hash: {}  (DRAGGED: {})", active_id, splitter_hash, g.ActiveId == splitter_hash);
-        //LOG_INFO("DockSpace ID Stack: {}", g.CurrentWindow->IDStack.Size);
-        //ImGui::PopID();
-        ImGui::PopID();
-        last_left_node_state = left_node_state;
-        ImGui::End();
-
-        ImGui::Begin(SIDEBAR_RIGHT);
-        ImGui::PushID(right_node->ID);
-        active_id = ImGui::GetActiveID();
-        splitter_id = ImGui::GetID("##Splitter");
-        Sidebar_Right_Dragged = (active_id == splitter_id);
-        ImGui::PopID();
-        last_right_node_state = right_node_state;
-        ImGui::End();
-
-        //LOG_DEBUG("Left node dragged: {}", Sidebar_Left_Dragged ? "DRAGGED" : "NOT DRAGGED");
-        if (Sidebar_Left_Dragged)
-        {
-            Sidebar_Left_Ratio = GetNode(SidebarLeftDockID)->Size.x / viewport->Size.x;
-            LOG_TRACE("LEFT DRAGGED");
-        }
-        else if (Sidebar_Right_Dragged)
-        {
-            Sidebar_Right_Ratio = GetNode(SidebarRightDockID)->Size.x / viewport->Size.x;
-            LOG_TRACE("RIGHT DRAGGED");
-        }
-        else
-            LastCenterWindowSize = ImGui::DockBuilderGetNode(RenderWindowDockID)->Size;
     }
 
     ImGuiDockNode* DockSpace::GetNode(ImGuiID& id)

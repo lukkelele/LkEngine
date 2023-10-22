@@ -25,6 +25,7 @@ namespace LkEngine {
                 float window_width, window_height, viewport_width, viewport_height;
 
 
+                float scale_x = DockSpace::CenterWindowSize.x / Window::Get()->GetViewportWidth();
                 mouse_pos.x -= DockSpace::SidebarLeftSize.x;
                 mouse_pos.y += DockSpace::TopBarSize.y;
 
@@ -69,12 +70,6 @@ namespace LkEngine {
                         //UILayer::SelectedEntityLabel = "";
                     }
                 }
-
-                //if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-                //{
-				//    EditorLayer::SelectedEntity = {};
-                //    UILayer::SelectedEntityLabel = "";
-                //}
             }
         }
 

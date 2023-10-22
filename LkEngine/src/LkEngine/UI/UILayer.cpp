@@ -125,8 +125,13 @@ namespace LkEngine {
         auto mouse_pos = Mouse::GetMousePosDockWindow();
         //ImGui::Text("Mouse (%1.f, %1.f)", Mouse::GetMouseX(), Mouse::GetMouseY());
         ImGui::Text("Mouse (%1.f, %1.f)", mouse_pos.x, mouse_pos.y);
-        ImGui::SameLine();
+        ImGui::SameLine(0, 10);
         ImGui::Text("Mouse normalized (%.4f, %.4f)", mouse_pos.x / DockSpace::CenterWindowSize.x, mouse_pos.y / DockSpace::CenterWindowSize.y);
+        ImGui::SameLine(0, 10);
+        float scale_x = DockSpace::CenterWindowSize.x / Window::Get()->GetViewportWidth();
+        ImGui::Text("Mouse scaled (%.4f, %.4f  x_scale: %.2f)", 
+            (mouse_pos.x / DockSpace::CenterWindowSize.x) / scale_x, 
+            (mouse_pos.y / DockSpace::CenterWindowSize.y) / scale_x, scale_x);
 
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_DockHierarchy))
         {

@@ -53,7 +53,6 @@ namespace LkEngine {
 
 
 
-
     // Move this
     constexpr int OpenGL_Major_Version = 4;
     constexpr int OpenGL_Minor_Version = 5;

@@ -17,6 +17,7 @@ namespace LkEngine {
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 		void SelectEntity(Entity& entity);
+		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
 
 		template<typename T, typename UIFunction>
 		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
@@ -39,6 +40,13 @@ namespace LkEngine {
 			Rotate	  = 7 << 3,
 			Scale     = 7 << 6
 		};
+
+		glm::vec2 m_ViewportBounds[2];
+		glm::vec2 m_SecondViewportBounds[2];
+
+		bool m_ShowMetricsTool = false;
+		bool m_ShowStackTool = false;
+		bool m_ShowStyleEditor = false;
 
 		int m_GizmoType = GizmoType::Translate;
 

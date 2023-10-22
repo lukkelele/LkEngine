@@ -32,7 +32,7 @@ namespace LkEngine {
         static float Sidebar_Left_Ratio, Sidebar_Right_Ratio, TopBottom_Ratio;
         static bool Sidebar_Left_Enabled, Sidebar_Right_Enabled;
         static bool Sidebar_Left_Dragged, Sidebar_Right_Dragged;
-        static bool DockingEnabled;
+        static bool DockingEnabled, ShouldUpdateDockSpace;
     };
 
 }

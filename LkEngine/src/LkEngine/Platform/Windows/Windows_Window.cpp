@@ -13,6 +13,8 @@ namespace LkEngine {
 		m_Title = title;
 		m_Width = width;
 		m_Height = height;
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
 	}
 	
 	Windows_Window::~Windows_Window()

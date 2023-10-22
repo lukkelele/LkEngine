@@ -231,5 +231,16 @@ namespace LkEngine {
 
 
 	}
+	std::pair<float, float> EditorLayer::GetMouseViewportSpace(bool primaryViewport)
+	{
+		auto [mx, my] = ImGui::GetMousePos();
+		const auto& viewportBounds = primaryViewport ? m_ViewportBounds : m_SecondViewportBounds;
+		mx -= viewportBounds[0].x;
+		my -= viewportBounds[0].y;
+		auto viewportWidth = viewportBounds[1].x - viewportBounds[0].x;
+		auto viewportHeight = viewportBounds[1].y - viewportBounds[0].y;
+
+		return { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
+	}
 
 }
