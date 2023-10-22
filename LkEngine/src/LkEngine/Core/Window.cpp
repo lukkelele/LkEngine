@@ -42,11 +42,7 @@ namespace LkEngine {
 		auto window = Window::Get();
 		window->m_ViewportWidth = size_x;
 		window->m_ViewportHeight = size_y;
-		auto& cam = *Scene::ActiveScene->GetActiveCamera();
-		//cam.SetProjection(glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height)));
-		//cam.SetProjection(glm::ortho(0.0f, static_cast<float>(DockSpace::CenterWindowSize.x), 0.0f, static_cast<float>(DockSpace::CenterWindowSize.y)));
 
-		//mouse_pos.y *= LkEngine::DockSpace::CenterWindowSize.y;
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImVec2 pos = viewport->WorkPos;
 
