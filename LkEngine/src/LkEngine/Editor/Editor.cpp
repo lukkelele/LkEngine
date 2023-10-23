@@ -9,8 +9,8 @@ namespace LkEngine {
         float quadWidth = sc.Size.x;
         float quadHeight = sc.Size.y;
         glm::vec3 quadPos = tc.Translation;
-
-        glm::vec2 bottomLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y - quadHeight * 0.50f };
+        //glm::vec2 bottomLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y - quadHeight * 0.50f };
+        glm::vec2 bottomLeft = { quadPos.x, quadPos.y };
         return bottomLeft;
     }
 
@@ -19,7 +19,8 @@ namespace LkEngine {
         float quadWidth = sc.Size.x;
         float quadHeight = sc.Size.y;
         glm::vec3 quadPos = tc.Translation;
-        glm::vec2 bottomRight = { quadPos.x + quadWidth * 0.50f, quadPos.y - quadHeight * 0.50f };
+        //glm::vec2 bottomRight = { quadPos.x + quadWidth * 0.50f, quadPos.y - quadHeight * 0.50f };
+        glm::vec2 bottomRight = { quadPos.x + quadWidth, quadPos.y };
         return bottomRight;
     }
 
@@ -28,7 +29,8 @@ namespace LkEngine {
         float quadWidth = sc.Size.x;
         float quadHeight = sc.Size.y;
         glm::vec3 quadPos = tc.Translation;
-        glm::vec2 topLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y + 0.50f * quadHeight };
+        //glm::vec2 topLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y + 0.50f * quadHeight };
+        glm::vec2 topLeft = { quadPos.x, quadPos.y + quadHeight };
         return topLeft;
     }
 
@@ -37,7 +39,8 @@ namespace LkEngine {
         float quadWidth = sc.Size.x;
         float quadHeight = sc.Size.y;
         glm::vec3 quadPos = tc.Translation;
-        glm::vec2 topRight = { quadPos.x + quadWidth * 0.50f, quadPos.y + 0.50f * quadHeight };
+        //glm::vec2 topRight = { quadPos.x + quadWidth * 0.50f, quadPos.y + 0.50f * quadHeight }; // Center origin
+        glm::vec2 topRight = { quadPos.x + quadWidth, quadPos.y + quadHeight };
         return topRight;
     }
 

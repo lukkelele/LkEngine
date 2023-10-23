@@ -234,11 +234,11 @@ namespace LkEngine {
 			{
 				ImGui::BeginGroup();
 				auto mouse_pos = Mouse::GetMousePos();
-				//Mouse::Pos = mouse_pos;
 				Mouse::Pos = Mouse::GetMousePos();
-				Mouse::Pos.y = viewport->Size.y - Mouse::Pos.y;
+				//Mouse::Pos.y = viewport->Size.y - bottombar_height + topbar_height - Mouse::Pos.y;
+				Mouse::Pos.y = viewport->Size.y - bottombar_height - Mouse::Pos.y;
 				Mouse::Pos.x -= sidebar_left_width;
-				Mouse::Pos.y -= topbar_height /* + padding -- need to fix !!! */;
+				//Mouse::Pos.y -= topbar_height /* + padding -- need to fix !!! */;
 				//ImGui::Text("Mouse (%1.f, %1.f)", Mouse::GetMouseX(), Mouse::GetMouseY());
 
 				ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);

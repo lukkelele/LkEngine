@@ -34,10 +34,10 @@ namespace LkEngine {
                 //glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + 0.50f * quad_height };
                 //glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + 0.50f * quad_height };
                 //glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
-                glm::vec2 bottom_left = { quad_pos.x - quad_width, quad_pos.y - quad_height };
+                glm::vec2 bottom_left = { quad_pos.x, quad_pos.y};
+                glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
                 glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
                 glm::vec2 top_left = { quad_pos.x - quad_width, quad_pos.y  + quad_height };
-                glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y - quad_height };
 
                 //printf("\n");
                 //printf("(%.2f, %.2f)>-----<(%.2f, %.2f)\n", top_left.x, top_left.y, top_right.x, top_right.y);
