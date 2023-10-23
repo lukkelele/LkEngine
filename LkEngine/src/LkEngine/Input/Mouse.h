@@ -23,6 +23,8 @@ namespace LkEngine {
 		static glm::vec2 Pos;
 		static glm::vec2 ScaledPos;
 		static glm::vec2 Scalers;
+		static glm::vec2 CenterPos;
+		static glm::vec2 ScaledCenterPos;
 	};
 
 }

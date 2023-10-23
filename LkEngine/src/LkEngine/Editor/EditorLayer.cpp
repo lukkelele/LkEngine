@@ -10,29 +10,33 @@
 
 namespace LkEngine {
 
+	s_ptr<EditorLayer> EditorLayer::s_Instance = nullptr;
 	uint64_t EditorLayer::SelectedEntityID;
 	ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
     std::string EditorLayer::SelectedEntityLabel; // remove
-
 	glm::vec2 EditorLayer::EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 	glm::vec2 EditorLayer::EditorViewportPos = { 0.0f, 0.0f };
+	glm::vec2 EditorLayer::ViewportScalers = { 1.0f, 1.0f };
+	bool EditorLayer::Enabled = false;
 
 	EditorLayer::EditorLayer(s_ptr<Scene> scene)
 		: m_Scene(scene)
 	{
+		s_Instance = std::shared_ptr<EditorLayer>(this);
 		m_Name = "Editor Layer";
 		m_ViewportBounds[0] = {0, 0};//;, ; {0, 0}
 		m_ViewportBounds[1] = {Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight()};
 		LOG_DEBUG("Viewport Bounds[0]: ({}, {})", m_ViewportBounds[0].x, m_ViewportBounds[0].y);
 		LOG_DEBUG("Viewport Bounds[1]: ({}, {})", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
 		m_ShowStackTool = true;
+		Enabled = true;
 	}
 
 	void EditorLayer::OnImGuiRender()
 	{
 		auto& io = ImGui::GetIO();
 		auto& style = ImGui::GetStyle();
-		//io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
+		io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
 
 		static ImGuiWindowFlags core_viewport_flags = ImGuiWindowFlags_NoDocking;
 		core_viewport_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
@@ -51,7 +55,6 @@ namespace LkEngine {
 		ImGui::SetNextWindowPos(viewport->Pos);
 		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
-		//LOG_TRACE("Viewport Pos and Size: ({} {})    ({} {})", viewport->Pos.x, viewport->Pos.y, viewport->Size.x, viewport->Size.y);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -87,18 +90,19 @@ namespace LkEngine {
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		ImGui::Begin(LkEngine_DockSpace, NULL, window_flags);
 
-		static float center_window_width = 0; // viewport->Size.x - sidebar_left_width - sidebar_right_width;
-		static float center_window_height = 0; // viewport->WorkSize.y - bottombar_height;
-		static ImVec2 center_window_size = { 0, 0 }; // { center_window_width, center_window_height };
-		static float center_window_xpos = 0; // sidebar_left_width;
-		static float center_window_ypos = 0; // bottombar_height;
-		static ImVec2 center_window_pos = { 0, 0 }; // { center_window_xpos, center_window_ypos };
-
+		static float center_window_width = 0;         // viewport->Size.x - sidebar_left_width - sidebar_right_width;
+		static float center_window_height = 0;        // viewport->WorkSize.y - bottombar_height;
+		static ImVec2 center_window_size = { 0, 0 };  // { center_window_width, center_window_height };
+		static float center_window_xpos = 0;          // sidebar_left_width;
+		static float center_window_ypos = 0;          // bottombar_height;
+		static ImVec2 center_window_pos = { 0, 0 };   // { center_window_xpos, center_window_ypos };
 
 		ImGui::PopStyleColor(1);
 		ImGui::PopStyleVar(1);
 		{
-			// Top menubar
+			//--------------------------------------------------
+			// TOP MENUBAR
+			//--------------------------------------------------
 			static ImGuiWindowFlags topbar_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar;
 			topbar_flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
 			static float topbar_height = 30.0f;
@@ -179,7 +183,6 @@ namespace LkEngine {
 			ImGui::End(); 
 			//--------------------------------------------------
 
-
 			//--------------------------------------------------
 			// RIGHT SIDEBAR
 			//--------------------------------------------------
@@ -216,7 +219,6 @@ namespace LkEngine {
 			ImGui::End();
 			//--------------------------------------------------
 
-
 			//--------------------------------------------------
 			// BOTTOM BAR
 			//--------------------------------------------------
@@ -240,12 +242,11 @@ namespace LkEngine {
 
 				float scale_x = center_window_width / m_ViewportBounds[1].x;
 				float scale_y = center_window_height / m_ViewportBounds[1].y;
+				ViewportScalers.x = scale_x;
+				ViewportScalers.y = scale_y;
 
-				    //(mouse_pos.x / center_window_size.x) / scale_x, 
-				    //(mouse_pos.y / center_window_size.y) / scale_y, 
 				ImGui::Text("Mouse normalized (%.2f, %.2f)  Scalers (%.2f, %.2f)",
-					Mouse::Pos.x / center_window_size.x, 
-					Mouse::Pos.y / center_window_size.y, 
+					Mouse::Pos.x / center_window_size.x, Mouse::Pos.y / center_window_size.y, 
 					Mouse::Scalers.x,   Mouse::Scalers.y);
 				ImGui::SameLine(0, 20);
 				ImGui::Text("Scaled mouse pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
@@ -261,29 +262,38 @@ namespace LkEngine {
 
 				ImGui::EndGroup();
 
-				float scaled_mouse_pos_x = (mouse_pos.x / center_window_size.x) / scale_x;
-				float scaled_mouse_pos_y = (mouse_pos.y / center_window_size.y) / scale_y;
-				//Mouse::ScaledPos = { scaled_mouse_pos_x, scaled_mouse_pos_y };
-				//Mouse::ScaledPos = { (Mouse::Pos.x / center_window_width) / scale_x, (Mouse::Pos.y / center_window_height) / scale_y };
 				Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
-				//Mouse::ScaledPos = { (mouse_pos.x) / scale_x, (mouse_pos.y) / scale_y };
 				Mouse::Scalers = { scale_x, scale_y };
+
+				// { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
+				//glm::vec2 centered_pos = { (Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, ((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f };
+				//Mouse::CenterPos = { centered_pos.x, centered_pos.y };
+					//(Mouse::Pos.x / viewport->Size.x) * 2.0f - 1.0f, 
+					//((Mouse::Pos.y / viewport->Size.y) * 2.0f - 1.0f) * -1.0f 
+				Mouse::CenterPos = { 
+					(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
+					((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f 
+				};
+				ImGui::Text("Centered normalized mouse pos (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);  
+				ImGui::SameLine(0, 15);
+				float viewport_width = Window::Get()->GetViewportWidth();
+				float viewport_height = Window::Get()->GetViewportHeight();
+				//Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (center_window_width * 0.50f)), (Mouse::CenterPos.y * (center_window_height * 0.50f)) };
+				Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (viewport_width * 0.50f)), (Mouse::CenterPos.y * (viewport_height * 0.50f)) };
+				ImGui::Text("Centered scaled mouse pos (%.2f, %.2f)", Mouse::ScaledCenterPos.x, Mouse::ScaledCenterPos.y);
 			}
 			ImGui::End();
 			//--------------------------------------------------
 
 			center_window_width = viewport->Size.x - sidebar_left_width - sidebar_right_width;
-			center_window_height = viewport->WorkSize.y - bottombar_height;
+			center_window_height = viewport->WorkSize.y - bottombar_height - topbar_height;
 			center_window_size = { center_window_width, center_window_height };
 			center_window_xpos = sidebar_left_width;
 			center_window_ypos = bottombar_height;
 			center_window_pos = { center_window_xpos, center_window_ypos };
-
 			
-			EditorViewportPos = { center_window_xpos, center_window_ypos };
-			EditorViewportBounds[0] = EditorViewportPos;
-			EditorViewportBounds[1] = { EditorViewportPos.x + center_window_width, EditorViewportPos.y + center_window_height };
-
+			m_SecondViewportBounds[0] = { center_window_xpos, topbar_height };
+			m_SecondViewportBounds[1] = { center_window_xpos + center_window_width, center_window_ypos + center_window_height - bottombar_height };
 
 			// TODO: some function here to set the viewport nicely
 			glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);

@@ -17,56 +17,22 @@ namespace LkEngine {
                 auto& tc = entity.GetComponent<TransformComponent>();
                 auto& mesh = entity.GetComponent<MeshComponent>();
                 auto& sprite = entity.GetComponent<SpriteComponent>();
-                glm::vec2 mouse_pos;
-                mouse_pos = Mouse::GetMousePos();
-                //mouse_pos = Mouse::GetMousePosNormalized();
-		        //LOG_DEBUG("Mouse NORMALIZED (x, y) : ({}, {})", mouse_pos.x, mouse_pos.y);
-                auto window = Application::Get()->GetWindow();
-                float window_width, window_height, viewport_width, viewport_height;
+                //glm::vec2 mouse_pos = Mouse::GetMousePos();
+                //glm::vec2 mouse_pos = Mouse::CenterPos;
+                glm::vec2 mouse_pos = Mouse::ScaledCenterPos;
 
-                float scale_x = DockSpace::CenterWindowSize.x / window->GetViewportWidth();
-                mouse_pos.x -= DockSpace::SidebarLeftSize.x;
-                mouse_pos.y += DockSpace::TopBarSize.y;
+                if (EditorLayer::Enabled)
+                {
+                    auto editor_layer = EditorLayer::Get();
+                }
 
-                viewport_width = window->GetViewportWidth();
-                viewport_height = window->GetViewportHeight();
-                //window_width = window->GetWidth();
-                //window_height = window->GetHeight();
-                window_width = DockSpace::CenterWindowSize.x;
-                window_height = DockSpace::CenterWindowSize.y;
+                auto window = Window::Get();
+                float window_width = window->GetWidth();
+                float window_height = window->GetHeight();
 
-                mouse_pos.y = window_height - mouse_pos.y;
-                float mx = mouse_pos.x / window_width;
-                float my = mouse_pos.y / window_height;
-
-#if 0
-				auto mouse_pos = Mouse::GetMousePos();
-				mouse_pos.x -= sidebar_left_width;
-				mouse_pos.y -= topbar_height /* + padding -- need to fix !!! */;
-				//ImGui::Text("Mouse (%1.f, %1.f)", Mouse::GetMouseX(), Mouse::GetMouseY());
-				ImGui::Text("Mouse (%1.f, %1.f)", mouse_pos.x, mouse_pos.y);
-				ImGui::SameLine(0, 20);
-				ImGui::Text("Mouse normalized (%.4f, %.4f)", mouse_pos.x / DockSpace::CenterWindowSize.x, mouse_pos.y / DockSpace::CenterWindowSize.y);
-				ImGui::SameLine(0, 20);
-				//float scale_x = center_window_width / Window::Get()->GetViewportWidth();
-				//float scale_y = center_window_height / Window::Get()->GetViewportHeight();
-				float scale_x = center_window_width / m_ViewportBounds[1].x;
-				float scale_y = center_window_height / m_ViewportBounds[1].y;
-				ImGui::Text("Mouse scaled (%.2f, %.2f)   Scale (%.2f, %.2f)", 
-				    (mouse_pos.x / center_window_size.x) / scale_x, 
-				    (mouse_pos.y / center_window_size.y) / scale_y, 
-					scale_x, scale_y);
-				ImGui::SameLine(0, 20);
-				ImGui::Text("Scaled mouse pos (%.1f, %.1f)", mouse_pos.x / scale_x, mouse_pos.y / scale_y);
-
-				ImGui::BeginGroup();
-				ImGui::Text("Center Window (%1.f, %1.f)", center_window_width, center_window_height);
-				ImGui::SameLine(0, 10);
-				ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / scale_x, center_window_height / scale_y);
-				ImGui::EndGroup();
-#endif
-
-
+                //mouse_pos.x *= window_width;
+                //mouse_pos.y *= window_height;
+      
                 float quad_width, quad_height;
                 quad_width = sprite.Size.x;
                 quad_height = sprite.Size.y;
@@ -74,17 +40,30 @@ namespace LkEngine {
 
 		        //LOG_DEBUG("Mouse (x, y) : ({}, {})", mouse_pos.x, mouse_pos.y);
 
-                glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
-                glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
-                glm::vec2 top_left = { quad_pos.x, quad_pos.y + quad_height};
-                glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
+                glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
+                glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + 0.50f * quad_height };
+                glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + 0.50f * quad_height };
+                glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
 
-                glm::vec2 bottom_left_norm = { bottom_left.x / window_width, bottom_left.y / window_width };
-                glm::vec2 top_right_norm = { (quad_pos.x + quad_width) / window_width, (quad_pos.y + quad_height) / window_height };
+                //bottom_left.x *= Mouse::Scalers.x;
+                //bottom_left.y *= Mouse::Scalers.y;
+                //bottom_right.x *= Mouse::Scalers.x;
+                //bottom_right.y *= Mouse::Scalers.y;
+                //top_left.x *= Mouse::Scalers.x;
+                //top_left.y *= Mouse::Scalers.y;
+                //top_right.x *= Mouse::Scalers.x;
+                //top_right.y *= Mouse::Scalers.y;
+
+                printf("\n");
+                printf("(%.2f, %.2f)>-----<(%.2f, %.2f)\n", top_left.x, top_left.y, top_right.x, top_right.y);
+                printf("|                           |\n");
+                printf("|                           |\n");
+                printf("(%.2f, %.2f)>-----<(%.2f,  %.2f)\n", bottom_left.x, bottom_left.y, bottom_right.x, bottom_right.y);
+                printf("\n");
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
-                    bool within_x_boundaries = (mouse_pos.x >= bottom_left_norm.x && mouse_pos.x <= top_right_norm.x);
+                    bool within_x_boundaries = (mouse_pos.x >= bottom_left.x && mouse_pos.x <= top_right.x);
                     bool within_y_boundaries = (mouse_pos.y <= top_left.y && mouse_pos.y >= bottom_right.y);
                     if (within_x_boundaries && within_y_boundaries)
                     {

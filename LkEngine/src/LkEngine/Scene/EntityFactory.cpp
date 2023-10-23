@@ -39,14 +39,21 @@ namespace LkEngine {
 
 		auto app = Application::Get();
 		auto window = app->GetWindow();
+		float width = window->GetWidth();
 		float height = window->GetHeight();
 		float viewport_height = window->GetViewportHeight();
 
+		//float vertices[] = {
+		//	0.0f,         0.0f,
+		//	rect_width,   0.0f,
+		//	rect_width,   rect_height,
+		//	0.0f,         rect_height 
+		//};
 		float vertices[] = {
-			0.0f,         0.0f,
-			rect_width,   0.0f,
-			rect_width,   rect_height,
-			0.0f,         rect_height 
+			-rect_width * 0.50f + (width * 0.50f),   -rect_height * 0.50f + (height * 0.50f),
+			 rect_width * 0.50f + (width * 0.50f),   -rect_height * 0.50f + (height * 0.50f), 
+			 rect_width * 0.50f + (width * 0.50f),    rect_height * 0.50f + (height * 0.50f), 
+			-rect_width * 0.50f + (width * 0.50f),    rect_height * 0.50f + (height * 0.50f) 
 		};
 		unsigned int indices[] = {
 			0, 1, 2,
@@ -65,8 +72,8 @@ namespace LkEngine {
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 		mesh.BaseShader->Unbind();
 
-		tc.Translation.x = p1_min.x;
-		tc.Translation.y = p1_min.y;
+		tc.Translation.x = p1_min.x; // + width / 2;
+		tc.Translation.y = p1_min.y; // + height / 2;
 
 		entity.AddComponent<MeshComponent>(mesh);
 		entity.AddComponent<TransformComponent>(tc);

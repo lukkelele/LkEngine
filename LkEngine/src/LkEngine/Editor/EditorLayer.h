@@ -33,6 +33,8 @@ namespace LkEngine {
 		EditorLayer(s_ptr<Scene> scene);
 		~EditorLayer() = default;
 
+		static s_ptr<EditorLayer> Get() { return s_Instance; }
+
 		void OnImGuiRender();
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
@@ -61,6 +63,8 @@ namespace LkEngine {
 		static ImVec2 SelectedEntityMenuSize;
 		static glm::vec2 EditorViewportBounds[2];
 		static glm::vec2 EditorViewportPos;
+		static glm::vec2 ViewportScalers;
+		static bool Enabled;
 	private:
 		s_ptr<Scene> m_Scene = nullptr;
 		glm::vec2 m_ViewportBounds[2];
@@ -69,7 +73,7 @@ namespace LkEngine {
 		bool m_ShowStackTool = false;
 		bool m_ShowStyleEditor = false;
 		int m_GizmoType = GizmoType::Translate;
-		
+		static s_ptr<EditorLayer> s_Instance;
 	};
 
 }

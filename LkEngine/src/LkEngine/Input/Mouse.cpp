@@ -9,6 +9,8 @@ namespace LkEngine {
 	glm::vec2 Mouse::Pos = { 0.0f, 0.0f };
 	glm::vec2 Mouse::ScaledPos = { 1.0f, 1.0f };
 	glm::vec2 Mouse::Scalers = { 1.0f, 1.0f };
+	glm::vec2 Mouse::CenterPos = { 0.0f, 0.0f };
+	glm::vec2 Mouse::ScaledCenterPos = { 0.0f, 0.0f };
 
 	bool Mouse::IsButtonPressed(MouseCode button)
 	{
