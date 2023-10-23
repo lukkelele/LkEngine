@@ -23,6 +23,8 @@ namespace LkEngine {
     {
         m_Window->Init();
         m_Context = m_Window->GetContext();
+        m_Input = create_s_ptr<Input>(this);
+        m_Input->Init();
 
         m_Scene = create_s_ptr<Scene>();
         m_EditorLayer = create_s_ptr<EditorLayer>(m_Scene);

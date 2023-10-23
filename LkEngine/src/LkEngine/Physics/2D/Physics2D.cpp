@@ -24,8 +24,7 @@ namespace LkEngine {
                 auto window = Application::Get()->GetWindow();
                 float window_width, window_height, viewport_width, viewport_height;
 
-
-                float scale_x = DockSpace::CenterWindowSize.x / Window::Get()->GetViewportWidth();
+                float scale_x = DockSpace::CenterWindowSize.x / window->GetViewportWidth();
                 mouse_pos.x -= DockSpace::SidebarLeftSize.x;
                 mouse_pos.y += DockSpace::TopBarSize.y;
 
@@ -39,6 +38,34 @@ namespace LkEngine {
                 mouse_pos.y = window_height - mouse_pos.y;
                 float mx = mouse_pos.x / window_width;
                 float my = mouse_pos.y / window_height;
+
+#if 0
+				auto mouse_pos = Mouse::GetMousePos();
+				mouse_pos.x -= sidebar_left_width;
+				mouse_pos.y -= topbar_height /* + padding -- need to fix !!! */;
+				//ImGui::Text("Mouse (%1.f, %1.f)", Mouse::GetMouseX(), Mouse::GetMouseY());
+				ImGui::Text("Mouse (%1.f, %1.f)", mouse_pos.x, mouse_pos.y);
+				ImGui::SameLine(0, 20);
+				ImGui::Text("Mouse normalized (%.4f, %.4f)", mouse_pos.x / DockSpace::CenterWindowSize.x, mouse_pos.y / DockSpace::CenterWindowSize.y);
+				ImGui::SameLine(0, 20);
+				//float scale_x = center_window_width / Window::Get()->GetViewportWidth();
+				//float scale_y = center_window_height / Window::Get()->GetViewportHeight();
+				float scale_x = center_window_width / m_ViewportBounds[1].x;
+				float scale_y = center_window_height / m_ViewportBounds[1].y;
+				ImGui::Text("Mouse scaled (%.2f, %.2f)   Scale (%.2f, %.2f)", 
+				    (mouse_pos.x / center_window_size.x) / scale_x, 
+				    (mouse_pos.y / center_window_size.y) / scale_y, 
+					scale_x, scale_y);
+				ImGui::SameLine(0, 20);
+				ImGui::Text("Scaled mouse pos (%.1f, %.1f)", mouse_pos.x / scale_x, mouse_pos.y / scale_y);
+
+				ImGui::BeginGroup();
+				ImGui::Text("Center Window (%1.f, %1.f)", center_window_width, center_window_height);
+				ImGui::SameLine(0, 10);
+				ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / scale_x, center_window_height / scale_y);
+				ImGui::EndGroup();
+#endif
+
 
                 float quad_width, quad_height;
                 quad_width = sprite.Size.x;

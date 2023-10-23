@@ -4,6 +4,7 @@
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Timer.h"
+#include "LkEngine/Input/Input.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Scene/EntityFactory.h"
@@ -49,10 +50,10 @@ namespace LkEngine {
         
         uint16_t GetWidth() const { return m_Window->GetWidth(); }
         uint16_t GetHeight() const { return m_Window->GetHeight(); }
-        std::shared_ptr<Window> GetWindow() const { return m_Window; }
-        std::shared_ptr<Renderer> GetRenderer() const { return m_Renderer; }
-        std::shared_ptr<GLFWwindow*> GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
-        std::shared_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
+        s_ptr<Window> GetWindow() const { return m_Window; }
+        s_ptr<Renderer> GetRenderer() const { return m_Renderer; }
+        s_ptr<GLFWwindow*> GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
+        s_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
 
         bool IsKeyboardEnabled();
         bool IsMouseEnabled();
@@ -61,11 +62,12 @@ namespace LkEngine {
         ApplicationProperties m_Props;
         LayerStack m_LayerStack;
         Timer m_Timer;
-        std::shared_ptr<Window> m_Window = nullptr;
-        std::shared_ptr<Renderer> m_Renderer = nullptr;
-        std::shared_ptr<GraphicsContext> m_Context = nullptr;
-        std::shared_ptr<Scene> m_Scene = nullptr;
-        std::shared_ptr<EditorLayer> m_EditorLayer = nullptr;
+        s_ptr<Window> m_Window = nullptr;
+        s_ptr<Renderer> m_Renderer = nullptr;
+        s_ptr<GraphicsContext> m_Context = nullptr;
+        s_ptr<Scene> m_Scene = nullptr;
+        s_ptr<EditorLayer> m_EditorLayer = nullptr;
+        s_ptr<Input> m_Input = nullptr;
         static Application* m_Instance;
     };
 

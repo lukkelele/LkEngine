@@ -59,6 +59,8 @@ namespace LkEngine {
 		static uint64_t SelectedEntityID;
         static std::string SelectedEntityLabel; // remove
 		static ImVec2 SelectedEntityMenuSize;
+		static glm::vec2 EditorViewportBounds[2];
+		static glm::vec2 EditorViewportPos;
 	private:
 		s_ptr<Scene> m_Scene = nullptr;
 		glm::vec2 m_ViewportBounds[2];

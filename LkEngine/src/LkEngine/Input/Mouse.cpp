@@ -6,6 +6,10 @@
 
 namespace LkEngine {
 
+	glm::vec2 Mouse::Pos = { 0.0f, 0.0f };
+	glm::vec2 Mouse::ScaledPos = { 1.0f, 1.0f };
+	glm::vec2 Mouse::Scalers = { 1.0f, 1.0f };
+
 	bool Mouse::IsButtonPressed(MouseCode button)
 	{
 		GLFWwindow* window = *GraphicsContext::Get()->GetGlfwWindow();
@@ -19,17 +23,9 @@ namespace LkEngine {
 		glfwGetCursorPos(*GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
-		//LOG_DEBUG("Mouse GLFW (x, y) : ({}, {})", x, y);
+		//Pos.x = x;
+		//Pos.y = y;
 		return { x, y };
-	}
-
-	glm::vec2 Mouse::GetMousePosDockWindow()
-	{
-		auto pos = GetMousePos();
-        pos.x -= DockSpace::SidebarLeftSize.x;
-        pos.y -= DockSpace::TopBarSize.y;
-
-		return { pos.x, pos.y };
 	}
 
 	std::pair<float, float> Mouse::GetMousePosition()

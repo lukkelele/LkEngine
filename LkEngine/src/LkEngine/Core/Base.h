@@ -39,6 +39,16 @@ namespace LkEngine {
 		return std::make_shared<T>(std::forward<ARGS>(args)...);
 	}
 
+	/* Pair Creation */
+	template<typename T, typename P>
+	using pair = std::pair<T, P>;
+	template<typename T, typename P, typename ... ARGS>
+	constexpr pair<T, P> new_pair(ARGS&& ... args)
+	{
+		return std::make_pair<T, P>(std::forward<ARGS>(args)...);
+	}
+	
+
 }
 
 //#ifndef IMGUI_DEFINE_MATH_OPERATORS
