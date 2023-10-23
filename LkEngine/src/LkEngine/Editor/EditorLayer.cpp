@@ -6,6 +6,7 @@
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/Application.h"
 #include "LkEngine/UI/ImGuiUtilities.h"
+#include "LkEngine/Editor/Editor.h"
 
 
 namespace LkEngine {
@@ -172,10 +173,12 @@ namespace LkEngine {
 				UI_SceneMenu();
 				UI_SceneContent();
 
+
 				ImGui::Text("Properties");
 				if (SelectedEntity)
 				{
-					DrawComponents(SelectedEntity);
+					//DrawComponents(SelectedEntity);
+					UI_SelectedEntity();
 				}
 				ImGui::EndGroup();
 
@@ -233,6 +236,7 @@ namespace LkEngine {
 				auto mouse_pos = Mouse::GetMousePos();
 				//Mouse::Pos = mouse_pos;
 				Mouse::Pos = Mouse::GetMousePos();
+				Mouse::Pos.y = viewport->Size.y - Mouse::Pos.y;
 				Mouse::Pos.x -= sidebar_left_width;
 				Mouse::Pos.y -= topbar_height /* + padding -- need to fix !!! */;
 				//ImGui::Text("Mouse (%1.f, %1.f)", Mouse::GetMouseX(), Mouse::GetMouseY());
@@ -470,7 +474,8 @@ namespace LkEngine {
     {
 		static float pos_step_size = 5.0f;
         auto& scene = *Scene::ActiveScene;
-        Entity entity = scene.FindEntity(SelectedEntityLabel);
+        //Entity entity = scene.FindEntity(SelectedEntityLabel);
+        Entity entity = scene.GetEntityWithUUID(SelectedEntityID);
 
         if (!entity)
             return;
@@ -518,35 +523,51 @@ namespace LkEngine {
         auto& scene = *Scene::ActiveScene;
         auto& cam = *scene.GetActiveCamera();
         auto& cam_pos = cam.GetPos();
+		//cam.UpdateView();
+		//cam.UpdateProjection();
         auto& view_matrix = cam.GetView();
         auto& proj_matrix = cam.GetProjection();
 		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
 		TransformComponent& tc = entity.GetComponent<TransformComponent>();
         glm::mat4& transform_matrix = tc.GetTransform();
+        SpriteComponent& sprite = entity.GetComponent<SpriteComponent>();
 
-        static ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove;
-        //ImGui::SetNextWindowBgAlpha(0.0f);
-        //ImGui::Begin(RENDER_WINDOW, NULL, flags);
-        ImGuizmo::SetOrthographic(true);
-        ImGuizmo::SetDrawlist();
+		float pos_x = m_SecondViewportBounds[0].x;
+		float pos_y = m_SecondViewportBounds[0].y;
+		float height = m_SecondViewportBounds[1].y;
+		float width  = m_SecondViewportBounds[1].x;
+
+		//auto window = ImGui::GetCurrentWindow();
+		//ImGui::SetNextWindowViewport(window->ID);
+		auto window = ImGui::FindWindowByName(CORE_VIEWPORT);
+		//auto window = ImGui::FindWindowByName(LkEngine_DockSpace);
+		//ImGui::Begin(LkEngine_DockSpace);
+		ImGui::Begin(window->Name);
+		ImGui::SetNextWindowViewport(window->ID);
+		ImGuizmo::SetOrthographic(true);
+		ImGuizmo::SetDrawlist();
+		float windowWidth = (float)ImGui::GetWindowWidth();
+		float windowHeight = (float)ImGui::GetWindowHeight();
+		//ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+		//ImGuizmo::SetRect(pos_x, pos_y, width, height);
+		auto spriteRect = Editor::Sprite_GetEdgePoints(sprite, tc);
+		auto& left_lower = spriteRect[0];
+		float center_x = width * 0.50;
+		float center_y = height * 0.50f;
+		//LOG_DEBUG("left lower ({}, {})", center_x + left_lower.x, center_y + left_lower.y);
+		//ImGuizmo::SetRect(center_x, center_y, width, height);
 
         //float pos_x = ImGui::GetWindowPos().x;
         //float pos_y = ImGui::GetWindowPos().y;
         //float width = (float)ImGui::GetWindowWidth();
         //float height = (float)ImGui::GetWindowHeight();
-		float pos_x = m_ViewportBounds[0].x;
-		float pos_y = m_ViewportBounds[0].y;
-		float height = m_ViewportBounds[1].y;
-		float width = m_ViewportBounds[1].x;
-
-        SpriteComponent& sprite = entity.GetComponent<SpriteComponent>();
-        ImGuizmo::SetRect(pos_x, pos_y, width, height);
+        ImGuizmo::SetRect(pos_x + center_x, pos_y - center_y, width, height);
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 
             glm::value_ptr(proj_matrix), 
             ImGuizmo::TRANSLATE, 
-            ImGuizmo::LOCAL, 
+            ImGuizmo::WORLD, 
             glm::value_ptr(transform_matrix)
         );
 
@@ -559,7 +580,7 @@ namespace LkEngine {
             tc.Scale = scale;
             tc.Rotation = rotation;
         }
-        //ImGui::End();
+		ImGui::End();
     }
 
 	void EditorLayer::UI_HandleManualWindowResize()
@@ -671,6 +692,7 @@ namespace LkEngine {
             {
                 LOG_TRACE("Selecting {}", label);
                 SelectedEntityLabel = label;
+				SelectedEntityID = entity.GetComponent<IDComponent>().ID;
             }
         }
 		ImGui::EndGroup();

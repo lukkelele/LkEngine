@@ -43,18 +43,24 @@ namespace LkEngine {
 		float height = window->GetHeight();
 		float viewport_height = window->GetViewportHeight();
 
-		//float vertices[] = {
-		//	0.0f,         0.0f,
-		//	rect_width,   0.0f,
-		//	rect_width,   rect_height,
-		//	0.0f,         rect_height 
-		//};
 		float vertices[] = {
-			-rect_width * 0.50f + (width * 0.50f),   -rect_height * 0.50f + (height * 0.50f),
-			 rect_width * 0.50f + (width * 0.50f),   -rect_height * 0.50f + (height * 0.50f), 
-			 rect_width * 0.50f + (width * 0.50f),    rect_height * 0.50f + (height * 0.50f), 
-			-rect_width * 0.50f + (width * 0.50f),    rect_height * 0.50f + (height * 0.50f) 
+			0.0f,         0.0f,
+			rect_width,   0.0f,
+			rect_width,   rect_height,
+			0.0f,         rect_height 
 		};
+		//float vertices[] = {
+		//	-rect_width * 0.50f + (width * 0.50f),   -rect_height * 0.50f + (height * 0.50f),
+		//	 rect_width * 0.50f + (width * 0.50f),   -rect_height * 0.50f + (height * 0.50f), 
+		//	 rect_width * 0.50f + (width * 0.50f),    rect_height * 0.50f + (height * 0.50f), 
+		//	-rect_width * 0.50f + (width * 0.50f),    rect_height * 0.50f + (height * 0.50f) 
+		//};
+		//float vertices[] = {
+		//	-rect_width * 0.50f,   -rect_height * 0.50f,
+		//	 rect_width * 0.50f,   -rect_height * 0.50f, 
+		//	 rect_width * 0.50f,    rect_height * 0.50f, 
+		//	-rect_width * 0.50f,    rect_height * 0.50f 
+		//};
 		unsigned int indices[] = {
 			0, 1, 2,
 			2, 3, 0

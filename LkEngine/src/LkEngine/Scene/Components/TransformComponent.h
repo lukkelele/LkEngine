@@ -34,6 +34,7 @@ namespace LkEngine {
 		glm::vec3 GetTranslation() const { return Translation; }
 		glm::vec3 GetScale() const { return Scale; }
 		glm::quat GetRotation() const { return Rotation; }
+
 	};
 
 }

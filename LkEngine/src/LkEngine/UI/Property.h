@@ -28,14 +28,14 @@ namespace LkEngine::UI {
 			ImGui::SameLine();
 			//ImGui::SetCursorPosX();
 			ImGui::PushItemWidth(100); // TODO
-			ImGui::SliderFloat2("##scale-vec2", &transform.Scale.x, -2.0f, 2.0f, "%.2f");
+			ImGui::SliderFloat2("##scale-vec2", &transform.Scale.x, -2.0f, 2.0f, "%.1f");
 			ImGui::PopItemWidth();
 
 			ImGui::Text("Rotation");
 			ImGui::SameLine();
 			//ImGui::SetCursorPosX(scale_textsize.x);
 			ImGui::PushItemWidth(100); // TODO
-			ImGui::SliderFloat2("##rot-vec2", &transform.Rotation.x, -6.0f, 6.0f, "%.2f"); // TODO: make to rad
+			ImGui::SliderFloat2("##rot-vec2", &transform.Rotation.x, -6.0f, 6.0f, "%.1f"); // TODO: make to rad
 			ImGui::PopItemWidth();
 
 			ImGui::PopStyleVar(1);
