@@ -301,8 +301,6 @@ namespace LkEngine {
 				(center_window_ypos + center_window_height - bottombar_height + topbar_height)
 			};
 
-			//LOG_TRACE("m_SecondViewportBounds[1]: ({}, {})", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
-
 			// TODO: some function here to set the viewport nicely
 			glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);
 			//LOG_DEBUG("Center Window Size: ({}, {})   Pos: ({}, {})", center_window_size.x, center_window_size.y, center_window_xpos, center_window_ypos);

@@ -8,12 +8,6 @@
 
 namespace LkEngine {
 
-    struct Vertex
-    {
-        glm::vec3 Pos;
-        glm::vec3 Normal;
-        glm::vec2 UV;
-    };
 
     struct MeshComponent
     {
@@ -24,23 +18,15 @@ namespace LkEngine {
         s_ptr<Shader> BaseShader = nullptr;
         glm::vec4 Color = { 0.30f , 0.630f, 0.80f, 1.0f };
 
-        std::vector<Vertex> Vertices;
-        std::vector<unsigned int> Indices;
 
         MeshComponent() 
-            : Vertices({})
         {
         }
 
         ~MeshComponent()
         {
-            Vertices.clear();
-            Indices.clear();
         }
 
-        void AddVertex(const glm::vec2& pos, const glm::vec2& uv) { }
-        void AddVertex(const glm::vec3 pos, const glm::vec2& uv) { }
-        void AddIndex(unsigned int index) { Indices.push_back(index); }
     };
 
 }
