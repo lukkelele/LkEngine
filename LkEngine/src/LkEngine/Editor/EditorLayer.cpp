@@ -555,7 +555,7 @@ namespace LkEngine {
 		auto& left_lower = spriteRect[0];
 		//ImGuizmo::SetRect(center_x, center_y, width, height);
         ImGuizmo::SetRect(pos_x, pos_y, width, height);
-		LOG_DEBUG("ImGuizmo DrawWindow: ({} {})", width, height);
+		//LOG_DEBUG("ImGuizmo DrawWindow: ({} {})", width, height);
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 
