@@ -260,8 +260,9 @@ namespace LkEngine {
 				ImGui::SameLine(0, 20);
 				//ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / scale_x, center_window_height / scale_y);
 				ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / Mouse::Scalers.x, center_window_height / Mouse::Scalers.y );
-				ImGui::SameLine(0, 10);
-				ImGui::Text("Center window pos (%.2f, %.2f)", EditorViewportBounds[0].x, EditorViewportBounds[0].y);  
+				ImGui::SameLine(0, 20);
+				ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y,
+					m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
 				ImGui::EndGroup();
 
 				ImGui::EndGroup();
@@ -269,17 +270,12 @@ namespace LkEngine {
 				Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
 				Mouse::Scalers = { scale_x, scale_y };
 
-				// { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
-				//glm::vec2 centered_pos = { (Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, ((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f };
-				//Mouse::CenterPos = { centered_pos.x, centered_pos.y };
-					//(Mouse::Pos.x / viewport->Size.x) * 2.0f - 1.0f, 
-					//((Mouse::Pos.y / viewport->Size.y) * 2.0f - 1.0f) * -1.0f 
 				Mouse::CenterPos = { 
 					(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
 					((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f 
 				};
 				ImGui::Text("Centered normalized mouse pos (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);  
-				ImGui::SameLine(0, 15);
+				ImGui::SameLine(0, 20);
 				float viewport_width = Window::Get()->GetViewportWidth();
 				float viewport_height = Window::Get()->GetViewportHeight();
 				//Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (center_window_width * 0.50f)), (Mouse::CenterPos.y * (center_window_height * 0.50f)) };
@@ -290,14 +286,22 @@ namespace LkEngine {
 			//--------------------------------------------------
 
 			center_window_width = viewport->Size.x - sidebar_left_width - sidebar_right_width;
-			center_window_height = viewport->WorkSize.y - bottombar_height - topbar_height;
+			center_window_height = viewport->Size.y - bottombar_height - topbar_height;
+			//LOG_TRACE("Center Window: ({}, {})", center_window_width, center_window_height);
 			center_window_size = { center_window_width, center_window_height };
+
+			/* Lower left point / bound */
 			center_window_xpos = sidebar_left_width;
 			center_window_ypos = bottombar_height;
-			center_window_pos = { center_window_xpos, center_window_ypos };
-			
+
+			/* Top right point / bound */
 			m_SecondViewportBounds[0] = { center_window_xpos, topbar_height };
-			m_SecondViewportBounds[1] = { center_window_xpos + center_window_width, center_window_ypos + center_window_height - bottombar_height };
+			m_SecondViewportBounds[1] = { 
+				(center_window_xpos + center_window_width), 
+				(center_window_ypos + center_window_height - bottombar_height + topbar_height)
+			};
+
+			//LOG_TRACE("m_SecondViewportBounds[1]: ({}, {})", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
 
 			// TODO: some function here to set the viewport nicely
 			glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);
@@ -534,11 +538,9 @@ namespace LkEngine {
 
 		float pos_x = m_SecondViewportBounds[0].x;
 		float pos_y = m_SecondViewportBounds[0].y;
-		float height = m_SecondViewportBounds[1].y;
-		float width  = m_SecondViewportBounds[1].x;
+		float width  = m_SecondViewportBounds[1].x - pos_x;
+		float height = m_SecondViewportBounds[1].y - pos_y;
 
-		//auto window = ImGui::GetCurrentWindow();
-		//ImGui::SetNextWindowViewport(window->ID);
 		auto window = ImGui::FindWindowByName(CORE_VIEWPORT);
 		//auto window = ImGui::FindWindowByName(LkEngine_DockSpace);
 		//ImGui::Begin(LkEngine_DockSpace);
@@ -546,22 +548,14 @@ namespace LkEngine {
 		ImGui::SetNextWindowViewport(window->ID);
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
-		float windowWidth = (float)ImGui::GetWindowWidth();
-		float windowHeight = (float)ImGui::GetWindowHeight();
+		auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
 		//ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 		//ImGuizmo::SetRect(pos_x, pos_y, width, height);
 		auto spriteRect = Editor::Sprite_GetEdgePoints(sprite, tc);
 		auto& left_lower = spriteRect[0];
-		float center_x = width * 0.50;
-		float center_y = height * 0.50f;
-		//LOG_DEBUG("left lower ({}, {})", center_x + left_lower.x, center_y + left_lower.y);
 		//ImGuizmo::SetRect(center_x, center_y, width, height);
-
-        //float pos_x = ImGui::GetWindowPos().x;
-        //float pos_y = ImGui::GetWindowPos().y;
-        //float width = (float)ImGui::GetWindowWidth();
-        //float height = (float)ImGui::GetWindowHeight();
-        ImGuizmo::SetRect(pos_x + center_x, pos_y - center_y, width, height);
+        ImGuizmo::SetRect(pos_x, pos_y, width, height);
+		LOG_DEBUG("ImGuizmo DrawWindow: ({} {})", width, height);
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 

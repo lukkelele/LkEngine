@@ -4,12 +4,16 @@
 #include "LkEngine/Application.h"
 #include "TestLayer.h"
 
+#define SCREEN_WIDTH    1920
+#define SCREEN_HEIGHT   1080
+
 using namespace LkEngine;
+
 
 class LkApplication : public LkEngine::Application
 {
 public:
-    LkApplication(LkEngine::ApplicationProperties props = LkEngine::ApplicationProperties("Sandbox", 1920, 1080))
+    LkApplication(LkEngine::ApplicationProperties props = LkEngine::ApplicationProperties("Sandbox", SCREEN_WIDTH, SCREEN_HEIGHT))
         : LkEngine::Application(props)
     {
     }

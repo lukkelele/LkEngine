@@ -11,15 +11,15 @@ namespace LkEngine {
 		static bool IsButtonPressed(MouseCode button);
 		static glm::vec2 GetMousePos();
 		static std::pair<float, float> GetMousePosition();
-		static float Mouse::GetMouseX();
-		static float Mouse::GetMouseY();
+		static float GetMouseX();
+		static float GetMouseY();
 		static glm::vec2 GetMousePosNormalized();
 		static void SetPos(float x, float y) { Pos.x = x; Pos.y = y; }
+		glm::vec2 GetPos() const { return Pos; }
+		glm::vec2 GetScaledPos() const { return ScaledPos; }
+		glm::vec2 GetCenterPos() const { return CenterPos; }
 
 	public:
-		//static std::pair<float, float> Pos;
-		//static std::pair<float, float> PosScaled;
-		//static std::pair<float, float> Scalers;
 		static glm::vec2 Pos;
 		static glm::vec2 ScaledPos;
 		static glm::vec2 Scalers;
