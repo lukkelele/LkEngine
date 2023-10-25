@@ -5,16 +5,33 @@
 
 namespace LkEngine {
 
+	static GLenum ImageFormatToGLDataFormat(ImageFormat format)
+	{
+		switch (format)
+		{
+			case ImageFormat::RGB8:  return GL_RGB;
+			case ImageFormat::RGBA8: return GL_RGBA;
+		}
+		return 0;
+	}
+
+	static GLenum ImageFormatToGLInternalFormat(ImageFormat format)
+	{
+		switch (format)
+		{
+			case ImageFormat::RGB8:  return GL_RGB8;
+			case ImageFormat::RGBA8: return GL_RGBA8;
+		}
+		return 0;
+	}
+
 	Texture::Texture(const std::string& path)
 		: m_RendererID(0)
-		, m_FilePath(path)
-		, m_LocalBuffer(nullptr)
-		, m_Width(0)
-		, m_Height(0)
-		, m_BPP(0)
+		, m_Path(path)
 	{
 		stbi_set_flip_vertically_on_load(1);
-		m_LocalBuffer = stbi_load(path.c_str(), &m_Width, &m_Height, &m_BPP, 4);
+		int width, height, channels;
+		stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
 
 		GL_CALL(glGenTextures(1, &m_RendererID));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
@@ -24,11 +41,26 @@ namespace LkEngine {
 		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); // S: x
 		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); // T: y
 
-		GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer));
+		GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
-		if (m_LocalBuffer)
-			stbi_image_free(m_LocalBuffer);
+		stbi_image_free(data);
+	}
+
+	Texture::Texture(const TextureSpecification& textureSpec)
+		: m_RendererID(0)
+	{
+		m_InternalFormat = ImageFormatToGLInternalFormat(m_Specification.Format);
+		m_DataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
+		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
+
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
 	Texture::~Texture()
@@ -46,4 +78,22 @@ namespace LkEngine {
 	{
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 	}
+
+	void Texture::SetData(void* data, uint32_t size)
+	{
+		uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3;
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+	}
+
+
+	s_ptr<Texture2D> Texture2D::Create(const TextureSpecification& textureSpec)
+	{
+		return std::make_shared<Texture2D>(textureSpec);
+	}
+
+	s_ptr<Texture2D> Texture2D::Create(const std::string& path)
+	{
+		return std::make_shared<Texture2D>(path);
+	}
+
 }

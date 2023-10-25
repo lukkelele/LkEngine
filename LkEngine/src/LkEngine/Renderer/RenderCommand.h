@@ -33,6 +33,26 @@ namespace LkEngine {
             s_Renderer->DrawIndexed(va);
         }
 
+        static void DrawIndexed(VertexArray& va, uint32_t indexCount)
+        {
+            auto& ib = va.GetIndexBuffer();
+            uint32_t count = indexCount ? indexCount : va.GetIndexBuffer()->GetCount();
+            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+        }
+
+
+        static void SetLineWidth(float width)
+        {
+            glLineWidth(width);
+        }
+
+        static void DrawLines(VertexArray& va, uint32_t lineVertexCount)
+        {
+
+        }
+
+
+
     private:
         static u_ptr<Renderer> s_Renderer;
     };

@@ -13,6 +13,8 @@ namespace LkEngine {
 		VertexArray();
 		~VertexArray();
 
+		static s_ptr<VertexArray> Create() { return std::make_shared<VertexArray>(); }
+
 		void Bind() const;
 		void Unbind() const;
 		void AddVertexBuffer(VertexBuffer& vb);

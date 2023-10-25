@@ -3,6 +3,7 @@
 #include "LkEngine/Renderer/VertexArray.h"
 #include "LkEngine/Renderer/VertexBuffer.h"
 #include "LkEngine/Renderer/IndexBuffer.h"
+#include "LkEngine/Renderer/UniformBuffer.h"
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Scene/Components.h"
@@ -31,7 +32,6 @@ namespace LkEngine {
 		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawIndexed(VertexArray& va);
 		static void SetDrawMode(int mode);
-
 
 	public:
 		static int DrawMode;

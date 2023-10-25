@@ -28,4 +28,10 @@ namespace LkEngine {
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	}
 
+	void VertexBuffer::SetData(const void* data, unsigned int size)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+	}
+
 }
