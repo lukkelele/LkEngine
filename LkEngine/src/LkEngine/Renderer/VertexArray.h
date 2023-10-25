@@ -16,8 +16,7 @@ namespace LkEngine {
 		void Bind() const;
 		void Unbind() const;
 		void AddVertexBuffer(VertexBuffer& vb);
-		void AddVertexBuffer(s_ptr<VertexBuffer> vb);
-		void AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout);
+		//void AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout);
 		std::vector<s_ptr<VertexBuffer>>& GetVertexBuffers() { return m_VertexBuffers;  }
 		s_ptr<IndexBuffer>& GetIndexBuffer() { return m_IndexBuffer; }
 		void SetIndexBuffer(const s_ptr<IndexBuffer> ib);

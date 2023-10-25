@@ -37,10 +37,11 @@ namespace LkEngine {
 	}
 
 	// Adds buffer and configures appropriate layout 
-	void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
+	void VertexArray::AddVertexBuffer(VertexBuffer& vb)
 	{ 
 		glBindVertexArray(m_RendererID);
 		vb.Bind();
+		VertexBufferLayout& layout = vb.GetLayout();
 
 		for (const auto& element : layout)
 		{

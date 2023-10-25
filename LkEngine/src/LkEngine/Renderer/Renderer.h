@@ -19,14 +19,17 @@ namespace LkEngine {
 	class Renderer
 	{
 	public:
-		static void Clear();
+		static void Init();
+		static void Shutdown();
 
+		static void Clear();
 		static void Draw(Entity& entity);
+		static void Draw(VertexArray& va, const Shader& shader);
 		static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void Draw(const MeshComponent& mesh);
 		static void DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
-		static void DrawIndexed(const s_ptr<VertexArray>& va);
+		static void DrawIndexed(VertexArray& va);
 		static void SetDrawMode(int mode);
 
 
