@@ -10,9 +10,11 @@ namespace LkEngine {
 	{
 	public:
 		VertexBuffer(const void* data, unsigned int size);
+		VertexBuffer(unsigned int size);
 		~VertexBuffer();
 
 		static s_ptr<VertexBuffer> Create(const void* data, unsigned int size) { return std::make_shared<VertexBuffer>(data, size); }
+		static s_ptr<VertexBuffer> Create(unsigned int size) { return std::make_shared<VertexBuffer>(size); }
 
 		void Bind() const;
 		void Unbind() const;

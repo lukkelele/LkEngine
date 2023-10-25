@@ -19,6 +19,9 @@ namespace LkEngine {
 		Shader(const std::string& vertexPath, const std::string& fragmentPath);
 		~Shader();
 
+		static s_ptr<Shader> Create(const std::string& filepath) { return std::make_shared<Shader>(filepath); }
+		static s_ptr<Shader> Create(const std::string& vertexPath, const std::string& fragmentPath) { return std::make_shared<Shader>(vertexPath, fragmentPath); }
+
 		void Bind() const;
 		void Unbind() const;
 

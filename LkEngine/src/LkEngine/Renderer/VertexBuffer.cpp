@@ -5,6 +5,14 @@
 
 namespace LkEngine {
 
+	VertexBuffer::VertexBuffer(unsigned int arrsize)
+	{
+		GL_CALL(glGenBuffers(1, &m_RendererID));
+		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+		LK_ASSERT(sizeof(GLfloat) == sizeof(float));
+		GL_CALL(glBufferData(GL_ARRAY_BUFFER, arrsize * sizeof(float), nullptr, GL_STATIC_DRAW));
+	}
+
 	VertexBuffer::VertexBuffer(const void* data, unsigned int arrsize)
 	{
 		GL_CALL(glGenBuffers(1, &m_RendererID));

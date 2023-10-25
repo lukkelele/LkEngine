@@ -12,12 +12,14 @@ namespace LkEngine {
         static void Init();
         static void Shutdown();
 
+        static void BeginScene(const Camera& camera);
         static void BeginScene(const Camera& camera, const glm::mat4& transform);
-        static void BeginScene(const EditorCamera& camera);
         static void EndScene();
         static void Flush();
 
         static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color);
+        static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color);
+        static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID);
         static void DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, int entityID = -1);
         static void DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, int entityID = -1);
         static void DrawRect(const glm::mat4& transform, const glm::vec4& color, int entityID = -1);
