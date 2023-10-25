@@ -6,6 +6,25 @@
 
 namespace LkEngine {
 
+	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
+	{
+		switch (type)
+		{
+			case ShaderDataType::Float:    return GL_FLOAT;
+			case ShaderDataType::Float2:   return GL_FLOAT;
+			case ShaderDataType::Float3:   return GL_FLOAT;
+			case ShaderDataType::Float4:   return GL_FLOAT;
+			case ShaderDataType::Mat3:     return GL_FLOAT;
+			case ShaderDataType::Mat4:     return GL_FLOAT;
+			case ShaderDataType::Int:      return GL_INT;
+			case ShaderDataType::Int2:     return GL_INT;
+			case ShaderDataType::Int3:     return GL_INT;
+			case ShaderDataType::Int4:     return GL_INT;
+			case ShaderDataType::Bool:     return GL_BOOL;
+		}
+		return 0;
+	}
+
 	VertexArray::VertexArray()
 	{
 		GL_CALL(glGenVertexArrays(1, &m_RendererID));
@@ -20,17 +39,66 @@ namespace LkEngine {
 	// Adds buffer and configures appropriate layout 
 	void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
 	{ 
-		Bind();
+		glBindVertexArray(m_RendererID);
 		vb.Bind();
-		const auto& elements = layout.GetElements();
-		unsigned int offset = 0;
-		for (unsigned int i = 0 ; i < elements.size(); i++) {
-			const auto& element = elements[i];
-			GL_CALL(glEnableVertexAttribArray(i));
-			GL_CALL(glVertexAttribPointer(i, element.count, element.type, element.normalized, 
-											layout.GetStride(), (const void*) offset));
-			offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
+
+		for (const auto& element : layout)
+		{
+			switch (element.Type)
+			{
+				case ShaderDataType::Float:
+				case ShaderDataType::Float2:
+				case ShaderDataType::Float3:
+				case ShaderDataType::Float4:
+				{
+					LOG_DEBUG("ShaderDataType::Float1/2/3/4");
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+					glVertexAttribPointer(m_VertexBufferIndex,
+										  element.GetComponentCount(),
+										  ShaderDataTypeToOpenGLBaseType(element.Type),
+										  element.Normalized ? GL_TRUE : GL_FALSE,
+										  layout.GetStride(),
+										  (const void*)element.Offset);
+					m_VertexBufferIndex++;
+					break;
+				}
+				case ShaderDataType::Int:
+				case ShaderDataType::Int2:
+				case ShaderDataType::Int3:
+				case ShaderDataType::Int4:
+				case ShaderDataType::Bool:
+				{
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+					glVertexAttribIPointer(m_VertexBufferIndex,
+										   element.GetComponentCount(),
+										   ShaderDataTypeToOpenGLBaseType(element.Type),
+										   layout.GetStride(),
+										   (const void*)element.Offset);
+					m_VertexBufferIndex++;
+					break;
+				}
+				case ShaderDataType::Mat3:
+				case ShaderDataType::Mat4:
+				{
+					uint8_t count = element.GetComponentCount();
+					for (uint8_t i = 0; i < count; i++)
+					{
+						glEnableVertexAttribArray(m_VertexBufferIndex);
+						glVertexAttribPointer(m_VertexBufferIndex,
+											  count,
+											  ShaderDataTypeToOpenGLBaseType(element.Type),
+											  element.Normalized ? GL_TRUE : GL_FALSE,
+											  layout.GetStride(),
+											  (const void*)(element.Offset + sizeof(float) * count * i));
+						glVertexAttribDivisor(m_VertexBufferIndex, 1);
+						m_VertexBufferIndex++;
+					}
+					break;
+				}
+				default: LK_ASSERT(false);
+			}
 		}
+		m_VertexBuffers.push_back(std::make_shared<VertexBuffer>(vb));
 	}
 
 	void VertexArray::Bind() const
@@ -41,6 +109,13 @@ namespace LkEngine {
 	void VertexArray::Unbind() const
 	{
 		GL_CALL(glBindVertexArray(0));
+	}
+
+	void VertexArray::SetIndexBuffer(const s_ptr<IndexBuffer> ib)
+	{
+		glBindVertexArray(m_RendererID);
+		ib->Bind();
+		m_IndexBuffer = ib;
 	}
 
 }

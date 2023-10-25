@@ -21,7 +21,6 @@ namespace LkEngine {
 	void VertexBuffer::Bind() const
 	{
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-
 	}
 
 	void VertexBuffer::Unbind() const

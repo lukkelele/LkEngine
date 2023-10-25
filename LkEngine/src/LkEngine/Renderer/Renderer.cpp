@@ -22,8 +22,10 @@ namespace LkEngine {
 		auto& mesh = entity.GetComponent<MeshComponent>();
 		mesh.BaseShader->Bind();
 		mesh.VAO->Bind();
-		mesh.IBO->Bind();
-		glDrawElements(DrawMode, mesh.IBO->GetCount(), GL_UNSIGNED_INT, nullptr);
+		//mesh.IBO->Bind();
+		auto& ibo = mesh.VAO->GetIndexBuffer();
+		ibo->Bind();
+		glDrawElements(DrawMode, ibo->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 

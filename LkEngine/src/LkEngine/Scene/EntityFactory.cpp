@@ -69,14 +69,17 @@ namespace LkEngine {
 		mesh.Color = Color::Generate();
 		mesh.VAO = create_s_ptr<VertexArray>();
 		mesh.VBO = create_s_ptr<VertexBuffer>(vertices, LK_ARRAYSIZE(vertices));
-		VertexBufferLayout layout;
-		layout.Push<float>(2);
-		mesh.VAO->AddBuffer(*mesh.VBO, layout);
+		//VertexBufferLayout layout;
+		//layout.Push<float>(2);
+		mesh.VBO->SetLayout({ { "pos", ShaderDataType::Float2 } });
+		//mesh.VAO->AddBuffer(*mesh.VBO, layout);
+		mesh.VAO->AddBuffer(*mesh.VBO, mesh.VBO->GetLayout());
 		mesh.IBO = create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices));
 		mesh.BaseShader = create_s_ptr<Shader>("assets/shaders/basic_model_view_proj.shader");
 		mesh.BaseShader->Bind();
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 		mesh.BaseShader->Unbind();
+		mesh.VAO->SetIndexBuffer(mesh.IBO);
 
 		tc.Translation.x = p1_min.x; // + width / 2;
 		tc.Translation.y = p1_min.y; // + height / 2;
