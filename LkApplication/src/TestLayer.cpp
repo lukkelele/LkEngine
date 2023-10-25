@@ -22,31 +22,6 @@ static unsigned int box_indices[6] = {
 TestLayer::TestLayer()
 {
     m_Name = "TestLayer";
-#if 0
-    ColorSlider = { 0.0f, 0.50f, 0.35f, 1.0f };
-    RectPos = { 0.0f, 0.0f, 0.0f };
-
-    auto app = LkEngine::Application::Get();
-    float width = (float)app->GetWidth();
-    float height = (float)app->GetHeight();
-
-    Pos = glm::vec3(0.0f);
-    Translation = glm::vec3(0.0f);
-    Scale = glm::vec3(1.0f);
-    Model = glm::mat4(1.0f);
-    View = glm::mat4(1.0f);
-    Projection = glm::ortho<float>(0, width, height, 0.0f, -1.0f, 1.0f);
-
-    // 3D
-    Yaw = 3.0f * glm::pi<float>() / 4.0f;
-	Pitch = glm::pi<float>() / 4.0f;
-	//Rot = glm::quat(glm::vec3(Pitch, Yaw, 0.0f));
-    Rot = glm::quat();
-
-    // For testing rectangles
-    ScalerSlider1 = 1.0f;
-    ScalerSlider2 = 1.0f;
-#endif
 }
 
 TestLayer::~TestLayer()
@@ -63,6 +38,8 @@ void TestLayer::OnAttach()
     //EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
     EntityFactory::CreateRectangle(*m_Scene, { 0, 0}, { 240, 240 });
+
+    Renderer2D::Init();
 }
 
 void TestLayer::OnDetach()
@@ -74,6 +51,15 @@ void TestLayer::OnUpdate(float ts)
     m_Scene->OnUpdate(ts);
     auto mouse_pos = Mouse::GetMousePos();
     Physics2D::Raycast(m_Scene, mouse_pos, mouse_pos);
+
+
+    auto& cam = *m_Scene->GetActiveCamera();
+
+    Renderer2D::BeginScene(cam);
+    Renderer2D::DrawQuad({ -0.50f, 0.0f }, { 0.4f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+    Renderer2D::DrawQuad({  0.0f, 0.0f }, { 0.8f, 0.8f }, { 0.25f, 0.30f, 0.60f, 1.0f });
+    Renderer2D::DrawQuad({  -1.0f, -1.0f }, { 0.1f, 0.1f }, { 0.25f, 0.30f, 0.60f, 1.0f });
+    Renderer2D::EndScene();
 }
 
 void TestLayer::OnImGuiRender()
