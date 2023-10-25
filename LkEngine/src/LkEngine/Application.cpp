@@ -56,6 +56,7 @@ namespace LkEngine {
             layer->OnUpdate(ts);
         }
 
+    #if 0
         m_Context->BeginImGuiFrame();
         for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
         {
@@ -63,6 +64,7 @@ namespace LkEngine {
             layer->OnImGuiRender();
         }
         m_Context->EndImGuiFrame();
+    #endif
 
         m_Window->OnUpdate();
     }

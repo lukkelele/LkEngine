@@ -28,12 +28,14 @@ namespace LkEngine {
 		glDrawElements(DrawMode, ibo->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
+	void Renderer::Draw(VertexArray& va, IndexBuffer& ib, Shader& shader) 
 	{
 		shader.Bind();
 		va.Bind();
-		ib.Bind();
-		glDrawElements(DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+		auto& ibo = va.GetIndexBuffer();
+		ibo->Bind();
+		//ib.Bind();
+		glDrawElements(DrawMode, ibo->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::Draw(const MeshComponent& mesh)
@@ -41,8 +43,11 @@ namespace LkEngine {
 		LK_ASSERT_MESHCOMPONENT(mesh);
 		mesh.BaseShader->Bind();
 		mesh.VAO->Bind();
-		mesh.IBO->Bind();
-		glDrawElements(DrawMode, mesh.IBO->GetCount(), GL_UNSIGNED_INT, nullptr);
+		//mesh.IBO->Bind();
+		auto& ib = mesh.VAO->GetIndexBuffer();
+		ib->Bind();
+		//glDrawElements(DrawMode, mesh.IBO->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(DrawMode, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 

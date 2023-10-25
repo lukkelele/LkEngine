@@ -69,9 +69,7 @@ namespace LkEngine {
 	class VertexBufferLayout
 	{
 	public:
-		VertexBufferLayout()
-			: m_Stride(0) {}
-
+		VertexBufferLayout() {}
 		VertexBufferLayout(std::initializer_list<VertexBufferElement> elements)
 			: m_Elements(elements)
 		{
@@ -95,7 +93,7 @@ namespace LkEngine {
 				element.Offset = offset;
 				offset += element.Size;
 				m_Stride += element.Size;
-				LOG_DEBUG("Element offset: {}", offset);
+				//LOG_DEBUG("Element offset: {}", offset);
 			}
 			LOG_DEBUG("VertexBufferLayout: {} elements, stride: {}", m_Elements.size(), m_Stride);
 		}
@@ -103,32 +101,6 @@ namespace LkEngine {
 	private:
 		std::vector<VertexBufferElement> m_Elements;
 		unsigned int m_Stride;
-
-	public:
-		// TODO: Define outside
-		template<typename T>
-		void Push(unsigned int count)
-		{
-		}
-
-		template<>
-		void Push<float>(unsigned int count)
-		{
-			//m_Elements.push_back({"NULL", ShaderDataType::Float, ShaderDataTypeSize(ShaderDataType::Float), 0, GL_FALSE, count});
-			m_Elements.push_back({ "NULL", ShaderDataType::Float, GL_FALSE });
-			m_Stride += count * VertexBufferElement::GetSizeOfType(GL_FLOAT);
-		}
-
-		template<>
-		void Push<unsigned int>(unsigned int count)
-		{
-			//m_Elements.push_back({"NULL", GL_UNSIGNED_INT, count, GL_FALSE, static_cast<uint32_t>(count * sizeof(GL_UNSIGNED_INT)), 0});
-			//m_Elements.push_back({"NULL", ShaderDataType::Int, ShaderDataTypeSize(ShaderDataType::Int), 0, GL_FALSE, count});
-			m_Elements.push_back({ "NULL", ShaderDataType::Int, GL_FALSE });
-			m_Stride += count * VertexBufferElement::GetSizeOfType(GL_UNSIGNED_INT);
-		}
-
-
 	};
 
 }

@@ -22,7 +22,7 @@ namespace LkEngine {
 		static void Clear();
 
 		static void Draw(Entity& entity);
-		static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
+		static void Draw(VertexArray& va, IndexBuffer& ib, Shader& shader);
 		static void Draw(const MeshComponent& mesh);
 		static void DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);

@@ -35,10 +35,10 @@ public:
     float ScalerSlider1, ScalerSlider2;
 
 private:
-    VertexArray* m_VAO = nullptr;
-    VertexBuffer* m_VBO = nullptr;
-    IndexBuffer* m_IBO = nullptr;
-    Shader* m_Shader = nullptr;
+    s_ptr<VertexArray> m_VAO = nullptr;
+    s_ptr<VertexBuffer> m_VBO = nullptr;
+    s_ptr<IndexBuffer> m_IBO = nullptr;
+    s_ptr<Shader> m_Shader = nullptr;
 
     s_ptr<Scene> m_Scene = nullptr;
 };

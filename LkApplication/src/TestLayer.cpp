@@ -63,6 +63,15 @@ void TestLayer::OnAttach()
     //EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
     EntityFactory::CreateRectangle(*m_Scene, { 0, 0}, { 240, 240 });
+
+    m_VAO = VertexArray::Create();
+    m_VBO = VertexBuffer::Create(box_vertices, LK_ARRAYSIZE(box_vertices));
+    m_IBO = IndexBuffer::Create(box_indices, LK_ARRAYSIZE(box_indices));
+    m_VBO->SetLayout({ 
+        { "pos", ShaderDataType::Float2 }
+    });
+    m_VAO->AddVertexBuffer(m_VBO);
+    m_Shader = create_s_ptr<Shader>("assets/shaders/basic_test.shader");
 }
 
 void TestLayer::OnDetach()
@@ -74,11 +83,13 @@ void TestLayer::OnUpdate(float ts)
     m_Scene->OnUpdate(ts);
     auto mouse_pos = Mouse::GetMousePos();
     Physics2D::Raycast(m_Scene, mouse_pos, mouse_pos);
+
+    m_VAO->Bind();
+    
 }
 
 void TestLayer::OnImGuiRender()
 {
-    m_Scene->OnImGuiRender();
 }
 
 

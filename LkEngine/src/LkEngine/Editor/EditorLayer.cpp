@@ -559,7 +559,7 @@ namespace LkEngine {
             glm::value_ptr(view_matrix), 
             glm::value_ptr(proj_matrix), 
             ImGuizmo::TRANSLATE, 
-            ImGuizmo::WORLD, 
+            ImGuizmo::LOCAL, 
             glm::value_ptr(transform_matrix)
         );
 
