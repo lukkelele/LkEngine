@@ -1,5 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Texture.h"
+#include "LkEngine/Renderer/Renderer.h"
 #include "stb_image/stb_image.h"
 
 

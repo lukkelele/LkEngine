@@ -6,6 +6,7 @@
 #include "LkEngine/Renderer/UniformBuffer.h"
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Renderer/Texture.h"
+#include "LkEngine/Renderer/Renderer2D.h"
 #include "LkEngine/Scene/Components.h"
 #include <glad/glad.h>
 

@@ -1,30 +1,12 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Renderer2D.h"
+#include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/RenderCommand.h"
 
 
 namespace LkEngine {
 
-    struct LineVertex
-    {
-        glm::vec3 Position;
-        glm::vec4 Color;
-
-        // Editor-only
-        int EntityID;
-    };
-
-    struct QuadVertex
-    {
-        glm::vec3 Position;
-        glm::vec4 Color;
-        glm::vec2 TexCoord;
-        float TexIndex;
-        float TilingFactor;
-
-        int EntityID; /* For editor */
-    };
-
+#if 0
     struct Renderer2DData
     {
         static const uint32_t MaxQuads = 20000;
@@ -65,14 +47,37 @@ namespace LkEngine {
         s_ptr<UniformBuffer> CameraUniformBuffer;
     };
 
-    static Renderer2DData s_Data;
+    static Renderer2DData m_
+#endif
+    
+
+    Renderer2D::Renderer2D(const Renderer2DSpecification& specification)
+        : m_Specification(specification)
+        , m_MaxVertices(specification.MaxQuads * 4)
+        , m_MaxIndices(specification.MaxQuads * 6)
+        , m_MaxLineVertices(specification.MaxLines * 2)
+        , m_MaxLineIndices(specification.MaxLines * 6)
+    {
+        Init();
+    }
+
+    Renderer2D::~Renderer2D()
+    {
+    }
 
     void Renderer2D::Init()
     {
-        s_Data.QuadVertexArray = VertexArray::Create();
+        //s_ptr<VertexArray> QuadVertexArray;
+        //s_ptr<VertexBuffer> QuadVertexBuffer;
+        //s_ptr<Shader> QuadShader;
+        //glm::vec4 QuadVertexPositions[4];
+        //s_ptr<VertexArray> LineVertexArray;
+        //s_ptr<VertexBuffer> LineVertexBuffer;
+        //s_ptr<Shader> LineShader;
+        m_QuadVertexArray = VertexArray::Create();
 
-        s_Data.QuadVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(QuadVertex));
-        s_Data.QuadVertexBuffer->SetLayout({
+        m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
+        m_QuadVertexBuffer->SetLayout({
             { "a_Position", ShaderDataType::Float3     },
             { "a_Color", ShaderDataType::Float4        },
             { "a_TexCoord", ShaderDataType::Float2     },
@@ -80,53 +85,54 @@ namespace LkEngine {
             { "a_TilingFactor", ShaderDataType::Float  },
             { "a_EntityID", ShaderDataType::Int        }
         });
-        s_Data.QuadVertexArray->AddVertexBuffer(*s_Data.QuadVertexBuffer);
+        m_QuadVertexArray->AddVertexBuffer(*m_QuadVertexBuffer);
+        m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
 
-        s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
-        uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
+        uint32_t* quadIndices = new uint32_t[m_MaxIndices];
 
         uint32_t offset = 0;
-        for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+        for (uint32_t i = 0; i < m_MaxIndices; i += 6)
         {
+            // First triangle
             quadIndices[i + 0] = offset + 0;
             quadIndices[i + 1] = offset + 1;
             quadIndices[i + 2] = offset + 2;
 
+            // Second triangle
             quadIndices[i + 3] = offset + 2;
             quadIndices[i + 4] = offset + 3;
             quadIndices[i + 5] = offset + 0;
 
             offset += 4;
         }
-        s_ptr<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
-        s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
+        s_ptr<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, m_MaxIndices);
+        m_QuadVertexArray->SetIndexBuffer(quadIB);
         delete[] quadIndices;
 
 
         // Line
-        s_Data.LineVertexArray = VertexArray::Create();
-        s_Data.LineVertexBuffer = VertexBuffer::Create(s_Data.MaxVertices * sizeof(LineVertex));
+        m_LineVertexArray = VertexArray::Create();
+        m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
         VertexBufferLayout lineVertexBufLayout{ };
-        s_Data.LineVertexBuffer->SetLayout({
+        m_LineVertexBuffer->SetLayout({
             {  "a_Position", ShaderDataType::Float3 ,  },
             {  "a_Color",    ShaderDataType::Float4 ,  },
             {  "a_EntityID", ShaderDataType::Int ,     }
             });
-        s_Data.LineVertexArray->AddVertexBuffer(*s_Data.LineVertexBuffer);
-        s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
+        m_LineVertexArray->AddVertexBuffer(*m_LineVertexBuffer);
+        m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
-        s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+        m_TextureSlots[0] = m_WhiteTexture;
 
-        //s_Data.QuadShader = Shader::Create("assets/shaders/basic_test.shader");
-        s_Data.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
-        s_Data.LineShader = Shader::Create("assets/shaders/basic_test.shader");
+        //m_QuadShader = Shader::Create("assets/shaders/basic_test.shader");
+        m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
+        m_LineShader = Shader::Create("assets/shaders/basic_test.shader");
+        m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 
-        s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-        s_Data.QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
-        s_Data.QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
-        s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
-
-        s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
+        m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
     }
 
     void Renderer2D::Shutdown()
@@ -135,15 +141,15 @@ namespace LkEngine {
 
     void Renderer2D::BeginScene(const Camera& camera)
     {
-        s_Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
-        s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
+        m_CameraBuffer.ViewProjection = camera.GetViewProjection();
+        m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
         StartBatch();
     }
 
     void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
     {
-        s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
-        s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
+        m_CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
+        m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
         StartBatch();
     }
 
@@ -154,11 +160,11 @@ namespace LkEngine {
 
     void Renderer2D::StartBatch()
     {
-        s_Data.QuadIndexCount = 0;
-        s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+        m_QuadIndexCount = 0;
+        m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
 
-        s_Data.LineVertexCount = 0;
-        s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
+        m_LineVertexCount = 0;
+        m_LineVertexBufferPtr = m_LineVertexBufferBase;
     }
 
     void Renderer2D::NextBatch()
@@ -169,34 +175,34 @@ namespace LkEngine {
 
     void Renderer2D::Flush()
     {
-        if (s_Data.QuadIndexCount)
+        if (m_QuadIndexCount)
         {
-            uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
-            s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+            uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
+            m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
             // Bind textures
-            for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+            for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
             {
                 // FIXME: Add textures here
-                s_ptr<Texture2D> tex2D = s_Data.TextureSlots[i];
+                s_ptr<Texture2D> tex2D = m_TextureSlots[i];
                 if (tex2D)
                     tex2D->Bind(i);
             }
 
-            s_Data.QuadShader->Bind();
-            RenderCommand::DrawIndexed(*s_Data.QuadVertexArray, s_Data.QuadIndexCount);
-            s_Data.Stats.DrawCalls++;
+            m_QuadShader->Bind();
+            RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
+            m_Stats.DrawCalls++;
         }
 
-        if (s_Data.LineVertexCount)
+        if (m_LineVertexCount)
         {
-            uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.LineVertexBufferPtr - (uint8_t*)s_Data.LineVertexBufferBase);
-            s_Data.LineVertexBuffer->SetData(s_Data.LineVertexBufferBase, dataSize);
+            uint32_t dataSize = (uint32_t)((uint8_t*)m_LineVertexBufferPtr - (uint8_t*)m_LineVertexBufferBase);
+            m_LineVertexBuffer->SetData(m_LineVertexBufferBase, dataSize);
 
-            s_Data.LineShader->Bind();
-            RenderCommand::SetLineWidth(s_Data.LineWidth);
-            RenderCommand::DrawLines(*s_Data.LineVertexArray, s_Data.LineVertexCount);
-            s_Data.Stats.DrawCalls++;
+            m_LineShader->Bind();
+            RenderCommand::SetLineWidth(m_LineWidth);
+            RenderCommand::DrawLines(*m_LineVertexArray, m_LineVertexCount);
+            m_Stats.DrawCalls++;
         }
     }
 
@@ -220,23 +226,23 @@ namespace LkEngine {
         constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
         const float tilingFactor = 1.0f;
 
-        if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
+        if (m_QuadIndexCount >= m_MaxIndices)
             NextBatch();
 
         for (size_t i = 0; i < quadVertexCount; i++)
         {
-            s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
-            s_Data.QuadVertexBufferPtr->Color = color;
-            s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
-            s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
-            s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
-            s_Data.QuadVertexBufferPtr->EntityID = entityID;
-            s_Data.QuadVertexBufferPtr++;
+            m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i];
+            m_QuadVertexBufferPtr->Color = color;
+            m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
+            m_QuadVertexBufferPtr->TexIndex = textureIndex;
+            m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+            m_QuadVertexBufferPtr->EntityID = entityID;
+            m_QuadVertexBufferPtr++;
         }
 
-        s_Data.QuadIndexCount += 6;
+        m_QuadIndexCount += 6;
 
-        s_Data.Stats.QuadCount++;
+        m_Stats.QuadCount++;
     }
 
     void Renderer2D::DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, int entityID)

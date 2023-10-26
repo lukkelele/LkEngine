@@ -39,7 +39,8 @@ void TestLayer::OnAttach()
     EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
     EntityFactory::CreateRectangle(*m_Scene, { 0, 0}, { 240, 240 });
 
-    Renderer2D::Init();
+    m_Renderer2D = std::make_shared<Renderer2D>();
+    m_Renderer2D->Init();
 }
 
 void TestLayer::OnDetach()
@@ -55,11 +56,11 @@ void TestLayer::OnUpdate(float ts)
 
     auto& cam = *m_Scene->GetActiveCamera();
 
-    Renderer2D::BeginScene(cam);
-    Renderer2D::DrawQuad({ -0.50f, 0.0f }, { 0.4f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-    Renderer2D::DrawQuad({  0.0f, 0.0f }, { 0.8f, 0.8f }, { 0.25f, 0.30f, 0.60f, 1.0f });
-    Renderer2D::DrawQuad({  -1.0f, -1.0f }, { 0.1f, 0.1f }, { 0.25f, 0.30f, 0.60f, 1.0f });
-    Renderer2D::EndScene();
+    m_Renderer2D->BeginScene(cam);
+    m_Renderer2D->DrawQuad({ -0.50f, 0.0f }, { 0.4f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+    m_Renderer2D->DrawQuad({  0.0f, 0.0f }, { 0.8f, 0.8f }, { 0.25f, 0.30f, 0.60f, 1.0f });
+    m_Renderer2D->DrawQuad({  -1.0f, -1.0f }, { 0.1f, 0.1f }, { 0.25f, 0.30f, 0.60f, 1.0f });
+    m_Renderer2D->EndScene();
 }
 
 void TestLayer::OnImGuiRender()

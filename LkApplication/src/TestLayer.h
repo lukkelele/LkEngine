@@ -20,6 +20,7 @@ public:
 
 private:
     s_ptr<Scene> m_Scene = nullptr;
+    s_ptr<Renderer2D> m_Renderer2D = nullptr;
 };
 
 

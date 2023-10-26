@@ -1,5 +1,7 @@
 #pragma once
-#include "LkEngine/Renderer/Renderer.h"
+
+#include "LkEngine/Core/Base.h"
+#include <glad/glad.h>
 
 
 namespace LkEngine {
