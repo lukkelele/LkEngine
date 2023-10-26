@@ -281,6 +281,12 @@ namespace LkEngine {
 				//Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (center_window_width * 0.50f)), (Mouse::CenterPos.y * (center_window_height * 0.50f)) };
 				Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (viewport_width * 0.50f)), (Mouse::CenterPos.y * (viewport_height * 0.50f)) };
 				ImGui::Text("Centered scaled mouse pos (%.2f, %.2f)", Mouse::ScaledCenterPos.x, Mouse::ScaledCenterPos.y);
+
+				auto& scene = *Scene::ActiveScene;
+				auto& active_cam = *scene.GetActiveCamera();
+				glm::vec2 cam_pos = active_cam.GetPos();
+
+				ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
 			}
 			ImGui::End();
 			//--------------------------------------------------

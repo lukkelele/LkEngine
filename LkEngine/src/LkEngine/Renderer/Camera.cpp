@@ -24,23 +24,22 @@ namespace LkEngine {
 			if (Keyboard::IsKeyPressed(Key::W))
 			{
 				m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
-				printf("Key -> A: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
+				//printf("Key -> A: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
 			}
 			if (Keyboard::IsKeyPressed(Key::A))
 			{
 				m_Pos -= glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
-				printf("Key -> A: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
+				//printf("Key -> A: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
 			}
 			if (Keyboard::IsKeyPressed(Key::S))
 			{
 				m_Pos -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
-				printf("Key -> S: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
+				//printf("Key -> S: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
 			}
 			if (Keyboard::IsKeyPressed(Key::D))
 			{
-				//LOG_DEBUG("Key: D");
 				m_Pos += glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
-				printf("Key -> D: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
+				//printf("Key -> D: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
 			}
 		}
 

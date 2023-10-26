@@ -53,14 +53,11 @@ void TestLayer::OnUpdate(float ts)
     auto mouse_pos = Mouse::GetMousePos();
     Physics2D::Raycast(m_Scene, mouse_pos, mouse_pos);
 
-
     auto& cam = *m_Scene->GetActiveCamera();
 
-    m_Renderer2D->BeginScene(cam);
-    m_Renderer2D->DrawQuad({ -0.50f, 0.0f }, { 0.4f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-    m_Renderer2D->DrawQuad({  0.0f, 0.0f }, { 0.8f, 0.8f }, { 0.25f, 0.30f, 0.60f, 1.0f });
-    m_Renderer2D->DrawQuad({  -1.0f, -1.0f }, { 0.1f, 0.1f }, { 0.25f, 0.30f, 0.60f, 1.0f });
-    m_Renderer2D->EndScene();
+    //m_Renderer2D->BeginScene(cam);
+    //m_Renderer2D->DrawQuad({ -0.50f, 0.0f }, { 0.4f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+    //m_Renderer2D->EndScene();
 }
 
 void TestLayer::OnImGuiRender()

@@ -14,27 +14,24 @@ namespace LkEngine {
         {
             if (entity.HasComponent<MeshComponent>() && entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
             {
+                glm::vec2 mouse_pos = Mouse::ScaledPos;
+
                 auto& tc = entity.GetComponent<TransformComponent>();
                 auto& mesh = entity.GetComponent<MeshComponent>();
                 auto& sprite = entity.GetComponent<SpriteComponent>();
-                //glm::vec2 mouse_pos = Mouse::ScaledCenterPos;
-                glm::vec2 mouse_pos = Mouse::ScaledPos;
+                auto& cam = *scene->GetActiveCamera();
+                glm::vec2 cam_pos = cam.GetPos();
 
                 if (EditorLayer::Enabled)
                 {
                     auto editor_layer = EditorLayer::Get();
                 }
-
                 float quad_width, quad_height;
                 quad_width = sprite.Size.x;
                 quad_height = sprite.Size.y;
                 glm::vec3 quad_pos = tc.Translation;
 
-                //glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
-                //glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + 0.50f * quad_height };
-                //glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + 0.50f * quad_height };
-                //glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
-                glm::vec2 bottom_left = { quad_pos.x, quad_pos.y};
+                glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
                 glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
                 glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
                 glm::vec2 top_left = { quad_pos.x - quad_width, quad_pos.y  + quad_height };
@@ -48,8 +45,8 @@ namespace LkEngine {
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
-                    bool within_x_boundaries = (mouse_pos.x >= bottom_left.x && mouse_pos.x <= top_right.x);
-                    bool within_y_boundaries = (mouse_pos.y <= top_left.y && mouse_pos.y >= bottom_right.y);
+                    bool within_x_boundaries = (mouse_pos.x + cam_pos.x >= bottom_left.x && mouse_pos.x + cam_pos.x <= top_right.x);
+                    bool within_y_boundaries = ((mouse_pos.y + cam_pos.y <= top_left.y) && (mouse_pos.y + cam_pos.y >= bottom_right.y));
                     if (within_x_boundaries && within_y_boundaries)
                     {
                         LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mouse_pos.x, mouse_pos.y);

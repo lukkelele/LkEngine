@@ -19,8 +19,10 @@ namespace LkEngine {
 		auto window = Window::Get();
 		float width = window->GetWidth();
 		float height = window->GetHeight();
-		m_ActiveCamera = create_s_ptr<OrthographicCamera>(0, width, 0, height);
-		m_Camera2D = create_s_ptr<OrthographicCamera>(0, width, height, 0);
+		//m_ActiveCamera = create_s_ptr<OrthographicCamera>(0, width, 0, height);
+		//m_Camera2D = create_s_ptr<OrthographicCamera>(0, width, height, 0);
+		m_Camera2D = create_s_ptr<OrthographicCamera>(0, width, 0, height);
+		m_ActiveCamera = m_Camera2D;
 		m_EditorCamera = create_s_ptr<EditorCamera>();
 	}
 
@@ -127,7 +129,6 @@ namespace LkEngine {
 	void Scene::OnUpdate(float ts)
 	{
 		m_ActiveCamera->OnUpdate(ts);
-		//m_EditorCamera->OnUpdate(ts);
 
 		auto entities = m_Registry.view<TransformComponent>();
 		for (auto& ent : entities)

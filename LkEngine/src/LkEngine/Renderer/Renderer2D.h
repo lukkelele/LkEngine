@@ -25,7 +25,6 @@ namespace LkEngine {
 
         void Init();
         void Shutdown();
-
         void BeginScene(const Camera& camera);
         void BeginScene(const Camera& camera, const glm::mat4& transform);
         void EndScene();
@@ -51,6 +50,9 @@ namespace LkEngine {
         };
         void ResetStats();
         Statistics GetStats();
+
+        float r = 1.0f;
+        float inc = 0.01;
 
     private:
         void StartBatch();
@@ -115,7 +117,6 @@ namespace LkEngine {
         };
         CameraData m_CameraBuffer;
         s_ptr<UniformBuffer> m_CameraUniformBuffer;
-
     };
 
 }

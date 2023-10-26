@@ -49,7 +49,6 @@ namespace LkEngine {
 
     static Renderer2DData m_
 #endif
-    
 
     Renderer2D::Renderer2D(const Renderer2DSpecification& specification)
         : m_Specification(specification)
@@ -67,23 +66,11 @@ namespace LkEngine {
 
     void Renderer2D::Init()
     {
-        //s_ptr<VertexArray> QuadVertexArray;
-        //s_ptr<VertexBuffer> QuadVertexBuffer;
-        //s_ptr<Shader> QuadShader;
-        //glm::vec4 QuadVertexPositions[4];
-        //s_ptr<VertexArray> LineVertexArray;
-        //s_ptr<VertexBuffer> LineVertexBuffer;
-        //s_ptr<Shader> LineShader;
         m_QuadVertexArray = VertexArray::Create();
 
         m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
         m_QuadVertexBuffer->SetLayout({
-            { "a_Position", ShaderDataType::Float3     },
-            { "a_Color", ShaderDataType::Float4        },
-            { "a_TexCoord", ShaderDataType::Float2     },
-            { "a_TexIndex", ShaderDataType::Float      },
-            { "a_TilingFactor", ShaderDataType::Float  },
-            { "a_EntityID", ShaderDataType::Int        }
+            { "a_Position", ShaderDataType::Float2 },
         });
         m_QuadVertexArray->AddVertexBuffer(*m_QuadVertexBuffer);
         m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
@@ -115,22 +102,22 @@ namespace LkEngine {
         m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
         VertexBufferLayout lineVertexBufLayout{ };
         m_LineVertexBuffer->SetLayout({
-            {  "a_Position", ShaderDataType::Float3 ,  },
-            {  "a_Color",    ShaderDataType::Float4 ,  },
-            {  "a_EntityID", ShaderDataType::Int ,     }
+            {  "a_Position", ShaderDataType::Float3,  },
+            {  "a_Color",    ShaderDataType::Float4,  },
+            {  "a_EntityID", ShaderDataType::Int,     }
             });
         m_LineVertexArray->AddVertexBuffer(*m_LineVertexBuffer);
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
         m_TextureSlots[0] = m_WhiteTexture;
 
-        //m_QuadShader = Shader::Create("assets/shaders/basic_test.shader");
-        m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
+        //m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");
+        m_QuadShader = Shader::Create("assets/shaders/basic_color.shader");
         m_LineShader = Shader::Create("assets/shaders/basic_test.shader");
         m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-        m_QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
-        m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
-        m_QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[3] = { 0.5f, -0.5f, 0.0f, 1.0f };
 
         m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
     }
@@ -143,6 +130,13 @@ namespace LkEngine {
     {
         m_CameraBuffer.ViewProjection = camera.GetViewProjection();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
+
+        m_TextureSlotIndex = 1;
+        for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
+        {
+            m_TextureSlots[i] = nullptr;
+        }
+
         StartBatch();
     }
 
@@ -186,10 +180,17 @@ namespace LkEngine {
                 // FIXME: Add textures here
                 s_ptr<Texture2D> tex2D = m_TextureSlots[i];
                 if (tex2D)
+                {
                     tex2D->Bind(i);
+                }
             }
 
             m_QuadShader->Bind();
+            m_QuadShader->SetUniform4f("u_Color", r, 1.0f, 0.2f, 1.0f);
+            r -= inc;
+            if (r < 0 || r > 1.0f)
+                inc *= -1;
+
             RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
             m_Stats.DrawCalls++;
         }
