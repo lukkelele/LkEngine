@@ -21,6 +21,7 @@ namespace LkEngine {
 		virtual void OnUpdate(float ts) = 0;
 		virtual void UpdateView() = 0;
 		virtual void UpdateProjection() = 0;
+		void UpdateViewProjection() { UpdateView(); UpdateProjection(); }
 		virtual void UpdateMousePosition();
 		virtual void SetProjection(glm::mat4& proj) { m_Projection = proj; } // FIXME
 		virtual void HandleInput(float ts);

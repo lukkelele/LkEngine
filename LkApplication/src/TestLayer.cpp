@@ -1,4 +1,7 @@
 #include "TestLayer.h"
+#include "LkEngine/Renderer/Renderer.h"
+#include "LkEngine/Renderer/Renderer2D.h"
+//#include <LkEngine/Application.h>
 #include <LkEngine/UI/UILayer.h>
 #include <LkEngine/Math/Math.h>
 #include <LkEngine/Application.h>
@@ -41,6 +44,11 @@ void TestLayer::OnAttach()
 
     m_Renderer2D = std::make_shared<Renderer2D>();
     m_Renderer2D->Init();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void TestLayer::OnDetach()
@@ -56,10 +64,9 @@ void TestLayer::OnUpdate(float ts)
     auto& cam = *m_Scene->GetActiveCamera();
     glm::vec2 camPos = cam.GetPos();
     m_Renderer2D->BeginScene(cam);
-    //m_Renderer2D->DrawQuad({ -0.50f + camPos.x, 0.0f + camPos.y }, { 0.1f, 0.1f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-    //m_Renderer2D->DrawQuad({ -0.50f, 0.50f }, { 0.1f, 0.1f }, { 0.5f, 0.2f, 0.3f, 1.0f });
     m_Renderer2D->DrawQuad({ 50.0f, 50.0f }, { 0.50f, 1.00f }, { 0.1f, 0.8f, 0.5f, 1.0f });
-    //m_Renderer2D->DrawQuad({ 0.0f, 0.0f }, { 100.0f, 100.0f }, { 0.1f, 0.8f, 0.5f, 1.0f });
+    m_Renderer2D->DrawQuad({ 1200.0f, 400.0f }, { 0.45f + r, 0.90f }, { 0.5f, 0.2f, 0.3f, 1.0f });
+    r += 0.00025;
     m_Renderer2D->EndScene();
 }
 

@@ -10,6 +10,7 @@
 #include "LkEngine/Scene/EntityFactory.h"
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Renderer/Renderer2D.h"
+#include "LkEngine/Renderer/RenderCommand.h"
 #include "LkEngine/Physics/2D/Physics2D.h"
 #include "LkEngine/UI/UILayer.h"
 

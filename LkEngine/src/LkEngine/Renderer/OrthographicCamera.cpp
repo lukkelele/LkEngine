@@ -15,6 +15,8 @@ namespace LkEngine {
 	void OrthographicCamera::OnUpdate(float ts)
 	{
 		HandleInput(ts);
+		//UpdateViewProjection();
+		UpdateView(); // UpdateView sets m_ViewProjection in OrthographicCameras overridden func
 	}
 
 	void OrthographicCamera::UpdateProjection()

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
+#include <cstddef>
 
 
 
@@ -19,6 +20,8 @@ namespace LkEngine {
 	#define BIT_FIELD(x)                     (1 << x)
 	#define STRINIGFY(x)                     #x
 	#define GL_CALL(_FUNC)                   (void)(_FUNC) // TODO: Add opengl call func here
+
+	using byte = uint8_t;
 
 	/* Unique pointer */
 	template<typename T>

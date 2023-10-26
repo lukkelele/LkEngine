@@ -105,6 +105,7 @@ namespace LkEngine {
 
         float m_LineWidth = 2.0f;
 
+        s_ptr<Shader> m_TextureShader = nullptr;
         s_ptr<Texture2D> m_WhiteTexture = nullptr;
         std::array<s_ptr<Texture2D>, MaxTextureSlots> m_TextureSlots;
         uint32_t m_TextureSlotIndex = 1; // 0 = white texture

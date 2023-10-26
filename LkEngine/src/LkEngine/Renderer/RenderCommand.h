@@ -1,7 +1,6 @@
 #pragma once
 
 #include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Renderer/Renderer2D.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 
@@ -14,6 +13,12 @@ namespace LkEngine {
         static void Init()
         {
             s_Renderer->Init();
+        }
+
+        //static void Draw(& entity)
+        static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader)
+        {
+            s_Renderer->Draw(va, ib, shader);
         }
 
         static void Draw(Entity& entity)
@@ -36,7 +41,9 @@ namespace LkEngine {
         static void DrawIndexed(VertexArray& va, uint32_t indexCount)
         {
             auto& ib = va.GetIndexBuffer();
-            uint32_t count = indexCount ? indexCount : va.GetIndexBuffer()->GetCount();
+            //uint32_t count = indexCount ? indexCount : va.GetIndexBuffer()->GetCount();
+            uint32_t count = indexCount ? indexCount : va.GetIndexBuffer()->GetSize() / sizeof(unsigned int);
+            LOG_WARN("DrawIndexed: {}", count);
             glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
         }
 
@@ -50,7 +57,6 @@ namespace LkEngine {
         {
 
         }
-
 
 
     private:

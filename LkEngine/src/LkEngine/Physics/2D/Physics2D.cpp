@@ -45,8 +45,8 @@ namespace LkEngine {
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
-                    bool within_x_boundaries = (mouse_pos.x + cam_pos.x >= bottom_left.x && mouse_pos.x + cam_pos.x <= top_right.x);
-                    bool within_y_boundaries = ((mouse_pos.y + cam_pos.y <= top_left.y) && (mouse_pos.y + cam_pos.y >= bottom_right.y));
+                    bool within_x_boundaries = ((mouse_pos.x + cam_pos.x) >= bottom_left.x && (mouse_pos.x + cam_pos.x) <= top_right.x);
+                    bool within_y_boundaries = ((mouse_pos.y + cam_pos.y) <= top_left.y && (mouse_pos.y + cam_pos.y) >= bottom_right.y);
                     if (within_x_boundaries && within_y_boundaries)
                     {
                         LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mouse_pos.x, mouse_pos.y);

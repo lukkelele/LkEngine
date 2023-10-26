@@ -19,7 +19,9 @@ namespace LkEngine {
 
 	void UniformBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
 	{
+		//glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
 		glNamedBufferSubData(m_RendererID, offset, size, data);
+		//glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
 }

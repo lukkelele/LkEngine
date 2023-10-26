@@ -77,7 +77,9 @@ namespace LkEngine {
 		//mesh.VAO->AddBuffer(*mesh.VBO, layout);
 		mesh.VAO->AddVertexBuffer(*mesh.VBO);
 		//auto IBO = create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices));
-		mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices)));
+		//mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices)));
+		//mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices) * sizeof(unsigned int)));
+		mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
 		mesh.BaseShader = create_s_ptr<Shader>("assets/shaders/basic_model_view_proj.shader");
 		mesh.BaseShader->Bind();
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);

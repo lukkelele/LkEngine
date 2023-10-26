@@ -86,6 +86,22 @@ namespace LkEngine {
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
+	Buffer Texture::GetWriteableBuffer()
+	{
+		LK_ASSERT(m_Locked);
+		return m_ImageData;
+	}
+
+	void Texture::Lock()
+	{
+		m_Locked = true;
+	}
+
+	void Texture::Unlock()
+	{
+		m_Locked = false;
+		// Submit to renderer
+	}
 
 	s_ptr<Texture2D> Texture2D::Create(const TextureSpecification& textureSpec)
 	{

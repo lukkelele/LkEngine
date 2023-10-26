@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Buffer.h"
 #include <glad/glad.h>
 
 
@@ -35,17 +36,22 @@ namespace LkEngine {
 
 		virtual void Bind(unsigned int slot = 0) const;
 		virtual void Unbind() const;
+		void Lock();
+		void Unlock();
 		virtual int GetWidth() const { return m_Width; }
 		virtual int GetHeight() const { return m_Height; }
 		virtual const std::string& GetPath() const { return m_Path; }
-		virtual bool IsLoaded() const { return m_IsLoaded; }
+		virtual bool IsLoaded() const { return m_Loaded; }
 		void SetData(void* data, uint32_t size);
+		Buffer GetWriteableBuffer();
 
 	protected:
 		unsigned int m_RendererID;
 		uint32_t m_Width, m_Height;
+		Buffer m_ImageData;
 		std::string m_Path;
-		bool m_IsLoaded = false;
+		bool m_Loaded = false;
+		bool m_Locked = false;
 		TextureSpecification m_Specification;
 		GLenum m_InternalFormat, m_DataFormat;
 	};
