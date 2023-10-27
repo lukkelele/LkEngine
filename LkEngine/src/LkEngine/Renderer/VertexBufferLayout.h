@@ -37,9 +37,6 @@ namespace LkEngine {
 
 	struct VertexBufferElement
 	{
-		//unsigned int type;
-		//unsigned int count;
-		//unsigned char normalized;
 		std::string Name;
 		ShaderDataType Type;
 		uint32_t Size;
@@ -47,15 +44,15 @@ namespace LkEngine {
 		unsigned char Normalized;
 		unsigned int Count;
 
-		static unsigned int GetSizeOfType(unsigned int type)
+		VertexBufferElement() = default;
+
+		VertexBufferElement(const std::string& name, ShaderDataType type, bool normalized = false)
+			: Type(type)
+			, Name(name)
+			, Size(ShaderDataTypeSize(type))
+			, Offset(0)
+			, Normalized(normalized)
 		{
-			switch (type)
-			{
-				case GL_FLOAT:			return 4;
-				case GL_UNSIGNED_INT:   return 4;
-				case GL_UNSIGNED_BYTE:  return 1;
-			}
-			return 0;
 		}
 
 		uint32_t GetComponentCount() const
@@ -111,41 +108,10 @@ namespace LkEngine {
 				element.Offset = offset;
 				offset += element.Size;
 				m_Stride += element.Size;
-				//LOG_DEBUG("Element offset: {}", offset);
+				//LOG_DEBUG("Element offset: {}, size: {}", offset, element.Size);
 			}
-			LOG_DEBUG("VertexBufferLayout: {} elements, stride: {}", m_Elements.size(), m_Stride);
+			//LOG_DEBUG("VertexBufferLayout: {} elements, stride: {}", m_Elements.size(), m_Stride);
 		}
-
-		template<typename T>
-		void Push(unsigned int count)
-		{
-		}
-
-		template<>
-		void Push<float>(unsigned int count)
-		{
-			m_Elements.push_back({ "NULL", ShaderDataType::Float, GL_FLOAT , 0, GL_FALSE, count });
-			//m_Elements.push_back({"NULL", ShaderDataType::Float, static_cast<uint32_t>(count * sizeof(GL_FLOAT)), count, GL_FALSE});
-			//m_Elements.push_back({"NULL", ShaderDataType::Float, count * ShaderDataTypeSize(ShaderDataType::Float), count, GL_FALSE});
-			m_Stride += count * VertexBufferElement::GetSizeOfType(GL_FLOAT);
-			LOG_TRACE("Stride --> {}", m_Stride);
-		}
-
-#if 0
-		template<>
-		void Push<unsigned int>(unsigned int count)
-		{
-			m_Elements.push_back({GL_UNSIGNED_INT, count, GL_FALSE});
-			m_Stride += count * VertexBufferElement::GetSizeOfType(GL_UNSIGNED_INT);
-		}
-
-		template<>
-		void Push<unsigned char>(unsigned int count)
-		{
-			m_Elements.push_back({GL_UNSIGNED_BYTE, count, GL_TRUE});
-			m_Stride += count * VertexBufferElement::GetSizeOfType(GL_UNSIGNED_BYTE);
-		}
-#endif
 
 	};
 
