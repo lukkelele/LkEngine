@@ -10,6 +10,9 @@
 
 namespace LkEngine {
 
+    // Forward declaration
+    class Entity;
+
     struct Renderer2DSpecification
     {
         uint32_t MaxQuads = 10000;
@@ -31,6 +34,7 @@ namespace LkEngine {
         void BeginScene(const Camera& camera, const glm::mat4& transform);
         void EndScene();
         void Flush();
+        void DrawEntity(Entity& entity);
         void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color);
         void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color);
         void DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID);
@@ -55,9 +59,6 @@ namespace LkEngine {
         void ResetStats();
         Statistics GetStats();
 
-        float r = 1.0f;
-        float inc = 0.01;
-
     private:
         void StartBatch();
         void NextBatch();
@@ -77,7 +78,7 @@ namespace LkEngine {
         {
             glm::vec3 Position;
             glm::vec4 Color;
-            //int EntityID; // For editor 
+            int EntityID; // For editor 
             //glm::vec2 TexCoord;
             //float TexIndex;
             //float TilingFactor;

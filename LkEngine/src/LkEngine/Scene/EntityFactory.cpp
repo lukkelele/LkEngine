@@ -1,7 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/Scene/EntityFactory.h"
 #include "LkEngine/Scene/Scene.h"
-#include "LkEngine/Application.h"
+#include "LkEngine/Core/Application.h"
 #include <random>
 #include <chrono>
 #include "LkEngine/Renderer/Color.h"
@@ -49,18 +49,6 @@ namespace LkEngine {
 			rect_width,   rect_height,
 			0.0f,         rect_height 
 		};
-		//float vertices[] = {
-		//	-rect_width * 0.50f + (width * 0.50f),   -rect_height * 0.50f + (height * 0.50f),
-		//	 rect_width * 0.50f + (width * 0.50f),   -rect_height * 0.50f + (height * 0.50f), 
-		//	 rect_width * 0.50f + (width * 0.50f),    rect_height * 0.50f + (height * 0.50f), 
-		//	-rect_width * 0.50f + (width * 0.50f),    rect_height * 0.50f + (height * 0.50f) 
-		//};
-		//float vertices[] = {
-		//	-rect_width * 0.50f,   -rect_height * 0.50f,
-		//	 rect_width * 0.50f,   -rect_height * 0.50f, 
-		//	 rect_width * 0.50f,    rect_height * 0.50f, 
-		//	-rect_width * 0.50f,    rect_height * 0.50f 
-		//};
 		unsigned int indices[] = {
 			0, 1, 2,
 			2, 3, 0
@@ -76,9 +64,6 @@ namespace LkEngine {
 		});
 		//mesh.VAO->AddBuffer(*mesh.VBO, layout);
 		mesh.VAO->AddVertexBuffer(*mesh.VBO);
-		//auto IBO = create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices));
-		//mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices)));
-		//mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, LK_ARRAYSIZE(indices) * sizeof(unsigned int)));
 		mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
 		mesh.BaseShader = create_s_ptr<Shader>("assets/shaders/basic_model_view_proj.shader");
 		mesh.BaseShader->Bind();

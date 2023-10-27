@@ -2,9 +2,9 @@
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Math/Math.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/UI/Property.h"
-#include "LkEngine/Application.h"
 #include "LkEngine/UI/ImGuiUtilities.h"
 #include "LkEngine/Editor/Editor.h"
 

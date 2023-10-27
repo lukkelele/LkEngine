@@ -20,13 +20,22 @@ namespace LkEngine {
             s_Renderer->Draw(va, ib, shader);
         }
 
-        static void Draw(Entity& entity)
+        static void DrawEntity(Entity& entity)
         {
 		    if (!entity.HasComponent<MeshComponent>())
 		    	return;
 		    auto& mesh = entity.GetComponent<MeshComponent>();
 		    mesh.BaseShader->Bind();
 		    mesh.VAO->Bind();
+			mesh.BaseShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
+            if (entity.HasComponent<TransformComponent>())
+            {
+		        auto& transform = entity.GetComponent<TransformComponent>();
+		        mesh.BaseShader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
+            }
+
+		    mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
+
             s_Renderer->DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
         }
 

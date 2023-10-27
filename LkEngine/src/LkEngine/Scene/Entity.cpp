@@ -15,12 +15,7 @@ namespace LkEngine {
 		if (!HasComponent<MeshComponent>() || !HasComponent<TransformComponent>())
 			return;
 
-		auto& transform = GetComponent<TransformComponent>();
 		auto& mesh = GetComponent<MeshComponent>();
-
-		mesh.BaseShader->Bind();
-		mesh.BaseShader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
-		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 	}
 
 

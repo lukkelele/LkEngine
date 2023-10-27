@@ -2,6 +2,7 @@
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/Renderer/RenderCommand.h"
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/UI/UILayer.h"
 #include "LkEngine/UI/Property.h"
@@ -139,11 +140,8 @@ namespace LkEngine {
 			if (entity.HasComponent<MeshComponent>())
 			{
 				entity.OnUpdate(ts);
-				auto& mesh = entity.GetComponent<MeshComponent>();
-				mesh.BaseShader->Bind();
-				mesh.BaseShader->SetUniformMat4f("u_ViewProj", m_ActiveCamera->GetViewProjection());
-
-				Renderer::Draw(entity);
+				//Renderer::Draw(entity);
+				RenderCommand::DrawEntity(entity);
 			}
 		}
 	}

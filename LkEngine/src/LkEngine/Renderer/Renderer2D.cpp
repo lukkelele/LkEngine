@@ -2,6 +2,7 @@
 #include "LkEngine/Renderer/Renderer2D.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/RenderCommand.h"
+#include "LkEngine/Scene/Entity.h"
 
 
 namespace LkEngine {
@@ -36,7 +37,7 @@ namespace LkEngine {
         m_QuadVertexBuffer->SetLayout({
             { "a_Position",     ShaderDataType::Float3  },
             { "a_Color",        ShaderDataType::Float4  },
-            //{ "a_EntityID",     ShaderDataType::Float,  },
+            { "a_EntityID",     ShaderDataType::Float  },
         });
         m_QuadVertexArray->AddVertexBuffer(*m_QuadVertexBuffer);
         m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
@@ -46,11 +47,11 @@ namespace LkEngine {
         uint32_t offset = 0;
         for (uint32_t i = 0; i < m_MaxIndices; i += 6)
         {
-            // First triangle
+            // First triangle, 0->1->2
             quadIndices[i + 0] = offset + 0;
             quadIndices[i + 1] = offset + 1;
             quadIndices[i + 2] = offset + 2;
-            // Second triangle
+            // Second triangle, 2->3->0
             quadIndices[i + 3] = offset + 2;
             quadIndices[i + 4] = offset + 3;
             quadIndices[i + 5] = offset + 0;
@@ -85,14 +86,11 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetViewProjection();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-
         m_TextureSlotIndex = 1;
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
             m_TextureSlots[i] = nullptr;
         }
-
-        //LOG_WARN("BEGIN SCENE");
         StartBatch();
     }
 
@@ -101,13 +99,11 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
         StartBatch();
-        //LOG_WARN("BEGIN SCENE (w transform)");
     }
 
     void Renderer2D::EndScene()
     {
         Flush();
-        //LOG_DEBUG("END SCENE");
     }
 
     void Renderer2D::StartBatch()
@@ -141,6 +137,17 @@ namespace LkEngine {
         }
     }
 
+    void Renderer2D::DrawEntity(Entity& entity)
+    {
+        if (!entity.HasComponent<MeshComponent>())
+	    	return;
+	    auto& mesh = entity.GetComponent<MeshComponent>();
+	    mesh.BaseShader->Bind();
+	    mesh.VAO->Bind();
+        //s_Renderer->DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
+        RenderCommand::DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
+    }
+
     void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color)
     {
         DrawQuad({ pos.x, pos.y, 0.0f }, size, color);
@@ -158,7 +165,7 @@ namespace LkEngine {
     {
         constexpr size_t quadVertexCount = 4;
 
-        if (m_QuadIndexCount >= m_MaxIndices)
+        if (m_QuadIndexCount >= m_MaxIndices) 
         {
             NextBatch();
         }
