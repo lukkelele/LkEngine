@@ -32,7 +32,7 @@ namespace LkEngine {
 		static void Draw(const MeshComponent& mesh);
 		static void DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
-		static void DrawIndexed(VertexArray& va);
+		static void DrawIndexed(VertexArray& va, unsigned int count);
 		static void SetDrawMode(int mode);
 
 	public:

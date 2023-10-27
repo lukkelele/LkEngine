@@ -33,9 +33,6 @@ namespace LkEngine {
 		auto& ib = mesh.VAO->GetIndexBuffer();
 		ib->Bind();
 		glDrawElements(DrawMode, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
-		//ib->Unbind();
-		//mesh.VAO->Unbind();
-		//mesh.BaseShader->Unbind();
 	}
 
 	void Renderer::Draw(VertexArray& va, const Shader& shader) 
@@ -45,9 +42,6 @@ namespace LkEngine {
 		auto& ib = va.GetIndexBuffer();
 		ib->Bind();
 		glDrawElements(DrawMode, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
-		//va.Unbind();
-		//ib->Unbind();
-		//shader.Unbind();
 	}
 
 	void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
@@ -83,12 +77,9 @@ namespace LkEngine {
 		glDrawElements(GL_LINES, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::DrawIndexed(VertexArray& va)
+	void Renderer::DrawIndexed(VertexArray& va, unsigned int count)
 	{
-		va.Bind();
-		auto& ib = va.GetIndexBuffer();
-		ib->Bind();
-		glDrawElements(GL_LINES, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES /*DrawMode*/, count, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::SetDrawMode(int mode)

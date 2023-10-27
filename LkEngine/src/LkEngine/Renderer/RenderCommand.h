@@ -27,22 +27,22 @@ namespace LkEngine {
 		    auto& mesh = entity.GetComponent<MeshComponent>();
 		    mesh.BaseShader->Bind();
 		    mesh.VAO->Bind();
-            s_Renderer->DrawIndexed(*mesh.VAO);
+            s_Renderer->DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
         }
 
         static void DrawIndexed(VertexArray& va)
         {
             auto& ib = va.GetIndexBuffer();
             ib->Bind();
-            s_Renderer->DrawIndexed(va);
+            s_Renderer->DrawIndexed(va, ib->GetCount());
         }
 
-        static void DrawIndexed(VertexArray& va, uint32_t indexCount)
+        static void DrawIndexed(VertexArray& va, uint32_t _indexCount)
         {
             va.Bind();
-            LOG_DEBUG("RenderCommand::DrawIndexed -> {}", indexCount);
-            //GL_CALL(glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr));
-            GL_CALL(glDrawElements(GL_LINES, indexCount, GL_UNSIGNED_INT, nullptr));
+            auto& ib = va.GetIndexBuffer();
+            int indexCount = _indexCount ? _indexCount : ib->GetCount();
+            s_Renderer->DrawIndexed(va, indexCount);
         }
 
 

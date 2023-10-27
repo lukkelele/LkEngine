@@ -35,8 +35,8 @@ namespace LkEngine {
         m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
         m_QuadVertexBuffer->SetLayout({
             { "a_Position",     ShaderDataType::Float3  },
-            { "a_Color",        ShaderDataType::Float4, },
-            { "a_EntityID",     ShaderDataType::Float,  },
+            //{ "a_Color",        ShaderDataType::Float4, },
+            //{ "a_EntityID",     ShaderDataType::Float,  },
         });
         m_QuadVertexArray->AddVertexBuffer(*m_QuadVertexBuffer);
         m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
@@ -85,6 +85,8 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetViewProjection();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
+        glDisable(GL_DEPTH_TEST);
+
         m_TextureSlotIndex = 1;
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
@@ -126,7 +128,7 @@ namespace LkEngine {
         if (m_QuadIndexCount)
         {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
-            LOG_INFO("[Flush] Datasize: {}", dataSize);
+            //LOG_INFO("[Flush] Datasize: {}", dataSize);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
             // Bind textures
@@ -138,14 +140,7 @@ namespace LkEngine {
                 inc *= -1;
             m_QuadShader->SetUniform4f("u_Color", r * 0.85f, 0.80f, 0.30f, 1.0f);
 
-            LOG_DEBUG("m_QuadIndexCount == {} , VertexArray ID: {}, VertexBuffer ID: {}", m_QuadIndexCount, m_QuadVertexArray->GetID(), m_QuadVertexBuffer->GetID());
-            m_QuadVertexArray->Bind();
-            auto& ib = m_QuadVertexArray->GetIndexBuffer();
-            ib->Bind();
-            //IndexBuffer::PrintBufferContent(*ib, m_QuadIndexCount);
             RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
-            //RenderCommand::DrawIndexed(*m_QuadVertexArray);
-            //Renderer::DrawIndexed(*m_QuadVertexArray);
 
             m_Stats.DrawCalls++;
         }
@@ -161,7 +156,6 @@ namespace LkEngine {
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
             * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-        //DrawQuad(transform, color, 0 /* TODO: editor should insert entity ID here */);
         DrawQuad(transform, color, 0);
     }
 
@@ -171,35 +165,22 @@ namespace LkEngine {
 
         if (m_QuadIndexCount >= m_MaxIndices)
         {
-            LOG_TRACE("Next Batch");
             NextBatch();
         }
 
-        //m_QuadShader->Bind();
-		//m_QuadShader->SetUniformMat4f("u_TransformMatrix", transform);
+        m_QuadShader->Bind();
+		m_QuadShader->SetUniformMat4f("u_TransformMatrix", transform);
         for (size_t i = 0; i < quadVertexCount; i++)
         {
-            //LOG_TRACE("VertexBufferPtr: {}", (uint64_t)m_QuadVertexBufferPtr);
-            //LOG_WARN("m_QuadVertexBufferPtr->Position == ({}, {})", m_QuadVertexBufferPtr->Position.x, m_QuadVertexBufferPtr->Position.y );
+            //LOG_WARN("(BEFORE) m_QuadVertexBufferPtr->Position == ({}, {})", m_QuadVertexBufferPtr->Position.x, m_QuadVertexBufferPtr->Position.y );
             m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i]; 
-            m_QuadVertexBufferPtr->Color = color;
-            m_QuadVertexBufferPtr->EntityID = entityID;
-            //LOG_ERROR("m_QuadVertexBufferPtr->Position == ({}, {}) (entity: {})", m_QuadVertexBufferPtr->Position.x, m_QuadVertexBufferPtr->Position.y, entityID);
+            //m_QuadVertexBufferPtr->Color = color;
+            //m_QuadVertexBufferPtr->EntityID = entityID;
+            //LOG_ERROR("(AFTER) m_QuadVertexBufferPtr->Position == ({}, {}) (entity: {})", m_QuadVertexBufferPtr->Position.x, m_QuadVertexBufferPtr->Position.y, entityID);
             m_QuadVertexBufferPtr++;
         }
         m_QuadIndexCount += 6;
-#if 0
-        m_QuadShader->Bind();
-        uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
-        LOG_INFO("[Inside DrawQuad] Datasize: {}", dataSize);
-        if (dataSize)
-        {
-            m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
-            m_QuadVertexArray->GetIndexBuffer()->Bind();
-            LOG_WARN("DrawIndexed: {}", m_QuadIndexCount);
-            RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
-        }
-#endif
+
         m_Stats.QuadCount++;
     }
 

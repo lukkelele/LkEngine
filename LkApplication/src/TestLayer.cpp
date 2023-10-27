@@ -64,10 +64,10 @@ void TestLayer::OnUpdate(float ts)
     auto& cam = *m_Scene->GetActiveCamera();
     glm::vec2 camPos = cam.GetPos();
     m_Renderer2D->BeginScene(cam);
-    m_Renderer2D->DrawQuad({ 900.0f, 450.0f }, { 0.40f + r * 0.50f, 0.90f }, { 0.5f, 0.2f, 0.3f, 1.0f });
-    m_Renderer2D->DrawQuad({ 300.0f, 300.0f }, { 0.50f - r, 0.50f + r * 2 }, { 0.9f, 0.8f, 0.5f, 1.0f });
-    m_Renderer2D->DrawQuad({ 100.0f, 100.0f }, { 0.45f + r, 0.90f }, { 0.9f, 0.5f, 0.8f, 1.0f });
-    m_Renderer2D->DrawQuad({ 600.0f, 600.0f }, { 0.45f + r, 0.90f }, { 0.5f, 0.1f, 0.3f, 1.0f });
+    m_Renderer2D->DrawQuad({ 900.0f, 450.0f }, { 140.0f + r * 0.50f, 320.0f }, { 0.5f, 0.2f, 0.3f, 1.0f });
+    m_Renderer2D->DrawQuad({ 300.0f, 300.0f }, { 200.0 + 0.50 * r, 50.0f }, { 0.9f, 0.8f, 0.5f, 1.0f });
+    m_Renderer2D->DrawQuad({ 100.0f, 100.0f }, { 100 + r, 90.0f }, { 0.9f, 0.5f, 0.8f, 1.0f });
+    m_Renderer2D->DrawQuad({ 400.0f, 600.0f }, { 100 + 1.2 * r, 80.0f }, { 0.5f, 0.1f, 0.3f, 1.0f });
     r += 0.00025;
     m_Renderer2D->EndScene();
 }
