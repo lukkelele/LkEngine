@@ -141,7 +141,7 @@ namespace LkEngine {
             LOG_DEBUG("m_QuadIndexCount == {} , VertexArray ID: {}, VertexBuffer ID: {}", m_QuadIndexCount, m_QuadVertexArray->GetID(), m_QuadVertexBuffer->GetID());
             m_QuadVertexArray->Bind();
             auto& ib = m_QuadVertexArray->GetIndexBuffer();
-            //ib->Bind();
+            ib->Bind();
             //IndexBuffer::PrintBufferContent(*ib, m_QuadIndexCount);
             RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
             //RenderCommand::DrawIndexed(*m_QuadVertexArray);
@@ -175,8 +175,8 @@ namespace LkEngine {
             NextBatch();
         }
 
-        m_QuadShader->Bind();
-		m_QuadShader->SetUniformMat4f("u_TransformMatrix", transform);
+        //m_QuadShader->Bind();
+		//m_QuadShader->SetUniformMat4f("u_TransformMatrix", transform);
         for (size_t i = 0; i < quadVertexCount; i++)
         {
             //LOG_TRACE("VertexBufferPtr: {}", (uint64_t)m_QuadVertexBufferPtr);
@@ -188,13 +188,14 @@ namespace LkEngine {
             m_QuadVertexBufferPtr++;
         }
         m_QuadIndexCount += 6;
-#if 1
+#if 0
         m_QuadShader->Bind();
         uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
         LOG_INFO("[Inside DrawQuad] Datasize: {}", dataSize);
         if (dataSize)
         {
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
+            m_QuadVertexArray->GetIndexBuffer()->Bind();
             LOG_WARN("DrawIndexed: {}", m_QuadIndexCount);
             RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
         }
