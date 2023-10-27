@@ -20,7 +20,10 @@ namespace LkEngine {
 		unsigned int GetCount() const { return m_Count;  }
 		void SetData(const void* data, uint32_t size, uint32_t offset = 0);
 		uint32_t GetSize() const { return m_Size; }
-		unsigned int GetRendererID() const { return m_RendererID; }
+		unsigned int GetID() const { return m_RendererID; }
+		Buffer GetLocalData() { return Buffer::Copy(m_LocalData.Data, m_Size); }
+
+		static void PrintBufferContent(IndexBuffer& indexbuffer, int entries_to_print);
 
 	private:
 		unsigned int m_RendererID;

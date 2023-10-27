@@ -18,7 +18,7 @@ namespace LkEngine {
 
 		void Bind() const;
 		void Unbind() const;
-		unsigned int GetRendererID() const { return m_RendererID; }
+		unsigned int GetID() const { return m_RendererID; }
 		void SetData(const void* data, unsigned int size);
 		void SetLayout(const VertexBufferLayout& layout) { m_BufferLayout = layout; }
 		VertexBufferLayout GetLayout() const { return m_BufferLayout; }

@@ -287,6 +287,17 @@ namespace LkEngine {
 				glm::vec2 cam_pos = active_cam.GetPos();
 
 				ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
+
+				auto& renderer2D = *Renderer2D::Get();
+				Renderer2D::Statistics renderer2D_stats = renderer2D.GetStats();
+				ImGui::BeginGroup();
+				ImGui::Text("Renderer 2D Stats");
+				ImGui::Text("QuadVertexArray ID: %f", renderer2D_stats.QuadVertexArray_RendererID);
+				ImGui::SameLine(0, 20);
+				ImGui::Text("QuadVertexBuffer ID : %f", renderer2D_stats.QuadVertexBuffer_RendererID);
+				ImGui::SameLine(0, 20);
+				ImGui::Text("Quads: %d", renderer2D_stats.QuadCount);
+				ImGui::EndGroup();
 			}
 			ImGui::End();
 			//--------------------------------------------------

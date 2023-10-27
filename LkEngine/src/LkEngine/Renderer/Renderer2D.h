@@ -23,6 +23,8 @@ namespace LkEngine {
         Renderer2D(const Renderer2DSpecification& specification = Renderer2DSpecification());
         ~Renderer2D();
 
+        static s_ptr<Renderer2D> Get() { return s_Instance; }
+
         void Init();
         void Shutdown();
         void BeginScene(const Camera& camera);
@@ -44,6 +46,8 @@ namespace LkEngine {
         {
             uint32_t DrawCalls = 0;
             uint32_t QuadCount = 0;
+            uint32_t QuadVertexArray_RendererID = 0;
+            uint32_t QuadVertexBuffer_RendererID = 0;
 
             uint32_t GetTotalVertexCount() const { return QuadCount * 4; }
             uint32_t GetTotalIndexCount() const { return QuadCount * 6; }
@@ -59,6 +63,7 @@ namespace LkEngine {
         void NextBatch();
 
     private:
+        static s_ptr<Renderer2D> s_Instance;
         Renderer2DSpecification m_Specification;
 
         struct LineVertex
@@ -72,11 +77,13 @@ namespace LkEngine {
         {
             glm::vec3 Position;
             glm::vec4 Color;
-            glm::vec2 TexCoord;
-            float TexIndex;
-            float TilingFactor;
             int EntityID; // For editor 
+            //glm::vec2 TexCoord;
+            //float TexIndex;
+            //float TilingFactor;
         };
+
+        static float m_inc;
 
         static const uint32_t MaxTextureSlots = 32;
 
@@ -91,19 +98,9 @@ namespace LkEngine {
         s_ptr<VertexBuffer> m_QuadVertexBuffer;
         s_ptr<Shader> m_QuadShader;
 
-        s_ptr<VertexArray> m_LineVertexArray;
-        s_ptr<VertexBuffer> m_LineVertexBuffer;
-        s_ptr<Shader> m_LineShader;
-
         uint32_t m_QuadIndexCount = 0;
         QuadVertex* m_QuadVertexBufferBase = nullptr;
         QuadVertex* m_QuadVertexBufferPtr = nullptr;
-
-        uint32_t m_LineVertexCount = 0;
-        LineVertex* m_LineVertexBufferBase = nullptr;
-        LineVertex* m_LineVertexBufferPtr = nullptr;
-
-        float m_LineWidth = 2.0f;
 
         s_ptr<Shader> m_TextureShader = nullptr;
         s_ptr<Texture2D> m_WhiteTexture = nullptr;

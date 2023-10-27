@@ -15,7 +15,6 @@ namespace LkEngine {
             s_Renderer->Init();
         }
 
-        //static void Draw(& entity)
         static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader)
         {
             s_Renderer->Draw(va, ib, shader);
@@ -40,11 +39,10 @@ namespace LkEngine {
 
         static void DrawIndexed(VertexArray& va, uint32_t indexCount)
         {
-            auto& ib = va.GetIndexBuffer();
-            //uint32_t count = indexCount ? indexCount : va.GetIndexBuffer()->GetCount();
-            uint32_t count = indexCount ? indexCount : va.GetIndexBuffer()->GetSize() / sizeof(unsigned int);
-            LOG_WARN("DrawIndexed: {}", count);
-            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+            va.Bind();
+            LOG_DEBUG("RenderCommand::DrawIndexed -> {}", indexCount);
+            //GL_CALL(glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr));
+            GL_CALL(glDrawElements(GL_LINES, indexCount, GL_UNSIGNED_INT, nullptr));
         }
 
 

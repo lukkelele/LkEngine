@@ -5,20 +5,21 @@
 
 namespace LkEngine {
 
-	VertexBuffer::VertexBuffer(unsigned int arrsize)
+	VertexBuffer::VertexBuffer(unsigned int bufsize)
 	{
+		//GL_CALL(glCreateBuffers(1, &m_RendererID));
 		GL_CALL(glGenBuffers(1, &m_RendererID));
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-		LK_ASSERT(sizeof(GLfloat) == sizeof(float));
-		GL_CALL(glBufferData(GL_ARRAY_BUFFER, arrsize * sizeof(float), nullptr, GL_STATIC_DRAW));
+		GL_CALL(glBufferData(GL_ARRAY_BUFFER, bufsize, nullptr, GL_STATIC_DRAW));
+		LOG_TRACE("New VertexBuffer, id: {}", m_RendererID);
 	}
 
 	VertexBuffer::VertexBuffer(const void* data, unsigned int arrsize)
 	{
 		GL_CALL(glGenBuffers(1, &m_RendererID));
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-		LK_ASSERT(sizeof(GLfloat) == sizeof(float));
 		GL_CALL(glBufferData(GL_ARRAY_BUFFER, arrsize * sizeof(float), data, GL_STATIC_DRAW));
+		LOG_TRACE("New VertexBuffer, id: {}", m_RendererID);
 	}
 	 
 	VertexBuffer::~VertexBuffer() 
@@ -38,7 +39,6 @@ namespace LkEngine {
 
 	void VertexBuffer::SetData(const void* data, unsigned int size)
 	{
-		//Bind();
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 	}

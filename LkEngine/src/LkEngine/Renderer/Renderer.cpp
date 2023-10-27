@@ -56,9 +56,6 @@ namespace LkEngine {
 		va.Bind();
 		ib.Bind();
 		glDrawElements(DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
-		//ib.Unbind();
-		//va.Unbind();
-		//shader.Unbind();
 	}
 
 	void Renderer::Draw(const MeshComponent& mesh)
@@ -91,7 +88,7 @@ namespace LkEngine {
 		va.Bind();
 		auto& ib = va.GetIndexBuffer();
 		ib->Bind();
-		glDrawElements(GL_TRIANGLES, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_LINES, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::SetDrawMode(int mode)

@@ -29,6 +29,7 @@ namespace LkEngine {
 	{
 		GL_CALL(glGenVertexArrays(1, &m_RendererID));
 		GL_CALL(glBindVertexArray(m_RendererID));
+		LOG_TRACE("New VertexArray, id: {}", m_RendererID);
 	}
 
 	VertexArray::~VertexArray()

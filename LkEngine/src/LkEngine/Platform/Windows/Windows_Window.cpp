@@ -28,9 +28,9 @@ namespace LkEngine {
 	
 		int glfwRes = glfwInit();
 	
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); 
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Set core profile
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OpenGL_Major_Version); 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OpenGL_Minor_Version);
 	
 		m_GlfwWindow = std::make_shared<GLFWwindow*>(glfwCreateWindow((int)m_Width, (int)m_Height, m_Title.c_str(), nullptr, nullptr));
 		LK_ASSERT(m_GlfwWindow != nullptr);
@@ -57,6 +57,12 @@ namespace LkEngine {
 
 		LOG_DEBUG("Created Window ({}, {})", m_Width, m_Height);
 		GLFW_Initialized = true;
+
+		const char* glVersion = (char*)glGetString(GL_VERSION);
+		if (glVersion)
+		{
+			LOG_DEBUG("OpenGL Version: {}", glVersion);
+		}
 	}
 	
 	void Windows_Window::Exit()
