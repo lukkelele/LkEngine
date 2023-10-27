@@ -28,9 +28,10 @@ namespace LkEngine {
 			exit(EXIT_FAILURE);
 		}
 		printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
+
+		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
 		//glEnable(GL_DEPTH_TEST); 
-		//glEnable(GL_LINE_SMOOTH);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 	

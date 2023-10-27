@@ -35,7 +35,7 @@ namespace LkEngine {
         m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
         m_QuadVertexBuffer->SetLayout({
             { "a_Position",     ShaderDataType::Float3  },
-            //{ "a_Color",        ShaderDataType::Float4, },
+            { "a_Color",        ShaderDataType::Float4  },
             //{ "a_EntityID",     ShaderDataType::Float,  },
         });
         m_QuadVertexArray->AddVertexBuffer(*m_QuadVertexBuffer);
@@ -63,7 +63,7 @@ namespace LkEngine {
         m_WhiteTexture = std::make_shared<Texture2D>("assets/img/atte_square.png");
         m_TextureSlots[0] = m_WhiteTexture;
 
-        m_QuadShader = Shader::Create("assets/shaders/Renderer2D_BasicQuad.shader");
+        m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
 
         m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
         m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
@@ -85,7 +85,6 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetViewProjection();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        glDisable(GL_DEPTH_TEST);
 
         m_TextureSlotIndex = 1;
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
@@ -93,7 +92,7 @@ namespace LkEngine {
             m_TextureSlots[i] = nullptr;
         }
 
-        LOG_WARN("BEGIN SCENE");
+        //LOG_WARN("BEGIN SCENE");
         StartBatch();
     }
 
@@ -102,13 +101,13 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
         StartBatch();
-        LOG_WARN("BEGIN SCENE (w transform)");
+        //LOG_WARN("BEGIN SCENE (w transform)");
     }
 
     void Renderer2D::EndScene()
     {
         Flush();
-        LOG_DEBUG("END SCENE");
+        //LOG_DEBUG("END SCENE");
     }
 
     void Renderer2D::StartBatch()
@@ -128,19 +127,15 @@ namespace LkEngine {
         if (m_QuadIndexCount)
         {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
-            //LOG_INFO("[Flush] Datasize: {}", dataSize);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
             // Bind textures
-            /* <<< insert >>> */
+            /* <<< bind textures here >>> */
+
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
-            r -= inc;
-            if (r < 0 || r > 1.0f)
-                inc *= -1;
-            m_QuadShader->SetUniform4f("u_Color", r * 0.85f, 0.80f, 0.30f, 1.0f);
-
             RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
+            m_QuadShader->Unbind();
 
             m_Stats.DrawCalls++;
         }
@@ -168,15 +163,10 @@ namespace LkEngine {
             NextBatch();
         }
 
-        m_QuadShader->Bind();
-		m_QuadShader->SetUniformMat4f("u_TransformMatrix", transform);
         for (size_t i = 0; i < quadVertexCount; i++)
         {
-            //LOG_WARN("(BEFORE) m_QuadVertexBufferPtr->Position == ({}, {})", m_QuadVertexBufferPtr->Position.x, m_QuadVertexBufferPtr->Position.y );
             m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i]; 
-            //m_QuadVertexBufferPtr->Color = color;
-            //m_QuadVertexBufferPtr->EntityID = entityID;
-            //LOG_ERROR("(AFTER) m_QuadVertexBufferPtr->Position == ({}, {}) (entity: {})", m_QuadVertexBufferPtr->Position.x, m_QuadVertexBufferPtr->Position.y, entityID);
+            m_QuadVertexBufferPtr->Color = color;
             m_QuadVertexBufferPtr++;
         }
         m_QuadIndexCount += 6;
