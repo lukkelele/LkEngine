@@ -131,6 +131,8 @@ namespace LkEngine {
 	{
 		m_ActiveCamera->OnUpdate(ts);
 
+
+
 		auto entities = m_Registry.view<TransformComponent>();
 		for (auto& ent : entities)
 		{	

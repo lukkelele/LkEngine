@@ -43,7 +43,6 @@ namespace LkEngine {
         void Init();
         void Run();
         void Exit();
-        void OnUpdate(float ts = 1.0f);
         void OnEvent(Event& e);
         void PushLayer(Layer* layer);
         void PopLayer(Layer* layer);

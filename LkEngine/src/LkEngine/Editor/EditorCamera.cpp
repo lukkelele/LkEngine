@@ -12,21 +12,6 @@ namespace LkEngine {
 
 	EditorCamera::EditorCamera(float FOV, float nearPlane, float farPlane)
 	{
-#ifdef LK_ENGINE_OLD_IMPL
-		m_FOV = FOV;
-		m_NearPlane = nearPlane;
-		m_FarPlane = farPlane;
-
-		const glm::quat orientation = GetOrientation();
-
-		m_Yaw = 3.0f * glm::pi<float>() / 4.0f;
-		m_Pitch = glm::pi<float>() / 4.0f;
-
-		m_Projection = glm::perspectiveFov(glm::radians(m_FOV), m_ViewportWidth, m_ViewportHeight, m_NearPlane, m_FarPlane);
-		m_View = glm::translate(glm::mat4(1.0f), m_Pos) * glm::toMat4(orientation);
-		m_ViewProjection = m_Projection * m_View;
-#endif
-
 		auto mouse_pos = Mouse::GetMousePosition();
 		m_InitialMousePos = { mouse_pos.first, mouse_pos.second };
 	}

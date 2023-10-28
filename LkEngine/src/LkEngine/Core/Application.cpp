@@ -35,8 +35,28 @@ namespace LkEngine {
     {
 		while (!glfwWindowShouldClose(*m_Window->GetGlfwWindow()))
 		{
-			float deltaTime = m_Timer.GetDeltaTime();
-			OnUpdate(deltaTime);
+			float ts = m_Timer.GetDeltaTime();
+            glm::vec2 mousePos = Mouse::GetMousePos();
+
+            auto raycastResults = Physics2D::Raycast(m_Scene, mousePos, mousePos);
+
+            m_Renderer->Clear();
+
+            for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
+            {
+                Layer* layer = *it;
+                layer->OnUpdate(ts);
+            }
+
+            m_Context->BeginImGuiFrame();
+            for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
+            {
+                Layer* layer = *it;
+                layer->OnImGuiRender();
+            }
+            m_Context->EndImGuiFrame();
+
+            m_Window->OnUpdate();
 		}
     }
 
@@ -44,27 +64,6 @@ namespace LkEngine {
     {
         m_Context->Destroy();
         m_Window->Exit();
-    }
-
-    void Application::OnUpdate(float ts)
-    {
-        m_Renderer->Clear();
-
-        for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
-        {
-            Layer* layer = *it;
-            layer->OnUpdate(ts);
-        }
-
-        m_Context->BeginImGuiFrame();
-        for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
-        {
-            Layer* layer = *it;
-            layer->OnImGuiRender();
-        }
-        m_Context->EndImGuiFrame();
-
-        m_Window->OnUpdate();
     }
 
     void Application::PushLayer(Layer* layer)

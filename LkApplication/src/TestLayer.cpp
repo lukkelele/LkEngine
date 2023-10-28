@@ -2,11 +2,11 @@
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/Renderer2D.h"
-//#include <LkEngine/Application.h>
-#include <LkEngine/UI/UILayer.h>
-#include <LkEngine/Math/Math.h>
-#include <LkEngine/Renderer/Camera.h>
-#include <LkEngine/Scene/EntityFactory.h>
+#include "LkEngine/Math/Math.h"
+#include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Renderer/Camera.h"
+#include "LkEngine/Scene/EntityFactory.h"
+#include "LkEngine/Physics/2D/Physics2D.h"
 
 
 // TODO: Move to a better location to be used for geometry
@@ -58,8 +58,28 @@ void TestLayer::OnDetach()
 void TestLayer::OnUpdate(float ts)
 {
     m_Scene->OnUpdate(ts);
-    auto mouse_pos = Mouse::GetMousePos();
-    Physics2D::Raycast(m_Scene, mouse_pos, mouse_pos);
+    auto mousePos = Mouse::GetMousePos();
+    //auto raycastResults = Physics2D::Raycast(m_Scene, mousePos, mousePos);
+    auto raycastResults = Physics2D::RaycastFromScreen(m_Scene);
+    int raycastHits = raycastResults.size();
+    if (raycastHits == 1)
+    {
+        Raycast2DResult raycast = raycastResults.at(0);
+        Entity entity = raycast.HitEntity;
+        LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
+        EditorLayer::SelectedEntityID = entity.GetComponent<IDComponent>().ID;
+    }
+    else if (raycastHits > 1)
+    {
+        //for (int i = 0; i < raycastHits; i++)
+        for (auto& raycast : raycastResults)
+        {
+            //Raycast2DResult raycast = raycastResults.at(i);
+            LOG_DEBUG("(more raycast hits) Hit Entity: {}", (uint32_t)raycast.HitEntity);
+        }
+    }
+
+    //LOG_DEBUG("Raycast Results: {}", raycastResults.size());
 
     auto& cam = *m_Scene->GetActiveCamera();
     glm::vec2 camPos = cam.GetPos();

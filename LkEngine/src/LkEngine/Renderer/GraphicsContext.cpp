@@ -36,7 +36,6 @@ namespace LkEngine {
 		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 	
 		InitImGui(m_Window->GetGlslVersion().c_str());
-		//UILayer::Init();
 	}
 
 	void GraphicsContext::Destroy()

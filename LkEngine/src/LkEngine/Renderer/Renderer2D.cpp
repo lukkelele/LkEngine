@@ -144,7 +144,6 @@ namespace LkEngine {
 	    auto& mesh = entity.GetComponent<MeshComponent>();
 	    mesh.BaseShader->Bind();
 	    mesh.VAO->Bind();
-        //s_Renderer->DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
         RenderCommand::DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
     }
 
