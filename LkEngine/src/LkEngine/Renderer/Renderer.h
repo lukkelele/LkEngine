@@ -19,6 +19,11 @@ namespace LkEngine {
 
 	class Entity;
 
+	struct RenderPass
+	{
+
+	};
+
 	class Renderer
 	{
 	public:
@@ -34,6 +39,8 @@ namespace LkEngine {
 		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawIndexed(VertexArray& va, unsigned int count);
 		static void SetDrawMode(int mode);
+
+		static void Submit(LK_Function func);
 
 	public:
 		static int DrawMode;

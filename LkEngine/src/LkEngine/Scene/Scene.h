@@ -39,6 +39,9 @@ namespace LkEngine {
 		uint64_t GetEntityCount() const { return m_EntityMap.size(); }
 		std::vector<Entity> GetEntities();
 
+		template<typename RaycastTResult>
+		void HandleRaycast(std::vector<RaycastTResult>& result);
+
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 

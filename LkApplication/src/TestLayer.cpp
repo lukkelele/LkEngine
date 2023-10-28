@@ -64,31 +64,14 @@ void TestLayer::OnUpdate(float ts)
     m_Renderer2D->BeginScene(cam);
     m_Scene->BeginScene();
 
+    // TODO: Snapping movement with the mouse can switch selected entities 
+    //       because the mousepos is used and not translation for each sprite
     auto mousePos = Mouse::GetMousePos();
     auto raycastResults = Physics2D::RaycastFromScreen(m_Scene);
-    int raycastHits = raycastResults.size();
-    if (raycastHits == 1)
+    m_Scene->HandleRaycast(raycastResults);
+    if (Keyboard::IsKeyPressed(Key::Escape) && EditorLayer::SelectedEntityID != 0)
     {
-        Raycast2DResult raycast = raycastResults.at(0);
-        Entity entity = raycast.HitEntity;
-        uint32_t hitEntityID = entity;
-        EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
-        //LOG_DEBUG("Selected Entity ID: {}", EditorLayer::SelectedEntityID);
-    }
-    else if (raycastHits > 1)
-    {
-        for (const auto& raycast : raycastResults)
-        {
-            Entity entity = raycast.HitEntity;
-            uint64_t hitEntityID = entity.GetUUID();
-            if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
-            {
-                EditorLayer::SelectedEntityID = hitEntityID;
-            }
-        }
-    }
-    else if (raycastHits == 0 && Mouse::IsButtonPressed(MouseButton::ButtonLeft)) 
-    {
+        EditorLayer::SelectedEntity = { (entt::entity)NULL, &*m_Scene };
         EditorLayer::SelectedEntityID = 0;
     }
 

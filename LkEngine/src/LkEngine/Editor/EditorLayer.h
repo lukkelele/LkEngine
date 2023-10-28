@@ -58,6 +58,7 @@ namespace LkEngine {
         void DrawImGuizmo(Entity& entity);
 
 	public:
+		static Entity SelectedEntity;
 		static uint64_t SelectedEntityID;
         static std::string SelectedEntityLabel; // remove
 		static ImVec2 SelectedEntityMenuSize;

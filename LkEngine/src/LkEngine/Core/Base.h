@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 #include <memory>
+#include <functional>
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
@@ -22,6 +23,7 @@ namespace LkEngine {
 	#define GL_CALL(_FUNC)                   (void)(_FUNC) // TODO: Add opengl call func here
 
 	using byte = uint8_t;
+	using LK_Function = std::function<void()>;
 
 	/* Unique pointer */
 	template<typename T>

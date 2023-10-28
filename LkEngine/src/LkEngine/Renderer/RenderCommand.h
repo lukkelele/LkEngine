@@ -24,6 +24,7 @@ namespace LkEngine {
         {
 		    if (!entity.HasComponent<MeshComponent>())
 		    	return;
+#if 0
 		    auto& mesh = entity.GetComponent<MeshComponent>();
 		    mesh.BaseShader->Bind();
 		    mesh.VAO->Bind();
@@ -33,10 +34,24 @@ namespace LkEngine {
 		        auto& transform = entity.GetComponent<TransformComponent>();
 		        mesh.BaseShader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
             }
-
 		    mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
-
             s_Renderer->DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
+#endif
+        }
+
+        // TODO: The way of using static/non-static render functions for submitting drawcalls is just 
+        //       weird and unnecessarily difficult, fix 
+        static void DrawSprite(Entity& entity)
+        {
+		    if (!entity.HasComponent<SpriteComponent>() && !entity.HasComponent<TransformComponent>())
+		    	return;
+	        auto& tc = entity.GetComponent<TransformComponent>();
+	        auto& sc = entity.GetComponent<SpriteComponent>();
+            auto& renderer2D = Renderer2D::Get();
+            //LOG_TRACE("");
+            glm::vec3 pos = tc.Translation;
+            renderer2D->DrawQuad({ tc.Translation.x, tc.Translation.y }, sc.Size, sc.Color, (uint64_t)entity.GetUUID());
+            //renderer2D->DrawQuad(pos, sc.Color, entityID);
         }
 
         static void DrawIndexed(VertexArray& va)

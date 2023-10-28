@@ -66,10 +66,14 @@ namespace LkEngine {
 
         m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
 
-        m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
         m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
         m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
         m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
+        //m_QuadVertexPositions[0] = { -1.0f, -1.0f, 0.0f, 1.0f }; 
+        //m_QuadVertexPositions[1] = { -1.0f,  1.0f, 0.0f, 1.0f };
+        //m_QuadVertexPositions[2] = {  1.0f,  1.0f, 0.0f, 1.0f };
+        //m_QuadVertexPositions[3] = {  1.0f, -1.0f, 0.0f, 1.0f };
 
         m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
 
@@ -124,7 +128,6 @@ namespace LkEngine {
         {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
-
             // Bind textures
             /* <<< bind textures here >>> */
 
@@ -144,24 +147,21 @@ namespace LkEngine {
 	    auto& mesh = entity.GetComponent<MeshComponent>();
 	    auto& tc = entity.GetComponent<TransformComponent>();
 	    auto& sc = entity.GetComponent<SpriteComponent>();
-	    mesh.BaseShader->Bind();
-	    mesh.VAO->Bind();
-        RenderCommand::DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
 
         DrawQuad(tc.GetTransform(), sc.Color, entity.GetUUID());
     }
 
-    void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color)
+    void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
     {
         DrawQuad({ pos.x, pos.y, 0.0f }, size, color);
     }
 
-    void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color)
+    void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
     {
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
             * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-        DrawQuad(transform, color, 0);
+        DrawQuad(transform, color, entityID);
     }
 
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
@@ -169,14 +169,13 @@ namespace LkEngine {
         constexpr size_t quadVertexCount = 4;
 
         if (m_QuadIndexCount >= m_MaxIndices) 
-        {
             NextBatch();
-        }
 
         for (size_t i = 0; i < quadVertexCount; i++)
         {
             m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i]; 
             m_QuadVertexBufferPtr->Color = color;
+            m_QuadVertexBufferPtr->EntityID = entityID;
             m_QuadVertexBufferPtr++;
         }
         m_QuadIndexCount += 6;

@@ -87,4 +87,9 @@ namespace LkEngine {
 		DrawMode = mode;
 	}
 
+	void Renderer::Submit(LK_Function func)
+	{
+		
+	}
+
 }

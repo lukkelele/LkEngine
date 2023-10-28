@@ -12,6 +12,7 @@
 namespace LkEngine {
 
 	s_ptr<EditorLayer> EditorLayer::s_Instance = nullptr;
+	Entity EditorLayer::SelectedEntity;
 	uint64_t EditorLayer::SelectedEntityID = 0;
 	ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
     std::string EditorLayer::SelectedEntityLabel; // remove
@@ -545,8 +546,6 @@ namespace LkEngine {
         auto& scene = *Scene::ActiveScene;
         auto& cam = *scene.GetActiveCamera();
         auto& cam_pos = cam.GetPos();
-		//cam.UpdateView();
-		//cam.UpdateProjection();
         auto& view_matrix = cam.GetView();
         auto& proj_matrix = cam.GetProjection();
 		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
@@ -560,20 +559,15 @@ namespace LkEngine {
 		float height = m_SecondViewportBounds[1].y - pos_y;
 
 		auto window = ImGui::FindWindowByName(CORE_VIEWPORT);
-		//auto window = ImGui::FindWindowByName(LkEngine_DockSpace);
-		//ImGui::Begin(LkEngine_DockSpace);
 		ImGui::Begin(window->Name);
 		ImGui::SetNextWindowViewport(window->ID);
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
 		auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-		//ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-		//ImGuizmo::SetRect(pos_x, pos_y, width, height);
 		auto spriteRect = Editor::Sprite_GetEdgePoints(sprite, tc);
 		auto& left_lower = spriteRect[0];
 		//ImGuizmo::SetRect(center_x, center_y, width, height);
         ImGuizmo::SetRect(pos_x, pos_y, width, height);
-		//LOG_DEBUG("ImGuizmo DrawWindow: ({} {})", width, height);
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 

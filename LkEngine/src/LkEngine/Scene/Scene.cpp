@@ -8,6 +8,8 @@
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/Renderer/Color.h"
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/Physics/2D/Physics2D.h"
+#include "LkEngine/Editor/EditorLayer.h"
 
 
 namespace LkEngine {
@@ -127,6 +129,41 @@ namespace LkEngine {
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 	}
 
+	template<typename RaycastTResult>
+	void Scene::HandleRaycast(std::vector<RaycastTResult>& raycastResults)
+	{
+		LK_UNUSED(raycastResults);
+	}
+
+	template<>
+	void Scene::HandleRaycast(std::vector<Raycast2DResult>& raycastResults)
+	{
+		int raycastHits = raycastResults.size();
+
+		if (raycastHits == 1)
+		{
+		    Raycast2DResult raycast = raycastResults.at(0);
+		    Entity entity = raycast.HitEntity;
+		    auto& mc = entity.GetComponent<MeshComponent>();
+		    EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
+		}
+		else if (raycastHits > 1)
+		{
+		    for (const auto& raycast : raycastResults)
+		    {
+		        Entity entity = raycast.HitEntity;
+		        
+		        uint64_t hitEntityID = entity.GetUUID();
+		        if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
+		        {
+		            Entity currentEntity = EditorLayer::SelectedEntity;
+		            EditorLayer::SelectedEntityID = hitEntityID;
+		            EditorLayer::SelectedEntity = raycast.HitEntity;
+		        }
+		    }
+		}
+	}
+
 	void Scene::BeginScene()
 	{
 		auto entities = m_Registry.view<TransformComponent>();
@@ -138,7 +175,8 @@ namespace LkEngine {
 			if (entity.HasComponent<MeshComponent>())
 			{
 				// TODO: Submit to renderer
-				RenderCommand::DrawEntity(entity);
+				//RenderCommand::DrawEntity(entity);
+				RenderCommand::DrawSprite(entity);
 			}
 		}
 	}

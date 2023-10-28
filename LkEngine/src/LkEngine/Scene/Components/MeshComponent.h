@@ -16,6 +16,7 @@ namespace LkEngine {
         s_ptr<VertexBuffer> VBO = nullptr;
         s_ptr<Shader> BaseShader = nullptr;
         glm::vec4 Color = { 0.30f , 0.630f, 0.80f, 1.0f };
+        bool Dragged = false;
 
         MeshComponent() { }
         ~MeshComponent() { }

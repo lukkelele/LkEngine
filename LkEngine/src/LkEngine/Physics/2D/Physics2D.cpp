@@ -25,16 +25,14 @@ namespace LkEngine {
                 {
                     auto editor_layer = EditorLayer::Get();
                 }
-                float quad_width, quad_height;
-                quad_width = sprite.Size.x;
-                quad_height = sprite.Size.y;
+                float quad_width = sprite.Size.x;
+                float quad_height = sprite.Size.y;
                 glm::vec3 quad_pos = tc.Translation;
 
                 glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
                 glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
                 glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
                 glm::vec2 top_left = { quad_pos.x - quad_width, quad_pos.y + quad_height };
-
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
@@ -83,20 +81,26 @@ namespace LkEngine {
                 quad_height = sprite.Size.y;
                 glm::vec3 quad_pos = tc.Translation;
 
-                glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
-                glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
-                glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
-                glm::vec2 top_left = { quad_pos.x - quad_width, quad_pos.y + quad_height };
+                //glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
+                //glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
+                //glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
+                //glm::vec2 top_left = { quad_pos.x - quad_width, quad_pos.y + quad_height };
+                glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
+                glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
+                glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + quad_height * 0.50f };
+                glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + quad_height * 0.50f};
 
+                LOG_TRACE("BottomLeft: ({}, {})", bottom_left.x, bottom_left.y);
                 float centerX = tc.Translation.x + quad_width * 0.50f;
                 float centerY = tc.Translation.y + quad_height * 0.50f;
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
-                    bool within_x_boundaries = ((mousePos.x + camPos.x) >= bottom_left.x && (mousePos.x + camPos.x) <= top_right.x);
-                    bool within_y_boundaries = ((mousePos.y + camPos.y) <= top_left.y && (mousePos.y + camPos.y) >= bottom_right.y);
+                    bool within_x_boundaries = ((mousePos.x + camPos.x >= bottom_left.x) && ((mousePos.x + camPos.x) <= top_right.x));
+                    bool within_y_boundaries = ((mousePos.y + camPos.y) <= top_left.y && (mousePos.y + camPos.y >= bottom_right.y));
                     if (within_x_boundaries && within_y_boundaries)
                     {
+                        LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
                         float x = centerX - mousePos.x;
                         float y = centerY - mousePos.y;
                         glm::vec2 intersection = { x, y };
