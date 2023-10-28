@@ -37,11 +37,11 @@ namespace LkEngine {
         void DrawEntity(Entity& entity);
         void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color);
         void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color);
-        void DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID);
-        void DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, int entityID = -1);
-        void DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, int entityID = -1);
-        void DrawRect(const glm::mat4& transform, const glm::vec4& color, int entityID = -1);
-        void DrawSprite(const glm::mat4& transform, SpriteComponent& src, int entityID);
+        void DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawRect(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawSprite(const glm::mat4& transform, SpriteComponent& src, uint64_t entityID);
 
         float GetLineWidth();
         void SetLineWidth(float width);

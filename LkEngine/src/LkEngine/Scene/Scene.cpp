@@ -127,11 +127,30 @@ namespace LkEngine {
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 	}
 
+	void Scene::BeginScene()
+	{
+		auto entities = m_Registry.view<TransformComponent>();
+		for (auto& ent : entities)
+		{	
+			Entity entity = { ent, this };
+
+			auto& transform = entity.GetComponent<TransformComponent>();
+			if (entity.HasComponent<MeshComponent>())
+			{
+				// TODO: Submit to renderer
+				RenderCommand::DrawEntity(entity);
+			}
+		}
+	}
+
+	void Scene::EndScene()
+	{
+
+	}
+
 	void Scene::OnUpdate(float ts)
 	{
-		m_ActiveCamera->OnUpdate(ts);
-
-
+		m_ActiveCamera->Update(ts);
 
 		auto entities = m_Registry.view<TransformComponent>();
 		for (auto& ent : entities)
@@ -141,8 +160,6 @@ namespace LkEngine {
 			auto& transform = entity.GetComponent<TransformComponent>();
 			if (entity.HasComponent<MeshComponent>())
 			{
-				entity.OnUpdate(ts);
-				//Renderer::Draw(entity);
 				RenderCommand::DrawEntity(entity);
 			}
 		}

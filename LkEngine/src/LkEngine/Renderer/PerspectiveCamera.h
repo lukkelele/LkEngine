@@ -21,7 +21,7 @@ namespace LkEngine {
 		PerspectiveCamera(float FOV, float nearPlane, float farPlane);
 		virtual ~PerspectiveCamera() = default;
 
-		void OnUpdate(float ts);
+		void Update(float ts);
 
 		glm::quat GetOrientation() const;
 		glm::vec3 GetDirection();

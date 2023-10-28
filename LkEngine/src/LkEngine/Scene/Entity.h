@@ -14,9 +14,9 @@ namespace LkEngine {
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
 		Entity(const Entity& other) = default;
-		~Entity() {}
+		~Entity() = default;
 
-		void OnUpdate(float ts);
+		void OnUpdate(float ts) {}
 
 		template<typename T, typename... ARGS>
 		T& AddComponent(ARGS&&... args)

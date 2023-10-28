@@ -142,9 +142,13 @@ namespace LkEngine {
         if (!entity.HasComponent<MeshComponent>())
 	    	return;
 	    auto& mesh = entity.GetComponent<MeshComponent>();
+	    auto& tc = entity.GetComponent<TransformComponent>();
+	    auto& sc = entity.GetComponent<SpriteComponent>();
 	    mesh.BaseShader->Bind();
 	    mesh.VAO->Bind();
         RenderCommand::DrawIndexed(*mesh.VAO, mesh.VAO->GetIndexBuffer()->GetCount());
+
+        DrawQuad(tc.GetTransform(), sc.Color, entity.GetUUID());
     }
 
     void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color)
@@ -160,7 +164,7 @@ namespace LkEngine {
         DrawQuad(transform, color, 0);
     }
 
-    void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID)
+    void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         constexpr size_t quadVertexCount = 4;
 
@@ -180,19 +184,19 @@ namespace LkEngine {
         m_Stats.QuadCount++;
     }
 
-    void Renderer2D::DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, int entityID)
+    void Renderer2D::DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, uint64_t entityID)
     {
     }
 
-    void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, int entityID)
+    void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
     {
     }
 
-    void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec4& color, int entityID)
+    void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
     }
 
-    void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteComponent& src, int entityID)
+    void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteComponent& src, uint64_t entityID)
     {
     }
 

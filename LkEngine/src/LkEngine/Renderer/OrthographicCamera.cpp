@@ -12,7 +12,7 @@ namespace LkEngine {
 		m_ViewProjection = m_Projection * m_View;
 	}
 
-	void OrthographicCamera::OnUpdate(float ts)
+	void OrthographicCamera::Update(float ts)
 	{
 		HandleInput(ts);
 		//UpdateViewProjection();

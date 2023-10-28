@@ -11,7 +11,7 @@ namespace LkEngine {
         OrthographicCamera(float left, float right, float bottom, float top);
         ~OrthographicCamera() = default;
 
-        void OnUpdate(float ts);
+        void Update(float ts);
         void UpdateProjection();
         void UpdateView();
         void SetProjection(float left, float right, float bottom, float top);

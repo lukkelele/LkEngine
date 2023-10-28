@@ -20,7 +20,7 @@ namespace LkEngine {
 		m_ViewProjection = m_Projection * m_View;
 	}
 
-	void PerspectiveCamera::OnUpdate(float ts)
+	void PerspectiveCamera::Update(float ts)
 	{
 	}
 

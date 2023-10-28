@@ -18,7 +18,7 @@ namespace LkEngine {
 		Camera() = default;
 		virtual ~Camera() = default;
 
-		virtual void OnUpdate(float ts) = 0;
+		virtual void Update(float ts) = 0;
 		virtual void UpdateView() = 0;
 		virtual void UpdateProjection() = 0;
 		void UpdateViewProjection() { UpdateView(); UpdateProjection(); }

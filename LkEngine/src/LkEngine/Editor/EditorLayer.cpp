@@ -12,7 +12,7 @@
 namespace LkEngine {
 
 	s_ptr<EditorLayer> EditorLayer::s_Instance = nullptr;
-	uint64_t EditorLayer::SelectedEntityID;
+	uint64_t EditorLayer::SelectedEntityID = 0;
 	ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
     std::string EditorLayer::SelectedEntityLabel; // remove
 	glm::vec2 EditorLayer::EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
@@ -31,6 +31,7 @@ namespace LkEngine {
 		LOG_DEBUG("Viewport Bounds[1]: ({}, {})", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
 		m_ShowStackTool = true;
 		Enabled = true;
+		//SelectedEntityID = -1;
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -578,7 +579,7 @@ namespace LkEngine {
             glm::value_ptr(view_matrix), 
             glm::value_ptr(proj_matrix), 
             ImGuizmo::TRANSLATE, 
-            ImGuizmo::WORLD, 
+            ImGuizmo::LOCAL, 
             glm::value_ptr(transform_matrix)
         );
 

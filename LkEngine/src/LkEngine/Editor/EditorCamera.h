@@ -13,7 +13,7 @@ namespace LkEngine {
 		EditorCamera(float FOV, float nearPlane, float farPlane);
 		~EditorCamera() = default;
 
-		void OnUpdate(float ts);
+		void Update(float ts);
 
 		void UpdateView();
 		void UpdateProjection();

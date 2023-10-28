@@ -20,7 +20,7 @@ namespace LkEngine {
 		SceneCamera();
 		~SceneCamera() = default;
 
-		void OnUpdate(float ts);
+		void Update(float ts);
 		void UpdateView();
 		void UpdateProjection();
 	};

@@ -12,7 +12,7 @@ namespace LkEngine {
 		ID = UUID();
 	}
 
-	void SceneCamera::OnUpdate(float ts)
+	void SceneCamera::Update(float ts)
 	{
 		HasMouseMoved = false;
 

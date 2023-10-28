@@ -16,7 +16,7 @@ namespace LkEngine {
 		m_InitialMousePos = { mouse_pos.first, mouse_pos.second };
 	}
 
-	void EditorCamera::OnUpdate(float ts)
+	void EditorCamera::Update(float ts)
 	{
 		HasMouseMoved = false;
 
