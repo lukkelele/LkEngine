@@ -48,10 +48,10 @@ namespace LkEngine {
 	        auto& tc = entity.GetComponent<TransformComponent>();
 	        auto& sc = entity.GetComponent<SpriteComponent>();
             auto& renderer2D = Renderer2D::Get();
-            //LOG_TRACE("");
-            glm::vec3 pos = tc.Translation;
-            renderer2D->DrawQuad({ tc.Translation.x, tc.Translation.y }, sc.Size, sc.Color, (uint64_t)entity.GetUUID());
-            //renderer2D->DrawQuad(pos, sc.Color, entityID);
+            glm::vec2 size = { tc.Scale.x * sc.Size.x, tc.Scale.y * sc.Size.y };
+            //renderer2D->DrawQuad({ tc.Translation.x, tc.Translation.y }, size, sc.Color, (uint64_t)entity.GetUUID());
+            //renderer2D->DrawRotatedQuad({ tc.Translation.x, tc.Translation.y }, size, tc.Rotation2D, sc.Color, (uint64_t)entity.GetUUID());
+            renderer2D->DrawQuad({ tc.Translation.x, tc.Translation.y }, size, tc.Rotation2D, sc.Color, (uint64_t)entity.GetUUID());
         }
 
         static void DrawIndexed(VertexArray& va)

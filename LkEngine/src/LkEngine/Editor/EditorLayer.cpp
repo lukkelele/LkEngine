@@ -551,7 +551,7 @@ namespace LkEngine {
 		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
 		TransformComponent& tc = entity.GetComponent<TransformComponent>();
         glm::mat4& transform_matrix = tc.GetTransform();
-        SpriteComponent& sprite = entity.GetComponent<SpriteComponent>();
+        SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
 
 		float pos_x = m_SecondViewportBounds[0].x;
 		float pos_y = m_SecondViewportBounds[0].y;
@@ -564,7 +564,7 @@ namespace LkEngine {
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
 		auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-		auto spriteRect = Editor::Sprite_GetEdgePoints(sprite, tc);
+		auto spriteRect = Editor::Sprite_GetEdgePoints(sc, tc);
 		auto& left_lower = spriteRect[0];
 		//ImGuizmo::SetRect(center_x, center_y, width, height);
         ImGuizmo::SetRect(pos_x, pos_y, width, height);

@@ -37,7 +37,12 @@ namespace LkEngine {
         void DrawEntity(Entity& entity);
         void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawQuad(const glm::vec3& pos, const glm::vec2& size, float rotation, const glm::vec4& color, uint64_t entityID = 0);
         void DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, float rotation, const glm::vec4& color, uint64_t entityID = 0);
+        void DrawRotatedQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);
         void DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, uint64_t entityID = 0);
         void DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         void DrawRect(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);

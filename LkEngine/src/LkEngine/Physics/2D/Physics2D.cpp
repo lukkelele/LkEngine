@@ -17,7 +17,7 @@ namespace LkEngine {
                 glm::vec2 mousePos = Mouse::ScaledPos;
 
                 auto& tc = entity.GetComponent<TransformComponent>();
-                auto& sprite = entity.GetComponent<SpriteComponent>();
+                auto& sc = entity.GetComponent<SpriteComponent>();
                 auto& cam = *scene->GetActiveCamera();
                 glm::vec2 camPos = cam.GetPos();
 
@@ -25,8 +25,8 @@ namespace LkEngine {
                 {
                     auto editor_layer = EditorLayer::Get();
                 }
-                float quad_width = sprite.Size.x;
-                float quad_height = sprite.Size.y;
+                float quad_width = sc.Size.x;
+                float quad_height = sc.Size.y;
                 glm::vec3 quad_pos = tc.Translation;
 
                 glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
@@ -68,7 +68,7 @@ namespace LkEngine {
                 glm::vec2 mousePos = Mouse::GetScaledPos();
 
                 auto& tc = entity.GetComponent<TransformComponent>();
-                auto& sprite = entity.GetComponent<SpriteComponent>();
+                auto& sc = entity.GetComponent<SpriteComponent>();
                 auto& cam = *scene->GetActiveCamera();
                 glm::vec2 camPos = cam.GetPos();
 
@@ -77,9 +77,21 @@ namespace LkEngine {
                     auto editor_layer = EditorLayer::Get();
                 }
                 float quad_width, quad_height;
-                quad_width = sprite.Size.x;
-                quad_height = sprite.Size.y;
-                glm::vec3 quad_pos = tc.Translation;
+                quad_width = tc.Scale.x * sc.Size.x;
+                quad_height = tc.Scale.y * sc.Size.y;
+                //glm::vec3 quad_pos = tc.Translation;
+                glm::vec2 quad_pos = { tc.Translation.x, tc.Translation.y };
+
+                //float rotAngle = tc.GetRotation2D();
+                //glm::mat2 rotMat = glm::mat2(glm::cos(glm::radians(rotAngle)), -glm::sin(glm::radians(rotAngle)),
+                //    glm::sin(glm::radians(rotAngle)), glm::cos(glm::radians(rotAngle)));
+
+                float angleDeg = tc.GetRotation2D();
+                float angleRad = glm::radians(tc.GetRotation2D());
+                glm::mat2 rotMat = {
+                    glm::cos(angleRad), -glm::sin(angleRad),
+                    glm::sin(angleRad), glm::cos(angleRad)
+                };
 
                 //glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
                 //glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
@@ -90,7 +102,8 @@ namespace LkEngine {
                 glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + quad_height * 0.50f };
                 glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + quad_height * 0.50f};
 
-                LOG_TRACE("BottomLeft: ({}, {})", bottom_left.x, bottom_left.y);
+                
+                //LOG_TRACE("BottomLeft: ({}, {})", bottom_left.x, bottom_left.y);
                 float centerX = tc.Translation.x + quad_width * 0.50f;
                 float centerY = tc.Translation.y + quad_height * 0.50f;
 

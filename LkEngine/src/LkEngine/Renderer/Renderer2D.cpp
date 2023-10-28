@@ -164,6 +164,20 @@ namespace LkEngine {
         DrawQuad(transform, color, entityID);
     }
 
+    void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, uint64_t entityID)
+    {
+        DrawRotatedQuad({ pos.x, pos.y, 0.0f }, size, rotation, color);
+    }
+
+    void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, float rotation, const glm::vec4& color, uint64_t entityID)
+    {
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
+            * glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
+            * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+        DrawRotatedQuad(transform, color, entityID);
+    }
+
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         constexpr size_t quadVertexCount = 4;
@@ -182,6 +196,40 @@ namespace LkEngine {
 
         m_Stats.QuadCount++;
     }
+
+    void Renderer2D::DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, uint64_t entityID)
+    {
+        DrawRotatedQuad({ pos.x, pos.y, 0.0f }, size, rotation, color);
+    }
+
+    void Renderer2D::DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, float rotation, const glm::vec4& color, uint64_t entityID)
+    {
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
+            * glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
+            * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+        DrawRotatedQuad(transform, color, entityID);
+    }
+
+    void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
+    {
+        constexpr size_t quadVertexCount = 4;
+
+        if (m_QuadIndexCount >= m_MaxIndices) 
+            NextBatch();
+
+        for (size_t i = 0; i < quadVertexCount; i++)
+        {
+            m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i]; 
+            m_QuadVertexBufferPtr->Color = color;
+            m_QuadVertexBufferPtr->EntityID = entityID;
+            m_QuadVertexBufferPtr++;
+        }
+        m_QuadIndexCount += 6;
+
+        m_Stats.QuadCount++;
+    }
+
 
     void Renderer2D::DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, uint64_t entityID)
     {
