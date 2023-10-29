@@ -12,7 +12,7 @@ namespace LkEngine {
         std::vector<Raycast2DResult> results = {};
         for (auto& entity : scene_entities)
         {
-            if (entity.HasComponent<MeshComponent>() && entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
+            if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
             {
                 glm::vec2 mousePos = Mouse::ScaledPos;
 
@@ -63,7 +63,8 @@ namespace LkEngine {
         std::vector<Raycast2DResult> results = {};
         for (auto& entity : scene_entities)
         {
-            if (entity.HasComponent<MeshComponent>() && entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
+            //if (entity.HasComponent<MeshComponent>() && entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
+            if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
             {
                 glm::vec2 mousePos = Mouse::GetScaledPos();
 

@@ -52,8 +52,11 @@ namespace LkEngine {
 			, Size(ShaderDataTypeSize(type))
 			, Offset(0)
 			, Normalized(normalized)
+			, Count(0)
 		{
 		}
+
+		std::string_view GetName() { return Name; }
 
 		uint32_t GetComponentCount() const
 		{
@@ -97,7 +100,20 @@ namespace LkEngine {
 		std::vector<VertexBufferElement>::const_iterator end() const { return m_Elements.end(); }
 
 		inline const std::vector<VertexBufferElement> GetElements() const& { return m_Elements; }
-		inline unsigned int GetStride() const { return m_Stride;  }
+		inline unsigned int GetStride() const { return m_Stride; }
+
+		VertexBufferElement GetElement(const std::string& name)
+		{
+			for (auto it = begin(); it != end(); it++)
+			{
+				VertexBufferElement& element = *it;
+				std::string_view elementName = element.GetName();
+				if (elementName == name)
+					return element;
+			}
+			LOG_ERROR("Could not retrieve element by the name '{}'", name);
+			return VertexBufferElement();
+		}
 
 		void CalculateOffsetsAndStride()
 		{
@@ -108,7 +124,6 @@ namespace LkEngine {
 				element.Offset = offset;
 				offset += element.Size;
 				m_Stride += element.Size;
-				//LOG_DEBUG("Element offset: {}, size: {}", offset, element.Size);
 			}
 			//LOG_DEBUG("VertexBufferLayout: {} elements, stride: {}", m_Elements.size(), m_Stride);
 		}

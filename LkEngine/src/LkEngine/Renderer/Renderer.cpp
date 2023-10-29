@@ -7,9 +7,12 @@ namespace LkEngine {
 
 	int Renderer::DrawMode = GL_TRIANGLES;
 	glm::vec4 Renderer::BackgroundColor = { 0.50f, 0.50f, 0.50f, 1.0f };
+	s_ptr<Renderer2D> Renderer::s_Renderer2D = nullptr;
 
 	void Renderer::Init()
 	{
+		s_Renderer2D = std::make_shared<Renderer2D>();
+		s_Renderer2D->Init();
 	}
 
 	void Renderer::Shutdown()
@@ -21,6 +24,11 @@ namespace LkEngine {
 		auto& c = BackgroundColor;
 		glClearColor(c.x, c.y, c.z, c.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	s_ptr<Renderer2D> Renderer::GetRenderer2D() 
+	{ 
+		return s_Renderer2D; 
 	}
 
 	void Renderer::Draw(Entity& entity)
@@ -87,9 +95,8 @@ namespace LkEngine {
 		DrawMode = mode;
 	}
 
-	void Renderer::Submit(LK_Function func)
-	{
-		
-	}
+	//void Renderer::Submit(std::function<void> func)
+	//{
+	//}
 
 }

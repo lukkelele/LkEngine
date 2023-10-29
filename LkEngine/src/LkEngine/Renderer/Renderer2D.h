@@ -92,8 +92,6 @@ namespace LkEngine {
             int EntityID; // For editor 
         };
 
-        static float m_inc; // remove
-
         static const uint32_t MaxTextureSlots = 32;
 
         const uint32_t m_MaxVertices;

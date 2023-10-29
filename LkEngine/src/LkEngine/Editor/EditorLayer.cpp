@@ -508,7 +508,8 @@ namespace LkEngine {
 
         //ImGui::SetCursorPosY(window->GetHeight() - SelectedEntityMenuSize.y);
         ImGui::BeginChild("##selected-entity-menu", SelectedEntityMenuSize, true);
-        if (entity && entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
+        //if (entity && entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
+        if (entity && entity.HasComponent<TransformComponent>())
         {
             ImGui::SeparatorText(SelectedEntityLabel.c_str());
             ImGui::Indent();
@@ -530,8 +531,12 @@ namespace LkEngine {
             ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
             transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
 
-            ImGui::Text("Color");
-			UI::Property::RGBAColor(entity, mesh.Color);
+			if (entity.HasComponent<SpriteComponent>())
+			{
+				ImGui::Text("Sprite Color");
+				SpriteComponent& sc = entity.GetSpriteComponent();
+				UI::Property::RGBAColor(entity, sc.Color);
+			}
 
             ImGui::Unindent();
 
@@ -548,10 +553,11 @@ namespace LkEngine {
         auto& cam_pos = cam.GetPos();
         auto& view_matrix = cam.GetView();
         auto& proj_matrix = cam.GetProjection();
-		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
+
+		//MeshComponent& mesh = entity.GetComponent<MeshComponent>();
+        SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
 		TransformComponent& tc = entity.GetComponent<TransformComponent>();
         glm::mat4& transform_matrix = tc.GetTransform();
-        SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
 
 		float pos_x = m_SecondViewportBounds[0].x;
 		float pos_y = m_SecondViewportBounds[0].y;

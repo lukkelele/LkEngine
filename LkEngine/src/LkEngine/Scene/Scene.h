@@ -20,9 +20,8 @@ namespace LkEngine {
 		Scene();
 		~Scene() = default;
 
-		void BeginScene();
+		void BeginScene(float ts = 1.0f);
 		void EndScene();
-		void OnUpdate(float ts);
 		void OnImGuiRender();
 		Entity GetEntityWithUUID(UUID uuid);
 		Entity FindEntity(std::string_view name);

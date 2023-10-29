@@ -13,6 +13,7 @@ namespace LkEngine {
         static void Init()
         {
             s_Renderer->Init();
+    
         }
 
         static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader)
@@ -49,8 +50,6 @@ namespace LkEngine {
 	        auto& sc = entity.GetComponent<SpriteComponent>();
             auto& renderer2D = Renderer2D::Get();
             glm::vec2 size = { tc.Scale.x * sc.Size.x, tc.Scale.y * sc.Size.y };
-            //renderer2D->DrawQuad({ tc.Translation.x, tc.Translation.y }, size, sc.Color, (uint64_t)entity.GetUUID());
-            //renderer2D->DrawRotatedQuad({ tc.Translation.x, tc.Translation.y }, size, tc.Rotation2D, sc.Color, (uint64_t)entity.GetUUID());
             renderer2D->DrawQuad({ tc.Translation.x, tc.Translation.y }, size, tc.Rotation2D, sc.Color, (uint64_t)entity.GetUUID());
         }
 

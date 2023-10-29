@@ -26,6 +26,8 @@ namespace LkEngine {
         m_Input = create_s_ptr<Input>(this);
         m_Input->Init();
 
+        m_Renderer = std::make_shared<Renderer>();
+        m_Renderer->Init();
         m_Scene = create_s_ptr<Scene>();
         m_EditorLayer = create_s_ptr<EditorLayer>(m_Scene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);

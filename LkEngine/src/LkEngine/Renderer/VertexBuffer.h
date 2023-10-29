@@ -22,6 +22,7 @@ namespace LkEngine {
 		void SetData(const void* data, unsigned int size);
 		void SetLayout(const VertexBufferLayout& layout) { m_BufferLayout = layout; }
 		VertexBufferLayout GetLayout() const { return m_BufferLayout; }
+		VertexBufferElement& GetElement(const std::string& elementName);
 
 	private:
 		unsigned int m_RendererID;

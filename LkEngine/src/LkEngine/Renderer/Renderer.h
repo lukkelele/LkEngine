@@ -40,11 +40,13 @@ namespace LkEngine {
 		static void DrawIndexed(VertexArray& va, unsigned int count);
 		static void SetDrawMode(int mode);
 
-		static void Submit(LK_Function func);
+		//static void Submit(std::function<void> func);
+		static s_ptr<Renderer2D> GetRenderer2D();// { return s_Renderer2D; }
 
 	public:
 		static int DrawMode;
 		static glm::vec4 BackgroundColor;
+		static s_ptr<Renderer2D> s_Renderer2D;
 	};
 
 }

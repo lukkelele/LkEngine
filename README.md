@@ -16,8 +16,8 @@
 
 ## About 
 
-When I began my first engine **LukkelEngine** I had lots to learn about graphics and engines (still do).
-Because of this, lots of focus was aimed towards things such as 3D objects and rigid bodies.<br>
+When I began my first engine **LukkelEngine** I had lots to learn about graphics and engines (still do),
+and because of this, lots of focus was aimed towards things such as 3D objects and rigid bodies.<br>
 This caused some flaws in the base design that I wasn't too happy with.<br>
 <br>
 That is why **LkEngine** will focus towards 2D in the beginning and when I feel as if the engine is ready I 
@@ -85,6 +85,18 @@ make
 # Development
 
 ## LkEngine Development
+
+### October 29, 2023
+
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-29-10-2023.png" width=740 height=440>
+	<p align="center">
+		Rendering lines and quads using the new 2D renderer
+	</p>
+</div>
+<br>
+
+### October 20, 2023
 
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-20-10-2023.png" width=740 height=440>

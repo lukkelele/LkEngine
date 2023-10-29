@@ -43,4 +43,9 @@ namespace LkEngine {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 	}
 
+	VertexBufferElement& VertexBuffer::GetElement(const std::string& elementName)
+	{
+		return m_BufferLayout.GetElement(elementName);
+	}
+
 }

@@ -7,6 +7,7 @@
 #include "LkEngine/Renderer/Camera.h"
 #include "LkEngine/Scene/EntityFactory.h"
 #include "LkEngine/Physics/2D/Physics2D.h"
+#include "LkEngine/Renderer/Color.h"
 
 
 // TODO: Move to a better location to be used for geometry
@@ -39,14 +40,12 @@ void TestLayer::OnAttach()
     EntityFactory::CreateRectangle(*m_Scene, { 20, 20 },   { 140.0f, 140.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
+    EntityFactory::CreateQuad(*m_Scene, { 750, 200 }, { 240, 520 }, Color::Generate());
+    EntityFactory::CreateQuad(*m_Scene, { 400, 320 }, { 400, 110 }, Color::Generate());
+    EntityFactory::CreateLine(*m_Scene, { 400, 400 }, { 250, 250 }, 8.0f, Color::Generate());
 
-    m_Renderer2D = std::make_shared<Renderer2D>();
-    m_Renderer2D->Init();
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    auto& renderer2D = Renderer::GetRenderer2D();
+    m_Renderer2D = std::shared_ptr<Renderer2D>(renderer2D);
 }
 
 void TestLayer::OnDetach()
@@ -73,9 +72,8 @@ void TestLayer::OnUpdate(float ts)
         EditorLayer::SelectedEntityID = 0;
     }
 
-    glm::vec2 p0, p1;
-    p0 = { 0.1, 0.3 };
-    p1 = { 0.5, 0.5 };
+    glm::vec2 p0 = { 200.0f, 300.0f };
+    glm::vec2 p1 = { 400.0f, 800.0f };
     glm::vec4 lineColor = { 0.0f, 1.0f, 0.5f, 1.0f };
     m_Renderer2D->DrawLine(p0, p1, lineColor);
 

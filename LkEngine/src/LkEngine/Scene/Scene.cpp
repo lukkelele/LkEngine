@@ -164,7 +164,7 @@ namespace LkEngine {
 		}
 	}
 
-	void Scene::BeginScene()
+	void Scene::BeginScene(float ts)
 	{
 		auto entities = m_Registry.view<TransformComponent>();
 		for (auto& ent : entities)
@@ -172,7 +172,8 @@ namespace LkEngine {
 			Entity entity = { ent, this };
 
 			auto& transform = entity.GetComponent<TransformComponent>();
-			if (entity.HasComponent<MeshComponent>())
+			//if (entity.HasComponent<MeshComponent>())
+			if (entity.HasComponent<SpriteComponent>())
 			{
 				// TODO: Submit to renderer
 				//RenderCommand::DrawEntity(entity);
@@ -184,23 +185,6 @@ namespace LkEngine {
 	void Scene::EndScene()
 	{
 
-	}
-
-	void Scene::OnUpdate(float ts)
-	{
-		m_ActiveCamera->Update(ts);
-
-		auto entities = m_Registry.view<TransformComponent>();
-		for (auto& ent : entities)
-		{	
-			Entity entity = { ent, this };
-
-			auto& transform = entity.GetComponent<TransformComponent>();
-			if (entity.HasComponent<MeshComponent>())
-			{
-				RenderCommand::DrawEntity(entity);
-			}
-		}
 	}
 
 	void Scene::OnImGuiRender()

@@ -143,8 +143,8 @@ namespace LkEngine {
         {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
-            // Bind textures
-            /* <<< bind textures here >>> */
+
+            // <<<< Bind textures here >>>>
 
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
@@ -163,24 +163,11 @@ namespace LkEngine {
 
             m_LineShader->Bind();
             m_LineShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
-            //m_LineShader->SetUniformMat4f("u_TransformMatrix", glm::mat4(1.0f));
             RenderCommand::SetLineWidth(m_LineWidth);
             RenderCommand::DrawLines(*m_LineVertexArray, m_LineIndexCount);
-            //RenderCommand::DrawIndexed(*m_LineVertexArray, m_LineIndexCount);
 
             m_Stats.DrawCalls++;
         }
-    }
-
-    void Renderer2D::DrawEntity(Entity& entity)
-    {
-        if (!entity.HasComponent<MeshComponent>())
-	    	return;
-	    auto& mesh = entity.GetComponent<MeshComponent>();
-	    auto& tc = entity.GetComponent<TransformComponent>();
-	    auto& sc = entity.GetComponent<SpriteComponent>();
-
-        DrawQuad(tc.GetTransform(), sc.Color, entity.GetUUID());
     }
 
     void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
@@ -270,11 +257,6 @@ namespace LkEngine {
 
     void Renderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, uint64_t entityID)
     {
-        glm::mat4 transform = glm::translate(glm::mat4(1.0f), { p1.x - p0.x, p1.y - p0.y, 0.0f })
-            * glm::scale(glm::mat4(1.0f), { m_LineWidth, m_LineWidth, 1.0f });
-        m_LineShader->Bind();
-        m_LineShader->SetUniformMat4f("u_TransformMatrix", transform);
-
         m_LineVertexBufferPtr->Position = p0;
         m_LineVertexBufferPtr->Color = color;
         m_LineVertexBufferPtr++;
@@ -300,9 +282,21 @@ namespace LkEngine {
     {
     }
 
+    void Renderer2D::DrawEntity(Entity& entity)
+    {
+        if (!entity.HasComponent<MeshComponent>())
+	    	return;
+	    auto& mesh = entity.GetComponent<MeshComponent>();
+	    auto& tc = entity.GetComponent<TransformComponent>();
+	    auto& sc = entity.GetComponent<SpriteComponent>();
+
+        DrawQuad(tc.GetTransform(), sc.Color, entity.GetUUID());
+    }
+
+
     float Renderer2D::GetLineWidth()
     {
-        return 0.0f;
+        return m_LineWidth;
     }
 
     void Renderer2D::SetLineWidth(float width)

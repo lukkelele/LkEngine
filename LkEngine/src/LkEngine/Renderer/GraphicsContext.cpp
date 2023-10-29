@@ -31,7 +31,8 @@ namespace LkEngine {
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
-		//glEnable(GL_DEPTH_TEST); 
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 	
