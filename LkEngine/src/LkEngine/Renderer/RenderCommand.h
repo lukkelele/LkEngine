@@ -75,9 +75,10 @@ namespace LkEngine {
             glLineWidth(width);
         }
 
-        static void DrawLines(VertexArray& va, uint32_t lineVertexCount)
+        static void DrawLines(VertexArray& va, uint32_t lineIndexCount)
         {
-
+            va.Bind();
+            glDrawArrays(GL_LINES, 0, lineIndexCount);
         }
 
 

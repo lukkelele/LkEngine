@@ -86,17 +86,14 @@ namespace LkEngine {
                 //glm::mat2 rotMat = glm::mat2(glm::cos(glm::radians(rotAngle)), -glm::sin(glm::radians(rotAngle)),
                 //    glm::sin(glm::radians(rotAngle)), glm::cos(glm::radians(rotAngle)));
 
-                float angleDeg = tc.GetRotation2D();
+                float angleDeg = glm::degrees(tc.GetRotation2D());
                 float angleRad = glm::radians(tc.GetRotation2D());
+                //LOG_DEBUG("Angle: {}", angleDeg);
                 glm::mat2 rotMat = {
                     glm::cos(angleRad), -glm::sin(angleRad),
                     glm::sin(angleRad), glm::cos(angleRad)
                 };
 
-                //glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
-                //glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
-                //glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
-                //glm::vec2 top_left = { quad_pos.x - quad_width, quad_pos.y + quad_height };
                 glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
                 glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
                 glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + quad_height * 0.50f };

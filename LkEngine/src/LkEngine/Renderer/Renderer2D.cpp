@@ -17,6 +17,8 @@ namespace LkEngine {
         , m_MaxLineIndices(specification.MaxLines * 6)
     {
         s_Instance = std::shared_ptr<Renderer2D>(this);
+        m_CameraBuffer = {};
+        m_CameraUniformBuffer = {};
     }
 
     Renderer2D::~Renderer2D()
@@ -25,10 +27,10 @@ namespace LkEngine {
 
     void Renderer2D::Init()
     {
-        if (m_QuadVertexArray)
+        if (m_Initialized)
         {
             LOG_CRITICAL("Renderer2D already initialized");
-            exit(1);
+            LK_ASSERT(false); // crash it for now
             return;
         }
         m_QuadVertexArray = VertexArray::Create();
@@ -61,22 +63,32 @@ namespace LkEngine {
         m_QuadVertexArray->SetIndexBuffer(quadIB);
         delete[] quadIndices;
 
+        // Line
+        m_LineVertexArray = VertexArray::Create();
+        m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
+        VertexBufferLayout lineVertexBufLayout{ };
+        m_LineVertexBuffer->SetLayout({
+            { "a_Pos",      ShaderDataType::Float3, },
+            { "a_Color",    ShaderDataType::Float4, },
+            { "a_EntityID", ShaderDataType::Float,    }
+         });
+        m_LineVertexArray->AddVertexBuffer(*m_LineVertexBuffer);
+        m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
+
         m_WhiteTexture = std::make_shared<Texture2D>("assets/img/atte_square.png");
         m_TextureSlots[0] = m_WhiteTexture;
 
         m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
+        m_LineShader = Shader::Create("assets/shaders/Renderer2D_Line.shader");
 
         m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
         m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
         m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
         m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
-        //m_QuadVertexPositions[0] = { -1.0f, -1.0f, 0.0f, 1.0f }; 
-        //m_QuadVertexPositions[1] = { -1.0f,  1.0f, 0.0f, 1.0f };
-        //m_QuadVertexPositions[2] = {  1.0f,  1.0f, 0.0f, 1.0f };
-        //m_QuadVertexPositions[3] = {  1.0f, -1.0f, 0.0f, 1.0f };
 
         m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
 
+        // Doesn't work really
         m_Stats.QuadVertexArray_RendererID = m_QuadVertexArray->GetID();
         m_Stats.QuadVertexBuffer_RendererID = m_QuadVertexBuffer->GetID();
     }
@@ -114,6 +126,9 @@ namespace LkEngine {
     {
         m_QuadIndexCount = 0;
         m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
+
+        m_LineIndexCount = 0;
+        m_LineVertexBufferPtr = m_LineVertexBufferBase;
     }
 
     void Renderer2D::NextBatch()
@@ -135,6 +150,23 @@ namespace LkEngine {
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
             RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
             m_QuadShader->Unbind();
+
+            m_Stats.DrawCalls++;
+        }
+
+        if (m_LineIndexCount)
+        {
+            uint32_t dataSize = (uint32_t)((uint8_t*)m_LineVertexBufferPtr - (uint8_t*)m_LineVertexBufferBase);
+            m_LineVertexBuffer->SetData(m_LineVertexBufferBase, dataSize);
+
+            // <<<< Bind textures here >>>>
+
+            m_LineShader->Bind();
+            m_LineShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
+            //m_LineShader->SetUniformMat4f("u_TransformMatrix", glm::mat4(1.0f));
+            RenderCommand::SetLineWidth(m_LineWidth);
+            RenderCommand::DrawLines(*m_LineVertexArray, m_LineIndexCount);
+            //RenderCommand::DrawIndexed(*m_LineVertexArray, m_LineIndexCount);
 
             m_Stats.DrawCalls++;
         }
@@ -178,6 +210,7 @@ namespace LkEngine {
         DrawRotatedQuad(transform, color, entityID);
     }
 
+    // TODO: Merge DrawQuad with DrawRotatedQuad
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         constexpr size_t quadVertexCount = 4;
@@ -230,9 +263,29 @@ namespace LkEngine {
         m_Stats.QuadCount++;
     }
 
-
-    void Renderer2D::DrawLine(const glm::vec3& p0, glm::vec3& p1, const glm::vec4& color, uint64_t entityID)
+    void Renderer2D::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID)
     {
+        DrawLine({ p0.x, p0.y, 0.0f }, { p1.x, p1.y, 0.0f }, color, entityID);
+    }
+
+    void Renderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, uint64_t entityID)
+    {
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), { p1.x - p0.x, p1.y - p0.y, 0.0f })
+            * glm::scale(glm::mat4(1.0f), { m_LineWidth, m_LineWidth, 1.0f });
+        m_LineShader->Bind();
+        m_LineShader->SetUniformMat4f("u_TransformMatrix", transform);
+
+        m_LineVertexBufferPtr->Position = p0;
+        m_LineVertexBufferPtr->Color = color;
+        m_LineVertexBufferPtr++;
+
+        m_LineVertexBufferPtr->Position = p1;
+        m_LineVertexBufferPtr->Color = color;
+        m_LineVertexBufferPtr++;
+
+        m_LineIndexCount += 2;
+
+        m_Stats.LineCount++;
     }
 
     void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)

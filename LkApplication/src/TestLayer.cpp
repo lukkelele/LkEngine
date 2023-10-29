@@ -36,11 +36,9 @@ void TestLayer::OnAttach()
     LOG_DEBUG("TestLayer::OnAttach()");
     m_Scene = create_s_ptr<Scene>();
 
-    //EntityFactory::CreateRectangle(*m_Scene, { -100.0, -100.0f }, { 80.0f, 80.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 20, 20 },   { 140.0f, 140.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
     EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
-    //EntityFactory::CreateRectangle(*m_Scene, { 0, 0}, { 240, 240 });
 
     m_Renderer2D = std::make_shared<Renderer2D>();
     m_Renderer2D->Init();
@@ -74,6 +72,12 @@ void TestLayer::OnUpdate(float ts)
         EditorLayer::SelectedEntity = { (entt::entity)NULL, &*m_Scene };
         EditorLayer::SelectedEntityID = 0;
     }
+
+    glm::vec2 p0, p1;
+    p0 = { 0.1, 0.3 };
+    p1 = { 0.5, 0.5 };
+    glm::vec4 lineColor = { 0.0f, 1.0f, 0.5f, 1.0f };
+    m_Renderer2D->DrawLine(p0, p1, lineColor);
 
     m_Scene->EndScene();
     m_Renderer2D->EndScene();
