@@ -39,6 +39,9 @@ namespace LkEngine {
 		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawIndexed(VertexArray& va, unsigned int count);
 		static void SetDrawMode(int mode);
+        static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
+        static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
+		static void DrawSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
 
 		//static void Submit(std::function<void> func);
 		static s_ptr<Renderer2D> GetRenderer2D();// { return s_Renderer2D; }
@@ -46,7 +49,7 @@ namespace LkEngine {
 	public:
 		static int DrawMode;
 		static glm::vec4 BackgroundColor;
-		static s_ptr<Renderer2D> s_Renderer2D;
+		static s_ptr<Renderer2D> m_Renderer2D;
 	};
 
 }

@@ -29,8 +29,17 @@ namespace LkEngine {
 
 	std::pair<float, float> Window::GetPos()
 	{
+		return std::make_pair<float, float>(0, 0); 
+	}
 
-		return std::make_pair<float, float>(0, 0); // TODO:
+	std::pair<float, float> Window::GetSize()
+	{
+		return std::make_pair<float, float>(m_Width, m_Height); 
+	}
+
+	std::pair<float, float> Window::GetViewportSize()
+	{
+		return std::make_pair<float, float>(m_ViewportWidth, m_ViewportHeight); 
 	}
 
 	void Window::WindowResizeCallback(GLFWwindow* glfw_window, int width, int height)

@@ -175,11 +175,13 @@ namespace LkEngine {
 			//if (entity.HasComponent<MeshComponent>())
 			if (entity.HasComponent<SpriteComponent>())
 			{
-				// TODO: Submit to renderer
-				//RenderCommand::DrawEntity(entity);
-				RenderCommand::DrawSprite(entity);
+				RenderCommand::DrawSprite(entity.GetComponent<TransformComponent>(), 
+									      entity.GetComponent<SpriteComponent>(), 
+						                  entity.GetUUID()
+				);
 			}
 		}
+		RenderCommand::DrawGrid(4, 4, { 0.80f, 0.50f, 0.80f, 1.0f }, 20, 20);
 	}
 
 	void Scene::EndScene()

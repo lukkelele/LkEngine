@@ -10,7 +10,6 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <ImGuizmo/ImGuizmo.h>
 
-
 namespace LkEngine {
 
     constexpr const char* CORE_VIEWPORT = "##lkengine-core-viewport";
@@ -34,6 +33,7 @@ namespace LkEngine {
 		~EditorLayer() = default;
 
 		static s_ptr<EditorLayer> Get() { return s_Instance; }
+		static bool IsEnabled() { return Enabled; }
 
 		void OnImGuiRender();
 		void DrawEntityNode(Entity entity);
@@ -51,6 +51,8 @@ namespace LkEngine {
 		void UI_SceneMenu();
 		void UI_SceneContent();
         void UI_SelectedEntity();
+		//std::pair<float, float> GetViewportPos();
+		glm::vec2 GetViewportPos();
 
 	private:
 		void RenderViewport(); // TODO

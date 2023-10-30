@@ -331,11 +331,16 @@ namespace LkEngine {
 		ImGui::End(); // Core Viewport
 	}
 
-
 	void EditorLayer::SelectEntity(Entity& entity)
 	{
 		if (SelectedEntityID != entity.GetUUID())
 			SelectedEntityID = entity.GetUUID();
+	}
+
+	//std::pair<float, float> EditorLayer::GetViewportPos() 
+	glm::vec2 EditorLayer::GetViewportPos() 
+	{ 
+		return { m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y };
 	}
 
 	void EditorLayer::DrawEntityNode(Entity entity)

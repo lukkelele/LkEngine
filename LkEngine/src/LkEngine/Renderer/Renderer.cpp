@@ -7,12 +7,12 @@ namespace LkEngine {
 
 	int Renderer::DrawMode = GL_TRIANGLES;
 	glm::vec4 Renderer::BackgroundColor = { 0.50f, 0.50f, 0.50f, 1.0f };
-	s_ptr<Renderer2D> Renderer::s_Renderer2D = nullptr;
+	s_ptr<Renderer2D> Renderer::m_Renderer2D = nullptr;
 
 	void Renderer::Init()
 	{
-		s_Renderer2D = std::make_shared<Renderer2D>();
-		s_Renderer2D->Init();
+		m_Renderer2D = std::make_shared<Renderer2D>();
+		m_Renderer2D->Init();
 	}
 
 	void Renderer::Shutdown()
@@ -28,7 +28,7 @@ namespace LkEngine {
 
 	s_ptr<Renderer2D> Renderer::GetRenderer2D() 
 	{ 
-		return s_Renderer2D; 
+		return m_Renderer2D; 
 	}
 
 	void Renderer::Draw(Entity& entity)
@@ -94,6 +94,21 @@ namespace LkEngine {
 	{
 		DrawMode = mode;
 	}
+
+	void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+	{
+		m_Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);
+	}
+
+	void Renderer::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+	{
+		m_Renderer2D->DrawQuad(pos, size, color, entityID);
+	}
+
+	void Renderer::DrawSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID)
+    {
+        m_Renderer2D->DrawQuad({ tc.Translation.x, tc.Translation.y }, size, color, tc.Rotation2D, entityID);
+    }
 
 	//void Renderer::Submit(std::function<void> func)
 	//{

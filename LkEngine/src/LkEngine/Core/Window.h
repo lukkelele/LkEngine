@@ -36,6 +36,8 @@ namespace LkEngine {
         std::string GetGlslVersion() const { return m_GlslVersion;  }
         bool IsVSync() const { return m_VSync; }
         std::pair<float, float> GetPos();
+        std::pair<float, float> GetSize();
+        std::pair<float, float> GetViewportSize();
 
     protected:
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
