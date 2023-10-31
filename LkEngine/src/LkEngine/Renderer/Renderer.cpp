@@ -8,7 +8,8 @@ namespace LkEngine {
 
 	int Renderer::DrawMode = GL_TRIANGLES;
 	glm::vec4 Renderer::BackgroundColor = { 0.50f, 0.50f, 0.50f, 1.0f };
-	s_ptr<Renderer2D> Renderer::m_Renderer2D = nullptr;
+
+	s_ptr<RendererAPI> Renderer::m_RendererAPI = nullptr;
 
 	void RendererAPI::SetAPI(RendererAPIType api)
 	{
@@ -17,8 +18,8 @@ namespace LkEngine {
 
 	void Renderer::Init()
 	{
-		m_Renderer2D = std::make_shared<Renderer2D>();
-		m_Renderer2D->Init();
+		m_RendererAPI = RendererAPI::Create();
+		m_RendererAPI->Init();
 	}
 
 	void Renderer::Shutdown()
@@ -27,14 +28,12 @@ namespace LkEngine {
 
 	void Renderer::Clear() 
 	{
-		auto& c = BackgroundColor;
-		glClearColor(c.x, c.y, c.z, c.w);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		m_RendererAPI->Clear();
 	}
 
 	s_ptr<Renderer2D> Renderer::GetRenderer2D() 
 	{ 
-		return m_Renderer2D; 
+		return std::shared_ptr<Renderer2D>(m_RendererAPI->m_Renderer2D); 
 	}
 
 	void Renderer::Draw(Entity& entity)
@@ -55,7 +54,7 @@ namespace LkEngine {
 		va.Bind();
 		auto& ib = va.GetIndexBuffer();
 		ib->Bind();
-		glDrawElements(DrawMode, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
+		m_RendererAPI->Draw(va, shader);
 	}
 
 	void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
@@ -63,24 +62,7 @@ namespace LkEngine {
 		shader.Bind();
 		va.Bind();
 		ib.Bind();
-		glDrawElements(DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
-	}
-
-	void Renderer::Draw(const MeshComponent& mesh)
-	{
-		LK_ASSERT(mesh.VAO);
-		mesh.BaseShader->Bind();
-		mesh.VAO->Bind();
-		auto& ib = mesh.VAO->GetIndexBuffer();
-		glDrawElements(DrawMode, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
-	}
-
-	void Renderer::DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
-	{
-		shader.Bind();
-		va.Bind();
-		ib.Bind();
-		GL_CALL(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+		m_RendererAPI->Draw(va, ib, shader);
 	}
 
 	void Renderer::DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
@@ -88,12 +70,16 @@ namespace LkEngine {
 		shader.Bind();
 		va.Bind();
 		ib.Bind();
-		glDrawElements(GL_LINES, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+		SetDrawMode(LK_DRAW_LINES);
+		m_RendererAPI->Draw(va, ib, shader);
+		SetDrawMode(LK_DRAW_TRIANGLES);
 	}
 
 	void Renderer::DrawIndexed(VertexArray& va, unsigned int count)
 	{
-		glDrawElements(GL_TRIANGLES /*DrawMode*/, count, GL_UNSIGNED_INT, nullptr);
+		va.Bind();
+		va.GetIndexBuffer()->Bind();
+		m_RendererAPI->DrawIndexed(va, count);
 	}
 
 	void Renderer::SetDrawMode(int mode)
@@ -103,21 +89,17 @@ namespace LkEngine {
 
 	void Renderer::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
 	{
-		m_Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);
+		m_RendererAPI->DrawQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);
 	}
 
 	void Renderer::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
 	{
-		m_Renderer2D->DrawQuad(pos, size, color, entityID);
+		m_RendererAPI->DrawQuad(pos, size, color, entityID);
 	}
 
 	void Renderer::DrawSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID)
     {
-        m_Renderer2D->DrawQuad({ tc.Translation.x, tc.Translation.y }, size, color, tc.Rotation2D, entityID);
+        m_RendererAPI->DrawQuad({ tc.Translation.x, tc.Translation.y }, size, color, tc.Rotation2D, entityID);
     }
-
-	//void Renderer::Submit(std::function<void> func)
-	//{
-	//}
 
 }

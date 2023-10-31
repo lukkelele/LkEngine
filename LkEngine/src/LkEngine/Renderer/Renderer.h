@@ -17,6 +17,8 @@
 
 namespace LkEngine {
 
+	// Forward declaration
+	class RendererAPI;
 	class Entity;
 
 	struct RenderPass
@@ -31,25 +33,23 @@ namespace LkEngine {
 		static void Shutdown();
 
 		static void Clear();
+		static void SetDrawMode(int mode);
 		static void Draw(Entity& entity);
 		static void Draw(VertexArray& va, const Shader& shader);
 		static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
-		static void Draw(const MeshComponent& mesh);
-		static void DrawTriangles(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
 		static void DrawIndexed(VertexArray& va, unsigned int count);
-		static void SetDrawMode(int mode);
         static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
 		static void DrawSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
 
-		//static void Submit(std::function<void> func);
 		static s_ptr<Renderer2D> GetRenderer2D();// { return s_Renderer2D; }
 
 	public:
 		static int DrawMode;
 		static glm::vec4 BackgroundColor;
-		static s_ptr<Renderer2D> m_Renderer2D;
+	private:
+		static s_ptr<RendererAPI> m_RendererAPI;
 	};
 
 }

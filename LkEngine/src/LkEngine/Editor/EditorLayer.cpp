@@ -337,7 +337,6 @@ namespace LkEngine {
 			SelectedEntityID = entity.GetUUID();
 	}
 
-	//std::pair<float, float> EditorLayer::GetViewportPos() 
 	glm::vec2 EditorLayer::GetViewportPos() 
 	{ 
 		return { m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y };
@@ -615,8 +614,6 @@ namespace LkEngine {
 	void EditorLayer::UI_SceneMenu()
 	{
 		ImGui::PushID("##lkengine-ui-scene-menu");
-        //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        //ImGui::BeginChild("##scene-menu");
         ImGui::BeginGroup();
         ImGui::SeparatorText("Scene");
 
@@ -686,11 +683,8 @@ namespace LkEngine {
 
 	void EditorLayer::UI_SceneContent()
 	{
-        //ImGuiDockNode* window = ImGui::GetWindowDockNode();
         auto window = Window::Get();
-        //SceneContentMenuSize.y = window->GetHeight() - SelectedEntityMenuSize.y;
 		float menu_height = window->GetHeight() - SelectedEntityMenuSize.y;
-        //ImGui::BeginChild("##lkengine-ui-scene-content", ImVec2(0, menu_height), true);
 		ImGui::PushID("##lkengine-scene-content");
 		ImGui::BeginGroup();
 		ImGui::SeparatorText("Scene");

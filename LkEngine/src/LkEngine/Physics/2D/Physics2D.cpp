@@ -111,7 +111,7 @@ namespace LkEngine {
                     bool within_y_boundaries = ((mousePos.y + camPos.y) <= top_left.y && (mousePos.y + camPos.y >= bottom_right.y));
                     if (within_x_boundaries && within_y_boundaries)
                     {
-                        LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
+                        //LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
                         float x = centerX - mousePos.x;
                         float y = centerY - mousePos.y;
                         glm::vec2 intersection = { x, y };

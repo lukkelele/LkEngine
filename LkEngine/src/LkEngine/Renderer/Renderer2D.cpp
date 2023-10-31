@@ -185,7 +185,21 @@ namespace LkEngine {
 
     void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
     {
-        DrawQuad({ pos.x, pos.y, 0.0f }, size, color, rotation);
+        DrawQuad({ pos.x, pos.y, 0.0f }, size, color, rotation, entityID);
+    }
+
+    void Renderer2D::DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
+    {                                                                                                     
+        DrawQuad({ pos.x, pos.y, 0.0f }, size, color, rotation);                                   
+    } 
+
+    void Renderer2D::DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
+    {
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
+            * glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
+            * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+        DrawQuad(transform, color, entityID);
     }
 
     void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
@@ -196,21 +210,7 @@ namespace LkEngine {
 
         DrawQuad(transform, color, entityID);
     }
-
-    void Renderer2D::DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
-    {                                                                                                     
-        DrawQuad({ pos.x, pos.y, 0.0f }, size, color, rotation);                                   
-    }                                                                                                     
                                                                                                           
-    void Renderer2D::DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
-    {
-        glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
-            * glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
-            * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
-        DrawQuad(transform, color, entityID);
-    }
-
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         constexpr size_t quadVertexCount = 4;
