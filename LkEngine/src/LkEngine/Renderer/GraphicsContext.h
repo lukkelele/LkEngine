@@ -16,28 +16,34 @@ namespace LkEngine {
     class GraphicsContext
     {
     public:
-        GraphicsContext(void* window_handle);
-        ~GraphicsContext() = default;
+        virtual ~GraphicsContext() = default;
 
         static GraphicsContext* Get() { return m_Context; }
-        void BeginImGuiFrame();
-        void EndImGuiFrame();
 
-        void Init();
-        void Destroy();
-        s_ptr<GLFWwindow*> GetGlfwWindow();
-        void InitImGui(const std::string& glslVersion);
-        void SetDarkTheme();
+        static s_ptr<GraphicsContext> Create(Window& window, const std::string& glslVersion);
+
+        virtual void Init() = 0;
+        virtual void Destroy() = 0;
+        virtual void BeginImGuiFrame() = 0;
+        virtual void EndImGuiFrame() = 0;
+        virtual void InitImGui(const std::string& glslVersion) = 0;
+        virtual void SetDarkTheme();
+        s_ptr<GLFWwindow*> GetGlfwWindow() { return m_GlfwWindow; }
+
+        // Remove 
         ImVec2 GetMainRenderWindowSize();
         ImVec2 GetMainRenderWindowPos();
 
-    private:
+    protected:
         static void HandleViewportEvents();
     
-    private:
+    protected:
         static GraphicsContext* m_Context;
         s_ptr<GLFWwindow*> m_GlfwWindow = nullptr;
         s_ptr<Window> m_Window = nullptr;
+        std::string m_GlslVersion = "";
+
+        // Remove
         ImVec2 m_ViewportSize, m_ViewportPos; // GLFW window
         ImVec2 m_MainRenderWindowSize, m_MainRenderWindowPos;
     };

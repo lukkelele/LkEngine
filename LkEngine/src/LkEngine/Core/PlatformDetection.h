@@ -2,8 +2,8 @@
 
 #ifdef _WIN32
 #ifdef _WIN64
-    #ifndef PLATFORM_WINDOWS;
-    #define PLATFORM_WINDOWS
+    #ifndef LK_PLATFORM_WINDOWS;
+    #define LK_PLATFORM_WINDOWS
     #endif
 #else
     #error "x86 Builds are not supported!"
@@ -14,8 +14,8 @@
     #error "Android is not supported"
 
 #elif defined(__linux__)
-    #ifndef PLATFORM_LINUX
-    #define PLATFORM_LINUX
+    #ifndef LK_PLATFORM_LINUX
+    #define LK_PLATFORM_LINUX
     #endif
 #else
     #error "Unknown platform!"

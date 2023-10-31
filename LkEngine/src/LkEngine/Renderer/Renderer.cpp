@@ -1,5 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Renderer.h"
+#include "LkEngine/Renderer/RendererAPI.h"
 #include "LkEngine/Scene/Entity.h"
 
 
@@ -8,6 +9,11 @@ namespace LkEngine {
 	int Renderer::DrawMode = GL_TRIANGLES;
 	glm::vec4 Renderer::BackgroundColor = { 0.50f, 0.50f, 0.50f, 1.0f };
 	s_ptr<Renderer2D> Renderer::m_Renderer2D = nullptr;
+
+	void RendererAPI::SetAPI(RendererAPIType api)
+	{
+		RendererAPI::m_CurrentRendererAPI = api;
+	}
 
 	void Renderer::Init()
 	{

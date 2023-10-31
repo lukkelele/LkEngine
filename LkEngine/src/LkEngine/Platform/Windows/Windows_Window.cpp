@@ -38,7 +38,8 @@ namespace LkEngine {
 
 		if (!GLFW_Initialized)
 		{
-			m_Context = std::make_shared<GraphicsContext>(this);
+			//m_Context = std::make_shared<GraphicsContext>(this);
+			m_Context = GraphicsContext::Create(*this, glslVersion);
 			m_Context->Init();
 			m_Context->SetDarkTheme();
 		}

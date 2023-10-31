@@ -4,11 +4,29 @@
 #include "LkEngine/UI/UILayer.h"
 #include <ImGuizmo/ImGuizmo.h>
 
+#ifdef LK_RENDERER_API_OPENGL
+	#include "LkEngine/Renderer/OpenGL/OpenGLContext.h"
+#elif defined(LK_RENDERER_API_VULKAN)
+#endif
 
 namespace LkEngine {
 
 	GraphicsContext* GraphicsContext::m_Context = nullptr;
 
+	s_ptr<GraphicsContext> GraphicsContext::Create(Window& window, const std::string& glslVersion)
+	{
+	#ifdef LK_RENDERER_API_OPENGL
+		s_ptr<GraphicsContext> context = std::make_shared<OpenGLContext>(window, glslVersion);
+		//context->m_Window = std::make_shared<Window>(window);
+		return context;
+	#elif defined(LK_RENDERER_API_VULKAN)
+
+	#else
+		return nullptr;
+	#endif
+	}
+
+#if 0
 	GraphicsContext::GraphicsContext(void* window_handle)
 	{
 		m_Context = this;
@@ -46,11 +64,6 @@ namespace LkEngine {
 		ImGui::DestroyContext();
 	}
 
-	std::shared_ptr<GLFWwindow*> GraphicsContext::GetGlfwWindow()
-	{
-		return m_GlfwWindow;
-	}
-	
 	void GraphicsContext::InitImGui(const std::string& glslVersion)
 	{
 	    ImGui::CreateContext();
@@ -85,6 +98,7 @@ namespace LkEngine {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
+#endif
 
 	void GraphicsContext::HandleViewportEvents()
 	{

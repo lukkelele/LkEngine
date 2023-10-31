@@ -54,6 +54,8 @@ project "LkEngine"
         "GLFW_INCLUDE_NONE",
         "IMGUI_IMPL_OPENGL_LOADER_GLAD",
         "IMGUI_DEFINE_MATH_OPERATORS",
+
+        "LK_RENDERER_API_OPENGL",
     }
 
     files { 
@@ -96,7 +98,7 @@ project "LkEngine"
 
 	filter "system:windows"
 		defines { 
-            "PLATFORM_WINDOWS",
+            "LKPLATFORM_WINDOWS",
             "_IMGUI_WIN32",
             "_CRT_SECURE_NO_WARNINGS",
 		}
