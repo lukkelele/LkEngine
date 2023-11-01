@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 #include "LkEngine/Core/Base.h"
 
 
@@ -15,29 +15,25 @@ namespace LkEngine {
 	class Shader
 	{
 	public:
-		Shader() = default;
-		Shader(const std::string& filepath);
-		Shader(const std::string& vertexPath, const std::string& fragmentPath);
-		~Shader();
+		virtual ~Shader() = default;
 
-		static s_ptr<Shader> Create(const std::string& filepath) { return std::make_shared<Shader>(filepath); }
-		static s_ptr<Shader> Create(const std::string& vertexPath, const std::string& fragmentPath) { return std::make_shared<Shader>(vertexPath, fragmentPath); }
+		static s_ptr<Shader> Create(const std::string& filepath); // { return std::make_shared<Shader>(filepath); }
+		static s_ptr<Shader> Create(const std::string& vertexPath, const std::string& fragmentPath); // { return std::make_shared<Shader>(vertexPath, fragmentPath); }
 
-		void Bind() const;
-		void Unbind() const;
-
-		int GetUniformLocation(const std::string& name);
-		void SetUniform1i(const std::string& name, int value);
-		void SetUniform1f(const std::string& name, float value);
-		void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
-		void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
+		virtual int GetUniformLocation(const std::string& name) = 0;
+		virtual void SetUniform1i(const std::string& name, int value) = 0;
+		virtual void SetUniform1f(const std::string& name, float value) = 0;
+		virtual void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) = 0;
+		virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) = 0;
+		virtual unsigned int CompileShader(unsigned int type, const std::string& source) = 0;
+		virtual unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) = 0;
 
 		ShaderProgramSource ParseShader(const std::string& filepath);
 		ShaderProgramSource ParseShaders(const std::string& vertexPath, const std::string& fragmentPath);
-		unsigned int CompileShader(unsigned int type, const std::string& source);
-		unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
 
-	private:
+	protected:
 		std::string m_FilePath;
 		std::string m_VertexPath;
 		std::string m_FragmentPath;

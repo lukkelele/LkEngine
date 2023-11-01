@@ -106,7 +106,8 @@ namespace LkEngine {
 		//mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
 		mesh.VBO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
 
-		mesh.BaseShader = create_s_ptr<Shader>("assets/shaders/basic_model_view_proj.shader");
+		//mesh.BaseShader = create_s_ptr<Shader>("assets/shaders/basic_model_view_proj.shader");
+		mesh.BaseShader = Shader::Create("assets/shaders/basic_model_view_proj.shader");
 		mesh.BaseShader->Bind();
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 		mesh.BaseShader->Unbind();

@@ -1,91 +1,62 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/Shader.h"
+#include "LkEngine/Renderer/OpenGL/OpenGLShader.h"
 #include <glad/glad.h>
 
-#ifdef LK_RENDERER_API_VULKAN
-	#include "LkEngine/Renderer/Vulkan/VulkanShader.h"
-#elif defined(LK_RENDERER_API_OPENGL)
-	#include "LkEngine/Renderer/OpenGL/OpenGLShader.h"
-#endif
 
 namespace LkEngine {
 
-	s_ptr<Shader> Shader::Create(const std::string& filePath)
+	OpenGLShader::OpenGLShader(const std::string& filePath)
 	{
-	#ifdef LK_RENDERER_API_VULKAN
-		return std::make_shared<VulkanShader>(filePath);
-	#elif defined(LK_RENDERER_API_OPENGL)
-		return std::make_shared<OpenGLShader>(filePath);
-	#else
-		LK_ASSERT(false);
-		return nullptr;
-	#endif
-	}
-
-	s_ptr<Shader> Shader::Create(const std::string& vertexPath, const std::string& fragmentPath)
-	{
-	#ifdef LK_RENDERER_API_VULKAN
-		return std::make_shared<VulkanShader>(vertexPath, fragmentPath);
-	#elif defined(LK_RENDERER_API_OPENGL)
-		return std::make_shared<OpenGLShader>(vertexPath, fragmentPath);
-	#else
-		LK_ASSERT(false);
-		return nullptr;
-	#endif
-	}
-
-#if 0
-	Shader::Shader(const std::string& filePath)
-		: m_FilePath(filePath)   // keep for debug purposes
-	{
+		m_FilePath = filePath;   
 		ShaderProgramSource source = ParseShader(filePath);
 		m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
 	}
 
-	Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
-		: m_VertexPath(vertexPath), m_FragmentPath(fragmentPath)
+	OpenGLShader::OpenGLShader(const std::string& vertexPath, const std::string& fragmentPath)
 	{
+		m_VertexPath = vertexPath;
+		m_FragmentPath = fragmentPath;
 		ShaderProgramSource source = ParseShaders(vertexPath, fragmentPath);
 		m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
 	}
 
-	Shader::~Shader()
+	OpenGLShader::~OpenGLShader()
 	{
-		GL_CALL(glDeleteProgram(m_RendererID));	// successful if m_RendererID isn't 0
+		GL_CALL(glDeleteProgram(m_RendererID));
 	}
 
-	void Shader::Bind() const
+	void OpenGLShader::Bind() const
 	{
 		GL_CALL(glUseProgram(m_RendererID));
 	}
 
-	void Shader::Unbind() const
+	void OpenGLShader::Unbind() const
 	{
 		GL_CALL(glUseProgram(0));
 	}
 
-	void Shader::SetUniform1i(const std::string& name, int value)
+	void OpenGLShader::SetUniform1i(const std::string& name, int value)
 	{
 		GL_CALL(glUniform1i(GetUniformLocation(name), value));
 	}
 
-	void Shader::SetUniform1f(const std::string& name, float value)
+	void OpenGLShader::SetUniform1f(const std::string& name, float value)
 	{
 		GL_CALL(glUniform1f(GetUniformLocation(name), value));
 	}
 
-	void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+	void OpenGLShader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 	{
 		int location = GetUniformLocation(name);
 		GL_CALL(glUniform4f(location, v0, v1, v2, v3));
 	}
 
-	void Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
+	void OpenGLShader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
 	{
 		GL_CALL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
 	}
 
-	int Shader::GetUniformLocation(const std::string& name)
+	int OpenGLShader::GetUniformLocation(const std::string& name)
 	{
 		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
 			return m_UniformLocationCache[name];
@@ -99,25 +70,7 @@ namespace LkEngine {
 		return location;
 	}
 
-	unsigned int Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
-	{
-		unsigned int program = glCreateProgram();
-		unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-		unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-		
-		glAttachShader(program, vs);
-		glAttachShader(program, fs);
-		glLinkProgram(program);
-		glValidateProgram(program);
-
-		// NOTE: Detach shaders instead of deleting IF needed for debugging 
-		glDeleteShader(vs);
-		glDeleteShader(fs);
-
-		return program;
-	}
-
-	unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
+	unsigned int OpenGLShader::CompileShader(unsigned int type, const std::string& source)
 	{
 		unsigned int id = glCreateShader(type);
 		const char* src = source.c_str();   // &source[0] 
@@ -140,11 +93,28 @@ namespace LkEngine {
 		return id;
 	}
 
-#endif
-
-	ShaderProgramSource Shader::ParseShader(const std::string& filepath)
+	unsigned int OpenGLShader::CreateShader(const std::string& vertexOpenGLShader, const std::string& fragmentOpenGLShader)
 	{
-		enum class ShaderType
+		unsigned int program = glCreateProgram();
+		unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexOpenGLShader);
+		unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentOpenGLShader);
+		
+		glAttachShader(program, vs);
+		glAttachShader(program, fs);
+		glLinkProgram(program);
+		glValidateProgram(program);
+
+		// NOTE: Detach shaders instead of deleting IF needed for debugging 
+		glDeleteShader(vs);
+		glDeleteShader(fs);
+
+		return program;
+	}
+
+#if 0
+	ShaderProgramSource OpenGLShader::ParseShader(const std::string& filepath)
+	{
+		enum class OpenGLShaderType
 		{
 			NONE = -1,
 			VERTEX = 0,
@@ -154,7 +124,7 @@ namespace LkEngine {
 		std::ifstream stream(filepath);
 		std::string line;
 		std::stringstream ss[2];
-		ShaderType type = ShaderType::NONE;
+		OpenGLShaderType type = OpenGLShaderType::NONE;
 
 		while (getline(stream, line))
 		{
@@ -164,13 +134,13 @@ namespace LkEngine {
 			if (line.find("#shader") != std::string::npos)
 			{
 				if (line.find("vertex") != std::string::npos)
-					type = ShaderType::VERTEX;
+					type = OpenGLShaderType::VERTEX;
 				else if (line.find("fragment") != std::string::npos)
-					type = ShaderType::FRAGMENT;
+					type = OpenGLShaderType::FRAGMENT;
 			} 
 			else
-			{	// Use ShaderType to append lines appropriately 
-				if (type != ShaderType::NONE)
+			{	// Use OpenGLShaderType to append lines appropriately 
+				if (type != OpenGLShaderType::NONE)
 					ss[(int)type] << line << '\n';
 			}
 		}
@@ -185,9 +155,9 @@ namespace LkEngine {
 		return { vertex_str, frag_str };
 	}
 
-	ShaderProgramSource Shader::ParseShaders(const std::string& vertexPath, const std::string& fragmentPath)
+	ShaderProgramSource OpenGLShader::ParseShaders(const std::string& vertexPath, const std::string& fragmentPath)
 	{
-		enum class ShaderType
+		enum class OpenGLShaderType
 		{
 			NONE = -1,
 			VERTEX = 0,
@@ -197,7 +167,7 @@ namespace LkEngine {
 		std::ifstream streamVertex(vertexPath);
 		std::string line;
 		std::stringstream ss[2];
-		ShaderType type = ShaderType::VERTEX;
+		OpenGLShaderType type = OpenGLShaderType::VERTEX;
 
 		while (getline(streamVertex, line))
 		{
@@ -208,7 +178,7 @@ namespace LkEngine {
 		}
 
 		std::ifstream streamFrag(fragmentPath);
-		type = ShaderType::FRAGMENT;
+		type = OpenGLShaderType::FRAGMENT;
 		while (getline(streamFrag, line))
 		{
 	#ifdef LK_ENGINE_PRINT_SHADER
@@ -226,6 +196,6 @@ namespace LkEngine {
 
 		return { vertex_str, frag_str };
 	}
-
+#endif
 
 }
