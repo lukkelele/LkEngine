@@ -1,11 +1,12 @@
 #pragma once
 
+#include "LkEngine/Renderer/VertexBuffer.h"
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Renderer/Texture.h"
-#include "LkEngine/Editor/EditorCamera.h"
-#include "LkEngine/Scene/Components.h"
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/UniformBuffer.h"
+#include "LkEngine/Scene/Components.h"
+#include "LkEngine/Editor/EditorCamera.h"
 
 
 namespace LkEngine {

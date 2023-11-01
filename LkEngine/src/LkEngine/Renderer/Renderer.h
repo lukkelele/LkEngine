@@ -1,7 +1,6 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
-#include "LkEngine/Renderer/VertexArray.h"
 #include "LkEngine/Renderer/VertexBuffer.h"
 #include "LkEngine/Renderer/IndexBuffer.h"
 #include "LkEngine/Renderer/UniformBuffer.h"

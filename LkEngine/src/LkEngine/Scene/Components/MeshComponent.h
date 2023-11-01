@@ -1,9 +1,11 @@
 #pragma once
+
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/UUID.h"
-#include "LkEngine/Renderer/VertexArray.h"
-#include <glm/glm.hpp>
+#include "LkEngine/Renderer/VertexBuffer.h"
 #include "LkEngine/Renderer/Shader.h"
+
+#include <glm/glm.hpp>
 
 
 namespace LkEngine {
