@@ -9,22 +9,21 @@ namespace LkEngine {
 	class VertexBuffer
 	{
 	public:
-		VertexBuffer(const void* data, unsigned int size);
-		VertexBuffer(unsigned int size);
-		~VertexBuffer();
+		virtual ~VertexBuffer() = default;
 
-		static s_ptr<VertexBuffer> Create(const void* data, unsigned int size) { return std::make_shared<VertexBuffer>(data, size); }
-		static s_ptr<VertexBuffer> Create(unsigned int size) { return std::make_shared<VertexBuffer>(size); }
+		static s_ptr<VertexBuffer> Create(const void* data, unsigned int size);
+		static s_ptr<VertexBuffer> Create(unsigned int size);
 
-		void Bind() const;
-		void Unbind() const;
-		unsigned int GetID() const { return m_RendererID; }
-		void SetData(const void* data, unsigned int size);
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
+		virtual void SetData(const void* data, unsigned int size) = 0;
+
 		void SetLayout(const VertexBufferLayout& layout) { m_BufferLayout = layout; }
+		unsigned int GetID() const { return m_RendererID; }
 		VertexBufferLayout GetLayout() const { return m_BufferLayout; }
-		VertexBufferElement& GetElement(const std::string& elementName);
+		VertexBufferElement& GetElement(const std::string& elementName) { return m_BufferLayout.GetElement(elementName); }
 
-	private:
+	protected:
 		unsigned int m_RendererID;
 		VertexBufferLayout m_BufferLayout;
 	};

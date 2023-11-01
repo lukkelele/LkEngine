@@ -100,7 +100,8 @@ namespace LkEngine {
 				default: LK_ASSERT(false);
 			}
 		}
-		m_VertexBuffers.push_back(std::make_shared<VertexBuffer>(vb));
+		//m_VertexBuffers.push_back(std::make_shared<VertexBuffer>(&vb));
+		m_VertexBuffers.push_back(std::shared_ptr<VertexBuffer>(&vb));
 	}
 
 	void VertexArray::Bind() const
