@@ -77,7 +77,8 @@ namespace LkEngine {
         //m_LineVertexArray->AddVertexBuffer(*m_LineVertexBuffer);
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
-        m_WhiteTexture = std::make_shared<Texture2D>("assets/img/atte_square.png");
+        //m_WhiteTexture = std::make_shared<Texture2D>("assets/img/atte_square.png");
+        m_WhiteTexture = Texture2D::Create("assets/img/atte_square.png");
         m_TextureSlots[0] = m_WhiteTexture;
 
         m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");

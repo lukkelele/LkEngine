@@ -38,7 +38,7 @@ namespace LkEngine {
         static void HandleViewportEvents();
     
     protected:
-        static GraphicsContext* m_Context;
+        inline static GraphicsContext* m_Context = nullptr;
         s_ptr<GLFWwindow*> m_GlfwWindow = nullptr;
         s_ptr<Window> m_Window = nullptr;
         std::string m_GlslVersion = "";

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <glad/glad.h>
+#include <stb_image/stb_image.h>
+
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Buffer.h"
-#include <glad/glad.h>
 
 
 namespace LkEngine {
@@ -24,32 +26,31 @@ namespace LkEngine {
 		bool GenerateMips = true;
 	};
 
-	// TODO:
-	// - The texture class needs some of its attributes passed to a base Texture class that
-	//   will be inherited by Texture (the 3D texture class) and Texture2D
 	class Texture
 	{
 	public:
-		Texture(const std::string& path);
-		Texture(const TextureSpecification& textureSpec);
-		virtual ~Texture();
+		virtual ~Texture() = default;
 
-		virtual void Bind(unsigned int slot = 0) const;
-		virtual void Unbind() const;
-		void Lock();
-		void Unlock();
-		virtual int GetWidth() const { return m_Width; }
-		virtual int GetHeight() const { return m_Height; }
-		virtual const std::string& GetPath() const { return m_Path; }
-		virtual bool IsLoaded() const { return m_Loaded; }
-		void SetData(void* data, uint32_t size);
+		static s_ptr<Texture> Create(const TextureSpecification& specification);
+		static s_ptr<Texture> Create(const std::string& path);
+
+		int GetWidth() const { return m_Width; } 
+		int GetHeight() const { return m_Height; }
+		const std::string& GetPath() const { return m_FilePath; }
 		Buffer GetWriteableBuffer();
+
+		virtual void Bind(unsigned int slot = 0) const = 0;
+		virtual void Unbind() const = 0;
+		virtual void Lock() = 0;
+		virtual void Unlock() = 0;
+		virtual void SetData(void* data, uint32_t size) = 0;
+		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
 
 	protected:
 		unsigned int m_RendererID;
 		uint32_t m_Width, m_Height;
 		Buffer m_ImageData;
-		std::string m_Path;
+		std::string m_FilePath;
 		bool m_Loaded = false;
 		bool m_Locked = false;
 		TextureSpecification m_Specification;
@@ -59,14 +60,20 @@ namespace LkEngine {
 	class Texture2D : public Texture
 	{
 	public:
-		Texture2D(const TextureSpecification& specification) 
-			: Texture(specification) {}
-
-		Texture2D(const std::string& path) 
-			: Texture(path) {}
+		//Texture2D(const TextureSpecification& specification) : Texture(specification) {}
+		//Texture2D(const std::string& path) : Texture(path) {}
+		virtual ~Texture2D() = default;
 
 		static s_ptr<Texture2D> Create(const TextureSpecification& specification);
 		static s_ptr<Texture2D> Create(const std::string& path);
+
+		virtual void Bind(unsigned int slot = 0) const = 0;
+		virtual void Unbind() const = 0;
+		virtual void Lock() = 0;
+		virtual void Unlock() = 0;
+		virtual void SetData(void* data, uint32_t size) = 0;
+		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
+
 	};
 
 }

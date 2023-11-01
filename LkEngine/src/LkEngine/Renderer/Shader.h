@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+
 #include "LkEngine/Core/Base.h"
 
 
@@ -17,8 +18,8 @@ namespace LkEngine {
 	public:
 		virtual ~Shader() = default;
 
-		static s_ptr<Shader> Create(const std::string& filepath); // { return std::make_shared<Shader>(filepath); }
-		static s_ptr<Shader> Create(const std::string& vertexPath, const std::string& fragmentPath); // { return std::make_shared<Shader>(vertexPath, fragmentPath); }
+		static s_ptr<Shader> Create(const std::string& filepath); 
+		static s_ptr<Shader> Create(const std::string& vertexPath, const std::string& fragmentPath); 
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
@@ -34,11 +35,11 @@ namespace LkEngine {
 		ShaderProgramSource ParseShaders(const std::string& vertexPath, const std::string& fragmentPath);
 
 	protected:
+		unsigned int m_RendererID;
 		std::string m_FilePath;
 		std::string m_VertexPath;
 		std::string m_FragmentPath;
 		std::unordered_map<std::string, int> m_UniformLocationCache;
-		unsigned int m_RendererID;
 	};
 
 }

@@ -1,34 +1,71 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/Renderer.h"
-#include "stb_image/stb_image.h"
 
+#ifdef LK_RENDERER_API_VULKAN
+	#include "LkEngine/Renderer/Vulkan/VulkanTexture.h"
+#elif defined(LK_RENDERER_API_OPENGL)
+	#include "LkEngine/Renderer/OpenGL/OpenGLTexture.h"
+#endif
 
 namespace LkEngine {
 
-	static GLenum ImageFormatToGLDataFormat(ImageFormat format)
+
+	s_ptr<Texture> Texture::Create(const TextureSpecification& textureSpec)
 	{
-		switch (format)
-		{
-			case ImageFormat::RGB8:  return GL_RGB;
-			case ImageFormat::RGBA8: return GL_RGBA;
-		}
-		return 0;
+	#ifdef LK_RENDERER_API_VULKAN
+		return std::make_shared<VulkanTexture>(textureSpec);
+	#elif defined(LK_RENDERER_API_OPENGL)
+		return std::make_shared<OpenGLTexture>(textureSpec);
+	#endif
 	}
 
-	static GLenum ImageFormatToGLInternalFormat(ImageFormat format)
+	s_ptr<Texture> Texture::Create(const std::string& filePath)
 	{
-		switch (format)
-		{
-			case ImageFormat::RGB8:  return GL_RGB8;
-			case ImageFormat::RGBA8: return GL_RGBA8;
-		}
-		return 0;
+	#ifdef LK_RENDERER_API_VULKAN
+		return std::make_shared<VulkanTexture>(filePath);
+	#elif defined(LK_RENDERER_API_OPENGL)
+		return std::make_shared<OpenGLTexture>(filePath);
+	#endif
 	}
+
+	Buffer Texture::GetWriteableBuffer()
+	{
+		LK_ASSERT(m_Locked);
+		return m_ImageData;
+	}
+
+
+
+
+	//================================================================================
+	// Texture 2D
+	//================================================================================
+
+	s_ptr<Texture2D> Texture2D::Create(const TextureSpecification& textureSpec)
+	{
+	#ifdef LK_RENDERER_API_VULKAN
+		return std::make_shared<VulkanTexture>(textureSpec);
+	#elif defined(LK_RENDERER_API_OPENGL)
+		return std::make_shared<OpenGLTexture2D>(textureSpec);
+	#endif
+	}
+
+	s_ptr<Texture2D> Texture2D::Create(const std::string& filePath)
+	{
+	#ifdef LK_RENDERER_API_VULKAN
+		return std::make_shared<VulkanTexture>(filePath);
+	#elif defined(LK_RENDERER_API_OPENGL)
+		return std::make_shared<OpenGLTexture2D>(filePath);
+	#endif
+	}
+
+
+#if 0
 
 	Texture::Texture(const std::string& path)
 		: m_RendererID(0)
-		, m_Path(path)
+		, m_FilePath(path)
 	{
 		stbi_set_flip_vertically_on_load(1);
 		int width, height, channels;
@@ -112,5 +149,7 @@ namespace LkEngine {
 	{
 		return std::make_shared<Texture2D>(path);
 	}
+
+#endif
 
 }

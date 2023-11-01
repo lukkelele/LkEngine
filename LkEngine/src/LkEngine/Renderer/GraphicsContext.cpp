@@ -11,8 +11,6 @@
 
 namespace LkEngine {
 
-	GraphicsContext* GraphicsContext::m_Context = nullptr;
-
 	s_ptr<GraphicsContext> GraphicsContext::Create(Window& window, const std::string& glslVersion)
 	{
 	#ifdef LK_RENDERER_API_OPENGL
@@ -22,83 +20,10 @@ namespace LkEngine {
 	#elif defined(LK_RENDERER_API_VULKAN)
 
 	#else
+		LK_ASSERT(false);
 		return nullptr;
 	#endif
 	}
-
-#if 0
-	GraphicsContext::GraphicsContext(void* window_handle)
-	{
-		m_Context = this;
-	    Window* window = static_cast<Window*>(window_handle);
-	    m_Window = std::shared_ptr<Window>(window);
-		m_GlfwWindow = m_Window->GetGlfwWindow();
-		
-		m_MainRenderWindowSize = ImVec2(0, 0);
-	}
-	
-	void GraphicsContext::Init()
-	{
-		GLenum err = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		if (err == 0)
-		{
-			printf("[ERROR] Error starting GLAD");
-			exit(EXIT_FAILURE);
-		}
-		printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
-
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
-	
-		InitImGui(m_Window->GetGlslVersion().c_str());
-	}
-
-	void GraphicsContext::Destroy()
-	{
-		ImGui_ImplGlfw_Shutdown();
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui::DestroyContext();
-	}
-
-	void GraphicsContext::InitImGui(const std::string& glslVersion)
-	{
-	    ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
-		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-		io.Fonts->AddFontFromFileTTF("assets/fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
-		//io.ConfigViewportsNoDecoration = false;
-		//io.ConfigWindowsResizeFromEdges = false;
-		io.ConfigDockingAlwaysTabBar = false;
-
-	    ImGui_ImplGlfw_InitForOpenGL(*m_Window->GetGlfwWindow(), true);
-	    ImGui_ImplOpenGL3_Init(glslVersion.c_str());
-		LOG_INFO("ImGui Version: {0}", ImGui::GetVersion());
-		//UILayer::Init();
-	}
-	
-	void GraphicsContext::BeginImGuiFrame()
-	{
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-		ImGuizmo::BeginFrame();
-	}
-
-	void GraphicsContext::EndImGuiFrame()
-	{
-		//auto size = GetMainRenderWindowSize();
-		//auto pos = GetMainRenderWindowPos();
-		//glViewport(pos.x, pos.y, size.x, size.y);
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	}
-#endif
 
 	void GraphicsContext::HandleViewportEvents()
 	{
