@@ -42,44 +42,45 @@ namespace LkEngine {
 			return;
 		auto& mesh = entity.GetComponent<MeshComponent>();
 		mesh.BaseShader->Bind();
-		mesh.VAO->Bind();
-		auto& ib = mesh.VAO->GetIndexBuffer();
+		//mesh.VBO->Bind();
+		mesh.VBO->Bind();
+		auto& ib = mesh.VBO->GetIndexBuffer();
 		ib->Bind();
 		glDrawElements(DrawMode, ib->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::Draw(VertexArray& va, const Shader& shader) 
+	void Renderer::Draw(VertexBuffer& vb, const Shader& shader) 
 	{
 		shader.Bind();
-		va.Bind();
-		auto& ib = va.GetIndexBuffer();
+		vb.Bind();
+		auto& ib = vb.GetIndexBuffer();
 		ib->Bind();
-		m_RendererAPI->Draw(va, shader);
+		m_RendererAPI->Draw(vb, shader);
 	}
 
-	void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
+	void Renderer::Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
 	{
 		shader.Bind();
-		va.Bind();
+		vb.Bind();
 		ib.Bind();
-		m_RendererAPI->Draw(va, ib, shader);
+		m_RendererAPI->Draw(vb, ib, shader);
 	}
 
-	void Renderer::DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
+	void Renderer::DrawLines(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
 	{
 		shader.Bind();
-		va.Bind();
+		vb.Bind();
 		ib.Bind();
 		SetDrawMode(LK_DRAW_LINES);
-		m_RendererAPI->Draw(va, ib, shader);
+		m_RendererAPI->Draw(vb, ib, shader);
 		SetDrawMode(LK_DRAW_TRIANGLES);
 	}
 
-	void Renderer::DrawIndexed(VertexArray& va, unsigned int count)
+	void Renderer::DrawIndexed(VertexBuffer& vb, unsigned int count)
 	{
-		va.Bind();
-		va.GetIndexBuffer()->Bind();
-		m_RendererAPI->DrawIndexed(va, count);
+		vb.Bind();
+		vb.GetIndexBuffer()->Bind();
+		m_RendererAPI->DrawIndexed(count);
 	}
 
 	void Renderer::SetDrawMode(int mode)

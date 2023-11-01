@@ -101,13 +101,13 @@ namespace LkEngine {
 
         // Quad
         glm::vec4 m_QuadVertexPositions[4];
-        s_ptr<VertexArray> m_QuadVertexArray;
+        //s_ptr<VertexArray> m_QuadVertexArray;
         s_ptr<VertexBuffer> m_QuadVertexBuffer;
         s_ptr<Shader> m_QuadShader;
         uint32_t m_QuadIndexCount = 0;
 
         // Line
-        s_ptr<VertexArray>  m_LineVertexArray;
+        //s_ptr<VertexArray>  m_LineVertexArray;
         s_ptr<VertexBuffer> m_LineVertexBuffer;
         s_ptr<Shader> m_LineShader;
         uint32_t m_LineIndexCount = 0;

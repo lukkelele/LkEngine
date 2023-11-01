@@ -96,14 +96,15 @@ namespace LkEngine {
 		};
 
 		mesh.Color = Color::Generate();
-		mesh.VAO = create_s_ptr<VertexArray>();
+		//mesh.VAO = create_s_ptr<VertexArray>();
 		mesh.VBO = VertexBuffer::Create(vertices, LK_ARRAYSIZE(vertices));
 		mesh.VBO->SetLayout({ 
 			{ "pos", ShaderDataType::Float2 } 
 		});
 
-		mesh.VAO->AddVertexBuffer(*mesh.VBO);
-		mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
+		//mesh.VAO->AddVertexBuffer(*mesh.VBO);
+		//mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
+		mesh.VBO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
 
 		mesh.BaseShader = create_s_ptr<Shader>("assets/shaders/basic_model_view_proj.shader");
 		mesh.BaseShader->Bind();

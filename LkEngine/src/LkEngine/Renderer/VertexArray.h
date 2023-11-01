@@ -7,6 +7,7 @@
 
 namespace LkEngine {
 
+#if 0
 	class VertexArray
 	{
 	public:
@@ -18,7 +19,6 @@ namespace LkEngine {
 		void Bind() const;
 		void Unbind() const;
 		void AddVertexBuffer(VertexBuffer& vb);
-		std::vector<s_ptr<VertexBuffer>>& GetVertexBuffers() { return m_VertexBuffers;  }
 		s_ptr<IndexBuffer>& GetIndexBuffer() { return m_IndexBuffer; }
 		void SetIndexBuffer(const s_ptr<IndexBuffer> ib);
 		unsigned int GetID() { return m_RendererID; }
@@ -26,9 +26,9 @@ namespace LkEngine {
 	private:
 		unsigned int m_RendererID; // = 0;
 		uint32_t m_VertexBufferIndex = 0;
-		std::vector<s_ptr<VertexBuffer>> m_VertexBuffers;
 		s_ptr<IndexBuffer> m_IndexBuffer;
 
 	};
+#endif
 
 }

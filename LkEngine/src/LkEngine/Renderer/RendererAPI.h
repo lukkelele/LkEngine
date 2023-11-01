@@ -26,9 +26,9 @@ namespace LkEngine {
 		virtual void Clear() = 0;
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
-		virtual void Draw(VertexArray& va, const Shader& shader) = 0;
-		virtual void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) = 0;
-		virtual void DrawIndexed(VertexArray& va, unsigned int count) = 0;
+		virtual void Draw(VertexBuffer& vb, const Shader& shader) = 0;
+		virtual void Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) = 0;
+		virtual void DrawIndexed(unsigned int indexCount) = 0;
 		virtual void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
 		virtual void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
 		virtual void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;

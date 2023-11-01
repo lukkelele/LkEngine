@@ -35,10 +35,14 @@ namespace LkEngine {
 		static void Clear();
 		static void SetDrawMode(int mode);
 		static void Draw(Entity& entity);
-		static void Draw(VertexArray& va, const Shader& shader);
-		static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
-		static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
-		static void DrawIndexed(VertexArray& va, unsigned int count);
+		static void Draw(VertexBuffer& va, const Shader& shader);
+		static void Draw(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
+		static void DrawLines(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
+		//static void Draw(VertexArray& va, const Shader& shader);
+		//static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
+		//static void DrawLines(const VertexArray& va, const IndexBuffer& ib, const Shader& shader);
+		//static void DrawIndexed(VertexArray& va, unsigned int count);
+		static void DrawIndexed(VertexBuffer& vb, unsigned int count);
         static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
 		static void DrawSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);

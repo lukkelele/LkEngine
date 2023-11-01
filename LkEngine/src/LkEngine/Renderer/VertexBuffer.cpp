@@ -11,6 +11,7 @@
 
 namespace LkEngine {
 
+
 	s_ptr<VertexBuffer> VertexBuffer::Create(const void* data, unsigned int size) 
 	{ 
 	#ifdef LK_RENDERER_API_VULKAN

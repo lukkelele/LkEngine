@@ -6,24 +6,7 @@
 
 namespace LkEngine {
 
-	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
-	{
-		switch (type)
-		{
-			case ShaderDataType::Float:    return GL_FLOAT;
-			case ShaderDataType::Float2:   return GL_FLOAT;
-			case ShaderDataType::Float3:   return GL_FLOAT;
-			case ShaderDataType::Float4:   return GL_FLOAT;
-			case ShaderDataType::Mat3:     return GL_FLOAT;
-			case ShaderDataType::Mat4:     return GL_FLOAT;
-			case ShaderDataType::Int:      return GL_INT;
-			case ShaderDataType::Int2:     return GL_INT;
-			case ShaderDataType::Int3:     return GL_INT;
-			case ShaderDataType::Int4:     return GL_INT;
-			case ShaderDataType::Bool:     return GL_BOOL;
-		}
-		return 0;
-	}
+#if 0
 
 	VertexArray::VertexArray()
 	{
@@ -100,8 +83,6 @@ namespace LkEngine {
 				default: LK_ASSERT(false);
 			}
 		}
-		//m_VertexBuffers.push_back(std::make_shared<VertexBuffer>(&vb));
-		m_VertexBuffers.push_back(std::shared_ptr<VertexBuffer>(&vb));
 	}
 
 	void VertexArray::Bind() const
@@ -120,5 +101,7 @@ namespace LkEngine {
 		ib->Bind();
 		m_IndexBuffer = ib;
 	}
+
+#endif
 
 }

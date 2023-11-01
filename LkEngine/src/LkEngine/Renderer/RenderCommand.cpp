@@ -18,33 +18,33 @@ namespace LkEngine {
         glLineWidth(width);
     }
 
-    void RenderCommand::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader)
+    void RenderCommand::Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader)
     {
-        s_Renderer->Draw(va, ib, shader);
+        s_Renderer->Draw(vb, ib, shader);
     }
 
-    void RenderCommand::DrawIndexed(VertexArray& va)
+    void RenderCommand::DrawIndexed(VertexBuffer& vb)
     {
-        auto& ib = va.GetIndexBuffer();
+        auto& ib = vb.GetIndexBuffer();
         ib->Bind();
-        s_Renderer->DrawIndexed(va, ib->GetCount());
+        s_Renderer->DrawIndexed(vb, ib->GetCount());
     }
 
-    void RenderCommand::DrawIndexed(VertexArray& va, uint32_t _indexCount)
+    void RenderCommand::DrawIndexed(VertexBuffer& vb, uint32_t _indexCount)
     {
-        va.Bind();
-        auto& ib = va.GetIndexBuffer();
+        vb.Bind();
+        auto& ib = vb.GetIndexBuffer();
         int indexCount = _indexCount ? _indexCount : ib->GetCount();
-        s_Renderer->DrawIndexed(va, indexCount);
+        s_Renderer->DrawIndexed(vb, indexCount);
     }
 
     void RenderCommand::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID)
     {
     }
 
-    void RenderCommand::DrawLines(VertexArray& va, uint32_t lineIndexCount)
+    void RenderCommand::DrawLines(VertexBuffer& vb, uint32_t lineIndexCount)
     {
-        va.Bind();
+        vb.Bind();
         glDrawArrays(GL_LINES, 0, lineIndexCount);
     }
 

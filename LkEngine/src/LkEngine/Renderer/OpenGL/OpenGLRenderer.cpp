@@ -33,17 +33,17 @@ namespace LkEngine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLRenderer::Draw(VertexArray& va, const Shader& shader)
+	void OpenGLRenderer::Draw(VertexBuffer& vb, const Shader& shader)
 	{
-		glDrawElements(Renderer::DrawMode, va.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(Renderer::DrawMode, vb.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void OpenGLRenderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) 
+	void OpenGLRenderer::Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
 	{
 		glDrawElements(Renderer::DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void OpenGLRenderer::DrawIndexed(VertexArray& va, unsigned int indexCount)
+	void OpenGLRenderer::DrawIndexed(unsigned int indexCount)
 	{
 		glDrawElements(Renderer::DrawMode, indexCount, GL_UNSIGNED_INT, nullptr);
 	}

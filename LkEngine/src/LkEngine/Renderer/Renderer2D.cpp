@@ -33,7 +33,8 @@ namespace LkEngine {
             LK_ASSERT(false); // crash it for now
             return;
         }
-        m_QuadVertexArray = VertexArray::Create();
+        //m_QuadVertexArray = VertexArray::Create();
+        LOG_DEBUG("Initializing Renderer2D");
 
         m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
         m_QuadVertexBuffer->SetLayout({
@@ -41,7 +42,7 @@ namespace LkEngine {
             { "a_Color",        ShaderDataType::Float4  },
             { "a_EntityID",     ShaderDataType::Float  },
         });
-        m_QuadVertexArray->AddVertexBuffer(*m_QuadVertexBuffer);
+        //m_QuadVertexArray->AddVertexBuffer(*m_QuadVertexBuffer);
         m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
 
         uint32_t* quadIndices = new uint32_t[m_MaxIndices];
@@ -60,11 +61,12 @@ namespace LkEngine {
             offset += 4;
         }
         s_ptr<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, m_MaxIndices);
-        m_QuadVertexArray->SetIndexBuffer(quadIB);
+        //m_QuadVertexArray->SetIndexBuffer(quadIB);
+        m_QuadVertexBuffer->SetIndexBuffer(quadIB);
         delete[] quadIndices;
 
         // Line
-        m_LineVertexArray = VertexArray::Create();
+        //m_LineVertexArray = VertexArray::Create();
         m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
         VertexBufferLayout lineVertexBufLayout{ };
         m_LineVertexBuffer->SetLayout({
@@ -72,7 +74,7 @@ namespace LkEngine {
             { "a_Color",    ShaderDataType::Float4, },
             { "a_EntityID", ShaderDataType::Float,    }
          });
-        m_LineVertexArray->AddVertexBuffer(*m_LineVertexBuffer);
+        //m_LineVertexArray->AddVertexBuffer(*m_LineVertexBuffer);
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
         m_WhiteTexture = std::make_shared<Texture2D>("assets/img/atte_square.png");
@@ -89,8 +91,8 @@ namespace LkEngine {
         m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
 
         // Doesn't work really
-        m_Stats.QuadVertexArray_RendererID = m_QuadVertexArray->GetID();
-        m_Stats.QuadVertexBuffer_RendererID = m_QuadVertexBuffer->GetID();
+        //m_Stats.QuadVertexArray_RendererID = m_QuadVertexArray->GetID();
+        //m_Stats.QuadVertexBuffer_RendererID = m_QuadVertexBuffer->GetID();
     }
 
     void Renderer2D::Shutdown()
@@ -148,7 +150,8 @@ namespace LkEngine {
 
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
-            RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
+            //RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
+            RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
             m_QuadShader->Unbind();
 
             m_Stats.DrawCalls++;
@@ -164,7 +167,8 @@ namespace LkEngine {
             m_LineShader->Bind();
             m_LineShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
             RenderCommand::SetLineWidth(m_LineWidth);
-            RenderCommand::DrawLines(*m_LineVertexArray, m_LineIndexCount);
+            //RenderCommand::DrawLines(*m_LineVertexArray, m_LineIndexCount);
+            RenderCommand::DrawLines(*m_LineVertexBuffer, m_LineIndexCount);
 
             m_Stats.DrawCalls++;
         }
