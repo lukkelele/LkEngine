@@ -30,7 +30,7 @@ namespace LkEngine {
         if (m_Initialized)
         {
             LOG_CRITICAL("Renderer2D already initialized");
-            LK_ASSERT(false); // crash it for now
+            LK_ASSERT(false); // Crash it for now
             return;
         }
         //m_QuadVertexArray = VertexArray::Create();
@@ -42,7 +42,6 @@ namespace LkEngine {
             { "a_Color",        ShaderDataType::Float4  },
             { "a_EntityID",     ShaderDataType::Float  },
         });
-        //m_QuadVertexArray->AddVertexBuffer(*m_QuadVertexBuffer);
         m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
 
         uint32_t* quadIndices = new uint32_t[m_MaxIndices];
@@ -61,12 +60,10 @@ namespace LkEngine {
             offset += 4;
         }
         s_ptr<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, m_MaxIndices);
-        //m_QuadVertexArray->SetIndexBuffer(quadIB);
         m_QuadVertexBuffer->SetIndexBuffer(quadIB);
         delete[] quadIndices;
 
         // Line
-        //m_LineVertexArray = VertexArray::Create();
         m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
         VertexBufferLayout lineVertexBufLayout{ };
         m_LineVertexBuffer->SetLayout({
@@ -74,10 +71,8 @@ namespace LkEngine {
             { "a_Color",    ShaderDataType::Float4, },
             { "a_EntityID", ShaderDataType::Float,    }
          });
-        //m_LineVertexArray->AddVertexBuffer(*m_LineVertexBuffer);
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
-        //m_WhiteTexture = std::make_shared<Texture2D>("assets/img/atte_square.png");
         m_WhiteTexture = Texture2D::Create("assets/img/atte_square.png");
         m_TextureSlots[0] = m_WhiteTexture;
 
@@ -90,10 +85,6 @@ namespace LkEngine {
         m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
         m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
-
-        // Doesn't work really
-        //m_Stats.QuadVertexArray_RendererID = m_QuadVertexArray->GetID();
-        //m_Stats.QuadVertexBuffer_RendererID = m_QuadVertexBuffer->GetID();
     }
 
     void Renderer2D::Shutdown()

@@ -5,6 +5,7 @@
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/UniformBuffer.h"
+#include "LkEngine/Renderer/Color.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Editor/EditorCamera.h"
 

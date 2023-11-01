@@ -52,7 +52,6 @@ namespace LkEngine {
 	}
 
 
-
 	// 3 - 2
 	// |  /|
 	// | / |

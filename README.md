@@ -38,10 +38,7 @@ When the 2D implementation is done, the plan is to create a game such as **Super
 - ImGuizmo
 
 ### Building LkEngine
-I use premake5 because it is able to create solution files in a neat way.
-This allows for (almost) identical development on both Windows and Linux.
-CMake is a choice as well, there are CMakeLists.txt available but there is some configuration to do.
-<br>
+TODO: *Add build scripts !!*
 <br>
 Use the build script in the repo or execute premake5 manually in bash (or PS). 
 <br>
@@ -49,7 +46,7 @@ Manually in Windows:
 ```
  lib\premake-5.0\premake5.exe vs2022 
 ```
-And on Linux:
+Linux:
 ```
 mkdir build
 cd build
@@ -69,6 +66,7 @@ make
 :white_check_mark: Ortographic camera<br>
 :white_check_mark: Sprite rendering<br>
 :black_square_button: Collision system<br>
+:black_square_button: Grid creation<br>
 :white_check_mark: Raycasting <br>
 :black_square_button: Physics <br>
 
@@ -85,6 +83,17 @@ make
 # Development
 
 ## LkEngine Development
+
+### November 1, 2023
+
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-1-11-2023.png" width=740 height=440>
+	<p align="center">
+		Rendering a grid, will eventually expand to be used as a base for creating 2D games such as Super Mario
+	</p>
+</div>
+<br>
+
 
 ### October 29, 2023
 

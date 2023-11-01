@@ -37,12 +37,9 @@ void TestLayer::OnAttach()
     LOG_DEBUG("TestLayer::OnAttach()");
     m_Scene = create_s_ptr<Scene>();
 
-    EntityFactory::CreateRectangle(*m_Scene, { 20, 20 },   { 140.0f, 140.0f });
-    EntityFactory::CreateRectangle(*m_Scene, { 100, 100 }, { 400, 400.0f });
-    EntityFactory::CreateRectangle(*m_Scene, { 500, 500 }, { 840, 840 });
+    EntityFactory::CreateRectangle(*m_Scene, { 220, 80 },   { 140.0f, 140.0f });
     EntityFactory::CreateQuad(*m_Scene, { 750, 200 }, { 240, 520 }, Color::Generate());
     EntityFactory::CreateQuad(*m_Scene, { 400, 320 }, { 400, 110 }, Color::Generate());
-    EntityFactory::CreateLine(*m_Scene, { 400, 400 }, { 250, 250 }, 8.0f, Color::Generate());
 
     auto& renderer2D = Renderer::GetRenderer2D();
     m_Renderer2D = std::shared_ptr<Renderer2D>(renderer2D);

@@ -78,11 +78,12 @@ namespace LkEngine {
     {
         auto& window = *Window::Get();
         auto [windowWidth, windowHeight] = window.GetSize();
-        float quadWidth = (windowWidth - columns * spacingX) / columns;
-        float quadHeight = (windowHeight - rows * spacingY) / rows;
-        //float quadWidth = windowWidth / columns;
-        //float quadHeight = windowHeight / rows;
+        //float quadWidth = (windowWidth - columns * spacingX) / columns;
+        //float quadHeight = (windowHeight - rows * spacingY) / rows;
+        float quadWidth = windowWidth / columns;
+        float quadHeight = windowHeight / rows;
         glm::vec2 quadSize = { quadWidth, quadHeight };
+        glm::vec2 smallerQuadSize = { quadWidth - 10.0f, quadHeight - 10.f };
 
         float cursorX = 0.0f;
         float cursorY = 0.0f;
@@ -91,27 +92,39 @@ namespace LkEngine {
         {
             windowPos = EditorLayer::Get()->GetViewportPos();
         }
-        cursorX = windowPos.x;
-        cursorY = windowPos.y;
+        cursorX = windowPos.x - quadWidth * 0.25f;
+        cursorY = windowPos.y + quadHeight * 0.25f;
+        cursorX += spacingX;
         //cursorX += spacingX;
         //cursorY += spacingY;
-        float cursorXBegin = windowPos.x; // + spacingX;
-        float cursorYBegin = windowPos.y; // + spacingY;
+        float cursorXBegin = cursorX; // + spacingX;
+        float cursorYBegin = cursorY; // + spacingY;
+
+        static glm::vec4 colors[] = {
+            { 0.3f,  1.00f, 0.30f, 1.0f },
+            { 1.0f,  0.5f,  0.25f, 1.0f },
+            { 0.75f, 0.80f, 0.20f, 1.0f },
+            { 0.40f, 0.50f, 0.15f, 1.0f },
+            { 0.75f, 0.80f, 0.30f, 1.0f },
+            { 0.12f, 0.35f, 0.90f, 1.0f },
+            { 0.24f, 0.22f, 0.48f, 1.0f },
+        };
 
         for (int row = 0; row < rows; row++)
         {
             for (int col = 0; col < columns; col++)
             {
-                //cursorX += spacingX * 0.50f;
-                cursorX += spacingX * 1.00f;
-                Renderer::DrawQuad({ cursorX, cursorY }, quadSize, color);
-                cursorX += quadWidth;
+                // FIXME:
+                // The first DrawQuad call does go above the black quad even if it is 'before' that second drawcall
+                // I really need to fix a render queue for stuff like this
+                Renderer::DrawQuad({ cursorX, cursorY }, smallerQuadSize, colors[(LK_ARRAYSIZE(colors) * (col + 1 + row)) % 3]);
+                Renderer::DrawQuad({ cursorX, cursorY }, quadSize, { 0.0f, 0.0f, 0.0f, 1.0f });
                 //cursorX += (quadWidth + spacingX);
-                //cursorX += (quadWidth + 2 * spacingX);
+                cursorX += quadWidth;
             }
-            //cursorX = 0.0f;
             cursorX = cursorXBegin;
-            cursorY += (quadHeight + spacingY);
+            cursorY += quadHeight;
+            //cursorY += (quadHeight + spacingY);
         }
         
         //Renderer::DrawQuad();

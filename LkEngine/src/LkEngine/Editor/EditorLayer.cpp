@@ -39,6 +39,7 @@ namespace LkEngine {
 	{
 		auto& io = ImGui::GetIO();
 		auto& style = ImGui::GetStyle();
+		auto& colors = style.Colors;
 		io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
 
 		static ImGuiWindowFlags core_viewport_flags = ImGuiWindowFlags_NoDocking;
@@ -161,13 +162,16 @@ namespace LkEngine {
 				ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 				if (ImGui::TreeNode("Colors"))
 				{
-				    ImGui::PushID("##lkengine-bg-color");
+				    ImGui::PushID("##lkengine-leftpanel-colors");
 				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
 				    ImGui::Text("Background"); 
 				    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+
+				    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
+
 				    ImGui::PopID();
 				    ImGui::TreePop();
 				}
@@ -202,8 +206,6 @@ namespace LkEngine {
 				if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor)) { }
 				if (ImGui::Checkbox("Stack Debugger", &m_ShowStackTool)) { }
 
-				ImGui::Text("Right sidebar content");
-
 				if (SelectedEntity && m_GizmoType != -1)
 				{
 					DrawImGuizmo(SelectedEntity);
@@ -217,6 +219,11 @@ namespace LkEngine {
 					ImGui::ShowStyleEditor();
 					ImGui::End();
 				}
+				if (ImGui::Checkbox("Left dock", &DockSpace::Sidebar_Left_Enabled))
+				{
+					DockSpace::ApplyDockSpaceLayout();
+				}
+
 				UI_SelectedEntity();
 
 				ImGui::EndGroup();
