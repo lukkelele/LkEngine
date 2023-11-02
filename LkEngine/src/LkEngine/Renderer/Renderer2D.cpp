@@ -40,7 +40,10 @@ namespace LkEngine {
         m_QuadVertexBuffer->SetLayout({
             { "a_Position",     ShaderDataType::Float3  },
             { "a_Color",        ShaderDataType::Float4  },
-            { "a_EntityID",     ShaderDataType::Float  },
+            { "a_TexCoord",     ShaderDataType::Float2  },
+            { "a_TexIndex",     ShaderDataType::Float,  },
+            { "a_TilingFactor", ShaderDataType::Float,  },
+            { "a_EntityID",     ShaderDataType::Int     },
         });
         m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
 
@@ -67,15 +70,16 @@ namespace LkEngine {
         m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
         VertexBufferLayout lineVertexBufLayout{ };
         m_LineVertexBuffer->SetLayout({
-            { "a_Pos",      ShaderDataType::Float3, },
-            { "a_Color",    ShaderDataType::Float4, },
-            { "a_EntityID", ShaderDataType::Float,    }
+            { "a_Position",     ShaderDataType::Float3, },
+            { "a_Color",        ShaderDataType::Float4, },
+            { "a_EntityID",     ShaderDataType::Float,  }
          });
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
         m_WhiteTexture = Texture2D::Create("assets/img/atte_square.png");
         m_TextureSlots[0] = m_WhiteTexture;
 
+        //m_QuadShader = Shader::Create("assets/shaders/Renderer2D_QuadAdvanced.shader");
         m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
         m_LineShader = Shader::Create("assets/shaders/Renderer2D_Line.shader");
 
@@ -138,7 +142,17 @@ namespace LkEngine {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
-            // <<<< Bind textures here >>>>
+            // Bind textures
+            //for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
+            //{
+            //    s_ptr<Texture2D> tex2D = m_TextureSlots[i];
+            //    if (tex2D)
+            //    {
+            //        LOG_DEBUG("Bound texture: {}", tex2D->GetPath());
+            //        tex2D->Bind(i);
+            //    }
+            //}
+            //m_WhiteTexture->Bind();
 
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
@@ -210,14 +224,25 @@ namespace LkEngine {
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         constexpr size_t quadVertexCount = 4;
+        constexpr glm::vec2 textureCoords[] = { 
+            { 0.0f, 0.0f }, 
+            { 1.0f, 0.0f }, 
+            { 1.0f, 1.0f }, 
+            { 0.0f, 1.0f } 
+        };
+        const float tilingFactor = 1.0f;
+        const float textureIndex = 0.0f; // White texture
 
         if (m_QuadIndexCount >= m_MaxIndices) 
             NextBatch();
 
         for (size_t i = 0; i < quadVertexCount; i++)
         {
-            m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i]; 
+            m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i];
+            m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
             m_QuadVertexBufferPtr->Color = color;
+            m_QuadVertexBufferPtr->TexIndex = textureIndex;
+            m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
             m_QuadVertexBufferPtr->EntityID = entityID;
             m_QuadVertexBufferPtr++;
         }

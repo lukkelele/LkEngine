@@ -17,6 +17,7 @@
 namespace LkEngine {
 
 	#define LK_ASSERT(_COND)                 assert(_COND)
+
 	#define LK_ARRAYSIZE(_ARR)               ((int)(sizeof(_ARR) / sizeof(*(_ARR))))    
 	#define LK_UNUSED(_VAR)                  ((void)(_VAR))
 	#define BIT_FIELD(x)                     (1 << x)

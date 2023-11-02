@@ -87,9 +87,9 @@ namespace LkEngine {
         {
             glm::vec3 Position;
             glm::vec4 Color;
-            //glm::vec2 TexCoord;
-            //float TexIndex;
-            //float TilingFactor;
+            glm::vec2 TexCoord;
+            float TexIndex;
+            float TilingFactor;
             int EntityID; // For editor 
         };
 

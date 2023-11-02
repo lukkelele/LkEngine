@@ -102,7 +102,6 @@ namespace LkEngine {
 				case ShaderDataType::Float3:
 				case ShaderDataType::Float4:
 				{
-					LOG_DEBUG("ShaderDataType::Float1/2/3/4");
 					glEnableVertexAttribArray(m_VertexBufferIndex);
 					glVertexAttribPointer(m_VertexBufferIndex,
 										  element.GetComponentCount(),
@@ -168,7 +167,6 @@ namespace LkEngine {
 				case ShaderDataType::Float3:
 				case ShaderDataType::Float4:
 				{
-					LOG_DEBUG("ShaderDataType::Float1/2/3/4");
 					glEnableVertexAttribArray(m_VertexBufferIndex);
 					glVertexAttribPointer(m_VertexBufferIndex,
 										  element.GetComponentCount(),

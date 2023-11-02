@@ -3,20 +3,10 @@
 #include <glad/glad.h>
 #include <stb_image/stb_image.h>
 
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/Buffer.h"
+#include "LkEngine/Renderer/Image.h"
 
 
 namespace LkEngine {
-
-	enum class ImageFormat
-	{
-		None = 0,
-		R8,
-		RGB8,
-		RGBA8,
-		RGBA32F
-	};
 
 	struct TextureSpecification
 	{
@@ -49,12 +39,12 @@ namespace LkEngine {
 	protected:
 		unsigned int m_RendererID;
 		uint32_t m_Width, m_Height;
-		Buffer m_ImageData;
 		std::string m_FilePath;
 		bool m_Loaded = false;
 		bool m_Locked = false;
 		TextureSpecification m_Specification;
-		GLenum m_InternalFormat, m_DataFormat;
+		s_ptr<Image> m_Image = nullptr;
+		//GLenum m_InternalFormat, m_DataFormat;
 	};
 
 	class Texture2D : public Texture
@@ -73,7 +63,6 @@ namespace LkEngine {
 		virtual void Unlock() = 0;
 		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
-
 	};
 
 }

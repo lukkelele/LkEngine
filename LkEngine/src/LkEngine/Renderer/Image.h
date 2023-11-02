@@ -15,11 +15,34 @@ namespace LkEngine {
 	{
 	    None = 0,
 		RGB,
+		RGB8,
 	    RGBA,
+	    RGBA8,
 		RGBA16F,
 	    RGBA32F,
 		DEPTH32F,
 		DEPTH24STENCIL8,
+	};
+
+	enum class TextureWrap
+	{
+		None = 0,
+		Clamp,
+		Repeat
+	};
+
+	enum class TextureFilter
+	{
+		None = 0,
+		Linear,
+		Nearest
+	};
+
+	enum class TextureType
+	{
+		None = 0,
+		Texture2D,
+		TextureCube
 	};
 
 	struct ImageSpecification
@@ -48,8 +71,9 @@ namespace LkEngine {
 		static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height);
 		static bool IsDepthFormat(ImageFormat format);
 	
-		virtual void SetData(const void* data) = 0;
+		virtual void Invalidate() = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		virtual void SetData(const void* data) = 0;
 
 		virtual Buffer GetBuffer() const = 0;
 		virtual Buffer& GetBuffer() = 0;
@@ -60,8 +84,8 @@ namespace LkEngine {
 		virtual const ImageSpecification GetImageSpecification() const = 0;
 	
 	protected:
+		virtual void Release() = 0;
 		virtual void AllocateMemory(uint64_t size) = 0;
-		virtual void ReleaseMemory() = 0;
 
 	};
 }

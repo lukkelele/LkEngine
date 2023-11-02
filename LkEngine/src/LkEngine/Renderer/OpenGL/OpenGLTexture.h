@@ -35,7 +35,6 @@ namespace LkEngine {
 		const std::string& GetPath() const { return m_FilePath; }
 		bool IsLoaded() const { return m_Loaded; }
 		void SetData(void* data, uint32_t size);
-
 	};
 
 

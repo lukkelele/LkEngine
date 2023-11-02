@@ -103,13 +103,13 @@ namespace LkEngine {
         float cursorYBegin = cursorY; // + spacingY;
 
         static glm::vec4 colors[] = {
-            { 0.3f,  1.00f, 0.30f, 1.0f },
-            { 1.0f,  0.5f,  0.25f, 1.0f },
-            { 0.75f, 0.80f, 0.20f, 1.0f },
-            { 0.40f, 0.50f, 0.15f, 1.0f },
-            { 0.0f,  1.00f, 0.90f, 1.0f },
-            { 0.75f, 0.80f, 0.30f, 1.0f },
-            { 0.12f, 0.35f, 0.90f, 1.0f },
+            { 0.3f,  1.00f, 0.30f, color.a },
+            { 1.0f,  0.5f,  0.25f, color.a },
+            { 0.75f, 0.80f, 0.20f, color.a },
+            { 0.40f, 0.50f, 0.15f, color.a },
+            { 0.0f,  1.00f, 0.90f, color.a },
+            { 0.75f, 0.80f, 0.30f, color.a },
+            { 0.12f, 0.35f, 0.90f, color.a },
             { 0.24f, 0.22f, 0.48f, 1.0f },
         };
 
@@ -120,8 +120,8 @@ namespace LkEngine {
                 // FIXME:
                 // The first DrawQuad call does go above the black quad even if it is 'before' that second drawcall
                 // I really need to fix a render queue for stuff like this
-                RenderCommand::DrawQuad({ cursorX, cursorY }, smallerQuadSize, colors[(LK_ARRAYSIZE(colors) * (col + 1 + row)) % 5]);
                 RenderCommand::DrawQuad({ cursorX, cursorY }, quadSize, { 0.0f, 0.0f, 0.0f, 1.0f });
+                RenderCommand::DrawQuad({ cursorX, cursorY }, smallerQuadSize, colors[(LK_ARRAYSIZE(colors) * (col + 1 + row)) % 5]);
                 //cursorX += (quadWidth + spacingX);
                 cursorX += quadWidth;
             }

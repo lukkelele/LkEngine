@@ -7,6 +7,7 @@
 using namespace LkEngine;
 
 class LkEngine::Renderer2D;
+class LkEngine::Texture;
 
 class TestLayer : public Layer
 {
@@ -24,6 +25,7 @@ public:
 private:
     s_ptr<Scene> m_Scene = nullptr;
     s_ptr<Renderer2D> m_Renderer2D = nullptr;
+    s_ptr<Texture> m_TestTexture = nullptr;
 };
 
 

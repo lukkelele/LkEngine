@@ -181,7 +181,6 @@ namespace LkEngine {
 				);
 			}
 		}
-		RenderCommand::DrawGrid(4, 4, { 0.80f, 0.50f, 0.80f, 1.0f }, 20, 20);
 	}
 
 	void Scene::EndScene()

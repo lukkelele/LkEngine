@@ -44,6 +44,8 @@ void TestLayer::OnAttach()
     auto& renderer2D = Renderer::GetRenderer2D();
     m_Renderer2D = std::shared_ptr<Renderer2D>(renderer2D);
     LK_ASSERT(m_Renderer2D);
+
+    m_TestTexture = Texture::Create("assets/img/atte_square.png");
 }
 
 void TestLayer::OnDetach()
@@ -57,6 +59,8 @@ void TestLayer::OnUpdate(float ts)
     glm::vec2 camPos = cam.GetPos();
 
     m_Renderer2D->BeginScene(cam);
+	RenderCommand::DrawGrid(4, 4, { 0.80f, 0.50f, 0.80f, 0.20f }, 20, 20);
+
     m_Scene->BeginScene();
 
     // TODO: Snapping movement with the mouse can switch selected entities 
@@ -70,10 +74,12 @@ void TestLayer::OnUpdate(float ts)
         EditorLayer::SelectedEntityID = 0;
     }
 
+#if 0
     glm::vec2 p0 = { 200.0f, 300.0f };
     glm::vec2 p1 = { 400.0f, 800.0f };
     glm::vec4 lineColor = { 0.0f, 1.0f, 0.5f, 1.0f };
     m_Renderer2D->DrawLine(p0, p1, lineColor);
+#endif
 
     m_Scene->EndScene();
     m_Renderer2D->EndScene();

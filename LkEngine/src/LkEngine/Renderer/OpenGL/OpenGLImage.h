@@ -1,21 +1,21 @@
 #pragma once
 
+#include <glad/glad.h>
 #include "LkEngine/Renderer/Image.h"
 
 
 namespace LkEngine {
 
-
 	class OpenGLImage : public Image
 	{
 	public:
-		//OpenGLImage(std::string_view stringView);
 		OpenGLImage(ImageSpecification spec, Buffer buffer);
 		OpenGLImage(ImageSpecification spec, const void* data = nullptr);
 		~OpenGLImage();
 
-		void SetData(const void* data);
+		void Invalidate();
 		void Resize(uint32_t width, uint32_t height);
+		void SetData(const void* data);
 
 		RendererID GetRendererID() const { return m_RendererID; }
 		Buffer GetBuffer() const { return m_ImageData; }
@@ -26,8 +26,8 @@ namespace LkEngine {
 		const ImageSpecification GetImageSpecification() const { return m_Specification; }
 
 	private:
+		void Release();
 		void AllocateMemory(uint64_t size);
-		void ReleaseMemory();
 
 	private:
 		RendererID m_RendererID = 0;

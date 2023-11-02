@@ -82,7 +82,6 @@ namespace LkEngine {
 	{
 		if (format == ImageFormat::DEPTH24STENCIL8 || format == ImageFormat::DEPTH32F)
 			return true;
-
 		return false;
 	}
 

@@ -8,8 +8,11 @@ namespace LkEngine {
 	{
 		switch (format)
 		{
-			case ImageFormat::RGB8:  return GL_RGB;
-			case ImageFormat::RGBA8: return GL_RGBA;
+			case ImageFormat::RGB:  
+			case ImageFormat::RGB8:    return GL_RGB;
+			case ImageFormat::RGBA:   
+			case ImageFormat::RGBA8:   
+			case ImageFormat::RGBA32F: return GL_RGBA;
 		}
 		return 0;
 	}
@@ -18,8 +21,11 @@ namespace LkEngine {
 	{
 		switch (format)
 		{
-			case ImageFormat::RGB8:  return GL_RGB8;
-			case ImageFormat::RGBA8: return GL_RGBA8;
+			case ImageFormat::RGB:     return GL_RGB32F;
+			case ImageFormat::RGB8:    return GL_RGB8;
+			case ImageFormat::RGBA8:   return GL_RGBA8;
+			case ImageFormat::RGBA:    return GL_RGBA8;
+			case ImageFormat::RGBA32F: return GL_RGBA32F;
 		}
 		return 0;
 	}
@@ -49,17 +55,18 @@ namespace LkEngine {
 	OpenGLTexture::OpenGLTexture(const TextureSpecification& textureSpec)
 	{
 		m_RendererID = 0;
-		m_InternalFormat = ImageFormatToGLInternalFormat(m_Specification.Format);
-		m_DataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
+		ImageSpecification imageSpec;
+		m_Image = Image::Create(imageSpec, nullptr);
+		//m_InternalFormat = ImageFormatToGLInternalFormat(m_Specification.Format);
+		//m_DataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
+		//glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
+		//glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
 
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		//glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -80,8 +87,10 @@ namespace LkEngine {
 
 	void OpenGLTexture::SetData(void* data, uint32_t size)
 	{
-		uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3;
-		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+		//uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3;
+		GLenum dataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
+		uint32_t bpp = ImageFormatToGLDataFormat(m_Specification.Format) == GL_RGBA ? 4 : 3;
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OpenGLTexture::Lock()
@@ -124,8 +133,9 @@ namespace LkEngine {
 
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
-		uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3;
-		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+		GLenum dataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
+		uint32_t bpp = dataFormat == GL_RGBA ? 4 : 3;
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OpenGLTexture2D::Lock()
