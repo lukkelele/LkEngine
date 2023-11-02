@@ -224,6 +224,16 @@ namespace LkEngine {
 					DockSpace::ApplyDockSpaceLayout();
 				}
 
+				auto& whiteTexture = Renderer2D::Get()->m_WhiteTexture;
+				bool white_texture_loaded = whiteTexture->IsLoaded();
+				if (ImGui::Checkbox("Load 'White' Texture", &white_texture_loaded))
+				{
+					if (white_texture_loaded)
+						whiteTexture->Load();
+					else
+						whiteTexture->Unload();
+				}
+
 				UI_SelectedEntity();
 
 				ImGui::EndGroup();
@@ -297,16 +307,6 @@ namespace LkEngine {
 
 				ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
 
-				auto& renderer2D = *Renderer2D::Get();
-				Renderer2D::Statistics renderer2D_stats = renderer2D.GetStats();
-				ImGui::BeginGroup();
-				ImGui::Text("Renderer 2D Stats");
-				ImGui::Text("QuadVertexArray ID: %f", renderer2D_stats.QuadVertexArray_RendererID);
-				ImGui::SameLine(0, 20);
-				ImGui::Text("QuadVertexBuffer ID : %f", renderer2D_stats.QuadVertexBuffer_RendererID);
-				ImGui::SameLine(0, 20);
-				ImGui::Text("Quads: %d", renderer2D_stats.QuadCount);
-				ImGui::EndGroup();
 			}
 			ImGui::End();
 			//--------------------------------------------------
@@ -534,7 +534,6 @@ namespace LkEngine {
 
             DrawImGuizmo(entity);
 
-            static float temp_scale = 1.0f;
             ImGui::Text("Scale");
             ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 5.0f, "%.2f");
 

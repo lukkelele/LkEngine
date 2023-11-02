@@ -34,6 +34,8 @@ namespace LkEngine {
 		virtual void Lock() = 0;
 		virtual void Unlock() = 0;
 		virtual void SetData(void* data, uint32_t size) = 0;
+		virtual void Load() = 0;
+		virtual void Unload() = 0;
 		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
 
 #if 0
@@ -65,6 +67,9 @@ namespace LkEngine {
 		virtual void Unlock() = 0;
 		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual bool IsLoaded() const = 0;
+
+		virtual void Load() = 0;
+		virtual void Unload() = 0;
 
 		virtual uint32_t GetWidth() const = 0;  
 		virtual uint32_t GetHeight() const = 0;

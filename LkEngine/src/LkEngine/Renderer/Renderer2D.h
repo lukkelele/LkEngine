@@ -22,6 +22,10 @@ namespace LkEngine {
         bool SwapChainTarget = false;
     };
 
+    //
+    // TODO:
+    // - GetTexture(index: int) / GetTexture(name: string)
+    //
     class Renderer2D
     {
     public:
@@ -133,6 +137,8 @@ namespace LkEngine {
         };
         CameraData m_CameraBuffer;
         s_ptr<UniformBuffer> m_CameraUniformBuffer;
+
+        friend class EditorLayer;
     };
 
 }

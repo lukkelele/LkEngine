@@ -48,12 +48,14 @@ namespace LkEngine {
 		//m_Image->Invalidate();
 	}
 
-	OpenGLTexture::OpenGLTexture(const TextureSpecification& textureSpec)
+	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
 	{
 		m_RendererID = 0;
 		ImageSpecification imageSpec;
+		imageSpec.Width = specification.Width;
+		imageSpec.Height = specification.Height;
+
 		m_Image = Image::Create(imageSpec, nullptr);
-		//m_Image->Invalidate();
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -90,12 +92,26 @@ namespace LkEngine {
 		// Submit to renderer
 	}
 
+	void OpenGLTexture::Load()
+	{
+		m_Loaded = true;
+	}
+
+	void OpenGLTexture::Unload()
+	{
+		m_Loaded = false;
+	}
+
+
+
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
 		: m_Specification(specification)
 		, m_Width(specification.Width)
 		, m_Height(specification.Height)
 	{
 		ImageSpecification imageSpec;
+		imageSpec.Width = specification.Width;
+		imageSpec.Height = specification.Height;
 		m_Image = Image::Create(imageSpec, nullptr);
 		//m_Image->Invalidate();
 	}
@@ -115,7 +131,6 @@ namespace LkEngine {
 		m_Height = height;
 
 		m_Image = Image::Create(imageSpec, data);
-		//m_Image->Invalidate();
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
@@ -152,6 +167,17 @@ namespace LkEngine {
 		m_Locked = false;
 		// Submit to renderer
 	}
+
+	void OpenGLTexture2D::Load()
+	{
+		m_Loaded = true;
+	}
+
+	void OpenGLTexture2D::Unload()
+	{
+		m_Loaded = false;
+	}
+
 
 
 }

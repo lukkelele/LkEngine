@@ -52,8 +52,11 @@ namespace LkEngine {
 
     void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint64_t entityID)
     {
-        glm::vec2 scaledSize = { tc.Scale.x * sc.Size.x, tc.Scale.y * sc.Size.y };
-        s_Renderer->SubmitSprite(tc, sc.Size, sc.Color, entityID);
+        glm::vec2 scaledSize = { 
+            tc.Scale.x * sc.Size.x, 
+            tc.Scale.y * sc.Size.y 
+        };
+        s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
     }
 
     void RenderCommand::DrawSprite(Entity& entity)
@@ -62,8 +65,9 @@ namespace LkEngine {
 	    	return;
 	    auto& tc = entity.GetComponent<TransformComponent>();
 	    auto& sc = entity.GetComponent<SpriteComponent>();
+        LOG_TRACE("Sprite Scale -> ({}, {})", tc.Scale.x, tc.Scale.y);
         glm::vec2 scaledSize = { tc.Scale.x * sc.Size.x, tc.Scale.y * sc.Size.y };
-        s_Renderer->SubmitSprite(tc, sc.Size, sc.Color, entity.GetUUID());
+        s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entity.GetUUID());
     }
 
     void RenderCommand::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)

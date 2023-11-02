@@ -21,6 +21,9 @@ namespace LkEngine {
 		void SetData(void* data, uint32_t size);
 		Buffer GetWriteableBuffer() { return m_Image->GetBuffer(); }
 
+		void Load();
+		void Unload();
+
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
 
@@ -33,6 +36,9 @@ namespace LkEngine {
 		TextureSpecification m_Specification;
 		s_ptr<Image> m_Image = nullptr;
 	};
+
+
+
 
 
 	class OpenGLTexture2D : public Texture2D
@@ -50,6 +56,9 @@ namespace LkEngine {
 		bool IsLoaded() const { return m_Loaded; }
 		void SetData(void* data, uint32_t size);
 		Buffer GetWriteableBuffer() { return m_Image->GetBuffer(); }
+
+		void Load();
+		void Unload();
 
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
