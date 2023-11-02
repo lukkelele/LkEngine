@@ -53,8 +53,6 @@ namespace LkEngine {
         uint16_t GetHeight() const { return m_Window->GetHeight(); }
         s_ptr<Window> GetWindow() const { return m_Window; }
         s_ptr<Renderer> GetRenderer() const { return m_Renderer; }
-        s_ptr<Renderer2D> GetRenderer2D() const { return m_Renderer->GetRenderer2D(); }
-        //s_ptr<Renderer2D> GetRenderer2D() const { return Renderer2D::Get()->GetRenderer2D(); }
         s_ptr<GLFWwindow*> GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
         s_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
 

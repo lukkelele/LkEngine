@@ -43,6 +43,7 @@ void TestLayer::OnAttach()
 
     auto& renderer2D = Renderer::GetRenderer2D();
     m_Renderer2D = std::shared_ptr<Renderer2D>(renderer2D);
+    LK_ASSERT(m_Renderer2D);
 }
 
 void TestLayer::OnDetach()

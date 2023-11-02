@@ -18,16 +18,18 @@ namespace LkEngine {
         glLineWidth(width);
     }
 
+#if 0
     void RenderCommand::Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader)
     {
-        s_Renderer->Draw(vb, ib, shader);
+        s_Renderer->Submit(vb, ib, shader);
     }
+#endif
 
     void RenderCommand::DrawIndexed(VertexBuffer& vb)
     {
         auto& ib = vb.GetIndexBuffer();
         ib->Bind();
-        s_Renderer->DrawIndexed(vb, ib->GetCount());
+        s_Renderer->SubmitIndexed(vb, ib->GetCount());
     }
 
     void RenderCommand::DrawIndexed(VertexBuffer& vb, uint32_t _indexCount)
@@ -35,7 +37,7 @@ namespace LkEngine {
         vb.Bind();
         auto& ib = vb.GetIndexBuffer();
         int indexCount = _indexCount ? _indexCount : ib->GetCount();
-        s_Renderer->DrawIndexed(vb, indexCount);
+        s_Renderer->SubmitIndexed(vb, indexCount);
     }
 
     void RenderCommand::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID)
@@ -51,7 +53,7 @@ namespace LkEngine {
     void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint64_t entityID)
     {
         glm::vec2 scaledSize = { tc.Scale.x * sc.Size.x, tc.Scale.y * sc.Size.y };
-        s_Renderer->DrawSprite(tc, sc.Size, sc.Color, entityID);
+        s_Renderer->SubmitSprite(tc, sc.Size, sc.Color, entityID);
     }
 
     void RenderCommand::DrawSprite(Entity& entity)
@@ -61,17 +63,17 @@ namespace LkEngine {
 	    auto& tc = entity.GetComponent<TransformComponent>();
 	    auto& sc = entity.GetComponent<SpriteComponent>();
         glm::vec2 scaledSize = { tc.Scale.x * sc.Size.x, tc.Scale.y * sc.Size.y };
-        s_Renderer->DrawSprite(tc, sc.Size, sc.Color, entity.GetUUID());
+        s_Renderer->SubmitSprite(tc, sc.Size, sc.Color, entity.GetUUID());
     }
 
     void RenderCommand::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
     {
-        s_Renderer->DrawQuad(pos, size, color, entityID);
+        s_Renderer->SubmitQuad(pos, size, color, entityID);
     }
 
     void RenderCommand::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
     {
-        s_Renderer->DrawQuad(pos, size, color, entityID);
+        s_Renderer->SubmitQuad(pos, size, color, entityID);
     }
 
     void RenderCommand::DrawGrid(int columns, int rows, const glm::vec4& color, float spacingX, float spacingY)
@@ -105,6 +107,7 @@ namespace LkEngine {
             { 1.0f,  0.5f,  0.25f, 1.0f },
             { 0.75f, 0.80f, 0.20f, 1.0f },
             { 0.40f, 0.50f, 0.15f, 1.0f },
+            { 0.0f,  1.00f, 0.90f, 1.0f },
             { 0.75f, 0.80f, 0.30f, 1.0f },
             { 0.12f, 0.35f, 0.90f, 1.0f },
             { 0.24f, 0.22f, 0.48f, 1.0f },
@@ -117,8 +120,8 @@ namespace LkEngine {
                 // FIXME:
                 // The first DrawQuad call does go above the black quad even if it is 'before' that second drawcall
                 // I really need to fix a render queue for stuff like this
-                Renderer::DrawQuad({ cursorX, cursorY }, smallerQuadSize, colors[(LK_ARRAYSIZE(colors) * (col + 1 + row)) % 3]);
-                Renderer::DrawQuad({ cursorX, cursorY }, quadSize, { 0.0f, 0.0f, 0.0f, 1.0f });
+                RenderCommand::DrawQuad({ cursorX, cursorY }, smallerQuadSize, colors[(LK_ARRAYSIZE(colors) * (col + 1 + row)) % 5]);
+                RenderCommand::DrawQuad({ cursorX, cursorY }, quadSize, { 0.0f, 0.0f, 0.0f, 1.0f });
                 //cursorX += (quadWidth + spacingX);
                 cursorX += quadWidth;
             }

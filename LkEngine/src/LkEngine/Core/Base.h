@@ -1,5 +1,7 @@
 #pragma once
+
 #include "LkEngine/Core/PlatformDetection.h"
+
 #include <cassert>
 #include <stdexcept>
 #include <cstdint>
@@ -12,7 +14,6 @@
 #include <cstddef>
 
 
-
 namespace LkEngine {
 
 	#define LK_ASSERT(_COND)                 assert(_COND)
@@ -23,7 +24,7 @@ namespace LkEngine {
 	#define GL_CALL(_FUNC)                   (void)(_FUNC) // TODO: Add opengl call func here
 
 	using byte = uint8_t;
-	using LK_Function = std::function<void()>;
+	using RendererID = uint32_t;
 
 	/* Unique pointer */
 	template<typename T>

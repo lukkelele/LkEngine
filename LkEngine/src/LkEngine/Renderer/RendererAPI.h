@@ -26,21 +26,24 @@ namespace LkEngine {
 		virtual void Clear() = 0;
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
+
 		virtual void Draw(VertexBuffer& vb, const Shader& shader) = 0;
 		virtual void Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) = 0;
-		virtual void DrawIndexed(unsigned int indexCount) = 0;
-		virtual void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
-		virtual void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
-		virtual void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;
-		virtual void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;
-		virtual void DrawSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0) = 0;
+
+		virtual void SubmitIndexed(unsigned int indexCount) = 0;
+		virtual void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
+		virtual void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
+		virtual void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;
+		virtual void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;
+		virtual void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0) = 0;
 
 		static RendererAPIType Current() { return m_CurrentRendererAPI; }
 		static void SetAPI(RendererAPIType api);
+		static s_ptr<Renderer2D>& GetRenderer2D() { return m_Renderer2D; }
 
 	protected:
 		inline static RendererAPIType m_CurrentRendererAPI = RendererAPIType::OpenGL;
-		static s_ptr<Renderer2D> m_Renderer2D;
+		inline static s_ptr<Renderer2D> m_Renderer2D = nullptr;
 
 		friend class Renderer;
     };
