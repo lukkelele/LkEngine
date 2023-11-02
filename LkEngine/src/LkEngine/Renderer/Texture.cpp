@@ -29,12 +29,13 @@ namespace LkEngine {
 	#endif
 	}
 
+#if 0
 	Buffer Texture::GetWriteableBuffer()
 	{
 		LK_ASSERT(m_Locked);
 		return m_Image->GetBuffer();// m_ImageData;
 	}
-
+#endif
 
 
 	//================================================================================

@@ -24,10 +24,10 @@ namespace LkEngine {
 		static s_ptr<Texture> Create(const TextureSpecification& specification);
 		static s_ptr<Texture> Create(const std::string& path);
 
-		int GetWidth() const { return m_Width; } 
-		int GetHeight() const { return m_Height; }
-		const std::string& GetPath() const { return m_FilePath; }
-		Buffer GetWriteableBuffer();
+		virtual uint32_t GetWidth() const = 0; 
+		virtual uint32_t GetHeight() const = 0; 
+		virtual const std::string& GetPath() const = 0;
+		virtual Buffer GetWriteableBuffer() = 0;
 
 		virtual void Bind(unsigned int slot = 0) const = 0;
 		virtual void Unbind() const = 0;
@@ -36,15 +36,17 @@ namespace LkEngine {
 		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
 
+#if 0
 	protected:
 		unsigned int m_RendererID;
-		uint32_t m_Width, m_Height;
-		std::string m_FilePath;
+		//uint32_t m_Width, m_Height;
+		//std::string m_FilePath;
 		bool m_Loaded = false;
 		bool m_Locked = false;
 		TextureSpecification m_Specification;
 		s_ptr<Image> m_Image = nullptr;
 		//GLenum m_InternalFormat, m_DataFormat;
+#endif
 	};
 
 	class Texture2D : public Texture
@@ -62,7 +64,12 @@ namespace LkEngine {
 		virtual void Lock() = 0;
 		virtual void Unlock() = 0;
 		virtual void SetData(void* data, uint32_t size) = 0;
-		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
+		virtual bool IsLoaded() const = 0;
+
+		virtual uint32_t GetWidth() const = 0;  
+		virtual uint32_t GetHeight() const = 0;
+		virtual const std::string& GetPath() const = 0; 
+		virtual Buffer GetWriteableBuffer() = 0;
 	};
 
 }

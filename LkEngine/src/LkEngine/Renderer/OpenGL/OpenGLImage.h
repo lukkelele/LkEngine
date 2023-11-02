@@ -13,11 +13,16 @@ namespace LkEngine {
 		OpenGLImage(ImageSpecification spec, const void* data = nullptr);
 		~OpenGLImage();
 
+		void Bind();
+		void Unbind();
+
 		void Invalidate();
 		void Resize(uint32_t width, uint32_t height);
 		void SetData(const void* data);
 
+		RendererID& GetRendererID() { return m_RendererID; }
 		RendererID GetRendererID() const { return m_RendererID; }
+
 		Buffer GetBuffer() const { return m_ImageData; }
 		Buffer& GetBuffer() { return m_ImageData; }	
 		uint32_t GetWidth() const { return m_Specification.Width; }

@@ -49,7 +49,6 @@ void main()
     //vec4 color;
     //color = texture(u_Texture, v_TexCoord);
     // FragColor = color;
-    
     //FragColor = v_Color;
-    FragColor = v_Color;
+    FragColor = texture(u_Texture, v_TexCoord);
 }

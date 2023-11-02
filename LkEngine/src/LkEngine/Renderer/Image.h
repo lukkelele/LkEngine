@@ -62,7 +62,6 @@ namespace LkEngine {
 	public:
 		virtual ~Image() = default;
 	
-		//static s_ptr<Image> Create(std::string_view filepath);
 		static s_ptr<Image> Create(ImageSpecification spec, Buffer buffer);
 		static s_ptr<Image> Create(ImageSpecification spec, const void* data = nullptr);
 		static uint32_t BytesPerPixel(ImageFormat format);
@@ -71,16 +70,21 @@ namespace LkEngine {
 		static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height);
 		static bool IsDepthFormat(ImageFormat format);
 	
+		virtual void Bind() = 0;
+		virtual void Unbind() = 0;
+
 		virtual void Invalidate() = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		virtual void SetData(const void* data) = 0;
+
+		virtual RendererID& GetRendererID() = 0;
+		virtual RendererID GetRendererID() const = 0;
 
 		virtual Buffer GetBuffer() const = 0;
 		virtual Buffer& GetBuffer() = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual int64_t GetImageFormat(ImageFormat fmt) = 0;
-		virtual RendererID GetRendererID() const = 0;
 		virtual const ImageSpecification GetImageSpecification() const = 0;
 	
 	protected:

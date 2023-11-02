@@ -152,7 +152,7 @@ namespace LkEngine {
             //        tex2D->Bind(i);
             //    }
             //}
-            //m_WhiteTexture->Bind();
+            m_WhiteTexture->Bind();
 
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
