@@ -13,8 +13,8 @@ namespace LkEngine {
 		OpenGLImage(ImageSpecification spec, const void* data = nullptr);
 		~OpenGLImage();
 
-		void Bind();
-		void Unbind();
+		//void Bind();
+		//void Unbind();
 
 		void Invalidate();
 		void Resize(uint32_t width, uint32_t height);

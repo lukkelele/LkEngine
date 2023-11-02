@@ -76,7 +76,22 @@ namespace LkEngine {
         , m_Height(spec.Height)
         , m_ImageData(buffer)
     {
-		//Invalidate();
+		if (buffer.GetSize() == 0)
+		{
+			LOG_WARN("OpenGLImage: Passed buffer is of size 0!");
+		}
+		m_ImageData = buffer;
+
+		GL_CALL(glGenTextures(1, &m_RendererID));
+		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
+
+		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); // S: x
+		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); // T: y
+
+		GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_ImageData.Data));
+		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
     }
 
     OpenGLImage::OpenGLImage(ImageSpecification spec, const void* data)
@@ -89,39 +104,25 @@ namespace LkEngine {
             uint32_t memorySize = Image::GetMemorySize(spec.Format, spec.Width, spec.Height);
 			LOG_TRACE("OpenGLImage: Memory size '{}'", memorySize);
 			m_ImageData = Buffer::Copy(data, memorySize);
+
+			GL_CALL(glGenTextures(1, &m_RendererID));
+			GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
+
+			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); // S: x
+			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); // T: y
+
+			GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_ImageData.Data));
+			GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+
 		}
-#if 0
-		GL_CALL(glGenTextures(1, &m_RendererID));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
-
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); // S: x
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); // T: y
-
-		GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, spec.Width, spec.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-#endif 
-
-		//Invalidate();
     }
 
     OpenGLImage::~OpenGLImage()
     {
     }
 
-	void OpenGLImage::Bind()
-	{
-		//LOG_TRACE("Binding Image Tex");
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-		//LOG_TRACE("Image Data size: {}", m_ImageData.GetSize());
-		//LK_ASSERT(m_ImageData.GetSize() != 0);
-	}
-
-	void OpenGLImage::Unbind()
-	{
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-	}
 
 	void OpenGLImage::SetData(const void* data)
     {
@@ -144,18 +145,6 @@ namespace LkEngine {
             Release();
 		}
 
-		GL_CALL(glGenTextures(1, &m_RendererID));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
-
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); // S: x
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); // T: y
-
-		GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_ImageData.Data));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-
-#if 0
         glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
 
@@ -170,8 +159,7 @@ namespace LkEngine {
             glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, format, dataType, m_ImageData.Data);
             //glGenerateTextureMipmap(m_RendererID); // TODO: optional
         }
-		//glBindTexture(GL_TEXTURE_2D, 0);
-#endif
+		glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     void OpenGLImage::AllocateMemory(uint64_t size)

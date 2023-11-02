@@ -45,22 +45,7 @@ namespace LkEngine {
 		m_Width = width;
 		m_Height = height;
 		m_Image = Image::Create(imageSpec, data);
-		m_Image->Invalidate();
-
-#if 0
-		GL_CALL(glGenTextures(1, &m_RendererID));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
-
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); // S: x
-		GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); // T: y
-
-		GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-
-		stbi_image_free(data);
-#endif
+		//m_Image->Invalidate();
 	}
 
 	OpenGLTexture::OpenGLTexture(const TextureSpecification& textureSpec)
@@ -68,20 +53,7 @@ namespace LkEngine {
 		m_RendererID = 0;
 		ImageSpecification imageSpec;
 		m_Image = Image::Create(imageSpec, nullptr);
-		m_Image->Invalidate();
-
-#if 0
-		m_InternalFormat = ImageFormatToGLInternalFormat(m_Specification.Format);
-		m_DataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
-
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
-
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-#endif
+		//m_Image->Invalidate();
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -93,7 +65,6 @@ namespace LkEngine {
 	{
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
-		//m_Image->Bind();
 	}
 
 	void OpenGLTexture::Unbind() const
@@ -103,11 +74,9 @@ namespace LkEngine {
 
 	void OpenGLTexture::SetData(void* data, uint32_t size)
 	{
-		//uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3;
 		GLenum dataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
 		uint32_t bpp = ImageFormatToGLDataFormat(m_Specification.Format) == GL_RGBA ? 4 : 3;
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
-		//glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Specification.Width, m_Specification.Height, dataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OpenGLTexture::Lock()
@@ -121,22 +90,19 @@ namespace LkEngine {
 		// Submit to renderer
 	}
 
-
-
-
-
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
+		: m_Specification(specification)
+		, m_Width(specification.Width)
+		, m_Height(specification.Height)
 	{
-		m_RendererID = 0;
 		ImageSpecification imageSpec;
 		m_Image = Image::Create(imageSpec, nullptr);
-		m_Image->Invalidate();
+		//m_Image->Invalidate();
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& filePath)
 	{
 		LOG_TRACE("OpenGLTexture2D created: {}", filePath);
-		m_RendererID = 0;
 		m_FilePath = filePath;
 		stbi_set_flip_vertically_on_load(1);
 		int width, height, channels;
@@ -149,7 +115,7 @@ namespace LkEngine {
 		m_Height = height;
 
 		m_Image = Image::Create(imageSpec, data);
-		m_Image->Invalidate();
+		//m_Image->Invalidate();
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
@@ -159,10 +125,7 @@ namespace LkEngine {
 	void OpenGLTexture2D::Bind(unsigned int slot /*= 0*/) const
 	{
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
-		//GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
-		//m_Image->Bind();
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
-		LK_ASSERT(m_Image->GetBuffer().GetSize());
 	}
 
 	void OpenGLTexture2D::Unbind() const
@@ -170,12 +133,13 @@ namespace LkEngine {
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 	}
 
+	// TODO: Remove this ?
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
 		GLenum dataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
 		uint32_t bpp = dataFormat == GL_RGBA ? 4 : 3;
-		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
-		//glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Specification.Width, m_Specification.Height, dataFormat, GL_UNSIGNED_BYTE, data);
+		//glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(m_Image->GetRendererID(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OpenGLTexture2D::Lock()

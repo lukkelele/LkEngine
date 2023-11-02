@@ -55,7 +55,7 @@ namespace LkEngine {
 		uint32_t GetHeight() const { return m_Height; }
 
 	private:
-		unsigned int m_RendererID;
+		//unsigned int m_RendererID;
 		std::string m_FilePath;
 		uint32_t m_Width, m_Height;
 		bool m_Loaded = false;
