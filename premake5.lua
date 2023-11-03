@@ -1,3 +1,5 @@
+include "lib/dependencies.lua"
+
 workspace "LkEngine"
     architecture "x86_64"
     startproject "LkApplication"
@@ -29,10 +31,11 @@ workspace "LkEngine"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}"
 
 include "LkApplication/premake5.lua"
-include "lib/glfw/glfw.lua"
-include "lib/glad/glad.lua"
-include "lib/imgui/imgui.lua"
-include "lib/ImGuizmo/ImGuizmo.lua"
+include "lib/glfw/premake5.lua"
+include "lib/glad/premake5.lua"
+include "lib/imgui/premake5.lua"
+include "lib/ImGuizmo/premake5.lua"
+include "lib/box2d/premake5.lua"
 
 
 project "LkEngine"
@@ -81,11 +84,13 @@ project "LkEngine"
         "%{wks.location}/lib/GLFW/include",
         "%{wks.location}/lib/spdlog/include",
         "%{wks.location}/lib/stb_image",
-        "%{wks.location}/lib/imgui",
+        --"%{wks.location}/lib/imgui",
+        "%{Dependencies.ImGui.IncludeDir}",
         "%{wks.location}/lib/imgui/backends",
         "%{wks.location}/lib/imgui/examples",
         "%{wks.location}/lib/ImGuizmo",
         "%{wks.location}/lib/entt/src",
+        "%{wks.location}/lib/box2d/include",
     }
 
     links {
@@ -93,7 +98,8 @@ project "LkEngine"
         "glad",
         "opengl32",
         "ImGui",
-        "ImGuizmo"
+        "ImGuizmo",
+        "box2d",
     }
 
 	filter "system:windows"

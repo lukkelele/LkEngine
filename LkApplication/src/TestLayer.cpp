@@ -37,7 +37,6 @@ void TestLayer::OnAttach()
     LOG_DEBUG("TestLayer::OnAttach()");
     m_Scene = create_s_ptr<Scene>();
 
-    EntityFactory::CreateRectangle(*m_Scene, { 220, 80 },   { 140.0f, 140.0f });
     EntityFactory::CreateQuad(*m_Scene, { 750, 200 }, { 240, 520 }, Color::Generate());
     EntityFactory::CreateQuad(*m_Scene, { 400, 320 }, { 400, 110 }, Color::Generate());
 

@@ -4,8 +4,11 @@
 #include "LkEngine/Core/Application.h"
 #include "TestLayer.h"
 
-#define SCREEN_WIDTH    1920
-#define SCREEN_HEIGHT   1080
+#include "SuperMario/GameLayer.h"
+
+
+constexpr uint32_t SCREEN_WIDTH = 1480;
+constexpr uint32_t SCREEN_HEIGHT = 1024;
 
 using namespace LkEngine;
 
@@ -27,9 +30,14 @@ int main()
     LkApplication app;
     TestLayer testLayer;
 
+    GameLayer superMarioGameLayer;
+
     app.Init();
+
     app.PushLayer(&testLayer);
+    app.PushLayer(&superMarioGameLayer);
     app.Run();
+
     app.Exit();
 
     return 0;
