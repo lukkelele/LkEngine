@@ -70,6 +70,7 @@ namespace LkEngine {
 
     void Application::PushLayer(Layer* layer)
     {
+        LOG_DEBUG("Pushing layer \"{}\"", layer->GetName());
         m_LayerStack.PushLayer(layer);
         layer->OnAttach();
     }

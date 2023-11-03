@@ -3,11 +3,158 @@
 #include "LkEngine/Scene/Components/TagComponent.h"
 #include "LkEngine/Scene/Components/TransformComponent.h"
 #include "LkEngine/Scene/Components/CameraComponent.h"
-#include "LkEngine/Scene/Components/MeshComponent.h"
 #include "LkEngine/Scene/Components/SpriteComponent.h"
 
 
 namespace LkEngine{
+
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+	};
+
+	struct TagComponent
+	{
+		std::string Tag;
+
+		TagComponent() = default;
+		TagComponent(const TagComponent&) = default;
+		TagComponent(const std::string& Tag)
+			: Tag(Tag) {}
+	};
+
+    struct TransformComponent
+    {
+		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+		glm::quat Rotation = { 1.0f, 0.0f, 0.0f, 0.0f };
+		// TODO: Patch out the use of Rotation2D and just use the Rotation quaternion
+		float Rotation2D = 0.0f;
+
+		TransformComponent() = default;
+		TransformComponent(const TransformComponent& other) = default;
+		TransformComponent(const glm::vec3& Translation)
+			: Translation(Translation) {}
+
+		glm::vec3 GetTranslation() const { return Translation; }
+		glm::vec3 GetScale() const { return Scale; }
+		glm::quat GetRotation() const { return Rotation; }
+		float GetRotation2D() const { return Rotation2D; }
+
+		glm::mat4 GetTransform() const
+		{
+			return glm::translate(glm::mat4(1.0f), Translation)
+				* glm::toMat4(Rotation)
+				* glm::scale(glm::mat4(1.0f), Scale);
+		}
+
+		glm::mat4 GetInvTransform() const
+		{
+			glm::mat4 inv_translation = glm::translate(glm::mat4(1.0f), -Translation);
+			glm::quat inv_rotation = glm::conjugate(Rotation);
+			glm::mat4 inv_scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f / Scale.x, 1.0f / Scale.y, 1.0f / Scale.z));
+			return inv_scale * glm::toMat4(inv_rotation) * inv_translation;
+		}
+
+		void SetRotation(float degrees)
+		{
+			float angleRad = glm::radians(degrees);
+			float qw = cos(angleRad / 2.0f);
+			float qz = sin(angleRad / 2.0f);
+			Rotation = glm::quat(qw, 0.0f, 0.0f, qz);
+		}
+
+	};
+
+    struct SpriteComponent
+    {
+        std::string FilePath;
+        glm::vec2 Size;
+        glm::vec4 Color; 
+
+        SpriteComponent(const std::string& filepath, 
+                        const glm::vec2& size = { 0.0f, 0.0f }, 
+                        const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
+            : FilePath(filepath)
+            , Size(size)
+            , Color(color) 
+        {
+        }
+
+        SpriteComponent(const glm::vec2& size = { 0.0f, 0.0f },
+                        const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
+            : FilePath("")
+            , Size(size)
+            , Color(color) 
+        {
+        }
+
+        float GetWidth() const { return Size.x; }
+        float GetHeight() const { return Size.y; }
+        glm::vec2 GetSize() const { return Size; }
+		void SetSize(const glm::vec2& size) { Size = size; }
+		void SetSize(float x, float y) { Size = { x, y }; }
+    };
+
+
+	enum class CameraType 
+	{ 
+		Null = -1, 
+		Ortographic,  // 2D
+		Perspective,  // First Person
+	};
+
+	struct CameraComponent
+	{
+
+		CameraType Type;
+		SceneCamera* CameraRef;
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent& other) = default;
+
+		operator SceneCamera& () { return *CameraRef; }
+		operator const SceneCamera& () const { return *CameraRef; }
+	};
+
+
+	struct RigidBody2DComponent
+	{
+		enum class Type { None = -1, Static, Dynamic, Kinematic };
+		Type BodyType;
+		bool FixedRotation = false;
+		float Mass = 1.0f;
+		float LinearDrag = 0.01f;
+		float AngularDrag = 0.05f;
+		float GravityScale = 1.0f;
+		bool IsBullet = false;
+		// Storage for runtime
+		void* RuntimeBody = nullptr;
+
+		RigidBody2DComponent() = default;
+		RigidBody2DComponent(const RigidBody2DComponent& other) = default;
+	};
+
+	struct BoxCollider2DComponent
+	{
+		glm::vec2 Offset = { 0.0f,0.0f };
+		glm::vec2 Size = { 0.5f, 0.5f };
+
+		float Density = 1.0f;
+		float Friction = 1.0f;
+
+		// Storage for runtime
+		void* RuntimeFixture = nullptr;
+
+		BoxCollider2DComponent() = default;
+		BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
+	};
+
+
+
 
 	template<typename... Component>
 	struct ComponentGroup
@@ -18,7 +165,6 @@ namespace LkEngine{
 		IDComponent, 
 		TagComponent, 
 		TransformComponent,
-		MeshComponent,
 		CameraComponent,
 		SpriteComponent
 	>;

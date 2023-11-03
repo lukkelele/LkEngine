@@ -39,8 +39,8 @@ namespace LkEngine {
 
 	ImVec2 GraphicsContext::GetMainRenderWindowPos()
 	{
-		auto [x, y] = m_Window->GetPos();
-		return ImVec2(x, y);
+		glm::vec2 pos = m_Window->GetPos();
+		return ImVec2(pos.x, pos.y);
 	}
 	
 	void GraphicsContext::SetDarkTheme()

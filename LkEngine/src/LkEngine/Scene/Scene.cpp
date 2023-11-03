@@ -1,6 +1,5 @@
 #include "LKpch.h"
 #include "LkEngine/Scene/Scene.h"
-#include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Renderer/RenderCommand.h"
 #include "LkEngine/Editor/EditorCamera.h"
@@ -13,8 +12,6 @@
 
 
 namespace LkEngine {
-
-	Scene* Scene::ActiveScene;
 
 	Scene::Scene()
 	{
@@ -106,11 +103,6 @@ namespace LkEngine {
 	}
 
 	template<>
-	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& mesh)
-	{
-	}
-
-	template<>
 	void Scene::OnComponentAdded<SpriteComponent>(Entity entity, SpriteComponent& mesh)
 	{
 	}
@@ -144,7 +136,6 @@ namespace LkEngine {
 		{
 		    Raycast2DResult raycast = raycastResults.at(0);
 		    Entity entity = raycast.HitEntity;
-		    auto& mc = entity.GetComponent<MeshComponent>();
 		    EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
 		}
 		else if (raycastHits > 1)

@@ -5,13 +5,12 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Renderer/OrthographicCamera.h"
+#include "LkEngine/Scene/Entity.h"
+
 #include <entt/entt.hpp>
-
-
 
 namespace LkEngine {
 
-	class Entity;
 	class World;
 
 	class Scene
@@ -50,8 +49,8 @@ namespace LkEngine {
 		template<typename T>
 		static void HandleComponent(Entity& entity);
 
-	public:
-		static Scene* ActiveScene;
+	private:
+		inline static Scene* ActiveScene = nullptr;
 	private:
 		bool m_IsRunning = false;
 		bool m_Paused = false;

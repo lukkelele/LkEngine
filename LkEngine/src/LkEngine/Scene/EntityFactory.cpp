@@ -51,89 +51,27 @@ namespace LkEngine {
 		return entity;
 	}
 
-
-	// 3 - 2
-	// |  /|
-	// | / |
-	// |/  |
-	// 0 - 1
-	Entity EntityFactory::CreateRectangle(Scene& scene, glm::vec2 p1_min, glm::vec2 p2_max)
-	{
-		int entityCount = scene.GetEntityCount();
-		std::string name = "Rectangle_" + std::to_string(entityCount);
-		return CreateRectangle(name, scene, p1_min, p2_max);
-	} 
-
-	Entity EntityFactory::CreateRectangle(const std::string& name, Scene& scene, glm::vec2 p1_min, glm::vec2 p2_max)
-	{
-		float rect_width = p2_max.x - p1_min.x;
-		float rect_height = p2_max.y - p1_min.y;
-
-		int entityCount = scene.GetEntityCount();
-		Entity entity = scene.CreateEntity(std::string(name));
-		TransformComponent tc;
-		MeshComponent mesh;
-
-		glm::vec2 rect_size = { rect_width, rect_height };
-		SpriteComponent sprite = SpriteComponent(rect_size, Color::Generate());
-
-		auto app = Application::Get();
-		auto window = app->GetWindow();
-		float width = window->GetWidth();
-		float height = window->GetHeight();
-		float viewport_height = window->GetViewportHeight();
-
-		float vertices[] = {
-			0.0f,         0.0f,
-			rect_width,   0.0f,
-			rect_width,   rect_height,
-			0.0f,         rect_height 
-		};
-		unsigned int indices[] = {
-			0, 1, 2,
-			2, 3, 0
-		};
-
-		mesh.Color = Color::Generate();
-		//mesh.VAO = create_s_ptr<VertexArray>();
-		mesh.VBO = VertexBuffer::Create(vertices, LK_ARRAYSIZE(vertices));
-		mesh.VBO->SetLayout({ 
-			{ "pos", ShaderDataType::Float2 } 
-		});
-
-		//mesh.VAO->AddVertexBuffer(*mesh.VBO);
-		//mesh.VAO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
-		mesh.VBO->SetIndexBuffer(create_s_ptr<IndexBuffer>(indices, sizeof(indices)));
-
-		//mesh.BaseShader = create_s_ptr<Shader>("assets/shaders/basic_model_view_proj.shader");
-		mesh.BaseShader = Shader::Create("assets/shaders/basic_model_view_proj.shader");
-		mesh.BaseShader->Bind();
-		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
-		mesh.BaseShader->Unbind();
-		//mesh.VAO->SetIndexBuffer(mesh.VAO->I);
-
-		tc.Translation.x = p1_min.x; // + width / 2;
-		tc.Translation.y = p1_min.y; // + height / 2;
-
-		entity.AddComponent<MeshComponent>(mesh);
-		entity.AddComponent<TransformComponent>(tc);
-		entity.AddComponent<SpriteComponent>(sprite);
-
-		return entity;
-	}
-
-
 	Entity EntityFactory::CreateGrid(Scene& scene, int rows, int columns, float spacingX, float spacingY)
 	{
 		int entityCount = scene.GetEntityCount();
 		std::string name = "Quad_" + std::to_string(entityCount);
 		Entity entity = scene.CreateEntity(std::string(name));
 
-		glm::vec2 spriteSize = Window::Get()->GetSize();
-		glm::vec2 spritePos = Window::Get()->GetPos();
+		glm::vec2 windowSize = Window::Get()->GetSize();
+		glm::vec2 windowPos = Window::Get()->GetPos();
+		//glm::vec2 spriteSize = Window::Get()->GetSize();
+		//glm::vec2 spritePos = Window::Get()->GetPos();
 
-		SpriteComponent sc = SpriteComponent(spriteSize);
-		TransformComponent tc = TransformComponent({ spritePos.x, spritePos.y, 0.0f });
+		float windowWidth = windowSize.x;
+		float windowHeight = windowSize.y;
+
+        float quadWidth = windowWidth / columns;
+        float quadHeight = windowHeight / rows;
+        glm::vec2 quadSize = { quadWidth, quadHeight };
+        glm::vec2 smallerQuadSize = { quadWidth - 10.0f, quadHeight - 10.f };
+
+		SpriteComponent sc = SpriteComponent(quadSize);
+		TransformComponent tc = TransformComponent({ windowPos.x, windowPos.y, 0.0f });
 		entity.AddComponent<SpriteComponent>(sc);
 		entity.AddComponent<TransformComponent>(tc);
 

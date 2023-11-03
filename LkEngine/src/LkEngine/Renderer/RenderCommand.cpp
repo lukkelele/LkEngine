@@ -40,7 +40,7 @@ namespace LkEngine {
         s_Renderer->SubmitIndexed(vb, indexCount);
     }
 
-    void RenderCommand::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID)
+    void RenderCommand::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
     {
     }
 
@@ -50,7 +50,7 @@ namespace LkEngine {
         glDrawArrays(GL_LINES, 0, lineIndexCount);
     }
 
-    void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint64_t entityID)
+    void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint32_t entityID)
     {
         glm::vec2 scaledSize = { 
             tc.Scale.x * sc.Size.x, 
@@ -70,12 +70,12 @@ namespace LkEngine {
         s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entity.GetUUID());
     }
 
-    void RenderCommand::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+    void RenderCommand::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint32_t entityID)
     {
         s_Renderer->SubmitQuad(pos, size, color, entityID);
     }
 
-    void RenderCommand::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+    void RenderCommand::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint32_t entityID)
     {
         s_Renderer->SubmitQuad(pos, size, color, entityID);
     }

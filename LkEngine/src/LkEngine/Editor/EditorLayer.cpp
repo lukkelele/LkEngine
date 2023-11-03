@@ -303,7 +303,7 @@ namespace LkEngine {
 				Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (viewport_width * 0.50f)), (Mouse::CenterPos.y * (viewport_height * 0.50f)) };
 				ImGui::Text("Centered scaled mouse pos (%.2f, %.2f)", Mouse::ScaledCenterPos.x, Mouse::ScaledCenterPos.y);
 
-				auto& scene = *Scene::ActiveScene;
+				auto& scene = *Scene::GetActiveScene();
 				auto& active_cam = *scene.GetActiveCamera();
 				glm::vec2 cam_pos = active_cam.GetPos();
 
@@ -505,7 +505,7 @@ namespace LkEngine {
     void EditorLayer::UI_SelectedEntity()
     {
 		static float pos_step_size = 5.0f;
-        auto& scene = *Scene::ActiveScene;
+        auto& scene = *Scene::GetActiveScene();
         //Entity entity = scene.FindEntity(SelectedEntityLabel);
         Entity entity = scene.GetEntityWithUUID(SelectedEntityID);
 
@@ -525,7 +525,6 @@ namespace LkEngine {
 			uint32_t id = entity;
 		    ImGui::PushID(id);
 
-			MeshComponent& mesh = entity.GetComponent<MeshComponent>();
 			TransformComponent& transform = entity.GetComponent<TransformComponent>();
             ImGui::Text("Position");
 			UI::Property::PositionXY(entity, transform.Translation, pos_step_size);
@@ -556,7 +555,7 @@ namespace LkEngine {
 
     void EditorLayer::DrawImGuizmo(Entity& entity)
     {
-        auto& scene = *Scene::ActiveScene;
+		auto& scene = *Scene::GetActiveScene();
         auto& cam = *scene.GetActiveCamera();
         auto& cam_pos = cam.GetPos();
         auto& view_matrix = cam.GetView();
@@ -676,7 +675,6 @@ namespace LkEngine {
                 ImVec2 window_size = ImVec2(window->GetWidth(), window->GetHeight());
                 glm::vec2 p1 = { start_placing_point.x, start_placing_point.y };
                 glm::vec2 p2 = { start_placing_point.x + rect_width, start_placing_point.y + rect_height };
-                EntityFactory::CreateRectangle(*Scene::ActiveScene, p1, p2);
             }
         }
         ImGui::EndGroup();
@@ -693,7 +691,7 @@ namespace LkEngine {
 		ImGui::BeginGroup();
 		ImGui::SeparatorText("Scene");
 
-        auto& scene = *Scene::ActiveScene;
+        auto& scene = *Scene::GetActiveScene();
         auto& registry = scene.GetRegistry();
         static ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick;
 

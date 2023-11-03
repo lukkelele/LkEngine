@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <cstddef>
 
+#include "LkEngine/Core/UUID.h"
 
 namespace LkEngine {
 

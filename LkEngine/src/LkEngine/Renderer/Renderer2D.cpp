@@ -154,7 +154,7 @@ namespace LkEngine {
             //}
             m_WhiteTexture->Bind();
             m_QuadShader->Bind();
-            m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
+            m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
             m_QuadShader->SetUniform1i("u_TextureEnabled", m_WhiteTexture->IsLoaded());
             //RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
             RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
@@ -171,7 +171,7 @@ namespace LkEngine {
             // <<<< Bind textures here >>>>
 
             m_LineShader->Bind();
-            m_LineShader->SetUniformMat4f("u_ViewProj", Scene::ActiveScene->GetActiveCamera()->GetViewProjection());
+            m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
             RenderCommand::SetLineWidth(m_LineWidth);
             //RenderCommand::DrawLines(*m_LineVertexArray, m_LineIndexCount);
             RenderCommand::DrawLines(*m_LineVertexBuffer, m_LineIndexCount);
@@ -286,9 +286,6 @@ namespace LkEngine {
 
     void Renderer2D::DrawEntity(Entity& entity)
     {
-        if (!entity.HasComponent<MeshComponent>())
-	    	return;
-	    auto& mesh = entity.GetComponent<MeshComponent>();
 	    auto& tc = entity.GetComponent<TransformComponent>();
 	    auto& sc = entity.GetComponent<SpriteComponent>();
 
