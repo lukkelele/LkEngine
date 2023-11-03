@@ -2,6 +2,7 @@
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Scene/Scene.h" // temporary
 #include "LkEngine/UI/DockSpace.h" // temporary
+#include "LkEngine/Editor/EditorLayer.h"
 
 #ifdef LK_PLATFORM_WINDOWS
 #include "Platform/Windows/Windows_Window.h"
@@ -27,14 +28,16 @@ namespace LkEngine {
 	#endif
 	}
 
-	std::pair<float, float> Window::GetPos()
+	//std::pair<float, float> Window::GetPos()
+	glm::vec2 Window::GetPos()
 	{
-		return std::make_pair<float, float>(0, 0); 
+		return m_Pos; 
 	}
 
-	std::pair<float, float> Window::GetSize()
+	//std::pair<float, float> Window::GetSize()
+	glm::vec2 Window::GetSize()
 	{
-		return std::make_pair<float, float>(m_Width, m_Height); 
+		return glm::vec2(m_Width, m_Height);
 	}
 
 	std::pair<float, float> Window::GetViewportSize()
@@ -55,9 +58,24 @@ namespace LkEngine {
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImVec2 pos = viewport->WorkPos;
 
+		if (EditorLayer::IsEnabled())
+		{
+			//window->m_Width = EditorLayer::EditorWindowSize.x;
+			//window->m_Height = EditorLayer::EditorWindowSize.y;
+			//width = EditorLayer::EditorWindowSize.x;
+			//height = EditorLayer::EditorWindowSize.y;
+			//pos = ImVec2(EditorLayer::EditorWindowPos.x, EditorLayer::EditorWindowPos.y);
+		}
+		else
+		{
+			window->m_Width = width;
+			window->m_Height = height;
+		}
+
 		glViewport(pos.x, pos.y, width, height);
-		window->m_Width = width;
-		window->m_Height = height;
+
+
+		LOG_DEBUG("Window Resize: ({}, {})", window->m_Width, window->m_Height);
 
 		auto& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2(width, height);

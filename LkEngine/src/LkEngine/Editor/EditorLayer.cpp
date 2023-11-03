@@ -18,6 +18,8 @@ namespace LkEngine {
     std::string EditorLayer::SelectedEntityLabel; // remove
 	glm::vec2 EditorLayer::EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 	glm::vec2 EditorLayer::EditorViewportPos = { 0.0f, 0.0f };
+	glm::vec2 EditorLayer::EditorWindowSize = { 0.0f, 0.0f };
+	glm::vec2 EditorLayer::EditorWindowPos = { 0.0f, 0.0f };
 	glm::vec2 EditorLayer::ViewportScalers = { 1.0f, 1.0f };
 	bool EditorLayer::Enabled = false;
 
@@ -327,9 +329,10 @@ namespace LkEngine {
 				(center_window_ypos + center_window_height - bottombar_height + topbar_height)
 			};
 
+			EditorWindowSize = { center_window_size.x, center_window_size.y };
+			EditorWindowPos = { center_window_xpos, center_window_ypos };
 			//LOG_TRACE("m_SecondViewportBounds[1]: ({}, {})", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
 
-			// TODO: some function here to set the viewport nicely
 			glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);
 			//LOG_DEBUG("Center Window Size: ({}, {})   Pos: ({}, {})", center_window_size.x, center_window_size.y, center_window_xpos, center_window_ypos);
 		}
@@ -342,11 +345,6 @@ namespace LkEngine {
 	{
 		if (SelectedEntityID != entity.GetUUID())
 			SelectedEntityID = entity.GetUUID();
-	}
-
-	glm::vec2 EditorLayer::GetViewportPos() 
-	{ 
-		return { m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y };
 	}
 
 	void EditorLayer::DrawEntityNode(Entity entity)
@@ -715,6 +713,15 @@ namespace LkEngine {
 		ImGui::EndGroup();
 		ImGui::PopID();
         //ImGui::EndChild();
+	}
+
+	glm::vec2 EditorLayer::GetEditorWindowSize() const
+	{
+		glm::vec2 size = { 
+			m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
+			m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y 
+		};
+		return size;
 	}
 
 

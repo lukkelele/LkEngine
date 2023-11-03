@@ -52,7 +52,9 @@ namespace LkEngine {
 		void UI_SceneContent();
         void UI_SelectedEntity();
 		//std::pair<float, float> GetViewportPos();
-		glm::vec2 GetViewportPos();
+
+		glm::vec2 GetEditorWindowSize() const;
+		glm::vec2 GetViewportBounds(int viewportIndex, int boundIndex);
 
 	private:
 		void RenderViewport(); // TODO
@@ -66,7 +68,9 @@ namespace LkEngine {
 		static ImVec2 SelectedEntityMenuSize;
 		static glm::vec2 EditorViewportBounds[2];
 		static glm::vec2 EditorViewportPos;
+		static glm::vec2 EditorWindowPos;
 		static glm::vec2 ViewportScalers;
+		static glm::vec2 EditorWindowSize;
 		static bool Enabled;
 	private:
 		s_ptr<Scene> m_Scene = nullptr;

@@ -123,6 +123,22 @@ namespace LkEngine {
 	}
 
 
+	Entity EntityFactory::CreateGrid(Scene& scene, int rows, int columns, float spacingX, float spacingY)
+	{
+		int entityCount = scene.GetEntityCount();
+		std::string name = "Quad_" + std::to_string(entityCount);
+		Entity entity = scene.CreateEntity(std::string(name));
+
+		glm::vec2 spriteSize = Window::Get()->GetSize();
+		glm::vec2 spritePos = Window::Get()->GetPos();
+
+		SpriteComponent sc = SpriteComponent(spriteSize);
+		TransformComponent tc = TransformComponent({ spritePos.x, spritePos.y, 0.0f });
+		entity.AddComponent<SpriteComponent>(sc);
+		entity.AddComponent<TransformComponent>(tc);
+
+		return entity;
+	}
 
 
 

@@ -83,26 +83,26 @@ namespace LkEngine {
     void RenderCommand::DrawGrid(int columns, int rows, const glm::vec4& color, float spacingX, float spacingY)
     {
         auto& window = *Window::Get();
-        auto [windowWidth, windowHeight] = window.GetSize();
-        //float quadWidth = (windowWidth - columns * spacingX) / columns;
-        //float quadHeight = (windowHeight - rows * spacingY) / rows;
+        //auto [windowWidth, windowHeight] = window.GetSize();
+        glm::vec2 windowSize = window.GetSize();
+        float windowWidth = windowSize.x;
+        float windowHeight = windowSize.y;
+
+        glm::vec2 windowPos = { 0.0f, 0.0f };
+        if (EditorLayer::IsEnabled())
+        {
+            //windowPos = EditorLayer::Get()->GetViewportBounds(1, 0);
+        }
+
         float quadWidth = windowWidth / columns;
         float quadHeight = windowHeight / rows;
         glm::vec2 quadSize = { quadWidth, quadHeight };
         glm::vec2 smallerQuadSize = { quadWidth - 10.0f, quadHeight - 10.f };
 
-        float cursorX = 0.0f;
-        float cursorY = 0.0f;
-        glm::vec2 windowPos = { 0.0f, 0.0f };
-        if (EditorLayer::IsEnabled())
-        {
-            windowPos = EditorLayer::Get()->GetViewportPos();
-        }
-        cursorX = windowPos.x - quadWidth * 0.25f;
-        cursorY = windowPos.y + quadHeight * 0.25f;
-        cursorX += spacingX;
-        //cursorX += spacingX;
-        //cursorY += spacingY;
+        //float cursorX = windowPos.x - quadWidth;
+        float cursorX = windowPos.x + quadWidth * 0.50f;
+        float cursorY = windowPos.y + quadHeight * 0.50f;
+
         float cursorXBegin = cursorX; // + spacingX;
         float cursorYBegin = cursorY; // + spacingY;
 
@@ -121,20 +121,16 @@ namespace LkEngine {
         {
             for (int col = 0; col < columns; col++)
             {
-                // FIXME:
-                // The first DrawQuad call does go above the black quad even if it is 'before' that second drawcall
-                // I really need to fix a render queue for stuff like this
                 RenderCommand::DrawQuad({ cursorX, cursorY }, quadSize, { 0.0f, 0.0f, 0.0f, 1.0f });
-                RenderCommand::DrawQuad({ cursorX, cursorY }, smallerQuadSize, colors[(LK_ARRAYSIZE(colors) * (col + 1 + row)) % 5]);
-                //cursorX += (quadWidth + spacingX);
+
+                glm::vec2 smallerQuadPos = { cursorX + spacingX / 2.0f, cursorY + spacingY / 2.0f };
+                RenderCommand::DrawQuad(smallerQuadPos, smallerQuadSize, colors[(LK_ARRAYSIZE(colors) * (col + 1 + row)) % 3]);
+
                 cursorX += quadWidth;
             }
             cursorX = cursorXBegin;
             cursorY += quadHeight;
-            //cursorY += (quadHeight + spacingY);
         }
-        
-        //Renderer::DrawQuad();
     }
 
 

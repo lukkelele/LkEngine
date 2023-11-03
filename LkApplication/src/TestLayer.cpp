@@ -60,6 +60,7 @@ void TestLayer::OnUpdate(float ts)
 
     m_Renderer2D->BeginScene(cam);
 	//RenderCommand::DrawGrid(4, 4, { 0.80f, 0.50f, 0.80f, 0.20f }, 20, 20);
+	RenderCommand::DrawGrid(5, 5, { 0.80f, 0.50f, 0.80f, 0.20f }, 20, 20);
 
     m_Scene->BeginScene();
 

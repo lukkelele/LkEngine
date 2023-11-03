@@ -38,17 +38,6 @@ namespace LkEngine {
 		virtual void Unload() = 0;
 		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
 
-#if 0
-	protected:
-		unsigned int m_RendererID;
-		//uint32_t m_Width, m_Height;
-		//std::string m_FilePath;
-		bool m_Loaded = false;
-		bool m_Locked = false;
-		TextureSpecification m_Specification;
-		s_ptr<Image> m_Image = nullptr;
-		//GLenum m_InternalFormat, m_DataFormat;
-#endif
 	};
 
 	class Texture2D : public Texture

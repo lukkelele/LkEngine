@@ -35,8 +35,10 @@ namespace LkEngine {
         std::string GetTitle()  const { return m_Title; }
         std::string GetGlslVersion() const { return m_GlslVersion;  }
         bool IsVSync() const { return m_VSync; }
-        std::pair<float, float> GetPos();
-        std::pair<float, float> GetSize();
+        //std::pair<float, float> GetPos();
+        //std::pair<float, float> GetSize();
+        glm::vec2 GetPos();
+        glm::vec2 GetSize();
         std::pair<float, float> GetViewportSize();
 
     protected:
@@ -45,6 +47,7 @@ namespace LkEngine {
     protected:
         uint16_t m_Width = 0, m_Height = 0;
         uint16_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+        glm::vec2 m_Pos = { 0.0f, 0.0f };
         std::string m_Title = "";
         std::string m_GlslVersion = "";
         bool m_VSync;
