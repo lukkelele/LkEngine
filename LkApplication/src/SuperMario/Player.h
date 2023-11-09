@@ -15,6 +15,7 @@ namespace LkEngine {
     class Player
     {
     public:
+        Player(Entity& entity);
         Player(const std::string& name = "Player");
         virtual ~Player();
 

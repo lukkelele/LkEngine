@@ -1,4 +1,5 @@
 #include "GameLayer.h"
+#include "Enemy.h"
 
 
 namespace LkEngine {
@@ -25,6 +26,15 @@ namespace LkEngine {
         Camera& cam = playerEntity.GetComponent<CameraComponent>();
         //m_Scene->SetActiveCamera(m_Player->GetEntity().GetComponent<CameraComponent>());
         m_Scene->SetActiveCamera(cam);
+
+        for (int i = 0; i < 3; i++)
+        {
+            //m_Enemies.push_back(std::make_shared<Enemy>("Enemy-" + std::to_string(i)));
+            s_ptr<Enemy> enemy= std::make_shared<Enemy>("Enemy-" + std::to_string(i));
+            Entity enemyEntity = m_Scene->CreateEntity(enemy->GetName());
+            enemy->SetEntity(enemyEntity);
+            m_Enemies.push_back(enemy);
+        }
     }
 
     void GameLayer::OnDetach()
@@ -49,8 +59,14 @@ namespace LkEngine {
             EditorLayer::SelectedEntityID = 0;
         }
 
+        RenderCommand::DrawQuad({ 300, 400 }, { 100, 200 }, { 0.80f, 0.10f, 0.20f, 1.0f });
+
         m_Player->OnUpdate(ts);
-        RenderCommand::DrawQuad({ 300, 400 }, { 100, 200 }, { 0.8, 0.1, 0.20, 1.0f });
+
+        for (auto& enemy : m_Enemies)
+        {
+            enemy->OnUpdate(ts);
+        }
 
         m_Scene->EndScene();
         m_Renderer2D->EndScene();

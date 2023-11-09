@@ -3,6 +3,12 @@
 
 namespace LkEngine {
 
+    Player::Player(Entity& entity)
+        : m_Name(entity.GetName())
+    {
+        SetEntity(entity);
+    }
+
     Player::Player(const std::string& name)
         : m_Name(name)
     {
@@ -43,8 +49,6 @@ namespace LkEngine {
         tc.Translation = cam.GetPos();
         tc.Translation.x += m_CameraOffset.x;
         tc.Translation.y += m_CameraOffset.y;
-        //auto& sc = m_Entity.GetComponent<SpriteComponent>();
-        //RenderCommand::DrawQuad(m_Pos, m_Entity.GetComponent<SpriteComponent>().Size, sc.Color, m_Entity);
     }
 
     void Player::OnImGuiRender()
