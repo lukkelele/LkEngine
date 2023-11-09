@@ -109,15 +109,15 @@ namespace LkEngine{
 
 	struct CameraComponent
 	{
-
 		CameraType Type;
-		SceneCamera* CameraRef;
+		//SceneCamera* CameraRef;
+		Camera* CameraRef;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent& other) = default;
 
-		operator SceneCamera& () { return *CameraRef; }
-		operator const SceneCamera& () const { return *CameraRef; }
+		operator Camera& () { return *CameraRef; }
+		operator const Camera& () const { return *CameraRef; }
 	};
 
 

@@ -4,6 +4,7 @@
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Logger.h"
 #include "LkEngine/Core/Layer.h"
+#include "LkEngine/Core/Window.h"
 
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Scene.h"

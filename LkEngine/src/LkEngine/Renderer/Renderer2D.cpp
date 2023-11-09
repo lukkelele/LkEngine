@@ -95,6 +95,11 @@ namespace LkEngine {
     {
     }
 
+    void Renderer2D::BeginScene()
+    {
+        BeginScene(*Scene::GetActiveScene()->GetActiveCamera());
+    }
+
     void Renderer2D::BeginScene(const Camera& camera)
     {
         m_CameraBuffer.ViewProjection = camera.GetViewProjection();

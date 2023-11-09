@@ -5,11 +5,18 @@
 
 namespace LkEngine {
 
+    enum class WalkDirection
+    {
+        None = 0,
+        Left,
+        Right,
+    };
+
     class Player
     {
     public:
         Player(const std::string& name = "Player");
-        ~Player();
+        virtual ~Player();
 
         std::string GetName() const { return m_Name; }
 
@@ -18,17 +25,17 @@ namespace LkEngine {
         Entity GetEntity() const { return m_Entity; }
         void SetEntity(const Entity& entity); // { m_Entity = entity; }
 
-        void OnUpdate(float ts = 1.0f);
-        void OnImGuiRender();
+        virtual void OnUpdate(float ts = 1.0f);
+        virtual void OnImGuiRender();
 
-    private:
+    protected:
         UUID m_ID;
         std::string m_Name;
         float m_Health = 5.0f; // 
         float m_Speed = 1.0f;
         float m_JumpHeight = 50.0f;
         glm::vec2 m_Pos = { 0.0f, 0.0f };
-        glm::vec4 m_Color = { 1.0f, 1.0f, 1.0f, 1.0f }; // Remove
+        glm::vec2 m_CameraOffset = { 140.0f, 180.0f };
 
         Entity m_Entity;
     };

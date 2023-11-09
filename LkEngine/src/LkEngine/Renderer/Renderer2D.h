@@ -36,6 +36,7 @@ namespace LkEngine {
 
         void Init();
         void Shutdown();
+        void BeginScene();
         void BeginScene(const Camera& camera);
         void BeginScene(const Camera& camera, const glm::mat4& transform);
         void EndScene();

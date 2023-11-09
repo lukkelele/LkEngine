@@ -29,6 +29,7 @@ namespace LkEngine {
 		entt::registry& GetRegistry() { return m_Registry; }
 		void DestroyEntity(Entity entity);
 		s_ptr<Camera> GetActiveCamera() const { return m_ActiveCamera; }
+		void SetActiveCamera(Camera& cam) { m_ActiveCamera = std::shared_ptr<Camera>(&cam); }
 		s_ptr<Camera> GetEditorCamera() const { return m_EditorCamera; }
 		s_ptr<World> GetWorld() { return m_World; }
 		bool IsRunning() const { return m_IsRunning; }

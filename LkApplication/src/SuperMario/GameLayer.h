@@ -8,7 +8,7 @@
 namespace LkEngine {
 
     /**
-     * Super Mario wannabee
+     * Super Mario wannabe
      */
     class GameLayer : public Layer
     {
@@ -18,12 +18,13 @@ namespace LkEngine {
 
         void OnAttach() override;
         void OnDetach() override;
-
+        void OnImGuiRender() override;
+        void OnUpdate(float ts) override;
 
     private:
-        s_ptr<Player> m_Player = nullptr;
         s_ptr<Scene> m_Scene = nullptr;
-
+        s_ptr<Player> m_Player = nullptr;
+        s_ptr<Renderer2D> m_Renderer2D = nullptr;
     };
 
 }

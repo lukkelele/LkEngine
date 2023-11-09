@@ -34,8 +34,9 @@ int main()
 
     app.Init();
 
-    app.PushLayer(&testLayer);
     app.PushLayer(&superMarioGameLayer);
+    //app.PushOverlay(&testLayer);
+
     app.Run();
 
     app.Exit();
