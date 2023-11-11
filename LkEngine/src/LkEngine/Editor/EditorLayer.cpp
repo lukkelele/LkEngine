@@ -28,13 +28,12 @@ namespace LkEngine {
 		s_Instance = this;
 		//m_Scene = s_ptr<Scene>(&scene);
 		//m_Name = "EditorLayer";
-		m_ViewportBounds[0] = {0, 0};//;, ; {0, 0}
+		m_ViewportBounds[0] = {0, 0};
 		m_ViewportBounds[1] = {Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight()};
 		LOG_DEBUG("Viewport Bounds[0]: ({}, {})", m_ViewportBounds[0].x, m_ViewportBounds[0].y);
 		LOG_DEBUG("Viewport Bounds[1]: ({}, {})", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
 		m_ShowStackTool = true;
 		Enabled = true;
-		//SelectedEntityID = -1;
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -70,7 +69,7 @@ namespace LkEngine {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
 		ImGui::Begin(UI_CORE_VIEWPORT, nullptr, core_viewport_flags);
-		ImGui::PopStyleColor(); // MenuBarBg
+		ImGui::PopStyleColor(); 
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleVar(2);
 
@@ -113,7 +112,8 @@ namespace LkEngine {
 			topbar_flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
 			static float topbar_height = 30.0f;
 
-			ImGui::PushID("##lkengine-topbar-menu");
+			//ImGui::PushID("##lkengine-topbar-menu");
+			ImGui::PushID(UI_TOP_BAR);
 			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
@@ -177,7 +177,7 @@ namespace LkEngine {
 				    ImGui::TreePop();
 				}
 
-				UI_SceneMenu();
+				//UI_SceneMenu();
 				UI_SceneContent();
 
 				if (SelectedEntity)
@@ -694,7 +694,7 @@ namespace LkEngine {
         for (auto& ent : entities)
         {
             Entity entity = { ent, &scene };
-            bool is_selected = SelectedEntityLabel == entity.GetName();
+			bool is_selected = SelectedEntity == entity;
             std::string label = fmt::format("{}", entity.GetName());
             if (ImGui::Selectable(label.c_str(), &is_selected, selectable_flags))
             {
