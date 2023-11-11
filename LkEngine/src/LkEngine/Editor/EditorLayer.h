@@ -37,6 +37,7 @@ namespace LkEngine {
 		static EditorLayer* Get() { return s_Instance; }
 		static bool IsEnabled() { return Enabled; }
 		static Entity GetSelectedEntity() { return SelectedEntity; }
+		static const char* GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
 
 		void OnImGuiRender();
 		void DrawEntityNode(Entity entity);
@@ -54,7 +55,6 @@ namespace LkEngine {
 		void UI_SceneMenu();
 		void UI_SceneContent();
         void UI_SelectedEntity();
-		//std::pair<float, float> GetViewportPos();
 
 		glm::vec2 GetEditorWindowSize() const;
 		glm::vec2 GetViewportBounds(int viewportIndex, int boundIndex);
@@ -75,6 +75,8 @@ namespace LkEngine {
 		static glm::vec2 ViewportScalers;
 		static glm::vec2 EditorWindowSize;
 		static bool Enabled;
+		// Window where the selected entity settings will be shown in
+		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 	private:
 		s_ptr<Scene> m_Scene = nullptr;
 		glm::vec2 m_ViewportBounds[2];

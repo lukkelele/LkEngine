@@ -34,7 +34,7 @@ namespace LkEngine {
         if (EditorLayer::GetSelectedEntity() != m_Entity)
             return;
 
-        ImGui::Begin(UI_SIDEBAR_RIGHT);
+        ImGui::Begin(EditorLayer::GetSelectedEntityWindowName());
         ImGui::BeginChild(UI_SELECTED_ENTITY_DETAILS);
 
         ImGui::SeparatorText("Stats");
