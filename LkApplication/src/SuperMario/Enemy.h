@@ -7,6 +7,7 @@ namespace LkEngine {
     class Enemy : public Player
     {
     public:
+        Enemy(Entity& entity);
         Enemy(const std::string& name = "Enemy");
         ~Enemy() = default;
 

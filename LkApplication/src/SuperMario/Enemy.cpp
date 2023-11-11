@@ -4,6 +4,11 @@
 
 namespace LkEngine {
 
+    Enemy::Enemy(Entity& entity)
+        : Player(entity)
+    {
+    }
+
     Enemy::Enemy(const std::string& name)
         : Player(name)
     {

@@ -29,10 +29,8 @@ namespace LkEngine {
 
         for (int i = 0; i < 3; i++)
         {
-            //m_Enemies.push_back(std::make_shared<Enemy>("Enemy-" + std::to_string(i)));
-            s_ptr<Enemy> enemy= std::make_shared<Enemy>("Enemy-" + std::to_string(i));
-            Entity enemyEntity = m_Scene->CreateEntity(enemy->GetName());
-            enemy->SetEntity(enemyEntity);
+            Entity enemyEntity = m_Scene->CreateEntity("Enemy-" + std::to_string(i));
+            s_ptr<Enemy> enemy = std::make_shared<Enemy>(enemyEntity);
             m_Enemies.push_back(enemy);
         }
     }

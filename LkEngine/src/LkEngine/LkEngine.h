@@ -13,6 +13,7 @@
 #include "LkEngine/Renderer/Image.h"
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/Camera.h"
+#include "LkEngine/Renderer/OrthographicCamera.h"
 #include "LkEngine/Renderer/PerspectiveCamera.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/Renderer2D.h"
