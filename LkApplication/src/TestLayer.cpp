@@ -65,8 +65,8 @@ void TestLayer::OnUpdate(float ts)
     // TODO: Snapping movement with the mouse can switch selected entities 
     //       because the mousepos is used and not translation for each sprite
     auto mousePos = Mouse::GetMousePos();
-    auto raycastResults = Physics2D::RaycastFromScreen(m_Scene);
-    m_Scene->HandleRaycast(raycastResults);
+    auto raycastResults = Physics2D::RaycastFromScreen(*m_Scene);
+    //m_Scene->HandleRaycast(raycastResults);
     if (Keyboard::IsKeyPressed(Key::Escape) && EditorLayer::SelectedEntityID != 0)
     {
         EditorLayer::SelectedEntity = { (entt::entity)NULL, &*m_Scene };

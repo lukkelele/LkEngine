@@ -5,7 +5,9 @@
 
 namespace LkEngine {
 
+    // Forward declaration
     class Application;
+    class Scene;
 
     class Input
     {
@@ -13,14 +15,14 @@ namespace LkEngine {
         Input(Application* app);
         ~Input() = default;
 
-        static s_ptr<Input> Get() { return s_Instance; }
+        static Input* Get() { return s_Instance; }
 
-        void Init();
-        void OnUpdate();
+        static void Init();
+        static void HandleScene(Scene& scene);
 
     private:
         s_ptr<Application> m_App = nullptr;
-        static s_ptr<Input> s_Instance;
+        inline static Input* s_Instance = nullptr;
     };
 
 }

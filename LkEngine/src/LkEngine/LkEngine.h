@@ -6,6 +6,10 @@
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/Window.h"
 
+#include "LkEngine/Input/Keyboard.h"
+#include "LkEngine/Input/Mouse.h"
+#include "LkEngine/Input/Input.h"
+
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
@@ -21,5 +25,7 @@
 
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Editor/EditorCamera.h"
+
+#include "LkEngine/Debug/DebugLayer.h"
 
 #include "LkEngine/Physics/2D/Physics2D.h"

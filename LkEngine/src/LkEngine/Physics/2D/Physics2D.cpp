@@ -6,9 +6,9 @@
 
 namespace LkEngine {
 
-    std::vector<Raycast2DResult> Physics2D::Raycast(s_ptr<Scene> scene, const glm::vec2& point0, const glm::vec2& point1)
+    std::vector<Raycast2DResult> Physics2D::Raycast(Scene& scene, const glm::vec2& point0, const glm::vec2& point1)
     {
-        std::vector<Entity> scene_entities = scene->GetEntities();
+        std::vector<Entity> scene_entities = scene.GetEntities();
         std::vector<Raycast2DResult> results = {};
         for (auto& entity : scene_entities)
         {
@@ -18,7 +18,7 @@ namespace LkEngine {
 
                 auto& tc = entity.GetComponent<TransformComponent>();
                 auto& sc = entity.GetComponent<SpriteComponent>();
-                auto& cam = *scene->GetActiveCamera();
+                auto& cam = *scene.GetActiveCamera();
                 glm::vec2 camPos = cam.GetPos();
 
                 if (EditorLayer::Enabled)
@@ -57,9 +57,9 @@ namespace LkEngine {
         return results;
     }
 
-    std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(s_ptr<Scene> scene)
+    std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(Scene& scene)
     {
-        std::vector<Entity> scene_entities = scene->GetEntities();
+        std::vector<Entity> scene_entities = scene.GetEntities();
         std::vector<Raycast2DResult> results = {};
         for (auto& entity : scene_entities)
         {
@@ -70,7 +70,7 @@ namespace LkEngine {
 
                 auto& tc = entity.GetComponent<TransformComponent>();
                 auto& sc = entity.GetComponent<SpriteComponent>();
-                auto& cam = *scene->GetActiveCamera();
+                auto& cam = *scene.GetActiveCamera();
                 glm::vec2 camPos = cam.GetPos();
 
                 if (EditorLayer::Enabled)

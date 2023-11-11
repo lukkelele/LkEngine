@@ -19,39 +19,40 @@ namespace LkEngine {
 		Scene();
 		~Scene() = default;
 
+		void BeginScene(Camera& cam, float ts = 1.0f);
 		void BeginScene(float ts = 1.0f);
 		void EndScene();
+		bool IsRunning() const { return m_IsRunning; }
+		void Pause(bool paused);
+
 		void OnImGuiRender();
-		Entity GetEntityWithUUID(UUID uuid);
+
+		std::vector<Entity> GetEntities();
 		Entity FindEntity(std::string_view name);
+		Entity GetEntityWithUUID(UUID uuid);
 		Entity CreateEntity(const std::string& name);
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name);
 		entt::registry& GetRegistry() { return m_Registry; }
 		void DestroyEntity(Entity entity);
+
 		s_ptr<Camera> GetActiveCamera() const { return m_ActiveCamera; }
 		void SetActiveCamera(Camera& cam) { m_ActiveCamera = std::shared_ptr<Camera>(&cam); }
 		s_ptr<Camera> GetEditorCamera() const { return m_EditorCamera; }
 		s_ptr<World> GetWorld() { return m_World; }
-		bool IsRunning() const { return m_IsRunning; }
-		void Pause(bool paused);
 		void SwitchCamera();
 		uint64_t GetEntityCount() const { return m_EntityMap.size(); }
-		std::vector<Entity> GetEntities();
-
-		template<typename RaycastTResult>
-		void HandleRaycast(std::vector<RaycastTResult>& result);
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 
-		static Scene* GetActiveScene() { return ActiveScene; }
+		static Scene* GetActiveScene() { return s_ActiveScene; }
 
 	private:
 		template<typename T>
 		static void HandleComponent(Entity& entity);
 
 	private:
-		inline static Scene* ActiveScene = nullptr;
+		inline static Scene* s_ActiveScene = nullptr;
 	private:
 		bool m_IsRunning = false;
 		bool m_Paused = false;

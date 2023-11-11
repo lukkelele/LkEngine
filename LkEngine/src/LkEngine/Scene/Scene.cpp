@@ -15,7 +15,7 @@ namespace LkEngine {
 
 	Scene::Scene()
 	{
-		ActiveScene = this;
+		s_ActiveScene = this;
 		auto window = Window::Get();
 		float width = window->GetWidth();
 		float height = window->GetHeight();
@@ -125,6 +125,7 @@ namespace LkEngine {
 		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
 	}
 
+#if 0
 	template<typename RaycastTResult>
 	void Scene::HandleRaycast(std::vector<RaycastTResult>& raycastResults)
 	{
@@ -158,11 +159,18 @@ namespace LkEngine {
 		    }
 		}
 	}
+#endif
 
 	void Scene::BeginScene(float ts)
 	{
 		m_ActiveCamera->Update(ts);
 		m_ActiveCamera->HandleInput(ts);
+	}
+
+	void Scene::BeginScene(Camera& cam, float ts)
+	{
+		cam.Update(ts);
+		cam.HandleInput(ts);
 	}
 
 	void Scene::EndScene()
