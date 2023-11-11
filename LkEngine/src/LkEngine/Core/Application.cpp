@@ -28,8 +28,8 @@ namespace LkEngine {
 
         m_Renderer = std::make_shared<Renderer>();
         m_Renderer->Init();
-        m_Scene = create_s_ptr<Scene>();
-        m_EditorLayer = create_s_ptr<EditorLayer>(m_Scene);
+        m_Scene = std::make_shared<Scene>();
+        m_EditorLayer = std::make_shared<EditorLayer>(*m_Scene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);
     }
 

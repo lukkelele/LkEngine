@@ -12,12 +12,13 @@
 
 namespace LkEngine {
 
-    constexpr const char* CORE_VIEWPORT = "##lkengine-core-viewport";
-    constexpr const char* RENDER_WINDOW = "##__main-render-window";
-    constexpr const char* TOP_BAR = "##__top-bar";
-    constexpr const char* BOTTOM_BAR = "##__lower-bar";
-    constexpr const char* SIDEBAR_LEFT = "##__left-sidebar";
-    constexpr const char* SIDEBAR_RIGHT = "##__right-sidebar";
+    constexpr const char* UI_CORE_VIEWPORT = "##lkengine-core-viewport";
+    constexpr const char* UI_RENDER_WINDOW = "##lkengine-render-window";
+    constexpr const char* UI_TOP_BAR = "##lkengine-top-bar";
+    constexpr const char* UI_BOTTOM_BAR = "##lkengine-lower-bar";
+    constexpr const char* UI_SIDEBAR_LEFT = "##lkengine-sidebar-left";
+    constexpr const char* UI_SIDEBAR_RIGHT = "##lkengine-sidebar-right";
+    constexpr const char* UI_SELECTED_ENTITY_DETAILS = "##lkengine-selected-entity-details";
 
 	class EditorLayer : public Layer
 	{
@@ -29,11 +30,13 @@ namespace LkEngine {
 			Scale     = 7 << 6
 		};
 
-		EditorLayer(s_ptr<Scene> scene);
+		//EditorLayer(s_ptr<Scene> scene);
+		EditorLayer(Scene& scene);
 		~EditorLayer() = default;
 
-		static s_ptr<EditorLayer> Get() { return s_Instance; }
+		static EditorLayer* Get() { return s_Instance; }
 		static bool IsEnabled() { return Enabled; }
+		static Entity GetSelectedEntity() { return SelectedEntity; }
 
 		void OnImGuiRender();
 		void DrawEntityNode(Entity entity);
@@ -62,8 +65,8 @@ namespace LkEngine {
         void DrawImGuizmo(Entity& entity);
 
 	public:
-		static Entity SelectedEntity;
-		static uint64_t SelectedEntityID;
+		inline static Entity SelectedEntity;
+		inline static uint64_t SelectedEntityID = 0;
         static std::string SelectedEntityLabel; // remove
 		static ImVec2 SelectedEntityMenuSize;
 		static glm::vec2 EditorViewportBounds[2];
@@ -80,7 +83,8 @@ namespace LkEngine {
 		bool m_ShowStackTool = false;
 		bool m_ShowStyleEditor = false;
 		int m_GizmoType = GizmoType::Translate;
-		static s_ptr<EditorLayer> s_Instance;
+
+		inline static EditorLayer* s_Instance = nullptr;
 	};
 
 }

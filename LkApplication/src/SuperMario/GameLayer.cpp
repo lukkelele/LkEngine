@@ -17,21 +17,24 @@ namespace LkEngine {
     {
         m_Renderer2D = Renderer::GetRenderer2D();
         m_Scene = std::make_shared<Scene>();
-        m_Player = std::make_shared<Player>("Mario");
-        LOG_DEBUG("Created new player: {}", m_Player->GetName());
 
         Entity playerEntity = m_Scene->CreateEntity("Player");
+        m_Player = std::make_shared<Player>(playerEntity, "Mario");
+        LOG_DEBUG("Created new player: {}, uuid: {}", m_Player->GetName(), m_Player->GetUUID());
+
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { 400, 500 });
 
-        m_Player->SetEntity(playerEntity);
-        LOG_DEBUG("Player UUID set to: {}", m_Player->GetUUID());
         Camera& cam = playerEntity.GetComponent<CameraComponent>();
         m_Scene->SetActiveCamera(cam);
 
-        for (int i = 0; i < 2; i++)
+        float enemyPosY = 0.0f;
+        // Create 3 enemies on different y positions
+        for (int i = 1; i < 4; i++)
         {
             Entity enemyEntity = m_Scene->CreateEntity("Enemy-" + std::to_string(i));
             s_ptr<Enemy> enemy = std::make_shared<Enemy>(enemyEntity);
+            enemyPosY += enemy->GetHeight() * (DebugLayer::s_DebugEntities * 1.50f);
+            enemy->SetPos(0, enemyPosY);
             m_Enemies.push_back(enemy);
         }
     }
@@ -53,7 +56,7 @@ namespace LkEngine {
         //RenderCommand::DrawQuad({ 300, 400 }, { 100, 200 }, { 0.80f, 0.10f, 0.20f, 1.0f });
         m_Player->OnUpdate(ts);
 
-        for (auto& enemy : m_Enemies)
+        for (const auto& enemy : m_Enemies)
         {
             enemy->OnUpdate(ts);
         }
@@ -65,6 +68,11 @@ namespace LkEngine {
     void GameLayer::OnImGuiRender()
     {
         m_Scene->OnImGuiRender();
+
+        for (const auto& enemy : m_Enemies)
+        {
+            enemy->OnImGuiRender();
+        }
     }
 
 }

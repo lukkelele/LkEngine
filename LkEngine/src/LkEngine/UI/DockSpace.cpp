@@ -139,11 +139,11 @@ namespace LkEngine {
         SidebarLeftDockID = dock_id_left;
         SidebarRightDockID = dock_id_right;
         // Build dockspace
-        ImGui::DockBuilderDockWindow(TOP_BAR, dock_id_new_top);
-        ImGui::DockBuilderDockWindow(SIDEBAR_LEFT, dock_id_left);
-        ImGui::DockBuilderDockWindow(SIDEBAR_RIGHT, dock_id_right);
-        ImGui::DockBuilderDockWindow(BOTTOM_BAR, dock_id_bottom);
-        ImGui::DockBuilderDockWindow(RENDER_WINDOW, dock_id_center);
+        ImGui::DockBuilderDockWindow(UI_TOP_BAR, dock_id_new_top);
+        ImGui::DockBuilderDockWindow(UI_SIDEBAR_LEFT, dock_id_left);
+        ImGui::DockBuilderDockWindow(UI_SIDEBAR_RIGHT, dock_id_right);
+        ImGui::DockBuilderDockWindow(UI_BOTTOM_BAR, dock_id_bottom);
+        ImGui::DockBuilderDockWindow(UI_RENDER_WINDOW, dock_id_center);
         ImGui::DockBuilderFinish(DockSpaceID);
 
         auto center_node = ImGui::DockBuilderGetNode(dock_id_center);

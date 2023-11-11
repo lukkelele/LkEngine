@@ -15,7 +15,7 @@ namespace LkEngine {
     class Player
     {
     public:
-        Player(Entity& entity);
+        Player(Entity& entity, const std::string& name = "");
         Player(const std::string& name = "Player");
         virtual ~Player();
 
@@ -25,9 +25,18 @@ namespace LkEngine {
         UUID GetUUID() const { return m_ID; }
         Entity GetEntity() const { return m_Entity; }
         void SetEntity(const Entity& entity); // { m_Entity = entity; }
+        void SetPos(float x, float y);
+        void SetPos(const glm::vec2& pos);
+
+        const glm::vec2 GetSize();
+        float GetWidth();
+        float GetHeight();
 
         virtual void OnUpdate(float ts = 1.0f);
         virtual void OnImGuiRender();
+
+    protected:
+        glm::vec3& GetPos() { return m_Entity.GetComponent<TransformComponent>().Translation; }
 
     protected:
         UUID m_ID;
