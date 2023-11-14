@@ -24,9 +24,12 @@ namespace LkEngine {
         void OnImGuiRender() override;
         void OnUpdate(float ts) override;
 
+        void DrawBackground();
+
     private:
         s_ptr<Scene> m_Scene = nullptr;
         s_ptr<Player> m_Player = nullptr;
+        s_ptr<Texture2D> m_BgTexture = nullptr;
         s_ptr<Renderer2D> m_Renderer2D = nullptr;
 
         std::vector<s_ptr<Enemy>> m_Enemies = {};

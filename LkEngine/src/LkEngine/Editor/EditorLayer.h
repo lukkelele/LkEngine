@@ -1,8 +1,10 @@
 #pragma once
 #include "LkEngine/Core/Layer.h"
+#include "LkEngine/Math/Math.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
+
 #include <entt/entt.hpp>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -37,7 +39,7 @@ namespace LkEngine {
 		static EditorLayer* Get() { return s_Instance; }
 		static bool IsEnabled() { return Enabled; }
 		static Entity GetSelectedEntity() { return SelectedEntity; }
-		static const char* GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
+		static const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
 
 		void OnImGuiRender();
 		void DrawEntityNode(Entity entity);
@@ -65,16 +67,15 @@ namespace LkEngine {
         void DrawImGuizmo(Entity& entity);
 
 	public:
+		static ImVec2 SelectedEntityMenuSize;
 		inline static Entity SelectedEntity;
 		inline static uint64_t SelectedEntityID = 0;
-        static std::string SelectedEntityLabel; // remove
-		static ImVec2 SelectedEntityMenuSize;
-		static glm::vec2 EditorViewportBounds[2];
-		static glm::vec2 EditorViewportPos;
-		static glm::vec2 EditorWindowPos;
-		static glm::vec2 ViewportScalers;
-		static glm::vec2 EditorWindowSize;
-		static bool Enabled;
+		inline static glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
+		inline static glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
+		inline static glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
+		inline static glm::vec2 ViewportScalers = { 1.0f, 1.0f };
+		inline static glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
+		inline static bool Enabled = true;
 		// Window where the selected entity settings will be shown in
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 	private:

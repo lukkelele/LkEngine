@@ -7,7 +7,6 @@
 namespace LkEngine {
 
 	int Renderer::DrawMode = GL_TRIANGLES;
-	glm::vec4 Renderer::BackgroundColor = { 0.50f, 0.50f, 0.50f, 1.0f };
 
 	void RendererAPI::SetAPI(RendererAPIType api)
 	{
@@ -44,34 +43,14 @@ namespace LkEngine {
 		DrawMode = mode;
 	}
 
-
-#if 0
-	void Renderer::Draw(VertexBuffer& vb, const Shader& shader) 
-	{
-		shader.Bind();
-		vb.Bind();
-		auto& ib = vb.GetIndexBuffer();
-		ib->Bind();
-		m_RendererAPI->Submit(vb, shader);
-	}
-
-	void Renderer::Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
-	{
-		shader.Bind();
-		vb.Bind();
-		ib.Bind();
-		m_RendererAPI->Submit(vb, ib, shader);
-	}
-#endif
-
 	void Renderer::SubmitLines(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
 	{
 		shader.Bind();
 		vb.Bind();
 		ib.Bind();
-		SetDrawMode(LK_DRAW_LINES);
+		SetDrawMode(LK_DRAWMODE_LINES);
 		m_RendererAPI->Draw(vb, ib, shader);
-		SetDrawMode(LK_DRAW_TRIANGLES);
+		SetDrawMode(LK_DRAWMODE_TRIANGLES);
 	}
 
 	void Renderer::SubmitIndexed(VertexBuffer& vb, unsigned int count)
@@ -80,6 +59,7 @@ namespace LkEngine {
 		vb.GetIndexBuffer()->Bind();
 		m_RendererAPI->SubmitIndexed(count);
 	}
+
 	void Renderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
 	{
 		m_RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);

@@ -22,31 +22,29 @@ namespace LkEngine {
         virtual void OnUpdate() = 0;
         virtual void Exit() = 0;
         virtual void SetVSync(bool enabled) = 0;
-        virtual std::shared_ptr<GLFWwindow*> GetGlfwWindow() const = 0;
-        virtual std::shared_ptr<GraphicsContext> GetContext() const = 0;
-        uint16_t GetWidth()  const { return m_Width; }
-        uint16_t GetHeight() const { return m_Height; }
-        uint16_t GetViewportWidth()  const { return m_ViewportWidth; }
-        uint16_t GetViewportHeight() const { return m_ViewportHeight; }
-        void SetWidth(uint16_t width) { m_Width = width; }
-        void SetHeight(uint16_t height) { m_Height = height; }
-        void SetViewportWidth(uint16_t width) { m_ViewportWidth = width; }
-        void SetViewportHeight(uint16_t height) { m_ViewportHeight = height; }
+        virtual s_ptr<GLFWwindow*> GetGlfwWindow() const = 0;
+        virtual s_ptr<GraphicsContext> GetContext() const = 0;
+        virtual uint16_t GetWidth() const = 0; // { return m_Width; }
+        virtual uint16_t GetHeight() const = 0; // { return m_Height; }
+        virtual uint16_t GetViewportWidth() const = 0; // { return m_ViewportWidth; }
+        virtual uint16_t GetViewportHeight() const = 0; // { return m_ViewportHeight; }
+        virtual void SetWidth(uint16_t width) = 0; // { m_Width = width; }
+        virtual void SetHeight(uint16_t height) = 0; // { m_Height = height; }
+        virtual void SetViewportWidth(uint16_t width) = 0; // { m_ViewportWidth = width; }
+        virtual void SetViewportHeight(uint16_t height) = 0; // { m_ViewportHeight = height; }
         std::string GetTitle()  const { return m_Title; }
         std::string GetGlslVersion() const { return m_GlslVersion;  }
         bool IsVSync() const { return m_VSync; }
-        //std::pair<float, float> GetPos();
-        //std::pair<float, float> GetSize();
-        glm::vec2 GetPos();
-        glm::vec2 GetSize();
-        std::pair<float, float> GetViewportSize();
+        virtual glm::vec2 GetPos() const = 0;
+        virtual glm::vec2 GetSize() const = 0;
+        virtual glm::vec2 GetViewportSize() const = 0;
 
     protected:
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
     
     protected:
-        uint16_t m_Width = 0, m_Height = 0;
-        uint16_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+        //uint16_t m_Width = 0, m_Height = 0;
+        //uint16_t m_ViewportWidth = 0, m_ViewportHeight = 0;
         glm::vec2 m_Pos = { 0.0f, 0.0f };
         std::string m_Title = "";
         std::string m_GlslVersion = "";

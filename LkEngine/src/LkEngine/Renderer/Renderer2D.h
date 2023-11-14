@@ -22,7 +22,6 @@ namespace LkEngine {
         bool SwapChainTarget = false;
     };
 
-    //
     // TODO:
     // - GetTexture(index: int) / GetTexture(name: string)
     //
@@ -32,7 +31,7 @@ namespace LkEngine {
         Renderer2D(const Renderer2DSpecification& specification = Renderer2DSpecification());
         ~Renderer2D();
 
-        static s_ptr<Renderer2D> Get() { return s_Instance; }
+        static Renderer2D* Get() { return s_Instance; }
 
         void Init();
         void Shutdown();
@@ -77,7 +76,7 @@ namespace LkEngine {
         void NextBatch();
 
     private:
-        static s_ptr<Renderer2D> s_Instance;
+        inline static Renderer2D* s_Instance = nullptr;
         bool m_Initialized = false;
         Renderer2DSpecification m_Specification;
 

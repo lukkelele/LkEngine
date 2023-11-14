@@ -1,6 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/Editor/EditorLayer.h"
-#include "LkEngine/Math/Math.h"
+#include "LkEngine/Debug/DebugLayer.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
@@ -12,13 +12,6 @@
 namespace LkEngine {
 
 	ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
-    std::string EditorLayer::SelectedEntityLabel; // remove
-	glm::vec2 EditorLayer::EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
-	glm::vec2 EditorLayer::EditorViewportPos = { 0.0f, 0.0f };
-	glm::vec2 EditorLayer::EditorWindowSize = { 0.0f, 0.0f };
-	glm::vec2 EditorLayer::EditorWindowPos = { 0.0f, 0.0f };
-	glm::vec2 EditorLayer::ViewportScalers = { 1.0f, 1.0f };
-	bool EditorLayer::Enabled = false;
 
 	//EditorLayer::EditorLayer(s_ptr<Scene> scene)
 	EditorLayer::EditorLayer(Scene& scene)
@@ -32,6 +25,7 @@ namespace LkEngine {
 		m_ViewportBounds[1] = {Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight()};
 		LOG_DEBUG("Viewport Bounds[0]: ({}, {})", m_ViewportBounds[0].x, m_ViewportBounds[0].y);
 		LOG_DEBUG("Viewport Bounds[1]: ({}, {})", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
+		
 		m_ShowStackTool = true;
 		Enabled = true;
 	}
@@ -515,7 +509,7 @@ namespace LkEngine {
         ImGui::BeginChild(UI_SELECTED_ENTITY_DETAILS, SelectedEntityMenuSize, true);
         if (entity && entity.HasComponent<TransformComponent>())
         {
-            ImGui::SeparatorText(SelectedEntityLabel.c_str());
+            ImGui::SeparatorText(SelectedEntity.GetName().c_str());
             ImGui::Indent();
 			uint32_t id = entity;
 		    ImGui::PushID(id);
@@ -698,9 +692,9 @@ namespace LkEngine {
             std::string label = fmt::format("{}", entity.GetName());
             if (ImGui::Selectable(label.c_str(), &is_selected, selectable_flags))
             {
-                LOG_TRACE("Selecting {}", label);
-                SelectedEntityLabel = label;
+                LOG_DEBUG("Selecting {}", label);
 				SelectedEntityID = entity.GetComponent<IDComponent>().ID;
+				SelectedEntity = entity;
             }
         }
 		ImGui::EndGroup();

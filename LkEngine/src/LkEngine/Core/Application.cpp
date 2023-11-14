@@ -23,7 +23,7 @@ namespace LkEngine {
     {
         m_Window->Init();
         m_Context = m_Window->GetContext();
-        m_Input = create_s_ptr<Input>(this);
+        m_Input = std::make_shared<Input>(this);
         m_Input->Init();
 
         m_Renderer = std::make_shared<Renderer>();

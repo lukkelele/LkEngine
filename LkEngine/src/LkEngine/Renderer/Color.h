@@ -6,25 +6,27 @@
 
 namespace LkEngine {
 
-    class Color
-    {
-    public:
-        Color() = default;
-        ~Color() = default;
 
-        static void Init();
-        static void Randomize(glm::vec4& color);
-        static glm::vec4 Generate();
+    namespace Color {
 
-    private:
-        static bool m_Initialized;
-        static std::mt19937 RNG;
-        static std::uniform_int_distribution<int> Dist;
+        void Randomize(glm::vec4& color);
+        glm::vec4 Generate();
 
-        static glm::vec4 Red;
-        static glm::vec4 Green;
-        static glm::vec4 Blue;
-    };
+        extern std::mt19937 RNG;
+        extern std::uniform_int_distribution<int> Dist;
+
+        namespace RGBA 
+        {
+            extern glm::vec4 White;
+            extern glm::vec4 Black;
+            extern glm::vec4 Gray;
+            extern glm::vec4 Red;
+            extern glm::vec4 Green;
+            extern glm::vec4 Blue;
+        }
+
+    }
+
 
 
 }

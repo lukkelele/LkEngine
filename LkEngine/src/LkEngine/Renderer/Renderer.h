@@ -11,9 +11,8 @@
 #include "LkEngine/Scene/Components.h"
 #include <glad/glad.h>
 
-#define LK_DRAW_TRIANGLES  GL_TRIANGLES
-#define LK_DRAW_LINES	   GL_LINES
-
+#define LK_DRAWMODE_TRIANGLES  GL_TRIANGLES
+#define LK_DRAWMODE_LINES	   GL_LINES
 
 namespace LkEngine {
 
@@ -42,7 +41,7 @@ namespace LkEngine {
 
 	public:
 		static int DrawMode;
-		static glm::vec4 BackgroundColor;
+		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
 	private:
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;
 	};

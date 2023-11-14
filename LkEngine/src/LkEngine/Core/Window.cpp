@@ -28,32 +28,16 @@ namespace LkEngine {
 	#endif
 	}
 
-	//std::pair<float, float> Window::GetPos()
-	glm::vec2 Window::GetPos()
-	{
-		return m_Pos; 
-	}
-
-	//std::pair<float, float> Window::GetSize()
-	glm::vec2 Window::GetSize()
-	{
-		return glm::vec2(m_Width, m_Height);
-	}
-
-	std::pair<float, float> Window::GetViewportSize()
-	{
-		return std::make_pair<float, float>(m_ViewportWidth, m_ViewportHeight); 
-	}
-
 	void Window::WindowResizeCallback(GLFWwindow* glfw_window, int width, int height)
 	{
-		//LOG_DEBUG("Window resized ({0}, {1})", width, height);
 		int size_x, size_y;
 		glfwGetWindowSize(glfw_window, &size_x, &size_y);
 
 		auto window = Window::Get();
-		window->m_ViewportWidth = size_x;
-		window->m_ViewportHeight = size_y;
+		//window->m_ViewportWidth = size_x;
+		//window->m_ViewportHeight = size_y;
+		window->SetViewportWidth(size_x);
+		window->SetViewportHeight(size_y);
 
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImVec2 pos = viewport->WorkPos;
@@ -68,14 +52,12 @@ namespace LkEngine {
 		}
 		else
 		{
-			window->m_Width = width;
-			window->m_Height = height;
+			window->SetWidth(width);
+			window->SetHeight(height);
 		}
 
 		glViewport(pos.x, pos.y, width, height);
-
-
-		LOG_DEBUG("Window Resize: ({}, {})", window->m_Width, window->m_Height);
+		LOG_DEBUG("Window Resize: ({}, {})", window->GetWidth(), window->GetHeight());
 
 		auto& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2(width, height);

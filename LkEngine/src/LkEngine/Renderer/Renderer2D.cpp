@@ -7,8 +7,6 @@
 
 namespace LkEngine {
 
-    s_ptr<Renderer2D> Renderer2D::s_Instance = nullptr;
-
     Renderer2D::Renderer2D(const Renderer2DSpecification& specification)
         : m_Specification(specification)
         , m_MaxVertices(specification.MaxQuads * 4)
@@ -16,7 +14,7 @@ namespace LkEngine {
         , m_MaxLineVertices(specification.MaxLines * 2)
         , m_MaxLineIndices(specification.MaxLines * 6)
     {
-        s_Instance = std::shared_ptr<Renderer2D>(this);
+        s_Instance = this;
         m_CameraBuffer = {};
         m_CameraUniformBuffer = {};
     }

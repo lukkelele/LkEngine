@@ -92,5 +92,19 @@ namespace LkEngine {
 		return m_VSync;
 	}
 
+	glm::vec2 Windows_Window::GetPos() const
+	{
+		return m_Pos; 
+	}
+
+	glm::vec2 Windows_Window::GetSize() const
+	{
+		return glm::vec2(m_Width, m_Height);
+	}
+
+	glm::vec2 Windows_Window::GetViewportSize() const
+	{
+		return { m_ViewportWidth, m_ViewportHeight };
+	}
 
 }
