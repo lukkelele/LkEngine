@@ -19,8 +19,10 @@ namespace LkEngine {
         m_Scene = std::make_shared<Scene>();
 
         TextureSpecification bgTextureSpecification;
-        bgTextureSpecification.Width = Window::Get()->GetWidth();
-        bgTextureSpecification.Height = Window::Get()->GetHeight();
+        //bgTextureSpecification.Width = Window::Get()->GetWidth();
+        //bgTextureSpecification.Height = Window::Get()->GetHeight();
+        bgTextureSpecification.Path = "assets/img/sky-background-2d.png";
+        //bgTextureSpecification.Path = "assets/img/atte_square.png";
         m_BgTexture = Texture2D::Create(bgTextureSpecification);
 
         Entity playerEntity = m_Scene->CreateEntity("Player");
@@ -86,10 +88,8 @@ namespace LkEngine {
 
     void GameLayer::DrawBackground()
     {
-        m_BgTexture->Bind();
         auto window = Window::Get();
         auto& tc = m_Background->GetComponent<TransformComponent>();
-        //float bgStartX = 0.0f;
         float bgStartX = tc.GetTranslation().x;
         float bgStartY = tc.GetTranslation().y;
         float bgEndX = (float)window->GetWidth();
@@ -104,14 +104,18 @@ namespace LkEngine {
             glm::vec2 viewportBounds = editorLayer->EditorViewportBounds[0];
             bgStartX += viewportBounds.x * 0.50f;
             bgStartY += viewportBounds.y * 0.50f;
-            Debug::PrintVec2(viewportBounds, "Viewport bounds");
+            //Debug::PrintVec2(viewportBounds, "Viewport bounds");
         }
-        Debug::PrintVec2({ bgEndX, bgEndY }, "Bg End Coords");
+        //Debug::PrintVec2({ bgEndX, bgEndY }, "Bg End Coords");
 
         //glm::vec3 startPos = { bgStartX + (bgStartX * 0.50f), bgStartY + (bgStartY * 0.50f), 0.0f};
         glm::vec3 startPos = { bgStartX, bgStartY, 0.0f};
         glm::vec2 size = { bgEndX * 3.0f, bgEndY * 1.0f };
-        RenderCommand::DrawQuad(startPos, size, Color::RGBA::White );
+
+        //m_BgTexture->Bind();
+        Renderer::BoundTextureID = 1;
+        RenderCommand::DrawQuad(startPos, size, Color::RGBA::White);
+        Renderer::BoundTextureID = 0;
     }
 
 

@@ -39,7 +39,7 @@ namespace LkEngine {
             { "a_Position",     ShaderDataType::Float3  },
             { "a_Color",        ShaderDataType::Float4  },
             { "a_TexCoord",     ShaderDataType::Float2  },
-            { "a_TexIndex",     ShaderDataType::Float,  },
+            { "a_TexIndex",     ShaderDataType::Int,    },
             { "a_TilingFactor", ShaderDataType::Float,  },
             { "a_EntityID",     ShaderDataType::Int     },
         });
@@ -76,6 +76,7 @@ namespace LkEngine {
 
         m_WhiteTexture = Texture2D::Create("assets/img/atte_square.png");
         m_TextureSlots[0] = m_WhiteTexture;
+        m_TextureSlots[1] = Texture2D::Create("assets/img/sky-background-2d.png");
 
         //m_QuadShader = Shader::Create("assets/shaders/Renderer2D_QuadAdvanced.shader");
         m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
@@ -103,10 +104,10 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetViewProjection();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        m_TextureSlotIndex = 1;
+        //for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
-            m_TextureSlots[i] = nullptr;
+            //m_TextureSlots[i] = nullptr;
         }
         StartBatch();
     }
@@ -146,20 +147,23 @@ namespace LkEngine {
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
             // Bind textures
-            //for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
-            //{
-            //    s_ptr<Texture2D> tex2D = m_TextureSlots[i];
-            //    if (tex2D)
-            //    {
-            //        LOG_DEBUG("Bound texture: {}", tex2D->GetPath());
-            //        tex2D->Bind(i);
-            //    }
-            //}
-            m_WhiteTexture->Bind();
+            for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
+            {
+                s_ptr<Texture2D> tex2D = m_TextureSlots[i];
+                if (tex2D)
+                {
+                    //LOG_DEBUG("Bound texture: {}", tex2D->GetPath());
+                    tex2D->Bind(i);
+                }
+            }
+            //m_WhiteTexture->Bind();
+
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
-            m_QuadShader->SetUniform1i("u_TextureEnabled", m_WhiteTexture->IsLoaded());
-            //RenderCommand::DrawIndexed(*m_QuadVertexArray, m_QuadIndexCount);
+            //m_QuadShader->SetUniform1i("u_TextureEnabled", m_WhiteTexture->IsLoaded());
+            //m_QuadShader->SetUniform1i("u_TextureEnabled", (m_TextureSlots.size() > 2 && m_TextureSlots[1]->IsLoaded())); // FIXME: Set to 2 just to disable textures
+            m_QuadShader->SetUniform1i("u_TextureEnabled", (m_TextureSlots.size() > 1 && m_TextureSlots[1]->IsLoaded())); 
+            //m_QuadShader->SetUniform1i("u_TextureEnabled", 0); // Set to 0 temporarily or else textures always enabled
             RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
             m_QuadShader->Unbind();
 
@@ -176,7 +180,6 @@ namespace LkEngine {
             m_LineShader->Bind();
             m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
             RenderCommand::SetLineWidth(m_LineWidth);
-            //RenderCommand::DrawLines(*m_LineVertexArray, m_LineIndexCount);
             RenderCommand::DrawLines(*m_LineVertexBuffer, m_LineIndexCount);
 
             m_Stats.DrawCalls++;
@@ -234,7 +237,10 @@ namespace LkEngine {
             { 0.0f, 1.0f } 
         };
         const float tilingFactor = 1.0f;
-        const float textureIndex = 0.0f; // White texture
+        //const float textureIndex = 0.0f; // White texture
+        //const float textureIndex = Renderer::BoundTextureID; 
+        //float textureIndex = Renderer::BoundTextureID; 
+        float textureIndex = 0; // Renderer::BoundTextureID;
 
         if (m_QuadIndexCount >= m_MaxIndices) 
             NextBatch();

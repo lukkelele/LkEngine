@@ -60,6 +60,7 @@ namespace LkEngine {
 		switch (format)
 		{
 			case ImageFormat::RGB:
+			case ImageFormat::RGBA8:   return 4;
 			case ImageFormat::RGBA:    return 4;
 			case ImageFormat::RGBA16F: return 2 * 4;
 			case ImageFormat::RGBA32F: return 4 * 4;

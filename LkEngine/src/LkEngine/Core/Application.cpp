@@ -93,6 +93,7 @@ namespace LkEngine {
 
     void Application::OnEvent(Event& e)
     {
+        e.HandleEvent();
     }
 
     bool Application::IsKeyboardEnabled()

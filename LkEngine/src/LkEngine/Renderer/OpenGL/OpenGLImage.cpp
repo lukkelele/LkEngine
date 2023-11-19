@@ -80,7 +80,6 @@ namespace LkEngine {
 		{
 			LOG_WARN("OpenGLImage: Passed buffer is of size 0!");
 		}
-		m_ImageData = buffer;
 
 		GL_CALL(glGenTextures(1, &m_RendererID));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
@@ -115,14 +114,12 @@ namespace LkEngine {
 
 			GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_ImageData.Data));
 			GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-
 		}
     }
 
     OpenGLImage::~OpenGLImage()
     {
     }
-
 
 	void OpenGLImage::SetData(const void* data)
     {

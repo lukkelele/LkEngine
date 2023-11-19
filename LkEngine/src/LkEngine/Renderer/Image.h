@@ -7,6 +7,7 @@
 
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Buffer.h"
+#include "LkEngine/Event/AssetEvent.h"
 
 
 namespace LkEngine {
@@ -52,8 +53,8 @@ namespace LkEngine {
 		uint32_t Height = 1;
 		uint32_t Mips = 1;
 		uint32_t Layers = 1;
+		std::string Path = "";
 		bool Deinterleaved = false;
-
 		std::string DebugName;
 	};
 	

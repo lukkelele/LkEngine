@@ -1,20 +1,24 @@
 #pragma once
+
 #include "LkEngine/Event/Event.h"
 #include "LkEngine/Input/Keycodes.h"
+
+#include <sstream>
 
 
 namespace LkEngine {
 
 	class KeyEvent : public Event
 	{
-	public:
-		KeyCode getKeyCode() const { return m_KeyCode; }
-
 	protected:
 		KeyEvent(const KeyCode keycode)
 			: m_KeyCode(keycode) {}
 
 		KeyCode m_KeyCode;
+
+	public:
+		KeyCode GetKeyCode() const { return m_KeyCode; }
+
 	};
 
 	class KeyPressedEvent : public KeyEvent

@@ -15,7 +15,7 @@ namespace LkEngine {
 		{
 		}
 
-		Buffer(const void* data, uint64_t size = 0)
+		Buffer(const void* data, uint64_t size)
 			: Data((void*)data), Size(size)
 		{
 		}
@@ -32,6 +32,7 @@ namespace LkEngine {
 		{
 			Buffer buffer;
 			buffer.Allocate(size);
+			LOG_TRACE("Buffer: Allocated '{0}'", size);
 			memcpy(buffer.Data, data, size);
 			return buffer;
 		}

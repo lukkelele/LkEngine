@@ -1,5 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/OpenGL/OpenGLTexture.h"
+#include "LkEngine/Core/Application.h"
 
 
 namespace LkEngine {
@@ -31,10 +32,10 @@ namespace LkEngine {
 	}
 
 
+	//=============================================================================
+
 
 	OpenGLTexture::OpenGLTexture(const std::string& filePath)
-		: m_ScalerX(1.0f)
-		, m_ScalerY(1.0f)
 	{
 		LOG_TRACE("OpenGLTexture created: {}", filePath);
 		m_RendererID = 0;
@@ -49,19 +50,25 @@ namespace LkEngine {
 		m_Width = width;
 		m_Height = height;
 		m_Image = Image::Create(imageSpec, data);
-		//m_Image->Invalidate();
 	}
 
 	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
-		: m_ScalerX(1.0f)
-		, m_ScalerY(1.0f)
 	{
 		m_RendererID = 0;
 		ImageSpecification imageSpec;
+		imageSpec.Path = specification.Path;
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
 
-		m_Image = Image::Create(imageSpec, nullptr);
+		if (specification.Path != "")
+		{
+			stbi_set_flip_vertically_on_load(1);
+			int width, height, channels;
+			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
+			m_Image = Image::Create(imageSpec, data);
+		}
+		else
+			m_Image = Image::Create(imageSpec, nullptr);
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -69,15 +76,17 @@ namespace LkEngine {
 		GL_CALL(glDeleteTextures(1, &m_RendererID));
 	}
 
-	void OpenGLTexture::Bind(unsigned int slot /*= 0*/) const
+	void OpenGLTexture::Bind(unsigned int slot /*= 0*/) 
 	{
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
+		//m_Loaded = true;
 	}
 
-	void OpenGLTexture::Unbind() const
+	void OpenGLTexture::Unbind()
 	{
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+		//m_Loaded = false;
 	}
 
 	void OpenGLTexture::SetData(void* data, uint32_t size)
@@ -108,7 +117,9 @@ namespace LkEngine {
 		m_Loaded = false;
 	}
 
-
+	//=====================================================
+	// Texture 2D
+	//=====================================================
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
 		: m_Specification(specification)
@@ -118,8 +129,29 @@ namespace LkEngine {
 		ImageSpecification imageSpec;
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
-		m_Image = Image::Create(imageSpec, nullptr);
+		imageSpec.Path = specification.Path;
 		//m_Image->Invalidate();
+
+		if (specification.Path != "")
+		{
+			stbi_set_flip_vertically_on_load(1);
+			int width, height, channels;
+			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
+            uint32_t memorySize = Image::GetMemorySize(specification.Format, specification.Width, specification.Height);
+			//Buffer buf = Buffer(data, memorySize);
+			//LOG_DEBUG("BUFFER SIZE: {}", buf.GetSize());
+			//m_Image = Image::Create(imageSpec, buf);
+			imageSpec.Width = width;
+			imageSpec.Height = height;
+			m_Image = Image::Create(imageSpec, data);
+		}
+		else
+			m_Image = Image::Create(imageSpec, nullptr);
+
+		// Notify application about event
+		Application* app = Application::Get();
+		// TODO: Register event func
+		app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& filePath)
@@ -137,21 +169,27 @@ namespace LkEngine {
 		m_Height = height;
 
 		m_Image = Image::Create(imageSpec, data);
+
+		Application* app = Application::Get();
+		app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 	}
 
-	void OpenGLTexture2D::Bind(unsigned int slot /*= 0*/) const
+	void OpenGLTexture2D::Bind(unsigned int slot /*= 0*/)
 	{
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
+		//m_Loaded = true; // FIXME: Should not be set here, or ?
 	}
 
-	void OpenGLTexture2D::Unbind() const
+	void OpenGLTexture2D::Unbind()
 	{
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+		//m_Loaded = false;
+		//m_Loaded = false; // FIXME: Should not be set here, or ?
 	}
 
 	// TODO: Remove this ?

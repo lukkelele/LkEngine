@@ -1,6 +1,8 @@
 #pragma once
+
 #include "LkEngine/Core/Base.h"
 
+#include <sstream>
 
 namespace LkEngine {
 
@@ -10,6 +12,8 @@ namespace LkEngine {
 		WindowFocus, WindowLostFocus, WindowMoved, WindowResize, WindowClose,
 		KeyPressed, KeyReleased, KeyTyped,
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,
+		//
+		TextureCreated, TextureDeleted,	
 		// Physics
 		ConstraintAdded, ConstraintRemoved, ConstraintAltered,
 		RigidbodyAdded, RigidbodyRemoved, RigidbodyAltered,

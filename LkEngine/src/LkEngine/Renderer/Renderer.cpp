@@ -6,8 +6,6 @@
 
 namespace LkEngine {
 
-	int Renderer::DrawMode = GL_TRIANGLES;
-
 	void RendererAPI::SetAPI(RendererAPIType api)
 	{
 		RendererAPI::m_CurrentRendererAPI = api;

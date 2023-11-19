@@ -36,12 +36,12 @@ namespace LkEngine {
         static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
-
 		static s_ptr<Renderer2D> GetRenderer2D() { return m_RendererAPI->GetRenderer2D(); }
 
 	public:
-		static int DrawMode;
+		inline static int DrawMode = GL_TRIANGLES;
 		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
+		inline static uint64_t BoundTextureID = 0;
 	private:
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;
 	};
