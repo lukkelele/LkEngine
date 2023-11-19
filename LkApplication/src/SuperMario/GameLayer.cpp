@@ -27,6 +27,12 @@ namespace LkEngine {
         m_Player = std::make_shared<Player>(playerEntity, "Mario");
         LOG_DEBUG("Created new player: {}, uuid: {}", m_Player->GetName(), m_Player->GetUUID());
 
+        Entity bgEntity = m_Scene->CreateEntity("Background");
+        auto& bgSprite = bgEntity.AddComponent<SpriteComponent>();
+        auto& bgTransform = bgEntity.AddComponent<TransformComponent>();
+        bgTransform.Translation.y = 450.0f;
+        m_Background = std::make_shared<Entity>(bgEntity);
+
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { 400, 500 });
 
         Camera& cam = playerEntity.GetComponent<CameraComponent>();
@@ -82,26 +88,30 @@ namespace LkEngine {
     {
         m_BgTexture->Bind();
         auto window = Window::Get();
-        float bgStartX = 0.0f;
-        float bgStartY = 300.0f;
+        auto& tc = m_Background->GetComponent<TransformComponent>();
+        //float bgStartX = 0.0f;
+        float bgStartX = tc.GetTranslation().x;
+        float bgStartY = tc.GetTranslation().y;
         float bgEndX = (float)window->GetWidth();
         float bgEndY = (float)window->GetHeight();
+        // Draw calls use origin in the middle, so offset this to the middle of the render window
+        bgStartX += bgEndX * 0.50f;
+        bgStartY += bgEndY * 0.50f;
         // If editor layer is enabled, use the editor viewport pos for the bottom left screen coordinates
-        if (EditorLayer::IsEnabled())
+        auto editorLayer = EditorLayer::Get();
+        if (editorLayer->IsEnabled())
         {
-            auto editorLayer = EditorLayer::Get();
-            //glm::vec2 viewportBounds = editorLayer->EditorViewportBounds[0];
-            glm::vec2 viewportBounds = editorLayer->EditorWindowPos;
-            bgStartX = viewportBounds.x;
-            bgStartY = viewportBounds.y;
-            //bgEndX += viewportBounds.x;
-            //bgEndY += viewportBounds.y;
+            glm::vec2 viewportBounds = editorLayer->EditorViewportBounds[0];
+            bgStartX += viewportBounds.x * 0.50f;
+            bgStartY += viewportBounds.y * 0.50f;
             Debug::PrintVec2(viewportBounds, "Viewport bounds");
         }
         Debug::PrintVec2({ bgEndX, bgEndY }, "Bg End Coords");
 
-        //RenderCommand::DrawQuad({ bgStartX, bgStartY, 0.0f }, { bgEndX - bgStartX, bgEndY - bgStartY }, Color::RGBA::White );
-        RenderCommand::DrawQuad({ bgStartX, bgStartY, 0.0f }, { bgEndX , bgEndY }, Color::RGBA::White );
+        //glm::vec3 startPos = { bgStartX + (bgStartX * 0.50f), bgStartY + (bgStartY * 0.50f), 0.0f};
+        glm::vec3 startPos = { bgStartX, bgStartY, 0.0f};
+        glm::vec2 size = { bgEndX * 3.0f, bgEndY * 1.0f };
+        RenderCommand::DrawQuad(startPos, size, Color::RGBA::White );
     }
 
 

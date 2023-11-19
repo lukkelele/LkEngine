@@ -20,8 +20,7 @@ namespace LkEngine {
     struct ApplicationProperties
     {
 		std::string Title;
-        uint32_t Width;
-        uint32_t Height;
+        uint32_t Width, Height;
 		std::string Directory;
 		std::string GlslVersion;
 		ApplicationProperties(const std::string& title = "LkEngine",
@@ -35,7 +34,7 @@ namespace LkEngine {
     class Application
     {
     public:
-        Application(ApplicationProperties& props = ApplicationProperties());
+        Application(const ApplicationProperties& props = ApplicationProperties());
         ~Application();
 
         static Application* Get() { return m_Instance; }
@@ -69,7 +68,7 @@ namespace LkEngine {
         s_ptr<Scene> m_Scene = nullptr;
         s_ptr<EditorLayer> m_EditorLayer = nullptr;
         s_ptr<Input> m_Input = nullptr;
-        static Application* m_Instance;
+        inline static Application* m_Instance = nullptr;
     };
 
 }

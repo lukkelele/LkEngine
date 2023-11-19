@@ -31,6 +31,7 @@ namespace LkEngine {
 		unsigned int m_RendererID;
 		std::string m_FilePath;
 		uint32_t m_Width, m_Height;
+		float m_ScalerX, m_ScalerY;
 		bool m_Loaded = false;
 		bool m_Locked = false;
 		TextureSpecification m_Specification;

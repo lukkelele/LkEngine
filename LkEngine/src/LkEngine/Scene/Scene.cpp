@@ -180,7 +180,7 @@ namespace LkEngine {
 		{	
 			Entity entity = { entityTag, this };
 
-			if (entity.HasComponent<SpriteComponent>())
+			if (entity.HasComponent<SpriteComponent>() && entity.HasComponent<TransformComponent>())
 			{
 				RenderCommand::DrawSprite(entity.GetComponent<TransformComponent>(), 
 									      entity.GetComponent<SpriteComponent>(), 

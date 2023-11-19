@@ -30,7 +30,11 @@ namespace LkEngine {
 		return 0;
 	}
 
+
+
 	OpenGLTexture::OpenGLTexture(const std::string& filePath)
+		: m_ScalerX(1.0f)
+		, m_ScalerY(1.0f)
 	{
 		LOG_TRACE("OpenGLTexture created: {}", filePath);
 		m_RendererID = 0;
@@ -49,6 +53,8 @@ namespace LkEngine {
 	}
 
 	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
+		: m_ScalerX(1.0f)
+		, m_ScalerY(1.0f)
 	{
 		m_RendererID = 0;
 		ImageSpecification imageSpec;

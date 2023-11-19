@@ -4,9 +4,7 @@
 
 namespace LkEngine {
 
-    Application* Application::m_Instance = nullptr;
-
-    Application::Application(ApplicationProperties& props)
+    Application::Application(const ApplicationProperties& props)
         : m_Props(props)
     {
         m_Instance = this;
