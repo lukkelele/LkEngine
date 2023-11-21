@@ -6,6 +6,8 @@
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/Window.h"
 
+#include "LkEngine/IO/FileExplorer.h"
+
 #include "LkEngine/Input/Keyboard.h"
 #include "LkEngine/Input/Mouse.h"
 #include "LkEngine/Input/Input.h"

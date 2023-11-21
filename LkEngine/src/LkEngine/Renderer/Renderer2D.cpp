@@ -160,9 +160,7 @@ namespace LkEngine {
 
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
-            //m_QuadShader->SetUniform1i("u_TextureEnabled", m_WhiteTexture->IsLoaded());
-            //m_QuadShader->SetUniform1i("u_TextureEnabled", (m_TextureSlots.size() > 2 && m_TextureSlots[1]->IsLoaded())); // FIXME: Set to 2 just to disable textures
-            m_QuadShader->SetUniform1i("u_TextureEnabled", (m_TextureSlots.size() > 1 && m_TextureSlots[1]->IsLoaded())); 
+            //m_QuadShader->SetUniform1i("u_TextureEnabled", (m_TextureSlots.size() > 1 && m_TextureSlots[1]->IsLoaded())); 
             //m_QuadShader->SetUniform1i("u_TextureEnabled", 0); // Set to 0 temporarily or else textures always enabled
             RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
             m_QuadShader->Unbind();

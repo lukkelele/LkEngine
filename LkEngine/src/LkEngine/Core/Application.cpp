@@ -29,6 +29,8 @@ namespace LkEngine {
         m_Scene = std::make_shared<Scene>();
         m_EditorLayer = std::make_shared<EditorLayer>(*m_Scene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);
+
+        m_TextureLibrary.LoadTextures();
     }
 
     void Application::Run()

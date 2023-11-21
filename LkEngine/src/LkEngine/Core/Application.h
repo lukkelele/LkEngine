@@ -4,6 +4,7 @@
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Timer.h"
+#include "LkEngine/IO/FileExplorer.h"
 #include "LkEngine/Input/Input.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/SceneCamera.h"
@@ -11,6 +12,7 @@
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/RenderCommand.h"
+#include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Physics/2D/Physics2D.h"
 #include "LkEngine/UI/UILayer.h"
 
@@ -62,6 +64,7 @@ namespace LkEngine {
         ApplicationProperties m_Props;
         LayerStack m_LayerStack;
         Timer m_Timer;
+        TextureLibrary m_TextureLibrary;
         s_ptr<Window> m_Window = nullptr;
         s_ptr<Renderer> m_Renderer = nullptr;
         s_ptr<GraphicsContext> m_Context = nullptr;
