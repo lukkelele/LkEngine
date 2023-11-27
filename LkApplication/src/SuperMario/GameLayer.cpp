@@ -18,12 +18,25 @@ namespace LkEngine {
         m_Renderer2D = Renderer::GetRenderer2D();
         m_Scene = std::make_shared<Scene>();
 
+        FileExplorer fileExplorer;
+        auto imagesInAssetsDir = fileExplorer.GetFilesInDirectory("assets/img");
+        auto textureLibrary = TextureLibrary::Get();
+
+        std::string bgFilename = "sky-background-2d.png";
+
         TextureSpecification bgTextureSpecification;
         //bgTextureSpecification.Width = Window::Get()->GetWidth();
         //bgTextureSpecification.Height = Window::Get()->GetHeight();
-        bgTextureSpecification.Path = "assets/img/sky-background-2d.png";
+        bgTextureSpecification.Path = textureLibrary->GetTexturesDirectoryPath() + bgFilename;
         //bgTextureSpecification.Path = "assets/img/atte_square.png";
         m_BgTexture = Texture2D::Create(bgTextureSpecification);
+
+
+
+        for (const auto& image : imagesInAssetsDir)
+        {
+            image.PrintInformation();
+        }
 
         Entity playerEntity = m_Scene->CreateEntity("Player");
         m_Player = std::make_shared<Player>(playerEntity, "Mario");

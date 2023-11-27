@@ -56,6 +56,7 @@ namespace LkEngine {
         s_ptr<Renderer> GetRenderer() const { return m_Renderer; }
         s_ptr<GLFWwindow*> GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
         s_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
+        s_ptr<TextureLibrary> GetTextureLibrary() { return m_TextureLibrary; }
 
         bool IsKeyboardEnabled();
         bool IsMouseEnabled();
@@ -64,10 +65,10 @@ namespace LkEngine {
         ApplicationProperties m_Props;
         LayerStack m_LayerStack;
         Timer m_Timer;
-        TextureLibrary m_TextureLibrary;
         s_ptr<Window> m_Window = nullptr;
         s_ptr<Renderer> m_Renderer = nullptr;
         s_ptr<GraphicsContext> m_Context = nullptr;
+        s_ptr<TextureLibrary> m_TextureLibrary = nullptr;
         s_ptr<Scene> m_Scene = nullptr;
         s_ptr<EditorLayer> m_EditorLayer = nullptr;
         s_ptr<Input> m_Input = nullptr;

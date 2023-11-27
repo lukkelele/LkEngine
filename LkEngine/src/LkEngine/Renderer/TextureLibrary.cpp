@@ -6,8 +6,10 @@
 
 namespace LkEngine {
 
-    TextureLibrary::TextureLibrary()
+    TextureLibrary::TextureLibrary(const std::string& texturesDir)
+        : m_TexturesDir(texturesDir)
     {
+        m_Instance = this;
     }
 
     TextureLibrary::~TextureLibrary()
@@ -16,10 +18,17 @@ namespace LkEngine {
         m_Collection2D.clear();
     }
 
+    std::shared_ptr<TextureLibrary> TextureLibrary::Create(const std::string& texturesDir)
+    {
+        if (texturesDir.at(texturesDir.size() - 1) != '/')
+            return std::make_shared<TextureLibrary>(texturesDir + "/");
+        return std::make_shared<TextureLibrary>(texturesDir);
+    }
+
     // Iterate the textures/images directory and create the texture objects
     void TextureLibrary::LoadTextures()
     {
-        std::vector<File> textureFiles = FileExplorer::GetFilesInDirectory(m_TexturesPath);
+        std::vector<File> textureFiles = FileExplorer::GetFilesInDirectory(m_TexturesDir);
         for (const auto& file : textureFiles)
         {
             LOG_DEBUG("Retrieved texture file: {0} ({1})", file.GetName(), file.GetPath());

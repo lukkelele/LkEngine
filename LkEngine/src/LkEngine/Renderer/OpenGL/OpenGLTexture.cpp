@@ -130,7 +130,6 @@ namespace LkEngine {
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
 		imageSpec.Path = specification.Path;
-		//m_Image->Invalidate();
 
 		if (specification.Path != "")
 		{

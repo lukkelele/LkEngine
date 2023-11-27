@@ -6,9 +6,20 @@ namespace LkEngine {
 
     File::File(const std::string& filePath)
         : m_Path(filePath)
+        , m_PathObject(filePath)
     {
-        std::filesystem::path filePathObject(filePath);
-        m_Name = filePathObject.filename().string();
+        //std::filesystem::path filePathObject(filePath);
+        m_Name = m_PathObject.filename().string();
+    }
+
+    std::string File::GetParentPath() const
+    {
+        return m_PathObject.parent_path().string();
+    }
+
+    void File::PrintInformation() const
+    {
+        printf("Filename: %s    Path: %s\n", m_Name.c_str(), m_Path.c_str());
     }
 
     bool File::DoesFileExist(const std::string& filePath)

@@ -16,10 +16,14 @@ namespace LkEngine {
 
         std::string GetName() const { return m_Name; }
         std::string GetPath() const { return m_Path; }
+        std::string GetParentPath() const;
+        void SetPath(const std::string& filePath) { m_Path = filePath; }
+        void PrintInformation() const;
 
     private:
         std::string m_Name;
         std::string m_Path;
+        std::filesystem::path m_PathObject;
     };
 
 }

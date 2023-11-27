@@ -30,7 +30,9 @@ namespace LkEngine {
         m_EditorLayer = std::make_shared<EditorLayer>(*m_Scene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);
 
-        m_TextureLibrary.LoadTextures();
+        //m_TextureLibrary = std::make_shared<TextureLibrary>("assets/img");
+        m_TextureLibrary = TextureLibrary::Create("assets/img");
+        m_TextureLibrary->LoadTextures();
     }
 
     void Application::Run()
