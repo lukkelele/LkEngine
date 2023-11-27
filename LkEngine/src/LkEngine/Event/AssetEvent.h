@@ -1,6 +1,8 @@
 #pragma once
 
 #include "LkEngine/Event/Event.h"
+#include "LkEngine/Renderer/Texture.h"
+#include "LkEngine/Renderer/TextureLibrary.h"
 
 
 namespace LkEngine {
@@ -8,34 +10,29 @@ namespace LkEngine {
 	class AssetEvent : public Event
 	{
 	public:
-		//AssetEvent() {}
 		virtual ~AssetEvent() {}
-
-		//EventType GetEventType() const = 0
-		//const char* GetName() const = 0;
-		//virtual std::string ToString() const { return GetName(); }
-		//virtual bool HandleEvent() = 0;
 	};
 
 
 	class TextureCreatedEvent : public AssetEvent
 	{
 	public:
-		TextureCreatedEvent(uint64_t textureID) 
-			: TextureID(textureID) {}
+		TextureCreatedEvent(Texture& texture) 
+			: m_Texture(&texture)
+			, m_TextureID(texture.GetRendererID()) {}
 
 		bool HandleEvent() override
 		{
-			//Application::Get();
-			//Renderer::RegisterTexture(TextureID);
 			printf("TextureCreatedEvent: HandleEvent\n");
+			auto textureLibrary = TextureLibrary::Get();
+			//textureLibrary->
 			return true;
 		}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "TextureCreatedEvent: New texture created with ID '" << TextureID << "'";
+			ss << "TextureCreatedEvent: New texture created with ID '" << m_TextureID << "'";
 			return ss.str();
 		}
 
@@ -43,24 +40,27 @@ namespace LkEngine {
 		EventType GetEventType() const { return EventType::TextureCreated;  }
 
 	private:
-		uint64_t TextureID;
+		uint32_t m_TextureID;
+		Texture* m_Texture = nullptr;
 	};
 
 	class TextureDeletedEvent : public AssetEvent
 	{
 	public:
-		TextureDeletedEvent(uint64_t textureID) 
-			: TextureID(textureID) {}
+		TextureDeletedEvent(Texture& texture) 
+			: m_Texture(&texture)
+			, m_TextureID(texture.GetRendererID()) {}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "TextureDeletedEvent: Texture " << TextureID << " deleted";
+			ss << "TextureDeletedEvent: Texture " << m_TextureID << " deleted";
 			return ss.str();
 		}
 
 	private:
-		uint64_t TextureID;
+		uint64_t m_TextureID;
+		Texture* m_Texture = nullptr;
 	};
 
 }

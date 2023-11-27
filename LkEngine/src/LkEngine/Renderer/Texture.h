@@ -38,6 +38,7 @@ namespace LkEngine {
 		virtual void Load() = 0;
 		virtual void Unload() = 0;
 		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
+		virtual RendererID GetRendererID() const = 0;
 
 	};
 
@@ -57,6 +58,7 @@ namespace LkEngine {
 		virtual void Unlock() = 0;
 		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual bool IsLoaded() const = 0;
+		virtual RendererID GetRendererID() const = 0;
 
 		virtual void Load() = 0;
 		virtual void Unload() = 0;

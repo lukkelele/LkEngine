@@ -25,11 +25,12 @@ namespace LkEngine {
         std::string bgFilename = "sky-background-2d.png";
 
         TextureSpecification bgTextureSpecification;
+        bgTextureSpecification.Path = textureLibrary->GetTexturesDirectoryPath() + bgFilename;
         //bgTextureSpecification.Width = Window::Get()->GetWidth();
         //bgTextureSpecification.Height = Window::Get()->GetHeight();
-        bgTextureSpecification.Path = textureLibrary->GetTexturesDirectoryPath() + bgFilename;
         //bgTextureSpecification.Path = "assets/img/atte_square.png";
         m_BgTexture = Texture2D::Create(bgTextureSpecification);
+        m_BgTexture = TextureLibrary::FindTexture2D(bgFilename);
 
 
 

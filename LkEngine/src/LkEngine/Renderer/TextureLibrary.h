@@ -19,6 +19,8 @@ namespace LkEngine {
 
         static TextureLibrary* Get() { return m_Instance; }
         static std::shared_ptr<TextureLibrary> Create(const std::string& texturesDir = LK_TEXTURES_DIR);
+        static std::shared_ptr<Texture> FindTexture(const std::string textureName);
+        static std::shared_ptr<Texture2D> FindTexture2D(const std::string textureName);
 
         void LoadTextures();
         void AddTexture(const std::string& textureName, const std::string& filePath);
@@ -28,7 +30,7 @@ namespace LkEngine {
     private:
         std::string m_TexturesDir;
         std::unordered_map<std::string, s_ptr<Texture>> m_Collection;
-        std::unordered_map<std::string, s_ptr<Texture>> m_Collection2D;
+        std::unordered_map<std::string, s_ptr<Texture2D>> m_Collection2D;
         inline static TextureLibrary* m_Instance = nullptr;
     };
 

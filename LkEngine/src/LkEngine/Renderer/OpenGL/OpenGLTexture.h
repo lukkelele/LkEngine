@@ -16,6 +16,7 @@ namespace LkEngine {
 		void Unbind();
 		void Lock();
 		void Unlock();
+		RendererID GetRendererID() const;
 		const std::string& GetPath() const { return m_FilePath; }
 		bool IsLoaded() const { return m_Loaded; }
 		void SetData(void* data, uint32_t size);
@@ -51,6 +52,7 @@ namespace LkEngine {
 		void Unbind();
 		void Lock();
 		void Unlock();
+		RendererID GetRendererID() const;
 		const std::string& GetPath() const { return m_FilePath; }
 		bool IsLoaded() const { return m_Loaded; }
 		void SetData(void* data, uint32_t size);
@@ -63,7 +65,6 @@ namespace LkEngine {
 		uint32_t GetHeight() const { return m_Height; }
 
 	private:
-		//unsigned int m_RendererID;
 		std::string m_FilePath;
 		uint32_t m_Width, m_Height;
 		bool m_Loaded = false;

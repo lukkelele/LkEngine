@@ -50,6 +50,9 @@ namespace LkEngine {
 		m_Width = width;
 		m_Height = height;
 		m_Image = Image::Create(imageSpec, data);
+
+		auto app = Application::Get();
+		app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
@@ -69,6 +72,9 @@ namespace LkEngine {
 		}
 		else
 			m_Image = Image::Create(imageSpec, nullptr);
+
+		auto app = Application::Get();
+		app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -87,6 +93,11 @@ namespace LkEngine {
 	{
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 		//m_Loaded = false;
+	}
+
+	RendererID OpenGLTexture::GetRendererID() const
+	{
+		return m_Image->GetRendererID();
 	}
 
 	void OpenGLTexture::SetData(void* data, uint32_t size)
