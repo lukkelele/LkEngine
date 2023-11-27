@@ -44,8 +44,8 @@ namespace LkEngine {
 	class OpenGLTexture2D : public Texture2D
 	{
 	public:
-		OpenGLTexture2D(const TextureSpecification& specification); // : Texture2D(specification) {}
-		OpenGLTexture2D(const std::string& filePath); // : Texture2D(filePath) {}
+		OpenGLTexture2D(const TextureSpecification& specification); 
+		OpenGLTexture2D(const std::string& filePath); 
 		~OpenGLTexture2D();
 
 		void Bind(unsigned int slot = 0);

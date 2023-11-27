@@ -8,7 +8,6 @@ namespace LkEngine {
         : m_Path(filePath)
         , m_PathObject(filePath)
     {
-        //std::filesystem::path filePathObject(filePath);
         m_Name = m_PathObject.filename().string();
     }
 

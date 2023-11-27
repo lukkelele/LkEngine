@@ -51,8 +51,8 @@ namespace LkEngine {
 		m_Height = height;
 		m_Image = Image::Create(imageSpec, data);
 
-		auto app = Application::Get();
-		app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
+		//auto app = Application::Get();
+		//app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
@@ -73,8 +73,8 @@ namespace LkEngine {
 		else
 			m_Image = Image::Create(imageSpec, nullptr);
 
-		auto app = Application::Get();
-		app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
+		//auto app = Application::Get();
+		//app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -160,8 +160,9 @@ namespace LkEngine {
 
 		// Notify application about event
 		Application* app = Application::Get();
+
 		// TODO: Register event func
-		app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
+		//app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& filePath)
@@ -180,8 +181,8 @@ namespace LkEngine {
 
 		m_Image = Image::Create(imageSpec, data);
 
-		Application* app = Application::Get();
-		app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
+		//Application* app = Application::Get();
+		//app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
@@ -200,6 +201,11 @@ namespace LkEngine {
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 		//m_Loaded = false;
 		//m_Loaded = false; // FIXME: Should not be set here, or ?
+	}
+
+	RendererID OpenGLTexture2D::GetRendererID() const
+	{
+		return m_Image->GetRendererID();
 	}
 
 	// TODO: Remove this ?

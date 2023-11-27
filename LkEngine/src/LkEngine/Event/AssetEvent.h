@@ -1,12 +1,12 @@
 #pragma once
 
 #include "LkEngine/Event/Event.h"
-#include "LkEngine/Renderer/Texture.h"
-#include "LkEngine/Renderer/TextureLibrary.h"
-
+//#include "LkEngine/Renderer/Texture.h"
+//#include "LkEngine/Renderer/TextureLibrary.h"
 
 namespace LkEngine {
 
+#if 0
 	class AssetEvent : public Event
 	{
 	public:
@@ -62,5 +62,6 @@ namespace LkEngine {
 		uint64_t m_TextureID;
 		Texture* m_Texture = nullptr;
 	};
+#endif
 
 }

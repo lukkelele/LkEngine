@@ -28,13 +28,10 @@ namespace LkEngine {
         {
             if (fileEntry.exists() && !fileEntry.is_symlink() && !fileEntry.is_directory())
             {
-                //std::string filePath = fileEntry.path().string();
                 std::string filePath = fileEntry.path().parent_path().string();
                 std::string fileName = fileEntry.path().filename().string();
-                LOG_WARN("FILEPATH: {}", filePath); LOG_WARN("FILENAME: {}", fileName);
                 File file(filePath + "/" + fileName);
                 files.push_back(file);
-                LOG_DEBUG("Pushing back: {0} ({1})", file.GetName(), file.GetPath());
             }
         }
         return files;

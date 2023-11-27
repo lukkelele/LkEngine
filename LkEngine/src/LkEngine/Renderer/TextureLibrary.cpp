@@ -10,8 +10,8 @@ namespace LkEngine {
         : m_TexturesDir(texturesDir)
     {
         m_Instance = this;
-        m_Collection = {};
-        m_Collection2D = {};
+        m_Collection;
+        m_Collection2D;
     }
 
     TextureLibrary::~TextureLibrary()
@@ -29,17 +29,22 @@ namespace LkEngine {
     
     std::shared_ptr<Texture> TextureLibrary::FindTexture(const std::string textureName)
     {
-        if (m_Instance == nullptr)
+        if (m_Initialized == false)
         {
-            LOG_ERROR("Texture library not created!");
-            LK_ASSERT(false); // throw error
+            LoadTextures();
+            m_Initialized = true;
         }
-        auto& lib = *m_Instance;
-        if (lib.m_Collection.empty())
-            return nullptr;
 
-        for (const auto& texture : lib.m_Collection)
+        if (m_Collection.empty())
         {
+            LOG_WARN("Texture library is empty");
+            return nullptr;
+        }
+
+        //for (auto iter = lib.m_Collection.begin(); iter != lib.m_Collection.end(); ++iter)
+        for (auto iter = m_Collection.begin(); iter != m_Collection.end(); ++iter)
+        {
+            auto& texture = *iter;
             if (texture.first == textureName)
                 return texture.second;
         }
@@ -48,17 +53,21 @@ namespace LkEngine {
 
     std::shared_ptr<Texture2D> TextureLibrary::FindTexture2D(const std::string textureName)
     {
-        if (m_Instance == nullptr)
+        if (m_Initialized == false)
         {
-            LOG_ERROR("Texture library not created!");
-            LK_ASSERT(false); // throw error
+            LoadTextures();
+            m_Initialized = true;
         }
-        auto& lib = *m_Instance;
-        if (lib.m_Collection2D.empty())
-            return nullptr;
 
-        for (const auto& texture : lib.m_Collection2D)
+        if (m_Collection2D.empty())
         {
+            LOG_WARN("Texture library is empty");
+            return nullptr;
+        }
+        //for (auto iter = lib.m_Collection2D.begin(); iter != lib.m_Collection2D.end(); ++iter)
+        for (auto iter = m_Collection2D.begin(); iter != m_Collection2D.end(); ++iter)
+        {
+            auto& texture = *iter;
             if (texture.first == textureName)
                 return texture.second;
         }
@@ -68,12 +77,17 @@ namespace LkEngine {
     // Iterate the textures/images directory and create the texture objects
     void TextureLibrary::LoadTextures()
     {
+        LOG_CRITICAL("Loading textures into texture library");
         std::vector<File> textureFiles = FileExplorer::GetFilesInDirectory(m_TexturesDir);
         for (const auto& file : textureFiles)
         {
-            LOG_DEBUG("Retrieved texture file: {0} ({1})", file.GetName(), file.GetPath());
-            AddTexture(file.GetName(), file.GetPath());
+            LOG_WARN("Retrieved texture file: {0} ({1})", file.GetName(), file.GetPath());
+
+            // TODO: Need to make it so 2D and 3D texture are located in different dirs
+            //AddTexture(file.GetName(), file.GetPath());
+            AddTexture2D(file.GetName(), file.GetPath());
         }
+        m_Initialized = true;
     }
 
     void TextureLibrary::AddTexture(const std::string& textureName, const std::string& filePath)
