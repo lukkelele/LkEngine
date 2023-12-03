@@ -20,6 +20,8 @@ namespace LkEngine {
         static void DrawLines(VertexBuffer& vb, uint32_t lineIndexCount);
         static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint32_t entityID = 0);
         static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint32_t entityID = 0);
+        static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, uint32_t entityID = 0);
+        static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint32_t entityID = 0);
         static void DrawGrid(int columns, int rows, const glm::vec4& color = { 0.0f, 1.0f, 0.0f, 1.0f }, float spacingX = 10.0f, float spacingY = 10.0f);
 
     private:

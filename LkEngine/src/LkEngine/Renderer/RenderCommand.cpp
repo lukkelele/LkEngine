@@ -80,6 +80,16 @@ namespace LkEngine {
         s_Renderer->SubmitQuad(pos, size, color, entityID);
     }
 
+    void RenderCommand::DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, uint32_t entityID)
+    {
+        s_Renderer->SubmitQuad(pos, size, texture, entityID);
+    }
+
+    void RenderCommand::DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint32_t entityID)
+    {
+        s_Renderer->SubmitQuad(pos, size, texture, entityID);
+    }
+
     void RenderCommand::DrawGrid(int columns, int rows, const glm::vec4& color, float spacingX, float spacingY)
     {
         auto& window = *Window::Get();

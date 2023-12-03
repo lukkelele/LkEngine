@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Logger.h"
 #include "LkEngine/Core/Layer.h"

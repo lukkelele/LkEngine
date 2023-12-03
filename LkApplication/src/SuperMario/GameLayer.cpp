@@ -20,14 +20,16 @@ namespace LkEngine {
 
         FileExplorer fileExplorer;
         auto imagesInAssetsDir = fileExplorer.GetFilesInDirectory("assets/img");
-        auto textureLibrary = TextureLibrary::Get();
+        //auto textureLibrary = TextureLibrary::Get();
 
         std::string bgFilename = "sky-background-2d.png";
-        m_BgTexture = textureLibrary->FindTexture2D(bgFilename);
+        //m_BgTexture = textureLibrary->FindTexture2D(bgFilename);
+        m_BgTexture = Application::FindTexture2D(bgFilename);
         if (m_BgTexture == nullptr)
         {
-            LOG_ERROR("Background texture was not loaded correctly / not found");
-            LK_ASSERT(false);
+            //LOG_ERROR("Background texture was not loaded correctly / not found");
+            //throw std::runtime_error("Background texture was not loaded correctly");
+            LK_THROW_RUNTIME_ERR("Background texture was not loaded correctly");
         }
 
         for (const auto& image : imagesInAssetsDir)
@@ -75,14 +77,15 @@ namespace LkEngine {
         m_Renderer2D->BeginScene(playerCam);
         m_Scene->BeginScene(playerCam); // if no cam is passed, m_ActiveCamera is used instead
 
-        // First and foremost draw background
         DrawBackground();
         // Handle 2D raycast
         Input::HandleScene(*m_Scene); 
 
         m_Player->OnUpdate(ts);
         for (const auto& enemy : m_Enemies)
+        {
             enemy->OnUpdate(ts);
+        }
 
         m_Scene->EndScene();
         m_Renderer2D->EndScene();
@@ -123,9 +126,9 @@ namespace LkEngine {
         glm::vec2 size = { bgEndX * 3.0f, bgEndY * 1.0f };
 
         //m_BgTexture->Bind();
-        Renderer::BoundTextureID = 1;
+        //Renderer::BoundTextureID = 1;
         RenderCommand::DrawQuad(startPos, size, Color::RGBA::White);
-        Renderer::BoundTextureID = 0;
+        //Renderer::BoundTextureID = 0;
     }
 
 

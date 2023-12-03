@@ -14,11 +14,11 @@ namespace LkEngine {
     ImGuiID DockSpace::SidebarRightDockID;
     //ImVec2 DockSpace::LastViewportSize = ImVec2(0, 0);
     //ImVec2 DockSpace::LastCenterWindowSize = ImVec2(0, 0);
-    ImVec2 DockSpace::BottomBarSize = ImVec2(0, 0);
-    ImVec2 DockSpace::CenterWindowSize = ImVec2(0, 0);
-    ImVec2 DockSpace::TopBarSize = ImVec2(0, 0);
-    ImVec2 DockSpace::SidebarLeftSize = ImVec2(0, 0);
-    ImVec2 DockSpace::SidebarRightSize = ImVec2(0, 0);
+    //ImVec2 DockSpace::BottomBarSize = ImVec2(0, 0);
+    //ImVec2 DockSpace::CenterWindowSize = ImVec2(0, 0);
+    //ImVec2 DockSpace::TopBarSize = ImVec2(0, 0);
+    //ImVec2 DockSpace::SidebarLeftSize = ImVec2(0, 0);
+    //ImVec2 DockSpace::SidebarRightSize = ImVec2(0, 0);
     float DockSpace::Sidebar_Left_Ratio = 0.20f;
     float DockSpace::Sidebar_Right_Ratio = 0.20f;
     float DockSpace::TopBottom_Ratio = 0.80f;

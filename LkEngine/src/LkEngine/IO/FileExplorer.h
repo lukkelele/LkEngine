@@ -15,7 +15,6 @@ namespace LkEngine {
         static File GetFile(const std::string& filePath);
         static std::vector<File> GetFilesInDirectory(const std::string& directory);
         static std::string ExtractFileName(const std::string& filePath);
-
     };
 
 }

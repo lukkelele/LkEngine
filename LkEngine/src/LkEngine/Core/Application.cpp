@@ -109,4 +109,18 @@ namespace LkEngine {
         return m_Scene->GetActiveCamera()->IsMouseEnabled();
     }
 
+    std::shared_ptr<Texture> Application::FindTexture(const std::string& filename)
+    {
+        auto app = m_Instance;
+        auto textureLibrary = app->GetTextureLibrary();
+        return textureLibrary->FindTexture(filename);
+    }
+
+    std::shared_ptr<Texture2D> Application::FindTexture2D(const std::string& filename)
+    {
+        auto app = m_Instance;
+        auto textureLibrary = app->GetTextureLibrary();
+        return textureLibrary->FindTexture2D(filename);
+    }
+
 }

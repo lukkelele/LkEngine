@@ -74,7 +74,13 @@ namespace LkEngine {
          });
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
-        m_WhiteTexture = Texture2D::Create("assets/img/atte_square.png");
+        //TextureSpecification whiteTextureSpec;
+        //whiteTextureSpec.Width = 200;
+        //whiteTextureSpec.Height = 200;
+        //whiteTextureSpec.Name = "White Texture";
+        //m_WhiteTexture = Texture2D::Create(whiteTextureSpec);
+        //m_WhiteTexture = Texture2D::Create("assets/img/atte_square.png");
+        m_WhiteTexture = Texture2D::Create("assets/img/white-texture.png");
         m_TextureSlots[0] = m_WhiteTexture;
         m_TextureSlots[1] = Texture2D::Create("assets/img/sky-background-2d.png");
 
@@ -103,12 +109,12 @@ namespace LkEngine {
     {
         m_CameraBuffer.ViewProjection = camera.GetViewProjection();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
-
-        //for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
-            //m_TextureSlots[i] = nullptr;
+            if (m_TextureSlots[i])
+                m_TextureSlots[i]->Unbind();
         }
+
         StartBatch();
     }
 
@@ -116,6 +122,14 @@ namespace LkEngine {
     {
         m_CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
+
+        // Unbind all textures above slot 0
+        for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
+        {
+            if (m_TextureSlots[i])
+                m_TextureSlots[i]->Unbind();
+        }
+
         StartBatch();
     }
 
@@ -147,21 +161,29 @@ namespace LkEngine {
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
             // Bind textures
+            //for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
             for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
             {
-                s_ptr<Texture2D> tex2D = m_TextureSlots[i];
-                if (tex2D)
+                if (m_TextureSlots[i])
                 {
-                    //LOG_DEBUG("Bound texture: {}", tex2D->GetPath());
-                    tex2D->Bind(i);
+                    m_TextureSlots[i]->Bind(i);
                 }
             }
-            //m_WhiteTexture->Bind();
 
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
-            //m_QuadShader->SetUniform1i("u_TextureEnabled", (m_TextureSlots.size() > 1 && m_TextureSlots[1]->IsLoaded())); 
-            //m_QuadShader->SetUniform1i("u_TextureEnabled", 0); // Set to 0 temporarily or else textures always enabled
+
+#if 0
+            for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
+            {
+                if (m_TextureSlots[i])
+                {
+                    std::string uniform = "u_Textures[" + std::to_string(i) + "]";
+                    m_QuadShader->SetUniform1i(uniform, i);
+                }
+            }
+#endif
+
             RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
             m_QuadShader->Unbind();
 
@@ -182,6 +204,8 @@ namespace LkEngine {
 
             m_Stats.DrawCalls++;
         }
+
+        m_TextureSlotIndex = 0;
     }
 
     void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
@@ -227,6 +251,8 @@ namespace LkEngine {
                                                                                                           
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
+        float textureIndex = 0; 
+        const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
         constexpr glm::vec2 textureCoords[] = { 
             { 0.0f, 0.0f }, 
@@ -234,11 +260,13 @@ namespace LkEngine {
             { 1.0f, 1.0f }, 
             { 0.0f, 1.0f } 
         };
-        const float tilingFactor = 1.0f;
-        //const float textureIndex = 0.0f; // White texture
-        //const float textureIndex = Renderer::BoundTextureID; 
-        //float textureIndex = Renderer::BoundTextureID; 
-        float textureIndex = 0; // Renderer::BoundTextureID;
+
+#if 0
+        for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
+        {
+            if (m_TextureSlots[i]->)
+        }
+#endif
 
         if (m_QuadIndexCount >= m_MaxIndices) 
             NextBatch();
@@ -258,7 +286,6 @@ namespace LkEngine {
         m_Stats.QuadCount++;
     }
 
-
     void Renderer2D::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID)
     {
         DrawLine({ p0.x, p0.y, 0.0f }, { p1.x, p1.y, 0.0f }, color, entityID);
@@ -277,6 +304,77 @@ namespace LkEngine {
         m_LineIndexCount += 2;
 
         m_Stats.LineCount++;
+    }
+
+    void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture2D> texture2D, float rotation, uint64_t entityID)
+    {
+        DrawQuad({ pos.x, pos.y, 0.0f }, size, texture2D, rotation, entityID);
+    }
+
+    void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID)
+    {
+        float textureIndex = 0.0f;
+        const float tilingFactor = 1.0f;
+        constexpr size_t quadVertexCount = 4;
+        constexpr glm::vec2 textureCoords[] = {
+            { 0.0f, 0.0f },
+            { 1.0f, 0.0f },
+            { 1.0f, 1.0f },
+            { 0.0f, 1.0f }
+        };
+        //glm::vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+        glm::vec4 tintColor = Color::RGBA::White;
+
+        for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
+        {
+            if (m_TextureSlots[i]->GetRendererID() == texture->GetRendererID())
+            {
+                textureIndex = (float)i;
+                break;
+            }
+        }
+
+        if (textureIndex == 0.0f)
+        {
+            //textureIndex = (float)m_TextureSlotIndex;
+            //m_TextureSlots[m_TextureSlotIndex] = texture2D;
+            //m_TextureSlotIndex++;
+        }
+
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0.0f })
+            * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+        m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[0];
+        m_QuadVertexBufferPtr->Color = tintColor;
+        m_QuadVertexBufferPtr->TexCoord = textureCoords[0];
+        m_QuadVertexBufferPtr->TexIndex = textureIndex;
+        m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+        m_QuadVertexBufferPtr++;
+
+        m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[1];
+        m_QuadVertexBufferPtr->Color = tintColor;
+        m_QuadVertexBufferPtr->TexCoord = textureCoords[1];
+        m_QuadVertexBufferPtr->TexIndex = textureIndex;
+        m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+        m_QuadVertexBufferPtr++;
+
+        m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[2];
+        m_QuadVertexBufferPtr->Color = tintColor;
+        m_QuadVertexBufferPtr->TexCoord = textureCoords[2];
+        m_QuadVertexBufferPtr->TexIndex = textureIndex;
+        m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+        m_QuadVertexBufferPtr++;
+
+        m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[3];
+        m_QuadVertexBufferPtr->Color = tintColor;
+        m_QuadVertexBufferPtr->TexCoord = textureCoords[3];
+        m_QuadVertexBufferPtr->TexIndex = textureIndex;
+        m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+        m_QuadVertexBufferPtr++;
+
+        m_QuadIndexCount += 6;
+
+        m_Stats.QuadCount++;
     }
 
     void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
@@ -299,7 +397,6 @@ namespace LkEngine {
         DrawQuad(tc.GetTransform(), sc.Color, entity.GetUUID());
     }
 
-
     float Renderer2D::GetLineWidth()
     {
         return m_LineWidth;
@@ -316,6 +413,17 @@ namespace LkEngine {
     Renderer2D::Statistics Renderer2D::GetStats()
     {
         return Statistics();
+    }
+
+    int Renderer2D::GetBoundTextureSlotsCount() const
+    {
+        int count = 0;
+        for (const auto& tex : m_TextureSlots)
+        {
+            if (tex != nullptr)
+                count++;
+        }
+        return count;
     }
 
 }

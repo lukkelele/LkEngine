@@ -8,15 +8,10 @@
 namespace LkEngine {
 
     float UILayer::PositionStepSize = 5;
-    ImGuiWindowClass* UILayer::UILayerWindowClass = nullptr;
-    ImGuiWindowClass* UILayer::RendererWindowClass = nullptr;
-    ImGuiWindowClass* UILayer::ExternalWindowClass = nullptr;
     //uint32_t UILayer::SelectedEntityID = 0;
     std::string UILayer::SelectedEntityLabel = "";
     ImVec2 UILayer::SceneContentMenuSize = ImVec2(0, 500);
     ImVec2 UILayer::SelectedEntityMenuSize = ImVec2(0, 440);
-    bool UILayer::ShowImGuiDemoWindow = false;
-    bool UILayer::Initialized = false;
 
     void UILayer::Init()
     {

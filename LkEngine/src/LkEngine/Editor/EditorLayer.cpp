@@ -91,10 +91,10 @@ namespace LkEngine {
 
 		static float center_window_width = 0;         // viewport->Size.x - sidebar_left_width - sidebar_right_width;
 		static float center_window_height = 0;        // viewport->WorkSize.y - bottombar_height;
-		static ImVec2 center_window_size = { 0, 0 };  // { center_window_width, center_window_height };
 		static float center_window_xpos = 0;          // sidebar_left_width;
 		static float center_window_ypos = 0;          // bottombar_height;
 		static ImVec2 center_window_pos = { 0, 0 };   // { center_window_xpos, center_window_ypos };
+		static ImVec2 center_window_size = { 0, 0 };  // { center_window_width, center_window_height };
 
 		ImGui::PopStyleColor(1);
 		ImGui::PopStyleVar(1);
@@ -160,10 +160,10 @@ namespace LkEngine {
 				    ImGui::PushID("##lkengine-leftpanel-colors");
 				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
 				    ImGui::Text("Background"); 
-				    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##x", &Renderer::s_BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##y", &Renderer::s_BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##z", &Renderer::s_BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##w", &Renderer::s_BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 
 				    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
 
@@ -268,14 +268,36 @@ namespace LkEngine {
 				ImGui::Text("Scaled mouse pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
 
 				ImGui::BeginGroup();
-				ImGui::Text("Center Window (%1.f, %1.f)", center_window_width, center_window_height);
-				ImGui::SameLine(0, 20);
-				//ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / scale_x, center_window_height / scale_y);
-				ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / Mouse::Scalers.x, center_window_height / Mouse::Scalers.y );
-				ImGui::SameLine(0, 20);
-				ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y,
-					m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+				{
+					ImGui::Text("Center Window (%1.f, %1.f)", center_window_width, center_window_height);
+					ImGui::SameLine(0, 20);
+					ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / Mouse::Scalers.x, center_window_height / Mouse::Scalers.y );
+					ImGui::SameLine(0, 20);
+					ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+				}
 				ImGui::EndGroup();
+
+				ImGui::Dummy({ 0, 4 });
+
+				ImGui::BeginGroup();
+				{
+					auto textureLibrary = Application::Get()->GetTextureLibrary();
+					auto renderer2D = Renderer2D::Get();
+					ImGui::Text("Texture Data");
+					ImGui::SameLine();
+
+					int boundSlotsCount = renderer2D->GetBoundTextureSlotsCount();
+					ImGui::Text("Total slots: %d", boundSlotsCount);
+					for (int i = 0; i < boundSlotsCount; i++)
+					{
+						auto boundTexture = renderer2D->GetBoundTexture(i);
+						ImGui::Text("Slot %d: %s,   id: %d", i, boundTexture->GetName().c_str(), boundTexture->GetRendererID());
+					}
+
+				}
+				ImGui::EndGroup();
+
+				ImGui::Dummy({ 0, 4 });
 
 				ImGui::EndGroup();
 
@@ -286,18 +308,15 @@ namespace LkEngine {
 					(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
 					((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f 
 				};
-				ImGui::Text("Centered normalized mouse pos (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);  
-				ImGui::SameLine(0, 20);
+				//ImGui::Text("Centered normalized mouse pos (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);  
+				//ImGui::SameLine(0, 20);
 				float viewport_width = Window::Get()->GetViewportWidth();
 				float viewport_height = Window::Get()->GetViewportHeight();
-				//Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (center_window_width * 0.50f)), (Mouse::CenterPos.y * (center_window_height * 0.50f)) };
-				Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (viewport_width * 0.50f)), (Mouse::CenterPos.y * (viewport_height * 0.50f)) };
-				ImGui::Text("Centered scaled mouse pos (%.2f, %.2f)", Mouse::ScaledCenterPos.x, Mouse::ScaledCenterPos.y);
+				//Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (viewport_width * 0.50f)), (Mouse::CenterPos.y * (viewport_height * 0.50f)) };
+				//ImGui::Text("Centered scaled mouse pos (%.2f, %.2f)", Mouse::ScaledCenterPos.x, Mouse::ScaledCenterPos.y);
 
-				auto& scene = *Scene::GetActiveScene();
-				auto& active_cam = *scene.GetActiveCamera();
+				auto& active_cam = *Scene::GetActiveScene()->GetActiveCamera();
 				glm::vec2 cam_pos = active_cam.GetPos();
-
 				ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
 
 			}

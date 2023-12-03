@@ -40,7 +40,9 @@ namespace LkEngine {
         void BeginScene(const Camera& camera, const glm::mat4& transform);
         void EndScene();
         void Flush();
+
         void DrawEntity(Entity& entity);
+
         void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0); // Wrapper
@@ -48,14 +50,24 @@ namespace LkEngine {
         void DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);
         void DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
         void DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
+
+        void DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture2D> texture2D, float rotation, uint64_t entityID = 0); // Wrapper
+        void DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID = 0); // Wrapper
+
         void DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID = 0);
         void DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, uint64_t entityID = 0);
+
         void DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         void DrawRect(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);
+
         void DrawSprite(const glm::mat4& transform, SpriteComponent& sc, uint64_t entityID);
 
         float GetLineWidth();
         void SetLineWidth(float width);
+
+        int GetTextureSlotsCount() const { return m_TextureSlots.size(); }
+        int GetBoundTextureSlotsCount() const;
+        s_ptr<Texture> GetBoundTexture(int slot) const { return m_TextureSlots[slot]; }
 
         struct Statistics
         {
@@ -106,28 +118,26 @@ namespace LkEngine {
         const uint32_t m_MaxLineIndices;
 
         // Quad
-        glm::vec4 m_QuadVertexPositions[4];
-        //s_ptr<VertexArray> m_QuadVertexArray;
-        s_ptr<VertexBuffer> m_QuadVertexBuffer;
-        s_ptr<Shader> m_QuadShader;
         uint32_t m_QuadIndexCount = 0;
+        glm::vec4 m_QuadVertexPositions[4];
+        QuadVertex* m_QuadVertexBufferBase = nullptr;
+        QuadVertex* m_QuadVertexBufferPtr = nullptr;
+        s_ptr<Shader> m_QuadShader;
+        s_ptr<VertexBuffer> m_QuadVertexBuffer;
 
         // Line
-        //s_ptr<VertexArray>  m_LineVertexArray;
         s_ptr<VertexBuffer> m_LineVertexBuffer;
         s_ptr<Shader> m_LineShader;
         uint32_t m_LineIndexCount = 0;
         float m_LineWidth = 3.0f;
 
-        QuadVertex* m_QuadVertexBufferBase = nullptr;
-        QuadVertex* m_QuadVertexBufferPtr = nullptr;
         LineVertex* m_LineVertexBufferBase = nullptr;
         LineVertex* m_LineVertexBufferPtr = nullptr;
 
+        uint32_t m_TextureSlotIndex = 1; // 0 = white texture
         s_ptr<Shader> m_TextureShader = nullptr;
         s_ptr<Texture2D> m_WhiteTexture = nullptr;
         std::array<s_ptr<Texture2D>, MaxTextureSlots> m_TextureSlots;
-        uint32_t m_TextureSlotIndex = 1; // 0 = white texture
 
         Renderer2D::Statistics m_Stats;
 

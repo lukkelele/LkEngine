@@ -41,12 +41,13 @@ namespace LkEngine {
 
     public:
         static float PositionStepSize;
-        static ImGuiWindowClass* UILayerWindowClass;        
-        static ImGuiWindowClass* RendererWindowClass;   
-        static ImGuiWindowClass* ExternalWindowClass;   
+        inline static bool Initialized = false;
+        inline static bool ShowImGuiDemoWindow = false;
+        inline static ImGuiWindowClass* UILayerWindowClass = nullptr;
+        inline static ImGuiWindowClass* RendererWindowClass = nullptr;
+        inline static ImGuiWindowClass* ExternalWindowClass = nullptr;
         static std::string SelectedEntityLabel;
         static ImVec2 SceneContentMenuSize, SelectedEntityMenuSize;
-        static bool Initialized, ShowImGuiDemoWindow;
     };
 
 }

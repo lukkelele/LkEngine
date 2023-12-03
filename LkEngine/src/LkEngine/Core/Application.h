@@ -40,6 +40,8 @@ namespace LkEngine {
         ~Application();
 
         static Application* Get() { return m_Instance; }
+        static std::shared_ptr<Texture> FindTexture(const std::string& filename);
+        static std::shared_ptr<Texture2D> FindTexture2D(const std::string& filename);
 
         void Init();
         void Run();

@@ -36,9 +36,9 @@ namespace LkEngine {
 	{
 	}
 
-	void Renderer::SetDrawMode(int mode)
+	void Renderer::SetDrawMode(int drawMode)
 	{
-		DrawMode = mode;
+		s_DrawMode = drawMode;
 	}
 
 	void Renderer::SubmitLines(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
@@ -68,9 +68,24 @@ namespace LkEngine {
 		m_RendererAPI->SubmitQuad(pos, size, color, entityID);
 	}
 
+	void Renderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID)
+	{
+		m_RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, texture, entityID);
+	}
+
+	void Renderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID)
+	{
+		m_RendererAPI->SubmitQuad(pos, size, texture, entityID);
+	}
+
 	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID)
     {
         m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, color, tc.Rotation2D, entityID);
+    }
+
+	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID)
+    {
+        m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, tc.Rotation2D, entityID);
     }
 
 }

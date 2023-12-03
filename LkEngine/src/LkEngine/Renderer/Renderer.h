@@ -29,19 +29,21 @@ namespace LkEngine {
 		static void BeginFrame();
 		static void EndFrame();
 		static void SetDrawMode(int mode);
-		//static void Draw(VertexBuffer& va, const Shader& shader);
-		//static void Draw(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
 		static void SubmitLines(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
 		static void SubmitIndexed(VertexBuffer& vb, unsigned int count);
         static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
+        static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
+        static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
+		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
 		static s_ptr<Renderer2D> GetRenderer2D() { return m_RendererAPI->GetRenderer2D(); }
 
 	public:
-		inline static int DrawMode = GL_TRIANGLES;
-		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
-		inline static uint64_t BoundTextureID = 0;
+		inline static int s_DrawMode = GL_TRIANGLES;
+		inline static glm::vec4 s_BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
+		//inline static uint64_t BoundTextureID = 0;
+		inline static bool s_TexturesEnabled = true;
 	private:
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;
 	};

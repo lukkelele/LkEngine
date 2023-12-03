@@ -32,7 +32,6 @@ namespace LkEngine {
 		{
 			Buffer buffer;
 			buffer.Allocate(size);
-			LOG_TRACE("Buffer: Allocated '{0}'", size);
 			memcpy(buffer.Data, data, size);
 			return buffer;
 		}

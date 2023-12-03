@@ -54,6 +54,7 @@ namespace LkEngine {
 		uint32_t Mips = 1;
 		uint32_t Layers = 1;
 		std::string Path = "";
+		std::string Name = "";
 		bool Deinterleaved = false;
 		std::string DebugName;
 	};

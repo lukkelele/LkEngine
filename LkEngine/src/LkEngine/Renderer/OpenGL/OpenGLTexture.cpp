@@ -40,6 +40,8 @@ namespace LkEngine {
 		LOG_TRACE("OpenGLTexture created: {}", filePath);
 		m_RendererID = 0;
 		m_FilePath = filePath;
+		m_Name = FileExplorer::ExtractFileName(filePath);
+
 		stbi_set_flip_vertically_on_load(1);
 		int width, height, channels;
 		stbi_uc* data = stbi_load(filePath.c_str(), &width, &height, &channels, 4);
@@ -50,9 +52,6 @@ namespace LkEngine {
 		m_Width = width;
 		m_Height = height;
 		m_Image = Image::Create(imageSpec, data);
-
-		//auto app = Application::Get();
-		//app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
@@ -62,6 +61,9 @@ namespace LkEngine {
 		imageSpec.Path = specification.Path;
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
+		m_Name = specification.Name;
+		if (specification.Name.empty())
+			m_Name = specification.Path;
 
 		if (specification.Path != "")
 		{
@@ -72,9 +74,6 @@ namespace LkEngine {
 		}
 		else
 			m_Image = Image::Create(imageSpec, nullptr);
-
-		//auto app = Application::Get();
-		//app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -132,39 +131,6 @@ namespace LkEngine {
 	// Texture 2D
 	//=====================================================
 
-	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
-		: m_Specification(specification)
-		, m_Width(specification.Width)
-		, m_Height(specification.Height)
-	{
-		ImageSpecification imageSpec;
-		imageSpec.Width = specification.Width;
-		imageSpec.Height = specification.Height;
-		imageSpec.Path = specification.Path;
-
-		if (specification.Path != "")
-		{
-			stbi_set_flip_vertically_on_load(1);
-			int width, height, channels;
-			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
-            uint32_t memorySize = Image::GetMemorySize(specification.Format, specification.Width, specification.Height);
-			//Buffer buf = Buffer(data, memorySize);
-			//LOG_DEBUG("BUFFER SIZE: {}", buf.GetSize());
-			//m_Image = Image::Create(imageSpec, buf);
-			imageSpec.Width = width;
-			imageSpec.Height = height;
-			m_Image = Image::Create(imageSpec, data);
-		}
-		else
-			m_Image = Image::Create(imageSpec, nullptr);
-
-		// Notify application about event
-		Application* app = Application::Get();
-
-		// TODO: Register event func
-		//app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
-	}
-
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& filePath)
 	{
 		LOG_TRACE("OpenGLTexture2D created: {}", filePath);
@@ -178,11 +144,36 @@ namespace LkEngine {
 		imageSpec.Height = height;
 		m_Width = width;
 		m_Height = height;
+		m_Name = FileExplorer::ExtractFileName(filePath);
 
 		m_Image = Image::Create(imageSpec, data);
+	}
 
-		//Application* app = Application::Get();
-		//app->OnEvent(TextureCreatedEvent(m_Image->GetRendererID()));
+	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
+		: m_Specification(specification)
+		, m_Width(specification.Width)
+		, m_Height(specification.Height)
+	{
+		ImageSpecification imageSpec;
+		imageSpec.Width = specification.Width;
+		imageSpec.Height = specification.Height;
+		imageSpec.Path = specification.Path;
+		m_Name = specification.Name;
+		if (specification.Name.empty())
+			m_Name = specification.Path;
+
+		if (specification.Path != "")
+		{
+			stbi_set_flip_vertically_on_load(1);
+			int width, height, channels;
+			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
+            uint32_t memorySize = Image::GetMemorySize(specification.Format, specification.Width, specification.Height);
+			imageSpec.Width = width;
+			imageSpec.Height = height;
+			m_Image = Image::Create(imageSpec, data);
+		}
+		else
+			m_Image = Image::Create(imageSpec, nullptr);
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
@@ -193,14 +184,11 @@ namespace LkEngine {
 	{
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
-		//m_Loaded = true; // FIXME: Should not be set here, or ?
 	}
 
 	void OpenGLTexture2D::Unbind()
 	{
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-		//m_Loaded = false;
-		//m_Loaded = false; // FIXME: Should not be set here, or ?
 	}
 
 	RendererID OpenGLTexture2D::GetRendererID() const
