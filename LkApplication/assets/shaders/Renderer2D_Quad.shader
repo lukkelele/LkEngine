@@ -40,25 +40,18 @@ flat in int   v_TexIndex;
 in float      v_TilingFactor;
 flat in int   v_EntityID;
 
-uniform sampler2D u_Texture;
 uniform int u_TextureEnabled;
+uniform sampler2D u_Texture;
 uniform sampler2D u_Textures[32];
 
 void main()
 {
-    if (u_TextureEnabled > 0)
-    {
-        //vec4 color = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
-        //FragColor = texture(u_Texture, v_TexCoord);
-        FragColor = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
-    }
-    else
-    {
-        vec4 color = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
-        //vec4 baseColor = v_Color; 
-        //vec4 darkerColor = baseColor * vec4(0.8, 0.8, 0.8, 1.0);
-        //FragColor = mix(baseColor, darkerColor, v_TexCoord.y);
-        FragColor = color;
-    }
+    vec4 tex = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
+    FragColor = tex * v_Color;
 
+    //FragColor = tex * vec4(1.0f, 0.5, 1.0f, 1.0f);
+
+    //FragColor = mix(v_Color, vec4(0.5, 0.5, 0.5, 1.0), v_TexCoord.y);
+    //FragColor = v_Color;
+    //FragColor = tex;
 }
