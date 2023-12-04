@@ -47,11 +47,11 @@ namespace LkEngine {
 
     s_ptr<Texture> TextureLibrary::GetTexture(const std::string textureName)
     {
-        if (m_Initialized == false)
-        {
-            LoadTextures();
-            m_Initialized = true;
-        }
+        //if (m_Initialized == false)
+        //{
+        //    LoadTextures();
+        //    m_Initialized = true;
+        //}
 
         if (m_Collection.empty())
         {
@@ -63,7 +63,7 @@ namespace LkEngine {
         for (auto iter = m_Collection.begin(); iter != m_Collection.end(); ++iter)
         {
             auto& texture = *iter;
-            if (texture.first == textureName)
+            if (File::ExtractFilenameWithoutExtension(texture.first, FileExtension::PNG) == textureName)
                 return texture.second;
         }
         return nullptr;
@@ -89,12 +89,6 @@ namespace LkEngine {
 
     s_ptr<Texture2D> TextureLibrary::GetTexture2D(const std::string textureName)
     {
-        if (m_Initialized == false)
-        {
-            LoadTextures();
-            m_Initialized = true;
-        }
-
         if (m_Collection2D.empty())
         {
             LOG_WARN("Texture library is empty");
@@ -104,9 +98,8 @@ namespace LkEngine {
         for (auto iter = m_Collection2D.begin(); iter != m_Collection2D.end(); ++iter)
         {
             auto& texture = *iter;
-            if (File::ExtractFilenameWithoutExtension(texture.first) == textureName)
+            if (File::ExtractFilenameWithoutExtension(texture.first, FileExtension::PNG) == textureName)
             {
-                LOG_TRACE("GetTexture -> Returning texture '{}'", textureName);
                 return texture.second;
             }
         }

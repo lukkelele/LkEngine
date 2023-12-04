@@ -44,11 +44,12 @@ namespace LkEngine {
         return filePath;
     }
 
-    std::string File::ExtractFilenameWithoutExtension(const std::string& filename)
+    std::string File::ExtractFilenameWithoutExtension(const std::string& filename, const FileExtension& fileExtension)
     {
         if (HasFileExtension(filename) == false)
             return filename;
-        return ExtractFilename(filename.substr(0, filename.size() - 4));
+        //return ExtractFilename(filename.substr(0, filename.size() - 4));
+        return ExtractFilename(filename.substr(0, filename.size() - ((size_t)fileExtension + 1)));
     }
 
 

@@ -6,6 +6,14 @@
 
 namespace LkEngine {
 
+    enum class FileExtension
+    {
+        PNG = 3,
+        JPG = 3,
+        LUA = 3,
+        PY  = 2
+    };
+
     class File
     {
     public:
@@ -14,7 +22,8 @@ namespace LkEngine {
 
         static bool DoesFileExist(const std::string& filePath);
         static bool HasFileExtension(const std::string& filename);
-        static std::string ExtractFilenameWithoutExtension(const std::string& filename);
+        //static std::string ExtractFilenameWithoutExtension(const std::string& filename);
+        static std::string ExtractFilenameWithoutExtension(const std::string& filename, const FileExtension& fileExtension = FileExtension::PNG);
         static std::string ExtractFilename(const std::string& filepath);
 
         std::string GetName() const { return m_Name; }
