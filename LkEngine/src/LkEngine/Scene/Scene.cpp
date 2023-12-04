@@ -177,7 +177,8 @@ namespace LkEngine {
 	{
 		auto entityTags = m_Registry.view<TagComponent>();
 		auto textureLibrary = TextureLibrary::Get();
-		auto atillaTexture = textureLibrary->FindTexture2D("atte-square");
+		//auto atillaTexture = textureLibrary->GetTexture2D("atte_square");
+
 		for (auto& entityTag : entityTags)
 		{	
 			Entity entity = { entityTag, this };

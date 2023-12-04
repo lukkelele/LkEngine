@@ -24,7 +24,7 @@ namespace LkEngine {
 
         //std::string bgFilename = "sky-background-2d.png";
         std::string bgFilename = "sky-background-2d";
-        m_BgTexture = textureLibrary->FindTexture2D(bgFilename);
+        m_BgTexture = textureLibrary->GetTexture2D(bgFilename);
         LK_ASSERT(m_BgTexture);
 
         for (const auto& image : imagesInAssetsDir)
@@ -55,6 +55,10 @@ namespace LkEngine {
             s_ptr<Enemy> enemy = std::make_shared<Enemy>(enemyEntity);
             enemyPosY += enemy->GetHeight() * (DebugLayer::s_DebugEntities * 1.50f);
             enemy->SetPos(0, enemyPosY);
+            // Set texture instead of color
+            auto& sc = enemyEntity.GetComponent<SpriteComponent>();
+            //sc.TextureID = textureLibrary->GetTexture2D("atte_square")->GetRendererID();
+            sc.TextureName = "atte_square";
             m_Enemies.push_back(enemy);
         }
     }

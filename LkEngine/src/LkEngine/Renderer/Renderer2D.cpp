@@ -83,6 +83,7 @@ namespace LkEngine {
         m_WhiteTexture = Texture2D::Create("assets/img/white-texture.png");
         m_TextureSlots[0] = m_WhiteTexture;
         m_TextureSlots[1] = Texture2D::Create("assets/img/sky-background-2d.png");
+        m_TextureSlots[2] = Texture2D::Create("assets/img/atte_square.png");
 
         //m_QuadShader = Shader::Create("assets/shaders/Renderer2D_QuadAdvanced.shader");
         m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
@@ -160,25 +161,16 @@ namespace LkEngine {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
+            m_QuadShader->Bind();
+            m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
+
             // Bind textures
-            //for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
             for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
             {
                 if (m_TextureSlots[i])
                 {
                     m_TextureSlots[i]->Bind(i);
-                }
-            }
-
-            m_QuadShader->Bind();
-            m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
-
-            for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
-            {
-                if (m_TextureSlots[i])
-                {
                     std::string uniform = "u_Textures[" + std::to_string(i) + "]";
-                    LOG_TRACE("Setting uniform: {}     ({})", uniform, m_TextureSlots[i]->GetName());
                     m_QuadShader->SetUniform1i(uniform, i);
                 }
             }
@@ -194,10 +186,10 @@ namespace LkEngine {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_LineVertexBufferPtr - (uint8_t*)m_LineVertexBufferBase);
             m_LineVertexBuffer->SetData(m_LineVertexBufferBase, dataSize);
 
-            // <<<< Bind textures here >>>>
-
+            // TODO: Texture binding here, same as with quads
             m_LineShader->Bind();
             m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
+
             RenderCommand::SetLineWidth(m_LineWidth);
             RenderCommand::DrawLines(*m_LineVertexBuffer, m_LineIndexCount);
 

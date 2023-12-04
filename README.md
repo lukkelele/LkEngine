@@ -84,6 +84,25 @@ make
 
 ## LkEngine Development
 
+### December 4, 2023
+It has been a while since I last posted some progress.<br>
+What's new is that I've added functionality to pass textures to draw calls for 2D rendering 
+which can be seen in the images below :smile:<br>
+(sincere thanks to Atilla for being my debugging texture)
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-4-12-2023_1.png" width=740 height=440>
+	<p align="center">
+	<br>
+	The different rendered entities can all be interacted with, the selected entity menu is shown to the right
+	</p>
+	<br>
+	<img align="center" src="/doc/img/LkEngine-4-12-2023_2.png" width=740 height=440>
+	<p align="center">
+	</p>
+</div>
+<br>
+
+
 ### November 1, 2023
 
 <div align="center">

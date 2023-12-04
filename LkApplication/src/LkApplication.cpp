@@ -7,8 +7,8 @@
 #include "SuperMario/GameLayer.h"
 
 
-constexpr uint32_t SCREEN_WIDTH = 1200;
-constexpr uint32_t SCREEN_HEIGHT = 800;
+constexpr uint32_t SCREEN_WIDTH = 1400;
+constexpr uint32_t SCREEN_HEIGHT = 1024;
 
 using namespace LkEngine;
 

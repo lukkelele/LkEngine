@@ -74,6 +74,8 @@ namespace LkEngine{
         std::string FilePath;
         glm::vec2 Size;
         glm::vec4 Color; 
+		int TextureID = 0; // default to white texture (for 2D)
+		std::string TextureName = ""; // FIXME: TEMPORARY !!!
 
         SpriteComponent(const std::string& filepath, 
                         const glm::vec2& size = { 0.0f, 0.0f }, 

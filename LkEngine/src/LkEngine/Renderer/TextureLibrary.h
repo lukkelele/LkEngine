@@ -18,9 +18,11 @@ namespace LkEngine {
         ~TextureLibrary();
 
         static TextureLibrary* Get() { return m_Instance; }
-        static std::shared_ptr<TextureLibrary> Create(const std::string& texturesDir = LK_TEXTURES_DIR);
-        std::shared_ptr<Texture> FindTexture(const std::string textureName);
-        std::shared_ptr<Texture2D> FindTexture2D(const std::string textureName);
+        static s_ptr<TextureLibrary> Create(const std::string& texturesDir = LK_TEXTURES_DIR);
+        s_ptr<Texture> GetTexture(int textureID);
+        s_ptr<Texture> GetTexture(const std::string textureName);
+        s_ptr<Texture2D> GetTexture2D(int textureID);
+        s_ptr<Texture2D> GetTexture2D(const std::string textureName);
 
         void LoadTextures();
         s_ptr<Texture> AddTexture(const std::string& textureName, const std::string& filePath);

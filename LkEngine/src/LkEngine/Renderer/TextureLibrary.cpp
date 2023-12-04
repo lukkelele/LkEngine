@@ -20,14 +20,32 @@ namespace LkEngine {
         m_Collection2D.clear();
     }
 
-    std::shared_ptr<TextureLibrary> TextureLibrary::Create(const std::string& texturesDir)
+    s_ptr<TextureLibrary> TextureLibrary::Create(const std::string& texturesDir)
     {
         if (texturesDir.at(texturesDir.size() - 1) != '/')
             return std::make_shared<TextureLibrary>(texturesDir + "/");
         return std::make_shared<TextureLibrary>(texturesDir);
     }
-    
-    std::shared_ptr<Texture> TextureLibrary::FindTexture(const std::string textureName)
+
+    s_ptr<Texture> TextureLibrary::GetTexture(int textureID)
+    {
+        if (m_Collection.empty())
+        {
+            LOG_WARN("Texture library is empty");
+            return nullptr;
+        }
+
+        for (auto iter = m_Collection.begin(); iter != m_Collection.end(); ++iter)
+        {
+            auto& texture = *iter;
+            if (texture.second->GetRendererID() == textureID)
+            {
+                return texture.second;
+            }
+        }
+    } 
+
+    s_ptr<Texture> TextureLibrary::GetTexture(const std::string textureName)
     {
         if (m_Initialized == false)
         {
@@ -51,7 +69,25 @@ namespace LkEngine {
         return nullptr;
     }
 
-    std::shared_ptr<Texture2D> TextureLibrary::FindTexture2D(const std::string textureName)
+    s_ptr<Texture2D> TextureLibrary::GetTexture2D(int textureID)
+    {
+        if (m_Collection2D.empty())
+        {
+            LOG_WARN("Texture library is empty");
+            return nullptr;
+        }
+
+        for (auto iter = m_Collection2D.begin(); iter != m_Collection2D.end(); ++iter)
+        {
+            auto& texture = *iter;
+            if (texture.second->GetRendererID() == textureID)
+            {
+                return texture.second;
+            }
+        }
+    } 
+
+    s_ptr<Texture2D> TextureLibrary::GetTexture2D(const std::string textureName)
     {
         if (m_Initialized == false)
         {
@@ -70,11 +106,11 @@ namespace LkEngine {
             auto& texture = *iter;
             if (File::ExtractFilenameWithoutExtension(texture.first) == textureName)
             {
+                LOG_TRACE("GetTexture -> Returning texture '{}'", textureName);
                 return texture.second;
             }
         }
-        // FIXME:
-        // If the texture doesnt exist, try to create it
+
         LOG_WARN("Couldn't find texture, trying to create it ( {}, {} )", textureName, m_TexturesDir + textureName);
         AddTexture2D(textureName, m_TexturesDir + textureName);
 

@@ -1,7 +1,8 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/RenderCommand.h"
-#include "LkEngine/Core/Window.h"
+#include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Core/Window.h"
 
 
 namespace LkEngine {
@@ -56,7 +57,16 @@ namespace LkEngine {
             tc.Scale.x * sc.Size.x, 
             tc.Scale.y * sc.Size.y 
         };
-        s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
+        // Draw with color
+        //if (sc.TextureID == 0)
+        if (sc.TextureName == "")
+        {
+            s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
+            return;
+        }
+        // Draw with texture
+        //s_Renderer->SubmitSprite(tc, scaledSize, TextureLibrary::Get()->GetTexture(sc.TextureID), entityID);
+        s_Renderer->SubmitSprite(tc, scaledSize, TextureLibrary::Get()->GetTexture2D(sc.TextureName), entityID);
     }
 
     void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, s_ptr<Texture> texture, uint32_t entityID)
