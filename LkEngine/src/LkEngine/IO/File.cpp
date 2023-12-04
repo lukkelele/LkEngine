@@ -26,4 +26,30 @@ namespace LkEngine {
         return std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath);
     }
 
+    bool File::HasFileExtension(const std::string& filename)
+    {
+        size_t pos = filename.rfind('.');
+        if (pos == std::string::npos) 
+            return false;
+        return true;
+    }
+
+    std::string File::ExtractFilename(const std::string& filePath)
+    {
+        size_t pos = filePath.find_last_of("/\\");
+        if (pos != std::string::npos)
+        {
+            return filePath.substr(pos + 1);
+        }
+        return filePath;
+    }
+
+    std::string File::ExtractFilenameWithoutExtension(const std::string& filename)
+    {
+        if (HasFileExtension(filename) == false)
+            return filename;
+        return ExtractFilename(filename.substr(0, filename.size() - 4));
+    }
+
+
 }

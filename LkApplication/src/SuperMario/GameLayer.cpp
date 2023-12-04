@@ -22,9 +22,10 @@ namespace LkEngine {
         auto imagesInAssetsDir = fileExplorer.GetFilesInDirectory("assets/img");
         auto textureLibrary = TextureLibrary::Get();
 
-        std::string bgFilename = "sky-background-2d.png";
-        //m_BgTexture = Application::FindTexture2D(bgFilename);
+        //std::string bgFilename = "sky-background-2d.png";
+        std::string bgFilename = "sky-background-2d";
         m_BgTexture = textureLibrary->FindTexture2D(bgFilename);
+        LK_ASSERT(m_BgTexture);
 
         for (const auto& image : imagesInAssetsDir)
         {
@@ -111,11 +112,8 @@ namespace LkEngine {
             glm::vec2 viewportBounds = editorLayer->EditorViewportBounds[0];
             bgStartX += viewportBounds.x * 0.50f;
             bgStartY += viewportBounds.y * 0.50f;
-            //Debug::PrintVec2(viewportBounds, "Viewport bounds");
         }
-        //Debug::PrintVec2({ bgEndX, bgEndY }, "Bg End Coords");
 
-        //glm::vec3 startPos = { bgStartX + (bgStartX * 0.50f), bgStartY + (bgStartY * 0.50f), 0.0f};
         glm::vec3 startPos = { bgStartX, bgStartY, 0.0f};
         glm::vec2 size = { bgEndX * 3.0f, bgEndY * 1.0f };
 

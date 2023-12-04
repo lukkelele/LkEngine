@@ -57,7 +57,6 @@ namespace LkEngine {
         {
             LoadTextures();
             m_Initialized = true;
-            LK_ASSERT(false); // testing
         }
 
         if (m_Collection2D.empty())
@@ -65,16 +64,20 @@ namespace LkEngine {
             LOG_WARN("Texture library is empty");
             return nullptr;
         }
-        //for (auto iter = lib.m_Collection2D.begin(); iter != lib.m_Collection2D.end(); ++iter)
+
         for (auto iter = m_Collection2D.begin(); iter != m_Collection2D.end(); ++iter)
         {
             auto& texture = *iter;
-            auto name = FileExplorer::ExtractFileName(texture.first);
-            LOG_DEBUG("FILENAME FOR ITERATED 2D_COLL: {} ({})", name, texture.first);
-
-            if (FileExplorer::ExtractFileName(texture.first) == textureName)
+            if (File::ExtractFilenameWithoutExtension(texture.first) == textureName)
+            {
                 return texture.second;
+            }
         }
+        // FIXME:
+        // If the texture doesnt exist, try to create it
+        LOG_WARN("Couldn't find texture, trying to create it ( {}, {} )", textureName, m_TexturesDir + textureName);
+        AddTexture2D(textureName, m_TexturesDir + textureName);
+
         return nullptr;
     }
 
@@ -88,34 +91,37 @@ namespace LkEngine {
             LOG_WARN("Retrieved texture file: {0} ({1})", file.GetName(), file.GetPath());
 
             // TODO: Need to make it so 2D and 3D texture are located in different dirs
-            //AddTexture(file.GetName(), file.GetPath());
             AddTexture2D(file.GetName(), file.GetPath());
         }
         m_Initialized = true;
     }
 
-    void TextureLibrary::AddTexture(const std::string& textureName, const std::string& filePath)
+    // TODO: Expand this as the 2D function is as well
+    s_ptr<Texture> TextureLibrary::AddTexture(const std::string& textureName, const std::string& filePath)
     {
         s_ptr<Texture> texture = Texture::Create(filePath);
         m_Collection.insert({ textureName, texture });
+
         LOG_DEBUG("Added texture {0} to texture library", textureName);
+        return texture;
     }
 
-    void TextureLibrary::AddTexture2D(const std::string& textureName, const std::string& filePath)
+    s_ptr<Texture> TextureLibrary::AddTexture2D(const std::string& textureName, const std::string& filePath)
     {
         // Check if the texture already exists
         for (const auto& entry : m_Collection2D)
         {
-            if (entry.first == textureName)
+            if (entry.first == File::ExtractFilenameWithoutExtension(textureName))
             {
-                LOG_WARN("Texture (2D) {0} already exists", textureName);
-                return;
+                return entry.second;
             }
         }
+
         s_ptr<Texture2D> texture2D = Texture2D::Create(filePath);
-        m_Collection2D.insert({ textureName, texture2D });
-        LOG_DEBUG("Added 2D texture {0} to texture library", textureName);
-        LK_ASSERT(m_Collection2D.at(textureName) != nullptr);
+        m_Collection2D.insert({ File::ExtractFilenameWithoutExtension(textureName), texture2D });
+        LOG_DEBUG("Added 2D texture {0} to texture library", File::ExtractFilenameWithoutExtension(textureName));
+
+        return texture2D;
     }
 
 }

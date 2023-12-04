@@ -23,9 +23,11 @@ namespace LkEngine {
         std::shared_ptr<Texture2D> FindTexture2D(const std::string textureName);
 
         void LoadTextures();
-        void AddTexture(const std::string& textureName, const std::string& filePath);
-        void AddTexture2D(const std::string& textureName, const std::string& filePath);
+        s_ptr<Texture> AddTexture(const std::string& textureName, const std::string& filePath);
+        s_ptr<Texture> AddTexture2D(const std::string& textureName, const std::string& filePath);
         std::string GetTexturesDirectoryPath() { return m_TexturesDir; }
+
+        bool VerifyTexturesAreLoaded() const;
 
     private:
         bool m_Initialized = false;

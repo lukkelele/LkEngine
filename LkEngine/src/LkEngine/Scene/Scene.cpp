@@ -1,15 +1,15 @@
 #include "LKpch.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/Core/Window.h"
 #include "LkEngine/Renderer/RenderCommand.h"
-#include "LkEngine/Editor/EditorCamera.h"
+#include "LkEngine/Renderer/TextureLibrary.h"
+#include "LkEngine/Renderer/Color.h"
 #include "LkEngine/UI/UILayer.h"
 #include "LkEngine/UI/Property.h"
-#include "LkEngine/Renderer/Color.h"
-#include "LkEngine/Core/Window.h"
-#include "LkEngine/Physics/2D/Physics2D.h"
+#include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/Editor/EditorLayer.h"
-
+#include "LkEngine/Physics/2D/Physics2D.h"
 
 namespace LkEngine {
 
@@ -176,15 +176,18 @@ namespace LkEngine {
 	void Scene::EndScene()
 	{
 		auto entityTags = m_Registry.view<TagComponent>();
+		auto textureLibrary = TextureLibrary::Get();
+		auto atillaTexture = textureLibrary->FindTexture2D("atte-square");
 		for (auto& entityTag : entityTags)
 		{	
 			Entity entity = { entityTag, this };
 
 			if (entity.HasComponent<SpriteComponent>() && entity.HasComponent<TransformComponent>())
 			{
-				RenderCommand::DrawSprite(entity.GetComponent<TransformComponent>(), 
-									      entity.GetComponent<SpriteComponent>(), 
-						                  entity.GetUUID()
+				RenderCommand::DrawSprite(
+					entity.GetComponent<TransformComponent>(), 
+					entity.GetComponent<SpriteComponent>(),
+					entity.GetUUID()
 				);
 			}
 		}

@@ -312,6 +312,12 @@ namespace LkEngine {
 
     void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID)
     {
+        if (texture == nullptr)
+        {
+            LOG_ERROR("Passed texture to DrawQuad was NULLPTR");
+            LK_ASSERT(false);
+        }
+
         float textureIndex = 0.0f;
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;

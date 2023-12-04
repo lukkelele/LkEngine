@@ -40,7 +40,7 @@ namespace LkEngine {
 		LOG_TRACE("OpenGLTexture created: {}", filePath);
 		m_RendererID = 0;
 		m_FilePath = filePath;
-		m_Name = FileExplorer::ExtractFileName(filePath);
+		m_Name = File::ExtractFilenameWithoutExtension(filePath);
 
 		stbi_set_flip_vertically_on_load(1);
 		int width, height, channels;
@@ -144,7 +144,8 @@ namespace LkEngine {
 		imageSpec.Height = height;
 		m_Width = width;
 		m_Height = height;
-		m_Name = FileExplorer::ExtractFileName(filePath);
+		//m_Name = FileExplorer::ExtractFileName(filePath);
+		m_Name = File::ExtractFilenameWithoutExtension(filePath);
 
 		m_Image = Image::Create(imageSpec, data);
 	}

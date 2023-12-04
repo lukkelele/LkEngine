@@ -13,6 +13,9 @@ namespace LkEngine {
         ~File() = default;
 
         static bool DoesFileExist(const std::string& filePath);
+        static bool HasFileExtension(const std::string& filename);
+        static std::string ExtractFilenameWithoutExtension(const std::string& filename);
+        static std::string ExtractFilename(const std::string& filepath);
 
         std::string GetName() const { return m_Name; }
         std::string GetPath() const { return m_Path; }
