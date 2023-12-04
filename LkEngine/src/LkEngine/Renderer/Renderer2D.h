@@ -51,7 +51,7 @@ namespace LkEngine {
         void DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
         void DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
 
-        void DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture2D> texture2D, float rotation, uint64_t entityID = 0); // Wrapper
+        void DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture2D, float rotation, uint64_t entityID = 0); // Wrapper
         void DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID = 0); // Wrapper
 
         void DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID = 0);

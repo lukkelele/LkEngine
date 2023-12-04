@@ -173,16 +173,15 @@ namespace LkEngine {
             m_QuadShader->Bind();
             m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
 
-#if 0
             for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
             {
                 if (m_TextureSlots[i])
                 {
                     std::string uniform = "u_Textures[" + std::to_string(i) + "]";
+                    LOG_TRACE("Setting uniform: {}     ({})", uniform, m_TextureSlots[i]->GetName());
                     m_QuadShader->SetUniform1i(uniform, i);
                 }
             }
-#endif
 
             RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
             m_QuadShader->Unbind();
@@ -306,7 +305,7 @@ namespace LkEngine {
         m_Stats.LineCount++;
     }
 
-    void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture2D> texture2D, float rotation, uint64_t entityID)
+    void Renderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture2D, float rotation, uint64_t entityID)
     {
         DrawQuad({ pos.x, pos.y, 0.0f }, size, texture2D, rotation, entityID);
     }
@@ -325,9 +324,12 @@ namespace LkEngine {
         //glm::vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
         glm::vec4 tintColor = Color::RGBA::White;
 
-        for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
+        //for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
+        //LOG_WARN("OUTSIDE - Texture Index: {} | texture.GetRendererID() == {}    NAME: {} | TextureSlots.size() --> {}", textureIndex, texture->GetRendererID(), texture->GetName(), m_TextureSlots.size());
+        for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
-            if (m_TextureSlots[i]->GetRendererID() == texture->GetRendererID())
+            //if (m_TextureSlots[i] != nullptr && m_TextureSlots[i]->GetRendererID() == texture->GetRendererID())
+            if (m_TextureSlots[i] != nullptr && m_TextureSlots[i]->GetName() == texture->GetName())
             {
                 textureIndex = (float)i;
                 break;

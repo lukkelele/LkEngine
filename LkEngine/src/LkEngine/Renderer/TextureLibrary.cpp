@@ -57,6 +57,7 @@ namespace LkEngine {
         {
             LoadTextures();
             m_Initialized = true;
+            LK_ASSERT(false); // testing
         }
 
         if (m_Collection2D.empty())
@@ -68,7 +69,10 @@ namespace LkEngine {
         for (auto iter = m_Collection2D.begin(); iter != m_Collection2D.end(); ++iter)
         {
             auto& texture = *iter;
-            if (texture.first == textureName)
+            auto name = FileExplorer::ExtractFileName(texture.first);
+            LOG_DEBUG("FILENAME FOR ITERATED 2D_COLL: {} ({})", name, texture.first);
+
+            if (FileExplorer::ExtractFileName(texture.first) == textureName)
                 return texture.second;
         }
         return nullptr;
@@ -99,9 +103,19 @@ namespace LkEngine {
 
     void TextureLibrary::AddTexture2D(const std::string& textureName, const std::string& filePath)
     {
+        // Check if the texture already exists
+        for (const auto& entry : m_Collection2D)
+        {
+            if (entry.first == textureName)
+            {
+                LOG_WARN("Texture (2D) {0} already exists", textureName);
+                return;
+            }
+        }
         s_ptr<Texture2D> texture2D = Texture2D::Create(filePath);
         m_Collection2D.insert({ textureName, texture2D });
         LOG_DEBUG("Added 2D texture {0} to texture library", textureName);
+        LK_ASSERT(m_Collection2D.at(textureName) != nullptr);
     }
 
 }

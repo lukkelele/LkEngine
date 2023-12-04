@@ -120,6 +120,7 @@ namespace LkEngine {
     {
         auto app = m_Instance;
         auto textureLibrary = app->GetTextureLibrary();
+        LK_ASSERT(textureLibrary);
         return textureLibrary->FindTexture2D(filename);
     }
 

@@ -20,17 +20,11 @@ namespace LkEngine {
 
         FileExplorer fileExplorer;
         auto imagesInAssetsDir = fileExplorer.GetFilesInDirectory("assets/img");
-        //auto textureLibrary = TextureLibrary::Get();
+        auto textureLibrary = TextureLibrary::Get();
 
         std::string bgFilename = "sky-background-2d.png";
-        //m_BgTexture = textureLibrary->FindTexture2D(bgFilename);
-        m_BgTexture = Application::FindTexture2D(bgFilename);
-        if (m_BgTexture == nullptr)
-        {
-            //LOG_ERROR("Background texture was not loaded correctly / not found");
-            //throw std::runtime_error("Background texture was not loaded correctly");
-            LK_THROW_RUNTIME_ERR("Background texture was not loaded correctly");
-        }
+        //m_BgTexture = Application::FindTexture2D(bgFilename);
+        m_BgTexture = textureLibrary->FindTexture2D(bgFilename);
 
         for (const auto& image : imagesInAssetsDir)
         {
@@ -125,10 +119,7 @@ namespace LkEngine {
         glm::vec3 startPos = { bgStartX, bgStartY, 0.0f};
         glm::vec2 size = { bgEndX * 3.0f, bgEndY * 1.0f };
 
-        //m_BgTexture->Bind();
-        //Renderer::BoundTextureID = 1;
-        RenderCommand::DrawQuad(startPos, size, Color::RGBA::White);
-        //Renderer::BoundTextureID = 0;
+        RenderCommand::DrawQuad(startPos, size, m_BgTexture);
     }
 
 

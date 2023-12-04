@@ -42,7 +42,7 @@ namespace LkEngine {
         size_t pos = filePath.find_last_of("/\\");
         if (pos != std::string::npos)
             return filePath.substr(pos + 1);
-        return "";
+        return filePath;
     }
 
 }
