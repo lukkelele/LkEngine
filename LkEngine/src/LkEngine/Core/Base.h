@@ -57,6 +57,18 @@ namespace LkEngine {
 	}
 	
 
+#ifdef LK_RENDERER_API_OPENGL
+    constexpr int OpenGL_Major_Version = 4;
+    constexpr int OpenGL_Minor_Version = 5;
+    constexpr const char* OpenGL_GLSL_33 = "#version 330";
+    constexpr const char* OpenGL_GLSL_45 = "#version 450";
+    constexpr const char* OpenGL_GLSL = OpenGL_GLSL_33;
+
+	constexpr const char* LK_SHADER_VERSION = OpenGL_GLSL;
+#elif defined(LK_RENDERER_API_VULKAN)
+	constexpr const char* LK_SHADER_VERSION = "";
+#endif
+
 }
 
 //#ifndef IMGUI_DEFINE_MATH_OPERATORS

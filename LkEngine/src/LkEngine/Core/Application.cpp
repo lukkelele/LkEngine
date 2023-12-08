@@ -19,15 +19,14 @@ namespace LkEngine {
 
     void Application::Init()
     {
-        m_Window->Init();
+        m_Window->Init(LK_SHADER_VERSION);
         m_Context = m_Window->GetContext();
-        m_Input = std::make_shared<Input>(this);
-        m_Input->Init();
-
-        m_Renderer = std::make_shared<Renderer>();
+        m_Input = Input::Create(this);
+        m_Renderer = Renderer::Create();
+        
         m_Renderer->Init();
-        m_Scene = std::make_shared<Scene>();
-        m_EditorLayer = std::make_shared<EditorLayer>(*m_Scene);
+        m_Scene = Scene::Create();
+        m_EditorLayer = EditorLayer::Create(*m_Scene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);
 
         m_TextureLibrary = TextureLibrary::Create("assets/img");
@@ -36,7 +35,7 @@ namespace LkEngine {
 
     void Application::Run()
     {
-		while (!glfwWindowShouldClose(*m_Window->GetGlfwWindow()))
+		while (!glfwWindowShouldClose(m_Window->GetGlfwWindow()))
 		{
 			float ts = m_Timer.GetDeltaTime();
             glm::vec2 mousePos = Mouse::GetMousePos();

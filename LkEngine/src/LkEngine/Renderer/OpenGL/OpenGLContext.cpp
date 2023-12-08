@@ -16,14 +16,12 @@
 
 namespace LkEngine {
 
-
     OpenGLContext::OpenGLContext(Window& window, const std::string& glslVersion)
     {
-    	m_Context = this;
+    	m_Instance = this;
 	    m_Window = std::shared_ptr<Window>(&window);
 		m_GlfwWindow = m_Window->GetGlfwWindow();
 		
-		m_MainRenderWindowSize = ImVec2(0, 0);
 	}
 
     OpenGLContext::~OpenGLContext()
@@ -42,12 +40,20 @@ namespace LkEngine {
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
+		// TODO: Add condition to check if 2D or 3D, to enable depth test or not
 		//glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		//glDepthFunc(GL_LESS);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 	
 		InitImGui(m_Window->GetGlslVersion().c_str());
+
+		const char* glVersion = (char*)glGetString(GL_VERSION);
+		if (glVersion)
+		{
+			LOG_DEBUG("OpenGL Version: {}", glVersion);
+		}
     }
 
     void OpenGLContext::Destroy()
@@ -63,16 +69,12 @@ namespace LkEngine {
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
-		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		io.Fonts->AddFontFromFileTTF("assets/fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
-		//io.ConfigViewportsNoDecoration = false;
-		//io.ConfigWindowsResizeFromEdges = false;
 		io.ConfigDockingAlwaysTabBar = false;
 
-	    ImGui_ImplGlfw_InitForOpenGL(*m_Window->GetGlfwWindow(), true);
+	    ImGui_ImplGlfw_InitForOpenGL(m_Window->GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(glslVersion.c_str());
 		LOG_INFO("ImGui Version: {0}", ImGui::GetVersion());
-		//UILayer::Init();
     }
 
 	void OpenGLContext::BeginImGuiFrame()
@@ -89,4 +91,14 @@ namespace LkEngine {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
+	void OpenGLContext::SetDepthEnabled(bool enabled)
+	{
+		m_depthEnabled = enabled;
+		if (m_depthEnabled)
+		{
+			glEnable(GL_DEPTH_TEST);
+			return;
+		}
+		glDisable(GL_DEPTH_TEST);
+	}
 }

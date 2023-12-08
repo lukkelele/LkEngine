@@ -35,7 +35,6 @@ namespace LkEngine {
 		std::string name = "Line_" + std::to_string(entityCount);
 		Entity entity = scene.CreateEntity(std::string(name));
 
-		//glm::vec2 size = { p1.x - p0.x, p1.y - p0.y };
 		glm::vec2 size = { lineWidth, p1.y - p0.y };
 		float angleRad = atan2((p1.x - p0.x), (p1.y - p0.y));
 		float angleDeg = glm::degrees(angleRad);
@@ -59,14 +58,13 @@ namespace LkEngine {
 
 		glm::vec2 windowSize = Window::Get()->GetSize();
 		glm::vec2 windowPos = Window::Get()->GetPos();
-		//glm::vec2 spriteSize = Window::Get()->GetSize();
-		//glm::vec2 spritePos = Window::Get()->GetPos();
 
 		float windowWidth = windowSize.x;
 		float windowHeight = windowSize.y;
 
         float quadWidth = windowWidth / columns;
         float quadHeight = windowHeight / rows;
+
         glm::vec2 quadSize = { quadWidth, quadHeight };
         glm::vec2 smallerQuadSize = { quadWidth - 10.0f, quadHeight - 10.f };
 

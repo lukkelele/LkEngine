@@ -63,12 +63,14 @@ namespace LkEngine {
 	{
 		switch (filter)
 		{
-			case TextureFilter::Linear:   return mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
-			case TextureFilter::Nearest:  return mipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST;
+			case TextureFilter::Linear:  return mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
+			case TextureFilter::Nearest: return mipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST;
 		}
 		LK_ASSERT(false);
 		return 0;
 	}
+
+
 
     OpenGLImage::OpenGLImage(ImageSpecification spec, Buffer buffer)
         : m_Specification(spec)
@@ -138,7 +140,6 @@ namespace LkEngine {
     {
 		if (m_RendererID)
 		{
-			LOG_WARN("OpenGLImage: Releasing");
             Release();
 		}
 

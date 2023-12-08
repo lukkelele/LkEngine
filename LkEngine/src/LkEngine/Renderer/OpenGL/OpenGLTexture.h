@@ -50,10 +50,10 @@ namespace LkEngine {
 		OpenGLTexture2D(const std::string& filePath); 
 		~OpenGLTexture2D();
 
+		RendererID GetRendererID() const;
 		std::string GetName() const { return m_Name; }
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
-		RendererID GetRendererID() const;
 		const std::string& GetPath() const { return m_FilePath; }
 		bool IsLoaded() const { return m_Loaded; }
 		void SetData(void* data, uint32_t size);

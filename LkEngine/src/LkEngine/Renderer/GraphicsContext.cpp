@@ -14,14 +14,11 @@ namespace LkEngine {
 	s_ptr<GraphicsContext> GraphicsContext::Create(Window& window, const std::string& glslVersion)
 	{
 	#ifdef LK_RENDERER_API_OPENGL
-		s_ptr<GraphicsContext> context = std::make_shared<OpenGLContext>(window, glslVersion);
-		//context->m_Window = std::make_shared<Window>(window);
-		return context;
+		return std::make_shared<OpenGLContext>(window, glslVersion);
 	#elif defined(LK_RENDERER_API_VULKAN)
-
+		throw std::runtime_error("No graphics context could be created as Vulkan is not supported yet!");
 	#else
-		LK_ASSERT(false);
-		return nullptr;
+		throw std::runtime_error("No graphics context could be created as LK_RENDERER_API is undefined");
 	#endif
 	}
 
@@ -29,9 +26,10 @@ namespace LkEngine {
 	{
 		auto window = Window::Get();
 		int viewport_width, viewport_height;
-		glfwGetWindowSize(*window->GetGlfwWindow(), &viewport_width, &viewport_height);
+		glfwGetWindowSize(window->GetGlfwWindow(), &viewport_width, &viewport_height);
 	}
 
+#if 0
 	ImVec2 GraphicsContext::GetMainRenderWindowSize()
 	{
 		return ImVec2(m_Window->GetWidth(), m_Window->GetHeight());
@@ -42,6 +40,7 @@ namespace LkEngine {
 		glm::vec2 pos = m_Window->GetPos();
 		return ImVec2(pos.x, pos.y);
 	}
+#endif
 	
 	void GraphicsContext::SetDarkTheme()
 	{

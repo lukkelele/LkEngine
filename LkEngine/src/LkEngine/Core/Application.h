@@ -16,6 +16,10 @@
 #include "LkEngine/Physics/2D/Physics2D.h"
 #include "LkEngine/UI/UILayer.h"
 
+/*
+    TODO:
+    - UV Mapping, rotate textures
+*/
 
 namespace LkEngine {
 
@@ -54,7 +58,7 @@ namespace LkEngine {
         uint16_t GetHeight() const { return m_Window->GetHeight(); }
         s_ptr<Window> GetWindow() const { return m_Window; }
         s_ptr<Renderer> GetRenderer() const { return m_Renderer; }
-        s_ptr<GLFWwindow*> GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
+        GLFWwindow* GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
         s_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
         s_ptr<TextureLibrary> GetTextureLibrary() { return m_TextureLibrary; }
 

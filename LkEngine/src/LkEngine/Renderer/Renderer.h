@@ -24,6 +24,7 @@ namespace LkEngine {
 	public:
 		static void Init();
 		static void Shutdown();
+		static s_ptr<Renderer> Create() { return std::make_shared<Renderer>(); }
 
 		static void Clear();
 		static void BeginFrame();

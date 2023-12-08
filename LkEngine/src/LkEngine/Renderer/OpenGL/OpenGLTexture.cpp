@@ -32,7 +32,6 @@ namespace LkEngine {
 	}
 
 
-	//=============================================================================
 
 
 	OpenGLTexture::OpenGLTexture(const std::string& filePath)
@@ -70,10 +69,35 @@ namespace LkEngine {
 			stbi_set_flip_vertically_on_load(1);
 			int width, height, channels;
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
-			m_Image = Image::Create(imageSpec, data);
+
+			int rotatedWidth = height;
+			int rotatedHeight = width;
+			unsigned char* rotatedImageData = new unsigned char[rotatedWidth * rotatedHeight * channels];
+
+			// Copy the pixel data with rotation
+			for (int x = 0; x < width; x++)
+			{
+				for (int y = 0; y < height; y++) 
+				{
+					for (int c = 0; c < channels; c++) 
+					{
+						rotatedImageData[(x * rotatedWidth + (rotatedWidth - y - 1)) * channels + c] = data[(x * width + y) * channels + c];
+					}
+				}
+			}
+			// Use the rotated image buffer for OpenGL texture loading
+			// Assuming you have OpenGL code to load the texture from the rotatedImageData buffer
+			// Clean up resources
+			m_Image = Image::Create(imageSpec, rotatedImageData);
+
+			delete[] rotatedImageData;
+			stbi_image_free(data);
 		}
 		else
+		{
 			m_Image = Image::Create(imageSpec, nullptr);
+		}
+
 	}
 
 	OpenGLTexture::~OpenGLTexture()
@@ -137,17 +161,17 @@ namespace LkEngine {
 		m_FilePath = filePath;
 		stbi_set_flip_vertically_on_load(1);
 		int width, height, channels;
-		stbi_uc* data = stbi_load(filePath.c_str(), &width, &height, &channels, 4);
+		stbi_uc* data = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
 		ImageSpecification imageSpec;
 		imageSpec.Width = width;
 		imageSpec.Height = height;
 		m_Width = width;
 		m_Height = height;
-		//m_Name = FileExplorer::ExtractFileName(filePath);
 		m_Name = File::ExtractFilenameWithoutExtension(filePath);
 
 		m_Image = Image::Create(imageSpec, data);
+		stbi_image_free(data);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
@@ -174,7 +198,9 @@ namespace LkEngine {
 			m_Image = Image::Create(imageSpec, data);
 		}
 		else
+		{
 			m_Image = Image::Create(imageSpec, nullptr);
+		}
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()

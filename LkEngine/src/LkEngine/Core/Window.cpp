@@ -13,9 +13,6 @@
 
 namespace LkEngine {
 
-	Window* Window::m_Instance = nullptr;
-	bool Window::GLFW_Initialized = false;
-	
 	std::shared_ptr<Window> Window::Create(const char* title, uint32_t width, uint32_t height)
 	{
 	#ifdef LK_PLATFORM_WINDOWS

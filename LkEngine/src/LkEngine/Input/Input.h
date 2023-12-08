@@ -16,8 +16,7 @@ namespace LkEngine {
         ~Input() = default;
 
         static Input* Get() { return s_Instance; }
-
-        static void Init();
+        static s_ptr<Input> Create(Application* app) { return std::make_shared<Input>(app); }
         static void HandleScene(Scene& scene);
 
     private:

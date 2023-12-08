@@ -57,7 +57,7 @@ namespace LkEngine {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		auto* window = static_cast<GLFWwindow*>(*Application::Get()->GetWindow()->GetGlfwWindow());
+		auto* window = Application::Get()->GetWindow()->GetGlfwWindow();
 		bool isMaximized = (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
@@ -150,37 +150,53 @@ namespace LkEngine {
 			ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()));
 			ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Always);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 12));
+
 			ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, sidebar_flags);
-			ImGui::PopStyleVar(1);
 			{
-				ImGui::BeginGroup();
-				ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-				if (ImGui::TreeNode("Colors"))
+				ImGui::PopStyleVar(1);
 				{
-				    ImGui::PushID("##lkengine-leftpanel-colors");
-				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
-				    ImGui::Text("Background"); 
-				    ImGui::SliderFloat("##x", &Renderer::s_BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##y", &Renderer::s_BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##z", &Renderer::s_BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##w", &Renderer::s_BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+					// TODO: initialize this bool by checking the depth in the graphics context
+					static bool depth_test_checkbox = false;
+					ImGui::BeginGroup();
+					if (ImGui::Checkbox("Depth Testing", &depth_test_checkbox))
+					{
+						if (depth_test_checkbox == true)
+						{
+							Window::Get()->SetDepthEnabled(true);
+						}
+						else
+						{
+							Window::Get()->SetDepthEnabled(false);
+						}
+					}
 
-				    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
+					ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+					if (ImGui::TreeNode("Colors"))
+					{
+					    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
+					    ImGui::PushID("##lkengine-leftpanel-colors");
+					    ImGui::Text("Background"); 
+					    ImGui::SliderFloat("##x", &Renderer::s_BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+					    ImGui::SliderFloat("##y", &Renderer::s_BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+					    ImGui::SliderFloat("##z", &Renderer::s_BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+					    ImGui::SliderFloat("##w", &Renderer::s_BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+					    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
+					    ImGui::PopID();
 
-				    ImGui::PopID();
-				    ImGui::TreePop();
+					    ImGui::TreePop();
+					}
+
+					//UI_SceneMenu();
+					UI_SceneContent();
+
+					if (SelectedEntity)
+					{
+						//DrawComponents(SelectedEntity);
+						UI_SelectedEntity();
+					}
+					ImGui::EndGroup();
+
 				}
-
-				//UI_SceneMenu();
-				UI_SceneContent();
-
-				if (SelectedEntity)
-				{
-					//DrawComponents(SelectedEntity);
-					UI_SelectedEntity();
-				}
-				ImGui::EndGroup();
-
 			}
 			ImGui::End(); 
 			//--------------------------------------------------
@@ -612,7 +628,7 @@ namespace LkEngine {
 
 	void EditorLayer::UI_HandleManualWindowResize()
 	{
-		auto* window = static_cast<GLFWwindow*>(*Application::Get()->GetWindow()->GetGlfwWindow());
+		auto window = Application::Get()->GetWindow()->GetGlfwWindow();
 		const bool maximized = (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
 		ImVec2 newSize, newPosition;
 		if (!maximized && UI::UpdateWindowManualResize(ImGui::GetCurrentWindow(), newSize, newPosition))

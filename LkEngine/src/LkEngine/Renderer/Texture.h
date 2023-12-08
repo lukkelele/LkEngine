@@ -18,6 +18,11 @@ namespace LkEngine {
 		bool GenerateMips = true;
 	};
 
+	// TODO:
+	// - UV Mapping
+	// Setting the resolutions of textures should be easy
+	// Should be easy to rotate etc
+
 	class Texture
 	{
 	public:

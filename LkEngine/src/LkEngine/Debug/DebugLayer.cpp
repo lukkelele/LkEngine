@@ -40,11 +40,14 @@ namespace LkEngine {
         {
             DebugLayer::s_DebugEntities++;
             Entity debugEntity = scene.CreateEntity("DebugEntity-" + std::to_string(DebugLayer::s_DebugEntities));
+
             TransformComponent& debugTransform = debugEntity.AddComponent<TransformComponent>();
-            SpriteComponent& debugSprite = debugEntity.AddComponent<SpriteComponent>();
             debugTransform.Translation = pos;
+
+            SpriteComponent& debugSprite = debugEntity.AddComponent<SpriteComponent>();
             debugSprite.Size = size;
             debugSprite.Color = color;
+
             return debugEntity;
         }
 

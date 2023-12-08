@@ -25,6 +25,9 @@ namespace LkEngine {
 	class EditorLayer : public Layer
 	{
 	public:
+		EditorLayer(Scene& scene);
+		~EditorLayer() = default;
+
 		enum GizmoType
 		{
 			Translate = 7 << 0,
@@ -32,11 +35,8 @@ namespace LkEngine {
 			Scale     = 7 << 6
 		};
 
-		//EditorLayer(s_ptr<Scene> scene);
-		EditorLayer(Scene& scene);
-		~EditorLayer() = default;
-
 		static EditorLayer* Get() { return s_Instance; }
+		static s_ptr<EditorLayer> Create(Scene& scene) { return std::make_shared<EditorLayer>(scene); }
 		static bool IsEnabled() { return Enabled; }
 		static Entity GetSelectedEntity() { return SelectedEntity; }
 		static const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }

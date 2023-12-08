@@ -10,14 +10,8 @@ namespace LkEngine {
     {
         s_Instance = this;
         LK_ASSERT(m_App);
-        LK_ASSERT(s_Instance);
     }
 
-    void Input::Init()
-    {
-        LOG_DEBUG("Initializing input");
-    }
-    
     void Input::HandleScene(Scene& scene)
     {
         auto mousePos = Mouse::GetMousePos();

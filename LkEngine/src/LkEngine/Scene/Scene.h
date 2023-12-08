@@ -19,13 +19,14 @@ namespace LkEngine {
 		Scene();
 		~Scene() = default;
 
+		static s_ptr<Scene> Create() { return std::make_shared<Scene>(); }
+
 		void BeginScene(Camera& cam, float ts = 1.0f);
 		void BeginScene(float ts = 1.0f);
 		void EndScene();
+		void OnImGuiRender();
 		bool IsRunning() const { return m_IsRunning; }
 		void Pause(bool paused);
-
-		void OnImGuiRender();
 
 		std::vector<Entity> GetEntities();
 		Entity FindEntity(std::string_view name);

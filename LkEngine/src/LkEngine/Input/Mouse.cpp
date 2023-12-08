@@ -14,7 +14,7 @@ namespace LkEngine {
 
 	bool Mouse::IsButtonPressed(MouseCode button)
 	{
-		GLFWwindow* window = *GraphicsContext::Get()->GetGlfwWindow();
+		GLFWwindow* window = GraphicsContext::Get()->GetGlfwWindow();
 		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
 		return state == GLFW_PRESS;
 	}
@@ -22,7 +22,7 @@ namespace LkEngine {
 	glm::vec2 Mouse::GetMousePos()
 	{
 		double xpos, ypos;
-		glfwGetCursorPos(*GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
+		glfwGetCursorPos(GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
 		//Pos.x = x;
@@ -33,7 +33,7 @@ namespace LkEngine {
 	std::pair<float, float> Mouse::GetMousePosition()
 	{
 		double xpos, ypos;
-		glfwGetCursorPos(*GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
+		glfwGetCursorPos(GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
 		return std::make_pair(x, y);

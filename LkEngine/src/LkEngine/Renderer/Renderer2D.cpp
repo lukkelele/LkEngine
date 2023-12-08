@@ -7,6 +7,15 @@
 
 namespace LkEngine {
 
+    // Basic UV coordinates
+    constexpr glm::vec2 TextureCoords[] = { 
+        { 0.0f, 0.0f }, // bottom left 
+        { 0.0f, 1.0f }, // top left
+        { 1.0f, 1.0f }, // top right
+        { 1.0f, 0.0f }  // bottom right
+    };
+
+
     Renderer2D::Renderer2D(const Renderer2DSpecification& specification)
         : m_Specification(specification)
         , m_MaxVertices(specification.MaxQuads * 4)
@@ -74,13 +83,13 @@ namespace LkEngine {
          });
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
-        //TextureSpecification whiteTextureSpec;
-        //whiteTextureSpec.Width = 200;
-        //whiteTextureSpec.Height = 200;
-        //whiteTextureSpec.Name = "White Texture";
-        //m_WhiteTexture = Texture2D::Create(whiteTextureSpec);
-        //m_WhiteTexture = Texture2D::Create("assets/img/atte_square.png");
-        m_WhiteTexture = Texture2D::Create("assets/img/white-texture.png");
+        TextureSpecification whiteTextureSpec;
+        whiteTextureSpec.Width = 400;
+        whiteTextureSpec.Height = 400;
+        whiteTextureSpec.Name = "White Texture";
+        whiteTextureSpec.Path = "assets/img/white-texture.png";
+        m_WhiteTexture = Texture2D::Create(whiteTextureSpec);
+
         m_TextureSlots[0] = m_WhiteTexture;
         m_TextureSlots[1] = Texture2D::Create("assets/img/sky-background-2d.png");
         m_TextureSlots[2] = Texture2D::Create("assets/img/atte_square.png");
@@ -181,6 +190,7 @@ namespace LkEngine {
             m_Stats.DrawCalls++;
         }
 
+
         if (m_LineIndexCount)
         {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_LineVertexBufferPtr - (uint8_t*)m_LineVertexBufferBase);
@@ -245,27 +255,16 @@ namespace LkEngine {
         float textureIndex = 0; 
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
-        constexpr glm::vec2 textureCoords[] = { 
-            { 0.0f, 0.0f }, 
-            { 1.0f, 0.0f }, 
-            { 1.0f, 1.0f }, 
-            { 0.0f, 1.0f } 
-        };
 
-#if 0
-        for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
+        if (m_QuadIndexCount >= m_MaxIndices)
         {
-            if (m_TextureSlots[i]->)
-        }
-#endif
-
-        if (m_QuadIndexCount >= m_MaxIndices) 
             NextBatch();
+        }
 
         for (size_t i = 0; i < quadVertexCount; i++)
         {
             m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i];
-            m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
+            m_QuadVertexBufferPtr->TexCoord = TextureCoords[i];
             m_QuadVertexBufferPtr->Color = color;
             m_QuadVertexBufferPtr->TexIndex = textureIndex;
             m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
@@ -313,12 +312,14 @@ namespace LkEngine {
         float textureIndex = 0.0f;
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
+#if 0
         constexpr glm::vec2 textureCoords[] = {
             { 0.0f, 0.0f },
             { 1.0f, 0.0f },
             { 1.0f, 1.0f },
             { 0.0f, 1.0f }
         };
+#endif
         //glm::vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
         glm::vec4 tintColor = Color::RGBA::White;
 
@@ -346,28 +347,28 @@ namespace LkEngine {
 
         m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[0];
         m_QuadVertexBufferPtr->Color = tintColor;
-        m_QuadVertexBufferPtr->TexCoord = textureCoords[0];
+        m_QuadVertexBufferPtr->TexCoord = TextureCoords[0];
         m_QuadVertexBufferPtr->TexIndex = textureIndex;
         m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
         m_QuadVertexBufferPtr++;
 
         m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[1];
         m_QuadVertexBufferPtr->Color = tintColor;
-        m_QuadVertexBufferPtr->TexCoord = textureCoords[1];
+        m_QuadVertexBufferPtr->TexCoord = TextureCoords[1];
         m_QuadVertexBufferPtr->TexIndex = textureIndex;
         m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
         m_QuadVertexBufferPtr++;
 
         m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[2];
         m_QuadVertexBufferPtr->Color = tintColor;
-        m_QuadVertexBufferPtr->TexCoord = textureCoords[2];
+        m_QuadVertexBufferPtr->TexCoord = TextureCoords[2];
         m_QuadVertexBufferPtr->TexIndex = textureIndex;
         m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
         m_QuadVertexBufferPtr++;
 
         m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[3];
         m_QuadVertexBufferPtr->Color = tintColor;
-        m_QuadVertexBufferPtr->TexCoord = textureCoords[3];
+        m_QuadVertexBufferPtr->TexCoord = TextureCoords[3];
         m_QuadVertexBufferPtr->TexIndex = textureIndex;
         m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
         m_QuadVertexBufferPtr++;
