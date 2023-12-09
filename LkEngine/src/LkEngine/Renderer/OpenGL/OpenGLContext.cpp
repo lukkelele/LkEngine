@@ -16,19 +16,57 @@
 
 namespace LkEngine {
 
+	void OpenGL_ClearError() { while (glGetError() != GL_NO_ERROR); }
+
+    bool OpenGL_LogCall(const char* function, const char* file, int line)
+    {
+        while (GLenum error = glGetError())
+        {
+            std::cout << "[OpenGL Error] (" << error << ")\nFUNCTION: " << function <<
+                "\nFILE: " << file << "\nLINE: " << line << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+	int GetOpenGLSourceBlendFunction(const SourceBlendFunction& srcFunc)
+	{
+		switch (srcFunc)
+		{
+			case SourceBlendFunction::Zero:  return GL_ZERO;
+			case SourceBlendFunction::One:   return GL_ONE;
+			case SourceBlendFunction::Alpha: return GL_ALPHA;
+			case SourceBlendFunction::Color: return GL_COLOR;
+			case SourceBlendFunction::One_Minus_DestinationAlpha: return GL_ONE_MINUS_DST_ALPHA;
+			default: throw std::runtime_error("Source blend function could not be retrieved correctly");
+		}
+	}
+
+	int GetOpenGLDestinationBlendFunction(const DestinationBlendFunction& dstFunc)
+	{
+		switch (dstFunc)
+		{
+			case DestinationBlendFunction::Zero:  return GL_ZERO;
+			case DestinationBlendFunction::One:   return GL_ONE;
+			case DestinationBlendFunction::Alpha: return GL_ALPHA;
+			case DestinationBlendFunction::Color: return GL_COLOR;
+			case DestinationBlendFunction::One_Minus_SourceAlpha: return GL_ONE_MINUS_SRC_ALPHA;
+			default: throw std::runtime_error("Destination blend function could not be retrieved correctly");
+		}
+	}
+
     OpenGLContext::OpenGLContext(Window& window, const std::string& glslVersion)
     {
     	m_Instance = this;
 	    m_Window = std::shared_ptr<Window>(&window);
 		m_GlfwWindow = m_Window->GetGlfwWindow();
-		
 	}
 
     OpenGLContext::~OpenGLContext()
     {
     }
 
-    void OpenGLContext::Init()
+    void OpenGLContext::Init(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc)
     {
 		GLenum err = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (err == 0)
@@ -46,6 +84,10 @@ namespace LkEngine {
 		//glDepthFunc(GL_LESS);
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+		m_BlendFunction.Source = srcFunc;
+		m_BlendFunction.Destination = dstFunc;
+		SetBlendFunction(srcFunc, dstFunc);
+
 	
 		InitImGui(m_Window->GetGlslVersion().c_str());
 
@@ -93,12 +135,70 @@ namespace LkEngine {
 
 	void OpenGLContext::SetDepthEnabled(bool enabled)
 	{
-		m_depthEnabled = enabled;
-		if (m_depthEnabled)
+		m_DepthEnabled = enabled;
+		if (m_DepthEnabled)
 		{
 			glEnable(GL_DEPTH_TEST);
 			return;
 		}
 		glDisable(GL_DEPTH_TEST);
 	}
+
+	void OpenGLContext::SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc)
+	{
+		LOG_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(srcFunc));
+		LOG_DEBUG("Setting destination blend function: {}", GetDestinationBlendFunctionName(dstFunc));
+		glBlendFunc(GetOpenGLSourceBlendFunction(srcFunc), GetOpenGLDestinationBlendFunction(dstFunc));
+	}
+
+	void OpenGLContext::SetSourceBlendFunction(const SourceBlendFunction& srcFunc)
+	{
+		m_BlendFunction.Source = srcFunc;
+		LOG_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(srcFunc));
+		glBlendFunc(GetOpenGLSourceBlendFunction(m_BlendFunction.Source), GetOpenGLDestinationBlendFunction(m_BlendFunction.Destination));
+	}
+
+    void OpenGLContext::SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc)
+	{
+		m_BlendFunction.Destination = dstFunc;
+		LOG_DEBUG("Setting source blend function: {}", GetDestinationBlendFunctionName(dstFunc));
+		glBlendFunc(GetOpenGLSourceBlendFunction(m_BlendFunction.Source), GetOpenGLDestinationBlendFunction(m_BlendFunction.Destination));
+	}
+
+	std::string OpenGLContext::GetSourceBlendFunctionName()
+	{
+		return GetSourceBlendFunctionName(m_BlendFunction.Source);
+	}
+
+	std::string OpenGLContext::GetDestinationBlendFunctionName()
+	{
+		return GetDestinationBlendFunctionName(m_BlendFunction.Destination);
+	}
+
+	std::string OpenGLContext::GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc)
+	{
+		switch (srcFunc)
+		{
+			case SourceBlendFunction::Zero:  return "Zero";
+			case SourceBlendFunction::One:   return "One";
+			case SourceBlendFunction::Alpha: return "Alpha";
+			case SourceBlendFunction::Color: return "Color";
+			case SourceBlendFunction::One_Minus_DestinationAlpha: return "One_Minus_DestinationAlpha";
+			default: throw std::runtime_error("Source blend function name could not be retrieved correctly");
+		}
+	}
+
+	std::string OpenGLContext::GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc)
+	{
+		switch (dstFunc)
+		{
+			case DestinationBlendFunction::Zero:  return "Zero";
+			case DestinationBlendFunction::One:   return "One";
+			case DestinationBlendFunction::Alpha: return "Alpha";
+			case DestinationBlendFunction::Color: return "Color";
+			case DestinationBlendFunction::One_Minus_SourceAlpha: return "One_Minus_SourceAlpha";
+			default: throw std::runtime_error("Destination blend function name could not be retrieved correctly");
+		}
+	}
+
 }

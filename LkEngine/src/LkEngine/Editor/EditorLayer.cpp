@@ -4,6 +4,7 @@
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/UI/ImGuiUtilities.h"
 #include "LkEngine/Editor/Editor.h"
@@ -19,12 +20,10 @@ namespace LkEngine {
 		, m_Scene(&scene)
 	{
 		s_Instance = this;
-		//m_Scene = s_ptr<Scene>(&scene);
-		//m_Name = "EditorLayer";
-		m_ViewportBounds[0] = {0, 0};
-		m_ViewportBounds[1] = {Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight()};
-		LOG_DEBUG("Viewport Bounds[0]: ({}, {})", m_ViewportBounds[0].x, m_ViewportBounds[0].y);
-		LOG_DEBUG("Viewport Bounds[1]: ({}, {})", m_ViewportBounds[1].x, m_ViewportBounds[1].y);
+		m_ViewportBounds[0] = { 0, 0 };
+		m_ViewportBounds[1] = { Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight() };
+		m_SecondViewportBounds[0] = { 0, 0 };
+		m_SecondViewportBounds[1] = { 0, 0 };
 		
 		m_ShowStackTool = true;
 		Enabled = true;
@@ -37,57 +36,41 @@ namespace LkEngine {
 		auto& colors = style.Colors;
 		io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
 
-		static ImGuiWindowFlags core_viewport_flags = ImGuiWindowFlags_NoDocking;
-		core_viewport_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		core_viewport_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
-
-		static ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
-		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
-		window_flags |= ImGuiWindowFlags_MenuBar;
-
-		static ImGuiWindowFlags sidebar_flags = ImGuiWindowFlags_NoDocking;
-		sidebar_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
-		sidebar_flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
 		ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
 		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		auto* window = Application::Get()->GetWindow()->GetGlfwWindow();
 		bool isMaximized = (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
-		ImGui::Begin(UI_CORE_VIEWPORT, nullptr, core_viewport_flags);
+		// Push 4 style var, 1 color
+		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
 		ImGui::PopStyleColor(); 
-		ImGui::PopStyleVar(2);
-		ImGui::PopStyleVar(2);
+		ImGui::PopStyleVar(4);
 
 		UI_HandleManualWindowResize();
 
 		// Dockspace
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-        dockspace_flags |= ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe;
-        dockspace_flags |= ImGuiDockNodeFlags_NoDockingOverOther | ImGuiDockNodeFlags_NoDockingOverEmpty;
-        dockspace_flags |= ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoTabBar;
-		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		if (UI::DockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
 		{
-		    core_viewport_flags |= ImGuiWindowFlags_NoBackground;
-			window_flags |= ImGuiWindowFlags_NoBackground;
+		    UI::CoreViewportFlags |= ImGuiWindowFlags_NoBackground;
+			UI::HostWindowFlags |= ImGuiWindowFlags_NoBackground;
 		}
 
 		float minWinSizeX = style.WindowMinSize.x;
 		style.WindowMinSize.x = 370.0f;
-		ImGui::DockSpace(ImGui::GetID(LkEngine_DockSpace), ImVec2(0, 0), dockspace_flags);
+		ImGui::DockSpace(ImGui::GetID(LkEngine_DockSpace), ImVec2(0, 0), UI::DockspaceFlags);
 		style.WindowMinSize.x = minWinSizeX;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		ImGui::Begin(LkEngine_DockSpace, NULL, window_flags);
+		ImGui::Begin(LkEngine_DockSpace, NULL, UI::HostWindowFlags);
 
 		static float center_window_width = 0;         // viewport->Size.x - sidebar_left_width - sidebar_right_width;
 		static float center_window_height = 0;        // viewport->WorkSize.y - bottombar_height;
@@ -102,8 +85,6 @@ namespace LkEngine {
 			//--------------------------------------------------
 			// TOP MENUBAR
 			//--------------------------------------------------
-			static ImGuiWindowFlags topbar_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar;
-			topbar_flags |= ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
 			static float topbar_height = 30.0f;
 
 			//ImGui::PushID("##lkengine-topbar-menu");
@@ -111,7 +92,7 @@ namespace LkEngine {
 			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
-			ImGui::Begin(UI_TOP_BAR, NULL, topbar_flags);
+			ImGui::Begin(UI_TOP_BAR, NULL, UI::TopbarFlags);
 			ImGui::PopStyleVar(1);
 			{
 				ImGui::BeginMenuBar();
@@ -120,6 +101,10 @@ namespace LkEngine {
 				{
 					if (ImGui::MenuItem("New")) { }
 					ImGui::EndMenu();
+				}
+				if (ImGui::MenuItem("Render Information"))
+				{
+					ShowRenderInformationWindow = !ShowRenderInformationWindow;
 				}
 				ImGui::EndMenuBar();
 			}
@@ -146,12 +131,11 @@ namespace LkEngine {
 			//--------------------------------------------------
 			static float sidebar_left_width = 340.0f;
 			static float sidebar_left_height = m_ViewportBounds[1].y;
-			//ImGui::SetNextWindowSizeConstraints(ImVec2(sidebar_left_width, sidebar_left_height), ImVec2(600, 4000));
 			ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()));
 			ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Always);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 12));
 
-			ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, sidebar_flags);
+			ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 			{
 				ImGui::PopStyleVar(1);
 				{
@@ -201,6 +185,7 @@ namespace LkEngine {
 			ImGui::End(); 
 			//--------------------------------------------------
 
+
 			//--------------------------------------------------
 			// RIGHT SIDEBAR
 			//--------------------------------------------------
@@ -209,7 +194,7 @@ namespace LkEngine {
 			//ImGui::SetNextWindowSizeConstraints(ImVec2(sidebar_right_width, sidebar_right_height), ImVec2(600, 4000));
 			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - sidebar_right_width, ImGui::GetCursorPosY()));
 			ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Always);
-			ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, sidebar_flags);
+			ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 			{
 				ImGui::BeginGroup();
 				if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor)) { }
@@ -248,7 +233,7 @@ namespace LkEngine {
 				ImGui::EndGroup();
 			}
 			ImGui::End();
-			//--------------------------------------------------
+
 
 			//--------------------------------------------------
 			// BOTTOM BAR
@@ -258,16 +243,13 @@ namespace LkEngine {
 			float min_width = viewport->Size.x - (sidebar_right_width + sidebar_left_width);
 			ImGui::SetNextWindowSizeConstraints(ImVec2(min_width, 180.0f), ImVec2(4000, 800));
 			ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport->Size.y - bottombar_height));
-			ImGui::Begin(UI_BOTTOM_BAR, nullptr, sidebar_flags);
+			ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 			{
 				ImGui::BeginGroup();
 				auto mouse_pos = Mouse::GetMousePos();
 				Mouse::Pos = Mouse::GetMousePos();
-				//Mouse::Pos.y = viewport->Size.y - bottombar_height + topbar_height - Mouse::Pos.y;
 				Mouse::Pos.y = viewport->Size.y - bottombar_height - Mouse::Pos.y;
 				Mouse::Pos.x -= sidebar_left_width;
-				//Mouse::Pos.y -= topbar_height /* + padding -- need to fix !!! */;
-				//ImGui::Text("Mouse (%1.f, %1.f)", Mouse::GetMouseX(), Mouse::GetMouseY());
 
 				ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
 				ImGui::SameLine(0, 20);
@@ -320,16 +302,14 @@ namespace LkEngine {
 				Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
 				Mouse::Scalers = { scale_x, scale_y };
 
-				Mouse::CenterPos = { 
+				//Mouse::CenterPos = { 
+				//	(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
+				//	((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f 
+				//};
+				Mouse::SetCenterPos(
 					(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
-					((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f 
-				};
-				//ImGui::Text("Centered normalized mouse pos (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);  
-				//ImGui::SameLine(0, 20);
-				float viewport_width = Window::Get()->GetViewportWidth();
-				float viewport_height = Window::Get()->GetViewportHeight();
-				//Mouse::ScaledCenterPos = { (Mouse::CenterPos.x * (viewport_width * 0.50f)), (Mouse::CenterPos.y * (viewport_height * 0.50f)) };
-				//ImGui::Text("Centered scaled mouse pos (%.2f, %.2f)", Mouse::ScaledCenterPos.x, Mouse::ScaledCenterPos.y);
+					((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f
+				);
 
 				auto& active_cam = *Scene::GetActiveScene()->GetActiveCamera();
 				glm::vec2 cam_pos = active_cam.GetPos();
@@ -341,14 +321,13 @@ namespace LkEngine {
 
 			center_window_width = viewport->Size.x - sidebar_left_width - sidebar_right_width;
 			center_window_height = viewport->Size.y - bottombar_height - topbar_height;
-			//LOG_TRACE("Center Window: ({}, {})", center_window_width, center_window_height);
 			center_window_size = { center_window_width, center_window_height };
 
-			/* Lower left point / bound */
+			// Lower left point/bound 
 			center_window_xpos = sidebar_left_width;
 			center_window_ypos = bottombar_height;
 
-			/* Top right point / bound */
+			// Top right point/bound
 			m_SecondViewportBounds[0] = { center_window_xpos, topbar_height };
 			m_SecondViewportBounds[1] = { 
 				(center_window_xpos + center_window_width), 
@@ -357,14 +336,21 @@ namespace LkEngine {
 
 			EditorWindowSize = { center_window_size.x, center_window_size.y };
 			EditorWindowPos = { center_window_xpos, center_window_ypos };
-			//LOG_TRACE("m_SecondViewportBounds[1]: ({}, {})", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
 
 			glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);
-			//LOG_DEBUG("Center Window Size: ({}, {})   Pos: ({}, {})", center_window_size.x, center_window_size.y, center_window_xpos, center_window_ypos);
 		}
-
 		ImGui::End(); // Viewport
+
+		HandleExternalWindows();
 		ImGui::End(); // Core Viewport
+	}
+
+	void EditorLayer::HandleExternalWindows()
+	{
+		if (ShowRenderInformationWindow)
+		{
+			UI_RenderSettingsInformation();
+		}
 	}
 
 	void EditorLayer::SelectEntity(Entity& entity)
@@ -744,6 +730,47 @@ namespace LkEngine {
 			m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y 
 		};
 		return size;
+	}
+
+	void EditorLayer::UI_RenderSettingsInformation()
+	{
+		if (ImGui::Begin("Render Settings", &ShowRenderInformationWindow, ImGuiWindowFlags_NoDocking))
+		{
+			auto* graphicsCtx = GraphicsContext::Get();
+			ImGui::SeparatorText("Blend Function");
+
+			if (ImGui::BeginCombo(fmt::format("Source: {}", graphicsCtx->GetSourceBlendFunctionName()).c_str(), nullptr, ImGuiComboFlags_NoPreview))
+			{
+				if (ImGui::MenuItem("Zero"))
+					graphicsCtx->SetSourceBlendFunction(SourceBlendFunction::Zero);
+				else if (ImGui::MenuItem("One"))
+					graphicsCtx->SetSourceBlendFunction(SourceBlendFunction::One);
+				else if (ImGui::MenuItem("Alpha"))
+					graphicsCtx->SetSourceBlendFunction(SourceBlendFunction::Alpha);
+				else if (ImGui::MenuItem("Color"))
+					graphicsCtx->SetSourceBlendFunction(SourceBlendFunction::Color);
+				else if (ImGui::MenuItem("One_Minus_DestinationAlpha"))
+					graphicsCtx->SetSourceBlendFunction(SourceBlendFunction::One_Minus_DestinationAlpha);
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::BeginCombo(fmt::format("Destination: {}", graphicsCtx->GetDestinationBlendFunctionName()).c_str(), nullptr, ImGuiComboFlags_NoPreview))
+			{
+				if (ImGui::MenuItem("Zero"))
+					graphicsCtx->SetDestinationBlendFunction(DestinationBlendFunction::Zero);
+				else if (ImGui::MenuItem("One"))
+					graphicsCtx->SetDestinationBlendFunction(DestinationBlendFunction::One);
+				else if (ImGui::MenuItem("Alpha"))
+					graphicsCtx->SetDestinationBlendFunction(DestinationBlendFunction::Alpha);
+				else if (ImGui::MenuItem("Color"))
+					graphicsCtx->SetDestinationBlendFunction(DestinationBlendFunction::Color);
+				else if (ImGui::MenuItem("One_Minus_SourceAlpha"))
+					graphicsCtx->SetDestinationBlendFunction(DestinationBlendFunction::One_Minus_SourceAlpha);
+				ImGui::EndCombo();
+			}
+
+			ImGui::End();
+		}
 	}
 
 

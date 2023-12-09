@@ -24,7 +24,6 @@ namespace LkEngine {
 	#define LK_UNUSED(_VAR)                  ((void)(_VAR))
 	#define BIT_FIELD(x)                     (1 << x)
 	#define STRINIGFY(x)                     #x
-	#define GL_CALL(_FUNC)                   (void)(_FUNC) // TODO: Add opengl call func here
 
 	using byte = uint8_t;
 	using RendererID = uint32_t;
@@ -58,6 +57,12 @@ namespace LkEngine {
 	
 
 #ifdef LK_RENDERER_API_OPENGL
+	// OpenGL call macro to use for invoking opengl functions, provides error handling
+	#define GL_CALL(_FUNC) OpenGL_ClearError(); _FUNC; LK_ASSERT(OpenGL_LogCall(#_FUNC, __FILE__, __LINE__))
+    // OpenGL Error handling functions, defined in OpenGLContext.cpp
+    void OpenGL_ClearError();
+    bool OpenGL_LogCall(const char* function, const char* file, int line);
+
     constexpr int OpenGL_Major_Version = 4;
     constexpr int OpenGL_Minor_Version = 5;
     constexpr const char* OpenGL_GLSL_33 = "#version 330";
@@ -65,15 +70,13 @@ namespace LkEngine {
     constexpr const char* OpenGL_GLSL = OpenGL_GLSL_33;
 
 	constexpr const char* LK_SHADER_VERSION = OpenGL_GLSL;
+
 #elif defined(LK_RENDERER_API_VULKAN)
 	constexpr const char* LK_SHADER_VERSION = "";
 #endif
 
 }
 
-//#ifndef IMGUI_DEFINE_MATH_OPERATORS
-//#define IMGUI_DEFINE_MATH_OPERATORS
-//#endif
 
 #ifdef RENDERER_API_VULKAN
 #include "Vulkan/vulkan.h"

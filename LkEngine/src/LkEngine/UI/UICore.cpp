@@ -5,10 +5,34 @@
 
 namespace LkEngine::UI {
 
+	ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_NoDocking
+		| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
+
+	ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoDocking
+	    | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs
+        | ImGuiWindowFlags_MenuBar;
+
+    ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_None
+        | ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe
+        | ImGuiDockNodeFlags_NoDockingOverOther | ImGuiDockNodeFlags_NoDockingOverEmpty
+        | ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoTabBar;
+
+    ImGuiWindowFlags TopbarFlags = ImGuiWindowFlags_MenuBar
+        | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
+
+    ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoDocking 
+		| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings
+		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+
     static int s_UIContextID = 0;
     static uint32_t s_Counter = 0;
     static char s_IDBuffer[16] = "##";
     static char s_LabelIDBuffer[1024];
+
 
     const char* GenerateID()
     {

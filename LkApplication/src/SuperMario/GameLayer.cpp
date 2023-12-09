@@ -27,10 +27,6 @@ namespace LkEngine {
         m_BgTexture = textureLibrary->GetTexture2D(bgFilename);
         LK_ASSERT(m_BgTexture);
 
-        for (const auto& image : imagesInAssetsDir)
-        {
-            image.PrintInformation();
-        }
 
         Entity playerEntity = m_Scene->CreateEntity("Player");
         m_Player = std::make_shared<Player>(playerEntity, "Mario");

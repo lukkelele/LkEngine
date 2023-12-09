@@ -17,7 +17,7 @@ namespace LkEngine {
         void Init(const std::string& glslVersion);
         void OnUpdate();
         void Exit();
-        bool IsVSync() const;
+        bool IsVSyncEnabled() const;
         void SetVSync(bool enabled);
         GLFWwindow* GetGlfwWindow() const { return m_GlfwWindow; }
         s_ptr<GraphicsContext> GetContext() const { return m_Context; }

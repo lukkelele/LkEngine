@@ -4,7 +4,6 @@
 layout(location = 0) in vec3     a_Pos;
 layout(location = 1) in vec4     a_Color;
 layout(location = 2) in vec2     a_TexCoord;
-//layout(location = 3) in int      a_TexIndex;
 layout(location = 3) in float    a_TexIndex;
 layout(location = 4) in float    a_TilingFactor;
 layout(location = 5) in int      a_EntityID;
@@ -41,7 +40,6 @@ in float      v_TexIndex;
 in float      v_TilingFactor;
 flat in int   v_EntityID;
 
-uniform int u_TextureEnabled;
 uniform sampler2D u_Texture;
 uniform sampler2D u_Textures[32];
 
@@ -49,10 +47,4 @@ void main()
 {
     vec4 tex = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
     FragColor = tex * v_Color;
-
-    //FragColor = tex * vec4(1.0f, 0.5, 1.0f, 1.0f);
-
-    //FragColor = mix(v_Color, vec4(0.5, 0.5, 0.5, 1.0), v_TexCoord.y);
-    //FragColor = v_Color;
-    //FragColor = tex;
 }

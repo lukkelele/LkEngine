@@ -13,23 +13,57 @@ namespace LkEngine {
 
     // Forward declaration
     class Window;
-    
+
+    enum class SourceBlendFunction
+    {
+        Zero = 0,
+        One,
+        Color,
+        Alpha,
+        One_Minus_DestinationAlpha
+    };
+
+    enum class DestinationBlendFunction 
+    {
+        Zero = 0,
+        One,
+        Alpha,
+        Color,
+        One_Minus_SourceAlpha,
+    };
+
+    struct BlendFunction
+    {
+        SourceBlendFunction Source;
+        DestinationBlendFunction Destination;
+        BlendFunction() 
+            : Source(SourceBlendFunction::Alpha), Destination(DestinationBlendFunction::One_Minus_SourceAlpha) {}
+        BlendFunction(const SourceBlendFunction& source, const DestinationBlendFunction& destination)
+            : Source(source), Destination(destination) {}
+    };
+
     class GraphicsContext
     {
     public:
         virtual ~GraphicsContext() = default;
 
         static GraphicsContext* Get() { return m_Instance; }
+        static s_ptr<GraphicsContext> Create(Window& window, const std::string& shaderVersion);
 
-        static s_ptr<GraphicsContext> Create(Window& window, const std::string& glslVersion);
-
-        virtual void Init() = 0;
+        virtual void Init(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) = 0;
         virtual void Destroy() = 0;
+        virtual GLFWwindow* GetGlfwWindow() = 0;
         virtual void BeginImGuiFrame() = 0;
         virtual void EndImGuiFrame() = 0;
         virtual void InitImGui(const std::string& glslVersion) = 0;
         virtual void SetDepthEnabled(bool enabled) = 0;
-        virtual GLFWwindow* GetGlfwWindow() = 0;
+        virtual void SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) = 0;
+        virtual void SetSourceBlendFunction(const SourceBlendFunction& srcFunc) = 0;
+        virtual void SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc) = 0;
+        virtual std::string GetSourceBlendFunctionName() = 0;
+        virtual std::string GetDestinationBlendFunctionName() = 0;
+        virtual std::string GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc) = 0;
+        virtual std::string GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc) = 0;
         virtual void SetDarkTheme();
 
     protected:

@@ -57,17 +57,19 @@ namespace LkEngine {
 		void UI_SceneMenu();
 		void UI_SceneContent();
         void UI_SelectedEntity();
+		void UI_RenderSettingsInformation();
 
 		glm::vec2 GetEditorWindowSize() const;
-		glm::vec2 GetViewportBounds(int viewportIndex, int boundIndex);
 
 	private:
 		void RenderViewport(); // TODO
 		//void RenderViewport(s_ptr<Image> img);
         void DrawImGuizmo(Entity& entity);
+		void HandleExternalWindows();
 
 	public:
 		static ImVec2 SelectedEntityMenuSize;
+		inline static bool Enabled = true;
 		inline static Entity SelectedEntity;
 		inline static uint64_t SelectedEntityID = 0;
 		inline static glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
@@ -75,9 +77,11 @@ namespace LkEngine {
 		inline static glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
 		inline static glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 		inline static glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
-		inline static bool Enabled = true;
+		inline static bool ShowRenderInformationWindow = false;
+
 		// Window where the selected entity settings will be shown in
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
+
 	private:
 		s_ptr<Scene> m_Scene = nullptr;
 		glm::vec2 m_ViewportBounds[2];

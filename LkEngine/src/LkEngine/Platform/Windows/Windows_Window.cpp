@@ -39,7 +39,7 @@ namespace LkEngine {
 		if (!GLFW_Initialized)
 		{
 			m_Context = GraphicsContext::Create(*this, glslVersion);
-			m_Context->Init();
+			m_Context->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
 			m_Context->SetDarkTheme();
 		}
 	
@@ -75,14 +75,14 @@ namespace LkEngine {
 	
 	void Windows_Window::SetVSync(bool enabled)
 	{
-		if (enabled)
+		m_VSync = enabled;
+		if (m_VSync)
 			glfwSwapInterval(1);
 		else
 			glfwSwapInterval(0);
-		m_VSync = enabled;
 	}
 
-	bool Windows_Window::IsVSync() const
+	bool Windows_Window::IsVSyncEnabled() const
 	{
 		return m_VSync;
 	}

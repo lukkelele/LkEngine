@@ -15,6 +15,7 @@ namespace LkEngine {
 		static float GetMouseY();
 		static glm::vec2 GetMousePosNormalized();
 		static void SetPos(float x, float y) { Pos.x = x; Pos.y = y; }
+		static void SetCenterPos(float x, float y) { CenterPos.x = x; CenterPos.y = y; }
 		static glm::vec2 GetPos() { return Pos; }
 		static glm::vec2 GetScaledPos() { return ScaledPos; }
 		static glm::vec2 GetCenterPos() { return CenterPos; }

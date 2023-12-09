@@ -25,24 +25,16 @@ namespace LkEngine {
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(unsigned int bufsize)
 	{
-		// Create VertexArray
 		GL_CALL(glGenVertexArrays(1, &m_VertexArrayID));
 		GL_CALL(glBindVertexArray(m_VertexArrayID));
-		LOG_TRACE("New VertexArray, id: {}", m_VertexArrayID);
 
-		//GL_CALL(glCreateBuffers(1, &m_RendererID));
 		GL_CALL(glGenBuffers(1, &m_RendererID));
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 		GL_CALL(glBufferData(GL_ARRAY_BUFFER, bufsize, nullptr, GL_STATIC_DRAW));
-		LOG_TRACE("New OpenGLVertexBuffer, id: {}", m_RendererID);
-
-		//AddVertexBuffer(*this);
-		//AddVertexBufferToVertexArray();
 	}
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const void* data, unsigned int arrsize)
 	{
-		// Create VertexArray
 		GL_CALL(glGenVertexArrays(1, &m_VertexArrayID));
 		GL_CALL(glBindVertexArray(m_VertexArrayID));
 		LOG_TRACE("New VertexArray, id: {}", m_VertexArrayID);
@@ -51,9 +43,6 @@ namespace LkEngine {
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 		GL_CALL(glBufferData(GL_ARRAY_BUFFER, arrsize * sizeof(float), data, GL_STATIC_DRAW));
 		LOG_TRACE("New OpenGLVertexBuffer, id: {}", m_RendererID);
-
-		//AddVertexBuffer(*this);
-		//AddVertexBufferToVertexArray();
 	}
 	 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer() 
@@ -65,14 +54,12 @@ namespace LkEngine {
 	void OpenGLVertexBuffer::Bind() const
 	{
 		GL_CALL(glBindVertexArray(m_VertexArrayID));
-		//GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 	}
 
 	void OpenGLVertexBuffer::Unbind() const
 	{
 		GL_CALL(glBindVertexArray(0));
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-		//GL_CALL(glBindVertexArray(m_VertexArrayID));
 	}
 
 	void OpenGLVertexBuffer::SetData(const void* data, unsigned int size)

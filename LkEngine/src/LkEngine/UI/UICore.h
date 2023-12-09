@@ -1,8 +1,17 @@
 #pragma once
+
 #include <imgui/imgui.h>
 
 
 namespace LkEngine::UI {
+
+    //extern ImGuiDockNodeFlags UI_DockspaceFlags; 
+    extern ImGuiWindowFlags CoreViewportFlags;
+    extern ImGuiWindowFlags HostWindowFlags;
+    extern ImGuiDockNodeFlags DockspaceFlags; // = ImGuiDockNodeFlags_None;
+    extern ImGuiWindowFlags SidebarFlags;
+    extern ImGuiWindowFlags TopbarFlags;
+
 
     const char* GenerateID();
     void PushID();

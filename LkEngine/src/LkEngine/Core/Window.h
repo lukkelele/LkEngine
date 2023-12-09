@@ -35,7 +35,7 @@ namespace LkEngine {
         virtual void SetDepthEnabled(bool enabled) = 0;
         std::string GetTitle()  const { return m_Title; }
         std::string GetGlslVersion() const { return m_GlslVersion;  }
-        bool IsVSync() const { return m_VSync; }
+        bool IsVSyncEnabled() const { return m_VSync; }
         virtual glm::vec2 GetPos() const = 0;
         virtual glm::vec2 GetSize() const = 0;
         virtual glm::vec2 GetViewportSize() const = 0;

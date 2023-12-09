@@ -15,15 +15,9 @@ namespace LkEngine {
 		GL_CALL(glNamedBufferData(m_RendererID, m_Size, nullptr, GL_DYNAMIC_DRAW));
 	}
 
-
-	//IndexBuffer::IndexBuffer(const void* data, unsigned int count)
 	IndexBuffer::IndexBuffer(const void* data, uint32_t size)
 		: m_Size(size), m_Count(size / sizeof(unsigned int))
 	{
-		//GL_CALL(glGenBuffers(1, &m_RendererID));
-		//GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
-		//GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,  size, data, GL_STATIC_DRAW));
-		//GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,  count * sizeof(unsigned int), data, GL_STATIC_DRAW));
 		GL_CALL(glCreateBuffers(1, &m_RendererID));
 		GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
 		GL_CALL(glNamedBufferData(m_RendererID, m_Size, nullptr, GL_DYNAMIC_DRAW));
