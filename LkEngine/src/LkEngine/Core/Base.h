@@ -18,12 +18,16 @@
 namespace LkEngine {
 
 	#define LK_ASSERT(_COND)                 assert(_COND)
-	#define LK_THROW_RUNTIME_ERR(_MESSAGE)   { LOG_ERROR(_MESSAGE); throw std::runtime_error(_MESSAGE); }
-
 	#define LK_ARRAYSIZE(_ARR)               ((int)(sizeof(_ARR) / sizeof(*(_ARR))))    
 	#define LK_UNUSED(_VAR)                  ((void)(_VAR))
 	#define BIT_FIELD(x)                     (1 << x)
 	#define STRINIGFY(x)                     #x
+
+	#ifdef LK_PLATFORM_WINDOWS
+	#define LK_ITOA(c, buf, size, p)  _itoa_s(c, buf, size, p)
+	#elif defined(LK_PLATFORM_LINUX)
+	#define LK_ITOA(c, buf, size, p)  void() // FIXME
+	#endif
 
 	using byte = uint8_t;
 	using RendererID = uint32_t;

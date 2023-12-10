@@ -103,7 +103,6 @@ namespace LkEngine {
 		if (data)
 		{
             uint32_t memorySize = Image::GetMemorySize(spec.Format, spec.Width, spec.Height);
-			LOG_TRACE("OpenGLImage: Memory size '{}'", memorySize);
 			m_ImageData = Buffer::Copy(data, memorySize);
 
 			GL_CALL(glGenTextures(1, &m_RendererID));
@@ -142,12 +141,11 @@ namespace LkEngine {
 		{
             Release();
 		}
+        GLenum internalFormat = OpenGLImageInternalFormat(m_Specification.Format);
+        uint32_t mipCount = CalculateMipCount(m_Width, m_Height);
 
         glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-
-        GLenum internalFormat = OpenGLImageInternalFormat(m_Specification.Format);
-        uint32_t mipCount = CalculateMipCount(m_Width, m_Height);
         glTextureStorage2D(m_RendererID, mipCount, internalFormat, m_Width, m_Height);
         if (m_ImageData)
         {

@@ -20,7 +20,7 @@ namespace LkEngine {
     constexpr const char* UI_BOTTOM_BAR = "##lkengine-lower-bar";
     constexpr const char* UI_SIDEBAR_LEFT = "##lkengine-sidebar-left";
     constexpr const char* UI_SIDEBAR_RIGHT = "##lkengine-sidebar-right";
-    constexpr const char* UI_SELECTED_ENTITY_DETAILS = "##lkengine-selected-entity-details";
+    constexpr const char* UI_SELECTED_ENTITY_INFO = "##lkengine-selected-entity-info";
 
 	class EditorLayer : public Layer
 	{

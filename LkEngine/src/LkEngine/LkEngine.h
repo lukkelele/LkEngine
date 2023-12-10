@@ -29,6 +29,9 @@
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Editor/EditorCamera.h"
 
+#include "LkEngine/UI/UICore.h"
+#include "LkEngine/UI/ImGuiUtilities.h"
+
 #include "LkEngine/Debug/DebugLayer.h"
 
 #include "LkEngine/Physics/2D/Physics2D.h"

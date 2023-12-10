@@ -14,7 +14,6 @@ namespace LkEngine {
 
 	ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
 
-	//EditorLayer::EditorLayer(s_ptr<Scene> scene)
 	EditorLayer::EditorLayer(Scene& scene)
 		: Layer("EditorLayer")
 		, m_Scene(&scene)
@@ -179,7 +178,6 @@ namespace LkEngine {
 						UI_SelectedEntity();
 					}
 					ImGui::EndGroup();
-
 				}
 			}
 			ImGui::End(); 
@@ -527,22 +525,23 @@ namespace LkEngine {
         static uint32_t last_id = 0;
         auto window = Window::Get();
 
-        ImGui::BeginChild(UI_SELECTED_ENTITY_DETAILS, SelectedEntityMenuSize, true);
+        ImGui::BeginChild(UI_SELECTED_ENTITY_INFO, SelectedEntityMenuSize, true);
         if (entity && entity.HasComponent<TransformComponent>())
         {
             ImGui::SeparatorText(SelectedEntity.GetName().c_str());
             ImGui::Indent();
-			uint32_t id = entity;
-		    ImGui::PushID(id);
+			//uint32_t id = entity;
+		    //ImGui::PushID(id);
+			UI::PushID();
 
 			TransformComponent& transform = entity.GetComponent<TransformComponent>();
             ImGui::Text("Position");
-			UI::Property::PositionXY(entity, transform.Translation, pos_step_size);
+			UI::Property::PositionXY(transform.Translation, pos_step_size);
 
             DrawImGuizmo(entity);
 
             ImGui::Text("Scale");
-            ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 5.0f, "%.2f");
+            ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
 
             ImGui::Text("Rotation");
             ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
@@ -557,8 +556,9 @@ namespace LkEngine {
 
             ImGui::Unindent();
 
-            last_id = id;
-			ImGui::PopID();
+            //last_id = id;
+			//ImGui::PopID();
+			UI::PopID();
 		}
         ImGui::EndChild();
     }
@@ -697,7 +697,8 @@ namespace LkEngine {
 	{
         auto window = Window::Get();
 		float menu_height = window->GetHeight() - SelectedEntityMenuSize.y;
-		ImGui::PushID("##lkengine-scene-content");
+		//ImGui::PushID("##lkengine-scene-content");
+		UI::PushID();
 		ImGui::BeginGroup();
 		ImGui::SeparatorText("Scene");
 
@@ -719,7 +720,9 @@ namespace LkEngine {
             }
         }
 		ImGui::EndGroup();
-		ImGui::PopID();
+		UI::PopID();
+
+		//ImGui::PopID();
         //ImGui::EndChild();
 	}
 
