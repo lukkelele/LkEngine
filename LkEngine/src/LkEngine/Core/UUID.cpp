@@ -11,6 +11,9 @@ namespace LkEngine {
 	UUID::UUID()
 		: m_UUID(s_UniformDistribution(s_Engine))
 	{
+		// Never let UUID be 0
+		while (m_UUID == 0)
+			m_UUID = s_UniformDistribution(s_Engine);
 	}
 
 	UUID::UUID(uint64_t uuid)

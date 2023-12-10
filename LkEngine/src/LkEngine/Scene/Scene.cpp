@@ -60,6 +60,8 @@ namespace LkEngine {
 				return Entity{ entity , this };
 			}
 		}
+		//return { (entt::entity)-1, NULL };
+		//return { (entt::entity)-1, nullptr };
 		return { };
 	}
 
@@ -70,12 +72,19 @@ namespace LkEngine {
 		LOG_DEBUG("Entity successfully deleted");
 	}
 
+	bool Scene::IsEntityInRegistry(Entity entity) const
+	{
+		return m_Registry.any_of<IDComponent>(entity);
+	}
+
 	std::vector<Entity> Scene::GetEntities()
 	{
 		auto view = m_Registry.view<IDComponent>();
 		std::vector<Entity> entities;
 		for (const auto& entity : view)
+		{
 			entities.push_back({ entity, this });
+		}
 		return entities;
 	}
 

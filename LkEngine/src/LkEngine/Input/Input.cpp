@@ -23,6 +23,13 @@ namespace LkEngine {
 		    Raycast2DResult raycast = raycastResults.at(0);
 		    Entity entity = raycast.HitEntity;
 		    EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
+
+		    if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
+		    {
+		        EditorLayer::SelectedEntity = raycast.HitEntity;
+				EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
+		        //EditorLayer::SelectedEntityID = hitEntityID;
+		    }
 		}
 
 		else if (raycastHits > 1)

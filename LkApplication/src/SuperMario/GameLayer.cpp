@@ -16,7 +16,7 @@ namespace LkEngine {
     void GameLayer::OnAttach()
     {
         m_Renderer2D = Renderer::GetRenderer2D();
-        m_Scene = std::make_shared<Scene>();
+        m_Scene = std::shared_ptr<Scene>(Scene::GetActiveScene());
 
         FileExplorer fileExplorer;
         auto imagesInAssetsDir = fileExplorer.GetFilesInDirectory("assets/img");
@@ -26,7 +26,6 @@ namespace LkEngine {
         std::string bgFilename = "sky-background-2d";
         m_BgTexture = textureLibrary->GetTexture2D(bgFilename);
         LK_ASSERT(m_BgTexture);
-
 
         Entity playerEntity = m_Scene->CreateEntity("Player");
         m_Player = std::make_shared<Player>(playerEntity, "Mario");

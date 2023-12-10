@@ -86,7 +86,6 @@ namespace LkEngine {
 			//--------------------------------------------------
 			static float topbar_height = 30.0f;
 
-			//ImGui::PushID("##lkengine-topbar-menu");
 			ImGui::PushID(UI_TOP_BAR);
 			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
@@ -111,19 +110,7 @@ namespace LkEngine {
 			ImGui::PopID();
 			//--------------------------------------------------
 
-			if (m_Scene)
-			{
-				auto& registry = m_Scene->GetRegistry();
-				registry.each([&](auto entityID)
-					{
-						Entity entity{ entityID, m_Scene.get() };
-						DrawEntityNode(entity);
-					});
-
-				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-					SelectedEntityID = {};
-			}
-			Entity SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntityID);
+			SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntityID);
 
 			//--------------------------------------------------
 			// LEFT SIDEBAR
@@ -168,43 +155,56 @@ namespace LkEngine {
 
 					    ImGui::TreePop();
 					}
-
-					//UI_SceneMenu();
-					UI_SceneContent();
+					//UI_SceneContent();
 
 					if (SelectedEntity)
 					{
-						//DrawComponents(SelectedEntity);
-						UI_SelectedEntity();
+						DrawComponents(SelectedEntity);
 					}
 					ImGui::EndGroup();
 				}
-			}
-			ImGui::End(); 
-			//--------------------------------------------------
+				ImGui::Text("Selected ID: %llu", SelectedEntityID);
+				ImGui::Text("Selected Entity Handle: %llu", SelectedEntity.IsValid() ? SelectedEntity.GetUUID() : 0);
 
+				if (m_Scene)
+				{
+					auto& registry = m_Scene->GetRegistry();
+					registry.each([&](auto entityID)
+					{
+							Entity entity{ entityID, m_Scene.get() };
+							DrawEntityNode(entity);
+					});
+
+					if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+					{
+						SelectedEntityID = {};
+					}
+
+				}
+
+			}
+			ImGui::End();  
+			//--------------------------------------------------
 
 			//--------------------------------------------------
 			// RIGHT SIDEBAR
 			//--------------------------------------------------
 			static float sidebar_right_width = 340.0f;
 			static float sidebar_right_height = m_ViewportBounds[1].y;
-			//ImGui::SetNextWindowSizeConstraints(ImVec2(sidebar_right_width, sidebar_right_height), ImVec2(600, 4000));
 			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - sidebar_right_width, ImGui::GetCursorPosY()));
 			ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Always);
 			ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 			{
 				ImGui::BeginGroup();
 				if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor)) { }
-				if (ImGui::Checkbox("Stack Debugger", &m_ShowStackTool)) { }
+				//if (ImGui::Checkbox("Stack Debugger", &m_ShowStackTool)) { }
 
 				if (SelectedEntity && m_GizmoType != -1)
 				{
 					DrawImGuizmo(SelectedEntity);
 				}
 
-				if (m_ShowStackTool)
-					ImGui::ShowStackToolWindow();
+				if (m_ShowStackTool) ImGui::ShowStackToolWindow();
 				if (m_ShowStyleEditor)
 				{
 					ImGui::Begin("Style Editor");
@@ -215,18 +215,7 @@ namespace LkEngine {
 				{
 					DockSpace::ApplyDockSpaceLayout();
 				}
-
-				auto& whiteTexture = Renderer2D::Get()->m_WhiteTexture;
-				bool white_texture_loaded = whiteTexture->IsLoaded();
-				if (ImGui::Checkbox("Load 'White' Texture", &white_texture_loaded))
-				{
-					if (white_texture_loaded)
-						whiteTexture->Load();
-					else
-						whiteTexture->Unload();
-				}
-
-				UI_SelectedEntity();
+				//UI_SelectedEntityProperties();
 
 				ImGui::EndGroup();
 			}
@@ -257,12 +246,6 @@ namespace LkEngine {
 				ViewportScalers.x = scale_x;
 				ViewportScalers.y = scale_y;
 
-				ImGui::Text("Mouse normalized (%.2f, %.2f)  Scalers (%.2f, %.2f)",
-					Mouse::Pos.x / center_window_size.x, Mouse::Pos.y / center_window_size.y, 
-					Mouse::Scalers.x,   Mouse::Scalers.y);
-				ImGui::SameLine(0, 20);
-				ImGui::Text("Scaled mouse pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
-
 				ImGui::BeginGroup();
 				{
 					ImGui::Text("Center Window (%1.f, %1.f)", center_window_width, center_window_height);
@@ -273,7 +256,7 @@ namespace LkEngine {
 				}
 				ImGui::EndGroup();
 
-				ImGui::Dummy({ 0, 4 });
+				ImGui::Dummy({ 0, 2 });
 
 				ImGui::BeginGroup();
 				{
@@ -292,18 +275,11 @@ namespace LkEngine {
 
 				}
 				ImGui::EndGroup();
-
-				ImGui::Dummy({ 0, 4 });
-
 				ImGui::EndGroup();
 
 				Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
 				Mouse::Scalers = { scale_x, scale_y };
 
-				//Mouse::CenterPos = { 
-				//	(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
-				//	((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f 
-				//};
 				Mouse::SetCenterPos(
 					(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
 					((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f
@@ -459,8 +435,14 @@ namespace LkEngine {
 		}
 	}
 
-	void EditorLayer::DrawComponents(Entity entity)
+	void EditorLayer::DrawComponents(Entity ent)
 	{
+		Entity entity = m_Scene->GetEntityWithUUID(SelectedEntityID);
+		if (!entity || !entity.IsValid())
+			return;
+
+		UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
+
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -485,18 +467,23 @@ namespace LkEngine {
 		}
 		ImGui::PopItemWidth();
 
-		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& component)
+		if (entity.HasComponent<TransformComponent>())
 		{
-			/* Translation / Position */
-			glm::vec3 translation = component.Translation;
-			//UI::Property::Vector3Control("Position", translation);
-			component.Translation = translation;
+			DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& transform)
+			{
+				ImGui::Text("Position");
+				UI::Property::PositionXY(transform.Translation, 2.0);
 
-			/* Scale */
-			glm::vec3 scale = component.Scale;
-			//UI::Property::Vector3Control("Scale", scale);
-			component.Scale = scale;
-		});
+				ImGui::Text("Scale");
+				ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
+
+				ImGui::Text("Rotation");
+				ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
+				transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
+			});
+		}
+
+		UI::EndSubwindow();
 
 	}
 
@@ -512,33 +499,28 @@ namespace LkEngine {
 		return { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
 	}
 
-    void EditorLayer::UI_SelectedEntity()
+    void EditorLayer::UI_SelectedEntityProperties()
     {
 		static float pos_step_size = 5.0f;
         auto& scene = *Scene::GetActiveScene();
         Entity entity = scene.GetEntityWithUUID(SelectedEntityID);
+		if (!entity)
+			return;
 
-        if (!entity)
-            return;
-
-		SelectedEntity = entity;
-        static uint32_t last_id = 0;
         auto window = Window::Get();
 
+		UI::PushID();
         ImGui::BeginChild(UI_SELECTED_ENTITY_INFO, SelectedEntityMenuSize, true);
-        if (entity && entity.HasComponent<TransformComponent>())
+        if (entity.HasComponent<TransformComponent>())
         {
             ImGui::SeparatorText(SelectedEntity.GetName().c_str());
             ImGui::Indent();
-			//uint32_t id = entity;
-		    //ImGui::PushID(id);
-			UI::PushID();
+
+            //DrawImGuizmo(entity);
 
 			TransformComponent& transform = entity.GetComponent<TransformComponent>();
             ImGui::Text("Position");
 			UI::Property::PositionXY(transform.Translation, pos_step_size);
-
-            DrawImGuizmo(entity);
 
             ImGui::Text("Scale");
             ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
@@ -551,16 +533,13 @@ namespace LkEngine {
 			{
 				ImGui::Text("Sprite Color");
 				SpriteComponent& sc = entity.GetSpriteComponent();
-				UI::Property::RGBAColor(entity, sc.Color);
+				UI::Property::RGBAColor(sc.Color);
 			}
 
             ImGui::Unindent();
-
-            //last_id = id;
-			//ImGui::PopID();
-			UI::PopID();
 		}
         ImGui::EndChild();
+		UI::PopID();
     }
 
     void EditorLayer::DrawImGuizmo(Entity& entity)
@@ -697,8 +676,8 @@ namespace LkEngine {
 	{
         auto window = Window::Get();
 		float menu_height = window->GetHeight() - SelectedEntityMenuSize.y;
-		//ImGui::PushID("##lkengine-scene-content");
-		UI::PushID();
+		ImGui::PushID("##lkengine-scene-content");
+		//UI::PushID();
 		ImGui::BeginGroup();
 		ImGui::SeparatorText("Scene");
 
@@ -720,9 +699,9 @@ namespace LkEngine {
             }
         }
 		ImGui::EndGroup();
-		UI::PopID();
 
-		//ImGui::PopID();
+		//UI::PopID();
+		ImGui::PopID();
         //ImGui::EndChild();
 	}
 

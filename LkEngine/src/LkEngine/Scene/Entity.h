@@ -1,6 +1,8 @@
 #pragma once
+
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
+
 #include <vector>
 #include <glm/glm.hpp>
 #include <entt/entt.hpp>
@@ -50,6 +52,11 @@ namespace LkEngine {
 		void AddExistingComponent(T) 
 		{
 			m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
+		}
+
+		bool IsValid() const 
+		{ 
+			return m_Scene != nullptr;
 		}
 
 		UUID GetUUID() { return GetComponent<IDComponent>().ID; }

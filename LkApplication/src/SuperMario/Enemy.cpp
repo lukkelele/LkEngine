@@ -34,14 +34,9 @@ namespace LkEngine {
         if (EditorLayer::GetSelectedEntity() != m_Entity)
             return;
 
-        ImGui::Begin(EditorLayer::UI_GetSelectedEntityWindowName());
-        ImGui::BeginChild(UI_SELECTED_ENTITY_DETAILS);
-
-        ImGui::SeparatorText("Stats");
+        UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
         ImGui::SliderFloat("Speed", &m_Speed, 0.0f, 5.0f, "%.1f");
-
-        ImGui::EndChild();
-        ImGui::End();
+        UI::EndSubwindow();
     }
 
 }

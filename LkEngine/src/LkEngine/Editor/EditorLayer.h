@@ -56,7 +56,7 @@ namespace LkEngine {
 		void UI_HandleManualWindowResize();
 		void UI_SceneMenu();
 		void UI_SceneContent();
-        void UI_SelectedEntity();
+        void UI_SelectedEntityProperties();
 		void UI_RenderSettingsInformation();
 
 		glm::vec2 GetEditorWindowSize() const;

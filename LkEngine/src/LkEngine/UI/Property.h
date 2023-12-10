@@ -184,7 +184,7 @@ namespace LkEngine::UI {
 			UI::PopID();
 		}
 
-		static void RGBAColor(uint32_t id, glm::vec4& color, float column_width = 100.0f)
+		static void RGBAColor(glm::vec4& color, float column_width = 100.0f)
 		{
 			UI::PushID();
 			ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
