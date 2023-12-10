@@ -1,5 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/UI/UICore.h"
+#include "LkEngine/Editor/EditorLayer.h"
+
 #include <imgui_internal.h>
 
 
@@ -28,15 +30,16 @@ namespace LkEngine::UI {
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
 
-    static int s_UIContextID = 0;
     static uint32_t s_Counter = 0;
+    static int s_UIContextID = 0;
     static char s_IDBuffer[16] = "##";
     static char s_LabelIDBuffer[1024];
-
+    //std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
+    const char* SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
     const char* GenerateID()
     {
-        _itoa_s(s_Counter++, s_IDBuffer + 2, sizeof(s_IDBuffer) - 2, 16);
+        LK_ITOA(s_Counter++, s_IDBuffer + 2, sizeof(s_IDBuffer) - 2, 16);
         return s_IDBuffer;
     }
 
@@ -96,8 +99,27 @@ namespace LkEngine::UI {
                 currentNavWindow = currentNavWindow->RootWindow;
             }
         }
-
         return currentNavWindow == ImGui::FindWindowByName(windowName);
+    }
+
+    const char* GetSelectedEntityWindowName()
+    {
+        return SelectedEntityWindow;
+    }
+
+    void BeginSubwindow(const char* windowName)
+    {
+        PushID();
+        //ImGui::Begin(EditorLayer::UI_GetSelectedEntityWindowName());
+        ImGui::Begin(SelectedEntityWindow);
+        ImGui::BeginChild(windowName);
+    }
+
+    void EndSubwindow()
+    {
+        ImGui::EndChild();
+        ImGui::End();
+        PopID();
     }
 
 }

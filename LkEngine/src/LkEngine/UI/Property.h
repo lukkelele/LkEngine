@@ -1,25 +1,28 @@
 #pragma once
+
 #include "LkEngine/Core/Base.h"
+#include "LkEngine/UI/UICore.h"
+#include "LkEngine/Scene/Components.h"
+
 #include <imgui/imgui.h>
 #include <imgui_internal.h>
 #include <glm/glm.hpp>
-#include "LkEngine/Scene/Components.h"
 
 
 namespace LkEngine::UI {
 
     namespace Property {
 
-		static void Rotation2D(uint32_t id, TransformComponent& transform)
+		static void Rotation2D(TransformComponent& transform)
 		{
-			ImGui::PushID(id);
+			UI::PushID();
 			ImGui::SliderFloat2("Rot", &transform.Rotation.x, -6.0f, 6.0f, "%.3f");
-			ImGui::PopID();
+			UI::PopID();
 		}
 
 		static void Scale2D(uint32_t id, TransformComponent& transform)
 		{
-			ImGui::PushID(id);
+			UI::PushID();
 
 			// Submit render
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 0));
@@ -40,8 +43,7 @@ namespace LkEngine::UI {
 
 			ImGui::PopStyleVar(1);
 
-			ImGui::PopID();
-
+			UI::PopID();
 		}
 
 		static void Rotation3D(float rot)
@@ -49,9 +51,11 @@ namespace LkEngine::UI {
 		}
 
 		// 2D
-		static void PositionXY(uint32_t id, glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
+		//static void PositionXY(uint32_t id, glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
+		static void PositionXY(glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
 		{
-			ImGui::PushID(id);
+			UI::PushID();
+
 			ImGuiIO& io = ImGui::GetIO();
 			auto boldFont = io.Fonts->Fonts[0];
 
@@ -103,13 +107,14 @@ namespace LkEngine::UI {
 				ImGui::EndTable();
 			}
 			ImGui::PopStyleVar(2);
-			ImGui::PopID();
+
+			UI::PopID();
 		}
 
-		static void PositionXYZ(uint32_t id, glm::vec3& pos, float step = 1.0f, 
-			float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
+		//static void PositionXYZ(uint32_t id, glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
+		static void PositionXYZ(glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
 		{
-			ImGui::PushID(id);
+			UI::PushID();
 			ImGuiIO& io = ImGui::GetIO();
 			auto boldFont = io.Fonts->Fonts[0];
 
@@ -175,13 +180,13 @@ namespace LkEngine::UI {
 				ImGui::EndTable();
 			}
 			ImGui::PopStyleVar(2);
-			ImGui::PopID();
+			
+			UI::PopID();
 		}
 
 		static void RGBAColor(uint32_t id, glm::vec4& color, float column_width = 100.0f)
 		{
-			//ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_RowBg;
-			ImGui::PushID(id);
+			UI::PushID();
 			ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
@@ -254,7 +259,7 @@ namespace LkEngine::UI {
 			}
 			ImGui::PopStyleVar(2);
 
-			ImGui::PopID();
+			UI::PopID();
 		}
 
     }

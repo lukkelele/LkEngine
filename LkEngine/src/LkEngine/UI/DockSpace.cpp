@@ -12,13 +12,6 @@ namespace LkEngine {
     ImGuiID DockSpace::BottomBarDockID;
     ImGuiID DockSpace::SidebarLeftDockID;
     ImGuiID DockSpace::SidebarRightDockID;
-    //ImVec2 DockSpace::LastViewportSize = ImVec2(0, 0);
-    //ImVec2 DockSpace::LastCenterWindowSize = ImVec2(0, 0);
-    //ImVec2 DockSpace::BottomBarSize = ImVec2(0, 0);
-    //ImVec2 DockSpace::CenterWindowSize = ImVec2(0, 0);
-    //ImVec2 DockSpace::TopBarSize = ImVec2(0, 0);
-    //ImVec2 DockSpace::SidebarLeftSize = ImVec2(0, 0);
-    //ImVec2 DockSpace::SidebarRightSize = ImVec2(0, 0);
     float DockSpace::Sidebar_Left_Ratio = 0.20f;
     float DockSpace::Sidebar_Right_Ratio = 0.20f;
     float DockSpace::TopBottom_Ratio = 0.80f;
@@ -120,17 +113,25 @@ namespace LkEngine {
         // Split the top horizontally to create the top bar
         auto dock_id_middle = dock_id_top;
         auto dock_id_new_top = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Up, 0.08f, nullptr, &dock_id_top);
+
         // Split vertically to create sidebars
         if (Sidebar_Left_Enabled)
+        {
             dock_id_left = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Left, Sidebar_Left_Ratio, nullptr, &dock_id_top);
+        }
         else
+        {
             dock_id_left = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Left, 0, nullptr, &dock_id_top);
-
-            //dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);
+        }
+        
         if (Sidebar_Right_Enabled)
+        {
             dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, Sidebar_Right_Ratio, nullptr, &dock_id_top);
+        }
         else
+        {
             dock_id_right = ImGui::DockBuilderSplitNode(dock_id_top, ImGuiDir_Right, 0, nullptr, &dock_id_top);
+        }
         auto dock_id_center = dock_id_top;  // Center part is the remaining space in dock_id_top
 
         // Store dock ID's to be able to fetch size and position of the center positioned render window
