@@ -11,6 +11,7 @@ namespace LkEngine{
 	struct IDComponent
 	{
 		UUID ID;
+		bool Removable = true;
 
 		IDComponent() = default;
 		IDComponent(const IDComponent&) = default;
@@ -19,6 +20,7 @@ namespace LkEngine{
 	struct TagComponent
 	{
 		std::string Tag;
+		bool Removable = true;
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
@@ -33,6 +35,7 @@ namespace LkEngine{
 		glm::quat Rotation = { 1.0f, 0.0f, 0.0f, 0.0f };
 		// TODO: Patch out the use of Rotation2D and just use the Rotation quaternion
 		float Rotation2D = 0.0f;
+		bool Removable = true;
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;
@@ -76,6 +79,7 @@ namespace LkEngine{
         glm::vec4 Color; 
 		int TextureID = 0; // default to white texture (for 2D)
 		std::string TextureName = ""; // FIXME: TEMPORARY !!!
+		bool Removable = true;
 
         SpriteComponent(const std::string& filepath, 
                         const glm::vec2& size = { 0.0f, 0.0f }, 
@@ -114,6 +118,7 @@ namespace LkEngine{
 		CameraType Type;
 		//SceneCamera* CameraRef;
 		Camera* CameraRef;
+		bool Removable = true;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent& other) = default;
@@ -135,6 +140,7 @@ namespace LkEngine{
 		bool IsBullet = false;
 		// Storage for runtime
 		void* RuntimeBody = nullptr;
+		bool Removable = true;
 
 		RigidBody2DComponent() = default;
 		RigidBody2DComponent(const RigidBody2DComponent& other) = default;
@@ -150,12 +156,11 @@ namespace LkEngine{
 
 		// Storage for runtime
 		void* RuntimeFixture = nullptr;
+		bool Removable = true;
 
 		BoxCollider2DComponent() = default;
 		BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
 	};
-
-
 
 
 	template<typename... Component>

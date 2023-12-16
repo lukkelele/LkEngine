@@ -382,44 +382,53 @@ namespace LkEngine {
 	template<typename T, typename UIFunction>
 	void EditorLayer::DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
-		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen 
+		static const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen 
 			| ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth
 			| ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 
-		if (entity.HasComponent<T>())
+		if (!entity.HasComponent<T>())
+			return;
+
+		auto& component = entity.GetComponent<T>();
+		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImGui::Separator();
+		bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+		ImGui::PopStyleVar();
+		ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+
+		if (ImGui::Button("+", ImVec2(lineHeight, lineHeight)))
 		{
-			auto& component = entity.GetComponent<T>();
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-			ImGui::Separator();
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-			ImGui::PopStyleVar();
-			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-
-			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
-			{
-				ImGui::OpenPopup("ComponentSettings");
-			}
-
-			bool removeComponent = false;
-			if (ImGui::BeginPopup("ComponentSettings"))
-			{
-				if (ImGui::MenuItem("Remove component"))
-					removeComponent = true;
-				ImGui::EndPopup();
-			}
-
-			if (open)
-			{
-				uiFunction(component);
-				ImGui::TreePop();
-			}
-
-			if (removeComponent)
-				entity.RemoveComponent<T>();
+			ImGui::OpenPopup("ComponentSettings");
 		}
+
+		bool removeComponent = false;
+		if (ImGui::BeginPopup("ComponentSettings"))
+		{
+			if (component.Removable == true && ImGui::MenuItem("Remove component"))
+				removeComponent = true;
+			ImGui::EndPopup();
+		}
+
+		if (open)
+		{
+			uiFunction(component);
+			ImGui::TreePop();
+		}
+
+		if (removeComponent)
+		{
+			// Check if component can be removed
+			auto& component = entity.GetComponent<T>();
+			if (component.Removable == true)
+			{
+				LOG_DEBUG("Removing component from {}", entity.GetName());
+				entity.RemoveComponent<T>();
+			}
+		}
+		
 	}
 
 	template<typename T>
@@ -467,24 +476,25 @@ namespace LkEngine {
 		}
 		ImGui::PopItemWidth();
 
-		if (entity.HasComponent<TransformComponent>())
+		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& transform)
 		{
-			DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& transform)
-			{
-				ImGui::Text("Position");
-				UI::Property::PositionXY(transform.Translation, 2.0);
+			ImGui::Text("Position");
+			UI::Property::PositionXY(transform.Translation, 2.0);
 
-				ImGui::Text("Scale");
-				ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
+			ImGui::Text("Scale");
+			ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
 
-				ImGui::Text("Rotation");
-				ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
-				transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
-			});
-		}
+			ImGui::Text("Rotation");
+			ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
+			transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
+		});
+
+		DrawComponent<SpriteComponent> ("Color", entity, [&entity](auto& sprite)
+		{
+			UI::Property::RGBAColor(sprite.Color);
+		});
 
 		UI::EndSubwindow();
-
 	}
 
 	std::pair<float, float> EditorLayer::GetMouseViewportSpace(bool primaryViewport)
@@ -544,16 +554,18 @@ namespace LkEngine {
 
     void EditorLayer::DrawImGuizmo(Entity& entity)
     {
+		TransformComponent& tc = entity.GetComponent<TransformComponent>();
+		if (&tc == nullptr) 
+			return;
+        glm::mat4& transform_matrix = tc.GetTransform();
+
 		auto& scene = *Scene::GetActiveScene();
         auto& cam = *scene.GetActiveCamera();
         auto& cam_pos = cam.GetPos();
         auto& view_matrix = cam.GetView();
         auto& proj_matrix = cam.GetProjection();
 
-		//MeshComponent& mesh = entity.GetComponent<MeshComponent>();
         SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
-		TransformComponent& tc = entity.GetComponent<TransformComponent>();
-        glm::mat4& transform_matrix = tc.GetTransform();
 
 		float pos_x = m_SecondViewportBounds[0].x;
 		float pos_y = m_SecondViewportBounds[0].y;
@@ -566,8 +578,8 @@ namespace LkEngine {
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
 		auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-		auto spriteRect = Editor::Sprite_GetEdgePoints(sc, tc);
-		auto& left_lower = spriteRect[0];
+		//auto spriteRect = Editor::Sprite_GetEdgePoints(sc, tc);
+		//auto& left_lower = spriteRect[0];
 		//ImGuizmo::SetRect(center_x, center_y, width, height);
         ImGuizmo::SetRect(pos_x, pos_y, width, height);
 
@@ -676,8 +688,8 @@ namespace LkEngine {
 	{
         auto window = Window::Get();
 		float menu_height = window->GetHeight() - SelectedEntityMenuSize.y;
-		ImGui::PushID("##lkengine-scene-content");
-		//UI::PushID();
+		constexpr const char* id = "##lkengine-scene-content";
+		UI::PushID(id);
 		ImGui::BeginGroup();
 		ImGui::SeparatorText("Scene");
 
@@ -700,9 +712,7 @@ namespace LkEngine {
         }
 		ImGui::EndGroup();
 
-		//UI::PopID();
-		ImGui::PopID();
-        //ImGui::EndChild();
+		UI::PopID(id);
 	}
 
 	glm::vec2 EditorLayer::GetEditorWindowSize() const

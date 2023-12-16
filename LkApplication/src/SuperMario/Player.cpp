@@ -56,6 +56,10 @@ namespace LkEngine {
         playerCam->SetPos(tc.Translation);
         cameraComponent.CameraRef = playerCam;
 
+        sc.Removable = false;
+        tc.Removable = false;
+        cameraComponent.Removable = false;
+
         LOG_DEBUG("Added sprite to \"{}\" with size ({}, {})", m_Name, sc.Size.x, sc.Size.y);
     }
 

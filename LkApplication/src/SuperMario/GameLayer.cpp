@@ -18,11 +18,8 @@ namespace LkEngine {
         m_Renderer2D = Renderer::GetRenderer2D();
         m_Scene = std::shared_ptr<Scene>(Scene::GetActiveScene());
 
-        FileExplorer fileExplorer;
-        auto imagesInAssetsDir = fileExplorer.GetFilesInDirectory("assets/img");
+        auto imagesInAssetsDir = File::GetFilesInDirectory("assets/img");
         auto textureLibrary = TextureLibrary::Get();
-
-        //std::string bgFilename = "sky-background-2d.png";
         std::string bgFilename = "sky-background-2d";
         m_BgTexture = textureLibrary->GetTexture2D(bgFilename);
         LK_ASSERT(m_BgTexture);
@@ -51,8 +48,8 @@ namespace LkEngine {
             enemyPosY += enemy->GetHeight() * (DebugLayer::s_DebugEntities * 1.50f);
             enemy->SetPos(0, enemyPosY);
             // Set texture instead of color
+            //auto& tc = enemyEntity.GetComponent<TransformComponent>();
             auto& sc = enemyEntity.GetComponent<SpriteComponent>();
-            //sc.TextureID = textureLibrary->GetTexture2D("atte_square")->GetRendererID();
             sc.TextureName = "atte_square";
             m_Enemies.push_back(enemy);
         }

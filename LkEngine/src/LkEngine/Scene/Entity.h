@@ -20,7 +20,7 @@ namespace LkEngine {
 
 		void OnUpdate(float ts) {}
 
-		template<typename T, typename... ARGS>
+		template<typename T, typename ...ARGS>
 		T& AddComponent(ARGS&&... args)
 		{
 			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);

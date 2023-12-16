@@ -1,7 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Renderer/Texture.h"
-#include "LkEngine/IO/FileExplorer.h"
+#include "LkEngine/IO/File.h"
 
 
 namespace LkEngine {
@@ -94,7 +94,8 @@ namespace LkEngine {
     // Iterate the textures/images directory and create the texture objects
     void TextureLibrary::LoadTextures()
     {
-        std::vector<File> textureFiles = FileExplorer::GetFilesInDirectory(m_TexturesDir);
+        //std::vector<File> textureFiles = FileExplorer::GetFilesInDirectory(m_TexturesDir);
+        std::vector<File> textureFiles = File::GetFilesInDirectory(m_TexturesDir);
         for (const auto& file : textureFiles)
         {
             // TODO: Need to make it so 2D and 3D texture are located in different dirs

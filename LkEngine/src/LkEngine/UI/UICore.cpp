@@ -29,12 +29,10 @@ namespace LkEngine::UI {
 		| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-
     static uint32_t s_Counter = 0;
     static int s_UIContextID = 0;
     static char s_IDBuffer[16] = "##";
     static char s_LabelIDBuffer[1024];
-    //std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
     const char* SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
     const char* GenerateID()
@@ -49,10 +47,20 @@ namespace LkEngine::UI {
         s_Counter = 0;
     }
 
+    void PushID(const char* id)
+    {
+        ImGui::PushID(id);
+    }
+
     void PopID()
     {
         ImGui::PopID();
         s_UIContextID--;
+    }
+
+    void PopID(const char* id)
+    {
+        ImGui::PopID();
     }
 
     bool IsInputEnabled()

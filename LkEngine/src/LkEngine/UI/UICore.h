@@ -14,7 +14,9 @@ namespace LkEngine::UI {
 
     const char* GenerateID();
     void PushID();
+    void PushID(const char* id);
     void PopID();
+    void PopID(const char* id);
     void Separator(ImVec2 size, ImVec4 color);
     bool IsInputEnabled();
     void SetInputEnabled(bool enabled);
