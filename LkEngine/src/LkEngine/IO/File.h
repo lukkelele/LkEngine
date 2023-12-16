@@ -25,6 +25,8 @@ namespace LkEngine {
         //static std::string ExtractFilenameWithoutExtension(const std::string& filename);
         static std::string ExtractFilenameWithoutExtension(const std::string& filename, const FileExtension& fileExtension = FileExtension::PNG);
         static std::string ExtractFilename(const std::string& filepath);
+        static File File::GetFile(const std::string& filePath);
+        static std::vector<File> File::GetFilesInDirectory(const std::string& directory);
 
         std::string GetName() const { return m_Name; }
         std::string GetPath() const { return m_Path; }
