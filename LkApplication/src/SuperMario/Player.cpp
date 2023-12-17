@@ -1,5 +1,8 @@
 #include "Player.h"
 
+#include "LkEngine/Scene/Components.h"
+#include "LkEngine/Scene/Entity.h"
+
 
 namespace LkEngine {
 

@@ -12,8 +12,8 @@
 #include "LkEngine/Input/Mouse.h"
 #include "LkEngine/Input/Input.h"
 
-#include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Scene.h"
+#include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 
 #include "LkEngine/Renderer/Image.h"
@@ -34,4 +34,4 @@
 
 #include "LkEngine/Debug/DebugLayer.h"
 
-#include "LkEngine/Physics/2D/Physics2D.h"
+#include "LkEngine/Physics2D/Physics2D.h"

@@ -16,7 +16,8 @@ namespace LkEngine {
     void GameLayer::OnAttach()
     {
         m_Renderer2D = Renderer::GetRenderer2D();
-        m_Scene = std::shared_ptr<Scene>(Scene::GetActiveScene());
+        //m_Scene = std::shared_ptr<Scene>(Scene::GetActiveScene());
+        m_Scene = Scene::Create("GameLayer");
 
         auto imagesInAssetsDir = File::GetFilesInDirectory("assets/img");
         auto textureLibrary = TextureLibrary::Get();
@@ -48,9 +49,7 @@ namespace LkEngine {
             enemyPosY += enemy->GetHeight() * (DebugLayer::s_DebugEntities * 1.50f);
             enemy->SetPos(0, enemyPosY);
             // Set texture instead of color
-            //auto& tc = enemyEntity.GetComponent<TransformComponent>();
-            auto& sc = enemyEntity.GetComponent<SpriteComponent>();
-            sc.TextureName = "atte_square";
+            auto& sc = enemyEntity.GetComponent<SpriteComponent>().TextureName = "atte_square";
             m_Enemies.push_back(enemy);
         }
     }

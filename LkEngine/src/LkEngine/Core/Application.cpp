@@ -25,7 +25,8 @@ namespace LkEngine {
         m_Renderer = Renderer::Create();
         
         m_Renderer->Init();
-        m_Scene = Scene::Create();
+        m_Scene = Scene::Create("BaseScene"); // Base Scene
+        LOG_INFO("Created scene: {}", m_Scene->GetName());
         m_EditorLayer = EditorLayer::Create(*m_Scene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);
 
@@ -106,6 +107,12 @@ namespace LkEngine {
     bool Application::IsMouseEnabled()
     {
         return m_Scene->GetActiveCamera()->IsMouseEnabled();
+    }
+
+    void Application::AddScene(Scene& scene)
+    {
+        m_Scenes[Scene::GetSceneCount()] = std::shared_ptr<Scene>(&scene);
+        LOG_DEBUG("Added scene: {}, scene count: {}", scene.GetName(), Scene::GetSceneCount());
     }
 
 

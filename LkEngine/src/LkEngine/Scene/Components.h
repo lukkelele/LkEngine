@@ -1,12 +1,18 @@
 #pragma once
-#include "LkEngine/Scene/Components/IDComponent.h"
-#include "LkEngine/Scene/Components/TagComponent.h"
-#include "LkEngine/Scene/Components/TransformComponent.h"
-#include "LkEngine/Scene/Components/CameraComponent.h"
-#include "LkEngine/Scene/Components/SpriteComponent.h"
+
+//#include "LkEngine/Scene/Components/IDComponent.h"
+//#include "LkEngine/Scene/Components/TagComponent.h"
+//#include "LkEngine/Scene/Components/TransformComponent.h"
+//#include "LkEngine/Scene/Components/CameraComponent.h"
+//#include "LkEngine/Scene/Components/SpriteComponent.h"
+#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/UUID.h"
+#include "LkEngine/Math/Math.h"
 
 
 namespace LkEngine{
+
+	class Camera;
 
 	struct IDComponent
 	{
@@ -24,8 +30,7 @@ namespace LkEngine{
 
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
-		TagComponent(const std::string& Tag)
-			: Tag(Tag) {}
+		TagComponent(const std::string& Tag) : Tag(Tag) {}
 	};
 
     struct TransformComponent
@@ -39,8 +44,7 @@ namespace LkEngine{
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;
-		TransformComponent(const glm::vec3& Translation)
-			: Translation(Translation) {}
+		TransformComponent(const glm::vec3& Translation) : Translation(Translation) {}
 
 		glm::vec3 GetTranslation() const { return Translation; }
 		glm::vec3 GetScale() const { return Scale; }
@@ -105,7 +109,6 @@ namespace LkEngine{
 		void SetSize(float x, float y) { Size = { x, y }; }
     };
 
-
 	enum class CameraType 
 	{ 
 		Null = -1, 
@@ -116,7 +119,6 @@ namespace LkEngine{
 	struct CameraComponent
 	{
 		CameraType Type;
-		//SceneCamera* CameraRef;
 		Camera* CameraRef;
 		bool Removable = true;
 
@@ -127,10 +129,16 @@ namespace LkEngine{
 		operator const Camera& () const { return *CameraRef; }
 	};
 
-
 	struct RigidBody2DComponent
 	{
-		enum class Type { None = -1, Static, Dynamic, Kinematic };
+		enum class Type 
+		{ 
+			None = -1, 
+			Static, 
+			Dynamic, 
+			Kinematic 
+		};
+
 		Type BodyType;
 		bool FixedRotation = false;
 		float Mass = 1.0f;
@@ -172,8 +180,8 @@ namespace LkEngine{
 		IDComponent, 
 		TagComponent, 
 		TransformComponent,
-		CameraComponent,
-		SpriteComponent
+		SpriteComponent,
+		CameraComponent
 	>;
 
 }

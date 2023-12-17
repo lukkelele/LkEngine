@@ -20,24 +20,28 @@ namespace LkEngine {
 
 		if (raycastHits == 1)
 		{
+			LOG_DEBUG("Raycast hits: 1");
 		    Raycast2DResult raycast = raycastResults.at(0);
 		    Entity entity = raycast.HitEntity;
-		    EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
+		    //EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
 
-		    if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
+		    //if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
+			LOG_TRACE("MouseButton::ButtonLeft pressed: {}", Mouse::IsButtonPressed(MouseButton::ButtonLeft) ? "YES" : "NO");
+			LOG_WARN("EditorLayer::SelectedEntityID == 0: {}", EditorLayer::SelectedEntityID == 0 ? "YES" : "NO");
+		    //if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
+		    if ((Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0))
 		    {
 		        EditorLayer::SelectedEntity = raycast.HitEntity;
 				EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
-		        //EditorLayer::SelectedEntityID = hitEntityID;
 		    }
 		}
-
 		else if (raycastHits > 1)
 		{
+			//LOG_DEBUG("Raycast hits: >1");
 		    for (const auto& raycast : raycastResults)
 		    {
+				LOG_CRITICAL("iterating entity hitcast results");
 		        Entity entity = raycast.HitEntity;
-		        
 		        uint64_t hitEntityID = entity.GetUUID();
 		        if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
 		        {

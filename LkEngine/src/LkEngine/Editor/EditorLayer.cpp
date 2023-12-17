@@ -8,6 +8,7 @@
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/UI/ImGuiUtilities.h"
 #include "LkEngine/Editor/Editor.h"
+#include "LkEngine/Scene/Scene.h"
 
 
 namespace LkEngine {
@@ -23,7 +24,6 @@ namespace LkEngine {
 		m_ViewportBounds[1] = { Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight() };
 		m_SecondViewportBounds[0] = { 0, 0 };
 		m_SecondViewportBounds[1] = { 0, 0 };
-		
 		m_ShowStackTool = true;
 		Enabled = true;
 	}
@@ -80,239 +80,244 @@ namespace LkEngine {
 
 		ImGui::PopStyleColor(1);
 		ImGui::PopStyleVar(1);
-		{
-			//--------------------------------------------------
-			// TOP MENUBAR
-			//--------------------------------------------------
-			static float topbar_height = 30.0f;
+		
+		//--------------------------------------------------
+		// TOP MENUBAR
+		//--------------------------------------------------
+		static float topbar_height = 30.0f;
 
-			ImGui::PushID(UI_TOP_BAR);
-			ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
-			ImGui::Begin(UI_TOP_BAR, NULL, UI::TopbarFlags);
+		ImGui::PushID(UI_TOP_BAR);
+		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
+		ImGui::Begin(UI_TOP_BAR, NULL, UI::TopbarFlags);
+		ImGui::PopStyleVar(1);
+		{
+			ImGui::BeginMenuBar();
+			topbar_height = ImGui::GetFrameHeight();
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("New")) { }
+				ImGui::EndMenu();
+			}
+			if (ImGui::MenuItem("Render Information"))
+			{
+				ShowRenderInformationWindow = !ShowRenderInformationWindow;
+			}
+			ImGui::EndMenuBar();
+		}
+		ImGui::End();
+		ImGui::PopID();
+		//--------------------------------------------------
+
+		if (m_Scene)
+		{
+			SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntityID);
+		}
+
+		//--------------------------------------------------
+		// LEFT SIDEBAR
+		//--------------------------------------------------
+		static float sidebar_left_width = 340.0f;
+		static float sidebar_left_height = m_ViewportBounds[1].y;
+		ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()));
+		ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Always);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 12));
+
+		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
+		{
 			ImGui::PopStyleVar(1);
 			{
-				ImGui::BeginMenuBar();
-				topbar_height = ImGui::GetFrameHeight();
-				if (ImGui::BeginMenu("File"))
+				// TODO: initialize this bool by checking the depth in the graphics context
+				static bool depth_test_checkbox = false;
+				ImGui::BeginGroup();
+				if (ImGui::Checkbox("Depth Testing", &depth_test_checkbox))
 				{
-					if (ImGui::MenuItem("New")) { }
-					ImGui::EndMenu();
+					if (depth_test_checkbox == true)
+					{
+						Window::Get()->SetDepthEnabled(true);
+					}
+					else
+					{
+						Window::Get()->SetDepthEnabled(false);
+					}
 				}
-				if (ImGui::MenuItem("Render Information"))
+
+				ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+				if (ImGui::TreeNode("Colors"))
 				{
-					ShowRenderInformationWindow = !ShowRenderInformationWindow;
+				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
+				    ImGui::PushID("##lkengine-leftpanel-colors");
+				    ImGui::Text("Background"); 
+				    ImGui::SliderFloat("##x", &Renderer::s_BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##y", &Renderer::s_BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##z", &Renderer::s_BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##w", &Renderer::s_BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
+				    ImGui::PopID();
+
+				    ImGui::TreePop();
 				}
-				ImGui::EndMenuBar();
+				//UI_SceneContent();
+
+				//if (SelectedEntity)
+				if (SelectedEntity)
+				{
+					DrawComponents(SelectedEntity);
+				}
+				ImGui::EndGroup();
 			}
-			ImGui::End();
-			ImGui::PopID();
-			//--------------------------------------------------
+			ImGui::Text("Selected ID: %llu", SelectedEntityID);
+			ImGui::Text("Selected Entity Handle: %llu", SelectedEntity.IsValid() ? SelectedEntity.GetUUID() : 0);
+			ImGui::Text("Active Scene: %s", Scene::GetActiveSceneName().c_str());
+			ImGui::Text("Scenes in memory: %d", Scene::GetSceneCount());
 
-			SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntityID);
-
-			//--------------------------------------------------
-			// LEFT SIDEBAR
-			//--------------------------------------------------
-			static float sidebar_left_width = 340.0f;
-			static float sidebar_left_height = m_ViewportBounds[1].y;
-			ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()));
-			ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Always);
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 12));
-
-			ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
+			if (m_Scene)
 			{
-				ImGui::PopStyleVar(1);
+				auto& registry = m_Scene->GetRegistry();
+				registry.each([&](auto entityID)
 				{
-					// TODO: initialize this bool by checking the depth in the graphics context
-					static bool depth_test_checkbox = false;
-					ImGui::BeginGroup();
-					if (ImGui::Checkbox("Depth Testing", &depth_test_checkbox))
-					{
-						if (depth_test_checkbox == true)
-						{
-							Window::Get()->SetDepthEnabled(true);
-						}
-						else
-						{
-							Window::Get()->SetDepthEnabled(false);
-						}
-					}
+						Entity entity{ entityID, m_Scene };
+						DrawEntityNode(entity);
+				});
 
-					ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-					if (ImGui::TreeNode("Colors"))
-					{
-					    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
-					    ImGui::PushID("##lkengine-leftpanel-colors");
-					    ImGui::Text("Background"); 
-					    ImGui::SliderFloat("##x", &Renderer::s_BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-					    ImGui::SliderFloat("##y", &Renderer::s_BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-					    ImGui::SliderFloat("##z", &Renderer::s_BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-					    ImGui::SliderFloat("##w", &Renderer::s_BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-					    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
-					    ImGui::PopID();
-
-					    ImGui::TreePop();
-					}
-					//UI_SceneContent();
-
-					if (SelectedEntity)
-					{
-						DrawComponents(SelectedEntity);
-					}
-					ImGui::EndGroup();
-				}
-				ImGui::Text("Selected ID: %llu", SelectedEntityID);
-				ImGui::Text("Selected Entity Handle: %llu", SelectedEntity.IsValid() ? SelectedEntity.GetUUID() : 0);
-
-				if (m_Scene)
+				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 				{
-					auto& registry = m_Scene->GetRegistry();
-					registry.each([&](auto entityID)
-					{
-							Entity entity{ entityID, m_Scene.get() };
-							DrawEntityNode(entity);
-					});
-
-					if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-					{
-						SelectedEntityID = {};
-					}
-
+					SelectedEntityID = {};
 				}
 
 			}
-			ImGui::End();  
-			//--------------------------------------------------
 
-			//--------------------------------------------------
-			// RIGHT SIDEBAR
-			//--------------------------------------------------
-			static float sidebar_right_width = 340.0f;
-			static float sidebar_right_height = m_ViewportBounds[1].y;
-			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - sidebar_right_width, ImGui::GetCursorPosY()));
-			ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Always);
-			ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
-			{
-				ImGui::BeginGroup();
-				if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor)) { }
-				//if (ImGui::Checkbox("Stack Debugger", &m_ShowStackTool)) { }
-
-				if (SelectedEntity && m_GizmoType != -1)
-				{
-					DrawImGuizmo(SelectedEntity);
-				}
-
-				if (m_ShowStackTool) ImGui::ShowStackToolWindow();
-				if (m_ShowStyleEditor)
-				{
-					ImGui::Begin("Style Editor");
-					ImGui::ShowStyleEditor();
-					ImGui::End();
-				}
-				if (ImGui::Checkbox("Left dock", &DockSpace::Sidebar_Left_Enabled))
-				{
-					DockSpace::ApplyDockSpaceLayout();
-				}
-				//UI_SelectedEntityProperties();
-
-				ImGui::EndGroup();
-			}
-			ImGui::End();
-
-
-			//--------------------------------------------------
-			// BOTTOM BAR
-			//--------------------------------------------------
-			static float bottombar_height = 180.0f;
-			ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
-			float min_width = viewport->Size.x - (sidebar_right_width + sidebar_left_width);
-			ImGui::SetNextWindowSizeConstraints(ImVec2(min_width, 180.0f), ImVec2(4000, 800));
-			ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport->Size.y - bottombar_height));
-			ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
-			{
-				ImGui::BeginGroup();
-				auto mouse_pos = Mouse::GetMousePos();
-				Mouse::Pos = Mouse::GetMousePos();
-				Mouse::Pos.y = viewport->Size.y - bottombar_height - Mouse::Pos.y;
-				Mouse::Pos.x -= sidebar_left_width;
-
-				ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
-				ImGui::SameLine(0, 20);
-
-				float scale_x = center_window_width / m_ViewportBounds[1].x;
-				float scale_y = center_window_height / m_ViewportBounds[1].y;
-				ViewportScalers.x = scale_x;
-				ViewportScalers.y = scale_y;
-
-				ImGui::BeginGroup();
-				{
-					ImGui::Text("Center Window (%1.f, %1.f)", center_window_width, center_window_height);
-					ImGui::SameLine(0, 20);
-					ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / Mouse::Scalers.x, center_window_height / Mouse::Scalers.y );
-					ImGui::SameLine(0, 20);
-					ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
-				}
-				ImGui::EndGroup();
-
-				ImGui::Dummy({ 0, 2 });
-
-				ImGui::BeginGroup();
-				{
-					auto textureLibrary = Application::Get()->GetTextureLibrary();
-					auto renderer2D = Renderer2D::Get();
-					ImGui::Text("Texture Data");
-					ImGui::SameLine();
-
-					int boundSlotsCount = renderer2D->GetBoundTextureSlotsCount();
-					ImGui::Text("Total slots: %d", boundSlotsCount);
-					for (int i = 0; i < boundSlotsCount; i++)
-					{
-						auto boundTexture = renderer2D->GetBoundTexture(i);
-						ImGui::Text("Slot %d: %s,   id: %d", i, boundTexture->GetName().c_str(), boundTexture->GetRendererID());
-					}
-
-				}
-				ImGui::EndGroup();
-				ImGui::EndGroup();
-
-				Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
-				Mouse::Scalers = { scale_x, scale_y };
-
-				Mouse::SetCenterPos(
-					(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
-					((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f
-				);
-
-				auto& active_cam = *Scene::GetActiveScene()->GetActiveCamera();
-				glm::vec2 cam_pos = active_cam.GetPos();
-				ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
-
-			}
-			ImGui::End();
-			//--------------------------------------------------
-
-			center_window_width = viewport->Size.x - sidebar_left_width - sidebar_right_width;
-			center_window_height = viewport->Size.y - bottombar_height - topbar_height;
-			center_window_size = { center_window_width, center_window_height };
-
-			// Lower left point/bound 
-			center_window_xpos = sidebar_left_width;
-			center_window_ypos = bottombar_height;
-
-			// Top right point/bound
-			m_SecondViewportBounds[0] = { center_window_xpos, topbar_height };
-			m_SecondViewportBounds[1] = { 
-				(center_window_xpos + center_window_width), 
-				(center_window_ypos + center_window_height - bottombar_height + topbar_height)
-			};
-
-			EditorWindowSize = { center_window_size.x, center_window_size.y };
-			EditorWindowPos = { center_window_xpos, center_window_ypos };
-
-			glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);
 		}
+		ImGui::End();  
+		//--------------------------------------------------
+
+		//--------------------------------------------------
+		// RIGHT SIDEBAR
+		//--------------------------------------------------
+		static float sidebar_right_width = 340.0f;
+		static float sidebar_right_height = m_ViewportBounds[1].y;
+		ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - sidebar_right_width, ImGui::GetCursorPosY()));
+		ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Always);
+		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
+		{
+			ImGui::BeginGroup();
+			if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor)) { }
+			//if (ImGui::Checkbox("Stack Debugger", &m_ShowStackTool)) { }
+
+			if (SelectedEntity && m_GizmoType != -1)
+			{
+				DrawImGuizmo(SelectedEntity);
+			}
+
+			if (m_ShowStackTool) ImGui::ShowStackToolWindow();
+			if (m_ShowStyleEditor)
+			{
+				ImGui::Begin("Style Editor");
+				ImGui::ShowStyleEditor();
+				ImGui::End();
+			}
+			if (ImGui::Checkbox("Left dock", &DockSpace::Sidebar_Left_Enabled))
+			{
+				DockSpace::ApplyDockSpaceLayout();
+			}
+			//UI_SelectedEntityProperties();
+
+			ImGui::EndGroup();
+		}
+		ImGui::End();
+
+
+		//--------------------------------------------------
+		// BOTTOM BAR
+		//--------------------------------------------------
+		static float bottombar_height = 180.0f;
+		ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
+		float min_width = viewport->Size.x - (sidebar_right_width + sidebar_left_width);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(min_width, 180.0f), ImVec2(4000, 800));
+		ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport->Size.y - bottombar_height));
+		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
+		{
+			ImGui::BeginGroup();
+			auto mouse_pos = Mouse::GetMousePos();
+			Mouse::Pos = Mouse::GetMousePos();
+			Mouse::Pos.y = viewport->Size.y - bottombar_height - Mouse::Pos.y;
+			Mouse::Pos.x -= sidebar_left_width;
+
+			ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
+			ImGui::SameLine(0, 20);
+
+			float scale_x = center_window_width / m_ViewportBounds[1].x;
+			float scale_y = center_window_height / m_ViewportBounds[1].y;
+			ViewportScalers.x = scale_x;
+			ViewportScalers.y = scale_y;
+
+			ImGui::BeginGroup();
+			{
+				ImGui::Text("Center Window (%1.f, %1.f)", center_window_width, center_window_height);
+				ImGui::SameLine(0, 20);
+				ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / Mouse::Scalers.x, center_window_height / Mouse::Scalers.y );
+				ImGui::SameLine(0, 20);
+				ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+			}
+			ImGui::EndGroup();
+
+			ImGui::Dummy({ 0, 2 });
+
+			ImGui::BeginGroup();
+			{
+				auto textureLibrary = Application::Get()->GetTextureLibrary();
+				auto renderer2D = Renderer2D::Get();
+				ImGui::Text("Texture Data");
+				ImGui::SameLine();
+
+				int boundSlotsCount = renderer2D->GetBoundTextureSlotsCount();
+				ImGui::Text("Total slots: %d", boundSlotsCount);
+				for (int i = 0; i < boundSlotsCount; i++)
+				{
+					auto boundTexture = renderer2D->GetBoundTexture(i);
+					ImGui::Text("Slot %d: %s,   id: %d", i, boundTexture->GetName().c_str(), boundTexture->GetRendererID());
+				}
+
+			}
+			ImGui::EndGroup();
+			ImGui::EndGroup();
+
+			Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
+			Mouse::Scalers = { scale_x, scale_y };
+
+			Mouse::SetCenterPos(
+				(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
+				((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f
+			);
+
+			auto& active_cam = *Scene::GetActiveScene()->GetActiveCamera();
+			glm::vec2 cam_pos = active_cam.GetPos();
+			ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
+
+		}
+		ImGui::End();
+		//--------------------------------------------------
+
+		center_window_width = viewport->Size.x - sidebar_left_width - sidebar_right_width;
+		center_window_height = viewport->Size.y - bottombar_height - topbar_height;
+		center_window_size = { center_window_width, center_window_height };
+
+		// Lower left point/bound 
+		center_window_xpos = sidebar_left_width;
+		center_window_ypos = bottombar_height;
+
+		// Top right point/bound
+		m_SecondViewportBounds[0] = { center_window_xpos, topbar_height };
+		m_SecondViewportBounds[1] = { 
+			(center_window_xpos + center_window_width), 
+			(center_window_ypos + center_window_height - bottombar_height + topbar_height)
+		};
+
+		EditorWindowSize = { center_window_size.x, center_window_size.y };
+		EditorWindowPos = { center_window_xpos, center_window_ypos };
+		glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);
+		
 		ImGui::End(); // Viewport
 
 		HandleExternalWindows();
@@ -330,7 +335,10 @@ namespace LkEngine {
 	void EditorLayer::SelectEntity(Entity& entity)
 	{
 		if (SelectedEntityID != entity.GetUUID())
+		{
 			SelectedEntityID = entity.GetUUID();
+			LOG_DEBUG("Editor: Selecting entity {} ({})", entity.GetName(), entity.GetUUID());
+		}
 	}
 
 	void EditorLayer::DrawEntityNode(Entity entity)
@@ -345,6 +353,7 @@ namespace LkEngine {
 		if (ImGui::IsItemClicked())
 		{
 			SelectedEntityID = entity.GetUUID();
+			LOG_DEBUG("Editor: Selecting entity {} ({})", entity.GetName(), entity.GetUUID());
 		}
 
 		bool entityDeleted = false;
@@ -446,6 +455,9 @@ namespace LkEngine {
 
 	void EditorLayer::DrawComponents(Entity ent)
 	{
+		if (!m_Scene)
+			return;
+
 		Entity entity = m_Scene->GetEntityWithUUID(SelectedEntityID);
 		if (!entity || !entity.IsValid())
 			return;
@@ -542,7 +554,7 @@ namespace LkEngine {
 			if (entity.HasComponent<SpriteComponent>())
 			{
 				ImGui::Text("Sprite Color");
-				SpriteComponent& sc = entity.GetSpriteComponent();
+				SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
 				UI::Property::RGBAColor(sc.Color);
 			}
 
@@ -554,9 +566,10 @@ namespace LkEngine {
 
     void EditorLayer::DrawImGuizmo(Entity& entity)
     {
-		TransformComponent& tc = entity.GetComponent<TransformComponent>();
-		if (&tc == nullptr) 
+		if (!entity.HasComponent<TransformComponent>())
 			return;
+
+		TransformComponent& tc = entity.GetComponent<TransformComponent>();
         glm::mat4& transform_matrix = tc.GetTransform();
 
 		auto& scene = *Scene::GetActiveScene();
@@ -763,6 +776,11 @@ namespace LkEngine {
 
 			ImGui::End();
 		}
+	}
+
+	bool EditorLayer::IsEntitySelected() const
+	{
+		return SelectedEntityID > 0;
 	}
 
 

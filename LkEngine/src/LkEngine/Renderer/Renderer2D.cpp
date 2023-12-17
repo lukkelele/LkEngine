@@ -2,6 +2,7 @@
 #include "LkEngine/Renderer/Renderer2D.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/RenderCommand.h"
+#include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 
 

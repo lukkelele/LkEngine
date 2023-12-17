@@ -1,9 +1,10 @@
 #include "LKpch.h"
 #include "LkEngine/Math/Math.h"
-#include <imgui/imgui_internal.h>
 #include "LkEngine/UI/DockSpace.h"
-#include "LkEngine/Scene/Components/TransformComponent.h"
+#include "LkEngine/Scene/Components.h"
 #include "LkEngine/Core/Window.h"
+
+#include <imgui/imgui_internal.h>
 
 
 namespace LkEngine::Math {

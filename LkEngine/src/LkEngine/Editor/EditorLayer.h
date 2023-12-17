@@ -1,7 +1,8 @@
 #pragma once
+
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Math/Math.h"
-#include "LkEngine/Scene/Scene.h"
+//#include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 
@@ -21,6 +22,8 @@ namespace LkEngine {
     constexpr const char* UI_SIDEBAR_LEFT = "##lkengine-sidebar-left";
     constexpr const char* UI_SIDEBAR_RIGHT = "##lkengine-sidebar-right";
     constexpr const char* UI_SELECTED_ENTITY_INFO = "##lkengine-selected-entity-info";
+
+	class Scene;
 
 	class EditorLayer : public Layer
 	{
@@ -45,21 +48,20 @@ namespace LkEngine {
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 		void SelectEntity(Entity& entity);
+		void SetScene(Scene& scene) { m_Scene = &scene; }
 		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
-		static void Select(Entity& entity) { SelectedEntityID = entity.GetComponent<IDComponent>().ID; }
-
+		//static void Select(Entity& entity); { SelectedEntityID = entity.GetComponent<IDComponent>().ID; }
 		template<typename T, typename UIFunction>
 		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
 		template<typename T>
 		void DisplayAddComponentEntry(const std::string& entryName);
-
 		void UI_HandleManualWindowResize();
 		void UI_SceneMenu();
 		void UI_SceneContent();
         void UI_SelectedEntityProperties();
 		void UI_RenderSettingsInformation();
-
 		glm::vec2 GetEditorWindowSize() const;
+		bool IsEntitySelected() const;
 
 	private:
 		void RenderViewport(); // TODO
@@ -83,7 +85,8 @@ namespace LkEngine {
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
 	private:
-		s_ptr<Scene> m_Scene = nullptr;
+		//s_ptr<Scene> m_Scene = nullptr;
+		Scene* m_Scene = nullptr;
 		glm::vec2 m_ViewportBounds[2];
 		glm::vec2 m_SecondViewportBounds[2];
 		bool m_ShowMetricsTool = false;

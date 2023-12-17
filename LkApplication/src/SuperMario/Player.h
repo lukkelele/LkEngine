@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LkEngine/LkEngine.h"
-
+#include "LkEngine/Scene/Components.h"
 
 namespace LkEngine {
 

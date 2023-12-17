@@ -6,7 +6,7 @@
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Renderer/Camera.h"
 #include "LkEngine/Scene/EntityFactory.h"
-#include "LkEngine/Physics/2D/Physics2D.h"
+#include "LkEngine/Physics2D/Physics2D.h"
 #include "LkEngine/Renderer/Color.h"
 
 
@@ -35,7 +35,8 @@ TestLayer::~TestLayer()
 void TestLayer::OnAttach()
 {
     LOG_DEBUG("TestLayer::OnAttach()");
-    m_Scene = create_s_ptr<Scene>();
+    //m_Scene = create_s_ptr<Scene>();
+    m_Scene = Scene::Create("TestLayer-Scene");
 
     EntityFactory::CreateQuad(*m_Scene, { 750, 200 }, { 240, 520 }, Color::Generate());
     EntityFactory::CreateQuad(*m_Scene, { 400, 320 }, { 400, 110 }, Color::Generate());

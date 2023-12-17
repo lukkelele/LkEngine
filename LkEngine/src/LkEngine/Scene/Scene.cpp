@@ -1,28 +1,46 @@
 #include "LKpch.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/Scene/Entity.h"
+#include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Renderer/RenderCommand.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Renderer/Color.h"
-#include "LkEngine/UI/UILayer.h"
-#include "LkEngine/UI/Property.h"
+#include "LkEngine/Physics2D/Physics2D.h"
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/Editor/EditorLayer.h"
-#include "LkEngine/Physics/2D/Physics2D.h"
+#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/UI/Property.h"
 
 namespace LkEngine {
 
-	Scene::Scene()
+	Scene::Scene(const std::string& name, bool activeScene)
+		: m_Name(name)
 	{
-		s_ActiveScene = this;
 		auto window = Window::Get();
 		float width = window->GetWidth();
 		float height = window->GetHeight();
 
-		m_Camera2D = create_s_ptr<OrthographicCamera>(0, width, 0, height);
+		m_Camera2D = new_s_ptr<OrthographicCamera>(0, width, 0, height);
 		m_ActiveCamera = m_Camera2D;
-		m_EditorCamera = create_s_ptr<EditorCamera>();
+		m_EditorCamera = new_s_ptr<EditorCamera>();
+
+		if (activeScene)
+			s_ActiveScene = this;
+	}
+
+	s_ptr<Scene> Scene::Create(const std::string& name, bool activeScene)
+	{
+		s_ptr<Scene> scene = new_s_ptr<Scene>(name, activeScene);
+		auto* editorLayer = EditorLayer::Get();
+		if (editorLayer != nullptr && editorLayer->IsEnabled())
+		{
+			editorLayer->SetScene(*scene);
+		}
+		Application::Get()->AddScene(*scene);
+		s_SceneCounter++;
+		return scene;
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)

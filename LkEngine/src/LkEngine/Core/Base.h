@@ -32,7 +32,7 @@ namespace LkEngine {
 	using byte = uint8_t;
 	using RendererID = uint32_t;
 
-	/* Unique pointer */
+	// Unique pointer 
 	template<typename T>
 	using u_ptr = std::unique_ptr<T>;
 	template<typename T, typename ... ARGS>
@@ -41,11 +41,17 @@ namespace LkEngine {
 		return std::make_unique<T>(std::forward<ARGS>(args)...);
 	}
 
-	/* Shared pointer */
+	// Shared pointer
 	template<typename T>
 	using s_ptr = std::shared_ptr<T>;
+	// TODO: Replace create_s_ptr with new_s_ptr
 	template<typename T, typename ... ARGS>
 	constexpr s_ptr<T> create_s_ptr(ARGS&& ... args)
+	{
+		return std::make_shared<T>(std::forward<ARGS>(args)...);
+	}
+	template<typename T, typename ... ARGS>
+	constexpr s_ptr<T> new_s_ptr(ARGS&& ... args)
 	{
 		return std::make_shared<T>(std::forward<ARGS>(args)...);
 	}

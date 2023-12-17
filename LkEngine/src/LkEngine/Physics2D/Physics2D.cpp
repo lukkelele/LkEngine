@@ -1,7 +1,9 @@
 #include "LKpch.h"
-#include "LkEngine/Physics/2D/Physics2D.h"
+#include "LkEngine/Physics2D/Physics2D.h"
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Scene/Scene.h"
+#include "LkEngine/Scene/Entity.h"
 
 
 namespace LkEngine {
@@ -99,7 +101,6 @@ namespace LkEngine {
                 glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
                 glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + quad_height * 0.50f };
                 glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + quad_height * 0.50f};
-
                 
                 //LOG_TRACE("BottomLeft: ({}, {})", bottom_left.x, bottom_left.y);
                 float centerX = tc.Translation.x + quad_width * 0.50f;

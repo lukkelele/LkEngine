@@ -1,9 +1,16 @@
 #pragma once
 
+//#include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
+
+#include <glm/glm.hpp>
 
 
 namespace LkEngine {
+
+	// Forward declarations
+	class Scene;
+	class Entity;
 
 	struct Raycast2DResult
 	{
