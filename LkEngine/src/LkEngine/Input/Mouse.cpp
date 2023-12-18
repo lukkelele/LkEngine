@@ -6,12 +6,6 @@
 
 namespace LkEngine {
 
-	glm::vec2 Mouse::Pos = { 0.0f, 0.0f };
-	glm::vec2 Mouse::ScaledPos = { 1.0f, 1.0f };
-	glm::vec2 Mouse::Scalers = { 1.0f, 1.0f };
-	glm::vec2 Mouse::CenterPos = { 0.0f, 0.0f };
-	glm::vec2 Mouse::ScaledCenterPos = { 0.0f, 0.0f };
-
 	bool Mouse::IsButtonPressed(MouseCode button)
 	{
 		GLFWwindow* window = GraphicsContext::Get()->GetGlfwWindow();
@@ -25,8 +19,6 @@ namespace LkEngine {
 		glfwGetCursorPos(GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
-		//Pos.x = x;
-		//Pos.y = y;
 		return { x, y };
 	}
 
@@ -41,14 +33,12 @@ namespace LkEngine {
 
 	float Mouse::GetMouseX()
 	{
-		//auto [x, y] = GetMousePosition();
 		auto pos = GetMousePos();
 		return pos.x;
 	}
 
 	float Mouse::GetMouseY()
 	{
-		//auto [x, y] = GetMousePosition();
 		auto pos = GetMousePos();
 		return pos.y;
 	}
@@ -61,6 +51,18 @@ namespace LkEngine {
 		double norm_mouse_x = mouse_pos.x / window_width;
 		double norm_mouse_y = 1.0 - (mouse_pos.y / window_height);
 		return { norm_mouse_x, norm_mouse_y };
+	}
+
+	bool Mouse::IsMouseButtonProcessed(const MouseCode& button)
+	{
+		switch (button)
+		{
+			case MouseButton::ButtonLeft: return LeftMouseButtonProcessed;
+			case MouseButton::ButtonRight: return RightMouseButtonProcessed;
+			//default: throw std::runtime_error("Button press registration not implemented");
+			default: break;
+		}
+		throw std::runtime_error("Button press registration not implemented");
 	}
 
 }

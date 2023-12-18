@@ -33,22 +33,14 @@ namespace LkEngine {
         virtual void SetViewportWidth(uint16_t width) = 0; 
         virtual void SetViewportHeight(uint16_t height) = 0; 
         virtual void SetDepthEnabled(bool enabled) = 0;
-        std::string GetTitle()  const { return m_Title; }
-        std::string GetGlslVersion() const { return m_GlslVersion;  }
-        bool IsVSyncEnabled() const { return m_VSync; }
+        virtual std::string GetTitle() const = 0;
+        virtual std::string GetGlslVersion() const = 0;
+        virtual bool IsVSyncEnabled() const = 0;
         virtual glm::vec2 GetPos() const = 0;
         virtual glm::vec2 GetSize() const = 0;
         virtual glm::vec2 GetViewportSize() const = 0;
 
     protected:
-        static void WindowResizeCallback(GLFWwindow* window, int width, int height);
-    
-    protected:
-        glm::vec2 m_Pos = { 0.0f, 0.0f };
-        std::string m_Title = "";
-        std::string m_GlslVersion = "";
-        bool m_VSync;
-
         inline static bool GLFW_Initialized = false;
         inline static Window* m_Instance = nullptr;
     };

@@ -10,8 +10,9 @@ namespace LkEngine {
 
     std::vector<Raycast2DResult> Physics2D::Raycast(Scene& scene, const glm::vec2& point0, const glm::vec2& point1)
     {
-        std::vector<Entity> scene_entities = scene.GetEntities();
         std::vector<Raycast2DResult> results = {};
+#if 0
+        std::vector<Entity> scene_entities = scene.GetEntities();
         for (auto& entity : scene_entities)
         {
             if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
@@ -56,6 +57,7 @@ namespace LkEngine {
                 }
             }
         }
+#endif
         return results;
     }
 

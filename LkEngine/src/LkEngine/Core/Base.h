@@ -72,6 +72,7 @@ namespace LkEngine {
     // OpenGL Error handling functions, defined in OpenGLContext.cpp
     void OpenGL_ClearError();
     bool OpenGL_LogCall(const char* function, const char* file, int line);
+	const char* OpenGL_GetVersion();
 
     constexpr int OpenGL_Major_Version = 4;
     constexpr int OpenGL_Minor_Version = 5;

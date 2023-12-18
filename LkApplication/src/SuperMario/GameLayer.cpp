@@ -69,7 +69,7 @@ namespace LkEngine {
 
         DrawBackground();
         // Handle 2D raycast
-        Input::HandleScene(*m_Scene); 
+        //Input::HandleScene(*m_Scene); 
 
         m_Player->OnUpdate(ts);
         for (const auto& enemy : m_Enemies)

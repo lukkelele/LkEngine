@@ -24,12 +24,9 @@ namespace LkEngine {
 		    Raycast2DResult raycast = raycastResults.at(0);
 		    Entity entity = raycast.HitEntity;
 		    //EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
-
-		    //if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
-			LOG_TRACE("MouseButton::ButtonLeft pressed: {}", Mouse::IsButtonPressed(MouseButton::ButtonLeft) ? "YES" : "NO");
-			LOG_WARN("EditorLayer::SelectedEntityID == 0: {}", EditorLayer::SelectedEntityID == 0 ? "YES" : "NO");
-		    //if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
-		    if ((Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0))
+		    //if ((Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0 
+		    //if ((Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntity != raycast.HitEntity))
+		    if (Mouse::IsButtonPressed(MouseButton::ButtonLeft))
 		    {
 		        EditorLayer::SelectedEntity = raycast.HitEntity;
 				EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
@@ -51,6 +48,17 @@ namespace LkEngine {
 		        }
 		    }
 		}
+		else // NO HITS
+		{
+		#if 0
+			if (Mouse::IsButtonPressed(MouseButton::ButtonLeft))
+			{
+				EditorLayer::SelectedEntity = { (entt::entity)0, &scene };
+				EditorLayer::SelectedEntityID = 0;
+			}
+		#endif
+		}
+
 
         if (Keyboard::IsKeyPressed(Key::Escape) && EditorLayer::SelectedEntityID != 0)
         {

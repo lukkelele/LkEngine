@@ -60,6 +60,7 @@ namespace LkEngine {
         virtual void SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) = 0;
         virtual void SetSourceBlendFunction(const SourceBlendFunction& srcFunc) = 0;
         virtual void SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc) = 0;
+        virtual void UpdateResolution(uint16_t width, uint16_t height) = 0;
         virtual std::string GetSourceBlendFunctionName() = 0;
         virtual std::string GetDestinationBlendFunctionName() = 0;
         virtual std::string GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc) = 0;

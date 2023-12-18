@@ -170,6 +170,14 @@ namespace LkEngine{
 		BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
 	};
 
+	struct IOComponent
+	{
+		bool Draggable = true;
+		bool Dragged = false;
+
+		IOComponent() = default;
+	};
+
 
 	template<typename... Component>
 	struct ComponentGroup

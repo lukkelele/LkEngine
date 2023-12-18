@@ -16,7 +16,14 @@
 
 namespace LkEngine {
 
-	void OpenGL_ClearError() { while (glGetError() != GL_NO_ERROR); }
+	//=======================================================================================================
+	// Helper Functions
+	//=======================================================================================================
+
+	void OpenGL_ClearError() 
+	{ 
+		while (glGetError() != GL_NO_ERROR); 
+	}
 
     bool OpenGL_LogCall(const char* function, const char* file, int line)
     {
@@ -28,6 +35,13 @@ namespace LkEngine {
         }
         return true;
     }
+
+	const char* OpenGL_GetVersion()
+	{
+		char buf[120];
+		sprintf(buf, "%s", glGetString(GL_VERSION));
+		return buf;
+	}
 
 	int GetOpenGLSourceBlendFunction(const SourceBlendFunction& srcFunc)
 	{
@@ -55,6 +69,8 @@ namespace LkEngine {
 		}
 	}
 
+	//=======================================================================================================
+
     OpenGLContext::OpenGLContext(Window& window, const std::string& glslVersion)
     {
     	m_Instance = this;
@@ -74,20 +90,18 @@ namespace LkEngine {
 			printf("[ERROR] Error starting GLAD");
 			exit(EXIT_FAILURE);
 		}
-		printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
+		//printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
+		printf("OpenGL Version: %s\n", OpenGL_GetVersion());
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
 		// TODO: Add condition to check if 2D or 3D, to enable depth test or not
 		//glEnable(GL_DEPTH_TEST);
-
 		//glDepthFunc(GL_LESS);
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
-		m_BlendFunction.Source = srcFunc;
-		m_BlendFunction.Destination = dstFunc;
-		SetBlendFunction(srcFunc, dstFunc);
 
+		SetBlendFunction(srcFunc, dstFunc);
 	
 		InitImGui(m_Window->GetGlslVersion().c_str());
 
@@ -133,6 +147,16 @@ namespace LkEngine {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
+	void OpenGLContext::UpdateResolution(uint16_t width, uint16_t height)
+	{
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImVec2 pos = viewport->WorkPos;
+		glViewport(pos.x, pos.y, width, height);
+
+		auto& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2(width, height);
+	}
+
 	void OpenGLContext::SetDepthEnabled(bool enabled)
 	{
 		m_DepthEnabled = enabled;
@@ -149,6 +173,8 @@ namespace LkEngine {
 		LOG_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(srcFunc));
 		LOG_DEBUG("Setting destination blend function: {}", GetDestinationBlendFunctionName(dstFunc));
 		glBlendFunc(GetOpenGLSourceBlendFunction(srcFunc), GetOpenGLDestinationBlendFunction(dstFunc));
+		m_BlendFunction.Source = srcFunc;
+		m_BlendFunction.Destination = dstFunc;
 	}
 
 	void OpenGLContext::SetSourceBlendFunction(const SourceBlendFunction& srcFunc)

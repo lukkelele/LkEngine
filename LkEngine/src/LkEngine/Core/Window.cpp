@@ -21,43 +21,8 @@ namespace LkEngine {
 		std::shared_ptr<Window> window = std::make_shared<Linux_Window>(title, width, height);
 		return window;
 	#else
-		return nullptr;
+		throw std::runtime_error("No Windows/Linux platform detected");
 	#endif
-	}
-
-	void Window::WindowResizeCallback(GLFWwindow* glfw_window, int width, int height)
-	{
-		int size_x, size_y;
-		glfwGetWindowSize(glfw_window, &size_x, &size_y);
-
-		auto window = Window::Get();
-		//window->m_ViewportWidth = size_x;
-		//window->m_ViewportHeight = size_y;
-		window->SetViewportWidth(size_x);
-		window->SetViewportHeight(size_y);
-
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImVec2 pos = viewport->WorkPos;
-
-		if (EditorLayer::IsEnabled())
-		{
-			//window->m_Width = EditorLayer::EditorWindowSize.x;
-			//window->m_Height = EditorLayer::EditorWindowSize.y;
-			//width = EditorLayer::EditorWindowSize.x;
-			//height = EditorLayer::EditorWindowSize.y;
-			//pos = ImVec2(EditorLayer::EditorWindowPos.x, EditorLayer::EditorWindowPos.y);
-		}
-		else
-		{
-			window->SetWidth(width);
-			window->SetHeight(height);
-		}
-
-		glViewport(pos.x, pos.y, width, height);
-		LOG_DEBUG("Window Resize: ({}, {})", window->GetWidth(), window->GetHeight());
-
-		auto& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(width, height);
 	}
 
 

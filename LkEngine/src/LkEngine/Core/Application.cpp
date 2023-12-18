@@ -40,10 +40,8 @@ namespace LkEngine {
 		{
 			float ts = m_Timer.GetDeltaTime();
             glm::vec2 mousePos = Mouse::GetMousePos();
-
-            auto raycastResults = Physics2D::Raycast(*m_Scene, mousePos, mousePos);
-
             m_Renderer->Clear();
+            //auto raycastResults = Physics2D::Raycast(*m_Scene, mousePos, mousePos);
 
             for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
             {

@@ -19,13 +19,16 @@ namespace LkEngine {
 		static glm::vec2 GetPos() { return Pos; }
 		static glm::vec2 GetScaledPos() { return ScaledPos; }
 		static glm::vec2 GetCenterPos() { return CenterPos; }
+		static bool IsMouseButtonProcessed(const MouseCode& button);
 
 	public:
-		static glm::vec2 Pos;
-		static glm::vec2 ScaledPos;
-		static glm::vec2 Scalers;
-		static glm::vec2 CenterPos;
-		static glm::vec2 ScaledCenterPos;
+		inline static bool LeftMouseButtonProcessed = false;
+		inline static bool RightMouseButtonProcessed = false;
+		inline static glm::vec2 Pos = { 0.0f, 0.0f };
+		inline static glm::vec2 ScaledPos = { 1.0f, 1.0f };
+		inline static glm::vec2 Scalers = { 1.0f, 1.0f };
+		inline static glm::vec2 CenterPos = { 0.0f, 0.0f };
+		inline static glm::vec2 ScaledCenterPos = { 0.0f, 0.0f };
 	};
 
 }

@@ -52,10 +52,11 @@ namespace LkEngine {
 		glfwSetWindowAttrib(m_GlfwWindow, GLFW_FOCUSED, GL_TRUE);
 		glfwSetInputMode(m_GlfwWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
 		glfwSetInputMode(m_GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		glfwSetWindowSizeCallback(m_GlfwWindow, Window::WindowResizeCallback);
 		glfwSetWindowSizeLimits(m_GlfwWindow, 420, 280, 2560, 1440);
+		glfwSetWindowSizeCallback(m_GlfwWindow, WindowResizeCallback);
+		//glfwSetMouseButtonCallback(m_GlfwWindow, MouseButtonCallback);
 	
-		glViewport(0, 0, m_Width, m_Height);
+		//glViewport(0, 0, m_Width, m_Height);
 
 		LOG_DEBUG("Created Window ({}, {})", m_Width, m_Height);
 		GLFW_Initialized = true;
@@ -69,6 +70,11 @@ namespace LkEngine {
 	
 	void Windows_Window::OnUpdate()
 	{
+		if (Mouse::IsButtonPressed(MouseButton::ButtonLeft))
+		{
+			Input::HandleScene(*Scene::GetActiveScene());
+		}
+
 		glfwPollEvents();
 		glfwSwapBuffers(m_GlfwWindow);
 	}
@@ -80,11 +86,6 @@ namespace LkEngine {
 			glfwSwapInterval(1);
 		else
 			glfwSwapInterval(0);
-	}
-
-	bool Windows_Window::IsVSyncEnabled() const
-	{
-		return m_VSync;
 	}
 
 	glm::vec2 Windows_Window::GetPos() const
@@ -100,6 +101,39 @@ namespace LkEngine {
 	glm::vec2 Windows_Window::GetViewportSize() const
 	{
 		return { m_ViewportWidth, m_ViewportHeight };
+	}
+
+	void Windows_Window::WindowResizeCallback(GLFWwindow* window, int width, int height)
+	{
+		int size_x, size_y;
+		glfwGetWindowSize(window, &size_x, &size_y);
+
+		m_Instance->SetViewportWidth(size_x);
+		m_Instance->SetViewportHeight(size_y);
+		m_Instance->SetWidth(width);
+		m_Instance->SetHeight(height);
+		m_Instance->GetContext()->UpdateResolution(width, height);
+		LOG_DEBUG("Window Resize: ({}, {})", m_Instance->GetWidth(), m_Instance->GetHeight());
+	}
+
+	void Windows_Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		Input::HandleScene(*Scene::GetActiveScene());
+#if 0
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !Mouse::LeftMouseButtonProcessed)
+		{
+			LOG_DEBUG("Processing left mouse button click");
+
+			Input::HandleScene(*Scene::GetActiveScene());
+			// Set flag to true to avoid processing again
+			Mouse::LeftMouseButtonProcessed = true;
+		}
+		// Reset the flag when the button is released
+		else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) 
+		{
+			Mouse::LeftMouseButtonProcessed = false;
+		}
+#endif
 	}
 
 }
