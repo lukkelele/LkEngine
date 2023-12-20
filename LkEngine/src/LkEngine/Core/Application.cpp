@@ -38,11 +38,11 @@ namespace LkEngine {
     {
 		while (!glfwWindowShouldClose(m_Window->GetGlfwWindow()))
 		{
-			float ts = m_Timer.GetDeltaTime();
-            glm::vec2 mousePos = Mouse::GetMousePos();
             m_Renderer->Clear();
+			float ts = m_Timer.GetDeltaTime();
             //auto raycastResults = Physics2D::Raycast(*m_Scene, mousePos, mousePos);
 
+            m_Input->OnUpdate();
             for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
             {
                 Layer* layer = *it;
@@ -109,6 +109,7 @@ namespace LkEngine {
 
     void Application::AddScene(Scene& scene)
     {
+		Input::SetScene(scene);
         m_Scenes[Scene::GetSceneCount()] = std::shared_ptr<Scene>(&scene);
         LOG_DEBUG("Added scene: {}, scene count: {}", scene.GetName(), Scene::GetSceneCount());
     }

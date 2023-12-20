@@ -40,6 +40,7 @@ namespace LkEngine {
 		}
 		Application::Get()->AddScene(*scene);
 		s_SceneCounter++;
+
 		return scene;
 	}
 

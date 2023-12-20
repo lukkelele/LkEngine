@@ -4,6 +4,9 @@
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 
+// TODO:
+// - Begin/End scene functions should not be of two different types, a generalized version should be used
+//   to remove the need for a '2D' version of the begin/end function
 
 namespace LkEngine {
 
@@ -11,6 +14,14 @@ namespace LkEngine {
     {
     public:
         static void Init();
+        static void BeginScene(s_ptr<Scene> scene);
+		static void BeginScene(s_ptr<Scene> scene, const Camera& camera);
+        static void BeginScene2D(s_ptr<Scene> scene);
+		static void BeginScene2D(s_ptr<Scene> scene, const Camera& camera);
+        static void EndScene(s_ptr<Scene> scene);
+		static void EndScene(s_ptr<Scene> scene, const Camera& camera);
+        static void EndScene2D(s_ptr<Scene> scene);
+		static void EndScene2D(s_ptr<Scene> scene, const Camera& camera);
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint32_t entityID = 0);
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, s_ptr<Texture> texture, uint32_t entityID = 0);
         static void DrawIndexed(VertexBuffer& vb);

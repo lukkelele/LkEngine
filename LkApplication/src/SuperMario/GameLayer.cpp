@@ -64,12 +64,8 @@ namespace LkEngine {
         Entity playerEntity = m_Player->GetEntity();
         Camera& playerCam = playerEntity.GetComponent<CameraComponent>();
 
-        m_Renderer2D->BeginScene(playerCam);
-        m_Scene->BeginScene(playerCam); // if no cam is passed, m_ActiveCamera is used instead
-
+        RenderCommand::BeginScene2D(m_Scene, playerCam);
         DrawBackground();
-        // Handle 2D raycast
-        //Input::HandleScene(*m_Scene); 
 
         m_Player->OnUpdate(ts);
         for (const auto& enemy : m_Enemies)
@@ -77,8 +73,7 @@ namespace LkEngine {
             enemy->OnUpdate(ts);
         }
 
-        m_Scene->EndScene();
-        m_Renderer2D->EndScene();
+        RenderCommand::EndScene2D(m_Scene);
     }
 
     void GameLayer::OnImGuiRender()
