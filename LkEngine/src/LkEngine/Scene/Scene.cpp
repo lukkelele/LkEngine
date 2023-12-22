@@ -13,6 +13,7 @@
 #include "LkEngine/UI/UILayer.h"
 #include "LkEngine/UI/Property.h"
 
+
 namespace LkEngine {
 
 	Scene::Scene(const std::string& name, bool activeScene)
@@ -191,14 +192,12 @@ namespace LkEngine {
 
 	void Scene::BeginScene(float ts)
 	{
-		m_ActiveCamera->Update(ts);
-		m_ActiveCamera->HandleInput(ts);
+		BeginScene(*m_ActiveCamera, ts);
 	}
 
 	void Scene::BeginScene(Camera& cam, float ts)
 	{
 		cam.Update(ts);
-		cam.HandleInput(ts);
 	}
 
 	void Scene::EndScene()
@@ -210,7 +209,6 @@ namespace LkEngine {
 		for (auto& entityTag : entityTags)
 		{	
 			Entity entity = { entityTag, this };
-
 			if (entity.HasComponent<SpriteComponent>() && entity.HasComponent<TransformComponent>())
 			{
 				RenderCommand::DrawSprite(
@@ -220,10 +218,6 @@ namespace LkEngine {
 				);
 			}
 		}
-	}
-
-	void Scene::OnImGuiRender()
-	{
 	}
 
 }

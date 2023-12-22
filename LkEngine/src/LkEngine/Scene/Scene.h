@@ -4,7 +4,7 @@
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/OrthographicCamera.h"
-#include "LkEngine/Scene/SceneCamera.h"
+#include "LkEngine/Renderer/SceneCamera.h"
 #include "LkEngine/Editor/EditorCamera.h"
 
 #include <entt/entt.hpp>
@@ -15,6 +15,8 @@ namespace LkEngine {
 	// Forward declarations
 	class Entity;
 	class World;
+
+	typedef std::unordered_map<UUID, Entity> EntityMap;
 
 	class Scene
 	{
@@ -31,7 +33,6 @@ namespace LkEngine {
 		void BeginScene(Camera& cam, float ts = 1.0f);
 		void BeginScene(float ts = 1.0f);
 		void EndScene();
-		void OnImGuiRender();
 		bool IsRunning() const { return m_IsRunning; }
 		void Pause(bool paused);
 
@@ -67,7 +68,8 @@ namespace LkEngine {
 		Timer m_Timer;
 		std::string m_Name;
 		entt::registry m_Registry; 
-		std::unordered_map<UUID, entt::entity> m_EntityMap;
+		//std::unordered_map<UUID, entt::entity> m_EntityMap;
+		EntityMap m_EntityMap;
 		s_ptr<Renderer> m_Renderer;
 		s_ptr<Camera> m_ActiveCamera; 
 		s_ptr<World> m_World;
