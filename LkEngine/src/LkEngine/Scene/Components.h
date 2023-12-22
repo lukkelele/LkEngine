@@ -119,7 +119,7 @@ namespace LkEngine{
 	struct CameraComponent
 	{
 		CameraType Type;
-		Camera* CameraRef;
+		Camera* CameraRef = nullptr;
 		bool Removable = true;
 
 		CameraComponent() = default;
