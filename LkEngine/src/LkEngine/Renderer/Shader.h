@@ -35,11 +35,30 @@ namespace LkEngine {
 		ShaderProgramSource ParseShaders(const std::string& vertexPath, const std::string& fragmentPath);
 
 	protected:
-		unsigned int m_RendererID;
+		RendererID m_RendererID;
 		std::string m_FilePath;
 		std::string m_VertexPath;
 		std::string m_FragmentPath;
 		std::unordered_map<std::string, int> m_UniformLocationCache;
 	};
+
+
+
+    class ShaderLibrary
+    {
+    public:
+        ShaderLibrary();
+        ~ShaderLibrary();
+
+		static s_ptr<ShaderLibrary> Create() { return std::make_shared<ShaderLibrary>(); }
+
+        void Add(const s_ptr<Shader>& shader);
+		void Load(std::string_view name, const std::string& path);
+        s_ptr<Shader>& Get(std::string_view shaderName);
+
+    private:
+        std::unordered_map<std::string_view, s_ptr<Shader>> m_Shaders;
+    };
+
 
 }
