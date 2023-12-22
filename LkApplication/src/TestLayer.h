@@ -1,6 +1,6 @@
 #pragma once
+
 #include "LkEngine/Core/Layer.h"
-//#include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Scene/Scene.h"
 
 

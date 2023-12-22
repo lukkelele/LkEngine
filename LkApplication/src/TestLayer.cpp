@@ -41,7 +41,7 @@ void TestLayer::OnAttach()
     EntityFactory::CreateQuad(*m_Scene, { 750, 200 }, { 240, 520 }, Color::Generate());
     EntityFactory::CreateQuad(*m_Scene, { 400, 320 }, { 400, 110 }, Color::Generate());
 
-    auto& renderer2D = Renderer::GetRenderer2D();
+    auto& renderer2D = Renderer::GetRendererAPI()->GetRenderer2D();
     m_Renderer2D = std::shared_ptr<Renderer2D>(renderer2D);
     LK_ASSERT(m_Renderer2D);
 
@@ -80,7 +80,6 @@ void TestLayer::OnUpdate(float ts)
 
 void TestLayer::OnImGuiRender()
 {
-    m_Scene->OnImGuiRender();
 }
 
 
