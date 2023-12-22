@@ -27,6 +27,7 @@ namespace LkEngine {
         void SetEntity(const Entity& entity); // { m_Entity = entity; }
         void SetPos(float x, float y);
         void SetPos(const glm::vec2& pos);
+        Camera& GetCamera() { return *m_Entity.GetComponent<CameraComponent>().CameraRef; }
 
         const glm::vec2 GetSize();
         float GetWidth();
