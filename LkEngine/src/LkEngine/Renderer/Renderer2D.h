@@ -1,10 +1,10 @@
 #pragma once
 
+#include "LkEngine/Renderer/UniformBuffer.h"
 #include "LkEngine/Renderer/VertexBuffer.h"
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Renderer/Texture.h"
-#include "LkEngine/Renderer/Texture.h"
-#include "LkEngine/Renderer/UniformBuffer.h"
+#include "LkEngine/Renderer/RenderCommandQueue.h"
 #include "LkEngine/Renderer/Color.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Editor/EditorCamera.h"
@@ -31,11 +31,8 @@ namespace LkEngine {
         Renderer2D(const Renderer2DSpecification& specification = Renderer2DSpecification());
         ~Renderer2D();
 
-        static Renderer2D* Get() { return s_Instance; }
-
         void Init();
         void Shutdown();
-        void BeginScene();
         void BeginScene(const Camera& camera);
         void BeginScene(const Camera& camera, const glm::mat4& transform);
         void EndScene();
@@ -88,8 +85,8 @@ namespace LkEngine {
         void NextBatch();
 
     private:
-        inline static Renderer2D* s_Instance = nullptr;
         bool m_Initialized = false;
+        RenderCommandQueue m_RenderQueue;
         Renderer2DSpecification m_Specification;
 
         struct LineVertex

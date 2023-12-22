@@ -30,6 +30,10 @@ namespace LkEngine {
 		static void BeginFrame();
 		static void EndFrame();
 		static void SetDrawMode(int mode);
+		static uint32_t GetRenderQueueIndex();
+		static uint32_t GetRenderQueueSubmissionIndex();
+		static s_ptr<RendererAPI> GetRendererAPI() { return m_RendererAPI; }
+		static s_ptr<ShaderLibrary> GetShaderLibrary();
 		static void SubmitLines(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
 		static void SubmitIndexed(VertexBuffer& vb, unsigned int count);
         static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
@@ -38,13 +42,26 @@ namespace LkEngine {
         static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
-		static s_ptr<Renderer2D> GetRenderer2D() { return m_RendererAPI->GetRenderer2D(); }
+
+		template<typename FuncT>
+		static void Submit(FuncT&& func)
+		{
+			auto renderCmd = [](void* ptr) {
+				auto pFunc = (FuncT*)ptr;
+				(*pFunc)();
+
+				// NOTE: Instead of destroying we could try and enforce all items to be trivally destructible
+				// however some items like uniforms which contain std::strings still exist for now
+				// static_assert(std::is_trivially_destructible_v<FuncT>, "FuncT must be trivially destructible");
+				pFunc->~FuncT();
+			};
+			auto storageBuffer = GetRenderCommandQueue().Allocate(renderCmd, sizeof(func));
+			new (storageBuffer) FuncT(std::forward<FuncT>(func));
+		}
 
 	public:
-		inline static int s_DrawMode = GL_TRIANGLES;
-		inline static glm::vec4 s_BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
-		//inline static uint64_t BoundTextureID = 0;
-		inline static bool s_TexturesEnabled = true;
+		inline static int DrawMode = GL_TRIANGLES;
+		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
 	private:
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;
 	};

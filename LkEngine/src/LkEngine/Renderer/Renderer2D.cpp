@@ -24,7 +24,6 @@ namespace LkEngine {
         , m_MaxLineVertices(specification.MaxLines * 2)
         , m_MaxLineIndices(specification.MaxLines * 6)
     {
-        s_Instance = this;
         m_CameraBuffer = {};
         m_CameraUniformBuffer = {};
     }
@@ -95,9 +94,10 @@ namespace LkEngine {
         m_TextureSlots[1] = Texture2D::Create("assets/img/sky-background-2d.png");
         m_TextureSlots[2] = Texture2D::Create("assets/img/atte_square.png");
 
-        //m_QuadShader = Shader::Create("assets/shaders/Renderer2D_QuadAdvanced.shader");
-        m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
-        m_LineShader = Shader::Create("assets/shaders/Renderer2D_Line.shader");
+        //m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
+        //m_LineShader = Shader::Create("assets/shaders/Renderer2D_Line.shader");
+        m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
+        m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
 
         m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
         m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
@@ -109,11 +109,6 @@ namespace LkEngine {
 
     void Renderer2D::Shutdown()
     {
-    }
-
-    void Renderer2D::BeginScene()
-    {
-        BeginScene(*Scene::GetActiveScene()->GetActiveCamera());
     }
 
     void Renderer2D::BeginScene(const Camera& camera)

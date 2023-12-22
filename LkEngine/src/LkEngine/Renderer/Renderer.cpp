@@ -1,6 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/RendererAPI.h"
+#include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Scene/Entity.h"
 
 
@@ -11,8 +12,41 @@ namespace LkEngine {
 		RendererAPI::m_CurrentRendererAPI = api;
 	}
 
+	struct RendererData
+	{
+		s_ptr<ShaderLibrary> m_ShaderLibrary;
+
+		s_ptr<Texture2D> WhiteTexture;
+		s_ptr<Texture2D> BlackTexture;
+	};
+
+	static RendererData* Data = nullptr;
+	constexpr static uint32_t RenderCommandQueueCount = 2;
+	static RenderCommandQueue* CommandQueue[RenderCommandQueueCount];
+	static std::atomic<uint32_t> RenderCommandQueueSubmissionIndex = 0;
+
 	void Renderer::Init()
 	{
+		CommandQueue[0] = new RenderCommandQueue;
+		CommandQueue[1] = new RenderCommandQueue;
+
+		Data = new RendererData;
+		Data->m_ShaderLibrary = ShaderLibrary::Create();
+
+		uint32_t whiteTextureData = 0xFFFFFFFF;
+		TextureSpecification spec;
+		spec.Format = ImageFormat::RGBA;
+		spec.Width = 1;
+		spec.Height = 1;
+		Data->WhiteTexture = Texture2D::Create(spec, Buffer(&whiteTextureData, sizeof(uint32_t)));
+
+		constexpr uint32_t blackTextureData = 0xFF000000;
+		Data->BlackTexture = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
+
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad", "assets/shaders/Renderer2D_Quad.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Line", "assets/shaders/Renderer2D_Line.shader");
+
+		LOG_DEBUG("Creating Renderer API");
 		m_RendererAPI = RendererAPI::Create();
 		m_RendererAPI->Init();
 	}
@@ -38,7 +72,22 @@ namespace LkEngine {
 
 	void Renderer::SetDrawMode(int drawMode)
 	{
-		s_DrawMode = drawMode;
+		DrawMode = drawMode;
+	}
+
+	uint32_t Renderer::GetRenderQueueIndex()
+	{
+		return (RenderCommandQueueSubmissionIndex + 1) % RenderCommandQueueCount;
+	}
+
+	uint32_t Renderer::GetRenderQueueSubmissionIndex()
+	{
+		return RenderCommandQueueSubmissionIndex;
+	}
+
+	s_ptr<ShaderLibrary> Renderer::GetShaderLibrary()
+	{
+		return Data->m_ShaderLibrary;
 	}
 
 	void Renderer::SubmitLines(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
