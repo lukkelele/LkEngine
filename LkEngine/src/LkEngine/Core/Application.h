@@ -7,7 +7,7 @@
 #include "LkEngine/IO/File.h"
 #include "LkEngine/Input/Input.h"
 #include "LkEngine/Scene/Scene.h"
-#include "LkEngine/Scene/SceneCamera.h"
+#include "LkEngine/Renderer/SceneCamera.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Scene/EntityFactory.h"
