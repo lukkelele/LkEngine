@@ -1,8 +1,8 @@
 #include "LKpch.h"
-#include "LkEngine/Scene/SceneCamera.h"
+#include "LkEngine/Renderer/SceneCamera.h"
 #include "LkEngine/Core/Application.h"
-#include "LkEngine/Input/Keyboard.h"
-#include "LkEngine/Input/Mouse.h"
+//#include "LkEngine/Input/Keyboard.h"
+//#include "LkEngine/Input/Mouse.h"
 
 
 namespace LkEngine {
