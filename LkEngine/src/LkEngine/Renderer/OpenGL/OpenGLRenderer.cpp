@@ -28,24 +28,24 @@ namespace LkEngine {
 
 	void OpenGLRenderer::Clear()
 	{
-		auto& c = Renderer::s_BackgroundColor;
+		auto& c = Renderer::BackgroundColor;
 		glClearColor(c.r, c.g, c.b, c.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void OpenGLRenderer::Draw(VertexBuffer& vb, const Shader& shader)
 	{
-		glDrawElements(Renderer::s_DrawMode, vb.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(Renderer::DrawMode, vb.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRenderer::Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
 	{
-		glDrawElements(Renderer::s_DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(Renderer::DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRenderer::SubmitIndexed(unsigned int indexCount)
 	{
-		glDrawElements(Renderer::s_DrawMode, indexCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(Renderer::DrawMode, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
