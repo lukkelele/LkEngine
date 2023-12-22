@@ -19,65 +19,6 @@ namespace LkEngine {
         glLineWidth(width);
     }
 
-#if 0
-    void RenderCommand::Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader)
-    {
-        s_Renderer->Submit(vb, ib, shader);
-    }
-#endif
-
-    // TODO: Fix this when implementing 3D
-    void RenderCommand::BeginScene(s_ptr<Scene> scene)
-    {
-        Renderer2D::Get()->BeginScene();
-        scene->BeginScene();
-    }
-
-    // TODO: Fix this when implementing 3D
-    void RenderCommand::BeginScene(s_ptr<Scene> scene, const Camera& camera)
-    {
-        Renderer2D::Get()->BeginScene();
-        scene->BeginScene();
-    }
-
-    void RenderCommand::BeginScene2D(s_ptr<Scene> scene)
-    {
-        Renderer2D::Get()->BeginScene();
-        scene->BeginScene();
-    }
-
-    void RenderCommand::BeginScene2D(s_ptr<Scene> scene, const Camera& camera)
-    {
-        Renderer2D::Get()->BeginScene(camera);
-        scene->BeginScene();
-    }
-
-    // TODO: Fix this when implementing 3D
-    void RenderCommand::EndScene(s_ptr<Scene> scene)
-    {
-        scene->EndScene();
-        //Renderer::Get()->EndScene();
-    }
-
-    // TODO: Fix this when implementing 3D
-    void RenderCommand::EndScene(s_ptr<Scene> scene, const Camera& camera)
-    {
-        scene->EndScene();
-        //Renderer::Get()->EndScene();
-    }
-
-    void RenderCommand::EndScene2D(s_ptr<Scene> scene)
-    {
-        scene->EndScene();
-        Renderer2D::Get()->EndScene();
-    }
-
-    void RenderCommand::EndScene2D(s_ptr<Scene> scene, const Camera& camera)
-    {
-        scene->EndScene();
-        Renderer2D::Get()->EndScene();
-    }
-
     void RenderCommand::DrawIndexed(VertexBuffer& vb)
     {
         auto& ib = vb.GetIndexBuffer();

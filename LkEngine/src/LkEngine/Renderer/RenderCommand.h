@@ -14,14 +14,6 @@ namespace LkEngine {
     {
     public:
         static void Init();
-        static void BeginScene(s_ptr<Scene> scene);
-		static void BeginScene(s_ptr<Scene> scene, const Camera& camera);
-        static void BeginScene2D(s_ptr<Scene> scene);
-		static void BeginScene2D(s_ptr<Scene> scene, const Camera& camera);
-        static void EndScene(s_ptr<Scene> scene);
-		static void EndScene(s_ptr<Scene> scene, const Camera& camera);
-        static void EndScene2D(s_ptr<Scene> scene);
-		static void EndScene2D(s_ptr<Scene> scene, const Camera& camera);
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint32_t entityID = 0);
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, s_ptr<Texture> texture, uint32_t entityID = 0);
         static void DrawIndexed(VertexBuffer& vb);
