@@ -15,7 +15,7 @@ namespace LkEngine {
 
     void GameLayer::OnAttach()
     {
-        m_Renderer2D = Renderer::GetRenderer2D();
+        m_Renderer2D = Renderer::GetRendererAPI()->GetRenderer2D();
         //m_Scene = std::shared_ptr<Scene>(Scene::GetActiveScene());
         m_Scene = Scene::Create("GameLayer");
 
@@ -64,7 +64,9 @@ namespace LkEngine {
         Entity playerEntity = m_Player->GetEntity();
         Camera& playerCam = playerEntity.GetComponent<CameraComponent>();
 
-        RenderCommand::BeginScene2D(m_Scene, playerCam);
+        //RenderCommand::BeginScene(m_Scene, playerCam);
+        m_Renderer2D->BeginScene(playerCam);
+        m_Scene->BeginScene();
         DrawBackground();
 
         m_Player->OnUpdate(ts);
@@ -73,7 +75,9 @@ namespace LkEngine {
             enemy->OnUpdate(ts);
         }
 
-        RenderCommand::EndScene2D(m_Scene);
+        //RenderCommand::EndScene(m_Scene);
+        m_Scene->EndScene();
+        m_Renderer2D->EndScene();
     }
 
     void GameLayer::OnImGuiRender()
