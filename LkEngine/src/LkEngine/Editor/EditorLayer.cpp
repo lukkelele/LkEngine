@@ -149,10 +149,10 @@ namespace LkEngine {
 				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
 				    ImGui::PushID("##lkengine-leftpanel-colors");
 				    ImGui::Text("Background"); 
-				    ImGui::SliderFloat("##x", &Renderer::s_BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##y", &Renderer::s_BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##z", &Renderer::s_BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##w", &Renderer::s_BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+				    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
 				    ImGui::PopID();
 
@@ -266,6 +266,7 @@ namespace LkEngine {
 
 			ImGui::BeginGroup();
 			{
+#if 0
 				auto textureLibrary = Application::Get()->GetTextureLibrary();
 				auto renderer2D = Renderer2D::Get();
 				ImGui::Text("Texture Data");
@@ -278,6 +279,7 @@ namespace LkEngine {
 					auto boundTexture = renderer2D->GetBoundTexture(i);
 					ImGui::Text("Slot %d: %s,   id: %d", i, boundTexture->GetName().c_str(), boundTexture->GetRendererID());
 				}
+#endif 
 
 			}
 			ImGui::EndGroup();

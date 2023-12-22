@@ -19,6 +19,7 @@ namespace LkEngine {
 	void EditorCamera::Update(float ts)
 	{
 		HasMouseMoved = false;
+		HandleInput(ts);
 
 		if (m_KeyboardEnabled)
 		{
