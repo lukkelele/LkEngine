@@ -10,7 +10,6 @@
 
 namespace LkEngine {
 
-
 	s_ptr<Texture> Texture::Create(const TextureSpecification& textureSpec)
 	{
 	#ifdef LK_RENDERER_API_VULKAN
@@ -48,6 +47,15 @@ namespace LkEngine {
 		return std::make_shared<VulkanTexture>(textureSpec);
 	#elif defined(LK_RENDERER_API_OPENGL)
 		return std::make_shared<OpenGLTexture2D>(textureSpec);
+	#endif
+	}
+
+	s_ptr<Texture2D> Texture2D::Create(const TextureSpecification& specification, Buffer imageData)
+	{
+	#ifdef LK_RENDERER_API_VULKAN
+		return std::make_shared<VulkanTexture>(specification);
+	#elif defined(LK_RENDERER_API_OPENGL)
+		return std::make_shared<OpenGLTexture2D>(specification, imageData);
 	#endif
 	}
 

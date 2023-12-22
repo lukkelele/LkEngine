@@ -8,8 +8,9 @@ namespace LkEngine {
 	class OpenGLTexture : public Texture
 	{
 	public:
-		OpenGLTexture(const std::string& filePath);
 		OpenGLTexture(const TextureSpecification& textureSpec);
+		OpenGLTexture(const TextureSpecification& textureSpec, Buffer imageData);
+		OpenGLTexture(const std::string& filePath);
 		virtual ~OpenGLTexture();
 
 		std::string GetName() const { return m_Name; }
@@ -30,7 +31,6 @@ namespace LkEngine {
 		void Unload();
 
 	protected:
-		unsigned int m_RendererID;
 		std::string m_Name;
 		std::string m_FilePath;
 		uint32_t m_Width, m_Height;
@@ -47,6 +47,7 @@ namespace LkEngine {
 	{
 	public:
 		OpenGLTexture2D(const TextureSpecification& specification); 
+		OpenGLTexture2D(const TextureSpecification& textureSpec, Buffer imageData);
 		OpenGLTexture2D(const std::string& filePath); 
 		~OpenGLTexture2D();
 

@@ -55,6 +55,7 @@ namespace LkEngine {
 		virtual ~Texture2D() = default;
 
 		static s_ptr<Texture2D> Create(const TextureSpecification& specification);
+		static s_ptr<Texture2D> Create(const TextureSpecification& specification, Buffer imageData);
 		static s_ptr<Texture2D> Create(const std::string& path);
 
 		virtual std::string GetName() const = 0;
