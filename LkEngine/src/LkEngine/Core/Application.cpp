@@ -5,7 +5,7 @@
 namespace LkEngine {
 
     Application::Application(const ApplicationProperties& props)
-        : m_Props(props)
+        : m_Properties(props)
     {
         m_Instance = this;
         Logger::Init("LkEngine.log", "Core", "Client");
@@ -20,7 +20,7 @@ namespace LkEngine {
     void Application::Init()
     {
         m_Window->Init(LK_SHADER_VERSION);
-        m_Context = m_Window->GetContext();
+        m_GraphicsContext = m_Window->GetContext();
         m_Input = Input::Create(this);
         m_Renderer = Renderer::Create();
         
@@ -38,24 +38,23 @@ namespace LkEngine {
     {
 		while (!glfwWindowShouldClose(m_Window->GetGlfwWindow()))
 		{
-            m_Renderer->Clear();
+            Application* app = this; // Multiple threads
 			float ts = m_Timer.GetDeltaTime();
-            //auto raycastResults = Physics2D::Raycast(*m_Scene, mousePos, mousePos);
-
             m_Input->OnUpdate();
-            for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
+
+            Renderer::BeginFrame();
             {
-                Layer* layer = *it;
-                layer->OnUpdate(ts);
+                for (Layer* layer : m_LayerStack)
+                    layer->OnUpdate(ts);
             }
 
-            m_Context->BeginImGuiFrame();
-            for (auto it = m_LayerStack.rBegin(); it != m_LayerStack.rEnd(); it++)
+            if (m_Properties.ImGuiEnabled)
             {
-                Layer* layer = *it;
-                layer->OnImGuiRender();
+                auto& renderer = m_Renderer;
+			    Renderer::Submit([app]() { app->RenderImGui(); });
+				Renderer::Submit([=]() { m_GraphicsContext->EndImGuiFrame(); });
             }
-            m_Context->EndImGuiFrame();
+            Renderer::EndFrame();
 
             m_Window->OnUpdate();
 		}
@@ -63,13 +62,12 @@ namespace LkEngine {
 
     void Application::Exit()
     {
-        m_Context->Destroy();
+        m_GraphicsContext->Destroy();
         m_Window->Exit();
     }
 
     void Application::PushLayer(Layer* layer)
     {
-        LOG_DEBUG("Pushing layer \"{}\"", layer->GetName());
         m_LayerStack.PushLayer(layer);
         layer->OnAttach();
     }
@@ -95,6 +93,15 @@ namespace LkEngine {
     void Application::OnEvent(Event& e)
     {
         e.HandleEvent();
+    }
+
+    void Application::RenderImGui()
+    {
+        m_GraphicsContext->BeginImGuiFrame();
+        for (int i = 0; i < m_LayerStack.Size(); i++)
+        {
+            m_LayerStack[i]->OnImGuiRender();
+        }
     }
 
     bool Application::IsKeyboardEnabled()

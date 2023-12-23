@@ -15,15 +15,17 @@ namespace LkEngine {
 		void PopLayer(Layer* layer);
 		void PopOverlay(Layer* overlay);
 
-		std::vector<Layer*>::iterator Begin() { return m_Layers.begin(); }
-		std::vector<Layer*>::iterator End() { return m_Layers.end(); }
-		std::vector<Layer*>::reverse_iterator rBegin() { return m_Layers.rbegin(); }
-		std::vector<Layer*>::reverse_iterator rEnd() { return m_Layers.rend(); }
+		Layer* operator[](size_t index)
+		{
+			LK_ASSERT(index >= 0 && index < m_Layers.size());
+			return m_Layers[index];
+		}
 
-		std::vector<Layer*>::const_iterator Begin() const { return m_Layers.begin(); }
-		std::vector<Layer*>::const_iterator End()	const { return m_Layers.end(); }
-		std::vector<Layer*>::const_reverse_iterator rBegin() const { return m_Layers.rbegin(); }
-		std::vector<Layer*>::const_reverse_iterator rEnd() const { return m_Layers.rend(); }
+		uint8_t Size() const { return m_Layers.size(); }
+
+		std::vector<Layer*>::iterator begin() { return m_Layers.begin(); }
+		std::vector<Layer*>::iterator end() { return m_Layers.end(); }
+
 	private:
 		std::vector<Layer*> m_Layers;
 		unsigned int m_LayerInsertIndex = 0;

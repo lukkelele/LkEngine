@@ -14,6 +14,7 @@
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/RenderCommand.h"
+#include "LkEngine/Renderer/RenderCommandQueue.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Physics2D/Physics2D.h"
 #include "LkEngine/UI/UILayer.h"
@@ -32,12 +33,18 @@ namespace LkEngine {
         uint32_t Width, Height;
 		std::string Directory;
 		std::string GlslVersion;
+        bool ImGuiEnabled = true;
+
 		ApplicationProperties(const std::string& title = "LkEngine",
 						      uint16_t width = 1920,
 						      uint16_t height = 1080,
                               const std::string& directory = "",
-                              const std::string& glslVersion = "#version 450")
-			: Title(title), Width(width), Height(height), Directory(directory), GlslVersion(glslVersion) {}
+                              const std::string& glslVersion = "#version 450",
+                              bool imguiEnabled = true)
+			: Title(title), Width(width), Height(height), Directory(directory), GlslVersion(glslVersion)
+            , ImGuiEnabled(imguiEnabled)
+        {
+        }
     };
 
     class Application
@@ -62,20 +69,21 @@ namespace LkEngine {
         s_ptr<Window> GetWindow() const { return m_Window; }
         s_ptr<Renderer> GetRenderer() const { return m_Renderer; }
         GLFWwindow* GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
-        s_ptr<GraphicsContext> GetGraphicsContext() { return m_Context; }
+        s_ptr<GraphicsContext> GetGraphicsContext() { return m_GraphicsContext; }
         s_ptr<TextureLibrary> GetTextureLibrary() { return m_TextureLibrary; }
+        void RenderImGui();
         bool IsKeyboardEnabled();
         bool IsMouseEnabled();
         void AddScene(Scene& scene);
         s_ptr<Scene> GetScene(uint8_t idx) { return m_Scenes[idx]; }
 
     private:
-        ApplicationProperties m_Props;
+        ApplicationProperties m_Properties;
         LayerStack m_LayerStack;
         Timer m_Timer;
         s_ptr<Window> m_Window = nullptr;
         s_ptr<Renderer> m_Renderer = nullptr;
-        s_ptr<GraphicsContext> m_Context = nullptr;
+        s_ptr<GraphicsContext> m_GraphicsContext = nullptr;
         s_ptr<TextureLibrary> m_TextureLibrary = nullptr;
         s_ptr<Scene> m_Scene = nullptr;
         s_ptr<EditorLayer> m_EditorLayer = nullptr;
