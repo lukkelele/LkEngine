@@ -58,12 +58,16 @@ namespace LkEngine {
 
 	void Renderer::BeginFrame()
 	{
+		Clear();
 		m_RendererAPI->BeginFrame();
 	}
 
 	void Renderer::EndFrame()
 	{
+		LOG_CRITICAL("EndFrame, render queue: {},  swapping after this", GetRenderQueueIndex());
+		CommandQueue[GetRenderQueueIndex()]->Execute();
 		m_RendererAPI->EndFrame();
+		SwapQueues();
 	}
 
 	void Renderer::Shutdown()
@@ -73,6 +77,17 @@ namespace LkEngine {
 	void Renderer::SetDrawMode(int drawMode)
 	{
 		DrawMode = drawMode;
+	}
+
+	void Renderer::SwapQueues()
+	{
+		RenderCommandQueueSubmissionIndex = (RenderCommandQueueSubmissionIndex + 1) % RenderCommandQueueCount;
+		LOG_WARN("New queue index: {}", GetRenderQueueIndex());
+	}
+
+	RenderCommandQueue& Renderer::GetRenderCommandQueue()
+	{
+		return *CommandQueue[RenderCommandQueueSubmissionIndex];
 	}
 
 	uint32_t Renderer::GetRenderQueueIndex()

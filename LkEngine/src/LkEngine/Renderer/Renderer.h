@@ -4,13 +4,15 @@
 #include "LkEngine/Renderer/VertexBuffer.h"
 #include "LkEngine/Renderer/IndexBuffer.h"
 #include "LkEngine/Renderer/UniformBuffer.h"
+#include "LkEngine/Renderer/RendererAPI.h"
+#include "LkEngine/Renderer/Renderer2D.h"
+#include "LkEngine/Renderer/RenderCommandQueue.h"
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Renderer/Texture.h"
-#include "LkEngine/Renderer/Renderer2D.h"
-#include "LkEngine/Renderer/RendererAPI.h"
 #include "LkEngine/Scene/Components.h"
-#include <glad/glad.h>
 
+// FIXME
+#include <glad/glad.h>
 #define LK_DRAWMODE_TRIANGLES  GL_TRIANGLES
 #define LK_DRAWMODE_LINES	   GL_LINES
 
@@ -30,6 +32,8 @@ namespace LkEngine {
 		static void BeginFrame();
 		static void EndFrame();
 		static void SetDrawMode(int mode);
+		static void SwapQueues();
+		static RenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
 		static uint32_t GetRenderQueueSubmissionIndex();
 		static s_ptr<RendererAPI> GetRendererAPI() { return m_RendererAPI; }
@@ -50,9 +54,6 @@ namespace LkEngine {
 				auto pFunc = (FuncT*)ptr;
 				(*pFunc)();
 
-				// NOTE: Instead of destroying we could try and enforce all items to be trivally destructible
-				// however some items like uniforms which contain std::strings still exist for now
-				// static_assert(std::is_trivially_destructible_v<FuncT>, "FuncT must be trivially destructible");
 				pFunc->~FuncT();
 			};
 			auto storageBuffer = GetRenderCommandQueue().Allocate(renderCmd, sizeof(func));

@@ -19,6 +19,7 @@ namespace LkEngine {
 	void* RenderCommandQueue::Allocate(RenderCommandFn fn, uint32_t size)
 	{
 		// TODO: alignment
+		LOG_DEBUG("Allocate {} bytes", size);
 		*(RenderCommandFn*)m_CommandBufferPtr = fn;
 		m_CommandBufferPtr += sizeof(RenderCommandFn);
 
@@ -29,6 +30,7 @@ namespace LkEngine {
 		m_CommandBufferPtr += size;
 
 		m_CommandCount++;
+		LOG_DEBUG("m_CommandCount == {}", m_CommandCount);
 		return memory;
 	}
 
@@ -36,9 +38,11 @@ namespace LkEngine {
 	{
 		byte* buffer = m_CommandBuffer;
 
+		LOG_WARN("RenderCommandQueue->Execute    command count: {}", m_CommandCount);
 		for (uint32_t i = 0; i < m_CommandCount; i++)
 		{
 			RenderCommandFn function = *(RenderCommandFn*)buffer;
+			LOG_WARN("RenderCommandQueue->Execute {}", i);
 			buffer += sizeof(RenderCommandFn);
 
 			uint32_t size = *(uint32_t*)buffer;
@@ -49,6 +53,7 @@ namespace LkEngine {
 
 		m_CommandBufferPtr = m_CommandBuffer;
 		m_CommandCount = 0;
+		LOG_TRACE("RESETTING m_CommandCount == {}", m_CommandCount);
 	}
 
 
