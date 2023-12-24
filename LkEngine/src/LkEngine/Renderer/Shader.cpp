@@ -103,9 +103,7 @@ namespace LkEngine {
 		type = ShaderType::FRAGMENT;
 		while (getline(streamFrag, line))
 		{
-	#ifdef LK_ENGINE_PRINT_SHADER
-			printf("%s\n", line.c_str());
-	#endif
+			//printf("%s\n", line.c_str());
 			ss[(int)type] << line << '\n';
 		}
 

@@ -27,6 +27,7 @@ namespace LkEngine {
 
 	void Renderer::Init()
 	{
+		DrawMode = RendererDrawMode::Triangles;
 		CommandQueue[0] = new RenderCommandQueue;
 		CommandQueue[1] = new RenderCommandQueue;
 
@@ -58,31 +59,29 @@ namespace LkEngine {
 
 	void Renderer::BeginFrame()
 	{
-		Clear();
+        Renderer::SwapQueues();
 		m_RendererAPI->BeginFrame();
 	}
 
 	void Renderer::EndFrame()
 	{
-		LOG_CRITICAL("EndFrame, render queue: {},  swapping after this", GetRenderQueueIndex());
 		CommandQueue[GetRenderQueueIndex()]->Execute();
 		m_RendererAPI->EndFrame();
-		SwapQueues();
 	}
 
 	void Renderer::Shutdown()
 	{
 	}
 
-	void Renderer::SetDrawMode(int drawMode)
+	void Renderer::SetDrawMode(const RendererDrawMode& drawMode)
 	{
 		DrawMode = drawMode;
+		m_RendererAPI->SetDrawMode(drawMode);
 	}
 
 	void Renderer::SwapQueues()
 	{
 		RenderCommandQueueSubmissionIndex = (RenderCommandQueueSubmissionIndex + 1) % RenderCommandQueueCount;
-		LOG_WARN("New queue index: {}", GetRenderQueueIndex());
 	}
 
 	RenderCommandQueue& Renderer::GetRenderCommandQueue()
@@ -110,9 +109,11 @@ namespace LkEngine {
 		shader.Bind();
 		vb.Bind();
 		ib.Bind();
-		SetDrawMode(LK_DRAWMODE_LINES);
+		//SetDrawMode(LK_DRAWMODE_LINES);
+		SetDrawMode(RendererDrawMode::Lines);
 		m_RendererAPI->Draw(vb, ib, shader);
-		SetDrawMode(LK_DRAWMODE_TRIANGLES);
+		SetDrawMode(RendererDrawMode::Triangles);
+		//SetDrawMode(LK_DRAWMODE_TRIANGLES);
 	}
 
 	void Renderer::SubmitIndexed(VertexBuffer& vb, unsigned int count)
@@ -151,5 +152,15 @@ namespace LkEngine {
     {
         m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, tc.Rotation2D, entityID);
     }
+
+	std::string Renderer::GetDrawModeStr()
+	{
+		switch (DrawMode)
+		{
+			case RendererDrawMode::Triangles: return "Triangles";
+			case RendererDrawMode::Lines:     return "Lines";
+			default:                          return "Unknown_Draw_Mode";
+		}
+	}
 
 }

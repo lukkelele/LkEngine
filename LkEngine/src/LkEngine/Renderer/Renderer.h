@@ -31,7 +31,8 @@ namespace LkEngine {
 		static void Clear();
 		static void BeginFrame();
 		static void EndFrame();
-		static void SetDrawMode(int mode);
+		static void SetDrawMode(const RendererDrawMode& drawMode);
+		static RendererDrawMode& GetDrawMode() { return DrawMode; }
 		static void SwapQueues();
 		static RenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
@@ -46,22 +47,43 @@ namespace LkEngine {
         static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
+		static std::string GetDrawModeStr();
 
 		template<typename FuncT>
 		static void Submit(FuncT&& func)
 		{
-			auto renderCmd = [](void* ptr) {
+			auto renderCmd = [](void* ptr) 
+			{
 				auto pFunc = (FuncT*)ptr;
 				(*pFunc)();
-
 				pFunc->~FuncT();
 			};
+
 			auto storageBuffer = GetRenderCommandQueue().Allocate(renderCmd, sizeof(func));
 			new (storageBuffer) FuncT(std::forward<FuncT>(func));
 		}
 
+		template<typename FuncT>
+		static void SubmitResourceFree(FuncT&& func)
+		{
+			auto renderCmd = [](void* ptr) 
+			{
+				auto pFunc = (FuncT*)ptr;
+				(*pFunc)();
+				pFunc->~FuncT();
+			};
+
+			Submit([renderCmd, func]()
+			{
+				const uint32_t index = Renderer::RT_GetCurrentFrameIndex();
+				auto storageBuffer = GetRenderResourceReleaseQueue(index).Allocate(renderCmd, sizeof(func));
+				new (storageBuffer) FuncT(std::forward<FuncT>((FuncT&&)func));
+			});
+		}
+
+
 	public:
-		inline static int DrawMode = GL_TRIANGLES;
+		inline static RendererDrawMode DrawMode;
 		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
 	private:
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;

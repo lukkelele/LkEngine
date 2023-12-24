@@ -9,11 +9,11 @@ namespace LkEngine {
 
     namespace Color {
 
-        void Randomize(glm::vec4& color);
-        glm::vec4 Generate();
-
         extern std::mt19937 RNG;
         extern std::uniform_int_distribution<int> Dist;
+
+        glm::vec4 Generate(float alpha = 1.0f);
+        void Randomize(glm::vec4& color, float alpha = 1.0f);
 
         namespace RGBA 
         {
