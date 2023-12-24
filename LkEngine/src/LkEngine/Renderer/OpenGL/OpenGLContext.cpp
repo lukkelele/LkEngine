@@ -19,7 +19,6 @@ namespace LkEngine {
 	//=======================================================================================================
 	// Helper Functions
 	//=======================================================================================================
-
 	void OpenGL_ClearError() 
 	{ 
 		while (glGetError() != GL_NO_ERROR); 
@@ -71,10 +70,10 @@ namespace LkEngine {
 
 	//=======================================================================================================
 
-    OpenGLContext::OpenGLContext(Window& window, const std::string& glslVersion)
+    OpenGLContext::OpenGLContext(Window* window, const std::string& glslVersion)
     {
     	m_Instance = this;
-	    m_Window = std::shared_ptr<Window>(&window);
+	    m_Window = std::shared_ptr<Window>(window);
 		m_GlfwWindow = m_Window->GetGlfwWindow();
 	}
 

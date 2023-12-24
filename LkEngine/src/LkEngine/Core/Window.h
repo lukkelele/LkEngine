@@ -19,7 +19,7 @@ namespace LkEngine {
         static s_ptr<Window> Create(const char* title, uint32_t width, uint32_t height);
 
         virtual void Init(const std::string& glslVersion = "#version 450") = 0;
-        virtual void OnUpdate() = 0;
+        virtual void SwapBuffers() = 0;
         virtual void Exit() = 0;
         virtual void SetVSync(bool enabled) = 0;
         virtual GLFWwindow* GetGlfwWindow() const = 0;

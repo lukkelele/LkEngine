@@ -11,7 +11,7 @@
 
 namespace LkEngine {
 
-	s_ptr<GraphicsContext> GraphicsContext::Create(Window& window, const std::string& glslVersion)
+	s_ptr<GraphicsContext> GraphicsContext::Create(Window* window, const std::string& glslVersion)
 	{
 	#ifdef LK_RENDERER_API_OPENGL
 		return std::make_shared<OpenGLContext>(window, glslVersion);
@@ -19,6 +19,33 @@ namespace LkEngine {
 		throw std::runtime_error("No graphics context could be created as Vulkan is not supported yet!");
 	#else
 		throw std::runtime_error("No graphics context could be created as LK_RENDERER_API is undefined");
+	#endif
+	}
+
+	void GraphicsContext::SetProfile(const Profile& profile)
+	{
+	#ifdef LK_RENDERER_API_OPENGL
+		switch (profile)
+		{
+			case Profile::Core:
+				glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Set core profile
+				break;
+			case Profile::Compability:
+				glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE); // Set core profile
+				break;
+		}
+	#elif defined(LK_RENDERER_API_VULKAN)
+		// TODO: Vulkan Implementation
+	#endif
+	}
+
+	void GraphicsContext::SetVersion(int majorVersion, int minorVersion)
+	{
+	#ifdef LK_RENDERER_API_OPENGL
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion); 
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
+	#elif defined(LK_RENDERER_API_VULKAN)
+		// TODO: Vulkan Implementation
 	#endif
 	}
 

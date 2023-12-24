@@ -11,7 +11,7 @@ namespace LkEngine {
     class OpenGLContext : public GraphicsContext
     {
     public:
-        OpenGLContext(Window& window, const std::string& glslVersion);
+        OpenGLContext(Window* window, const std::string& glslVersion);
         ~OpenGLContext();
 
         void Init(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc);

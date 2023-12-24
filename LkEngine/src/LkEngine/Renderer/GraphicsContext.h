@@ -45,10 +45,14 @@ namespace LkEngine {
     class GraphicsContext
     {
     public:
+        enum class Profile { Core = 0, Compability = 1 };
+    public:
         virtual ~GraphicsContext() = default;
 
         static GraphicsContext* Get() { return m_Instance; }
-        static s_ptr<GraphicsContext> Create(Window& window, const std::string& shaderVersion);
+        static s_ptr<GraphicsContext> Create(Window* window, const std::string& shaderVersion);
+        static void SetProfile(const Profile& profile);
+        static void SetVersion(int majorVersion, int minorVersion);
 
         virtual void Init(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) = 0;
         virtual void Destroy() = 0;

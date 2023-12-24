@@ -15,6 +15,7 @@ namespace LkEngine {
         ~Windows_Window();
     
         void Init(const std::string& glslVersion);
+        void SwapBuffers();
         void OnUpdate();
         void Exit();
         uint16_t GetWidth() const { return m_Width; }
@@ -29,28 +30,27 @@ namespace LkEngine {
         bool IsVSyncEnabled() const { return m_VSync; }
         std::string GetGlslVersion() const { return m_GlslVersion;  }
         GLFWwindow* GetGlfwWindow() const { return m_GlfwWindow; }
-        s_ptr<GraphicsContext> GetContext() const { return m_Context; }
+        s_ptr<GraphicsContext> GetContext() const { return m_GraphicsContext; }
         void SetWidth(uint16_t width) { m_Width = width; }
         void SetHeight(uint16_t height) { m_Height = height; }
         void SetViewportWidth(uint16_t width) { m_ViewportWidth = width; }
         void SetViewportHeight(uint16_t height) { m_ViewportHeight = height; }
-        void SetDepthEnabled(bool enabled) { m_Context->SetDepthEnabled(enabled); }
+        void SetDepthEnabled(bool enabled) { m_GraphicsContext->SetDepthEnabled(enabled); }
 
     private:
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
     private:
+        std::string m_Title = "";
         uint16_t m_Width = 0, m_Height = 0;
         uint16_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-
         glm::vec2 m_Pos = { 0.0f, 0.0f };
-        std::string m_Title = "";
         std::string m_GlslVersion = "";
         bool m_VSync;
 
         GLFWwindow* m_GlfwWindow = nullptr;
-        s_ptr<GraphicsContext> m_Context = nullptr;
+        s_ptr<GraphicsContext> m_GraphicsContext = nullptr;
     };
 
 }

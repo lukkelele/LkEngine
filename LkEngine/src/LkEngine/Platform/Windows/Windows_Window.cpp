@@ -24,13 +24,16 @@ namespace LkEngine {
 	void Windows_Window::Init(const std::string& glslVersion)
 	{
 		if (GLFW_Initialized)
-			return;
+		{
+			throw std::runtime_error("Windows_Window::Init has already been called once!");
+			//return;
+		}
+
+		int glfwInitResult = glfwInit();
+		LK_ASSERT(glfwInitResult == GLFW_TRUE);
 	
-		int glfwRes = glfwInit();
-	
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Set core profile
+		GraphicsContext::SetProfile(GraphicsContext::Profile::Core);
+		GraphicsContext::SetVersion(4, 5);
 	
 		m_GlfwWindow = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title.c_str(), nullptr, nullptr);
 		LK_ASSERT(m_GlfwWindow != nullptr);
@@ -38,9 +41,9 @@ namespace LkEngine {
 
 		if (!GLFW_Initialized)
 		{
-			m_Context = GraphicsContext::Create(*this, glslVersion);
-			m_Context->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
-			m_Context->SetDarkTheme();
+			m_GraphicsContext = GraphicsContext::Create(this, glslVersion);
+			m_GraphicsContext->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
+			m_GraphicsContext->SetDarkTheme();
 		}
 	
 		SetVSync(true);
@@ -55,28 +58,20 @@ namespace LkEngine {
 		glfwSetWindowSizeLimits(m_GlfwWindow, 420, 280, 2560, 1440);
 		glfwSetWindowSizeCallback(m_GlfwWindow, WindowResizeCallback);
 		//glfwSetMouseButtonCallback(m_GlfwWindow, MouseButtonCallback);
-	
-		//glViewport(0, 0, m_Width, m_Height);
 
-		LOG_DEBUG("Created Window ({}, {})", m_Width, m_Height);
 		GLFW_Initialized = true;
+	}
+
+	void Windows_Window::SwapBuffers()
+	{
+		glfwPollEvents();
+		glfwSwapBuffers(m_GlfwWindow);
 	}
 	
 	void Windows_Window::Exit()
 	{
 		glfwTerminate();
 		glfwDestroyWindow(m_GlfwWindow);
-	}
-	
-	void Windows_Window::OnUpdate()
-	{
-		if (Mouse::IsButtonPressed(MouseButton::ButtonLeft))
-		{
-			Input::HandleScene(*Scene::GetActiveScene());
-		}
-
-		glfwPollEvents();
-		glfwSwapBuffers(m_GlfwWindow);
 	}
 	
 	void Windows_Window::SetVSync(bool enabled)
