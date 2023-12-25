@@ -12,7 +12,8 @@
 
 namespace LkEngine{
 
-	class Camera;
+	// Forward declaration
+	class SceneCamera;
 
 	struct IDComponent
 	{
@@ -81,7 +82,7 @@ namespace LkEngine{
         std::string FilePath;
         glm::vec2 Size;
         glm::vec4 Color; 
-		int TextureID = 0; // default to white texture (for 2D)
+		//int TextureID = 0; // default to white texture (for 2D)
 		std::string TextureName = ""; // FIXME: TEMPORARY !!!
 		bool Removable = true;
 
@@ -109,24 +110,19 @@ namespace LkEngine{
 		void SetSize(float x, float y) { Size = { x, y }; }
     };
 
-	enum class CameraType 
-	{ 
-		Null = -1, 
-		Ortographic,  // 2D
-		Perspective,  // First Person
-	};
-
 	struct CameraComponent
 	{
-		CameraType Type;
-		Camera* CameraRef = nullptr;
+		enum class Type { Null = -1, Ortographic = 0 , Perspective = 1 };
+		Type CameraType;
+
+		SceneCamera* CameraRef = nullptr;
 		bool Removable = true;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent& other) = default;
 
-		operator Camera& () { return *CameraRef; }
-		operator const Camera& () const { return *CameraRef; }
+		operator SceneCamera& () { return *CameraRef; }
+		operator const SceneCamera& () const { return *CameraRef; }
 	};
 
 	struct RigidBody2DComponent

@@ -12,6 +12,7 @@ namespace LkEngine {
     {
     public:
         Windows_Window(const char* title, uint32_t width, uint32_t height);
+        Windows_Window(const ApplicationSpecification& specification);
         ~Windows_Window();
     
         void Init(const std::string& glslVersion);

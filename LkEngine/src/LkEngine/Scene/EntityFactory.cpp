@@ -22,6 +22,10 @@ namespace LkEngine {
 
 		SpriteComponent sc = SpriteComponent(size, color);
 		TransformComponent tc = TransformComponent(pos);
+		// Place the origin in the center
+		//tc.Translation.x -= sc.Size.x * 0.50f; // Half Width
+		//tc.Translation.y += sc.Size.y * 0.50f; // Half Height
+
 		entity.AddComponent<SpriteComponent>(sc);
 		entity.AddComponent<TransformComponent>(tc);
 

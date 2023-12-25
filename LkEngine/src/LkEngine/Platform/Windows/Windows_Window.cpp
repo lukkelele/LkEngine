@@ -16,7 +16,17 @@ namespace LkEngine {
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
 	}
-	
+
+	Windows_Window::Windows_Window(const ApplicationSpecification& specification)
+	{
+		m_Instance = this;
+		m_Title = specification.Title;
+		m_Width = specification.Width;
+		m_Height = specification.Height;
+		m_ViewportWidth = specification.Width;
+		m_ViewportHeight = specification.Height;
+	}
+
 	Windows_Window::~Windows_Window()
 	{
 	}
@@ -78,9 +88,13 @@ namespace LkEngine {
 	{
 		m_VSync = enabled;
 		if (m_VSync)
+		{
 			glfwSwapInterval(1);
+		}
 		else
+		{
 			glfwSwapInterval(0);
+		}
 	}
 
 	glm::vec2 Windows_Window::GetPos() const
@@ -102,7 +116,6 @@ namespace LkEngine {
 	{
 		int size_x, size_y;
 		glfwGetWindowSize(window, &size_x, &size_y);
-
 		m_Instance->SetViewportWidth(size_x);
 		m_Instance->SetViewportHeight(size_y);
 		m_Instance->SetWidth(width);
@@ -113,7 +126,7 @@ namespace LkEngine {
 
 	void Windows_Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		Input::HandleScene(*Scene::GetActiveScene());
+		//Input::HandleScene(*Scene::GetActiveScene());
 #if 0
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !Mouse::LeftMouseButtonProcessed)
 		{

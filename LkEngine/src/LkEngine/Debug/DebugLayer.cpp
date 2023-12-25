@@ -31,6 +31,16 @@ namespace LkEngine {
 
     namespace Debug {
 
+        Entity CreateDebugSprite(s_ptr<Scene> scene, const glm::vec2& size, const glm::vec2& pos, const glm::vec4& color)
+        {
+            return CreateDebugSprite(*scene, size, { pos.x, pos.y, 0.0f }, color);
+        }
+
+        Entity CreateDebugSprite(Scene* scene, const glm::vec2& size, const glm::vec2& pos, const glm::vec4& color)
+        {
+            return CreateDebugSprite(*scene, size, { pos.x, pos.y, 0.0f }, color);
+        }
+
         Entity CreateDebugSprite(Scene& scene, const glm::vec2& size, const glm::vec2& pos, const glm::vec4& color)
         {
             return CreateDebugSprite(scene, size, { pos.x, pos.y, 0.0f }, color);
@@ -41,12 +51,15 @@ namespace LkEngine {
             DebugLayer::s_DebugEntities++;
             Entity debugEntity = scene.CreateEntity("DebugEntity-" + std::to_string(DebugLayer::s_DebugEntities));
 
-            TransformComponent& debugTransform = debugEntity.AddComponent<TransformComponent>();
-            debugTransform.Translation = pos;
-
             SpriteComponent& debugSprite = debugEntity.AddComponent<SpriteComponent>();
             debugSprite.Size = size;
             debugSprite.Color = color;
+
+            TransformComponent& debugTransform = debugEntity.AddComponent<TransformComponent>();
+            debugTransform.Translation = pos;
+
+            //debugTransform.Translation.x -= debugSprite.Size.x * 0.50f;
+            //debugTransform.Translation.x += debugSprite.Size.y * 0.50f;
 
             return debugEntity;
         }

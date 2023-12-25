@@ -23,12 +23,17 @@ namespace LkEngine {
 		float width = window->GetWidth();
 		float height = window->GetHeight();
 
-		m_Camera2D = new_s_ptr<OrthographicCamera>(0, width, 0, height);
-		m_ActiveCamera = m_Camera2D;
-		m_EditorCamera = new_s_ptr<EditorCamera>();
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
+
+		m_Camera2D = std::make_shared<SceneCamera>();
+		m_Camera2D->SetOrthographic(width, height, -1.0f, 1.0f);
+		m_SceneCamera = m_Camera2D;
 
 		if (activeScene)
+		{
 			s_ActiveScene = this;
+		}
 	}
 
 	s_ptr<Scene> Scene::Create(const std::string& name, bool activeScene)
@@ -140,63 +145,14 @@ namespace LkEngine {
 	{
 	}
 
-	template<typename T>
-	void Scene::HandleComponent(Entity& entity)
-	{
-		if (!entity.HasComponent<MeshComponent>())
-			return;
-
-		auto& transform = entity.GetComponent<TransformComponent>();
-		auto& mesh = entity.GetComponent<MeshComponent>();
-
-		mesh.BaseShader->Bind();
-		mesh.BaseShader->SetUniformMat4f("u_TransformMatrix", transform.GetTransform());
-		mesh.BaseShader->SetUniform4f("u_Color", mesh.Color.x, mesh.Color.y, mesh.Color.z, mesh.Color.w);
-	}
-
-#if 0
-	template<typename RaycastTResult>
-	void Scene::HandleRaycast(std::vector<RaycastTResult>& raycastResults)
-	{
-		LK_UNUSED(raycastResults);
-	}
-
-	template<>
-	void Scene::HandleRaycast(std::vector<Raycast2DResult>& raycastResults)
-	{
-		int raycastHits = raycastResults.size();
-
-		if (raycastHits == 1)
-		{
-		    Raycast2DResult raycast = raycastResults.at(0);
-		    Entity entity = raycast.HitEntity;
-		    EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
-		}
-		else if (raycastHits > 1)
-		{
-		    for (const auto& raycast : raycastResults)
-		    {
-		        Entity entity = raycast.HitEntity;
-		        
-		        uint64_t hitEntityID = entity.GetUUID();
-		        if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
-		        {
-		            Entity currentEntity = EditorLayer::SelectedEntity;
-		            EditorLayer::SelectedEntityID = hitEntityID;
-		            EditorLayer::SelectedEntity = raycast.HitEntity;
-		        }
-		    }
-		}
-	}
-#endif
-
 	void Scene::BeginScene(float ts)
 	{
-		BeginScene(*m_ActiveCamera, ts);
+		BeginScene(*m_SceneCamera, ts);
 	}
 
-	void Scene::BeginScene(Camera& cam, float ts)
+	void Scene::BeginScene(SceneCamera& cam, float ts)
 	{
+		cam.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		cam.Update(ts);
 	}
 

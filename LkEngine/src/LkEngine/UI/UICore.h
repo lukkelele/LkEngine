@@ -19,6 +19,8 @@ namespace LkEngine::UI {
     void PopID(const char* id);
     void Separator(ImVec2 size, ImVec4 color);
     bool IsInputEnabled();
+    bool IsMouseEnabled();
+    bool IsKeyboardEnabled();
     void SetInputEnabled(bool enabled);
 
     // Insert UI widgets inside already existing windows on the screen.

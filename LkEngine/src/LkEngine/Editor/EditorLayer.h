@@ -43,7 +43,6 @@ namespace LkEngine {
 		static bool IsEnabled() { return Enabled; }
 		static Entity GetSelectedEntity() { return SelectedEntity; }
 		static const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
-
 		void OnImGuiRender();
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
@@ -62,9 +61,12 @@ namespace LkEngine {
 		void UI_RenderSettingsInformation();
 		glm::vec2 GetEditorWindowSize() const;
 		bool IsEntitySelected() const;
+		
+		static glm::vec2 GetTopBarSize();
+		static glm::vec2 GetCenteredMousePos();
 
 	private:
-		void RenderViewport(); // TODO
+		//void RenderViewport(); // TODO
 		//void RenderViewport(s_ptr<Image> img);
         void DrawImGuizmo(Entity& entity);
 		void HandleExternalWindows();
@@ -79,6 +81,12 @@ namespace LkEngine {
 		inline static glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
 		inline static glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 		inline static glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
+		inline static glm::vec2 TopBarSize = { 0.0f, 30.0f };
+		inline static glm::vec2 TopBarFramePadding = { 5.0f, 5.0f };
+		inline static glm::vec2 BottomBarSize = { 0.0f, 0.0f };
+		inline static glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
+		inline static glm::vec2 LeftSidebarPadding = { 0.0f, 0.0f };
+		inline static float TopBarHeight = 0.0f;
 		inline static bool ShowRenderInformationWindow = false;
 
 		// Window where the selected entity settings will be shown in

@@ -1,9 +1,12 @@
 #pragma once
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
+
 #include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/ApplicationConfig.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/GraphicsContext.h"
 
@@ -16,6 +19,7 @@ namespace LkEngine {
         virtual ~Window() = default;
     
         static Window* Get() { return m_Instance; }
+        static s_ptr<Window> Create(const ApplicationSpecification& specification);
         static s_ptr<Window> Create(const char* title, uint32_t width, uint32_t height);
 
         virtual void Init(const std::string& glslVersion = "#version 450") = 0;

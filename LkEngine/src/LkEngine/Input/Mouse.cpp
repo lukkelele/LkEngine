@@ -6,6 +6,10 @@
 
 namespace LkEngine {
 
+	void Mouse::Init()
+	{
+	}
+
 	bool Mouse::IsButtonPressed(MouseCode button)
 	{
 		GLFWwindow* window = GraphicsContext::Get()->GetGlfwWindow();

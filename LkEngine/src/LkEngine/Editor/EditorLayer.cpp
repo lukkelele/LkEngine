@@ -45,13 +45,10 @@ namespace LkEngine {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 6.0f) : ImVec2(1.0f, 1.0f));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
-		// Push 4 style var, 1 color
 		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
 		ImGui::PopStyleColor(); 
-		ImGui::PopStyleVar(4);
+		ImGui::PopStyleVar(2);
 
 		UI_HandleManualWindowResize();
 
@@ -70,6 +67,8 @@ namespace LkEngine {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		ImGui::Begin(LkEngine_DockSpace, NULL, UI::HostWindowFlags);
+		ImGui::PopStyleColor(1);
+		ImGui::PopStyleVar(1);
 
 		static float center_window_width = 0;         // viewport->Size.x - sidebar_left_width - sidebar_right_width;
 		static float center_window_height = 0;        // viewport->WorkSize.y - bottombar_height;
@@ -77,24 +76,21 @@ namespace LkEngine {
 		static float center_window_ypos = 0;          // bottombar_height;
 		static ImVec2 center_window_pos = { 0, 0 };   // { center_window_xpos, center_window_ypos };
 		static ImVec2 center_window_size = { 0, 0 };  // { center_window_width, center_window_height };
-
-		ImGui::PopStyleColor(1);
-		ImGui::PopStyleVar(1);
 		
 		//--------------------------------------------------
 		// TOP MENUBAR
 		//--------------------------------------------------
-		static float topbar_height = 30.0f;
-
-		ImGui::PushID(UI_TOP_BAR);
+		static float topbar_height = 0.0f;
+#if 0
+		//ImGui::PushID(UI_TOP_BAR);
+		UI::PushID(UI_TOP_BAR);
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
+		//ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
 		ImGui::Begin(UI_TOP_BAR, NULL, UI::TopbarFlags);
-		ImGui::PopStyleVar(1);
 		{
 			ImGui::BeginMenuBar();
 			topbar_height = ImGui::GetFrameHeight();
+			TopBarHeight = ImGui::GetFrameHeight();
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem("New")) { }
@@ -107,8 +103,9 @@ namespace LkEngine {
 			ImGui::EndMenuBar();
 		}
 		ImGui::End();
-		ImGui::PopID();
+		UI::PopID(UI_TOP_BAR);
 		//--------------------------------------------------
+#endif
 
 		if (m_Scene)
 		{
@@ -122,11 +119,8 @@ namespace LkEngine {
 		static float sidebar_left_height = m_ViewportBounds[1].y;
 		ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()));
 		ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Always);
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 12));
-
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
-			ImGui::PopStyleVar(1);
 			{
 				// TODO: initialize this bool by checking the depth in the graphics context
 				static bool depth_test_checkbox = false;
@@ -147,20 +141,19 @@ namespace LkEngine {
 				if (ImGui::TreeNode("Colors"))
 				{
 				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
-				    ImGui::PushID("##lkengine-leftpanel-colors");
+				    //ImGui::PushID("##lkengine-leftpanel-colors");
+					UI::PushID("##LkEngine-LeftPanel-Colors");
 				    ImGui::Text("Background"); 
 				    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
-				    ImGui::PopID();
+					UI::PopID("#LkEngine-LeftPanel-Colors");
 
 				    ImGui::TreePop();
 				}
-				//UI_SceneContent();
 
-				//if (SelectedEntity)
 				if (SelectedEntity)
 				{
 					DrawComponents(SelectedEntity);
@@ -177,20 +170,17 @@ namespace LkEngine {
 				auto& registry = m_Scene->GetRegistry();
 				registry.each([&](auto entityID)
 				{
-						Entity entity{ entityID, m_Scene };
-						DrawEntityNode(entity);
+					Entity entity{ entityID, m_Scene };
+					DrawEntityNode(entity);
 				});
 
 				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 				{
 					SelectedEntityID = {};
 				}
-
 			}
-
 		}
 		ImGui::End();  
-		//--------------------------------------------------
 
 		//--------------------------------------------------
 		// RIGHT SIDEBAR
@@ -203,7 +193,6 @@ namespace LkEngine {
 		{
 			ImGui::BeginGroup();
 			if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor)) { }
-			//if (ImGui::Checkbox("Stack Debugger", &m_ShowStackTool)) { }
 
 			if (SelectedEntity && m_GizmoType != -1)
 			{
@@ -217,11 +206,9 @@ namespace LkEngine {
 				ImGui::ShowStyleEditor();
 				ImGui::End();
 			}
-			if (ImGui::Checkbox("Left dock", &DockSpace::Sidebar_Left_Enabled))
-			{
-				DockSpace::ApplyDockSpaceLayout();
-			}
-			//UI_SelectedEntityProperties();
+
+			//if (ImGui::Checkbox("Left dock", &DockSpace::Sidebar_Left_Enabled))
+			//	DockSpace::ApplyDockSpaceLayout();
 
 			ImGui::EndGroup();
 		}
@@ -232,6 +219,7 @@ namespace LkEngine {
 		// BOTTOM BAR
 		//--------------------------------------------------
 		static float bottombar_height = 180.0f;
+		BottomBarSize.y = 180.0f;
 		ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
 		float min_width = viewport->Size.x - (sidebar_right_width + sidebar_left_width);
 		ImGui::SetNextWindowSizeConstraints(ImVec2(min_width, 180.0f), ImVec2(4000, 800));
@@ -241,7 +229,7 @@ namespace LkEngine {
 			ImGui::BeginGroup();
 			auto mouse_pos = Mouse::GetMousePos();
 			Mouse::Pos = Mouse::GetMousePos();
-			Mouse::Pos.y = viewport->Size.y - bottombar_height - Mouse::Pos.y;
+			Mouse::Pos.y = viewport->Size.y - bottombar_height - Mouse::Pos.y; // Why do I remove Mouse::Pos.y here ?
 			Mouse::Pos.x -= sidebar_left_width;
 
 			ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
@@ -259,14 +247,18 @@ namespace LkEngine {
 				ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / Mouse::Scalers.x, center_window_height / Mouse::Scalers.y );
 				ImGui::SameLine(0, 20);
 				ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+
+				auto centeredMousePos = GetCenteredMousePos();
+				auto& sceneCamera = *Scene::GetActiveScene()->GetActiveCamera();
+				glm::vec2 sceneCameraPos = sceneCamera.GetPos();
+				ImGui::Text("Centered Mouse Pos: (%.2f, %.2f)", centeredMousePos.x, centeredMousePos.y);
+				ImGui::Text("SceneCamera Pos: (%.1f, %.1f)", sceneCameraPos.x, sceneCameraPos.y);
 			}
 			ImGui::EndGroup();
-
 			ImGui::Dummy({ 0, 2 });
-
+#if 0
 			ImGui::BeginGroup();
 			{
-#if 0
 				auto textureLibrary = Application::Get()->GetTextureLibrary();
 				auto renderer2D = Renderer2D::Get();
 				ImGui::Text("Texture Data");
@@ -279,10 +271,10 @@ namespace LkEngine {
 					auto boundTexture = renderer2D->GetBoundTexture(i);
 					ImGui::Text("Slot %d: %s,   id: %d", i, boundTexture->GetName().c_str(), boundTexture->GetRendererID());
 				}
-#endif 
 
 			}
 			ImGui::EndGroup();
+#endif 
 			ImGui::EndGroup();
 
 			Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
@@ -302,12 +294,13 @@ namespace LkEngine {
 		//--------------------------------------------------
 
 		center_window_width = viewport->Size.x - sidebar_left_width - sidebar_right_width;
-		center_window_height = viewport->Size.y - bottombar_height - topbar_height;
+		center_window_height = viewport->Size.y - bottombar_height;// -topbar_height;
 		center_window_size = { center_window_width, center_window_height };
 
 		// Lower left point/bound 
 		center_window_xpos = sidebar_left_width;
 		center_window_ypos = bottombar_height;
+		LeftSidebarSize.x = sidebar_left_width;
 
 		// Top right point/bound
 		m_SecondViewportBounds[0] = { center_window_xpos, topbar_height };
@@ -318,6 +311,7 @@ namespace LkEngine {
 
 		EditorWindowSize = { center_window_size.x, center_window_size.y };
 		EditorWindowPos = { center_window_xpos, center_window_ypos };
+		// FIXME
 		glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);
 		
 		ImGui::End(); // Viewport
@@ -593,9 +587,6 @@ namespace LkEngine {
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
 		auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-		//auto spriteRect = Editor::Sprite_GetEdgePoints(sc, tc);
-		//auto& left_lower = spriteRect[0];
-		//ImGuizmo::SetRect(center_x, center_y, width, height);
         ImGuizmo::SetRect(pos_x, pos_y, width, height);
 
         ImGuizmo::Manipulate(
@@ -744,8 +735,24 @@ namespace LkEngine {
 		if (ImGui::Begin("Render Settings", &ShowRenderInformationWindow, ImGuiWindowFlags_NoDocking))
 		{
 			auto* graphicsCtx = GraphicsContext::Get();
-			ImGui::SeparatorText("Blend Function");
 
+			if (ImGui::BeginCombo("Drawmode", Renderer::GetDrawModeStr().c_str(), NULL))
+			{
+				if (ImGui::MenuItem("Triangles"))
+				{
+					LOG_DEBUG("Selected new drawmode 'Triangles'");
+					Renderer::SetDrawMode(RendererDrawMode::Triangles);
+				}
+				if (ImGui::MenuItem("Lines"))
+				{
+					LOG_DEBUG("Selected new drawmode 'Lines'");
+					Renderer::SetDrawMode(RendererDrawMode::Lines);
+				}
+
+				ImGui::EndCombo();
+			}
+
+			ImGui::SeparatorText("Blend Function");
 			if (ImGui::BeginCombo(fmt::format("Source: {}", graphicsCtx->GetSourceBlendFunctionName()).c_str(), nullptr, ImGuiComboFlags_NoPreview))
 			{
 				if (ImGui::MenuItem("Zero"))
@@ -785,5 +792,17 @@ namespace LkEngine {
 		return SelectedEntityID > 0;
 	}
 
+	glm::vec2 EditorLayer::GetTopBarSize() 
+	{ 
+		return glm::vec2(TopBarSize.x + TopBarFramePadding.x, TopBarSize.y + TopBarFramePadding.y); 
+	}
+
+	glm::vec2 EditorLayer::GetCenteredMousePos()
+	{
+		return glm::vec2(
+			Mouse::CenterPos.x * EditorLayer::EditorWindowSize.x,
+			-Mouse::CenterPos.y * EditorLayer::EditorWindowSize.y
+		);
+	}
 
 }

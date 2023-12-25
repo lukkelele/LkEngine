@@ -1,4 +1,5 @@
 #pragma once
+#if 0
 #include "LkEngine/Renderer/Camera.h"
 
 
@@ -18,8 +19,10 @@ namespace LkEngine {
         float GetRotation() const { return m_Rotation; }
 
     private:
+        glm::vec3 m_Pos{}; // FIXME: REMOVE, JUST TO COMPILE
         float m_Rotation = 0.0f;
-
     };
 
 }
+
+#endif

@@ -4,12 +4,12 @@
 
 namespace LkEngine {
 
-    Application::Application(const ApplicationProperties& props)
-        : m_Properties(props)
+    Application::Application(const ApplicationSpecification& specification)
+        : m_Specification(specification)
     {
         m_Instance = this;
         Logger::Init("LkEngine.log", "Core", "Client");
-        m_Window = Window::Create(props.Title.c_str(), props.Width, props.Height);
+        m_Window = Window::Create(specification.Title.c_str(), specification.Width, specification.Height);
         m_Timer.Reset();
     }
 
@@ -25,9 +25,8 @@ namespace LkEngine {
         m_Renderer = Renderer::Create();
         
         m_Renderer->Init();
-        m_Scene = Scene::Create("BaseScene"); // Base Scene
-        LOG_INFO("Created scene: {}", m_Scene->GetName());
-        m_EditorLayer = EditorLayer::Create(*m_Scene);
+        m_ActiveScene = Scene::Create("BaseScene"); // Base Scene
+        m_EditorLayer = EditorLayer::Create(*m_ActiveScene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);
 
         m_TextureLibrary = TextureLibrary::Create("assets/img");
@@ -42,21 +41,30 @@ namespace LkEngine {
 			float ts = m_Timer.GetDeltaTime();
             m_Input->OnUpdate();
 
+            //m_Renderer2D->BeginScene(playerCam);
+            //m_Renderer->BeginScene(playerCam);
+            
             Renderer::BeginFrame();
             {
                 for (Layer* layer : m_LayerStack)
                     layer->OnUpdate(ts);
             }
 
-            if (m_Properties.ImGuiEnabled)
+            if (m_ActiveScene)
             {
-                auto& renderer = m_Renderer;
+                //Renderer::BeginScene(m_ActiveScene);
+                //Renderer::BeginScene();
+                m_ActiveScene->BeginScene();
+            }
+
+            if (m_Specification.ImGuiEnabled)
+            {
 			    Renderer::Submit([app]() { app->RenderImGui(); });
 				Renderer::Submit([=]() { m_GraphicsContext->EndImGuiFrame(); });
             }
             Renderer::EndFrame();
 
-            m_Window->OnUpdate();
+            Renderer::Submit([&]() { m_Window->SwapBuffers(); });
 		}
     }
 
@@ -102,16 +110,6 @@ namespace LkEngine {
         {
             m_LayerStack[i]->OnImGuiRender();
         }
-    }
-
-    bool Application::IsKeyboardEnabled()
-    {
-        return m_Scene->GetActiveCamera()->IsKeyboardEnabled();
-    }
-
-    bool Application::IsMouseEnabled()
-    {
-        return m_Scene->GetActiveCamera()->IsMouseEnabled();
     }
 
     void Application::AddScene(Scene& scene)

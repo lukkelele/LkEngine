@@ -16,7 +16,6 @@ namespace LkEngine {
     {
     public:
         Player(Entity& entity, const std::string& name = "");
-        Player(const std::string& name = "Player");
         virtual ~Player();
 
         std::string GetName() const { return m_Name; }
@@ -27,7 +26,8 @@ namespace LkEngine {
         void SetEntity(const Entity& entity); // { m_Entity = entity; }
         void SetPos(float x, float y);
         void SetPos(const glm::vec2& pos);
-        Camera& GetCamera() { return *m_Entity.GetComponent<CameraComponent>().CameraRef; }
+        SceneCamera& GetCamera() { return *m_Entity.GetComponent<CameraComponent>().CameraRef; }
+        //SceneCamera& GetCamera() { return m_Entity.GetComponent<CameraComponent>(); }
 
         const glm::vec2 GetSize();
         float GetWidth();
@@ -46,7 +46,8 @@ namespace LkEngine {
         float m_Speed = 1.0f;
         float m_JumpHeight = 50.0f;
         glm::vec2 m_Pos = { 0.0f, 0.0f };
-        glm::vec2 m_CameraOffset = { 140.0f, 180.0f };
+        //glm::vec2 m_CameraOffset = { 140.0f, 180.0f };
+        glm::vec2 m_CameraOffset = { 0.0f, 0.0f };
 
         Entity m_Entity;
     };

@@ -51,7 +51,6 @@ namespace LkEngine {
             tc.Scale.y * sc.Size.y 
         };
         // Draw with color
-        //if (sc.TextureID == 0)
         if (sc.TextureName == "")
         {
             s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);

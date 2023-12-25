@@ -2,15 +2,11 @@
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/Core/Application.h"
 
+//FIXME
 
 namespace LkEngine {
 
-	EditorCamera::EditorCamera()
-	{
-		LOG_DEBUG("Created EditorCamera");
-	}
-
-	EditorCamera::EditorCamera(float FOV, float nearPlane, float farPlane)
+	EditorCamera::EditorCamera(float FOV_deg, float width, float height, float nearPlane, float farPlane)
 	{
 		auto mouse_pos = Mouse::GetMousePosition();
 		m_InitialMousePos = { mouse_pos.first, mouse_pos.second };
@@ -19,7 +15,7 @@ namespace LkEngine {
 	void EditorCamera::Update(float ts)
 	{
 		HasMouseMoved = false;
-		HandleInput(ts);
+		//HandleInput(ts);
 
 		if (m_KeyboardEnabled)
 		{
@@ -47,14 +43,14 @@ namespace LkEngine {
 			}
 		}
 
-		UpdateMousePosition();
+		//UpdateMousePosition();
 		// If the mouse has moved since last frame, update camera rotation
 		UpdateProjection();
 		UpdateView();
-		m_InverseView = glm::inverse(m_View);
-		m_InverseProjection = glm::inverse(m_Projection);
-		m_InverseViewProjection = m_InverseProjection * m_InverseView;
-		m_ViewProjection = m_Projection * m_View;
+		m_InverseViewMatrix = glm::inverse(m_ViewMatrix);
+		m_InverseProjectionMatrix = glm::inverse(m_ProjectionMatrix);
+		m_InverseViewProjectionMatrix = m_InverseProjectionMatrix * m_InverseViewMatrix;
+		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 	void EditorCamera::UpdateView()

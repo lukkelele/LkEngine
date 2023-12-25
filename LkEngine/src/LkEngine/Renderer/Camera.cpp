@@ -4,14 +4,11 @@
 
 namespace LkEngine {
 
-	void Camera::UpdateMousePosition()
+#if 0
+	void Camera::UpdateViewProjection()
 	{
-		const glm::vec2& mousePos { Mouse::GetMouseX(), Mouse::GetMouseY() };
-		m_MouseDelta = (mousePos - m_MousePos);
-		m_MousePos = mousePos;
-
-		if (Keyboard::IsKeyPressed(Key::Escape))
-			m_MouseEnabled = false;
+		UpdateView(); 
+		UpdateProjection();
 	}
 
 	void Camera::HandleInput(float ts)
@@ -24,12 +21,12 @@ namespace LkEngine {
 			if (Keyboard::IsKeyPressed(Key::W))
 			{
 				m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
-				//printf("Key -> A: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
+				printf("Key -> A: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
 			}
 			if (Keyboard::IsKeyPressed(Key::A))
 			{
 				m_Pos -= glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
-				//printf("Key -> A: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
+				printf("Key -> A: m_Pos == (%f, %f, %f)\n", m_Pos.x, m_Pos.y, m_Pos.z);
 			}
 			if (Keyboard::IsKeyPressed(Key::S))
 			{
@@ -43,15 +40,16 @@ namespace LkEngine {
 			}
 		}
 
-		UpdateMousePosition();
+		//UpdateMousePosition();
 		// If the mouse has moved since last frame, update camera rotation
 		UpdateProjection();
 		UpdateView();
-		m_InverseView = glm::inverse(m_View);
-		m_InverseProjection = glm::inverse(m_Projection);
-		m_InverseViewProjection = m_InverseProjection * m_InverseView;
-		m_ViewProjection = m_Projection * m_View;
+		m_InverseViewMatrix = glm::inverse(m_ViewMatrix);
+		m_InverseProjectionMatrix = glm::inverse(m_ProjectionMatrix);
+		m_InverseViewProjectionMatrix = m_InverseProjectionMatrix * m_InverseViewMatrix;
+		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
+#endif
 
 
 }

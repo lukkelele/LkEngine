@@ -7,8 +7,7 @@ namespace LkEngine {
     class Enemy : public Player
     {
     public:
-        Enemy(Entity& entity, const std::string& name = "");
-        Enemy(const std::string& name = "Enemy");
+        Enemy(Entity& entity, const std::string& name = "Enemy");
         ~Enemy() = default;
 
         void OnUpdate(float ts = 1.0f) override;

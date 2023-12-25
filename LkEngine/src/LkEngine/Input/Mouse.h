@@ -8,6 +8,7 @@ namespace LkEngine {
 	class Mouse
 	{
 	public:
+		static void Init();
 		static bool IsButtonPressed(MouseCode button);
 		static glm::vec2 GetMousePos();
 		static std::pair<float, float> GetMousePosition();

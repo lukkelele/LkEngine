@@ -94,8 +94,6 @@ namespace LkEngine {
         m_TextureSlots[1] = Texture2D::Create("assets/img/sky-background-2d.png");
         m_TextureSlots[2] = Texture2D::Create("assets/img/atte_square.png");
 
-        //m_QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.shader");
-        //m_LineShader = Shader::Create("assets/shaders/Renderer2D_Line.shader");
         m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
         m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
 

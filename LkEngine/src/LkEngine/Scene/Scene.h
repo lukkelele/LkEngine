@@ -4,7 +4,7 @@
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/OrthographicCamera.h"
-#include "LkEngine/Renderer/SceneCamera.h"
+#include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Editor/EditorCamera.h"
 
 #include <entt/entt.hpp>
@@ -30,7 +30,7 @@ namespace LkEngine {
 		static std::string GetActiveSceneName() { if (s_ActiveScene) { return s_ActiveScene->GetName(); } return ""; }
 		static uint8_t GetSceneCount() { return s_SceneCounter; }
 
-		void BeginScene(Camera& cam, float ts = 1.0f);
+		void BeginScene(SceneCamera& cam, float ts = 1.0f);
 		void BeginScene(float ts = 1.0f);
 		void EndScene();
 		bool IsRunning() const { return m_IsRunning; }
@@ -44,19 +44,15 @@ namespace LkEngine {
 		entt::registry& GetRegistry() { return m_Registry; }
 		void DestroyEntity(Entity entity);
 		bool IsEntityInRegistry(Entity entity) const;
-		s_ptr<Camera> GetActiveCamera() const { return m_ActiveCamera; }
-		void SetActiveCamera(Camera& cam) { m_ActiveCamera = std::shared_ptr<Camera>(&cam); }
-		s_ptr<Camera> GetEditorCamera() const { return m_EditorCamera; }
+		s_ptr<SceneCamera> GetActiveCamera() const { return m_SceneCamera; }
+		void SetActiveCamera(SceneCamera& cam) { m_SceneCamera = std::shared_ptr<SceneCamera>(&cam); }
+		s_ptr<EditorCamera> GetEditorCamera() const { return m_EditorCamera; }
 		s_ptr<World> GetWorld() { return m_World; }
 		void SwitchCamera();
 		uint64_t GetEntityCount() const { return m_EntityMap.size(); }
 		std::string GetName() const { return m_Name; }
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
-
-	private:
-		template<typename T>
-		static void HandleComponent(Entity& entity);
 
 	private:
 		inline static Scene* s_ActiveScene = nullptr;
@@ -68,12 +64,12 @@ namespace LkEngine {
 		Timer m_Timer;
 		std::string m_Name;
 		entt::registry m_Registry; 
-		//std::unordered_map<UUID, entt::entity> m_EntityMap;
+		uint16_t m_ViewportWidth, m_ViewportHeight;
 		EntityMap m_EntityMap;
 		s_ptr<Renderer> m_Renderer;
-		s_ptr<Camera> m_ActiveCamera; 
+		s_ptr<SceneCamera> m_SceneCamera; 
+		s_ptr<SceneCamera> m_Camera2D = nullptr;
 		s_ptr<World> m_World;
-		s_ptr<OrthographicCamera> m_Camera2D = nullptr;
 		s_ptr<EditorCamera> m_EditorCamera;
 
 		friend class Entity;

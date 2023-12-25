@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 
 #include <glad/glad.h>
@@ -14,6 +15,7 @@
 
 
 namespace LkEngine {
+
 
 	class PerspectiveCamera : public Camera
 	{
@@ -59,3 +61,5 @@ namespace LkEngine {
 	};
 
 }
+
+#endif

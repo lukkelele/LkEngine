@@ -16,8 +16,9 @@ namespace LkEngine {
     void GameLayer::OnAttach()
     {
         m_Renderer2D = Renderer::GetRendererAPI()->GetRenderer2D();
-        //m_Scene = std::shared_ptr<Scene>(Scene::GetActiveScene());
         m_Scene = Scene::Create("GameLayer");
+
+        auto window = Window::Get();
 
         auto imagesInAssetsDir = File::GetFilesInDirectory("assets/img");
         auto textureLibrary = TextureLibrary::Get();
@@ -35,18 +36,20 @@ namespace LkEngine {
         bgTransform.Translation.y = 450.0f;
         m_Background = std::make_shared<Entity>(bgEntity);
 
-        Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { 400, 500 });
+        Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { -200, -400 });
+        Debug::CreateDebugSprite(*m_Scene, { 80, 320 }, { 140, 300 });
 
-        Camera& cam = playerEntity.GetComponent<CameraComponent>();
+        SceneCamera& cam = playerEntity.GetComponent<CameraComponent>();
+        cam.SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
         m_Scene->SetActiveCamera(cam);
 
         // Create enemies on different y positions
         float enemyPosY = 0.0f;
-        for (int i = 1; i < 4; i++)
+        for (int i = 0; i < 1; i++)
         {
-            Entity enemyEntity = m_Scene->CreateEntity("Enemy-" + std::to_string(i));
+            Entity enemyEntity = m_Scene->CreateEntity("Enemy-" + std::to_string(i + 1));
             s_ptr<Enemy> enemy = std::make_shared<Enemy>(enemyEntity);
-            enemyPosY += enemy->GetHeight() * (DebugLayer::s_DebugEntities * 1.50f);
+            enemyPosY += (-window->GetHeight() * 0.50f) + enemy->GetHeight() * (DebugLayer::s_DebugEntities * 1.50f);
             enemy->SetPos(0, enemyPosY);
             // Set texture instead of color
             auto& sc = enemyEntity.GetComponent<SpriteComponent>().TextureName = "atte_square";
@@ -64,7 +67,6 @@ namespace LkEngine {
         Entity playerEntity = m_Player->GetEntity();
         Camera& playerCam = playerEntity.GetComponent<CameraComponent>();
 
-        //RenderCommand::BeginScene(m_Scene, playerCam);
         m_Renderer2D->BeginScene(playerCam);
         m_Scene->BeginScene();
         DrawBackground();
@@ -75,7 +77,6 @@ namespace LkEngine {
             enemy->OnUpdate(ts);
         }
 
-        //RenderCommand::EndScene(m_Scene);
         m_Scene->EndScene();
         m_Renderer2D->EndScene();
     }

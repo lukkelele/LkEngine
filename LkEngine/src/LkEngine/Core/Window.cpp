@@ -1,17 +1,25 @@
 #include "LKpch.h"
 #include "LkEngine/Core/Window.h"
-#include "LkEngine/Scene/Scene.h" // temporary
-#include "LkEngine/UI/DockSpace.h" // temporary
-#include "LkEngine/Editor/EditorLayer.h"
 
 #ifdef LK_PLATFORM_WINDOWS
-#include "Platform/Windows/Windows_Window.h"
+	#include "Platform/Windows/Windows_Window.h"
 #else
-// #include "Platform/Linux/Linux_Window.h"
+	#include "Platform/Linux/Linux_Window.h"
 #endif
 
 
 namespace LkEngine {
+
+	std::shared_ptr<Window> Window::Create(const ApplicationSpecification& specification)
+	{
+	#ifdef LK_PLATFORM_WINDOWS
+		return std::make_shared<Windows_Window>(specification);
+	#elif defined(LK_PLATFORM_LINUX)
+		return std::make_shared<Linux_Window>(specification);
+	#else
+		throw std::runtime_error("No Windows/Linux platform detected");
+	#endif
+	}
 
 	std::shared_ptr<Window> Window::Create(const char* title, uint32_t width, uint32_t height)
 	{

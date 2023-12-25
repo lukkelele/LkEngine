@@ -31,9 +31,9 @@ namespace LkEngine {
 		static void Clear();
 		static void BeginFrame();
 		static void EndFrame();
+		static void SwapQueues();
 		static void SetDrawMode(const RendererDrawMode& drawMode);
 		static RendererDrawMode& GetDrawMode() { return DrawMode; }
-		static void SwapQueues();
 		static RenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
 		static uint32_t GetRenderQueueSubmissionIndex();

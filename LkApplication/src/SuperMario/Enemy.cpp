@@ -9,11 +9,6 @@ namespace LkEngine {
     {
     }
 
-    Enemy::Enemy(const std::string& name)
-        : Player(name)
-    {
-    }
-
     void Enemy::OnUpdate(float ts)
     {
         float distance = m_Speed * ts;

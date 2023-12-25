@@ -11,53 +11,6 @@ namespace LkEngine {
     std::vector<Raycast2DResult> Physics2D::Raycast(Scene& scene, const glm::vec2& point0, const glm::vec2& point1)
     {
         std::vector<Raycast2DResult> results = {};
-#if 0
-        std::vector<Entity> scene_entities = scene.GetEntities();
-        for (auto& entity : scene_entities)
-        {
-            if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
-            {
-                glm::vec2 mousePos = Mouse::ScaledPos;
-
-                auto& tc = entity.GetComponent<TransformComponent>();
-                auto& sc = entity.GetComponent<SpriteComponent>();
-                auto& cam = *scene.GetActiveCamera();
-                glm::vec2 camPos = cam.GetPos();
-
-                if (EditorLayer::Enabled)
-                {
-                    auto editor_layer = EditorLayer::Get();
-                }
-                float quad_width = sc.Size.x;
-                float quad_height = sc.Size.y;
-                glm::vec3 quad_pos = tc.Translation;
-
-                glm::vec2 bottom_left = { quad_pos.x, quad_pos.y };
-                glm::vec2 bottom_right = { quad_pos.x + quad_width, quad_pos.y };
-                glm::vec2 top_right = { quad_pos.x + quad_width, quad_pos.y + quad_height };
-                glm::vec2 top_left = { quad_pos.x - quad_width, quad_pos.y + quad_height };
-
-                if (Mouse::IsButtonPressed(MouseButton::Button0))
-                {
-                    bool within_x_boundaries = ((mousePos.x + camPos.x) >= bottom_left.x && (mousePos.x + camPos.x) <= top_right.x);
-                    bool within_y_boundaries = ((mousePos.y + camPos.y) <= top_left.y && (mousePos.y + camPos.y) >= bottom_right.y);
-                    if (within_x_boundaries && within_y_boundaries)
-                    {
-                        LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
-                        EditorLayer::SelectedEntityID = entity.GetComponent<IDComponent>().ID;
-                        float x = point1.x - point0.x;
-                        float y = point1.y - point0.y;
-                        glm::vec2 intersection = { point1.x - point0.x, point1.y - point0.y };
-                        float distance = sqrt(pow(x, 2) + pow(y, 2));
-                        results.push_back(Raycast2DResult(entity, intersection, { 0, 0 }, distance));
-                    }
-                    else
-                    {
-                    }
-                }
-            }
-        }
-#endif
         return results;
     }
 
@@ -65,9 +18,13 @@ namespace LkEngine {
     {
         std::vector<Entity> scene_entities = scene.GetEntities();
         std::vector<Raycast2DResult> results = {};
+
+        auto window = Window::Get();
+        float windowWidth = window->GetWidth();
+        float windowHeight = window->GetHeight();
+
         for (auto& entity : scene_entities)
         {
-            //if (entity.HasComponent<MeshComponent>() && entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
             if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
             {
                 glm::vec2 mousePos = Mouse::GetScaledPos();
@@ -77,44 +34,59 @@ namespace LkEngine {
                 auto& cam = *scene.GetActiveCamera();
                 glm::vec2 camPos = cam.GetPos();
 
+                float quad_width = tc.Scale.x * sc.Size.x;
+                float quad_height = tc.Scale.y * sc.Size.y;
+                glm::vec2 quad_pos = { tc.Translation.x, tc.Translation.y };
+                //LOG_TRACE("QUAD POS ({} {})", quad_pos.x, quad_pos.y);
+
+                // If the editor layer is enabled, adjust the quad pos by taking the bottom dockbar into consideration
                 if (EditorLayer::Enabled)
                 {
-                    auto editor_layer = EditorLayer::Get();
+                    auto* viewport = ImGui::GetMainViewport();
+                    quad_pos.x += EditorLayer::EditorWindowSize.x * 0.50f + EditorLayer::LeftSidebarSize.x;
+                    quad_pos.y += (viewport->WorkSize.y * 0.50f) + EditorLayer::BottomBarSize.y;
                 }
-                float quad_width, quad_height;
-                quad_width = tc.Scale.x * sc.Size.x;
-                quad_height = tc.Scale.y * sc.Size.y;
-                //glm::vec3 quad_pos = tc.Translation;
-                glm::vec2 quad_pos = { tc.Translation.x, tc.Translation.y };
-
-                //float rotAngle = tc.GetRotation2D();
-                //glm::mat2 rotMat = glm::mat2(glm::cos(glm::radians(rotAngle)), -glm::sin(glm::radians(rotAngle)),
-                //    glm::sin(glm::radians(rotAngle)), glm::cos(glm::radians(rotAngle)));
+                else
+                {
+                    quad_pos.x += windowWidth * 0.50f;
+                    quad_pos.y += windowHeight * 0.50f;
+                }
+                //quad_pos.y = windowHeight - (tc.Translation.y + windowHeight * 0.50f + EditorLayer::BottomBarSize.y);
 
                 float angleDeg = glm::degrees(tc.GetRotation2D());
                 float angleRad = glm::radians(tc.GetRotation2D());
-                //LOG_DEBUG("Angle: {}", angleDeg);
                 glm::mat2 rotMat = {
                     glm::cos(angleRad), -glm::sin(angleRad),
                     glm::sin(angleRad), glm::cos(angleRad)
                 };
 
-                glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
-                glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
-                glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + quad_height * 0.50f };
-                glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + quad_height * 0.50f};
-                
-                //LOG_TRACE("BottomLeft: ({}, {})", bottom_left.x, bottom_left.y);
-                float centerX = tc.Translation.x + quad_width * 0.50f;
-                float centerY = tc.Translation.y + quad_height * 0.50f;
+                // Sprite Points
+                glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height };
+                glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height };
+                glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y };
+                glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y };
 
+                //glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
+                //glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
+                //glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + quad_height * 0.50f};
+                //glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + quad_height * 0.50f };
+
+                //glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height };
+                //glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height };
+                //glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y };
+                //glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y };
+                
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
+                    // Add camera position to adjust for camera placement in the world
                     bool within_x_boundaries = ((mousePos.x + camPos.x >= bottom_left.x) && ((mousePos.x + camPos.x) <= top_right.x));
-                    bool within_y_boundaries = ((mousePos.y + camPos.y) <= top_left.y && (mousePos.y + camPos.y >= bottom_right.y));
+                    bool within_y_boundaries = ((mousePos.y + camPos.y <= top_left.y) && (mousePos.y + camPos.y >= bottom_right.y));
                     if (within_x_boundaries && within_y_boundaries)
                     {
-                        //LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
+                        float centerX = tc.Translation.x + quad_width * 0.50f;
+                        float centerY = tc.Translation.y + quad_height * 0.50f;
+                        LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
+
                         float x = centerX - mousePos.x;
                         float y = centerY - mousePos.y;
                         glm::vec2 intersection = { x, y };

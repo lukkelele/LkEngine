@@ -1,6 +1,6 @@
 #include "LKpch.h"
+#if 0
 #include "LkEngine/Renderer/PerspectiveCamera.h"
-
 
 namespace LkEngine {
 
@@ -85,5 +85,6 @@ namespace LkEngine {
 		UpdateProjection();
 	}
 
-
 }
+
+#endif

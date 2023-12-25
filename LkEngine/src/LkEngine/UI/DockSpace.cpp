@@ -88,6 +88,7 @@ namespace LkEngine {
 
     void DockSpace::ApplyDockSpaceLayout()
     {
+        LOG_DEBUG("Applying dockspace");
         //static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoResize; 
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoDocking; 
         dockspace_flags |= ImGuiDockNodeFlags_NoDockingInCentralNode;

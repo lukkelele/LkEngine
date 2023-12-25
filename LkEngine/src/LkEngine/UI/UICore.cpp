@@ -11,10 +11,10 @@ namespace LkEngine::UI {
 		| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
 		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
 
-	ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoDocking
-	    | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs
-        | ImGuiWindowFlags_MenuBar;
+    ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoDocking
+        | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
+        //| ImGuiWindowFlags_MenuBar;
 
     ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_None
         | ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe
@@ -67,6 +67,18 @@ namespace LkEngine::UI {
     {
         const auto& io = ImGui::GetIO();
         return (io.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0 && (io.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0;
+    }
+
+    bool IsMouseEnabled()
+    {
+        const auto& io = ImGui::GetIO();
+        return (io.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0;
+    }
+
+    bool IsKeyboardEnabled()
+    {
+        const auto& io = ImGui::GetIO();
+        return (io.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0;
     }
 
     void SetInputEnabled(bool enabled)
@@ -129,5 +141,6 @@ namespace LkEngine::UI {
         ImGui::End();
         PopID();
     }
+
 
 }

@@ -15,72 +15,67 @@ namespace LkEngine {
 	class Camera 
 	{
 	public:
+		enum class ProjectionType { Perspective = 0, Orthographic = 1 };
+	public:
 		Camera() = default;
 		virtual ~Camera() = default;
 
 		virtual void Update(float ts) = 0;
 		virtual void UpdateView() = 0;
 		virtual void UpdateProjection() = 0;
-		void UpdateViewProjection() { UpdateView(); UpdateProjection(); }
-		virtual void UpdateMousePosition();
-		virtual void SetProjection(glm::mat4& proj) { m_Projection = proj; } // FIXME
-		virtual void HandleInput(float ts);
+		virtual void UpdateViewProjection() = 0;
+		//virtual void UpdateMousePosition();
+		virtual void SetProjection(glm::mat4& proj) { m_ProjectionMatrix = proj; } 
 
-		glm::vec3& GetPos() { return m_Pos; }
-	    glm::mat4 GetView() const { return m_View; }
-	    glm::mat4 GetProjection() const { return m_Projection; }
-	    glm::mat4 GetViewProjection() const { return m_ViewProjection; }
-		glm::mat4& GetInverseViewProjection() { return m_InverseViewProjection; }
-		glm::mat4& GetInverseView() { return m_InverseView; }
-		glm::mat4& GetInverseProjection() { return m_InverseProjection; }
-		float GetScreenWidth() const { return m_ViewportWidth; }
-		float GetScreenHeight() const { return m_ViewportHeight; }
-		void SetPos(glm::vec3& pos) { m_Pos = pos; }
+		//virtual void HandleInput(float ts);
 
-		//float GetFOV() const { return m_FOV; }
-		float GetNearClip() const { return m_NearPlane; }
-		float GetFarClip() const { return m_FarPlane; }
-		void SetNearClip(float nearClip) { m_NearPlane = nearClip; }
-		void SetFarClip(float farClip) { m_FarPlane = farClip; }
+		glm::mat4 GetView() const { return m_ViewMatrix; }
+		glm::mat4 GetProjection() const { return m_ProjectionMatrix; }
+		glm::mat4 GetViewProjection() const { return m_ViewProjectionMatrix; }
+		glm::mat4& GetInverseViewProjection() { return m_InverseViewProjectionMatrix; }
+		glm::mat4& GetInverseView() { return m_InverseViewMatrix; }
+		glm::mat4& GetInverseProjection() { return m_InverseProjectionMatrix; }
+
 		float GetRotation() { return glm::radians(m_Rotation); }
 
-		bool IsKeyboardEnabled() { return m_KeyboardEnabled; }
-		bool IsMouseEnabled() { return m_MouseEnabled; }
+		void SetProjectionMatrix(const glm::mat4 projection)
+		{
+			m_ProjectionMatrix = projection;
+		}
 
-		// Temporary! Should use CameraComponent
-		uint64_t ID = 0;
+		void SetPerspectiveProjectionMatrix(const float radFov, const float width, const float height, const float nearP, const float farP)
+		{
+			m_ProjectionMatrix = glm::perspectiveFov(radFov, width, height, farP, nearP);
+		}
+
+		void SetOrthoProjectionMatrix(const float width, const float height, const float nearP, const float farP)
+		{
+			m_ProjectionMatrix = glm::ortho(-width * 0.5f, width * 0.5f, -height * 0.5f, height * 0.5f, farP, nearP);
+		}
+
 
 	protected:
-		glm::vec3 m_Pos = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 m_PosDelta = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 m_Origin = { 0.0f, 0.0f, 0.0f };
-		glm::vec2 m_MouseDelta = { 0.0f, 0.0f };
-		glm::vec2 m_MousePos = { 0.0f, 0.0f };
-		glm::vec2 m_InitialMousePos{};
-
 		float m_NearPlane = 0.10f, m_FarPlane = 1000.0f;
 		float m_Zoom = 1.0f;
 		float m_Rotation = 0.0f;
 		float m_RotationSpeed = 0.0002f;
-		float m_TravelSpeed = 1.0f; // 0.10f;
+		float m_TravelSpeed = 1.0f;
 		float m_MouseSpeed = 1.0f;
-		bool m_KeyboardEnabled = true;
-		bool m_MouseEnabled = true;
-
-		glm::mat4 m_View;
-		glm::mat4 m_Projection; 
-		glm::mat4 m_ViewProjection; 
-		glm::mat4 m_InverseView;
-		glm::mat4 m_InverseProjection;
-		glm::mat4 m_InverseViewProjection;
-
+		bool m_MouseEnabled = true, m_KeyboardEnabled = true;
 		bool HasMouseMoved;
+
+		glm::mat4 m_ViewMatrix;
+		glm::mat4 m_ProjectionMatrix; 
+		glm::mat4 m_ViewProjectionMatrix; 
+		glm::mat4 m_InverseViewMatrix;
+		glm::mat4 m_InverseProjectionMatrix;
+		glm::mat4 m_InverseViewProjectionMatrix;
+
 		// ----------------- TO BE FIXED ---------------------
 		// TODO: Automate assignment
 		float m_ViewportWidth;// = 2200;
 		float m_ViewportHeight;// = 1240;
 		float m_AspectRatio;// = float(16.0f / 9.0f);
-
 	};
 
 }

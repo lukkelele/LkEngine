@@ -12,11 +12,10 @@ namespace LkEngine {
         if (name.empty())
             m_Name = entity.GetName();
         SetEntity(entity);
-    }
 
-    Player::Player(const std::string& name)
-        : m_Name(name)
-    {
+        float windowWidth = Window::Get()->GetWidth();
+        float windowHeight = Window::Get()->GetHeight();
+        m_CameraOffset = { -windowWidth * 0.45f, -windowHeight * 0.40f };
     }
 
     Player::~Player()
@@ -25,7 +24,7 @@ namespace LkEngine {
 
     void Player::OnUpdate(float ts)
     {
-        Camera& cam = m_Entity.GetComponent<CameraComponent>();
+        SceneCamera& cam = m_Entity.GetComponent<CameraComponent>();
 
         auto& tc = m_Entity.GetComponent<TransformComponent>();
         tc.Translation = cam.GetPos();
@@ -42,20 +41,22 @@ namespace LkEngine {
         m_Entity = entity;
         m_ID = m_Entity.GetUUID();
 
-        //SpriteComponent sc;
+		auto window = Window::Get();
+		float width = window->GetWidth();
+		float height = window->GetHeight();
+
         SpriteComponent& sc = m_Entity.AddComponent<SpriteComponent>();
         sc.SetSize(60, 130);
         sc.Color = Color::Generate(); // Debug purposes, before textures are used
 
         TransformComponent& tc = m_Entity.AddComponent<TransformComponent>();
-        tc.Translation.x += (sc.Size.x * 0.50f);
-        tc.Translation.y += (sc.Size.y * 0.50f);
+        // Add half sprite size to center origin
+        tc.Translation.x -= (sc.Size.x * 0.50f);
+        tc.Translation.y -= (sc.Size.y * 0.50f);
+        
         CameraComponent& cameraComponent = m_Entity.AddComponent<CameraComponent>();
-
-		auto window = Window::Get();
-		float width = window->GetWidth();
-		float height = window->GetHeight();
-        OrthographicCamera* playerCam = new OrthographicCamera(0, width, 0, height);
+        SceneCamera* playerCam = new SceneCamera();
+        playerCam->SetOrthographic(width, height, -1.0f, 1.0f);
         playerCam->SetPos(tc.Translation);
         cameraComponent.CameraRef = playerCam;
 
@@ -73,8 +74,11 @@ namespace LkEngine {
 
     void Player::SetPos(const glm::vec2& pos)
     {
-        glm::vec3& currentPos = GetPos();
-        currentPos = { pos.x, pos.y, currentPos.z };
+        //glm::vec3& currentPos = GetPos();
+        //currentPos = { pos.x, pos.y, currentPos.z };
+        //m_Pos = { pos.x, pos.y, m_Pos.z };
+        m_Pos.x = pos.x;
+        m_Pos.y = pos.y;
     }
 
     const glm::vec2 Player::GetSize()

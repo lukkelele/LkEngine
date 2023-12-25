@@ -1,7 +1,5 @@
-//#ifndef IMGUI_DEFINE_MATH_OPERATORS
-//#define IMGUI_DEFINE_MATH_OPERATORS
-//#endif
 #include "LkEngine/Core/Application.h"
+
 #include "TestLayer.h"
 
 #include "SuperMario/GameLayer.h"
@@ -16,7 +14,7 @@ using namespace LkEngine;
 class LkApplication : public LkEngine::Application
 {
 public:
-    LkApplication(LkEngine::ApplicationProperties props = LkEngine::ApplicationProperties("Sandbox", SCREEN_WIDTH, SCREEN_HEIGHT))
+    LkApplication(LkEngine::ApplicationSpecification props = LkEngine::ApplicationSpecification("Sandbox", SCREEN_WIDTH, SCREEN_HEIGHT))
         : LkEngine::Application(props)
     {
     }
