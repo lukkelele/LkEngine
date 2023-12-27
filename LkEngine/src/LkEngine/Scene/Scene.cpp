@@ -10,7 +10,6 @@
 #include "LkEngine/Physics2D/Physics2D.h"
 #include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/Editor/EditorLayer.h"
-#include "LkEngine/UI/UILayer.h"
 #include "LkEngine/UI/Property.h"
 
 

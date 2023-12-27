@@ -18,7 +18,6 @@
 #include "LkEngine/Renderer/RenderCommandQueue.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Physics2D/Physics2D.h"
-#include "LkEngine/UI/UILayer.h"
 
 //
 // TODO:

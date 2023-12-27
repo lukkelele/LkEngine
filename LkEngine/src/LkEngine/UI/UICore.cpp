@@ -25,8 +25,10 @@ namespace LkEngine::UI {
         | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
 
-    ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoDocking 
-		| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings
+    //ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoDocking 
+		//| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings
+    //ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove 
+    ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoTitleBar 
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
     static uint32_t s_Counter = 0;
@@ -34,6 +36,7 @@ namespace LkEngine::UI {
     static char s_IDBuffer[16] = "##";
     static char s_LabelIDBuffer[1024];
     const char* SelectedEntityWindow = UI_SIDEBAR_RIGHT;
+    static bool LastPushedIDWasString = false;
 
     const char* GenerateID()
     {
@@ -50,11 +53,17 @@ namespace LkEngine::UI {
     void PushID(const char* id)
     {
         ImGui::PushID(id);
+        LastPushedIDWasString = true;
     }
 
     void PopID()
     {
         ImGui::PopID();
+        if (LastPushedIDWasString)
+        {
+            LastPushedIDWasString = false;
+            return;
+        }
         s_UIContextID--;
     }
 

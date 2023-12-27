@@ -7,8 +7,8 @@
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/UI/ImGuiUtilities.h"
-#include "LkEngine/Editor/Editor.h"
 #include "LkEngine/Scene/Scene.h"
+#include "LkEngine/UI/DockSpace.h"
 
 
 namespace LkEngine {
@@ -70,12 +70,24 @@ namespace LkEngine {
 		ImGui::PopStyleColor(1);
 		ImGui::PopStyleVar(1);
 
+		static float bottombar_height = 180.0f;
+		static float bottombar_width = 0.0f;
+		BottomBarSize.y = 180.0f;
+
 		static float center_window_width = 0;         // viewport->Size.x - sidebar_left_width - sidebar_right_width;
-		static float center_window_height = 0;        // viewport->WorkSize.y - bottombar_height;
-		static float center_window_xpos = 0;          // sidebar_left_width;
-		static float center_window_ypos = 0;          // bottombar_height;
+		//static float center_window_height = 0;        // viewport->WorkSize.y - bottombar_height;
+		static float center_window_start_xpos = 0;    // sidebar_left_width;
+		static float center_window_start_ypos = 0;    // bottombar_height;
 		static ImVec2 center_window_pos = { 0, 0 };   // { center_window_xpos, center_window_ypos };
 		static ImVec2 center_window_size = { 0, 0 };  // { center_window_width, center_window_height };
+
+		static bool dockWindowsHaveChangedInSize = true; // Run once when starting
+		static ImVec2 last_sidebar_right_size = ImVec2(0, 0);
+		static ImVec2 last_sidebar_left_size = ImVec2(0, 0);
+		static ImVec2 last_bottombar_size = ImVec2(0, 0);
+
+		static float center_window_height = viewport->Size.y - bottombar_height;
+		LOG_DEBUG("Center window height {}", center_window_height);
 		
 		//--------------------------------------------------
 		// TOP MENUBAR
@@ -117,8 +129,8 @@ namespace LkEngine {
 		//--------------------------------------------------
 		static float sidebar_left_width = 340.0f;
 		static float sidebar_left_height = m_ViewportBounds[1].y;
-		ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()));
-		ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Always);
+		ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Once);
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
 			{
@@ -179,6 +191,12 @@ namespace LkEngine {
 					SelectedEntityID = {};
 				}
 			}
+			auto windowSize = ImGui::GetWindowSize();
+			if (windowSize.x != last_sidebar_left_size.x || windowSize.y != last_sidebar_left_size.y)
+			{
+				dockWindowsHaveChangedInSize = true;
+			}
+			last_sidebar_left_size = windowSize;
 		}
 		ImGui::End();  
 
@@ -187,8 +205,8 @@ namespace LkEngine {
 		//--------------------------------------------------
 		static float sidebar_right_width = 340.0f;
 		static float sidebar_right_height = m_ViewportBounds[1].y;
-		ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - sidebar_right_width, ImGui::GetCursorPosY()));
-		ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Always);
+		ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - sidebar_right_width, ImGui::GetCursorPosY()), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 		{
 			ImGui::BeginGroup();
@@ -207,23 +225,42 @@ namespace LkEngine {
 				ImGui::End();
 			}
 
-			//if (ImGui::Checkbox("Left dock", &DockSpace::Sidebar_Left_Enabled))
-			//	DockSpace::ApplyDockSpaceLayout();
-
 			ImGui::EndGroup();
+
+			ImGui::Text("Second Viewport Bounds[0]: (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y);
+			ImGui::Text("Second Viewport Bounds[1]: (%1.f, %1.f)", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+			ImGui::Text("Second Viewport Size: (%1.f, %1.f)", 
+				m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
+				m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y
+			);
+
+			ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", last_sidebar_right_size.x, last_sidebar_right_size.y);
+			ImGui::Text("center_window_width: %1.f", center_window_width);
+			ImGui::Text("center_window_height: %1.f", center_window_height);
+			ImGui::Text("center_window_start_xpos: %1.f", center_window_start_xpos);
+			ImGui::Text("center_window_start_ypos: %1.f", center_window_start_ypos);
+
+			auto windowSize = ImGui::GetWindowSize();
+			if (windowSize.x != last_sidebar_right_size.x || windowSize.y != last_sidebar_right_size.y)
+			{
+				dockWindowsHaveChangedInSize = true;
+			}
+			last_sidebar_right_size = windowSize;
 		}
 		ImGui::End();
 
+		if (center_window_height == 0)
+			throw std::runtime_error("Center window height is 0");
 
 		//--------------------------------------------------
 		// BOTTOM BAR
 		//--------------------------------------------------
-		static float bottombar_height = 180.0f;
-		BottomBarSize.y = 180.0f;
-		ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
+		//ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
 		float min_width = viewport->Size.x - (sidebar_right_width + sidebar_left_width);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(min_width, 180.0f), ImVec2(4000, 800));
-		ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport->Size.y - bottombar_height));
+		//ImGui::SetNextWindowSizeConstraints(ImVec2(min_width, 180.0f), ImVec2(4000, 800));
+		ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport->Size.y - bottombar_height), ImGuiCond_Once);
+		//ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport-bottombar_height), ImGuiCond_Always);
+		//ImGui::SetNextWindowSize(); // Set the size 
 		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 		{
 			ImGui::BeginGroup();
@@ -256,25 +293,7 @@ namespace LkEngine {
 			}
 			ImGui::EndGroup();
 			ImGui::Dummy({ 0, 2 });
-#if 0
-			ImGui::BeginGroup();
-			{
-				auto textureLibrary = Application::Get()->GetTextureLibrary();
-				auto renderer2D = Renderer2D::Get();
-				ImGui::Text("Texture Data");
-				ImGui::SameLine();
 
-				int boundSlotsCount = renderer2D->GetBoundTextureSlotsCount();
-				ImGui::Text("Total slots: %d", boundSlotsCount);
-				for (int i = 0; i < boundSlotsCount; i++)
-				{
-					auto boundTexture = renderer2D->GetBoundTexture(i);
-					ImGui::Text("Slot %d: %s,   id: %d", i, boundTexture->GetName().c_str(), boundTexture->GetRendererID());
-				}
-
-			}
-			ImGui::EndGroup();
-#endif 
 			ImGui::EndGroup();
 
 			Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
@@ -289,31 +308,68 @@ namespace LkEngine {
 			glm::vec2 cam_pos = active_cam.GetPos();
 			ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
 
+			auto windowSize = ImGui::GetWindowSize();
+			if (windowSize.x != last_bottombar_size.x || windowSize.y != last_bottombar_size.y)
+			{
+				dockWindowsHaveChangedInSize = true;
+			}
+			LOG_TRACE("Bottombar Height: {}", bottombar_height);
+			auto* currentWindow = ImGui::GetCurrentWindow();
+			LOG_TRACE("CURRENT WINDOW: {}, SIZE: ({}, {})", currentWindow->Name, currentWindow->Size.x, currentWindow->Size.y);
+			last_bottombar_size = windowSize;
+			//last_bottombar_size.y = viewport->WorkSize.y - windowSize.y;
+			//last_bottombar_size.y = ImGui::GetWindowDockNode()->Size.y;
+			ImGui::Text("Last Bottombar Size: (%1.f, %1.f)", last_bottombar_size.x, last_bottombar_size.y);
 		}
-		ImGui::End();
-		//--------------------------------------------------
 
+		//center_window_width = viewport->WorkSize.x - sidebar_left_width - sidebar_right_width;
+		//center_window_height = viewport->WorkSize.y - bottombar_height;// -topbar_height;
 		center_window_width = viewport->Size.x - sidebar_left_width - sidebar_right_width;
-		center_window_height = viewport->Size.y - bottombar_height;// -topbar_height;
+		//center_window_height = viewport->Size.y - bottombar_height;// -topbar_height;
 		center_window_size = { center_window_width, center_window_height };
 
+		ImGui::Text("Center Window Size (%1.f, %1.f)", center_window_width, center_window_height);
+		ImGui::Text("Viewport Size: (%1.f, %1.f)", viewport->Size.x, viewport->Size.y);
+		ImGui::SameLine();
+		ImGui::Text("WorkSize: (%1.f, %1.f)", viewport->WorkSize.x, viewport->WorkSize.y);
 		// Lower left point/bound 
-		center_window_xpos = sidebar_left_width;
-		center_window_ypos = bottombar_height;
+		center_window_start_xpos = sidebar_left_width;
+		center_window_start_ypos = bottombar_height;
 		LeftSidebarSize.x = sidebar_left_width;
 
 		// Top right point/bound
-		m_SecondViewportBounds[0] = { center_window_xpos, topbar_height };
+		//m_SecondViewportBounds[0] = { center_window_xpos, topbar_height };
+		m_SecondViewportBounds[0] = { center_window_start_xpos, center_window_start_ypos };
 		m_SecondViewportBounds[1] = { 
-			(center_window_xpos + center_window_width), 
-			(center_window_ypos + center_window_height - bottombar_height + topbar_height)
+			(center_window_start_xpos + center_window_width), 
+			(center_window_start_ypos + center_window_height)
 		};
 
+		ImGui::End();
+
 		EditorWindowSize = { center_window_size.x, center_window_size.y };
-		EditorWindowPos = { center_window_xpos, center_window_ypos };
-		// FIXME
-		glViewport(center_window_xpos, center_window_ypos, center_window_width, center_window_height);
+		EditorWindowPos = { center_window_start_xpos, center_window_start_ypos };
 		
+		// Check to see if any of the editor windows have changed in size and if they have
+		// then readjust the viewport
+		if (dockWindowsHaveChangedInSize)
+		{
+			sidebar_left_width = last_sidebar_left_size.x;
+			sidebar_left_height = last_sidebar_left_size.y;
+
+			sidebar_right_width = last_sidebar_right_size.x;
+			sidebar_right_height = last_sidebar_right_size.y;
+
+			bottombar_width = last_bottombar_size.x;
+			bottombar_height = last_bottombar_size.y;
+
+			//center_window_height = viewport->WorkSize.y - bottombar_height;
+			// FIXME
+			glViewport(center_window_start_xpos, center_window_start_ypos, center_window_width, center_window_height);
+			dockWindowsHaveChangedInSize = false;
+		}
+
+
 		ImGui::End(); // Viewport
 
 		HandleExternalWindows();
@@ -619,75 +675,6 @@ namespace LkEngine {
 			glfwSetWindowPos(window, newPosition.x, newPosition.y);
 			glfwSetWindowSize(window, newSize.x, newSize.y);
 		}
-	}
-
-	void EditorLayer::UI_SceneMenu()
-	{
-		ImGui::PushID("##lkengine-ui-scene-menu");
-        ImGui::BeginGroup();
-        ImGui::SeparatorText("Scene");
-
-        static const char* type_geometry = "Geometry";
-        static const char* type_rigidbody = "Rigidbody";
-        const char* entity_types[] = { type_geometry, type_rigidbody };
-        static int current_type_idx = 0;
-        const char* entity_type_preview = entity_types[current_type_idx];
-        static ImGuiComboFlags combo_flags = ImGuiComboFlags_None;
-        combo_flags |= ImGuiComboFlags_PopupAlignLeft;
-
-        float center_window_width = Window::Get()->GetWidth();
-        float center_window_height = Window::Get()->GetHeight();
-        ImVec2 window_size = { center_window_width, center_window_height };
-
-        static float rect_width = 100.0f;
-        static float rect_height = 150.0f;
-        static ImVec2 start_placing_point = ImVec2(0, 0);
-
-        ImGui::SeparatorText("Entity");
-        if (ImGui::BeginCombo("Type", entity_type_preview, combo_flags))
-        {
-            for (int n = 0; n < LK_ARRAYSIZE(entity_types); n++)
-            {
-                const bool is_selected = (current_type_idx == n);
-                if (ImGui::Selectable(entity_types[n], is_selected))
-                    current_type_idx = n;
-                if (is_selected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-
-            ImGui::EndCombo();
-        }
-        const char* current_type = entity_types[current_type_idx];
-
-        ImGui::Text("Item Properties");
-        // Show different menues depending on what type is to be created and added to the scene
-        if (current_type == type_geometry)
-        {
-            ImGui::Text("Rectangle");
-            ImGui::SliderFloat("Width", &rect_width, 50.0f, 500.0f, "%.1f");
-            ImGui::SliderFloat("Height", &rect_height, 50.0f, 500.0f, "%.1f");
-            ImGui::SliderFloat2("Placing Point", &start_placing_point.x, 0.0f, 1000.0f, "%1.f");
-        }
-        if (current_type == type_rigidbody)
-        {
-        }
-
-        if (ImGui::Button("Add")) 
-        {
-            if (current_type == type_geometry)
-            {
-                auto window = Window::Get();
-                ImVec2 window_size = ImVec2(window->GetWidth(), window->GetHeight());
-                glm::vec2 p1 = { start_placing_point.x, start_placing_point.y };
-                glm::vec2 p2 = { start_placing_point.x + rect_width, start_placing_point.y + rect_height };
-            }
-        }
-        ImGui::EndGroup();
-        //ImGui::EndChild();
-        //ImGui::PopStyleVar(1);
-        ImGui::PopID();
 	}
 
 	void EditorLayer::UI_SceneContent()
