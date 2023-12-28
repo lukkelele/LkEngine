@@ -33,29 +33,33 @@ namespace LkEngine {
                 auto& sc = entity.GetComponent<SpriteComponent>();
                 auto& cam = *scene.GetActiveCamera();
                 glm::vec2 camPos = cam.GetPos();
+                auto* editor = EditorLayer::Get();
 
                 float quad_width = tc.Scale.x * sc.Size.x;
                 float quad_height = tc.Scale.y * sc.Size.y;
                 glm::vec2 quad_pos = { tc.Translation.x, tc.Translation.y };
-                //LOG_TRACE("QUAD POS ({} {})", quad_pos.x, quad_pos.y);
 
-                // If the editor layer is enabled, adjust the quad pos by taking the bottom dockbar into consideration
-                auto* editor = EditorLayer::Get();
+                // The position is placed in between the upper two points.
+                //
+
+                // Place the origin in the middle of the screen
+                // This is done by adding half of the window width and height
+
+                // If the editor layer is enabled, adjust the quad pos by taking the editor windows into consideration
                 if (editor && editor->IsEnabled())
                 {
                     auto* viewport = ImGui::GetMainViewport();
                     auto editorWindowSize = editor->GetEditorWindowSize();
                     quad_pos.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
-                    quad_pos.y += (viewport->WorkSize.y * 0.50f) + editor->GetBottomBarSize().y;
+                    quad_pos.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
                 }
                 else
                 {
                     quad_pos.x += windowWidth * 0.50f;
                     quad_pos.y += windowHeight * 0.50f;
                 }
-                //quad_pos.y = windowHeight - (tc.Translation.y + windowHeight * 0.50f + EditorLayer::BottomBarSize.y);
 
-                float angleDeg = glm::degrees(tc.GetRotation2D());
+                //float angleDeg = glm::degrees(tc.GetRotation2D());
                 float angleRad = glm::radians(tc.GetRotation2D());
                 glm::mat2 rotMat = {
                     glm::cos(angleRad), -glm::sin(angleRad),
@@ -68,21 +72,11 @@ namespace LkEngine {
                 glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y };
                 glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y };
 
-                //glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
-                //glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height * 0.50f };
-                //glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y + quad_height * 0.50f};
-                //glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y + quad_height * 0.50f };
-
-                //glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height };
-                //glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height };
-                //glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y };
-                //glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y };
-                
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
                     // Add camera position to adjust for camera placement in the world
-                    bool within_x_boundaries = ((mousePos.x + camPos.x >= bottom_left.x) && ((mousePos.x + camPos.x) <= top_right.x));
-                    bool within_y_boundaries = ((mousePos.y + camPos.y <= top_left.y) && (mousePos.y + camPos.y >= bottom_right.y));
+                    bool within_x_boundaries = (mousePos.x + camPos.x >= bottom_left.x) && (mousePos.x + camPos.x <= top_right.x);
+                    bool within_y_boundaries = (mousePos.y + camPos.y <= top_left.y) && (mousePos.y + camPos.y >= bottom_right.y);
                     if (within_x_boundaries && within_y_boundaries)
                     {
                         float centerX = tc.Translation.x + quad_width * 0.50f;
