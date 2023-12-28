@@ -14,6 +14,7 @@
 namespace LkEngine {
 
 	ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
+	static float bottombar_height = 180.0f;
 
 	EditorLayer::EditorLayer(Scene& scene)
 		: Layer("EditorLayer")
@@ -70,7 +71,6 @@ namespace LkEngine {
 		ImGui::PopStyleColor(1);
 		ImGui::PopStyleVar(1);
 
-		static float bottombar_height = 180.0f;
 		static float bottombar_width = 0.0f;
 		BottomBarSize.y = 180.0f;
 
@@ -129,8 +129,9 @@ namespace LkEngine {
 		//--------------------------------------------------
 		static float sidebar_left_width = 340.0f;
 		static float sidebar_left_height = m_ViewportBounds[1].y;
-		ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()), ImGuiCond_Always);
+		//ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, sidebar_left_height), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(sidebar_left_width, viewport->WorkSize.y - topbar_height), ImGuiCond_Always);
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
 			{
@@ -258,9 +259,12 @@ namespace LkEngine {
 		//ImGui::SetNextWindowSize(ImVec2(sidebar_right_width, sidebar_right_height), ImGuiCond_Once);
 		float min_width = viewport->Size.x - (sidebar_right_width + sidebar_left_width);
 		//ImGui::SetNextWindowSizeConstraints(ImVec2(min_width, 180.0f), ImVec2(4000, 800));
-		ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport->Size.y - bottombar_height), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport->Size.y - bottombar_height), ImGuiCond_Always);
 		//ImGui::SetNextWindowPos(ImVec2(sidebar_left_width, viewport-bottombar_height), ImGuiCond_Always);
 		//ImGui::SetNextWindowSize(); // Set the size 
+		ImGui::SetNextWindowSize(ImVec2(
+			viewport->WorkSize.x - (sidebar_left_width + sidebar_right_width), bottombar_height), ImGuiCond_Always
+		);
 		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 		{
 			ImGui::BeginGroup();
@@ -643,7 +647,8 @@ namespace LkEngine {
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
 		auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-        ImGuizmo::SetRect(pos_x, pos_y, width, height);
+        //ImGuizmo::SetRect(pos_x, pos_y, width, height);
+        ImGuizmo::SetRect(pos_x, (pos_y + bottombar_height), width, height);
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 

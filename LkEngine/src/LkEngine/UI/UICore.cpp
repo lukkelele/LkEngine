@@ -26,10 +26,10 @@ namespace LkEngine::UI {
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
 
     //ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoDocking 
-		//| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings
     //ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove 
-    ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoTitleBar 
-		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoTitleBar
+        | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
+        | ImGuiWindowFlags_NoMove;// | ImGuiWindowFlags_NoSavedSettings;
 
     static uint32_t s_Counter = 0;
     static int s_UIContextID = 0;
@@ -70,6 +70,7 @@ namespace LkEngine::UI {
     void PopID(const char* id)
     {
         ImGui::PopID();
+        LastPushedIDWasString = false;
     }
 
     bool IsInputEnabled()
