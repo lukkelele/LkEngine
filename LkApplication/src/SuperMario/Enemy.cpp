@@ -16,11 +16,12 @@ namespace LkEngine {
             distance *= -1;
 
         auto& tc = m_Entity.GetComponent<TransformComponent>();
+        auto& sc = m_Entity.GetComponent<SpriteComponent>();
         tc.Translation.x += distance;
 
-        if (tc.Translation.x < 0)
+        if (tc.Translation.x < -(Window::Get()->GetWidth() * 0.50f + sc.GetWidth()))
         {
-            tc.Translation.x = Window::Get()->GetWidth();
+            tc.Translation.x = Window::Get()->GetWidth() * 0.50f;
         }
     }
 
@@ -30,7 +31,7 @@ namespace LkEngine {
         if (editor && editor->GetSelectedEntity() != m_Entity)
             return;
 
-        UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
+        UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO, ImGuiWindowFlags_NoMove);
         ImGui::SliderFloat("Speed", &m_Speed, 0.0f, 5.0f, "%.1f");
         UI::EndSubwindow();
     }

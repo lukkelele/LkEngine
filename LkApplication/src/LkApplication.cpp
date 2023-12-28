@@ -1,7 +1,5 @@
 #include "LkEngine/Core/Application.h"
 
-#include "TestLayer.h"
-
 #include "SuperMario/GameLayer.h"
 
 
@@ -26,12 +24,9 @@ public:
 int main()
 {
     LkApplication app;
-    TestLayer testLayer;
-
-    GameLayer superMarioGameLayer;
-
     app.Init();
 
+    GameLayer superMarioGameLayer;
     app.PushLayer(&superMarioGameLayer);
 
     app.Run();

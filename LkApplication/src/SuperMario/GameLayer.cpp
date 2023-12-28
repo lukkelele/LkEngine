@@ -17,8 +17,7 @@ namespace LkEngine {
     {
         m_Renderer2D = Renderer::GetRendererAPI()->GetRenderer2D();
         m_Scene = Scene::Create("GameLayer");
-
-        auto window = Window::Get();
+        auto* window = Window::Get();
 
         auto imagesInAssetsDir = File::GetFilesInDirectory("assets/img");
         auto textureLibrary = TextureLibrary::Get();
@@ -37,7 +36,10 @@ namespace LkEngine {
         m_Background = std::make_shared<Entity>(bgEntity);
 
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { -200, -400 });
-        Debug::CreateDebugSprite(*m_Scene, { 80, 320 }, { 140, 300 });
+        Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { 100, 300 });
+        Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { -100, 300 });
+        //Debug::CreateDebugSprite(*m_Scene, { 80, 320 }, { 140, 300 }); // Bugged out when raycasting
+        Debug::CreateDebugSprite(*m_Scene, { 80, 110 }, { -240, 0 });
 
         SceneCamera& cam = playerEntity.GetComponent<CameraComponent>();
         cam.SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
@@ -64,12 +66,14 @@ namespace LkEngine {
     void GameLayer::OnUpdate(float ts)
     {
         // Get main character objects
-        Entity playerEntity = m_Player->GetEntity();
+        Entity& playerEntity = m_Player->GetEntity();
         Camera& playerCam = playerEntity.GetComponent<CameraComponent>();
 
         m_Renderer2D->BeginScene(playerCam);
         m_Scene->BeginScene();
         DrawBackground();
+
+        RenderCommand::DrawLine({ -200, 20 }, { 200, 40 }, Color::RGBA::Blue);
 
         m_Player->OnUpdate(ts);
         for (const auto& enemy : m_Enemies)
@@ -91,7 +95,7 @@ namespace LkEngine {
 
     void GameLayer::DrawBackground()
     {
-        auto window = Window::Get();
+        auto* window = Window::Get();
         auto& tc = m_Background->GetComponent<TransformComponent>();
         float bgStartX = tc.GetTranslation().x;
         float bgStartY = tc.GetTranslation().y;
