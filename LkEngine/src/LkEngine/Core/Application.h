@@ -48,7 +48,6 @@ namespace LkEngine {
         s_ptr<Window> GetWindow() const { return m_Window; }
         s_ptr<Renderer> GetRenderer() const { return m_Renderer; }
         s_ptr<GraphicsContext> GetGraphicsContext() { return m_GraphicsContext; }
-        s_ptr<TextureLibrary> GetTextureLibrary() { return m_TextureLibrary; }
         void RenderImGui();
         void AddScene(Scene& scene);
         s_ptr<Scene> GetScene(uint8_t idx) { return m_Scenes[idx]; }
@@ -60,11 +59,10 @@ namespace LkEngine {
         s_ptr<Window> m_Window = nullptr;
         s_ptr<Renderer> m_Renderer = nullptr;
         s_ptr<GraphicsContext> m_GraphicsContext = nullptr;
-        s_ptr<TextureLibrary> m_TextureLibrary = nullptr;
         s_ptr<Scene> m_ActiveScene = nullptr;
-        s_ptr<EditorLayer> m_EditorLayer = nullptr;
         s_ptr<Input> m_Input = nullptr;
         s_ptr<Scene> m_Scenes[8];
+        s_ptr<EditorLayer> m_EditorLayer = nullptr;
         inline static Application* m_Instance = nullptr;
     };
 

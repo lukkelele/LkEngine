@@ -28,9 +28,6 @@ namespace LkEngine {
         m_ActiveScene = Scene::Create("BaseScene"); // Base Scene
         m_EditorLayer = EditorLayer::Create(*m_ActiveScene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);
-
-        m_TextureLibrary = TextureLibrary::Create("assets/img");
-        m_TextureLibrary->LoadTextures();
     }
 
     void Application::Run()
