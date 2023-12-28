@@ -27,7 +27,7 @@ namespace LkEngine::UI {
 
     //ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoDocking 
     //ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove 
-    ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoTitleBar
+    ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
         | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
         | ImGuiWindowFlags_NoMove;// | ImGuiWindowFlags_NoSavedSettings;
 

@@ -79,15 +79,22 @@ namespace LkEngine {
 		inline static glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
 		inline static glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
 		inline static glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
-		inline static glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 		inline static glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
+		inline static glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 		inline static glm::vec2 TopBarSize = { 0.0f, 30.0f };
 		inline static glm::vec2 TopBarFramePadding = { 5.0f, 5.0f };
 		inline static glm::vec2 BottomBarSize = { 0.0f, 0.0f };
 		inline static glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
-		inline static glm::vec2 LeftSidebarPadding = { 0.0f, 0.0f };
-		inline static float TopBarHeight = 0.0f;
+		glm::vec2 RightSidebarSize = { 0.0f, 0.0f };
+		float EditorWindowWidth = 0.0f;
+		float EditorWindowHeight = 0.0f;
+
+		inline static bool UpdateWindowSize = true;
 		inline static bool ShowRenderInformationWindow = false;
+
+		ImVec2 last_sidebar_right_size = ImVec2(0, 0);
+		ImVec2 last_sidebar_left_size = ImVec2(0, 0);
+		ImVec2 last_bottombar_size = ImVec2(0, 0);
 
 		// Window where the selected entity settings will be shown in
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;

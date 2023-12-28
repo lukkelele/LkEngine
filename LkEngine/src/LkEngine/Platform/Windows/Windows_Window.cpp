@@ -121,6 +121,11 @@ namespace LkEngine {
 		m_Instance->SetHeight(height);
 		m_Instance->GetContext()->UpdateResolution(width, height);
 		LOG_DEBUG("Window Resize: ({}, {})", m_Instance->GetWidth(), m_Instance->GetHeight());
+
+		if (EditorLayer::Enabled)
+		{
+			EditorLayer::UpdateWindowSize = true;
+		}
 	}
 
 	void Windows_Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
