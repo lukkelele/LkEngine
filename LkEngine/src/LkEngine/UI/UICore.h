@@ -25,7 +25,7 @@ namespace LkEngine::UI {
 
     // Insert UI widgets inside already existing windows on the screen.
     // Is determined by SelectedEntityWindow
-    void BeginSubwindow(const char* windowName);
+    void BeginSubwindow(const char* windowName, ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None);
     void EndSubwindow();
     bool IsWindowFocused(const char* windowName, const bool checkRootWindow);
     const char* GetSelectedEntityWindowName();

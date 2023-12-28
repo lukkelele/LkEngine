@@ -14,7 +14,6 @@ namespace LkEngine::UI {
     ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoDocking
         | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
-        //| ImGuiWindowFlags_MenuBar;
 
     ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_None
         | ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe
@@ -25,8 +24,6 @@ namespace LkEngine::UI {
         | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
 
-    //ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoDocking 
-    //ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_None | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove 
     ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
         | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
         | ImGuiWindowFlags_NoMove;// | ImGuiWindowFlags_NoSavedSettings;
@@ -137,12 +134,11 @@ namespace LkEngine::UI {
         return SelectedEntityWindow;
     }
 
-    void BeginSubwindow(const char* windowName)
+    void BeginSubwindow(const char* windowName, ImGuiWindowFlags windowFlags)
     {
-        PushID();
-        //ImGui::Begin(EditorLayer::UI_GetSelectedEntityWindowName());
-        ImGui::Begin(SelectedEntityWindow);
-        ImGui::BeginChild(windowName);
+        PushID(std::string("##" + std::string(windowName)).c_str());
+        ImGui::Begin(SelectedEntityWindow, NULL, (windowFlags | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse));
+        ImGui::BeginChild(windowName, ImVec2(0, 0), false, (windowFlags | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse));
     }
 
     void EndSubwindow()

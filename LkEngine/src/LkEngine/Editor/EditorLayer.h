@@ -41,11 +41,10 @@ namespace LkEngine {
 		static EditorLayer* Get() { return s_Instance; }
 		static s_ptr<EditorLayer> Create(Scene& scene) { return std::make_shared<EditorLayer>(scene); }
 
+		void OnImGuiRender();
 		bool IsEnabled() { return m_Enabled; }
 		Entity GetSelectedEntity() { return SelectedEntity; }
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
-
-		void OnImGuiRender();
 		void SelectEntity(Entity& entity);
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
@@ -63,8 +62,9 @@ namespace LkEngine {
 		bool IsEntitySelected() const;
 		void SetUpdateWindowFlag(bool flag) { m_UpdateWindowSize = flag; }
 		void SetSelectedEntity(Entity& entity);
-		//inline glm::vec2 GetEditorWindowSize() const;
 		glm::vec2 GetEditorWindowSize() const;
+		float GetEditorWindowWidth() const;
+		float GetEditorWindowHeight() const;
 		inline uint64_t GetSelectedEntityID() const { return SelectedEntityID; }
 		inline glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
 		inline glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
@@ -90,13 +90,21 @@ namespace LkEngine {
 		glm::vec2 BottomBarSize = { 0.0f, 0.0f };
 		glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
 		glm::vec2 RightSidebarSize = { 0.0f, 0.0f };
+		glm::vec2 BottomBarPos = { 0.0f, 0.0f };
+		glm::vec2 LeftSidebarPos = { 0.0f, 0.0f };
+		glm::vec2 RightSidebarPos = { 0.0f, 0.0f };
 
+		bool m_UpdateWindowPos = true;
 		bool m_UpdateWindowSize = true;
+
 		bool ShowRenderInformationWindow = false;
 		bool m_FillSidebarsVertically = true; // Always fill out sidebars vertically
 
-		ImVec2 last_sidebar_right_size = ImVec2(0, 0);
+		ImVec2 last_sidebar_left_pos = ImVec2(0, 0);
 		ImVec2 last_sidebar_left_size = ImVec2(0, 0);
+		ImVec2 last_sidebar_right_pos = ImVec2(0, 0);
+		ImVec2 last_sidebar_right_size = ImVec2(0, 0);
+		ImVec2 last_bottombar_pos = ImVec2(0, 0);
 		ImVec2 last_bottombar_size = ImVec2(0, 0);
 
 		// Window where the selected entity settings will be shown in
