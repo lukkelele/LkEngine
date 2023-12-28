@@ -3,9 +3,9 @@
 
 
 #ifdef LK_RENDERER_API_VULKAN 
-    #include "LkEngine/Renderer/Vulkan/VulkanRenderer.h"
+    #include "LkEngine/Platform/Vulkan/VulkanRenderer.h"
 #elif defined(LK_RENDERER_API_OPENGL)
-    #include "LkEngine/Renderer/OpenGl/OpenGLRenderer.h"
+    #include "LkEngine/Platform/OpenGl/OpenGLRenderer.h"
 #endif
 
 

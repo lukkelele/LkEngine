@@ -5,7 +5,7 @@
 #include <ImGuizmo/ImGuizmo.h>
 
 #ifdef LK_RENDERER_API_OPENGL
-	#include "LkEngine/Renderer/OpenGL/OpenGLContext.h"
+	#include "LkEngine/Platform/OpenGL/OpenGLContext.h"
 #elif defined(LK_RENDERER_API_VULKAN)
 #endif
 

@@ -3,9 +3,9 @@
 #include <glad/glad.h>
 
 #ifdef LK_RENDERER_API_VULKAN
-	#include "LkEngine/Renderer/Vulkan/VulkanVertexBuffer.h"
+	#include "LkEngine/Platform/Vulkan/VulkanVertexBuffer.h"
 #elif defined(LK_RENDERER_API_OPENGL)
-	#include "LkEngine/Renderer/OpenGL/OpenGLVertexBuffer.h"
+	#include "LkEngine/Platform/OpenGL/OpenGLVertexBuffer.h"
 #endif
 
 

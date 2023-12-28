@@ -2,9 +2,9 @@
 #include "LkEngine/Renderer/Image.h"
 
 #ifdef LK_RENDERER_API_VULKAN
-	#include "LkEngine/Renderer/Vulkan/VulkanImage.h"
+	#include "LkEngine/Platform/Vulkan/VulkanImage.h"
 #elif defined (LK_RENDERER_API_OPENGL)
-	#include "LkEngine/Renderer/OpenGL/OpenGLImage.h"
+	#include "LkEngine/Platform/OpenGL/OpenGLImage.h"
 #endif
 
 namespace LkEngine {
