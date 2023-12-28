@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/OpenGL/OpenGLVertexBuffer.h"
+#include "LkEngine/Platform/OpenGL/OpenGLVertexBuffer.h"
 
 
 namespace LkEngine {

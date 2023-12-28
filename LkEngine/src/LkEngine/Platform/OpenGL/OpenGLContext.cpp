@@ -1,6 +1,7 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/OpenGL/OpenGLContext.h"
+#include "LkEngine/Platform/OpenGL/OpenGLContext.h"
 #include "LkEngine/Core/Window.h"
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>

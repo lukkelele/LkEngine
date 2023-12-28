@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/OpenGL/OpenGLImage.h"
+#include "LkEngine/Platform/OpenGL/OpenGLImage.h"
 
 
 namespace LkEngine {

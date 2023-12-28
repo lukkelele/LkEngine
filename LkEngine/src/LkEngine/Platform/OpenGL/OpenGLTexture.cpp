@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/OpenGL/OpenGLTexture.h"
+#include "LkEngine/Platform/OpenGL/OpenGLTexture.h"
 #include "LkEngine/Core/Application.h"
 
 
