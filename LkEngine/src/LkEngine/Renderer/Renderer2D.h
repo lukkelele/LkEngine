@@ -133,7 +133,7 @@ namespace LkEngine {
 
         uint32_t m_TextureSlotIndex = 1; // 0 = white texture
         s_ptr<Shader> m_TextureShader = nullptr;
-        s_ptr<Texture2D> m_WhiteTexture = nullptr;
+        s_ptr<Texture> m_WhiteTexture = nullptr;
         std::array<s_ptr<Texture>, MaxTextureSlots> m_TextureSlots;
 
         Renderer2D::Statistics m_Stats;

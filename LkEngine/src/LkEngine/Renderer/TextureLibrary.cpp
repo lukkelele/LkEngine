@@ -6,18 +6,76 @@
 
 namespace LkEngine {
 
+    static std::vector<std::string> ImageExtensions = { 
+        ".jpg", 
+        ".jpeg", 
+        ".png", 
+        ".bmp" 
+    };
+
+    FileExtension DetermineExtension(const std::filesystem::directory_entry& entry)
+    {
+        if (entry.is_regular_file() == false)
+        {
+            return FileExtension::Unknown;
+        }
+
+        std::string filename = entry.path().filename().string();
+        std::string filepath = entry.path().string();
+        std::string fileExtension = entry.path().extension().string();
+
+        if (fileExtension == "png")
+            return FileExtension::PNG;
+        else if (fileExtension == "jpg")
+            return FileExtension::JPG;
+        else
+            return FileExtension::Unknown;
+
+    }
+
     TextureLibrary::TextureLibrary(const std::string& texturesDir)
         : m_TexturesDir(texturesDir)
     {
         m_Instance = this;
-        m_Collection;
-        m_Collection2D;
     }
 
     TextureLibrary::~TextureLibrary()
     {
         m_Collection.clear();
         m_Collection2D.clear();
+    }
+
+    void TextureLibrary::Init()
+    {
+        namespace fs = std::filesystem;
+
+        // Find all textures and add to respective texture collections
+        for (const auto& entry : fs::recursive_directory_iterator(m_TexturesDir)) 
+        {
+            if (entry.is_regular_file()) 
+            {
+                std::string filepath = entry.path().string();
+                std::string extension = entry.path().extension().string();
+
+                // Check if the file has an image extension
+                if (std::find(ImageExtensions.begin(), ImageExtensions.end(), extension) != ImageExtensions.end()) 
+                {
+                    LOG_DEBUG("Found image/texture: {}", filepath);
+                    //AddTexture(File::ExtractFilenameWithoutExtension(entry.path().filename().string(), DetermineExtension(entry)), filepath);
+                    AddTexture2D(File::ExtractFilenameWithoutExtension(entry.path().filename().string(), DetermineExtension(entry)), filepath);
+                }
+            }
+        }
+
+        // Create basic textures
+        TextureSpecification whiteTextureSpec;
+        whiteTextureSpec.Width = 400;
+        whiteTextureSpec.Height = 400;
+        whiteTextureSpec.Name = "White Texture";
+        whiteTextureSpec.Path = "assets/img/white-texture.png";
+        auto whiteTexture = Texture2D::Create(whiteTextureSpec);
+
+        m_Collection2D.insert({ "WhiteTexture", whiteTexture });
     }
 
     s_ptr<TextureLibrary> TextureLibrary::Create(const std::string& texturesDir)
@@ -130,6 +188,11 @@ namespace LkEngine {
         LOG_DEBUG("Added 2D texture {0} to texture library", File::ExtractFilenameWithoutExtension(textureName));
 
         return texture2D;
+    }
+
+    s_ptr<Texture> TextureLibrary::GetWhiteTexture()
+    {
+        return m_Collection2D.at("WhiteTexture");
     }
 
 }

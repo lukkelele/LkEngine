@@ -2,6 +2,7 @@
 #include "LkEngine/Renderer/Renderer2D.h"
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/RenderCommand.h"
+#include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 
@@ -82,16 +83,13 @@ namespace LkEngine {
          });
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
-        TextureSpecification whiteTextureSpec;
-        whiteTextureSpec.Width = 400;
-        whiteTextureSpec.Height = 400;
-        whiteTextureSpec.Name = "White Texture";
-        whiteTextureSpec.Path = "assets/img/white-texture.png";
-        m_WhiteTexture = Texture2D::Create(whiteTextureSpec);
+        auto* textureLibrary = TextureLibrary::Get();
+        m_WhiteTexture = textureLibrary->GetWhiteTexture();
 
         m_TextureSlots[0] = m_WhiteTexture;
-        m_TextureSlots[1] = Texture2D::Create("assets/img/sky-background-2d.png");
-        m_TextureSlots[2] = Texture2D::Create("assets/img/atte_square.png");
+        m_TextureSlots[1] = textureLibrary->GetTexture2D("sky-background-2d");
+        m_TextureSlots[2] = textureLibrary->GetTexture2D("atte_square");
+        m_TextureSlots[3] = textureLibrary->GetTexture2D("super_mario_ground");
 
         m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
         m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");

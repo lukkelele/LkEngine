@@ -2,6 +2,7 @@
 
 #include "LkEngine/Renderer/Renderer2D.h"
 #include "LkEngine/Renderer/VertexBuffer.h"
+#include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Scene/Components.h"
 

@@ -88,6 +88,7 @@ namespace LkEngine {
 		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
 	private:
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;
+		inline static s_ptr<TextureLibrary> m_TextureLibrary = nullptr;
 	};
 
 }

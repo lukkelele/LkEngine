@@ -3,9 +3,9 @@
 #include "LkEngine/Renderer/Renderer.h"
 
 #ifdef LK_RENDERER_API_VULKAN
-	#include "LkEngine/Renderer/Vulkan/VulkanTexture.h"
+	#include "LkEngine/Platform/Vulkan/VulkanTexture.h"
 #elif defined(LK_RENDERER_API_OPENGL)
-	#include "LkEngine/Renderer/OpenGL/OpenGLTexture.h"
+	#include "LkEngine/Platform/OpenGL/OpenGLTexture.h"
 #endif
 
 namespace LkEngine {

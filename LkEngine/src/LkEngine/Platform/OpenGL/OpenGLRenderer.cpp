@@ -1,7 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/Platform/OpenGL/OpenGLRenderer.h"
 #include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Renderer/TextureLibrary.h"
 
 
 namespace LkEngine {

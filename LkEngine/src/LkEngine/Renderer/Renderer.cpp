@@ -33,6 +33,8 @@ namespace LkEngine {
 
 		Data = new RendererData();
 		Data->m_ShaderLibrary = ShaderLibrary::Create();
+		m_TextureLibrary = TextureLibrary::Create("assets/textures");
+		m_TextureLibrary->Init();
 
 		uint32_t whiteTextureData = 0xFFFFFFFF;
 		TextureSpecification spec;
