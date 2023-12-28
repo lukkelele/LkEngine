@@ -122,9 +122,10 @@ namespace LkEngine {
 		m_Instance->GetContext()->UpdateResolution(width, height);
 		LOG_DEBUG("Window Resize: ({}, {})", m_Instance->GetWidth(), m_Instance->GetHeight());
 
-		if (EditorLayer::Enabled)
+		auto* editor = EditorLayer::Get();
+		if (editor && editor->IsEnabled())
 		{
-			EditorLayer::UpdateWindowSize = true;
+			editor->SetUpdateWindowFlag(true);
 		}
 	}
 

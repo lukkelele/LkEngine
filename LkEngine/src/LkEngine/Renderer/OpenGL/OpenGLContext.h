@@ -19,6 +19,7 @@ namespace LkEngine {
         void BeginImGuiFrame();
         void EndImGuiFrame();
         void InitImGui(const std::string& glslVersion);
+        void SetViewport(const glm::vec2& pos, const glm::vec2& size);
         void UpdateResolution(uint16_t width, uint16_t height);
         void SetDepthEnabled(bool enabled);
         GLFWwindow* GetGlfwWindow() { return m_GlfwWindow; }

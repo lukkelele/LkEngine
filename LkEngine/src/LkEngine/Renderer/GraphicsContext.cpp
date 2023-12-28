@@ -1,7 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/GraphicsContext.h"
 #include "LkEngine/Platform/Windows/Windows_Window.h"
-#include "LkEngine/UI/UILayer.h"
+
 #include <ImGuizmo/ImGuizmo.h>
 
 #ifdef LK_RENDERER_API_OPENGL

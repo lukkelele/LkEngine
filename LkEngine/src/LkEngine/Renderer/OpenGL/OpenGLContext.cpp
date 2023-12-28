@@ -70,6 +70,8 @@ namespace LkEngine {
 
 	//=======================================================================================================
 
+
+
     OpenGLContext::OpenGLContext(Window* window, const std::string& glslVersion)
     {
     	m_Instance = this;
@@ -110,6 +112,11 @@ namespace LkEngine {
 			LOG_DEBUG("OpenGL Version: {}", glVersion);
 		}
     }
+
+	void OpenGLContext::SetViewport(const glm::vec2& pos, const glm::vec2& size)
+	{
+		glViewport(pos.x, pos.y, size.x, size.y);
+	}
 
     void OpenGLContext::Destroy()
     {

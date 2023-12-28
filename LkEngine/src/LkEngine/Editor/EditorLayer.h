@@ -40,16 +40,17 @@ namespace LkEngine {
 
 		static EditorLayer* Get() { return s_Instance; }
 		static s_ptr<EditorLayer> Create(Scene& scene) { return std::make_shared<EditorLayer>(scene); }
-		static bool IsEnabled() { return Enabled; }
-		static Entity GetSelectedEntity() { return SelectedEntity; }
-		static const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
+
+		bool IsEnabled() { return m_Enabled; }
+		Entity GetSelectedEntity() { return SelectedEntity; }
+		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
+
 		void OnImGuiRender();
+		void SelectEntity(Entity& entity);
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
-		void SelectEntity(Entity& entity);
 		void SetScene(Scene& scene) { m_Scene = &scene; }
 		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
-		//static void Select(Entity& entity); { SelectedEntityID = entity.GetComponent<IDComponent>().ID; }
 		template<typename T, typename UIFunction>
 		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
 		template<typename T>
@@ -59,11 +60,15 @@ namespace LkEngine {
 		void UI_SceneContent();
         void UI_SelectedEntityProperties();
 		void UI_RenderSettingsInformation();
-		glm::vec2 GetEditorWindowSize() const;
 		bool IsEntitySelected() const;
-		
-		static glm::vec2 GetTopBarSize();
-		static glm::vec2 GetCenteredMousePos();
+		void SetUpdateWindowFlag(bool flag) { m_UpdateWindowSize = flag; }
+		void SetSelectedEntity(Entity& entity);
+		//inline glm::vec2 GetEditorWindowSize() const;
+		glm::vec2 GetEditorWindowSize() const;
+		inline uint64_t GetSelectedEntityID() const { return SelectedEntityID; }
+		inline glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
+		inline glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
+		inline glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
 
 	private:
 		//void RenderViewport(); // TODO
@@ -73,24 +78,22 @@ namespace LkEngine {
 
 	public:
 		static ImVec2 SelectedEntityMenuSize;
-		inline static bool Enabled = true;
-		inline static Entity SelectedEntity;
-		inline static uint64_t SelectedEntityID = 0;
-		inline static glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
-		inline static glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
-		inline static glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
-		inline static glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
-		inline static glm::vec2 ViewportScalers = { 1.0f, 1.0f };
-		inline static glm::vec2 TopBarSize = { 0.0f, 30.0f };
-		inline static glm::vec2 TopBarFramePadding = { 5.0f, 5.0f };
-		inline static glm::vec2 BottomBarSize = { 0.0f, 0.0f };
-		inline static glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
+		Entity SelectedEntity;
+		uint64_t SelectedEntityID = 0;
+		glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
+		glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
+		glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
+		glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
+		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
+		glm::vec2 TopBarSize = { 0.0f, 30.0f };
+		glm::vec2 TopBarFramePadding = { 5.0f, 5.0f };
+		glm::vec2 BottomBarSize = { 0.0f, 0.0f };
+		glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
 		glm::vec2 RightSidebarSize = { 0.0f, 0.0f };
-		float EditorWindowWidth = 0.0f;
-		float EditorWindowHeight = 0.0f;
 
-		inline static bool UpdateWindowSize = true;
-		inline static bool ShowRenderInformationWindow = false;
+		bool m_UpdateWindowSize = true;
+		bool ShowRenderInformationWindow = false;
+		bool m_FillSidebarsVertically = true; // Always fill out sidebars vertically
 
 		ImVec2 last_sidebar_right_size = ImVec2(0, 0);
 		ImVec2 last_sidebar_left_size = ImVec2(0, 0);
@@ -102,6 +105,7 @@ namespace LkEngine {
 	private:
 		//s_ptr<Scene> m_Scene = nullptr;
 		Scene* m_Scene = nullptr;
+		bool m_Enabled = true;
 		glm::vec2 m_ViewportBounds[2];
 		glm::vec2 m_SecondViewportBounds[2];
 		bool m_ShowMetricsTool = false;

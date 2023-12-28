@@ -40,11 +40,13 @@ namespace LkEngine {
                 //LOG_TRACE("QUAD POS ({} {})", quad_pos.x, quad_pos.y);
 
                 // If the editor layer is enabled, adjust the quad pos by taking the bottom dockbar into consideration
-                if (EditorLayer::Enabled)
+                auto* editor = EditorLayer::Get();
+                if (editor && editor->IsEnabled())
                 {
                     auto* viewport = ImGui::GetMainViewport();
-                    quad_pos.x += EditorLayer::EditorWindowSize.x * 0.50f + EditorLayer::LeftSidebarSize.x;
-                    quad_pos.y += (viewport->WorkSize.y * 0.50f) + EditorLayer::BottomBarSize.y;
+                    auto editorWindowSize = editor->GetEditorWindowSize();
+                    quad_pos.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+                    quad_pos.y += (viewport->WorkSize.y * 0.50f) + editor->GetBottomBarSize().y;
                 }
                 else
                 {

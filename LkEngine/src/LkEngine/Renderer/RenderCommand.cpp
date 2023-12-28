@@ -113,7 +113,8 @@ namespace LkEngine {
         float windowHeight = windowSize.y;
 
         glm::vec2 windowPos = { 0.0f, 0.0f };
-        if (EditorLayer::IsEnabled())
+        auto* editor = EditorLayer::Get();
+        if (editor && editor->IsEnabled())
         {
             //windowPos = EditorLayer::Get()->GetViewportBounds(1, 0);
         }

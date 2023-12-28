@@ -26,7 +26,8 @@ namespace LkEngine {
 
     void Enemy::OnImGuiRender()
     {
-        if (EditorLayer::GetSelectedEntity() != m_Entity)
+        auto* editor = EditorLayer::Get();
+        if (editor && editor->GetSelectedEntity() != m_Entity)
             return;
 
         UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);

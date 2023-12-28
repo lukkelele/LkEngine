@@ -60,6 +60,7 @@ namespace LkEngine {
         virtual void BeginImGuiFrame() = 0;
         virtual void EndImGuiFrame() = 0;
         virtual void InitImGui(const std::string& glslVersion) = 0;
+        virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) = 0;
         virtual void SetDepthEnabled(bool enabled) = 0;
         virtual void SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) = 0;
         virtual void SetSourceBlendFunction(const SourceBlendFunction& srcFunc) = 0;

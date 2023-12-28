@@ -13,7 +13,9 @@
 
 namespace LkEngine {
 
+	//ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
 	ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
+
 	static float bottombar_height = 180.0f;
 
 	EditorLayer::EditorLayer(Scene& scene)
@@ -26,7 +28,7 @@ namespace LkEngine {
 		m_SecondViewportBounds[0] = { 0, 0 };
 		m_SecondViewportBounds[1] = { 0, 0 };
 		m_ShowStackTool = true;
-		Enabled = true;
+		m_Enabled = true;
 
 		LeftSidebarSize.x = 340.0f;
 		LeftSidebarSize.y = m_ViewportBounds[1].y;
@@ -55,7 +57,7 @@ namespace LkEngine {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
 		ImGui::PopStyleColor(); 
 		ImGui::PopStyleVar(2);
@@ -81,12 +83,12 @@ namespace LkEngine {
 		ImGui::PopStyleVar(1);
 
 
-		static float center_window_width = 0;         // viewport->Size.x - sidebar_left_width - sidebar_right_width;
+		//static float center_window_width = 0;         // viewport->Size.x - sidebar_left_width - sidebar_right_width;
 		//static float center_window_height = 0;        // viewport->WorkSize.y - bottombar_height;
-		static float center_window_start_xpos = 0;    // sidebar_left_width;
-		static float center_window_start_ypos = 0;    // bottombar_height;
-		static ImVec2 center_window_pos = { 0, 0 };   // { center_window_xpos, center_window_ypos };
-		static ImVec2 center_window_size = { 0, 0 };  // { center_window_width, center_window_height };
+		//static float center_window_start_xpos = 0;    // sidebar_left_width;
+		//static float center_window_start_ypos = 0;    // bottombar_height;
+		//static ImVec2 center_window_pos = { 0, 0 };   // { center_window_xpos, center_window_ypos };
+		//static ImVec2 center_window_size = { 0, 0 };  // { center_window_width, center_window_height };
 
 		static bool dockWindowsHaveChangedInSize = true; // Run once when starting
 
@@ -130,9 +132,7 @@ namespace LkEngine {
 		//--------------------------------------------------
 		// LEFT SIDEBAR
 		//--------------------------------------------------
-		//static float sidebar_left_width = 340.0f;
-		//static float sidebar_left_height = m_ViewportBounds[1].y;
-		if (UpdateWindowSize)
+		if (m_UpdateWindowSize)
 		{
 			ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y - topbar_height), ImGuiCond_Always);
@@ -159,7 +159,6 @@ namespace LkEngine {
 				if (ImGui::TreeNode("Colors"))
 				{
 				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
-				    //ImGui::PushID("##lkengine-leftpanel-colors");
 					UI::PushID("##LkEngine-LeftPanel-Colors");
 				    ImGui::Text("Background"); 
 				    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
@@ -167,7 +166,7 @@ namespace LkEngine {
 				    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
 				    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
-					UI::PopID("#LkEngine-LeftPanel-Colors");
+					UI::PopID();
 
 				    ImGui::TreePop();
 				}
@@ -209,10 +208,11 @@ namespace LkEngine {
 		//--------------------------------------------------
 		// RIGHT SIDEBAR
 		//--------------------------------------------------
-		if (UpdateWindowSize)
+		if (m_UpdateWindowSize)
 		{
 			ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - RightSidebarSize.x, ImGui::GetCursorPosY()), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
+			//ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always); // Always fill out screen vertically
 		}
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 		{
@@ -243,18 +243,13 @@ namespace LkEngine {
 			);
 
 			ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", last_sidebar_right_size.x, last_sidebar_right_size.y);
-			ImGui::Text("center_window_width: %1.f", center_window_width);
-			ImGui::Text("center_window_height: %1.f", center_window_height);
-			ImGui::Text("center_window_start_xpos: %1.f", center_window_start_xpos);
-			ImGui::Text("center_window_start_ypos: %1.f", center_window_start_ypos);
 
 			auto windowSize = ImGui::GetWindowSize();
-			//if (windowSize.x != last_sidebar_right_size.x || windowSize.y != last_sidebar_right_size.y)
 			if (windowSize.x != RightSidebarSize.x || windowSize.y != RightSidebarSize.y)
 			{
 				dockWindowsHaveChangedInSize = true;
-				LOG_WARN("last_sidebar_right_size: ({}, {})", last_sidebar_right_size.x, last_sidebar_right_size.y);
-				LOG_WARN("windowSize: ({}, {})", windowSize.x, windowSize.y);
+				//LOG_WARN("last_sidebar_right_size: ({}, {})", last_sidebar_right_size.x, last_sidebar_right_size.y);
+				//LOG_WARN("windowSize: ({}, {})", windowSize.x, windowSize.y);
 			}
 			last_sidebar_right_size = windowSize;
 
@@ -270,7 +265,7 @@ namespace LkEngine {
 		//--------------------------------------------------
 		// BOTTOM BAR
 		//--------------------------------------------------
-		if (UpdateWindowSize)
+		if (m_UpdateWindowSize)
 		{
 			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y - BottomBarSize.y), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x - (LeftSidebarSize.x + RightSidebarSize.x), BottomBarSize.y), ImGuiCond_Always);
@@ -278,7 +273,6 @@ namespace LkEngine {
 		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 		{
 			ImGui::BeginGroup();
-			auto mouse_pos = Mouse::GetMousePos();
 			Mouse::Pos = Mouse::GetMousePos();
 			Mouse::Pos.y = viewport->WorkSize.y - bottombar_height - Mouse::Pos.y; // Why do I remove Mouse::Pos.y here ?
 			Mouse::Pos.x -= LeftSidebarSize.x;
@@ -286,23 +280,24 @@ namespace LkEngine {
 			ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
 			ImGui::SameLine(0, 20);
 
-			float scale_x = center_window_width / m_ViewportBounds[1].x;
-			float scale_y = center_window_height / m_ViewportBounds[1].y;
+			float scale_x = EditorWindowSize.x / m_ViewportBounds[1].x;
+			float scale_y = EditorWindowSize.y / m_ViewportBounds[1].y;
+
 			ViewportScalers.x = scale_x;
 			ViewportScalers.y = scale_y;
 
 			ImGui::BeginGroup();
 			{
-				ImGui::Text("Center Window (%1.f, %1.f)", center_window_width, center_window_height);
+				ImGui::Text("Center Window (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
 				ImGui::SameLine(0, 20);
-				ImGui::Text("Scaled res (%.1f, %.1f)", center_window_width / Mouse::Scalers.x, center_window_height / Mouse::Scalers.y );
+				ImGui::Text("Scaled res (%.1f, %.1f)", EditorWindowSize.x / Mouse::Scalers.x, EditorWindowSize.y / Mouse::Scalers.y);
 				ImGui::SameLine(0, 20);
 				ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
 
-				auto centeredMousePos = GetCenteredMousePos();
+				//auto centeredMousePos = GetCenteredMousePos();
 				auto& sceneCamera = *Scene::GetActiveScene()->GetActiveCamera();
 				glm::vec2 sceneCameraPos = sceneCamera.GetPos();
-				ImGui::Text("Centered Mouse Pos: (%.2f, %.2f)", centeredMousePos.x, centeredMousePos.y);
+				//ImGui::Text("Centered Mouse Pos: (%.2f, %.2f)", centeredMousePos.x, centeredMousePos.y);
 				ImGui::Text("SceneCamera Pos: (%.1f, %.1f)", sceneCameraPos.x, sceneCameraPos.y);
 			}
 			ImGui::EndGroup();
@@ -310,12 +305,12 @@ namespace LkEngine {
 
 			ImGui::EndGroup();
 
-			Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
 			Mouse::Scalers = { scale_x, scale_y };
+			Mouse::ScaledPos = { (Mouse::Pos.x) / scale_x, (Mouse::Pos.y) / scale_y };
 
 			Mouse::SetCenterPos(
-				(Mouse::Pos.x / center_window_width) * 2.0f - 1.0f, 
-				((Mouse::Pos.y / center_window_height) * 2.0f - 1.0f) * -1.0f
+				(Mouse::Pos.x / EditorWindowSize.x) * 2.0f - 1.0f, 
+				((Mouse::Pos.y / EditorWindowSize.y) * 2.0f - 1.0f) * -1.0f
 			);
 
 			auto& active_cam = *Scene::GetActiveScene()->GetActiveCamera();
@@ -333,36 +328,26 @@ namespace LkEngine {
 			ImGui::Text("Last Bottombar Size: (%1.f, %1.f)", last_bottombar_size.x, last_bottombar_size.y);
 		}
 
-		//center_window_width = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
-		//center_window_height = viewport->Size.y - bottombar_height;// -topbar_height;
-		EditorWindowWidth = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
-		EditorWindowHeight = viewport->Size.y - bottombar_height /* - topbar_height */;
-		center_window_size = { EditorWindowWidth, EditorWindowHeight };
+		EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
+		EditorWindowSize.y = viewport->Size.y - bottombar_height /* - topbar_height */;
 
-		ImGui::Text("Center Window Size (%1.f, %1.f)", center_window_width, center_window_height);
 		ImGui::Text("Viewport Size: (%1.f, %1.f)", viewport->Size.x, viewport->Size.y);
 		ImGui::SameLine();
 		ImGui::Text("WorkSize: (%1.f, %1.f)", viewport->WorkSize.x, viewport->WorkSize.y);
-		// Lower left point/bound 
-		//center_window_start_ypos = BottomBarSize.y;
 
 		// Top right point/bound
-		m_SecondViewportBounds[0] = { LeftSidebarSize.x, center_window_start_ypos };
+		m_SecondViewportBounds[0] = { LeftSidebarSize.x, BottomBarSize.y };
 		m_SecondViewportBounds[1] = { 
-			(m_SecondViewportBounds[0].x + EditorWindowWidth),
-			(m_SecondViewportBounds[0].y + EditorWindowHeight)
+			(m_SecondViewportBounds[0].x + EditorWindowSize.x),
+			(m_SecondViewportBounds[0].y + EditorWindowSize.y)
 		};
 		ImGui::End();
 
-		EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
-		//EditorWindowSize = { center_window_size.x, center_window_size.y };
-		EditorWindowSize = { EditorWindowWidth, EditorWindowHeight };
-		
 		// If the window sizes have been adjusted, set the bool member to false
 		// This must be run BEFORE the 'dockWindowsHaveChangedInSize' if-statement
-		if (UpdateWindowSize == true)
+		if (m_UpdateWindowSize == true)
 		{
-			UpdateWindowSize = false; 
+			m_UpdateWindowSize = false; 
 		}
 
 		// Check to see if any of the editor windows have changed in size and if they have
@@ -371,20 +356,28 @@ namespace LkEngine {
 		// windows readjusting in an exponential rate
 		if (dockWindowsHaveChangedInSize && !Mouse::IsButtonPressed(MouseButton::ButtonLeft))
 		{
-			LOG_DEBUG("Dock Windows Have Changed In Size!");
 			LeftSidebarSize = { last_sidebar_left_size.x, last_sidebar_left_size.y };
 			RightSidebarSize = { last_sidebar_right_size.x, last_sidebar_right_size.y };
 			BottomBarSize = { last_bottombar_size.x, last_bottombar_size.y };
 
-			// FIXME
-			//glViewport(center_window_start_xpos, center_window_start_ypos, center_window_width, center_window_height);
+			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
+			EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
+			EditorWindowSize.y = viewport->Size.y - bottombar_height /* - topbar_height */;
+
+			if (m_FillSidebarsVertically)
+			{
+				LeftSidebarSize.y = viewport->WorkSize.y;
+				RightSidebarSize.y = viewport->WorkSize.y;
+			}
+
+			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
+
 			// Reapply viewport settings starting from a lower point of the left sidebar and the bottom bar height
-			glViewport(LeftSidebarSize.x, BottomBarSize.y, EditorWindowSize.x, EditorWindowSize.y);
+			GraphicsContext::Get()->SetViewport(EditorWindowPos, EditorWindowSize);
 
 			dockWindowsHaveChangedInSize = false;
-			UpdateWindowSize = true; // Tell UI to set the window size ONCE
+			m_UpdateWindowSize = true; // Tell UI to set the window size ONCE
 		}
-
 
 		ImGui::End(); // Viewport
 
@@ -796,17 +789,17 @@ namespace LkEngine {
 		return SelectedEntityID > 0;
 	}
 
-	glm::vec2 EditorLayer::GetTopBarSize() 
-	{ 
-		return glm::vec2(TopBarSize.x + TopBarFramePadding.x, TopBarSize.y + TopBarFramePadding.y); 
-	}
-
-	glm::vec2 EditorLayer::GetCenteredMousePos()
+	void EditorLayer::SetSelectedEntity(Entity& entity)
 	{
-		return glm::vec2(
-			Mouse::CenterPos.x * EditorLayer::EditorWindowSize.x,
-			-Mouse::CenterPos.y * EditorLayer::EditorWindowSize.y
-		);
+		SelectedEntity = entity;
+		if (entity.HasComponent<IDComponent>())
+		{
+			SelectedEntityID = entity.GetUUID();
+		}
+		else
+		{
+			SelectedEntityID = 0;
+		}
 	}
 
 }

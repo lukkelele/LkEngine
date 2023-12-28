@@ -25,6 +25,7 @@ namespace LkEngine {
         auto mousePos = Mouse::GetMousePos();
         auto raycastResults = Physics2D::RaycastFromScreen(*m_Scene);
 		int raycastHits = raycastResults.size();
+		auto* editor = EditorLayer::Get();
 
 		if (raycastHits == 1)
 		{
@@ -34,23 +35,29 @@ namespace LkEngine {
 		    //if ((Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntity != raycast.HitEntity))
 		    if (Mouse::IsButtonPressed(MouseButton::ButtonLeft))
 		    {
-		        EditorLayer::SelectedEntity = raycast.HitEntity;
-				EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
+				if (editor)
+				{
+					//EditorLayer::SelectedEntity = raycast.HitEntity;
+					//EditorLayer::SelectedEntityID = raycast.HitEntity.GetUUID();
+					editor->SetSelectedEntity(raycast.HitEntity);
+				}
 		    }
 		}
 		else if (raycastHits > 1)
 		{
-		    for (const auto& raycast : raycastResults)
+		    for (auto& raycast : raycastResults)
 		    {
 				//LOG_CRITICAL("iterating entity hitcast results");
-		        Entity entity = raycast.HitEntity;
-		        uint64_t hitEntityID = entity.GetUUID();
-		        if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntityID == 0)
-		        {
-		            Entity currentEntity = EditorLayer::SelectedEntity;
-		            EditorLayer::SelectedEntityID = hitEntityID;
-		            EditorLayer::SelectedEntity = raycast.HitEntity;
-		        }
+		        //Entity entity = raycast.HitEntity;
+		        //uint64_t hitEntityID = entity.GetUUID();
+
+				if (Mouse::IsButtonPressed(MouseButton::ButtonLeft))
+				{
+					if (editor && editor->GetSelectedEntityID() == 0)
+					{
+						editor->SetSelectedEntity(raycast.HitEntity);
+					}
+				}
 		    }
 		}
 		else // NO HITS
@@ -64,10 +71,13 @@ namespace LkEngine {
 		#endif
 		}
 
-        if (Keyboard::IsKeyPressed(Key::Escape) && EditorLayer::SelectedEntityID != 0)
+        if (Keyboard::IsKeyPressed(Key::Escape))
         {
-            EditorLayer::SelectedEntity = { (entt::entity)0, m_Scene };
-            EditorLayer::SelectedEntityID = 0;
+			if (editor && editor->IsEnabled() && editor->GetSelectedEntityID() != 0)
+			{
+				Entity entity = { (entt::entity)0, m_Scene };
+				editor->SetSelectedEntity(entity);
+			}
         }
 	}
 

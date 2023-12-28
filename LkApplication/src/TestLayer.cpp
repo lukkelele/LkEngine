@@ -68,11 +68,12 @@ void TestLayer::OnUpdate(float ts)
     auto mousePos = Mouse::GetMousePos();
     auto raycastResults = Physics2D::RaycastFromScreen(*m_Scene);
     //m_Scene->HandleRaycast(raycastResults);
-    if (Keyboard::IsKeyPressed(Key::Escape) && EditorLayer::SelectedEntityID != 0)
-    {
-        EditorLayer::SelectedEntity = { (entt::entity)NULL, &*m_Scene };
-        EditorLayer::SelectedEntityID = 0;
-    }
+    //if (Keyboard::IsKeyPressed(Key::Escape) && EditorLayer::SelectedEntityID != 0)
+    //if (Keyboard::IsKeyPressed(Key::Escape) && EditorLayer::SelectedEntityID != 0)
+    //{
+    //    EditorLayer::SelectedEntity = { (entt::entity)NULL, &*m_Scene };
+    //    EditorLayer::SelectedEntityID = 0;
+    //}
 
     m_Scene->EndScene();
     m_Renderer2D->EndScene();
