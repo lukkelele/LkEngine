@@ -16,7 +16,6 @@ namespace LkEngine {
         { 1.0f, 0.0f }  // bottom right
     };
 
-
     Renderer2D::Renderer2D(const Renderer2DSpecification& specification)
         : m_Specification(specification)
         , m_MaxVertices(specification.MaxQuads * 4)
@@ -103,6 +102,75 @@ namespace LkEngine {
         m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
         m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
+
+        
+#if 0
+		// Lines
+		PipelineSpecification pipelineSpecification;
+		pipelineSpecification.DebugName = "Renderer2D-Line";
+		pipelineSpecification.Shader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
+		pipelineSpecification.TargetFramebuffer = framebuffer;
+		pipelineSpecification.Topology = PrimitiveTopology::Lines;
+		pipelineSpecification.LineWidth = 2.0f;
+		pipelineSpecification.Layout = {
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color" }
+		};
+
+		{
+			RenderPassSpecification lineSpec;
+			lineSpec.DebugName = "Renderer2D-Line";
+			lineSpec.Pipeline = Pipeline::Create(pipelineSpecification);
+			m_LinePass = RenderPass::Create(lineSpec);
+			m_LinePass->SetInput("Camera", m_UBSCamera);
+			HZ_CORE_VERIFY(m_LinePass->Validate());
+			m_LinePass->Bake();
+		}
+
+		{
+			RenderPassSpecification lineOnTopSpec;
+			lineOnTopSpec.DebugName = "Renderer2D-Line(OnTop)";
+			pipelineSpecification.DepthTest = false;
+			lineOnTopSpec.Pipeline = Pipeline::Create(pipelineSpecification);
+			m_LineOnTopPass = RenderPass::Create(lineOnTopSpec);
+			m_LineOnTopPass->SetInput("Camera", m_UBSCamera);
+			HZ_CORE_VERIFY(m_LineOnTopPass->Validate());
+			m_LineOnTopPass->Bake();
+		}
+
+		m_LineVertexBuffers.resize(1);
+		m_LineVertexBufferBases.resize(1);
+		m_LineVertexBufferPtr.resize(1);
+
+		m_LineVertexBuffers[0].resize(framesInFlight);
+		m_LineVertexBufferBases[0].resize(framesInFlight);
+		for (uint32_t i = 0; i < framesInFlight; i++)
+		{
+			uint64_t allocationSize = c_MaxLineVertices * sizeof(LineVertex);
+			m_LineVertexBuffers[0][i] = VertexBuffer::Create(allocationSize);
+			m_MemoryStats.TotalAllocated += allocationSize;
+			m_LineVertexBufferBases[0][i] = hnew LineVertex[c_MaxLineVertices];
+		}
+
+		uint32_t* lineIndices = hnew uint32_t[c_MaxLineIndices];
+		for (uint32_t i = 0; i < c_MaxLineIndices; i++)
+			lineIndices[i] = i;
+
+		{
+			uint64_t allocationSize = c_MaxLineIndices * sizeof(uint32_t);
+			m_LineIndexBuffer = IndexBuffer::Create(lineIndices, allocationSize);
+			m_MemoryStats.TotalAllocated += allocationSize;
+		}
+		hdelete[] lineIndices;
+#endif
+
+		uint32_t* lineIndices = new uint32_t[m_MaxLineIndices];
+        for (uint32_t i = 0; i < m_MaxLineIndices; i++)
+        {
+			lineIndices[i] = i;
+        }
+		delete[] lineIndices;
+
     }
 
     void Renderer2D::Shutdown()
@@ -116,7 +184,9 @@ namespace LkEngine {
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
             if (m_TextureSlots[i])
+            {
                 m_TextureSlots[i]->Unbind();
+            }
         }
 
         StartBatch();
@@ -127,11 +197,12 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        // Unbind all textures above slot 0
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
             if (m_TextureSlots[i])
+            {
                 m_TextureSlots[i]->Unbind();
+            }
         }
 
         StartBatch();
@@ -173,8 +244,7 @@ namespace LkEngine {
                 if (m_TextureSlots[i])
                 {
                     m_TextureSlots[i]->Bind(i);
-                    std::string uniform = "u_Textures[" + std::to_string(i) + "]";
-                    m_QuadShader->SetUniform1i(uniform, i);
+                    m_QuadShader->SetUniform1i("u_Textures[" + std::to_string(i) + "]", i);
                 }
             }
 
@@ -194,8 +264,21 @@ namespace LkEngine {
             m_LineShader->Bind();
             m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
 
+            for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
+            {
+                if (m_TextureSlots[i])
+                {
+                    m_TextureSlots[i]->Bind(i);
+                    //std::string uniform = "u_Textures[" + std::to_string(i) + "]";
+                    //m_LineShader->SetUniform1i(uniform, i);
+                    m_LineShader->SetUniform1i("u_Textures[" + std::to_string(i) + "]", i);
+                }
+            }
+
             RenderCommand::SetLineWidth(m_LineWidth);
             RenderCommand::DrawLines(*m_LineVertexBuffer, m_LineIndexCount);
+
+            m_LineShader->Unbind();
 
             m_Stats.DrawCalls++;
         }
@@ -306,19 +389,9 @@ namespace LkEngine {
         float textureIndex = 0.0f;
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
-#if 0
-        constexpr glm::vec2 textureCoords[] = {
-            { 0.0f, 0.0f },
-            { 1.0f, 0.0f },
-            { 1.0f, 1.0f },
-            { 0.0f, 1.0f }
-        };
-#endif
         //glm::vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
         glm::vec4 tintColor = Color::RGBA::White;
 
-        //for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
-        //LOG_WARN("OUTSIDE - Texture Index: {} | texture.GetRendererID() == {}    NAME: {} | TextureSlots.size() --> {}", textureIndex, texture->GetRendererID(), texture->GetName(), m_TextureSlots.size());
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
             //if (m_TextureSlots[i] != nullptr && m_TextureSlots[i]->GetRendererID() == texture->GetRendererID())
@@ -331,9 +404,9 @@ namespace LkEngine {
 
         if (textureIndex == 0.0f)
         {
-            //textureIndex = (float)m_TextureSlotIndex;
-            //m_TextureSlots[m_TextureSlotIndex] = texture2D;
-            //m_TextureSlotIndex++;
+            textureIndex = (float)m_TextureSlotIndex;
+            m_TextureSlots[m_TextureSlotIndex] = texture;
+            m_TextureSlotIndex++;
         }
 
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0.0f })

@@ -56,6 +56,12 @@ namespace LkEngine {
 		glDrawElements(m_DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
+	void OpenGLRenderer::SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color)
+	{
+		//glDrawElements(m_DrawMode, indexCount, GL_UNSIGNED_INT, nullptr);
+		m_Renderer2D->DrawLine(p1, p2, color);
+	}
+
 	void OpenGLRenderer::SubmitIndexed(unsigned int indexCount)
 	{
 		glDrawElements(m_DrawMode, indexCount, GL_UNSIGNED_INT, nullptr);

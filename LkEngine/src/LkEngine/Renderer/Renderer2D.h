@@ -123,9 +123,9 @@ namespace LkEngine {
         s_ptr<VertexBuffer> m_QuadVertexBuffer;
 
         // Line
-        s_ptr<VertexBuffer> m_LineVertexBuffer;
-        s_ptr<Shader> m_LineShader;
         uint32_t m_LineIndexCount = 0;
+        s_ptr<Shader> m_LineShader;
+        s_ptr<VertexBuffer> m_LineVertexBuffer;
         float m_LineWidth = 3.0f;
 
         LineVertex* m_LineVertexBufferBase = nullptr;
@@ -134,7 +134,7 @@ namespace LkEngine {
         uint32_t m_TextureSlotIndex = 1; // 0 = white texture
         s_ptr<Shader> m_TextureShader = nullptr;
         s_ptr<Texture2D> m_WhiteTexture = nullptr;
-        std::array<s_ptr<Texture2D>, MaxTextureSlots> m_TextureSlots;
+        std::array<s_ptr<Texture>, MaxTextureSlots> m_TextureSlots;
 
         Renderer2D::Statistics m_Stats;
 

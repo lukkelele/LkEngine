@@ -28,7 +28,7 @@ namespace LkEngine {
         static void DrawGrid(int columns, int rows, const glm::vec4& color = { 0.0f, 1.0f, 0.0f, 1.0f }, float spacingX = 10.0f, float spacingY = 10.0f);
 
     private:
-        static u_ptr<Renderer> s_Renderer;
+        static u_ptr<Renderer> m_Renderer;
     };
 
 }

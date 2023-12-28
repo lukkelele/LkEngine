@@ -39,6 +39,7 @@ namespace LkEngine {
 		static uint32_t GetRenderQueueSubmissionIndex();
 		static s_ptr<RendererAPI> GetRendererAPI() { return m_RendererAPI; }
 		static s_ptr<ShaderLibrary> GetShaderLibrary();
+		static void SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color);
 		static void SubmitLines(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
 		static void SubmitIndexed(VertexBuffer& vb, unsigned int count);
         static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);

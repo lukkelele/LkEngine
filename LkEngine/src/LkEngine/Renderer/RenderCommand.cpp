@@ -7,11 +7,11 @@
 
 namespace LkEngine {
 
-    u_ptr<Renderer> RenderCommand::s_Renderer;
+    u_ptr<Renderer> RenderCommand::m_Renderer;
 
     void RenderCommand::Init()
     {
-        s_Renderer->Init();
+        m_Renderer->Init();
     }
 
     void RenderCommand::SetLineWidth(float width)
@@ -23,7 +23,7 @@ namespace LkEngine {
     {
         auto& ib = vb.GetIndexBuffer();
         ib->Bind();
-        s_Renderer->SubmitIndexed(vb, ib->GetCount());
+        m_Renderer->SubmitIndexed(vb, ib->GetCount());
     }
 
     void RenderCommand::DrawIndexed(VertexBuffer& vb, uint32_t _indexCount)
@@ -31,11 +31,12 @@ namespace LkEngine {
         vb.Bind();
         auto& ib = vb.GetIndexBuffer();
         int indexCount = _indexCount ? _indexCount : ib->GetCount();
-        s_Renderer->SubmitIndexed(vb, indexCount);
+        m_Renderer->SubmitIndexed(vb, indexCount);
     }
 
     void RenderCommand::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
     {
+        m_Renderer->SubmitLine(p0, p1, color);
     }
 
     void RenderCommand::DrawLines(VertexBuffer& vb, uint32_t lineIndexCount)
@@ -53,12 +54,12 @@ namespace LkEngine {
         // Draw with color
         if (sc.TextureName == "")
         {
-            s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
+            m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
             return;
         }
         // Draw with texture
-        //s_Renderer->SubmitSprite(tc, scaledSize, TextureLibrary::Get()->GetTexture(sc.TextureID), entityID);
-        s_Renderer->SubmitSprite(tc, scaledSize, TextureLibrary::Get()->GetTexture2D(sc.TextureName), entityID);
+        //m_Renderer->SubmitSprite(tc, scaledSize, TextureLibrary::Get()->GetTexture(sc.TextureID), entityID);
+        m_Renderer->SubmitSprite(tc, scaledSize, TextureLibrary::Get()->GetTexture2D(sc.TextureName), entityID);
     }
 
     void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, s_ptr<Texture> texture, uint32_t entityID)
@@ -67,8 +68,8 @@ namespace LkEngine {
             tc.Scale.x * sc.Size.x, 
             tc.Scale.y * sc.Size.y 
         };
-        //s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
-        s_Renderer->SubmitSprite(tc, scaledSize, texture, entityID);
+        //m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
+        m_Renderer->SubmitSprite(tc, scaledSize, texture, entityID);
     }
 
 #if 0
@@ -80,28 +81,28 @@ namespace LkEngine {
 	    auto& sc = entity.GetComponent<SpriteComponent>();
         LOG_TRACE("Sprite Scale -> ({}, {})", tc.Scale.x, tc.Scale.y);
         glm::vec2 scaledSize = { tc.Scale.x * sc.Size.x, tc.Scale.y * sc.Size.y };
-        s_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entity.GetUUID());
+        m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entity.GetUUID());
     }
 #endif
 
     void RenderCommand::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint32_t entityID)
     {
-        s_Renderer->SubmitQuad(pos, size, color, entityID);
+        m_Renderer->SubmitQuad(pos, size, color, entityID);
     }
 
     void RenderCommand::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint32_t entityID)
     {
-        s_Renderer->SubmitQuad(pos, size, color, entityID);
+        m_Renderer->SubmitQuad(pos, size, color, entityID);
     }
 
     void RenderCommand::DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, uint32_t entityID)
     {
-        s_Renderer->SubmitQuad(pos, size, texture, entityID);
+        m_Renderer->SubmitQuad(pos, size, texture, entityID);
     }
 
     void RenderCommand::DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint32_t entityID)
     {
-        s_Renderer->SubmitQuad(pos, size, texture, entityID);
+        m_Renderer->SubmitQuad(pos, size, texture, entityID);
     }
 
     void RenderCommand::DrawGrid(int columns, int rows, const glm::vec4& color, float spacingX, float spacingY)

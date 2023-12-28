@@ -28,10 +28,10 @@ namespace LkEngine {
 	void Renderer::Init()
 	{
 		DrawMode = RendererDrawMode::Triangles;
-		CommandQueue[0] = new RenderCommandQueue;
-		CommandQueue[1] = new RenderCommandQueue;
+		CommandQueue[0] = new RenderCommandQueue();
+		CommandQueue[1] = new RenderCommandQueue();
 
-		Data = new RendererData;
+		Data = new RendererData();
 		Data->m_ShaderLibrary = ShaderLibrary::Create();
 
 		uint32_t whiteTextureData = 0xFFFFFFFF;
@@ -102,6 +102,11 @@ namespace LkEngine {
 	s_ptr<ShaderLibrary> Renderer::GetShaderLibrary()
 	{
 		return Data->m_ShaderLibrary;
+	}
+
+	void Renderer::SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color)
+	{
+		m_RendererAPI->SubmitLine(p1, p2, color);
 	}
 
 	void Renderer::SubmitLines(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
