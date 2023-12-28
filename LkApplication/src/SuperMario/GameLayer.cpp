@@ -19,11 +19,13 @@ namespace LkEngine {
         m_Scene = Scene::Create("GameLayer");
         auto* window = Window::Get();
 
-        auto imagesInAssetsDir = File::GetFilesInDirectory("assets/img");
         auto textureLibrary = TextureLibrary::Get();
-        std::string bgFilename = "sky-background-2d";
-        m_BgTexture = textureLibrary->GetTexture2D(bgFilename);
+        m_BgTexture = textureLibrary->GetTexture2D("sky-background-2d");
+        m_GroundTexture = textureLibrary->GetTexture2D("super_mario_ground");
+        //m_BgTexture = textureLibrary->GetTexture2D("super_mario_ground");
+        //m_GroundTexture = textureLibrary->GetTexture2D("sky-background-2d");
         LK_ASSERT(m_BgTexture);
+        LK_ASSERT(m_GroundTexture);
 
         Entity playerEntity = m_Scene->CreateEntity("Player");
         m_Player = std::make_shared<Player>(playerEntity, "Mario");
@@ -35,11 +37,19 @@ namespace LkEngine {
         bgTransform.Translation.y = 450.0f;
         m_Background = std::make_shared<Entity>(bgEntity);
 
+        Entity groundEntity = m_Scene->CreateEntity("Ground");
+        auto& groundSprite = groundEntity.AddComponent<SpriteComponent>();
+        auto& groundTransform = groundEntity.AddComponent<TransformComponent>();
+        groundTransform.Translation.y = 50.0f;
+        m_Ground = std::make_shared<Entity>(groundEntity);
+
+        // TODO: Weird raycast bug whenever a certain type of rectangle dimension is used. 
+        // Only the thinner ones bug out, need to figure out why
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { -200, -400 });
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { 100, 300 });
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { -100, 300 });
-        //Debug::CreateDebugSprite(*m_Scene, { 80, 320 }, { 140, 300 }); // Bugged out when raycasting
         Debug::CreateDebugSprite(*m_Scene, { 80, 110 }, { -240, 0 });
+        //Debug::CreateDebugSprite(*m_Scene, { 80, 320 }, { 140, 300 }); // Bugged out when raycasting
 
         SceneCamera& cam = playerEntity.GetComponent<CameraComponent>();
         cam.SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
@@ -72,6 +82,7 @@ namespace LkEngine {
         m_Renderer2D->BeginScene(playerCam);
         m_Scene->BeginScene();
         DrawBackground();
+        DrawGround();
 
         RenderCommand::DrawLine({ -200, 20 }, { 200, 40 }, Color::RGBA::Blue);
 
@@ -119,6 +130,10 @@ namespace LkEngine {
         RenderCommand::DrawQuad(startPos, size, m_BgTexture);
     }
 
+    void GameLayer::DrawGround()
+    {
+        RenderCommand::DrawQuad({ 100, 100 }, { 140, 140 }, m_GroundTexture);
+    }
 
 
 }
