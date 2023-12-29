@@ -26,6 +26,7 @@ namespace LkEngine {
         glm::vec2 GetViewportSize() const;
         glm::vec2 GetSize() const;
         glm::vec2 GetPos() const;
+        void SetSize(const glm::vec2& size);
         void SetVSync(bool enabled);
         std::string GetTitle() const { return m_Title; }
         bool IsVSyncEnabled() const { return m_VSync; }

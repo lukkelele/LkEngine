@@ -106,6 +106,12 @@ namespace LkEngine {
 		return glm::vec2(m_Width, m_Height);
 	}
 
+	void Windows_Window::SetSize(const glm::vec2& size)
+	{
+		m_Width = size.x;
+		m_Height = size.y;
+	}
+
 	glm::vec2 Windows_Window::GetViewportSize() const
 	{
 		return { m_ViewportWidth, m_ViewportHeight };
@@ -126,6 +132,10 @@ namespace LkEngine {
 		if (editor && editor->IsEnabled())
 		{
 			editor->SetUpdateWindowFlag(true);
+			// Set the window size to be that of the editor window size,
+			// this is because of the other docking windows that occopy screen space
+			m_Instance->SetWidth(editor->GetEditorWindowWidth());
+			m_Instance->SetHeight(editor->GetEditorWindowHeight());
 		}
 	}
 
