@@ -70,14 +70,6 @@ namespace LkEngine {
             tc.Scale.x * sc.Size.x, 
             tc.Scale.y * sc.Size.y 
         };
-        // Draw with color
-        //if (sc.TextureName == "")
-        //{
-        //    m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
-        //    return;
-        //}
-        // 
-        // No material passed, use color
         m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
     }
 
@@ -87,22 +79,8 @@ namespace LkEngine {
             tc.Scale.x * sc.Size.x, 
             tc.Scale.y * sc.Size.y 
         };
-        //m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
         m_Renderer->SubmitSprite(tc, scaledSize, texture, entityID);
     }
-
-#if 0
-    void RenderCommand::DrawSprite(Entity& entity)
-    {
-	    if (!entity.HasComponent<SpriteComponent>() && !entity.HasComponent<TransformComponent>())
-	    	return;
-	    auto& tc = entity.GetComponent<TransformComponent>();
-	    auto& sc = entity.GetComponent<SpriteComponent>();
-        LOG_TRACE("Sprite Scale -> ({}, {})", tc.Scale.x, tc.Scale.y);
-        glm::vec2 scaledSize = { tc.Scale.x * sc.Size.x, tc.Scale.y * sc.Size.y };
-        m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entity.GetUUID());
-    }
-#endif
 
     void RenderCommand::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint32_t entityID)
     {
