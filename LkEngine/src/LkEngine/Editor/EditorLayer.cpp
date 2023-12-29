@@ -802,7 +802,6 @@ namespace LkEngine {
 
 	void EditorLayer::SetSelectedEntity(Entity& entity)
 	{
-		SelectedEntity = entity;
 		if (entity.HasComponent<IDComponent>())
 		{
 			SelectedEntityID = entity.GetUUID();
@@ -811,6 +810,7 @@ namespace LkEngine {
 		{
 			SelectedEntityID = 0;
 		}
+		SelectedEntity = entity;
 	}
 
 	float EditorLayer::GetEditorWindowWidth() const

@@ -31,12 +31,14 @@ namespace LkEngine {
         auto& bgSprite = bgEntity.AddComponent<SpriteComponent>();
         auto& bgTransform = bgEntity.AddComponent<TransformComponent>();
         //auto& bgMC = bgEntity.AddComponent<MaterialComponent>(m_BgTexture);
+        bgSprite.SetPassthrough(true);
         bgEntity.AddComponent<MaterialComponent>(skyTexture);
         bgTransform.Translation.y = 450.0f;
         m_Background = std::make_shared<Entity>(bgEntity);
 
         Entity groundEntity = m_Scene->CreateEntity("Ground");
         auto& groundSprite = groundEntity.AddComponent<SpriteComponent>();
+        groundSprite.SetPassthrough(false);
         auto& groundTransform = groundEntity.AddComponent<TransformComponent>();
         groundEntity.AddComponent<MaterialComponent>(groundTexture);
         groundTransform.Translation.x = 50.0f;

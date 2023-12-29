@@ -1,5 +1,6 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/OpenGL/OpenGLShader.h"
+#include "LkEngine/Platform/OpenGL/OpenGLShader.h"
+
 #include <glad/glad.h>
 
 
@@ -49,6 +50,12 @@ namespace LkEngine {
 	{
 		int location = GetUniformLocation(name);
 		GL_CALL(glUniform4f(location, v0, v1, v2, v3));
+	}
+
+	void OpenGLShader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
+	{
+		int location = GetUniformLocation(name);
+		GL_CALL(glUniform4f(location, vec4.x, vec4.y, vec4.z, vec4.w));
 	}
 
 	void OpenGLShader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
@@ -111,91 +118,5 @@ namespace LkEngine {
 		return program;
 	}
 
-#if 0
-	ShaderProgramSource OpenGLShader::ParseShader(const std::string& filepath)
-	{
-		enum class OpenGLShaderType
-		{
-			NONE = -1,
-			VERTEX = 0,
-			FRAGMENT = 1
-		};
-
-		std::ifstream stream(filepath);
-		std::string line;
-		std::stringstream ss[2];
-		OpenGLShaderType type = OpenGLShaderType::NONE;
-
-		while (getline(stream, line))
-		{
-	#ifdef LK_ENGINE_PRINT_SHADER
-			printf("%s\n", line.c_str());
-	#endif
-			if (line.find("#shader") != std::string::npos)
-			{
-				if (line.find("vertex") != std::string::npos)
-					type = OpenGLShaderType::VERTEX;
-				else if (line.find("fragment") != std::string::npos)
-					type = OpenGLShaderType::FRAGMENT;
-			} 
-			else
-			{	// Use OpenGLShaderType to append lines appropriately 
-				if (type != OpenGLShaderType::NONE)
-					ss[(int)type] << line << '\n';
-			}
-		}
-
-		std::string vertex_str = ss[0].str();
-		std::string frag_str = ss[1].str();
-		if (vertex_str.empty())
-			LOG_ERROR("Parsed vertex shader is empty!");
-		if (frag_str.empty())
-			LOG_ERROR("Parsed fragment shader is empty!");
-
-		return { vertex_str, frag_str };
-	}
-
-	ShaderProgramSource OpenGLShader::ParseShaders(const std::string& vertexPath, const std::string& fragmentPath)
-	{
-		enum class OpenGLShaderType
-		{
-			NONE = -1,
-			VERTEX = 0,
-			FRAGMENT = 1
-		};
-
-		std::ifstream streamVertex(vertexPath);
-		std::string line;
-		std::stringstream ss[2];
-		OpenGLShaderType type = OpenGLShaderType::VERTEX;
-
-		while (getline(streamVertex, line))
-		{
-	#ifdef LK_ENGINE_PRINT_SHADER
-			printf("%s\n", line.c_str());
-	#endif
-			ss[(int)type] << line << '\n';
-		}
-
-		std::ifstream streamFrag(fragmentPath);
-		type = OpenGLShaderType::FRAGMENT;
-		while (getline(streamFrag, line))
-		{
-	#ifdef LK_ENGINE_PRINT_SHADER
-			printf("%s\n", line.c_str());
-	#endif
-			ss[(int)type] << line << '\n';
-		}
-
-		std::string vertex_str = ss[0].str();
-		std::string frag_str = ss[1].str();
-		if (vertex_str.empty())
-			LOG_ERROR("Parsed vertex shader is empty!");
-		if (frag_str.empty())
-			LOG_ERROR("Parsed fragment shader is empty!");
-
-		return { vertex_str, frag_str };
-	}
-#endif
 
 }

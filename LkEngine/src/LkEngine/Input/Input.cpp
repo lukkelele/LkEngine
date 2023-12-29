@@ -22,14 +22,29 @@ namespace LkEngine {
 		if (m_Scene == nullptr)
 			return;
 
+		auto* editor = EditorLayer::Get();
+		if (Mouse::IsButtonPressed(MouseButton::ButtonLeft) == false)
+		{
+			if (Keyboard::IsKeyPressed(Key::Escape))
+			{
+				//if (editor && editor->IsEnabled() && editor->GetSelectedEntityID() != 0)
+				LOG_TRACE("De-selecting (clicked escape)");
+				if (editor && editor->IsEnabled())
+				{
+					Entity entity = { (entt::entity)0, m_Scene };
+					editor->SetSelectedEntity(entity);
+				}
+			}
+			return;
+		}
+
         auto mousePos = Mouse::GetMousePos();
         auto raycastResults = Physics2D::RaycastFromScreen(*m_Scene);
 		int raycastHits = raycastResults.size();
-		auto* editor = EditorLayer::Get();
 
 		if (raycastHits == 1)
 		{
-			LOG_DEBUG("Raycast hits: 1");
+			LOG_DEBUG("Hitcast result == 1");
 		    Raycast2DResult raycast = raycastResults.at(0);
 		    Entity entity = raycast.HitEntity;
 		    //if ((Mouse::IsButtonPressed(MouseButton::ButtonLeft) && EditorLayer::SelectedEntity != raycast.HitEntity))
@@ -45,12 +60,18 @@ namespace LkEngine {
 		}
 		else if (raycastHits > 1)
 		{
+			LOG_WARN("Hitcast results > 1");
 		    for (auto& raycast : raycastResults)
 		    {
-				//LOG_CRITICAL("iterating entity hitcast results");
 		        //Entity entity = raycast.HitEntity;
 		        //uint64_t hitEntityID = entity.GetUUID();
+				if (editor && editor->IsEnabled())
+				{
+					editor->SetSelectedEntity(raycast.HitEntity);
+					break;
+				}
 
+#if 0
 				if (Mouse::IsButtonPressed(MouseButton::ButtonLeft))
 				{
 					if (editor && editor->GetSelectedEntityID() == 0)
@@ -58,10 +79,12 @@ namespace LkEngine {
 						editor->SetSelectedEntity(raycast.HitEntity);
 					}
 				}
+#endif
 		    }
 		}
 		else // NO HITS
 		{
+			LOG_ERROR("Hitcast results == 0");
 		#if 0
 			if (Mouse::IsButtonPressed(MouseButton::ButtonLeft))
 			{
@@ -73,7 +96,9 @@ namespace LkEngine {
 
         if (Keyboard::IsKeyPressed(Key::Escape))
         {
-			if (editor && editor->IsEnabled() && editor->GetSelectedEntityID() != 0)
+			//if (editor && editor->IsEnabled() && editor->GetSelectedEntityID() != 0)
+			LOG_TRACE("De-selecting (clicked escape)");
+			if (editor && editor->IsEnabled())
 			{
 				Entity entity = { (entt::entity)0, m_Scene };
 				editor->SetSelectedEntity(entity);
