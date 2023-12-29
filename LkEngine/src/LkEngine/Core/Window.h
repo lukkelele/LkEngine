@@ -34,6 +34,7 @@ namespace LkEngine {
         virtual uint16_t GetViewportHeight() const = 0;
         virtual void SetWidth(uint16_t width) = 0;
         virtual void SetHeight(uint16_t height) = 0; 
+        virtual void SetSize(const glm::vec2& size) = 0;
         virtual void SetViewportWidth(uint16_t width) = 0; 
         virtual void SetViewportHeight(uint16_t height) = 0; 
         virtual void SetDepthEnabled(bool enabled) = 0;
