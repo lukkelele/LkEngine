@@ -16,24 +16,44 @@ namespace LkEngine {
 
     std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(Scene& scene)
     {
-        std::vector<Entity> scene_entities = scene.GetEntities();
         std::vector<Raycast2DResult> results = {};
-
         auto window = Window::Get();
-        float windowWidth = window->GetWidth();
-        float windowHeight = window->GetHeight();
+        float windowWidth = (float)window->GetWidth();
+        float windowHeight = (float)window->GetHeight();
+        glm::vec2 mousePos = Mouse::GetScaledPos();
+        auto* editor = EditorLayer::Get();
 
-        for (auto& entity : scene_entities)
+        // FIXME
+#if 0
+        if (editor)
+        {
+            auto editorWindowSize = editor->GetEditorWindowSize();
+            windowWidth += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+            windowHeight += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
+        }
+
+        //auto* editor = EditorLayer::Get();
+        if (mousePos.x < (-windowWidth * 0.50f) || mousePos.x > (windowWidth * 0.50f)
+            || mousePos.y < (-windowHeight * 0.50f) || mousePos.y > (windowHeight * 0.50f))
+        {
+            LOG_TRACE("Raycast OUTSIDE of window");
+            return results;
+        }
+#endif
+
+        std::vector<Entity> sceneEntities = scene.GetEntities();
+
+        for (auto& entity : sceneEntities)
         {
             if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
             {
-                glm::vec2 mousePos = Mouse::GetScaledPos();
-
                 auto& tc = entity.GetComponent<TransformComponent>();
                 auto& sc = entity.GetComponent<SpriteComponent>();
+                if (tc.IsStatic() || sc.IsPassthrough())
+                    continue;
                 auto& cam = *scene.GetActiveCamera();
+
                 glm::vec2 camPos = cam.GetPos();
-                auto* editor = EditorLayer::Get();
 
                 float quad_width = tc.Scale.x * sc.Size.x;
                 float quad_height = tc.Scale.y * sc.Size.y;
