@@ -4,7 +4,7 @@
 #include "LkEngine/Core/UUID.h"
 #include "LkEngine/Math/Math.h"
 
-#include "LkEngine/Renderer/Texture.h"
+#include "LkEngine/Renderer/Material.h"
 
 
 namespace LkEngine{
@@ -39,6 +39,7 @@ namespace LkEngine{
 		// TODO: Patch out the use of Rotation2D and just use the Rotation quaternion
 		float Rotation2D = 0.0f;
 		bool Removable = true;
+		bool Static = false;
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;
@@ -70,8 +71,10 @@ namespace LkEngine{
 			float qw = cos(angleRad / 2.0f);
 			float qz = sin(angleRad / 2.0f);
 			Rotation = glm::quat(qw, 0.0f, 0.0f, qz);
+			//Rotation2D = angleRad; // FIXME
 		}
 
+		bool IsStatic() const { return Static; }
 	};
 
     struct SpriteComponent
@@ -79,7 +82,7 @@ namespace LkEngine{
         std::string FilePath;
         glm::vec2 Size;
         glm::vec4 Color; 
-		//std::string TextureName = ""; // FIXME: TEMPORARY !!!
+		bool Passthrough = false;
 		bool Removable = true;
 
         SpriteComponent(const std::string& filepath, 
@@ -102,6 +105,8 @@ namespace LkEngine{
         glm::vec2 GetSize() const { return Size; }
 		void SetSize(const glm::vec2& size) { Size = size; }
 		void SetSize(float x, float y) { Size = { x, y }; }
+		void SetPassthrough(bool passthrough) { Passthrough = passthrough; }
+		bool IsPassthrough() const { return Passthrough; }
     };
 
 	struct CameraComponent
@@ -170,21 +175,30 @@ namespace LkEngine{
 
 	struct MaterialComponent
 	{
-		float Roughness = 0.50f;
-		float Hardness = 0.50f;
-		s_ptr<Texture> m_Texture = nullptr;
+		s_ptr<Material> m_Material = nullptr;
 
-		s_ptr<Texture> GetTexture() { return m_Texture; }
+		s_ptr<Texture> GetTexture() { return m_Material->GetTexture(); }
 		std::string GetTextureName() const 
 		{
-			if (m_Texture == nullptr)
+			if (m_Material->GetTexture() == nullptr)
 				throw std::runtime_error("MaterialComponent: Cannot get texture name of a nullptr texture");
-			return m_Texture->GetName();
+			return m_Material->GetTexture()->GetName();
 		}
-		void SetTexture(s_ptr<Texture> texture) { m_Texture = texture; }
+		void SetTexture(s_ptr<Texture> texture) { m_Material->SetTexture(texture); }
 
-		MaterialComponent() = default;
-		MaterialComponent(s_ptr<Texture> texture) : m_Texture(texture) {}
+			//m_Material = std::make_shared<Material>();
+		MaterialComponent() : m_Material(std::make_shared<Material>()) {}
+		MaterialComponent(s_ptr<Material> material) : m_Material(material) {}
+		MaterialComponent(s_ptr<Material> material, s_ptr<Texture> texture) 
+			: m_Material(material)
+		{
+			m_Material->SetTexture(texture);
+		}
+		MaterialComponent(s_ptr<Texture> texture)
+		{
+			m_Material = std::make_shared<Material>();
+			m_Material->SetTexture(texture);
+		}
 	};
 
 
