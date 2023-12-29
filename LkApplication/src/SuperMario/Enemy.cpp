@@ -7,6 +7,7 @@ namespace LkEngine {
     Enemy::Enemy(Entity& entity, const std::string& name)
         : Player(entity, name)
     {
+        entity.GetComponent<MaterialComponent>().SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
     }
 
     void Enemy::OnUpdate(float ts)

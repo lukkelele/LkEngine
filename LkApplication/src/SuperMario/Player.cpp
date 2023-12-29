@@ -53,6 +53,9 @@ namespace LkEngine {
         // Add half sprite size to center origin
         tc.Translation.x -= (sc.Size.x * 0.50f);
         tc.Translation.y -= (sc.Size.y * 0.50f);
+
+        auto& mc = m_Entity.AddComponent<MaterialComponent>();
+        //mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
         
         CameraComponent& cameraComponent = m_Entity.AddComponent<CameraComponent>();
         SceneCamera* playerCam = new SceneCamera();

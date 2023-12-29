@@ -24,14 +24,9 @@ namespace LkEngine {
         void OnImGuiRender() override;
         void OnUpdate(float ts) override;
 
-        void DrawBackground();
-        void DrawGround();
-
     private:
         s_ptr<Scene> m_Scene = nullptr;
         s_ptr<Player> m_Player = nullptr;
-        s_ptr<Texture> m_GroundTexture = nullptr;
-        s_ptr<Texture2D> m_BgTexture = nullptr;
         s_ptr<Renderer2D> m_Renderer2D = nullptr;
         s_ptr<Entity> m_Ground = nullptr;
         s_ptr<Entity> m_Background = nullptr;
