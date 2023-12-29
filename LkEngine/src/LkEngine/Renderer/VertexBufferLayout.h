@@ -15,6 +15,13 @@ namespace LkEngine {
 		Bool,
 	};
 
+	enum class ShaderDataMember
+	{
+		Null = 0,
+		Position,
+		Color
+	};
+
 	static unsigned int ShaderDataTypeSize(ShaderDataType dataType)
 	{
 		switch (dataType)
@@ -102,6 +109,18 @@ namespace LkEngine {
 		inline const std::vector<VertexBufferElement> GetElements() const& { return m_Elements; }
 		inline unsigned int GetStride() const { return m_Stride; }
 
+		// FIXME
+		VertexBufferElement GetElement(const ShaderDataMember& member)
+		{
+			switch (member)
+			{
+				case ShaderDataMember::Color:
+					//return m_Elements.;
+					break;
+			}
+		}
+
+		// FIXME
 		VertexBufferElement GetElement(const std::string& name)
 		{
 			for (auto it = begin(); it != end(); it++)
@@ -112,7 +131,8 @@ namespace LkEngine {
 					return element;
 			}
 			LOG_ERROR("Could not retrieve element by the name '{}'", name);
-			return VertexBufferElement();
+			//return VertexBufferElement();
+			throw std::runtime_error("Could not retrieve VertexBufferElement");
 		}
 
 		void CalculateOffsetsAndStride()
@@ -125,7 +145,6 @@ namespace LkEngine {
 				offset += element.Size;
 				m_Stride += element.Size;
 			}
-			//LOG_DEBUG("VertexBufferLayout: {} elements, stride: {}", m_Elements.size(), m_Stride);
 		}
 
 	};

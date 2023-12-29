@@ -5,7 +5,7 @@
 #ifdef LK_RENDERER_API_VULKAN
 	#include "LkEngine/Renderer/Vulkan/VulkanShader.h"
 #elif defined(LK_RENDERER_API_OPENGL)
-	#include "LkEngine/Renderer/OpenGL/OpenGLShader.h"
+	#include "LkEngine/Platform/OpenGL/OpenGLShader.h"
 #endif
 
 namespace LkEngine {

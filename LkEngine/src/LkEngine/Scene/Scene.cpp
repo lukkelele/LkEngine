@@ -135,13 +135,32 @@ namespace LkEngine {
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SpriteComponent>(Entity entity, SpriteComponent& mesh)
+	void Scene::OnComponentAdded<SpriteComponent>(Entity entity, SpriteComponent& sprite)
 	{
+		if (entity.HasComponent<MaterialComponent>())
+		{
+			auto& mc = entity.GetComponent<MaterialComponent>();
+			auto& texture = mc.GetTexture();
+			if (texture != nullptr)
+			{
+				//sprite.TextureName = texture->GetName();
+			}
+		}
 	}
 
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& camera)
 	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MaterialComponent>(Entity entity, MaterialComponent& mc)
+	{
+		if (entity.HasComponent<SpriteComponent>() && mc.GetTexture() != nullptr)
+		{
+			//entity.GetComponent<SpriteComponent>().TextureName = mc.GetTextureName();
+			//LOG_TRACE("Detected SpriteComponent when adding MaterialComponent, setting the TextureName to mc.GetTextureName()");
+		}
 	}
 
 	void Scene::BeginScene(float ts)
@@ -158,19 +177,30 @@ namespace LkEngine {
 	void Scene::EndScene()
 	{
 		auto entityTags = m_Registry.view<TagComponent>();
-		auto textureLibrary = TextureLibrary::Get();
-		//auto atillaTexture = textureLibrary->GetTexture2D("atte_square");
 
 		for (auto& entityTag : entityTags)
 		{	
 			Entity entity = { entityTag, this };
 			if (entity.HasComponent<SpriteComponent>() && entity.HasComponent<TransformComponent>())
 			{
-				RenderCommand::DrawSprite(
-					entity.GetComponent<TransformComponent>(), 
-					entity.GetComponent<SpriteComponent>(),
-					entity.GetUUID()
-				);
+				// If MaterialComponent exists, use it to gather pointer to texture
+				if (entity.HasComponent<MaterialComponent>())
+				{
+					RenderCommand::DrawSprite(
+						entity.GetComponent<TransformComponent>(), 
+						entity.GetComponent<SpriteComponent>(),
+						entity.GetComponent<MaterialComponent>(),
+						entity.GetUUID()
+					);
+				}
+				else // Draw color only, no texture
+				{
+					RenderCommand::DrawSprite(
+						entity.GetComponent<TransformComponent>(), 
+						entity.GetComponent<SpriteComponent>(),
+						entity.GetUUID()
+					);
+				}
 			}
 		}
 	}

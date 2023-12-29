@@ -45,6 +45,25 @@ namespace LkEngine {
         glDrawArrays(GL_LINES, 0, lineIndexCount);
     }
 
+    void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, MaterialComponent& mc, uint32_t entityID)
+    {
+        glm::vec2 scaledSize = { 
+            tc.Scale.x * sc.Size.x, 
+            tc.Scale.y * sc.Size.y 
+        };
+
+        // Draw with texture
+        auto texture = mc.GetTexture();
+        if (texture != nullptr)
+        {
+            //DrawSprite(tc, scaledSize, texture, entityID);
+            m_Renderer->SubmitSprite(tc, scaledSize, texture, entityID);
+            return;
+        }
+        // Draw with color if no texture is available
+        m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
+    }
+
     void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint32_t entityID)
     {
         glm::vec2 scaledSize = { 
@@ -52,14 +71,14 @@ namespace LkEngine {
             tc.Scale.y * sc.Size.y 
         };
         // Draw with color
-        if (sc.TextureName == "")
-        {
-            m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
-            return;
-        }
-        // Draw with texture
-        //m_Renderer->SubmitSprite(tc, scaledSize, TextureLibrary::Get()->GetTexture(sc.TextureID), entityID);
-        m_Renderer->SubmitSprite(tc, scaledSize, TextureLibrary::Get()->GetTexture2D(sc.TextureName), entityID);
+        //if (sc.TextureName == "")
+        //{
+        //    m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
+        //    return;
+        //}
+        // 
+        // No material passed, use color
+        m_Renderer->SubmitSprite(tc, scaledSize, sc.Color, entityID);
     }
 
     void RenderCommand::DrawSprite(TransformComponent& tc, SpriteComponent& sc, s_ptr<Texture> texture, uint32_t entityID)

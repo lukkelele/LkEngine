@@ -15,6 +15,7 @@ namespace LkEngine {
     public:
         static void Init();
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint32_t entityID = 0);
+        static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, MaterialComponent& mc, uint32_t entityID = 0);
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, s_ptr<Texture> texture, uint32_t entityID = 0);
         static void DrawIndexed(VertexBuffer& vb);
         static void DrawIndexed(VertexBuffer& vb, uint32_t indexCount);

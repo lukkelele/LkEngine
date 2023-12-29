@@ -1,13 +1,10 @@
 #pragma once
 
-//#include "LkEngine/Scene/Components/IDComponent.h"
-//#include "LkEngine/Scene/Components/TagComponent.h"
-//#include "LkEngine/Scene/Components/TransformComponent.h"
-//#include "LkEngine/Scene/Components/CameraComponent.h"
-//#include "LkEngine/Scene/Components/SpriteComponent.h"
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/UUID.h"
 #include "LkEngine/Math/Math.h"
+
+#include "LkEngine/Renderer/Texture.h"
 
 
 namespace LkEngine{
@@ -82,26 +79,23 @@ namespace LkEngine{
         std::string FilePath;
         glm::vec2 Size;
         glm::vec4 Color; 
-		//int TextureID = 0; // default to white texture (for 2D)
-		std::string TextureName = ""; // FIXME: TEMPORARY !!!
+		//std::string TextureName = ""; // FIXME: TEMPORARY !!!
 		bool Removable = true;
 
         SpriteComponent(const std::string& filepath, 
-                        const glm::vec2& size = { 0.0f, 0.0f }, 
+                        const glm::vec2& size = { 100.0f, 100.0f }, 
                         const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
             : FilePath(filepath)
             , Size(size)
             , Color(color) 
-        {
-        }
+		{}
 
         SpriteComponent(const glm::vec2& size = { 0.0f, 0.0f },
                         const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
             : FilePath("")
             , Size(size)
             , Color(color) 
-        {
-        }
+        {}
 
         float GetWidth() const { return Size.x; }
         float GetHeight() const { return Size.y; }
@@ -172,6 +166,25 @@ namespace LkEngine{
 		bool Dragged = false;
 
 		IOComponent() = default;
+	};
+
+	struct MaterialComponent
+	{
+		float Roughness = 0.50f;
+		float Hardness = 0.50f;
+		s_ptr<Texture> m_Texture = nullptr;
+
+		s_ptr<Texture> GetTexture() { return m_Texture; }
+		std::string GetTextureName() const 
+		{
+			if (m_Texture == nullptr)
+				throw std::runtime_error("MaterialComponent: Cannot get texture name of a nullptr texture");
+			return m_Texture->GetName();
+		}
+		void SetTexture(s_ptr<Texture> texture) { m_Texture = texture; }
+
+		MaterialComponent() = default;
+		MaterialComponent(s_ptr<Texture> texture) : m_Texture(texture) {}
 	};
 
 

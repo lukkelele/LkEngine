@@ -26,6 +26,7 @@ namespace LkEngine {
 		virtual int GetUniformLocation(const std::string& name) = 0;
 		virtual void SetUniform1i(const std::string& name, int value) = 0;
 		virtual void SetUniform1f(const std::string& name, float value) = 0;
+		virtual void SetUniform4f(const std::string& name, const glm::vec4& vec4) = 0;
 		virtual void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) = 0;
 		virtual void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) = 0;
 		virtual unsigned int CompileShader(unsigned int type, const std::string& source) = 0;

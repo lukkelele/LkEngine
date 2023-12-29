@@ -5,6 +5,8 @@
 
 namespace LkEngine {
 
+    constexpr const char* TEXTURE_DIR = "assets/textures";
+
     // Forward declaration
     class Texture;
     class Texture2D;
@@ -16,20 +18,20 @@ namespace LkEngine {
         ~TextureLibrary();
 
         static TextureLibrary* Get() { return m_Instance; }
-        static s_ptr<TextureLibrary> Create(const std::string& texturesDir = "assets/textures");
+        static s_ptr<TextureLibrary> Create(const std::string& texturesDir = TEXTURE_DIR);
 
         void Init();
+        void LoadTextures();
         s_ptr<Texture> GetTexture(int textureID);
         s_ptr<Texture> GetTexture(const std::string textureName);
         s_ptr<Texture2D> GetTexture2D(int textureID);
         s_ptr<Texture2D> GetTexture2D(const std::string textureName);
         s_ptr<Texture> GetWhiteTexture();
-
-        void LoadTextures();
         s_ptr<Texture> AddTexture(const std::string& textureName, const std::string& filePath);
         s_ptr<Texture> AddTexture2D(const std::string& textureName, const std::string& filePath);
         std::string GetTexturesDirectoryPath() { return m_TexturesDir; }
-
+        void RenameTexture(const std::string& name, const std::string& newName);
+        std::vector<std::pair<std::string, s_ptr<Texture2D>>> GetTextures2D();
         bool VerifyTexturesAreLoaded() const;
 
     private:

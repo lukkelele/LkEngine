@@ -45,7 +45,7 @@ namespace LkEngine {
 
         m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
         m_QuadVertexBuffer->SetLayout({
-            { "a_Position",     ShaderDataType::Float3  },
+            { "a_Pos",          ShaderDataType::Float3  },
             { "a_Color",        ShaderDataType::Float4  },
             { "a_TexCoord",     ShaderDataType::Float2  },
             { "a_TexIndex",     ShaderDataType::Int,    },
@@ -77,19 +77,27 @@ namespace LkEngine {
         m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
         VertexBufferLayout lineVertexBufLayout{ };
         m_LineVertexBuffer->SetLayout({
-            { "a_Position",  ShaderDataType::Float3, },
+            { "a_Pos",       ShaderDataType::Float3, },
             { "a_Color",     ShaderDataType::Float4, },
-            { "a_EntityID",  ShaderDataType::Float,  }
+            { "a_EntityID",  ShaderDataType::Int,  }
          });
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
         auto* textureLibrary = TextureLibrary::Get();
         m_WhiteTexture = textureLibrary->GetWhiteTexture();
-
         m_TextureSlots[0] = m_WhiteTexture;
-        m_TextureSlots[1] = textureLibrary->GetTexture2D("sky-background-2d");
-        m_TextureSlots[2] = textureLibrary->GetTexture2D("atte_square");
-        m_TextureSlots[3] = textureLibrary->GetTexture2D("super_mario_ground");
+
+        auto textures2D = textureLibrary->GetTextures2D();
+        // First texture is the white texture in the texture library also, so begin iterating at i=1
+        for (int i = 1; i < textures2D.size(); i++)
+        {
+            auto& textureEntry = textures2D[i];
+            m_TextureSlots[i] = textureEntry.second;
+            LOG_DEBUG("Assigning m_TextureSlots[{}] == {}", i, textureEntry.first);
+        }
+        //m_TextureSlots[1] = textureLibrary->GetTexture2D("sky-background-2d");
+        //m_TextureSlots[2] = textureLibrary->GetTexture2D("atte_square");
+        //m_TextureSlots[3] = textureLibrary->GetTexture2D("SuperMario-ground_block");
 
         m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
         m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
@@ -117,12 +125,11 @@ namespace LkEngine {
     {
         m_CameraBuffer.ViewProjection = camera.GetViewProjection();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
+
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
             if (m_TextureSlots[i])
-            {
                 m_TextureSlots[i]->Unbind();
-            }
         }
 
         StartBatch();
@@ -136,9 +143,7 @@ namespace LkEngine {
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
             if (m_TextureSlots[i])
-            {
                 m_TextureSlots[i]->Unbind();
-            }
         }
 
         StartBatch();
@@ -200,14 +205,14 @@ namespace LkEngine {
             m_LineShader->Bind();
             m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
 
+            auto lineElements = m_LineVertexBuffer->GetLayout().GetElements();
+
             for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
             {
                 if (m_TextureSlots[i])
                 {
                     m_TextureSlots[i]->Bind(i);
-                    //std::string uniform = "u_Textures[" + std::to_string(i) + "]";
-                    //m_LineShader->SetUniform1i(uniform, i);
-                    m_LineShader->SetUniform1i("u_Textures[" + std::to_string(i) + "]", i);
+                    m_LineShader->SetUniform4f("a_Color", m_LineVertexBufferPtr->Color);
                 }
             }
 
@@ -263,6 +268,7 @@ namespace LkEngine {
         DrawQuad(transform, color, entityID);
     }
                                                                                                           
+    // Draw without texture - use color
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         float textureIndex = 0; 
@@ -338,11 +344,16 @@ namespace LkEngine {
             }
         }
 
+#if 0
         if (textureIndex == 0.0f)
         {
             textureIndex = (float)m_TextureSlotIndex;
             m_TextureSlots[m_TextureSlotIndex] = texture;
             m_TextureSlotIndex++;
+        }
+#endif
+        if (textureIndex == 0.0f) // White texture is to be used, apply color
+        {
         }
 
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0.0f })
