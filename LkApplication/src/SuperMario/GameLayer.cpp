@@ -37,13 +37,13 @@ namespace LkEngine {
         m_Background = std::make_shared<Entity>(bgEntity);
 
         Entity groundEntity = m_Scene->CreateEntity("Ground");
+        auto& groundMaterial = groundEntity.AddComponent<MaterialComponent>(groundTexture);
         auto& groundSprite = groundEntity.AddComponent<SpriteComponent>();
         groundSprite.SetPassthrough(false);
         auto& groundTransform = groundEntity.AddComponent<TransformComponent>();
-        groundEntity.AddComponent<MaterialComponent>(groundTexture);
         groundTransform.Translation.x = 50.0f;
         groundTransform.Translation.y = 50.0f;
-        groundSprite.Size = { 200.0f, 200.0f };
+        groundSprite.SetSize(200, 200);
         m_Ground = std::make_shared<Entity>(groundEntity);
 
         float bgStartX = bgTransform.GetTranslation().x;
@@ -72,9 +72,6 @@ namespace LkEngine {
         // Only the thinner ones bug out, need to figure out why
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { -200, -400, 0});
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { 100, 300 , 0 });
-        //Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { -100, 300 });
-        //Debug::CreateDebugSprite(*m_Scene, { 80, 110 }, { -240, 0 });
-        //Debug::CreateDebugSprite(*m_Scene, { 80, 320 }, { 140, 300 }); // Bugged out when raycasting
 
         SceneCamera& cam = playerEntity.GetComponent<CameraComponent>();
         cam.SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
@@ -88,6 +85,7 @@ namespace LkEngine {
             Entity enemyEntity = m_Scene->CreateEntity("Enemy-" + std::to_string(i + 1));
             s_ptr<Enemy> enemy = std::make_shared<Enemy>(enemyEntity);
 
+            auto& sc = enemyEntity.GetComponent<SpriteComponent>();
             auto& mc = enemyEntity.GetComponent<MaterialComponent>();
             mc.SetTexture(textureLibrary->GetTexture2D("atte_square"));
 
@@ -95,8 +93,6 @@ namespace LkEngine {
             enemyPosY += (-window->GetHeight() * 0.50f) + enemy->GetHeight() * (DebugLayer::s_DebugEntities * 1.50f);
             enemy->SetPos(0, enemyPosY);
 
-            // Set texture instead of color
-            //auto& sc = enemyEntity.GetComponent<SpriteComponent>().TextureName = "atte_square";
             m_Enemies.push_back(enemy);
         }
     }
@@ -127,9 +123,7 @@ namespace LkEngine {
     void GameLayer::OnImGuiRender()
     {
         for (const auto& enemy : m_Enemies)
-        {
             enemy->OnImGuiRender();
-        }
     }
 
 

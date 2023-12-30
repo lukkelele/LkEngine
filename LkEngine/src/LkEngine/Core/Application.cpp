@@ -38,9 +38,6 @@ namespace LkEngine {
 			float ts = m_Timer.GetDeltaTime();
             m_Input->OnUpdate();
 
-            //m_Renderer2D->BeginScene(playerCam);
-            //m_Renderer->BeginScene(playerCam);
-            
             Renderer::BeginFrame();
             {
                 for (Layer* layer : m_LayerStack)
@@ -49,8 +46,6 @@ namespace LkEngine {
 
             if (m_ActiveScene)
             {
-                //Renderer::BeginScene(m_ActiveScene);
-                //Renderer::BeginScene();
                 m_ActiveScene->BeginScene();
             }
 

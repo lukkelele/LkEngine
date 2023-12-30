@@ -48,7 +48,6 @@ namespace LkEngine {
     {
         if (HasFileExtension(filename) == false)
             return filename;
-        //return ExtractFilename(filename.substr(0, filename.size() - 4));
         return ExtractFilename(filename.substr(0, filename.size() - ((size_t)fileExtension + 1)));
     }
 

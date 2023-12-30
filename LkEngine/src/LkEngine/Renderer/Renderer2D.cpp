@@ -336,24 +336,11 @@ namespace LkEngine {
 
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {
-            //if (m_TextureSlots[i] != nullptr && m_TextureSlots[i]->GetRendererID() == texture->GetRendererID())
             if (m_TextureSlots[i] != nullptr && m_TextureSlots[i]->GetName() == texture->GetName())
             {
                 textureIndex = (float)i;
                 break;
             }
-        }
-
-#if 0
-        if (textureIndex == 0.0f)
-        {
-            textureIndex = (float)m_TextureSlotIndex;
-            m_TextureSlots[m_TextureSlotIndex] = texture;
-            m_TextureSlotIndex++;
-        }
-#endif
-        if (textureIndex == 0.0f) // White texture is to be used, apply color
-        {
         }
 
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0.0f })

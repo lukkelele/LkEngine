@@ -8,10 +8,11 @@ namespace LkEngine {
 
     enum class FileExtension
     {
-        PNG = 3,
-        JPG = 3,
-        LUA = 3,
-        PY  = 2
+        Unknown = -1,
+        PNG     = 3,
+        JPG     = 3,
+        LUA     = 3,
+        PY      = 2
     };
 
     class File

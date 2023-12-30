@@ -56,7 +56,6 @@ namespace LkEngine {
         auto texture = mc.GetTexture();
         if (texture != nullptr)
         {
-            //DrawSprite(tc, scaledSize, texture, entityID);
             m_Renderer->SubmitSprite(tc, scaledSize, texture, entityID);
             return;
         }
