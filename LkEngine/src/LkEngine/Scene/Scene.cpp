@@ -84,8 +84,6 @@ namespace LkEngine {
 				return Entity{ entity , this };
 			}
 		}
-		//return { (entt::entity)-1, NULL };
-		//return { (entt::entity)-1, nullptr };
 		return { };
 	}
 
@@ -93,7 +91,7 @@ namespace LkEngine {
 	{
 		m_EntityMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);
-		LOG_DEBUG("Entity successfully deleted");
+		LOG_DEBUG("Entity {} deleted", entity.GetName());
 	}
 
 	bool Scene::IsEntityInRegistry(Entity entity) const

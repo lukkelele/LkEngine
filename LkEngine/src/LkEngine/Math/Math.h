@@ -13,12 +13,22 @@
 
 #include <imgui/imgui.h>
 
-
+// Forward declaration
 namespace LkEngine {
     struct TransformComponent;
 }
 
+
 namespace LkEngine::Math {
+
+    enum class Shape
+    {
+        None = 0,
+        Rectangle,
+        Circle,
+        Triangle,
+        Hexagon,
+    };
 
     glm::vec3 Scale(glm::vec3& vec, float scale_factor);
     bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::quat& rot, glm::vec3& scale);

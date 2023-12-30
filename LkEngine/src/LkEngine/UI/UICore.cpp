@@ -138,12 +138,10 @@ namespace LkEngine::UI {
     {
         PushID(std::string("##" + std::string(windowName)).c_str());
         ImGui::Begin(SelectedEntityWindow, NULL, (windowFlags | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse));
-        ImGui::BeginChild(windowName, ImVec2(0, 0), false, (windowFlags | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse));
     }
 
     void EndSubwindow()
     {
-        ImGui::EndChild();
         ImGui::End();
         PopID();
     }

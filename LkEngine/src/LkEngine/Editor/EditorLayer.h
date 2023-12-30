@@ -55,8 +55,8 @@ namespace LkEngine {
 		template<typename T>
 		void DisplayAddComponentEntry(const std::string& entryName);
 		void UI_HandleManualWindowResize();
-		void UI_SceneMenu();
 		void UI_SceneContent();
+		void UI_CreateMenu();
         void UI_SelectedEntityProperties();
 		void UI_RenderSettingsInformation();
 		bool IsEntitySelected() const;
@@ -77,7 +77,7 @@ namespace LkEngine {
 		void HandleExternalWindows();
 
 	public:
-		static ImVec2 SelectedEntityMenuSize;
+		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 };
 		Entity SelectedEntity;
 		uint64_t SelectedEntityID = 0;
 		glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };

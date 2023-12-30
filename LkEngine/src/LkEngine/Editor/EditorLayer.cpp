@@ -13,8 +13,6 @@
 
 namespace LkEngine {
 
-	ImVec2 EditorLayer::SelectedEntityMenuSize = ImVec2(0, 440); // TODO: patch out
-
 	EditorLayer::EditorLayer(Scene& scene)
 		: Layer("EditorLayer")
 		, m_Scene(&scene)
@@ -124,61 +122,70 @@ namespace LkEngine {
 			SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntityID);
 		}
 
-		//--------------------------------------------------
-		// LEFT SIDEBAR
-		//--------------------------------------------------
 		if (m_UpdateWindowSize)
 		{
 			ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y - topbar_height), ImGuiCond_Always);
 		}
+
+		//--------------------------------------------------
+		// LEFT SIDEBAR
+		//--------------------------------------------------
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
+			// TODO: initialize this bool by checking the depth in the graphics context
+			static bool depth_test_checkbox = false;
+			ImGui::BeginGroup();
+			if (ImGui::Checkbox("Depth Testing", &depth_test_checkbox))
 			{
-				// TODO: initialize this bool by checking the depth in the graphics context
-				static bool depth_test_checkbox = false;
-				ImGui::BeginGroup();
-				if (ImGui::Checkbox("Depth Testing", &depth_test_checkbox))
-				{
-					if (depth_test_checkbox == true)
-					{
-						Window::Get()->SetDepthEnabled(true);
-					}
-					else
-					{
-						Window::Get()->SetDepthEnabled(false);
-					}
-				}
-
-				ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-				if (ImGui::TreeNode("Colors"))
-				{
-				    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
-					UI::PushID("##LkEngine-LeftPanel-Colors");
-				    ImGui::Text("Background"); 
-				    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-				    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
-					UI::PopID();
-
-				    ImGui::TreePop();
-				}
-
-				if (SelectedEntity)
-				{
-					DrawComponents(SelectedEntity);
-				}
-				ImGui::EndGroup();
+				if (depth_test_checkbox == true)
+					Window::Get()->SetDepthEnabled(true);
+				else
+					Window::Get()->SetDepthEnabled(false);
 			}
-			ImGui::Text("Selected ID: %llu", SelectedEntityID);
-			ImGui::Text("Selected Entity Handle: %llu", SelectedEntity.IsValid() ? SelectedEntity.GetUUID() : 0);
-			ImGui::Text("Active Scene: %s", Scene::GetActiveSceneName().c_str());
-			ImGui::Text("Scenes in memory: %d", Scene::GetSceneCount());
+
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			if (ImGui::TreeNode("Colors"))
+			{
+			    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
+				UI::PushID("##LkEngine-LeftPanel-Colors");
+			    ImGui::Text("Background"); 
+			    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+			    ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+			    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+			    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
+			    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
+				UI::PopID();
+
+			    ImGui::TreePop();
+			}
+
+			if (SelectedEntity)
+			{
+				DrawComponents(SelectedEntity);
+			}
+			ImGui::EndGroup();
+			
+			ImGui::BeginGroup();
+			{
+				ImGui::Text("Selected ID: %llu", SelectedEntityID);
+				ImGui::Text("Selected Entity Handle: %llu", SelectedEntity.IsValid() ? SelectedEntity.GetUUID() : 0);
+				ImGui::Text("Active Scene: %s", Scene::GetActiveSceneName().c_str());
+				ImGui::Text("Scenes in memory: %d", Scene::GetSceneCount());
+			}
+			ImGui::EndGroup();
+
+			// Creator menu
+			ImGui::BeginGroup();
+			{
+				UI_CreateMenu();
+			}
+			ImGui::EndGroup();
+			//ImGui::Separator();
 
 			if (m_Scene)
 			{
+				ImGui::SeparatorText("Entity Map");
 				auto& registry = m_Scene->GetRegistry();
 				registry.each([&](auto entityID)
 				{
@@ -191,6 +198,7 @@ namespace LkEngine {
 					SelectedEntityID = {};
 				}
 			}
+
 			auto windowSize = ImGui::GetWindowSize();
 			auto windowPos = ImGui::GetWindowPos();
 			if (windowSize.x != last_sidebar_left_size.x || windowSize.y != last_sidebar_left_size.y)
@@ -341,13 +349,9 @@ namespace LkEngine {
 		// If the window sizes have been adjusted, set the bool member to false
 		// This must be run BEFORE the 'windowsHaveChangedSize' if-statement
 		if (m_UpdateWindowSize == true)
-		{
 			m_UpdateWindowSize = false; 
-		}
 		if (m_UpdateWindowPos == true)
-		{
 			m_UpdateWindowPos = false; 
-		}
 
 		// Check to see if any of the editor windows have changed in size and if they have
 		// then readjust the viewport
@@ -422,7 +426,7 @@ namespace LkEngine {
 		if (ImGui::IsItemClicked())
 		{
 			SelectedEntityID = entity.GetUUID();
-			LOG_DEBUG("Editor: Selecting entity {} ({})", entity.GetName(), entity.GetUUID());
+			LOG_DEBUG("Selecting entity {} ({})", entity.GetName(), entity.GetUUID());
 		}
 
 		bool entityDeleted = false;
@@ -602,13 +606,11 @@ namespace LkEngine {
 		static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
 
 		UI::PushID("UI_SELECTED_ENTITY_PROPERTIES");
-        //ImGui::BeginChild(UI_SELECTED_ENTITY_INFO, SelectedEntityMenuSize, true, UI::SidebarFlags);
         ImGui::BeginChild(UI_SELECTED_ENTITY_INFO, SelectedEntityMenuSize, true, windowFlags);
         if (entity.HasComponent<TransformComponent>())
         {
             ImGui::SeparatorText(SelectedEntity.GetName().c_str());
             ImGui::Indent();
-
             //DrawImGuizmo(entity);
 
 			TransformComponent& transform = entity.GetComponent<TransformComponent>();
@@ -622,15 +624,16 @@ namespace LkEngine {
             ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
             transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
 
-			if (entity.HasComponent<SpriteComponent>())
-			{
-				ImGui::Text("Sprite Color");
-				SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
-				UI::Property::RGBAColor(sc.Color);
-			}
-
             ImGui::Unindent();
 		}
+
+		if (entity.HasComponent<SpriteComponent>())
+		{
+			ImGui::Text("Sprite Color");
+			SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
+			UI::Property::RGBAColor(sc.Color);
+		}
+
         ImGui::EndChild();
 		UI::PopID();
     }
@@ -821,6 +824,103 @@ namespace LkEngine {
 	float EditorLayer::GetEditorWindowHeight() const
 	{
 		return (m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y);
+	}
+
+	// Determine selected shape
+	const Math::Shape& DetermineSelectedShape(const char* shape, const char** geometricShapes, int geometricShapeCurrentIndex)
+	{
+		if (geometricShapes[geometricShapeCurrentIndex] == "Rectangle")     return Math::Shape::Rectangle;
+		else if (geometricShapes[geometricShapeCurrentIndex] == "Circle")   return Math::Shape::Circle;
+		else if (geometricShapes[geometricShapeCurrentIndex] == "Triangle") return Math::Shape::Triangle;
+	}
+
+	void EditorLayer::UI_CreateMenu()
+	{
+		UI::PushID();
+		ImGui::SeparatorText("Create Menu");
+
+		static char nameInputBuffer[140] = "item";
+		ImGui::Text("Name");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(140);
+		ImGui::InputText("##LkEngine-CreateMenu-InputBuffer", nameInputBuffer, LK_ARRAYSIZE(nameInputBuffer), ImGuiInputFlags_RepeatRateDefault);
+
+		const char* geometricShapes[] = { "Rectangle", "Circle", "Triangle" };
+		static int geometricShapeCurrentIndex = 0; // Here we store our selection data as an index
+		const char* geometricPreviewValue = geometricShapes[geometricShapeCurrentIndex]; // Pass in the preview value visible before opening the combo (it could be anything)
+		static ImGuiComboFlags geometricCreateMenuFlags = ImGuiComboFlags_HeightLargest;
+		static Math::Shape currentGeometricShape = Math::Shape::None;
+
+		// Shape
+		ImGui::Text("Shape");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(114);
+		if (ImGui::BeginCombo("##LkEngine-CreateMenu", geometricPreviewValue, geometricCreateMenuFlags))
+		{
+			for (int n = 0; n < ARRAYSIZE(geometricShapes); n++)
+			{
+				const bool is_selected = (geometricShapeCurrentIndex == n);
+				if (ImGui::Selectable(geometricShapes[n], is_selected))
+					geometricShapeCurrentIndex = n;
+
+				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		constexpr unsigned int shapeSizeColumnSize = 50;
+		// Determine selected shape and show size modification menu
+		if (geometricShapes[geometricShapeCurrentIndex] == "Rectangle")
+		{
+			constexpr unsigned int rectangle_ColumnPadding = 60;
+			currentGeometricShape = Math::Shape::Rectangle;
+			static float rectangle_Width = 1.0f;
+			static float rectangle_Height = 1.0f;
+			// Width
+			ImGui::Text("Width");
+			ImGui::SameLine(0, rectangle_ColumnPadding - ImGui::CalcTextSize("Width").x);
+			ImGui::SetNextItemWidth(shapeSizeColumnSize);
+			ImGui::DragFloat("##Width", &rectangle_Width, 0.10f ,0.010f, 0.0f, "%.2f");
+			// Height
+			ImGui::Text("Height");
+			ImGui::SameLine(0, rectangle_ColumnPadding - ImGui::CalcTextSize("Height").x);
+			ImGui::SetNextItemWidth(shapeSizeColumnSize);
+			ImGui::DragFloat("##Height", &rectangle_Height, 0.10f ,0.010f, 0.0f, "%.2f");
+		}
+		else if (geometricShapes[geometricShapeCurrentIndex] == "Circle")
+		{
+			constexpr unsigned int circle_ColumnPadding = 84;
+			currentGeometricShape = Math::Shape::Circle;
+			static float circle_Radius = 1.0f;
+			static float circle_Thickness = 1.0f;
+			// Radius
+			ImGui::Text("Radius");
+			ImGui::SameLine(0, circle_ColumnPadding - ImGui::CalcTextSize("Radius").x);
+			ImGui::SetNextItemWidth(shapeSizeColumnSize);
+			ImGui::DragFloat("##Radius", &circle_Radius, 0.010f ,0.010f, 0.0f, "%.2f");
+			// Thickness
+			ImGui::Text("Thickness");
+			ImGui::SameLine(0, circle_ColumnPadding - ImGui::CalcTextSize("Thickness").x);
+			ImGui::SetNextItemWidth(shapeSizeColumnSize);
+			ImGui::DragFloat("##Thickness", &circle_Thickness, 0.10f ,0.10f, 0.0f, "%.2f");
+		}
+		else if (geometricShapes[geometricShapeCurrentIndex] == "Triangle")
+		{
+			currentGeometricShape = Math::Shape::Triangle;
+		}
+		
+		// Size
+		//switch (current)
+
+		if (ImGui::Button("Add"))
+		{
+			// Gather characteristics for creating object
+			LOG_TRACE("Creating: {}", nameInputBuffer);
+		}
+
+		UI::PopID();
 	}
 
 }
