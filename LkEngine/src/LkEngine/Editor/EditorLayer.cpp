@@ -185,7 +185,7 @@ namespace LkEngine {
 
 			if (m_Scene)
 			{
-				ImGui::SeparatorText("Entity Map");
+				ImGui::SeparatorText("Current Scene");
 				auto& registry = m_Scene->GetRegistry();
 				registry.each([&](auto entityID)
 				{
@@ -826,14 +826,6 @@ namespace LkEngine {
 		return (m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y);
 	}
 
-	// Determine selected shape
-	const Math::Shape& DetermineSelectedShape(const char* shape, const char** geometricShapes, int geometricShapeCurrentIndex)
-	{
-		if (geometricShapes[geometricShapeCurrentIndex] == "Rectangle")     return Math::Shape::Rectangle;
-		else if (geometricShapes[geometricShapeCurrentIndex] == "Circle")   return Math::Shape::Circle;
-		else if (geometricShapes[geometricShapeCurrentIndex] == "Triangle") return Math::Shape::Triangle;
-	}
-
 	void EditorLayer::UI_CreateMenu()
 	{
 		UI::PushID();
@@ -865,13 +857,74 @@ namespace LkEngine {
 
 				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 				if (is_selected)
+				{
 					ImGui::SetItemDefaultFocus();
+					LOG_DEBUG("COMBO: Selected Item -> {}", geometricShapes[geometricShapeCurrentIndex]);
+				}
 			}
 			ImGui::EndCombo();
 		}
 
+		// Selectable geometric shapes
+		// Can be clicked on to select diffent shapes instead of dropdown menu
+		auto* textureLibrary = TextureLibrary::Get();
+		ImGui::BeginGroup();
+		{
+			static const ImVec4 tintColor = ImVec4(1, 1, 0.90, 1);
+			static const ImVec4 bgColor = ImVec4(0, 0, 0, 0);
+			static const ImVec2 imageSize = ImVec2(60, 60);
+
+			// Rectangle Image
+			s_ptr<Texture> rectangleTexture = textureLibrary->GetTexture2D("atte_square");
+			if (ImGui::ImageButton("##RectangleImage", (void*)rectangleTexture->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
+			{
+				LOG_TRACE("Clicked RectangleImage -> Selecting rectangle shape");
+				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
+				{
+					if (geometricShapes[i] == "Rectangle")
+					{
+						geometricShapeCurrentIndex = i;
+						break;
+					}
+				}
+			}
+			ImGui::SameLine(0, 2);
+
+			// Circle Image
+			if (ImGui::ImageButton("##CircleImage", (void*)textureLibrary->GetTexture2D("atte_square")->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
+			{
+				LOG_TRACE("Clicked CircleImage -> Selecting circle shape");
+				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
+				{
+					if (geometricShapes[i] == "Circle")
+					{
+						geometricShapeCurrentIndex = i;
+						break;
+					}
+				}
+			}
+			ImGui::SameLine(0, 2);
+
+			// Triangle Image
+			if (ImGui::ImageButton("##TriangleImage", (void*)textureLibrary->GetTexture2D("atte_square")->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
+			{
+				LOG_TRACE("Clicked TriangleImage -> Selecting triangle shape");
+				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
+				{
+					if (geometricShapes[i] == "Triangle")
+					{
+						geometricShapeCurrentIndex = i;
+						break;
+					}
+				}
+			}
+
+		}
+		ImGui::EndGroup();
+
 		constexpr unsigned int shapeSizeColumnSize = 50;
 		// Determine selected shape and show size modification menu
+		// Shape: Rectangle
 		if (geometricShapes[geometricShapeCurrentIndex] == "Rectangle")
 		{
 			constexpr unsigned int rectangle_ColumnPadding = 60;
@@ -889,6 +942,7 @@ namespace LkEngine {
 			ImGui::SetNextItemWidth(shapeSizeColumnSize);
 			ImGui::DragFloat("##Height", &rectangle_Height, 0.10f ,0.010f, 0.0f, "%.2f");
 		}
+		// Shape: Circle
 		else if (geometricShapes[geometricShapeCurrentIndex] == "Circle")
 		{
 			constexpr unsigned int circle_ColumnPadding = 84;
@@ -906,6 +960,7 @@ namespace LkEngine {
 			ImGui::SetNextItemWidth(shapeSizeColumnSize);
 			ImGui::DragFloat("##Thickness", &circle_Thickness, 0.10f ,0.10f, 0.0f, "%.2f");
 		}
+		// Shape: Triangle
 		else if (geometricShapes[geometricShapeCurrentIndex] == "Triangle")
 		{
 			currentGeometricShape = Math::Shape::Triangle;
