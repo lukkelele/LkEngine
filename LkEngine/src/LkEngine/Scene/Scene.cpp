@@ -4,6 +4,7 @@
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/RenderCommand.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Renderer/Color.h"

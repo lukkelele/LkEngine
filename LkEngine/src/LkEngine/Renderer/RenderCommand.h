@@ -1,6 +1,7 @@
 #pragma once
 
-#include "LkEngine/Renderer/Renderer.h"
+#include "LkEngine/Renderer/VertexBuffer.h"
+#include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 
@@ -27,9 +28,13 @@ namespace LkEngine {
         static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, uint32_t entityID = 0);
         static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint32_t entityID = 0);
         static void DrawGrid(int columns, int rows, const glm::vec4& color = { 0.0f, 1.0f, 0.0f, 1.0f }, float spacingX = 10.0f, float spacingY = 10.0f);
+        static void DrawCircle(const glm::vec2& p0);
 
     private:
-        static u_ptr<Renderer> m_Renderer;
+        //static u_ptr<Renderer> m_Renderer;
+        //inline static u_ptr<Renderer> m_Renderer;
+        //inline static s_ptr<Renderer> m_Renderer = nullptr;
+        inline static Renderer* m_Renderer = nullptr;
     };
 
 }

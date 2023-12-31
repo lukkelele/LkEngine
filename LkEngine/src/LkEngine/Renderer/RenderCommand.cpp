@@ -1,5 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/RenderCommand.h"
+#include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Core/Window.h"
@@ -7,11 +8,14 @@
 
 namespace LkEngine {
 
-    u_ptr<Renderer> RenderCommand::m_Renderer;
+    //u_ptr<Renderer> RenderCommand::m_Renderer;
 
     void RenderCommand::Init()
     {
-        m_Renderer->Init();
+        //m_Renderer = std::shared_ptr<Renderer>(Renderer::Get());
+        m_Renderer = Renderer::Get();
+        //m_Renderer->Init();
+        //m_Renderer = Renderer::Get();
     }
 
     void RenderCommand::SetLineWidth(float width)
@@ -153,6 +157,11 @@ namespace LkEngine {
             cursorX = cursorXBegin;
             cursorY += quadHeight;
         }
+    }
+
+    void RenderCommand::DrawCircle(const glm::vec2& p0)
+    {
+
     }
 
 

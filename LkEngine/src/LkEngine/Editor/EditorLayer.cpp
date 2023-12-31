@@ -879,6 +879,7 @@ namespace LkEngine {
 			if (ImGui::ImageButton("##RectangleImage", (void*)rectangleTexture->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LOG_TRACE("Clicked RectangleImage -> Selecting rectangle shape");
+				InCreateItemProcess = true;
 				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
 				{
 					if (geometricShapes[i] == "Rectangle")
@@ -894,6 +895,7 @@ namespace LkEngine {
 			if (ImGui::ImageButton("##CircleImage", (void*)textureLibrary->GetTexture2D("atte_square")->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LOG_TRACE("Clicked CircleImage -> Selecting circle shape");
+				InCreateItemProcess = true;
 				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
 				{
 					if (geometricShapes[i] == "Circle")
@@ -909,6 +911,7 @@ namespace LkEngine {
 			if (ImGui::ImageButton("##TriangleImage", (void*)textureLibrary->GetTexture2D("atte_square")->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LOG_TRACE("Clicked TriangleImage -> Selecting triangle shape");
+				InCreateItemProcess = true;
 				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
 				{
 					if (geometricShapes[i] == "Triangle")
@@ -966,9 +969,6 @@ namespace LkEngine {
 			currentGeometricShape = Math::Shape::Triangle;
 		}
 		
-		// Size
-		//switch (current)
-
 		if (ImGui::Button("Add"))
 		{
 			// Gather characteristics for creating object

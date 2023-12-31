@@ -6,6 +6,7 @@
 #include "LkEngine/Renderer/UniformBuffer.h"
 #include "LkEngine/Renderer/RendererAPI.h"
 #include "LkEngine/Renderer/Renderer2D.h"
+#include "LkEngine/Renderer/RenderCommand.h"
 #include "LkEngine/Renderer/RenderCommandQueue.h"
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Renderer/Texture.h"
@@ -26,6 +27,7 @@ namespace LkEngine {
 	public:
 		static void Init();
 		static void Shutdown();
+		static Renderer* Get() { return m_Instance; }
 		static s_ptr<Renderer> Create() { return std::make_shared<Renderer>(); }
 
 		static void Clear();
@@ -87,6 +89,7 @@ namespace LkEngine {
 		inline static RendererDrawMode DrawMode;
 		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
 	private:
+		inline static Renderer* m_Instance = nullptr;
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;
 		inline static s_ptr<TextureLibrary> m_TextureLibrary = nullptr;
 	};

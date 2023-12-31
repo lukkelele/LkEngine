@@ -2,7 +2,6 @@
 
 #include "LkEngine/Core/UUID.h"
 #include "LkEngine/Core/Timer.h"
-#include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/OrthographicCamera.h"
 #include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Editor/EditorCamera.h"
@@ -15,6 +14,7 @@ namespace LkEngine {
 	// Forward declarations
 	class Entity;
 	class World;
+	class Renderer;
 
 	typedef std::unordered_map<UUID, Entity> EntityMap;
 

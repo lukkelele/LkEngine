@@ -77,7 +77,9 @@ namespace LkEngine {
 		void HandleExternalWindows();
 
 	public:
-		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 };
+		// Flag to determine if an item is currently being created
+		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window
+		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 }; // TODO: REMOVE/UPDATE
 		Entity SelectedEntity;
 		uint64_t SelectedEntityID = 0;
 		glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
@@ -111,7 +113,6 @@ namespace LkEngine {
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
 	private:
-		//s_ptr<Scene> m_Scene = nullptr;
 		Scene* m_Scene = nullptr;
 		bool m_Enabled = true;
 		glm::vec2 m_ViewportBounds[2];
