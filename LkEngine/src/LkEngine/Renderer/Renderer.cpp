@@ -25,6 +25,12 @@ namespace LkEngine {
 	static RenderCommandQueue* CommandQueue[RenderCommandQueueCount];
 	static std::atomic<uint32_t> RenderCommandQueueSubmissionIndex = 0;
 
+	Renderer::Renderer()
+	{
+		m_Instance = this;
+		RenderCommand::SetRenderer(this);
+	}
+
 	void Renderer::Init()
 	{
 		DrawMode = RendererDrawMode::Triangles;

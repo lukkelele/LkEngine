@@ -13,7 +13,6 @@ namespace LkEngine {
     public:
         void Init();
         void Shutdown();
-
         void Clear();
         void BeginFrame();
         void EndFrame();

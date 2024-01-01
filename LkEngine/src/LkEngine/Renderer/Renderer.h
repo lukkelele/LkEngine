@@ -25,11 +25,14 @@ namespace LkEngine {
 	class Renderer
 	{
 	public:
-		static void Init();
-		static void Shutdown();
+		Renderer();
+		~Renderer() = default;
+
 		static Renderer* Get() { return m_Instance; }
 		static s_ptr<Renderer> Create() { return std::make_shared<Renderer>(); }
 
+		static void Init();
+		static void Shutdown();
 		static void Clear();
 		static void BeginFrame();
 		static void EndFrame();

@@ -8,14 +8,9 @@
 
 namespace LkEngine {
 
-    //u_ptr<Renderer> RenderCommand::m_Renderer;
-
-    void RenderCommand::Init()
+    void RenderCommand::SetRenderer(Renderer* renderer)
     {
-        //m_Renderer = std::shared_ptr<Renderer>(Renderer::Get());
-        m_Renderer = Renderer::Get();
-        //m_Renderer->Init();
-        //m_Renderer = Renderer::Get();
+        m_Renderer = renderer;
     }
 
     void RenderCommand::SetLineWidth(float width)

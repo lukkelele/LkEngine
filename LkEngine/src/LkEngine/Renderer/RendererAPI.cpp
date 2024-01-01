@@ -17,10 +17,7 @@ namespace LkEngine {
         return std::make_shared<VulkanRenderer>();
     #elif defined(LK_RENDERER_API_OPENGL)
         return std::make_shared<OpenGLRenderer>();
-    #else
-        return nullptr;
     #endif
-
     }
 
 }

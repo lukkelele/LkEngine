@@ -14,7 +14,7 @@ namespace LkEngine {
     class RenderCommand
     {
     public:
-        static void Init();
+        static void SetRenderer(Renderer* renderer);
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, uint32_t entityID = 0);
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, MaterialComponent& mc, uint32_t entityID = 0);
         static void DrawSprite(TransformComponent& tc, SpriteComponent& sc, s_ptr<Texture> texture, uint32_t entityID = 0);
@@ -31,10 +31,9 @@ namespace LkEngine {
         static void DrawCircle(const glm::vec2& p0);
 
     private:
-        //static u_ptr<Renderer> m_Renderer;
-        //inline static u_ptr<Renderer> m_Renderer;
-        //inline static s_ptr<Renderer> m_Renderer = nullptr;
         inline static Renderer* m_Renderer = nullptr;
+
+        friend class Renderer;
     };
 
 }
