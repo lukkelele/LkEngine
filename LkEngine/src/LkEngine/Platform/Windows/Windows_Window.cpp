@@ -137,6 +137,16 @@ namespace LkEngine {
 		return { m_ViewportWidth, m_ViewportHeight };
 	}
 
+    void Windows_Window::SetWidth(uint16_t width) 
+	{ 
+		m_Width = width; 
+	}
+
+    void Windows_Window::SetHeight(uint16_t height) 
+	{ 
+		m_Height = height; 
+	}
+
 	void Windows_Window::WindowResizeCallback(GLFWwindow* window, int width, int height)
 	{
 		int size_x, size_y;
@@ -196,43 +206,38 @@ namespace LkEngine {
 
 	float Windows_Window::GetScalerX() const
 	{
-		return m_ScalerX;
+		return m_ViewportScalers.x;
 	}
 	
 	float Windows_Window::GetScalerY() const
 	{
-		return m_ScalerY;
+		return m_ViewportScalers.y;
 	}
 
 	glm::vec2 Windows_Window::GetScalers() const
 	{
-		return { m_ScalerX, m_ScalerY };
+		return m_ViewportScalers;
 	}
 
 	void Windows_Window::SetScalerX(float x)
 	{
-		m_ScalerX = x;
+		m_ViewportScalers.x = x;
 	}
 
 	void Windows_Window::SetScalerY(float y)
 	{
-		m_ScalerY = y;
+		m_ViewportScalers.y = y;
 	}
 
 	void Windows_Window::SetScalers(float x, float y)
 	{
-		m_ScalerX = x;
-		m_ScalerY = y;
+		m_ViewportScalers.x = x;
+		m_ViewportScalers.y = y;
 	}
 
-    void Windows_Window::SetWidth(uint16_t width) 
-	{ 
-		m_Width = width; 
-	}
-
-    void Windows_Window::SetHeight(uint16_t height) 
-	{ 
-		m_Height = height; 
+	void Windows_Window::SetScalers(const glm::vec2& scalers)
+	{
+		m_ViewportScalers = scalers;
 	}
 
 }

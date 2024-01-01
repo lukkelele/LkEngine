@@ -43,6 +43,7 @@ namespace LkEngine {
         void SetScalerX(float x);
         void SetScalerY(float y);
         void SetScalers(float x, float y);
+        void SetScalers(const glm::vec2& scalers);
 
         // Callbacks
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
@@ -53,7 +54,7 @@ namespace LkEngine {
         uint16_t m_Width = 0, m_Height = 0;
         uint16_t m_ViewportWidth = 0, m_ViewportHeight = 0;
         glm::vec2 m_Pos = { 0.0f, 0.0f };
-        float m_ScalerX = 1.0f, m_ScalerY = 1.0f;
+        glm::vec2 m_ViewportScalers = { 1.0f, 1.0f };
 
         std::string m_GlslVersion = "";
         bool m_VSync;

@@ -50,6 +50,7 @@ namespace LkEngine {
         virtual void SetScalerX(float x) = 0;
         virtual void SetScalerY(float y) = 0;
         virtual void SetScalers(float x, float y) = 0;
+        virtual void SetScalers(const glm::vec2& scalers) = 0;
 
     protected:
         inline static bool GLFW_Initialized = false;
