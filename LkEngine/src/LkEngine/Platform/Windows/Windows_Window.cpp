@@ -69,6 +69,26 @@ namespace LkEngine {
 		//glfwSetMouseButtonCallback(m_GlfwWindow, MouseButtonCallback);
 
 		GLFW_Initialized = true;
+
+#if 0
+		auto* editor = EditorLayer::Get();
+		if (editor && editor->IsEnabled())
+		{
+			float editorWindowWidth = editor->GetEditorWindowSize().x;
+			float editorWindowHeight = editor->GetEditorWindowSize().y;
+
+			// Scale the resolution for the editor 'main' window
+			editorWindowWidth /= m_ScalerX;
+			editorWindowHeight /= m_ScalerY;
+
+			m_Width = editorWindowWidth;
+			m_Height = editorWindowWidth;
+			Mouse::SetWindowWidth(m_Width * m_ScalerX);
+			Mouse::SetWindowHeight(m_Height * m_ScalerY);
+
+			m_GraphicsContext->UpdateResolution(editorWindowWidth, editorWindowHeight);
+		}
+#endif
 	}
 
 	void Windows_Window::SwapBuffers()
@@ -131,11 +151,26 @@ namespace LkEngine {
 		auto* editor = EditorLayer::Get();
 		if (editor && editor->IsEnabled())
 		{
-			editor->SetUpdateWindowFlag(true);
+			float editorWindowWidth = editor->GetEditorWindowSize().x;
+			float editorWindowHeight = editor->GetEditorWindowSize().y;
+
+			// Scale the resolution for the editor 'main' window
+			editorWindowWidth /= m_Instance->GetScalerX();
+			editorWindowHeight /= m_Instance->GetScalerY();
+			
+			m_Instance->SetWidth(editorWindowWidth);
+			m_Instance->SetHeight(editorWindowHeight);
+			m_Instance->GetContext()->UpdateResolution(editorWindowWidth, editorWindowHeight);
+
+			// Update the window width and height for Mouse as well but do not use the scaled resolution
+			// as this will always be scaled to be the same 
+			//Mouse::SetWindowResolution(editorWindowWidth, editorWindowHeight);
+
 			// Set the window size to be that of the editor window size,
 			// this is because of the other docking windows that occopy screen space
-			m_Instance->SetWidth(editor->GetEditorWindowWidth());
-			m_Instance->SetHeight(editor->GetEditorWindowHeight());
+			editor->SetUpdateWindowFlag(true);
+
+			LOG_DEBUG("Editor enabled, setting width and height to -> ({}, {})", editorWindowWidth, editorWindowHeight);
 		}
 	}
 
@@ -157,6 +192,47 @@ namespace LkEngine {
 			Mouse::LeftMouseButtonProcessed = false;
 		}
 #endif
+	}
+
+	float Windows_Window::GetScalerX() const
+	{
+		return m_ScalerX;
+	}
+	
+	float Windows_Window::GetScalerY() const
+	{
+		return m_ScalerY;
+	}
+
+	glm::vec2 Windows_Window::GetScalers() const
+	{
+		return { m_ScalerX, m_ScalerY };
+	}
+
+	void Windows_Window::SetScalerX(float x)
+	{
+		m_ScalerX = x;
+	}
+
+	void Windows_Window::SetScalerY(float y)
+	{
+		m_ScalerY = y;
+	}
+
+	void Windows_Window::SetScalers(float x, float y)
+	{
+		m_ScalerX = x;
+		m_ScalerY = y;
+	}
+
+    void Windows_Window::SetWidth(uint16_t width) 
+	{ 
+		m_Width = width; 
+	}
+
+    void Windows_Window::SetHeight(uint16_t height) 
+	{ 
+		m_Height = height; 
 	}
 
 }

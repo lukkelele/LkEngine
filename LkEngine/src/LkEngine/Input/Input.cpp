@@ -5,10 +5,15 @@
 
 namespace LkEngine {
 
+    //s_ptr<Application> m_App = nullptr;
+    Application* m_App = nullptr;
+
     Input::Input(Application* app)
-        : m_App(s_ptr<Application>(app))
+        //: m_App(s_ptr<Application>(app))
     {
         m_Instance = this;
+		//m_App = s_ptr<Application>(app);
+		m_App = app;
         LK_ASSERT(m_App);
     }
 

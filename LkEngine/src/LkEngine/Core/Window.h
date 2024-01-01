@@ -44,6 +44,12 @@ namespace LkEngine {
         virtual glm::vec2 GetPos() const = 0;
         virtual glm::vec2 GetSize() const = 0;
         virtual glm::vec2 GetViewportSize() const = 0;
+        virtual float GetScalerX() const = 0;
+        virtual float GetScalerY() const = 0;
+        virtual glm::vec2 GetScalers() const = 0;
+        virtual void SetScalerX(float x) = 0;
+        virtual void SetScalerY(float y) = 0;
+        virtual void SetScalers(float x, float y) = 0;
 
     protected:
         inline static bool GLFW_Initialized = false;
@@ -51,7 +57,3 @@ namespace LkEngine {
     };
 
 }
-
-// OpenGL Functions
-// static void OpenGL_ClearError();
-// static bool OpenGL_LogCall(const char* func, const char* file, int line);

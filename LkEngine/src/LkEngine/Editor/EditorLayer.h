@@ -42,6 +42,7 @@ namespace LkEngine {
 		static s_ptr<EditorLayer> Create(Scene& scene) { return std::make_shared<EditorLayer>(scene); }
 
 		void OnImGuiRender();
+		void OnAttach() override;
 		bool IsEnabled() { return m_Enabled; }
 		Entity GetSelectedEntity() { return SelectedEntity; }
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
@@ -60,7 +61,7 @@ namespace LkEngine {
         void UI_SelectedEntityProperties();
 		void UI_RenderSettingsInformation();
 		bool IsEntitySelected() const;
-		void SetUpdateWindowFlag(bool flag) { m_UpdateWindowSize = flag; }
+		void SetUpdateWindowFlag(bool flag); // { m_UpdateWindowSize = flag; }
 		void SetSelectedEntity(Entity& entity);
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
@@ -69,6 +70,8 @@ namespace LkEngine {
 		inline glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
 		inline glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
 		inline glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
+		float GetViewportScalerX() const { return ViewportScalers.x; }
+		float GetViewportScalerY() const { return ViewportScalers.y; }
 
 	private:
 		//void RenderViewport(); // TODO
@@ -96,7 +99,6 @@ namespace LkEngine {
 		glm::vec2 LeftSidebarPos = { 0.0f, 0.0f };
 		glm::vec2 RightSidebarPos = { 0.0f, 0.0f };
 
-		bool m_UpdateWindowPos = true;
 		bool m_UpdateWindowSize = true;
 
 		bool ShowRenderInformationWindow = false;

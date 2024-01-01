@@ -22,7 +22,6 @@ namespace LkEngine {
         static void SetScene(Scene& scene) { m_Scene = &scene; }
 
     private:
-        s_ptr<Application> m_App = nullptr;
         inline static Input* m_Instance = nullptr;
         inline static Scene* m_Scene = nullptr;
     };

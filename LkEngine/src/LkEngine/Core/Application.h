@@ -56,13 +56,15 @@ namespace LkEngine {
         ApplicationSpecification m_Specification;
         LayerStack m_LayerStack;
         Timer m_Timer;
+
         s_ptr<Window> m_Window = nullptr;
         s_ptr<Renderer> m_Renderer = nullptr;
         s_ptr<GraphicsContext> m_GraphicsContext = nullptr;
-        s_ptr<Scene> m_ActiveScene = nullptr;
         s_ptr<Input> m_Input = nullptr;
+        s_ptr<Scene> m_ActiveScene = nullptr;
         s_ptr<Scene> m_Scenes[8];
         s_ptr<EditorLayer> m_EditorLayer = nullptr;
+
         inline static Application* m_Instance = nullptr;
     };
 

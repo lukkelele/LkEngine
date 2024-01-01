@@ -22,9 +22,11 @@ namespace LkEngine {
         m_Window->Init(LK_SHADER_VERSION);
         m_GraphicsContext = m_Window->GetContext();
         m_Input = Input::Create(this);
+        Mouse::Init();
+
         m_Renderer = Renderer::Create();
-        
         m_Renderer->Init();
+
         m_ActiveScene = Scene::Create("BaseScene"); // Base Scene
         m_EditorLayer = EditorLayer::Create(*m_ActiveScene);
         m_LayerStack.PushOverlay(&*m_EditorLayer);
