@@ -38,29 +38,11 @@ When the 2D implementation is done, the plan is to create a game such as **Super
 - ImGuizmo
 
 ### Building LkEngine
-TODO: *Add build scripts !!*
+TODO: *this section is to be written in the **somewhat near** future*
 <br>
-Use the build script in the repo or execute premake5 manually in bash (or PS). 
-<br>
-Manually in Windows:
-```
- lib\premake-5.0\premake5.exe vs2022 
-```
-Linux:
-```
-mkdir build
-cd build
-../lib/premake-5.0/premake5 gmake
-make
-```
-
----
 
 ## Todo
-
 <!---------------------- Checklist --------------------------->
-### General
-:black_square_button: Shader hot reloading<br>
 
 ### 2D 
 :white_check_mark: Ortographic camera<br>
@@ -83,6 +65,22 @@ make
 # Development
 
 ## LkEngine Development
+
+### January 1, 2024
+The current look of the engine. Lots to polish. The creation of scene entities through the UI is what's focused for now. 
+Which means that the UI is what I spend the most time on.
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-2024-01-01.png" width=740 height=440>
+	<p align="center">
+</div>
+
+Once again thanks to Atilla for his handsome face. I need to add new images for 
+the *Create Menu* (what I call it for now) but Atilla's beauty will do for now.
+
+<br>
+
+---
+
 
 ### December 4, 2023
 It has been a while since I last posted some progress.<br>
