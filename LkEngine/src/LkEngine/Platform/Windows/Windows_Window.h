@@ -18,10 +18,10 @@ namespace LkEngine {
         void Init(const std::string& glslVersion);
         void SwapBuffers();
         void Exit();
-        uint16_t GetWidth() const { return m_Width; }
-        uint16_t GetHeight() const { return m_Height; }
-        uint16_t GetViewportWidth()  const { return m_ViewportWidth; }
-        uint16_t GetViewportHeight() const { return m_ViewportHeight; }
+        inline uint16_t GetWidth() const { return m_Width; }
+        inline uint16_t GetHeight() const { return m_Height; }
+        inline uint16_t GetViewportWidth()  const { return m_ViewportWidth; }
+        inline uint16_t GetViewportHeight() const { return m_ViewportHeight; }
         glm::vec2 GetViewportSize() const;
         glm::vec2 GetSize() const;
         glm::vec2 GetPos() const;
@@ -58,6 +58,7 @@ namespace LkEngine {
 
         std::string m_GlslVersion = "";
         bool m_VSync;
+        bool GLFW_Initialized = false;
 
         GLFWwindow* m_GlfwWindow = nullptr;
         s_ptr<GraphicsContext> m_GraphicsContext = nullptr;

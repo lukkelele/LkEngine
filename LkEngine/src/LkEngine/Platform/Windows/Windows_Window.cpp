@@ -30,19 +30,21 @@ namespace LkEngine {
 	{
 	}
 	
-	void Windows_Window::Init(const std::string& glslVersion)
+	void Windows_Window::Init(const std::string& shaderVersion)
 	{
 		if (GLFW_Initialized)
-		{
-			throw std::runtime_error("Windows_Window::Init has already been called once!");
-			//return;
-		}
+			throw std::runtime_error("Windows_Window::Init has already been called once! (GLFW already initialized)");
 
-		int glfwInitResult = glfwInit();
-		LK_ASSERT(glfwInitResult == GLFW_TRUE);
+		if (glfwInit() != GLFW_TRUE)
+			throw std::runtime_error("Could not initialize GLFW");
 	
+		// Set context profile and the version to use for the Renderer API
 		GraphicsContext::SetProfile(GraphicsContext::Profile::Core);
+	#ifdef LK_RENDERER_API_OPENGL
 		GraphicsContext::SetVersion(4, 5);
+	#elif defined(LK_RENDERER_API_VULKAN)
+		GraphicsContext::SetVersion(MAJOR_VERSION, MINOR_VERSION);
+	#endif
 	
 		m_GlfwWindow = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title.c_str(), nullptr, nullptr);
 		LK_ASSERT(m_GlfwWindow != nullptr);
@@ -50,7 +52,7 @@ namespace LkEngine {
 
 		if (!GLFW_Initialized)
 		{
-			m_GraphicsContext = GraphicsContext::Create(this, glslVersion);
+			m_GraphicsContext = GraphicsContext::Create(this, shaderVersion);
 			m_GraphicsContext->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
 			m_GraphicsContext->SetDarkTheme();
 		}
@@ -68,27 +70,9 @@ namespace LkEngine {
 		glfwSetWindowSizeCallback(m_GlfwWindow, WindowResizeCallback);
 		//glfwSetMouseButtonCallback(m_GlfwWindow, MouseButtonCallback);
 
+		Mouse::SetActiveWindow(this);
+
 		GLFW_Initialized = true;
-
-#if 0
-		auto* editor = EditorLayer::Get();
-		if (editor && editor->IsEnabled())
-		{
-			float editorWindowWidth = editor->GetEditorWindowSize().x;
-			float editorWindowHeight = editor->GetEditorWindowSize().y;
-
-			// Scale the resolution for the editor 'main' window
-			editorWindowWidth /= m_ScalerX;
-			editorWindowHeight /= m_ScalerY;
-
-			m_Width = editorWindowWidth;
-			m_Height = editorWindowWidth;
-			Mouse::SetWindowWidth(m_Width * m_ScalerX);
-			Mouse::SetWindowHeight(m_Height * m_ScalerY);
-
-			m_GraphicsContext->UpdateResolution(editorWindowWidth, editorWindowHeight);
-		}
-#endif
 	}
 
 	void Windows_Window::SwapBuffers()
@@ -172,12 +156,8 @@ namespace LkEngine {
 			m_Instance->SetHeight(editorWindowHeight);
 			m_Instance->GetContext()->UpdateResolution(editorWindowWidth, editorWindowHeight);
 
-			// Update the window width and height for Mouse as well but do not use the scaled resolution
-			// as this will always be scaled to be the same 
-			//Mouse::SetWindowResolution(editorWindowWidth, editorWindowHeight);
-
 			// Set the window size to be that of the editor window size,
-			// this is because of the other docking windows that occopy screen space
+			// this is because of the other docking windows in the Editor that occopy screen space
 			editor->SetUpdateWindowFlag(true);
 
 			LOG_DEBUG("Editor enabled, setting width and height to -> ({}, {})", editorWindowWidth, editorWindowHeight);
@@ -186,22 +166,6 @@ namespace LkEngine {
 
 	void Windows_Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		//Input::HandleScene(*Scene::GetActiveScene());
-#if 0
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !Mouse::LeftMouseButtonProcessed)
-		{
-			LOG_DEBUG("Processing left mouse button click");
-
-			Input::HandleScene(*Scene::GetActiveScene());
-			// Set flag to true to avoid processing again
-			Mouse::LeftMouseButtonProcessed = true;
-		}
-		// Reset the flag when the button is released
-		else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) 
-		{
-			Mouse::LeftMouseButtonProcessed = false;
-		}
-#endif
 	}
 
 	float Windows_Window::GetScalerX() const
