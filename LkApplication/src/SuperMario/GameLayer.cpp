@@ -30,7 +30,6 @@ namespace LkEngine {
         Entity bgEntity = m_Scene->CreateEntity("Background");
         auto& bgSprite = bgEntity.AddComponent<SpriteComponent>();
         auto& bgTransform = bgEntity.AddComponent<TransformComponent>();
-        //auto& bgMC = bgEntity.AddComponent<MaterialComponent>(m_BgTexture);
         bgSprite.SetPassthrough(true);
         bgEntity.AddComponent<MaterialComponent>(skyTexture);
         bgTransform.Translation.y = 450.0f;
@@ -39,12 +38,24 @@ namespace LkEngine {
         Entity groundEntity = m_Scene->CreateEntity("Ground");
         auto& groundMaterial = groundEntity.AddComponent<MaterialComponent>(groundTexture);
         auto& groundSprite = groundEntity.AddComponent<SpriteComponent>();
-        groundSprite.SetPassthrough(false);
         auto& groundTransform = groundEntity.AddComponent<TransformComponent>();
-        groundTransform.Translation.x = 50.0f;
-        groundTransform.Translation.y = 50.0f;
-        groundSprite.SetSize(200, 200);
+        groundSprite.SetPassthrough(false);
+        groundTransform.Translation.x = 0.0f;
+        groundTransform.Translation.y = -(window->GetHeight() * 0.50f / window->GetScalerY());
+        //groundSprite.SetSize((float)window->GetViewportWidth() + 100.0f, 200.0f);
+        groundSprite.Size = { 
+            ((float)window->GetWidth() / window->GetScalerX()) + 100.0f, 
+            400.0f 
+        };
         m_Ground = std::make_shared<Entity>(groundEntity);
+
+        // Set player on top of ground
+        auto& playerCameraOffset = m_Player->GetCameraOffset();
+        playerCameraOffset.x = -(window->GetWidth() * 0.50f / window->GetScalerX()) + 100.0f;
+        playerCameraOffset.y = 0.0f;
+        //m_Player->SetPos(0.0f, groundTransform.Translation.y + m_Player->GetCameraOffset().y);
+        //m_Player->SetPos(0.0f, groundTransform.Translation.y + groundSprite.Size.y * 0.50f);
+        m_Player->SetPos(0.0f, groundTransform.Translation.y + groundSprite.Size.y * 0.50f + 136); 
 
         float bgStartX = bgTransform.GetTranslation().x;
         float bgStartY = bgTransform.GetTranslation().y;
@@ -117,11 +128,7 @@ namespace LkEngine {
 
         // Scale mouse pos with window resolution
         //auto mousePos = Mouse::GetPos();
-        auto mousePos = Mouse::GetRawPos();
-        if (editor != nullptr && editor->IsEnabled())
-        {
-            //mousePos.x -= editor->GetLeftSidebarSize().x;
-        }
+        auto mousePos = Mouse::GetPos();
         RenderCommand::DrawLine({ mousePos.x - 40, (mousePos.y - 40) }, { mousePos.x + 40, (mousePos.y + 40) }, Color::RGBA::Blue);
         //RenderCommand::DrawLine({ mousePos.x + 40, (mousePos.y + 40) }, { mousePos.x - 40, (mousePos.y - 40) }, Color::RGBA::Red);
 
@@ -136,6 +143,8 @@ namespace LkEngine {
 
     void GameLayer::OnImGuiRender()
     {
+        m_Player->OnImGuiRender();
+
         for (const auto& enemy : m_Enemies)
             enemy->OnImGuiRender();
     }

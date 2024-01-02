@@ -18,23 +18,23 @@ namespace LkEngine {
         Player(Entity& entity, const std::string& name = "");
         virtual ~Player();
 
-        std::string GetName() const { return m_Name; }
+        virtual void OnUpdate(float ts = 1.0f);
+        virtual void OnImGuiRender();
+        const glm::vec2 GetSize();
+        float GetWidth();
+        float GetHeight();
 
+        std::string GetName() const { return m_Name; }
         void SetUUID(UUID& id) { m_ID = id; }
         UUID GetUUID() const { return m_ID; }
         Entity GetEntity() const { return m_Entity; }
         void SetEntity(const Entity& entity); // { m_Entity = entity; }
         void SetPos(float x, float y);
         void SetPos(const glm::vec2& pos);
-        SceneCamera& GetCamera() { return *m_Entity.GetComponent<CameraComponent>().CameraRef; }
-        //SceneCamera& GetCamera() { return m_Entity.GetComponent<CameraComponent>(); }
 
-        const glm::vec2 GetSize();
-        float GetWidth();
-        float GetHeight();
-
-        virtual void OnUpdate(float ts = 1.0f);
-        virtual void OnImGuiRender();
+        SceneCamera& GetCamera() { return m_Entity.GetComponent<CameraComponent>(); }
+        glm::vec2& GetCameraOffset() { return m_CameraOffset; }
+        glm::vec2 GetCameraOffset() const { return m_CameraOffset; }
 
     protected:
         glm::vec3& GetPos() { return m_Entity.GetComponent<TransformComponent>().Translation; }

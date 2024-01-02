@@ -15,7 +15,7 @@ namespace LkEngine {
 
         float windowWidth = Window::Get()->GetWidth();
         float windowHeight = Window::Get()->GetHeight();
-        m_CameraOffset = { -windowWidth * 0.45f, -windowHeight * 0.40f };
+        //m_CameraOffset = { -windowWidth * 0.45f, -windowHeight * 0.40f };
     }
 
     Player::~Player()
@@ -25,8 +25,8 @@ namespace LkEngine {
     void Player::OnUpdate(float ts)
     {
         SceneCamera& cam = m_Entity.GetComponent<CameraComponent>();
-
         auto& tc = m_Entity.GetComponent<TransformComponent>();
+
         tc.Translation = cam.GetPos();
         tc.Translation.x += m_CameraOffset.x;
         tc.Translation.y += m_CameraOffset.y;
@@ -34,6 +34,9 @@ namespace LkEngine {
 
     void Player::OnImGuiRender()
     {
+        UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO, ImGuiWindowFlags_NoMove);
+        ImGui::SliderFloat2("Camera Offset", &m_CameraOffset.x, -500.0f, 500.f, "%1.f");
+        UI::EndSubwindow();
     }
 
     void Player::SetEntity(const Entity& entity)
@@ -77,11 +80,13 @@ namespace LkEngine {
 
     void Player::SetPos(const glm::vec2& pos)
     {
-        //glm::vec3& currentPos = GetPos();
-        //currentPos = { pos.x, pos.y, currentPos.z };
-        //m_Pos = { pos.x, pos.y, m_Pos.z };
+        auto& cam = GetCamera();
+        auto& tc = m_Entity.GetComponent<TransformComponent>();
         m_Pos.x = pos.x;
         m_Pos.y = pos.y;
+        tc.Translation.x = m_Pos.x;
+        tc.Translation.y = m_Pos.y;
+        cam.SetPos(tc.Translation);
     }
 
     const glm::vec2 Player::GetSize()
