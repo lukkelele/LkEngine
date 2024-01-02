@@ -110,9 +110,23 @@ namespace LkEngine {
         m_Renderer2D->BeginScene(playerCam);
         m_Scene->BeginScene();
 
-        RenderCommand::DrawLine({ -200, 20 }, { 200, 40 }, Color::RGBA::Blue);
+        //RenderCommand::DrawLine({ -200, 20 }, { 200, 40 }, Color::RGBA::Blue);
+
+        auto* window = Window::Get();
+        auto* editor = EditorLayer::Get();
+
+        // Scale mouse pos with window resolution
+        //auto mousePos = Mouse::GetPos();
+        auto mousePos = Mouse::GetRawPos();
+        if (editor != nullptr && editor->IsEnabled())
+        {
+            //mousePos.x -= editor->GetLeftSidebarSize().x;
+        }
+        RenderCommand::DrawLine({ mousePos.x - 40, (mousePos.y - 40) }, { mousePos.x + 40, (mousePos.y + 40) }, Color::RGBA::Blue);
+        //RenderCommand::DrawLine({ mousePos.x + 40, (mousePos.y + 40) }, { mousePos.x - 40, (mousePos.y - 40) }, Color::RGBA::Red);
 
         m_Player->OnUpdate(ts);
+
         for (const auto& enemy : m_Enemies)
             enemy->OnUpdate(ts);
 

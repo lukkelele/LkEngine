@@ -20,9 +20,10 @@ namespace LkEngine {
         auto& sc = m_Entity.GetComponent<SpriteComponent>();
         tc.Translation.x += distance;
 
-        if (tc.Translation.x < -(Window::Get()->GetWidth() * 0.50f + sc.GetWidth()))
+        // Whenever the enemy sprite is 'outside' of the screen to the left, reset the position to the right
+        if (tc.Translation.x < -(Window::Get()->GetViewportWidth() * 0.50f + sc.GetWidth()))
         {
-            tc.Translation.x = Window::Get()->GetWidth() * 0.50f;
+            tc.Translation.x = Window::Get()->GetViewportWidth() * 0.50f;
         }
     }
 
