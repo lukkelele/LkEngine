@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 
 #include <glm/glm.hpp>

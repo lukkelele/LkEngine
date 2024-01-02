@@ -20,10 +20,10 @@ namespace LkEngine {
         auto window = Window::Get();
         float windowWidth = (float)window->GetWidth();
         float windowHeight = (float)window->GetHeight();
-        //glm::vec2 mousePos = Mouse::GetScaledPos();
-        glm::vec2 mousePos = Mouse::ScaledPos;
-        LOG_WARN("Scaled Mouse (Physics2D Getter) - ({} ,{})", mousePos.x, mousePos.y);
-		LOG_ERROR("Scaled Mouse (Physics2D Mouse->Members) - ({} ,{})", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
+        glm::vec2 mousePos = Mouse::GetScaledPos();
+        //glm::vec2 mousePos = Mouse::ScaledPos;
+        //LOG_WARN("Scaled Mouse (Physics2D Getter) - ({} ,{})", mousePos.x, mousePos.y);
+		//LOG_ERROR("Scaled Mouse (Physics2D Mouse->Members) - ({} ,{})", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
 
         auto* editor = EditorLayer::Get();
 
@@ -50,9 +50,9 @@ namespace LkEngine {
                 // This is done by adding half of the window width and height
 
                 // If the editor layer is enabled, adjust the quad pos by taking the editor windows into consideration
+            #if 0
                 if (editor && editor->IsEnabled())
                 {
-                    //auto* viewport = ImGui::GetMainViewport();
                     auto editorWindowSize = editor->GetEditorWindowSize();
                     quad_pos.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
                     quad_pos.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
@@ -62,8 +62,10 @@ namespace LkEngine {
                     quad_pos.x += windowWidth * 0.50f;
                     quad_pos.y += windowHeight * 0.50f;
                 }
+            #endif
 
-                //float angleDeg = glm::degrees(tc.GetRotation2D());
+                UI::SetOriginInMiddleOfScreen(quad_pos);
+
                 float angleRad = glm::radians(tc.GetRotation2D());
                 glm::mat2 rotMat = {
                     glm::cos(angleRad), -glm::sin(angleRad),
@@ -76,13 +78,12 @@ namespace LkEngine {
                 glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y };
                 glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y };
 
+
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
                     // Add camera position to adjust for camera placement in the world
                     bool within_x_boundaries = (mousePos.x + camPos.x >= bottom_left.x) && (mousePos.x + camPos.x <= top_right.x);
                     bool within_y_boundaries = (mousePos.y + camPos.y <= top_left.y) && (mousePos.y + camPos.y >= bottom_right.y);
-                    //bool within_x_boundaries = (mousePos.x + camPos.x >= bottom_left.x) && (mousePos.x + camPos.x <= top_right.x);
-                    //bool within_y_boundaries = (mousePos.y + camPos.y >= top_left.y) && (mousePos.y + camPos.y <= bottom_right.y);
                     if (within_x_boundaries && within_y_boundaries)
                     {
                         float centerX = tc.Translation.x + quad_width * 0.50f;

@@ -2,6 +2,17 @@
 
 #include <imgui/imgui.h>
 
+#include <glm/glm.hpp>
+
+
+namespace LkEngine {
+
+    // Forward declarations
+    class Entity;
+    struct TransformComponent;
+    struct SpriteComponent;
+
+}
 
 namespace LkEngine::UI {
 
@@ -22,6 +33,14 @@ namespace LkEngine::UI {
     bool IsMouseEnabled();
     bool IsKeyboardEnabled();
     void SetInputEnabled(bool enabled);
+
+    void SetOriginInMiddleOfScreen(TransformComponent& tc);
+    void SetOriginInMiddleOfScreen(glm::vec2& vec);
+
+    glm::vec2 Sprite_GetPoint_BottomLeft(const SpriteComponent& sc, Entity& entity);
+    glm::vec2 Sprite_GetPoint_BottomRight(const SpriteComponent& sc, Entity& entity);
+    glm::vec2 Sprite_GetPoint_TopLeft(const SpriteComponent& sc, Entity& entity);
+    glm::vec2 Sprite_GetPoint_TopRight(const SpriteComponent& sc, Entity& entity);
 
     // Insert UI widgets inside already existing windows on the screen.
     // Is determined by SelectedEntityWindow

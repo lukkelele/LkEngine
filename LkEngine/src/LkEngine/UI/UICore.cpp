@@ -1,6 +1,9 @@
 #include "LKpch.h"
 #include "LkEngine/UI/UICore.h"
+#include "LkEngine/Core/Window.h"
 #include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Scene/Entity.h"
+#include "LkEngine/Scene/Components.h"
 
 #include <imgui_internal.h>
 
@@ -146,5 +149,105 @@ namespace LkEngine::UI {
         PopID();
     }
 
+    void SetOriginInMiddleOfScreen(TransformComponent& tc)
+    {
+        auto* editor = EditorLayer::Get();
+        if (editor && editor->IsEnabled())
+        {
+            auto editorWindowSize = editor->GetEditorWindowSize();
+            tc.Translation.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+            tc.Translation.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
+        }
+        else
+        {
+            tc.Translation.x += Window::Get()->GetWidth() * 0.50f;
+            tc.Translation.y += Window::Get()->GetHeight() * 0.50f;
+        }
+    }
+
+    void SetOriginInMiddleOfScreen(glm::vec2& vec)
+    {
+        auto* editor = EditorLayer::Get();
+        if (editor && editor->IsEnabled())
+        {
+            auto editorWindowSize = editor->GetEditorWindowSize();
+            vec.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+            vec.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
+        }
+        else
+        {
+            vec.x += Window::Get()->GetWidth() * 0.50f;
+            vec.y += Window::Get()->GetHeight() * 0.50f;
+        }
+    }
+
+    glm::vec2 Sprite_GetPoint_BottomLeft(const SpriteComponent& sc, Entity& entity)
+    {
+        TransformComponent& tc = entity.GetComponent<TransformComponent>();
+        SetOriginInMiddleOfScreen(tc);
+        return { tc.Translation.x - sc.Size.x * 0.50f, tc.Translation.y - sc.Size.y };
+    }
+       
+    glm::vec2 Sprite_GetPoint_BottomRight(const SpriteComponent& sc, Entity& entity)
+    {
+        TransformComponent& tc = entity.GetComponent<TransformComponent>();
+
+        auto* editor = EditorLayer::Get();
+        if (editor && editor->IsEnabled())
+        {
+            auto editorWindowSize = editor->GetEditorWindowSize();
+            tc.Translation.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+            tc.Translation.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
+        }
+        else
+        {
+            tc.Translation.x += Window::Get()->GetWidth() * 0.50f;
+            tc.Translation.y += Window::Get()->GetHeight() * 0.50f;
+        }
+
+        return { tc.Translation.x + sc.Size.x * 0.50f, tc.Translation.y - sc.Size.y };
+    }
+
+    glm::vec2 Sprite_GetPoint_TopLeft(const SpriteComponent& sc, Entity& entity)
+    {
+        TransformComponent& tc = entity.GetComponent<TransformComponent>();
+        //glm::vec2 top_left = { tc.Translation.x - quad_width * 0.50f, tc.Translation.y };
+
+        auto* editor = EditorLayer::Get();
+        if (editor && editor->IsEnabled())
+        {
+            auto editorWindowSize = editor->GetEditorWindowSize();
+            tc.Translation.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+            tc.Translation.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
+        }
+        else
+        {
+            tc.Translation.x += Window::Get()->GetWidth() * 0.50f;
+            tc.Translation.y += Window::Get()->GetHeight() * 0.50f;
+        }
+
+        return { tc.Translation.x - sc.Size.x * 0.50f, tc.Translation.y };
+    }
+
+    glm::vec2 Sprite_GetPoint_TopRight(const SpriteComponent& sc, Entity& entity)
+    {
+        TransformComponent& tc = entity.GetComponent<TransformComponent>();
+        //glm::vec2 top_right = { tc.Translation.x + quad_width * 0.50f, tc.Translation.y };
+
+        auto* editor = EditorLayer::Get();
+        if (editor && editor->IsEnabled())
+        {
+            auto editorWindowSize = editor->GetEditorWindowSize();
+            tc.Translation.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+            tc.Translation.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
+        }
+        else
+        {
+            tc.Translation.x += Window::Get()->GetWidth() * 0.50f;
+            tc.Translation.y += Window::Get()->GetHeight() * 0.50f;
+        }
+
+        return { tc.Translation.x + sc.Size.x * 0.50f, tc.Translation.y };
+    }
 
 }
