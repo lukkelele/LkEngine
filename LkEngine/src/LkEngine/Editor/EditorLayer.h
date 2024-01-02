@@ -66,10 +66,10 @@ namespace LkEngine {
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
 		float GetEditorWindowHeight() const;
-		inline uint64_t GetSelectedEntityID() const { return SelectedEntityID; }
-		inline glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
-		inline glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
-		inline glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
+		uint64_t GetSelectedEntityID() const { return SelectedEntityID; }
+		glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
+		glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
+		glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
 		float GetViewportScalerX() const { return ViewportScalers.x; }
 		float GetViewportScalerY() const { return ViewportScalers.y; }
 

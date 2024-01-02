@@ -43,7 +43,7 @@ namespace LkEngine {
 			return;
 		}
 
-        auto mousePos = Mouse::GetMousePos();
+        auto mousePos = Mouse::GetPos();
         auto raycastResults = Physics2D::RaycastFromScreen(*m_Scene);
 		int raycastHits = raycastResults.size();
 

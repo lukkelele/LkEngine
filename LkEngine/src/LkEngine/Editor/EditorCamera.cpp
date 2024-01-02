@@ -8,8 +8,7 @@ namespace LkEngine {
 
 	EditorCamera::EditorCamera(float FOV_deg, float width, float height, float nearPlane, float farPlane)
 	{
-		auto mouse_pos = Mouse::GetMousePosition();
-		m_InitialMousePos = { mouse_pos.first, mouse_pos.second };
+		m_InitialMousePos = Mouse::GetPos();
 	}
 
 	void EditorCamera::Update(float ts)

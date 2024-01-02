@@ -20,29 +20,14 @@ namespace LkEngine {
         auto window = Window::Get();
         float windowWidth = (float)window->GetWidth();
         float windowHeight = (float)window->GetHeight();
-        glm::vec2 mousePos = Mouse::GetScaledPos();
+        //glm::vec2 mousePos = Mouse::GetScaledPos();
+        glm::vec2 mousePos = Mouse::ScaledPos;
+        LOG_WARN("Scaled Mouse (Physics2D Getter) - ({} ,{})", mousePos.x, mousePos.y);
+		LOG_ERROR("Scaled Mouse (Physics2D Mouse->Members) - ({} ,{})", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
+
         auto* editor = EditorLayer::Get();
 
-        // FIXME
-#if 0
-        if (editor)
-        {
-            auto editorWindowSize = editor->GetEditorWindowSize();
-            windowWidth += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
-            windowHeight += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
-        }
-
-        //auto* editor = EditorLayer::Get();
-        if (mousePos.x < (-windowWidth * 0.50f) || mousePos.x > (windowWidth * 0.50f)
-            || mousePos.y < (-windowHeight * 0.50f) || mousePos.y > (windowHeight * 0.50f))
-        {
-            LOG_TRACE("Raycast OUTSIDE of window");
-            return results;
-        }
-#endif
-
         std::vector<Entity> sceneEntities = scene.GetEntities();
-
         for (auto& entity : sceneEntities)
         {
             if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
@@ -60,7 +45,6 @@ namespace LkEngine {
                 glm::vec2 quad_pos = { tc.Translation.x, tc.Translation.y };
 
                 // The position is placed in between the upper two points.
-                //
 
                 // Place the origin in the middle of the screen
                 // This is done by adding half of the window width and height
@@ -68,7 +52,7 @@ namespace LkEngine {
                 // If the editor layer is enabled, adjust the quad pos by taking the editor windows into consideration
                 if (editor && editor->IsEnabled())
                 {
-                    auto* viewport = ImGui::GetMainViewport();
+                    //auto* viewport = ImGui::GetMainViewport();
                     auto editorWindowSize = editor->GetEditorWindowSize();
                     quad_pos.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
                     quad_pos.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
@@ -97,6 +81,8 @@ namespace LkEngine {
                     // Add camera position to adjust for camera placement in the world
                     bool within_x_boundaries = (mousePos.x + camPos.x >= bottom_left.x) && (mousePos.x + camPos.x <= top_right.x);
                     bool within_y_boundaries = (mousePos.y + camPos.y <= top_left.y) && (mousePos.y + camPos.y >= bottom_right.y);
+                    //bool within_x_boundaries = (mousePos.x + camPos.x >= bottom_left.x) && (mousePos.x + camPos.x <= top_right.x);
+                    //bool within_y_boundaries = (mousePos.y + camPos.y >= top_left.y) && (mousePos.y + camPos.y <= bottom_right.y);
                     if (within_x_boundaries && within_y_boundaries)
                     {
                         float centerX = tc.Translation.x + quad_width * 0.50f;
