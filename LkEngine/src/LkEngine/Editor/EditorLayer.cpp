@@ -55,23 +55,6 @@ namespace LkEngine {
 		window->SetHeight(EditorWindowSize.y);
 	}
 
-	void EditorLayer::OnAttach()
-	{
-#if 0
-		auto* window = Window::Get();
-
-		EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
-
-		LK_ASSERT(EditorWindowSize.x != 0 && EditorWindowSize.y != 0);
-		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
-		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
-
-		window->SetScalers(ViewportScalers.x, ViewportScalers.y);
-		window->SetWidth(EditorWindowSize.x / ViewportScalers.x);
-		window->SetHeight(EditorWindowSize.y / ViewportScalers.y);
-#endif
-	}
-
 	void EditorLayer::OnImGuiRender()
 	{
 		auto& io = ImGui::GetIO();
@@ -132,12 +115,10 @@ namespace LkEngine {
 		Mouse::Pos = Mouse::GetRawPos();
 		Mouse::Pos.x -= LeftSidebarSize.x;
 		Mouse::Pos.y = viewport->WorkSize.y - BottomBarSize.y - Mouse::Pos.y;
-		//Mouse::Pos.y = viewport->WorkSize.y - BottomBarSize.y - Mouse::Pos.y;
-		//Mouse::Pos.y = Window::Get()->GetViewportHeight() - BottomBarSize.y - Mouse::Pos.y;
-		//Mouse::ScaledPos.x = (Mouse::Pos.x) / window->GetScalerX();
-		//Mouse::ScaledPos.y = (Mouse::Pos.y) / window->GetScalerY();
+
 		Mouse::ScaledPos.x = (Mouse::Pos.x) / ViewportScalers.x;
 		Mouse::ScaledPos.y = (Mouse::Pos.y) / ViewportScalers.y;
+
 		Mouse::CenterPos.x = (Mouse::Pos.x / window->GetWidth()) * 2.0f - 1.0f;
 		Mouse::CenterPos.y = ((Mouse::Pos.y / window->GetHeight()) * 2.0f - 1.0f) * -1.0f; // was -1.0f 
 
@@ -604,8 +585,12 @@ namespace LkEngine {
 			transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
 		});
 
-		DrawComponent<SpriteComponent> ("Color", entity, [&entity](auto& sprite)
+		DrawComponent<SpriteComponent>("Sprite", entity, [&entity](auto& sprite)
 		{
+			ImGui::Text("Sprite Component");
+			ImGui::Text("Size");
+			ImGui::SameLine();
+			ImGui::SliderFloat2("##Size", &sprite.Size.x, 0.0f, 800.0f, "%1.f");
 			UI::Property::RGBAColor(sprite.Color);
 		});
 
@@ -659,9 +644,12 @@ namespace LkEngine {
 
 		if (entity.HasComponent<SpriteComponent>())
 		{
-			ImGui::Text("Sprite Color");
+			ImGui::Text("Sprite Component");
 			SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
 			UI::Property::RGBAColor(sc.Color);
+			ImGui::SliderFloat3("##Piss", &sc.Size.x, 0.0f, 800.0f, "%1.f");
+			//ImGui::SliderFloat("##Piss", &sc.Size.x, 0.0f, 800.0f, "%1.f");
+			//ImGui::SliderFloat("##Piss", &sc.Size.x, 0.0f, 800.0f, "%1.f");
 		}
 
         ImGui::EndChild();

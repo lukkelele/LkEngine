@@ -2,9 +2,9 @@
 
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Math/Math.h"
-//#include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/UI/UICore.h"
 
 #include <entt/entt.hpp>
 #include <imgui/imgui.h>
@@ -42,7 +42,6 @@ namespace LkEngine {
 		static s_ptr<EditorLayer> Create(Scene& scene) { return std::make_shared<EditorLayer>(scene); }
 
 		void OnImGuiRender();
-		void OnAttach() override;
 		bool IsEnabled() { return m_Enabled; }
 		Entity GetSelectedEntity() { return SelectedEntity; }
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
