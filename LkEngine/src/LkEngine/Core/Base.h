@@ -89,7 +89,7 @@ namespace LkEngine {
 }
 
 
-#ifdef RENDERER_API_VULKAN
+#ifdef LK_RENDERER_API_VULKAN
 #include "Vulkan/vulkan.h"
 
 static std::string Vulkan_GetErrorString(VkResult errorCode)
