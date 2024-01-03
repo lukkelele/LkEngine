@@ -6,7 +6,6 @@
 
 namespace LkEngine {
 
-	//enum class AssetFlag
 	enum class AssetFlag : uint16_t
 	{
 		None    = 0 << 0,
@@ -46,6 +45,23 @@ namespace LkEngine {
 			if (assetType == "Animation")           return AssetType::Animation;
 
 			return AssetType::None;
+		}
+
+		inline std::string AssetTypeToString(const AssetType& assetType)
+		{
+			if (assetType == AssetType::None)          return "None";
+			if (assetType == AssetType::Scene)         return "Scene";
+			if (assetType == AssetType::Prefab)        return "Prefab";
+			if (assetType == AssetType::Mesh)          return "Mesh";
+			if (assetType == AssetType::StaticMesh)    return "StaticMesh";
+			if (assetType == AssetType::MeshSource)    return "MeshSource";
+			if (assetType == AssetType::Material)      return "Material";
+			if (assetType == AssetType::Texture)       return "Texture";
+			if (assetType == AssetType::Font)          return "Font";
+			if (assetType == AssetType::Skeleton)      return "Skeleton";
+			if (assetType == AssetType::Animation)     return "Animation";
+
+			return "NullAssetType";
 		}
 
 	}
