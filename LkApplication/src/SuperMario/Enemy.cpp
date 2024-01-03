@@ -26,8 +26,7 @@ namespace LkEngine {
         // re-center the origin in OnAddedComponent in Scene
         auto& tc = m_Entity.AddComponent<TransformComponent>();
         auto& mc = m_Entity.AddComponent<MaterialComponent>();
-
-        m_Entity.GetComponent<MaterialComponent>().SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
+        mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
     }
 
     void Enemy::Destroy()
@@ -42,12 +41,19 @@ namespace LkEngine {
 
         auto& tc = m_Entity.GetComponent<TransformComponent>();
         auto& sc = m_Entity.GetComponent<SpriteComponent>();
+        m_Pos.x += distance;
+
+        //tc.Translation.x += distance;
+        //tc.Translation.x = m_Pos.x;
         tc.Translation.x += distance;
 
         // Whenever the enemy sprite is 'outside' of the screen to the left, reset the position to the right
-        if (tc.Translation.x < -(Window::Get()->GetViewportWidth() * 0.50f + sc.GetWidth()))
+        //if (tc.Translation.x < -(Window::Get()->GetViewportWidth() * 0.50f + sc.GetWidth()))
+        if (tc.Translation.x < m_EndDistance)
         {
-            tc.Translation.x = Window::Get()->GetViewportWidth() * 0.50f;
+            //tc.Translation.x = Window::Get()->GetViewportWidth() * 0.50f;
+            //tc.Translation.x = m_SpawnPoint.x;
+            Respawn();
         }
     }
 
@@ -60,6 +66,11 @@ namespace LkEngine {
         UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO, ImGuiWindowFlags_NoMove);
         ImGui::SliderFloat("Speed", &m_TravelSpeed, 0.0f, 5.0f, "%.1f");
         UI::EndSubwindow();
+    }
+
+    void Enemy::SetEndDistance(float endDistance)
+    {
+        m_EndDistance = endDistance;
     }
 
 }

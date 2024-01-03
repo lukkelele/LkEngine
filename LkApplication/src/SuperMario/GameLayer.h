@@ -27,6 +27,7 @@ namespace LkEngine {
     private:
         void CreateGround();
         void CreateSky();
+        float Ground_GetLeftBound();
 
     private:
         s_ptr<Scene> m_Scene = nullptr;

@@ -13,6 +13,7 @@ namespace LkEngine {
         m_ID = m_Entity.GetUUID();
         if (name.empty())
             m_Name = entity.GetName();
+        m_JumpTimer.Reset();
     }
 
     Player::~Player()
@@ -69,14 +70,11 @@ namespace LkEngine {
             cam.SetPos(tc.Translation);
         }
 
-        // Get affected by gravity
-
-
         // Input 
 	    // WASD
 	    if (Keyboard::IsKeyPressed(Key::W))
 	    {
-	    	m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
+	    	//m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
 	    }
 	    if (Keyboard::IsKeyPressed(Key::A))
 	    {
@@ -84,7 +82,7 @@ namespace LkEngine {
 	    }
 	    if (Keyboard::IsKeyPressed(Key::S))
 	    {
-	    	m_Pos -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
+	    	//m_Pos -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
 	    }
 	    if (Keyboard::IsKeyPressed(Key::D))
 	    {
@@ -93,8 +91,12 @@ namespace LkEngine {
 
 		if (Keyboard::IsKeyPressed(Key::Space))
 		{
-            LOG_DEBUG("+JUMP");
-			m_Pos += glm::vec3(0, 1, 0) * ts * m_JumpHeight;
+            if (m_Metadata.JumpActive == false)
+            {
+                m_Metadata.JumpActive = true;
+                m_JumpTimer.Reset();
+                //LOG_TRACE("Jump started ---> {}", m_Metadata.JumpStarted);
+            }
 		}
 		if (Keyboard::IsKeyPressed(Key::Backspace))
 		{
@@ -102,6 +104,38 @@ namespace LkEngine {
 			m_Pos -= glm::vec3(0, 1, 0) * ts * m_JumpHeight;
 		}
 
+
+        // Jump
+        if (m_Metadata.JumpActive == true)
+        {
+            float jumpTimeMS = m_JumpTimer.ElapsedMs();
+            // If less than 0.5 seconds
+            if (jumpTimeMS < 400 * 1.0f)
+            {
+                // First period
+                if (jumpTimeMS < 200 * 1.0f)
+                {
+			        m_Pos += glm::vec3(0, 1, 0) * ts * 1.50f * m_JumpHeight;
+                }
+                else // Second period
+                {
+			        m_Pos += glm::vec3(0, 1, 0) * ts * m_JumpHeight;
+                }
+            }
+            // If equal or more than 0.5 seconds
+            else if (jumpTimeMS >= 400 * 1.0f)
+            {
+                // First period
+                if (jumpTimeMS > 400 && jumpTimeMS < 600)
+                {
+			        m_Pos -= glm::vec3(0, 1, 0) * ts * m_JumpHeight;
+                }
+                else // Second period
+                {
+			        m_Pos -= glm::vec3(0, 1, 0) * ts * 1.50f * m_JumpHeight;
+                }
+            }
+        }
     }
 
     void Player::OnImGuiRender()
@@ -157,5 +191,21 @@ namespace LkEngine {
         return GetSize().y;
     }
 
+    void Player::Respawn()
+    {
+        m_Pos.x = m_SpawnPoint.x;
+        m_Pos.y = m_SpawnPoint.y;
+
+        auto& tc = m_Entity.GetComponent<TransformComponent>();
+        tc.Translation.x = m_Pos.x;
+        tc.Translation.y = m_Pos.y;
+
+        LOG_DEBUG("Player '{}' -> Respawn!", m_Name);
+    }
+
+    void Player::SetSpawnPoint(const glm::vec2& spawnPoint)
+    {
+        m_SpawnPoint = spawnPoint;
+    }
 
 }

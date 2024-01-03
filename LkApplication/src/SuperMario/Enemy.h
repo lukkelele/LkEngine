@@ -13,14 +13,15 @@ namespace LkEngine {
         void Setup() override;   // inherited from RuntimeAsset
         void Destroy() override; // inherited from RuntimeAsset
 
-        void OnUpdate(float ts = 1.0f) override;
-        void OnImGuiRender() override;
+        void OnUpdate(float ts = 1.0f);
+        void OnImGuiRender();
 
+        void SetEndDistance(float endDistance);
         void SetWalkDirection(WalkDirection newDir) { m_Dir = newDir; }
 
     private:
         WalkDirection m_Dir = WalkDirection::Left;
-
+        float m_EndDistance = 0.0f; // Distance in X direction, if reached then enemy respawns 
     };
 
 }
