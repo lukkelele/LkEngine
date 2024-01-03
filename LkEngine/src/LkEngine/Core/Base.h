@@ -30,6 +30,7 @@ namespace LkEngine {
 	#endif
 
 	using byte = uint8_t;
+	using llong = long long;
 	using RendererID = uint32_t;
 
 	// Unique pointer 

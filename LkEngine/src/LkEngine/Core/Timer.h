@@ -7,10 +7,7 @@ namespace LkEngine {
 	class Timer
 	{
 	public:
-		Timer()
-		{
-			Reset();
-		}
+		Timer() { Reset(); }
 
 		void Timer::Reset() { m_Start = std::chrono::high_resolution_clock::now(); }
 
@@ -32,6 +29,11 @@ namespace LkEngine {
 			float deltaTime = now - m_LastTime;
 			m_LastTime = now;
 			return deltaTime;
+		}
+
+		static llong Timer::GetTimeSinceEpoch()
+		{
+			return std::chrono::high_resolution_clock::now().time_since_epoch().count();
 		}
 
 	private:
