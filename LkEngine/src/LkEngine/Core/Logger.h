@@ -18,12 +18,7 @@ namespace LkEngine {
 
 	class Logger
 	{
-	private:
-		static std::shared_ptr<spdlog::logger> s_CoreLogger;
-		static std::shared_ptr<spdlog::logger> s_ClientLogger;
-
 	public:
-
 		enum class LK_ASSERT_LEVEL
 		{
 			TRACE, 
@@ -38,47 +33,35 @@ namespace LkEngine {
 						 std::string coreLoggerName = "CORE",
 						 std::string clientLoggerName = "CLIENT");
 
-		static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
-		static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
+		static std::shared_ptr<spdlog::logger>& GetCoreLogger()   { return m_CoreLogger; }
+		static std::shared_ptr<spdlog::logger>& GetClientLogger() { return m_ClientLogger; }
+		static std::shared_ptr<spdlog::logger>& GetAssetLogger()  { return m_AssetLogger; }
 
-		template<typename... ARGS>
-		static void PrintMessage(LK_ASSERT_LEVEL level, ARGS&&... args);
-
+	private:
+		inline static std::shared_ptr<spdlog::logger> m_CoreLogger = nullptr;
+		inline static std::shared_ptr<spdlog::logger> m_ClientLogger = nullptr;
+		inline static std::shared_ptr<spdlog::logger> m_AssetLogger = nullptr;
 	};
 
-	// FIXME: fmt::v9::format error when trying to parse passed __VA_ARGS__
-	template<typename... ARGS>
-	void Logger::PrintMessage(LK_ASSERT_LEVEL level, ARGS&&... args)
-	{
-		auto logger = GetCoreLogger();
-		// auto str = fmt::format(std::forward<ARGS>(args)...);
-		switch (level)
-		{
-			case LK_ASSERT_LEVEL::INFO:
-				// logger->info("{0}", fmt::format(std::forward<ARGS>(args)...));
-				break;
-			case LK_ASSERT_LEVEL::CRITICAL:
-				// logger->critical("{0}", fmt::format(std::forward<ARGS>(args)...));
-				logger->critical("{0}", "Assertion failed");
-				break;
-		}
-	}
 
 }
 
 // Core log macros 
-#define LOG_TRACE(...)     			::LkEngine::Logger::GetCoreLogger()->trace(__VA_ARGS__)
-#define LOG_DEBUG(...)     			::LkEngine::Logger::GetCoreLogger()->debug(__VA_ARGS__)
-#define LOG_INFO(...)    			::LkEngine::Logger::GetCoreLogger()->info(__VA_ARGS__)
-#define LOG_WARN(...)     			::LkEngine::Logger::GetCoreLogger()->warn(__VA_ARGS__)
-#define LOG_ERROR(...)    			::LkEngine::Logger::GetCoreLogger()->error(__VA_ARGS__)
-#define LOG_CRITICAL(...) 			::LkEngine::Logger::GetCoreLogger()->critical(__VA_ARGS__)
+#define LOG_TRACE(...)     	       ::LkEngine::Logger::GetCoreLogger()->trace(__VA_ARGS__)
+#define LOG_DEBUG(...)     	       ::LkEngine::Logger::GetCoreLogger()->debug(__VA_ARGS__)
+#define LOG_INFO(...)    	       ::LkEngine::Logger::GetCoreLogger()->info(__VA_ARGS__)
+#define LOG_WARN(...)     	       ::LkEngine::Logger::GetCoreLogger()->warn(__VA_ARGS__)
+#define LOG_ERROR(...)    	       ::LkEngine::Logger::GetCoreLogger()->error(__VA_ARGS__)
+#define LOG_CRITICAL(...) 	       ::LkEngine::Logger::GetCoreLogger()->critical(__VA_ARGS__)
 
 // Client log macros 
-#define LOG_CLIENT_TRACE(...)		::LkEngine::Logger::GetClientLogger()->trace(__VA_ARGS__)
-#define LOG_CLIENT_DEBUG(...)       ::LkEngine::Logger::GetClientLogger()->debug(__VA_ARGS__)
-#define LOG_CLIENT_INFO(...)		::LkEngine::Logger::GetClientLogger()->info(__VA_ARGS__)
-#define LOG_CLIENT_WARN(...)        ::LkEngine::Logger::GetClientLogger()->warn(__VA_ARGS__)
-#define LOG_CLIENT_ERROR(...)       ::LkEngine::Logger::GetClientLogger()->error(__VA_ARGS__)
-#define LOG_CLIENT_CRITICAL(...)    ::LkEngine::Logger::GetClientLogger()->critical(__VA_ARGS__)
+#define LOG_CLIENT_TRACE(...)      ::LkEngine::Logger::GetClientLogger()->trace(__VA_ARGS__)
+#define LOG_CLIENT_DEBUG(...)      ::LkEngine::Logger::GetClientLogger()->debug(__VA_ARGS__)
+#define LOG_CLIENT_INFO(...)       ::LkEngine::Logger::GetClientLogger()->info(__VA_ARGS__)
+#define LOG_CLIENT_WARN(...)       ::LkEngine::Logger::GetClientLogger()->warn(__VA_ARGS__)
+#define LOG_CLIENT_ERROR(...)      ::LkEngine::Logger::GetClientLogger()->error(__VA_ARGS__)
+#define LOG_CLIENT_CRITICAL(...)   ::LkEngine::Logger::GetClientLogger()->critical(__VA_ARGS__)
+
+// Asset logging macros
+#define LOG_ASSET(...) 			   ::LkEngine::Logger::GetAssetLogger()->debug(__VA_ARGS__)
 

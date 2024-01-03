@@ -3,9 +3,6 @@
 
 namespace LkEngine {
 
-	std::shared_ptr<spdlog::logger> Logger::s_CoreLogger;
-	std::shared_ptr<spdlog::logger> Logger::s_ClientLogger;
-
 	void Logger::Init(std::string logfilename,
 		           std::string coreLoggerName,
 			       std::string clientLoggerName)
@@ -17,15 +14,23 @@ namespace LkEngine {
 		logSinks[0]->set_pattern("%^%H:%M:%S | %n: %v%$");
 		logSinks[1]->set_pattern("%H:%M:%S | %n: %v");
 
-		s_CoreLogger = std::make_shared<spdlog::logger>(coreLoggerName, begin(logSinks), end(logSinks));
-		spdlog::register_logger(s_CoreLogger);
-		s_CoreLogger->set_level(spdlog::level::trace);
-		s_CoreLogger->flush_on(spdlog::level::trace);
+		// Core Logger
+		m_CoreLogger = std::make_shared<spdlog::logger>(coreLoggerName, begin(logSinks), end(logSinks));
+		m_CoreLogger->set_level(spdlog::level::trace);
+		m_CoreLogger->flush_on(spdlog::level::trace);
+		spdlog::register_logger(m_CoreLogger);
 
-		s_ClientLogger = std::make_shared<spdlog::logger>(clientLoggerName, begin(logSinks), end(logSinks));
-		spdlog::register_logger(s_ClientLogger);
-		s_ClientLogger->set_level(spdlog::level::trace);
-		s_ClientLogger->flush_on(spdlog::level::trace);
+		// Client Logger
+		m_ClientLogger = std::make_shared<spdlog::logger>(clientLoggerName, begin(logSinks), end(logSinks));
+		m_ClientLogger->set_level(spdlog::level::trace);
+		m_ClientLogger->flush_on(spdlog::level::trace);
+		spdlog::register_logger(m_ClientLogger);
+
+		// Asset Logger
+		m_AssetLogger = std::make_shared<spdlog::logger>("ASSET", begin(logSinks), end(logSinks));
+		m_AssetLogger ->set_level(spdlog::level::debug);
+		m_AssetLogger ->flush_on(spdlog::level::debug);
+		spdlog::register_logger(m_AssetLogger);
 	}
 
 }
