@@ -12,6 +12,12 @@ namespace LkEngine {
         Right,
     };
 
+    struct PlayerMetadata
+    {
+        glm::vec2 LastJumpPos = { 0.0f, 0.0f };
+        bool JumpActive = false;
+    };
+
     class Player : public RuntimeAsset
     {
     public:
@@ -21,35 +27,34 @@ namespace LkEngine {
         void Setup() override;
         void Destroy() override;
 
-        //virtual void OnUpdate(float ts = 1.0f);
         void OnUpdate(float ts = 1.0f);
         virtual void OnImGuiRender();
 
-        const glm::vec2 GetSize();
+        //glm::vec3& GetPos() { return m_Entity.GetComponent<TransformComponent>().Translation; }
+        glm::vec3& GetPos() { return m_Pos; }
+        glm::vec3 GetPos() const { return m_Pos; }
+
+        std::string GetName() const { return m_Name; }
         float GetWidth();
         float GetHeight();
-        std::string GetName() const { return m_Name; }
-        void SetUUID(UUID& id) { m_ID = id; }
+        const glm::vec2 GetSize();
+        void SetSize(float x, float y);
+        void SetSize(const glm::vec2& size);
         UUID GetUUID() const { return m_ID; }
         Entity GetEntity() const { return m_Entity; }
-        void SetEntity(const Entity& entity);
         void SetPos(float x, float y);
         void SetPos(const glm::vec2& pos);
         SceneCamera& GetCamera() { return m_Entity.GetComponent<CameraComponent>(); }
-        glm::vec2& GetCameraOffset() { return m_CameraOffset; }
-        glm::vec2 GetCameraOffset() const { return m_CameraOffset; }
-
-    protected:
-        glm::vec3& GetPos() { return m_Entity.GetComponent<TransformComponent>().Translation; }
+        PlayerMetadata& GetMetadata() { return m_Metadata; }
 
     protected:
         UUID m_ID;
         std::string m_Name;
+        PlayerMetadata m_Metadata;
         float m_Health = 5.0f; 
-        float m_Speed = 1.0f;
-        float m_JumpHeight = 50.0f;
-        glm::vec2 m_Pos = { 0.0f, 0.0f };
-        glm::vec2 m_CameraOffset = { 0.0f, 0.0f };
+        float m_TravelSpeed = 1.0f;
+        float m_JumpHeight = 2.0f;
+        glm::vec3 m_Pos = { 0.0f, 0.0f, 0.0f };
 
         Entity m_Entity;
     };

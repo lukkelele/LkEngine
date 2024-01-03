@@ -21,8 +21,12 @@ namespace LkEngine {
 
         void OnAttach() override;
         void OnDetach() override;
-        void OnImGuiRender() override;
         void OnUpdate(float ts) override;
+        void OnImGuiRender() override;
+
+    private:
+        void CreateGround();
+        void CreateSky();
 
     private:
         s_ptr<Scene> m_Scene = nullptr;
@@ -30,8 +34,9 @@ namespace LkEngine {
         s_ptr<Renderer2D> m_Renderer2D = nullptr;
         s_ptr<Entity> m_Ground = nullptr;
         s_ptr<Entity> m_Background = nullptr;
-
         glm::vec2 m_BackgroundPos = { 0, 300.0f };
+
+        float m_GravityScalar = 3.0f;
 
         std::vector<s_ptr<Enemy>> m_Enemies = {};
     };

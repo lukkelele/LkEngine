@@ -36,7 +36,7 @@ namespace LkEngine {
 
     void Enemy::OnUpdate(float ts)
     {
-        float distance = m_Speed * ts;
+        float distance = m_TravelSpeed * ts;
         if (m_Dir == WalkDirection::Left)
             distance *= -1;
 
@@ -58,7 +58,7 @@ namespace LkEngine {
             return;
 
         UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO, ImGuiWindowFlags_NoMove);
-        ImGui::SliderFloat("Speed", &m_Speed, 0.0f, 5.0f, "%.1f");
+        ImGui::SliderFloat("Speed", &m_TravelSpeed, 0.0f, 5.0f, "%.1f");
         UI::EndSubwindow();
     }
 
