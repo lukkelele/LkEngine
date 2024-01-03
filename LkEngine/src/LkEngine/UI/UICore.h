@@ -4,13 +4,26 @@
 
 #include <glm/glm.hpp>
 
+#include "LkEngine/Scene/Components.h"
 
 namespace LkEngine {
 
     // Forward declarations
     class Entity;
-    struct TransformComponent;
-    struct SpriteComponent;
+    //struct TransformComponent;
+    //struct SpriteComponent;
+
+}
+
+namespace LkEngine {
+
+	enum OriginPlacement
+	{
+		None = 0,
+		BottomLeft,
+		Center,
+		TopRight
+	};
 
 }
 
@@ -34,20 +47,11 @@ namespace LkEngine::UI {
     bool IsKeyboardEnabled();
     void SetInputEnabled(bool enabled);
 
-    void SetOriginInMiddleOfScreen(TransformComponent& tc);
-    void SetOriginInMiddleOfScreen(glm::vec2& vec);
-
-    glm::vec2 Sprite_GetPoint_BottomLeft(const SpriteComponent& sc, Entity& entity);
-    glm::vec2 Sprite_GetPoint_BottomRight(const SpriteComponent& sc, Entity& entity);
-    glm::vec2 Sprite_GetPoint_TopLeft(const SpriteComponent& sc, Entity& entity);
-    glm::vec2 Sprite_GetPoint_TopRight(const SpriteComponent& sc, Entity& entity);
-
     // Insert UI widgets inside already existing windows on the screen.
     // Is determined by SelectedEntityWindow
     void BeginSubwindow(const char* windowName, ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None);
     void EndSubwindow();
     bool IsWindowFocused(const char* windowName, const bool checkRootWindow);
     const char* GetSelectedEntityWindowName();
-
 
 }
