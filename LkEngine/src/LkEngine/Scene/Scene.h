@@ -44,8 +44,8 @@ namespace LkEngine {
 		entt::registry& GetRegistry() { return m_Registry; }
 		void DestroyEntity(Entity entity);
 		bool IsEntityInRegistry(Entity entity) const;
-		s_ptr<SceneCamera> GetActiveCamera() const { return m_SceneCamera; }
-		void SetActiveCamera(SceneCamera& cam) { m_SceneCamera = std::shared_ptr<SceneCamera>(&cam); }
+		SceneCamera* GetActiveCamera() { return m_SceneCamera; }
+		void SetActiveCamera(SceneCamera* cam);
 		s_ptr<EditorCamera> GetEditorCamera() const { return m_EditorCamera; }
 		s_ptr<World> GetWorld() { return m_World; }
 		void SwitchCamera();
@@ -66,9 +66,9 @@ namespace LkEngine {
 		entt::registry m_Registry; 
 		uint16_t m_ViewportWidth, m_ViewportHeight;
 		EntityMap m_EntityMap;
-		s_ptr<Renderer> m_Renderer;
-		s_ptr<SceneCamera> m_SceneCamera; 
+		SceneCamera* m_SceneCamera = nullptr;
 		s_ptr<SceneCamera> m_Camera2D = nullptr;
+		s_ptr<Renderer> m_Renderer;
 		s_ptr<World> m_World;
 		s_ptr<EditorCamera> m_EditorCamera;
 

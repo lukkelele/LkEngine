@@ -28,7 +28,7 @@ namespace LkEngine {
 
 		m_Camera2D = std::make_shared<SceneCamera>();
 		m_Camera2D->SetOrthographic(width, height, -1.0f, 1.0f);
-		m_SceneCamera = m_Camera2D;
+		m_SceneCamera = m_Camera2D.get();
 
 		if (activeScene)
 		{
@@ -202,6 +202,11 @@ namespace LkEngine {
 				}
 			}
 		}
+	}
+
+	void Scene::SetActiveCamera(SceneCamera* cam)
+	{ 
+		m_SceneCamera = cam;
 	}
 
 }
