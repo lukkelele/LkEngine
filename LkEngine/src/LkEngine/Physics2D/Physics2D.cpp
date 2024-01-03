@@ -38,11 +38,16 @@ namespace LkEngine {
                     continue;
                 auto& cam = *scene.GetActiveCamera();
 
+                //glm::vec2 camPos = cam.GetPos();
+                //glm::vec2 camPos = cam.GetPosWithOffset();
                 glm::vec2 camPos = cam.GetPos();
+                glm::vec2 camOffset = cam.GetOffset();
+                camPos.x += camOffset.x;
+                camPos.y += camOffset.y;
 
-                float quad_width = tc.Scale.x * sc.Size.x;
-                float quad_height = tc.Scale.y * sc.Size.y;
-                glm::vec2 quad_pos = { tc.Translation.x, tc.Translation.y };
+                float quadWidth = tc.Scale.x * sc.Size.x;
+                float quadHeight = tc.Scale.y * sc.Size.y;
+                glm::vec2 quadPos = { tc.Translation.x, tc.Translation.y };
 
                 // The position is placed in between the upper two points.
 
@@ -50,21 +55,18 @@ namespace LkEngine {
                 // This is done by adding half of the window width and height
 
                 // If the editor layer is enabled, adjust the quad pos by taking the editor windows into consideration
-            #if 0
                 if (editor && editor->IsEnabled())
                 {
                     auto editorWindowSize = editor->GetEditorWindowSize();
-                    quad_pos.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
-                    quad_pos.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
+                    quadPos.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+                    quadPos.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
                 }
                 else
                 {
-                    quad_pos.x += windowWidth * 0.50f;
-                    quad_pos.y += windowHeight * 0.50f;
+                    quadPos.x += windowWidth * 0.50f;
+                    quadPos.y += windowHeight * 0.50f;
                 }
-            #endif
 
-                UI::SetOriginInMiddleOfScreen(quad_pos);
 
                 float angleRad = glm::radians(tc.GetRotation2D());
                 glm::mat2 rotMat = {
@@ -72,22 +74,25 @@ namespace LkEngine {
                     glm::sin(angleRad), glm::cos(angleRad)
                 };
 
-                // Sprite Points
-                glm::vec2 bottom_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y - quad_height };
-                glm::vec2 bottom_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y - quad_height };
-                glm::vec2 top_left = { quad_pos.x - quad_width * 0.50f, quad_pos.y };
-                glm::vec2 top_right = { quad_pos.x + quad_width * 0.50f, quad_pos.y };
-
+                // >> Sprite Points
+                // Bottom left: Move half size to left, down entire sprite height
+                // Bottom left: Move half size to right, down entire sprite height
+                // Top left: Move half size to left, stay at y
+                // Top right: Move half size to right, stay at y
+                glm::vec2 spritePoint_BottomLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y - quadHeight };
+                glm::vec2 spritePoint_BottomRight = { quadPos.x + quadWidth * 0.50f, quadPos.y - quadHeight };
+                glm::vec2 spritePoint_TopLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y };
+                glm::vec2 spritePoint_TopRight = { quadPos.x + quadWidth * 0.50f, quadPos.y };
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
                     // Add camera position to adjust for camera placement in the world
-                    bool within_x_boundaries = (mousePos.x + camPos.x >= bottom_left.x) && (mousePos.x + camPos.x <= top_right.x);
-                    bool within_y_boundaries = (mousePos.y + camPos.y <= top_left.y) && (mousePos.y + camPos.y >= bottom_right.y);
+                    bool within_x_boundaries = (mousePos.x + camPos.x >= spritePoint_BottomLeft.x) && (mousePos.x + camPos.x <= spritePoint_TopRight.x);
+                    bool within_y_boundaries = (mousePos.y + camPos.y <= spritePoint_TopLeft.y) && (mousePos.y + camPos.y >= spritePoint_BottomRight.y);
                     if (within_x_boundaries && within_y_boundaries)
                     {
-                        float centerX = tc.Translation.x + quad_width * 0.50f;
-                        float centerY = tc.Translation.y + quad_height * 0.50f;
+                        float centerX = tc.Translation.x + quadWidth * 0.50f;
+                        float centerY = tc.Translation.y + quadHeight * 0.50f;
                         LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
 
                         float x = centerX - mousePos.x;
