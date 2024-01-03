@@ -25,6 +25,7 @@ namespace LkEngine {
 
         Entity playerEntity = m_Scene->CreateEntity("Player");
         m_Player = std::make_shared<Player>(playerEntity, "Mario");
+        m_Player->Setup();
         LOG_DEBUG("Created new player: {}, uuid: {}", m_Player->GetName(), m_Player->GetUUID());
 
         Entity bgEntity = m_Scene->CreateEntity("Background");
@@ -40,27 +41,25 @@ namespace LkEngine {
         auto& groundSprite = groundEntity.AddComponent<SpriteComponent>();
         auto& groundTransform = groundEntity.AddComponent<TransformComponent>();
         groundSprite.SetPassthrough(false);
-        groundTransform.Translation.x = 0.0f;
-        groundTransform.Translation.y = -(window->GetHeight() * 0.50f / window->GetScalerY());
-        //groundSprite.SetSize((float)window->GetViewportWidth() + 100.0f, 200.0f);
-        groundSprite.Size = { 
-            ((float)window->GetWidth() / window->GetScalerX()) + 100.0f, 
-            400.0f 
-        };
+        //groundTransform.Translation.x = 0.0f;
+        groundTransform.Translation.x = -(window->GetViewportWidth() * 0.50f);
+        groundTransform.Translation.y = -(window->GetViewportHeight() * 0.50f);
+        groundSprite.Size = { ((float)window->GetViewportWidth() + 100.0f), 400.0f };
         m_Ground = std::make_shared<Entity>(groundEntity);
 
-        // Set player on top of ground
-        auto& playerCameraOffset = m_Player->GetCameraOffset();
-        playerCameraOffset.x = -(window->GetWidth() * 0.50f / window->GetScalerX()) + 100.0f;
-        playerCameraOffset.y = 0.0f;
-        //m_Player->SetPos(0.0f, groundTransform.Translation.y + m_Player->GetCameraOffset().y);
-        //m_Player->SetPos(0.0f, groundTransform.Translation.y + groundSprite.Size.y * 0.50f);
-        m_Player->SetPos(0.0f, groundTransform.Translation.y + groundSprite.Size.y * 0.50f + 136); 
+        // Set player on top of ground and to the left of the screen
+        SceneCamera& cam = playerEntity.GetComponent<CameraComponent>();
+        cam.SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
+        // Place the camera such that the player is in the lower left corner
+        cam.SetOffset({ Window::Get()->GetWidth() * 0.90f, 0});
+        float player_posY = groundTransform.Translation.y + groundSprite.Size.y * 0.50f;
+        player_posY += m_Player->GetHeight() * 0.50f;
+        m_Player->SetPos(-(groundSprite.GetWidth()) + 1.50f * m_Player->GetWidth(), player_posY);
 
         float bgStartX = bgTransform.GetTranslation().x;
         float bgStartY = bgTransform.GetTranslation().y;
-        float bgEndX = (float)window->GetWidth();
-        float bgEndY = (float)window->GetHeight();
+        float bgEndX = (float)window->GetViewportWidth();
+        float bgEndY = (float)window->GetViewportHeight();
         // Draw calls use origin in the middle, so offset this to the middle of the render window
         bgStartX += bgEndX * 0.50f;
         bgStartY += bgEndY * 0.50f;
@@ -84,9 +83,7 @@ namespace LkEngine {
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { -200, -400, 0});
         Debug::CreateDebugSprite(*m_Scene, { 120, 180 }, { 100, 300 , 0 });
 
-        SceneCamera& cam = playerEntity.GetComponent<CameraComponent>();
-        cam.SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
-        m_Scene->SetActiveCamera(cam);
+        m_Scene->SetActiveCamera(&cam);
 
         // Create enemies on different y positions
         float enemyPosY = 0.0f;
@@ -95,10 +92,8 @@ namespace LkEngine {
             // Create enemy entity and enemy object
             Entity enemyEntity = m_Scene->CreateEntity("Enemy-" + std::to_string(i + 1));
             s_ptr<Enemy> enemy = std::make_shared<Enemy>(enemyEntity);
-
-            auto& sc = enemyEntity.GetComponent<SpriteComponent>();
-            auto& mc = enemyEntity.GetComponent<MaterialComponent>();
-            mc.SetTexture(textureLibrary->GetTexture2D("atte_square"));
+            enemy->Setup();
+            //auto& sc = enemyEntity.GetComponent<SpriteComponent>();
 
             // Set the enemy position
             enemyPosY += (-window->GetHeight() * 0.50f) + enemy->GetHeight() * (DebugLayer::s_DebugEntities * 1.50f);

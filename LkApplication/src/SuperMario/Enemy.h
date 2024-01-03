@@ -10,6 +10,9 @@ namespace LkEngine {
         Enemy(Entity& entity, const std::string& name = "Enemy");
         ~Enemy() = default;
 
+        void Setup() override;   // inherited from RuntimeAsset
+        void Destroy() override; // inherited from RuntimeAsset
+
         void OnUpdate(float ts = 1.0f) override;
         void OnImGuiRender() override;
 

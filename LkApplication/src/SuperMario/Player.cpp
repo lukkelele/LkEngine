@@ -7,18 +7,52 @@
 namespace LkEngine {
 
     Player::Player(Entity& entity, const std::string& name)
-        : m_Name(name)
+        : m_Entity(entity)
+        , m_Name(name)
     {
         if (name.empty())
             m_Name = entity.GetName();
-        SetEntity(entity);
-
-        float windowWidth = Window::Get()->GetWidth();
-        float windowHeight = Window::Get()->GetHeight();
-        //m_CameraOffset = { -windowWidth * 0.45f, -windowHeight * 0.40f };
     }
 
     Player::~Player()
+    {
+    }
+    
+    void Player::Setup()
+    {
+        m_ID = m_Entity.GetUUID();
+
+		auto window = Window::Get();
+		float width = window->GetWidth();
+		float height = window->GetHeight();
+
+        auto& sc = m_Entity.AddComponent<SpriteComponent>();
+        sc.SetSize(60, 130);
+        sc.Color = Color::Generate(); // Debugging
+
+        // Add SpriteComponent and set its size before TransformComponent to automatically
+        // re-center the origin in OnAddedComponent in Scene
+        auto& tc = m_Entity.AddComponent<TransformComponent>();
+        auto& mc = m_Entity.AddComponent<MaterialComponent>();
+        auto& cameraComponent = m_Entity.AddComponent<CameraComponent>();
+
+        // Add half sprite size to center origin
+        tc.Translation.x -= (sc.Size.x * 0.50f);
+        tc.Translation.y -= (sc.Size.y * 0.50f);
+
+        SceneCamera* playerCam = new SceneCamera();
+        playerCam->SetOrthographic(width, height, -1.0f, 1.0f);
+        playerCam->SetPos(tc.Translation);
+        cameraComponent.CameraRef = playerCam;
+
+        sc.Removable = false;
+        tc.Removable = false;
+        cameraComponent.Removable = false;
+
+        m_CameraOffset = { -window->GetViewportWidth() * 0.50f + 100.0f, 0.0f };
+    }
+
+    void Player::Destroy()
     {
     }
 
@@ -27,9 +61,12 @@ namespace LkEngine {
         SceneCamera& cam = m_Entity.GetComponent<CameraComponent>();
         auto& tc = m_Entity.GetComponent<TransformComponent>();
 
-        tc.Translation = cam.GetPos();
-        tc.Translation.x += m_CameraOffset.x;
-        tc.Translation.y += m_CameraOffset.y;
+        if (m_Entity.HasComponent<CameraComponent>())
+        {
+            tc.Translation = cam.GetPos();
+            //tc.Translation.x += m_CameraOffset.x;
+            //tc.Translation.y += m_CameraOffset.y;
+        }
     }
 
     void Player::OnImGuiRender()
@@ -48,19 +85,20 @@ namespace LkEngine {
 		float width = window->GetWidth();
 		float height = window->GetHeight();
 
-        SpriteComponent& sc = m_Entity.AddComponent<SpriteComponent>();
+        auto& sc = m_Entity.AddComponent<SpriteComponent>();
         sc.SetSize(60, 130);
-        sc.Color = Color::Generate(); // Debug purposes, before textures are used
+        sc.Color = Color::Generate(); // Debugging
 
-        TransformComponent& tc = m_Entity.AddComponent<TransformComponent>();
+        // Add SpriteComponent and set its size before TransformComponent to automatically
+        // re-center the origin in OnAddedComponent in Scene
+        auto& tc = m_Entity.AddComponent<TransformComponent>();
+        auto& mc = m_Entity.AddComponent<MaterialComponent>();
+        auto& cameraComponent = m_Entity.AddComponent<CameraComponent>();
+
         // Add half sprite size to center origin
         tc.Translation.x -= (sc.Size.x * 0.50f);
         tc.Translation.y -= (sc.Size.y * 0.50f);
 
-        auto& mc = m_Entity.AddComponent<MaterialComponent>();
-        //mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
-        
-        CameraComponent& cameraComponent = m_Entity.AddComponent<CameraComponent>();
         SceneCamera* playerCam = new SceneCamera();
         playerCam->SetOrthographic(width, height, -1.0f, 1.0f);
         playerCam->SetPos(tc.Translation);
@@ -69,8 +107,6 @@ namespace LkEngine {
         sc.Removable = false;
         tc.Removable = false;
         cameraComponent.Removable = false;
-
-        LOG_DEBUG("Added sprite to \"{}\" with size ({}, {})", m_Name, sc.Size.x, sc.Size.y);
     }
 
     void Player::SetPos(float x, float y)
@@ -80,16 +116,20 @@ namespace LkEngine {
 
     void Player::SetPos(const glm::vec2& pos)
     {
-        auto& cam = GetCamera();
         auto& tc = m_Entity.GetComponent<TransformComponent>();
         m_Pos.x = pos.x;
         m_Pos.y = pos.y;
         tc.Translation.x = m_Pos.x;
         tc.Translation.y = m_Pos.y;
-        cam.SetPos(tc.Translation);
+
+        if (m_Entity.HasComponent<CameraComponent>())
+        {
+            SceneCamera& cam = m_Entity.GetComponent<CameraComponent>();
+            cam.SetPos(tc.Translation);
+        }
     }
 
-    const glm::vec2 Player::GetSize()
+    const glm::vec2 Player::GetSize() 
     {
         SpriteComponent& sc = m_Entity.GetComponent<SpriteComponent>();
         return sc.GetSize();

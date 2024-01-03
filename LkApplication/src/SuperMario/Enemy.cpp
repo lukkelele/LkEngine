@@ -7,7 +7,31 @@ namespace LkEngine {
     Enemy::Enemy(Entity& entity, const std::string& name)
         : Player(entity, name)
     {
-        entity.GetComponent<MaterialComponent>().SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
+        m_Entity = entity;
+    }
+
+    void Enemy::Setup()
+    {
+        m_ID = m_Entity.GetUUID();
+
+		auto window = Window::Get();
+		float width = window->GetWidth();
+		float height = window->GetHeight();
+
+        auto& sc = m_Entity.AddComponent<SpriteComponent>();
+        sc.SetSize(60, 130);
+        sc.Color = Color::Generate(); // Debugging
+
+        // Add SpriteComponent and set its size before TransformComponent to automatically
+        // re-center the origin in OnAddedComponent in Scene
+        auto& tc = m_Entity.AddComponent<TransformComponent>();
+        auto& mc = m_Entity.AddComponent<MaterialComponent>();
+
+        m_Entity.GetComponent<MaterialComponent>().SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
+    }
+
+    void Enemy::Destroy()
+    {
     }
 
     void Enemy::OnUpdate(float ts)
