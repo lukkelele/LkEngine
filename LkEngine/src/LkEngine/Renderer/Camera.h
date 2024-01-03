@@ -24,18 +24,13 @@ namespace LkEngine {
 		virtual void UpdateView() = 0;
 		virtual void UpdateProjection() = 0;
 		virtual void UpdateViewProjection() = 0;
-		//virtual void UpdateMousePosition();
 		virtual void SetProjection(glm::mat4& proj) { m_ProjectionMatrix = proj; } 
-
-		//virtual void HandleInput(float ts);
-
 		glm::mat4 GetView() const { return m_ViewMatrix; }
 		glm::mat4 GetProjection() const { return m_ProjectionMatrix; }
 		glm::mat4 GetViewProjection() const { return m_ViewProjectionMatrix; }
 		glm::mat4& GetInverseViewProjection() { return m_InverseViewProjectionMatrix; }
 		glm::mat4& GetInverseView() { return m_InverseViewMatrix; }
 		glm::mat4& GetInverseProjection() { return m_InverseProjectionMatrix; }
-
 		float GetRotation() { return glm::radians(m_Rotation); }
 
 		void SetProjectionMatrix(const glm::mat4 projection)
@@ -53,6 +48,8 @@ namespace LkEngine {
 			m_ProjectionMatrix = glm::ortho(-width * 0.5f, width * 0.5f, -height * 0.5f, height * 0.5f, farP, nearP);
 		}
 
+		virtual void SetMouseEnabled(bool enabled) { m_MouseEnabled = enabled; }
+		virtual void SetKeyboardEnabled(bool enabled) { m_KeyboardEnabled = enabled; }
 
 	protected:
 		float m_NearPlane = 0.10f, m_FarPlane = 1000.0f;
@@ -61,7 +58,8 @@ namespace LkEngine {
 		float m_RotationSpeed = 0.0002f;
 		float m_TravelSpeed = 1.0f;
 		float m_MouseSpeed = 1.0f;
-		bool m_MouseEnabled = true, m_KeyboardEnabled = true;
+		bool m_MouseEnabled = true;
+		bool m_KeyboardEnabled = true;
 		bool HasMouseMoved;
 
 		glm::mat4 m_ViewMatrix;
