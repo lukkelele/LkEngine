@@ -1,9 +1,10 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <stb_image/stb_image.h>
 
 #include "LkEngine/Renderer/Image.h"
+
+#include "LkEngine/Asset/Asset.h"
 
 
 namespace LkEngine {
@@ -23,7 +24,7 @@ namespace LkEngine {
 	// Setting the resolutions of textures should be easy
 	// Should be easy to rotate etc
 
-	class Texture
+	class Texture : public Asset
 	{
 	public:
 		virtual ~Texture() = default;
