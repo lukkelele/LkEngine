@@ -34,15 +34,11 @@ namespace LkEngine {
 
     void Renderer2D::Init()
     {
-        if (m_Initialized)
-        {
-            LOG_CRITICAL("Renderer2D already initialized");
-            LK_ASSERT(false); // Crash it for now
-            return;
-        }
-        //m_QuadVertexArray = VertexArray::Create();
-        LOG_DEBUG("Initializing Renderer2D");
+        if (m_Initialized == true)
+            throw std::runtime_error("Renderer2D already initialized");
+        LOG_DEBUG("Initializing 2D Renderer");
 
+        // Quad
         m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
         m_QuadVertexBuffer->SetLayout({
             { "a_Pos",          ShaderDataType::Float3  },
@@ -71,6 +67,12 @@ namespace LkEngine {
         }
         s_ptr<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, m_MaxIndices);
         m_QuadVertexBuffer->SetIndexBuffer(quadIB);
+
+        m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
+        m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
+        m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
+
         delete[] quadIndices;
 
         // Line
@@ -80,7 +82,7 @@ namespace LkEngine {
             { "a_Pos",       ShaderDataType::Float3, },
             { "a_Color",     ShaderDataType::Float4, },
             { "a_EntityID",  ShaderDataType::Int,  }
-         });
+        });
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
         auto* textureLibrary = TextureLibrary::Get();
@@ -93,27 +95,17 @@ namespace LkEngine {
         {
             auto& textureEntry = textures2D[i];
             m_TextureSlots[i] = textureEntry.second;
-            LOG_DEBUG("Assigning m_TextureSlots[{}] == {}", i, textureEntry.first);
         }
-        //m_TextureSlots[1] = textureLibrary->GetTexture2D("sky-background-2d");
-        //m_TextureSlots[2] = textureLibrary->GetTexture2D("atte_square");
-        //m_TextureSlots[3] = textureLibrary->GetTexture2D("SuperMario-ground_block");
 
+        // Shader setup
         m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
         m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
-
-        m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
-        m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
-        m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
-        m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
         m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
 
 		uint32_t* lineIndices = new uint32_t[m_MaxLineIndices];
         for (uint32_t i = 0; i < m_MaxLineIndices; i++)
-        {
 			lineIndices[i] = i;
-        }
 		delete[] lineIndices;
     }
 
@@ -177,7 +169,7 @@ namespace LkEngine {
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
             m_QuadShader->Bind();
-            m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
+            m_QuadShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetCamera()->GetViewProjection());
 
             // Bind textures
             for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
@@ -203,7 +195,7 @@ namespace LkEngine {
 
             // TODO: Texture binding here, same as with quads
             m_LineShader->Bind();
-            m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetActiveCamera()->GetViewProjection());
+            m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetCamera()->GetViewProjection());
 
             auto lineElements = m_LineVertexBuffer->GetLayout().GetElements();
 
@@ -216,7 +208,7 @@ namespace LkEngine {
                 }
             }
 
-            RenderCommand::SetLineWidth(m_LineWidth);
+            //RenderCommand::SetLineWidth(m_LineWidth);
             RenderCommand::DrawLines(*m_LineVertexBuffer, m_LineIndexCount);
 
             m_LineShader->Unbind();
@@ -322,17 +314,26 @@ namespace LkEngine {
 
     void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID)
     {
+    #if 0
         if (texture == nullptr)
-        {
-            LOG_ERROR("Passed texture to DrawQuad was NULLPTR");
-            LK_ASSERT(false);
-        }
+            throw std::runtime_error("Passed texture to DrawQuad was NULLPTR");
+        float textureIndex = 0.0f;
+        const float tilingFactor = 1.0f;
+        constexpr size_t quadVertexCount = 4;
+        glm::vec4 tintColor = texture->GetTintColor();
+    #endif
+        //DrawQuad(pos, size, texture, texture->GetTintColor(), rotation, entityID);
+        DrawQuad(pos, size, texture, rotation, entityID);
+    }
+
+    void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID)
+    {
+        if (texture == nullptr)
+            throw std::runtime_error("Passed texture to DrawQuad was NULLPTR");
 
         float textureIndex = 0.0f;
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
-        //glm::vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-        glm::vec4 tintColor = Color::RGBA::White;
 
         for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
         {

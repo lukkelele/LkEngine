@@ -1,4 +1,5 @@
 #pragma once
+
 #include <glm/glm.hpp>
 #include <random>
 #include <time.h>
@@ -17,6 +18,7 @@ namespace LkEngine {
 
         namespace RGBA 
         {
+            extern glm::vec4 Transparent;
             extern glm::vec4 White;
             extern glm::vec4 Black;
             extern glm::vec4 Gray;

@@ -38,6 +38,7 @@ namespace LkEngine {
         m_Renderer->SubmitLine(p0, p1, color);
     }
 
+    // FIXME
     void RenderCommand::DrawLines(VertexBuffer& vb, uint32_t lineIndexCount)
     {
         vb.Bind();
@@ -55,7 +56,7 @@ namespace LkEngine {
         auto texture = mc.GetTexture();
         if (texture != nullptr)
         {
-            m_Renderer->SubmitSprite(tc, scaledSize, texture, entityID);
+            m_Renderer->SubmitSprite(tc, scaledSize, texture, sc.Color, entityID);
             return;
         }
         // Draw with color if no texture is available

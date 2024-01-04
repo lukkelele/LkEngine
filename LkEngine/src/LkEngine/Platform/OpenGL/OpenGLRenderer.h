@@ -26,6 +26,7 @@ namespace LkEngine {
         void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
         void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID = 0);
         void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID = 0);
+        void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID);
 		void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
 		void SubmitIndexed(unsigned int count);
 

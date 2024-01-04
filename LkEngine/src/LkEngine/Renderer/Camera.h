@@ -25,13 +25,18 @@ namespace LkEngine {
 		virtual void UpdateProjection() = 0;
 		virtual void UpdateViewProjection() = 0;
 		virtual void SetProjection(glm::mat4& proj) { m_ProjectionMatrix = proj; } 
+
 		glm::mat4 GetView() const { return m_ViewMatrix; }
 		glm::mat4 GetProjection() const { return m_ProjectionMatrix; }
 		glm::mat4 GetViewProjection() const { return m_ViewProjectionMatrix; }
 		glm::mat4& GetInverseViewProjection() { return m_InverseViewProjectionMatrix; }
 		glm::mat4& GetInverseView() { return m_InverseViewMatrix; }
 		glm::mat4& GetInverseProjection() { return m_InverseProjectionMatrix; }
+
 		float GetRotation() { return glm::radians(m_Rotation); }
+		float GetZoom() const { return m_Zoom; }
+		float& GetZoom() { return m_Zoom; }
+		void SetZoom(float zoom) { m_Zoom = zoom; }
 
 		void SetProjectionMatrix(const glm::mat4 projection)
 		{
@@ -45,7 +50,13 @@ namespace LkEngine {
 
 		void SetOrthoProjectionMatrix(const float width, const float height, const float nearP, const float farP)
 		{
-			m_ProjectionMatrix = glm::ortho(-width * 0.5f, width * 0.5f, -height * 0.5f, height * 0.5f, farP, nearP);
+			m_ProjectionMatrix = glm::ortho(
+				-(width * 0.5f)  * m_Zoom, 
+				 (width * 0.5f)  * m_Zoom, 
+				-(height * 0.5f) * m_Zoom, 
+				 (height * 0.5f) * m_Zoom, 
+				farP, 
+				nearP);
 		}
 
 		virtual void SetMouseEnabled(bool enabled) { m_MouseEnabled = enabled; }

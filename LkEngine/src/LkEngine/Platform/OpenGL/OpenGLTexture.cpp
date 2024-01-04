@@ -48,28 +48,9 @@ namespace LkEngine {
 			int width, height, channels;
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
 
-			int rotatedWidth = height;
-			int rotatedHeight = width;
-			unsigned char* rotatedImageData = new unsigned char[rotatedWidth * rotatedHeight * channels];
-
-			// Copy the pixel data with rotation
-			for (int x = 0; x < width; x++)
-			{
-				for (int y = 0; y < height; y++) 
-				{
-					for (int c = 0; c < channels; c++) 
-					{
-						rotatedImageData[(x * rotatedWidth + (rotatedWidth - y - 1)) * channels + c] = data[(x * width + y) * channels + c];
-					}
-				}
-			}
-			// Use the rotated image buffer for OpenGL texture loading
-			// Assuming you have OpenGL code to load the texture from the rotatedImageData buffer
-			// Clean up resources
-			m_Image = Image::Create(imageSpec, rotatedImageData);
-
-			delete[] rotatedImageData;
+			m_Image = Image::Create(imageSpec, data);
 			stbi_image_free(data);
+			delete[] data;
 		}
 		else
 		{
@@ -171,6 +152,7 @@ namespace LkEngine {
 	{
 		m_Loaded = false;
 	}
+
 
 	//=====================================================
 	// Texture 2D
@@ -299,7 +281,5 @@ namespace LkEngine {
 	{
 		m_Loaded = false;
 	}
-
-
 
 }

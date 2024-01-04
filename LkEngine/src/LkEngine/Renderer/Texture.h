@@ -7,6 +7,11 @@
 #include "LkEngine/Asset/Asset.h"
 
 
+// TODO:
+// - UV Mapping
+// Setting the resolutions of textures should be easy
+// Should be easy to rotate etc
+
 namespace LkEngine {
 
 	struct TextureSpecification
@@ -18,11 +23,6 @@ namespace LkEngine {
 		ImageFormat Format = ImageFormat::RGBA8;
 		bool GenerateMips = true;
 	};
-
-	// TODO:
-	// - UV Mapping
-	// Setting the resolutions of textures should be easy
-	// Should be easy to rotate etc
 
 	class Texture : public Asset
 	{
@@ -47,7 +47,6 @@ namespace LkEngine {
 		virtual void Unload() = 0;
 		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
 		virtual RendererID GetRendererID() const = 0;
-
 	};
 
 	class Texture2D : public Texture

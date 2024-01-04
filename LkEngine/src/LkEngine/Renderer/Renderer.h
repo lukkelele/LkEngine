@@ -53,6 +53,7 @@ namespace LkEngine {
         static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
+		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& color, uint64_t entityID = 0);
 		static std::string GetDrawModeStr();
 
 		template<typename FuncT>

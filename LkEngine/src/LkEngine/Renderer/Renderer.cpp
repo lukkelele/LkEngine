@@ -166,6 +166,11 @@ namespace LkEngine {
         m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, tc.Rotation2D, entityID);
     }
 
+	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& color, uint64_t entityID)
+    {
+        m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, color, tc.Rotation2D, entityID);
+    }
+
 	std::string Renderer::GetDrawModeStr()
 	{
 		switch (DrawMode)

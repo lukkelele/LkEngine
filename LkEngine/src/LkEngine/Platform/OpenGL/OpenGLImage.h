@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+
 #include "LkEngine/Renderer/Image.h"
 
 
@@ -12,9 +13,6 @@ namespace LkEngine {
 		OpenGLImage(ImageSpecification spec, Buffer buffer);
 		OpenGLImage(ImageSpecification spec, const void* data = nullptr);
 		~OpenGLImage();
-
-		//void Bind();
-		//void Unbind();
 
 		void Invalidate();
 		void Resize(uint32_t width, uint32_t height);
@@ -40,6 +38,7 @@ namespace LkEngine {
 		uint32_t m_Width, m_Height;
 		std::string m_FilePath;
 		Buffer m_ImageData;
+		glm::vec4 m_TintColor = Color::RGBA::Transparent;
 	};
 
 

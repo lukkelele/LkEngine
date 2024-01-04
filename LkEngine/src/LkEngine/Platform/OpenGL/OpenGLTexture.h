@@ -13,11 +13,12 @@ namespace LkEngine {
 		OpenGLTexture(const std::string& filePath);
 		virtual ~OpenGLTexture();
 
+		RendererID GetRendererID() const;
 		std::string GetName() const { return m_Name; }
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
 		const std::string& GetPath() const { return m_FilePath; }
-		RendererID GetRendererID() const;
+		Buffer GetWriteableBuffer() { return m_Image->GetBuffer(); }
 
 		void Bind(unsigned int slot = 0);
 		void Unbind();
@@ -25,7 +26,6 @@ namespace LkEngine {
 		void Unlock();
 		bool IsLoaded() const { return m_Loaded; }
 		void SetData(void* data, uint32_t size);
-		Buffer GetWriteableBuffer() { return m_Image->GetBuffer(); }
 
 		void Load();
 		void Unload();
@@ -77,6 +77,5 @@ namespace LkEngine {
 		TextureSpecification m_Specification;
 		s_ptr<Image> m_Image = nullptr;
 	};
-
 
 }

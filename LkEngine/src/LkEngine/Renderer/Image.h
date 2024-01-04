@@ -3,11 +3,13 @@
 #include <string>
 #include <cstdint>
 #include <memory>
+
 #include <stb_image/stb_image.h>
 
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Buffer.h"
 #include "LkEngine/Event/AssetEvent.h"
+#include "LkEngine/Renderer/Color.h"
 
 
 namespace LkEngine {
@@ -71,7 +73,7 @@ namespace LkEngine {
 		static uint32_t CalculateMipCount(uint32_t width, uint32_t height);
 		static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height);
 		static bool IsDepthFormat(ImageFormat format);
-	
+
 		//virtual void Bind() = 0;
 		//virtual void Unbind() = 0;
 
@@ -81,7 +83,6 @@ namespace LkEngine {
 
 		virtual RendererID& GetRendererID() = 0;
 		virtual RendererID GetRendererID() const = 0;
-
 		virtual Buffer GetBuffer() const = 0;
 		virtual Buffer& GetBuffer() = 0;
 		virtual uint32_t GetWidth() const = 0;
@@ -92,6 +93,6 @@ namespace LkEngine {
 	protected:
 		virtual void Release() = 0;
 		virtual void AllocateMemory(uint64_t size) = 0;
-
 	};
+
 }
