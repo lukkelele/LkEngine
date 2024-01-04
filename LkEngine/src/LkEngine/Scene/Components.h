@@ -6,6 +6,8 @@
 
 #include "LkEngine/Renderer/Material.h"
 
+#include "LkEngine/Physics2D/ContactListener2D.h"
+
 
 namespace LkEngine{
 
@@ -16,6 +18,8 @@ namespace LkEngine{
 	{
 		UUID ID;
 		bool Removable = true;
+
+		operator UUID() { return ID; }
 
 		IDComponent() = default;
 		IDComponent(const IDComponent&) = default;
@@ -33,13 +37,19 @@ namespace LkEngine{
 
     struct TransformComponent
     {
+	public:
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+	private:
+		glm::vec3 RotationEuler = { 0.0f, 0.0f, 0.0f };
 		glm::quat Rotation = { 1.0f, 0.0f, 0.0f, 0.0f };
+
+	public:
 		// TODO: Patch out the use of Rotation2D and just use the Rotation quaternion
 		float Rotation2D = 0.0f;
-		bool Removable = true;
+
 		bool Static = false;
+		bool Removable = true;
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;
@@ -47,7 +57,6 @@ namespace LkEngine{
 
 		glm::vec3 GetTranslation() const { return Translation; }
 		glm::vec3 GetScale() const { return Scale; }
-		glm::quat GetRotation() const { return Rotation; }
 		float GetRotation2D() const { return Rotation2D; }
 
 		glm::mat4 GetTransform() const
@@ -65,13 +74,38 @@ namespace LkEngine{
 			return inv_scale * glm::toMat4(inv_rotation) * inv_translation;
 		}
 
-		void SetRotation(float degrees)
+		glm::vec3 GetRotationEuler() const
 		{
-			float angleRad = glm::radians(degrees);
-			float qw = cos(angleRad / 2.0f);
-			float qz = sin(angleRad / 2.0f);
-			Rotation = glm::quat(qw, 0.0f, 0.0f, qz);
-			//Rotation2D = angleRad; // FIXME
+			return RotationEuler;
+		}
+
+		void SetRotationEuler(const glm::vec3& euler)
+		{
+			RotationEuler = euler;
+			Rotation = glm::quat(RotationEuler);
+		}
+
+		glm::quat GetRotation() const
+		{
+			return Rotation;
+		}
+
+		void SetRotation(const glm::quat& quat)
+		{
+			auto originalEuler = RotationEuler;
+			Rotation = quat;
+			RotationEuler = glm::eulerAngles(Rotation);
+
+			// Attempt to avoid 180deg flips in the Euler angles when using SetRotation(quat)
+			if (
+				(fabs(RotationEuler.x - originalEuler.x) == glm::pi<float>()) &&
+				(fabs(RotationEuler.z - originalEuler.z) == glm::pi<float>())
+			)
+			{
+				RotationEuler.x = originalEuler.x;
+				RotationEuler.y = glm::pi<float>() - RotationEuler.y;
+				RotationEuler.z = originalEuler.z;
+			}
 		}
 
 		bool IsStatic() const { return Static; }
@@ -141,30 +175,31 @@ namespace LkEngine{
 		float AngularDrag = 0.05f;
 		float GravityScale = 1.0f;
 		bool IsBullet = false;
-		// Storage for runtime
-		void* RuntimeBody = nullptr;
+		void* RuntimeBody = nullptr; // Assigned at component creation
+
 		bool Removable = true;
 
-		RigidBody2DComponent() = default;
+		RigidBody2DComponent() : BodyType(Type::Dynamic) {}
+		RigidBody2DComponent(Type type) : BodyType(type) {}
 		RigidBody2DComponent(const RigidBody2DComponent& other) = default;
 	};
 
 	struct BoxCollider2DComponent
 	{
-		glm::vec2 Offset = { 0.0f,0.0f };
-		glm::vec2 Size = { 0.5f, 0.5f };
+		glm::vec2 Offset = { 0.0f, 0.0f };
+		glm::vec2 Size = { 0.50f, 0.50f };
 
 		float Density = 1.0f;
 		float Friction = 1.0f;
+		void* RuntimeBody = nullptr; // Assigned at component creation
 
-		// Storage for runtime
-		void* RuntimeFixture = nullptr;
 		bool Removable = true;
 
 		BoxCollider2DComponent() = default;
 		BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
 	};
 
+	// TODO: Remove ?
 	struct IOComponent
 	{
 		bool Draggable = true;
@@ -186,7 +221,6 @@ namespace LkEngine{
 		}
 		void SetTexture(s_ptr<Texture> texture) { m_Material->SetTexture(texture); }
 
-			//m_Material = std::make_shared<Material>();
 		MaterialComponent() : m_Material(std::make_shared<Material>()) {}
 		MaterialComponent(s_ptr<Material> material) : m_Material(material) {}
 		MaterialComponent(s_ptr<Material> material, s_ptr<Texture> texture) 
@@ -201,6 +235,12 @@ namespace LkEngine{
 		}
 	};
 
+	struct Box2DWorldComponent
+	{
+		std::unique_ptr<b2World> World;
+		ContactListener2D ContactListener;
+	};
+
 
 	template<typename... Component>
 	struct ComponentGroup
@@ -212,7 +252,10 @@ namespace LkEngine{
 		TagComponent, 
 		TransformComponent,
 		SpriteComponent,
-		CameraComponent
+		CameraComponent,
+		MaterialComponent,
+		RigidBody2DComponent,
+		BoxCollider2DComponent
 	>;
 
 }
