@@ -10,9 +10,10 @@ namespace LkEngine {
     // Forward declaration
     class Enemy;
 
-    /**
-     * Super Mario wannabe
-     */
+
+    //
+    // Super Mario wannabe
+    //
     class GameLayer : public Layer
     {
     public:

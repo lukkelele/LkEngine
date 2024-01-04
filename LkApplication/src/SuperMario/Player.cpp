@@ -10,7 +10,6 @@ namespace LkEngine {
         : m_Entity(entity)
         , m_Name(name)
     {
-        m_ID = m_Entity.GetUUID();
         if (name.empty())
             m_Name = entity.GetName();
         m_JumpTimer.Reset();
@@ -29,13 +28,14 @@ namespace LkEngine {
 
         auto& sc = m_Entity.AddComponent<SpriteComponent>();
         sc.SetSize(60, 130);
-        sc.Color = Color::Generate(); // Debugging
+        //sc.Color = Color::Generate(); // Debugging
+        sc.Color = Color::RGBA::Transparent;
 
-        // Add SpriteComponent and set its size before TransformComponent to automatically
-        // re-center the origin in OnAddedComponent in Scene
         auto& tc = m_Entity.AddComponent<TransformComponent>();
         auto& mc = m_Entity.AddComponent<MaterialComponent>();
         auto& cameraComponent = m_Entity.AddComponent<CameraComponent>();
+        mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
+
 
         // Add half sprite size to center origin
         tc.Translation.x -= (sc.Size.x * 0.50f);
@@ -50,8 +50,31 @@ namespace LkEngine {
 
         sc.Removable = false;
         tc.Removable = false;
+
+        RigidBody2DComponent rigidbodyComponent(RigidBody2DComponent::Type::Dynamic);
+        rigidbodyComponent.Mass = 50;
+        rigidbodyComponent.GravityScale = 0;
+        m_Entity.AddComponent<RigidBody2DComponent>(rigidbodyComponent);
+
+        BoxCollider2DComponent boxCollider;
+        //boxCollider.Size = sc.Size;
+        boxCollider.Size = { 100, 100 };
+        m_Entity.AddComponent<BoxCollider2DComponent>(boxCollider);
+
         cameraComponent.CameraRef = playerCam;
         cameraComponent.Removable = false;
+
+        // Create gun
+        m_GunEntity = Scene::GetActiveScene()->CreateEntity("Big-Gun");
+        auto& gunSC = m_GunEntity.AddComponent<SpriteComponent>();
+        gunSC.SetSize(100, 90);
+        auto& gunMC = m_GunEntity.AddComponent<MaterialComponent>();
+        auto& gunTC = m_GunEntity.AddComponent<TransformComponent>();
+        //gunTC.Translation.x = tc.GetTranslation().x + gunSC.GetSize().x;
+        //gunTC.Translation.y = tc.GetTranslation().y + gunSC.GetSize().y;
+        gunTC.Translation.x = m_Pos.x + gunSC.GetSize().x;
+        gunTC.Translation.y = m_Pos.y + gunSC.GetSize().y;
+        gunMC.SetTexture(TextureLibrary::Get()->GetTexture2D("SuperMario-gun"));
     }
 
     void Player::Destroy()
@@ -65,9 +88,21 @@ namespace LkEngine {
 
         if (m_Entity.HasComponent<CameraComponent>())
         {
-            //tc.Translation = cam.GetPos();
             tc.Translation = m_Pos;
             cam.SetPos(tc.Translation);
+
+		    auto& rigidBody2D = m_Entity.GetComponent<RigidBody2DComponent>();
+            b2Body* body = static_cast<b2Body*>(rigidBody2D.RuntimeBody);
+            auto& bodyTransform = body->GetTransform();
+            body->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), tc.GetRotationEuler().x);
+            auto& bodyPos = body->GetPosition();
+            //LOG_WARN("BODY POS: ({}, {})", bodyPos.x, bodyPos.y);
+
+            auto& size = GetSize();
+            auto& gunSC = m_GunEntity.GetComponent<SpriteComponent>();
+            auto& gunTC = m_GunEntity.GetComponent<TransformComponent>();
+            gunTC.Translation.x = m_Pos.x + size.x * 0.50f + gunSC.GetSize().x * 0.50f;
+            gunTC.Translation.y = m_Pos.y + size.y * 0.50f - gunSC.GetSize().y;
         }
 
         // Input 
@@ -88,6 +123,14 @@ namespace LkEngine {
 	    {
 	    	m_Pos += glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
 	    }
+	    if (Keyboard::IsKeyPressed(Key::Q))
+		{
+			cam.GetZoom() += 0.010f;
+		}
+		if (Keyboard::IsKeyPressed(Key::R))
+		{
+			cam.GetZoom() -= 0.010f;
+		}
 
 		if (Keyboard::IsKeyPressed(Key::Space))
 		{
@@ -141,7 +184,6 @@ namespace LkEngine {
     void Player::OnImGuiRender()
     {
         UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO, ImGuiWindowFlags_NoMove);
-        //ImGui::SliderFloat2("Camera Offset", &m_CameraOffset.x, -500.0f, 500.f, "%1.f");
         ImGui::Text("Jump Flag: %s", m_Metadata.JumpActive ? "ACTIVE" : "NOT ACTIVE");
         UI::EndSubwindow();
     }

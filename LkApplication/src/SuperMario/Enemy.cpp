@@ -12,21 +12,27 @@ namespace LkEngine {
 
     void Enemy::Setup()
     {
-        m_ID = m_Entity.GetUUID();
-
-		auto window = Window::Get();
-		float width = window->GetWidth();
-		float height = window->GetHeight();
-
         auto& sc = m_Entity.AddComponent<SpriteComponent>();
-        sc.SetSize(60, 130);
-        sc.Color = Color::Generate(); // Debugging
+        sc.SetSize(80, 130);
 
         // Add SpriteComponent and set its size before TransformComponent to automatically
         // re-center the origin in OnAddedComponent in Scene
         auto& tc = m_Entity.AddComponent<TransformComponent>();
         auto& mc = m_Entity.AddComponent<MaterialComponent>();
         mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
+
+        RigidBody2DComponent rigidbody;
+        rigidbody.BodyType = RigidBody2DComponent::Type::Dynamic;
+        rigidbody.GravityScale = 0.0f;
+        m_Entity.AddComponent<RigidBody2DComponent>(rigidbody);
+
+        BoxCollider2DComponent boxCollider;
+        //boxCollider.Size = { 100, 100 };
+        boxCollider.Size = { sc.Size.x * tc.Scale.x, sc.Size.y * tc.Scale.y };
+        m_Entity.AddComponent<BoxCollider2DComponent>(boxCollider);
+
+        sc.Color = Color::RGBA::Red;
+        sc.Color.a = 0.10f;
     }
 
     void Enemy::Destroy()
@@ -42,10 +48,10 @@ namespace LkEngine {
         auto& tc = m_Entity.GetComponent<TransformComponent>();
         auto& sc = m_Entity.GetComponent<SpriteComponent>();
         m_Pos.x += distance;
-
-        //tc.Translation.x += distance;
-        //tc.Translation.x = m_Pos.x;
         tc.Translation.x += distance;
+
+        b2Body* body = static_cast<b2Body*>(GetEntity().GetComponent<RigidBody2DComponent>().RuntimeBody);
+        body->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), 0.0f);
 
         // Whenever the enemy sprite is 'outside' of the screen to the left, reset the position to the right
         //if (tc.Translation.x < -(Window::Get()->GetViewportWidth() * 0.50f + sc.GetWidth()))

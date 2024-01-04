@@ -12,7 +12,6 @@ namespace LkEngine {
 
         void Setup() override;   // inherited from RuntimeAsset
         void Destroy() override; // inherited from RuntimeAsset
-
         void OnUpdate(float ts = 1.0f);
         void OnImGuiRender();
 

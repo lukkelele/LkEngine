@@ -33,7 +33,7 @@ namespace LkEngine {
         m_Player = std::make_shared<Player>(playerEntity, "Mario");
         m_Player->Setup();
         m_Player->SetSize(120, 150);
-        m_Scene->SetActiveCamera(&m_Player->GetCamera());
+        m_Scene->SetCamera(&m_Player->GetCamera());
         // Place player on the left side and on top of the ground entity
         float player_posY = groundTransform.Translation.y + groundSprite.Size.y * 0.50f;
         player_posY += m_Player->GetHeight() * 0.50f;
@@ -81,15 +81,19 @@ namespace LkEngine {
         Entity& playerEntity = m_Player->GetEntity();
         Camera& playerCam = playerEntity.GetComponent<CameraComponent>();
 
+        b2Body* body = static_cast<b2Body*>(m_Player->GetEntity().GetComponent<RigidBody2DComponent>().RuntimeBody);
+        b2Vec2 pos(m_Player->GetPos().y, m_Player->GetPos().y);
+        body->SetTransform(b2Vec2(pos), m_Player->GetEntity().Transform().GetRotationEuler().z);
+
         m_Renderer2D->BeginScene(playerCam);
         m_Scene->BeginScene();
 
         // Scale mouse pos with window resolution
         auto mousePos = Mouse::GetPos();
         RenderCommand::DrawLine({ mousePos.x - 40, (mousePos.y - 40) }, { mousePos.x + 40, (mousePos.y + 40) }, Color::RGBA::Blue);
-        //RenderCommand::DrawLine({ mousePos.x + 40, (mousePos.y + 40) }, { mousePos.x - 40, (mousePos.y - 40) }, Color::RGBA::Red);
 
         m_Player->OnUpdate(ts);
+
         PlayerMetadata& playerData = m_Player->GetMetadata();
 
         // Check player lower point y-pos versus ground upper point y-pos to determine if player has jumped or not
@@ -97,33 +101,6 @@ namespace LkEngine {
         ground_posY += m_Ground->GetComponent<SpriteComponent>().Size.y * 0.50f;
         float player_posY = m_Player->GetPos().y - m_Player->GetSize().y * 0.50f;
 
-#if 0
-        // Player has jumped - IN AIR
-        if (player_posY > ground_posY)
-        {
-            // Initial jump 
-            if (playerData.JumpActive == false)
-            {
-                playerData.JumpActive = true;
-                playerData.LastJumpPos = m_Player->GetPos();
-            }
-            // Apply simple physics
-            else
-            {
-                auto& playerPos = m_Player->GetPos();
-                playerPos.y -= m_GravityScalar;
-            }
-        }
-        // Player has not jumped - ON GROUND
-        else if (player_posY <= ground_posY)
-        {
-            // Player landing
-            if (playerData.JumpActive == true)
-            {
-                playerData.JumpActive = false;
-            }
-        }
-#endif
         // Temporary solution for 'detecting' contact with the ground beneath the player
         if (player_posY < ground_posY)
         {
@@ -158,10 +135,17 @@ namespace LkEngine {
 
         groundTransform.Translation.x = -(window->GetViewportWidth() * 0.50f);  // Lower left
         groundTransform.Translation.y = -(window->GetViewportHeight() * 0.50f); // Bottom half
-
         groundSprite.Size = { 3.0f * (float)window->GetViewportWidth(), 400.0f };
         groundSprite.SetPassthrough(false);
 
+        RigidBody2DComponent rigidbody(RigidBody2DComponent::Type::Static);
+        rigidbody.Mass = 100;
+        rigidbody.GravityScale = 0.0f;
+        groundEntity.AddComponent<RigidBody2DComponent>(rigidbody);
+
+        BoxCollider2DComponent boxCollider;
+        boxCollider.Offset = { 0.0f, -40.0f };
+        groundEntity.AddComponent<BoxCollider2DComponent>(boxCollider);
         //groundTransform.Translation.x -= groundSprite.Size.x * 0.50f;
 
         m_Ground = std::make_shared<Entity>(groundEntity);

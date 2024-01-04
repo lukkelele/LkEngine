@@ -30,41 +30,41 @@ namespace LkEngine {
         void Setup() override;
         void Destroy() override;
 
-        virtual void SetSpawnPoint(const glm::vec2& spawnPoint);
-        virtual glm::vec2 GetSpawnPoint() const { return m_SpawnPoint; }
-        virtual void Respawn();
-
-        glm::vec3& GetPos() { return m_Pos; }
         glm::vec3 GetPos() const { return m_Pos; }
+        glm::vec3& GetPos() { return m_Pos; }
         std::string GetName() const { return m_Name; }
         float GetWidth();
         float GetHeight();
         const glm::vec2 GetSize();
         void SetSize(float x, float y);
         void SetSize(const glm::vec2& size);
-        UUID GetUUID() const { return m_ID; }
+        UUID GetUUID() { return m_Entity.GetComponent<IDComponent>(); }
         Entity GetEntity() const { return m_Entity; }
         void SetPos(float x, float y);
         void SetPos(const glm::vec2& pos);
         SceneCamera& GetCamera() { return m_Entity.GetComponent<CameraComponent>(); }
         PlayerMetadata& GetMetadata() { return m_Metadata; }
 
+        virtual void SetSpawnPoint(const glm::vec2& spawnPoint);
+        virtual glm::vec2 GetSpawnPoint() const { return m_SpawnPoint; }
+        virtual void Respawn();
+
     protected:
-        UUID m_ID;
+        Entity m_Entity;
         std::string m_Name;
         PlayerMetadata m_Metadata;
+
         float m_Health = 5.0f; 
         float m_TravelSpeed = 1.0f;
         float m_JumpHeight = 1.0f;
         bool m_Jumping = false;
         float m_TotalJumpTime = 1.0f; // 1 second for an entire jump, so 0.5s up and 0.5s down
-
         Timer m_JumpTimer; 
+
+        Entity m_GunEntity;
 
         glm::vec3 m_Pos = { 0.0f, 0.0f, 0.0f };
         glm::vec2 m_SpawnPoint = { 0.0f, 0.0f };
-
-        Entity m_Entity;
     };
 
 }
