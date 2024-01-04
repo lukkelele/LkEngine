@@ -1,38 +1,48 @@
 #include "LKpch.h"
-#include "LkEngine/Scene/Scene.h"
-#include "LkEngine/Scene/Components.h"
+#include "Scene.h"
+
 #include "LkEngine/Scene/Entity.h"
+#include "LkEngine/Scene/Components.h"
 #include "LkEngine/Core/Application.h"
-#include "LkEngine/Core/Window.h"
 #include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Renderer/RenderCommand.h"
-#include "LkEngine/Renderer/TextureLibrary.h"
-#include "LkEngine/Renderer/Color.h"
-#include "LkEngine/Physics2D/Physics2D.h"
-#include "LkEngine/Editor/EditorCamera.h"
 #include "LkEngine/Editor/EditorLayer.h"
-#include "LkEngine/UI/Property.h"
+#include "LkEngine/Physics2D/Physics2D.h"
+
+#include "LkEngine/Debug/Debugger2D.h"
+
+#include "LkEngine/Debug/Box2DDebugger.h"
+
+#include "LkEngine/Editor/EditorCamera.h"
 
 
 namespace LkEngine {
 
-	Scene::Scene(const std::string& name, bool activeScene)
-		: m_Name(name)
+	Scene::Scene(const std::string& name, bool activeScene, bool editorScene)
+		: m_EditorScene(editorScene)
 	{
-		auto window = Window::Get();
-		float width = window->GetWidth();
-		float height = window->GetHeight();
+		m_SceneEntity = m_Registry.create();
+		m_SceneInfo.Name = name;
 
-		m_ViewportWidth = width;
-		m_ViewportHeight = height;
+		m_ViewportWidth = Window::Get()->GetViewportWidth();
+		m_ViewportHeight = Window::Get()->GetViewportHeight();
 
-		m_Camera2D = std::make_shared<SceneCamera>();
-		m_Camera2D->SetOrthographic(width, height, -1.0f, 1.0f);
-		m_SceneCamera = m_Camera2D.get();
-
-		if (activeScene)
-		{
+		if (activeScene)	
 			s_ActiveScene = this;
+		
+		if (editorScene == false)
+		{
+			Box2DWorldComponent& b2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
+			b2dWorld.World->SetContactListener(&b2dWorld.ContactListener);
+
+			auto& debugger2D = Debugger::GetDebugger2D();
+			if (Debugger2D::GetType() == Debugger2D::Type::Box2D)
+			{
+				// Retrieve and cast the Debugger2D
+				b2Draw* drawDebugger = dynamic_cast<b2Draw*>(Debugger2D::Get());
+				b2dWorld.World->SetDebugDraw(drawDebugger);
+				drawDebugger->SetFlags(b2Draw::e_shapeBit);
+				LOG_CRITICAL("Added debug drawer for Box2D");
+			}
 		}
 	}
 
@@ -81,9 +91,7 @@ namespace LkEngine {
 		{
 			const TagComponent& tc = view.get<TagComponent>(entity);
 			if (tc.Tag == name)
-			{
 				return Entity{ entity , this };
-			}
 		}
 		return { };
 	}
@@ -102,18 +110,16 @@ namespace LkEngine {
 
 	std::vector<Entity> Scene::GetEntities()
 	{
-		auto view = m_Registry.view<IDComponent>();
 		std::vector<Entity> entities;
+		auto view = m_Registry.view<IDComponent>();
 		for (const auto& entity : view)
-		{
 			entities.push_back({ entity, this });
-		}
 		return entities;
 	}
 
 	void Scene::Pause(bool paused)
 	{
-		m_Paused = paused;
+		m_SceneInfo.Paused = paused;
 		//m_World->Pause(paused);
 	}
 
@@ -142,7 +148,6 @@ namespace LkEngine {
 			auto& texture = mc.GetTexture();
 			if (texture != nullptr)
 			{
-				//sprite.TextureName = texture->GetName();
 			}
 		}
 	}
@@ -155,24 +160,110 @@ namespace LkEngine {
 	template<>
 	void Scene::OnComponentAdded<MaterialComponent>(Entity entity, MaterialComponent& mc)
 	{
-		if (entity.HasComponent<SpriteComponent>() && mc.GetTexture() != nullptr)
+	}
+
+	template<>
+	void Scene::OnComponentAdded<RigidBody2DComponent>(Entity entity, RigidBody2DComponent& rigidBody2DComponent)
+	{
+		if (m_EditorScene == true)
+			return;
+
+		//auto sceneView = m_Registry.view<Box2DWorldComponent>();
+		//auto& world = m_Registry.get<Box2DWorldComponent>(sceneView.front()).World;
+		auto& world = GetBox2DWorld();
+
+		Entity e = { entity, this };
+		UUID entityID = e.GetComponent<IDComponent>().ID;
+		TransformComponent& transform = e.GetComponent<TransformComponent>();
+		auto& rigidBody2D = m_Registry.get<RigidBody2DComponent>(entity);
+
+		b2BodyDef bodyDef;
+		if (rigidBody2D.BodyType == RigidBody2DComponent::Type::Static)
+			bodyDef.type = b2_staticBody;
+		else if (rigidBody2D.BodyType == RigidBody2DComponent::Type::Dynamic)
+			bodyDef.type = b2_dynamicBody;
+		else if (rigidBody2D.BodyType == RigidBody2DComponent::Type::Kinematic)
+			bodyDef.type = b2_kinematicBody;
+
+		bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
+		bodyDef.angle = transform.GetRotationEuler().z;
+
+		b2Body* body = world.World->CreateBody(&bodyDef);
+		body->SetFixedRotation(rigidBody2D.FixedRotation);
+
+		b2MassData massData = body->GetMassData();
+		massData.mass = rigidBody2D.Mass;
+		body->SetMassData(&massData);
+		body->SetGravityScale(rigidBody2D.GravityScale);
+		body->SetLinearDamping(rigidBody2D.LinearDrag);
+		body->SetAngularDamping(rigidBody2D.AngularDrag);
+		body->SetBullet(rigidBody2D.IsBullet);
+		body->GetUserData().pointer = (uintptr_t)entityID;
+		rigidBody2D.RuntimeBody = body;
+
+		LOG_DEBUG("OnComponentAdded<RigidBody2DComponent>  {}", entity.GetName());
+	}
+
+	template<>
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& boxColliderComponent)
+	{
+		LOG_DEBUG("OnComponentAdded<BoxCollider2DComponent>  {}", entity.GetName());
+
+		Entity e = { entity, this };
+		auto& transform = e.Transform();
+
+		auto& boxCollider2D = m_Registry.get<BoxCollider2DComponent>(entity);
+		if (e.HasComponent<RigidBody2DComponent>())
 		{
-			//entity.GetComponent<SpriteComponent>().TextureName = mc.GetTextureName();
-			//LOG_TRACE("Detected SpriteComponent when adding MaterialComponent, setting the TextureName to mc.GetTextureName()");
+			auto& rigidBody2D = e.GetComponent<RigidBody2DComponent>();
+			b2Body* body = static_cast<b2Body*>(rigidBody2D.RuntimeBody);
+
+			b2PolygonShape polygonShape;
+			LK_ASSERT(boxCollider2D.Size.x > 0 && boxCollider2D.Size.y > 0);
+			polygonShape.SetAsBox(transform.Scale.x * boxCollider2D.Size.x, transform.Scale.y * boxCollider2D.Size.y);
+			LK_ASSERT(transform.Scale.x * boxCollider2D.Size.x > 0 && transform.Scale.y * boxCollider2D.Size.y > 0);
+			LOG_INFO("BoxCollider for {}, size ({}, {})", 
+				entity.GetName(), transform.Scale.x * boxCollider2D.Size.x, transform.Scale.y * boxCollider2D.Size.y);
+			//polygonShape.SetAsBox(1000, 1000);
+
+			b2FixtureDef fixtureDef;
+			fixtureDef.shape = &polygonShape;
+			fixtureDef.density = boxCollider2D.Density;
+			fixtureDef.friction = boxCollider2D.Friction;
+			body->CreateFixture(&fixtureDef);
+			LOG_DEBUG("Added b2FixtureDef to body");
 		}
 	}
 
 	void Scene::BeginScene(float ts)
 	{
-		BeginScene(*m_SceneCamera, ts);
+		BeginScene(*m_Camera, ts);
 	}
 
-	void Scene::BeginScene(SceneCamera& cam, float ts)
+	void Scene::BeginScene(SceneCamera& cam, Timestep ts)
 	{
+		if (m_EditorScene)
+		{
+
+		}
+
 		cam.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		cam.Update(ts);
+
+		signed int velocityIterations = 6;
+		signed int positionIterations = 2;
+
+		if (m_SceneInfo.Paused == false)
+		{
+			// Update the world
+			auto& world = GetBox2DWorld();
+			world.World->Step((1.0f / 60.0f), 12, 4);
+			world.World->DebugDraw();
+		}
 	}
 
+
+	// TODO: Update this so no RenderCommand calls are needed and its not exclusive towards sprite draw calls
 	void Scene::EndScene()
 	{
 		auto entityTags = m_Registry.view<TagComponent>();
@@ -204,9 +295,19 @@ namespace LkEngine {
 		}
 	}
 
-	void Scene::SetActiveCamera(SceneCamera* cam)
+	void Scene::SetCamera(SceneCamera* cam)
 	{ 
-		m_SceneCamera = cam;
+		m_Camera = cam;
+	}
+
+	void Scene::SetEditorCamera(EditorCamera* cam)
+	{ 
+		m_EditorCamera = cam;
+	}
+
+	Box2DWorldComponent& Scene::GetBox2DWorld()
+	{
+		return m_Registry.get<Box2DWorldComponent>(m_SceneEntity);
 	}
 
 }

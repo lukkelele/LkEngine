@@ -63,13 +63,19 @@ namespace LkEngine {
 			{
 				m_Pos += glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
 			}
-		}
+			if (Keyboard::IsKeyPressed(Key::Q))
+			{
+				m_Zoom += 0.010f;
+			}
+			if (Keyboard::IsKeyPressed(Key::R))
+			{
+				m_Zoom -= 0.010f;
+			}
 
-		// If the mouse has moved since last frame, update camera rotation
-		//UpdateMousePosition();
-		//UpdateProjection();
-		//UpdateView();
-		//UpdateViewProjection();
+		}
+		if (m_MouseEnabled)
+		{
+		}
 
 		auto* window = Window::Get();
 		SetViewportSize(window->GetViewportWidth(), window->GetViewportHeight());
