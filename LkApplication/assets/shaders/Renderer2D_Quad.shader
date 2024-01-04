@@ -47,4 +47,14 @@ void main()
 {
     vec4 tex = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
     FragColor = tex * v_Color;
+
+    //vec4 redTint = vec4(1.0, 0.0, 0.0, 1.0); // Red color
+    //float redIntensity = 0.2; // Adjust this value for more or less redness
+
+    // Mix original texture color with red tint
+    //vec4 tintedColor = mix(tex, redTint, redIntensity);
+    //vec4 tintedColor = mix(tex, redTint, v_Color.a);
+
+    // Combine with vertex color if needed
+    //FragColor = tintedColor * v_Color;
 }
