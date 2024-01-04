@@ -46,14 +46,19 @@ namespace LkEngine {
 		Entity GetSelectedEntity() { return SelectedEntity; }
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
 		void SelectEntity(Entity& entity);
+		void SetSelectedEntity(Entity& entity);
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 		void SetScene(Scene& scene) { m_Scene = &scene; }
 		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
+
+		EditorCamera& GetEditorCamera() { return *m_EditorCamera; }
+
 		template<typename T, typename UIFunction>
 		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
 		template<typename T>
 		void DisplayAddComponentEntry(const std::string& entryName);
+
 		void UI_HandleManualWindowResize();
 		void UI_SceneContent();
 		void UI_CreateMenu();
@@ -61,7 +66,7 @@ namespace LkEngine {
 		void UI_RenderSettingsInformation();
 		bool IsEntitySelected() const;
 		void SetUpdateWindowFlag(bool flag); // { m_UpdateWindowSize = flag; }
-		void SetSelectedEntity(Entity& entity);
+
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
 		float GetEditorWindowHeight() const;
@@ -122,6 +127,8 @@ namespace LkEngine {
 		bool m_ShowStackTool = false;
 		bool m_ShowStyleEditor = false;
 		int m_GizmoType = GizmoType::Translate;
+
+		EditorCamera* m_EditorCamera = nullptr;
 
 		inline static EditorLayer* s_Instance = nullptr;
 	};

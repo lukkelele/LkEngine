@@ -48,11 +48,14 @@ namespace LkEngine {
 		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 		LK_ASSERT(EditorWindowSize.x != 0 && EditorWindowSize.y != 0 && EditorWindowSize.x > 0 && EditorWindowSize.y > 0);
 
-		//Mouse::SetScalers(ViewportScalers.x, ViewportScalers.y); // This is not required to be set each frame
 		auto* window = Window::Get();
 		window->SetScalers(ViewportScalers.x, ViewportScalers.y);
 		window->SetWidth(EditorWindowSize.x);
 		window->SetHeight(EditorWindowSize.y);
+
+		m_EditorCamera = new EditorCamera();
+		m_EditorCamera->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
+		Scene::GetActiveScene()->SetEditorCamera(m_EditorCamera);
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -67,8 +70,6 @@ namespace LkEngine {
 		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
 
-		//auto* window = Application::Get()->GetWindow()->GetGlfwWindow();
-		//auto* glfwWindow = Application::Get()->GetWindow()->GetGlfwWindow();
 		auto* window = Window::Get();
 		auto* glfwWindow = window->GetGlfwWindow();
 		bool isMaximized = (bool)glfwGetWindowAttrib(glfwWindow, GLFW_MAXIMIZED);
@@ -198,7 +199,6 @@ namespace LkEngine {
 			ImGui::BeginGroup();
 			{
 				ImGui::Text("Selected ID: %llu", SelectedEntityID);
-				ImGui::Text("Selected Entity Handle: %llu", SelectedEntity.IsValid() ? SelectedEntity.GetUUID() : 0);
 				ImGui::Text("Active Scene: %s", Scene::GetActiveSceneName().c_str());
 				ImGui::Text("Scenes in memory: %d", Scene::GetSceneCount());
 			}
@@ -324,7 +324,7 @@ namespace LkEngine {
 				ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
 				ImGui::Text("Mouse Scalers (%.2f, %.2f)", scalers.x, scalers.y);
 
-				auto& sceneCamera = *Scene::GetActiveScene()->GetActiveCamera();
+				auto& sceneCamera = *Scene::GetActiveScene()->GetCamera();
 				glm::vec2 sceneCameraPos = sceneCamera.GetPos();
 				ImGui::Text("SceneCamera Pos: (%.1f, %.1f)", sceneCameraPos.x, sceneCameraPos.y);
 			}
@@ -335,7 +335,7 @@ namespace LkEngine {
 
 			//Mouse::ScaledPos = { (Mouse::Pos.x) / scalers.x, (Mouse::Pos.y) / scalers.y };
 
-			auto& active_cam = *Scene::GetActiveScene()->GetActiveCamera();
+			auto& active_cam = *Scene::GetActiveScene()->GetCamera();
 			glm::vec2 cam_pos = active_cam.GetPos();
 			ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
 
@@ -427,6 +427,9 @@ namespace LkEngine {
 
 	void EditorLayer::DrawEntityNode(Entity entity)
 	{
+		if (entity.HasComponent<IDComponent>() == false || entity.HasComponent<TagComponent>() == false)
+			return;
+
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 		bool entity_selected = (SelectedEntityID == entity.GetUUID());
@@ -543,7 +546,7 @@ namespace LkEngine {
 			return;
 
 		Entity entity = m_Scene->GetEntityWithUUID(SelectedEntityID);
-		if (!entity || !entity.IsValid())
+		if (!entity)
 			return;
 
 		UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
@@ -582,7 +585,10 @@ namespace LkEngine {
 
 			ImGui::Text("Rotation");
 			ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
-			transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
+			auto rot = transform.GetRotation();
+			//transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
+			transform.SetRotation(glm::angleAxis(rot.x, glm::vec3(0.0f, 0.0f, 1.0f)));
+			//transform.SetRotation(rot);
 		});
 
 		DrawComponent<SpriteComponent>("Sprite", entity, [&entity](auto& sprite)
@@ -637,7 +643,7 @@ namespace LkEngine {
 
             ImGui::Text("Rotation");
             ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
-            transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
+			transform.SetRotation(glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f)));
 
             ImGui::Unindent();
 		}
@@ -665,7 +671,7 @@ namespace LkEngine {
         glm::mat4& transform_matrix = tc.GetTransform();
 
 		auto& scene = *Scene::GetActiveScene();
-        auto& cam = *scene.GetActiveCamera();
+        auto& cam = *scene.GetCamera();
         auto& cam_pos = cam.GetPos();
         auto& view_matrix = cam.GetView();
         auto& proj_matrix = cam.GetProjection();
@@ -702,7 +708,7 @@ namespace LkEngine {
             Math::DecomposeTransform(transform_matrix, translation, rotation, scale);
             tc.Translation = translation;
             tc.Scale = scale;
-            tc.Rotation = rotation;
+            tc.SetRotation(rotation);
         }
 		ImGui::End();
     }
