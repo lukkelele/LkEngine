@@ -1,5 +1,6 @@
 #include "LKpch.h"
-#include "LkEngine/Physics2D/Physics2D.h"
+#include "Physics2D.h"
+
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Scene/Scene.h"
@@ -17,14 +18,7 @@ namespace LkEngine {
     std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(Scene& scene)
     {
         std::vector<Raycast2DResult> results = {};
-        auto window = Window::Get();
-        float windowWidth = (float)window->GetWidth();
-        float windowHeight = (float)window->GetHeight();
         glm::vec2 mousePos = Mouse::GetScaledPos();
-        //glm::vec2 mousePos = Mouse::ScaledPos;
-        //LOG_WARN("Scaled Mouse (Physics2D Getter) - ({} ,{})", mousePos.x, mousePos.y);
-		//LOG_ERROR("Scaled Mouse (Physics2D Mouse->Members) - ({} ,{})", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
-
         auto* editor = EditorLayer::Get();
 
         std::vector<Entity> sceneEntities = scene.GetEntities();
@@ -36,7 +30,7 @@ namespace LkEngine {
                 auto& sc = entity.GetComponent<SpriteComponent>();
                 if (tc.IsStatic() || sc.IsPassthrough())
                     continue;
-                auto& cam = *scene.GetActiveCamera();
+                auto& cam = *scene.GetCamera();
 
                 //glm::vec2 camPos = cam.GetPos();
                 //glm::vec2 camPos = cam.GetPosWithOffset();
@@ -63,8 +57,8 @@ namespace LkEngine {
                 }
                 else
                 {
-                    quadPos.x += windowWidth * 0.50f;
-                    quadPos.y += windowHeight * 0.50f;
+                    quadPos.x += Window::Get()->GetWidth() * 0.50f;
+                    quadPos.y += Window::Get()->GetHeight() * 0.50f;
                 }
 
 
