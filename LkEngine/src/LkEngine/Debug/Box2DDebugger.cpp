@@ -3,72 +3,52 @@
 
 #include "LkEngine/Renderer/Renderer.h"
 
+#include <glad/glad.h>
+
+
 
 namespace LkEngine {
 
     Box2DDebugger::Box2DDebugger()
     {
         m_Instance = this;
-        Debugger2D::SetType(Type::Box2D);
+        Debugger2D::SetType(Physics2D::API::Box2D);
     }
 
-    // Debugger2D functions are just invoking the b2Draw functions
-    void Box2DDebugger::DrawQuad(const glm::vec2* vertices, const glm::vec4& color)
-    {
-
-    }
-
-    void Box2DDebugger::DrawPolygon(const glm::vec2* vertices, int vertexCount, const glm::vec4& color)
+    void Box2DDebugger::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) 
     {
         // Quad
+        std::cout << "DrawPolygon -- VertexCount: " << std::to_string(vertexCount) << "  ";
         if (vertexCount == 4)
         {
             // Four vertices
             glm::vec2 bottomLeft  = glm::vec2(vertices[0].x, vertices[0].y);
             glm::vec2 bottomRight = glm::vec2(vertices[1].x, vertices[1].y);
-            glm::vec2 topLeft     = glm::vec2(vertices[2].x, vertices[2].y);
-            glm::vec2 topRight    = glm::vec2(vertices[3].x, vertices[3].y);
-            glm::vec2 center = { (topLeft.x - bottomRight.x) * 0.50f, (topLeft.y - bottomRight.y) * 0.50f };
+            glm::vec2 topRight    = glm::vec2(vertices[2].x, vertices[2].y);
+            glm::vec2 topLeft     = glm::vec2(vertices[3].x, vertices[3].y);
 
-            glm::vec3 pos = { bottomLeft.x, bottomLeft.y, 0.0f };
-            glm::vec2 size = { (topRight.x - bottomLeft.x), (topRight.y - bottomLeft.y) };
+            glm::vec2 center  = 0.5f * (bottomLeft + topRight);
+            glm::vec2 extents = 0.5f * glm::vec2(topRight.x - bottomLeft.x, topRight.y - bottomLeft.y);
+
+            glm::vec3 pos = { center.x, center.y, 0.0f };
+            glm::vec2 size = { 2.0f * extents.x, 2.0f * extents.y };
             glm::vec4 col = { color.r, color.g, color.b, color.a };
 
-            //RenderCommand::DrawQuad(pos, size, col, 0);
-            RenderCommand::DrawQuad({0, 0, 0}, size, col, 0);
-            //RenderCommand::DrawQuad(pos, { 1000, 1000 }, col, 0);
+            //RenderCommand::DrawQuad(pos, { 400, 400 }, col, 0);
+            RenderCommand::DrawQuad(pos, size, col, 0);
             LOG_TRACE("DrawQuad -> Pos ({}, {})", pos.x, pos.y);
         }
         // Triangle
         else if (vertexCount == 3)
         {
-            // TODO:
             LOG_DEBUG("DrawPolygon--Triangle: Not implemented");
+            throw std::runtime_error("DrawPolygon::Triangle, not implemented");
         }
-    }
-
-    void Box2DDebugger::DrawSolidPolygon(const glm::vec2* vertices, int vertexCount, const glm::vec4& color)
-    {
-    }
-
-    void Box2DDebugger::DrawCircle(const glm::vec2& center, float radius, const glm::vec4& color)
-    {
-    }
-
-    // -------------------------------------------------------------------------
-    // Box2D
-    // -------------------------------------------------------------------------
-
-    void Box2DDebugger::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) 
-    {
-        LOG_TRACE("DrawQuad -> Pos ({}, {}), vertexCount: {}", vertices[0].x, vertices[0].y, vertexCount);
-        DrawPolygon(Utils::ConvertB2VecToGlmVec2(vertices, vertexCount).data(), vertexCount, { color.r, color.g, color.b, color.a });
     }
 
     void Box2DDebugger::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
     {
-        //LOG_TRACE("Box2DDebugger::DrawSolidPolygon");
-        DrawPolygon(Utils::ConvertB2VecToGlmVec2(vertices, vertexCount).data(), vertexCount, { color.r, color.g, color.b, color.a });
+        DrawPolygon(vertices, vertexCount, color);
     }
 
     void Box2DDebugger::DrawCircle(const b2Vec2& center, float radius, const b2Color& color)
