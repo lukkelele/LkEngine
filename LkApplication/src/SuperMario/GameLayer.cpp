@@ -16,7 +16,7 @@ namespace LkEngine {
     void GameLayer::OnAttach()
     {
         m_Renderer2D = Renderer::GetRendererAPI()->GetRenderer2D();
-        m_Scene = Scene::Create("GameLayer");
+        m_Scene = std::make_shared<Scene>("GameLayer", true, true);
 
         auto* window = Window::Get();
         auto* textureLibrary = TextureLibrary::Get();
@@ -81,10 +81,7 @@ namespace LkEngine {
         Entity& playerEntity = m_Player->GetEntity();
         Camera& playerCam = playerEntity.GetComponent<CameraComponent>();
 
-        b2Body* body = static_cast<b2Body*>(m_Player->GetEntity().GetComponent<RigidBody2DComponent>().RuntimeBody);
-        b2Vec2 pos(m_Player->GetPos().y, m_Player->GetPos().y);
-        body->SetTransform(b2Vec2(pos), m_Player->GetEntity().Transform().GetRotationEuler().z);
-
+        Renderer::BeginScene(playerCam.GetViewProjection());
         m_Renderer2D->BeginScene(playerCam);
         m_Scene->BeginScene();
 
@@ -95,7 +92,6 @@ namespace LkEngine {
         m_Player->OnUpdate(ts);
 
         PlayerMetadata& playerData = m_Player->GetMetadata();
-
         // Check player lower point y-pos versus ground upper point y-pos to determine if player has jumped or not
         float ground_posY = m_Ground->GetComponent<TransformComponent>().GetTranslation().y;
         ground_posY += m_Ground->GetComponent<SpriteComponent>().Size.y * 0.50f;
@@ -129,9 +125,11 @@ namespace LkEngine {
         auto groundTexture = TextureLibrary::Get()->GetTexture2D("SuperMario-ground_block");
 
         Entity groundEntity = m_Scene->CreateEntity("Ground");
-        auto& groundMaterial = groundEntity.AddComponent<MaterialComponent>(groundTexture);
-        auto& groundSprite = groundEntity.AddComponent<SpriteComponent>();
-        auto& groundTransform = groundEntity.AddComponent<TransformComponent>();
+        m_Ground = std::make_shared<Entity>(groundEntity);
+
+        auto& groundMaterial = m_Ground->AddComponent<MaterialComponent>(groundTexture);
+        auto& groundSprite = m_Ground->AddComponent<SpriteComponent>();
+        auto& groundTransform = m_Ground->AddComponent<TransformComponent>();
 
         groundTransform.Translation.x = -(window->GetViewportWidth() * 0.50f);  // Lower left
         groundTransform.Translation.y = -(window->GetViewportHeight() * 0.50f); // Bottom half
@@ -141,14 +139,11 @@ namespace LkEngine {
         RigidBody2DComponent rigidbody(RigidBody2DComponent::Type::Static);
         rigidbody.Mass = 100;
         rigidbody.GravityScale = 0.0f;
-        groundEntity.AddComponent<RigidBody2DComponent>(rigidbody);
+        m_Ground->AddComponent<RigidBody2DComponent>(rigidbody);
 
         BoxCollider2DComponent boxCollider;
-        boxCollider.Offset = { 0.0f, -40.0f };
-        groundEntity.AddComponent<BoxCollider2DComponent>(boxCollider);
-        //groundTransform.Translation.x -= groundSprite.Size.x * 0.50f;
-
-        m_Ground = std::make_shared<Entity>(groundEntity);
+        boxCollider.Offset = { 0.0f, 0.0f };
+        m_Ground->AddComponent<BoxCollider2DComponent>(boxCollider);
     }
 
     void GameLayer::CreateSky()

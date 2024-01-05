@@ -22,59 +22,59 @@ namespace LkEngine {
     
     void Player::Setup()
     {
-		auto window = Window::Get();
-		float width = window->GetWidth();
-		float height = window->GetHeight();
+		float width = Window::Get()->GetWidth();
+		float height = Window::Get()->GetHeight();
 
         auto& sc = m_Entity.AddComponent<SpriteComponent>();
+        sc.Removable = false;
         sc.SetSize(60, 130);
         //sc.Color = Color::Generate(); // Debugging
         sc.Color = Color::RGBA::Transparent;
 
         auto& tc = m_Entity.AddComponent<TransformComponent>();
-        auto& mc = m_Entity.AddComponent<MaterialComponent>();
-        auto& cameraComponent = m_Entity.AddComponent<CameraComponent>();
-        mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
-
-
+        tc.Removable = false;
         // Add half sprite size to center origin
         tc.Translation.x -= (sc.Size.x * 0.50f);
         tc.Translation.y -= (sc.Size.y * 0.50f);
 
-        SceneCamera* playerCam = new SceneCamera();
-        //playerCam->SetOrthographic(width, height, -1.0f, 1.0f);
-        playerCam->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
-        playerCam->SetPos(tc.Translation); // Is reset in the initializing stage of GameLayer anyways
-        playerCam->SetOffset({ Window::Get()->GetWidth() * 0.90f, 0});
-        playerCam->SetKeyboardEnabled(false); // Player handles input itself and sets camera accordingly
+        auto& mc = m_Entity.AddComponent<MaterialComponent>();
+        mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
 
-        sc.Removable = false;
-        tc.Removable = false;
+        auto& cameraComponent = m_Entity.AddComponent<CameraComponent>();
+        cameraComponent.Removable = false;
+        cameraComponent.CameraRef = new SceneCamera();
 
-        RigidBody2DComponent rigidbodyComponent(RigidBody2DComponent::Type::Dynamic);
-        rigidbodyComponent.Mass = 50;
-        rigidbodyComponent.GravityScale = 0;
-        m_Entity.AddComponent<RigidBody2DComponent>(rigidbodyComponent);
+        SceneCamera& playerCam = m_Entity.Camera();
+        playerCam.SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
+        playerCam.SetPos(tc.Translation); // Is reset in the initializing stage of GameLayer anyways
+        playerCam.SetOffset({ Window::Get()->GetWidth() * 0.90f, 0});
+        playerCam.SetKeyboardEnabled(false); // Player handles input itself and sets camera accordingly
+
+        // From enemy.cpp
+        RigidBody2DComponent rigidbody;
+        rigidbody.BodyType = RigidBody2DComponent::Type::Dynamic;
+        rigidbody.GravityScale = 0.0f;
+        m_Entity.AddComponent<RigidBody2DComponent>(rigidbody);
 
         BoxCollider2DComponent boxCollider;
-        //boxCollider.Size = sc.Size;
-        boxCollider.Size = { 100, 100 };
+        // Use 60% instead of 50% to create an outline of the debug drawn shapes
+        // Release mode should use 50%
+    #ifdef LK_DEBUG
+        boxCollider.Size = { 0.60f * (sc.Size.x * tc.Scale.x), 0.60f * (sc.Size.y * tc.Scale.y) };
+    #else // Release Mode
+        boxCollider.Size = { 0.50f * (sc.Size.x * tc.Scale.x), 0.50f * (sc.Size.y * tc.Scale.y) };
+    #endif
         m_Entity.AddComponent<BoxCollider2DComponent>(boxCollider);
-
-        cameraComponent.CameraRef = playerCam;
-        cameraComponent.Removable = false;
 
         // Create gun
         m_GunEntity = Scene::GetActiveScene()->CreateEntity("Big-Gun");
-        auto& gunSC = m_GunEntity.AddComponent<SpriteComponent>();
-        gunSC.SetSize(100, 90);
-        auto& gunMC = m_GunEntity.AddComponent<MaterialComponent>();
         auto& gunTC = m_GunEntity.AddComponent<TransformComponent>();
-        //gunTC.Translation.x = tc.GetTranslation().x + gunSC.GetSize().x;
-        //gunTC.Translation.y = tc.GetTranslation().y + gunSC.GetSize().y;
+        auto& gunSC = m_GunEntity.AddComponent<SpriteComponent>();
+        auto& gunMC = m_GunEntity.AddComponent<MaterialComponent>();
+        gunSC.SetSize(100, 90);
+        gunMC.SetTexture(TextureLibrary::Get()->GetTexture2D("SuperMario-gun"));
         gunTC.Translation.x = m_Pos.x + gunSC.GetSize().x;
         gunTC.Translation.y = m_Pos.y + gunSC.GetSize().y;
-        gunMC.SetTexture(TextureLibrary::Get()->GetTexture2D("SuperMario-gun"));
     }
 
     void Player::Destroy()
@@ -83,33 +83,23 @@ namespace LkEngine {
 
     void Player::OnUpdate(float ts)
     {
-        SceneCamera& cam = m_Entity.GetComponent<CameraComponent>();
-        auto& tc = m_Entity.GetComponent<TransformComponent>();
+        SceneCamera& cam = m_Entity.Camera();
+        auto& tc = m_Entity.Transform();
 
-        if (m_Entity.HasComponent<CameraComponent>())
-        {
-            tc.Translation = m_Pos;
-            cam.SetPos(tc.Translation);
+        tc.Translation = m_Pos;
+        cam.SetPos(m_Pos);
 
-		    auto& rigidBody2D = m_Entity.GetComponent<RigidBody2DComponent>();
-            b2Body* body = static_cast<b2Body*>(rigidBody2D.RuntimeBody);
-            auto& bodyTransform = body->GetTransform();
-            body->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), tc.GetRotationEuler().x);
-            auto& bodyPos = body->GetPosition();
-            //LOG_WARN("BODY POS: ({}, {})", bodyPos.x, bodyPos.y);
-
-            auto& size = GetSize();
-            auto& gunSC = m_GunEntity.GetComponent<SpriteComponent>();
-            auto& gunTC = m_GunEntity.GetComponent<TransformComponent>();
-            gunTC.Translation.x = m_Pos.x + size.x * 0.50f + gunSC.GetSize().x * 0.50f;
-            gunTC.Translation.y = m_Pos.y + size.y * 0.50f - gunSC.GetSize().y;
-        }
+        auto& size = GetSize();
+        auto& gunSC = m_GunEntity.Sprite();
+        auto& gunTC = m_GunEntity.Transform();
+        gunTC.Translation.x = m_Pos.x + size.x * 0.50f + gunSC.GetSize().x * 0.50f;
+        gunTC.Translation.y = m_Pos.y + size.y * 0.50f - gunSC.GetSize().y;
 
         // Input 
 	    // WASD
 	    if (Keyboard::IsKeyPressed(Key::W))
 	    {
-	    	//m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
+	    	m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
 	    }
 	    if (Keyboard::IsKeyPressed(Key::A))
 	    {
@@ -117,7 +107,7 @@ namespace LkEngine {
 	    }
 	    if (Keyboard::IsKeyPressed(Key::S))
 	    {
-	    	//m_Pos -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
+	    	m_Pos -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
 	    }
 	    if (Keyboard::IsKeyPressed(Key::D))
 	    {
@@ -125,11 +115,11 @@ namespace LkEngine {
 	    }
 	    if (Keyboard::IsKeyPressed(Key::Q))
 		{
-			cam.GetZoom() += 0.010f;
+			cam.GetZoom() += 0.10f;
 		}
 		if (Keyboard::IsKeyPressed(Key::R))
 		{
-			cam.GetZoom() -= 0.010f;
+			cam.GetZoom() -= 0.10f;
 		}
 
 		if (Keyboard::IsKeyPressed(Key::Space))
@@ -146,7 +136,6 @@ namespace LkEngine {
             LOG_DEBUG("-JUMP");
 			m_Pos -= glm::vec3(0, 1, 0) * ts * m_JumpHeight;
 		}
-
 
         // Jump
         if (m_Metadata.JumpActive == true)
@@ -179,12 +168,24 @@ namespace LkEngine {
                 }
             }
         }
+
+        // Update rigidbody
+        //b2Body* body = static_cast<b2Body*>(GetEntity().GetComponent<RigidBody2DComponent>().RuntimeBody);
+        b2Body* body = static_cast<b2Body*>(m_Entity.RigidBody2D().RuntimeBody);
+        body->SetTransform(b2Vec2(m_Pos.x, m_Pos.y), 0.0f);
     }
 
     void Player::OnImGuiRender()
     {
         UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO, ImGuiWindowFlags_NoMove);
+
         ImGui::Text("Jump Flag: %s", m_Metadata.JumpActive ? "ACTIVE" : "NOT ACTIVE");
+
+        auto& rb = GetEntity().GetComponent<RigidBody2DComponent>();
+        b2Body* body = static_cast<b2Body*>(GetEntity().GetComponent<RigidBody2DComponent>().RuntimeBody);
+        ImGui::Text("Pos: (%1.f, %1.f)", m_Pos.x, m_Pos.y);
+        ImGui::Text("RigidBody Pos: (%1.f, %1.f)", body->GetPosition().x, body->GetPosition().y);
+
         UI::EndSubwindow();
     }
 
@@ -238,7 +239,7 @@ namespace LkEngine {
         m_Pos.x = m_SpawnPoint.x;
         m_Pos.y = m_SpawnPoint.y;
 
-        auto& tc = m_Entity.GetComponent<TransformComponent>();
+        auto& tc = m_Entity.Transform();
         tc.Translation.x = m_Pos.x;
         tc.Translation.y = m_Pos.y;
 

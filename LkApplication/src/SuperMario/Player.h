@@ -40,6 +40,7 @@ namespace LkEngine {
         void SetSize(const glm::vec2& size);
         UUID GetUUID() { return m_Entity.GetComponent<IDComponent>(); }
         Entity GetEntity() const { return m_Entity; }
+        Entity& GetEntity() { return m_Entity; }
         void SetPos(float x, float y);
         void SetPos(const glm::vec2& pos);
         SceneCamera& GetCamera() { return m_Entity.GetComponent<CameraComponent>(); }

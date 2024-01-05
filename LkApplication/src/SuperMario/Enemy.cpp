@@ -27,7 +27,6 @@ namespace LkEngine {
         m_Entity.AddComponent<RigidBody2DComponent>(rigidbody);
 
         BoxCollider2DComponent boxCollider;
-        //boxCollider.Size = { 100, 100 };
         boxCollider.Size = { sc.Size.x * tc.Scale.x, sc.Size.y * tc.Scale.y };
         m_Entity.AddComponent<BoxCollider2DComponent>(boxCollider);
 
@@ -48,19 +47,14 @@ namespace LkEngine {
         auto& tc = m_Entity.GetComponent<TransformComponent>();
         auto& sc = m_Entity.GetComponent<SpriteComponent>();
         m_Pos.x += distance;
-        tc.Translation.x += distance;
+        tc.Translation = m_Pos;
 
         b2Body* body = static_cast<b2Body*>(GetEntity().GetComponent<RigidBody2DComponent>().RuntimeBody);
-        body->SetTransform(b2Vec2(tc.Translation.x, tc.Translation.y), 0.0f);
+        body->SetTransform(b2Vec2(m_Pos.x, m_Pos.y), 0.0f);
 
         // Whenever the enemy sprite is 'outside' of the screen to the left, reset the position to the right
-        //if (tc.Translation.x < -(Window::Get()->GetViewportWidth() * 0.50f + sc.GetWidth()))
         if (tc.Translation.x < m_EndDistance)
-        {
-            //tc.Translation.x = Window::Get()->GetViewportWidth() * 0.50f;
-            //tc.Translation.x = m_SpawnPoint.x;
             Respawn();
-        }
     }
 
     void Enemy::OnImGuiRender()
