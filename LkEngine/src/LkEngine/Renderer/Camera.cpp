@@ -4,6 +4,17 @@
 
 namespace LkEngine {
 
+	std::string Camera::GetTypeStr() const
+	{
+		switch (m_Type)
+		{
+			case Type::Scene:  return "Scene";
+			case Type::Editor: return "Editor";
+			case Type::None:   return "None";
+		}
+		return "NULL";
+	}
+
 #if 0
 	void Camera::UpdateViewProjection()
 	{

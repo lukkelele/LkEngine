@@ -258,11 +258,13 @@ namespace LkEngine {
             * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
         DrawQuad(transform, color, entityID);
+        //DrawQuad(pos, size, m_WhiteTexture, color, rotation, entityID);
     }
                                                                                                           
     // Draw without texture - use color
     void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
+#if 0
         float textureIndex = 0; 
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
@@ -285,6 +287,42 @@ namespace LkEngine {
         m_QuadIndexCount += 6;
 
         m_Stats.QuadCount++;
+#endif
+        constexpr float textureIndex = 0;
+        constexpr float tilingFactor = 1.0f;
+
+        m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[0];
+        m_QuadVertexBufferPtr->Color = color;
+        m_QuadVertexBufferPtr->TexCoord = TextureCoords[0];
+        m_QuadVertexBufferPtr->TexIndex = textureIndex;
+        m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+        m_QuadVertexBufferPtr++;
+
+        m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[1];
+        m_QuadVertexBufferPtr->Color = color;
+        m_QuadVertexBufferPtr->TexCoord = TextureCoords[1];
+        m_QuadVertexBufferPtr->TexIndex = textureIndex;
+        m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+        m_QuadVertexBufferPtr++;
+
+        m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[2];
+        m_QuadVertexBufferPtr->Color = color;
+        m_QuadVertexBufferPtr->TexCoord = TextureCoords[2];
+        m_QuadVertexBufferPtr->TexIndex = textureIndex;
+        m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+        m_QuadVertexBufferPtr++;
+
+        m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[3];
+        m_QuadVertexBufferPtr->Color = color;
+        m_QuadVertexBufferPtr->TexCoord = TextureCoords[3];
+        m_QuadVertexBufferPtr->TexIndex = textureIndex;
+        m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+        m_QuadVertexBufferPtr++;
+
+        m_QuadIndexCount += 6;
+
+        m_Stats.QuadCount++;
+
     }
 
     void Renderer2D::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID)

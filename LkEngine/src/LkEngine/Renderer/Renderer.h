@@ -56,6 +56,8 @@ namespace LkEngine {
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& color, uint64_t entityID = 0);
 		static std::string GetDrawModeStr();
 
+		static void BeginScene(const glm::mat4& viewProjection);
+
 		template<typename FuncT>
 		static void Submit(FuncT&& func)
 		{

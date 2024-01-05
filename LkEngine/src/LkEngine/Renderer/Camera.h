@@ -16,6 +16,7 @@ namespace LkEngine {
 	{
 	public:
 		enum class ProjectionType { Perspective = 0, Orthographic = 1 };
+		enum class Type { None = 0, Scene = 1, Editor = 2 };
 	public:
 		Camera() = default;
 		virtual ~Camera() = default;
@@ -37,6 +38,8 @@ namespace LkEngine {
 		float GetZoom() const { return m_Zoom; }
 		float& GetZoom() { return m_Zoom; }
 		void SetZoom(float zoom) { m_Zoom = zoom; }
+		Type GetType() const { return m_Type; }
+		std::string GetTypeStr() const;
 
 		void SetProjectionMatrix(const glm::mat4 projection)
 		{
@@ -72,6 +75,7 @@ namespace LkEngine {
 		bool m_MouseEnabled = true;
 		bool m_KeyboardEnabled = true;
 		bool HasMouseMoved;
+		Type m_Type = Type::None;
 
 		glm::mat4 m_ViewMatrix;
 		glm::mat4 m_ProjectionMatrix; 

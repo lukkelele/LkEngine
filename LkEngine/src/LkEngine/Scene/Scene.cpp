@@ -29,35 +29,21 @@ namespace LkEngine {
 		if (activeScene)	
 			s_ActiveScene = this;
 		
-		if (editorScene == false)
-		{
-			Box2DWorldComponent& b2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
-			b2dWorld.World->SetContactListener(&b2dWorld.ContactListener);
 
-			auto& debugger2D = Debugger::GetDebugger2D();
-			if (Debugger2D::GetType() == Debugger2D::Type::Box2D)
-			{
-				// Retrieve and cast the Debugger2D
-				b2Draw* drawDebugger = dynamic_cast<b2Draw*>(Debugger2D::Get());
-				b2dWorld.World->SetDebugDraw(drawDebugger);
-				drawDebugger->SetFlags(b2Draw::e_shapeBit);
-				LOG_CRITICAL("Added debug drawer for Box2D");
-			}
-		}
-	}
-
-	s_ptr<Scene> Scene::Create(const std::string& name, bool activeScene)
-	{
-		s_ptr<Scene> scene = new_s_ptr<Scene>(name, activeScene);
-		auto* editorLayer = EditorLayer::Get();
-		if (editorLayer != nullptr && editorLayer->IsEnabled())
+		if (editorScene)
 		{
-			editorLayer->SetScene(*scene);
+			m_EditorCamera = EditorLayer::Get()->GetEditorCamera();
+			EditorLayer::Get()->SetScene(*this);
 		}
-		Application::Get()->AddScene(*scene);
+
+		Application::Get()->AddScene(*this);
 		s_SceneCounter++;
 
-		return scene;
+		// Initiate 2D physics
+		Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
+		box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
+
+		Debugger::AttachDebugDrawer2D(&box2dWorld);
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -165,9 +151,6 @@ namespace LkEngine {
 	template<>
 	void Scene::OnComponentAdded<RigidBody2DComponent>(Entity entity, RigidBody2DComponent& rigidBody2DComponent)
 	{
-		if (m_EditorScene == true)
-			return;
-
 		//auto sceneView = m_Registry.view<Box2DWorldComponent>();
 		//auto& world = m_Registry.get<Box2DWorldComponent>(sceneView.front()).World;
 		auto& world = GetBox2DWorld();
@@ -211,42 +194,63 @@ namespace LkEngine {
 
 		Entity e = { entity, this };
 		auto& transform = e.Transform();
+		//auto& boxCollider2D = m_Registry.get<BoxCollider2DComponent>(entity);
 
-		auto& boxCollider2D = m_Registry.get<BoxCollider2DComponent>(entity);
 		if (e.HasComponent<RigidBody2DComponent>())
 		{
+			LK_ASSERT(transform.Scale.x * boxColliderComponent.Size.x > 0 && transform.Scale.y * boxColliderComponent.Size.y > 0);
+
 			auto& rigidBody2D = e.GetComponent<RigidBody2DComponent>();
 			b2Body* body = static_cast<b2Body*>(rigidBody2D.RuntimeBody);
+			LK_ASSERT(body != nullptr);
 
 			b2PolygonShape polygonShape;
-			LK_ASSERT(boxCollider2D.Size.x > 0 && boxCollider2D.Size.y > 0);
-			polygonShape.SetAsBox(transform.Scale.x * boxCollider2D.Size.x, transform.Scale.y * boxCollider2D.Size.y);
-			LK_ASSERT(transform.Scale.x * boxCollider2D.Size.x > 0 && transform.Scale.y * boxCollider2D.Size.y > 0);
-			LOG_INFO("BoxCollider for {}, size ({}, {})", 
-				entity.GetName(), transform.Scale.x * boxCollider2D.Size.x, transform.Scale.y * boxCollider2D.Size.y);
+			polygonShape.SetAsBox(transform.Scale.x * boxColliderComponent.Size.x, transform.Scale.y * boxColliderComponent.Size.y);
+			LOG_INFO("BoxCollider for {}, size ({}, {})", entity.GetName(), transform.Scale.x * boxColliderComponent.Size.x, transform.Scale.y * boxColliderComponent.Size.y);
 			//polygonShape.SetAsBox(1000, 1000);
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &polygonShape;
-			fixtureDef.density = boxCollider2D.Density;
-			fixtureDef.friction = boxCollider2D.Friction;
+			fixtureDef.density = boxColliderComponent.Density;
+			fixtureDef.friction = boxColliderComponent.Friction;
 			body->CreateFixture(&fixtureDef);
 			LOG_DEBUG("Added b2FixtureDef to body");
 		}
 	}
 
-	void Scene::BeginScene(float ts)
+	void Scene::OnRender(s_ptr<SceneCamera> sceneCamera, Timestep ts)
 	{
+	}
+
+	void Scene::OnRenderEditor(EditorCamera& editorCamera, Timestep ts)
+	{
+		editorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+		editorCamera.Update(ts);
+	}
+
+	void Scene::BeginScene(Timestep ts)
+	{
+		if (m_Camera == nullptr)
+			return;
 		BeginScene(*m_Camera, ts);
+	}
+
+	void Scene::BeginScene(const glm::mat4& viewProjection, Timestep ts)
+	{
+		signed int velocityIterations = 6;
+		signed int positionIterations = 2;
+
+		if (m_SceneInfo.Paused == false)
+		{
+			// Update the world
+			auto& world = GetBox2DWorld();
+			world.World->Step((1.0f / 60.0f), 12, 4);
+			world.World->DebugDraw();
+		}
 	}
 
 	void Scene::BeginScene(SceneCamera& cam, Timestep ts)
 	{
-		if (m_EditorScene)
-		{
-
-		}
-
 		cam.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		cam.Update(ts);
 
@@ -295,9 +299,14 @@ namespace LkEngine {
 		}
 	}
 
-	void Scene::SetCamera(SceneCamera* cam)
+	void Scene::SetCamera(s_ptr<SceneCamera> cam)
 	{ 
 		m_Camera = cam;
+	}
+
+	void Scene::SetCamera(SceneCamera* cam)
+	{ 
+		m_Camera = std::shared_ptr<SceneCamera>(cam);
 	}
 
 	void Scene::SetEditorCamera(EditorCamera* cam)

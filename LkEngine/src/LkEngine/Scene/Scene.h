@@ -32,14 +32,17 @@ namespace LkEngine {
 		Scene(const std::string& name, bool activeScene = true, bool editorScene = false);
 		~Scene() = default;
 
-		static s_ptr<Scene> Create(const std::string& name, bool activeScene = true); 
 		static Scene* GetActiveScene() { return s_ActiveScene; }
 		static void SetActiveScene(Scene& scene) { s_ActiveScene = &scene; }
 		static std::string GetActiveSceneName() { if (s_ActiveScene) { return s_ActiveScene->GetName(); } return ""; }
 		static uint8_t GetSceneCount() { return s_SceneCounter; }
 
+		void OnRender(s_ptr<SceneCamera> cam, Timestep ts);
+		void OnRenderEditor(EditorCamera& editorCamera, Timestep ts);
+
 		void BeginScene(SceneCamera& cam, Timestep ts);
-		void BeginScene(float ts = 1.0f);
+		void BeginScene(const glm::mat4& viewProjection, Timestep ts);
+		void BeginScene(Timestep ts = 1.0f);
 		void EndScene();
 		void Pause(bool paused);
 
@@ -58,9 +61,10 @@ namespace LkEngine {
 		bool IsEntityInRegistry(Entity entity) const;
 
 		void SwitchCamera();
+		void SetCamera(s_ptr<SceneCamera> cam);
 		void SetCamera(SceneCamera* cam);
 		void SetEditorCamera(EditorCamera* editorCamera);
-		SceneCamera* GetCamera() { return m_Camera; }
+		s_ptr<SceneCamera> GetCamera() { return m_Camera; }
 
 		Box2DWorldComponent& GetBox2DWorld();
 
@@ -73,14 +77,14 @@ namespace LkEngine {
 	private:
 		entt::entity m_SceneEntity;
 		SceneInfo m_SceneInfo;
+		EntityMap m_EntityMap;
 		entt::registry m_Registry; 
 		Timer m_Timer;
 		bool m_EditorScene = false; // Blank scene
 
 		uint16_t m_ViewportWidth, m_ViewportHeight;
 
-		EntityMap m_EntityMap;
-		SceneCamera* m_Camera = nullptr;
+		s_ptr<SceneCamera> m_Camera = nullptr;
 		EditorCamera* m_EditorCamera = nullptr;
 
 		s_ptr<Renderer> m_Renderer;

@@ -45,6 +45,7 @@ namespace LkEngine {
 	void EditorCamera::Update(float ts)
 	{
 		HasMouseMoved = false;
+#if 0
 		if (m_KeyboardEnabled)
 		{
 			// WASD
@@ -77,6 +78,7 @@ namespace LkEngine {
 		if (m_MouseEnabled)
 		{
 		}
+#endif
 
 		auto* window = Window::Get();
 		SetViewportSize(window->GetViewportWidth(), window->GetViewportHeight());

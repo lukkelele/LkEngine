@@ -181,4 +181,9 @@ namespace LkEngine {
 		}
 	}
 
+	void Renderer::BeginScene(const glm::mat4& viewProjection)
+	{
+
+	}
+
 }

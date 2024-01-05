@@ -13,9 +13,9 @@
 
 namespace LkEngine {
 
-	EditorLayer::EditorLayer(Scene& scene)
+	EditorLayer::EditorLayer()
 		: Layer("EditorLayer")
-		, m_Scene(&scene)
+		, m_Scene(nullptr)
 	{
 		s_Instance = this;
 
@@ -55,7 +55,6 @@ namespace LkEngine {
 
 		m_EditorCamera = new EditorCamera();
 		m_EditorCamera->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
-		Scene::GetActiveScene()->SetEditorCamera(m_EditorCamera);
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -265,28 +264,39 @@ namespace LkEngine {
 			}
 
 			ImGui::EndGroup();
+			// Window Information
+			static bool ShowWindowInfo = false;
+			ImGui::Checkbox("Show Window Info", &ShowWindowInfo);
+			if (ShowWindowInfo)
+			{
+				ImGui::SeparatorText("Window Info");
+				ImGui::Text("Second Viewport Bounds[0]: (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y);
+				ImGui::Text("Second Viewport Bounds[1]: (%1.f, %1.f)", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+				ImGui::Text("Second Viewport Size: (%1.f, %1.f)", 
+					m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
+					m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y
+				);
 
-			ImGui::SeparatorText("Window Info");
-			ImGui::Text("Second Viewport Bounds[0]: (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y);
-			ImGui::Text("Second Viewport Bounds[1]: (%1.f, %1.f)", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
-			ImGui::Text("Second Viewport Size: (%1.f, %1.f)", 
-				m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
-				m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y
-			);
+				ImGui::Text("Window Size: (%1.f, %1.f)", (float)window->GetWidth(), (float)window->GetHeight());
+				ImGui::Text("Viewport Window Size: (%1.f, %1.f)", m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+				ImGui::Text("Editor Window Size: (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
+			}
 
-			ImGui::Text("Window Size: (%1.f, %1.f)", (float)window->GetWidth(), (float)window->GetHeight());
-			ImGui::Text("Viewport Window Size: (%1.f, %1.f)", m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-			ImGui::Text("Editor Window Size: (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
+			// Mouse Information
+			static bool ShowMouseInfo = true;
+			ImGui::Checkbox("Show Mouse Info", &ShowMouseInfo);
+			if (ShowMouseInfo)
+			{
+				ImGui::SeparatorText("Mouse Info");
+				ImGui::Text("Raw Pos (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
+				//ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::Pos.x / scalers.x, Mouse::Pos.y / scalers.y);
+				ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
+				ImGui::Text("Center Normalized (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);
+				ImGui::Text("Center Scaled (%.2f, %.2f)", (Mouse::CenterPos.x * EditorWindowSize.x * 0.50f) / scalers.x, Mouse::CenterPos.y * EditorWindowSize.y * 0.50f / scalers.y) ;
+				ImGui::Separator();
+				ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", last_sidebar_right_size.x, last_sidebar_right_size.y);
+			}
 
-			// Mouse Position
-			ImGui::SeparatorText("Mouse Info");
-			ImGui::Text("Raw Pos (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
-			//ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::Pos.x / scalers.x, Mouse::Pos.y / scalers.y);
-			ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
-			ImGui::Text("Center Normalized (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);
-			ImGui::Text("Center Scaled (%.2f, %.2f)", (Mouse::CenterPos.x * EditorWindowSize.x * 0.50f) / scalers.x, Mouse::CenterPos.y * EditorWindowSize.y * 0.50f / scalers.y) ;
-			ImGui::Separator();
-			ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", last_sidebar_right_size.x, last_sidebar_right_size.y);
 
 			auto windowSize = ImGui::GetWindowSize();
 			auto windowPos = ImGui::GetWindowPos();

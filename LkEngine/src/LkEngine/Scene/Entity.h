@@ -3,9 +3,10 @@
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
 
-#include <vector>
 #include <glm/glm.hpp>
 #include <entt/entt.hpp>
+
+#include <vector>
 
 
 namespace LkEngine {
@@ -54,18 +55,19 @@ namespace LkEngine {
 			m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
 		}
 
-		bool IsValid() const 
-		{ 
-			return m_Scene != nullptr;
-		}
-
 		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
 		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
-		SpriteComponent& GetSpriteComponent() { return GetComponent<SpriteComponent>(); }
+
+		TransformComponent& Transform() { return GetComponent<TransformComponent>(); }
+		SpriteComponent& Sprite() { return GetComponent<SpriteComponent>(); }
+		CameraComponent& Camera() { return GetComponent<CameraComponent>(); }
+		RigidBody2DComponent& RigidBody2D() { return GetComponent<RigidBody2DComponent>(); }
+		BoxCollider2DComponent& BoxCollider2D() { return GetComponent<BoxCollider2DComponent>(); }
 
 		operator bool() const { return m_EntityHandle != entt::null; }
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
+		operator TransformComponent&() { return GetComponent<TransformComponent>(); }
 		bool operator==(const Entity& other) const { return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene; }
 		bool operator!=(const Entity& other) const { return !(*this == other); }
 
