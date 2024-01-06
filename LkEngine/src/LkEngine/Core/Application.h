@@ -7,6 +7,8 @@
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/IO/File.h"
 #include "LkEngine/Input/Input.h"
+#include "LkEngine/Debug/Debugger.h"
+#include "LkEngine/Asset/AssetRegistry.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
@@ -14,16 +16,9 @@
 #include "LkEngine/Scene/EntityFactory.h"
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Renderer/RenderCommand.h"
-#include "LkEngine/Renderer/RenderCommandQueue.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
-#include "LkEngine/Physics2D/Physics2D.h"
+#include "LkEngine/Physics/PhysicsSystem.h"
 
-//
-// TODO:
-// - UV Mapping, rotate textures
-// - Entity selection, make it so dragging entities over eachother wont set new selection
-//
 
 namespace LkEngine {
 
@@ -54,16 +49,21 @@ namespace LkEngine {
 
     private:
         ApplicationSpecification m_Specification;
-        LayerStack m_LayerStack;
         Timer m_Timer;
+        LayerStack m_LayerStack;
+        AssetRegistry m_AssetRegistry;
 
         s_ptr<Window> m_Window = nullptr;
         s_ptr<Renderer> m_Renderer = nullptr;
         s_ptr<GraphicsContext> m_GraphicsContext = nullptr;
         s_ptr<Input> m_Input = nullptr;
-        s_ptr<Scene> m_ActiveScene = nullptr;
-        s_ptr<Scene> m_Scenes[8];
         s_ptr<EditorLayer> m_EditorLayer = nullptr;
+        PhysicsSystem* m_PhysicsSystem = nullptr;
+
+        s_ptr<Scene> m_Scene = nullptr; // Active scene
+        s_ptr<Scene> m_Scenes[8];
+
+        Debugger* m_Debugger = nullptr;
 
         inline static Application* m_Instance = nullptr;
     };

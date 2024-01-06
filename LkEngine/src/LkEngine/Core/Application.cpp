@@ -8,27 +8,36 @@ namespace LkEngine {
         : m_Specification(specification)
     {
         m_Instance = this;
-        Logger::Init("LkEngine.log", "Core", "Client");
+        Logger::Init("LkEngine.log");
         m_Window = Window::Create(specification.Title.c_str(), specification.Width, specification.Height);
         m_Timer.Reset();
+
+        m_Debugger = new Debugger();
     }
 
     Application::~Application()
     {
+        LOG_WARN("Terminating application");
     }
 
     void Application::Init()
     {
+        m_AssetRegistry.Clear();
         m_Window->Init(LK_SHADER_VERSION);
         m_GraphicsContext = m_Window->GetContext();
-        m_Input = Input::Create(this);
+
+        m_PhysicsSystem = new PhysicsSystem();
+        m_PhysicsSystem->Init();
+
+        m_Input = std::make_shared<Input>(this);
+        Keyboard::Init();
         Mouse::Init();
 
-        m_Renderer = Renderer::Create();
+        m_Renderer = std::make_shared<Renderer>();
         m_Renderer->Init();
+        m_Debugger->Init();
 
-        m_ActiveScene = Scene::Create("BaseScene"); // Base Scene
-        m_EditorLayer = EditorLayer::Create(*m_ActiveScene);
+        m_EditorLayer = std::make_shared<EditorLayer>();
         m_LayerStack.PushOverlay(&*m_EditorLayer);
     }
 
@@ -37,7 +46,8 @@ namespace LkEngine {
 		while (!glfwWindowShouldClose(m_Window->GetGlfwWindow()))
 		{
             Application* app = this; // Multiple threads
-			float ts = m_Timer.GetDeltaTime();
+			Timestep ts = m_Timer.GetDeltaTime();
+
             m_Input->OnUpdate();
 
             Renderer::BeginFrame();
@@ -46,19 +56,24 @@ namespace LkEngine {
                     layer->OnUpdate(ts);
             }
 
-            if (m_ActiveScene)
+            if (m_Scene)
             {
-                m_ActiveScene->BeginScene();
+                if (m_EditorLayer->IsEnabled())
+                    m_Scene->OnRenderEditor(*m_EditorLayer->GetEditorCamera(), ts);
+                else
+                    m_Scene->OnRender(m_Scene->GetCamera(), ts);
             }
 
             if (m_Specification.ImGuiEnabled)
             {
-			    Renderer::Submit([app]() { app->RenderImGui(); });
-				Renderer::Submit([=]() { m_GraphicsContext->EndImGuiFrame(); });
+			    Renderer::Submit([app] { app->RenderImGui(); });
+				Renderer::Submit([=] { m_GraphicsContext->EndImGuiFrame(); });
             }
-            Renderer::EndFrame();
 
-            Renderer::Submit([&]() { m_Window->SwapBuffers(); });
+            m_PhysicsSystem->Simulate(ts);
+
+            Renderer::EndFrame();
+            Renderer::Submit([&] { m_Window->SwapBuffers(); });
 		}
     }
 
@@ -101,9 +116,7 @@ namespace LkEngine {
     {
         m_GraphicsContext->BeginImGuiFrame();
         for (int i = 0; i < m_LayerStack.Size(); i++)
-        {
             m_LayerStack[i]->OnImGuiRender();
-        }
     }
 
     void Application::AddScene(Scene& scene)
