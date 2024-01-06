@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Debugger2D.h"
+#include "LkEngine/Debug/Debugger2D.h"
 
 #include <box2d/b2_draw.h>
 

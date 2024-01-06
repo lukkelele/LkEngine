@@ -14,6 +14,13 @@ namespace LkEngine {
     class Debugger2D
     {
     public:
+        enum DrawMode2D : int
+        {
+            None           = 1 << 0,
+            Shape          = 1 << 1,
+            Joints         = 1 << 2,
+        };
+    public:
         virtual ~Debugger2D() = default;
 
         static s_ptr<Debugger2D> Create();

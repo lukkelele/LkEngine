@@ -4,7 +4,7 @@
 #include "LkEngine/Scene/Scene.h"
 
 #ifdef LK_PHYSICS_API_BOX2D
-    #include "LkEngine/Debug/Box2DDebugger.h"
+    #include "LkEngine/Debug/Box2D/Box2DDebugger.h"
 #endif
 
 

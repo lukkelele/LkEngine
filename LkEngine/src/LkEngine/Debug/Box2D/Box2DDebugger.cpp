@@ -1,9 +1,6 @@
 #include "LKpch.h"
 #include "Box2DDebugger.h"
-
 #include "LkEngine/Renderer/Renderer.h"
-
-#include <glad/glad.h>
 
 
 
@@ -18,7 +15,6 @@ namespace LkEngine {
     void Box2DDebugger::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) 
     {
         // Quad
-        std::cout << "DrawPolygon -- VertexCount: " << std::to_string(vertexCount) << "  ";
         if (vertexCount == 4)
         {
             // Four vertices
@@ -34,14 +30,11 @@ namespace LkEngine {
             glm::vec2 size = { 2.0f * extents.x, 2.0f * extents.y };
             glm::vec4 col = { color.r, color.g, color.b, color.a };
 
-            //RenderCommand::DrawQuad(pos, { 400, 400 }, col, 0);
-            RenderCommand::DrawQuad(pos, size, col, 0);
-            LOG_TRACE("DrawQuad -> Pos ({}, {})", pos.x, pos.y);
+            Renderer::SubmitQuad(pos, size, col, 0);
         }
         // Triangle
         else if (vertexCount == 3)
         {
-            LOG_DEBUG("DrawPolygon--Triangle: Not implemented");
             throw std::runtime_error("DrawPolygon::Triangle, not implemented");
         }
     }

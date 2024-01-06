@@ -21,7 +21,7 @@ namespace LkEngine {
         static void DrawCursor(float x, float y);
         static void DrawCursor(const ImVec2& cursorPos);
 
-        static void AttachDebugDrawer2D(void* world2D);
+        static void AttachDebugDrawer2D(void* world2D, int drawFlags = Debugger2D::DrawMode2D::Shape);
 
     private:
         inline static Debugger* m_Instance = nullptr;
