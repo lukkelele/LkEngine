@@ -29,7 +29,6 @@ namespace LkEngine {
 		~Renderer() = default;
 
 		static Renderer* Get() { return m_Instance; }
-		static s_ptr<Renderer> Create() { return std::make_shared<Renderer>(); }
 
 		static void Init();
 		static void Shutdown();
@@ -37,16 +36,18 @@ namespace LkEngine {
 		static void BeginFrame();
 		static void EndFrame();
 		static void SwapQueues();
+
 		static void SetDrawMode(const RendererDrawMode& drawMode);
 		static RendererDrawMode& GetDrawMode() { return DrawMode; }
+		static std::string GetDrawModeStr();
 		static RenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
 		static uint32_t GetRenderQueueSubmissionIndex();
 		static s_ptr<RendererAPI> GetRendererAPI() { return m_RendererAPI; }
 		static s_ptr<ShaderLibrary> GetShaderLibrary();
-		static void SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color);
+
+		static void SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID = 0);
 		static void SubmitLines(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
-		static void SubmitIndexed(VertexBuffer& vb, unsigned int count);
         static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
@@ -54,8 +55,9 @@ namespace LkEngine {
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& color, uint64_t entityID = 0);
-		static std::string GetDrawModeStr();
+		static void SubmitIndexed(VertexBuffer& vb, unsigned int count);
 
+		static void BeginScene(const Camera& camera);
 		static void BeginScene(const glm::mat4& viewProjection);
 
 		template<typename FuncT>
@@ -90,14 +92,14 @@ namespace LkEngine {
 			});
 		}
 
-
 	public:
 		inline static RendererDrawMode DrawMode;
 		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
 	private:
-		inline static Renderer* m_Instance = nullptr;
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;
 		inline static s_ptr<TextureLibrary> m_TextureLibrary = nullptr;
+
+		inline static Renderer* m_Instance = nullptr;
 	};
 
 }

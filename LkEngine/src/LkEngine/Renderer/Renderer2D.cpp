@@ -181,7 +181,9 @@ namespace LkEngine {
                 }
             }
 
-            RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
+            Renderer::SubmitIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
+            //RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
+
             m_QuadShader->Unbind();
 
             m_Stats.DrawCalls++;
@@ -435,7 +437,7 @@ namespace LkEngine {
 	    auto& tc = entity.GetComponent<TransformComponent>();
 	    auto& sc = entity.GetComponent<SpriteComponent>();
 
-        DrawQuad(tc.GetTransform(), sc.Color, entity.GetUUID());
+        DrawQuad(tc.GetTransform(), sc.Color, entity.UUID());
     }
 
     float Renderer2D::GetLineWidth()

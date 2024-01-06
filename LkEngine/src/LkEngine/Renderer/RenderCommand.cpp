@@ -15,7 +15,7 @@ namespace LkEngine {
 
     void RenderCommand::SetLineWidth(float width)
     {
-        glLineWidth(width);
+        glLineWidth(width); // remove
     }
 
     void RenderCommand::DrawIndexed(VertexBuffer& vb)
@@ -35,7 +35,7 @@ namespace LkEngine {
 
     void RenderCommand::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
     {
-        m_Renderer->SubmitLine(p0, p1, color);
+        m_Renderer->SubmitLine(p0, p1, color, entityID);
     }
 
     // FIXME

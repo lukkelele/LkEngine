@@ -19,7 +19,7 @@ namespace LkEngine {
         void SetDrawMode(const RendererDrawMode& mode);
         void Draw(VertexBuffer& vb, const Shader& shader);
         void Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader);
-        void SubmitLine(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color);
+        void SubmitLine(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
         void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);

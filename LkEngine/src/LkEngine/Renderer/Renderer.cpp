@@ -112,9 +112,9 @@ namespace LkEngine {
 		return Data->m_ShaderLibrary;
 	}
 
-	void Renderer::SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color)
+	void Renderer::SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
 	{
-		m_RendererAPI->SubmitLine(p1, p2, color);
+		m_RendererAPI->SubmitLine(p0, p1, color, entityID);
 	}
 
 	void Renderer::SubmitLines(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
@@ -131,8 +131,13 @@ namespace LkEngine {
 
 	void Renderer::SubmitIndexed(VertexBuffer& vb, unsigned int count)
 	{
-		vb.Bind();
-		vb.GetIndexBuffer()->Bind();
+		//vb.Bind();
+		//vb.GetIndexBuffer()->Bind();
+        //SubmitIndexed(vb, indexCount);
+
+        vb.Bind();
+        auto& ib = vb.GetIndexBuffer();
+        int indexCount = count ? count : ib->GetCount();
 		m_RendererAPI->SubmitIndexed(count);
 	}
 
@@ -177,13 +182,17 @@ namespace LkEngine {
 		{
 			case RendererDrawMode::Triangles: return "Triangles";
 			case RendererDrawMode::Lines:     return "Lines";
-			default:                          return "Unknown_Draw_Mode";
+			default:                          return "Unknown_DrawMode";
 		}
+	}
+
+	void Renderer::BeginScene(const Camera& camera)
+	{
+		m_RendererAPI->m_Renderer2D->BeginScene(camera);
 	}
 
 	void Renderer::BeginScene(const glm::mat4& viewProjection)
 	{
-
 	}
 
 }
