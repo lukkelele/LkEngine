@@ -94,6 +94,8 @@ namespace LkEngine {
         void DrawImGuizmo(Entity& entity);
 		void HandleExternalWindows();
 
+		int GetTabCount() const { return m_Tabs.size(); }
+
 	public:
 		// Flag to determine if an item is currently being created
 		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window
@@ -107,7 +109,7 @@ namespace LkEngine {
 		glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 		glm::vec2 MenuBarSize = { 0.0f, 30.0f };
-		glm::vec2 TabBarSize = { 0.0f, 30.0f };
+		glm::vec2 TabBarSize = { 0.0f, 0.0f };
 		glm::vec2 BottomBarSize = { 0.0f, 0.0f };
 		glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
 		glm::vec2 RightSidebarSize = { 0.0f, 0.0f };
@@ -129,6 +131,8 @@ namespace LkEngine {
 
 		// Window where the selected entity settings will be shown in
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
+
+		std::vector<std::string> m_Tabs;
 
 	private:
 		Scene* m_Scene = nullptr;

@@ -51,7 +51,7 @@ namespace LkEngine {
 		MenuBarSize.y = 30.0f;
 
 		TabBarSize.x = 0.0f;
-		TabBarSize.y = 30.0f;
+		TabBarSize.y = 34.0f;
 
 		EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
 		EditorWindowSize.x = m_ViewportBounds[1].x - LeftSidebarSize.x - RightSidebarSize.x;
@@ -179,7 +179,6 @@ namespace LkEngine {
 					Window::Get()->SetDepthEnabled(false);
 			}
 
-
 			ImGui::BeginGroup();
 			{
 				static ImVec2 modeButtonSize = { 50.0f, 50.0f };
@@ -188,13 +187,20 @@ namespace LkEngine {
 				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LOG_DEBUG("Selected mode: Normal Mode");
+					if (m_Tabs.size() == 0)
+					{
+						m_Tabs.push_back("Viewport");
+					}
+					m_Tabs.push_back(fmt::format("Tab {}", m_Tabs.size() + 1));
 				}
 				ImGui::SameLine();
 				if (ImGui::ImageButton("##ModeButton-NodeEditor", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LOG_DEBUG("Selected mode: Node Editor");
+					m_Tabs.pop_back();
+					if (m_Tabs.size() == 1)
+						m_Tabs.pop_back();
 				}
-
 			}
 			ImGui::EndGroup();
 
@@ -266,31 +272,31 @@ namespace LkEngine {
 		//--------------------------------------------------
 		if (m_UpdateWindowSize)
 		{
-			//ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - RightSidebarSize.x, ImGui::GetCursorPosY()), ImGuiCond_Always);
 			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
-			//ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always);
+			//ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
 		}
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 		{
 			ImGui::Text("RightSidebarSize: (%1.f, %1.f)", RightSidebarSize.x, RightSidebarSize.y);
 			ImGui::BeginGroup();
-			if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor)) { }
-
-			if (SelectedEntity && m_GizmoType != -1)
 			{
-				DrawImGuizmo(SelectedEntity);
-			}
+				if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor));
 
-			if (m_ShowStackTool) 
-				ImGui::ShowStackToolWindow();
-			if (m_ShowStyleEditor)
-			{
-				ImGui::Begin("Style Editor");
-				ImGui::ShowStyleEditor();
-				ImGui::End();
-			}
+				if (SelectedEntity && m_GizmoType != -1)
+					DrawImGuizmo(SelectedEntity);
 
+				if (m_ShowStackTool) 
+					ImGui::ShowStackToolWindow();
+
+				if (m_ShowStyleEditor)
+				{
+					ImGui::Begin("Style Editor");
+					ImGui::ShowStyleEditor();
+					ImGui::End();
+				}
+
+			}
 			ImGui::EndGroup();
 			// Window Information
 			static bool ShowWindowInfo = false;
@@ -317,7 +323,6 @@ namespace LkEngine {
 			{
 				ImGui::SeparatorText("Mouse Info");
 				ImGui::Text("Raw Pos (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
-				//ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::Pos.x / scalers.x, Mouse::Pos.y / scalers.y);
 				ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
 				ImGui::Text("Center Normalized (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);
 				ImGui::Text("Center Scaled (%.2f, %.2f)", (Mouse::CenterPos.x * EditorWindowSize.x * 0.50f) / scalers.x, Mouse::CenterPos.y * EditorWindowSize.y * 0.50f / scalers.y) ;
@@ -343,18 +348,16 @@ namespace LkEngine {
 		//--------------------------------------------------
 		if (m_UpdateWindowSize)
 		{
-			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x, viewport->Size.y + MenuBarSize.y + TabBarSize.y - BottomBarSize.y), ImGuiCond_Always);
+			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x, viewport->Size.y + MenuBarSize.y - BottomBarSize.y), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - (LeftSidebarSize.x + RightSidebarSize.x), BottomBarSize.y), ImGuiCond_Always);
 		}
 		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 		{
 			ImGui::BeginGroup();
-
-			ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
-			ImGui::SameLine(0, 20);
-
-			ImGui::BeginGroup();
 			{
+				ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
+				ImGui::SameLine(0, 20);
+
 				ImGui::Text("Center Window (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
 				ImGui::SameLine(0, 20);
 				ImGui::Text("Scaled res (%.1f, %.1f)", EditorWindowSize.x / scalers.x, EditorWindowSize.y / scalers.y);
@@ -366,10 +369,8 @@ namespace LkEngine {
 				ImGui::Text("SceneCamera Pos: (%.1f, %.1f)", sceneCameraPos.x, sceneCameraPos.y);
 			}
 			ImGui::EndGroup();
+
 			ImGui::Dummy({ 0, 2 });
-
-			ImGui::EndGroup();
-
 			//Mouse::ScaledPos = { (Mouse::Pos.x) / scalers.x, (Mouse::Pos.y) / scalers.y };
 
 			auto& active_cam = *Scene::GetActiveScene()->GetCamera();
@@ -404,6 +405,71 @@ namespace LkEngine {
 		if (m_UpdateWindowSize == true)
 			m_UpdateWindowSize = false; 
 
+		static int lastTabCount = 0;
+		int currentTabCount = GetTabCount();
+		if (currentTabCount > 0)
+		{
+			// Apply viewport update as the tabbar height might've changed
+			if (lastTabCount != currentTabCount)
+			{
+				windowsHaveChangedSize = true;
+			}
+			ImGui::SetNextWindowPos({ LeftSidebarSize.x, MenuBarSize.y }, ImGuiCond_Always);
+			ImGui::SetNextWindowSize({ viewport->WorkSize.x, TabBarSize.y }, ImGuiCond_Always);
+			ImGui::Begin("##LkTabBar", NULL, UI::TabBarFlags);
+			{
+				if (ImGui::BeginTabBar("MainTab", ImGuiTabBarFlags_Reorderable))
+				{
+#if 0
+					if (ImGui::BeginTabItem("Viewport", NULL, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
+					{
+						m_ActiveWindowType = WindowType::Viewport;
+						ImGui::EndTabItem();
+					}
+
+					if (ImGui::BeginTabItem("Gay Uwu!"))
+					{
+						m_ActiveWindowType = WindowType::Viewport;
+
+						ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + MenuBarSize.y }, ImGuiCond_Always);
+						ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
+						ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(100, 0, 0, 255));
+						ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(255, 0, 0, 255));
+						ImGui::Begin("##CenterNodeWindow", NULL, UI::SidebarFlags);
+						{
+							ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), { EditorWindowSize.x, EditorWindowSize.y }, ImVec2(1, 1), ImVec2(0, 0), { 0, 0, 0, 0 }, { 1, 1, 1, 1 });
+						}
+						ImGui::End();
+						ImGui::PopStyleColor(2);
+
+						ImGui::EndTabItem();
+					}
+#endif
+					for (auto& tabName : m_Tabs)
+					{
+						if (ImGui::BeginTabItem(tabName.c_str()))
+						{
+							
+							ImGui::EndTabItem();
+						}
+					}
+
+					ImGui::EndTabBar();
+				}
+			}
+			ImGui::End();
+		}
+		// No tabs
+		else 
+		{
+			if (lastTabCount != currentTabCount)
+			{
+				windowsHaveChangedSize = true;
+			}
+		}
+
+		lastTabCount = GetTabCount();
+
 		// Check to see if any of the editor windows have changed in size and if they have
 		// then readjust the viewport
 		// Only adjust if the left button IS NOT pressed. This is to remove the issue of the 
@@ -416,7 +482,11 @@ namespace LkEngine {
 
 			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
 			EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
-			EditorWindowSize.y = viewport->Size.y - BottomBarSize.y /* - topbar_height */;
+			//EditorWindowSize.y = viewport->Size.y - BottomBarSize.y /* - topbar_height */;
+			if (lastTabCount > 0)
+				EditorWindowSize.y = viewport->Size.y - BottomBarSize.y - MenuBarSize.y - TabBarSize.y;
+			else
+				EditorWindowSize.y = viewport->Size.y - BottomBarSize.y - MenuBarSize.y;
 
 			// Update viewport scalers as the resolution has been altered
 			ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
@@ -438,94 +508,6 @@ namespace LkEngine {
 			windowsHaveChangedSize = false;
 			m_UpdateWindowSize = true; // Tell UI to set the window size ONCE
 		}
-
-		ImGui::SetNextWindowPos({ LeftSidebarSize.x, MenuBarSize.y }, ImGuiCond_Always);
-		ImGui::SetNextWindowSize({ viewport->WorkSize.x, TabBarSize.y }, ImGuiCond_Always);
-		ImGui::Begin("##LkTabBar", NULL, UI::SidebarFlags);
-		{
-			if (ImGui::BeginTabBar("MainTab"), ImGuiTabBarFlags_Reorderable | ImGuiTabBarFlags_NoTooltip)
-			{
-				if (ImGui::BeginTabItem("Tab1"))
-				{
-					m_ActiveWindowType = WindowType::Viewport;
-					ImGui::Text("Tab1 content");
-
-				#if 0
-					ImGui::SetNextWindowPos({ LeftSidebarSize.x, TopBarSize.y + CenterWindowTabBarSize.y }, ImGuiCond_Always);
-					ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
-					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
-					ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(255, 0, 0, 255));
-					ImGui::Begin("##CenterRenderWindow", NULL, UI::CoreViewportFlags | ImGuiWindowFlags_NoInputs);
-					{
-						ImGui::Text("Tab1");
-						ImGui::Button("Hello again");
-					}
-					ImGui::End();
-					ImGui::PopStyleColor(2);
-				#endif
-					ImGui::EndTabItem();
-				}
-
-				if (ImGui::BeginTabItem("Tab2"))
-				{
-					m_ActiveWindowType = WindowType::NodeEditor;
-					ImGui::Text("Tab2 content");
-
-					//ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + CenterWindowTabBarSize.y }, ImGuiCond_Always);
-					ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + MenuBarSize.y }, ImGuiCond_Always);
-					ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
-					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(100, 0, 0, 255));
-					ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(255, 0, 0, 255));
-					ImGui::Begin("##CenterNodeWindow", NULL, UI::SidebarFlags);
-					{
-					}
-					ImGui::End();
-					ImGui::PopStyleColor(2);
-
-					ImGui::EndTabItem();
-				}
-				if (ImGui::BeginTabItem("Crippy"))
-				{
-					m_ActiveWindowType = WindowType::NodeEditor;
-
-					//ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + CenterWindowTabBarSize.y }, ImGuiCond_Always);
-					ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + MenuBarSize.y }, ImGuiCond_Always);
-					ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
-					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 255, 255));
-					ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(0, 0, 255, 255));
-					ImGui::Begin("##CenterNodeWindow", NULL, UI::SidebarFlags);
-					{
-					}
-					ImGui::End();
-					ImGui::PopStyleColor(2);
-
-					ImGui::EndTabItem();
-				}
-				if (ImGui::BeginTabItem("Gay Uwu!"))
-				{
-					m_ActiveWindowType = WindowType::Viewport;
-
-					//ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + CenterWindowTabBarSize.y }, ImGuiCond_Always);
-					ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + MenuBarSize.y }, ImGuiCond_Always);
-					ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
-					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(100, 0, 0, 255));
-					ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(255, 0, 0, 255));
-					ImGui::Begin("##CenterNodeWindow", NULL, UI::SidebarFlags);
-					{
-						if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), {EditorWindowSize.x, EditorWindowSize.y}, ImVec2(1, 1), ImVec2(0, 0), { 0, 0, 0, 0 }, { 1, 1, 1, 1 }))
-						{
-						}
-					}
-					ImGui::End();
-					ImGui::PopStyleColor(2);
-
-					ImGui::EndTabItem();
-				}
-
-				ImGui::EndTabBar();
-			}
-		}
-		ImGui::End();
 
 
 		ImGui::End(); // Viewport
