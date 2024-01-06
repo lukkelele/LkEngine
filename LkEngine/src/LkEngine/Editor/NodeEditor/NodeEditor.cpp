@@ -16,7 +16,7 @@ namespace LkEngine {
     void NodeEditor::Init()
     {
         m_NodeEditorContext->Init();
-        NE::SetCurrentEditor(m_NodeEditorContext->GetContext());
+        //NE::SetCurrentEditor(m_NodeEditorContext->GetContext());
         m_Initialized = true;
     }
 

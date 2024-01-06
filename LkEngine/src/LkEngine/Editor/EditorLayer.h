@@ -99,6 +99,7 @@ namespace LkEngine {
 		void HandleExternalWindows();
 
 		int GetTabCount() const { return m_Tabs.size(); }
+		std::string GetCurrentTabName() const { return m_CurrentTab; }
 
 	public:
 		// Flag to determine if an item is currently being created
@@ -137,6 +138,7 @@ namespace LkEngine {
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
 		std::vector<std::string> m_Tabs;
+		std::string m_CurrentTab = "";
 
 	private:
 		Scene* m_Scene = nullptr;

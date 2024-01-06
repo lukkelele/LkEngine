@@ -193,8 +193,10 @@ namespace LkEngine {
 					if (m_Tabs.size() == 0)
 					{
 						m_Tabs.push_back("Viewport");
+						m_CurrentTab = "Viewport";
 					}
-					m_Tabs.push_back(fmt::format("Tab {}", m_Tabs.size() + 1));
+					//m_Tabs.push_back(fmt::format("Tab {}", m_Tabs.size() + 1));
+					m_Tabs.push_back(fmt::format("Node Editor-{}", m_Tabs.size()));
 				}
 				ImGui::SameLine();
 				if (ImGui::ImageButton("##ModeButton-NodeEditor", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
@@ -276,7 +278,6 @@ namespace LkEngine {
 		if (m_UpdateWindowSize)
 		{
 			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
-			//ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
 		}
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
@@ -374,7 +375,6 @@ namespace LkEngine {
 			ImGui::EndGroup();
 
 			ImGui::Dummy({ 0, 2 });
-			//Mouse::ScaledPos = { (Mouse::Pos.x) / scalers.x, (Mouse::Pos.y) / scalers.y };
 
 			auto& active_cam = *Scene::GetActiveScene()->GetCamera();
 			glm::vec2 cam_pos = active_cam.GetPos();
@@ -390,6 +390,8 @@ namespace LkEngine {
 			ImGui::Text("Viewport Size: (%1.f, %1.f)", viewport->Size.x, viewport->Size.y);
 			ImGui::SameLine();
 			ImGui::Text("WorkSize: (%1.f, %1.f)", viewport->WorkSize.x, viewport->WorkSize.y);
+
+			ImGui::Text("Current Tab: %s", GetCurrentTabName().c_str());
 
 			EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
 			EditorWindowSize.y = viewport->Size.y - BottomBarSize.y /* - topbar_height */;
@@ -413,10 +415,6 @@ namespace LkEngine {
 		if (currentTabCount > 0)
 		{
 			// Apply viewport update as the tabbar height might've changed
-			if (lastTabCount != currentTabCount)
-			{
-				windowsHaveChangedSize = true;
-			}
 			ImGui::SetNextWindowPos({ LeftSidebarSize.x, MenuBarSize.y }, ImGuiCond_Always);
 			ImGui::SetNextWindowSize({ viewport->WorkSize.x, TabBarSize.y }, ImGuiCond_Always);
 			ImGui::Begin("##LkTabBar", NULL, UI::TabBarFlags);
@@ -427,6 +425,15 @@ namespace LkEngine {
 					{
 						if (ImGui::BeginTabItem(tabName.c_str()))
 						{
+							m_CurrentTab = tabName;
+							if (tabName == "Node Editor-1")
+							{
+								ImGui::SetNextWindowPos({ m_SecondViewportBounds[0].x, MenuBarSize.y + TabBarSize.y }, ImGuiCond_Always);
+								ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
+								ImGui::Begin("LkEngine Node Editor", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+								m_NodeEditor->OnRender();
+								ImGui::End();
+							}
 							ImGui::EndTabItem();
 						}
 					}
@@ -438,16 +445,12 @@ namespace LkEngine {
 		// No tabs
 		else 
 		{
-			if (lastTabCount != currentTabCount)
-			{
-				windowsHaveChangedSize = true;
-			}
 		}
 
-		lastTabCount = GetTabCount();
+		if (lastTabCount != currentTabCount)
+			windowsHaveChangedSize = true;
 
-		// Node Editor
-		m_NodeEditor->OnRender();
+		lastTabCount = GetTabCount();
 
 		// Check to see if any of the editor windows have changed in size and if they have
 		// then readjust the viewport
@@ -458,11 +461,11 @@ namespace LkEngine {
 			LeftSidebarSize = { last_sidebar_left_size.x, last_sidebar_left_size.y };
 			RightSidebarSize = { last_sidebar_right_size.x, last_sidebar_right_size.y };
 			BottomBarSize = { last_bottombar_size.x, last_bottombar_size.y };
-
 			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
 			EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
-			//EditorWindowSize.y = viewport->Size.y - BottomBarSize.y /* - topbar_height */;
-			if (lastTabCount > 0)
+
+			// Only take the size of the TabBar into account if any tabs exist
+			if (currentTabCount > 0)
 				EditorWindowSize.y = viewport->Size.y - BottomBarSize.y - MenuBarSize.y - TabBarSize.y;
 			else
 				EditorWindowSize.y = viewport->Size.y - BottomBarSize.y - MenuBarSize.y;
@@ -480,7 +483,6 @@ namespace LkEngine {
 				LeftSidebarSize.y = viewport->WorkSize.y;
 				RightSidebarSize.y = viewport->WorkSize.y;
 			}
-
 			// Reapply viewport settings starting from a lower point of the left sidebar and the bottom bar height
 			GraphicsContext::Get()->SetViewport(EditorWindowPos, EditorWindowSize);
 
