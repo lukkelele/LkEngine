@@ -2,6 +2,7 @@
 
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Timer.h"
 #include "LkEngine/Core/Logger.h"
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/Window.h"
@@ -30,12 +31,14 @@
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 
+#include "LkEngine/Debug/Debugger.h"
 #include "LkEngine/Debug/DebugLayer.h"
 
-#include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Editor/Editor.h"
 #include "LkEngine/Editor/EditorCamera.h"
 
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/ImGuiUtilities.h"
 
+#include "LkEngine/Physics/PhysicsSystem.h"
 #include "LkEngine/Physics2D/Physics2D.h"

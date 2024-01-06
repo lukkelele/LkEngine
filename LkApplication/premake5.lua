@@ -27,6 +27,8 @@ project "LkApplication"
 		"%{wks.location}/lib/entt/src",
 		"%{wks.location}/lib/imgui",
 		"%{wks.location}/lib/ImGuizmo",
+        "%{wks.location}/lib/box2d/include",
+        "%{wks.location}/lib/yaml-cpp/include",
 	}
 
 	links
