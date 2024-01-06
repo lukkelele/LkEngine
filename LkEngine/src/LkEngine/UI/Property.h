@@ -16,7 +16,9 @@ namespace LkEngine::UI {
 		static void Rotation2D(TransformComponent& transform)
 		{
 			UI::PushID();
-			ImGui::SliderFloat2("Rot", &transform.Rotation.x, -6.0f, 6.0f, "%.3f");
+			auto rot = transform.GetRotation();
+			ImGui::SliderFloat2("Rot", &rot.x, -6.0f, 6.0f, "%.3f");
+			transform.SetRotation(rot);
 			UI::PopID();
 		}
 
@@ -38,7 +40,10 @@ namespace LkEngine::UI {
 			ImGui::SameLine();
 			//ImGui::SetCursorPosX(scale_textsize.x);
 			ImGui::PushItemWidth(100); // TODO
-			ImGui::SliderFloat2("##rot-vec2", &transform.Rotation.x, -6.0f, 6.0f, "%.1f"); // TODO: make to rad
+			auto rot = transform.GetRotation();
+			//ImGui::SliderFloat2("##rot-vec2", &transform.Rotation.x, -6.0f, 6.0f, "%.1f"); // TODO: make to rad
+			ImGui::SliderFloat2("Rotation", &rot.x, -6.0f, 6.0f, "%.3f");
+			transform.SetRotation(rot);
 			ImGui::PopItemWidth();
 
 			ImGui::PopStyleVar(1);

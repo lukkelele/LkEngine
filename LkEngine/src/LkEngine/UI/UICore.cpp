@@ -23,12 +23,12 @@ namespace LkEngine::UI {
         | ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoTabBar;
 
     ImGuiWindowFlags TopbarFlags = ImGuiWindowFlags_MenuBar
-        | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoSavedSettings;
+        | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
 
     ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
         | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
-        | ImGuiWindowFlags_NoMove;// | ImGuiWindowFlags_NoSavedSettings;
+        | ImGuiWindowFlags_NoMove;
 
     static uint32_t s_Counter = 0;
     static int s_UIContextID = 0;

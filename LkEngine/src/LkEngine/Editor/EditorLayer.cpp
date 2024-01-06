@@ -1,14 +1,19 @@
 #include "LKpch.h"
 #include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Debug/DebugLayer.h"
+
+#include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
+
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
+
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/UI/ImGuiUtilities.h"
-#include "LkEngine/Scene/Scene.h"
 #include "LkEngine/UI/DockSpace.h"
+
+#include "LkEngine/UI/OpenGLImGui.h"
 
 
 namespace LkEngine {
@@ -16,6 +21,7 @@ namespace LkEngine {
 	EditorLayer::EditorLayer()
 		: Layer("EditorLayer")
 		, m_Scene(nullptr)
+		, m_ActiveWindowType(WindowType::None)
 	{
 		s_Instance = this;
 
@@ -37,9 +43,15 @@ namespace LkEngine {
 		RightSidebarPos.y = 0.0f;
 
 		BottomBarSize.x = 0.0f;
-		BottomBarSize.y = 180.0f;
+		BottomBarSize.y = 340.0f;
 		BottomBarPos.x = 0.0f;
 		BottomBarPos.y = 0.0f;
+
+		MenuBarSize.x = 0.0f;
+		MenuBarSize.y = 30.0f;
+
+		TabBarSize.x = 0.0f;
+		TabBarSize.y = 30.0f;
 
 		EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
 		EditorWindowSize.x = m_ViewportBounds[1].x - LeftSidebarSize.x - RightSidebarSize.x;
@@ -48,13 +60,14 @@ namespace LkEngine {
 		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 		LK_ASSERT(EditorWindowSize.x != 0 && EditorWindowSize.y != 0 && EditorWindowSize.x > 0 && EditorWindowSize.y > 0);
 
-		auto* window = Window::Get();
-		window->SetScalers(ViewportScalers.x, ViewportScalers.y);
-		window->SetWidth(EditorWindowSize.x);
-		window->SetHeight(EditorWindowSize.y);
+		Window::Get()->SetScalers(ViewportScalers.x, ViewportScalers.y);
+		Window::Get()->SetWidth(EditorWindowSize.x);
+		Window::Get()->SetHeight(EditorWindowSize.y);
 
 		m_EditorCamera = new EditorCamera();
 		m_EditorCamera->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
+
+		m_ActiveWindowType = WindowType::Viewport;
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -125,37 +138,30 @@ namespace LkEngine {
 		//--------------------------------------------------
 		// TOP MENUBAR
 		//--------------------------------------------------
-		static float topbar_height = 0.0f;
-#if 0
-		//ImGui::PushID(UI_TOP_BAR);
 		UI::PushID(UI_TOP_BAR);
-		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-		//ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, topbar_height), ImGuiCond_Always);
-		ImGui::Begin(UI_TOP_BAR, NULL, UI::TopbarFlags);
+		ImGui::BeginMainMenuBar();
 		{
-			ImGui::BeginMenuBar();
-			topbar_height = ImGui::GetFrameHeight();
-			TopBarHeight = ImGui::GetFrameHeight();
+			MenuBarSize.x = ImGui::GetCurrentWindow()->Size.x;
+			MenuBarSize.y = ImGui::GetFrameHeight();
+
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("New")) { }
+				if (ImGui::MenuItem("New")) 
+				{ 
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::MenuItem("Render Information"))
-			{
 				ShowRenderInformationWindow = !ShowRenderInformationWindow;
-			}
-			ImGui::EndMenuBar();
+
 		}
-		ImGui::End();
+		ImGui::EndMainMenuBar();
 		UI::PopID(UI_TOP_BAR);
-		//--------------------------------------------------
-#endif
 
 		if (m_UpdateWindowSize)
 		{
-			ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetCursorPosY()), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y - topbar_height), ImGuiCond_Always);
+			ImGui::SetNextWindowPos(ImVec2(0, MenuBarSize.y), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always);
 		}
 		//--------------------------------------------------
 		// LEFT SIDEBAR
@@ -172,6 +178,25 @@ namespace LkEngine {
 				else
 					Window::Get()->SetDepthEnabled(false);
 			}
+
+
+			ImGui::BeginGroup();
+			{
+				static ImVec2 modeButtonSize = { 50.0f, 50.0f };
+				static ImVec4 modeButtonBgColor = { 0, 0, 0, 0 };
+				static ImVec4 modeButtonTintColor = { 1, 1, 1, 1 };
+				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
+				{
+					LOG_DEBUG("Selected mode: Normal Mode");
+				}
+				ImGui::SameLine();
+				if (ImGui::ImageButton("##ModeButton-NodeEditor", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
+				{
+					LOG_DEBUG("Selected mode: Node Editor");
+				}
+
+			}
+			ImGui::EndGroup();
 
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			if (ImGui::TreeNode("Colors"))
@@ -241,8 +266,10 @@ namespace LkEngine {
 		//--------------------------------------------------
 		if (m_UpdateWindowSize)
 		{
-			ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - RightSidebarSize.x, ImGui::GetCursorPosY()), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
+			//ImGui::SetNextWindowPos(ImVec2(viewport->WorkSize.x - RightSidebarSize.x, ImGui::GetCursorPosY()), ImGuiCond_Always);
+			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
+			//ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always);
 		}
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 		{
@@ -255,7 +282,8 @@ namespace LkEngine {
 				DrawImGuizmo(SelectedEntity);
 			}
 
-			//if (m_ShowStackTool) ImGui::ShowStackToolWindow();
+			if (m_ShowStackTool) 
+				ImGui::ShowStackToolWindow();
 			if (m_ShowStyleEditor)
 			{
 				ImGui::Begin("Style Editor");
@@ -297,7 +325,6 @@ namespace LkEngine {
 				ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", last_sidebar_right_size.x, last_sidebar_right_size.y);
 			}
 
-
 			auto windowSize = ImGui::GetWindowSize();
 			auto windowPos = ImGui::GetWindowPos();
 			if (windowSize.x != RightSidebarSize.x || windowSize.y != RightSidebarSize.y)
@@ -316,8 +343,8 @@ namespace LkEngine {
 		//--------------------------------------------------
 		if (m_UpdateWindowSize)
 		{
-			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y - BottomBarSize.y), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x - (LeftSidebarSize.x + RightSidebarSize.x), BottomBarSize.y), ImGuiCond_Always);
+			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x, viewport->Size.y + MenuBarSize.y + TabBarSize.y - BottomBarSize.y), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - (LeftSidebarSize.x + RightSidebarSize.x), BottomBarSize.y), ImGuiCond_Always);
 		}
 		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 		{
@@ -356,21 +383,20 @@ namespace LkEngine {
 			auto* currentWindow = ImGui::GetCurrentWindow();
 			last_bottombar_size = windowSize;
 			ImGui::Text("Last Bottombar Size: (%1.f, %1.f)", last_bottombar_size.x, last_bottombar_size.y);
+			ImGui::Text("Viewport Size: (%1.f, %1.f)", viewport->Size.x, viewport->Size.y);
+			ImGui::SameLine();
+			ImGui::Text("WorkSize: (%1.f, %1.f)", viewport->WorkSize.x, viewport->WorkSize.y);
+
+			EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
+			EditorWindowSize.y = viewport->Size.y - BottomBarSize.y /* - topbar_height */;
+
+			// Top right point/bound
+			m_SecondViewportBounds[0] = { LeftSidebarSize.x, BottomBarSize.y };
+			m_SecondViewportBounds[1] = { 
+				(m_SecondViewportBounds[0].x + EditorWindowSize.x),
+				(m_SecondViewportBounds[0].y + EditorWindowSize.y)
+			};
 		}
-
-		ImGui::Text("Viewport Size: (%1.f, %1.f)", viewport->Size.x, viewport->Size.y);
-		ImGui::SameLine();
-		ImGui::Text("WorkSize: (%1.f, %1.f)", viewport->WorkSize.x, viewport->WorkSize.y);
-
-		EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
-		EditorWindowSize.y = viewport->Size.y - BottomBarSize.y /* - topbar_height */;
-
-		// Top right point/bound
-		m_SecondViewportBounds[0] = { LeftSidebarSize.x, BottomBarSize.y };
-		m_SecondViewportBounds[1] = { 
-			(m_SecondViewportBounds[0].x + EditorWindowSize.x),
-			(m_SecondViewportBounds[0].y + EditorWindowSize.y)
-		};
 		ImGui::End();
 
 		// If the window sizes have been adjusted, set the bool member to false
@@ -412,6 +438,96 @@ namespace LkEngine {
 			windowsHaveChangedSize = false;
 			m_UpdateWindowSize = true; // Tell UI to set the window size ONCE
 		}
+
+		ImGui::SetNextWindowPos({ LeftSidebarSize.x, MenuBarSize.y }, ImGuiCond_Always);
+		ImGui::SetNextWindowSize({ viewport->WorkSize.x, TabBarSize.y }, ImGuiCond_Always);
+		ImGui::Begin("##LkTabBar", NULL, UI::SidebarFlags);
+		{
+			if (ImGui::BeginTabBar("MainTab"), ImGuiTabBarFlags_Reorderable | ImGuiTabBarFlags_NoTooltip)
+			{
+				if (ImGui::BeginTabItem("Tab1"))
+				{
+					m_ActiveWindowType = WindowType::Viewport;
+					ImGui::Text("Tab1 content");
+
+				#if 0
+					ImGui::SetNextWindowPos({ LeftSidebarSize.x, TopBarSize.y + CenterWindowTabBarSize.y }, ImGuiCond_Always);
+					ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
+					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+					ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(255, 0, 0, 255));
+					ImGui::Begin("##CenterRenderWindow", NULL, UI::CoreViewportFlags | ImGuiWindowFlags_NoInputs);
+					{
+						ImGui::Text("Tab1");
+						ImGui::Button("Hello again");
+					}
+					ImGui::End();
+					ImGui::PopStyleColor(2);
+				#endif
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Tab2"))
+				{
+					m_ActiveWindowType = WindowType::NodeEditor;
+					ImGui::Text("Tab2 content");
+
+					//ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + CenterWindowTabBarSize.y }, ImGuiCond_Always);
+					ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + MenuBarSize.y }, ImGuiCond_Always);
+					ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
+					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(100, 0, 0, 255));
+					ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(255, 0, 0, 255));
+					ImGui::Begin("##CenterNodeWindow", NULL, UI::SidebarFlags);
+					{
+					}
+					ImGui::End();
+					ImGui::PopStyleColor(2);
+
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Crippy"))
+				{
+					m_ActiveWindowType = WindowType::NodeEditor;
+
+					//ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + CenterWindowTabBarSize.y }, ImGuiCond_Always);
+					ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + MenuBarSize.y }, ImGuiCond_Always);
+					ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
+					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 255, 255));
+					ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(0, 0, 255, 255));
+					ImGui::Begin("##CenterNodeWindow", NULL, UI::SidebarFlags);
+					{
+					}
+					ImGui::End();
+					ImGui::PopStyleColor(2);
+
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Gay Uwu!"))
+				{
+					m_ActiveWindowType = WindowType::Viewport;
+
+					//ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + CenterWindowTabBarSize.y }, ImGuiCond_Always);
+					ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + MenuBarSize.y }, ImGuiCond_Always);
+					ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
+					ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(100, 0, 0, 255));
+					ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(255, 0, 0, 255));
+					ImGui::Begin("##CenterNodeWindow", NULL, UI::SidebarFlags);
+					{
+						if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), {EditorWindowSize.x, EditorWindowSize.y}, ImVec2(1, 1), ImVec2(0, 0), { 0, 0, 0, 0 }, { 1, 1, 1, 1 }))
+						{
+						}
+					}
+					ImGui::End();
+					ImGui::PopStyleColor(2);
+
+					ImGui::EndTabItem();
+				}
+
+				ImGui::EndTabBar();
+			}
+		}
+		ImGui::End();
+
+
 		ImGui::End(); // Viewport
 
 		HandleExternalWindows();
@@ -428,10 +544,10 @@ namespace LkEngine {
 
 	void EditorLayer::SelectEntity(Entity& entity)
 	{
-		if (SelectedEntityID != entity.GetUUID())
+		if (SelectedEntityID != entity.UUID())
 		{
-			SelectedEntityID = entity.GetUUID();
-			LOG_DEBUG("Editor: Selecting entity {} ({})", entity.GetName(), entity.GetUUID());
+			SelectedEntityID = entity.UUID();
+			LOG_DEBUG("Editor: Selecting entity {} ({})", entity.Name(), entity.UUID());
 		}
 	}
 
@@ -442,15 +558,15 @@ namespace LkEngine {
 
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-		bool entity_selected = (SelectedEntityID == entity.GetUUID());
+		bool entity_selected = (SelectedEntityID == entity.UUID());
 		ImGuiTreeNodeFlags flags = (entity_selected ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 
 		if (ImGui::IsItemClicked())
 		{
-			SelectedEntityID = entity.GetUUID();
-			LOG_DEBUG("Selecting entity {} ({})", entity.GetName(), entity.GetUUID());
+			SelectedEntityID = entity.UUID();
+			LOG_DEBUG("Selecting entity {} ({})", entity.Name(), entity.UUID());
 		}
 
 		bool entityDeleted = false;
@@ -479,7 +595,7 @@ namespace LkEngine {
 		{
 			m_Scene->DestroyEntity(entity);
 			// will crash ??
-			if (SelectedEntityID == entity.GetUUID())
+			if (SelectedEntityID == entity.UUID())
 				SelectedEntityID = {};
 		}
 
@@ -530,7 +646,7 @@ namespace LkEngine {
 			auto& component = entity.GetComponent<T>();
 			if (component.Removable == true)
 			{
-				LOG_DEBUG("Removing component from {}", entity.GetName());
+				LOG_DEBUG("Removing component from {}", entity.Name());
 				entity.RemoveComponent<T>();
 			}
 		}
@@ -640,7 +756,7 @@ namespace LkEngine {
         ImGui::BeginChild(UI_SELECTED_ENTITY_INFO, SelectedEntityMenuSize, true, windowFlags);
         if (entity.HasComponent<TransformComponent>())
         {
-            ImGui::SeparatorText(SelectedEntity.GetName().c_str());
+            ImGui::SeparatorText(SelectedEntity.Name().c_str());
             ImGui::Indent();
             //DrawImGuizmo(entity);
 
@@ -694,14 +810,13 @@ namespace LkEngine {
 		float height = m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y;
 
 		auto window = ImGui::FindWindowByName(UI_CORE_VIEWPORT);
+		//auto window = ImGui::FindWindowByName("##CenterRenderWindow");
 		ImGui::Begin(window->Name);
 		ImGui::SetNextWindowViewport(window->ID);
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
 		auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-        //ImGuizmo::SetRect(pos_x, pos_y, width, height);
         ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), width, height);
-        //ImGuizmo::SetRect(pos_x, (pos_y + bottombar_height), width, height);
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 
@@ -753,7 +868,7 @@ namespace LkEngine {
         {
             Entity entity = { ent, &scene };
 			bool is_selected = SelectedEntity == entity;
-            std::string label = fmt::format("{}", entity.GetName());
+            std::string label = fmt::format("{}", entity.Name());
             if (ImGui::Selectable(label.c_str(), &is_selected, selectable_flags))
             {
                 LOG_DEBUG("Selecting {}", label);
@@ -841,7 +956,7 @@ namespace LkEngine {
 	{
 		if (entity.HasComponent<IDComponent>())
 		{
-			SelectedEntityID = entity.GetUUID();
+			SelectedEntityID = entity.UUID();
 		}
 		else
 		{

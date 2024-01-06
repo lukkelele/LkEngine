@@ -28,7 +28,15 @@ namespace LkEngine {
 	class EditorLayer : public Layer
 	{
 	public:
-		EditorLayer(Scene& scene);
+		enum class WindowType
+		{
+			None = 0,
+			Viewport, // Editor Viewport, 'normal' mode
+			NodeEditor,
+		};
+
+	public:
+		EditorLayer();
 		~EditorLayer() = default;
 
 		enum GizmoType
@@ -39,7 +47,6 @@ namespace LkEngine {
 		};
 
 		static EditorLayer* Get() { return s_Instance; }
-		static s_ptr<EditorLayer> Create(Scene& scene) { return std::make_shared<EditorLayer>(scene); }
 
 		void OnImGuiRender();
 		bool IsEnabled() { return m_Enabled; }
@@ -52,7 +59,7 @@ namespace LkEngine {
 		void SetScene(Scene& scene) { m_Scene = &scene; }
 		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
 
-		EditorCamera& GetEditorCamera() { return *m_EditorCamera; }
+		EditorCamera* GetEditorCamera() { return m_EditorCamera; }
 
 		template<typename T, typename UIFunction>
 		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
@@ -76,6 +83,10 @@ namespace LkEngine {
 		glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
 		float GetViewportScalerX() const { return ViewportScalers.x; }
 		float GetViewportScalerY() const { return ViewportScalers.y; }
+		glm::vec2 GetMenuBarSize() const { return MenuBarSize; }
+		glm::vec2 GetTabBarSize() const { return TabBarSize; }
+
+		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
 
 	private:
 		//void RenderViewport(); // TODO
@@ -89,13 +100,14 @@ namespace LkEngine {
 		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 }; // TODO: REMOVE/UPDATE
 		Entity SelectedEntity;
 		uint64_t SelectedEntityID = 0;
+
 		glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
 		glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
 		glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
 		glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
-		glm::vec2 TopBarSize = { 0.0f, 30.0f };
-		glm::vec2 TopBarFramePadding = { 5.0f, 5.0f };
+		glm::vec2 MenuBarSize = { 0.0f, 30.0f };
+		glm::vec2 TabBarSize = { 0.0f, 30.0f };
 		glm::vec2 BottomBarSize = { 0.0f, 0.0f };
 		glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
 		glm::vec2 RightSidebarSize = { 0.0f, 0.0f };
@@ -129,6 +141,8 @@ namespace LkEngine {
 		int m_GizmoType = GizmoType::Translate;
 
 		EditorCamera* m_EditorCamera = nullptr;
+
+		WindowType m_ActiveWindowType;
 
 		inline static EditorLayer* s_Instance = nullptr;
 	};
