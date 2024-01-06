@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Editor/Editor.h"
 #include "LkEngine/Debug/DebugLayer.h"
 
 #include "LkEngine/Scene/Scene.h"
@@ -18,9 +18,8 @@
 
 namespace LkEngine {
 
-	EditorLayer::EditorLayer()
-		: Layer("EditorLayer")
-		, m_Scene(nullptr)
+	Editor::Editor()
+		: m_Scene(nullptr)
 		, m_ActiveWindowType(WindowType::None)
 	{
 		s_Instance = this;
@@ -30,7 +29,6 @@ namespace LkEngine {
 		m_SecondViewportBounds[0] = { 0, 0 };
 		m_SecondViewportBounds[1] = { 0, 0 };
 		m_ShowStackTool = true;
-		m_Enabled = true;
 
 		LeftSidebarSize.x = 340.0f;
 		LeftSidebarSize.y = m_ViewportBounds[1].y;
@@ -71,9 +69,11 @@ namespace LkEngine {
 		m_NodeEditor->Init();
 
 		m_ActiveWindowType = WindowType::Viewport;
+
+		m_Enabled = true;
 	}
 
-	void EditorLayer::OnImGuiRender()
+	void Editor::RenderImGui()
 	{
 		auto& io = ImGui::GetIO();
 		auto& style = ImGui::GetStyle();
@@ -195,7 +195,6 @@ namespace LkEngine {
 						m_Tabs.push_back("Viewport");
 						m_CurrentTab = "Viewport";
 					}
-					//m_Tabs.push_back(fmt::format("Tab {}", m_Tabs.size() + 1));
 					m_Tabs.push_back(fmt::format("Node Editor-{}", m_Tabs.size()));
 				}
 				ImGui::SameLine();
@@ -204,9 +203,14 @@ namespace LkEngine {
 					LOG_DEBUG("Selected mode: Node Editor");
 					m_Tabs.pop_back();
 					if (m_Tabs.size() == 1)
+					{
 						m_Tabs.pop_back();
+						m_CurrentTab = "";
+					}
 				}
 			}
+			ImGui::Text("MenuBarSize: (%1.f, %1.f)", MenuBarSize.x, MenuBarSize.y);
+			ImGui::Text("TabBarSize: (%1.f, %1.f)", TabBarSize.x, TabBarSize.y);
 			ImGui::EndGroup();
 
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
@@ -245,7 +249,6 @@ namespace LkEngine {
 				UI_CreateMenu();
 			}
 			ImGui::EndGroup();
-			//ImGui::Separator();
 
 			if (m_Scene)
 			{
@@ -497,7 +500,7 @@ namespace LkEngine {
 		ImGui::End(); // Core Viewport
 	}
 
-	void EditorLayer::HandleExternalWindows()
+	void Editor::HandleExternalWindows()
 	{
 		if (ShowRenderInformationWindow)
 		{
@@ -505,7 +508,7 @@ namespace LkEngine {
 		}
 	}
 
-	void EditorLayer::SelectEntity(Entity& entity)
+	void Editor::SelectEntity(Entity& entity)
 	{
 		if (SelectedEntityID != entity.UUID())
 		{
@@ -514,7 +517,7 @@ namespace LkEngine {
 		}
 	}
 
-	void EditorLayer::DrawEntityNode(Entity entity)
+	void Editor::DrawEntityNode(Entity entity)
 	{
 		if (entity.HasComponent<IDComponent>() == false || entity.HasComponent<TagComponent>() == false)
 			return;
@@ -565,7 +568,7 @@ namespace LkEngine {
 	}
 
 	template<typename T, typename UIFunction>
-	void EditorLayer::DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+	void Editor::DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
 		static const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen 
 			| ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth
@@ -617,7 +620,7 @@ namespace LkEngine {
 	}
 
 	template<typename T>
-	void EditorLayer::DisplayAddComponentEntry(const std::string& entryName)
+	void Editor::DisplayAddComponentEntry(const std::string& entryName)
 	{
 		if (!SelectedEntity.HasComponent<T>())
 		{
@@ -629,7 +632,7 @@ namespace LkEngine {
 		}
 	}
 
-	void EditorLayer::DrawComponents(Entity ent)
+	void Editor::DrawComponents(Entity ent)
 	{
 		if (!m_Scene)
 			return;
@@ -692,7 +695,7 @@ namespace LkEngine {
 		UI::EndSubwindow();
 	}
 
-	std::pair<float, float> EditorLayer::GetMouseViewportSpace(bool primaryViewport)
+	std::pair<float, float> Editor::GetMouseViewportSpace(bool primaryViewport)
 	{
 		auto [mx, my] = ImGui::GetMousePos();
 		const auto& viewportBounds = primaryViewport ? m_ViewportBounds : m_SecondViewportBounds;
@@ -704,7 +707,7 @@ namespace LkEngine {
 		return { (mx / viewportWidth) * 2.0f - 1.0f, ((my / viewportHeight) * 2.0f - 1.0f) * -1.0f };
 	}
 
-    void EditorLayer::UI_SelectedEntityProperties()
+    void Editor::UI_SelectedEntityProperties()
     {
 		static float pos_step_size = 5.0f;
         auto& scene = *Scene::GetActiveScene();
@@ -721,7 +724,6 @@ namespace LkEngine {
         {
             ImGui::SeparatorText(SelectedEntity.Name().c_str());
             ImGui::Indent();
-            //DrawImGuizmo(entity);
 
 			TransformComponent& transform = entity.GetComponent<TransformComponent>();
             ImGui::Text("Position");
@@ -751,7 +753,7 @@ namespace LkEngine {
 		UI::PopID();
     }
 
-    void EditorLayer::DrawImGuizmo(Entity& entity)
+    void Editor::DrawImGuizmo(Entity& entity)
     {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
@@ -762,10 +764,12 @@ namespace LkEngine {
 		auto& scene = *Scene::GetActiveScene();
         auto& cam = *scene.GetCamera();
         auto& cam_pos = cam.GetPos();
+		//cam_pos.x += camPosOffset.x;
+		//cam_pos.y += camPosOffset.y;
         auto& view_matrix = cam.GetView();
         auto& proj_matrix = cam.GetProjection();
 
-        SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
+		SpriteComponent& sc = entity.Sprite();
 
 		float pos_x = m_SecondViewportBounds[0].x;
 		float pos_y = m_SecondViewportBounds[0].y;
@@ -773,13 +777,22 @@ namespace LkEngine {
 		float height = m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y;
 
 		auto window = ImGui::FindWindowByName(UI_CORE_VIEWPORT);
-		//auto window = ImGui::FindWindowByName("##CenterRenderWindow");
 		ImGui::Begin(window->Name);
 		ImGui::SetNextWindowViewport(window->ID);
+
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
-		auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-        ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), width, height);
+		//auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
+		if (m_Tabs.size() == 0)
+			ImGuizmo::SetRect(pos_x, (m_SecondViewportBounds[0].y - BottomBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
+			//ImGuizmo::SetRect(pos_x, (m_SecondViewportBounds[0].y - BottomBarSize.y - MenuBarSize.y) * Window::Get()->GetScalerY(), EditorWindowSize.x, EditorWindowSize.y);
+			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
+			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
+			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), EditorWindowSize.x, EditorWindowSize.y + MenuBarSize.y);
+			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), width, height);
+		else
+			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), width, height);
+			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + TabBarSize.y + MenuBarSize.y), width, height);
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 
@@ -801,7 +814,7 @@ namespace LkEngine {
 		ImGui::End();
     }
 
-	void EditorLayer::UI_HandleManualWindowResize()
+	void Editor::UI_HandleManualWindowResize()
 	{
 		auto window = Application::Get()->GetWindow()->GetGlfwWindow();
 		const bool maximized = (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
@@ -813,7 +826,7 @@ namespace LkEngine {
 		}
 	}
 
-	void EditorLayer::UI_SceneContent()
+	void Editor::UI_SceneContent()
 	{
         auto window = Window::Get();
 		float menu_height = window->GetHeight() - SelectedEntityMenuSize.y;
@@ -844,7 +857,7 @@ namespace LkEngine {
 		UI::PopID(id);
 	}
 
-	glm::vec2 EditorLayer::GetEditorWindowSize() const
+	glm::vec2 Editor::GetEditorWindowSize() const
 	{
 		glm::vec2 size = { 
 			m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
@@ -853,7 +866,7 @@ namespace LkEngine {
 		return size;
 	}
 
-	void EditorLayer::UI_RenderSettingsInformation()
+	void Editor::UI_RenderSettingsInformation()
 	{
 		if (ImGui::Begin("Render Settings", &ShowRenderInformationWindow, ImGuiWindowFlags_NoDocking))
 		{
@@ -910,12 +923,12 @@ namespace LkEngine {
 		}
 	}
 
-	bool EditorLayer::IsEntitySelected() const
+	bool Editor::IsEntitySelected() const
 	{
 		return SelectedEntityID > 0;
 	}
 
-	void EditorLayer::SetSelectedEntity(Entity& entity)
+	void Editor::SetSelectedEntity(Entity& entity)
 	{
 		if (entity.HasComponent<IDComponent>())
 		{
@@ -928,19 +941,19 @@ namespace LkEngine {
 		SelectedEntity = entity;
 	}
 
-	float EditorLayer::GetEditorWindowWidth() const
+	float Editor::GetEditorWindowWidth() const
 	{
 		auto windowSize = GetEditorWindowSize();
 		return windowSize.x;
 	}
 
-	float EditorLayer::GetEditorWindowHeight() const
+	float Editor::GetEditorWindowHeight() const
 	{
 		auto windowSize = GetEditorWindowSize();
 		return windowSize.y;
 	}
 
-	void EditorLayer::UI_CreateMenu()
+	void Editor::UI_CreateMenu()
 	{
 		UI::PushID();
 		ImGui::SeparatorText("Create Menu");
@@ -1092,7 +1105,7 @@ namespace LkEngine {
 		UI::PopID();
 	}
 
-	void EditorLayer::SetUpdateWindowFlag(bool flag) 
+	void Editor::SetUpdateWindowFlag(bool flag) 
 	{ 
 		// Window width and height has been changed as this function has been called,
 		// therefore need to update the viewport bounds

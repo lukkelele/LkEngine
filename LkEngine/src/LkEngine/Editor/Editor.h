@@ -29,7 +29,7 @@ namespace LkEngine {
 
 	class Scene;
 
-	class EditorLayer : public Layer
+	class Editor
 	{
 	public:
 		enum class WindowType
@@ -47,21 +47,20 @@ namespace LkEngine {
 		};
 
 	public:
-		EditorLayer();
-		~EditorLayer() = default;
+		Editor();
+		~Editor() = default;
 
-		static EditorLayer* Get() { return s_Instance; }
+		static Editor* Get() { return s_Instance; }
 
-		void OnImGuiRender();
+		void RenderImGui();
 		bool IsEnabled() { return m_Enabled; }
-		Entity GetSelectedEntity() { return SelectedEntity; }
-		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
-		void SelectEntity(Entity& entity);
-		void SetSelectedEntity(Entity& entity);
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
 		void SetScene(Scene& scene) { m_Scene = &scene; }
 		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
+		Entity GetSelectedEntity() { return SelectedEntity; }
+		void SelectEntity(Entity& entity);
+		void SetSelectedEntity(Entity& entity);
 
 		EditorCamera* GetEditorCamera() { return m_EditorCamera; }
 
@@ -76,7 +75,8 @@ namespace LkEngine {
         void UI_SelectedEntityProperties();
 		void UI_RenderSettingsInformation();
 		bool IsEntitySelected() const;
-		void SetUpdateWindowFlag(bool flag); // { m_UpdateWindowSize = flag; }
+		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
+		void SetUpdateWindowFlag(bool flag); 
 
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
@@ -91,15 +91,15 @@ namespace LkEngine {
 		glm::vec2 GetTabBarSize() const { return TabBarSize; }
 
 		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
+		int GetTabCount() const { return m_Tabs.size(); }
+		std::string GetCurrentTabName() const { return m_CurrentTab; }
 
 	private:
-		//void RenderViewport(); // TODO
-		//void RenderViewport(s_ptr<Image> img);
         void DrawImGuizmo(Entity& entity);
 		void HandleExternalWindows();
 
-		int GetTabCount() const { return m_Tabs.size(); }
-		std::string GetCurrentTabName() const { return m_CurrentTab; }
+		//void RenderViewport();                 // TODO
+		//void RenderViewport(s_ptr<Image> img); // TODO
 
 	public:
 		// Flag to determine if an item is currently being created
@@ -155,7 +155,9 @@ namespace LkEngine {
 
 		WindowType m_ActiveWindowType;
 
-		inline static EditorLayer* s_Instance = nullptr;
+		friend class Physics2D; // For getting UI window size when raycasting
+
+		inline static Editor* s_Instance = nullptr;
 	};
 
 }
