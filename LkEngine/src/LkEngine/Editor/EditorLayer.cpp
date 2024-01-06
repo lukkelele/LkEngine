@@ -67,6 +67,9 @@ namespace LkEngine {
 		m_EditorCamera = new EditorCamera();
 		m_EditorCamera->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
 
+		m_NodeEditor = new NodeEditor();
+		m_NodeEditor->Init();
+
 		m_ActiveWindowType = WindowType::Viewport;
 	}
 
@@ -420,40 +423,13 @@ namespace LkEngine {
 			{
 				if (ImGui::BeginTabBar("MainTab", ImGuiTabBarFlags_Reorderable))
 				{
-#if 0
-					if (ImGui::BeginTabItem("Viewport", NULL, ImGuiTabItemFlags_NoCloseWithMiddleMouseButton))
-					{
-						m_ActiveWindowType = WindowType::Viewport;
-						ImGui::EndTabItem();
-					}
-
-					if (ImGui::BeginTabItem("Gay Uwu!"))
-					{
-						m_ActiveWindowType = WindowType::Viewport;
-
-						ImGui::SetNextWindowPos({ LeftSidebarSize.x, TabBarSize.y + MenuBarSize.y }, ImGuiCond_Always);
-						ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
-						ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(100, 0, 0, 255));
-						ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(255, 0, 0, 255));
-						ImGui::Begin("##CenterNodeWindow", NULL, UI::SidebarFlags);
-						{
-							ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), { EditorWindowSize.x, EditorWindowSize.y }, ImVec2(1, 1), ImVec2(0, 0), { 0, 0, 0, 0 }, { 1, 1, 1, 1 });
-						}
-						ImGui::End();
-						ImGui::PopStyleColor(2);
-
-						ImGui::EndTabItem();
-					}
-#endif
 					for (auto& tabName : m_Tabs)
 					{
 						if (ImGui::BeginTabItem(tabName.c_str()))
 						{
-							
 							ImGui::EndTabItem();
 						}
 					}
-
 					ImGui::EndTabBar();
 				}
 			}
@@ -469,6 +445,9 @@ namespace LkEngine {
 		}
 
 		lastTabCount = GetTabCount();
+
+		// Node Editor
+		m_NodeEditor->OnRender();
 
 		// Check to see if any of the editor windows have changed in size and if they have
 		// then readjust the viewport

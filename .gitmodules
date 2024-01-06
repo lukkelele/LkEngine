@@ -1,3 +1,6 @@
 [submodule "lib/yaml-cpp"]
 	path = lib/yaml-cpp
 	url = git@github.com:jbeder/yaml-cpp.git
+[submodule "lib/imgui-node-editor"]
+	path = lib/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor

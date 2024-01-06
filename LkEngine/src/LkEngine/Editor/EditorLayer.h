@@ -6,12 +6,16 @@
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/UI/UICore.h"
 
-#include <entt/entt.hpp>
+#include "LkEngine/Editor/NodeEditor/NodeEditor.h"
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>
+// TODO: Fix so opengl includes are handles in entrypoint
 #include <imgui/imgui_impl_opengl3.h>
+
 #include <ImGuizmo/ImGuizmo.h>
+
 
 namespace LkEngine {
 
@@ -35,16 +39,16 @@ namespace LkEngine {
 			NodeEditor,
 		};
 
-	public:
-		EditorLayer();
-		~EditorLayer() = default;
-
 		enum GizmoType
 		{
 			Translate = 7 << 0,
 			Rotate	  = 7 << 3,
 			Scale     = 7 << 6
 		};
+
+	public:
+		EditorLayer();
+		~EditorLayer() = default;
 
 		static EditorLayer* Get() { return s_Instance; }
 
@@ -144,6 +148,7 @@ namespace LkEngine {
 		bool m_ShowStyleEditor = false;
 		int m_GizmoType = GizmoType::Translate;
 
+		NodeEditor* m_NodeEditor = nullptr;
 		EditorCamera* m_EditorCamera = nullptr;
 
 		WindowType m_ActiveWindowType;
