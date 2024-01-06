@@ -2,7 +2,7 @@
 #include "Physics2D.h"
 
 #include "LkEngine/Core/Application.h"
-#include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Editor/Editor.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 
@@ -19,15 +19,14 @@ namespace LkEngine {
     {
         std::vector<Raycast2DResult> results = {};
         glm::vec2 mousePos = Mouse::GetScaledPos();
-        auto* editor = EditorLayer::Get();
 
         std::vector<Entity> sceneEntities = scene.GetEntities();
         for (auto& entity : sceneEntities)
         {
             if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
             {
-                auto& tc = entity.GetComponent<TransformComponent>();
-                auto& sc = entity.GetComponent<SpriteComponent>();
+                auto& tc = entity.Transform();
+                auto& sc = entity.Sprite();
                 if (tc.IsStatic() || sc.IsPassthrough())
                     continue;
                 auto& cam = *scene.GetCamera();
@@ -37,7 +36,7 @@ namespace LkEngine {
                 glm::vec2 camPos = cam.GetPos();
                 glm::vec2 camOffset = cam.GetOffset();
                 camPos.x += camOffset.x;
-                camPos.y += camOffset.y;
+                camPos.y += camOffset.y; // - or + ?
 
                 float quadWidth = tc.Scale.x * sc.Size.x;
                 float quadHeight = tc.Scale.y * sc.Size.y;
@@ -48,12 +47,19 @@ namespace LkEngine {
                 // Place the origin in the middle of the screen
                 // This is done by adding half of the window width and height
 
-                // If the editor layer is enabled, adjust the quad pos by taking the editor windows into consideration
+                auto* editor = Editor::Get();
                 if (editor && editor->IsEnabled())
                 {
-                    auto editorWindowSize = editor->GetEditorWindowSize();
-                    quadPos.x += editorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
-                    quadPos.y += editorWindowSize.y * 0.50f + editor->GetBottomBarSize().y;
+                    // Center the quad
+                    quadPos.x += editor->EditorWindowSize.x * 0.50f + editor->LeftSidebarSize.x;
+                    // Only add the tabbar size if there are any tabs 
+                    if (editor->GetTabCount() == 0)
+                        quadPos.y += (editor->EditorWindowSize.y * 0.50f) + (editor->BottomBarSize.y - editor->MenuBarSize.y) * Window::Get()->GetScalerY();
+                        //quadPos.y += editor->EditorWindowSize.y * 0.50f + editor->BottomBarSize.y - editor->MenuBarSize.y;
+                    else
+                        quadPos.y += (editor->EditorWindowSize.y * 0.50f) + (editor->BottomBarSize.y - editor->MenuBarSize.y - editor->TabBarSize.y) * Window::Get()->GetScalerY();
+                        //quadPos.y += editor->EditorWindowSize.y * 0.50f + editor->BottomBarSize.y - editor->TabBarSize.y - editor->MenuBarSize.y;
+                    //LOG_WARN("Quad Pos ({}, {})", quadPos.x, quadPos.y);
                 }
                 else
                 {
@@ -77,6 +83,12 @@ namespace LkEngine {
                 glm::vec2 spritePoint_BottomRight = { quadPos.x + quadWidth * 0.50f, quadPos.y - quadHeight };
                 glm::vec2 spritePoint_TopLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y };
                 glm::vec2 spritePoint_TopRight = { quadPos.x + quadWidth * 0.50f, quadPos.y };
+            #if 0
+                glm::vec2 spritePoint_BottomLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y - quadHeight * 0.50f };
+                glm::vec2 spritePoint_BottomRight = { quadPos.x + quadWidth * 0.50f, quadPos.y - quadHeight * 0.50f };
+                glm::vec2 spritePoint_TopLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y + quadHeight * 0.50f };
+                glm::vec2 spritePoint_TopRight = { quadPos.x + quadWidth * 0.50f, quadPos.y + quadHeight * 0.50f };
+            #endif
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
@@ -87,7 +99,7 @@ namespace LkEngine {
                     {
                         float centerX = tc.Translation.x + quadWidth * 0.50f;
                         float centerY = tc.Translation.y + quadHeight * 0.50f;
-                        LOG_WARN("Hit: {} -> ({}, {})", entity.GetName().c_str(), mousePos.x, mousePos.y);
+                        LOG_WARN("Hit: {} -> ({}, {})", entity.Name().c_str(), mousePos.x, mousePos.y);
 
                         float x = centerX - mousePos.x;
                         float y = centerY - mousePos.y;

@@ -5,18 +5,26 @@
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Timer.h"
+
 #include "LkEngine/IO/File.h"
+
 #include "LkEngine/Input/Input.h"
+
 #include "LkEngine/Debug/Debugger.h"
+
 #include "LkEngine/Asset/AssetRegistry.h"
+
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Scene/EntityFactory.h"
-#include "LkEngine/Editor/EditorLayer.h"
+
+#include "LkEngine/Editor/Editor.h"
+
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
+
 #include "LkEngine/Physics/PhysicsSystem.h"
 
 
@@ -57,7 +65,7 @@ namespace LkEngine {
         s_ptr<Renderer> m_Renderer = nullptr;
         s_ptr<GraphicsContext> m_GraphicsContext = nullptr;
         s_ptr<Input> m_Input = nullptr;
-        s_ptr<EditorLayer> m_EditorLayer = nullptr;
+        s_ptr<Editor> m_Editor = nullptr;
         PhysicsSystem* m_PhysicsSystem = nullptr;
 
         s_ptr<Scene> m_Scene = nullptr; // Active scene

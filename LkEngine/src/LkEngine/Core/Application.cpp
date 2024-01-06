@@ -1,6 +1,8 @@
 #include "LKpch.h"
 #include "LkEngine/Core/Application.h"
 
+#include "LkEngine/UI/OpenGLImGui.h" // TODO: Move me
+
 
 namespace LkEngine {
 
@@ -37,8 +39,9 @@ namespace LkEngine {
         m_Renderer->Init();
         m_Debugger->Init();
 
-        m_EditorLayer = std::make_shared<EditorLayer>();
-        m_LayerStack.PushOverlay(&*m_EditorLayer);
+        m_Editor = std::make_shared<Editor>();
+
+		//UI::InitOpenGLImGui(); // Crashes sometimes, not always for some awesome reason
     }
 
     void Application::Run()
@@ -58,8 +61,8 @@ namespace LkEngine {
 
             if (m_Scene)
             {
-                if (m_EditorLayer->IsEnabled())
-                    m_Scene->OnRenderEditor(*m_EditorLayer->GetEditorCamera(), ts);
+                if (m_Editor->IsEnabled())
+                    m_Scene->OnRenderEditor(*m_Editor->GetEditorCamera(), ts);
                 else
                     m_Scene->OnRender(m_Scene->GetCamera(), ts);
             }
@@ -115,6 +118,8 @@ namespace LkEngine {
     void Application::RenderImGui()
     {
         m_GraphicsContext->BeginImGuiFrame();
+        if (m_Editor->IsEnabled())
+            m_Editor->RenderImGui();
         for (int i = 0; i < m_LayerStack.Size(); i++)
             m_LayerStack[i]->OnImGuiRender();
     }
