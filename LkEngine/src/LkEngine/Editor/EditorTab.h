@@ -65,7 +65,7 @@ namespace LkEngine {
         void OnRender() override {}
         void OnImGuiRender() override
         {
-            NodeEditorRef->OnRender();
+            NodeEditorRef->OnImGuiRender();
         }
 
     public:

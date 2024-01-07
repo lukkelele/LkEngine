@@ -403,6 +403,9 @@ namespace LkEngine {
 		if (m_UpdateWindowSize == true)
 			m_UpdateWindowSize = false; 
 
+		//--------------------------------------------------
+		// TABBAR
+		//--------------------------------------------------
 		static int lastTabCount = 0;
 		int currentTabCount = m_TabManager.GetTabCount();
 		if (currentTabCount > 1)
@@ -426,9 +429,9 @@ namespace LkEngine {
 								continue;
 							}
 							LOG_TRACE("BeginTabItem  {}", tabEntry.second->Name);
-							ImGui::SetNextWindowPos({ m_SecondViewportBounds[0].x, MenuBarSize.y + TabBarSize.y });
-							ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y });
-							ImGui::Begin("LkEngine Node Editor", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+							ImGui::SetNextWindowPos({ m_SecondViewportBounds[0].x, MenuBarSize.y + TabBarSize.y }, ImGuiCond_Always);
+							ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
+							ImGui::Begin("EditorTabWindow", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 							tabEntry.second->OnImGuiRender();
 							ImGui::End();
 							ImGui::EndTabItem();
