@@ -9,38 +9,51 @@ namespace LkEngine {
 
     enum class EditorTabType
     {
+        None = 0,
         Viewport,
         BlankEditor,
         NodeEditor,
     };
 
-    struct Tab
+    class Tab
     {
-        std::string Name;
-        EditorTabType Type;
+    public:
+        std::string Name = "";
+        EditorTabType Type = EditorTabType::None;
         
-        virtual void OnRender() {}
-        virtual void OnImGuiRender() {}
+        virtual void OnRender() = 0;
+        virtual void OnImGuiRender() = 0;
 
-        Tab() = default;
-        Tab(std::string_view name, const EditorTabType type) : Name(std::string(name)) , Type(type) {}
+        EditorTabType GetTabType() const { return Type; }
+
         virtual ~Tab() = default;
     };
 
-    struct NodeEditorTab : public Tab
+
+    class ViewportTab : public Tab
     {
-        NodeEditor* NodeEditorRef = nullptr;
+    public:
+        ViewportTab(std::string_view name) 
+        {
+            Name = std::string(name);
+            Type = EditorTabType::Viewport;
+        }
+        ViewportTab(std::string_view name, const EditorTabType tabType)
+            : ViewportTab(name) {}
+        ~ViewportTab() = default;
 
         void OnRender() override {}
+        void OnImGuiRender() override {}
+    };
 
-        void OnImGuiRender() override
-        {
-            NodeEditorRef->OnRender();
-        }
 
+    class NodeEditorTab : public Tab
+    {
+    public:
         NodeEditorTab(std::string_view name) 
-            : Tab(name, EditorTabType::NodeEditor) 
         {
+            Name = std::string(name);
+            Type = EditorTabType::NodeEditor;
             NodeEditorRef = new NodeEditor(name);
         }
         NodeEditorTab(std::string_view name, const EditorTabType tabType) : NodeEditorTab(name) {}
@@ -48,6 +61,15 @@ namespace LkEngine {
         {
             NodeEditorRef->Destroy();
         }
+
+        void OnRender() override {}
+        void OnImGuiRender() override
+        {
+            NodeEditorRef->OnRender();
+        }
+
+    public:
+        NodeEditor* NodeEditorRef = nullptr;
 
     };
 

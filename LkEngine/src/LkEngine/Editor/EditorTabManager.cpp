@@ -15,14 +15,14 @@ namespace LkEngine {
 
     s_ptr<Tab> EditorTabManager::NewTab(std::string_view tabName, const EditorTabType tabType)
     {
-        if (tabType == EditorTabType::NodeEditor)
+        if (tabType == EditorTabType::Viewport)
         {
-            auto tab = std::make_shared<NodeEditorTab>(tabName);
+            auto tab = std::make_shared<ViewportTab>(tabName, tabType);
             m_Tabs.emplace(m_Tabs.size() + 1, tab);
         }
-        else
+        else if (tabType == EditorTabType::NodeEditor)
         {
-            auto tab = std::make_shared<Tab>(tabName, tabType);
+            auto tab = std::make_shared<NodeEditorTab>(tabName);
             m_Tabs.emplace(m_Tabs.size() + 1, tab);
         }
 
