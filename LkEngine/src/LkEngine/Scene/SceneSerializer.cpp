@@ -10,18 +10,13 @@
 namespace LkEngine {
 
 	SceneSerializer::SceneSerializer(Scene* scene)
-		: m_Scene(s_ptr<Scene>(scene))
-	{
-	}
-
-	SceneSerializer::SceneSerializer(const s_ptr<Scene>& scene)
 		: m_Scene(scene)
 	{
 	}
 
-	SceneSerializer::~SceneSerializer()
+	SceneSerializer::SceneSerializer(const s_ptr<Scene>& scene)
+		: m_Scene(scene.get())
 	{
-		LOG_WARN("~SceneSerializer() --> Destroying");
 	}
 
 	void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
@@ -113,9 +108,6 @@ namespace LkEngine {
 
 	void SceneSerializer::SerializeToYAML(YAML::Emitter& out)
 	{
-		// Re-initialise all animation components as otherwise each time we serialize then
-		// all of the bone entity transforms will be slightly different which is annoying
-		// (e.g. for version control of scene files)
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene";
 		out << YAML::Value << m_Scene->GetName();
@@ -166,9 +158,15 @@ namespace LkEngine {
 	void SceneSerializer::SerializeRuntime(AssetHandle scene)
 	{
 		// Not implemented
+		throw std::runtime_error("SerializeRuntime: Not implemented yet");
 	}
 
 	void SceneSerializer::DeserializeEntities(YAML::Node& entitiesNode, s_ptr<Scene> scene)
+	{
+		DeserializeEntities(entitiesNode, scene.get());
+	}
+
+	void SceneSerializer::DeserializeEntities(YAML::Node& entitiesNode, Scene* scene)
 	{
 		for (auto entity : entitiesNode)
 		{

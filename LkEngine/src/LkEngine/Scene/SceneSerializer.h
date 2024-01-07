@@ -15,10 +15,11 @@ namespace LkEngine {
     public:
 		SceneSerializer(Scene* scene);
 		SceneSerializer(const s_ptr<Scene>& scene);
-		~SceneSerializer();
+		~SceneSerializer() = default;
 
 		static void SerializeEntity(YAML::Emitter& out, Entity entity);
 		static void DeserializeEntities(YAML::Node& entitiesNode, s_ptr<Scene> scene);
+		static void DeserializeEntities(YAML::Node& entitiesNode, Scene* scene);
 
 		void Serialize(const std::filesystem::path& filepath);
 		void SerializeRuntime(AssetHandle scene);
@@ -32,7 +33,7 @@ namespace LkEngine {
 		inline static std::string_view FileFilter = "LkEngine Scene (*.lukkelele)\0*.lukkelele\0";
 		inline static std::string_view DefaultExtension = ".lukkelele";
 	private:
-		s_ptr<Scene> m_Scene = nullptr;
+		Scene* m_Scene = nullptr;
     };
 
 }

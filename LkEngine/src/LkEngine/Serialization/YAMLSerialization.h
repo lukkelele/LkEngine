@@ -2,6 +2,9 @@
 
 #include "LkEngine/Asset/Asset.h"
 
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
 #include <yaml-cpp/yaml.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
