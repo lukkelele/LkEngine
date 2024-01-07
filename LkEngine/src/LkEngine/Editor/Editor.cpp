@@ -18,6 +18,8 @@
 
 namespace LkEngine {
 
+	static bool WindowsHaveChangedInSize = true; // Run once when starting
+
 	Editor::Editor()
 		: m_Scene(nullptr)
 		, m_ActiveWindowType(WindowType::None)
@@ -121,7 +123,6 @@ namespace LkEngine {
 		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
 		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 
-		static bool windowsHaveChangedSize = true; // Run once when starting
 		auto scalers = window->GetScalers();
 
 		// The window space is calculated from topleft corner, so remove Mouse::Pos.y to get the actual cursor placement
@@ -199,8 +200,6 @@ namespace LkEngine {
 						m_TabManager.PopTab();
 				}
 			}
-			ImGui::Text("MenuBarSize: (%1.f, %1.f)", MenuBarSize.x, MenuBarSize.y);
-			ImGui::Text("TabBarSize: (%1.f, %1.f)", TabBarSize.x, TabBarSize.y);
 			ImGui::EndGroup();
 
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
@@ -259,7 +258,7 @@ namespace LkEngine {
 			auto windowSize = ImGui::GetWindowSize();
 			auto windowPos = ImGui::GetWindowPos();
 			if (windowSize.x != last_sidebar_left_size.x || windowSize.y != last_sidebar_left_size.y)
-				windowsHaveChangedSize = true;
+				WindowsHaveChangedInSize = true;
 			last_sidebar_left_pos = windowPos;
 			last_sidebar_left_size = windowSize;
 		}
@@ -275,7 +274,6 @@ namespace LkEngine {
 		}
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 		{
-			ImGui::Text("RightSidebarSize: (%1.f, %1.f)", RightSidebarSize.x, RightSidebarSize.y);
 			ImGui::BeginGroup();
 			{
 				if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor));
@@ -295,47 +293,25 @@ namespace LkEngine {
 
 			}
 			ImGui::EndGroup();
+
 			// Window Information
 			static bool ShowWindowInfo = false;
 			ImGui::Checkbox("Show Window Info", &ShowWindowInfo);
 			if (ShowWindowInfo)
-			{
-				ImGui::SeparatorText("Window Info");
-				ImGui::Text("Second Viewport Bounds[0]: (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y);
-				ImGui::Text("Second Viewport Bounds[1]: (%1.f, %1.f)", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
-				ImGui::Text("Second Viewport Size: (%1.f, %1.f)", 
-					m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
-					m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y
-				);
-
-				ImGui::Text("Window Size: (%1.f, %1.f)", (float)window->GetWidth(), (float)window->GetHeight());
-				ImGui::Text("Viewport Window Size: (%1.f, %1.f)", m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-				ImGui::Text("Editor Window Size: (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
-			}
+				UI_ShowViewportAndWindowDetails();
 
 			// Mouse Information
 			static bool ShowMouseInfo = true;
 			ImGui::Checkbox("Show Mouse Info", &ShowMouseInfo);
 			if (ShowMouseInfo)
-			{
-				ImGui::SeparatorText("Mouse Info");
-				ImGui::Text("Raw Pos (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
-				ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
-				ImGui::Text("Center Normalized (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);
-				ImGui::Text("Center Scaled (%.2f, %.2f)", (Mouse::CenterPos.x * EditorWindowSize.x * 0.50f) / scalers.x, Mouse::CenterPos.y * EditorWindowSize.y * 0.50f / scalers.y) ;
-				ImGui::Separator();
-				ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", last_sidebar_right_size.x, last_sidebar_right_size.y);
-			}
+				UI_ShowMouseDetails();
 
 			auto windowSize = ImGui::GetWindowSize();
-			auto windowPos = ImGui::GetWindowPos();
 			if (windowSize.x != RightSidebarSize.x || windowSize.y != RightSidebarSize.y)
-				windowsHaveChangedSize = true;
+				WindowsHaveChangedInSize = true;
 
-			last_sidebar_right_pos = windowPos;
+			last_sidebar_right_pos = ImGui::GetWindowPos();
 			last_sidebar_right_size = windowSize;
-
-			ImGui::Text("BottomBarSize: (%1.f, %1.f)", BottomBarSize.x, BottomBarSize.y);
 		}
 		ImGui::End();
 
@@ -350,22 +326,6 @@ namespace LkEngine {
 		}
 		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 		{
-			ImGui::BeginGroup();
-			{
-				ImGui::Text("Mouse (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
-				ImGui::SameLine(0, 20);
-
-				ImGui::Text("Center Window (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
-				ImGui::SameLine(0, 20);
-				ImGui::Text("Scaled res (%.1f, %.1f)", EditorWindowSize.x / scalers.x, EditorWindowSize.y / scalers.y);
-				ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
-				ImGui::Text("Mouse Scalers (%.2f, %.2f)", scalers.x, scalers.y);
-
-				auto& sceneCamera = *Scene::GetActiveScene()->GetCamera();
-				glm::vec2 sceneCameraPos = sceneCamera.GetPos();
-				ImGui::Text("SceneCamera Pos: (%.1f, %.1f)", sceneCameraPos.x, sceneCameraPos.y);
-			}
-			ImGui::EndGroup();
 
 			ImGui::Dummy({ 0, 2 });
 
@@ -375,40 +335,31 @@ namespace LkEngine {
 
 			auto windowSize = ImGui::GetWindowSize();
 			if (windowSize.x != BottomBarSize.x || windowSize.y != BottomBarSize.y)
-				windowsHaveChangedSize = true;
+				WindowsHaveChangedInSize = true;
 
 			auto* currentWindow = ImGui::GetCurrentWindow();
 			last_bottombar_size = windowSize;
-			ImGui::Text("Last Bottombar Size: (%1.f, %1.f)", last_bottombar_size.x, last_bottombar_size.y);
-			ImGui::Text("Viewport Size: (%1.f, %1.f)", viewport->Size.x, viewport->Size.y);
-			ImGui::SameLine();
-			ImGui::Text("WorkSize: (%1.f, %1.f)", viewport->WorkSize.x, viewport->WorkSize.y);
 
-			ImGui::Text("Current Tab: %s", m_TabManager.GetActiveTabName().c_str());
+			ImGui::BeginGroup();
+			{
+				UI_ShowViewportAndWindowDetails();
+				ImGui::SameLine();
+				UI_ShowEditorWindowsDetails();
+			}
+			ImGui::EndGroup();
 
-			EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
-			EditorWindowSize.y = viewport->Size.y - BottomBarSize.y /* - topbar_height */;
 
-			// Top right point/bound
-			m_SecondViewportBounds[0] = { LeftSidebarSize.x, BottomBarSize.y };
-			m_SecondViewportBounds[1] = { 
-				(m_SecondViewportBounds[0].x + EditorWindowSize.x),
-				(m_SecondViewportBounds[0].y + EditorWindowSize.y)
-			};
 		}
 		ImGui::End();
 
-		// If the window sizes have been adjusted, set the bool member to false
-		// This must be run BEFORE the 'windowsHaveChangedSize' if-statement
-		if (m_UpdateWindowSize == true)
-			m_UpdateWindowSize = false; 
 
 		//--------------------------------------------------
 		// TABBAR
 		//--------------------------------------------------
 		static int lastTabCount = 0;
-		int currentTabCount = m_TabManager.GetTabCount();
-		if (currentTabCount > 1)
+		m_CurrentTabCount = m_TabManager.GetTabCount();
+
+		if (m_CurrentTabCount > 1)
 		{
 			// Apply viewport update as the tabbar height might've changed
 			ImGui::SetNextWindowPos({ LeftSidebarSize.x, MenuBarSize.y }, ImGuiCond_Always);
@@ -429,12 +380,13 @@ namespace LkEngine {
 								continue;
 							}
 							LOG_TRACE("BeginTabItem  {}", tabEntry.second->Name);
+
 							ImGui::SetNextWindowPos({ m_SecondViewportBounds[0].x, MenuBarSize.y + TabBarSize.y }, ImGuiCond_Always);
 							ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
-							//ImGui::Begin(UI::GenerateID(), NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 							ImGui::Begin("##TabWindow", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 							tabEntry.second->OnImGuiRender();
 							ImGui::End();
+
 							ImGui::EndTabItem();
 						}
 					}
@@ -448,49 +400,18 @@ namespace LkEngine {
 		{
 		}
 
-		if (lastTabCount != currentTabCount)
-			windowsHaveChangedSize = true;
+		if (lastTabCount != m_CurrentTabCount)
+			WindowsHaveChangedInSize = true;
 
 		lastTabCount = m_TabManager.GetTabCount();
 
-		// Check to see if any of the editor windows have changed in size and if they have
-		// then readjust the viewport
-		// Only adjust if the left button IS NOT pressed. This is to remove the issue of the 
-		// windows readjusting in an exponential rate
-		if (windowsHaveChangedSize && !Mouse::IsButtonPressed(MouseButton::ButtonLeft))
-		{
-			LeftSidebarSize = { last_sidebar_left_size.x, last_sidebar_left_size.y };
-			RightSidebarSize = { last_sidebar_right_size.x, last_sidebar_right_size.y };
-			BottomBarSize = { last_bottombar_size.x, last_bottombar_size.y };
-			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
-			EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
+		// If the window sizes have been adjusted, set the bool member to false
+		// This must be run BEFORE the 'WindowsHaveChangedInSize' if-statement
+		if (m_UpdateWindowSize == true)
+			m_UpdateWindowSize = false; 
 
-			// Only take the size of the TabBar into account if any tabs exist
-			if (currentTabCount > 1)
-				EditorWindowSize.y = viewport->Size.y - BottomBarSize.y - MenuBarSize.y - TabBarSize.y;
-			else
-				EditorWindowSize.y = viewport->Size.y - BottomBarSize.y - MenuBarSize.y;
-
-			// Update viewport scalers as the resolution has been altered
-			ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
-			ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
-
-			window->SetScalers(ViewportScalers);
-			window->SetWidth(EditorWindowSize.x);
-			window->SetHeight(EditorWindowSize.y);
-
-			if (m_FillSidebarsVertically)
-			{
-				LeftSidebarSize.y = viewport->WorkSize.y;
-				RightSidebarSize.y = viewport->WorkSize.y;
-			}
-			// Reapply viewport settings starting from a lower point of the left sidebar and the bottom bar height
-			GraphicsContext::Get()->SetViewport(EditorWindowPos, EditorWindowSize);
-
-			windowsHaveChangedSize = false;
-			m_UpdateWindowSize = true; // Tell UI to set the window size ONCE
-		}
-
+		glm::vec2 viewportSize = { viewport->WorkSize.x, viewport->WorkSize.y };
+		UI_SyncEditorWindowSizes(viewportSize);
 
 		ImGui::End(); // Viewport
 
@@ -756,7 +677,7 @@ namespace LkEngine {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& tc = entity.GetComponent<TransformComponent>();
+		auto& tc = entity.Transform();
         glm::mat4& transform_matrix = tc.GetTransform();
 
 		auto& scene = *Scene::GetActiveScene();
@@ -780,18 +701,12 @@ namespace LkEngine {
 
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
-		//auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-		//if (m_TabManager.m_Tabs.size() == 0)
-		if (m_TabManager.GetTabCount() == 0)
-			ImGuizmo::SetRect(pos_x, (m_SecondViewportBounds[0].y - BottomBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
-			//ImGuizmo::SetRect(pos_x, (m_SecondViewportBounds[0].y - BottomBarSize.y - MenuBarSize.y) * Window::Get()->GetScalerY(), EditorWindowSize.x, EditorWindowSize.y);
-			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
-			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
-			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), EditorWindowSize.x, EditorWindowSize.y + MenuBarSize.y);
-			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), width, height);
+		// FIXME: The guizmo is somewhat misplaced and is sensitive to vertical translation for some odd reason.
+		//        I suspect some scaler bug, but could be many things. For now I just add '10' to center the guizmo a bit more
+		if (m_TabManager.GetTabCount() == 1) // Only 1 tab, aka only the 'Viewport' tab
+			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + 10), EditorWindowSize.x, EditorWindowSize.y);
 		else
-			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y), width, height);
-			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + TabBarSize.y + MenuBarSize.y), width, height);
+			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + TabBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
 
         ImGuizmo::Manipulate(
             glm::value_ptr(view_matrix), 
@@ -1116,6 +1031,114 @@ namespace LkEngine {
 		// The second viewport bounds are updated in the reoccuring update function in the editor
 		//m_SecondViewportBounds[0] = { 0, 0 };
 		//m_SecondViewportBounds[1] = { 0, 0 };
+	}
+
+	void Editor::UI_ShowViewportAndWindowDetails()
+	{
+		ImGui::BeginGroup();
+		{
+			ImGui::Text("Window Info");
+			ImGui::Text("Second Viewport Bounds[0]: (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y);
+			ImGui::Text("Second Viewport Bounds[1]: (%1.f, %1.f)", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+			ImGui::Text("Second Viewport Size: (%1.f, %1.f)", 
+				m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
+				m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y
+			);
+			ImGui::Text("Window Size: (%1.f, %1.f)", (float)Window::Get()->GetWidth(), (float)Window::Get()->GetHeight());
+			ImGui::Text("Viewport Window Size: (%1.f, %1.f)", m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+			ImGui::Text("Editor Window Size: (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
+			ImGui::Text("Center Window (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
+			ImGui::SameLine(0, 20);
+			ImGui::Text("Scaled res (%.1f, %.1f)", EditorWindowSize.x / ViewportScalers.x, EditorWindowSize.y / ViewportScalers.y);
+			ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+
+			glm::vec2 sceneCameraPos = Scene::GetActiveScene()->GetCamera()->GetPos();
+			ImGui::Text("SceneCamera Pos: (%.1f, %.1f)", sceneCameraPos.x, sceneCameraPos.y);
+		}
+		ImGui::EndGroup();
+	}
+
+	void Editor::UI_ShowMouseDetails()
+	{
+		ImGui::BeginGroup();
+		{
+			ImGui::SeparatorText("Mouse Info");
+			ImGui::Text("Raw Pos (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
+			ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
+			ImGui::Text("Center Normalized (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);
+			ImGui::Text("Center Scaled (%.2f, %.2f)", (Mouse::CenterPos.x * EditorWindowSize.x * 0.50f) / ViewportScalers.x, Mouse::CenterPos.y * EditorWindowSize.y * 0.50f / ViewportScalers.y) ;
+			ImGui::Text("Mouse Scalers (%.2f, %.2f)", ViewportScalers.x, ViewportScalers.y);
+			ImGui::Separator();
+			ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", last_sidebar_right_size.x, last_sidebar_right_size.y);
+		}
+		ImGui::EndGroup();
+	}
+
+	void Editor::UI_ShowEditorWindowsDetails()
+	{
+		ImGui::BeginGroup();
+		{
+			ImGui::Text("MenuBarSize: (%1.f, %1.f)", MenuBarSize.x, MenuBarSize.y);
+			ImGui::Text("TabBarSize: (%1.f, %1.f)", TabBarSize.x, TabBarSize.y);
+			ImGui::Text("RightSidebarSize: (%1.f, %1.f)", RightSidebarSize.x, RightSidebarSize.y);
+			ImGui::Text("BottomBarSize: (%1.f, %1.f)", BottomBarSize.x, BottomBarSize.y);
+			ImGui::Text("Last Bottombar Size: (%1.f, %1.f)", last_bottombar_size.x, last_bottombar_size.y);
+			ImGui::Text("Current Tab: %s", m_TabManager.GetActiveTabName().c_str());
+		}
+		ImGui::EndGroup();
+	}
+
+	void Editor::UI_SyncEditorWindowSizes(const glm::vec2& viewportSize)
+	{
+		// Update editor window size
+		EditorWindowSize.x = viewportSize.x - LeftSidebarSize.x - RightSidebarSize.x;
+		EditorWindowSize.y = viewportSize.y - BottomBarSize.y;
+
+		// Top right point/bound
+		m_SecondViewportBounds[0] = { LeftSidebarSize.x, BottomBarSize.y };
+		m_SecondViewportBounds[1] = { 
+			(m_SecondViewportBounds[0].x + EditorWindowSize.x),
+			(m_SecondViewportBounds[0].y + EditorWindowSize.y)
+		};
+
+		// Check to see if any of the editor windows have changed in size and if they have
+		// then readjust the viewport
+		if (WindowsHaveChangedInSize)
+		{
+			//auto* viewport = ImGui::GetMainViewport();
+			LeftSidebarSize = { last_sidebar_left_size.x, last_sidebar_left_size.y };
+			RightSidebarSize = { last_sidebar_right_size.x, last_sidebar_right_size.y };
+			BottomBarSize = { last_bottombar_size.x, last_bottombar_size.y };
+			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
+			//EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
+			EditorWindowSize.x = viewportSize.x - LeftSidebarSize.x - RightSidebarSize.x;
+
+			// Only take the size of the TabBar into account if any tabs exist
+			if (m_CurrentTabCount > 1)
+				EditorWindowSize.y = viewportSize.y - BottomBarSize.y - MenuBarSize.y - TabBarSize.y;
+			else
+				EditorWindowSize.y = viewportSize.y - BottomBarSize.y - MenuBarSize.y;
+
+			// Update viewport scalers as the resolution has been altered
+			ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
+			ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
+
+			Window::Get()->SetScalers(ViewportScalers);
+			Window::Get()->SetWidth(EditorWindowSize.x);
+			Window::Get()->SetHeight(EditorWindowSize.y);
+
+			if (m_FillSidebarsVertically)
+			{
+				LeftSidebarSize.y = viewportSize.y;
+				RightSidebarSize.y = viewportSize.y;
+			}
+			// Reapply viewport settings starting from a lower point of the left sidebar and the bottom bar height
+			GraphicsContext::Get()->SetViewport(EditorWindowPos, EditorWindowSize);
+
+			WindowsHaveChangedInSize = false;
+			m_UpdateWindowSize = true; // Tell UI to set the window size ONCE
+		}
+
 	}
 
 }

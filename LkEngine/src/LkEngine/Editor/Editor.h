@@ -96,6 +96,11 @@ namespace LkEngine {
 		int GetTabCount() const { return m_TabManager.GetTabCount(); }
 		std::string GetCurrentTabName() const { return m_TabManager.GetActiveTabName(); }
 
+		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize); // Update potential changes in editor docking window sizes/positions
+		void UI_ShowMouseDetails();
+		void UI_ShowViewportAndWindowDetails();
+		void UI_ShowEditorWindowsDetails();
+
 	private:
         void DrawImGuizmo(Entity& entity);
 		void HandleExternalWindows();
@@ -150,6 +155,7 @@ namespace LkEngine {
 		bool m_ShowStackTool = false;
 		bool m_ShowStyleEditor = false;
 		int m_GizmoType = GizmoType::Translate;
+		int m_CurrentTabCount = 0; // Incremented to 1 after Editor is initialized
 
 		NodeEditor* m_NodeEditor = nullptr;
 		EditorCamera* m_EditorCamera = nullptr;
