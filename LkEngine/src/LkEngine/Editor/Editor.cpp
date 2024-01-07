@@ -24,6 +24,8 @@ namespace LkEngine {
 	{
 		s_Instance = this;
 
+		m_TabManager.Init();
+
 		m_ViewportBounds[0] = { 0, 0 };
 		m_ViewportBounds[1] = { Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight() };
 		m_SecondViewportBounds[0] = { 0, 0 };
@@ -64,9 +66,6 @@ namespace LkEngine {
 
 		m_EditorCamera = new EditorCamera();
 		m_EditorCamera->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
-
-		m_NodeEditor = new NodeEditor();
-		m_NodeEditor->Init();
 
 		m_ActiveWindowType = WindowType::Viewport;
 
@@ -190,22 +189,27 @@ namespace LkEngine {
 				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LOG_DEBUG("Selected mode: Normal Mode");
-					if (m_Tabs.size() == 0)
+					if (m_TabManager.GetTabCount() == 0)
 					{
-						m_Tabs.push_back("Viewport");
-						m_CurrentTab = "Viewport";
+						//m_Tabs.push_back("Viewport");
+						//m_CurrentTab = "Viewport";
+						s_ptr<Tab> viewportTab = m_TabManager.NewTab("Viewport", EditorTabType::Viewport);
+						m_TabManager.SetActiveTab(viewportTab);
 					}
-					m_Tabs.push_back(fmt::format("Node Editor-{}", m_Tabs.size()));
+
+					m_TabManager.NewTab(fmt::format("Node Editor-{}", m_TabManager.GetTabCount()), EditorTabType::NodeEditor);
+					//m_NodeEditor = new NodeEditor(fmt::format("Node Editor-{}", m_Tabs.size()));
+					//m_NodeEditor->Init();
+					//m_Tabs.push_back(fmt::format("Node Editor-{}", m_Tabs.size()));
 				}
 				ImGui::SameLine();
 				if (ImGui::ImageButton("##ModeButton-NodeEditor", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LOG_DEBUG("Selected mode: Node Editor");
-					m_Tabs.pop_back();
-					if (m_Tabs.size() == 1)
+					m_TabManager.PopTab();
+					if (m_TabManager.GetTabCount() == 1)
 					{
-						m_Tabs.pop_back();
-						m_CurrentTab = "";
+						m_TabManager.PopTab();
 					}
 				}
 			}
@@ -394,7 +398,7 @@ namespace LkEngine {
 			ImGui::SameLine();
 			ImGui::Text("WorkSize: (%1.f, %1.f)", viewport->WorkSize.x, viewport->WorkSize.y);
 
-			ImGui::Text("Current Tab: %s", GetCurrentTabName().c_str());
+			ImGui::Text("Current Tab: %s", m_TabManager.GetActiveTabName().c_str());
 
 			EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
 			EditorWindowSize.y = viewport->Size.y - BottomBarSize.y /* - topbar_height */;
@@ -414,7 +418,7 @@ namespace LkEngine {
 			m_UpdateWindowSize = false; 
 
 		static int lastTabCount = 0;
-		int currentTabCount = GetTabCount();
+		int currentTabCount = m_TabManager.GetTabCount();
 		if (currentTabCount > 0)
 		{
 			// Apply viewport update as the tabbar height might've changed
@@ -424,17 +428,20 @@ namespace LkEngine {
 			{
 				if (ImGui::BeginTabBar("MainTab", ImGuiTabBarFlags_Reorderable))
 				{
-					for (auto& tabName : m_Tabs)
+					//for (auto& tabName : m_Tabs)
+					for (TabEntry tabEntry: m_TabManager.m_Tabs)
 					{
-						if (ImGui::BeginTabItem(tabName.c_str()))
+						//if (ImGui::BeginTabItem(tabName.c_str()))
+						if (ImGui::BeginTabItem(tabEntry.second->Name.c_str()))
 						{
-							m_CurrentTab = tabName;
-							if (tabName == "Node Editor-1")
+							//m_CurrentTab = tabEntry.second.Name;
+							m_TabManager.SetActiveTab(tabEntry.second);
+							if (tabEntry.second->Name == "Node Editor-1")
 							{
 								ImGui::SetNextWindowPos({ m_SecondViewportBounds[0].x, MenuBarSize.y + TabBarSize.y }, ImGuiCond_Always);
 								ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
 								ImGui::Begin("LkEngine Node Editor", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-								m_NodeEditor->OnRender();
+								//m_NodeEditor->OnImGuiRender();
 								ImGui::End();
 							}
 							ImGui::EndTabItem();
@@ -453,7 +460,7 @@ namespace LkEngine {
 		if (lastTabCount != currentTabCount)
 			windowsHaveChangedSize = true;
 
-		lastTabCount = GetTabCount();
+		lastTabCount = m_TabManager.GetTabCount();
 
 		// Check to see if any of the editor windows have changed in size and if they have
 		// then readjust the viewport
@@ -783,7 +790,8 @@ namespace LkEngine {
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
 		//auto [windowWidth, windowHeight] = ImGui::GetWindowSize();
-		if (m_Tabs.size() == 0)
+		//if (m_TabManager.m_Tabs.size() == 0)
+		if (m_TabManager.GetTabCount() == 0)
 			ImGuizmo::SetRect(pos_x, (m_SecondViewportBounds[0].y - BottomBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
 			//ImGuizmo::SetRect(pos_x, (m_SecondViewportBounds[0].y - BottomBarSize.y - MenuBarSize.y) * Window::Get()->GetScalerY(), EditorWindowSize.x, EditorWindowSize.y);
 			//ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y), EditorWindowSize.x, EditorWindowSize.y);

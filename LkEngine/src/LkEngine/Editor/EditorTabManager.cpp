@@ -18,12 +18,12 @@ namespace LkEngine {
         if (tabType == EditorTabType::NodeEditor)
         {
             auto tab = std::make_shared<NodeEditorTab>(tabName);
-            m_Tabs.emplace(m_Tabs.size(), tab);
+            m_Tabs.emplace(m_Tabs.size() + 1, tab);
         }
         else
         {
             auto tab = std::make_shared<Tab>(tabName, tabType);
-            m_Tabs.emplace(m_Tabs.size(), tab);
+            m_Tabs.emplace(m_Tabs.size() + 1, tab);
         }
 
         s_ptr<Tab> tab = GetTab(tabName);
@@ -69,17 +69,13 @@ namespace LkEngine {
     void EditorTabManager::PopTab()
     {
         LOG_DEBUG("EditorTabManager::PopTab() -> m_Tabs.size() == {}", m_Tabs.size());
+        m_Tabs.erase(m_Tabs.size());
         if (uint8_t tabCount = m_Tabs.size() > 0)
-        {
             LOG_DEBUG("Erase tab: {}", m_Tabs.find(tabCount)->second->Name); // at uses index, erase uses key
-            m_Tabs.erase(tabCount);
-        }
-        if (m_Tabs.size() == 1)
+
+        if (m_Tabs.size() == 0)
         {
             m_ActiveTab = nullptr;
-            // TODO: Reordering of tabs should be taken into account here
-            //m_Tabs.erase();
-            m_Tabs.clear(); // just clear for now, don't take reordering into consideration
         }
     }
 
