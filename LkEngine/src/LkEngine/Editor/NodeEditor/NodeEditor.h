@@ -7,19 +7,23 @@
 
 namespace LkEngine {
 
-    namespace NE = ax::NodeEditor; // Node Editor
+    namespace NE = ax::NodeEditor; 
 
     class NodeEditor
     {
     public:
-        NodeEditor();
+        NodeEditor(std::string_view name);
         ~NodeEditor();
 
-        void Init();
         void OnRender();
+        void OnImGuiRender();
+        void Destroy();
 
     private:
-        bool m_Initialized = false;
+        void Save();
+
+    private:
+        std::string m_Name;
         NodeEditorContext* m_NodeEditorContext = nullptr;
     };
 

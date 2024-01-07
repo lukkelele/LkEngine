@@ -4,23 +4,22 @@
 
 namespace LkEngine {
 
-    NodeEditor::NodeEditor()
+    NodeEditor::NodeEditor(std::string_view name)
+        : m_Name(name)
     {
         m_NodeEditorContext = new NodeEditorContext();
+        m_NodeEditorContext->Init();
     }
 
     NodeEditor::~NodeEditor()
     {
     }
 
-    void NodeEditor::Init()
+    void NodeEditor::OnRender()
     {
-        m_NodeEditorContext->Init();
-        //NE::SetCurrentEditor(m_NodeEditorContext->GetContext());
-        m_Initialized = true;
     }
 
-    void NodeEditor::OnRender()
+    void NodeEditor::OnImGuiRender()
     {
         static const int NodePin = 1;
         static const int InputPin = 1;
@@ -43,6 +42,16 @@ namespace LkEngine {
             NE::EndNode();
         }
         NE::End();
+    }
+
+    void NodeEditor::Destroy()
+    {
+        Save(); // Save before deletion begins
+    }
+
+    // Serialize
+    void NodeEditor::Save()
+    {
     }
 
 }

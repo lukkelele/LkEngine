@@ -6,7 +6,8 @@
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/UI/UICore.h"
 
-#include "LkEngine/Editor/NodeEditor/NodeEditor.h"
+#include "EditorTabManager.h"
+#include "NodeEditor/NodeEditor.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -91,8 +92,9 @@ namespace LkEngine {
 		glm::vec2 GetTabBarSize() const { return TabBarSize; }
 
 		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
-		int GetTabCount() const { return m_Tabs.size(); }
-		std::string GetCurrentTabName() const { return m_CurrentTab; }
+
+		int GetTabCount() const { return m_TabManager.GetTabCount(); }
+		std::string GetCurrentTabName() const { return m_TabManager.GetActiveTabName(); }
 
 	private:
         void DrawImGuizmo(Entity& entity);
@@ -136,9 +138,8 @@ namespace LkEngine {
 
 		// Window where the selected entity settings will be shown in
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
-
-		std::vector<std::string> m_Tabs;
-		std::string m_CurrentTab = "";
+		//std::vector<std::string> m_Tabs;
+		//std::string m_CurrentTab = "";
 
 	private:
 		Scene* m_Scene = nullptr;
@@ -152,6 +153,7 @@ namespace LkEngine {
 
 		NodeEditor* m_NodeEditor = nullptr;
 		EditorCamera* m_EditorCamera = nullptr;
+		EditorTabManager m_TabManager;
 
 		WindowType m_ActiveWindowType;
 
