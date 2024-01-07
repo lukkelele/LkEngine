@@ -9,9 +9,9 @@
 #include "LkEngine/Core/Window.h"
 
 #include "LkEngine/UI/UICore.h"
+#include "LkEngine/UI/DockSpace.h"
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/UI/ImGuiUtilities.h"
-#include "LkEngine/UI/DockSpace.h"
 
 #include "LkEngine/UI/OpenGLImGui.h"
 
@@ -26,35 +26,34 @@ namespace LkEngine {
 	{
 		s_Instance = this;
 		m_ShowStackTool = true;
+		m_ActiveWindowType = WindowType::Viewport;
 
 		m_ViewportBounds[0] = { 0, 0 };
 		m_ViewportBounds[1] = { Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight() };
 		m_SecondViewportBounds[0] = { 0, 0 };
 		m_SecondViewportBounds[1] = { 0, 0 };
 
-		{
-			LeftSidebarSize.x = 340.0f;
-			LeftSidebarSize.y = m_ViewportBounds[1].y;
-			RightSidebarSize.x = 340.0f;
-			RightSidebarSize.y = m_ViewportBounds[1].y;
+		LeftSidebarSize.x = 340.0f;
+		LeftSidebarSize.y = m_ViewportBounds[1].y;
+		RightSidebarSize.x = 340.0f;
+		RightSidebarSize.y = m_ViewportBounds[1].y;
 
-			BottomBarSize.x = 0.0f;
-			BottomBarSize.y = 340.0f;
+		BottomBarSize.x = 0.0f;
+		BottomBarSize.y = 340.0f;
 
-			MenuBarSize.x = 0.0f;
-			MenuBarSize.y = 30.0f;
+		MenuBarSize.x = 0.0f;
+		MenuBarSize.y = 30.0f;
 
-			TabBarSize.x = 0.0f;
-			TabBarSize.y = 34.0f;
+		TabBarSize.x = 0.0f;
+		TabBarSize.y = 34.0f;
 
-			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
-			EditorWindowSize.x = m_ViewportBounds[1].x - LeftSidebarSize.x - RightSidebarSize.x;
-			EditorWindowSize.y = m_ViewportBounds[1].y - BottomBarSize.y /* - topbar_height */;
-			LK_ASSERT(EditorWindowSize.x != 0 && EditorWindowSize.y != 0 && EditorWindowSize.x > 0 && EditorWindowSize.y > 0);
+		EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
+		EditorWindowSize.x = m_ViewportBounds[1].x - LeftSidebarSize.x - RightSidebarSize.x;
+		EditorWindowSize.y = m_ViewportBounds[1].y - BottomBarSize.y /* - topbar_height */;
+		LK_ASSERT(EditorWindowSize.x != 0 && EditorWindowSize.y != 0 && EditorWindowSize.x > 0 && EditorWindowSize.y > 0);
 
-			ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
-			ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
-		}
+		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
+		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 
 		Window::Get()->SetScalers(ViewportScalers.x, ViewportScalers.y);
 		Window::Get()->SetWidth(EditorWindowSize.x);
@@ -63,57 +62,27 @@ namespace LkEngine {
 		m_EditorCamera = new EditorCamera();
 		m_EditorCamera->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
 
-		m_ActiveWindowType = WindowType::Viewport;
-
 		m_TabManager.Init();
-		auto viewportTab = m_TabManager.NewTab("Viewport", EditorTabType::Viewport);
-		m_TabManager.SetActiveTab(viewportTab);
+		// Add Viewport tab as initial tab which is an unremovable tab
+		auto viewportTab = m_TabManager.NewTab("Viewport", EditorTabType::Viewport, true);
 
 		m_Enabled = true;
 	}
 
 	void Editor::RenderImGui()
 	{
+		auto* app = Application::Get();
+		auto* window = Window::Get();
 		auto& io = ImGui::GetIO();
 		auto& style = ImGui::GetStyle();
 		auto& colors = style.Colors;
 		io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
 
 		ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
 
-		auto* window = Window::Get();
-		auto* glfwWindow = window->GetGlfwWindow();
-		bool isMaximized = (bool)glfwGetWindowAttrib(glfwWindow, GLFW_MAXIMIZED);
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
-		ImGui::PopStyleColor(); 
-		ImGui::PopStyleVar(2);
-
+		UI::BeginViewport(UI_CORE_VIEWPORT, window, viewport);
 		UI_HandleManualWindowResize();
-
-		// Dockspace
-		if (UI::DockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
-		{
-		    UI::CoreViewportFlags |= ImGuiWindowFlags_NoBackground;
-			UI::HostWindowFlags |= ImGuiWindowFlags_NoBackground;
-		}
-
-		float minWinSizeX = style.WindowMinSize.x;
-		style.WindowMinSize.x = 370.0f;
-		ImGui::DockSpace(ImGui::GetID(LkEngine_DockSpace), ImVec2(0, 0), UI::DockspaceFlags);
-		style.WindowMinSize.x = minWinSizeX;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		ImGui::Begin(LkEngine_DockSpace, NULL, UI::HostWindowFlags);
-		ImGui::PopStyleColor(1);
-		ImGui::PopStyleVar(1);
+		UI::BeginDockSpace(LkEngine_DockSpace);
 
 		if (m_Scene)
 		{
@@ -122,8 +91,6 @@ namespace LkEngine {
 
 		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
 		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
-
-		auto scalers = window->GetScalers();
 
 		// The window space is calculated from topleft corner, so remove Mouse::Pos.y to get the actual cursor placement
 		{
@@ -137,11 +104,13 @@ namespace LkEngine {
 			Mouse::CenterPos.x = (Mouse::Pos.x / window->GetWidth()) * 2.0f - 1.0f;
 			Mouse::CenterPos.y = ((Mouse::Pos.y / window->GetHeight()) * 2.0f - 1.0f) * -1.0f; // was -1.0f 
 		}
+#ifdef YAML_CPP_DLL
+		std::string s;
+#endif
 
 		//--------------------------------------------------
-		// TOP MENUBAR
+		// Menubar
 		//--------------------------------------------------
-		UI::PushID(UI_TOP_BAR);
 		ImGui::BeginMainMenuBar();
 		{
 			MenuBarSize.x = ImGui::GetCurrentWindow()->Size.x;
@@ -152,6 +121,14 @@ namespace LkEngine {
 				if (ImGui::MenuItem("New")) 
 				{ 
 				}
+				if (ImGui::MenuItem("Save"))
+				{
+					LOG_DEBUG("File->Save");
+					SceneSerializer serializer(m_Scene);
+					std::string readString;
+					serializer.Serialize("serializer-test.lukkelele");
+					LOG_DEBUG("Exiting scope for SceneSerializer");
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::MenuItem("Render Information"))
@@ -159,21 +136,16 @@ namespace LkEngine {
 
 		}
 		ImGui::EndMainMenuBar();
-		UI::PopID(UI_TOP_BAR);
 
-		if (m_UpdateWindowSize)
-		{
-			ImGui::SetNextWindowPos(ImVec2(0, MenuBarSize.y), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always);
-		}
 		//--------------------------------------------------
-		// LEFT SIDEBAR
+		// Left Sidebar
 		//--------------------------------------------------
+		if (ShouldUpdateWindowSizes)
+			UpdateLeftSidebarSize(viewport);
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
 			// TODO: initialize this bool by checking the depth in the graphics context
 			static bool depth_test_checkbox = false;
-			ImGui::BeginGroup();
 			if (ImGui::Checkbox("Depth Testing", &depth_test_checkbox))
 			{
 				if (depth_test_checkbox == true)
@@ -182,6 +154,19 @@ namespace LkEngine {
 					Window::Get()->SetDepthEnabled(false);
 			}
 
+			//----------------------------------------
+			// Colors
+			//----------------------------------------
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			if (ImGui::TreeNode("Colors"))
+			{
+				UI_BackgroundColorModificationMenu();
+				ImGui::TreePop();
+			}
+
+			//----------------------------------------
+			// Mode Selector
+			//----------------------------------------
 			ImGui::BeginGroup();
 			{
 				static ImVec2 modeButtonSize = { 50.0f, 50.0f };
@@ -202,27 +187,11 @@ namespace LkEngine {
 			}
 			ImGui::EndGroup();
 
-			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-			if (ImGui::TreeNode("Colors"))
-			{
-			    static ImGuiSliderFlags bg_slider_flags = ImGuiSliderFlags_None;
-				UI::PushID("##LkEngine-LeftPanel-Colors");
-			    ImGui::Text("Background"); 
-			    ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-			    ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-			    ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-			    ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", bg_slider_flags);
-			    ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", bg_slider_flags);
-				UI::PopID();
-
-			    ImGui::TreePop();
-			}
 
 			if (SelectedEntity)
 			{
 				DrawComponents(SelectedEntity);
 			}
-			ImGui::EndGroup();
 			
 			ImGui::BeginGroup();
 			{
@@ -265,13 +234,10 @@ namespace LkEngine {
 		ImGui::End();  
 
 		//--------------------------------------------------
-		// RIGHT SIDEBAR
+		// Right Sidebar
 		//--------------------------------------------------
-		if (m_UpdateWindowSize)
-		{
-			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
-		}
+		if (ShouldUpdateWindowSizes)
+			UpdateRightSidebarSize(viewport);
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 		{
 			ImGui::BeginGroup();
@@ -319,7 +285,7 @@ namespace LkEngine {
 		//--------------------------------------------------
 		// BOTTOM BAR
 		//--------------------------------------------------
-		if (m_UpdateWindowSize)
+		if (ShouldUpdateWindowSizes)
 		{
 			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x, viewport->Size.y + MenuBarSize.y - BottomBarSize.y), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(viewport->Size.x - (LeftSidebarSize.x + RightSidebarSize.x), BottomBarSize.y), ImGuiCond_Always);
@@ -407,8 +373,8 @@ namespace LkEngine {
 
 		// If the window sizes have been adjusted, set the bool member to false
 		// This must be run BEFORE the 'WindowsHaveChangedInSize' if-statement
-		if (m_UpdateWindowSize == true)
-			m_UpdateWindowSize = false; 
+		if (ShouldUpdateWindowSizes == true)
+			ShouldUpdateWindowSizes = false; 
 
 		glm::vec2 viewportSize = { viewport->WorkSize.x, viewport->WorkSize.y };
 		UI_SyncEditorWindowSizes(viewportSize);
@@ -1023,7 +989,7 @@ namespace LkEngine {
 	{ 
 		// Window width and height has been changed as this function has been called,
 		// therefore need to update the viewport bounds
-		m_UpdateWindowSize = flag; 
+		ShouldUpdateWindowSizes = flag; 
 
 		m_ViewportBounds[0] = { 0, 0 };
 		m_ViewportBounds[1] = { Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight() };
@@ -1110,7 +1076,6 @@ namespace LkEngine {
 			RightSidebarSize = { last_sidebar_right_size.x, last_sidebar_right_size.y };
 			BottomBarSize = { last_bottombar_size.x, last_bottombar_size.y };
 			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
-			//EditorWindowSize.x = viewport->WorkSize.x - LeftSidebarSize.x - RightSidebarSize.x;
 			EditorWindowSize.x = viewportSize.x - LeftSidebarSize.x - RightSidebarSize.x;
 
 			// Only take the size of the TabBar into account if any tabs exist
@@ -1136,9 +1101,39 @@ namespace LkEngine {
 			GraphicsContext::Get()->SetViewport(EditorWindowPos, EditorWindowSize);
 
 			WindowsHaveChangedInSize = false;
-			m_UpdateWindowSize = true; // Tell UI to set the window size ONCE
+			ShouldUpdateWindowSizes = true; // Tell UI to set the window size ONCE
 		}
 
+	}
+
+	void Editor::UI_BackgroundColorModificationMenu()
+	{
+		static ImGuiSliderFlags backgroundSliderFlags = ImGuiSliderFlags_None;
+		auto& colors = ImGui::GetStyle().Colors;
+		UI::PushID();
+		ImGui::BeginGroup();
+		{
+			ImGui::Text("Background"); 
+			ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
+			ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
+			ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
+			ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
+			ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", backgroundSliderFlags);
+		}
+		ImGui::EndGroup();
+		UI::PopID();
+	}
+
+	void Editor::UpdateLeftSidebarSize(ImGuiViewport* viewport)
+	{
+		ImGui::SetNextWindowPos(ImVec2(0, MenuBarSize.y), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always);
+	}
+
+	void Editor::UpdateRightSidebarSize(ImGuiViewport* viewport)
+	{
+		ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
 	}
 
 }

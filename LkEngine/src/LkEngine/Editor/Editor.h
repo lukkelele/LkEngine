@@ -100,14 +100,17 @@ namespace LkEngine {
 		void UI_ShowMouseDetails();
 		void UI_ShowViewportAndWindowDetails();
 		void UI_ShowEditorWindowsDetails();
+		void UI_BackgroundColorModificationMenu();
 
 	private:
         void DrawImGuizmo(Entity& entity);
 		void HandleExternalWindows();
 
+		void UpdateLeftSidebarSize(ImGuiViewport* viewport);
+		void UpdateRightSidebarSize(ImGuiViewport* viewport);
+
 		//void RenderViewport();                 // TODO
 		//void RenderViewport(s_ptr<Image> img); // TODO
-
 	public:
 		// Flag to determine if an item is currently being created
 		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window
@@ -129,7 +132,7 @@ namespace LkEngine {
 		glm::vec2 LeftSidebarPos = { 0.0f, 0.0f };
 		glm::vec2 RightSidebarPos = { 0.0f, 0.0f };
 
-		bool m_UpdateWindowSize = true;
+		bool ShouldUpdateWindowSizes = true;
 
 		bool ShowRenderInformationWindow = false;
 		bool m_FillSidebarsVertically = true; // Always fill out sidebars vertically

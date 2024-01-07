@@ -13,7 +13,7 @@ namespace LkEngine {
         m_SwitchToNewTabsOnCreation = switchToNewTabsOnCreation;
     }
 
-    s_ptr<Tab> EditorTabManager::NewTab(std::string_view tabName, const EditorTabType tabType)
+    s_ptr<Tab> EditorTabManager::NewTab(std::string_view tabName, const EditorTabType tabType, bool setAsActive)
     {
         if (tabType == EditorTabType::Viewport)
         {
@@ -27,7 +27,7 @@ namespace LkEngine {
         }
 
         s_ptr<Tab> tab = GetTab(tabName);
-        if (m_SwitchToNewTabsOnCreation)
+        if (m_SwitchToNewTabsOnCreation || setAsActive)
             SetActiveTab(tab);
         return tab;
     }
