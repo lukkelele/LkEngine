@@ -126,8 +126,7 @@ namespace LkEngine {
 					LOG_DEBUG("File->Save");
 					SceneSerializer serializer(m_Scene);
 					std::string readString;
-					serializer.Serialize("serializer-test.lukkelele");
-					LOG_DEBUG("Exiting scope for SceneSerializer");
+					serializer.Serialize("scene.lukkelele");
 				}
 				ImGui::EndMenu();
 			}
