@@ -55,12 +55,12 @@ namespace LkEngine {
 			m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
 		}
 
-		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
-		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
-
+		const std::string& Name() { return GetComponent<TagComponent>().Tag; }
+		UUID UUID() { return GetComponent<IDComponent>().ID; }
 		TransformComponent& Transform() { return GetComponent<TransformComponent>(); }
 		SpriteComponent& Sprite() { return GetComponent<SpriteComponent>(); }
 		CameraComponent& Camera() { return GetComponent<CameraComponent>(); }
+		MaterialComponent& Material() { return GetComponent<MaterialComponent>(); }
 		RigidBody2DComponent& RigidBody2D() { return GetComponent<RigidBody2DComponent>(); }
 		BoxCollider2DComponent& BoxCollider2D() { return GetComponent<BoxCollider2DComponent>(); }
 

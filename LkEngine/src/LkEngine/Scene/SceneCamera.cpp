@@ -91,9 +91,9 @@ namespace LkEngine {
 		float left, right, bottom, top;
 		float width, height;
 
-		auto window = Application::Get()->GetWindow();
-		width = window->GetWidth();
-		height = window->GetWidth();
+		auto* window = Window::Get();
+		width = window->GetViewportWidth();
+		height = window->GetViewportWidth();
 
 		left = -width / 2.0f;
 		right = width / 2.0f;

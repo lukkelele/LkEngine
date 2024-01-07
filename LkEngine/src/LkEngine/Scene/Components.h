@@ -191,6 +191,7 @@ namespace LkEngine{
 
 		float Density = 1.0f;
 		float Friction = 1.0f;
+		bool IsSensor = false;
 		void* RuntimeBody = nullptr; // Assigned at component creation
 
 		bool Removable = true;

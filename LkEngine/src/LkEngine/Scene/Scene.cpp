@@ -1,18 +1,14 @@
 #include "LKpch.h"
 #include "Scene.h"
+#include "Entity.h"
 
-#include "LkEngine/Scene/Entity.h"
-#include "LkEngine/Scene/Components.h"
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Physics2D/Physics2D.h"
 
 #include "LkEngine/Debug/Debugger2D.h"
 
-#include "LkEngine/Debug/Box2DDebugger.h"
-
-#include "LkEngine/Editor/EditorCamera.h"
+#include "LkEngine/Editor/Editor.h"
 
 
 namespace LkEngine {
@@ -32,10 +28,11 @@ namespace LkEngine {
 
 		if (editorScene)
 		{
-			m_EditorCamera = EditorLayer::Get()->GetEditorCamera();
-			EditorLayer::Get()->SetScene(*this);
+			m_EditorCamera = Editor::Get()->GetEditorCamera();
+			Editor::Get()->SetScene(*this);
 		}
 
+		// TODO: Add SceneManager class for this
 		Application::Get()->AddScene(*this);
 		s_SceneCounter++;
 
@@ -43,16 +40,16 @@ namespace LkEngine {
 		Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
 		box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
 
-		Debugger::AttachDebugDrawer2D(&box2dWorld);
+		Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
-		Entity entity = CreateEntityWithUUID(UUID(), name);
+		Entity entity = CreateEntityWithID(UUID(), name);
 		return entity;
 	}
 
-	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	Entity Scene::CreateEntityWithID(UUID uuid, const std::string& name)
 	{
 		Entity entity = { m_Registry.create(), this };
 		entity.AddComponent<IDComponent>(uuid);
@@ -63,6 +60,7 @@ namespace LkEngine {
 		return entity;
 	}
 
+	// TODO: Change name to GetEntityWithID
 	Entity Scene::GetEntityWithUUID(UUID uuid)
 	{
 		if (m_EntityMap.find(uuid) != m_EntityMap.end())
@@ -84,9 +82,9 @@ namespace LkEngine {
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		m_EntityMap.erase(entity.GetUUID());
+		m_EntityMap.erase(entity.UUID());
 		m_Registry.destroy(entity);
-		LOG_DEBUG("Entity {} deleted", entity.GetName());
+		LOG_DEBUG("Entity {} deleted", entity.Name());
 	}
 
 	bool Scene::IsEntityInRegistry(Entity entity) const
@@ -101,6 +99,16 @@ namespace LkEngine {
 		for (const auto& entity : view)
 			entities.push_back({ entity, this });
 		return entities;
+	}
+
+	void Scene::SortEntities()
+	{
+		m_Registry.sort<IDComponent>([&](const auto lhs, const auto rhs)
+		{
+			auto lhsEntity = m_EntityMap.find(lhs.ID);
+			auto rhsEntity = m_EntityMap.find(rhs.ID);
+			return static_cast<uint32_t>(lhsEntity->second) < static_cast<uint32_t>(rhsEntity->second);
+		});
 	}
 
 	void Scene::Pause(bool paused)
@@ -151,27 +159,32 @@ namespace LkEngine {
 	template<>
 	void Scene::OnComponentAdded<RigidBody2DComponent>(Entity entity, RigidBody2DComponent& rigidBody2DComponent)
 	{
-		//auto sceneView = m_Registry.view<Box2DWorldComponent>();
-		//auto& world = m_Registry.get<Box2DWorldComponent>(sceneView.front()).World;
-		auto& world = GetBox2DWorld();
+		auto sceneView = m_Registry.view<Box2DWorldComponent>();
+		auto& world = m_Registry.get<Box2DWorldComponent>(sceneView.front()).World;
 
 		Entity e = { entity, this };
-		UUID entityID = e.GetComponent<IDComponent>().ID;
-		TransformComponent& transform = e.GetComponent<TransformComponent>();
+		UUID entityID = e.UUID();
+		TransformComponent& transform = e.Transform();
 		auto& rigidBody2D = m_Registry.get<RigidBody2DComponent>(entity);
 
 		b2BodyDef bodyDef;
-		if (rigidBody2D.BodyType == RigidBody2DComponent::Type::Static)
-			bodyDef.type = b2_staticBody;
-		else if (rigidBody2D.BodyType == RigidBody2DComponent::Type::Dynamic)
-			bodyDef.type = b2_dynamicBody;
-		else if (rigidBody2D.BodyType == RigidBody2DComponent::Type::Kinematic)
-			bodyDef.type = b2_kinematicBody;
+		switch (rigidBody2D.BodyType)
+		{
+			case RigidBody2DComponent::Type::Static: 
+				bodyDef.type = b2_staticBody;
+				break;
+			case RigidBody2DComponent::Type::Dynamic: 
+				bodyDef.type = b2_dynamicBody;
+				break;
+			case RigidBody2DComponent::Type::Kinematic: 
+				bodyDef.type = b2_kinematicBody;
+				break;
+		}
 
 		bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
 		bodyDef.angle = transform.GetRotationEuler().z;
 
-		b2Body* body = world.World->CreateBody(&bodyDef);
+		b2Body* body = world->CreateBody(&bodyDef);
 		body->SetFixedRotation(rigidBody2D.FixedRotation);
 
 		b2MassData massData = body->GetMassData();
@@ -184,35 +197,35 @@ namespace LkEngine {
 		body->GetUserData().pointer = (uintptr_t)entityID;
 		rigidBody2D.RuntimeBody = body;
 
-		LOG_DEBUG("OnComponentAdded<RigidBody2DComponent>  {}", entity.GetName());
+		LOG_DEBUG("OnComponentAdded<RigidBody2DComponent>  {}", entity.Name());
 	}
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& boxColliderComponent)
 	{
-		LOG_DEBUG("OnComponentAdded<BoxCollider2DComponent>  {}", entity.GetName());
+		LOG_DEBUG("OnComponentAdded<BoxCollider2DComponent>  {}", entity.Name());
 
 		Entity e = { entity, this };
 		auto& transform = e.Transform();
-		//auto& boxCollider2D = m_Registry.get<BoxCollider2DComponent>(entity);
 
 		if (e.HasComponent<RigidBody2DComponent>())
 		{
 			LK_ASSERT(transform.Scale.x * boxColliderComponent.Size.x > 0 && transform.Scale.y * boxColliderComponent.Size.y > 0);
 
-			auto& rigidBody2D = e.GetComponent<RigidBody2DComponent>();
+			auto& rigidBody2D = e.RigidBody2D();
 			b2Body* body = static_cast<b2Body*>(rigidBody2D.RuntimeBody);
 			LK_ASSERT(body != nullptr);
 
 			b2PolygonShape polygonShape;
 			polygonShape.SetAsBox(transform.Scale.x * boxColliderComponent.Size.x, transform.Scale.y * boxColliderComponent.Size.y);
-			LOG_INFO("BoxCollider for {}, size ({}, {})", entity.GetName(), transform.Scale.x * boxColliderComponent.Size.x, transform.Scale.y * boxColliderComponent.Size.y);
-			//polygonShape.SetAsBox(1000, 1000);
+			//LOG_INFO("BoxCollider for {}, size ({}, {})", entity.Name(), transform.Scale.x * boxColliderComponent.Size.x, transform.Scale.y * boxColliderComponent.Size.y);
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &polygonShape;
 			fixtureDef.density = boxColliderComponent.Density;
 			fixtureDef.friction = boxColliderComponent.Friction;
+			fixtureDef.isSensor = boxColliderComponent.IsSensor;
+			fixtureDef.restitution = 0.30f;
 			body->CreateFixture(&fixtureDef);
 			LOG_DEBUG("Added b2FixtureDef to body");
 		}
@@ -226,7 +239,14 @@ namespace LkEngine {
 	{
 		editorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		editorCamera.Update(ts);
+
+	#ifdef LK_DEBUG
+		auto& world = GetBox2DWorld();
+		world.World->DebugDraw();
+	#endif
 	}
+
+#if 0
 
 	void Scene::BeginScene(Timestep ts)
 	{
@@ -235,41 +255,20 @@ namespace LkEngine {
 		BeginScene(*m_Camera, ts);
 	}
 
-	void Scene::BeginScene(const glm::mat4& viewProjection, Timestep ts)
-	{
-		signed int velocityIterations = 6;
-		signed int positionIterations = 2;
-
-		if (m_SceneInfo.Paused == false)
-		{
-			// Update the world
-			auto& world = GetBox2DWorld();
-			world.World->Step((1.0f / 60.0f), 12, 4);
-			world.World->DebugDraw();
-		}
-	}
-
 	void Scene::BeginScene(SceneCamera& cam, Timestep ts)
 	{
 		cam.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		cam.Update(ts);
-
-		signed int velocityIterations = 6;
-		signed int positionIterations = 2;
-
-		if (m_SceneInfo.Paused == false)
-		{
-			// Update the world
-			auto& world = GetBox2DWorld();
-			world.World->Step((1.0f / 60.0f), 12, 4);
-			world.World->DebugDraw();
-		}
 	}
+#endif
 
 
 	// TODO: Update this so no RenderCommand calls are needed and its not exclusive towards sprite draw calls
 	void Scene::EndScene()
 	{
+		auto& world = GetBox2DWorld();
+		world.World->DebugDraw();
+
 		auto entityTags = m_Registry.view<TagComponent>();
 
 		for (auto& entityTag : entityTags)
@@ -281,18 +280,19 @@ namespace LkEngine {
 				if (entity.HasComponent<MaterialComponent>())
 				{
 					RenderCommand::DrawSprite(
-						entity.GetComponent<TransformComponent>(), 
-						entity.GetComponent<SpriteComponent>(),
-						entity.GetComponent<MaterialComponent>(),
-						entity.GetUUID()
+						entity.Transform(),
+						entity.Sprite(),
+						entity.Material(),
+						entity.UUID()
 					);
 				}
 				else // Draw color only, no texture
 				{
-					RenderCommand::DrawSprite(
-						entity.GetComponent<TransformComponent>(), 
-						entity.GetComponent<SpriteComponent>(),
-						entity.GetUUID()
+					Renderer::SubmitSprite(
+						entity.GetComponent<TransformComponent>(),
+						entity.Sprite().Size,
+						entity.Sprite().Color,
+						entity.UUID()
 					);
 				}
 			}

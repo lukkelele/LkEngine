@@ -41,13 +41,6 @@ namespace LkEngine {
 		glm::vec3& GetOffset() { return m_Offset; }
 
 	private:
-		ProjectionType m_ProjectionType = ProjectionType::Perspective;
-
-		float m_DegPerspectiveFOV = 45.0f;
-		float m_PerspectiveNear = 0.1f, m_PerspectiveFar = 1000.0f;
-		float m_OrthographicSize = 10.0f;
-		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
-
 		glm::vec3 m_Pos = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_PosDelta = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Origin = { 0.0f, 0.0f, 0.0f };
