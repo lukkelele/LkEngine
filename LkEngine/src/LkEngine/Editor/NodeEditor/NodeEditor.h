@@ -20,9 +20,8 @@ namespace LkEngine {
         void OnRender();
         void OnImGuiRender();
         void Destroy();
-
-        void DrawPinIcon(const Pin& pin, bool connected, int alpha);
-        ImColor GetIconColor(PinType type);
+        NodeEditorContext* GetEditorContext() { return m_EditorContext; }
+        void ActivateContext();
 
         void BuildNode(Node* node);
         Node* SpawnInputActionNode();
@@ -37,7 +36,8 @@ namespace LkEngine {
         Pin* FindPin(NE::PinId id);
         bool IsPinLinked(NE::PinId id);
         bool CanCreateLink(Pin* a, Pin* b);
-
+        void DrawPinIcon(const Pin& pin, bool connected, int alpha);
+        ImColor GetIconColor(PinType type);
         void IterateNodes();
 
     private:
@@ -52,7 +52,7 @@ namespace LkEngine {
         bool CreateNewNode = false;
     private:
         std::string m_Name;
-        NodeEditorContext* m_NodeEditorContext = nullptr;
+        NodeEditorContext* m_EditorContext = nullptr;
 
         std::vector<Node> m_Nodes;
         std::vector<Link> m_Links;

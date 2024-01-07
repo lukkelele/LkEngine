@@ -35,12 +35,24 @@ namespace LkEngine {
     void EditorTabManager::SetActiveTab(s_ptr<Tab> tab)
     {
         m_ActiveTab = tab;
+        if (m_ActiveTab->GetTabType() == EditorTabType::NodeEditor)
+        {
+            auto* nodeTab = static_cast<NodeEditorTab*>(m_ActiveTab.get());
+            //nodeTab->NodeEditorRef->GetEditorContext()->SetAsCurrentEditorContext();
+            nodeTab->NodeEditorRef->ActivateContext();
+        }
     }
 
     void EditorTabManager::SetActiveTab(std::string_view tabName)
     {
         s_ptr<Tab> tab = GetTab(tabName);
         m_ActiveTab = tab;
+        if (tab->GetTabType() == EditorTabType::NodeEditor)
+        {
+            auto* nodeTab = static_cast<NodeEditorTab*>(m_ActiveTab.get());
+            //nodeTab->NodeEditorRef->GetEditorContext()->SetAsCurrentEditorContext();
+            nodeTab->NodeEditorRef->ActivateContext();
+        }
     }
 
     std::string EditorTabManager::GetActiveTabName() const

@@ -13,7 +13,10 @@ namespace LkEngine {
         NodeEditorContext();
         ~NodeEditorContext();
 
+        static void SetEditorContext(NodeEditorContext* context);
+
         void Init();
+        void SetAsCurrentEditorContext();
 
         NE::EditorContext* GetContext() { return m_EditorContext; }
 

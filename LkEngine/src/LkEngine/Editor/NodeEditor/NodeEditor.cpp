@@ -15,8 +15,8 @@ namespace LkEngine {
     NodeEditor::NodeEditor(std::string_view name)
         : m_Name(name)
     {
-        m_NodeEditorContext = new NodeEditorContext();
-        m_NodeEditorContext->Init();
+        m_EditorContext = new NodeEditorContext();
+        m_EditorContext->Init();
     }
 
     NodeEditor::~NodeEditor()
@@ -33,7 +33,8 @@ namespace LkEngine {
         static const int InputPin = 1;
         static const int OutputPin = 2;
 
-        NE::Begin("My Node Editor");
+        //NE::Begin("My Node Editor");
+        NE::Begin(m_Name.c_str());
         {
             NE::BeginNode(NodePin);
 
@@ -425,5 +426,9 @@ namespace LkEngine {
         //ImGui::SetCursorScreenPos(cursorTopLeft);
     }
 
+    void NodeEditor::ActivateContext()
+    {
+        m_EditorContext->SetAsCurrentEditorContext();
+    }
 
 }
