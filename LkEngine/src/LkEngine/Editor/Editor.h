@@ -7,12 +7,13 @@
 #include "LkEngine/UI/UICore.h"
 
 #include "EditorTabManager.h"
+#include "ComponentEditor.h"
 #include "NodeEditor/NodeEditor.h"
 
+// TODO: Fix so opengl includes are handles in entrypoint
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>
-// TODO: Fix so opengl includes are handles in entrypoint
 #include <imgui/imgui_impl_opengl3.h>
 
 #include <ImGuizmo/ImGuizmo.h>
@@ -93,8 +94,9 @@ namespace LkEngine {
 
 		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
 
-		int GetTabCount() const { return m_TabManager.GetTabCount(); }
-		std::string GetCurrentTabName() const { return m_TabManager.GetActiveTabName(); }
+		EditorTabManager* GetTabManager() { return m_TabManager; }
+		int GetTabCount() const { return m_TabManager->GetTabCount(); }
+		std::string GetCurrentTabName() const { return m_TabManager->GetActiveTabName(); }
 
 		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize); // Update potential changes in editor docking window sizes/positions
 		void UI_ShowMouseDetails();
@@ -162,11 +164,14 @@ namespace LkEngine {
 
 		NodeEditor* m_NodeEditor = nullptr;
 		EditorCamera* m_EditorCamera = nullptr;
-		EditorTabManager m_TabManager;
+		EditorTabManager* m_TabManager = nullptr;
+		ComponentEditor m_ComponentEditor;
 
 		WindowType m_ActiveWindowType;
 
 		friend class Physics2D; // For getting UI window size when raycasting
+		friend class NodeEditorTab;
+		friend class MaterialEditorTab;
 
 		inline static Editor* s_Instance = nullptr;
 	};

@@ -2,6 +2,8 @@
 
 #include "LkEngine/Core/Base.h"
 
+#include "LkEngine/Renderer/Material.h"
+
 #include "NodeEditor/NodeEditor.h"
 
 
@@ -13,6 +15,8 @@ namespace LkEngine {
         Viewport,
         BlankEditor,
         NodeEditor,
+        MaterialEditor,
+        TextureEditor
     };
 
     class Tab
@@ -50,27 +54,32 @@ namespace LkEngine {
     class NodeEditorTab : public Tab
     {
     public:
-        NodeEditorTab(std::string_view name) 
-        {
-            Name = std::string(name);
-            Type = EditorTabType::NodeEditor;
-            NodeEditorRef = new NodeEditor(name);
-        }
-        NodeEditorTab(std::string_view name, const EditorTabType tabType) : NodeEditorTab(name) {}
-        ~NodeEditorTab()
-        {
-            NodeEditorRef->Destroy();
-        }
+        NodeEditorTab(std::string_view name);
+        NodeEditorTab(std::string_view name, const EditorTabType tabType);
+        ~NodeEditorTab();
 
-        void OnRender() override {}
-        void OnImGuiRender() override
-        {
-            NodeEditorRef->OnImGuiRender();
-        }
+        void OnRender() override;
+        void OnImGuiRender() override;
 
     public:
         NodeEditor* NodeEditorRef = nullptr;
-
     };
+
+
+    class MaterialEditorTab: public Tab
+    {
+    public:
+        MaterialEditorTab(std::string_view name);
+        MaterialEditorTab(std::string_view name, const EditorTabType tabType);
+        ~MaterialEditorTab();
+
+        void OnRender() override;
+        void OnImGuiRender() override;
+
+    public:
+        NodeEditor* NodeEditorRef = nullptr;
+        s_ptr<Material> MaterialRef = nullptr;
+    };
+
 
 }

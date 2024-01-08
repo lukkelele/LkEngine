@@ -25,8 +25,15 @@ namespace LkEngine {
             auto tab = std::make_shared<NodeEditorTab>(tabName);
             m_Tabs.emplace(m_Tabs.size() + 1, tab);
         }
+        else if (tabType == EditorTabType::MaterialEditor)
+        {
+            auto tab = std::make_shared<MaterialEditorTab>(tabName, tabType);
+            m_Tabs.emplace(m_Tabs.size() + 1, tab);
+        }
 
         s_ptr<Tab> tab = GetTab(tabName);
+        if (tab == nullptr)
+            throw std::runtime_error("New tab could not be created successfully, make sure the EditorTabType implementation exists for the specific type");
         if (m_SwitchToNewTabsOnCreation || setAsActive)
             SetActiveTab(tab);
         return tab;
@@ -38,7 +45,6 @@ namespace LkEngine {
         if (m_ActiveTab->GetTabType() == EditorTabType::NodeEditor)
         {
             auto* nodeTab = static_cast<NodeEditorTab*>(m_ActiveTab.get());
-            //nodeTab->NodeEditorRef->GetEditorContext()->SetAsCurrentEditorContext();
             nodeTab->NodeEditorRef->ActivateContext();
         }
     }

@@ -11,7 +11,8 @@
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/DockSpace.h"
 #include "LkEngine/UI/Property.h"
-#include "LkEngine/UI/ImGuiUtilities.h"
+
+#include "LkEngine/ImGui/ImGuiUtilities.h"
 
 #include "LkEngine/UI/OpenGLImGui.h"
 
@@ -62,9 +63,10 @@ namespace LkEngine {
 		m_EditorCamera = new EditorCamera();
 		m_EditorCamera->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
 
-		m_TabManager.Init();
+		m_TabManager = new EditorTabManager();
+		m_TabManager->Init();
 		// Add Viewport tab as initial tab which is an unremovable tab
-		auto viewportTab = m_TabManager.NewTab("Viewport", EditorTabType::Viewport, true);
+		auto viewportTab = m_TabManager->NewTab("Viewport", EditorTabType::Viewport, true);
 
 		m_Enabled = true;
 	}
@@ -118,12 +120,26 @@ namespace LkEngine {
 
 			if (ImGui::BeginMenu("File"))
 			{
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Edit"))
+			{
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("View"))
+			{
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Scene"))
+			{
 				if (ImGui::MenuItem("New")) 
 				{ 
 				}
-				if (ImGui::MenuItem("Save"))
+				if (ImGui::MenuItem("Save "))
 				{
-					LOG_DEBUG("File->Save");
 					SceneSerializer serializer(m_Scene);
 					std::string readString;
 					serializer.Serialize("scene.lukkelele");
@@ -174,14 +190,14 @@ namespace LkEngine {
 				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LOG_DEBUG("Push tab");
-					m_TabManager.NewTab(fmt::format("Node Editor-{}", m_TabManager.GetTabCount()), EditorTabType::NodeEditor);
+					m_TabManager->NewTab(fmt::format("Node Editor-{}", m_TabManager->GetTabCount()), EditorTabType::NodeEditor);
 				}
 				ImGui::SameLine();
 				if (ImGui::ImageButton("##ModeButton-NodeEditor", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LOG_DEBUG("Pop tab");
-					if (m_TabManager.GetTabCount() > 1)
-						m_TabManager.PopTab();
+					if (m_TabManager->GetTabCount() > 1)
+						m_TabManager->PopTab();
 				}
 			}
 			ImGui::EndGroup();
@@ -255,9 +271,10 @@ namespace LkEngine {
 					ImGui::ShowStyleEditor();
 					ImGui::End();
 				}
-
 			}
 			ImGui::EndGroup();
+
+			m_ComponentEditor.OnImGuiRender();
 
 			// Window Information
 			static bool ShowWindowInfo = false;
@@ -319,10 +336,10 @@ namespace LkEngine {
 
 
 		//--------------------------------------------------
-		// TABBAR
+		// Tab bar
 		//--------------------------------------------------
 		static int lastTabCount = 0;
-		m_CurrentTabCount = m_TabManager.GetTabCount();
+		m_CurrentTabCount = m_TabManager->GetTabCount();
 
 		if (m_CurrentTabCount > 1)
 		{
@@ -333,12 +350,12 @@ namespace LkEngine {
 			{
 				if (ImGui::BeginTabBar("MainTab", ImGuiTabBarFlags_Reorderable))
 				{
-					for (TabEntry tabEntry: m_TabManager.m_Tabs)
+					for (TabEntry tabEntry: m_TabManager->m_Tabs)
 					{
 						Tab& tab = *tabEntry.second;
 						if (ImGui::BeginTabItem(tabEntry.second->Name.c_str()))
 						{
-							m_TabManager.SetActiveTab(tabEntry.second);
+							m_TabManager->SetActiveTab(tabEntry.second);
 							if (tab.GetTabType() == EditorTabType::Viewport)
 							{
 								ImGui::EndTabItem();
@@ -368,7 +385,7 @@ namespace LkEngine {
 		if (lastTabCount != m_CurrentTabCount)
 			WindowsHaveChangedInSize = true;
 
-		lastTabCount = m_TabManager.GetTabCount();
+		lastTabCount = m_TabManager->GetTabCount();
 
 		// If the window sizes have been adjusted, set the bool member to false
 		// This must be run BEFORE the 'WindowsHaveChangedInSize' if-statement
@@ -668,7 +685,7 @@ namespace LkEngine {
 		ImGuizmo::SetDrawlist();
 		// FIXME: The guizmo is somewhat misplaced and is sensitive to vertical translation for some odd reason.
 		//        I suspect some scaler bug, but could be many things. For now I just add '10' to center the guizmo a bit more
-		if (m_TabManager.GetTabCount() == 1) // Only 1 tab, aka only the 'Viewport' tab
+		if (m_TabManager->GetTabCount() == 1) // Only 1 tab, aka only the 'Viewport' tab
 			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + 10), EditorWindowSize.x, EditorWindowSize.y);
 		else
 			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + TabBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
@@ -1048,7 +1065,7 @@ namespace LkEngine {
 			ImGui::Text("RightSidebarSize: (%1.f, %1.f)", RightSidebarSize.x, RightSidebarSize.y);
 			ImGui::Text("BottomBarSize: (%1.f, %1.f)", BottomBarSize.x, BottomBarSize.y);
 			ImGui::Text("Last Bottombar Size: (%1.f, %1.f)", last_bottombar_size.x, last_bottombar_size.y);
-			ImGui::Text("Current Tab: %s", m_TabManager.GetActiveTabName().c_str());
+			ImGui::Text("Current Tab: %s", m_TabManager->GetActiveTabName().c_str());
 		}
 		ImGui::EndGroup();
 	}
