@@ -29,6 +29,17 @@ namespace LkEngine {
 	}
 
 #if 0
+	s_ptr<Texture> Texture::Create(const Texture& texture)
+	{
+	#ifdef LK_RENDERER_API_VULKAN
+		return std::make_shared<VulkanTexture>(texture);
+	#elif defined(LK_RENDERER_API_OPENGL)
+		return std::make_shared<OpenGLTexture>(texture);
+	#endif
+	}
+#endif
+
+#if 0
 	Buffer Texture::GetWriteableBuffer()
 	{
 		LK_ASSERT(m_Locked);

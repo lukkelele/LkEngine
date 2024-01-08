@@ -32,13 +32,21 @@ namespace LkEngine {
     void MaterialLibrary::CreateBasicMaterials()
     {
         // Asphalt
+        MaterialProperties asphaltProperties;
+        asphaltProperties.Roughness = 1.0f;
+        asphaltProperties.Friction = 1.0f;
+        asphaltProperties.Density = 1.0f;
+        auto asphalt = std::make_shared<Material>(asphaltProperties);
+        asphalt->SetName("BasicMaterial_Asphalt");
+        m_Collection.emplace(asphalt->GetName(), asphalt);
 
         // Rubber
-        MaterialProperties RubberProperties;
-        RubberProperties.Density = 0.90f;
-        RubberProperties.Friction = 1.0f;
-        auto rubber = std::make_shared<Material>(RubberProperties);
-        m_Collection.emplace("Rubber", rubber);
+        MaterialProperties rubberProperties;
+        rubberProperties.Density = 0.90f;
+        rubberProperties.Friction = 1.0f;
+        auto rubber = std::make_shared<Material>(rubberProperties);
+        rubber->SetName("BasicMaterial_Rubber");
+        m_Collection.emplace(rubber->GetName(), rubber);
     }
 
 }

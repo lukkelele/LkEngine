@@ -47,6 +47,7 @@ namespace LkEngine {
 		virtual void Unload() = 0;
 		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
 		virtual RendererID GetRendererID() const = 0;
+		virtual TextureSpecification GetSpecification() const = 0;
 	};
 
 	class Texture2D : public Texture
@@ -71,6 +72,7 @@ namespace LkEngine {
 		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual bool IsLoaded() const = 0;
 		virtual RendererID GetRendererID() const = 0;
+		virtual TextureSpecification GetSpecification() const = 0;
 
 		virtual void Load() = 0;
 		virtual void Unload() = 0;

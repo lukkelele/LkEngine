@@ -49,7 +49,7 @@ namespace LkEngine {
         whiteTextureSpec.Width = 400;
         whiteTextureSpec.Height = 400;
         whiteTextureSpec.Name = "White Texture";
-        whiteTextureSpec.Path = "assets/img/white-texture.png";
+        whiteTextureSpec.Path = "assets/textures/white-texture.png";
         auto whiteTexture = Texture2D::Create(whiteTextureSpec);
         m_Collection2D.insert({ "WhiteTexture", whiteTexture });
 
@@ -142,7 +142,6 @@ namespace LkEngine {
     // Iterate the textures/images directory and create the texture objects
     void TextureLibrary::LoadTextures()
     {
-        //std::vector<File> textureFiles = FileExplorer::GetFilesInDirectory(m_TexturesDir);
         std::vector<File> textureFiles = File::GetFilesInDirectory(m_TexturesDir);
         for (const auto& file : textureFiles)
         {
@@ -172,7 +171,6 @@ namespace LkEngine {
         }
         s_ptr<Texture2D> texture2D = Texture2D::Create(filePath);
         m_Collection2D.insert({ File::ExtractFilenameWithoutExtension(textureName), texture2D });
-        //LOG_DEBUG("Added 2D texture {0} to texture library", File::ExtractFilenameWithoutExtension(textureName));
 
         return texture2D;
     }
