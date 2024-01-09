@@ -50,7 +50,6 @@ namespace LkEngine {
 
 			m_Image = Image::Create(imageSpec, data);
 			stbi_image_free(data);
-			delete[] data;
 		}
 		else
 		{
@@ -100,6 +99,11 @@ namespace LkEngine {
 		m_Width = width;
 		m_Height = height;
 		m_Image = Image::Create(imageSpec, data);
+	}
+
+	OpenGLTexture::OpenGLTexture(const OpenGLTexture& texture)
+		: OpenGLTexture(texture.GetSpecification())
+	{
 	}
 
 	OpenGLTexture::~OpenGLTexture()

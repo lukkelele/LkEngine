@@ -23,6 +23,7 @@ namespace LkEngine {
         void UpdateResolution(uint16_t width, uint16_t height);
         void SetDepthEnabled(bool enabled);
         GLFWwindow* GetGlfwWindow() { return m_GlfwWindow; }
+        void SetBlendingEnabled(bool enabled);
         void SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc);
         void SetSourceBlendFunction(const SourceBlendFunction& srcFunc);
         void SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc);
@@ -34,6 +35,7 @@ namespace LkEngine {
     private:
         std::string m_GlslVersion = "";
         bool m_DepthEnabled = true;
+        bool m_BlendingEnabled = true;
         BlendFunction m_BlendFunction;
         GLFWwindow* m_GlfwWindow = nullptr;
         s_ptr<Window> m_Window = nullptr;

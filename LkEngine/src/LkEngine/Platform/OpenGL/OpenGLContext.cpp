@@ -76,7 +76,7 @@ namespace LkEngine {
     OpenGLContext::OpenGLContext(Window* window, const std::string& glslVersion)
     {
     	m_Instance = this;
-	    m_Window = std::shared_ptr<Window>(window);
+	    m_Window = s_ptr<Window>(window);
 		m_GlfwWindow = m_Window->GetGlfwWindow();
 	}
 
@@ -92,31 +92,30 @@ namespace LkEngine {
 			printf("[ERROR] Error starting GLAD");
 			exit(EXIT_FAILURE);
 		}
-		//printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 		printf("OpenGL Version: %s\n", OpenGL_GetVersion());
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
-		// TODO: Add condition to check if 2D or 3D, to enable depth test or not
-		//glEnable(GL_DEPTH_TEST);
-		//glDepthFunc(GL_LESS);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 
+		SetBlendingEnabled(true);
+		SetDepthEnabled(false);
 		SetBlendFunction(srcFunc, dstFunc);
-	
-		InitImGui(m_Window->GetGlslVersion().c_str());
 
-		const char* glVersion = (char*)glGetString(GL_VERSION);
-		if (glVersion)
-		{
-			LOG_DEBUG("OpenGL Version: {}", glVersion);
-		}
+		InitImGui(m_Window->GetGlslVersion().c_str());
     }
 
 	void OpenGLContext::SetViewport(const glm::vec2& pos, const glm::vec2& size)
 	{
 		glViewport(pos.x, pos.y, size.x, size.y);
+	}
+
+	void OpenGLContext::SetBlendingEnabled(bool enabled)
+	{
+		m_BlendingEnabled = enabled;
+		if (m_BlendingEnabled)
+			glEnable(GL_BLEND);
+		else
+			glDisable(GL_BLEND);
 	}
 
     void OpenGLContext::Destroy()
