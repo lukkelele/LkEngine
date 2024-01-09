@@ -27,14 +27,14 @@ namespace LkEngine {
     {
     }
 
-    void NodeEditor::OnImGuiRender()
+    void NodeEditor::OnImGuiRender(const ImVec2& windowSize)
     {
         static const int NodePin = 1;
         static const int InputPin = 1;
         static const int OutputPin = 2;
 
         //NE::Begin("My Node Editor");
-        NE::Begin(m_Name.c_str());
+        NE::Begin(m_Name.c_str(), windowSize);
         {
             NE::BeginNode(NodePin);
 

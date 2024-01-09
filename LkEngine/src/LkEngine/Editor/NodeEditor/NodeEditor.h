@@ -18,7 +18,7 @@ namespace LkEngine {
         ~NodeEditor();
 
         void OnRender();
-        void OnImGuiRender();
+        void OnImGuiRender(const ImVec2& windowSize = ImVec2(0, 0));
         void Destroy();
         NodeEditorContext* GetEditorContext() { return m_EditorContext; }
         void ActivateContext();

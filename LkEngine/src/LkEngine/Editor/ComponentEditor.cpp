@@ -21,7 +21,7 @@ namespace LkEngine {
 
     void ComponentEditor::OnImGuiRender()
     {
-        static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_None;
+        static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;
         ImGui::BeginChild("##ComponentEditor", ImVec2(0, 0), false, ImGuiWindowFlags_NoDocking);
         {
             if (ImGui::TreeNodeEx("Materials", treeNodeFlags))
@@ -32,7 +32,7 @@ namespace LkEngine {
                 {
                     std::string materialName = materialEntry.first;
 				    const bool is_selected = (materialName == selected_material);
-                    if (ImGui::Selectable(materialName.c_str(), is_selected, ImGuiSelectableFlags_SpanAvailWidth | ImGuiSelectableFlags_AllowDoubleClick))
+                    if (ImGui::Selectable(materialName.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAllColumns))
                     {
                         if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                         {
