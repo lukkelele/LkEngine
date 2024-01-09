@@ -14,11 +14,14 @@
 
 #include "LkEngine/Asset/AssetRegistry.h"
 
+#include "LkEngine/Serialization/FileStream.h"
+
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Scene/SceneCamera.h"
 #include "LkEngine/Scene/EntityFactory.h"
+#include "LkEngine/Scene/SceneSerializer.h"
 
 #include "LkEngine/Editor/Editor.h"
 
@@ -53,7 +56,8 @@ namespace LkEngine {
         s_ptr<GraphicsContext> GetGraphicsContext() { return m_GraphicsContext; }
         void RenderImGui();
         void AddScene(Scene& scene);
-        s_ptr<Scene> GetScene(uint8_t idx) { return m_Scenes[idx]; }
+
+        Timestep GetTimestep() const { return m_Timestep; }
 
     private:
         ApplicationSpecification m_Specification;
@@ -67,11 +71,12 @@ namespace LkEngine {
         s_ptr<Input> m_Input = nullptr;
         s_ptr<Editor> m_Editor = nullptr;
         PhysicsSystem* m_PhysicsSystem = nullptr;
+        Debugger* m_Debugger = nullptr;
+
+        Timestep m_LastTimestep, m_Timestep;
 
         s_ptr<Scene> m_Scene = nullptr; // Active scene
         s_ptr<Scene> m_Scenes[8];
-
-        Debugger* m_Debugger = nullptr;
 
         inline static Application* m_Instance = nullptr;
     };

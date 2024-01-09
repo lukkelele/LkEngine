@@ -15,6 +15,9 @@ namespace LkEngine {
         m_Timer.Reset();
 
         m_Debugger = new Debugger();
+
+        m_Timestep = 0.0f;
+        m_LastTimestep = 0.0f;
     }
 
     Application::~Application()
@@ -49,22 +52,22 @@ namespace LkEngine {
 		while (!glfwWindowShouldClose(m_Window->GetGlfwWindow()))
 		{
             Application* app = this; // Multiple threads
-			Timestep ts = m_Timer.GetDeltaTime();
+			m_Timestep = m_Timer.GetDeltaTime();
 
             m_Input->OnUpdate();
 
             Renderer::BeginFrame();
             {
                 for (Layer* layer : m_LayerStack)
-                    layer->OnUpdate(ts);
+                    layer->OnUpdate(m_Timestep);
             }
 
             if (m_Scene)
             {
                 if (m_Editor->IsEnabled())
-                    m_Scene->OnRenderEditor(*m_Editor->GetEditorCamera(), ts);
+                    m_Scene->OnRenderEditor(*m_Editor->GetEditorCamera(), m_Timestep);
                 else
-                    m_Scene->OnRender(m_Scene->GetCamera(), ts);
+                    m_Scene->OnRender(m_Scene->GetCamera(), m_Timestep);
             }
 
             if (m_Specification.ImGuiEnabled)
@@ -73,10 +76,12 @@ namespace LkEngine {
 				Renderer::Submit([=] { m_GraphicsContext->EndImGuiFrame(); });
             }
 
-            m_PhysicsSystem->Simulate(ts);
+            m_PhysicsSystem->Simulate(m_Timestep);
 
             Renderer::EndFrame();
             Renderer::Submit([&] { m_Window->SwapBuffers(); });
+
+            m_LastTimestep = m_Timestep;
 		}
     }
 
