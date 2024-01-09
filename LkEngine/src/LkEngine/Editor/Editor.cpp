@@ -353,15 +353,35 @@ namespace LkEngine {
 					for (TabEntry tabEntry: m_TabManager->m_Tabs)
 					{
 						Tab& tab = *tabEntry.second;
-						if (ImGui::BeginTabItem(tabEntry.second->Name.c_str()))
+						const bool is_selected_tab = (m_TabManager->GetActiveTab()->Index == tab.Index);
+						constexpr float padding = { 36.0f };
+						if (is_selected_tab)
+							ImGui::SetNextItemWidth(ImGui::CalcTextSize(tab.Name.c_str()).x + padding);
+						if (ImGui::BeginTabItem(tabEntry.second->Name.c_str(), nullptr))
 						{
-							m_TabManager->SetActiveTab(tabEntry.second);
-							if (tab.GetTabType() == EditorTabType::Viewport)
+							if (is_selected_tab)
+							{
+								auto pos = (ImGui::GetItemRectMin());
+								pos.x = ImGui::GetItemRectMax().x;
+								pos.x -= padding * 0.75f;
+								pos.y += padding * (1.0f / 8.0f);
+
+								//if (ImGui::CloseButton(ImGui::GetID(tabEntry.second->Name.c_str()), pos))
+								if (ImGui::CloseButton(ImGui::GetID(UI::GenerateID()), pos))
+								{
+									if (tab.GetTabType() != EditorTabType::Viewport)
+										m_TabManager->CloseTab(tabEntry.second);
+								}
+							}
+
+							if (tab.Closed == false)
+								m_TabManager->SetActiveTab(tabEntry.second);
+
+							if (tab.GetTabType() == EditorTabType::Viewport || tab.Closed == true)
 							{
 								ImGui::EndTabItem();
 								continue;
 							}
-							LOG_TRACE("BeginTabItem  {}", tabEntry.second->Name);
 
 							ImGui::SetNextWindowPos({ m_SecondViewportBounds[0].x, MenuBarSize.y + TabBarSize.y }, ImGuiCond_Always);
 							ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
@@ -395,10 +415,15 @@ namespace LkEngine {
 		glm::vec2 viewportSize = { viewport->WorkSize.x, viewport->WorkSize.y };
 		UI_SyncEditorWindowSizes(viewportSize);
 
+		m_TabManager->End();
+
 		ImGui::End(); // Viewport
 
 		HandleExternalWindows();
+
 		ImGui::End(); // Core Viewport
+
+		// Take care of tabs
 	}
 
 	void Editor::HandleExternalWindows()

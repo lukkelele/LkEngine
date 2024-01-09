@@ -107,7 +107,7 @@ namespace LkEngine {
                     auto& texture = entry.second;
                     const bool is_selected = selected_texture == entry.second->GetName();
 
-                    if (ImGui::Selectable(texture->GetName().c_str(), (selected_texture == texture->GetName()), ImGuiSelectableFlags_AllowDoubleClick))
+                    if (ImGui::Selectable(texture->GetName().c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick))
                     {
 
                         selected_texture = texture->GetName();

@@ -24,6 +24,8 @@ namespace LkEngine {
     public:
         std::string Name = "";
         EditorTabType Type = EditorTabType::None;
+        bool Closed = false;
+        int Index;
         
         virtual void OnRender() = 0;
         virtual void OnImGuiRender() = 0;
