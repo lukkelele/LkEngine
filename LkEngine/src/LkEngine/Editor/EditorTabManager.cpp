@@ -66,7 +66,6 @@ namespace LkEngine {
         if (tab->GetTabType() == EditorTabType::NodeEditor)
         {
             auto* nodeTab = static_cast<NodeEditorTab*>(m_ActiveTab.get());
-            //nodeTab->NodeEditorRef->GetEditorContext()->SetAsCurrentEditorContext();
             nodeTab->NodeEditorRef->ActivateContext();
         }
     }

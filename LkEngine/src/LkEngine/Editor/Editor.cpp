@@ -84,7 +84,30 @@ namespace LkEngine {
 
 		UI::BeginViewport(UI_CORE_VIEWPORT, window, viewport);
 		UI_HandleManualWindowResize();
+
+
 		UI::BeginDockSpace(LkEngine_DockSpace);
+
+		//===================================================================
+		// Main Window
+		//===================================================================
+		static ImVec2 statsWindowSize = ImVec2(ImGui::CalcTextSize("  FPS: xyzw  ").x, 80);
+		UI::PushID();
+		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
+		{
+			if (m_TabManager->GetTabCount() == 1)
+				ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x + EditorWindowSize.x - statsWindowSize.x, MenuBarSize.y), ImGuiCond_Always);
+			else
+				ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x + EditorWindowSize.x - statsWindowSize.x, MenuBarSize.y + TabBarSize.y), ImGuiCond_Always);
+			ImGui::BeginChild("##WindowStats", statsWindowSize, false, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoInputs);
+			{
+				float fps = 1000.0f / app->GetTimestep();
+				ImGui::Text("FPS: %1.f", fps);
+			}
+			ImGui::EndChild();
+		}
+		ImGui::End();
+		UI::PopID();
 
 		if (m_Scene)
 		{
@@ -187,13 +210,14 @@ namespace LkEngine {
 				static ImVec2 modeButtonSize = { 50.0f, 50.0f };
 				static ImVec4 modeButtonBgColor = { 0, 0, 0, 0 };
 				static ImVec4 modeButtonTintColor = { 1, 1, 1, 1 };
-				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
+				std::string textureName = "ale";
+				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LOG_DEBUG("Push tab");
 					m_TabManager->NewTab(fmt::format("Node Editor-{}", m_TabManager->GetTabCount()), EditorTabType::NodeEditor);
 				}
 				ImGui::SameLine();
-				if (ImGui::ImageButton("##ModeButton-NodeEditor", (void*)TextureLibrary::Get()->GetTexture2D("atte_square")->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
+				if (ImGui::ImageButton("##ModeButton-NodeEditor", (void*)TextureLibrary::Get()->GetTexture2D(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LOG_DEBUG("Pop tab");
 					if (m_TabManager->GetTabCount() > 1)
@@ -922,8 +946,9 @@ namespace LkEngine {
 			static const ImVec4 bgColor = ImVec4(0, 0, 0, 0);
 			static const ImVec2 imageSize = ImVec2(60, 60);
 
+			static std::string textureName = "ale";
 			// Rectangle Image
-			s_ptr<Texture> rectangleTexture = textureLibrary->GetTexture2D("atte_square");
+			s_ptr<Texture> rectangleTexture = textureLibrary->GetTexture2D(textureName);
 			if (ImGui::ImageButton("##RectangleImage", (void*)rectangleTexture->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LOG_TRACE("Clicked RectangleImage -> Selecting rectangle shape");
@@ -940,7 +965,7 @@ namespace LkEngine {
 			ImGui::SameLine(0, 2);
 
 			// Circle Image
-			if (ImGui::ImageButton("##CircleImage", (void*)textureLibrary->GetTexture2D("atte_square")->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
+			if (ImGui::ImageButton("##CircleImage", (void*)textureLibrary->GetTexture2D(textureName)->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LOG_TRACE("Clicked CircleImage -> Selecting circle shape");
 				InCreateItemProcess = true;
@@ -956,7 +981,7 @@ namespace LkEngine {
 			ImGui::SameLine(0, 2);
 
 			// Triangle Image
-			if (ImGui::ImageButton("##TriangleImage", (void*)textureLibrary->GetTexture2D("atte_square")->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
+			if (ImGui::ImageButton("##TriangleImage", (void*)textureLibrary->GetTexture2D(textureName)->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LOG_TRACE("Clicked TriangleImage -> Selecting triangle shape");
 				InCreateItemProcess = true;

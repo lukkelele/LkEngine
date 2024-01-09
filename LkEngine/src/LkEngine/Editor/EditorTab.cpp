@@ -77,9 +77,9 @@ namespace LkEngine {
 		ImGui::SetNextWindowSize(nodeWindowSize, ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(0, nodeWindowSize.y), ImGuiCond_Always);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        UI::Begin(windowFlags);
+        //UI::Begin(windowFlags);
         NodeEditorRef->OnImGuiRender(nodeWindowSize);
-        UI::End();
+        //UI::End();
         ImGui::PopStyleVar(1);
 
 
