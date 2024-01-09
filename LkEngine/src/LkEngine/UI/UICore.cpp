@@ -1,10 +1,9 @@
 #include "LKpch.h"
-#include "LkEngine/UI/UICore.h"
+#include "UICore.h"
 #include "LkEngine/Core/Window.h"
-#include "LkEngine/Editor/EditorLayer.h"
 #include "LkEngine/Scene/Entity.h"
+#include "LkEngine/Editor/Editor.h"
 
-#include <imgui_internal.h>
 
 
 namespace LkEngine::UI {
@@ -22,13 +21,16 @@ namespace LkEngine::UI {
         | ImGuiDockNodeFlags_NoDockingOverOther | ImGuiDockNodeFlags_NoDockingOverEmpty
         | ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoTabBar;
 
-    ImGuiWindowFlags TopbarFlags = ImGuiWindowFlags_MenuBar
+    ImGuiWindowFlags MenuBarFlags = ImGuiWindowFlags_MenuBar
         | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
 
     ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
         | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
         | ImGuiWindowFlags_NoMove;
+
+    ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking
+        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
     static uint32_t s_Counter = 0;
     static int s_UIContextID = 0;
@@ -131,6 +133,30 @@ namespace LkEngine::UI {
         return currentNavWindow == ImGui::FindWindowByName(windowName);
     }
 
+    void Begin(std::string windowTitle, ImGuiWindowFlags windowFlags, bool* open)
+    {
+        Begin(windowTitle.c_str(), windowFlags, open);
+    }
+
+    void Begin(const char* windowTitle, ImGuiWindowFlags windowFlags, bool* open)
+    {
+        //UI::PushID(windowTitle);
+        UI::PushID();
+        ImGui::Begin(windowTitle, open, windowFlags);
+    }
+
+    void Begin(ImGuiWindowFlags windowFlags, bool* open)
+    {
+        UI::PushID();
+        ImGui::Begin(UI::GenerateID(), open, windowFlags);
+    }
+
+    void End()
+    {
+        ImGui::End();
+        UI::PopID();
+    }
+
     const char* GetSelectedEntityWindowName()
     {
         return SelectedEntityWindow;
@@ -146,6 +172,45 @@ namespace LkEngine::UI {
     {
         ImGui::End();
         PopID();
+    }
+
+    void BeginDockSpace(const char* dockspaceID)
+    {
+		auto& style = ImGui::GetStyle();
+
+		if (UI::DockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
+		{
+		    UI::CoreViewportFlags |= ImGuiWindowFlags_NoBackground;
+			UI::HostWindowFlags |= ImGuiWindowFlags_NoBackground;
+		}
+
+		float minWinSizeX = style.WindowMinSize.x;
+		style.WindowMinSize.x = 370.0f;
+		ImGui::DockSpace(ImGui::GetID(LkEngine_DockSpace), ImVec2(0, 0), UI::DockspaceFlags);
+		style.WindowMinSize.x = minWinSizeX;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::Begin(LkEngine_DockSpace, NULL, UI::HostWindowFlags);
+		ImGui::PopStyleColor(1);
+		ImGui::PopStyleVar(1);
+    }
+
+    void BeginViewport(const char* viewportID, Window* window, ImGuiViewport* viewport)
+    {
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		auto* glfwWindow = window->GetGlfwWindow();
+		bool isMaximized = (bool)glfwGetWindowAttrib(glfwWindow, GLFW_MAXIMIZED);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
+		ImGui::PopStyleColor(); 
+		ImGui::PopStyleVar(2);
     }
 
 }
