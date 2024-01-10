@@ -1,5 +1,6 @@
 #include "LKpch.h"
-#include "LkEngine/Platform/OpenGL/OpenGLContext.h"
+#include "OpenGLContext.h"
+
 #include "LkEngine/Core/Window.h"
 
 #include <imgui/imgui.h>
@@ -9,10 +10,12 @@
 #include <ImGuizmo/ImGuizmo.h>
 
 #ifdef LK_PLATFORM_WINDOWS
-#include "LkEngine/Platform/Windows/Windows_Window.h"
+	#include "LkEngine/Platform/Windows/Windows_Window.h"
 #elif defined(LK_PLATFORM_LINUX)
-#include "LkEngine/Platform/Linux/Linux_Window.h"
+	#include "LkEngine/Platform/Linux/Linux_Window.h"
 #endif
+
+#include "LkOpenGL.h"
 
 
 namespace LkEngine {
@@ -20,29 +23,6 @@ namespace LkEngine {
 	//=======================================================================================================
 	// Helper Functions
 	//=======================================================================================================
-	void OpenGL_ClearError() 
-	{ 
-		while (glGetError() != GL_NO_ERROR); 
-	}
-
-    bool OpenGL_LogCall(const char* function, const char* file, int line)
-    {
-        while (GLenum error = glGetError())
-        {
-            std::cout << "[OpenGL Error] (" << error << ")\nFUNCTION: " << function <<
-                "\nFILE: " << file << "\nLINE: " << line << std::endl;
-            return false;
-        }
-        return true;
-    }
-
-	const char* OpenGL_GetVersion()
-	{
-		char buf[120];
-		sprintf(buf, "%s", glGetString(GL_VERSION));
-		return buf;
-	}
-
 	int GetOpenGLSourceBlendFunction(const SourceBlendFunction& srcFunc)
 	{
 		switch (srcFunc)

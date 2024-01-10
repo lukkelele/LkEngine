@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "LkEngine/Platform/OpenGL/OpenGLRenderer.h"
+#include "OpenGLRenderer.h"
 #include "LkEngine/Renderer/Renderer.h"
 
 
@@ -93,6 +93,11 @@ namespace LkEngine {
 	void OpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID)
 	{
 		m_Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, size, texture, tintColor, rotation, entityID);
+	}
+
+	void OpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID)
+	{
+		m_Renderer2D->DrawQuad(pos, size, texture, tintColor, rotation, entityID);
 	}
 
 	void OpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID)

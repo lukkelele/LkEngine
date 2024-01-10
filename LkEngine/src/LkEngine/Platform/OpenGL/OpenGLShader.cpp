@@ -1,7 +1,7 @@
 #include "LKpch.h"
-#include "LkEngine/Platform/OpenGL/OpenGLShader.h"
+#include "OpenGLShader.h"
 
-#include <glad/glad.h>
+#include "LkOpenGL.h"
 
 
 namespace LkEngine {

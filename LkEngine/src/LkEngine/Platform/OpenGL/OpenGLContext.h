@@ -3,6 +3,7 @@
 #include "LkEngine/Renderer/GraphicsContext.h"
 
 
+
 namespace LkEngine {
 
     // Forward declaration
@@ -31,6 +32,8 @@ namespace LkEngine {
         std::string GetDestinationBlendFunctionName();
         std::string GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc);
         std::string GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc);
+
+        bool& GetBlending() { return m_BlendingEnabled; }
 
     private:
         std::string m_GlslVersion = "";

@@ -2,6 +2,8 @@
 
 #include "LkEngine/Renderer/Texture.h"
 
+#include "LkOpenGL.h"
+
 
 namespace LkEngine {
 
@@ -15,12 +17,14 @@ namespace LkEngine {
 		virtual ~OpenGLTexture();
 
 		RendererID GetRendererID() const;
+		RendererID& GetRendererID();
 		std::string GetName() const { return m_Name; }
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
 		const std::string& GetPath() const { return m_FilePath; }
 		Buffer GetWriteableBuffer() { return m_Image->GetBuffer(); }
 		TextureSpecification GetSpecification() const { return m_Specification; }
+		s_ptr<Image> GetImage();
 
 		void Bind(unsigned int slot = 0);
 		void Unbind();
@@ -54,6 +58,7 @@ namespace LkEngine {
 		~OpenGLTexture2D();
 
 		RendererID GetRendererID() const;
+		RendererID& GetRendererID();
 		std::string GetName() const { return m_Name; }
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
@@ -62,6 +67,7 @@ namespace LkEngine {
 		void SetData(void* data, uint32_t size);
 		Buffer GetWriteableBuffer() { return m_Image->GetBuffer(); }
 		TextureSpecification GetSpecification() const { return m_Specification; }
+		s_ptr<Image> GetImage();
 
 		void Bind(unsigned int slot = 0);
 		void Unbind();

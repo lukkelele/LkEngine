@@ -1,5 +1,8 @@
 #include "LKpch.h"
-#include "LkEngine/Platform/OpenGL/OpenGLTexture.h"
+#include "OpenGLTexture.h"
+
+#include "LkOpenGL.h"
+
 #include "LkEngine/Core/Application.h"
 
 
@@ -129,6 +132,11 @@ namespace LkEngine {
 		return m_Image->GetRendererID();
 	}
 
+	RendererID& OpenGLTexture::GetRendererID() 
+	{
+		return m_Image->GetRendererID();
+	}
+
 	void OpenGLTexture::SetData(void* data, uint32_t size)
 	{
 		GLenum dataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
@@ -157,6 +165,10 @@ namespace LkEngine {
 		m_Loaded = false;
 	}
 
+	s_ptr<Image> OpenGLTexture::GetImage()
+	{
+		return m_Image;
+	}
 
 	//=====================================================
 	// Texture 2D
@@ -205,7 +217,6 @@ namespace LkEngine {
 			m_Image = Image::Create(imageSpec, nullptr);
 		}
 	}
-
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
 		: m_Specification(specification)
@@ -256,6 +267,11 @@ namespace LkEngine {
 		return m_Image->GetRendererID();
 	}
 
+	RendererID& OpenGLTexture2D::GetRendererID() 
+	{
+		return m_Image->GetRendererID();
+	}
+
 	// TODO: Remove this ?
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
@@ -284,6 +300,11 @@ namespace LkEngine {
 	void OpenGLTexture2D::Unload()
 	{
 		m_Loaded = false;
+	}
+
+	s_ptr<Image> OpenGLTexture2D::GetImage()
+	{
+		return m_Image;
 	}
 
 }

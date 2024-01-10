@@ -15,7 +15,7 @@ namespace LkEngine {
         Windows_Window(const ApplicationSpecification& specification);
         ~Windows_Window();
     
-        void Init(const std::string& glslVersion);
+        void Init();
         void SwapBuffers();
         void Exit();
         inline uint16_t GetWidth() const { return m_Width; }

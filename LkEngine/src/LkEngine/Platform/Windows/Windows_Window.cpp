@@ -1,7 +1,8 @@
 #include "LKpch.h"
-#include "LkEngine/Platform/Windows/Windows_Window.h"
-#include "LkEngine/Renderer/Renderer.h"
+#include "Windows_Window.h"
+
 #include "LkEngine/Core/Application.h"
+#include "LkEngine/Renderer/Renderer.h"
 
 
 namespace LkEngine {
@@ -30,7 +31,7 @@ namespace LkEngine {
 	{
 	}
 	
-	void Windows_Window::Init(const std::string& shaderVersion)
+	void Windows_Window::Init()
 	{
 		if (GLFW_Initialized)
 			throw std::runtime_error("Windows_Window::Init has already been called once! (GLFW already initialized)");
@@ -40,11 +41,15 @@ namespace LkEngine {
 	
 		// Set context profile and the version to use for the Renderer API
 		GraphicsContext::SetProfile(GraphicsContext::Profile::Core);
+
 	#ifdef LK_RENDERER_API_OPENGL
 		GraphicsContext::SetVersion(4, 5);
+
 	#elif defined(LK_RENDERER_API_VULKAN)
 		GraphicsContext::SetVersion(MAJOR_VERSION, MINOR_VERSION);
 	#endif
+
+		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 	
 		m_GlfwWindow = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title.c_str(), nullptr, nullptr);
 		LK_ASSERT(m_GlfwWindow != nullptr);
@@ -52,7 +57,7 @@ namespace LkEngine {
 
 		if (!GLFW_Initialized)
 		{
-			m_GraphicsContext = GraphicsContext::Create(this, shaderVersion);
+			m_GraphicsContext = GraphicsContext::Create(this, LK_SHADER_VERSION);
 			m_GraphicsContext->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
 			m_GraphicsContext->SetDarkTheme();
 		}
@@ -77,8 +82,8 @@ namespace LkEngine {
 
 	void Windows_Window::SwapBuffers()
 	{
-		glfwPollEvents();
 		glfwSwapBuffers(m_GlfwWindow);
+		glfwPollEvents();
 	}
 	
 	void Windows_Window::Exit()
@@ -91,13 +96,9 @@ namespace LkEngine {
 	{
 		m_VSync = enabled;
 		if (m_VSync)
-		{
 			glfwSwapInterval(1);
-		}
 		else
-		{
 			glfwSwapInterval(0);
-		}
 	}
 
 	glm::vec2 Windows_Window::GetPos() const
@@ -142,7 +143,7 @@ namespace LkEngine {
 		m_Instance->GetContext()->UpdateResolution(width, height);
 		LOG_DEBUG("Window Resize: ({}, {})", m_Instance->GetWidth(), m_Instance->GetHeight());
 
-		auto* editor = EditorLayer::Get();
+		auto* editor = Editor::Get();
 		if (editor && editor->IsEnabled())
 		{
 			float editorWindowWidth = editor->GetEditorWindowSize().x;
