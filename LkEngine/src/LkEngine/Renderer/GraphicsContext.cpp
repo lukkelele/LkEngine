@@ -34,6 +34,7 @@ namespace LkEngine {
 				glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE); // Set core profile
 				break;
 		}
+
 	#elif defined(LK_RENDERER_API_VULKAN)
 		// TODO: Vulkan Implementation
 	#endif
@@ -69,6 +70,7 @@ namespace LkEngine {
 	}
 #endif
 	
+	// TODO: Move this to another UI class/part of code
 	void GraphicsContext::SetDarkTheme()
 	{
 		ImGui::StyleColorsDark();

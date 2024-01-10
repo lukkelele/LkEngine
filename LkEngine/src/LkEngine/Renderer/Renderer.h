@@ -1,15 +1,18 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
-#include "LkEngine/Renderer/VertexBuffer.h"
-#include "LkEngine/Renderer/IndexBuffer.h"
-#include "LkEngine/Renderer/UniformBuffer.h"
-#include "LkEngine/Renderer/RendererAPI.h"
-#include "LkEngine/Renderer/Renderer2D.h"
-#include "LkEngine/Renderer/RenderCommand.h"
-#include "LkEngine/Renderer/RenderCommandQueue.h"
-#include "LkEngine/Renderer/Shader.h"
-#include "LkEngine/Renderer/Texture.h"
+
+#include "RendererAPI.h"
+#include "Renderer2D.h"
+#include "RenderCommand.h"
+#include "RenderCommandQueue.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "UniformBuffer.h"
+#include "Shader.h"
+#include "Texture.h"
+#include "MaterialLibrary.h"
+
 #include "LkEngine/Scene/Components.h"
 
 // FIXME
@@ -94,12 +97,13 @@ namespace LkEngine {
 
 	public:
 		inline static RendererDrawMode DrawMode;
-		inline static glm::vec4 BackgroundColor = { 0.50f, 0.80f, 0.35f, 1.0f };
+		inline static glm::vec4 BackgroundColor = { 0.216f, 0.240f, 0.350f, 1.0f };
 	private:
 		inline static s_ptr<RendererAPI> m_RendererAPI = nullptr;
-		inline static s_ptr<TextureLibrary> m_TextureLibrary = nullptr;
 
 		inline static Renderer* m_Instance = nullptr;
+
+		friend class Editor;
 	};
 
 }

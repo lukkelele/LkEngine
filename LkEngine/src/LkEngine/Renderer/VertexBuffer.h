@@ -1,8 +1,9 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
-#include "LkEngine/Renderer/VertexBufferLayout.h"
-#include "LkEngine/Renderer/IndexBuffer.h"
+
+#include "VertexBufferLayout.h"
+#include "IndexBuffer.h"
 
 
 namespace LkEngine {

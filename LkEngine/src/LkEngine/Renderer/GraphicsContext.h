@@ -1,12 +1,12 @@
 #pragma once
 
-#include <memory>
-#include <string>
+#include "LkEngine/Core/Base.h"
 
-#include <glad/glad.h>
-#include <glfw/glfw3.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include <GLFW/glfw3.h>
+
+#ifdef LK_RENDERER_API_OPENGL
+//#include "LkEngine/Platform/OpenGL/LkOpenGL.h"
+#endif
 
 
 namespace LkEngine {
@@ -62,6 +62,7 @@ namespace LkEngine {
         virtual void InitImGui(const std::string& glslVersion) = 0;
         virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) = 0;
         virtual void SetDepthEnabled(bool enabled) = 0;
+        virtual void SetBlendingEnabled(bool enabled) = 0;
         virtual void SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) = 0;
         virtual void SetSourceBlendFunction(const SourceBlendFunction& srcFunc) = 0;
         virtual void SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc) = 0;
@@ -70,14 +71,19 @@ namespace LkEngine {
         virtual std::string GetDestinationBlendFunctionName() = 0;
         virtual std::string GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc) = 0;
         virtual std::string GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc) = 0;
-        virtual void SetDarkTheme();
+
+        virtual void SetDarkTheme(); // REMOVE
 
     protected:
         static void HandleViewportEvents();
+
+        // For editor
+        virtual bool& GetBlending() = 0;
     
     protected:
         inline static GraphicsContext* m_Instance = nullptr;
 
+        friend class Editor;
     };
 
 }

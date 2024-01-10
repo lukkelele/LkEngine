@@ -32,11 +32,14 @@ namespace LkEngine {
 		static s_ptr<Texture> Create(const TextureSpecification& specification);
 		static s_ptr<Texture> Create(const std::string& path);
 
+		virtual RendererID GetRendererID() const = 0;
+		virtual RendererID& GetRendererID() = 0;
 		virtual std::string GetName() const = 0;
 		virtual uint32_t GetWidth() const = 0; 
 		virtual uint32_t GetHeight() const = 0; 
 		virtual const std::string& GetPath() const = 0;
 		virtual Buffer GetWriteableBuffer() = 0;
+		virtual s_ptr<Image> GetImage() = 0;
 
 		virtual void Bind(unsigned int slot = 0) = 0;
 		virtual void Unbind() = 0;
@@ -46,7 +49,6 @@ namespace LkEngine {
 		virtual void Load() = 0;
 		virtual void Unload() = 0;
 		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
-		virtual RendererID GetRendererID() const = 0;
 		virtual TextureSpecification GetSpecification() const = 0;
 	};
 
@@ -59,11 +61,14 @@ namespace LkEngine {
 		static s_ptr<Texture2D> Create(const TextureSpecification& specification, Buffer imageData);
 		static s_ptr<Texture2D> Create(const std::string& path);
 
+		virtual RendererID GetRendererID() const = 0;
+		virtual RendererID& GetRendererID() = 0;
 		virtual std::string GetName() const = 0;
 		virtual uint32_t GetWidth() const = 0;  
 		virtual uint32_t GetHeight() const = 0;
 		virtual const std::string& GetPath() const = 0; 
 		virtual Buffer GetWriteableBuffer() = 0;
+		virtual s_ptr<Image> GetImage() = 0;
 
 		virtual void Bind(unsigned int slot = 0) = 0;
 		virtual void Unbind() = 0;
@@ -71,7 +76,6 @@ namespace LkEngine {
 		virtual void Unlock() = 0;
 		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual bool IsLoaded() const = 0;
-		virtual RendererID GetRendererID() const = 0;
 		virtual TextureSpecification GetSpecification() const = 0;
 
 		virtual void Load() = 0;

@@ -84,6 +84,8 @@ namespace LkEngine {
         void StartBatch();
         void NextBatch();
 
+    public:
+        static const uint32_t MaxTextureSlots = 32;
     private:
         bool m_Initialized = false;
         RenderCommandQueue m_RenderQueue;
@@ -106,7 +108,7 @@ namespace LkEngine {
             int EntityID; // For editor 
         };
 
-        static const uint32_t MaxTextureSlots = 32;
+        RendererID m_TextureArray;
 
         const uint32_t m_MaxVertices;
         const uint32_t m_MaxIndices;
@@ -145,7 +147,8 @@ namespace LkEngine {
         CameraData m_CameraBuffer;
         s_ptr<UniformBuffer> m_CameraUniformBuffer;
 
-        friend class EditorLayer;
+        friend class Editor;
+        //friend class TextureEditorPanel; // Viewing/modifying loaded textures
     };
 
 }

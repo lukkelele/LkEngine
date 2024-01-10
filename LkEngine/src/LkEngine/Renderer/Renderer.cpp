@@ -15,6 +15,8 @@ namespace LkEngine {
 	struct RendererData
 	{
 		s_ptr<ShaderLibrary> m_ShaderLibrary;
+		s_ptr<TextureLibrary> m_TextureLibrary;
+		s_ptr<MaterialLibrary> m_MaterialLibrary;
 
 		s_ptr<Texture2D> WhiteTexture;
 		s_ptr<Texture2D> BlackTexture;
@@ -38,9 +40,11 @@ namespace LkEngine {
 		CommandQueue[1] = new RenderCommandQueue();
 
 		Data = new RendererData();
-		Data->m_ShaderLibrary = ShaderLibrary::Create();
-		m_TextureLibrary = TextureLibrary::Create("assets/textures");
-		m_TextureLibrary->Init();
+		Data->m_ShaderLibrary = std::make_shared<ShaderLibrary>();
+		Data->m_TextureLibrary = TextureLibrary::Create("assets/textures");
+		Data->m_TextureLibrary->Init();
+		Data->m_MaterialLibrary = std::make_shared<MaterialLibrary>();
+		Data->m_MaterialLibrary->Init();
 
 		uint32_t whiteTextureData = 0xFFFFFFFF;
 		TextureSpecification spec;
@@ -122,19 +126,14 @@ namespace LkEngine {
 		shader.Bind();
 		vb.Bind();
 		ib.Bind();
-		//SetDrawMode(LK_DRAWMODE_LINES);
+
 		SetDrawMode(RendererDrawMode::Lines);
 		m_RendererAPI->Draw(vb, ib, shader);
 		SetDrawMode(RendererDrawMode::Triangles);
-		//SetDrawMode(LK_DRAWMODE_TRIANGLES);
 	}
 
 	void Renderer::SubmitIndexed(VertexBuffer& vb, unsigned int count)
 	{
-		//vb.Bind();
-		//vb.GetIndexBuffer()->Bind();
-        //SubmitIndexed(vb, indexCount);
-
         vb.Bind();
         auto& ib = vb.GetIndexBuffer();
         int indexCount = count ? count : ib->GetCount();
@@ -168,12 +167,15 @@ namespace LkEngine {
 
 	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID)
     {
-        m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, tc.Rotation2D, entityID);
+        //m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, tc.Rotation2D, entityID);
+        m_RendererAPI->SubmitQuad(tc.Translation, size, texture, tc.Rotation2D, entityID);
     }
 
 	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& color, uint64_t entityID)
     {
-        m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, color, tc.Rotation2D, entityID);
+        //m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, color, tc.Rotation2D, entityID);
+        //m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, color, tc.Rotation2D, entityID);
+        m_RendererAPI->SubmitQuad(tc.Translation, size, texture, color, tc.Rotation2D, entityID);
     }
 
 	std::string Renderer::GetDrawModeStr()

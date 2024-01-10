@@ -75,6 +75,22 @@ namespace LkEngine {
 
         delete[] quadIndices;
 
+#if 0
+        int textureWidth = 200;
+        int textureHeight = 200;
+		glGenTextures(1, &m_TextureArray);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_TextureArray);
+
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, textureWidth, textureHeight, 32, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_TextureArray);
+#endif
+
+
         // Line
         m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
         VertexBufferLayout lineVertexBufLayout{ };
@@ -85,9 +101,10 @@ namespace LkEngine {
         });
         m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
+        //-----------------------------------------
+        // Textures
         auto* textureLibrary = TextureLibrary::Get();
-        m_WhiteTexture = textureLibrary->GetWhiteTexture();
-        m_TextureSlots[0] = m_WhiteTexture;
+        m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture();
 
         auto textures2D = textureLibrary->GetTextures2D();
         // First texture is the white texture in the texture library also, so begin iterating at i=1
@@ -95,11 +112,15 @@ namespace LkEngine {
         {
             auto& textureEntry = textures2D[i];
             m_TextureSlots[i] = textureEntry.second;
+            //glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_TextureSlots[i]->GetWidth(), m_TextureSlots[i]->GetHeight(), 1, GL_RGBA, GL_UNSIGNED_BYTE, m_TextureSlots[i]->GetImage()->GetBuffer().Data);
         }
 
         // Shader setup
         m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
         m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
+
+        //m_QuadShader->Bind();
+        //m_QuadShader->SetUniform1i("u_TextureArray", 0);
 
         m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
 
@@ -107,6 +128,7 @@ namespace LkEngine {
         for (uint32_t i = 0; i < m_MaxLineIndices; i++)
 			lineIndices[i] = i;
 		delete[] lineIndices;
+
     }
 
     void Renderer2D::Shutdown()
@@ -180,9 +202,18 @@ namespace LkEngine {
                     m_QuadShader->SetUniform1i("u_Textures[" + std::to_string(i) + "]", i);
                 }
             }
-
+#if 0
+            for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
+            {
+                if (m_TextureSlots[i])
+                {
+                    m_TextureSlots[i]->Bind(i);
+                    m_QuadShader->SetUniform1i("u_TextureArray", i);
+                    //m_QuadShader->SetUniform1i("u_Textures[" + std::to_string(i) + "]", i);
+                }
+            }
+#endif
             Renderer::SubmitIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
-            //RenderCommand::DrawIndexed(*m_QuadVertexBuffer, m_QuadIndexCount);
 
             m_QuadShader->Unbind();
 
@@ -354,22 +385,14 @@ namespace LkEngine {
 
     void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, float rotation, uint64_t entityID)
     {
-    #if 0
-        if (texture == nullptr)
-            throw std::runtime_error("Passed texture to DrawQuad was NULLPTR");
-        float textureIndex = 0.0f;
-        const float tilingFactor = 1.0f;
-        constexpr size_t quadVertexCount = 4;
-        glm::vec4 tintColor = texture->GetTintColor();
-    #endif
         //DrawQuad(pos, size, texture, texture->GetTintColor(), rotation, entityID);
-        DrawQuad(pos, size, texture, rotation, entityID);
+        DrawQuad(pos, size, texture, { 0.0f, 0.0f, 0.0f, 0.0f }, rotation, entityID);
     }
 
     void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID)
     {
         if (texture == nullptr)
-            throw std::runtime_error("Passed texture to DrawQuad was NULLPTR");
+            throw std::runtime_error("Passed texture to DrawQuad was nullptr");
 
         float textureIndex = 0.0f;
         const float tilingFactor = 1.0f;
