@@ -2,14 +2,16 @@ project "ImGui"
 	kind "StaticLib"
 	language "C++"
     cppdialect "C++17"
+    staticruntime "On"
+
+    configurations { "Debug", "Release", "Dist" }
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
     defines { "IMGUI_DEFINE_MATH_OPERATORS" }
 
-	files
-	{
+	files {
         "imconfig.h",
 		"imgui.h",
 		"imgui.cpp",
@@ -26,8 +28,6 @@ project "ImGui"
 		"imgui_impl_opengl3.h",
         "imgui_tables.h",
         "imgui_tables.cpp",
-        --"ImGuizmo.h",
-        --"ImGuizmo.cpp",
 	}
 
     includedirs
@@ -38,17 +38,16 @@ project "ImGui"
 
 	filter "system:windows"
 		systemversion "latest"
-		staticruntime "On"
+		staticruntime "on"
 
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
-		staticruntime "On"
 
 	filter "configurations:Debug"
 		runtime "Debug"
-		symbols "on"
+		symbols "On"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		optimize "On"

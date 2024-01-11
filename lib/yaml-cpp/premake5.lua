@@ -2,44 +2,39 @@ project "yaml-cpp"
 	kind "StaticLib"
 	language "C++"
     cppdialect "C++17"
+	--staticruntime "Off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
-	files 
-	{ 
+	files { 
         "src/**.h", 
         "src/**.cpp", 
 		"include/**.h"
 	}
 
-	includedirs 
-	{ 
+	includedirs { 
 		"include",
 		"include/yaml-cpp"
 	}
 	
-	defines
-	{
+	defines {
 		"YAML_CPP_STATIC_DEFINE",
 		"YAMLCPP_USE_STATIC_LIBS"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
-		staticruntime "On"
+		--staticruntime "On"
 	
 	filter "configurations:Debug"
-		defines "LK_DEBUG"
 		runtime "Debug"
-		symbols "on"
+		symbols "On"
 	
 	filter "configurations:Release"
-		defines "LK_RELEASE"
 		runtime "Release"
-		optimize "on"
+		optimize "On"
 	
 	filter "configurations:Dist"
-		defines "LK_DIST"
 		runtime "Release"
-		optimize "on"
+		optimize "On"

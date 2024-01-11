@@ -23,7 +23,6 @@ project "ImGuizmo"
 	}
 
    includedirs {
-      --"LkEngine/lib/imgui",
       "../imgui"
    }
 
@@ -37,9 +36,10 @@ project "ImGuizmo"
 		staticruntime "On"
 
 	filter "configurations:Debug"
+		staticruntime "On"
 		runtime "Debug"
-		symbols "on"
+		symbols "On"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		optimize "On"

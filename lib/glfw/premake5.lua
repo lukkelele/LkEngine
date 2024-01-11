@@ -44,8 +44,7 @@ project "GLFW"
 	filter "system:windows"
 		systemversion "latest"
 
-		files
-		{
+		files {
 			"src/win32_init.c",
 			"src/win32_joystick.c",
 			"src/win32_monitor.c",
@@ -57,8 +56,7 @@ project "GLFW"
 			"src/osmesa_context.c"
 		}
 
-		defines 
-		{ 
+		defines { 
 			"_GLFW_WIN32",
 			"_CRT_SECURE_NO_WARNINGS"
 		}
@@ -66,8 +64,8 @@ project "GLFW"
 
 	filter "configurations:Debug"
 		runtime "Debug"
-		symbols "on"
+		symbols "On"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		optimize "On"

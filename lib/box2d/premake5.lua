@@ -2,20 +2,18 @@ project "box2d"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++11"
-	staticruntime "off"
+	staticruntime "Off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
-	files
-	{
+	files {
 		"src/**.h",
 		"src/**.cpp",
 		"include/**.h"
 	}
 
-	includedirs
-	{
+	includedirs {
 		"include",
 		"src"
 	}
@@ -25,13 +23,13 @@ project "box2d"
 
 	filter "configurations:Debug"
 		runtime "Debug"
-		symbols "on"
+		symbols "On"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		optimize "On"
 
 	filter "configurations:Dist"
 		runtime "Release"
-		optimize "on"
-        symbols "off"
+		optimize "On"
+        symbols "Off"
