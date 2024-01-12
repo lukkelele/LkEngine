@@ -75,7 +75,7 @@ namespace LkEngine {
 		void UI_SceneContent();
 		void UI_CreateMenu();
         void UI_SelectedEntityProperties();
-		void UI_RenderSettingsInformation();
+		void UI_RenderSettingsWindow();
 		bool IsEntitySelected() const;
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
 		void SetUpdateWindowFlag(bool flag); 
@@ -136,7 +136,7 @@ namespace LkEngine {
 
 		bool ShouldUpdateWindowSizes = true;
 
-		bool ShowRenderInformationWindow = false;
+		bool ShowRenderSettingsWindow = false;
 		bool m_FillSidebarsVertically = true; // Always fill out sidebars vertically
 
 		ImVec2 last_sidebar_left_pos = ImVec2(0, 0);
@@ -146,10 +146,7 @@ namespace LkEngine {
 		ImVec2 last_bottombar_pos = ImVec2(0, 0);
 		ImVec2 last_bottombar_size = ImVec2(0, 0);
 
-		// Window where the selected entity settings will be shown in
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
-		//std::vector<std::string> m_Tabs;
-		//std::string m_CurrentTab = "";
 
 	private:
 		Scene* m_Scene = nullptr;

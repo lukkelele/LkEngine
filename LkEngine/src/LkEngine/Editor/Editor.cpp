@@ -14,7 +14,6 @@
 
 #include "LkEngine/ImGui/ImGuiUtilities.h"
 
-#include "LkEngine/UI/OpenGLImGui.h"
 
 
 namespace LkEngine {
@@ -170,7 +169,7 @@ namespace LkEngine {
 				ImGui::EndMenu();
 			}
 			if (ImGui::MenuItem("Render Information"))
-				ShowRenderInformationWindow = !ShowRenderInformationWindow;
+				ShowRenderSettingsWindow = !ShowRenderSettingsWindow;
 
 		}
 		ImGui::EndMainMenuBar();
@@ -437,6 +436,7 @@ namespace LkEngine {
 			ShouldUpdateWindowSizes = false; 
 
 		glm::vec2 viewportSize = { viewport->WorkSize.x, viewport->WorkSize.y };
+		//glm::vec2 viewportSize = { viewport->Size.x, viewport->Size.y };
 		UI_SyncEditorWindowSizes(viewportSize);
 
 		m_TabManager->End();
@@ -452,9 +452,9 @@ namespace LkEngine {
 
 	void Editor::HandleExternalWindows()
 	{
-		if (ShowRenderInformationWindow)
+		if (ShowRenderSettingsWindow)
 		{
-			UI_RenderSettingsInformation();
+			UI_RenderSettingsWindow();
 		}
 	}
 
@@ -620,7 +620,7 @@ namespace LkEngine {
 		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& transform)
 		{
 			ImGui::Text("Position");
-			UI::Property::PositionXY(transform.Translation, 2.0);
+			UI::Property::PositionXYZ(transform.Translation, 2.0);
 
 			ImGui::Text("Scale");
 			ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
@@ -811,11 +811,20 @@ namespace LkEngine {
 		return size;
 	}
 
-	void Editor::UI_RenderSettingsInformation()
+	void Editor::UI_RenderSettingsWindow()
 	{
-		if (ImGui::Begin("Render Settings", &ShowRenderInformationWindow, ImGuiWindowFlags_NoDocking))
+		if (ImGui::Begin("Render Settings", &ShowRenderSettingsWindow, ImGuiWindowFlags_NoDocking))
 		{
 			auto* graphicsCtx = GraphicsContext::Get();
+
+			bool& blending = GraphicsContext::Get()->GetBlending();
+			if (ImGui::Checkbox("Blending", &blending))
+			{
+				if (blending == true)
+					GraphicsContext::Get()->SetBlendingEnabled(true);
+				else
+					GraphicsContext::Get()->SetBlendingEnabled(false);
+			}
 
 			if (ImGui::BeginCombo("Drawmode", Renderer::GetDrawModeStr().c_str(), NULL))
 			{
@@ -1116,6 +1125,7 @@ namespace LkEngine {
 			ImGui::Text("BottomBarSize: (%1.f, %1.f)", BottomBarSize.x, BottomBarSize.y);
 			ImGui::Text("Last Bottombar Size: (%1.f, %1.f)", last_bottombar_size.x, last_bottombar_size.y);
 			ImGui::Text("Current Tab: %s", m_TabManager->GetActiveTabName().c_str());
+			ImGui::Text("Tabs: %d", m_TabManager->GetTabCount());
 		}
 		ImGui::EndGroup();
 	}
@@ -1141,14 +1151,17 @@ namespace LkEngine {
 			LeftSidebarSize = { last_sidebar_left_size.x, last_sidebar_left_size.y };
 			RightSidebarSize = { last_sidebar_right_size.x, last_sidebar_right_size.y };
 			BottomBarSize = { last_bottombar_size.x, last_bottombar_size.y };
+
 			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
 			EditorWindowSize.x = viewportSize.x - LeftSidebarSize.x - RightSidebarSize.x;
 
 			// Only take the size of the TabBar into account if any tabs exist
 			if (m_CurrentTabCount > 1)
-				EditorWindowSize.y = viewportSize.y - BottomBarSize.y - MenuBarSize.y - TabBarSize.y;
+				EditorWindowSize.y = viewportSize.y - BottomBarSize.y;
 			else
-				EditorWindowSize.y = viewportSize.y - BottomBarSize.y - MenuBarSize.y;
+				EditorWindowSize.y = viewportSize.y - BottomBarSize.y + TabBarSize.y;
+
+			EditorWindowPos.y -= MenuBarSize.y;
 
 			// Update viewport scalers as the resolution has been altered
 			ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
@@ -1163,6 +1176,7 @@ namespace LkEngine {
 				LeftSidebarSize.y = viewportSize.y;
 				RightSidebarSize.y = viewportSize.y;
 			}
+
 			// Reapply viewport settings starting from a lower point of the left sidebar and the bottom bar height
 			GraphicsContext::Get()->SetViewport(EditorWindowPos, EditorWindowSize);
 
