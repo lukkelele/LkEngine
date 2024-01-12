@@ -59,7 +59,6 @@ namespace LkEngine {
 		{
 			m_GraphicsContext = GraphicsContext::Create(this, LK_SHADER_VERSION);
 			m_GraphicsContext->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
-			m_GraphicsContext->SetDarkTheme();
 		}
 	
 		SetVSync(true);
@@ -88,8 +87,8 @@ namespace LkEngine {
 	
 	void Windows_Window::Exit()
 	{
-		glfwTerminate();
 		glfwDestroyWindow(m_GlfwWindow);
+		glfwTerminate();
 	}
 	
 	void Windows_Window::SetVSync(bool enabled)

@@ -18,6 +18,7 @@ namespace LkEngine {
         void Init();
         void SwapBuffers();
         void Exit();
+
         inline uint16_t GetWidth() const { return m_Width; }
         inline uint16_t GetHeight() const { return m_Height; }
         inline uint16_t GetViewportWidth()  const { return m_ViewportWidth; }
@@ -29,9 +30,10 @@ namespace LkEngine {
         void SetVSync(bool enabled);
         std::string GetTitle() const { return m_Title; }
         bool IsVSyncEnabled() const { return m_VSync; }
-        std::string GetGlslVersion() const { return m_GlslVersion;  }
+        std::string GetShaderVersion() const { return m_GlslVersion;  }
         GLFWwindow* GetGlfwWindow() const { return m_GlfwWindow; }
         s_ptr<GraphicsContext> GetContext() const { return m_GraphicsContext; }
+
         void SetWidth(uint16_t width); // { m_Width = width; }
         void SetHeight(uint16_t height); // { m_Height = height; }
         void SetViewportWidth(uint16_t width) { m_ViewportWidth = width; }
