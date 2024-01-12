@@ -13,6 +13,8 @@ namespace LkEngine {
 		OpenGLShader(const std::string& vertexPath, const std::string& fragmentPath);
 		~OpenGLShader();
 
+		RendererID GetRendererID() const { return m_RendererID; }
+		RendererID& GetRendererID() { return m_RendererID; }
 		void Bind() const;
 		void Unbind() const;
 		int GetUniformLocation(const std::string& name);
@@ -23,5 +25,12 @@ namespace LkEngine {
 		void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
 		unsigned int CompileShader(unsigned int type, const std::string& source);
 		unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
+
+	private:
+		RendererID m_RendererID;
+		std::string m_FilePath;
+		std::string m_VertexPath;
+		std::string m_FragmentPath;
+		std::unordered_map<std::string, int> m_UniformLocationCache;
     };
 }

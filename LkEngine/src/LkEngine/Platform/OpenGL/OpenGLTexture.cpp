@@ -70,6 +70,8 @@ namespace LkEngine {
 		if (specification.Name.empty())
 			m_Name = specification.Path;
 
+		m_Image = Image::Create(imageSpec, imageData);
+#if 0
 		if (specification.Path != "")
 		{
 			stbi_set_flip_vertically_on_load(1);
@@ -83,6 +85,7 @@ namespace LkEngine {
 		{
 			m_Image = Image::Create(imageSpec, nullptr);
 		}
+#endif
 	}
 
 
@@ -101,6 +104,7 @@ namespace LkEngine {
 		imageSpec.Height = height;
 		m_Width = width;
 		m_Height = height;
+		imageSpec.Path = filePath;
 		m_Image = Image::Create(imageSpec, data);
 	}
 
@@ -121,7 +125,7 @@ namespace LkEngine {
 		//m_Loaded = true;
 	}
 
-	void OpenGLTexture::Unbind()
+	void OpenGLTexture::Unbind(unsigned slot)
 	{
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 		//m_Loaded = false;
@@ -171,9 +175,8 @@ namespace LkEngine {
 	}
 
 	//=====================================================
-	// Texture 2D
+	// OpenGLTexture 2D
 	//=====================================================
-
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& filePath)
 	{
 		LOG_TRACE("OpenGLTexture2D created: {}", filePath);
@@ -196,26 +199,19 @@ namespace LkEngine {
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification, Buffer imageData)
 	{
 		ImageSpecification imageSpec;
+		imageSpec.Name = specification.Name;
 		imageSpec.Path = specification.Path;
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
+		imageSpec.Format = specification.Format;
+		imageSpec.Filter = specification.Filter;
+		imageSpec.Wrap = specification.Wrap;
+
 		m_Name = specification.Name;
 		if (specification.Name.empty())
 			m_Name = specification.Path;
 
-		if (specification.Path != "")
-		{
-			stbi_set_flip_vertically_on_load(1);
-			int width, height, channels;
-			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
-
-			m_Image = Image::Create(imageSpec, data);
-			stbi_image_free(data);
-		}
-		else
-		{
-			m_Image = Image::Create(imageSpec, nullptr);
-		}
+		m_Image = Image::Create(imageSpec, imageData);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
@@ -224,27 +220,33 @@ namespace LkEngine {
 		, m_Height(specification.Height)
 	{
 		ImageSpecification imageSpec;
+		imageSpec.Name = specification.Name;
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
 		imageSpec.Path = specification.Path;
+		imageSpec.Format = specification.Format;
+		imageSpec.Filter = specification.Filter;
+		imageSpec.Wrap = specification.Wrap;
+
 		m_Name = specification.Name;
 		if (specification.Name.empty())
 			m_Name = specification.Path;
 
-		if (specification.Path != "")
+		// Try to read data from path
+		if (specification.Path.empty() == false)
 		{
-			stbi_set_flip_vertically_on_load(1);
 			int width, height, channels;
+			stbi_set_flip_vertically_on_load(1);
+
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
             uint32_t memorySize = Image::GetMemorySize(specification.Format, specification.Width, specification.Height);
+
 			imageSpec.Width = width;
 			imageSpec.Height = height;
 			m_Image = Image::Create(imageSpec, data);
 		}
 		else
-		{
 			m_Image = Image::Create(imageSpec, nullptr);
-		}
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
@@ -257,8 +259,9 @@ namespace LkEngine {
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
 	}
 
-	void OpenGLTexture2D::Unbind()
+	void OpenGLTexture2D::Unbind(unsigned slot)
 	{
+		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 	}
 

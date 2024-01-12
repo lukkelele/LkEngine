@@ -1,6 +1,7 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/TextureLibrary.h"
-#include "LkEngine/Renderer/Texture.h"
+#include "TextureLibrary.h"
+#include "Renderer.h"
+
 #include "LkEngine/IO/File.h"
 
 
@@ -34,7 +35,24 @@ namespace LkEngine {
         : m_TexturesDir(texturesDir)
     {
         m_Instance = this;
+
+		TextureSpecification spec;
+		spec.Format = ImageFormat::RGBA;
+		spec.Width = 1;
+		spec.Height = 1;
+        spec.Name = "white-texture";
+
+		constexpr uint32_t whiteTextureData = 0xFFFFFFFF;
+		m_WhiteTexture2D = Texture2D::Create(spec, Buffer(&whiteTextureData, sizeof(uint32_t)));
+
+        spec.Name = "black-texture";
+		constexpr uint32_t blackTextureData = 0xFF000000;
+		m_BlackTexture2D = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
+
+        m_Collection2D.insert({ "white-texture", m_WhiteTexture2D });
+        m_Collection2D.insert({ "black-texture", m_BlackTexture2D });
     }
+
 
     TextureLibrary::~TextureLibrary()
     {
@@ -42,32 +60,26 @@ namespace LkEngine {
         m_Collection2D.clear();
     }
 
-    void TextureLibrary::Init()
+    void TextureLibrary::Init(bool loadRecursively)
     {
-        // Create white texture as first texture
-        TextureSpecification whiteTextureSpec;
-        whiteTextureSpec.Width = 400;
-        whiteTextureSpec.Height = 400;
-        whiteTextureSpec.Name = "White Texture";
-        whiteTextureSpec.Path = "assets/textures/white-texture.png";
-        auto whiteTexture = Texture2D::Create(whiteTextureSpec);
-        m_Collection2D.insert({ "WhiteTexture", whiteTexture });
-
         namespace fs = std::filesystem;
 
-        // Find all textures and add to respective texture collections
-        for (const auto& entry : fs::recursive_directory_iterator(m_TexturesDir)) 
+        if (loadRecursively == true)
         {
-            if (entry.is_regular_file()) 
+            // Find all textures and add to respective texture collections
+            for (const auto& entry : fs::recursive_directory_iterator(m_TexturesDir)) 
             {
-                std::string filepath = entry.path().string();
-                std::string extension = entry.path().extension().string();
-
-                // Check if the file has an image extension
-                if (std::find(ImageExtensions.begin(), ImageExtensions.end(), extension) != ImageExtensions.end()) 
+                if (entry.is_regular_file()) 
                 {
-                    LOG_DEBUG("Found image/texture: {}", filepath);
-                    AddTexture2D(File::ExtractFilenameWithoutExtension(entry.path().filename().string(), DetermineExtension(entry)), filepath);
+                    std::string filepath = entry.path().string();
+                    std::string extension = entry.path().extension().string();
+
+                    // Check if the file has an image extension
+                    if (std::find(ImageExtensions.begin(), ImageExtensions.end(), extension) != ImageExtensions.end()) 
+                    {
+                        LOG_DEBUG("Found image/texture: {}", filepath);
+                        AddTexture2D(File::ExtractFilenameWithoutExtension(entry.path().filename().string(), DetermineExtension(entry)), filepath);
+                    }
                 }
             }
         }
@@ -136,7 +148,8 @@ namespace LkEngine {
 
         //return nullptr;
         // If no texture is found, return white texture
-        return m_Collection2D.at("WhiteTexture"); // White texture is the first added texture in the 2D collection
+        throw std::runtime_error(fmt::format("Could not find texture -> {}", textureName).c_str());
+        return m_Collection2D.at("white-texture"); // White texture is the first added texture in the 2D collection
     }
 
     // Iterate the textures/images directory and create the texture objects
@@ -167,7 +180,10 @@ namespace LkEngine {
         for (const auto& entry : m_Collection2D)
         {
             if (entry.first == File::ExtractFilenameWithoutExtension(textureName))
+            {
+                LOG_DEBUG("Texture {} already exists in the 2D collection, returning it", textureName);
                 return entry.second;
+            }
         }
         s_ptr<Texture2D> texture2D = Texture2D::Create(filePath);
         m_Collection2D.insert({ File::ExtractFilenameWithoutExtension(textureName), texture2D });
@@ -175,9 +191,61 @@ namespace LkEngine {
         return texture2D;
     }
 
+    s_ptr<Texture> TextureLibrary::AddTexture2D(const TextureSpecification& textureSpec)
+    {
+        // Check if the texture already exists
+        for (const auto& entry : m_Collection2D)
+        {
+            if (entry.first == File::ExtractFilenameWithoutExtension(textureSpec.Name))
+            {
+                LOG_DEBUG("Texture {} already exists in the 2D collection, returning it", textureSpec.Name);
+                return entry.second;
+            }
+        }
+        s_ptr<Texture2D> texture2D = Texture2D::Create(textureSpec);
+        m_Collection2D.insert({ File::ExtractFilenameWithoutExtension(textureSpec.Name), texture2D });
+
+        Renderer::Get()->GetRendererAPI()->GetRenderer2D()->AddTextureToSlot(texture2D);
+
+        return texture2D;
+    }
+
+    s_ptr<Texture> TextureLibrary::AddTexture2D(s_ptr<Texture2D> texture)
+    {
+        // Check if the texture already exists
+        for (const auto& entry : m_Collection2D)
+        {
+            if (entry.first == File::ExtractFilenameWithoutExtension(texture->GetName()))
+            {
+                LOG_DEBUG("Texture {} already exists in the 2D collection, returning it", texture->GetName());
+                return entry.second;
+            }
+        }
+        m_Collection2D.insert({ File::ExtractFilenameWithoutExtension(texture->GetName()), texture });
+
+        return texture;
+    }
+
     s_ptr<Texture> TextureLibrary::GetWhiteTexture()
     {
-        return m_Collection2D.at("WhiteTexture");
+        return m_WhiteTexture2D;
+    }
+
+    s_ptr<Texture2D> TextureLibrary::GetWhiteTexture2D()
+    {
+        //LK_ASSERT(m_Collection2D.at("white-texture") != nullptr);
+        //return m_Collection2D.at("white-texture");
+        return m_WhiteTexture2D;
+    }
+
+    s_ptr<Texture> TextureLibrary::GetBlackTexture()
+    {
+        return m_BlackTexture2D;
+    }
+
+    s_ptr<Texture2D> TextureLibrary::GetBlackTexture2D()
+    {
+        return m_BlackTexture2D;
     }
 
     void TextureLibrary::RenameTexture(const std::string& name, const std::string& newName)
@@ -193,8 +261,13 @@ namespace LkEngine {
     std::vector<std::pair<std::string, s_ptr<Texture2D>>> TextureLibrary::GetTextures2D()
     {
         std::vector<std::pair<std::string, s_ptr<Texture2D>>> textures;
+        textures.push_back({ "white-texture", m_WhiteTexture2D });
         for (auto& entry : m_Collection2D)
+        {
+            if (entry.second->GetName() == "black-texture" || entry.second->GetName() == "white-texture")
+                continue;
             textures.push_back(entry);
+        }
         return textures;
     }
 

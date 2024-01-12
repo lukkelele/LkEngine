@@ -10,9 +10,9 @@
 #include <ImGuizmo/ImGuizmo.h>
 
 #ifdef LK_PLATFORM_WINDOWS
-	#include "LkEngine/Platform/Windows/Windows_Window.h"
+	#include "Platform/Windows/Windows_Window.h"
 #elif defined(LK_PLATFORM_LINUX)
-	#include "LkEngine/Platform/Linux/Linux_Window.h"
+	#include "Platform/Linux/Linux_Window.h"
 #endif
 
 #include "LkOpenGL.h"
@@ -48,7 +48,6 @@ namespace LkEngine {
 			default: throw std::runtime_error("Destination blend function could not be retrieved correctly");
 		}
 	}
-
 	//=======================================================================================================
 
 
@@ -72,7 +71,6 @@ namespace LkEngine {
 			printf("[ERROR] Error starting GLAD");
 			exit(EXIT_FAILURE);
 		}
-		printf("OpenGL Version: %s\n", OpenGL_GetVersion());
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
@@ -81,12 +79,13 @@ namespace LkEngine {
 		SetDepthEnabled(false);
 		SetBlendFunction(srcFunc, dstFunc);
 
-		InitImGui(m_Window->GetGlslVersion().c_str());
+		//InitImGui(m_Window->GetGlslVersion().c_str());
     }
 
 	void OpenGLContext::SetViewport(const glm::vec2& pos, const glm::vec2& size)
 	{
 		glViewport(pos.x, pos.y, size.x, size.y);
+		//glViewport(pos.x * m_Window->GetScalerX(), pos.y * m_Window->GetScalerY(), size.x, size.y);
 	}
 
 	void OpenGLContext::SetBlendingEnabled(bool enabled)
@@ -100,11 +99,9 @@ namespace LkEngine {
 
     void OpenGLContext::Destroy()
     {
-		ImGui_ImplGlfw_Shutdown();
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui::DestroyContext();
     }
 
+#if 0
     void OpenGLContext::InitImGui(const std::string& glslVersion)
     {
 	    ImGui::CreateContext();
@@ -132,6 +129,7 @@ namespace LkEngine {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
+#endif
 
 	void OpenGLContext::UpdateResolution(uint16_t width, uint16_t height)
 	{

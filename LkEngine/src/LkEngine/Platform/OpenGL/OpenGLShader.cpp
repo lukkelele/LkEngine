@@ -38,6 +38,7 @@ namespace LkEngine {
 
 	void OpenGLShader::SetUniform1i(const std::string& name, int value)
 	{
+		//LOG_DEBUG("GetUniformLocation({}) == {}   value == {}", name, GetUniformLocation(name), value);
 		GL_CALL(glUniform1i(GetUniformLocation(name), value));
 	}
 
@@ -74,6 +75,7 @@ namespace LkEngine {
 			LOG_WARN("[SHADER] Warning: uniform {0} isn't in use", name);
 
 		m_UniformLocationCache[name] = location;
+		LOG_DEBUG("{} in uniform cache --> m_UniformLocationCache[{}] == {}", name, name, location);
 		return location;
 	}
 

@@ -27,7 +27,7 @@ namespace LkEngine {
 		s_ptr<Image> GetImage();
 
 		void Bind(unsigned int slot = 0);
-		void Unbind();
+		void Unbind(unsigned int slot = 0);
 		void Lock();
 		void Unlock();
 		bool IsLoaded() const { return m_Loaded; }
@@ -70,7 +70,7 @@ namespace LkEngine {
 		s_ptr<Image> GetImage();
 
 		void Bind(unsigned int slot = 0);
-		void Unbind();
+		void Unbind(unsigned int slot = 0);
 		void Lock();
 		void Unlock();
 

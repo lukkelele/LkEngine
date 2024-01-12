@@ -24,7 +24,10 @@ namespace LkEngine {
 	private:
 		RendererID m_FramebufferID;
 		RendererID m_RenderbufferID;
+		RendererID m_ImageID;
+
 		uint64_t m_Width, m_Height;
+		glm::vec4 m_ClearColor;
 
 		FramebufferSpecification m_Specification;
 
