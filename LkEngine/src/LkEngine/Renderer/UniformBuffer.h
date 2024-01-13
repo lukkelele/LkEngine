@@ -8,14 +8,12 @@ namespace LkEngine {
     class UniformBuffer
     {
     public:
-        UniformBuffer(uint32_t size, uint32_t binding);
-        ~UniformBuffer();
+        virtual ~UniformBuffer();
 
-        static s_ptr<UniformBuffer> Create(uint32_t size, uint32_t binding) { return std::make_shared<UniformBuffer>(size, binding); }
+        static Ref<UniformBuffer> Create(uint32_t size, uint32_t binding);
 
-        void SetData(const void* data, uint32_t size, uint32_t offset = 0);
-        void Bind();
-        void Unbind();
+        virtual void SetData(const void* data, uint32_t size, uint32_t offset = 0) = 0;
+        virtual void RT_SetData(const void* data, uint32_t size, uint32_t offset) = 0;
 
     private:
         uint32_t m_RendererID = 0;
