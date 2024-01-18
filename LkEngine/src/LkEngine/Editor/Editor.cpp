@@ -13,14 +13,24 @@
 #include "LkEngine/UI/Property.h"
 
 #include "LkEngine/ImGui/ImGuiUtilities.h"
-
+#include "Platform/Windows/Windows_Window.h"
 
 
 namespace LkEngine {
 
 	static bool WindowsHaveChangedInSize = true; // Run once when starting
 
-	Editor::Editor()
+	static glm::vec2 MenuBarSize = { 0.0f, 30.0f };
+	static glm::vec2 TabBarSize = { 0.0f, 0.0f };
+	static glm::vec2 BottomBarSize = { 0.0f, 0.0f };
+	static glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
+	static glm::vec2 RightSidebarSize = { 0.0f, 0.0f };
+	static glm::vec2 BottomBarPos = { 0.0f, 0.0f };
+	static glm::vec2 LeftSidebarPos = { 0.0f, 0.0f };
+	static glm::vec2 RightSidebarPos = { 0.0f, 0.0f };
+
+
+	Editor::Editor(const Ref<Window>& window)
 		: m_Scene(nullptr)
 		, m_ActiveWindowType(WindowType::None)
 	{
@@ -28,8 +38,14 @@ namespace LkEngine {
 		m_ShowStackTool = true;
 		m_ActiveWindowType = WindowType::Viewport;
 
+		//Ref<Window> window = Ref<Windows_Window>();
+		//auto window = Ref<Windows_Window>();
+		m_Window = window;
+		LK_CORE_ASSERT(m_Window != nullptr, "Window is nullptr");
+
 		m_ViewportBounds[0] = { 0, 0 };
-		m_ViewportBounds[1] = { Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight() };
+		m_ViewportBounds[1] = { window->GetViewportWidth(), window->GetViewportHeight()};
+
 		m_SecondViewportBounds[0] = { 0, 0 };
 		m_SecondViewportBounds[1] = { 0, 0 };
 
@@ -55,12 +71,13 @@ namespace LkEngine {
 		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
 		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 
-		Window::Get()->SetScalers(ViewportScalers.x, ViewportScalers.y);
-		Window::Get()->SetWidth(EditorWindowSize.x);
-		Window::Get()->SetHeight(EditorWindowSize.y);
+		m_Window->SetScalers(ViewportScalers.x, ViewportScalers.y);
+		m_Window->SetWidth(EditorWindowSize.x);
+		m_Window->SetHeight(EditorWindowSize.y);
 
 		m_EditorCamera = new EditorCamera();
-		m_EditorCamera->SetOrthographic(Window::Get()->GetWidth(), Window::Get()->GetHeight(), -1.0f, 1.0f);
+		//m_EditorCamera->SetOrthographic(m_Window->GetWidth(), m_Window->GetHeight(), -1.0f, 1.0f);
+		m_EditorCamera->SetOrthographic(m_Window->GetWidth(), m_Window->GetHeight(), -1.0f, 1.0f);
 
 		m_TabManager = new EditorTabManager();
 		m_TabManager->Init();
@@ -73,7 +90,7 @@ namespace LkEngine {
 	void Editor::RenderImGui()
 	{
 		auto* app = Application::Get();
-		auto* window = Window::Get();
+		auto& window = m_Window;
 		auto& io = ImGui::GetIO();
 		auto& style = ImGui::GetStyle();
 		auto& colors = style.Colors;
@@ -81,9 +98,8 @@ namespace LkEngine {
 
 		ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 
-		UI::BeginViewport(UI_CORE_VIEWPORT, window, viewport);
+		UI::BeginViewport(UI_CORE_VIEWPORT, window.Raw(), viewport);
 		UI_HandleManualWindowResize();
-
 
 		UI::BeginDockSpace(LkEngine_DockSpace);
 
@@ -186,9 +202,9 @@ namespace LkEngine {
 			if (ImGui::Checkbox("Depth Testing", &depth_test_checkbox))
 			{
 				if (depth_test_checkbox == true)
-					Window::Get()->SetDepthEnabled(true);
+					m_Window->SetDepthEnabled(true);
 				else
-					Window::Get()->SetDepthEnabled(false);
+					m_Window->SetDepthEnabled(false);
 			}
 
 			//----------------------------------------
@@ -212,13 +228,13 @@ namespace LkEngine {
 				std::string textureName = "ale";
 				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
-					LOG_DEBUG("Push tab");
+					LK_CORE_DEBUG("Push tab");
 					m_TabManager->NewTab(fmt::format("Node Editor-{}", m_TabManager->GetTabCount()), EditorTabType::NodeEditor);
 				}
 				ImGui::SameLine();
 				if (ImGui::ImageButton("##ModeButton-NodeEditor", (void*)TextureLibrary::Get()->GetTexture2D(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
-					LOG_DEBUG("Pop tab");
+					LK_CORE_DEBUG("Pop tab");
 					if (m_TabManager->GetTabCount() > 1)
 						m_TabManager->PopTab();
 				}
@@ -463,7 +479,7 @@ namespace LkEngine {
 		if (SelectedEntityID != entity.UUID())
 		{
 			SelectedEntityID = entity.UUID();
-			LOG_DEBUG("Editor: Selecting entity {} ({})", entity.Name(), entity.UUID());
+			LK_CORE_DEBUG("Editor: Selecting entity {} ({})", entity.Name(), entity.UUID());
 		}
 	}
 
@@ -482,7 +498,7 @@ namespace LkEngine {
 		if (ImGui::IsItemClicked())
 		{
 			SelectedEntityID = entity.UUID();
-			LOG_DEBUG("Selecting entity {} ({})", entity.Name(), entity.UUID());
+			LK_CORE_DEBUG("Selecting entity {} ({})", entity.Name(), entity.UUID());
 		}
 
 		bool entityDeleted = false;
@@ -562,7 +578,7 @@ namespace LkEngine {
 			auto& component = entity.GetComponent<T>();
 			if (component.Removable == true)
 			{
-				LOG_DEBUG("Removing component from {}", entity.Name());
+				LK_CORE_DEBUG("Removing component from {}", entity.Name());
 				entity.RemoveComponent<T>();
 			}
 		}
@@ -642,6 +658,35 @@ namespace LkEngine {
 			UI::Property::RGBAColor(sprite.Color);
 		});
 
+		DrawComponent<MaterialComponent>("Material", entity, [&entity](auto& mc)
+		{
+			auto texture = mc.GetTexture();
+			if (texture == nullptr)
+				return;
+
+			auto textures2D = TextureLibrary::Get()->GetTextures2D();
+			std::string textureName = texture->GetName();
+
+			ImGui::Text("%s", textureName.c_str());
+			ImGui::SameLine();
+			// Selectable texture
+			if (ImGui::BeginCombo("##DrawMaterialComponent", textureName.c_str(), ImGuiComboFlags_NoPreview))
+			{
+				for (auto& tex : textures2D)
+				{
+					ImGui::SetNextItemWidth(180);
+					if (ImGui::Selectable(tex.first.c_str()))
+						mc.SetTexture(tex.second);
+				}
+				ImGui::EndCombo();
+			}
+
+			auto material = mc.GetMaterial();
+			float roughness = material->GetRoughness();
+			ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+			material->SetRoughness(roughness);
+		});
+
 		UI::EndSubwindow();
 	}
 
@@ -665,7 +710,7 @@ namespace LkEngine {
 		if (!entity)
 			return;
 
-        auto* window = Window::Get();
+		Ref<Window> window = m_Window;
 		static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
 
 		UI::PushID("UI_SELECTED_ENTITY_PROPERTIES");
@@ -699,6 +744,16 @@ namespace LkEngine {
 			//ImGui::SliderFloat("##Piss", &sc.Size.x, 0.0f, 800.0f, "%1.f");
 		}
 
+		if (entity.HasComponent<MaterialComponent>())
+		{
+			MaterialComponent& mc = entity.Material();
+			auto currentTexture = mc.GetTexture();
+			if (currentTexture != nullptr)
+			{
+				ImGui::Text("Texture: %s", currentTexture);
+			}
+		}
+
         ImGui::EndChild();
 		UI::PopID();
     }
@@ -709,15 +764,15 @@ namespace LkEngine {
 			return;
 
 		auto& tc = entity.Transform();
-        glm::mat4& transform_matrix = tc.GetTransform();
+        glm::mat4 transform_matrix = tc.GetTransform();
 
 		auto& scene = *Scene::GetActiveScene();
         auto& cam = *scene.GetCamera();
         auto& cam_pos = cam.GetPos();
 		//cam_pos.x += camPosOffset.x;
 		//cam_pos.y += camPosOffset.y;
-        auto& view_matrix = cam.GetView();
-        auto& proj_matrix = cam.GetProjection();
+        auto view_matrix = cam.GetView();
+        auto proj_matrix = cam.GetProjection();
 
 		SpriteComponent& sc = entity.Sprite();
 
@@ -732,10 +787,8 @@ namespace LkEngine {
 
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
-		// FIXME: The guizmo is somewhat misplaced and is sensitive to vertical translation for some odd reason.
-		//        I suspect some scaler bug, but could be many things. For now I just add '10' to center the guizmo a bit more
 		if (m_TabManager->GetTabCount() == 1) // Only 1 tab, aka only the 'Viewport' tab
-			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + 10), EditorWindowSize.x, EditorWindowSize.y);
+			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
 		else
 			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + TabBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
 
@@ -773,7 +826,7 @@ namespace LkEngine {
 
 	void Editor::UI_SceneContent()
 	{
-        auto window = Window::Get();
+        auto window = m_Window;
 		float menu_height = window->GetHeight() - SelectedEntityMenuSize.y;
 		constexpr const char* id = "##lkengine-scene-content";
 		UI::PushID(id);
@@ -792,7 +845,7 @@ namespace LkEngine {
             std::string label = fmt::format("{}", entity.Name());
             if (ImGui::Selectable(label.c_str(), &is_selected, selectable_flags))
             {
-                LOG_DEBUG("Selecting {}", label);
+                LK_CORE_DEBUG("Selecting {}", label);
 				SelectedEntityID = entity.GetComponent<IDComponent>().ID;
 				SelectedEntity = entity;
             }
@@ -815,27 +868,30 @@ namespace LkEngine {
 	{
 		if (ImGui::Begin("Render Settings", &ShowRenderSettingsWindow, ImGuiWindowFlags_NoDocking))
 		{
-			auto* graphicsCtx = GraphicsContext::Get();
+			//auto graphicsCtx = Ref<GraphicsContext>();
+			//GraphicsContext* graphicsCtx = Ref<GraphicsContext>().Raw();
+			Ref<GraphicsContext> graphicsCtx = GraphicsContext::Get();
 
-			bool& blending = GraphicsContext::Get()->GetBlending();
+			//bool& blending = GraphicsContext::Get()->GetBlending();
+			bool& blending = graphicsCtx->GetBlending();
 			if (ImGui::Checkbox("Blending", &blending))
 			{
 				if (blending == true)
-					GraphicsContext::Get()->SetBlendingEnabled(true);
+					graphicsCtx->SetBlendingEnabled(true);
 				else
-					GraphicsContext::Get()->SetBlendingEnabled(false);
+					graphicsCtx->SetBlendingEnabled(false);
 			}
 
 			if (ImGui::BeginCombo("Drawmode", Renderer::GetDrawModeStr().c_str(), NULL))
 			{
 				if (ImGui::MenuItem("Triangles"))
 				{
-					LOG_DEBUG("Selected new drawmode 'Triangles'");
+					LK_CORE_DEBUG("Selected new drawmode 'Triangles'");
 					Renderer::SetDrawMode(RendererDrawMode::Triangles);
 				}
 				if (ImGui::MenuItem("Lines"))
 				{
-					LOG_DEBUG("Selected new drawmode 'Lines'");
+					LK_CORE_DEBUG("Selected new drawmode 'Lines'");
 					Renderer::SetDrawMode(RendererDrawMode::Lines);
 				}
 
@@ -843,7 +899,7 @@ namespace LkEngine {
 			}
 
 			ImGui::SeparatorText("Blend Function");
-			if (ImGui::BeginCombo(fmt::format("Source: {}", graphicsCtx->GetSourceBlendFunctionName()).c_str(), nullptr, ImGuiComboFlags_NoPreview))
+			if (ImGui::BeginCombo(fmt::format("Source: {}", graphicsCtx->GetCurrentSourceBlendFunctionName()).c_str(), nullptr, ImGuiComboFlags_NoPreview))
 			{
 				if (ImGui::MenuItem("Zero"))
 					graphicsCtx->SetSourceBlendFunction(SourceBlendFunction::Zero);
@@ -858,7 +914,7 @@ namespace LkEngine {
 				ImGui::EndCombo();
 			}
 
-			if (ImGui::BeginCombo(fmt::format("Destination: {}", graphicsCtx->GetDestinationBlendFunctionName()).c_str(), nullptr, ImGuiComboFlags_NoPreview))
+			if (ImGui::BeginCombo(fmt::format("Destination: {}", graphicsCtx->GetCurrentDestinationBlendFunctionName()).c_str(), nullptr, ImGuiComboFlags_NoPreview))
 			{
 				if (ImGui::MenuItem("Zero"))
 					graphicsCtx->SetDestinationBlendFunction(DestinationBlendFunction::Zero);
@@ -940,7 +996,7 @@ namespace LkEngine {
 				if (is_selected)
 				{
 					ImGui::SetItemDefaultFocus();
-					LOG_DEBUG("COMBO: Selected Item -> {}", geometricShapes[geometricShapeCurrentIndex]);
+					LK_CORE_DEBUG("COMBO: Selected Item -> {}", geometricShapes[geometricShapeCurrentIndex]);
 				}
 			}
 			ImGui::EndCombo();
@@ -948,7 +1004,7 @@ namespace LkEngine {
 
 		// Selectable geometric shapes
 		// Can be clicked on to select diffent shapes instead of dropdown menu
-		auto* textureLibrary = TextureLibrary::Get();
+		auto textureLibrary = TextureLibrary::Get();
 		ImGui::BeginGroup();
 		{
 			static const ImVec4 tintColor = ImVec4(1, 1, 0.90, 1);
@@ -957,10 +1013,10 @@ namespace LkEngine {
 
 			static std::string textureName = "ale";
 			// Rectangle Image
-			s_ptr<Texture> rectangleTexture = textureLibrary->GetTexture2D(textureName);
+			auto rectangleTexture = textureLibrary->GetTexture2D(textureName);
 			if (ImGui::ImageButton("##RectangleImage", (void*)rectangleTexture->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
-				LOG_TRACE("Clicked RectangleImage -> Selecting rectangle shape");
+				LK_CORE_TRACE("Clicked RectangleImage -> Selecting rectangle shape");
 				InCreateItemProcess = true;
 				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
 				{
@@ -976,7 +1032,7 @@ namespace LkEngine {
 			// Circle Image
 			if (ImGui::ImageButton("##CircleImage", (void*)textureLibrary->GetTexture2D(textureName)->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
-				LOG_TRACE("Clicked CircleImage -> Selecting circle shape");
+				LK_CORE_TRACE("Clicked CircleImage -> Selecting circle shape");
 				InCreateItemProcess = true;
 				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
 				{
@@ -992,7 +1048,7 @@ namespace LkEngine {
 			// Triangle Image
 			if (ImGui::ImageButton("##TriangleImage", (void*)textureLibrary->GetTexture2D(textureName)->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
-				LOG_TRACE("Clicked TriangleImage -> Selecting triangle shape");
+				LK_CORE_TRACE("Clicked TriangleImage -> Selecting triangle shape");
 				InCreateItemProcess = true;
 				for (int i = 0; i < LK_ARRAYSIZE(geometricShapes); i++)
 				{
@@ -1054,7 +1110,7 @@ namespace LkEngine {
 		if (ImGui::Button("Add"))
 		{
 			// Gather characteristics for creating object
-			LOG_TRACE("Creating: {}", nameInputBuffer);
+			LK_CORE_TRACE("Creating: {}", nameInputBuffer);
 		}
 
 		UI::PopID();
@@ -1067,7 +1123,7 @@ namespace LkEngine {
 		ShouldUpdateWindowSizes = flag; 
 
 		m_ViewportBounds[0] = { 0, 0 };
-		m_ViewportBounds[1] = { Window::Get()->GetViewportWidth(), Window::Get()->GetViewportHeight() };
+		m_ViewportBounds[1] = { m_Window->GetViewportWidth(), m_Window->GetViewportHeight()};
 
 		// The second viewport bounds are updated in the reoccuring update function in the editor
 		//m_SecondViewportBounds[0] = { 0, 0 };
@@ -1085,7 +1141,7 @@ namespace LkEngine {
 				m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
 				m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y
 			);
-			ImGui::Text("Window Size: (%1.f, %1.f)", (float)Window::Get()->GetWidth(), (float)Window::Get()->GetHeight());
+			ImGui::Text("Window Size: (%1.f, %1.f)", (float)m_Window->GetWidth(), (float)m_Window->GetHeight());
 			ImGui::Text("Viewport Window Size: (%1.f, %1.f)", m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 			ImGui::Text("Editor Window Size: (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
 			ImGui::Text("Center Window (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
@@ -1167,9 +1223,9 @@ namespace LkEngine {
 			ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
 			ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 
-			Window::Get()->SetScalers(ViewportScalers);
-			Window::Get()->SetWidth(EditorWindowSize.x);
-			Window::Get()->SetHeight(EditorWindowSize.y);
+			m_Window->SetScalers(ViewportScalers);
+			m_Window->SetWidth(EditorWindowSize.x);
+			m_Window->SetHeight(EditorWindowSize.y);
 
 			if (m_FillSidebarsVertically)
 			{
@@ -1183,7 +1239,6 @@ namespace LkEngine {
 			WindowsHaveChangedInSize = false;
 			ShouldUpdateWindowSizes = true; // Tell UI to set the window size ONCE
 		}
-
 	}
 
 	void Editor::UI_BackgroundColorModificationMenu()
@@ -1214,6 +1269,46 @@ namespace LkEngine {
 	{
 		ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
 		ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
+	}
+
+	uint64_t  Editor::GetSelectedEntityID() const
+	{
+		return SelectedEntityID; 
+	}
+
+	glm::vec2 Editor::GetLeftSidebarSize() const 
+	{ 
+		return LeftSidebarSize; 
+	}
+
+	glm::vec2 Editor::GetRightSidebarSize() const
+	{ 
+		return RightSidebarSize; 
+	}
+
+	glm::vec2 Editor::GetBottomBarSize() const
+	{
+		return BottomBarSize;
+	}
+
+	float Editor::GetViewportScalerX() const 
+	{ 
+		return ViewportScalers.x; 
+	}
+
+	float Editor::GetViewportScalerY() const 
+	{ 
+		return ViewportScalers.y; 
+	}
+
+	glm::vec2 Editor::GetMenuBarSize() const 
+	{ 
+		return MenuBarSize; 
+	}
+
+	glm::vec2 Editor::GetTabBarSize() const
+	{
+		return TabBarSize; 
 	}
 
 }

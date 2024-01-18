@@ -44,12 +44,12 @@ namespace LkEngine {
 		enum GizmoType
 		{
 			Translate = 7 << 0,
-			Rotate	  = 7 << 3,
-			Scale     = 7 << 6
+			Rotate = 7 << 3,
+			Scale = 7 << 6
 		};
 
 	public:
-		Editor();
+		Editor(const Ref<Window>& window);
 		~Editor() = default;
 
 		static Editor* Get() { return s_Instance; }
@@ -71,26 +71,26 @@ namespace LkEngine {
 		template<typename T>
 		void DisplayAddComponentEntry(const std::string& entryName);
 
+		void UI_SelectedEntityProperties();
 		void UI_HandleManualWindowResize();
 		void UI_SceneContent();
 		void UI_CreateMenu();
-        void UI_SelectedEntityProperties();
 		void UI_RenderSettingsWindow();
 		bool IsEntitySelected() const;
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
-		void SetUpdateWindowFlag(bool flag); 
+		void SetUpdateWindowFlag(bool flag);
 
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
 		float GetEditorWindowHeight() const;
-		uint64_t GetSelectedEntityID() const { return SelectedEntityID; }
-		glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
-		glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
-		glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
-		float GetViewportScalerX() const { return ViewportScalers.x; }
-		float GetViewportScalerY() const { return ViewportScalers.y; }
-		glm::vec2 GetMenuBarSize() const { return MenuBarSize; }
-		glm::vec2 GetTabBarSize() const { return TabBarSize; }
+		uint64_t GetSelectedEntityID() const;
+		glm::vec2 GetLeftSidebarSize() const;
+		glm::vec2 GetRightSidebarSize() const;
+		glm::vec2 GetBottomBarSize() const; 
+		float GetViewportScalerX() const; 
+		float GetViewportScalerY() const; 
+		glm::vec2 GetMenuBarSize() const; 
+		glm::vec2 GetTabBarSize() const;
 
 		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
 
@@ -110,9 +110,9 @@ namespace LkEngine {
 
 		void UpdateLeftSidebarSize(ImGuiViewport* viewport);
 		void UpdateRightSidebarSize(ImGuiViewport* viewport);
-
 		//void RenderViewport();                 // TODO
 		//void RenderViewport(s_ptr<Image> img); // TODO
+
 	public:
 		// Flag to determine if an item is currently being created
 		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window
@@ -125,14 +125,6 @@ namespace LkEngine {
 		glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
 		glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
-		glm::vec2 MenuBarSize = { 0.0f, 30.0f };
-		glm::vec2 TabBarSize = { 0.0f, 0.0f };
-		glm::vec2 BottomBarSize = { 0.0f, 0.0f };
-		glm::vec2 LeftSidebarSize = { 0.0f, 0.0f };
-		glm::vec2 RightSidebarSize = { 0.0f, 0.0f };
-		glm::vec2 BottomBarPos = { 0.0f, 0.0f };
-		glm::vec2 LeftSidebarPos = { 0.0f, 0.0f };
-		glm::vec2 RightSidebarPos = { 0.0f, 0.0f };
 
 		bool ShouldUpdateWindowSizes = true;
 
@@ -163,6 +155,8 @@ namespace LkEngine {
 		EditorCamera* m_EditorCamera = nullptr;
 		EditorTabManager* m_TabManager = nullptr;
 		ComponentEditor m_ComponentEditor;
+
+		Ref<Window> m_Window = nullptr;
 
 		WindowType m_ActiveWindowType;
 
