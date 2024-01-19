@@ -1,33 +1,32 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/VertexBuffer.h"
-#include <glad/glad.h>
+#include "VertexBuffer.h"
 
-#ifdef LK_RENDERER_API_VULKAN
-	#include "LkEngine/Platform/Vulkan/VulkanVertexBuffer.h"
-#elif defined(LK_RENDERER_API_OPENGL)
-	#include "LkEngine/Platform/OpenGL/OpenGLVertexBuffer.h"
-#endif
+#include "LkEngine/Platform/Vulkan/VulkanVertexBuffer.h"
+#include "LkEngine/Platform/OpenGL/OpenGLVertexBuffer.h"
+
+#include "RendererAPI.h"
 
 
 namespace LkEngine {
 
-
-	s_ptr<VertexBuffer> VertexBuffer::Create(const void* data, unsigned int size) 
+	Ref<VertexBuffer> VertexBuffer::Create(void* buffer, uint64_t size, VertexBufferUsage usage) 
 	{ 
-	#ifdef LK_RENDERER_API_VULKAN
-		return std::make_shared<VulkanVertexBuffer>(data, size); 
-	#elif defined(LK_RENDERER_API_OPENGL)
-		return std::make_shared<OpenGLVertexBuffer>(data, size); 
-	#endif
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::Vulkan: return Ref<VulkanVertexBuffer>::Create(buffer, size, usage);
+			case RendererAPIType::OpenGL: return Ref<OpenGLVertexBuffer>::Create(buffer, size, usage);
+		}
+		LK_CORE_ASSERT(false, "VertexBuffer::Create(data, size)    RendererAPI could not be determined");
 	}
 
-	s_ptr<VertexBuffer> VertexBuffer::Create(unsigned int size) 
+	Ref<VertexBuffer> VertexBuffer::Create(uint64_t size, VertexBufferUsage usage) 
 	{ 
-	#ifdef LK_RENDERER_API_VULKAN
-		return std::make_shared<VulkanVertexBuffer>(size); 
-	#elif defined(LK_RENDERER_API_OPENGL)
-		return std::make_shared<OpenGLVertexBuffer>(size); 
-	#endif
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::Vulkan: return Ref<VulkanVertexBuffer>::Create(size, usage);
+			case RendererAPIType::OpenGL: return Ref<OpenGLVertexBuffer>::Create(size, usage);
+		}
+		LK_CORE_ASSERT(false, "VertexBuffer::Create(data, size)    RendererAPI could not be determined");
 	}
 
 }

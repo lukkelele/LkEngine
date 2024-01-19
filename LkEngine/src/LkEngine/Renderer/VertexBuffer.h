@@ -1,36 +1,40 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Buffer.h"
 
 #include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
 
 
 namespace LkEngine {
 
-	class VertexBuffer
+	enum class VertexBufferUsage { None = 0, Static = 1, Dynamic = 2 };
+
+	class IndexBuffer;
+	class VertexBufferLayout;
+
+	class VertexBuffer : public RefCounted
 	{
 	public:
 		virtual ~VertexBuffer() = default;
 
-		static s_ptr<VertexBuffer> Create(const void* data, unsigned int size);
-		static s_ptr<VertexBuffer> Create(unsigned int size);
+		static Ref<VertexBuffer> Create(void* buffer, uint64_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
+		static Ref<VertexBuffer> Create(uint64_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
 
 		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
-		virtual void SetData(const void* data, unsigned int size) = 0;
-		virtual void SetIndexBuffer(const s_ptr<IndexBuffer> indexBuffer) = 0;
+		virtual void SetData(void* buffer, uint64_t size, uint64_t offset = 0) = 0;
+		virtual void RT_SetData(void* buffer, uint64_t size, uint64_t offset = 0) = 0;
+		virtual void SetIndexBuffer(const Ref<IndexBuffer> indexBuffer) = 0;
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 
-		s_ptr<IndexBuffer>& GetIndexBuffer() { return m_IndexBuffer; }
-		unsigned int GetID() const { return m_RendererID; }
-		VertexBufferLayout GetLayout() const { return m_BufferLayout; }
-		VertexBufferElement& GetElement(const std::string& elementName) { return m_BufferLayout.GetElement(elementName); }
+		//virtual RendererID GetRendererID() const = 0;
+		virtual uint64_t GetSize() const = 0;
 
-	protected:
-		unsigned int m_RendererID;
-		VertexBufferLayout m_BufferLayout;
-		s_ptr<IndexBuffer> m_IndexBuffer = nullptr;
+		virtual Buffer GetLocalData() = 0;
+		virtual Ref<IndexBuffer> GetIndexBuffer() = 0;
+
+		virtual VertexBufferLayout GetLayout() const = 0;
+		virtual VertexBufferLayout& GetLayout() = 0;
 	};
 
 }

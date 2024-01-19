@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
-#include <glad/glad.h>
+//#include <glad/glad.h>
 
 
 namespace LkEngine {
@@ -38,7 +38,7 @@ namespace LkEngine {
 			case ShaderDataType::Mat3:     return 4 * 3 * 3;
 			case ShaderDataType::Mat4:     return 4 * 4 * 4;
 		}
-		LK_ASSERT(false);
+		LK_CORE_ASSERT(false, "Could not get shader data type size for ShaderDataType: {}", (int)dataType);
 		return 0;
 	}
 
@@ -73,71 +73,42 @@ namespace LkEngine {
 				case ShaderDataType::Float2:  return 2;
 				case ShaderDataType::Float3:  return 3;
 				case ShaderDataType::Float4:  return 4;
+				case ShaderDataType::Mat3:    return 3 * 3;
+				case ShaderDataType::Mat4:    return 4 * 4;
 				case ShaderDataType::Int:     return 1;
 				case ShaderDataType::Int2:    return 2;
 				case ShaderDataType::Int3:    return 3;
 				case ShaderDataType::Int4:    return 4;
-				case ShaderDataType::Mat3:    return 3; 
-				case ShaderDataType::Mat4:    return 4; 
 				case ShaderDataType::Bool:    return 1;
 			}
+			LK_CORE_ASSERT(false, "GetComponentCount failed");
 			return 0;
 		}
 	};
 
 	class VertexBufferLayout
 	{
-	protected:
-		std::vector<VertexBufferElement> m_Elements;
-		unsigned int m_Stride;
-
 	public:
-		VertexBufferLayout()
-			: m_Stride(0) {}
+		VertexBufferLayout() {}
 
-		VertexBufferLayout(std::initializer_list<VertexBufferElement> elements)
+		VertexBufferLayout(const std::initializer_list<VertexBufferElement>& elements)
 			: m_Elements(elements)
 		{
 			CalculateOffsetsAndStride();
 		}
 
-		std::vector<VertexBufferElement>::iterator begin() { return m_Elements.begin(); }
-		std::vector<VertexBufferElement>::iterator end() { return m_Elements.end(); }
-		std::vector<VertexBufferElement>::const_iterator begin() const { return m_Elements.begin(); }
-		std::vector<VertexBufferElement>::const_iterator end() const { return m_Elements.end(); }
+		uint32_t GetStride() const { return m_Stride; }
+		const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }
+		uint32_t GetElementCount() const { return (uint32_t)m_Elements.size(); }
 
-		inline const std::vector<VertexBufferElement> GetElements() const& { return m_Elements; }
-		inline unsigned int GetStride() const { return m_Stride; }
-
-		// FIXME
-		VertexBufferElement GetElement(const ShaderDataMember& member)
-		{
-			switch (member)
-			{
-				case ShaderDataMember::Color:
-					//return m_Elements.;
-					break;
-			}
-		}
-
-		// FIXME
-		VertexBufferElement GetElement(const std::string& name)
-		{
-			for (auto it = begin(); it != end(); it++)
-			{
-				VertexBufferElement& element = *it;
-				std::string_view elementName = element.GetName();
-				if (elementName == name)
-					return element;
-			}
-			LOG_ERROR("Could not retrieve element by the name '{}'", name);
-			//return VertexBufferElement();
-			throw std::runtime_error("Could not retrieve VertexBufferElement");
-		}
-
+		[[nodiscard]] std::vector<VertexBufferElement>::iterator begin() { return m_Elements.begin(); }
+		[[nodiscard]] std::vector<VertexBufferElement>::iterator end() { return m_Elements.end(); }
+		[[nodiscard]] std::vector<VertexBufferElement>::const_iterator begin() const { return m_Elements.begin(); }
+		[[nodiscard]] std::vector<VertexBufferElement>::const_iterator end() const { return m_Elements.end(); }
+	private:
 		void CalculateOffsetsAndStride()
 		{
-			size_t offset = 0;
+			uint32_t offset = 0;
 			m_Stride = 0;
 			for (auto& element : m_Elements)
 			{
@@ -146,7 +117,10 @@ namespace LkEngine {
 				m_Stride += element.Size;
 			}
 		}
-
+	private:
+		std::vector<VertexBufferElement> m_Elements;
+		uint32_t m_Stride = 0;
 	};
+
 
 }
