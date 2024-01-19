@@ -5,18 +5,15 @@
 
 namespace LkEngine {
 
-    class UniformBuffer
+    class UniformBuffer : public RefCounted
     {
     public:
-        virtual ~UniformBuffer();
+        virtual ~UniformBuffer() = default;
 
-        static Ref<UniformBuffer> Create(uint32_t size, uint32_t binding);
+        static Ref<UniformBuffer> Create(uint64_t size);
 
-        virtual void SetData(const void* data, uint32_t size, uint32_t offset = 0) = 0;
-        virtual void RT_SetData(const void* data, uint32_t size, uint32_t offset) = 0;
-
-    private:
-        uint32_t m_RendererID = 0;
+        virtual void SetData(const void* data, uint64_t size, uint64_t offset = 0) = 0;
+        virtual void RT_SetData(const void* data, uint64_t size, uint64_t offset) = 0;
     };
 
 }

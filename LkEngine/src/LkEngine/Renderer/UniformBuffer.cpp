@@ -9,12 +9,12 @@
 
 namespace LkEngine {
 
-	Ref<UniformBuffer> UniformBuffer::Create(uint32_t size, uint32_t binding)
+	Ref<UniformBuffer> UniformBuffer::Create(uint64_t size)
 	{
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLUniformBuffer>::Create(size, binding);
-			case RendererAPIType::Vulkan: return Ref<VulkanUniformBuffer>::Create(size, binding);
+			case RendererAPIType::Vulkan: return Ref<VulkanUniformBuffer>::Create(size);
+			case RendererAPIType::OpenGL: return Ref<OpenGLUniformBuffer>::Create(size);
 		}
 		LK_CORE_ASSERT(false, "UniformBuffer::Create(), RendererAPI could not be determined");
 	}
