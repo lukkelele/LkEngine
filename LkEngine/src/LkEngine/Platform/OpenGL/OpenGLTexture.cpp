@@ -5,37 +5,13 @@
 
 #include "LkEngine/Core/Application.h"
 
+#include <stb_image_resize2.h>
+
 
 namespace LkEngine {
 
-	static GLenum ImageFormatToGLDataFormat(ImageFormat format)
-	{
-		switch (format)
-		{
-			case ImageFormat::RGB:  
-			case ImageFormat::RGB8:    return GL_RGB;
-			case ImageFormat::RGBA:   
-			case ImageFormat::RGBA8:   
-			case ImageFormat::RGBA32F: return GL_RGBA;
-		}
-		return 0;
-	}
-
-	static GLenum ImageFormatToGLInternalFormat(ImageFormat format)
-	{
-		switch (format)
-		{
-			case ImageFormat::RGB:     return GL_RGB32F;
-			case ImageFormat::RGB8:    return GL_RGB8;
-			case ImageFormat::RGBA8:   return GL_RGBA8;
-			case ImageFormat::RGBA:    return GL_RGBA8;
-			case ImageFormat::RGBA32F: return GL_RGBA32F;
-		}
-		return 0;
-	}
-
-
 	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
+		: m_Specification(specification)
 	{
 		ImageSpecification imageSpec;
 		imageSpec.Path = specification.Path;
@@ -51,8 +27,9 @@ namespace LkEngine {
 			int width, height, channels;
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
 
-			m_Image = Image::Create(imageSpec, data);
 			stbi_image_free(data);
+
+			m_Image = Image::Create(imageSpec, data);
 		}
 		else
 		{
@@ -88,26 +65,6 @@ namespace LkEngine {
 #endif
 	}
 
-
-	OpenGLTexture::OpenGLTexture(const std::string& filePath)
-	{
-		LOG_TRACE("OpenGLTexture created: {}", filePath);
-		m_FilePath = filePath;
-		m_Name = File::ExtractFilenameWithoutExtension(filePath);
-
-		stbi_set_flip_vertically_on_load(1);
-		int width, height, channels;
-		stbi_uc* data = stbi_load(filePath.c_str(), &width, &height, &channels, 4);
-
-		ImageSpecification imageSpec;
-		imageSpec.Width = width;
-		imageSpec.Height = height;
-		m_Width = width;
-		m_Height = height;
-		imageSpec.Path = filePath;
-		m_Image = Image::Create(imageSpec, data);
-	}
-
 	OpenGLTexture::OpenGLTexture(const OpenGLTexture& texture)
 		: OpenGLTexture(texture.GetSpecification())
 	{
@@ -120,13 +77,17 @@ namespace LkEngine {
 
 	void OpenGLTexture::Bind(unsigned int slot /*= 0*/) 
 	{
+		if (m_InTextureArray)
+			return;
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
-		//m_Loaded = true;
 	}
 
 	void OpenGLTexture::Unbind(unsigned slot)
 	{
+		if (m_InTextureArray)
+			return;
+		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 		//m_Loaded = false;
 	}
@@ -143,9 +104,19 @@ namespace LkEngine {
 
 	void OpenGLTexture::SetData(void* data, uint32_t size)
 	{
-		GLenum dataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
-		uint32_t bpp = ImageFormatToGLDataFormat(m_Specification.Format) == GL_RGBA ? 4 : 3;
+		GLenum dataFormat = GLUtils::ImageFormatToGLDataFormat(m_Specification.Format);
+		uint32_t bpp = GLUtils::ImageFormatToGLDataFormat(m_Specification.Format) == GL_RGBA ? 4 : 3;
 		glTextureSubImage2D(m_Image->GetRendererID(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
+	}
+
+	uint32_t OpenGLTexture::GetMipLevelCount() const
+	{
+		return 1;
+	}
+
+	uint64_t OpenGLTexture::GetARBHandle() const
+	{ 
+		return glGetTextureHandleARB(m_Image->GetRendererID()); 
 	}
 
 	void OpenGLTexture::Lock()
@@ -169,34 +140,21 @@ namespace LkEngine {
 		m_Loaded = false;
 	}
 
-	s_ptr<Image> OpenGLTexture::GetImage()
+	Ref<Image> OpenGLTexture::GetImage()
 	{
 		return m_Image;
+	}
+
+	void OpenGLTexture::Resize(uint32_t width, uint32_t height)
+	{
+		m_Image->Resize(width, height);
 	}
 
 	//=====================================================
 	// OpenGLTexture 2D
 	//=====================================================
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& filePath)
-	{
-		LOG_TRACE("OpenGLTexture2D created: {}", filePath);
-		m_FilePath = filePath;
-		stbi_set_flip_vertically_on_load(1);
-		int width, height, channels;
-		stbi_uc* data = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-
-		ImageSpecification imageSpec;
-		imageSpec.Width = width;
-		imageSpec.Height = height;
-		m_Width = width;
-		m_Height = height;
-		m_Name = File::ExtractFilenameWithoutExtension(filePath);
-
-		m_Image = Image::Create(imageSpec, data);
-		stbi_image_free(data);
-	}
-
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification, Buffer imageData)
+		: m_Specification(specification)
 	{
 		ImageSpecification imageSpec;
 		imageSpec.Name = specification.Name;
@@ -204,20 +162,18 @@ namespace LkEngine {
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
 		imageSpec.Format = specification.Format;
-		imageSpec.Filter = specification.Filter;
-		imageSpec.Wrap = specification.Wrap;
+		imageSpec.Filter = specification.SamplerFilter;
+		imageSpec.Wrap = specification.SamplerWrap;
 
-		m_Name = specification.Name;
-		if (specification.Name.empty())
-			m_Name = specification.Path;
-
+        //uint64_t memorySize = Image::GetMemorySize(specification.Format, specification.Width, specification.Height);
+		//imageSpec.Size = memorySize;
+		imageSpec.Size = imageData.GetSize();
+		LK_CORE_WARN_TAG("OpenGLTexture2D", "imageSpec.Size={}", imageSpec.Size);
 		m_Image = Image::Create(imageSpec, imageData);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
 		: m_Specification(specification)
-		, m_Width(specification.Width)
-		, m_Height(specification.Height)
 	{
 		ImageSpecification imageSpec;
 		imageSpec.Name = specification.Name;
@@ -225,12 +181,8 @@ namespace LkEngine {
 		imageSpec.Height = specification.Height;
 		imageSpec.Path = specification.Path;
 		imageSpec.Format = specification.Format;
-		imageSpec.Filter = specification.Filter;
-		imageSpec.Wrap = specification.Wrap;
-
-		m_Name = specification.Name;
-		if (specification.Name.empty())
-			m_Name = specification.Path;
+		imageSpec.Filter = specification.SamplerFilter;
+		imageSpec.Wrap = specification.SamplerWrap;
 
 		// Try to read data from path
 		if (specification.Path.empty() == false)
@@ -240,9 +192,12 @@ namespace LkEngine {
 
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
             uint32_t memorySize = Image::GetMemorySize(specification.Format, specification.Width, specification.Height);
-
-			imageSpec.Width = width;
-			imageSpec.Height = height;
+			imageSpec.Size = (uint64_t)width * (uint64_t)height * (uint64_t)channels;
+			if (imageSpec.Size != memorySize)
+			{
+				data = MemoryUtils::ResizeImageData(data, memorySize, width, height, specification.Width, specification.Height, STBIR_RGBA);
+				//LK_CORE_DEBUG_TAG("Image", "Resized image ({}, {}) -> ({}, {})", width, height, specification.Width, specification.Height);
+			}
 			m_Image = Image::Create(imageSpec, data);
 		}
 		else
@@ -255,12 +210,16 @@ namespace LkEngine {
 
 	void OpenGLTexture2D::Bind(unsigned int slot /*= 0*/)
 	{
+		if (m_InTextureArray)
+			return;
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
 	}
 
 	void OpenGLTexture2D::Unbind(unsigned slot)
 	{
+		if (m_InTextureArray)
+			return;
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 	}
@@ -275,13 +234,11 @@ namespace LkEngine {
 		return m_Image->GetRendererID();
 	}
 
-	// TODO: Remove this ?
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
-		GLenum dataFormat = ImageFormatToGLDataFormat(m_Specification.Format);
+		GLenum dataFormat = GLUtils::ImageFormatToGLDataFormat(m_Specification.Format);
 		uint32_t bpp = dataFormat == GL_RGBA ? 4 : 3;
-		//glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
-		glTextureSubImage2D(m_Image->GetRendererID(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(m_Image->GetRendererID(), 0, 0, 0, m_Specification.Width, m_Specification.Height, dataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OpenGLTexture2D::Lock()
@@ -305,9 +262,24 @@ namespace LkEngine {
 		m_Loaded = false;
 	}
 
-	s_ptr<Image> OpenGLTexture2D::GetImage()
+	Ref<Image> OpenGLTexture2D::GetImage()
 	{
 		return m_Image;
+	}
+
+	uint32_t OpenGLTexture2D::GetMipLevelCount() const
+	{
+		return 1;
+	}
+
+	uint64_t OpenGLTexture2D::GetARBHandle() const
+	{ 
+		return glGetTextureHandleARB(m_Image->GetRendererID()); 
+	}
+
+	void OpenGLTexture2D::Resize(uint32_t width, uint32_t height)
+	{
+		m_Image->Resize(width, height);
 	}
 
 }
