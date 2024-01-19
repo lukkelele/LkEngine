@@ -21,7 +21,7 @@ namespace LkEngine {
 		mutable std::atomic<uint32_t> m_RefCount = 0;
 	};
 
-	namespace RefUtils {
+	namespace _RefInternal {
 		void AddToLiveReferences(void* instance);
 		void RemoveFromLiveReferences(void* instance);
 		bool IsLive(void* instance);
@@ -45,7 +45,6 @@ namespace LkEngine {
 			: m_Instance(instance)
 		{
 			//static_assert(std::im_base_of<RefCounted, T>::value, "Class is not RefCounted!");
-
 			IncRef();
 		}
 
@@ -147,16 +146,22 @@ namespace LkEngine {
 		template<typename... Args>
 		static Ref<T> Create(Args&&... args)
 		{
-		#ifdef LK_PLATFORM_WINDOWS
 			return Ref<T>(new T(std::forward<Args>(args)...));
 			//return Ref<T>(new(typeid(T).name()) T(std::forward<Args>(args)...));
-		#else
-			return Ref<T>(new T(std::forward<Args>(args)...));
-		#endif
 		}
 
 		bool operator==(const Ref<T>& other) const { return m_Instance == other.m_Instance; }
 		bool operator!=(const Ref<T>& other) const { return !(*this == other); }
+
+		bool operator==(T& other) const { return (*this) == other; }
+		bool operator==(const T& other) const { return (*this) == other; }
+
+		bool IsNullptr() const
+		{
+			if (m_Instance == nullptr)
+				return true;
+			return false;
+		}
 
 		bool EqualsObject(const Ref<T>& other)
 		{
@@ -171,7 +176,7 @@ namespace LkEngine {
 			if (m_Instance != nullptr)
 			{
 				m_Instance->IncRefCount();
-				RefUtils::AddToLiveReferences((void*)m_Instance);
+				_RefInternal::AddToLiveReferences((void*)m_Instance);
 			}
 		}
 
@@ -184,7 +189,7 @@ namespace LkEngine {
 				if (m_Instance->GetRefCount() == 0)
 				{
 					delete m_Instance;
-					RefUtils::RemoveFromLiveReferences((void*)m_Instance);
+					_RefInternal::RemoveFromLiveReferences((void*)m_Instance);
 					m_Instance = nullptr;
 				}
 			}
@@ -193,6 +198,7 @@ namespace LkEngine {
 	private:
 		template<class T2>
 		friend class Ref;
+
 		mutable T* m_Instance;
 	};
 	
