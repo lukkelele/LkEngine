@@ -9,33 +9,43 @@ namespace LkEngine {
 	{
 	public:
 		OpenGLImage(ImageSpecification spec, Buffer buffer);
-		OpenGLImage(ImageSpecification spec, const void* data = nullptr);
+		OpenGLImage(ImageSpecification spec, void* data = nullptr);
 		~OpenGLImage();
 
-		void Invalidate();
-		void Resize(uint32_t width, uint32_t height);
-		void SetData(const void* data);
+		void Invalidate() override;
+		void RT_Invalidate() override;
 
-		RendererID& GetRendererID() { return m_RendererID; }
-		RendererID GetRendererID() const { return m_RendererID; }
+		void Resize(uint32_t width, uint32_t height) override;
+		void SetData(const void* data) override;
 
-		Buffer GetBuffer() const { return m_ImageData; }
-		Buffer& GetBuffer() { return m_ImageData; }	
-		uint32_t GetWidth() const { return m_Specification.Width; }
-		uint32_t GetHeight() const { return m_Specification.Height; }
-		int64_t GetImageFormat(ImageFormat fmt);
-		const ImageSpecification GetImageSpecification() const { return m_Specification; }
+		RendererID& GetRendererID() override { return m_RendererID; }
+		RendererID GetRendererID() const override { return m_RendererID; }
+
+		Buffer GetBuffer() const override { return m_ImageData; }
+		Buffer& GetBuffer() override { return m_ImageData; }	
+		uint32_t GetWidth() const override { return m_Specification.Width; }
+		uint32_t GetHeight() const override { return m_Specification.Height; }
+
+		int64_t GetImageFormat(ImageFormat fmt) override;
+
+		const ImageSpecification GetSpecification() const { return m_Specification; }
+		ImageSpecification& GetSpecification() { return m_Specification; }
+
+		uint64_t GetARBHandle() const { return m_HandleARB; } // TODO: Remove
 
 	private:
-		void Release();
-		void AllocateMemory(uint64_t size);
+		void Release() override;
+		void AllocateMemory(uint64_t size) override;
 
 	private:
 		RendererID m_RendererID = 0;
+		uint64_t m_HandleARB = 0;
+
 		ImageSpecification m_Specification;
-		uint32_t m_Width, m_Height;
 		std::string m_FilePath;
+
 		Buffer m_ImageData;
+
 		glm::vec4 m_TintColor = Color::RGBA::Transparent;
 	};
 
