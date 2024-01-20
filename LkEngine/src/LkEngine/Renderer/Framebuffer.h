@@ -6,6 +6,43 @@
 
 namespace LkEngine {
 
+	class Framebuffer;
+
+	enum class FramebufferBlendMode
+	{
+		None = 0,
+		OneZero,
+		SrcAlphaOneMinusSrcAlpha,
+		Additive,
+		Zero_SrcColor
+	};
+
+	enum class AttachmentLoadOp
+	{
+		Inherit = 0, Clear = 1, Load = 2
+	};
+
+	struct FramebufferTextureSpecification
+	{
+		FramebufferTextureSpecification() = default;
+		FramebufferTextureSpecification(ImageFormat format) : Format(format) {}
+
+		ImageFormat Format;
+		bool Blend = true;
+		FramebufferBlendMode BlendMode = FramebufferBlendMode::SrcAlphaOneMinusSrcAlpha;
+		AttachmentLoadOp LoadOp = AttachmentLoadOp::Inherit;
+		// TODO: filtering/wrap
+	};
+
+	struct FramebufferAttachmentSpecification
+	{
+		FramebufferAttachmentSpecification() = default;
+		FramebufferAttachmentSpecification(const std::initializer_list<FramebufferTextureSpecification>& attachments)
+			: Attachments(attachments) {}
+
+		std::vector<FramebufferTextureSpecification> Attachments;
+	};
+
 	struct FramebufferSpecification
 	{
 		float Scale = 1.0f;
@@ -16,25 +53,51 @@ namespace LkEngine {
 		bool ClearColorOnLoad = true;
 		bool ClearDepthOnLoad = true;
 
+		uint32_t Samples = 1;
+
+		FramebufferAttachmentSpecification Attachments;
+		FramebufferBlendMode BlendMode = FramebufferBlendMode::None;
+
+		bool SwapChainTarget = false; // SwapChainTarget
+		bool Transfer = false; // Transfer operation flag
+		bool Blend = true;
+
+		// Note: these are used to attach multi-layered color/depth images 
+		Ref<Image> ExistingImage;
+		std::vector<uint32_t> ExistingImageLayers;
+		
+		std::map<uint32_t, Ref<Image>> ExistingImages;
+
+		Ref<Framebuffer> ExistingFramebuffer;
+
+		std::string DebugName;
+
 		FramebufferSpecification() = default;
 	};
 
-	class Framebuffer
+	class Framebuffer : public RefCounted
 	{
 	public:
 		virtual ~Framebuffer() = default;
 
-		static s_ptr<Framebuffer> Create(const FramebufferSpecification& framebufferSpecification);
+		virtual Ref<Image> GetImage(uint32_t attachmentIndex = 0) const = 0;
+		virtual Ref<Image> GetDepthImage() const = 0;
+		virtual size_t GetColorAttachmentCount() const = 0;
+		virtual bool HasDepthAttachment() const = 0;
 
-		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
 		virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) = 0;
-		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const = 0;
+		virtual void AddResizeCallback(const std::function<void(Ref<Framebuffer>)>& func) = 0;
 
+		virtual const FramebufferSpecification& GetSpecification() const = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
-		virtual s_ptr<Image> GetImage(uint32_t attachmentIndex = 0) const = 0;
-		virtual const FramebufferSpecification& GetSpecification() const = 0;
+
+		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const = 0;
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
+
+		static Ref<Framebuffer> Create(const FramebufferSpecification& framebufferSpecification);
+
 	};
 
 
