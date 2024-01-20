@@ -20,7 +20,11 @@ namespace LkEngine {
 
     void PhysicsSystem::Simulate(Timestep ts)
     {
-        //m_PhysicsAPIType;
+        // 2D Physics
+		static signed int velocityIterations = 20;
+		static signed int positionIterations = 8;
+	    auto& world = Scene::GetActiveScene()->GetBox2DWorld();
+	    world.World->Step((1.0f / 60.0f), velocityIterations, positionIterations);
     }
 
 
