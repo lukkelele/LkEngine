@@ -1,36 +1,33 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Image.h"
 
-#ifdef LK_RENDERER_API_VULKAN
-	#include "LkEngine/Platform/Vulkan/VulkanImage.h"
-#elif defined (LK_RENDERER_API_OPENGL)
-	#include "LkEngine/Platform/OpenGL/OpenGLImage.h"
-#endif
+#include "LkEngine/Platform/Vulkan/VulkanImage.h"
+#include "LkEngine/Platform/OpenGL/OpenGLImage.h"
+
+#include "LkEngine/Renderer/RendererAPI.h"
+
 
 namespace LkEngine {
 
-	s_ptr<Image> Image::Create(ImageSpecification spec, Buffer buffer)
+	Ref<Image> Image::Create(ImageSpecification spec, Buffer buffer)
 	{
-	#ifdef LK_RENDERER_API_VULKAN
-		return std::make_shared<VulkanImage>(spec, buffer);
-	#elif defined (LK_RENDERER_API_OPENGL)
-		return std::make_shared<OpenGLImage>(spec, buffer);
-	#else
-		LK_ASSERT(false);
-		return nullptr;
-	#endif
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
+			case RendererAPIType::OpenGL: return Ref<OpenGLImage>::Create(spec, buffer);
+			case RendererAPIType::None:   return nullptr;
+		}
 	}
 
-	s_ptr<Image> Image::Create(ImageSpecification spec, const void* data)
+	Ref<Image> Image::Create(ImageSpecification spec, void* buffer)
 	{
-	#ifdef LK_RENDERER_API_VULKAN
-		return std::make_shared<VulkanImage>(spec, data);
-	#elif defined (LK_RENDERER_API_OPENGL)
-		return std::make_shared<OpenGLImage>(spec, data);
-	#else
-		LK_ASSERT(false);
-		return nullptr;
-	#endif
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
+			case RendererAPIType::OpenGL: return Ref<OpenGLImage>::Create(spec, buffer);
+			case RendererAPIType::None:   return nullptr;
+		}
+		LK_CORE_ASSERT(false, "No RenderAPI detected");
 	}
 	
 	uint32_t Image::BytesPerPixel(ImageFormat format)
@@ -65,7 +62,7 @@ namespace LkEngine {
 			case ImageFormat::RGBA16F: return 2 * 4;
 			case ImageFormat::RGBA32F: return 4 * 4;
 		}
-		LK_ASSERT(false);
+		LK_CORE_ASSERT(false, "GetFormatBPP failed, format not recognized!");
 		return 0;
 	}
 
@@ -86,5 +83,24 @@ namespace LkEngine {
 		return false;
 	}
 
+	namespace Utils {
+
+		std::string ImageFormatToString(const ImageFormat format)
+		{
+			switch (format)
+			{
+				case ImageFormat::RGB:               return "RGB";
+				case ImageFormat::RGBA:              return "RGBA";
+				case ImageFormat::RGBA8:             return "RGBA8";
+				case ImageFormat::RGBA16F:           return "RGBA16F";
+				case ImageFormat::RGBA32F:           return "RGBA32F";
+				case ImageFormat::SRGB:              return "SRGB";
+				case ImageFormat::SRGBA:             return "SRGBA";
+				case ImageFormat::DEPTH24STENCIL8:   return "DEPTH24STENCIL8";
+				case ImageFormat::RED32F:            return "RED32F";
+			}
+			return "";
+		}
+	}
 
 }
