@@ -1,24 +1,32 @@
 #include "LKpch.h"
 #include "IndexBuffer.h"
-#include "Renderer.h"
 
-#ifdef LK_RENDERER_API_OPENGL
-	#include "LkEngine/Platform/OpenGL/OpenGLIndexBuffer.h"
-#elif defined(LK_RENDERER_API_VULKAN)
-	#include "LkEngine/Platform/Vulkan/VulkanIndexBuffer.h"
-#endif
+#include "RendererAPI.h"
+
+#include "LkEngine/Platform/OpenGL/OpenGLIndexBuffer.h"
+#include "LkEngine/Platform/Vulkan/VulkanIndexBuffer.h"
+
 
 namespace LkEngine {
 
-	s_ptr<IndexBuffer> IndexBuffer::Create(const void* data, unsigned int count)
+	Ref<IndexBuffer> IndexBuffer::Create(void* buffer, uint64_t size)
 	{ 
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return std::make_shared<OpenGLIndexBuffer>(data, count);
-			case RendererAPIType::Vulkan: return nullptr;
+			case RendererAPIType::Vulkan: return Ref<VulkanIndexBuffer>::Create(buffer, size);
+			case RendererAPIType::OpenGL: return Ref<OpenGLIndexBuffer>::Create(buffer, size);
 			case RendererAPIType::None:   return nullptr;
 		}
 	}
 
+	Ref<IndexBuffer> IndexBuffer::Create(uint64_t size)
+	{ 
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::Vulkan: return Ref<VulkanIndexBuffer>::Create(size);
+			case RendererAPIType::OpenGL: return Ref<OpenGLIndexBuffer>::Create(size);
+			case RendererAPIType::None:   return nullptr;
+		}
+	}
 
 }

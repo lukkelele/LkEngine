@@ -5,20 +5,22 @@
 
 namespace LkEngine {
 
-	class IndexBuffer
+	class IndexBuffer : public RefCounted
 	{	
 	public:
 		virtual ~IndexBuffer() = default;
 
-		static s_ptr<IndexBuffer> Create(const void* data, unsigned int count);
+		virtual void SetData(void* buffer, uint64_t size, uint64_t offset = 0) = 0;
+
+		virtual uint32_t GetCount() const = 0;
+		virtual uint64_t GetSize() const = 0;
+
+		virtual Buffer GetLocalData() = 0;
 
 		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
-		virtual unsigned int GetCount() const = 0;
-		virtual void SetData(const void* data, uint32_t size, uint32_t offset = 0) = 0;
-		virtual uint32_t GetSize() const = 0;
-		virtual unsigned int GetID() const = 0;
-		virtual Buffer GetLocalData() = 0;
+
+		static Ref<IndexBuffer> Create(uint64_t size);
+		static Ref<IndexBuffer> Create(void* data, uint64_t size = 0);
 	};
 
 }
