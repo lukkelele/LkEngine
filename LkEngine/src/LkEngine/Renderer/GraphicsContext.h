@@ -2,64 +2,31 @@
 
 #include "LkEngine/Core/Base.h"
 
-#include <GLFW/glfw3.h>
+#include "BlendingSpecification.h"
 
-#ifdef LK_RENDERER_API_OPENGL
-//#include "LkEngine/Platform/OpenGL/LkOpenGL.h"
-#endif
-
+struct GLFWwindow;
 
 namespace LkEngine {
 
-    // Forward declaration
     class Window;
 
-    enum class SourceBlendFunction
-    {
-        Zero = 0,
-        One,
-        Color,
-        Alpha,
-        One_Minus_DestinationAlpha
-    };
-
-    enum class DestinationBlendFunction 
-    {
-        Zero = 0,
-        One,
-        Alpha,
-        Color,
-        One_Minus_SourceAlpha,
-    };
-
-    struct BlendFunction
-    {
-        SourceBlendFunction Source;
-        DestinationBlendFunction Destination;
-        BlendFunction() 
-            : Source(SourceBlendFunction::Alpha), Destination(DestinationBlendFunction::One_Minus_SourceAlpha) {}
-        BlendFunction(const SourceBlendFunction& source, const DestinationBlendFunction& destination)
-            : Source(source), Destination(destination) {}
-    };
-
-    class GraphicsContext
+    class GraphicsContext : public RefCounted
     {
     public:
         enum class Profile { Core = 0, Compability = 1 };
+
     public:
         virtual ~GraphicsContext() = default;
 
-        static GraphicsContext* Get() { return m_Instance; }
-        static s_ptr<GraphicsContext> Create(Window* window, const std::string& shaderVersion);
+        static Ref<GraphicsContext> Get() { return m_Instance; }
+        static Ref<GraphicsContext> Create(Window* window);
+
         static void SetProfile(const Profile& profile);
         static void SetVersion(int majorVersion, int minorVersion);
 
         virtual void Init(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) = 0;
         virtual void Destroy() = 0;
         virtual GLFWwindow* GetGlfwWindow() = 0;
-        virtual void BeginImGuiFrame() = 0;
-        virtual void EndImGuiFrame() = 0;
-        virtual void InitImGui(const std::string& glslVersion) = 0;
         virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) = 0;
         virtual void SetDepthEnabled(bool enabled) = 0;
         virtual void SetBlendingEnabled(bool enabled) = 0;
@@ -67,12 +34,15 @@ namespace LkEngine {
         virtual void SetSourceBlendFunction(const SourceBlendFunction& srcFunc) = 0;
         virtual void SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc) = 0;
         virtual void UpdateResolution(uint16_t width, uint16_t height) = 0;
-        virtual std::string GetSourceBlendFunctionName() = 0;
-        virtual std::string GetDestinationBlendFunctionName() = 0;
-        virtual std::string GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc) = 0;
-        virtual std::string GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc) = 0;
 
-        virtual void SetDarkTheme(); // REMOVE
+        virtual void SetName(std::string_view name) = 0;
+        virtual const std::string GetName() const = 0;
+
+        virtual std::string GetCurrentSourceBlendFunctionName() const = 0;
+        virtual std::string GetCurrentDestinationBlendFunctionName() const = 0;
+
+        static std::string GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc);
+        static std::string GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc);
 
     protected:
         static void HandleViewportEvents();
@@ -81,7 +51,7 @@ namespace LkEngine {
         virtual bool& GetBlending() = 0;
     
     protected:
-        inline static GraphicsContext* m_Instance = nullptr;
+        inline static Ref<GraphicsContext> m_Instance = nullptr;
 
         friend class Editor;
     };
