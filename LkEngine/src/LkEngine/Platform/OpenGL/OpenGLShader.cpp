@@ -36,32 +36,71 @@ namespace LkEngine {
 		GL_CALL(glUseProgram(0));
 	}
 
-	void OpenGLShader::SetUniform1i(const std::string& name, int value)
+	void OpenGLShader::Set(const std::string& name, int value)
 	{
-		//LOG_DEBUG("GetUniformLocation({}) == {}   value == {}", name, GetUniformLocation(name), value);
+		GL_CALL(glUseProgram(m_RendererID));
 		GL_CALL(glUniform1i(GetUniformLocation(name), value));
 	}
 
-	void OpenGLShader::SetUniform1f(const std::string& name, float value)
+	void OpenGLShader::Set(const std::string& name, float value)
 	{
+		GL_CALL(glUseProgram(m_RendererID));
 		GL_CALL(glUniform1f(GetUniformLocation(name), value));
 	}
 
-	void OpenGLShader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+	void OpenGLShader::Set(const std::string& name, uint32_t value)
 	{
-		int location = GetUniformLocation(name);
-		GL_CALL(glUniform4f(location, v0, v1, v2, v3));
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniform1i(GetUniformLocation(name), value));
 	}
 
-	void OpenGLShader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
+	void OpenGLShader::Set(const std::string& name, const glm::vec4& value)
 	{
-		int location = GetUniformLocation(name);
-		GL_CALL(glUniform4f(location, vec4.x, vec4.y, vec4.z, vec4.w));
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w));
 	}
 
-	void OpenGLShader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
+	void OpenGLShader::Set(const std::string& name, bool value)
 	{
-		GL_CALL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniform1i(GetUniformLocation(name), (int)value));
+	}
+
+	void OpenGLShader::Set(const std::string& name, const glm::vec2& value)
+	{
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0]));
+	}
+
+	void OpenGLShader::Set(const std::string& name, const glm::vec3& value)
+	{
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0]));
+	}
+
+	void OpenGLShader::Set(const std::string& name, const glm::mat4& value)
+	{
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]));
+	}
+
+	void OpenGLShader::Set(const std::string& name, const glm::ivec2& value)
+	{
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniform2i(GetUniformLocation(name), value.x, value.y));
+	}
+
+	void OpenGLShader::Set(const std::string& name, const glm::ivec3& value)
+	{
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniform3i(GetUniformLocation(name), value.x, value.y, value.z));
+	}
+
+	void OpenGLShader::Set(const std::string& name, const glm::ivec4& value)
+	{
+		GL_CALL(glUseProgram(m_RendererID));
+		//GL_CALL(glUniformHandleui64ARB(GetUniformLocation(name), m_HandleARB));
+		GL_CALL(glUniform4i(GetUniformLocation(name), value.x, value.y, value.z, value.w));
 	}
 
 	int OpenGLShader::GetUniformLocation(const std::string& name)
@@ -72,12 +111,13 @@ namespace LkEngine {
 		int location;
 		GL_CALL(location = glGetUniformLocation(m_RendererID, name.c_str()));
 		if (location == -1)
-			LOG_WARN("[SHADER] Warning: uniform {0} isn't in use", name);
+			LK_CORE_WARN("[SHADER] Warning: uniform {0} isn't in use", name);
 
 		m_UniformLocationCache[name] = location;
-		LOG_DEBUG("{} in uniform cache --> m_UniformLocationCache[{}] == {}", name, name, location);
+		LK_CORE_DEBUG("{} in uniform cache --> m_UniformLocationCache[{}] == {}", name, name, location);
 		return location;
 	}
+
 
 	unsigned int OpenGLShader::CompileShader(unsigned int type, const std::string& source)
 	{
@@ -95,7 +135,8 @@ namespace LkEngine {
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 			char* message = (char*)_malloca(length * sizeof(char));
 			glGetShaderInfoLog(id, length, &length, message);
-			printf("Failed to compile %s shader!\n%s", type == GL_VERTEX_SHADER ? "vertex" : "fragment", message);
+			LK_CORE_FATAL_TAG("OpenGLShader", "Failed to compile {} shader, \"{}\"", (type == GL_VERTEX_SHADER ? "vertex" : "fragment"), message);
+
 			glDeleteShader(id);
 			return 0;
 		}
