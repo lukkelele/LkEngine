@@ -31,30 +31,56 @@ namespace LkEngine {
 	{
 	}
 
-	void VulkanShader::SetUniform1i(const std::string& name, int value)
+	void VulkanShader::Set(const std::string& name, int value)
 	{
 	}
 
-	void VulkanShader::SetUniform1f(const std::string& name, float value)
+	void VulkanShader::Set(const std::string& name, bool value)
 	{
 	}
 
-	void VulkanShader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+	void VulkanShader::Set(const std::string& name, float value)
 	{
 	}
 
-	void VulkanShader::SetUniform4f(const std::string& name, const glm::vec4& vec4)
+	void VulkanShader::Set(const std::string& name, uint32_t value)
 	{
 	}
 
-	void VulkanShader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
+	void VulkanShader::Set(const std::string& name, const glm::vec2& value)
 	{
 	}
 
+	void VulkanShader::Set(const std::string& name, const glm::vec3& value)
+	{
+	}
+
+	void VulkanShader::Set(const std::string& name, const glm::vec4& value)
+	{
+	}
+
+	void VulkanShader::Set(const std::string& name, const glm::mat4& value)
+	{
+	}
+
+	void VulkanShader::Set(const std::string& name, const glm::ivec2& value)
+	{
+	}
+
+	void VulkanShader::Set(const std::string& name, const glm::ivec3& value)
+	{
+	}
+
+	void VulkanShader::Set(const std::string& name, const glm::ivec4& value)
+	{
+	}
+
+#if 0
 	int VulkanShader::GetUniformLocation(const std::string& name)
 	{
 		return 0;
 	}
+#endif
 
 	unsigned int VulkanShader::CompileShader(unsigned int type, const std::string& source)
 	{
@@ -64,6 +90,16 @@ namespace LkEngine {
 	unsigned int VulkanShader::CreateShader(const std::string& vertexVulkanShader, const std::string& fragmentVulkanShader)
 	{
 		return 0;
+	}
+
+	std::vector<VkDescriptorSetLayout> VulkanShader::GetAllDescriptorSetLayouts()
+	{
+		std::vector<VkDescriptorSetLayout> result;
+		result.reserve(m_DescriptorSetLayouts.size());
+		for (auto& layout : m_DescriptorSetLayouts)
+			result.emplace_back(layout);
+
+		return result;
 	}
 
 }
