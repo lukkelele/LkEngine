@@ -4,6 +4,7 @@
 
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/Renderer/SceneRenderer.h"
 
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
@@ -13,7 +14,9 @@
 #include "LkEngine/UI/Property.h"
 
 #include "LkEngine/ImGui/ImGuiUtilities.h"
-#include "Platform/Windows/Windows_Window.h"
+
+
+#include "LkEngine/Renderer/TextureLibrary.h"
 
 
 namespace LkEngine {
@@ -30,21 +33,20 @@ namespace LkEngine {
 	static glm::vec2 RightSidebarPos = { 0.0f, 0.0f };
 
 
-	Editor::Editor(const Ref<Window>& window)
+	Editor::Editor()
 		: m_Scene(nullptr)
 		, m_ActiveWindowType(WindowType::None)
 	{
 		s_Instance = this;
-		m_ShowStackTool = true;
+		m_ShowStackTool = false;
 		m_ActiveWindowType = WindowType::Viewport;
 
-		//Ref<Window> window = Ref<Windows_Window>();
-		//auto window = Ref<Windows_Window>();
-		m_Window = window;
+		Window& window = Application::Get()->GetWindow();
+		m_Window = &window;
 		LK_CORE_ASSERT(m_Window != nullptr, "Window is nullptr");
 
 		m_ViewportBounds[0] = { 0, 0 };
-		m_ViewportBounds[1] = { window->GetViewportWidth(), window->GetViewportHeight()};
+		m_ViewportBounds[1] = { window.GetViewportWidth(), window.GetViewportHeight() };
 
 		m_SecondViewportBounds[0] = { 0, 0 };
 		m_SecondViewportBounds[1] = { 0, 0 };
@@ -75,12 +77,13 @@ namespace LkEngine {
 		m_Window->SetWidth(EditorWindowSize.x);
 		m_Window->SetHeight(EditorWindowSize.y);
 
-		m_EditorCamera = new EditorCamera();
+		m_EditorCamera = Ref<EditorCamera>::Create(60.0f, Window::Get().GetWidth(), Window::Get().GetHeight(), 0.10f, 2400.0f);
+		m_EditorCamera->SetPosition({ -650, -100, -200 });
 		//m_EditorCamera->SetOrthographic(m_Window->GetWidth(), m_Window->GetHeight(), -1.0f, 1.0f);
-		m_EditorCamera->SetOrthographic(m_Window->GetWidth(), m_Window->GetHeight(), -1.0f, 1.0f);
 
 		m_TabManager = new EditorTabManager();
 		m_TabManager->Init();
+
 		// Add Viewport tab as initial tab which is an unremovable tab
 		auto viewportTab = m_TabManager->NewTab("Viewport", EditorTabType::Viewport, true);
 
@@ -98,7 +101,7 @@ namespace LkEngine {
 
 		ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 
-		UI::BeginViewport(UI_CORE_VIEWPORT, window.Raw(), viewport);
+		UI::BeginViewport(UI_CORE_VIEWPORT, m_Window, viewport);
 		UI_HandleManualWindowResize();
 
 		UI::BeginDockSpace(LkEngine_DockSpace);
@@ -106,10 +109,13 @@ namespace LkEngine {
 		//===================================================================
 		// Main Window
 		//===================================================================
-		static ImVec2 statsWindowSize = ImVec2(ImGui::CalcTextSize("  FPS: xyzw  ").x, 80);
-		UI::PushID();
-		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
+		//static ImVec2 statsWindowSize = ImVec2(ImGui::CalcTextSize("   FPS: xyzw   ").x, 400);
+		static ImVec2 statsWindowSize = ImVec2(ImGui::CalcTextSize("FPS: xyz").x + 200, 400);
+		UI::Begin(UI_CORE_VIEWPORT, UI::CoreViewportFlags);
 		{
+			//=========================================================
+			// Window statistics, FPS counter etc.
+			//=========================================================
 			if (m_TabManager->GetTabCount() == 1)
 				ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x + EditorWindowSize.x - statsWindowSize.x, MenuBarSize.y), ImGuiCond_Always);
 			else
@@ -118,11 +124,24 @@ namespace LkEngine {
 			{
 				float fps = 1000.0f / app->GetTimestep();
 				ImGui::Text("FPS: %1.f", fps);
+
+				if (m_EditorCamera->m_IsActive)
+				{
+					ImGui::Text("FOV: %1.f", m_EditorCamera->m_DegPerspectiveFOV);
+					const glm::vec3 camPos = m_EditorCamera->GetPosition();
+					ImGui::Text("Pos (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
+					ImGui::Text("Pitch: %.3f  Yaw: %.3f", m_EditorCamera->GetPitch(), m_EditorCamera->GetYaw());
+					ImGui::Text("Camera Zoom: %.3f", m_EditorCamera->ZoomSpeed());
+					ImGui::Text("Speed: %.3f", m_EditorCamera->GetCameraSpeed());
+					ImGui::Text("Distance: %.2f", m_EditorCamera->GetDistance());
+					ImGui::Text("Yaw Delta: %.2f", m_EditorCamera->GetYawDelta());
+					ImGui::Text("Pitch Delta: %.2f", m_EditorCamera->GetPitchDelta());
+					ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", m_EditorCamera->GetFocalPoint().x, m_EditorCamera->GetFocalPoint().y, m_EditorCamera->GetFocalPoint().z);
+				}
+				ImGui::EndChild();
 			}
-			ImGui::EndChild();
 		}
-		ImGui::End();
-		UI::PopID();
+		UI::End();
 
 		if (m_Scene)
 		{
@@ -176,15 +195,22 @@ namespace LkEngine {
 				if (ImGui::MenuItem("New")) 
 				{ 
 				}
-				if (ImGui::MenuItem("Save "))
+				if (ImGui::MenuItem("Load"))
+				{
+					//serializer.Serialize("scene.lukkelele");
+					m_Scene->Clear();
+					SceneSerializer sceneSerializer(m_Scene);
+					sceneSerializer.Deserialize("scene.lukkelele");
+					m_Scene = sceneSerializer.LoadScene().Raw();
+				}
+				if (ImGui::MenuItem("Save"))
 				{
 					SceneSerializer serializer(m_Scene);
-					std::string readString;
 					serializer.Serialize("scene.lukkelele");
 				}
 				ImGui::EndMenu();
 			}
-			if (ImGui::MenuItem("Render Information"))
+			if (ImGui::MenuItem("Renderer Settings"))
 				ShowRenderSettingsWindow = !ShowRenderSettingsWindow;
 
 		}
@@ -193,10 +219,28 @@ namespace LkEngine {
 		//--------------------------------------------------
 		// Left Sidebar
 		//--------------------------------------------------
+		ImGuiID DockspaceID_LeftSidebar = ImGui::GetID("Dockspace_LeftSidebar");
+		static bool ResetDockspace_LeftSidebar = true;
 		if (ShouldUpdateWindowSizes)
 			UpdateLeftSidebarSize(viewport);
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
+
+			// Individual dockspaces are for another day. I have no energy for that rn
+#if 0
+			if (ResetDockspace_LeftSidebar)
+			{
+				ResetDockspace_LeftSidebar = false;
+				{
+					ImGui::DockBuilderRemoveNode(DockspaceID_LeftSidebar);
+					ImGuiID rootNode = ImGui::DockBuilderAddNode(DockspaceID_LeftSidebar, ImGuiDockNodeFlags_DockSpace);
+					ImGui::DockBuilderFinish(DockspaceID_LeftSidebar);
+				}
+			}
+			ImGui::DockSpace(DockspaceID_LeftSidebar, ImVec2(LeftSidebarSize.x, LeftSidebarSize.y), ImGuiDockNodeFlags_None);
+#endif
+
+
 			// TODO: initialize this bool by checking the depth in the graphics context
 			static bool depth_test_checkbox = false;
 			if (ImGui::Checkbox("Depth Testing", &depth_test_checkbox))
@@ -216,6 +260,44 @@ namespace LkEngine {
 				UI_BackgroundColorModificationMenu();
 				ImGui::TreePop();
 			}
+			//----------------------------------------
+			// Editor Camera
+			//----------------------------------------
+			ImGui::Text("Editor Cam Mode: %s", (m_EditorCamera->m_CameraMode == EditorCamera::Mode::Arcball ? "Arcball" : "Flycam"));
+			static const char* cameraViewTypes[] = { "Perspective", "Orthographic" };
+			int selectedEditorCameraViewTypeIndex = (int)m_EditorCamera->GetProjectionType();
+			ImGui::Text("Selected View Type Index: %d", selectedEditorCameraViewTypeIndex);
+			// Get current camera view mode and set it to that if at init stage
+			if (ImGui::BeginCombo("Editor Camera Type", cameraViewTypes[selectedEditorCameraViewTypeIndex]))
+			{
+				int currentIdx = 0;
+				for (auto& viewType : cameraViewTypes)
+				{
+					//LK_CORE_DEBUG("Current viewtype: {}", viewType);
+					const bool isSelected = selectedEditorCameraViewTypeIndex == currentIdx;
+					if (ImGui::Selectable(cameraViewTypes[currentIdx], isSelected, ImGuiSelectableFlags_SpanAvailWidth))
+					{
+						selectedEditorCameraViewTypeIndex = currentIdx;
+						if (viewType == "Perspective")
+							m_EditorCamera->SetProjectionType(Camera::ProjectionType::Perspective);
+						else if (viewType == "Orthographic")
+							m_EditorCamera->SetProjectionType(Camera::ProjectionType::Orthographic);
+					}
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+
+					currentIdx++;
+				}
+
+				ImGui::EndCombo();
+			}
+			ImGui::BeginGroup();
+			{
+				UI::Property::PositionXYZ(m_EditorCamera->m_Position);
+				ImGui::SliderFloat("Pitch", &m_EditorCamera->m_Pitch, -12.0f, 12.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+				ImGui::SliderFloat("Yaw", &m_EditorCamera->m_Yaw, -12.0f, 12.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+			}
+			ImGui::EndGroup();
 
 			//----------------------------------------
 			// Mode Selector
@@ -242,11 +324,6 @@ namespace LkEngine {
 			ImGui::EndGroup();
 
 
-			if (SelectedEntity)
-			{
-				DrawComponents(SelectedEntity);
-			}
-			
 			ImGui::BeginGroup();
 			{
 				ImGui::Text("Selected ID: %llu", SelectedEntityID);
@@ -287,6 +364,13 @@ namespace LkEngine {
 		}
 		ImGui::End();  
 
+
+		if (SelectedEntity && m_GizmoType != -1)
+		{
+			if (SelectedEntity.m_Scene != nullptr)
+				DrawImGuizmo(SelectedEntity);
+		}
+
 		//--------------------------------------------------
 		// Right Sidebar
 		//--------------------------------------------------
@@ -294,38 +378,21 @@ namespace LkEngine {
 			UpdateRightSidebarSize(viewport);
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 		{
-			ImGui::BeginGroup();
-			{
-				if (ImGui::Checkbox("Style Editor", &m_ShowStyleEditor));
-
-				if (SelectedEntity && m_GizmoType != -1)
-					DrawImGuizmo(SelectedEntity);
-
-				if (m_ShowStackTool) 
-					ImGui::ShowStackToolWindow();
-
-				if (m_ShowStyleEditor)
-				{
-					ImGui::Begin("Style Editor");
-					ImGui::ShowStyleEditor();
-					ImGui::End();
-				}
-			}
-			ImGui::EndGroup();
 
 			m_ComponentEditor.OnImGuiRender();
 
 			// Window Information
-			static bool ShowWindowInfo = false;
-			ImGui::Checkbox("Show Window Info", &ShowWindowInfo);
-			if (ShowWindowInfo)
+			if (ImGui::TreeNode("Window Information"))
+			{
 				UI_ShowViewportAndWindowDetails();
-
+				ImGui::TreePop();
+			}
 			// Mouse Information
-			static bool ShowMouseInfo = true;
-			ImGui::Checkbox("Show Mouse Info", &ShowMouseInfo);
-			if (ShowMouseInfo)
+			if (ImGui::TreeNode("Mouse Information"))
+			{
 				UI_ShowMouseDetails();
+				ImGui::TreePop();
+			}
 
 			auto windowSize = ImGui::GetWindowSize();
 			if (windowSize.x != RightSidebarSize.x || windowSize.y != RightSidebarSize.y)
@@ -333,12 +400,18 @@ namespace LkEngine {
 
 			last_sidebar_right_pos = ImGui::GetWindowPos();
 			last_sidebar_right_size = windowSize;
+
+			ImGui::Separator();
 		}
 		ImGui::End();
 
+		// Draw component BELOW the content in the right sidebar
+		if (SelectedEntity)
+			DrawComponents(SelectedEntity);
+			
 
 		//--------------------------------------------------
-		// BOTTOM BAR
+		// Bottom Bar
 		//--------------------------------------------------
 		if (ShouldUpdateWindowSizes)
 		{
@@ -350,9 +423,19 @@ namespace LkEngine {
 
 			ImGui::Dummy({ 0, 2 });
 
-			auto& active_cam = *Scene::GetActiveScene()->GetCamera();
-			glm::vec2 cam_pos = active_cam.GetPos();
-			ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
+			auto sceneCamera = Scene::GetActiveScene()->GetMainCamera();
+			if (m_EditorCamera->m_IsActive)
+			{
+				glm::vec3 camPos = m_EditorCamera->GetPosition();
+				ImGui::Text("Camera Position (%.2f, %.2f, %.2f)      Pitch=%.3f  Yaw=%.3f", camPos.x, camPos.y, camPos.z, m_EditorCamera->GetPitch(), m_EditorCamera->GetYaw());
+				ImGui::Text("Zoom speed: %.3f", m_EditorCamera->ZoomSpeed());
+				//ImGui::Text()
+			}
+			else if (sceneCamera != nullptr)
+			{
+				glm::vec3 cam_pos = sceneCamera->GetPos();
+				ImGui::Text("Camera Pos (%1.f, %1.f)", cam_pos.x, cam_pos.y);
+			}
 
 			auto windowSize = ImGui::GetWindowSize();
 			if (windowSize.x != BottomBarSize.x || windowSize.y != BottomBarSize.y)
@@ -530,7 +613,37 @@ namespace LkEngine {
 			if (SelectedEntityID == entity.UUID())
 				SelectedEntityID = {};
 		}
+	}
 
+	void Editor::OnEvent(Event& e)
+	{
+		switch (e.GetEventType())
+		{
+			case EventType::MouseButtonPressed:
+			{
+				LK_CORE_INFO("Editor::MouseButtonPressed");
+				break;
+			}
+			case EventType::MouseButtonReleased:
+			{
+				LK_CORE_INFO("Editor::MouseButtonReleased");
+				break;
+			}
+			case EventType::MouseScrolled:
+			{
+				e.Handled = m_EditorCamera->OnMouseScroll(static_cast<MouseScrolledEvent&>(e));
+				break;
+			}
+			case EventType::KeyPressed:
+			{
+				e.Handled = m_EditorCamera->OnKeyPress(static_cast<KeyPressedEvent&>(e));
+				break;
+			}
+			case EventType::KeyReleased:
+			{
+				break;
+			}
+		}
 	}
 
 	template<typename T, typename UIFunction>
@@ -603,9 +716,12 @@ namespace LkEngine {
 		if (!m_Scene)
 			return;
 
-		Entity entity = m_Scene->GetEntityWithUUID(SelectedEntityID);
-		if (!entity)
+		//Entity entity = m_Scene->GetEntityWithUUID(SelectedEntityID);
+		//if (!entity)
+		if (m_Scene->HasEntity(SelectedEntity) == false)
 			return;
+
+		Entity entity = m_Scene->GetEntityWithUUID(SelectedEntityID);
 
 		UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
 
@@ -633,6 +749,9 @@ namespace LkEngine {
 		}
 		ImGui::PopItemWidth();
 
+		//---------------------------------------------------------------------------
+		// Transform Component
+		//---------------------------------------------------------------------------
 		DrawComponent<TransformComponent>("Transform", entity, [&entity](auto& transform)
 		{
 			ImGui::Text("Position");
@@ -649,6 +768,9 @@ namespace LkEngine {
 			//transform.SetRotation(rot);
 		});
 
+		//---------------------------------------------------------------------------
+		// Sprite Component
+		//---------------------------------------------------------------------------
 		DrawComponent<SpriteComponent>("Sprite", entity, [&entity](auto& sprite)
 		{
 			ImGui::Text("Sprite Component");
@@ -656,8 +778,12 @@ namespace LkEngine {
 			ImGui::SameLine();
 			ImGui::SliderFloat2("##Size", &sprite.Size.x, 0.0f, 800.0f, "%1.f");
 			UI::Property::RGBAColor(sprite.Color);
+			
 		});
 
+		//---------------------------------------------------------------------------
+		// Material Component
+		//---------------------------------------------------------------------------
 		DrawComponent<MaterialComponent>("Material", entity, [&entity](auto& mc)
 		{
 			auto texture = mc.GetTexture();
@@ -667,24 +793,46 @@ namespace LkEngine {
 			auto textures2D = TextureLibrary::Get()->GetTextures2D();
 			std::string textureName = texture->GetName();
 
-			ImGui::Text("%s", textureName.c_str());
-			ImGui::SameLine();
 			// Selectable texture
-			if (ImGui::BeginCombo("##DrawMaterialComponent", textureName.c_str(), ImGuiComboFlags_NoPreview))
+			if (ImGui::BeginTable("##MaterialTableProperties", 2, ImGuiTableFlags_SizingStretchProp))
 			{
-				for (auto& tex : textures2D)
-				{
-					ImGui::SetNextItemWidth(180);
-					if (ImGui::Selectable(tex.first.c_str()))
-						mc.SetTexture(tex.second);
-				}
-				ImGui::EndCombo();
-			}
+				ImGui::TableSetupColumn("##1", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_IndentDisable);
+				ImGui::TableSetupColumn("##2", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_IndentDisable);
 
-			auto material = mc.GetMaterial();
-			float roughness = material->GetRoughness();
-			ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-			material->SetRoughness(roughness);
+				// Texture
+				ImGui::TableNextRow(ImGuiTableFlags_SizingStretchProp | ImGuiTableColumnFlags_IndentDisable);
+				{
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Texture");
+
+					ImGui::TableSetColumnIndex(1);
+					if (ImGui::BeginCombo("##DrawMaterialComponent", textureName.c_str(), ImGuiComboFlags_HeightLargest))
+					{
+						for (auto& tex : textures2D)
+						{
+							if (ImGui::Selectable(tex.first.c_str()))
+								mc.SetTexture(tex.second);
+						}
+						ImGui::EndCombo();
+					}
+				}
+
+				// Roughness
+				ImGui::TableNextRow(ImGuiTableFlags_SizingStretchProp | ImGuiTableColumnFlags_IndentDisable);
+				{
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Roughness");
+
+					ImGui::TableSetColumnIndex(1);
+					auto material = mc.GetMaterial();
+					float roughness = material->GetRoughness();
+					ImGui::SliderFloat("##Roughness", &roughness, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+					material->SetRoughness(roughness);
+
+				}
+
+				ImGui::EndTable();
+			}
 		});
 
 		UI::EndSubwindow();
@@ -710,7 +858,7 @@ namespace LkEngine {
 		if (!entity)
 			return;
 
-		Ref<Window> window = m_Window;
+		Window& window = *m_Window;
 		static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
 
 		UI::PushID("UI_SELECTED_ENTITY_PROPERTIES");
@@ -739,9 +887,7 @@ namespace LkEngine {
 			ImGui::Text("Sprite Component");
 			SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
 			UI::Property::RGBAColor(sc.Color);
-			ImGui::SliderFloat3("##Piss", &sc.Size.x, 0.0f, 800.0f, "%1.f");
-			//ImGui::SliderFloat("##Piss", &sc.Size.x, 0.0f, 800.0f, "%1.f");
-			//ImGui::SliderFloat("##Piss", &sc.Size.x, 0.0f, 800.0f, "%1.f");
+			ImGui::SliderFloat3("##SpriteColor", &sc.Size.x, 0.0f, 800.0f, "%1.f");
 		}
 
 		if (entity.HasComponent<MaterialComponent>())
@@ -758,7 +904,7 @@ namespace LkEngine {
 		UI::PopID();
     }
 
-    void Editor::DrawImGuizmo(Entity& entity)
+    void Editor::DrawImGuizmo(Entity entity)
     {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
@@ -766,13 +912,13 @@ namespace LkEngine {
 		auto& tc = entity.Transform();
         glm::mat4 transform_matrix = tc.GetTransform();
 
-		auto& scene = *Scene::GetActiveScene();
-        auto& cam = *scene.GetCamera();
-        auto& cam_pos = cam.GetPos();
+		//auto& scene = *Scene::GetActiveScene();
+        //EditorCamera& cam = *scene.GetCamera();
+        auto& cameraPosition = m_EditorCamera->GetPosition();
 		//cam_pos.x += camPosOffset.x;
 		//cam_pos.y += camPosOffset.y;
-        auto view_matrix = cam.GetView();
-        auto proj_matrix = cam.GetProjection();
+        auto& viewMatrix = m_EditorCamera->GetViewMatrix();
+        auto& projectionMatrix = m_EditorCamera->GetProjectionMatrix();
 
 		SpriteComponent& sc = entity.Sprite();
 
@@ -782,39 +928,42 @@ namespace LkEngine {
 		float height = m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y;
 
 		auto window = ImGui::FindWindowByName(UI_CORE_VIEWPORT);
-		ImGui::Begin(window->Name);
 		ImGui::SetNextWindowViewport(window->ID);
+		ImGui::Begin(window->Name);
+		{
+			//ImGui::SetNextWindowViewport(window->ID);
 
-		ImGuizmo::SetOrthographic(true);
-		ImGuizmo::SetDrawlist();
-		if (m_TabManager->GetTabCount() == 1) // Only 1 tab, aka only the 'Viewport' tab
-			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
-		else
-			ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + TabBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
+			ImGuizmo::SetOrthographic((int)m_EditorCamera->GetProjectionType());
+			ImGuizmo::SetDrawlist();
+			if (m_TabManager->GetTabCount() == 1) // Only 1 tab, aka only the 'Viewport' tab
+				ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
+			else
+				ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + TabBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
 
-        ImGuizmo::Manipulate(
-            glm::value_ptr(view_matrix), 
-            glm::value_ptr(proj_matrix), 
-            ImGuizmo::TRANSLATE, 
-            ImGuizmo::LOCAL, 
-            glm::value_ptr(transform_matrix)
-        );
+			ImGuizmo::Manipulate(
+			    glm::value_ptr(viewMatrix), 
+			    glm::value_ptr(projectionMatrix), 
+			    ImGuizmo::TRANSLATE, 
+			    ImGuizmo::LOCAL, 
+			    glm::value_ptr(transform_matrix)
+			);
 
-        if (ImGuizmo::IsUsing())
-        {
-            glm::vec3 translation, scale;
-            glm::quat rotation;
-            Math::DecomposeTransform(transform_matrix, translation, rotation, scale);
-            tc.Translation = translation;
-            tc.Scale = scale;
-            tc.SetRotation(rotation);
-        }
+			if (ImGuizmo::IsUsing())
+			{
+			    glm::vec3 translation, scale;
+			    glm::quat rotation;
+			    Math::DecomposeTransform(transform_matrix, translation, rotation, scale);
+			    tc.Translation = translation;
+			    tc.Scale = scale;
+			    tc.SetRotation(rotation);
+			}
+		}
 		ImGui::End();
     }
 
 	void Editor::UI_HandleManualWindowResize()
 	{
-		auto window = Application::Get()->GetWindow()->GetGlfwWindow();
+		auto window = Application::Get()->GetWindow().GetGlfwWindow();
 		const bool maximized = (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
 		ImVec2 newSize, newPosition;
 		if (!maximized && UI::UpdateWindowManualResize(ImGui::GetCurrentWindow(), newSize, newPosition))
@@ -826,7 +975,7 @@ namespace LkEngine {
 
 	void Editor::UI_SceneContent()
 	{
-        auto window = m_Window;
+        auto& window = m_Window;
 		float menu_height = window->GetHeight() - SelectedEntityMenuSize.y;
 		constexpr const char* id = "##lkengine-scene-content";
 		UI::PushID(id);
@@ -1149,8 +1298,25 @@ namespace LkEngine {
 			ImGui::Text("Scaled res (%.1f, %.1f)", EditorWindowSize.x / ViewportScalers.x, EditorWindowSize.y / ViewportScalers.y);
 			ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
 
-			glm::vec2 sceneCameraPos = Scene::GetActiveScene()->GetCamera()->GetPos();
-			ImGui::Text("SceneCamera Pos: (%.1f, %.1f)", sceneCameraPos.x, sceneCameraPos.y);
+			if (m_EditorCamera->m_IsActive)
+			{
+				glm::vec2 cameraPos = m_EditorCamera->GetPosition();
+				ImGui::Text("EditorCamera Position: (%.1f, %.1f)", cameraPos.x, cameraPos.y);
+			}
+			else
+			{
+				auto sceneCamera = Scene::GetActiveScene()->GetMainCamera();
+				if (sceneCamera != nullptr)
+				{
+					glm::vec2 sceneCameraPos = Scene::GetActiveScene()->GetMainCamera()->GetPos();
+					ImGui::Text("SceneCamera Pos: (%.1f, %.1f)", sceneCameraPos.x, sceneCameraPos.y);
+				}
+				else
+				{
+					ImGui::Text("No camera attached to scene");
+				}
+			}
+
 		}
 		ImGui::EndGroup();
 	}
@@ -1245,18 +1411,19 @@ namespace LkEngine {
 	{
 		static ImGuiSliderFlags backgroundSliderFlags = ImGuiSliderFlags_None;
 		auto& colors = ImGui::GetStyle().Colors;
-		UI::PushID();
 		ImGui::BeginGroup();
 		{
+			UI::PushID("##BackgroundColorsModification");
 			ImGui::Text("Background"); 
 			ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
 			ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
 			ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
 			ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
 			ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", backgroundSliderFlags);
+			UI::PopID();
+			//UI::PopID("##BackgroundColors");
 		}
 		ImGui::EndGroup();
-		UI::PopID();
 	}
 
 	void Editor::UpdateLeftSidebarSize(ImGuiViewport* viewport)

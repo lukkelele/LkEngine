@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LkEngine/Core/Layer.h"
-#include "LkEngine/Math/Math.h"
+#include "LkEngine/Core/Math/Math.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/UI/UICore.h"
@@ -15,7 +15,6 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
-
 #include <ImGuizmo/ImGuizmo.h>
 
 
@@ -31,13 +30,13 @@ namespace LkEngine {
 
 	class Scene;
 
-	class Editor
+	class Editor : public Layer
 	{
 	public:
 		enum class WindowType
 		{
 			None = 0,
-			Viewport, // Editor Viewport, 'normal' mode
+			Viewport,  // Editor Viewport, 'normal' mode
 			NodeEditor,
 		};
 
@@ -49,22 +48,20 @@ namespace LkEngine {
 		};
 
 	public:
-		Editor(const Ref<Window>& window);
+		Editor();
 		~Editor() = default;
 
 		static Editor* Get() { return s_Instance; }
 
 		void RenderImGui();
-		bool IsEnabled() { return m_Enabled; }
 		void DrawEntityNode(Entity entity);
 		void DrawComponents(Entity entity);
-		void SetScene(Scene& scene) { m_Scene = &scene; }
-		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
-		Entity GetSelectedEntity() { return SelectedEntity; }
-		void SelectEntity(Entity& entity);
-		void SetSelectedEntity(Entity& entity);
 
-		EditorCamera* GetEditorCamera() { return m_EditorCamera; }
+		bool IsEnabled() { return m_Enabled; }
+		Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
+		void SetScene(Scene& scene) { m_Scene = &scene; }
+
+		void OnEvent(Event& e) override;
 
 		template<typename T, typename UIFunction>
 		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
@@ -80,6 +77,21 @@ namespace LkEngine {
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
 		void SetUpdateWindowFlag(bool flag);
 
+		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize); // Update potential changes in editor docking window sizes/positions
+		void UI_ShowMouseDetails();
+		void UI_ShowViewportAndWindowDetails();
+		void UI_ShowEditorWindowsDetails();
+		void UI_BackgroundColorModificationMenu();
+
+		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
+		Entity GetSelectedEntity() { return SelectedEntity; }
+		void SelectEntity(Entity& entity);
+		void SetSelectedEntity(Entity& entity);
+
+		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
+		EditorTabManager* GetTabManager() { return m_TabManager; }
+		int GetTabCount() const { return m_TabManager->GetTabCount(); }
+		std::string GetCurrentTabName() const { return m_TabManager->GetActiveTabName(); }
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
 		float GetEditorWindowHeight() const;
@@ -92,20 +104,8 @@ namespace LkEngine {
 		glm::vec2 GetMenuBarSize() const; 
 		glm::vec2 GetTabBarSize() const;
 
-		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
-
-		EditorTabManager* GetTabManager() { return m_TabManager; }
-		int GetTabCount() const { return m_TabManager->GetTabCount(); }
-		std::string GetCurrentTabName() const { return m_TabManager->GetActiveTabName(); }
-
-		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize); // Update potential changes in editor docking window sizes/positions
-		void UI_ShowMouseDetails();
-		void UI_ShowViewportAndWindowDetails();
-		void UI_ShowEditorWindowsDetails();
-		void UI_BackgroundColorModificationMenu();
-
 	private:
-        void DrawImGuizmo(Entity& entity);
+        void DrawImGuizmo(Entity entity);
 		void HandleExternalWindows();
 
 		void UpdateLeftSidebarSize(ImGuiViewport* viewport);
@@ -151,12 +151,13 @@ namespace LkEngine {
 		int m_GizmoType = GizmoType::Translate;
 		int m_CurrentTabCount = 0; // Incremented to 1 after Editor is initialized
 
+		Ref<EditorCamera> m_EditorCamera = nullptr;
+
 		NodeEditor* m_NodeEditor = nullptr;
-		EditorCamera* m_EditorCamera = nullptr;
 		EditorTabManager* m_TabManager = nullptr;
 		ComponentEditor m_ComponentEditor;
 
-		Ref<Window> m_Window = nullptr;
+		Window* m_Window = nullptr;
 
 		WindowType m_ActiveWindowType;
 
