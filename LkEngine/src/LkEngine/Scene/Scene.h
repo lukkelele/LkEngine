@@ -1,22 +1,23 @@
 #pragma once
 
-#include "LkEngine/Core/UUID.h"
+#include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Timer.h"
-#include "LkEngine/Scene/Components.h"
-#include "LkEngine/Scene/SceneCamera.h"
-#include "LkEngine/Editor/EditorCamera.h"
 
-#include "LkEngine/Renderer/OrthographicCamera.h" // remove
+#include "LkEngine/Asset/Asset.h"
+
+#include "Components.h"
+
+#include "LkEngine/Editor/EditorCamera.h"
 
 #include <entt/entt.hpp>
 
 
 namespace LkEngine {
 
-	// Forward declarations
 	class Entity;
 	class World;
 	class Renderer;
+	class SceneRenderer;
 
 	using EntityMap = std::unordered_map<UUID, Entity>;
 
@@ -27,18 +28,19 @@ namespace LkEngine {
 		int Frames = 0;
 	};
 
-	class Scene
+	class Scene : public Asset
 	{
 	public:
+		Scene(bool editorScene = true);
 		Scene(const std::string& name, bool activeScene = true, bool editorScene = false);
 		~Scene() = default;
 
-		static Scene* GetActiveScene() { return s_ActiveScene; }
-		static void SetActiveScene(Scene& scene) { s_ActiveScene = &scene; }
-		static std::string GetActiveSceneName() { if (s_ActiveScene) { return s_ActiveScene->GetName(); } return ""; }
+		static Scene* GetActiveScene() { return m_ActiveScene; }
+		static void SetActiveScene(Ref<Scene>& scene);
+		static std::string GetActiveSceneName() { if (m_ActiveScene) { return m_ActiveScene->GetName(); } return ""; }
 		static uint8_t GetSceneCount() { return s_SceneCounter; }
 
-		void OnRender(s_ptr<SceneCamera> cam, Timestep ts);
+		void OnRender(Ref<SceneRenderer> renderer, Timestep ts);
 		void OnRenderEditor(EditorCamera& editorCamera, Timestep ts);
 		void EndScene();
 
@@ -46,24 +48,26 @@ namespace LkEngine {
 		void SetName(const std::string& name) { m_SceneInfo.Name = name; }
 		SceneInfo GetSceneInfo() const { return m_SceneInfo; }
 		SceneInfo& GetSceneInfo() { return m_SceneInfo; }
+		void SetAsActive(bool active) { m_IsActiveScene = active; }
 
+		Entity GetMainCameraEntity();
 		std::vector<Entity> GetEntities();
 		uint64_t GetEntityCount() const { return m_EntityMap.size(); }
 		void SortEntities();
 		Entity FindEntity(std::string_view name);
 		Entity GetEntityWithUUID(UUID uuid);
 		Entity CreateEntity(const std::string& name);
-		Entity CreateEntityWithID(UUID uuid, const std::string& name);
+		Entity CreateEntityWithID(UUID uuid, const std::string& name = "");
 		entt::registry& GetRegistry() { return m_Registry; }
 		void DestroyEntity(Entity entity);
 		bool IsEntityInRegistry(Entity entity) const;
 
 		void Pause(bool paused);
 		void SwitchCamera();
-		void SetCamera(s_ptr<SceneCamera> cam);
+		void SetCamera(Ref<SceneCamera> cam);
 		void SetCamera(SceneCamera* cam);
-		void SetEditorCamera(EditorCamera* editorCamera);
-		s_ptr<SceneCamera> GetCamera() { return m_Camera; }
+		void SetEditorCamera(const Ref<EditorCamera> editorCamera);
+		Ref<SceneCamera> GetMainCamera() { return m_Camera; }
 
 		// TODO: Generalized and abstract 2d physics impl.
 		Box2DWorldComponent& GetBox2DWorld();
@@ -77,9 +81,8 @@ namespace LkEngine {
 			return m_Registry.view<Components...>();
 		}
 
-
 	private:
-		inline static Scene* s_ActiveScene = nullptr;
+		inline static Scene* m_ActiveScene = nullptr;
 		inline static uint8_t s_SceneCounter = 0;
 	private:
 		entt::entity m_SceneEntity;
@@ -88,16 +91,19 @@ namespace LkEngine {
 		entt::registry m_Registry; 
 		Timer m_Timer;
 		bool m_EditorScene = false; // Blank scene
+		AssetHandle m_AssetHandle;
+		bool m_IsActiveScene = false;
 
 		uint16_t m_ViewportWidth, m_ViewportHeight;
 
-		s_ptr<SceneCamera> m_Camera = nullptr;
-		EditorCamera* m_EditorCamera = nullptr;
+		Ref<EditorCamera> m_EditorCamera = nullptr;
 
-		s_ptr<Renderer> m_Renderer;
-		s_ptr<SceneCamera> m_Camera2D = nullptr; // remove
+		Ref<SceneCamera> m_Camera = nullptr;
+		Ref<SceneCamera> m_Camera2D = nullptr;
+		Ref<SceneRenderer> m_Renderer = nullptr;
 
 		friend class Entity;
+		friend class SceneLoader;
 		friend class SceneSerializer;
 	};
 

@@ -20,6 +20,8 @@ namespace LkEngine {
 	SceneSerializer::SceneSerializer(Scene* scene)
 		: m_Scene(scene)
 	{
+		if (m_Scene == nullptr)
+			m_Scene = new Scene;
 	}
 
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
@@ -145,7 +147,7 @@ namespace LkEngine {
 	
 			// Serialize sorted entities
 			for (auto [id, entity] : sortedEntityMap)
-				SerializeEntity(out, { entity, m_Scene->s_ActiveScene });
+				SerializeEntity(out, { entity, m_Scene->m_ActiveScene });
 		}
 		out << YAML::EndSeq;
 
@@ -208,69 +210,10 @@ namespace LkEngine {
 		if (entities)
 			DeserializeEntities(entities, m_Scene);
 
-		
 		auto& editorCamera = *Editor::Get()->GetEditorCamera();
 		auto editorCameraNode = data["EditorCamera"];
 		if (editorCameraNode)
-		{
-			// Position, origin, distance and focalpoint
-			editorCamera.m_Position = editorCameraNode["Position"].as<glm::vec3>(glm::vec3(0.0f));
-			editorCamera.m_Origin = editorCameraNode["Origin"].as<glm::vec3>(glm::vec3(0.0f));
-			editorCamera.m_Distance = editorCameraNode["Distance"].as<float>();
-			editorCamera.m_FocalPoint = editorCameraNode["FocalPoint"].as<glm::vec3>(glm::vec3(0.0f));
-
-			// Perspective data
-			const auto perspectiveCameraNode = editorCameraNode["Perspective"];
-			if (perspectiveCameraNode.IsMap())
-			{
-				editorCamera.m_DegPerspectiveFOV = perspectiveCameraNode["DegPerspectiveFOV"].as<float>();
-				editorCamera.m_PerspectiveNear = perspectiveCameraNode["PerspectiveNear"].as<float>();
-				editorCamera.m_PerspectiveFar = perspectiveCameraNode["PerspectiveFar"].as<float>();
-				editorCamera.SetPerspectiveNearClip(editorCamera.m_PerspectiveNear);
-				editorCamera.SetPerspectiveFarClip(editorCamera.m_PerspectiveFar);
-				editorCamera.SetPerspectiveProjectionMatrix(
-					glm::radians(editorCamera.m_DegPerspectiveFOV), 
-					editorCamera.m_ViewportWidth,
-					editorCamera.m_ViewportHeight,
-					editorCamera.m_PerspectiveNear,
-					editorCamera.m_PerspectiveFar);
-				editorCamera.SetPerspective(editorCamera.m_DegPerspectiveFOV, editorCamera.m_PerspectiveNear, editorCamera.m_PerspectiveFar);
-				//LK_CORE_DEBUG_TAG("SceneSerializer", "Set editor camera farP={} and nearP={}", editorCamera.m_PerspectiveFar, editorCamera.m_PerspectiveNear);
-			}
-
-			// Orthographic data
-			const auto orthographicCameraNode = editorCameraNode["Orthographic"];
-			if (orthographicCameraNode.IsMap())
-			{
-				editorCamera.m_OrthographicSize = orthographicCameraNode["OrthographicSize"].as<float>();
-				editorCamera.m_OrthographicNear = orthographicCameraNode["OrthographicNear"].as<float>();
-				editorCamera.m_OrthographicFar  = orthographicCameraNode["OrthographicFar"].as<float>();
-				editorCamera.SetOrthographicNearClip(editorCamera.m_OrthographicNear);
-				editorCamera.SetOrthographicFarClip(editorCamera.m_OrthographicFar);
-			}
-
-			// Pitch and yaw
-			editorCamera.m_Pitch = editorCameraNode["Pitch"].as<float>();
-			editorCamera.m_Yaw = editorCameraNode["Yaw"].as<float>();
-
-			// Projection Type, Perspective or Orthographic
-			int projectionType = editorCameraNode["ProjectionType"].as<int>();
-			if (projectionType == (int)Camera::ProjectionType::Perspective)
-				editorCamera.m_ProjectionType = Camera::ProjectionType::Perspective;
-			else if (projectionType == (int)Camera::ProjectionType::Orthographic)
-				editorCamera.m_ProjectionType = Camera::ProjectionType::Orthographic;
-
-			// Camera Mode, Flycam or Arcball
-			int cameraMode = editorCameraNode["CameraMode"].as<int>();
-			if (cameraMode == (int)EditorCamera::Mode::Flycam)
-				editorCamera.m_CameraMode = EditorCamera::Mode::Flycam;
-			else if (cameraMode == (int)EditorCamera::Mode::Arcball)
-				editorCamera.m_CameraMode = EditorCamera::Mode::Arcball;
-			else
-				editorCamera.m_CameraMode = EditorCamera::Mode::None;
-			
-		}
-
+			DeserializeEditorCamera(editorCameraNode, editorCamera);
 
 		// Sort IDComponent by by entity handle (which is essentially the order in which they were created)
 		m_Scene->m_Registry.sort<IDComponent>([this](const auto lhs, const auto rhs)
@@ -379,10 +322,71 @@ namespace LkEngine {
 
 	void SceneSerializer::SerializeEditorCamera(YAML::Emitter& out, EditorCamera& editorCamera)
 	{
+
 	}
 
-	void SceneSerializer::DeserializeEditorCamera(YAML::Emitter& out, Ref<Scene> scene)
+	void SceneSerializer::DeserializeEditorCamera(YAML::Node& editorCameraNode, EditorCamera& editorCamera)
 	{
+		//auto editorCameraNode = data["EditorCamera"];
+		//auto& editorCamera = *Editor::Get()->GetEditorCamera();
+		if (editorCameraNode)
+		{
+			// Position, origin, distance and focalpoint
+			editorCamera.m_Position = editorCameraNode["Position"].as<glm::vec3>(glm::vec3(0.0f));
+			editorCamera.m_Origin = editorCameraNode["Origin"].as<glm::vec3>(glm::vec3(0.0f));
+			editorCamera.m_Distance = editorCameraNode["Distance"].as<float>();
+			editorCamera.m_FocalPoint = editorCameraNode["FocalPoint"].as<glm::vec3>(glm::vec3(0.0f));
+
+			// Perspective data
+			const auto perspectiveCameraNode = editorCameraNode["Perspective"];
+			if (perspectiveCameraNode.IsMap())
+			{
+				editorCamera.m_DegPerspectiveFOV = perspectiveCameraNode["DegPerspectiveFOV"].as<float>();
+				editorCamera.m_PerspectiveNear = perspectiveCameraNode["PerspectiveNear"].as<float>();
+				editorCamera.m_PerspectiveFar = perspectiveCameraNode["PerspectiveFar"].as<float>();
+				editorCamera.SetPerspectiveNearClip(editorCamera.m_PerspectiveNear);
+				editorCamera.SetPerspectiveFarClip(editorCamera.m_PerspectiveFar);
+				editorCamera.SetPerspectiveProjectionMatrix(
+					glm::radians(editorCamera.m_DegPerspectiveFOV), 
+					editorCamera.m_ViewportWidth,
+					editorCamera.m_ViewportHeight,
+					editorCamera.m_PerspectiveNear,
+					editorCamera.m_PerspectiveFar);
+				editorCamera.SetPerspective(editorCamera.m_DegPerspectiveFOV, editorCamera.m_PerspectiveNear, editorCamera.m_PerspectiveFar);
+				//LK_CORE_DEBUG_TAG("SceneSerializer", "Set editor camera farP={} and nearP={}", editorCamera.m_PerspectiveFar, editorCamera.m_PerspectiveNear);
+			}
+
+			// Orthographic data
+			const auto orthographicCameraNode = editorCameraNode["Orthographic"];
+			if (orthographicCameraNode.IsMap())
+			{
+				editorCamera.m_OrthographicSize = orthographicCameraNode["OrthographicSize"].as<float>();
+				editorCamera.m_OrthographicNear = orthographicCameraNode["OrthographicNear"].as<float>();
+				editorCamera.m_OrthographicFar  = orthographicCameraNode["OrthographicFar"].as<float>();
+				editorCamera.SetOrthographicNearClip(editorCamera.m_OrthographicNear);
+				editorCamera.SetOrthographicFarClip(editorCamera.m_OrthographicFar);
+			}
+
+			// Pitch and yaw
+			editorCamera.m_Pitch = editorCameraNode["Pitch"].as<float>();
+			editorCamera.m_Yaw = editorCameraNode["Yaw"].as<float>();
+
+			// Projection Type, Perspective or Orthographic
+			int projectionType = editorCameraNode["ProjectionType"].as<int>();
+			if (projectionType == (int)Camera::ProjectionType::Perspective)
+				editorCamera.m_ProjectionType = Camera::ProjectionType::Perspective;
+			else if (projectionType == (int)Camera::ProjectionType::Orthographic)
+				editorCamera.m_ProjectionType = Camera::ProjectionType::Orthographic;
+
+			// Camera Mode, Flycam or Arcball
+			int cameraMode = editorCameraNode["CameraMode"].as<int>();
+			if (cameraMode == (int)EditorCamera::Mode::Flycam)
+				editorCamera.m_CameraMode = EditorCamera::Mode::Flycam;
+			else if (cameraMode == (int)EditorCamera::Mode::Arcball)
+				editorCamera.m_CameraMode = EditorCamera::Mode::Arcball;
+			else
+				editorCamera.m_CameraMode = EditorCamera::Mode::None;
+		}
 	}
 
 	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath)
@@ -410,7 +414,7 @@ namespace LkEngine {
 		return false;
 	}
 
-	Ref<Scene> SceneSerializer::GetLoadedScene()
+	Ref<Scene> SceneSerializer::LoadScene()
 	{
 		if (m_Scene == nullptr)
 			LK_CORE_ASSERT(false, "SceneSerializer::GetLoadedScene  m_Scene == nullptr");
@@ -420,7 +424,7 @@ namespace LkEngine {
 
 		if (m_Scene->m_IsActiveScene)
 		{
-			Scene::s_ActiveScene = m_Scene;
+			Scene::m_ActiveScene = m_Scene;
 			Input::SetScene(Ref<Scene>(m_Scene));
 		}
 		
