@@ -22,7 +22,7 @@ namespace LkEngine {
 		~SceneSerializer() = default;
 
 		static void SerializeEntity(YAML::Emitter& out, Entity entity);
-		static void DeserializeEntities(YAML::Node& entitiesNode, s_ptr<Scene> scene);
+		static void DeserializeEntities(YAML::Node& entitiesNode, Ref<Scene> scene);
 		static void DeserializeEntities(YAML::Node& entitiesNode, Scene* scene);
 
 		void Serialize(const std::filesystem::path& filepath);
@@ -35,6 +35,9 @@ namespace LkEngine {
 
 		Ref<Scene> LoadScene(const std::filesystem::path& filepath);
 		Ref<Scene> GetLoadedScene();
+
+		static void SerializeEditorCamera(YAML::Emitter& out, EditorCamera& editorCamera);
+		static void DeserializeEditorCamera(YAML::Emitter& out, Ref<Scene> scene);
 
 	public:
 		inline static std::string_view FileFilter = "LkEngine Scene (*.lukkelele)\0*.lukkelele\0";
