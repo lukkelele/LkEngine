@@ -60,6 +60,7 @@ namespace LkEngine {
 		bool IsEnabled() { return m_Enabled; }
 		Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
 		void SetScene(Scene& scene) { m_Scene = &scene; }
+		Ref<Scene> GetCurrentScene() { return m_Scene; }
 
 		void OnEvent(Event& e) override;
 
@@ -67,6 +68,8 @@ namespace LkEngine {
 		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
 		template<typename T>
 		void DisplayAddComponentEntry(const std::string& entryName);
+
+		void SetSelectedEntity(Entity entity);
 
 		void UI_SelectedEntityProperties();
 		void UI_HandleManualWindowResize();
@@ -84,9 +87,7 @@ namespace LkEngine {
 		void UI_BackgroundColorModificationMenu();
 
 		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
-		Entity GetSelectedEntity() { return SelectedEntity; }
-		void SelectEntity(Entity& entity);
-		void SetSelectedEntity(Entity& entity);
+		Entity GetSelectedEntity() const { return SelectedEntity; }
 
 		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
 		EditorTabManager* GetTabManager() { return m_TabManager; }
@@ -95,7 +96,6 @@ namespace LkEngine {
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
 		float GetEditorWindowHeight() const;
-		uint64_t GetSelectedEntityID() const;
 		glm::vec2 GetLeftSidebarSize() const;
 		glm::vec2 GetRightSidebarSize() const;
 		glm::vec2 GetBottomBarSize() const; 
@@ -118,7 +118,7 @@ namespace LkEngine {
 		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window
 		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 }; // TODO: REMOVE/UPDATE
 		Entity SelectedEntity;
-		uint64_t SelectedEntityID = 0;
+		//uint64_t SelectedEntityID = 0;
 
 		glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
 		glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
@@ -141,7 +141,7 @@ namespace LkEngine {
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
 	private:
-		Scene* m_Scene = nullptr;
+		Ref<Scene> m_Scene = nullptr;
 		bool m_Enabled = true;
 		glm::vec2 m_ViewportBounds[2];
 		glm::vec2 m_SecondViewportBounds[2];

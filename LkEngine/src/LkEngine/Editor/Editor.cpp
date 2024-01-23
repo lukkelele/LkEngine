@@ -137,15 +137,19 @@ namespace LkEngine {
 					ImGui::Text("Yaw Delta: %.2f", m_EditorCamera->GetYawDelta());
 					ImGui::Text("Pitch Delta: %.2f", m_EditorCamera->GetPitchDelta());
 					ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", m_EditorCamera->GetFocalPoint().x, m_EditorCamera->GetFocalPoint().y, m_EditorCamera->GetFocalPoint().z);
+					if (SelectedEntity)
+						ImGui::Text("Selected ID: %llu", SelectedEntity.UUID());
+					else
+						ImGui::Text("Selected ID: None");
 				}
 				ImGui::EndChild();
 			}
 		}
 		UI::End();
 
-		if (m_Scene)
+		if (m_Scene && SelectedEntity)
 		{
-			SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntityID);
+			SelectedEntity = m_Scene->GetEntityWithUUID(SelectedEntity.UUID());
 		}
 
 		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
@@ -197,11 +201,14 @@ namespace LkEngine {
 				}
 				if (ImGui::MenuItem("Load"))
 				{
-					//serializer.Serialize("scene.lukkelele");
-					m_Scene->Clear();
-					SceneSerializer sceneSerializer(m_Scene);
+					//m_Scene->Clear();
+					Ref<Scene> newScene = Ref<Scene>::Create();
+					SceneSerializer sceneSerializer(newScene);
 					sceneSerializer.Deserialize("scene.lukkelele");
-					m_Scene = sceneSerializer.LoadScene().Raw();
+					newScene->CopyTo(m_Scene);
+					m_Scene = newScene;
+					//m_Scene->m_MetaData.SceneCopied = true;
+					// As everything is cleared in the old scene, make sure to re-add all necessary elements in UI
 				}
 				if (ImGui::MenuItem("Save"))
 				{
@@ -326,7 +333,6 @@ namespace LkEngine {
 
 			ImGui::BeginGroup();
 			{
-				ImGui::Text("Selected ID: %llu", SelectedEntityID);
 				ImGui::Text("Active Scene: %s", Scene::GetActiveSceneName().c_str());
 				ImGui::Text("Scenes in memory: %d", Scene::GetSceneCount());
 			}
@@ -343,15 +349,16 @@ namespace LkEngine {
 			{
 				ImGui::SeparatorText("Current Scene");
 				auto& registry = m_Scene->GetRegistry();
+				ImGui::Text("Entities: %d", registry.size());
 				registry.each([&](auto entityID)
 				{
-					Entity entity{ entityID, m_Scene };
+					Entity entity{ entityID, m_Scene.Raw() };
 					DrawEntityNode(entity);
 				});
 
 				if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 				{
-					SelectedEntityID = {};
+					SelectedEntity = {};
 				}
 			}
 
@@ -365,10 +372,10 @@ namespace LkEngine {
 		ImGui::End();  
 
 
-		if (SelectedEntity && m_GizmoType != -1)
+		if (SelectedEntity.m_EntityHandle != entt::null && m_GizmoType != -1)
 		{
-			if (SelectedEntity.m_Scene != nullptr)
-				DrawImGuizmo(SelectedEntity);
+			DrawImGuizmo(SelectedEntity);
+			//if (SelectedEntity.m_Scene != nullptr) DrawImGuizmo(SelectedEntity);
 		}
 
 		//--------------------------------------------------
@@ -406,8 +413,8 @@ namespace LkEngine {
 		ImGui::End();
 
 		// Draw component BELOW the content in the right sidebar
-		if (SelectedEntity)
-			DrawComponents(SelectedEntity);
+		//if (SelectedEntity && SelectedEntity.m_Scene != nullptr && SelectedEntity.m_EntityHandle != entt::null)
+		DrawComponents(SelectedEntity);
 			
 
 		//--------------------------------------------------
@@ -557,15 +564,6 @@ namespace LkEngine {
 		}
 	}
 
-	void Editor::SelectEntity(Entity& entity)
-	{
-		if (SelectedEntityID != entity.UUID())
-		{
-			SelectedEntityID = entity.UUID();
-			LK_CORE_DEBUG("Editor: Selecting entity {} ({})", entity.Name(), entity.UUID());
-		}
-	}
-
 	void Editor::DrawEntityNode(Entity entity)
 	{
 		if (entity.HasComponent<IDComponent>() == false || entity.HasComponent<TagComponent>() == false)
@@ -573,14 +571,14 @@ namespace LkEngine {
 
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-		bool entity_selected = (SelectedEntityID == entity.UUID());
+		bool entity_selected = SelectedEntity && (SelectedEntity.UUID() == entity.UUID());
 		ImGuiTreeNodeFlags flags = (entity_selected ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 
 		if (ImGui::IsItemClicked())
 		{
-			SelectedEntityID = entity.UUID();
+			SelectedEntity = entity;
 			LK_CORE_DEBUG("Selecting entity {} ({})", entity.Name(), entity.UUID());
 		}
 
@@ -610,8 +608,8 @@ namespace LkEngine {
 		{
 			m_Scene->DestroyEntity(entity);
 			// will crash ??
-			if (SelectedEntityID == entity.UUID())
-				SelectedEntityID = {};
+			if (SelectedEntity.UUID() == entity.UUID())
+				SelectedEntity = {};
 		}
 	}
 
@@ -621,12 +619,12 @@ namespace LkEngine {
 		{
 			case EventType::MouseButtonPressed:
 			{
-				LK_CORE_INFO("Editor::MouseButtonPressed");
+				//LK_CORE_INFO("Editor::MouseButtonPressed");
 				break;
 			}
 			case EventType::MouseButtonReleased:
 			{
-				LK_CORE_INFO("Editor::MouseButtonReleased");
+				//LK_CORE_INFO("Editor::MouseButtonReleased");
 				break;
 			}
 			case EventType::MouseScrolled:
@@ -711,20 +709,17 @@ namespace LkEngine {
 		}
 	}
 
-	void Editor::DrawComponents(Entity ent)
+	void Editor::DrawComponents(Entity entity)
 	{
-		if (!m_Scene)
+		//if (!m_Scene || !entity)
+		if (!entity)
+		{
+			if (entity.m_Scene != nullptr)
+				LK_CORE_DEBUG_TAG("Editor", "Cannot DrawComponents for {}", entity.Name());
 			return;
-
-		//Entity entity = m_Scene->GetEntityWithUUID(SelectedEntityID);
-		//if (!entity)
-		if (m_Scene->HasEntity(SelectedEntity) == false)
-			return;
-
-		Entity entity = m_Scene->GetEntityWithUUID(SelectedEntityID);
+		}
 
 		UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
-
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -854,8 +849,8 @@ namespace LkEngine {
     {
 		static float pos_step_size = 5.0f;
         auto& scene = *Scene::GetActiveScene();
-        Entity entity = scene.GetEntityWithUUID(SelectedEntityID);
-		if (!entity)
+        //Entity entity = scene.GetEntityWithUUID(SelectedEntityID);
+		if (!SelectedEntity)
 			return;
 
 		Window& window = *m_Window;
@@ -863,12 +858,12 @@ namespace LkEngine {
 
 		UI::PushID("UI_SELECTED_ENTITY_PROPERTIES");
         ImGui::BeginChild(UI_SELECTED_ENTITY_INFO, SelectedEntityMenuSize, true, windowFlags);
-        if (entity.HasComponent<TransformComponent>())
+        if (SelectedEntity.HasComponent<TransformComponent>())
         {
             ImGui::SeparatorText(SelectedEntity.Name().c_str());
             ImGui::Indent();
 
-			TransformComponent& transform = entity.GetComponent<TransformComponent>();
+			TransformComponent& transform = SelectedEntity.GetComponent<TransformComponent>();
             ImGui::Text("Position");
 			UI::Property::PositionXY(transform.Translation, pos_step_size);
 
@@ -882,17 +877,17 @@ namespace LkEngine {
             ImGui::Unindent();
 		}
 
-		if (entity.HasComponent<SpriteComponent>())
+		if (SelectedEntity.HasComponent<SpriteComponent>())
 		{
 			ImGui::Text("Sprite Component");
-			SpriteComponent& sc = entity.GetComponent<SpriteComponent>();
+			SpriteComponent& sc = SelectedEntity.GetComponent<SpriteComponent>();
 			UI::Property::RGBAColor(sc.Color);
 			ImGui::SliderFloat3("##SpriteColor", &sc.Size.x, 0.0f, 800.0f, "%1.f");
 		}
 
-		if (entity.HasComponent<MaterialComponent>())
+		if (SelectedEntity.HasComponent<MaterialComponent>())
 		{
-			MaterialComponent& mc = entity.Material();
+			MaterialComponent& mc = SelectedEntity.Material();
 			auto currentTexture = mc.GetTexture();
 			if (currentTexture != nullptr)
 			{
@@ -906,17 +901,21 @@ namespace LkEngine {
 
     void Editor::DrawImGuizmo(Entity entity)
     {
+
 		if (!entity.HasComponent<TransformComponent>())
+		{
+			LK_CORE_ASSERT(false, "Entity doesnt have a transform component");
 			return;
+		}
 
 		auto& tc = entity.Transform();
         glm::mat4 transform_matrix = tc.GetTransform();
 
 		//auto& scene = *Scene::GetActiveScene();
         //EditorCamera& cam = *scene.GetCamera();
-        auto& cameraPosition = m_EditorCamera->GetPosition();
 		//cam_pos.x += camPosOffset.x;
 		//cam_pos.y += camPosOffset.y;
+        auto& cameraPosition = m_EditorCamera->GetPosition();
         auto& viewMatrix = m_EditorCamera->GetViewMatrix();
         auto& projectionMatrix = m_EditorCamera->GetProjectionMatrix();
 
@@ -982,21 +981,22 @@ namespace LkEngine {
 		ImGui::BeginGroup();
 		ImGui::SeparatorText("Scene");
 
-        auto& scene = *Scene::GetActiveScene();
-        auto& registry = scene.GetRegistry();
+        //auto& scene = *Scene::GetActiveScene();
+        //auto& registry = scene.GetRegistry();
         static ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick;
 
-		auto entities = registry.view<TransformComponent>();
+		auto entities = m_Scene->m_Registry.view<TransformComponent>();
+		ImGui::Text("Entities in scene: %d", entities.size());
         for (auto& ent : entities)
         {
-            Entity entity = { ent, &scene };
+            Entity entity = { ent, m_Scene.Raw() };
 			bool is_selected = SelectedEntity == entity;
             std::string label = fmt::format("{}", entity.Name());
             if (ImGui::Selectable(label.c_str(), &is_selected, selectable_flags))
             {
                 LK_CORE_DEBUG("Selecting {}", label);
-				SelectedEntityID = entity.GetComponent<IDComponent>().ID;
 				SelectedEntity = entity;
+				//SelectedEntityID = entity.GetComponent<IDComponent>().ID;
             }
         }
 		ImGui::EndGroup();
@@ -1080,24 +1080,6 @@ namespace LkEngine {
 
 			ImGui::End();
 		}
-	}
-
-	bool Editor::IsEntitySelected() const
-	{
-		return SelectedEntityID > 0;
-	}
-
-	void Editor::SetSelectedEntity(Entity& entity)
-	{
-		if (entity.HasComponent<IDComponent>())
-		{
-			SelectedEntityID = entity.UUID();
-		}
-		else
-		{
-			SelectedEntityID = 0;
-		}
-		SelectedEntity = entity;
 	}
 
 	float Editor::GetEditorWindowWidth() const
@@ -1426,6 +1408,11 @@ namespace LkEngine {
 		ImGui::EndGroup();
 	}
 
+	void Editor::SetSelectedEntity(Entity entity)
+	{
+		SelectedEntity = entity;
+	}
+
 	void Editor::UpdateLeftSidebarSize(ImGuiViewport* viewport)
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, MenuBarSize.y), ImGuiCond_Always);
@@ -1436,11 +1423,6 @@ namespace LkEngine {
 	{
 		ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
 		ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
-	}
-
-	uint64_t  Editor::GetSelectedEntityID() const
-	{
-		return SelectedEntityID; 
 	}
 
 	glm::vec2 Editor::GetLeftSidebarSize() const 
