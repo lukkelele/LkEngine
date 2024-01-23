@@ -27,7 +27,7 @@ namespace LkEngine {
 		void SerializeToYAML(YAML::Emitter& out);
 		bool DeserializeFromYAML(const std::string& yamlString);
 
-		// Retreive the deserialized scene
+		// Retreive the most recent deserialized scene
 		Ref<Scene> LoadScene();
 
 		void SerializeRuntime(AssetHandle scene);
