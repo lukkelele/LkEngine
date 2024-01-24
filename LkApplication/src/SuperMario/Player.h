@@ -1,6 +1,8 @@
 #pragma once
 
-#include "LkEngine/LkEngine.h"
+//#include "LkEngine/LkEngine.h"
+#include "LkEngine/Asset/RuntimeAsset.h"
+#include "LkEngine/Scene/Entity.h"
 
 
 namespace LkEngine {
@@ -22,7 +24,7 @@ namespace LkEngine {
     class Player : public RuntimeAsset
     {
     public:
-        Player(Entity& entity, const std::string& name = "");
+        Player(Entity entity, Ref<Scene> scene, const std::string& name = "");
         virtual ~Player();
 
         void OnUpdate(float ts = 1.0f);
@@ -45,6 +47,8 @@ namespace LkEngine {
         void SetPos(const glm::vec2& pos);
         SceneCamera& GetCamera() { return m_Entity.GetComponent<CameraComponent>(); }
         PlayerMetadata& GetMetadata() { return m_Metadata; }
+
+        void SetLinearVelocity(const glm::vec2& v);
 
         virtual void SetSpawnPoint(const glm::vec2& spawnPoint);
         virtual glm::vec2 GetSpawnPoint() const { return m_SpawnPoint; }

@@ -7,7 +7,7 @@ namespace LkEngine {
     class Enemy : public Player
     {
     public:
-        Enemy(Entity& entity, const std::string& name = "Enemy");
+        Enemy(Entity entity, Ref<Scene> scene, const std::string& name = "Enemy");
         ~Enemy() = default;
 
         void Setup() override;   // inherited from RuntimeAsset
