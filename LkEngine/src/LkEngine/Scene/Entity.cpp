@@ -10,4 +10,11 @@ namespace LkEngine {
 	{
 	}
 
+	Entity Entity::GetParent() const
+	{
+		return m_Scene->TryGetEntityWithUUID(GetParentUUID());
+	}
+
+
+	Entity::operator bool() const { return (m_EntityHandle != entt::null) && m_Scene && m_Scene->m_Registry.valid(m_EntityHandle); }
 }
