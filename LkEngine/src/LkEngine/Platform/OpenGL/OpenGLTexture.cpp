@@ -26,7 +26,6 @@ namespace LkEngine {
 			stbi_set_flip_vertically_on_load(1);
 			int width, height, channels;
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
-
 			stbi_image_free(data);
 
 			m_Image = Image::Create(imageSpec, data);
@@ -89,7 +88,6 @@ namespace LkEngine {
 			return;
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-		//m_Loaded = false;
 	}
 
 	RendererID OpenGLTexture::GetRendererID() const
@@ -117,6 +115,10 @@ namespace LkEngine {
 	uint64_t OpenGLTexture::GetARBHandle() const
 	{ 
 		return glGetTextureHandleARB(m_Image->GetRendererID()); 
+	}
+
+	void OpenGLTexture::Invalidate()
+	{
 	}
 
 	void OpenGLTexture::Lock()
@@ -210,16 +212,16 @@ namespace LkEngine {
 
 	void OpenGLTexture2D::Bind(unsigned int slot /*= 0*/)
 	{
-		if (m_InTextureArray)
-			return;
+		//if (m_InTextureArray)
+		//	return;
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
 	}
 
 	void OpenGLTexture2D::Unbind(unsigned slot)
 	{
-		if (m_InTextureArray)
-			return;
+		//if (m_InTextureArray)
+		//	return;
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 	}
@@ -280,6 +282,10 @@ namespace LkEngine {
 	void OpenGLTexture2D::Resize(uint32_t width, uint32_t height)
 	{
 		m_Image->Resize(width, height);
+	}
+
+	void OpenGLTexture2D::Invalidate()
+	{
 	}
 
 }

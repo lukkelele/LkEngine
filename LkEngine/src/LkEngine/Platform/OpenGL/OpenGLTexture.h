@@ -19,14 +19,14 @@ namespace LkEngine {
 		void SetData(void* data, uint32_t size);
 		bool IsLoaded() const { return m_Loaded; }
 
+		void Resize(uint32_t width, uint32_t height) override;
+		void Invalidate() override;
+
 		Ref<Image> GetImage() override;
 		Buffer GetWriteableBuffer() override { return m_Image->GetBuffer(); }
 		uint32_t GetMipLevelCount() const override;
 
 		TextureSpecification GetSpecification() const override { return m_Specification; }
-
-		void Resize(uint32_t width, uint32_t height) override;
-
 		uint64_t GetARBHandle() const; 
 
 		void Bind(unsigned int slot = 0) override;
@@ -74,11 +74,12 @@ namespace LkEngine {
 
 		Ref<Image> GetImage() override;
 		Buffer GetWriteableBuffer() override { return m_Image->GetBuffer(); }
-		TextureSpecification GetSpecification() const override { return m_Specification; }
+		void Invalidate() override;
 		void Resize(uint32_t width, uint32_t height) override;
 
 		uint32_t GetMipLevelCount() const override;
 		uint64_t GetARBHandle() const; 
+		TextureSpecification GetSpecification() const override { return m_Specification; }
 
 		void Bind(unsigned int slot = 0) override;
 		void Unbind(unsigned int slot = 0) override;
