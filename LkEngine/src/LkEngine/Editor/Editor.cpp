@@ -145,29 +145,15 @@ namespace LkEngine {
 		UI_HandleManualWindowResize();
 		UI::BeginDockSpace(LkEngine_DockSpace);
 
+		auto renderer2D = Renderer2DAPI::Get().As<OpenGLRenderer2D>();
+		auto framebuffer2D = renderer2D->GetFramebuffer();
+
 		//===================================================================
 		// Main Window
 		//===================================================================
 		static ImVec2 statsWindowSize = ImVec2(ImGui::CalcTextSize("FPS: xyz").x + 200, 400);
 		UI::Begin(UI_CORE_VIEWPORT, UI::CoreViewportFlags);
 		{
-			ImGui::SetCursorPos(ImVec2(LeftSidebarSize.x, 50.0f));
-			if (ImGui::InvisibleButton("ViewportDragAndDrop", Utils::ConvertToImVec2(EditorWindowSize)))
-			{
-			}
-			//if (ImGui::BeginDragDropTargetCustom(windowRect, ImGui::GetCurrentWindow()->ID))
-			if (ImGui::BeginDragDropTarget())
-			{
-				//ImGui::BeginDockableDragDropTarget(ImGui::GetCurrentWindow());
-			    const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FOLDER_DATA_TYPE", ImGuiDragDropFlags_None);
-			    if (payload)
-			    {
-			        LK_CORE_DEBUG_TAG("ContentBrowser", "Folder - AcceptDragDropPayload  Size={}", (int)payload->SourceId);
-			    }
-
-				ImGui::EndDragDropTarget();
-			}
-
 			//=========================================================
 			// Window statistics, FPS counter etc.
 			//=========================================================
@@ -511,7 +497,7 @@ namespace LkEngine {
 					ImGui::EndTabBar();
 				}
 			}
-			ImGui::End();
+			ImGui::End(); // TabBar
 		}
 		// No tabs
 		else 
@@ -534,30 +520,31 @@ namespace LkEngine {
 
 		m_TabManager->End();
 
+		auto& framebuffer = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
+
+		ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground);
+		RenderMirrorTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+		//RenderScreenTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+		ImGui::ImageButton((ImTextureID)framebuffer2D->GetColorAttachmentRendererID(0), ImVec2(EditorWindowSize.x, EditorWindowSize.y + MenuBarSize.y), ImVec2(0, 1), ImVec2(1, 0));
+		if (ImGui::BeginDragDropTarget())
+		{
+		    const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FOLDER_DATA_TYPE", ImGuiDragDropFlags_None);
+		    if (payload)
+		    {
+		        LK_CORE_DEBUG_TAG("ContentBrowser", "Folder - AcceptDragDropPayload  Size={}", (int)payload->SourceId);
+		    }
+
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::End();
+
+
 		ImGui::End(); // Viewport
 		HandleExternalWindows();
 		ImGui::End(); // Core Viewport
 
 		// Take care of tabs here
 		// ....
-
-		auto renderer2D = Renderer2DAPI::Get().As<OpenGLRenderer2D>();
-		//const Ref<OpenGLFramebuffer>& framebuffer2D = renderer2D.GetFramebuffer();
-		auto framebuffer2D = renderer2D->GetFramebuffer();
-		{
-			RenderMirrorTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-			//Renderer2D::DrawQuad({ 100, 100 }, { 200, 200 }, Color::RGBA::Green );
-			Renderer::SubmitQuad({ 100, 100 }, { 200, 200 }, Color::RGBA::Green );
-			RenderScreenTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-
-			ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Once);
-			ImGui::Begin("Editor Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-			{
-				ImGui::Text("FramebufferID: %d (OpenGLFramebuffer)", Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->GetRendererID());
-				ImGui::Image((ImTextureID)framebuffer2D->GetColorAttachmentRendererID(0), ImGui::GetWindowSize(), ImVec2(0, 1), ImVec2(1, 0));
-			}
-			ImGui::End();
-		}
 	}
 
 	void Editor::RenderViewport()
