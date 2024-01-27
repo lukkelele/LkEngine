@@ -2,13 +2,14 @@
 
 #include "LkEngine/Renderer/Renderer2DAPI.h"
 
+#include "OpenGLFramebuffer.h"
+
 #include <stb_image/stb_image.h>
 
 
 namespace LkEngine {
 
     class Entity;
-
 
 	class OpenGLRenderer2D : public Renderer2DAPI
 	{
@@ -41,11 +42,10 @@ namespace LkEngine {
         void DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID = 0) override;
         void DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, uint64_t entityID = 0) override;
 
-        void BindQuadTextures();
-
         Ref<Shader> GetQuadShader() override { return m_QuadShader; }
         Ref<Shader> GetLineShader() override { return m_LineShader; }
-        Framebuffer& GetFramebuffer() { return *m_TargetFramebuffer; }
+
+        Ref<OpenGLFramebuffer> GetFramebuffer() { return m_TargetFramebuffer; }
 
         float GetLineWidth() override;
         void SetLineWidth(float width) override;
@@ -111,7 +111,8 @@ namespace LkEngine {
 
         std::array<Ref<Texture2D>, MaxTextureSlots> m_TextureSlots;
 
-        Ref<Framebuffer> m_TargetFramebuffer;
+        //Ref<Framebuffer> m_TargetFramebuffer;
+        Ref<OpenGLFramebuffer> m_TargetFramebuffer;
 
         struct CameraData
         {
@@ -128,9 +129,8 @@ namespace LkEngine {
 
     //=====================================================================
     // Debug only, to be removed
-    extern unsigned int FramebufferID;
+    //extern unsigned int FramebufferID;
     extern unsigned int TextureColorBufferID, DepthTextureID;
-    extern unsigned int RenderBufferObject;
     extern unsigned int CubeTexture, FloorTexture;
 
     extern unsigned int CubeVAO, CubeVBO;
@@ -251,9 +251,6 @@ namespace LkEngine {
     void GenerateCubeVaoAndVbo(unsigned int& vao, unsigned int& vbo);
     void GeneratePlaneVaoAndVbo(unsigned int& vao, unsigned int& vbo);
     void GenerateScreenQuadVaoAndVbo(unsigned int& vao, unsigned int& vbo);
-
-    void BindMirrorFramebuffer();
-    void BindViewportFramebuffer();
 
     void RenderMirrorTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
     void RenderScreenTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));

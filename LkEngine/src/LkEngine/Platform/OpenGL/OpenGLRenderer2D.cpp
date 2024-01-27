@@ -26,9 +26,8 @@ namespace LkEngine {
     static int Uniform_TextureArray_Quad_Index = 0;
     static int Uniform_TextureArray_Quad_ActiveUnit = GL_TEXTURE0;
 
-    unsigned int FramebufferID;
+    //unsigned int FramebufferID;
     unsigned int TextureColorBufferID, DepthTextureID;
-    unsigned int RenderBufferObject;
     unsigned int CubeTexture, FloorTexture;
 
     unsigned int CubeVAO, CubeVBO;
@@ -69,33 +68,8 @@ namespace LkEngine {
         ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
         DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
 
-        // Target Framebuffer
-        {
-		    FramebufferSpecification framebufferSpec;
-		    framebufferSpec.Attachments = { 
-                ImageFormat::RGBA32F, 
-                ImageFormat::DEPTH24STENCIL8
-            };
-		    framebufferSpec.Samples = 1;
-		    framebufferSpec.ClearColorOnLoad = false;
-		    framebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
-		    framebufferSpec.DebugName = "OpenGLRenderer2D Framebuffer";
-            framebufferSpec.Width = Window::Get().GetViewportWidth();
-            framebufferSpec.Height = Window::Get().GetViewportHeight();
-		    m_TargetFramebuffer = Framebuffer::Create(framebufferSpec);
-            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Color attachment 0: {}", m_TargetFramebuffer->GetColorAttachmentRendererID(0));
-        }
-
-        // OpenGL VAO's and VBO's
-        {
-            GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
-            GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
-            GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
-
-            CubeTexture = LoadTexture("assets/textures/container.jpg");
-            FloorTexture = LoadTexture("assets/textures/metal.png");
-        }
-
+//#define USE_CUSTOM_FRAMEBUFFER
+#ifdef USE_CUSTOM_FRAMEBUFFER
         // OpenGL Framebuffer
         {
             glGenFramebuffers(1, &FramebufferID);
@@ -122,6 +96,34 @@ namespace LkEngine {
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
+#endif
+        // Target Framebuffer
+        {
+		    FramebufferSpecification framebufferSpec;
+		    framebufferSpec.Attachments = { ImageFormat::RGB, ImageFormat::DEPTH24STENCIL8 };
+		    framebufferSpec.Samples = 1;
+		    framebufferSpec.ClearColorOnLoad = false;
+		    framebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
+		    framebufferSpec.DebugName = "OpenGLRenderer2D Framebuffer";
+            framebufferSpec.Width = Window::Get().GetWidth();
+            framebufferSpec.Height = Window::Get().GetHeight();
+		    //m_TargetFramebuffer = Framebuffer::Create(framebufferSpec);
+		    m_TargetFramebuffer = Ref<OpenGLFramebuffer>::Create(framebufferSpec);
+            //LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Color attachment 0: {}", m_TargetFramebuffer->GetColorAttachmentRendererID(0));
+        }
+
+        // OpenGL VAO's and VBO's
+        {
+            m_TargetFramebuffer->Bind();
+            GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
+            GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
+            GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
+
+            CubeTexture = LoadTexture("assets/textures/container.jpg");
+            FloorTexture = LoadTexture("assets/textures/metal.png");
+
+            m_TargetFramebuffer->Unbind();
+        }
 
         // Quads
         {
@@ -132,28 +134,28 @@ namespace LkEngine {
             m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
             // Pipeline
-            PipelineSpecification pipelineSpecification;
-            pipelineSpecification.DebugName = "OpenGLRenderer2D-Quad";
-            pipelineSpecification.Shader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
-            LK_CORE_VERIFY(pipelineSpecification.Shader != nullptr, "Shader is nullptr");
-            pipelineSpecification.TargetFramebuffer = m_TargetFramebuffer;
-            pipelineSpecification.BackfaceCulling = false;
-            pipelineSpecification.Layout = {
-                { "a_Pos",          ShaderDataType::Float3  },
-                { "a_Color",        ShaderDataType::Float4  },
-                { "a_TexCoord",     ShaderDataType::Float2  },
-                { "a_TexIndex",     ShaderDataType::Int,    },
-                { "a_TilingFactor", ShaderDataType::Float,  },
-                { "a_EntityID",     ShaderDataType::Int     },
-            };
+            //PipelineSpecification pipelineSpecification;
+            //pipelineSpecification.DebugName = "OpenGLRenderer2D-Quad";
+            //pipelineSpecification.Shader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
+            //LK_CORE_VERIFY(pipelineSpecification.Shader != nullptr, "Shader is nullptr");
+            //pipelineSpecification.TargetFramebuffer = m_TargetFramebuffer;
+            //pipelineSpecification.BackfaceCulling = false;
+            //pipelineSpecification.Layout = {
+            //    { "a_Pos",          ShaderDataType::Float3  },
+            //    { "a_Color",        ShaderDataType::Float4  },
+            //    { "a_TexCoord",     ShaderDataType::Float2  },
+            //    { "a_TexIndex",     ShaderDataType::Int,    },
+            //    { "a_TilingFactor", ShaderDataType::Float,  },
+            //    { "a_EntityID",     ShaderDataType::Int     },
+            //};
 
-            RenderPassSpecification quadSpec;
-            quadSpec.DebugName = "OpenGLRenderer2D-Quad";
-            quadSpec.Pipeline = Pipeline::Create(pipelineSpecification);
-            m_QuadPass = RenderPass::Create(quadSpec);
-            m_QuadPass->SetInput("Camera", m_CameraUniformBuffer);
-            LK_CORE_VERIFY(m_QuadPass->Validate());
-            m_QuadPass->Bake();
+            //RenderPassSpecification quadSpec;
+            //quadSpec.DebugName = "OpenGLRenderer2D-Quad";
+            //quadSpec.Pipeline = Pipeline::Create(pipelineSpecification);
+            //m_QuadPass = RenderPass::Create(quadSpec);
+            //m_QuadPass->SetInput("Camera", m_CameraUniformBuffer);
+            //LK_CORE_VERIFY(m_QuadPass->Validate());
+            //m_QuadPass->Bake();
             
             // VertexBufferLayout
             m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
@@ -280,9 +282,6 @@ namespace LkEngine {
 
         m_LineIndexCount = 0;
         m_LineVertexBufferPtr = m_LineVertexBufferBase;
-
-        m_TargetFramebuffer->Bind();
-        m_TargetFramebuffer->BindTexture(0, 0); // RGBA32F
     }
 
     void OpenGLRenderer2D::NextBatch()
@@ -294,8 +293,6 @@ namespace LkEngine {
     void OpenGLRenderer2D::EndScene()
     {
         Flush();
-
-        m_TargetFramebuffer->Unbind();
     }
 
     void OpenGLRenderer2D::Flush()
@@ -312,8 +309,10 @@ namespace LkEngine {
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
             m_QuadShader->Bind();
-            BindQuadTextures();
             m_QuadShader->Set("u_ViewProj", m_CameraBuffer.ViewProjection);
+
+            glActiveTexture(Uniform_TextureArray_Quad_ActiveUnit);
+            m_QuadShader->Set("u_TextureArray", Uniform_TextureArray_Quad_Index);
 
 			//Renderer::BeginRenderPass(m_RenderCommandBuffer, m_QuadPass);
 			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, glm::mat4(1.0f), m_QuadIndexCount);
@@ -356,7 +355,6 @@ namespace LkEngine {
             m_Stats.DrawCalls++;
         }
 #endif
-        m_TargetFramebuffer->Unbind();
 
         m_TextureSlotIndex = 0;
     }
@@ -580,17 +578,13 @@ namespace LkEngine {
 #endif
 	}
 
-    void OpenGLRenderer2D::BindQuadTextures()
-    {
-        glActiveTexture(Uniform_TextureArray_Quad_ActiveUnit);
-        m_QuadShader->Set("u_TextureArray", Uniform_TextureArray_Quad_Index);
-    }
-
     void RenderMirrorTexture(const glm::mat4& view, const glm::mat4& proj)
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
+        //glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
+        //BindMirrorFramebuffer();
+        //glBindFramebuffer(GL_FRAMEBUFFER, Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->GetRendererID());
+        Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Bind();
         glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-        // Make sure we clear the framebuffer's content
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -667,27 +661,14 @@ namespace LkEngine {
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
         ScreenShader->Bind();
         glBindVertexArray(QuadVAO);
-        glBindTexture(GL_TEXTURE_2D, TextureColorBufferID);	// use the color attachment texture as the texture of the quad plane
+
+        //glBindTexture(GL_TEXTURE_2D, TextureColorBufferID);	// use the color attachment texture as the texture of the quad plane
+        unsigned int colorAttachment0 = Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->GetColorAttachmentRendererID(0);
+        glBindTexture(GL_TEXTURE_2D, colorAttachment0);	// use the color attachment texture as the texture of the quad plane
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         DebugShader->Unbind();
         ScreenShader->Unbind();
-    }
-
-    void BindMirrorFramebuffer()
-    {
-        glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
-        glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-        // Make sure we clear the framebuffer's content
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-
-    void BindViewportFramebuffer()
-    {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(0.1f, 0.2f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     unsigned int& GetFramebuffer() { return FramebufferID; }
@@ -697,11 +678,16 @@ namespace LkEngine {
     {
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
+
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Cube_Vertices), &Cube_Vertices, GL_STATIC_DRAW);
+
+        // Vertex indexing
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+        // Texture indexing
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     }
@@ -710,12 +696,15 @@ namespace LkEngine {
     {
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
+
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Plane_Vertices), &Plane_Vertices, GL_STATIC_DRAW);
+
         // Vertex indexing
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
         // Texture indexing
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -725,12 +714,15 @@ namespace LkEngine {
     {
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
+
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Quad_Vertices), &Quad_Vertices, GL_STATIC_DRAW);
+
         // Vertex indexing
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
         // Texture indexing
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
