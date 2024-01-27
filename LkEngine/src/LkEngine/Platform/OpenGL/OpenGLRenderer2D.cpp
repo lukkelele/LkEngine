@@ -26,15 +26,6 @@ namespace LkEngine {
     static int Uniform_TextureArray_Quad_Index = 0;
     static int Uniform_TextureArray_Quad_ActiveUnit = GL_TEXTURE0;
 
-    //unsigned int FramebufferID;
-    unsigned int TextureColorBufferID, DepthTextureID;
-    unsigned int CubeTexture, FloorTexture;
-
-    unsigned int CubeVAO, CubeVBO;
-    unsigned int PlaneVAO, PlaneVBO;
-    unsigned int QuadVAO, QuadVBO;
-
-
     OpenGLRenderer2D::OpenGLRenderer2D(const Renderer2DSpecification& specification) 
         : m_Specification(specification)
         , m_MaxVertices(specification.MaxQuads * 4)
@@ -65,38 +56,6 @@ namespace LkEngine {
         m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
         m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
 
-        ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
-        DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-
-//#define USE_CUSTOM_FRAMEBUFFER
-#ifdef USE_CUSTOM_FRAMEBUFFER
-        // OpenGL Framebuffer
-        {
-            glGenFramebuffers(1, &FramebufferID);
-            glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
-
-            // Create a color attachment texture
-            glGenTextures(1, &TextureColorBufferID);
-            glBindTexture(GL_TEXTURE_2D, TextureColorBufferID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Window::Get().GetWidth(), Window::Get().GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, TextureColorBufferID, 0);
-
-            // Create depth texture
-            glGenTextures(1, &DepthTextureID);
-            glBindTexture(GL_TEXTURE_2D, DepthTextureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, Window::Get().GetWidth(), Window::Get().GetHeight(), 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, DepthTextureID, 0);
-
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            {
-                LK_CORE_ERROR_TAG("OpenGLRenderer2D", "Framebuffer is not complete!");
-                exit(EXIT_FAILURE);
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-#endif
         // Target Framebuffer
         {
 		    FramebufferSpecification framebufferSpec;
@@ -107,22 +66,17 @@ namespace LkEngine {
 		    framebufferSpec.DebugName = "OpenGLRenderer2D Framebuffer";
             framebufferSpec.Width = Window::Get().GetWidth();
             framebufferSpec.Height = Window::Get().GetHeight();
-		    //m_TargetFramebuffer = Framebuffer::Create(framebufferSpec);
-		    m_TargetFramebuffer = Ref<OpenGLFramebuffer>::Create(framebufferSpec);
-            //LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Color attachment 0: {}", m_TargetFramebuffer->GetColorAttachmentRendererID(0));
+		    m_TargetFramebuffer = Framebuffer::Create(framebufferSpec);
+            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Color attachment 0: {}", m_TargetFramebuffer->GetColorAttachmentRendererID(0));
         }
 
-        // OpenGL VAO's and VBO's
+        // Debug OpenGL VAO's and VBO's
         {
-            m_TargetFramebuffer->Bind();
             GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
             GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
             GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
-
             CubeTexture = LoadTexture("assets/textures/container.jpg");
             FloorTexture = LoadTexture("assets/textures/metal.png");
-
-            m_TargetFramebuffer->Unbind();
         }
 
         // Quads
@@ -134,28 +88,6 @@ namespace LkEngine {
             m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
             // Pipeline
-            //PipelineSpecification pipelineSpecification;
-            //pipelineSpecification.DebugName = "OpenGLRenderer2D-Quad";
-            //pipelineSpecification.Shader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
-            //LK_CORE_VERIFY(pipelineSpecification.Shader != nullptr, "Shader is nullptr");
-            //pipelineSpecification.TargetFramebuffer = m_TargetFramebuffer;
-            //pipelineSpecification.BackfaceCulling = false;
-            //pipelineSpecification.Layout = {
-            //    { "a_Pos",          ShaderDataType::Float3  },
-            //    { "a_Color",        ShaderDataType::Float4  },
-            //    { "a_TexCoord",     ShaderDataType::Float2  },
-            //    { "a_TexIndex",     ShaderDataType::Int,    },
-            //    { "a_TilingFactor", ShaderDataType::Float,  },
-            //    { "a_EntityID",     ShaderDataType::Int     },
-            //};
-
-            //RenderPassSpecification quadSpec;
-            //quadSpec.DebugName = "OpenGLRenderer2D-Quad";
-            //quadSpec.Pipeline = Pipeline::Create(pipelineSpecification);
-            //m_QuadPass = RenderPass::Create(quadSpec);
-            //m_QuadPass->SetInput("Camera", m_CameraUniformBuffer);
-            //LK_CORE_VERIFY(m_QuadPass->Validate());
-            //m_QuadPass->Bake();
             
             // VertexBufferLayout
             m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
@@ -300,9 +232,9 @@ namespace LkEngine {
 		uint32_t frameIndex = Renderer::GetCurrentFrameIndex();
         uint32_t dataSize = 0;
 
-        //----------------------------------------------------------
+        m_TargetFramebuffer->Bind();
+
         // Quads
-        //----------------------------------------------------------
         if (m_QuadIndexCount)
         {
             dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
@@ -321,10 +253,10 @@ namespace LkEngine {
             m_QuadShader->Unbind();
             m_Stats.DrawCalls++;
         }
+        m_TargetFramebuffer->Unbind();
 
-        //----------------------------------------------------------
+
         // Lines
-        //----------------------------------------------------------
 #if 0
         if (m_LineIndexCount)
         {
@@ -562,170 +494,7 @@ namespace LkEngine {
 
 	Renderer2DAPI::LineVertex*& OpenGLRenderer2D::GetWriteableLineBuffer()
 	{
-#if 0
-		uint32_t frameIndex = Renderer::GetCurrentFrameIndex();
-
-		m_LineBufferWriteIndex = m_LineIndexCount / m_MaxIndices;
-		if (m_LineBufferWriteIndex >= m_LineVertexBufferBases.size())
-		{
-			AddLineBuffer();
-			m_LineVertexBufferPtr.emplace_back(); // TODO(Yan): check
-			m_LineVertexBufferPtr[m_LineBufferWriteIndex] = m_LineVertexBufferBases[m_LineBufferWriteIndex][frameIndex];
-		}
-		return m_LineVertexBufferPtr[m_LineBufferWriteIndex];
-#else
         return m_LineVertexBufferPtr;
-#endif
 	}
-
-    void RenderMirrorTexture(const glm::mat4& view, const glm::mat4& proj)
-    {
-        //glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
-        //BindMirrorFramebuffer();
-        //glBindFramebuffer(GL_FRAMEBUFFER, Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->GetRendererID());
-        Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Bind();
-        glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        DebugShader->Bind();
-        Model = glm::mat4(1.0f);
-        DebugShader->Set("View", view);
-        DebugShader->Set("Projection", proj);
-
-        // Cubes
-        {
-            glBindVertexArray(CubeVAO);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, CubeTexture);
-
-            // Cube 1
-            Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
-            DebugShader->Set("Model", Model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-
-            // Cube 2
-            Model = glm::mat4(1.0f);
-            Model = glm::translate(Model, glm::vec3(2.0f, 0.0f, 0.0f));
-            DebugShader->Set("Model", Model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        // Floor 
-        {
-            glBindVertexArray(PlaneVAO);
-            glBindTexture(GL_TEXTURE_2D, FloorTexture);
-
-            DebugShader->Set("Model", glm::mat4(1.0f));
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-        }
-        glBindVertexArray(0);
-    }
-
-    void RenderScreenTexture(const glm::mat4& view, const glm::mat4& proj)
-    {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(0.1f, 0.2f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        Model = glm::mat4(1.0f);
-        DebugShader->Bind();
-        DebugShader->Set("View", view);
-        DebugShader->Set("Projection", proj);
-
-        // Cubes
-        {
-            // Cube 1
-            glBindVertexArray(CubeVAO);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, CubeTexture);
-            Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
-            DebugShader->Set("Model", Model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-
-            // Cube 2
-            Model = glm::mat4(1.0f);
-            Model = glm::translate(Model, glm::vec3(2.0f, 0.0f, 0.0f));
-            DebugShader->Set("Model", Model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        // Floor
-        {
-            glBindVertexArray(PlaneVAO);
-            glBindTexture(GL_TEXTURE_2D, FloorTexture);
-            DebugShader->Set("Model", glm::mat4(1.0f));
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glBindVertexArray(0);
-        }
-
-        // Now draw the mirror quad with screen texture
-        glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
-        ScreenShader->Bind();
-        glBindVertexArray(QuadVAO);
-
-        //glBindTexture(GL_TEXTURE_2D, TextureColorBufferID);	// use the color attachment texture as the texture of the quad plane
-        unsigned int colorAttachment0 = Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->GetColorAttachmentRendererID(0);
-        glBindTexture(GL_TEXTURE_2D, colorAttachment0);	// use the color attachment texture as the texture of the quad plane
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        DebugShader->Unbind();
-        ScreenShader->Unbind();
-    }
-
-    unsigned int& GetFramebuffer() { return FramebufferID; }
-    unsigned int& GetTextureColorBufferID() { return TextureColorBufferID; }
-
-    void GenerateCubeVaoAndVbo(unsigned int& vao, unsigned int& vbo)
-    {
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Cube_Vertices), &Cube_Vertices, GL_STATIC_DRAW);
-
-        // Vertex indexing
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-        // Texture indexing
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    }
-
-    void GeneratePlaneVaoAndVbo(unsigned int& vao, unsigned int& vbo)
-    {
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Plane_Vertices), &Plane_Vertices, GL_STATIC_DRAW);
-
-        // Vertex indexing
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-        // Texture indexing
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    }
-
-    void GenerateScreenQuadVaoAndVbo(unsigned int& vao, unsigned int& vbo)
-    {
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Quad_Vertices), &Quad_Vertices, GL_STATIC_DRAW);
-
-        // Vertex indexing
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-
-        // Texture indexing
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    }
 
 }

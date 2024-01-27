@@ -540,19 +540,19 @@ namespace LkEngine {
 
 		// Take care of tabs here
 		// ....
-		// .........
 
 		auto renderer2D = Renderer2DAPI::Get().As<OpenGLRenderer2D>();
 		//const Ref<OpenGLFramebuffer>& framebuffer2D = renderer2D.GetFramebuffer();
 		auto framebuffer2D = renderer2D->GetFramebuffer();
 		{
 			RenderMirrorTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+			//Renderer2D::DrawQuad({ 100, 100 }, { 200, 200 }, Color::RGBA::Green );
+			Renderer::SubmitQuad({ 100, 100 }, { 200, 200 }, Color::RGBA::Green );
 			RenderScreenTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
 
 			ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_Once);
 			ImGui::Begin("Editor Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 			{
-				ImGui::Text("FramebufferID: %d", FramebufferID);
 				ImGui::Text("FramebufferID: %d (OpenGLFramebuffer)", Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->GetRendererID());
 				ImGui::Image((ImTextureID)framebuffer2D->GetColorAttachmentRendererID(0), ImGui::GetWindowSize(), ImVec2(0, 1), ImVec2(1, 0));
 			}
