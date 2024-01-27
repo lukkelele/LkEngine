@@ -88,6 +88,9 @@ namespace LkEngine {
             m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
             // Pipeline
+            PipelineSpecification pipelineSpec;
+            pipelineSpec.TargetFramebuffer = m_TargetFramebuffer;
+            m_QuadPass->
             
             // VertexBufferLayout
             m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
@@ -246,49 +249,39 @@ namespace LkEngine {
             glActiveTexture(Uniform_TextureArray_Quad_ActiveUnit);
             m_QuadShader->Set("u_TextureArray", Uniform_TextureArray_Quad_Index);
 
-			//Renderer::BeginRenderPass(m_RenderCommandBuffer, m_QuadPass);
+			Renderer::BeginRenderPass(m_RenderCommandBuffer, m_QuadPass);
 			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, glm::mat4(1.0f), m_QuadIndexCount);
-			//Renderer::EndRenderPass(m_RenderCommandBuffer);
+			Renderer::EndRenderPass(m_RenderCommandBuffer);
 
             m_QuadShader->Unbind();
             m_Stats.DrawCalls++;
         }
-        m_TargetFramebuffer->Unbind();
-
 
         // Lines
-#if 0
         if (m_LineIndexCount)
         {
             uint32_t dataSize = (uint32_t)((uint8_t*)m_LineVertexBufferPtr - (uint8_t*)m_LineVertexBufferBase);
             m_LineVertexBuffer->SetData(m_LineVertexBufferBase, dataSize);
 
-            // TODO: Texture binding here, same as with quads
             m_LineShader->Bind();
             //m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetCamera()->GetViewProjection());
-            m_LineShader->Set("u_ViewProj", Scene::GetActiveScene()->GetCamera()->GetViewProjection());
-
-            auto lineElements = m_LineVertexBuffer->GetLayout().GetElements();
 
             for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
             {
                 if (m_TextureSlots[i])
                 {
                     m_TextureSlots[i]->Bind(i);
-                    //m_LineShader->SetUniform4f("a_Color", m_LineVertexBufferPtr->Color);
                     m_LineShader->Set("a_Color", m_LineVertexBufferPtr->Color);
                 }
             }
-            //RenderCommand::SetLineWidth(m_LineWidth);
-            RenderCommand::DrawLines(*m_LineVertexBuffer, m_LineIndexCount);
+            //Renderer::SubmitLines(*m_LineVertexBuffer, m_LineIndexCount);
 
             m_LineShader->Unbind();
-
             m_Stats.DrawCalls++;
         }
-#endif
 
         m_TextureSlotIndex = 0;
+        m_TargetFramebuffer->Unbind();
     }
 
     void OpenGLRenderer2D::DrawImage(const Ref<Image> image)
