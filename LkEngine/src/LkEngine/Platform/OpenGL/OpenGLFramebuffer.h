@@ -33,26 +33,30 @@ namespace LkEngine {
 
 		const FramebufferSpecification& GetSpecification() const override;
 
+		RendererID& GetRendererID() { return m_RendererID; }
+
 	public:
 		static const uint32_t MaxFramebufferSize = 8192;
 	private:
 		RendererID m_RendererID;
-		//RendererID m_RenderbufferID;
-		//RendererID m_ImageID;
 
 		uint64_t m_Width;
 		uint64_t m_Height;
 
+		unsigned int m_TextureAttachment0;
+		unsigned int m_TextureAttachment1;
+		unsigned int m_DepthAttachment = 0;
+
 		glm::vec4 m_ClearColor;
 		std::vector<uint32_t> m_ColorAttachments;
+		std::vector<Ref<Image2D>> m_ColorAttachmentImages;
 
 		FramebufferSpecification m_Specification;
 		FramebufferTextureSpecification m_DepthAttachmentSpecification;
 		std::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecifications;
 
 		Ref<Image2D> m_Image;
-
-		uint32_t m_DepthAttachment = 0;
     };
+
 
 }
