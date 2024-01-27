@@ -18,7 +18,7 @@ namespace LkEngine {
 
 		void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) override;
 		void AddResizeCallback(const std::function<void(Ref<Framebuffer>)>& func) override;
-		virtual Ref<Image> GetImage(uint32_t attachmentIndex = 0) const override;
+		Ref<Image> GetImage(uint32_t attachmentIndex = 0) const override;
 
 		Ref<Image> GetDepthImage() const override;
 		size_t GetColorAttachmentCount() const override;
@@ -37,20 +37,21 @@ namespace LkEngine {
 		static const uint32_t MaxFramebufferSize = 8192;
 	private:
 		RendererID m_RendererID;
-		RendererID m_RenderbufferID;
-		RendererID m_ImageID;
+		//RendererID m_RenderbufferID;
+		//RendererID m_ImageID;
 
-		uint64_t m_Width, m_Height;
+		uint64_t m_Width;
+		uint64_t m_Height;
+
 		glm::vec4 m_ClearColor;
+		std::vector<uint32_t> m_ColorAttachments;
 
 		FramebufferSpecification m_Specification;
 		FramebufferTextureSpecification m_DepthAttachmentSpecification;
 		std::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecifications;
 
-		Ref<Image> m_Image;
-		Ref<Texture> m_Texture;
+		Ref<Image2D> m_Image;
 
-		std::vector<uint32_t> m_ColorAttachments;
 		uint32_t m_DepthAttachment = 0;
     };
 
