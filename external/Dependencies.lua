@@ -62,12 +62,12 @@ Dependencies = {
 
 }
 
-
-include "external/glfw/premake5.lua"
-include "external/glad/premake5.lua"
-include "external/imgui/premake5.lua"
-include "external/imgui-node-editor/premake5.lua"
-include "external/ImGuizmo/premake5.lua"
-include "external/box2d/premake5.lua"
-include "external/yaml-cpp/premake5.lua"
-include "LkApplication/premake5.lua"
+--include "external/glfw/premake5.lua"
+--include "external/glad/premake5.lua"
+--include "external/imgui/premake5.lua"
+--include "external/ImGuizmo/premake5.lua"
+--include "external/imgui-node-editor/premake5.lua"
+--include "external/box2d/premake5.lua"
+--include "external/yaml-cpp/premake5.lua"
+--
+--include "LkApplication/premake5.lua"
