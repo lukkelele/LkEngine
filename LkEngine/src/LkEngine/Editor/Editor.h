@@ -2,20 +2,24 @@
 
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/Math/Math.h"
+
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
+
+#include "LkEngine/Renderer/Framebuffer.h"
+
 #include "LkEngine/UI/UICore.h"
+#include "LkEngine/UI/SelectionContext.h"
+#include "LkEngine/UI/ContentBrowser.h"
+
+#include "LkEngine/Project/Project.h"
+
 
 #include "EditorTabManager.h"
 #include "ComponentEditor.h"
 #include "NodeEditor/NodeEditor.h"
 
-// TODO: Fix so opengl includes are handles in entrypoint
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
-#include <ImGuizmo/ImGuizmo.h>
+#include "LkEngine/ImGui/ImGuiLayer.h"
 
 
 namespace LkEngine {
@@ -29,6 +33,7 @@ namespace LkEngine {
     constexpr const char* UI_SELECTED_ENTITY_INFO = "##lkengine-selected-entity-info";
 
 	class Scene;
+	class SceneManagerPanel;
 
 	class Editor : public Layer
 	{
@@ -51,32 +56,21 @@ namespace LkEngine {
 		Editor();
 		~Editor() = default;
 
-		static Editor* Get() { return s_Instance; }
+		void OnUpdate();
+		void OnEvent(Event& e) override;
 
-		void RenderImGui();
-		void DrawEntityNode(Entity entity);
-		void DrawComponents(Entity entity);
+		void OnRender();
+		void OnImGuiRender();
 
 		bool IsEnabled() { return m_Enabled; }
 		Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
-		void SetScene(Scene& scene) { m_Scene = &scene; }
+		void SetScene(Ref<Scene> scene);
 		Ref<Scene> GetCurrentScene() { return m_Scene; }
 
-		void OnEvent(Event& e) override;
-
-		template<typename T, typename UIFunction>
-		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
-		template<typename T>
-		void DisplayAddComponentEntry(const std::string& entryName);
-
-		void SetSelectedEntity(Entity entity);
-
-		void UI_SelectedEntityProperties();
 		void UI_HandleManualWindowResize();
 		void UI_SceneContent();
 		void UI_CreateMenu();
 		void UI_RenderSettingsWindow();
-		bool IsEntitySelected() const;
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
 		void SetUpdateWindowFlag(bool flag);
 
@@ -86,8 +80,7 @@ namespace LkEngine {
 		void UI_ShowEditorWindowsDetails();
 		void UI_BackgroundColorModificationMenu();
 
-		std::pair<float, float> GetMouseViewportSpace(bool primary_viewport);
-		Entity GetSelectedEntity() const { return SelectedEntity; }
+		//Ref<Framebuffer> GetFramebuffer() { return m_Framebuffer; }
 
 		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
 		EditorTabManager* GetTabManager() { return m_TabManager; }
@@ -104,21 +97,23 @@ namespace LkEngine {
 		glm::vec2 GetMenuBarSize() const; 
 		glm::vec2 GetTabBarSize() const;
 
+		static Editor* Get() { return m_Instance; }
+
 	private:
+		void RenderViewport();                
+		void RenderViewport(Ref<Image> image); 
+
         void DrawImGuizmo(Entity entity);
 		void HandleExternalWindows();
 
 		void UpdateLeftSidebarSize(ImGuiViewport* viewport);
 		void UpdateRightSidebarSize(ImGuiViewport* viewport);
-		//void RenderViewport();                 // TODO
-		//void RenderViewport(s_ptr<Image> img); // TODO
+
 
 	public:
 		// Flag to determine if an item is currently being created
 		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window
 		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 }; // TODO: REMOVE/UPDATE
-		Entity SelectedEntity;
-		//uint64_t SelectedEntityID = 0;
 
 		glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
 		glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
@@ -151,21 +146,28 @@ namespace LkEngine {
 		int m_GizmoType = GizmoType::Translate;
 		int m_CurrentTabCount = 0; // Incremented to 1 after Editor is initialized
 
-		Ref<EditorCamera> m_EditorCamera = nullptr;
+		//Ref<Framebuffer> m_Framebuffer;
 
-		NodeEditor* m_NodeEditor = nullptr;
-		EditorTabManager* m_TabManager = nullptr;
+		Ref<EditorCamera> m_EditorCamera = nullptr;
+		SceneManagerPanel* m_SceneManagerPanel = nullptr;
+
+		Ref<Project> m_TargetProject;
+		Ref<Project> m_CachedProjects[5];
+
+		NodeEditor* m_NodeEditor;
+		EditorTabManager* m_TabManager;
 		ComponentEditor m_ComponentEditor;
+		ContentBrowser* m_ContentBrowser;
 
 		Window* m_Window = nullptr;
-
 		WindowType m_ActiveWindowType;
 
 		friend class Physics2D; // For getting UI window size when raycasting
 		friend class NodeEditorTab;
 		friend class MaterialEditorTab;
-
-		inline static Editor* s_Instance = nullptr;
+		friend class SceneManagerPanel;
+		
+		inline static Editor* m_Instance = nullptr;
 	};
 
 }
