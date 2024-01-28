@@ -21,6 +21,13 @@ namespace LkEngine {
     struct TransformComponent;
 }
 
+// box2d
+struct b2Vec2;
+struct b2Vec3;
+
+struct ImVec2;
+struct ImVec4;
+
 namespace LkEngine::Math {
 
     enum class Shape
@@ -44,5 +51,17 @@ namespace LkEngine::Math {
     glm::vec2 ScreenToWorld2D(const glm::vec2& ndc, const glm::mat4& inv_proj, const TransformComponent& transform);
     float Get2DRotationFromQuaternion(const glm::quat& quat);
 
+}
+
+namespace LkEngine::Utils {
+
+    glm::vec2 ConvertToGlm(const b2Vec2& vec2);
+    glm::vec3 ConvertToGlm(const b2Vec3& vec3);
+
+    b2Vec2 ConvertToB2(const glm::vec2& vec2);
+    b2Vec3 ConvertToB2(const glm::vec3& vec3);
+
+    ImVec2 ConvertToImVec2(const glm::vec2& vec2);
+    ImVec4 ConvertToImVec4(const glm::vec4& vec4);
 
 }

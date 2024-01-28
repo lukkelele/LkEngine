@@ -6,19 +6,22 @@
 
 #include "LkEngine/ImGui/ImGuiLayer.h"
 
+#include "LkEngine/Physics2D/Physics2D.h"
+
+
 
 namespace LkEngine::Math {
 
-    glm::vec3 Scale(glm::vec3& vec, float scale_factor)
-    {
-        return (vec * scale_factor) / glm::length(vec);
-    }
+	glm::vec3 Scale(glm::vec3& vec, float scale_factor)
+	{
+		return (vec * scale_factor) / glm::length(vec);
+	}
 
-	glm::mat4 TransformMatrix(glm::vec3& translation, glm::quat& rotation, const glm::vec3& scale) 
+	glm::mat4 TransformMatrix(glm::vec3& translation, glm::quat& rotation, const glm::vec3& scale)
 	{
 		return glm::translate(glm::mat4(1.0f), translation)
-			 * glm::toMat4(rotation)
-			 * glm::scale(glm::mat4(1.0f), scale);
+			* glm::toMat4(rotation)
+			* glm::scale(glm::mat4(1.0f), scale);
 	}
 
 	glm::mat4 TransformMatrix2D(const glm::vec3& translation, float rot, const glm::vec3& scale)
@@ -113,81 +116,92 @@ namespace LkEngine::Math {
 	}
 
 
-    glm::vec2 WorldToPos(const glm::vec3& world_pos, const glm::mat4& mat)
-    {
-        //vec_t trans;
-        //trans.TransformPoint(worldPos, mat);
-        //trans *= 0.5f / trans.w;
-        //trans += makeVect(0.5f, 0.5f);
-        //trans.y = 1.f - trans.y;
-        //trans.x *= size.x;
-        //trans.y *= size.y;
-        //trans.x += position.x;
-        //trans.y += position.y;
-        //return ImVec2(trans.x, trans.y);
-        return { 0, 0 };
-    }
+	glm::vec2 WorldToPos(const glm::vec3& world_pos, const glm::mat4& mat)
+	{
+		//vec_t trans;
+		//trans.TransformPoint(worldPos, mat);
+		//trans *= 0.5f / trans.w;
+		//trans += makeVect(0.5f, 0.5f);
+		//trans.y = 1.f - trans.y;
+		//trans.x *= size.x;
+		//trans.y *= size.y;
+		//trans.x += position.x;
+		//trans.y += position.y;
+		//return ImVec2(trans.x, trans.y);
+		return { 0, 0 };
+	}
 
-    glm::vec2 ScreenToWorld(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix)
-    {
-        return glm::vec2();
-    }
+	glm::vec2 ScreenToWorld(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix)
+	{
+		return glm::vec2();
+	}
 
-    glm::vec2 ScreenToWorld2D(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix)
-    {
-        // Convert screen coordinates to normalized device coordinates
-        auto& io = ImGui::GetIO();
-		auto window = Window::Get();
-        int width = window->GetWidth();
-        int height = window->GetHeight();
-        glm::vec4 clipCoords = glm::vec4(
-            2.0f * screenCoords.x / width - 1.0f,
-            1.0f - 2.0f * screenCoords.y / height, 
-            0.0f, 
-            1.0f
-        );
+	glm::vec2 ScreenToWorld2D(const glm::vec2& screenCoords, const glm::mat4& inverseProjectionMatrix, const glm::mat4& inverseViewMatrix)
+	{
+		// Convert screen coordinates to normalized device coordinates
+		auto& io = ImGui::GetIO();
+		auto& window = Window::Get();
+		int width = window.GetWidth();
+		int height = window.GetHeight();
+		glm::vec4 clipCoords = glm::vec4(
+			2.0f * screenCoords.x / width - 1.0f,
+			1.0f - 2.0f * screenCoords.y / height,
+			0.0f,
+			1.0f
+		);
 
-        // Multiply by inverse projection matrix
-        glm::vec4 eyeCoords = inverseProjectionMatrix * clipCoords;
-        eyeCoords.z = -1.0f; // Point into the scene
-        eyeCoords.w = 0.0f;
+		// Multiply by inverse projection matrix
+		glm::vec4 eyeCoords = inverseProjectionMatrix * clipCoords;
+		eyeCoords.z = -1.0f; // Point into the scene
+		eyeCoords.w = 0.0f;
 
-        // Convert to world coordinates
-        glm::vec4 worldCoords = inverseViewMatrix * eyeCoords;
-        return glm::vec2(worldCoords.x, worldCoords.y);
-    }
-
-
-    glm::vec2 ScreenToWorld2D(const glm::vec2& ndc, const glm::mat4& inv_proj, const TransformComponent& transform)
-    {
-        // Convert 2D NDC to homogeneous clip coordinates
-        glm::vec4 clipCoords(ndc.x, ndc.y, 0.0f, 1.0f);
-
-        // Convert from clip space to eye/camera space using inverse projection
-        glm::vec4 eyeCoords = inv_proj * clipCoords;
-
-        // Convert from eye/camera space to world space using inverse transform
-        glm::vec4 worldCoords = transform.GetInvTransform() * eyeCoords;
-
-        return glm::vec2(worldCoords.x, worldCoords.y);
-    }
-
-    float Get2DRotationFromQuaternion(const glm::quat& quat)
-    {
-        glm::quat norm_quat = glm::normalize(quat);
-
-        // Compute the angle of rotation around the Z-axis
-        float angle = std::atan2(
-            2.0f * (norm_quat.w * norm_quat.z + norm_quat.x * norm_quat.y),
-            1.0f - 2.0f * (norm_quat.y * norm_quat.y + norm_quat.z * norm_quat.z)
-        );
-
-        // Convert angle from radians to degrees if needed
-        float angle_deg = glm::degrees(angle);
-
-        return angle_deg;
-    }
+		// Convert to world coordinates
+		glm::vec4 worldCoords = inverseViewMatrix * eyeCoords;
+		return glm::vec2(worldCoords.x, worldCoords.y);
+	}
 
 
+	glm::vec2 ScreenToWorld2D(const glm::vec2& ndc, const glm::mat4& inv_proj, const TransformComponent& transform)
+	{
+		// Convert 2D NDC to homogeneous clip coordinates
+		glm::vec4 clipCoords(ndc.x, ndc.y, 0.0f, 1.0f);
+
+		// Convert from clip space to eye/camera space using inverse projection
+		glm::vec4 eyeCoords = inv_proj * clipCoords;
+
+		// Convert from eye/camera space to world space using inverse transform
+		glm::vec4 worldCoords = transform.GetInvTransform() * eyeCoords;
+
+		return glm::vec2(worldCoords.x, worldCoords.y);
+	}
+
+	float Get2DRotationFromQuaternion(const glm::quat& quat)
+	{
+		glm::quat norm_quat = glm::normalize(quat);
+
+		// Compute the angle of rotation around the Z-axis
+		float angle = std::atan2(
+			2.0f * (norm_quat.w * norm_quat.z + norm_quat.x * norm_quat.y),
+			1.0f - 2.0f * (norm_quat.y * norm_quat.y + norm_quat.z * norm_quat.z)
+		);
+
+		// Convert angle from radians to degrees if needed
+		float angle_deg = glm::degrees(angle);
+
+		return angle_deg;
+	}
+
+}
+
+namespace LkEngine::Utils {
+
+	glm::vec2 ConvertToGlm(const b2Vec2& vec2) { return glm::vec2(vec2.x, vec2.y); }
+	glm::vec3 ConvertToGlm(const b2Vec3& vec3) { return glm::vec3(vec3.x, vec3.y, vec3.z); }
+
+    b2Vec2 ConvertToB2(const glm::vec2& vec2) { return b2Vec2(vec2.x, vec2.y); }
+    b2Vec3 ConvertToB2(const glm::vec3& vec3) { return b2Vec3(vec3.x, vec3.y, vec3.z);  }
+
+	ImVec2 ConvertToImVec2(const glm::vec2& vec2) { return ImVec2(vec2.x, vec2.y); }
+	ImVec4 ConvertToImVec4(const glm::vec4& vec4) { return ImVec4(vec4.x, vec4.y, vec4.z, vec4.w); }
 
 }
