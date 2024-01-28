@@ -1,5 +1,5 @@
 # LkEngine :shaved_ice: 
-> Graphics Engine written in C++17<br>
+> Graphics Engine written in C++20<br>
 >
 > New version of my first engine **LukkelEngine** ([repo](https://github.com/lukkelele/LukkelEngine/tree/main)).<br>
 ---
@@ -16,7 +16,7 @@
 
 ## About 
 
-When I began my first engine **LukkelEngine** I had lots to learn about graphics and engines (still do),
+When I began my first engine **LukkelEngine** I had lots to learn about graphics and engines (I still do),
 and because of this, lots of focus was aimed towards things such as 3D objects and rigid bodies.<br>
 This caused some flaws in the base design that I wasn't too happy with.<br>
 <br>
@@ -37,9 +37,6 @@ When the 2D implementation is done, the plan is to create a game such as **Super
 - ImGui
 - ImGuizmo
 
-### Building LkEngine
-TODO: *this section is to be written in the **somewhat near** future*
-<br>
 
 ## Todo
 <!---------------------- Checklist --------------------------->
@@ -65,6 +62,19 @@ TODO: *this section is to be written in the **somewhat near** future*
 # Development
 
 ## LkEngine Development
+
+### January 28, 2024
+Some 3D rendering, the **Translate** and **Rotate** gizmo modes can be seen as well.
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-2024-01-28_1.png" width=740 height=440>
+	<p align="center">
+</div>
+
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-2024-01-28_2.png" width=740 height=440>
+	<p align="center">
+</div>
+
 
 ### January 1, 2024
 The current look of the engine. Lots to polish. The creation of scene entities through the UI is what's focused for now. 
