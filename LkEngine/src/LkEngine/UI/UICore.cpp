@@ -5,21 +5,19 @@
 #include "LkEngine/Editor/Editor.h"
 
 
-
 namespace LkEngine::UI {
 
-	ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_NoDocking
-		| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
+    ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_None
+        | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
+        //| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar;
 
-    ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoDocking
+    ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_None
         | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
 
     ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_None
-        | ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe
-        | ImGuiDockNodeFlags_NoDockingOverOther | ImGuiDockNodeFlags_NoDockingOverEmpty
-        | ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoDocking | ImGuiDockNodeFlags_NoTabBar;
+        | ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoTabBar;
 
     ImGuiWindowFlags MenuBarFlags = ImGuiWindowFlags_MenuBar
         | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
@@ -29,49 +27,49 @@ namespace LkEngine::UI {
         | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
         | ImGuiWindowFlags_NoMove;
 
+    ImGuiWindowFlags SidebarDockspaceFlags = ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoTabBar;
+
     ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking
         | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
-    static uint32_t s_Counter = 0;
-    static int s_UIContextID = 0;
-    static char s_IDBuffer[16] = "##";
-    static char s_LabelIDBuffer[1024];
+    ImGuiWindowFlags ViewportTextureFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+        | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize;
+
+    static uint32_t Counter = 0;
+    static int UIContextID = 0;
+    static char IDBuffer[16] = "##";
+    static char LabelIDBuffer[1024];
     const char* SelectedEntityWindow = UI_SIDEBAR_RIGHT;
-    static bool LastPushedIDWasString = false;
+
+    static int PushedStyleVars = 0;
+    static int PushedStyleColors = 0;
 
     const char* GenerateID()
     {
-        LK_ITOA(s_Counter++, s_IDBuffer + 2, sizeof(s_IDBuffer) - 2, 16);
-        return s_IDBuffer;
+        LK_ITOA(Counter++, IDBuffer + 2, sizeof(IDBuffer) - 2, 16);
+        return IDBuffer;
     }
 
     void PushID()
     {
-        ImGui::PushID(s_UIContextID++);
-        s_Counter = 0;
+        ImGui::PushID(UIContextID++);
+        Counter = 0;
     }
 
     void PushID(const char* id)
     {
         ImGui::PushID(id);
-        LastPushedIDWasString = true;
     }
 
     void PopID()
     {
         ImGui::PopID();
-        if (LastPushedIDWasString)
-        {
-            LastPushedIDWasString = false;
-            return;
-        }
-        s_UIContextID--;
+        UIContextID--;
     }
 
     void PopID(const char* id)
     {
         ImGui::PopID();
-        LastPushedIDWasString = false;
     }
 
     bool IsInputEnabled()
@@ -140,7 +138,6 @@ namespace LkEngine::UI {
 
     void Begin(const char* windowTitle, ImGuiWindowFlags windowFlags, bool* open)
     {
-        //UI::PushID(windowTitle);
         UI::PushID();
         ImGui::Begin(windowTitle, open, windowFlags);
     }
@@ -153,8 +150,22 @@ namespace LkEngine::UI {
 
     void End()
     {
+        //if (PushedStyleColors > 0) PopStyleColor(PushedStyleColors);
+        //if (PushedStyleVars > 0)   PopStyleVar(PushedStyleVars);
         ImGui::End();
         UI::PopID();
+    }
+    
+    void BeginCoreViewport()
+    {
+        UI::PushID(UI_CORE_VIEWPORT);
+		ImGui::Begin(UI_CORE_VIEWPORT, nullptr, CoreViewportFlags);
+    }
+
+    void EndCoreViewport()
+    {
+        ImGui::End();
+        UI::PopID(UI_CORE_VIEWPORT);
     }
 
     const char* GetSelectedEntityWindowName()
@@ -211,6 +222,52 @@ namespace LkEngine::UI {
 		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
 		ImGui::PopStyleColor(); 
 		ImGui::PopStyleVar(2);
+    }
+
+    void PushStyleVar(ImGuiStyleVar styleVar, const ImVec2& var)
+    {
+        ImGui::PushStyleVar(styleVar, var);
+        PushedStyleVars++;
+    }
+
+    void PushStyleVar(ImGuiStyleVar styleVar, const glm::vec2& var)
+    {
+        ImGui::PushStyleVar(styleVar, ImVec2(var.x, var.y));
+        PushedStyleVars++;
+    }
+
+    void PopStyleVar(uint8_t poppedStyleVars)
+    {
+        ImGui::PopStyleVar(poppedStyleVars);
+        PushedStyleVars = PushedStyleVars - poppedStyleVars;
+        LK_CORE_VERIFY(PushedStyleVars >= 0, "UI StyleVar Push/Pop stack invalid!");
+    }
+
+    void PushStyleColor(ImGuiCol colorVar, const ImVec4& color)
+    {
+        ImGui::PushStyleColor(colorVar, color);
+        PushedStyleColors++;
+    }
+
+    void PushStyleColor(ImGuiCol colorVar, const glm::vec4& color)
+    {
+        ImGui::PushStyleColor(colorVar, ImVec4(color.r, color.g, color.b, color.a));
+        PushedStyleColors++;
+    }
+
+    void PopStyleColor(uint8_t pop)
+    {
+        ImGui::PopStyleColor(pop);
+        PushedStyleColors = PushedStyleColors - pop;
+        LK_CORE_VERIFY(PushedStyleColors >= 0, "UI Color Push/Pop stack invalid!");
+    }
+
+    void PopStyleStack()
+    {
+        if (PushedStyleColors > 0)
+            PopStyleColor(PushedStyleColors);
+        if (PushedStyleVars > 0)
+            PopStyleVar(PushedStyleVars);
     }
 
 }
