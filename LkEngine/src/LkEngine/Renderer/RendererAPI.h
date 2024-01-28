@@ -11,6 +11,8 @@
 #include "UniformBuffer.h"
 #include "TextureLibrary.h"
 #include "MaterialLibrary.h"
+#include "UniformBufferSet.h"
+#include "Framebuffer.h"
 
 #include "RendererCapabilities.h"
 
@@ -34,16 +36,12 @@ namespace LkEngine {
 		virtual void Init() = 0;
 		virtual void Shutdown() = 0;
 
-		static RendererAPIType Current() { return m_CurrentRendererAPI; }
-		static Ref<RendererAPI> Create();
-		static void SetAPI(RendererAPIType api);
-
-		virtual Ref<Renderer2DAPI> GetRenderer2D() = 0;
-		virtual Ref<Renderer2DAPI> GetRenderer2DAPI() = 0;
-
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 		virtual void Clear() = 0;
+
+		virtual void SubmitImage(const Ref<Image> image) = 0;
+		virtual void SubmitImage(const Ref<Image2D> image) = 0;
 
 		virtual void BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass, bool explicitClear = false) = 0;
 		virtual void EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer) = 0;
@@ -68,6 +66,13 @@ namespace LkEngine {
 		virtual void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID) = 0;
 
 		virtual void SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, uint64_t entityID = 0) = 0;
+
+		static RendererAPIType Current() { return m_CurrentRendererAPI; }
+		static Ref<RendererAPI> Create();
+		static void SetAPI(RendererAPIType api);
+
+		virtual Ref<Renderer2DAPI> GetRenderer2D() = 0;
+		virtual Ref<Renderer2DAPI> GetRenderer2DAPI() = 0;
 
 		virtual RendererCapabilities& GetCapabilities() = 0;
 		

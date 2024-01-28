@@ -1,7 +1,12 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Renderer/RendererAPI.h"
-#include "LkEngine/Renderer/Texture.h"
+#include "Renderer.h"
+
+//#include "RendererAPI.h"
+#include "Texture.h"
+#include "GraphicsContext.h"
+
+#include "LkEngine/Core/Application.h"
+
 #include "LkEngine/Scene/Entity.h"
 
 
@@ -12,56 +17,72 @@ namespace LkEngine {
 		RendererAPI::m_CurrentRendererAPI = api;
 	}
 
+	Ref<GraphicsContext> Renderer::GetContext()
+	{
+		return Application::Get()->GetWindow().GetContext();
+	}
+
 	struct RendererData
 	{
-		s_ptr<ShaderLibrary> m_ShaderLibrary;
-		s_ptr<TextureLibrary> m_TextureLibrary;
-		s_ptr<MaterialLibrary> m_MaterialLibrary;
+		Ref<ShaderLibrary> m_ShaderLibrary = nullptr;
+		Ref<TextureLibrary> m_TextureLibrary = nullptr;
+		Ref<MaterialLibrary> m_MaterialLibrary = nullptr;
 
-		s_ptr<Texture2D> WhiteTexture;
-		s_ptr<Texture2D> BlackTexture;
+		Ref<Texture2D> WhiteTexture = nullptr;
+		Ref<Texture2D> BlackTexture = nullptr;
 	};
 
 	static RendererData* Data = nullptr;
 	constexpr static uint32_t RenderCommandQueueCount = 2;
 	static RenderCommandQueue* CommandQueue[RenderCommandQueueCount];
 	static std::atomic<uint32_t> RenderCommandQueueSubmissionIndex = 0;
+	static RenderCommandQueue ResourceFreeQueue[3];
 
 	Renderer::Renderer()
 	{
 		m_Instance = this;
-		RenderCommand::SetRenderer(this);
 	}
 
 	void Renderer::Init()
 	{
+		Data = new RendererData();
+
 		DrawMode = RendererDrawMode::Triangles;
 		CommandQueue[0] = new RenderCommandQueue();
 		CommandQueue[1] = new RenderCommandQueue();
 
-		Data = new RendererData();
-		Data->m_ShaderLibrary = std::make_shared<ShaderLibrary>();
-		Data->m_TextureLibrary = TextureLibrary::Create("assets/textures");
+		Data->m_ShaderLibrary = Ref<ShaderLibrary>::Create();
+		Data->m_TextureLibrary = Ref<TextureLibrary>::Create("assets/textures");
 		Data->m_TextureLibrary->Init();
-		Data->m_MaterialLibrary = std::make_shared<MaterialLibrary>();
+		Data->m_MaterialLibrary = Ref<MaterialLibrary>::Create();
 		Data->m_MaterialLibrary->Init();
 
-		uint32_t whiteTextureData = 0xFFFFFFFF;
+		//s_Config.FramesInFlight = glm::min<uint32_t>(s_Config.FramesInFlight, Application::Get().GetWindow().GetSwapChain().GetImageCount());
+
 		TextureSpecification spec;
+#if 0
+		uint32_t whiteTextureData = 0xFFFFFFFF;
 		spec.Format = ImageFormat::RGBA;
 		spec.Width = 1;
 		spec.Height = 1;
-		Data->WhiteTexture = Texture2D::Create(spec, Buffer(&whiteTextureData, sizeof(uint32_t)));
+		//Data->WhiteTexture = Texture2D::Create(spec, Buffer(&whiteTextureData, sizeof(uint32_t)));
+#endif
 
-		constexpr uint32_t blackTextureData = 0xFF000000;
-		Data->BlackTexture = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
+		Data->WhiteTexture = Data->m_TextureLibrary->GetWhiteTexture2D();
+		//Data->BlackTexture = Data->m_TextureLibrary->GetBlackTexture2D();
+		//LK_CORE_ASSERT(Data->BlackTexture, "Data->BlackTexture is nullptr");
+
+		LK_CORE_ASSERT(Data->WhiteTexture, "Data->WhiteTexture is nullptr");
 
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad", "assets/shaders/Renderer2D_Quad.shader");
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Line", "assets/shaders/Renderer2D_Line.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug", "assets/shaders/Renderer2D_Debug.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen", "assets/shaders/Renderer2D_Screen.shader");
 
-		LOG_DEBUG("Creating Renderer API");
 		m_RendererAPI = RendererAPI::Create();
 		m_RendererAPI->Init();
+
+		m_Renderer2DAPI = m_RendererAPI->GetRenderer2DAPI();
 	}
 
 	void Renderer::Clear()
@@ -111,9 +132,20 @@ namespace LkEngine {
 		return RenderCommandQueueSubmissionIndex;
 	}
 
-	s_ptr<ShaderLibrary> Renderer::GetShaderLibrary()
+	Ref<ShaderLibrary> Renderer::GetShaderLibrary()
 	{
+		LK_CORE_ASSERT(Data->m_ShaderLibrary != nullptr, "ShaderLibrary is nullptr!");
 		return Data->m_ShaderLibrary;
+	}
+
+	void Renderer::SubmitImage(const Ref<Image> image)
+	{
+		m_RendererAPI->SubmitImage(image);
+	}
+
+	void Renderer::SubmitImage(const Ref<Image2D> image)
+	{
+		m_RendererAPI->SubmitImage(image);
 	}
 
 	void Renderer::SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
@@ -135,8 +167,8 @@ namespace LkEngine {
 	void Renderer::SubmitIndexed(VertexBuffer& vb, unsigned int count)
 	{
         vb.Bind();
-        auto& ib = vb.GetIndexBuffer();
-        int indexCount = count ? count : ib->GetCount();
+        //auto ib = vb.GetIndexBuffer();
+		//if (ib != nullptr) int indexCount = count ? count : ib->GetCount();
 		m_RendererAPI->SubmitIndexed(count);
 	}
 
@@ -150,14 +182,14 @@ namespace LkEngine {
 		m_RendererAPI->SubmitQuad(pos, size, color, entityID);
 	}
 
-	void Renderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID)
+	void Renderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
 	{
 		m_RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, texture, entityID);
 	}
 
-	void Renderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID)
+	void Renderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
 	{
-		m_RendererAPI->SubmitQuad(pos, size, texture, entityID);
+		m_RendererAPI->SubmitQuad(pos, size, texture, 0.0f, entityID);
 	}
 
 	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID)
@@ -165,16 +197,13 @@ namespace LkEngine {
         m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, color, tc.Rotation2D, entityID);
     }
 
-	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, uint64_t entityID)
+	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
     {
-        //m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, tc.Rotation2D, entityID);
         m_RendererAPI->SubmitQuad(tc.Translation, size, texture, tc.Rotation2D, entityID);
     }
 
-	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, s_ptr<Texture> texture, const glm::vec4& color, uint64_t entityID)
+	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& color, uint64_t entityID)
     {
-        //m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, color, tc.Rotation2D, entityID);
-        //m_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, texture, color, tc.Rotation2D, entityID);
         m_RendererAPI->SubmitQuad(tc.Translation, size, texture, color, tc.Rotation2D, entityID);
     }
 
@@ -188,13 +217,57 @@ namespace LkEngine {
 		}
 	}
 
-	void Renderer::BeginScene(const Camera& camera)
+	// REMOVE
+	void Renderer::BeginScene(const SceneCamera& camera)
 	{
-		m_RendererAPI->m_Renderer2D->BeginScene(camera);
+		m_Renderer2DAPI->BeginScene(camera);
 	}
 
-	void Renderer::BeginScene(const glm::mat4& viewProjection)
+	// REMOVE
+	void Renderer::BeginScene(const glm::mat4& viewProjectionMatrix)
 	{
+		m_Renderer2DAPI->BeginScene(viewProjectionMatrix);
+	}
+
+	RendererCapabilities& Renderer::GetCapabilities()
+	{
+		return m_RendererAPI->GetCapabilities();
+	}
+
+	uint32_t Renderer::GetCurrentFrameIndex()
+	{
+		return Application::Get()->GetCurrentFrameIndex();
+	}
+
+	uint32_t Renderer::RT_GetCurrentFrameIndex()
+	{
+		// Swapchain owns the RenderThread frame index
+		return Application::Get()->GetWindow().GetSwapChain()->GetCurrentBufferIndex();
+	}
+
+	void Renderer::BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass)
+	{
+		m_RendererAPI->BeginRenderPass(renderCommandBuffer, renderPass, false);
+	}
+
+	void Renderer::EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer)
+	{
+		m_RendererAPI->EndRenderPass(renderCommandBuffer);
+	}
+
+	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
+	{
+		m_RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, vertexBuffer, indexBuffer, transform, indexCount);
+	}
+
+	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Shader> shader, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
+	{
+		m_RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, shader, vertexBuffer, indexBuffer, transform, indexCount);
+	}
+
+	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Material> material, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
+	{
+		m_RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, material, vertexBuffer, indexBuffer, transform, indexCount);
 	}
 
 }

@@ -5,15 +5,19 @@
 
 namespace LkEngine {
 
+    class SceneCamera;
+
     class Renderer2D : public RefCounted
     {
     public:
         static void Init();
         static void Shutdown();
-        static void BeginScene(const Camera& camera);
-        static void BeginScene(const Camera& camera, const glm::mat4& transform);
+        static void BeginScene(const SceneCamera& camera);
+        static void BeginScene(const SceneCamera& camera, const glm::mat4& transform);
         static void EndScene();
         static void Flush();
+
+        static void DrawImage(const Ref<Image> image);
 
         static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);
 
@@ -36,7 +40,7 @@ namespace LkEngine {
         static void SetLineWidth(float width);
 
         static Ref<Renderer2DAPI> Create(const Renderer2DSpecification& specification);
-        void SetRenderer(const Ref<RendererAPI>& renderer) { m_Renderer2D = renderer; }
+        void SetRenderer(const Ref<Renderer2DAPI>& renderer) { m_Renderer2D = renderer; }
 
     protected:
         inline static Ref<Renderer2DAPI> m_Renderer2D = nullptr;

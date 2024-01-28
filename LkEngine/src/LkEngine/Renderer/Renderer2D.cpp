@@ -3,8 +3,10 @@
 
 #include "RendererAPI.h"
 
-#include "LkEngine/Platform/Vulkan/VulkanRenderer2D.h"
 #include "LkEngine/Platform/OpenGL/OpenGLRenderer2D.h"
+//#include "LkEngine/Platform/Vulkan/VulkanRenderer2D.h"
+
+#include "LkEngine/Scene/SceneCamera.h"
 
 
 namespace LkEngine {
@@ -13,8 +15,8 @@ namespace LkEngine {
     {
         switch (RendererAPI::Current())
         {
-            case RendererAPIType::Vulkan: return m_Renderer2D = Ref<VulkanRenderer2D>::Create();
             case RendererAPIType::OpenGL: return m_Renderer2D = Ref<OpenGLRenderer2D>::Create();
+            //case RendererAPIType::Vulkan: return m_Renderer2D = Ref<VulkanRenderer2D>::Create();
         }
         LK_CORE_ASSERT(false, "No render api detected");
     }
@@ -27,12 +29,12 @@ namespace LkEngine {
     {
     }
 
-    void Renderer2D::BeginScene(const Camera& camera) 
+    void Renderer2D::BeginScene(const SceneCamera& camera) 
     {
         m_Renderer2D->BeginScene(camera);
     }
 
-    void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform) 
+    void Renderer2D::BeginScene(const SceneCamera& camera, const glm::mat4& transform) 
     {
         m_Renderer2D->BeginScene(camera, transform);
     }

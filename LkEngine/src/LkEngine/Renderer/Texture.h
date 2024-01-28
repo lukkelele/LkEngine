@@ -1,16 +1,9 @@
 #pragma once
 
-#include <stb_image/stb_image.h>
+#include "LkEngine/Core/Base.h"
 
-#include "LkEngine/Renderer/Image.h"
+#include "Image.h"
 
-#include "LkEngine/Asset/Asset.h"
-
-
-// TODO:
-// - UV Mapping
-// Setting the resolutions of textures should be easy
-// Should be easy to rotate etc
 
 namespace LkEngine {
 
@@ -20,17 +13,39 @@ namespace LkEngine {
 		std::string Name = "";
 		uint32_t Width = 1;
 		uint32_t Height = 1;
-		ImageFormat Format = ImageFormat::RGBA8;
 		bool GenerateMips = true;
+
+		ImageFormat Format = ImageFormat::RGBA;
+		TextureWrap SamplerWrap = TextureWrap::Clamp;
+		TextureFilter SamplerFilter = TextureFilter::Linear;
+
+		bool Storage = false;
+		bool StoreLocally = false;
+
+		std::string DebugName;
 	};
 
-	class Texture : public Asset
+	class Texture : public RefCounted
 	{
 	public:
 		virtual ~Texture() = default;
 
-		static s_ptr<Texture> Create(const TextureSpecification& specification);
-		static s_ptr<Texture> Create(const std::string& path);
+		virtual void SetData(void* data, uint32_t size) = 0;
+		virtual Buffer GetWriteableBuffer() = 0;
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		virtual void Invalidate() = 0;
+
+		virtual void Bind(unsigned int slot = 0) = 0;
+		virtual void Unbind(unsigned int slot = 0) = 0;
+
+		virtual void Lock() = 0;
+		virtual void Unlock() = 0;
+		virtual void Load() = 0;
+		virtual void Unload() = 0;
+		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
+		virtual uint32_t GetMipLevelCount() const = 0;
+
+		virtual TextureSpecification GetSpecification() const = 0;
 
 		virtual RendererID GetRendererID() const = 0;
 		virtual RendererID& GetRendererID() = 0;
@@ -38,48 +53,47 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0; 
 		virtual uint32_t GetHeight() const = 0; 
 		virtual const std::string& GetPath() const = 0;
-		virtual Buffer GetWriteableBuffer() = 0;
-		virtual s_ptr<Image> GetImage() = 0;
 
-		virtual void Bind(unsigned int slot = 0) = 0;
-		virtual void Unbind() = 0;
-		virtual void Lock() = 0;
-		virtual void Unlock() = 0;
-		virtual void SetData(void* data, uint32_t size) = 0;
-		virtual void Load() = 0;
-		virtual void Unload() = 0;
-		virtual bool IsLoaded() const = 0; // { return m_Loaded; }
-		virtual TextureSpecification GetSpecification() const = 0;
+		static Ref<Texture> Create(const TextureSpecification& specification);
 	};
+
 
 	class Texture2D : public Texture
 	{
 	public:
 		virtual ~Texture2D() = default;
 
-		static s_ptr<Texture2D> Create(const TextureSpecification& specification);
-		static s_ptr<Texture2D> Create(const TextureSpecification& specification, Buffer imageData);
-		static s_ptr<Texture2D> Create(const std::string& path);
+		virtual void SetData(void* data, uint32_t size) = 0;
 
-		virtual RendererID GetRendererID() const = 0;
-		virtual RendererID& GetRendererID() = 0;
-		virtual std::string GetName() const = 0;
-		virtual uint32_t GetWidth() const = 0;  
-		virtual uint32_t GetHeight() const = 0;
-		virtual const std::string& GetPath() const = 0; 
+		virtual Ref<Image2D> GetImage() = 0;
+
 		virtual Buffer GetWriteableBuffer() = 0;
-		virtual s_ptr<Image> GetImage() = 0;
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		virtual void Invalidate() = 0;
 
 		virtual void Bind(unsigned int slot = 0) = 0;
-		virtual void Unbind() = 0;
+		virtual void Unbind(unsigned int slot = 0) = 0;
 		virtual void Lock() = 0;
 		virtual void Unlock() = 0;
-		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual bool IsLoaded() const = 0;
+
+		virtual uint32_t GetMipLevelCount() const = 0;
 		virtual TextureSpecification GetSpecification() const = 0;
 
 		virtual void Load() = 0;
 		virtual void Unload() = 0;
+
+		virtual RendererID GetRendererID() const = 0;
+		virtual RendererID& GetRendererID() = 0;
+
+		virtual std::string GetName() const = 0;
+		virtual uint32_t GetWidth() const = 0;  
+		virtual uint32_t GetHeight() const = 0;
+		virtual const std::string& GetPath() const = 0; 
+
+		static Ref<Texture2D> Create(const TextureSpecification& specification);
+		static Ref<Texture2D> Create(const TextureSpecification& specification, Buffer imageData);
+
 	};
 
 }

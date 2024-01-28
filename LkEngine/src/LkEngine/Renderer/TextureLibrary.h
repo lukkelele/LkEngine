@@ -1,7 +1,6 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
-
+//#include "LkEngine/Core/Base.h"
 #include "Texture.h"
 
 
@@ -9,48 +8,47 @@ namespace LkEngine {
 
     constexpr const char* TEXTURE_DIR = "assets/textures";
 
-
-    class TextureLibrary
+    class TextureLibrary : public RefCounted
     {
     public:
         TextureLibrary(const std::string& texturesDir);
         ~TextureLibrary();
 
-        static TextureLibrary* Get() { return m_Instance; }
-        static s_ptr<TextureLibrary> Create(const std::string& texturesDir = TEXTURE_DIR);
-
         void Init(bool loadRecursively = false);
-        void LoadTextures();
-        s_ptr<Texture> GetTexture(int textureID);
-        s_ptr<Texture> GetTexture(const std::string textureName);
-        s_ptr<Texture2D> GetTexture2D(int textureID);
-        s_ptr<Texture2D> GetTexture2D(const std::string textureName);
-        s_ptr<Texture> GetWhiteTexture();
-        s_ptr<Texture2D> GetWhiteTexture2D();
-        s_ptr<Texture> GetBlackTexture();
-        s_ptr<Texture2D> GetBlackTexture2D();
-        s_ptr<Texture> AddTexture(const std::string& textureName, const std::string& filePath);
-        s_ptr<Texture> AddTexture2D(const std::string& textureName, const std::string& filePath);
-        s_ptr<Texture> AddTexture2D(s_ptr<Texture2D> texture);
-        s_ptr<Texture> AddTexture2D(const TextureSpecification& texture);
+        Ref<Texture> GetTexture(int textureID);
+        Ref<Texture> GetTexture(const std::string textureName);
+
+        Ref<Texture2D> GetTexture2D(int textureID);
+        Ref<Texture2D> GetTexture2D(const std::string textureName);
+
+        Ref<Texture2D> AddTexture2D(const TextureSpecification& texture);
         std::string GetTexturesDirectoryPath() { return m_TexturesDir; }
+
         void RenameTexture(const std::string& name, const std::string& newName);
-        std::vector<std::pair<std::string, s_ptr<Texture2D>>> GetTextures2D();
+        std::vector<std::pair<std::string, Ref<Texture2D>>> GetTextures2D();
+
+        Ref<Texture> GetWhiteTexture();
+        Ref<Texture2D> GetWhiteTexture2D();
+
+        Ref<Texture> GetBlackTexture();
+        Ref<Texture2D> GetBlackTexture2D();
+
         bool VerifyTexturesAreLoaded() const;
+
+        static Ref<TextureLibrary> Get() { return m_Instance; }
+        static Ref<TextureLibrary> Create(const std::string& texturesDir = TEXTURE_DIR);
 
     private:
         bool m_Initialized = false;
         std::string m_TexturesDir;
 
-        std::unordered_map<std::string, s_ptr<Texture>> m_Collection;
-        std::unordered_map<std::string, s_ptr<Texture2D>> m_Collection2D;
-        //std::map<std::string, s_ptr<Texture>> m_Collection;
-        //std::map<std::string, s_ptr<Texture2D>> m_Collection2D;
+        std::unordered_map<std::string, Ref<Texture>> m_Collection;
+        std::unordered_map<std::string, Ref<Texture2D>> m_Collection2D;
 
-        s_ptr<Texture2D> m_WhiteTexture2D = nullptr;
-        s_ptr<Texture2D> m_BlackTexture2D = nullptr;
+        Ref<Texture2D> m_WhiteTexture2D = nullptr;
+        Ref<Texture2D> m_BlackTexture2D = nullptr;
 
-        inline static TextureLibrary* m_Instance = nullptr;
+        inline static Ref<TextureLibrary> m_Instance = nullptr;
     };
 
 }
