@@ -90,6 +90,7 @@ namespace LkEngine {
             PipelineSpecification quadPipelineSpec;
             quadPipelineSpec.TargetFramebuffer = m_TargetFramebuffer;
             quadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
+            quadPipelineSpec.Shader = m_QuadShader;
 
             RenderPassSpecification quadPassSpec;
             quadPassSpec.DebugName = "Renderer2D-QuadPass";
@@ -255,9 +256,9 @@ namespace LkEngine {
             glActiveTexture(Uniform_TextureArray_Quad_ActiveUnit);
             m_QuadShader->Set("u_TextureArray", Uniform_TextureArray_Quad_Index);
 
-			Renderer::BeginRenderPass(m_RenderCommandBuffer, m_QuadPass);
+			//Renderer::BeginRenderPass(m_RenderCommandBuffer, m_QuadPass);
 			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, glm::mat4(1.0f), m_QuadIndexCount);
-			Renderer::EndRenderPass(m_RenderCommandBuffer);
+			//Renderer::EndRenderPass(m_RenderCommandBuffer);
 
             m_QuadShader->Unbind();
             m_Stats.DrawCalls++;
@@ -335,7 +336,6 @@ namespace LkEngine {
         DrawQuad(transform, color, entityID);
     }
                                                                                                           
-    // Draw without texture - use color
     void OpenGLRenderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         float textureIndex = 0; 

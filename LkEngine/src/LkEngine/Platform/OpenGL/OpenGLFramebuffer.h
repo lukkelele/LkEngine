@@ -14,6 +14,7 @@ namespace LkEngine {
 		void Invalidate() override;
 		int ReadPixel(uint32_t attachmentIndex, int x, int y) override;
 		void ClearAttachment(uint32_t attachmentIndex, int value) override;
+		void Clear() override;
 		uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const override;
 
 		void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) override;
@@ -30,13 +31,14 @@ namespace LkEngine {
 
 		uint32_t GetWidth() const override;
 		uint32_t GetHeight() const override;
+		uint64_t GetSize() const { return (m_Width * m_Height); }
 
 		const FramebufferSpecification& GetSpecification() const override;
 
 		RendererID& GetRendererID() { return m_RendererID; }
 
 	public:
-		static const uint32_t MaxFramebufferSize = 8192;
+		//static const uint32_t MaxFramebufferSize = 8192;
 	private:
 		RendererID m_RendererID;
 
@@ -48,8 +50,9 @@ namespace LkEngine {
 		unsigned int m_DepthAttachment = 0;
 
 		glm::vec4 m_ClearColor;
-		std::vector<uint32_t> m_ColorAttachments;
-		std::vector<Ref<Image2D>> m_ColorAttachmentImages;
+		std::vector<Ref<Image2D>> m_ColorAttachments;
+		std::vector<uint32_t> m_ColorAttachmentRendererIDs;
+		//std::vector<Ref<Image2D>> m_ColorAttachmentImages;
 
 		FramebufferSpecification m_Specification;
 		FramebufferTextureSpecification m_DepthAttachmentSpecification;

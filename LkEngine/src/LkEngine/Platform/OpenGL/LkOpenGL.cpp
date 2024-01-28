@@ -364,6 +364,33 @@ namespace LkEngine {
         ScreenShader->Unbind();
     }
 
+	void RenderCubes(const glm::mat4& view, const glm::mat4& projection)
+	{
+         glBindVertexArray(CubeVAO);
+         glActiveTexture(GL_TEXTURE0);
+         glBindTexture(GL_TEXTURE_2D, CubeTexture);
+
+         // Cube 1
+         Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
+         DebugShader->Set("Model", Model);
+         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+         // Cube 2
+         Model = glm::mat4(1.0f);
+         Model = glm::translate(Model, glm::vec3(2.0f, 0.0f, 0.0f));
+         DebugShader->Set("Model", Model);
+         glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+
+	void RenderFloor(const glm::mat4& view, const glm::mat4& projection)
+	{
+        glBindVertexArray(PlaneVAO);
+        glBindTexture(GL_TEXTURE_2D, FloorTexture);
+
+        DebugShader->Set("Model", glm::mat4(1.0f));
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
     void GenerateCubeVaoAndVbo(unsigned int& vao, unsigned int& vbo)
     {
         glGenVertexArrays(1, &vao);

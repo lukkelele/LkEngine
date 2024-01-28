@@ -11,7 +11,7 @@ namespace LkEngine {
         OpenGLImGuiLayer();
         ~OpenGLImGuiLayer();
 
-        void Init(Ref<Window>& window);
+        void Init();
         void Shutdown();
 
         void OnAttach() {}

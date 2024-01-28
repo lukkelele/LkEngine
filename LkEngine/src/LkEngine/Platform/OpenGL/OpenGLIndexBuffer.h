@@ -22,7 +22,8 @@ namespace LkEngine {
 
 		void Bind() const override;
 
-		RendererID GetID() const { return m_RendererID; }
+		RendererID GetRendererID() const override { return m_RendererID; }
+		RendererID& GetRendererID() override { return m_RendererID; }
 
 	private:
 		Buffer m_LocalData;
