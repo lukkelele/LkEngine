@@ -48,15 +48,6 @@ namespace LkEngine {
 		m_Window = &window;
 		LK_CORE_ASSERT(m_Window != nullptr, "Window is nullptr");
 
-		//FramebufferSpecification framebufferSpec;
-		//framebufferSpec.ClearColor = Renderer::BackgroundColor; // TODO: Update BackgroundColor to 'ClearColor'
-		//framebufferSpec.DebugName = "EditorFramebuffer";
-		//framebufferSpec.Attachments = { ImageFormat::RGBA8, ImageFormat::RED32UI, ImageFormat::Depth };
-		//framebufferSpec.Width = m_Window->GetViewportWidth();
-		//framebufferSpec.Height = m_Window->GetViewportHeight();
-		//m_Framebuffer = Framebuffer::Create(framebufferSpec);
-		//LK_CORE_DEBUG_TAG("Editor", "Created framebuffer");
-
 		m_ViewportBounds[0] = { 0, 0 };
 		m_ViewportBounds[1] = { window.GetViewportWidth(), window.GetViewportHeight() };
 		m_SecondViewportBounds[0] = { 0, 0 };
@@ -91,9 +82,9 @@ namespace LkEngine {
 			m_TabManager->Init();
 			auto viewportTab = m_TabManager->NewTab("Viewport", EditorTabType::Viewport, true);
 		}
+
 		// Default project
 		// TODO: Parse config or cache to determine most recent project and go from there
-
 		m_TargetProject = Ref<Project>::Create();
 		m_TargetProject->CreateDefaultProject();
 		SetScene(m_TargetProject->Data.TargetScene);
@@ -114,7 +105,7 @@ namespace LkEngine {
 			Mouse::CenterPos.x = (Mouse::Pos.x / m_Window->GetWidth()) * 2.0f - 1.0f;
 			Mouse::CenterPos.y = ((Mouse::Pos.y / m_Window->GetHeight()) * 2.0f - 1.0f) * -1.0f; // was -1.0f 
 		}
-
+		RenderViewport();
 	}
 
 	void Editor::OnRender()
@@ -154,6 +145,7 @@ namespace LkEngine {
 		static ImVec2 statsWindowSize = ImVec2(ImGui::CalcTextSize("FPS: xyz").x + 200, 400);
 		UI::Begin(UI_CORE_VIEWPORT, UI::CoreViewportFlags);
 		{
+			//RenderViewport();
 			//=========================================================
 			// Window statistics, FPS counter etc.
 			//=========================================================
@@ -294,7 +286,7 @@ namespace LkEngine {
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			if (ImGui::TreeNode("Colors"))
 			{
-				UI_BackgroundColorModificationMenu();
+				UI_ClearColorModificationMenu();
 				ImGui::TreePop();
 			}
 			//====================================================
@@ -520,24 +512,44 @@ namespace LkEngine {
 
 		m_TabManager->End();
 
-		auto& framebuffer = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
-
+		OpenGLFramebuffer& framebuffer = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
+		Ref<Image2D> viewportImage = framebuffer.GetImage(0);
 		ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground);
-		RenderMirrorTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-		//RenderScreenTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-		ImGui::ImageButton((ImTextureID)framebuffer2D->GetColorAttachmentRendererID(0), ImVec2(EditorWindowSize.x, EditorWindowSize.y + MenuBarSize.y), ImVec2(0, 1), ImVec2(1, 0));
-		if (ImGui::BeginDragDropTarget())
 		{
-		    const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FOLDER_DATA_TYPE", ImGuiDragDropFlags_None);
-		    if (payload)
-		    {
-		        LK_CORE_DEBUG_TAG("ContentBrowser", "Folder - AcceptDragDropPayload  Size={}", (int)payload->SourceId);
-		    }
+			//RenderScreenTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+			RenderFloor(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+			//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+			//ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+			//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
-			ImGui::EndDragDropTarget();
+			ImGui::ImageButton((ImTextureID)viewportImage->GetRendererID(), ImVec2(EditorWindowSize.x, EditorWindowSize.y + MenuBarSize.y), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::PopStyleVar(1);
+			//ImGui::PopStyleColor(3);
+
+			if (ImGui::BeginDragDropTarget())
+			{
+			    const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FOLDER_DATA_TYPE", ImGuiDragDropFlags_None);
+			    if (payload)
+			    {
+			        LK_CORE_DEBUG_TAG("ContentBrowser", "Folder - AcceptDragDropPayload  Size={}", (int)payload->SourceId);
+			    }
+
+				ImGui::EndDragDropTarget();
+			}
+			ImGui::Text("Viewport Image: {}", viewportImage->GetSpecification().DebugName);
 		}
-		ImGui::End();
 
+		// Temporary check
+		//if (!ScreenShader)
+		//	ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
+		//glDisable(GL_DEPTH_TEST);
+		////ScreenShader->Bind();
+		//glBindVertexArray(QuadVAO);
+		glBindTexture(GL_TEXTURE_2D, viewportImage->GetRendererID());
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		ImGui::End();
 
 		ImGui::End(); // Viewport
 		HandleExternalWindows();
@@ -549,6 +561,19 @@ namespace LkEngine {
 
 	void Editor::RenderViewport()
 	{
+		auto& framebuffer2D = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
+		auto viewportImage = framebuffer2D.GetImage(0);
+		//LK_CORE_DEBUG("Viewport Image: {}", viewportImage->GetSpecification().DebugName);
+
+		framebuffer2D.Bind();
+		framebuffer2D.BindTexture(0);
+
+		RenderMirrorTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+		RenderCubes(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+		RenderFloor(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+		Renderer::SubmitQuad({ 200, 0, 640 }, { 140, 90 }, Color::RGBA::Red);
+
+		framebuffer2D.Unbind();
 	}
 
 	void Editor::RenderViewport(Ref<Image> image)
@@ -606,6 +631,8 @@ namespace LkEngine {
 			return;
 		}
 
+		auto& framebuffer2D = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
+
 		auto& tc = entity.Transform();
         glm::mat4 transform_matrix = tc.GetTransform();
 
@@ -623,6 +650,8 @@ namespace LkEngine {
 		float pos_y = m_SecondViewportBounds[0].y;
 		float width  = m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x;
 		float height = m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y;
+
+		framebuffer2D.Bind();
 
 		auto window = ImGui::FindWindowByName(UI_CORE_VIEWPORT);
 		ImGui::SetNextWindowViewport(window->ID);
@@ -656,6 +685,8 @@ namespace LkEngine {
 			}
 		}
 		ImGui::End();
+
+		framebuffer2D.Unbind();
     }
 
 	void Editor::UI_HandleManualWindowResize()
@@ -1080,21 +1111,21 @@ namespace LkEngine {
 		}
 	}
 
-	void Editor::UI_BackgroundColorModificationMenu()
+	void Editor::UI_ClearColorModificationMenu()
 	{
 		static ImGuiSliderFlags backgroundSliderFlags = ImGuiSliderFlags_None;
 		auto& colors = ImGui::GetStyle().Colors;
 		ImGui::BeginGroup();
 		{
-			UI::PushID("##BackgroundColorsModification");
+			UI::PushID("##ClearColorsModification");
 			ImGui::Text("Background"); 
-			ImGui::SliderFloat("##x", &Renderer::BackgroundColor.x, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
-			ImGui::SliderFloat("##y", &Renderer::BackgroundColor.y, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
-			ImGui::SliderFloat("##z", &Renderer::BackgroundColor.z, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
-			ImGui::SliderFloat("##w", &Renderer::BackgroundColor.w, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
+			ImGui::SliderFloat("##x", &Renderer::ClearColor.x, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
+			ImGui::SliderFloat("##y", &Renderer::ClearColor.y, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
+			ImGui::SliderFloat("##z", &Renderer::ClearColor.z, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
+			ImGui::SliderFloat("##w", &Renderer::ClearColor.w, 0.0f, 1.0f, " %.3f", backgroundSliderFlags);
 			ImGui::SliderFloat("UI Alpha", &colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", backgroundSliderFlags);
 			UI::PopID();
-			//UI::PopID("##BackgroundColors");
+			//UI::PopID("##ClearColors");
 		}
 		ImGui::EndGroup();
 	}

@@ -59,7 +59,7 @@ namespace LkEngine {
         // Target Framebuffer
         {
 		    FramebufferSpecification framebufferSpec;
-		    framebufferSpec.Attachments = { ImageFormat::RGB, ImageFormat::DEPTH24STENCIL8 };
+		    framebufferSpec.Attachments = { ImageFormat::RGBA32F, ImageFormat::DEPTH24STENCIL8 };
 		    framebufferSpec.Samples = 1;
 		    framebufferSpec.ClearColorOnLoad = false;
 		    framebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
@@ -81,16 +81,22 @@ namespace LkEngine {
 
         // Quads
         {
-            // Vertex Positions
             m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
             m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
             m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
             m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
             // Pipeline
-            PipelineSpecification pipelineSpec;
-            pipelineSpec.TargetFramebuffer = m_TargetFramebuffer;
-            m_QuadPass->
+            PipelineSpecification quadPipelineSpec;
+            quadPipelineSpec.TargetFramebuffer = m_TargetFramebuffer;
+            quadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
+
+            RenderPassSpecification quadPassSpec;
+            quadPassSpec.DebugName = "Renderer2D-QuadPass";
+            quadPassSpec.Pipeline = Pipeline::Create(quadPipelineSpec);
+            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Created new pipeline {}", quadPipelineSpec.DebugName);
+
+            m_QuadPass = RenderPass::Create(quadPassSpec);
             
             // VertexBufferLayout
             m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
@@ -235,7 +241,7 @@ namespace LkEngine {
 		uint32_t frameIndex = Renderer::GetCurrentFrameIndex();
         uint32_t dataSize = 0;
 
-        m_TargetFramebuffer->Bind();
+        //m_TargetFramebuffer->Bind();
 
         // Quads
         if (m_QuadIndexCount)
@@ -281,7 +287,7 @@ namespace LkEngine {
         }
 
         m_TextureSlotIndex = 0;
-        m_TargetFramebuffer->Unbind();
+        //m_TargetFramebuffer->Unbind();
     }
 
     void OpenGLRenderer2D::DrawImage(const Ref<Image> image)
@@ -358,7 +364,6 @@ namespace LkEngine {
 
     void OpenGLRenderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, uint64_t entityID)
     {
-#if 0
         m_LineVertexBufferPtr->Position = p0;
         m_LineVertexBufferPtr->Color = color;
         m_LineVertexBufferPtr++;
@@ -366,19 +371,8 @@ namespace LkEngine {
         m_LineVertexBufferPtr->Position = p1;
         m_LineVertexBufferPtr->Color = color;
         m_LineVertexBufferPtr++;
-#endif
-		auto& bufferPtr = GetWriteableLineBuffer();
-		bufferPtr->Position = p0;
-		bufferPtr->Color = color;
-		bufferPtr++;
-
-		bufferPtr->Position = p1;
-		bufferPtr->Color = color;
-		bufferPtr++;
-
 
         m_LineIndexCount += 2;
-
         m_Stats.LineCount++;
     }
 
@@ -395,8 +389,7 @@ namespace LkEngine {
 
     void OpenGLRenderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID)
     {
-        if (texture == nullptr)
-            throw std::runtime_error("Passed texture to DrawQuad was nullptr");
+        LK_CORE_ASSERT(texture, "Passed texture to DrawQuad was nullptr");
 
         if (m_QuadIndexCount >= m_MaxIndices)
             NextBatch();
@@ -457,7 +450,7 @@ namespace LkEngine {
             if (m_TextureSlots[i] == nullptr)
             {
                 m_TextureSlots[i] = texture;
-                LK_CORE_DEBUG("OpenGLRenderer2D: Added texture \"{}\" to slot {}!", texture->GetName(), i);
+                LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Added texture \"{}\" to slot {}!", texture->GetName(), i);
                 break;
             }
         }
@@ -468,7 +461,7 @@ namespace LkEngine {
         if (m_TextureSlots[slot] == nullptr)
         {
             m_TextureSlots[slot] = texture;
-            LK_CORE_DEBUG("OpenGLRenderer2D: Added texture \"{}\" to slot {}!", texture->GetName(), slot);
+            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Added texture \"{}\" to slot {}!", texture->GetName(), slot);
         }
     }
 
