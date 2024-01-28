@@ -110,6 +110,7 @@ namespace LkEngine {
 
 	void Editor::OnRender()
 	{
+		RenderViewport();
 	}
 
 	void Editor::OnImGuiRender()
@@ -125,12 +126,9 @@ namespace LkEngine {
 		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
 		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 
-		// TODO: Update this part here with the mouse update and viewport sclers
-		if (m_Scene && SELECTION::SelectedEntity)
-			SELECTION::SelectedEntity = m_Scene->GetEntityWithUUID(SELECTION::SelectedEntity.GetUUID());
+		if (m_Scene && SELECTION::SelectedEntity != SELECTION::NULL_ENTITY)
+			SELECTION::SelectedEntity = m_Scene->TryGetEntityWithUUID(SELECTION::SelectedEntity.GetUUID());
 
-		//m_Framebuffer->Bind();
-		//m_Framebuffer->ClearAttachment(1, -1);
 
 		UI::BeginViewport(UI_CORE_VIEWPORT, m_Window, viewport);
 		UI_HandleManualWindowResize();
@@ -138,47 +136,6 @@ namespace LkEngine {
 
 		auto renderer2D = Renderer2DAPI::Get().As<OpenGLRenderer2D>();
 		auto framebuffer2D = renderer2D->GetFramebuffer();
-
-		//===================================================================
-		// Main Window
-		//===================================================================
-		static ImVec2 statsWindowSize = ImVec2(ImGui::CalcTextSize("FPS: xyz").x + 200, 400);
-		UI::Begin(UI_CORE_VIEWPORT, UI::CoreViewportFlags);
-		{
-			//RenderViewport();
-			//=========================================================
-			// Window statistics, FPS counter etc.
-			//=========================================================
-			if (m_TabManager->GetTabCount() == 1)
-				ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x + EditorWindowSize.x - statsWindowSize.x, MenuBarSize.y), ImGuiCond_Always);
-			else
-				ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x + EditorWindowSize.x - statsWindowSize.x, MenuBarSize.y + TabBarSize.y), ImGuiCond_Always);
-			ImGui::BeginChild("##WindowStats", statsWindowSize, false, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoInputs);
-			{
-				float fps = 1000.0f / app->GetTimestep();
-				ImGui::Text("FPS: %1.f", fps);
-
-				// Editor Camera information
-				if (m_EditorCamera->m_IsActive)
-				{
-					ImGui::Text("FOV: %1.f", m_EditorCamera->m_DegPerspectiveFOV);
-					const glm::vec3 camPos = m_EditorCamera->GetPosition();
-					ImGui::Text("Pos (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
-					ImGui::Text("Pitch: %.3f  Yaw: %.3f", m_EditorCamera->GetPitch(), m_EditorCamera->GetYaw());
-					ImGui::Text("Camera Zoom: %.3f", m_EditorCamera->ZoomSpeed());
-					ImGui::Text("Speed: %.3f", m_EditorCamera->GetCameraSpeed());
-					ImGui::Text("Distance: %.2f", m_EditorCamera->GetDistance());
-					ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", m_EditorCamera->GetFocalPoint().x, m_EditorCamera->GetFocalPoint().y, m_EditorCamera->GetFocalPoint().z);
-					if (SELECTION::SelectedEntity)
-						ImGui::Text("Selected ID: %llu", SELECTION::SelectedEntity.GetUUID());
-					else
-						ImGui::Text("Selected ID: None");
-				}
-				ImGui::EndChild();
-			}
-		}
-		UI::End();
-
 
 		//=========================================================
 		// Menubar
@@ -374,7 +331,7 @@ namespace LkEngine {
 
 		if (SELECTION::SelectedEntity.m_EntityHandle != entt::null && m_GizmoType != -1)
 		{
-			DrawImGuizmo(SELECTION::SelectedEntity);
+			//DrawImGuizmo(SELECTION::SelectedEntity);
 			//if (SELECTION::SelectedEntity.m_Scene != nullptr) DrawImGuizmo(SELECTION::SelectedEntity);
 		}
 
@@ -501,32 +458,31 @@ namespace LkEngine {
 
 		lastTabCount = m_TabManager->GetTabCount();
 
-		// If the window sizes have been adjusted, set the bool member to false
-		// This must be run BEFORE the 'WindowsHaveChangedInSize' if-statement
-		if (ShouldUpdateWindowSizes == true)
-			ShouldUpdateWindowSizes = false; 
-
-		glm::vec2 viewportSize = { viewport->WorkSize.x, viewport->WorkSize.y };
-		//glm::vec2 viewportSize = { viewport->Size.x, viewport->Size.y };
-		UI_SyncEditorWindowSizes(viewportSize);
-
-		m_TabManager->End();
-
-		OpenGLFramebuffer& framebuffer = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
-		Ref<Image2D> viewportImage = framebuffer.GetImage(0);
-		ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground);
+		//===================================================================
+		// Main Window
+		//===================================================================
+		static ImVec2 statsWindowSize = ImVec2(ImGui::CalcTextSize("FPS: xyz").x + 200, 400);
+		ImGui::SetCursorPos(Utils::ConvertToImVec2(EditorWindowPos));
+		UI::Begin(UI_CORE_VIEWPORT, UI::CoreViewportFlags);
 		{
-			//RenderScreenTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-			RenderFloor(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+			OpenGLFramebuffer& framebuffer = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
+			Ref<Image2D> viewportImage = framebuffer.GetImage(0);
+			ImGui::Begin("ViewportTexture", nullptr, UI::CoreViewportFlags | ImGuiWindowFlags_NoScrollWithMouse);
 			//ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
 			//ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
 			//ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+			//ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
+			UI::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+			UI::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+			UI::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			UI::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 			ImGui::ImageButton((ImTextureID)viewportImage->GetRendererID(), ImVec2(EditorWindowSize.x, EditorWindowSize.y + MenuBarSize.y), ImVec2(0, 1), ImVec2(1, 0));
-			ImGui::PopStyleVar(1);
+			//UI::PopStyleStack();
+			UI::PopStyleColor(3);
+			UI::PopStyleVar(1);
+			//ImGui::PopStyleVar(1);
 			//ImGui::PopStyleColor(3);
-
 			if (ImGui::BeginDragDropTarget())
 			{
 			    const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FOLDER_DATA_TYPE", ImGuiDragDropFlags_None);
@@ -537,26 +493,71 @@ namespace LkEngine {
 
 				ImGui::EndDragDropTarget();
 			}
-			ImGui::Text("Viewport Image: {}", viewportImage->GetSpecification().DebugName);
+			//ImGui::Text("Viewport Image: {}", viewportImage->GetSpecification().DebugName);
+
+			if (SELECTION::SelectedEntity)
+				DrawImGuizmo(SELECTION::SelectedEntity);
+
+			ImGui::End();
+			
+
+			//=========================================================
+			// Window statistics, FPS counter etc.
+			//=========================================================
+			if (m_TabManager->GetTabCount() == 1)
+				ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x + EditorWindowSize.x - statsWindowSize.x, MenuBarSize.y), ImGuiCond_Always);
+			else
+				ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x + EditorWindowSize.x - statsWindowSize.x, MenuBarSize.y + TabBarSize.y), ImGuiCond_Always);
+			ImGui::BeginChild("##WindowStats", statsWindowSize, false, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoInputs);
+			{
+				float fps = 1000.0f / app->GetTimestep();
+				ImGui::Text("FPS: %1.f", fps);
+
+				// Editor Camera information
+				if (m_EditorCamera->m_IsActive)
+				{
+					ImGui::Text("FOV: %1.f", m_EditorCamera->m_DegPerspectiveFOV);
+					const glm::vec3 camPos = m_EditorCamera->GetPosition();
+					ImGui::Text("Pos (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
+					ImGui::Text("Pitch: %.3f  Yaw: %.3f", m_EditorCamera->GetPitch(), m_EditorCamera->GetYaw());
+					ImGui::Text("Camera Zoom: %.3f", m_EditorCamera->ZoomSpeed());
+					ImGui::Text("Speed: %.3f", m_EditorCamera->GetCameraSpeed());
+					ImGui::Text("Distance: %.2f", m_EditorCamera->GetDistance());
+					ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", m_EditorCamera->GetFocalPoint().x, m_EditorCamera->GetFocalPoint().y, m_EditorCamera->GetFocalPoint().z);
+					if (SELECTION::SelectedEntity)
+						ImGui::Text("Selected ID: %llu", SELECTION::SelectedEntity.GetUUID());
+					else
+						ImGui::Text("Selected ID: None");
+				}
+				ImGui::EndChild();
+			}
 		}
+		UI::End();
+
+
+		// If the window sizes have been adjusted, set the bool member to false
+		// This must be run BEFORE the 'WindowsHaveChangedInSize' if-statement
+		if (ShouldUpdateWindowSizes == true)
+			ShouldUpdateWindowSizes = false; 
+
+		glm::vec2 viewportSize = { viewport->WorkSize.x, viewport->WorkSize.y };
+		UI_SyncEditorWindowSizes(viewportSize);
+
+		// Take care of tabs here
+		m_TabManager->End();
 
 		// Temporary check
 		//if (!ScreenShader)
 		//	ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
+		//ScreenShader->Bind();
 		//glDisable(GL_DEPTH_TEST);
-		////ScreenShader->Bind();
 		//glBindVertexArray(QuadVAO);
-		glBindTexture(GL_TEXTURE_2D, viewportImage->GetRendererID());
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		ImGui::End();
+		//glBindTexture(GL_TEXTURE_2D, viewportImage->GetRendererID());
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		ImGui::End(); // Viewport
 		HandleExternalWindows();
 		ImGui::End(); // Core Viewport
-
-		// Take care of tabs here
-		// ....
 	}
 
 	void Editor::RenderViewport()
@@ -624,7 +625,6 @@ namespace LkEngine {
 
     void Editor::DrawImGuizmo(Entity entity)
     {
-
 		if (!entity.HasComponent<TransformComponent>())
 		{
 			LK_CORE_ASSERT(false, "Entity doesnt have a transform component");
@@ -651,14 +651,12 @@ namespace LkEngine {
 		float width  = m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x;
 		float height = m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y;
 
-		framebuffer2D.Bind();
-
-		auto window = ImGui::FindWindowByName(UI_CORE_VIEWPORT);
-		ImGui::SetNextWindowViewport(window->ID);
-		ImGui::Begin(window->Name);
+		//auto window = ImGui::FindWindowByName(UI_CORE_VIEWPORT);
+		//auto window = ImGui::FindWindowByName("ViewportTexture");
+		//ImGui::SetNextWindowViewport(window->ID);
+		//ImGui::Begin(window->Name, nullptr, UI::CoreViewportFlags | ImGuiWindowFlags_NoScrollbar);
 		{
 			//ImGui::SetNextWindowViewport(window->ID);
-
 			ImGuizmo::SetOrthographic((int)m_EditorCamera->GetProjectionType());
 			ImGuizmo::SetDrawlist();
 			if (m_TabManager->GetTabCount() == 1) // Only 1 tab, aka only the 'Viewport' tab
@@ -684,9 +682,7 @@ namespace LkEngine {
 			    tc.SetRotation(rotation);
 			}
 		}
-		ImGui::End();
-
-		framebuffer2D.Unbind();
+		//ImGui::End();
     }
 
 	void Editor::UI_HandleManualWindowResize()
