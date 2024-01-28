@@ -10,19 +10,19 @@ namespace LkEngine {
 
 	EditorCamera::EditorCamera(const float degFov, const float width, const float height, const float nearP, const float farP)
 		: Camera(glm::perspectiveFov(glm::radians(degFov), width, height, farP, nearP))
+		, m_Pitch(0.0f), m_PitchDelta(0.0f)
+		, m_Yaw(0.0f), m_YawDelta(0.0f)
 	{
-		m_Pitch = 0.0f, m_PitchDelta = 0.0f;
-		m_Yaw = 0.0f, m_YawDelta = 0.0f;
+		m_PerspectiveNear = nearP;
+		m_PerspectiveFar = farP;
+		constexpr glm::vec3 position = { -5, 5, 5 }; 
+		m_Position = position;
 		Init();
-		LK_CORE_VERIFY(m_Position.x < 10000 && m_Position.y < 10000 && m_Position.z < 10000, "Position is too large after initialization");
 	}
 
 	void EditorCamera::Init()
 	{
-		constexpr glm::vec3 position = { -5, 5, 5 };
-		//constexpr glm::vec3 position = { -330, -140, -910 };
-		m_Position = position;
-		m_Distance = glm::distance(position, m_FocalPoint);
+		m_Distance = glm::distance(m_Position, m_FocalPoint);
 
 		m_Yaw = 3.0f * glm::pi<float>() / 4.0f;
 		m_Pitch = glm::pi<float>() / 4.0f;
@@ -53,16 +53,15 @@ namespace LkEngine {
 
 	void EditorCamera::SetViewportSize(uint32_t width, uint32_t height)
 	{
-		UpdateViewMatrix();
 		switch (m_ProjectionType)
 		{
-			case ProjectionType::Perspective:
-				SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), (float)width, (float)height, m_PerspectiveNear, m_PerspectiveFar);
-				break;
+		case ProjectionType::Perspective:
+			SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), (float)width, (float)height, m_PerspectiveNear, m_PerspectiveFar);
+			break;
 
-			case ProjectionType::Orthographic:
-				SetOrthoProjectionMatrix(width, height, m_OrthographicNear, m_OrthographicFar);
-				break;
+		case ProjectionType::Orthographic:
+			SetOrthoProjectionMatrix(width, height, m_OrthographicNear, m_OrthographicFar);
+			break;
 		}
 	}
 
@@ -79,40 +78,44 @@ namespace LkEngine {
 			return;
 		}
 
-		if (m_ProjectionType == ProjectionType::Orthographic)
+		// Translate Mode
+		if (Keyboard::IsKeyPressed(Key::T))
 		{
-			float left, right, bottom, top;
-			float width, height;
+			LK_CORE_DEBUG_TAG("EditorCamera", "TRANSLATE MODE");
+		}
+		// Rotation Mode
+		if (Keyboard::IsKeyPressed(Key::R))
+		{
+			LK_CORE_DEBUG_TAG("EditorCamera", "ROTATION MODE");
+		}
+		// Scale Mode
+		if (Keyboard::IsKeyPressed(Key::S))
+		{
+			LK_CORE_DEBUG_TAG("EditorCamera", "SCALE MODE");
+		}
 
-			auto& window = Window::Get();
-			width = window.GetViewportWidth();
-			height = window.GetViewportWidth();
 
-			left = -width / 2.0f;
-			right = width / 2.0f;
-			bottom = -height / 2.0f;
-			top = height / 2.0f;
+		if (Input::IsMouseButtonDown(MouseButton::Right) && !Input::IsKeyDown(KeyCode::LeftAlt))
+		{
+			m_CameraMode = Mode::Flycam;
+			Mouse::Disable();
 
-			//glm::mat4 transform = glm::translate(glm::mat4(1.0f), { m_Position.x, m_Position.y, m_Position.z }) * glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0, 0, 1));
-			//m_ViewMatrix = glm::inverse(transform);
-			//m_ProjectionMatrix = glm::ortho(left, right, bottom, top);
+			const float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
+			const float speed = GetCameraSpeed();
 
-			if (Keyboard::IsKeyPressed(Key::W))
-				m_Position += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
-			if (Keyboard::IsKeyPressed(Key::A))
-				m_Position -= glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
-			if (Keyboard::IsKeyPressed(Key::S))
-				m_Position -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
-			if (Keyboard::IsKeyPressed(Key::D))
-				m_Position += glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
-			if (Keyboard::IsKeyPressed(Key::Q))
-				MouseZoom(0.10f); // -= 0.10f;
-				//GetZoom() += 0.10f;
-			if (Keyboard::IsKeyPressed(Key::R))
-			{
-				//ZoomSpeed() -= 0.10f;
-				MouseZoom(-0.10f); // -= 0.10f;
-			}
+			if (Input::IsKeyDown(KeyCode::Q))
+				m_PositionDelta -= ts * speed * glm::vec3{ 0.f, yawSign, 0.f };
+			if (Input::IsKeyDown(KeyCode::E))
+				m_PositionDelta += ts * speed * glm::vec3{ 0.f, yawSign, 0.f };
+			if (Input::IsKeyDown(KeyCode::S))
+				m_PositionDelta -= ts * speed * m_Direction;
+			if (Input::IsKeyDown(KeyCode::W))
+				m_PositionDelta -= ts * speed * m_Direction;
+			if (Input::IsKeyDown(KeyCode::A))
+				m_PositionDelta -= ts * speed * m_RightDirection;
+			if (Input::IsKeyDown(KeyCode::D))
+				m_PositionDelta += ts * speed * m_RightDirection;
+
 			if (Keyboard::IsKeyPressed(Key::H))
 			{
 				m_ProjectionType = ProjectionType::Orthographic;
@@ -124,122 +127,67 @@ namespace LkEngine {
 				m_Position = { -330, -140, -910 };
 				m_Yaw = -3.10f;
 				m_Pitch = 6.40f;
-
-				const float distance = glm::distance(m_FocalPoint, m_Position);
-				m_FocalPoint = m_Position + GetForwardDirection() * distance;
-				m_Distance = distance;
-				LK_CORE_ASSERT(m_Distance > 10000, "Orthographic   Distance is larger than 10k");
 			}
 
+			constexpr float maxRate{ 0.12f };
+			m_YawDelta += glm::clamp(yawSign * delta.x * RotationSpeed(), -maxRate, maxRate);
+			m_PitchDelta += glm::clamp(delta.y * RotationSpeed(), -maxRate, maxRate);
+
+			m_RightDirection = glm::cross(m_Direction, glm::vec3{ 0.f, yawSign, 0.f });
+
+			m_Direction = glm::rotate(glm::normalize(glm::cross(glm::angleAxis(-m_PitchDelta, m_RightDirection),
+				glm::angleAxis(-m_YawDelta, glm::vec3{ 0.f, yawSign, 0.f }))), m_Direction);
+
+			const float distance = glm::distance(m_FocalPoint, m_Position);
+			m_FocalPoint = m_Position + GetForwardDirection() * distance;
+			m_Distance = distance;
+
+			LK_CORE_ASSERT(m_Distance < 10000, "Perspective   Distance is larger than 10k");
 		}
-		else if (m_ProjectionType == ProjectionType::Perspective)
+		//-----------------------------------------------
+		// Arcball  |  Modes: Pan/Rotate/Zoom 
+		//-----------------------------------------------
+		else if (Input::IsKeyDown(KeyCode::LeftAlt))
 		{
-			if (Input::IsMouseButtonDown(MouseButton::Right) && !Input::IsKeyDown(KeyCode::LeftAlt))
+			m_CameraMode = Mode::Arcball;
+
+			// Camera Mode: Pan
+			if (Input::IsMouseButtonDown(MouseButton::Middle))
 			{
-				m_CameraMode = Mode::Flycam;
 				Mouse::Disable();
-
-				const float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-				const float speed = GetCameraSpeed();
-
-				if (Input::IsKeyDown(KeyCode::Q))
-					m_PositionDelta -= ts * speed * glm::vec3{ 0.f, yawSign, 0.f };
-				if (Input::IsKeyDown(KeyCode::E))
-					m_PositionDelta += ts * speed * glm::vec3{ 0.f, yawSign, 0.f };
-				if (Input::IsKeyDown(KeyCode::S))
-					m_PositionDelta -= ts * speed * m_Direction;
-				if (Input::IsKeyDown(KeyCode::W))
-					m_PositionDelta -= ts * speed * m_Direction;
-				if (Input::IsKeyDown(KeyCode::A))
-					m_PositionDelta -= ts * speed * m_RightDirection;
-				if (Input::IsKeyDown(KeyCode::D))
-					m_PositionDelta += ts * speed * m_RightDirection;
-
-				if (Keyboard::IsKeyPressed(Key::H))
-				{
-					m_ProjectionType = ProjectionType::Orthographic;
-					m_Position = { 2, 2, 0 };
-				}
-				if (Keyboard::IsKeyPressed(Key::P))
-				{
-					m_ProjectionType = ProjectionType::Perspective;
-					m_Position = { -330, -140, -910 };
-					m_Yaw = -3.10f;
-					m_Pitch = 6.40f;
-				}
-
-				constexpr float maxRate{ 0.12f };
-				m_YawDelta += glm::clamp(yawSign * delta.x * RotationSpeed(), -maxRate, maxRate);
-				m_PitchDelta += glm::clamp(delta.y * RotationSpeed(), -maxRate, maxRate);
-
-				m_RightDirection = glm::cross(m_Direction, glm::vec3{ 0.f, yawSign, 0.f });
-
-				m_Direction = glm::rotate(glm::normalize(glm::cross(glm::angleAxis(-m_PitchDelta, m_RightDirection),
-					glm::angleAxis(-m_YawDelta, glm::vec3{ 0.f, yawSign, 0.f }))), m_Direction);
-
-				const float distance = glm::distance(m_FocalPoint, m_Position);
-				m_FocalPoint = m_Position + GetForwardDirection() * distance;
-				m_Distance = distance;
-
-				LK_CORE_ASSERT(m_Distance < 10000, "Perspective   Distance is larger than 10k");
+				MousePan(delta);
 			}
-			//-----------------------------------------------
-			// Arcball
-			else if (Input::IsKeyDown(KeyCode::LeftAlt))
+			// Camera Mode: Rotate
+			else if (Input::IsMouseButtonDown(MouseButton::Left))
 			{
-				m_CameraMode = Mode::Arcball;
-
-				// Camera Mode: Pan
-				if (Input::IsMouseButtonDown(MouseButton::Middle))
-				{
-					Mouse::Disable();
-					MousePan(delta);
-				}
-				// Camera Mode: Rotate
-				else if (Input::IsMouseButtonDown(MouseButton::Left))
-				{
-					Mouse::Disable();
-					MouseRotate(delta);
-				}
-				// Camera Mode: Zoom
-				else if (Input::IsMouseButtonDown(MouseButton::Right))
-				{
-					Mouse::Disable();
-					MouseZoom((delta.x + delta.y) * 0.1f);
-				}
-				else
-				{
-					Mouse::Enable();
-				}
+				Mouse::Disable();
+				MouseRotate(delta);
+			}
+			// Camera Mode: Zoom
+			else if (Input::IsMouseButtonDown(MouseButton::Right))
+			{
+				Mouse::Disable();
+				MouseZoom((delta.x + delta.y) * 0.1f);
 			}
 			else
 			{
 				Mouse::Enable();
 			}
-
-			m_InitialMousePosition = mouse;
-			m_Position += m_PositionDelta;
-			m_Yaw += m_YawDelta;
-			m_Pitch += m_PitchDelta;
-
-			if (m_CameraMode == Mode::Arcball)
-				m_Position = CalculatePosition();
-
-			UpdateCameraView();
 		}
-
-	}
-
-	void EditorCamera::UpdateProjectionMatrix()
-	{
-		if (m_ProjectionType == ProjectionType::Perspective)
+		else
 		{
-			SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), m_ViewportWidth, m_ViewportHeight, m_PerspectiveNear, m_PerspectiveFar);
+			Mouse::Enable();
 		}
-		else if (m_ProjectionType == ProjectionType::Orthographic)
-		{
-			SetOrthoProjectionMatrix(m_ViewportWidth, m_ViewportHeight, m_OrthographicNear, m_OrthographicFar);
-		}
+
+		m_InitialMousePosition = mouse;
+		m_Position += m_PositionDelta;
+		m_Yaw += m_YawDelta;
+		m_Pitch += m_PitchDelta;
+
+		if (m_CameraMode == Mode::Arcball)
+			m_Position = CalculatePosition();
+
+		UpdateCameraView();
 	}
 
 	void EditorCamera::UpdateCameraView()
@@ -258,8 +206,6 @@ namespace LkEngine {
 		m_YawDelta *= 0.6f;
 		m_PitchDelta *= 0.6f;
 		m_PositionDelta *= 0.8f;
-
-		UpdateProjectionMatrix();
 	}
 
 	void EditorCamera::MousePan(const glm::vec2& delta)
@@ -309,13 +255,6 @@ namespace LkEngine {
 		return { xFactor, yFactor };
 	}
 
-	void EditorCamera::UpdateViewMatrix()
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), { m_Position.x, m_Position.y, m_Position.z }) *
-			glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0, 0, 1));
-		m_ViewMatrix = glm::inverse(transform);
-	}
-
 	bool EditorCamera::OnMouseScroll(MouseScrolledEvent& e)
 	{
 		if (Input::IsMouseButtonDown(MouseButton::Right))
@@ -333,7 +272,6 @@ namespace LkEngine {
 
 	bool EditorCamera::OnKeyPress(KeyPressedEvent& e)
 	{
-
 		const glm::vec2& mouse{ Mouse::GetMouseX(), Mouse::GetMouseY() };
 		const glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.002f;
 
@@ -360,18 +298,40 @@ namespace LkEngine {
 		}
 		if (pressedKey == Key::S)
 		{
-			m_PositionDelta -= ts * speed * m_Direction;
+			//m_PositionDelta -= ts * speed * m_Direction;
 		}
 		if (pressedKey == Key::D)
 		{
 			m_PositionDelta += ts * speed * m_RightDirection;
 		}
+
+		if (pressedKey == Key::T)
+		{
+			m_GizmoMode = GizmoMode::Translate;
+		}
+		if (pressedKey == Key::R)
+		{
+			m_GizmoMode = GizmoMode::Rotate;
+		}
+		if (pressedKey == Key::S)
+		{
+			m_GizmoMode = GizmoMode::Scale;
+		}
+
 		return true;
+	}
+
+	void EditorCamera::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<KeyPressedEvent>([this](KeyPressedEvent& e) { return OnKeyPress(e); });
+		dispatcher.Dispatch<MouseScrolledEvent>([this](MouseScrolledEvent& e) { return OnMouseScroll(e); });
 	}
 
 	void EditorCamera::SetPosition(const glm::vec3& position)
 	{
 		m_Position = position;
+		UpdateCameraView();
 	}
 
 	glm::vec3 EditorCamera::GetUpDirection() const
@@ -391,8 +351,6 @@ namespace LkEngine {
 
 	glm::vec3 EditorCamera::CalculatePosition() const
 	{
-		//glm::vec3 res(m_FocalPoint - GetForwardDirection() * m_Distance + m_PositionDelta);
-		//LK_CORE_DEBUG_TAG("EditorCamera", "CalculatePosition == ({}, {}, {})", res.x, res.y, res.z);
 		return m_FocalPoint - GetForwardDirection() * m_Distance + m_PositionDelta;
 	}
 
@@ -414,6 +372,11 @@ namespace LkEngine {
 		if (Input::IsKeyDown(Key::LeftShift))
 			speed *= 2 - glm::log(m_NormalSpeed);
 		return glm::clamp(speed, MIN_SPEED, MAX_SPEED);
+	}
+
+	unsigned int EditorCamera::GetGizmoMode() const
+	{
+		return (unsigned int)m_GizmoMode;
 	}
 
 }

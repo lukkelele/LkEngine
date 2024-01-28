@@ -8,6 +8,8 @@
 #include "LkEngine/Core/Event/KeyEvent.h"
 #include "LkEngine/Core/Event/MouseEvent.h"
 
+#include "LkEngine/ImGui/ImGuiLayer.h"
+
 
 namespace LkEngine {
 
@@ -17,39 +19,18 @@ namespace LkEngine {
 		EditorCamera(const float degFov, const float width, const float height, const float nearP, const float farP); 
 
 		void Init();
+		void OnUpdate(const Timestep ts);
+		void UpdateCameraView();
+		void OnEvent(Event& e);
 
 		void SetPerspective(float verticalFOV, float nearClip = 0.1f, float farClip = 1000.0f);
 		void SetOrthographic(float width, float height, float nearClip = -1.0f, float farClip = 1.0f);
-
-		void OnUpdate(const Timestep ts);
-		void UpdateCameraView();
-
-		void UpdateViewMatrix();
-		void UpdateProjectionMatrix();
-
 		void SetViewportSize(uint32_t width, uint32_t height);
 
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		glm::mat4 GetViewProjectionMatrix() const { return GetProjectionMatrix() * m_ViewMatrix; }
 
-#if 0
-		inline void SetViewportSize(uint32_t width, uint32_t height)
-		{
-			if (m_ViewportWidth == width && m_ViewportHeight == height)
-				return;
-			switch (m_ProjectionType)
-			{
-				case ProjectionType::Perspective:
-					SetPerspectiveProjectionMatrix(m_VerticalFOV, (float)width, (float)height, m_NearClip, m_FarClip);
-					break;
-				case ProjectionType::Orthographic:
-					SetOrthoProjectionMatrix((float)width, (float)height, m_OrthographicNear, m_OrthographicFar);
-					break;
-			}
-			m_ViewportWidth = width;
-			m_ViewportHeight = height;
-		}
-#endif
+		unsigned int GetGizmoMode() const;
 
 		inline float GetDistance() const { return m_Distance; }
 		inline void SetDistance(float distance) { m_Distance = distance; }
@@ -59,9 +40,11 @@ namespace LkEngine {
 		glm::vec3 GetRightDirection() const;
 		glm::vec3 GetForwardDirection() const;
 		const glm::vec3& GetPosition() const { return m_Position; }
+		const glm::vec3& GetOrigin() const { return m_Origin; }
 		glm::quat GetOrientation() const;
 		glm::vec3 CalculatePosition() const;
 		float GetCameraSpeed() const;
+		const float GetPerspectiveDegFov() const { return m_DegPerspectiveFOV;  }
 
 		float GetPitch() const { return m_Pitch; }
 		float GetYaw() const { return m_Yaw; }
@@ -81,25 +64,14 @@ namespace LkEngine {
 		float RotationSpeed() const;
 		float ZoomSpeed() const;
 
-		void SetPos(const glm::vec3& pos);
-
 		inline float GetYawDelta() const { return m_YawDelta; }
 		inline float GetPitchDelta() const { return m_PitchDelta; }
 
 	private:
 		glm::mat4 m_ViewMatrix;
-		glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
-		glm::vec3 m_Direction{ 0.0f };
-		glm::vec3 m_FocalPoint{ 0.0f };
-
+		glm::vec3 m_Position{}, m_Direction{}, m_FocalPoint{};
 		glm::vec3 m_Origin = { 0.0f, 0.0f, 0.0f };
 
-		float m_DegPerspectiveFOV = 60.0f;
-		float m_PerspectiveNear = 0.1f, m_PerspectiveFar = 1000.0f;
-		float m_OrthographicSize = 10.0f;
-		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
-
-		// Perspective projection
 		float m_VerticalFOV, m_AspectRatio, m_NearClip, m_FarClip;
 
 		enum class Mode
@@ -117,6 +89,8 @@ namespace LkEngine {
 		float m_Distance;
 		float m_NormalSpeed{ 0.002f };
 
+		GizmoMode m_GizmoMode = GizmoMode::Translate;
+
 		float m_Pitch = 0.0f;
 		float m_Yaw = 0.0f;
 		float m_PitchDelta{}, m_YawDelta{};
@@ -132,6 +106,7 @@ namespace LkEngine {
 		constexpr static float MIN_SPEED{ 0.0005f }, MAX_SPEED{ 2.0f };
 
 		friend class Editor;
+		friend class SceneSerializer;
 	};
 
 }
