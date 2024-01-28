@@ -106,9 +106,13 @@ namespace LkEngine {
         void DrawImGuizmo(Entity entity);
 		void HandleExternalWindows();
 
-		void UpdateLeftSidebarSize(ImGuiViewport* viewport);
-		void UpdateRightSidebarSize(ImGuiViewport* viewport);
+		void UI_ViewportTexture();
+		void UI_WindowStatistics();
+		void UI_TabManager();
 
+		void UI_CheckLeftSidebarSize();
+		void UI_CheckRightSidebarSize();
+		void UI_CheckBottomBarSize();
 
 	public:
 		// Flag to determine if an item is currently being created
