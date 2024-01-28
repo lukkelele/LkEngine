@@ -113,6 +113,7 @@ namespace LkEngine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		auto& renderer2DFramebuffer = *m_Renderer2D->GetFramebuffer().As<OpenGLFramebuffer>();
+		renderer2DFramebuffer.Bind();
 		renderer2DFramebuffer.Clear();
 		renderer2DFramebuffer.Unbind();
 	}
