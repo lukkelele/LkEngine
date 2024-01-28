@@ -65,25 +65,19 @@ namespace LkEngine {
 			}
 			if (Keyboard::IsKeyPressed(Key::Q))
 			{
-				m_Zoom += 0.010f;
+				//m_Zoom += 0.010f;
 			}
 			if (Keyboard::IsKeyPressed(Key::R))
 			{
-				m_Zoom -= 0.010f;
+				//m_Zoom -= 0.010f;
 			}
 
 		}
 		if (m_MouseEnabled)
 		{
 		}
-
-		auto* window = Window::Get();
-		SetViewportSize(window->GetViewportWidth(), window->GetViewportHeight());
-
-		m_InverseViewMatrix = glm::inverse(m_ViewMatrix);
-		m_InverseProjectionMatrix = glm::inverse(m_ProjectionMatrix);
-		m_InverseViewProjectionMatrix = m_InverseProjectionMatrix * m_InverseViewMatrix;
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+        auto& window = Window::Get();
+		SetViewportSize(window.GetViewportWidth(), window.GetViewportHeight());
 	}
 
 	void SceneCamera::UpdateProjection()
@@ -91,9 +85,9 @@ namespace LkEngine {
 		float left, right, bottom, top;
 		float width, height;
 
-		auto* window = Window::Get();
-		width = window->GetViewportWidth();
-		height = window->GetViewportWidth();
+		auto& window = Window::Get();
+		width = window.GetViewportWidth();
+		height = window.GetViewportWidth();
 
 		left = -width / 2.0f;
 		right = width / 2.0f;
@@ -103,7 +97,6 @@ namespace LkEngine {
 		m_ProjectionMatrix = glm::ortho(left, right, bottom, top);
 	}
 
-	// FIXME: ortographic here, should be able to switch 
 	void SceneCamera::UpdateView()
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), { m_Pos.x + m_Offset.x, m_Pos.y + m_Offset.y, m_Pos.z + m_Offset.z }) *
@@ -112,30 +105,5 @@ namespace LkEngine {
 		m_ViewMatrix = glm::inverse(transform);
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
-
-	void SceneCamera::SetPos(const glm::vec3& pos)
-	{
-		m_Pos = pos;
-	}
-
-	void SceneCamera::SetOffset(const glm::vec2& offset)
-	{
-		SetOffset({ offset.x, offset.y, 0.0f });
-	}
-
-	void SceneCamera::SetOffset(const glm::vec3& offset)
-	{
-		m_Offset = offset;
-	}
-
-	glm::vec3 SceneCamera::GetPosWithOffset()
-	{
-		return { 
-			m_Pos.x + m_Offset.x, 
-			m_Pos.y + m_Offset.y, 
-			m_Pos.z + m_Offset.z
-		};
-	}
-
 
 }

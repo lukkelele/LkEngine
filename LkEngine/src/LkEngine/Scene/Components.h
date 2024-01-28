@@ -1,41 +1,56 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/UUID.h"
-#include "LkEngine/Math/Math.h"
+#include "LkEngine/Core/Math/Math.h"
 
 #include "LkEngine/Renderer/Material.h"
 
 #include "LkEngine/Physics2D/ContactListener2D.h"
 
+#include "SceneCamera.h"
+
 
 namespace LkEngine{
 
-	// Forward declaration
-	class SceneCamera;
+	// Component such as IDComponent and TagComponent are not in need of deriving BaseComponent as 
+	// they cannot and should not be removed at all
+	struct BaseComponent
+	{
+		bool Removable = true;
+	};
 
-	struct IDComponent
+	struct IDComponent 
 	{
 		UUID ID;
-		bool Removable = true;
 
 		operator UUID() { return ID; }
-
-		IDComponent() = default;
-		IDComponent(const IDComponent&) = default;
 	};
 
 	struct TagComponent
 	{
 		std::string Tag;
-		bool Removable = true;
 
 		TagComponent() = default;
-		TagComponent(const TagComponent&) = default;
-		TagComponent(const std::string& Tag) : Tag(Tag) {}
+		TagComponent(const TagComponent& other) = default;
+		TagComponent(const std::string& tag)
+			: Tag(tag) {}
+
+		operator std::string& () { return Tag; }
+		operator const std::string& () const { return Tag; }
 	};
 
-    struct TransformComponent
+	struct RelationshipComponent
+	{
+		UUID ParentHandle = 0;
+		std::vector<UUID> Children;
+
+		RelationshipComponent() = default;
+		RelationshipComponent(const RelationshipComponent& other) = default;
+		RelationshipComponent(UUID parent) : ParentHandle(parent) {}
+	};
+
+	// TODO: Patch out the use of Rotation2D and just use the Rotation quaternion
+    struct TransformComponent 
     {
 	public:
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
@@ -45,11 +60,8 @@ namespace LkEngine{
 		glm::quat Rotation = { 1.0f, 0.0f, 0.0f, 0.0f };
 
 	public:
-		// TODO: Patch out the use of Rotation2D and just use the Rotation quaternion
 		float Rotation2D = 0.0f;
-
 		bool Static = false;
-		bool Removable = true;
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& other) = default;
@@ -111,13 +123,13 @@ namespace LkEngine{
 		bool IsStatic() const { return Static; }
 	};
 
-    struct SpriteComponent
+
+    struct SpriteComponent 
     {
         std::string FilePath;
         glm::vec2 Size;
         glm::vec4 Color; 
 		bool Passthrough = false;
-		bool Removable = true;
 
         SpriteComponent(const std::string& filepath, 
                         const glm::vec2& size = { 100.0f, 100.0f }, 
@@ -134,38 +146,42 @@ namespace LkEngine{
             , Color(color) 
         {}
 
+        //glm::vec2& GetSize() { return Size; }
+        const glm::vec2& GetSize() const { return Size; }
+		const glm::vec4& GetColor() const { return Color; }
         float GetWidth() const { return Size.x; }
         float GetHeight() const { return Size.y; }
-        glm::vec2 GetSize() const { return Size; }
 		void SetSize(const glm::vec2& size) { Size = size; }
 		void SetSize(float x, float y) { Size = { x, y }; }
 		void SetPassthrough(bool passthrough) { Passthrough = passthrough; }
 		bool IsPassthrough() const { return Passthrough; }
     };
 
+
 	struct CameraComponent
 	{
-		enum class Type { Null = -1, Ortographic = 0 , Perspective = 1 };
-		Type CameraType;
+		enum class Type { None = -1, Perspective, Orthographic };
+		Type ProjectionType = Type::None;
 
-		SceneCamera* CameraRef = nullptr;
-		bool Removable = true;
+		Ref<SceneCamera> Camera;
+		bool Primary = false;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent& other) = default;
-
-		operator SceneCamera& () { return *CameraRef; }
-		operator const SceneCamera& () const { return *CameraRef; }
+		
+		operator SceneCamera& () { return *Camera; }
+		operator const SceneCamera& () const { return *Camera; }
 	};
 
-	struct RigidBody2DComponent
+
+	struct RigidBody2DComponent 
 	{
 		enum class Type 
 		{ 
 			None = -1, 
-			Static, 
-			Dynamic, 
-			Kinematic 
+			Static,   // 0
+			Dynamic,  // 1
+			Kinematic // 2
 		};
 
 		Type BodyType;
@@ -177,12 +193,11 @@ namespace LkEngine{
 		bool IsBullet = false;
 		void* RuntimeBody = nullptr; // Assigned at component creation
 
-		bool Removable = true;
-
 		RigidBody2DComponent() : BodyType(Type::Dynamic) {}
 		RigidBody2DComponent(Type type) : BodyType(type) {}
 		RigidBody2DComponent(const RigidBody2DComponent& other) = default;
 	};
+
 
 	struct BoxCollider2DComponent
 	{
@@ -194,52 +209,56 @@ namespace LkEngine{
 		bool IsSensor = false;
 		void* RuntimeBody = nullptr; // Assigned at component creation
 
-		bool Removable = true;
-
 		BoxCollider2DComponent() = default;
 		BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
 	};
 
-	// TODO: Remove ?
-	struct IOComponent
+
+	struct MaterialComponent : public BaseComponent
 	{
-		bool Draggable = true;
-		bool Dragged = false;
+		Ref<Material> m_Material = nullptr;
 
-		IOComponent() = default;
-	};
+		Ref<Material> GetMaterial() const { return m_Material; }
 
-	struct MaterialComponent
-	{
-		s_ptr<Material> m_Material = nullptr;
-
-		s_ptr<Texture> GetTexture() { return m_Material->GetTexture(); }
-		std::string GetTextureName() const 
-		{
-			if (m_Material->GetTexture() == nullptr)
-				throw std::runtime_error("MaterialComponent: Cannot get texture name of a nullptr texture");
-			return m_Material->GetTexture()->GetName();
+		Ref<Texture2D> GetTexture() 
+		{ 
+			LK_CORE_ASSERT(m_Material, "No material bound to component!");
+			return m_Material->GetTexture(); 
 		}
-		void SetTexture(s_ptr<Texture> texture) { m_Material->SetTexture(texture); }
 
-		MaterialComponent() : m_Material(std::make_shared<Material>()) {}
-		MaterialComponent(s_ptr<Material> material) : m_Material(material) {}
-		MaterialComponent(s_ptr<Material> material, s_ptr<Texture> texture) 
-			: m_Material(material)
-		{
-			m_Material->SetTexture(texture);
+		void SetTexture(Ref<Texture> texture) 
+		{ 
+			m_Material->SetTexture(texture); 
 		}
-		MaterialComponent(s_ptr<Texture> texture)
+
+		MaterialComponent()
 		{
-			m_Material = std::make_shared<Material>();
-			m_Material->SetTexture(texture);
+			MaterialSpecification specification;
+			//specification.Friction = 0.50f;
+			m_Material = Material::Create(specification);
+		}
+		MaterialComponent(Ref<Material> material) 
+		{
+			m_Material = Ref<Material>::Create(material);
 		}
 	};
 
-	struct Box2DWorldComponent
+
+	struct Box2DWorldComponent 
 	{
 		std::unique_ptr<b2World> World;
 		ContactListener2D ContactListener;
+		bool DebugDrawerAttached = false;
+
+		const glm::vec2 GetGravity() const
+		{
+			auto g = World->GetGravity();
+			return glm::vec2(g.x, g.y);
+		}
+		int GetBodyCount() const { return World->GetBodyCount(); }
+		int GetContactCount() const { return World->GetContactCount(); }
+		bool IsPaused() const { return World->IsLocked(); }
+		bool HasDebugDrawerAttached() const { return DebugDrawerAttached; }
 	};
 
 
@@ -260,3 +279,4 @@ namespace LkEngine{
 	>;
 
 }
+

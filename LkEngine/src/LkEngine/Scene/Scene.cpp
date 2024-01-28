@@ -15,9 +15,18 @@
 
 namespace LkEngine {
 
+	struct SceneComponent
+	{
+		UUID SceneID;
+	};
+
 	Scene::Scene(bool editorScene)
 		: m_EditorScene(editorScene)
+		, m_Name("")
 	{
+		m_SceneEntity = m_Registry.create();
+		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_SceneID);
+
 		m_ViewportWidth = Window::Get().GetViewportWidth();
 		m_ViewportHeight = Window::Get().GetViewportHeight();
 
@@ -25,7 +34,7 @@ namespace LkEngine {
 		{
 			m_EditorCamera = Editor::Get()->GetEditorCamera();
 			LK_CORE_ASSERT(m_EditorCamera, "EditorCamera is nullptr");
-			Editor::Get()->SetScene(*this);
+			Editor::Get()->SetScene(Ref<Scene>(this));
 			Input::SetScene(Ref<Scene>(this)); // REMOVE ME
 			Application::Get()->SetScene(Ref<Scene>(this)); // REMOVE ME
 		}
@@ -33,15 +42,17 @@ namespace LkEngine {
 		// Initiate 2D physics
 		Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
 		box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
-
 		Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+
+		LK_CORE_DEBUG_TAG("Scene", "New scene created {}", m_Name);
 	}
 
 	Scene::Scene(const std::string& name, bool activeScene, bool editorScene)
 		: m_EditorScene(editorScene)
+		, m_Name(name)
 	{
 		m_SceneEntity = m_Registry.create();
-		m_SceneInfo.Name = name;
+		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_SceneID);
 
 		m_ViewportWidth = Window::Get().GetViewportWidth();
 		m_ViewportHeight = Window::Get().GetViewportHeight();
@@ -56,22 +67,42 @@ namespace LkEngine {
 		if (editorScene)
 		{
 			m_EditorCamera = Editor::Get()->GetEditorCamera();
-			LK_CORE_ASSERT(m_EditorCamera, "EditorCamera is nullptr");
-			Editor::Get()->SetScene(*this);
+			Editor::Get()->SetScene(Ref<Scene>(this));
 			Application::Get()->SetScene(Ref<Scene>(this));
-			Input::SetScene(Ref<Scene>(this));
 		}
 
 		// Initiate 2D physics
 		Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
 		box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
-
 		Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+
+		LK_CORE_DEBUG_TAG("Scene", "New scene created {}", m_Name);
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
-		Entity entity = CreateEntityWithID(UUID(), name);
+		return CreateChildEntity({}, name);
+	}
+
+	Entity Scene::CreateChildEntity(Entity parent, const std::string& name)
+	{
+		auto entity = Entity{ m_Registry.create(), this };
+		auto& idComponent = entity.AddComponent<IDComponent>();
+		idComponent.ID = {};
+
+		entity.AddComponent<TransformComponent>();
+		if (!name.empty())
+			entity.AddComponent<TagComponent>(name);
+
+		entity.AddComponent<RelationshipComponent>();
+
+		if (parent)
+			entity.SetParent(parent);
+
+		m_EntityIDMap[idComponent.ID] = entity;
+
+		SortEntities();
+
 		return entity;
 	}
 
@@ -81,18 +112,24 @@ namespace LkEngine {
 		entity.AddComponent<IDComponent>(uuid);
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
-		m_EntityMap[uuid] = entity;
+		m_EntityIDMap[uuid] = entity;
 
-		//LK_CORE_DEBUG("Created new entity: {0} (UUID: {1}, tag: {2})", name, uuid, tag.Tag);
 		return entity;
 	}
 
 	// TODO: Change name to GetEntityWithID
 	Entity Scene::GetEntityWithUUID(UUID uuid)
 	{
-		if (m_EntityMap.find(uuid) != m_EntityMap.end())
-			return { m_EntityMap.at(uuid), this };
-		return { };
+		if (m_EntityIDMap.find(uuid) != m_EntityIDMap.end())
+			return { m_EntityIDMap.at(uuid), this };
+		return { entt::null, nullptr };
+	}
+
+	Entity Scene::TryGetEntityWithUUID(UUID id) const
+	{
+		if (const auto iter = m_EntityIDMap.find(id); iter != m_EntityIDMap.end())
+			return iter->second;
+		return Entity{};
 	}
 
 	Entity Scene::FindEntity(std::string_view name)
@@ -104,19 +141,19 @@ namespace LkEngine {
 			if (tc.Tag == name)
 				return Entity{ entity , this };
 		}
-		return { };
+		return {};
 	}
 
 	void Scene::DestroyEntity(Entity entity)
 	{
-		m_EntityMap.erase(entity.UUID());
+		m_EntityIDMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);
 		LK_CORE_DEBUG("Entity {} deleted", entity.Name());
 	}
 
 	bool Scene::IsEntityInRegistry(Entity entity) const
 	{
-		return m_Registry.any_of<IDComponent>(entity);
+		return m_Registry.has<IDComponent>(entity);
 	}
 
 	std::vector<Entity> Scene::GetEntities()
@@ -128,19 +165,29 @@ namespace LkEngine {
 		return entities;
 	}
 
+	bool Scene::HasEntity(Entity entity) const
+	{
+		return m_Registry.has<IDComponent>(entity) && entity.m_Scene != nullptr && entity.m_EntityHandle != entt::null;
+	}
+
+	Ref<Scene> Scene::CreateEmpty()
+	{
+		return Ref<Scene>::Create("Empty", false, false);
+	}
+
 	void Scene::SortEntities()
 	{
 		m_Registry.sort<IDComponent>([&](const auto lhs, const auto rhs)
 		{
-			auto lhsEntity = m_EntityMap.find(lhs.ID);
-			auto rhsEntity = m_EntityMap.find(rhs.ID);
+			auto lhsEntity = m_EntityIDMap.find(lhs.ID);
+			auto rhsEntity = m_EntityIDMap.find(rhs.ID);
 			return static_cast<uint32_t>(lhsEntity->second) < static_cast<uint32_t>(rhsEntity->second);
 		});
 	}
 
 	void Scene::Pause(bool paused)
 	{
-		m_SceneInfo.Paused = paused;
+		m_Paused = paused;
 		//m_World->Pause(paused);
 	}
 
@@ -156,7 +203,9 @@ namespace LkEngine {
 	}
 
 	template<>
-	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& id) {}
+	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& id) 
+	{
+	}
 
 	template<>
 	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& rigidbody)
@@ -188,7 +237,7 @@ namespace LkEngine {
 		auto& world = m_Registry.get<Box2DWorldComponent>(sceneView.front()).World;
 
 		Entity e = { entity, this };
-		UUID entityID = e.UUID();
+		UUID entityID = e.GetUUID();
 		TransformComponent& transform = e.Transform();
 		auto& rigidBody2D = m_Registry.get<RigidBody2DComponent>(entity);
 
@@ -229,8 +278,6 @@ namespace LkEngine {
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& boxColliderComponent)
 	{
-		//LK_CORE_DEBUG("OnComponentAdded<BoxCollider2DComponent>  {}", entity.Name());
-
 		Entity e = { entity, this };
 		auto& transform = e.Transform();
 
@@ -244,7 +291,6 @@ namespace LkEngine {
 
 			b2PolygonShape polygonShape;
 			polygonShape.SetAsBox(transform.Scale.x * boxColliderComponent.Size.x, transform.Scale.y * boxColliderComponent.Size.y);
-			//LOG_INFO("BoxCollider for {}, size ({}, {})", entity.Name(), transform.Scale.x * boxColliderComponent.Size.x, transform.Scale.y * boxColliderComponent.Size.y);
 
 			b2FixtureDef fixtureDef;
 			fixtureDef.shape = &polygonShape;
@@ -253,8 +299,90 @@ namespace LkEngine {
 			fixtureDef.isSensor = boxColliderComponent.IsSensor;
 			fixtureDef.restitution = 0.30f;
 			body->CreateFixture(&fixtureDef);
-			//LK_CORE_DEBUG("Added b2FixtureDef to body");
 		}
+	}
+
+	void Scene::ParentEntity(Entity entity, Entity parent)
+	{
+		if (parent.IsDescendantOf(entity))
+		{
+			UnparentEntity(parent);
+
+			Entity newParent = TryGetEntityWithUUID(entity.GetParentUUID());
+			if (newParent)
+			{
+				UnparentEntity(entity);
+				ParentEntity(parent, newParent);
+			}
+		}
+		else
+		{
+			Entity previousParent = TryGetEntityWithUUID(entity.GetParentUUID());
+
+			if (previousParent)
+				UnparentEntity(entity);
+		}
+
+		entity.SetParentUUID(parent.GetUUID());
+		parent.Children().push_back(entity.GetUUID());
+
+		//ConvertToLocalSpace(entity);
+	}
+
+	void Scene::UnparentEntity(Entity entity, bool convertToWorldSpace)
+	{
+		Entity parent = TryGetEntityWithUUID(entity.GetParentUUID());
+		if (!parent)
+			return;
+
+		auto& parentChildren = parent.Children();
+		parentChildren.erase(std::remove(parentChildren.begin(), parentChildren.end(), entity.GetUUID()), parentChildren.end());
+
+		//if (convertToWorldSpace)
+			//ConvertToWorldSpace(entity);
+
+		entity.SetParentUUID(0);
+	}
+
+	void Scene::CopyTo(Ref<Scene>& target)
+	{
+		LK_CORE_DEBUG_TAG("Scene", "Starting to copy scene \"{}\"", m_Name);
+
+		target->m_Name = m_Name;
+		target->m_EditorScene = m_EditorScene;
+
+		std::unordered_map<UUID, entt::entity> enttMap;
+		auto idComponents = m_Registry.view<IDComponent>();
+		for (auto entity : idComponents)
+		{
+			const auto uuid = m_Registry.get<IDComponent>(entity).ID; // Retrieve entity UUID
+			auto name = m_Registry.get<TagComponent>(entity).Tag;     // Retrieve the name of the entity
+			Entity e = target->CreateEntityWithID(uuid, name);        // Create identical entity on the target scene 
+			enttMap[uuid] = e.m_EntityHandle;
+		}
+
+#if 0
+		auto targetView = target->m_Registry.view<IDComponent>();
+		for (auto entity : targetView)
+		{
+			//UUID id = targetView.get<IDComponent>(entity).ID;
+			target->m_Registry.destroy(entity);
+		}
+#endif
+
+		CopyComponent<TagComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<TransformComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<SpriteComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<CameraComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<RigidBody2DComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<BoxCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
+
+		// This ensures a consistent ordering when iterating IDComponent's in the UI_SceneContent menu
+		target->SortEntities();
+		//target->SetPhysics2DGravity(GetPhysics2DGravity());
+
+		target->m_ViewportWidth = m_ViewportWidth;
+		target->m_ViewportHeight = m_ViewportHeight;
 	}
 
 	void Scene::OnRender(Ref<SceneRenderer> renderer, Timestep ts)
@@ -269,11 +397,19 @@ namespace LkEngine {
 	{
 		editorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		editorCamera.OnUpdate(ts);
-		
+
+		Renderer::SubmitQuad({ 200, -140, 700 }, { 1200, 1200 }, TextureLibrary::Get()->GetTexture2D("atte"));
+		Renderer::SubmitQuad({ 200, 0, 640 }, { 140, 90 }, Color::RGBA::Red);
+		Renderer::SubmitQuad({ 100, 100, 600 }, { 80, 100 }, Color::RGBA::Blue);
+
+		Editor::Get()->OnUpdate();
+
+#if 0
 	#ifdef LK_DEBUG
 		auto& world = GetBox2DWorld();
 		world.World->DebugDraw();
 	#endif
+#endif
 	}
 
 	Entity Scene::GetMainCameraEntity()
@@ -292,7 +428,6 @@ namespace LkEngine {
 	}
 
 #if 0
-
 	void Scene::BeginScene(Timestep ts)
 	{
 		if (m_Camera == nullptr)
@@ -336,6 +471,36 @@ namespace LkEngine {
 	void Scene::SetActiveScene(Ref<Scene>& scene)
 	{
 		m_ActiveScene = scene.Raw();
+	}
+
+	void Scene::Clear()
+	{
+		m_Registry.clear<AllComponents>();
+	}
+
+	void Scene::Initiate2DPhysics(const Physics2DSpecification& specification)
+	{
+		// Check to see if there already exists a 2D world for the scene and exit function if it does
+		if (m_Registry.has<Box2DWorldComponent>(m_SceneEntity) == true)
+		{
+			LK_CORE_DEBUG_TAG("Scene", "2D physics already initialized for the scene \"{}\"", m_Name);
+			auto& box2dWorld = m_Registry.get<Box2DWorldComponent>(m_SceneEntity);
+			if (box2dWorld.HasDebugDrawerAttached() == false && specification.DebugDrawer == true)
+				Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+		}
+		else
+		{
+			b2Vec2 gravity = Utils::ConvertToB2(specification.Gravity);
+			Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(gravity));
+			box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
+
+			// Attach debug drawer
+			if (specification.DebugDrawer)
+			{
+				Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+			}
+		}
+
 	}
 
 }

@@ -9,6 +9,8 @@
 
 #include "LkEngine/Editor/EditorCamera.h"
 
+//#include "LkEngine/Physics2D/Physics2DSpecification.h"
+
 #include <entt/entt.hpp>
 
 
@@ -18,15 +20,9 @@ namespace LkEngine {
 	class World;
 	class Renderer;
 	class SceneRenderer;
+	struct Physics2DSpecification;
 
 	using EntityMap = std::unordered_map<UUID, Entity>;
-
-	struct SceneInfo
-	{
-		std::string Name = "";
-		bool Paused = false;
-		int Frames = 0;
-	};
 
 	class Scene : public Asset
 	{
@@ -35,32 +31,36 @@ namespace LkEngine {
 		Scene(const std::string& name, bool activeScene = true, bool editorScene = false);
 		~Scene() = default;
 
-		static Scene* GetActiveScene() { return m_ActiveScene; }
-		static void SetActiveScene(Ref<Scene>& scene);
-		static std::string GetActiveSceneName() { if (m_ActiveScene) { return m_ActiveScene->GetName(); } return ""; }
-		static uint8_t GetSceneCount() { return s_SceneCounter; }
-
 		void OnRender(Ref<SceneRenderer> renderer, Timestep ts);
 		void OnRenderEditor(EditorCamera& editorCamera, Timestep ts);
 		void EndScene();
 
-		std::string GetName() const { return m_SceneInfo.Name; }
-		void SetName(const std::string& name) { m_SceneInfo.Name = name; }
-		SceneInfo GetSceneInfo() const { return m_SceneInfo; }
-		SceneInfo& GetSceneInfo() { return m_SceneInfo; }
-		void SetAsActive(bool active) { m_IsActiveScene = active; }
+		static Ref<Scene> CreateEmpty();
 
 		Entity GetMainCameraEntity();
 		std::vector<Entity> GetEntities();
-		uint64_t GetEntityCount() const { return m_EntityMap.size(); }
+		uint64_t GetEntityCount() const { return m_EntityIDMap.size(); }
 		void SortEntities();
 		Entity FindEntity(std::string_view name);
 		Entity GetEntityWithUUID(UUID uuid);
-		Entity CreateEntity(const std::string& name);
-		Entity CreateEntityWithID(UUID uuid, const std::string& name = "");
 		entt::registry& GetRegistry() { return m_Registry; }
 		void DestroyEntity(Entity entity);
+		bool HasEntity(Entity entity) const;
 		bool IsEntityInRegistry(Entity entity) const;
+
+		Entity CreateEntity(const std::string& name = "");
+		Entity CreateEntityWithID(UUID uuid, const std::string& name = "");
+		Entity CreateChildEntity(Entity parent, const std::string& name = "");
+		Entity TryGetEntityWithUUID(UUID id) const;
+
+		void ParentEntity(Entity entity, Entity parent);
+		void UnparentEntity(Entity entity, bool convertToWorldSpace = true);
+
+		std::string GetName() const { return m_Name; }
+		void SetName(const std::string& name) { m_Name = name; }
+		void SetAsActive(bool active) { m_IsActiveScene = active; }
+		void SetAsEditorScene(bool editorScene) { m_EditorScene = editorScene; }
+		void Clear();
 
 		void Pause(bool paused);
 		void SwitchCamera();
@@ -68,12 +68,43 @@ namespace LkEngine {
 		void SetCamera(SceneCamera* cam);
 		void SetEditorCamera(const Ref<EditorCamera> editorCamera);
 		Ref<SceneCamera> GetMainCamera() { return m_Camera; }
+		UUID GetUUID() const { return m_SceneID; }
 
-		// TODO: Generalized and abstract 2d physics impl.
 		Box2DWorldComponent& GetBox2DWorld();
+		void Initiate2DPhysics(const Physics2DSpecification& specification);
+
+		void CopyTo(Ref<Scene>& target);
 
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
+
+		template<typename T>
+		static void CopyComponent(entt::registry& dstRegistry, entt::registry& srcRegistry, const std::unordered_map<UUID, entt::entity>& enttMap)
+		{
+			auto srcEntities = srcRegistry.view<T>();
+			for (auto srcEntity : srcEntities)
+			{
+				entt::entity destEntity = enttMap.at(srcRegistry.get<IDComponent>(srcEntity).ID);
+				auto& srcComponent = srcRegistry.get<T>(srcEntity);
+				auto& destComponent = dstRegistry.emplace_or_replace<T>(destEntity, srcComponent);
+			}
+		}
+
+		template<typename TComponent>
+		void CopyComponentIfExists(entt::entity dst, entt::registry& dstRegistry, entt::entity src)
+		{
+			if (m_Registry.has<TComponent>(src))
+			{
+				auto& srcComponent = m_Registry.get<TComponent>(src);
+				dstRegistry.emplace_or_replace<TComponent>(dst, srcComponent);
+			}
+		}
+
+		template<typename TComponent>
+		static void CopyComponentFromScene(Entity dst, Ref<Scene> dstScene, Entity src, Ref<Scene> srcScene)
+		{
+			srcScene->CopyComponentIfExists<TComponent>((entt::entity)dst, dstScene->m_Registry, (entt::entity)src);
+		}
 
 		template<typename... Components>
 		auto GetAllEntitiesWith()
@@ -81,14 +112,24 @@ namespace LkEngine {
 			return m_Registry.view<Components...>();
 		}
 
+		static void SetActiveScene(Ref<Scene>& scene);
+		static std::string GetActiveSceneName() { if (m_ActiveScene) { return m_ActiveScene->GetName(); } return ""; }
+		static uint8_t GetSceneCount() { return m_SceneCounter; }
+		static Ref<Scene> GetActiveScene() { return m_ActiveScene; }
+
 	private:
 		inline static Scene* m_ActiveScene = nullptr;
-		inline static uint8_t s_SceneCounter = 0;
+		inline static uint8_t m_SceneCounter = 0;
 	private:
+		std::string m_Name = "";
 		entt::entity m_SceneEntity;
-		SceneInfo m_SceneInfo;
-		EntityMap m_EntityMap;
+		UUID m_SceneID = 0;
+		bool m_Paused = false;
+		int m_Frames = 0;
+
+		EntityMap m_EntityIDMap;
 		entt::registry m_Registry; 
+
 		Timer m_Timer;
 		bool m_EditorScene = false; // Blank scene
 		AssetHandle m_AssetHandle;
@@ -103,8 +144,9 @@ namespace LkEngine {
 		Ref<SceneRenderer> m_Renderer = nullptr;
 
 		friend class Entity;
-		friend class SceneLoader;
+		friend class Editor;
 		friend class SceneSerializer;
+		friend class SceneManagerPanel;
 	};
 
 }
