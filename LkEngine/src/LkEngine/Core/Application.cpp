@@ -1,60 +1,62 @@
 #include "LKpch.h"
-#include "LkEngine/Core/Application.h"
-
-#include "LkEngine/UI/OpenGLImGui.h" // TODO: Move me
+#include "Application.h"
 
 
 namespace LkEngine {
 
     Application::Application(const ApplicationSpecification& specification)
         : m_Specification(specification)
+        , m_Timestep(0.0f)
+        , m_LastTimestep(0.0f)
     {
         m_Instance = this;
-        Logger::Init("LkEngine.log");
-        m_Window = Window::Create(specification.Title.c_str(), specification.Width, specification.Height);
         m_Timer.Reset();
 
-        m_Debugger = new Debugger();
+        Logger::Init("LkEngine.log");
 
-        m_Timestep = 0.0f;
-        m_LastTimestep = 0.0f;
+        m_Window = std::make_unique<Window>(specification);
+        m_SelectionContext = new SelectionContext(); // Create selection context for UI
+
+        m_ImGuiLayer = ImGuiLayer::Create();
+
+        m_Debugger = new Debugger();
     }
 
     Application::~Application()
     {
-        LOG_WARN("Terminating application");
+        LK_CORE_WARN("Terminating application");
     }
 
     void Application::Init()
     {
         m_AssetRegistry.Clear();
-        m_Window->Init(LK_SHADER_VERSION);
+        m_Window->Init();
+		m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
+
         m_GraphicsContext = m_Window->GetContext();
+        Input::Init();
 
         m_PhysicsSystem = new PhysicsSystem();
         m_PhysicsSystem->Init();
 
-        m_Input = std::make_shared<Input>(this);
-        Keyboard::Init();
-        Mouse::Init();
-
-        m_Renderer = std::make_shared<Renderer>();
+        m_Renderer = Ref<Renderer>::Create();
         m_Renderer->Init();
+
+        m_ImGuiLayer->Init();
+        m_ImGuiLayer->SetDarkTheme();
+
         m_Debugger->Init();
 
-        m_Editor = std::make_shared<Editor>();
-
-		//UI::InitOpenGLImGui(); // Crashes sometimes, not always for some awesome reason
+        m_Editor = new Editor();
+        PushOverlay(m_Editor);
     }
 
     void Application::Run()
     {
 		while (!glfwWindowShouldClose(m_Window->GetGlfwWindow()))
 		{
-            Application* app = this; // Multiple threads
+            Application* app = this;
 			m_Timestep = m_Timer.GetDeltaTime();
-
-            m_Input->OnUpdate();
 
             Renderer::BeginFrame();
             {
@@ -62,26 +64,42 @@ namespace LkEngine {
                     layer->OnUpdate(m_Timestep);
             }
 
+            Input::Update();
+
+            
             if (m_Scene)
             {
                 if (m_Editor->IsEnabled())
+                {
+                    Renderer::BeginScene(m_Editor->GetEditorCamera()->GetViewProjectionMatrix());
                     m_Scene->OnRenderEditor(*m_Editor->GetEditorCamera(), m_Timestep);
+                }
                 else
-                    m_Scene->OnRender(m_Scene->GetCamera(), m_Timestep);
+                {
+                    m_Scene->OnRender(m_Scene->GetMainCamera(), m_Timestep);
+                }
+                m_Renderer->GetRenderer2D()->EndScene(); // Flush 2D renderer
             }
 
-            if (m_Specification.ImGuiEnabled)
-            {
-			    Renderer::Submit([app] { app->RenderImGui(); });
-				Renderer::Submit([=] { m_GraphicsContext->EndImGuiFrame(); });
-            }
+			if (m_Specification.ImGuiEnabled)
+			{
+				Renderer::Submit([app]() { app->RenderImGui(); });
+				Renderer::Submit([=]() { m_ImGuiLayer->EndFrame(); });
+			}
+			Renderer::EndFrame();
+
+			// On Render thread
+			Renderer::Submit([&]()
+			{
+				m_Window->SwapBuffers();
+			});
 
             m_PhysicsSystem->Simulate(m_Timestep);
 
-            Renderer::EndFrame();
-            Renderer::Submit([&] { m_Window->SwapBuffers(); });
-
+		    m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % Renderer::GetFramesInFlight();
             m_LastTimestep = m_Timestep;
+
+            ProcessEvents();
 		}
     }
 
@@ -115,25 +133,73 @@ namespace LkEngine {
         layer->OnDetach();
     }
 
-    void Application::OnEvent(Event& e)
-    {
-        e.HandleEvent();
-    }
+	void Application::OnEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+		//dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) { return OnWindowResize(e); });
+		//dispatcher.Dispatch<WindowMinimizeEvent>([this](WindowMinimizeEvent& e) { return OnWindowMinimize(e); });
+		//dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) { return OnWindowClose(e); });
+
+		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
+		{
+			(*--it)->OnEvent(event);
+			if (event.Handled)
+				break;
+		}
+
+		if (event.Handled)
+			return;
+
+		for (auto& eventCallback : m_EventCallbacks)
+		{
+			eventCallback(event);
+			if (event.Handled)
+				break;
+		}
+	}
+
+	void Application::ProcessEvents()
+	{
+        if (m_EventQueue.size() > 0)
+            LK_CORE_INFO_TAG("Application", "Events in queue {}", m_EventQueue.size());
+
+		Input::TransitionPressedKeys();
+		Input::TransitionPressedButtons();
+
+		m_Window->ProcessEvents();
+
+		std::scoped_lock<std::mutex> lock(m_EventQueueMutex);
+		while (m_EventQueue.size() > 0)
+		{
+			auto& func = m_EventQueue.front();
+			func();
+			m_EventQueue.pop();
+		}
+	}
 
     void Application::RenderImGui()
     {
-        m_GraphicsContext->BeginImGuiFrame();
-        if (m_Editor->IsEnabled())
-            m_Editor->RenderImGui();
+        m_ImGuiLayer->BeginFrame();
+
+        //if (m_Editor->IsEnabled()) m_Editor->OnImGuiRender();
+
         for (int i = 0; i < m_LayerStack.Size(); i++)
             m_LayerStack[i]->OnImGuiRender();
     }
 
     void Application::AddScene(Scene& scene)
     {
+		//Input::SetScene(Ref<Scene>(&scene));
+		Input::SetScene(Ref<Scene>(&scene));
+        //m_Scenes[Scene::GetSceneCount()] = std::shared_ptr<Scene>(&scene);
+        m_Scenes[Scene::GetSceneCount()] = Ref<Scene>(&scene);
+        LK_CORE_DEBUG("Added scene: {}, scene count: {}", scene.GetName(), Scene::GetSceneCount());
+    }
+    
+    void Application::SetScene(Ref<Scene> scene)
+    {
+        m_Scene = scene;
 		Input::SetScene(scene);
-        m_Scenes[Scene::GetSceneCount()] = std::shared_ptr<Scene>(&scene);
-        LOG_DEBUG("Added scene: {}, scene count: {}", scene.GetName(), Scene::GetSceneCount());
     }
 
 

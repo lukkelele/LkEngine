@@ -78,7 +78,7 @@ namespace LkEngine {
 		void UI_ShowMouseDetails();
 		void UI_ShowViewportAndWindowDetails();
 		void UI_ShowEditorWindowsDetails();
-		void UI_BackgroundColorModificationMenu();
+		void UI_ClearColorModificationMenu();
 
 		//Ref<Framebuffer> GetFramebuffer() { return m_Framebuffer; }
 

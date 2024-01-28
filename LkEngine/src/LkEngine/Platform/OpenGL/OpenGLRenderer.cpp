@@ -111,6 +111,10 @@ namespace LkEngine {
 		auto& c = Renderer::ClearColor;
 		glClearColor(c.r, c.g, c.b, c.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		auto& renderer2DFramebuffer = *m_Renderer2D->GetFramebuffer().As<OpenGLFramebuffer>();
+		renderer2DFramebuffer.Clear();
+		renderer2DFramebuffer.Unbind();
 	}
 
 	void OpenGLRenderer::SetDrawMode(const RendererDrawMode& mode)
@@ -215,7 +219,6 @@ namespace LkEngine {
 
 		Renderer::Submit([_renderCommandBuffer, pipeline, vertexBuffer, _indexBuffer, transform, indexCount]() mutable
 		{
-			
 		});
 	}
 
@@ -228,11 +231,10 @@ namespace LkEngine {
 		Ref<OpenGLRenderCommandBuffer> renderCommandBuffer = _renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
 		Ref<OpenGLFramebuffer> framebuffer = pipeline->GetSpecification().TargetFramebuffer.As<OpenGLFramebuffer>();
 
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "RenderGeometry: Framebuffer ID={}", framebuffer->GetRendererID());
-		Renderer::Submit([this, renderCommandBuffer, framebuffer, shader, vertexBuffer, indexCount]() mutable
+		//LK_CORE_DEBUG_TAG("OpenGLRenderer", "RenderGeometry: Framebuffer ID={}", framebuffer->GetRendererID());
+		Renderer::Submit([&]
 		{
 			framebuffer->Bind();
-			LK_CORE_DEBUG_TAG("OpenGLRenderer", "RenderGeometry: Framebuffer ID={}", framebuffer->GetRendererID());
 			shader->Bind();
 			vertexBuffer->Bind();
 			DrawIndexed(indexCount);
@@ -242,21 +244,19 @@ namespace LkEngine {
 
 	void OpenGLRenderer::RenderGeometry(Ref<RenderCommandBuffer> _renderCommandBuffer, Ref<Pipeline> _pipeline, Ref<Shader> _shader, Ref<VertexBuffer> _vertexBuffer, Ref<IndexBuffer> _indexBuffer, const glm::mat4& transform, uint32_t indexCount /* == 0*/)
 	{
-
 		Ref<OpenGLPipeline> pipeline = _pipeline.As<OpenGLPipeline>();
 		Ref<OpenGLShader> shader = _shader.As<OpenGLShader>();
 		Ref<OpenGLVertexBuffer> vertexBuffer = _vertexBuffer.As<OpenGLVertexBuffer>();
 		Ref<OpenGLRenderCommandBuffer> renderCommandBuffer = _renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
 		Ref<OpenGLFramebuffer> framebuffer = pipeline->GetSpecification().TargetFramebuffer.As<OpenGLFramebuffer>();
 
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "RenderGeometry: Framebuffer ID={}", framebuffer->GetRendererID());
 		Renderer::Submit([this, renderCommandBuffer, framebuffer, shader, vertexBuffer, indexCount]() 
 		{
-			//framebuffer->Bind();
+			framebuffer->Bind();
 			shader->Bind();
 			vertexBuffer->Bind();
 			DrawIndexed(indexCount);
-			//framebuffer->Unbind();
+			framebuffer->Unbind();
 		});
 	}
 
