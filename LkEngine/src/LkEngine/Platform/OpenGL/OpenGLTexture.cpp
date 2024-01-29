@@ -28,9 +28,10 @@ namespace LkEngine {
 			stbi_set_flip_vertically_on_load(1);
 			int width, height, channels;
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
-			stbi_image_free(data);
 
 			m_Image = Image::Create(imageSpec, data);
+
+			stbi_image_free(data);
 		}
 		else
 		{
@@ -147,6 +148,7 @@ namespace LkEngine {
 	{
 		ImageSpecification imageSpec;
 		imageSpec.Name = specification.Name;
+		imageSpec.DebugName = specification.DebugName;
 		imageSpec.Path = specification.Path;
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
@@ -161,6 +163,7 @@ namespace LkEngine {
 		{
 			int width, height, channels;
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
+			LK_CORE_INFO_TAG("OpenGLTexture2D", "Image {} specification doesn't match the read data size, resizing texture...", m_Specification.DebugName);
 			imageData.Data = MemoryUtils::ResizeImageData(data, memorySize, width, height, specification.Width, specification.Height, STBIR_RGBA);
 		}
 		m_Image = Image2D::Create(imageSpec, imageData);
@@ -171,6 +174,7 @@ namespace LkEngine {
 	{
 		ImageSpecification imageSpec;
 		imageSpec.Name = specification.Name;
+		imageSpec.DebugName = specification.DebugName;
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
 		imageSpec.Path = specification.Path;
@@ -190,7 +194,7 @@ namespace LkEngine {
 			if (imageSpec.Size != memorySize)
 			{
 				data = MemoryUtils::ResizeImageData(data, memorySize, width, height, specification.Width, specification.Height, STBIR_RGBA);
-				//LK_CORE_DEBUG_TAG("Image", "Resized image ({}, {}) -> ({}, {})", width, height, specification.Width, specification.Height);
+				LK_CORE_INFO_TAG("OpenGLTexture2D", "Image {} specification doesn't match the read data size, resizing texture...", m_Specification.DebugName);
 			}
 			m_Image = Image2D::Create(imageSpec, data);
 		}

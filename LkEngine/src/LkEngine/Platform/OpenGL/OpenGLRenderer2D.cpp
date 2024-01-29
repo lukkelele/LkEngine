@@ -3,7 +3,6 @@
 
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
-//#include "LkEngine/Renderer/UniformBuffer.h"
 
 #include "LkEngine/Core/Window.h"
 
@@ -75,8 +74,8 @@ namespace LkEngine {
             GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
             GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
             GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
-            CubeTexture = LoadTexture("assets/textures/container.jpg");
-            FloorTexture = LoadTexture("assets/textures/metal.png");
+            CubeTexture_ = LoadTexture("assets/textures/container.jpg");
+            FloorTexture_ = LoadTexture("assets/textures/metal.png");
         }
 
         // Quads
@@ -111,8 +110,8 @@ namespace LkEngine {
             });
 
             m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
-            uint32_t* quadIndices = new uint32_t[m_MaxIndices];
 
+            uint32_t* quadIndices = new uint32_t[m_MaxIndices];
             uint32_t offset = 0;
             for (uint32_t i = 0; i < m_MaxIndices; i += 6)
             {
@@ -126,10 +125,10 @@ namespace LkEngine {
                 quadIndices[i + 5] = offset + 0;
                 offset += 4;
             }
-
             Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, m_MaxIndices);
             m_QuadVertexBuffer->SetIndexBuffer(quadIB);
             m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
+
             LK_CORE_VERIFY(m_QuadVertexBuffer, "m_QuadVertexBuffer is nullptr");
             LK_CORE_VERIFY(m_QuadVertexBufferPtr, "m_QuadVertexBufferPtr is nullptr");
 
@@ -473,12 +472,12 @@ namespace LkEngine {
 	{
 	}
 
-	Renderer2DAPI::QuadVertex*& OpenGLRenderer2D::GetWriteableQuadBuffer()
+	QuadVertex*& OpenGLRenderer2D::GetWriteableQuadBuffer()
 	{
 		return m_QuadVertexBufferPtr;
 	}
 
-	Renderer2DAPI::LineVertex*& OpenGLRenderer2D::GetWriteableLineBuffer()
+	LineVertex*& OpenGLRenderer2D::GetWriteableLineBuffer()
 	{
         return m_LineVertexBufferPtr;
 	}

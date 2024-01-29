@@ -11,6 +11,8 @@
 #include "LkEngine/Renderer/Framebuffer.h"
 #include "LkEngine/Renderer/Shader.h"
 
+#include "LkEngine/Renderer/VertexBuffer.h"
+
 
 namespace LkEngine {
 
@@ -77,11 +79,16 @@ namespace LkEngine {
 
     //=====================================================================
     // Debugging
-    extern unsigned int CubeTexture, FloorTexture;
+    extern unsigned int CubeTexture_, FloorTexture_;
 
     extern unsigned int CubeVAO, CubeVBO;
     extern unsigned int PlaneVAO, PlaneVBO;
     extern unsigned int QuadVAO, QuadVBO;
+
+    extern Ref<VertexBuffer> CubeVertexBuffer;
+    extern Ref<VertexBuffer> PlaneVertexBuffer;
+    extern Ref<Texture2D> CubeTexture;
+    extern Ref<Texture2D> PlaneTexture;
 
     inline static Ref<Shader> ScreenShader = nullptr;
     inline static Ref<Shader> DebugShader = nullptr;
@@ -135,14 +142,14 @@ namespace LkEngine {
         -0.5f,  0.5f, -0.5f,    0.0f, 1.0f
     };
     static float Plane_Vertices[] = {
-        // Positions           // Texture Coords 
-         5.0f, -0.5f,  5.0f,   2.0f, 0.0f,
-        -5.0f, -0.5f,  5.0f,   0.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,   0.0f, 2.0f,
+        // Positions          // Texture Coords 
+         5.0f, -0.5f,  5.0f,     2.0f, 0.0f,
+        -5.0f, -0.5f,  5.0f,     0.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,     0.0f, 2.0f,
     
-         5.0f, -0.5f,  5.0f,   2.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,   0.0f, 2.0f,
-         5.0f, -0.5f, -5.0f,   2.0f, 2.0f
+         5.0f, -0.5f,  5.0f,     2.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,     0.0f, 2.0f,
+         5.0f, -0.5f, -5.0f,     2.0f, 2.0f
     };
     static float Quad_Vertices[] = { 
         // positions   // texCoords

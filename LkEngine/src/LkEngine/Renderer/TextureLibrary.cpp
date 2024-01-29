@@ -40,7 +40,10 @@ namespace LkEngine {
 		spec.Format = ImageFormat::RGBA32F;
 		spec.Width = 200;
 		spec.Height = 200;
+        spec.SamplerFilter = TextureFilter::None;
+        spec.SamplerWrap = TextureWrap::None;
         spec.Name = "white-texture";
+        spec.DebugName = "white-texture";
         spec.Path = "assets/textures/white-texture.png";
 
 		//constexpr uint32_t whiteTextureData = 0xFFFFFFFF; // White Pixel
@@ -58,6 +61,28 @@ namespace LkEngine {
         LK_CORE_ASSERT(m_BlackTexture2D, "m_BlackTexture2D is nullptr");
         m_Collection2D.insert({ "black-texture", m_BlackTexture2D });
 #endif
+
+		spec.Format = ImageFormat::RGBA32F;
+		spec.Width = 1024;
+		spec.Height = 1024;
+        spec.Name = "metal-ground";
+        spec.DebugName = "metal-ground";
+        spec.Path = "assets/textures/metal.png";
+        spec.GenerateMips = true;
+        spec.SamplerWrap = TextureWrap::Repeat;
+        spec.SamplerFilter = TextureFilter::Nearest;
+        m_Collection2D.insert({ "metal-ground", Texture2D::Create(spec) });
+
+		spec.Format = ImageFormat::RGB;
+		spec.Width = 512;
+		spec.Height = 512;
+        spec.Name = "wood-container";
+        spec.DebugName = "wood-container";
+        spec.Path = "assets/textures/container.jpg";
+        spec.SamplerWrap = TextureWrap::Repeat;
+        spec.SamplerFilter = TextureFilter::Linear;
+        spec.GenerateMips = true;
+        m_Collection2D.insert({ "wood-container", Texture2D::Create(spec) });
 
     }
 
@@ -154,10 +179,7 @@ namespace LkEngine {
             if (File::ExtractFilenameWithoutExtension(texture.first, FileExtension::PNG) == textureName)
                 return texture.second;
         }
-
         return nullptr;
-        // If no texture is found, return white texture
-        //return m_Collection2D.at("white-texture"); // White texture is the first added texture in the 2D collection
     }
 
     Ref<Texture2D> TextureLibrary::AddTexture2D(const TextureSpecification& textureSpec)
@@ -183,8 +205,6 @@ namespace LkEngine {
 
     Ref<Texture2D> TextureLibrary::GetWhiteTexture2D()
     {
-        //LK_ASSERT(m_Collection2D.at("white-texture") != nullptr);
-        //return m_Collection2D.at("white-texture");
         return m_WhiteTexture2D;
     }
 

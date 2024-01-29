@@ -254,25 +254,30 @@ namespace LkEngine {
 
     //unsigned int FramebufferID;
     unsigned int TextureColorBufferID, DepthTextureID;
-    unsigned int CubeTexture, FloorTexture;
+    unsigned int CubeTexture_, FloorTexture_;
 
     unsigned int CubeVAO, CubeVBO;
     unsigned int PlaneVAO, PlaneVBO;
     unsigned int QuadVAO, QuadVBO;
 
+    Ref<VertexBuffer> CubeVertexBuffer;
+    Ref<VertexBuffer> PlaneVertexBuffer;
+	Ref<Texture2D> CubeTexture;
+	Ref<Texture2D> PlaneTexture;
+
     void RenderMirrorTexture(const glm::mat4& view, const glm::mat4& proj)
     {
-		if (!DebugShader || !ScreenShader)
+		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 		{
 			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
 			return;
 		}
 
         Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Bind();
-        glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
 
         DebugShader->Bind();
         Model = glm::mat4(1.0f);
@@ -281,9 +286,10 @@ namespace LkEngine {
 
         // Cubes
         {
-            glBindVertexArray(CubeVAO);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, CubeTexture);
+			CubeVertexBuffer->Bind();
+            //glActiveTexture(GL_TEXTURE0);
+            //glBindTexture(GL_TEXTURE_2D, CubeTexture_);
+			CubeTexture->Bind();
 
             // Cube 1
             Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
@@ -298,21 +304,24 @@ namespace LkEngine {
         }
         // Floor 
         {
-            glBindVertexArray(PlaneVAO);
-            glBindTexture(GL_TEXTURE_2D, FloorTexture);
+			PlaneVertexBuffer->Bind();
+			PlaneTexture->Bind();
+            //glBindTexture(GL_TEXTURE_2D, FloorTexture);
 
             DebugShader->Set("Model", glm::mat4(1.0f));
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
-        glBindVertexArray(0);
+        //glBindVertexArray(0);
     }
 
     void RenderScreenTexture(const glm::mat4& view, const glm::mat4& proj)
     {
-		if (!DebugShader || !ScreenShader)
+		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 		{
 			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
 			return;
 		}
 
@@ -328,9 +337,12 @@ namespace LkEngine {
         // Cubes
         {
             // Cube 1
-            glBindVertexArray(CubeVAO);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, CubeTexture);
+            //glBindVertexArray(CubeVAO);
+            //glActiveTexture(GL_TEXTURE0);
+            //glBindTexture(GL_TEXTURE_2D, CubeTexture);
+			CubeVertexBuffer->Bind();
+			CubeTexture->Bind();
+            //glBindTexture(GL_TEXTURE_2D, CubeTexture);
             Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
             DebugShader->Set("Model", Model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -344,7 +356,8 @@ namespace LkEngine {
         // Floor
         {
             glBindVertexArray(PlaneVAO);
-            glBindTexture(GL_TEXTURE_2D, FloorTexture);
+            //glBindTexture(GL_TEXTURE_2D, FloorTexture);
+			PlaneTexture->Bind();
             DebugShader->Set("Model", glm::mat4(1.0f));
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
@@ -366,33 +379,98 @@ namespace LkEngine {
 
 	void RenderCubes(const glm::mat4& view, const glm::mat4& projection)
 	{
-         glBindVertexArray(CubeVAO);
-         glActiveTexture(GL_TEXTURE0);
-         glBindTexture(GL_TEXTURE_2D, CubeTexture);
+		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
+		{
+			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
+			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
+			return;
+		}
 
-         // Cube 1
-         Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
-         DebugShader->Set("Model", Model);
-         glDrawArrays(GL_TRIANGLES, 0, 36);
+		glEnable(GL_DEPTH_TEST);
 
-         // Cube 2
-         Model = glm::mat4(1.0f);
-         Model = glm::translate(Model, glm::vec3(2.0f, 0.0f, 0.0f));
-         DebugShader->Set("Model", Model);
-         glDrawArrays(GL_TRIANGLES, 0, 36);
+        Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Bind();
+
+        DebugShader->Bind();
+        DebugShader->Set("View", view);
+        DebugShader->Set("Projection", projection);
+        Model = glm::mat4(1.0f);
+
+		CubeVertexBuffer->Bind();
+        glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, CubeTexture);
+		CubeTexture->Bind();
+
+        // Cube 1
+        Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        DebugShader->Set("Model", Model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Cube 2
+        Model = glm::mat4(1.0f);
+        Model = glm::translate(Model, glm::vec3(2.0f, 0.0f, 0.0f));
+        DebugShader->Set("Model", Model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //glBindVertexArray(0);
+        DebugShader->Unbind();
 	}
 
 	void RenderFloor(const glm::mat4& view, const glm::mat4& projection)
 	{
-        glBindVertexArray(PlaneVAO);
-        glBindTexture(GL_TEXTURE_2D, FloorTexture);
+		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
+		{
+			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
+			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
+			return;
+		}
 
-        DebugShader->Set("Model", glm::mat4(1.0f));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+		glEnable(GL_DEPTH_TEST);
+        Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Bind();
+        //glBindVertexArray(PlaneVAO);
+
+        Model = glm::mat4(1.0f);
+        DebugShader->Bind();
+        DebugShader->Set("View", view);
+        DebugShader->Set("Projection", projection);
+
+  		PlaneVertexBuffer->Bind();
+		//glBindTexture(GL_TEXTURE_2D, FloorTexture);
+		PlaneTexture->Bind();
+
+		DebugShader->Set("Model", glm::mat4(1.0f));
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Unbind();
+
+        //glBindVertexArray(0);
 	}
 
     void GenerateCubeVaoAndVbo(unsigned int& vao, unsigned int& vbo)
     {
+		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
+		{
+			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
+			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
+			return;
+		}
+
+		CubeVertexBuffer = VertexBuffer::Create(Cube_Vertices, sizeof(Cube_Vertices));
+		CubeVertexBuffer->SetLayout({
+            { "a_Pos",          ShaderDataType::Float3  },
+            { "a_TexCoord",     ShaderDataType::Float2  },
+		});
+		LK_CORE_TRACE_TAG("LkOpenGL", "Generated CubeVertexBuffer!");
+
+        Ref<IndexBuffer> cubeIB = IndexBuffer::Create(Cube_Vertices, sizeof(Cube_Vertices));
+        CubeVertexBuffer->SetIndexBuffer(cubeIB);
+
+#if 0
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
 
@@ -407,10 +485,25 @@ namespace LkEngine {
         // Texture indexing
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+#endif
     }
 
     void GeneratePlaneVaoAndVbo(unsigned int& vao, unsigned int& vbo)
     {
+		if (!DebugShader)  DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
+		if (!ScreenShader) ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
+
+		PlaneVertexBuffer = VertexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices));
+		PlaneVertexBuffer->SetLayout({
+            { "a_Pos",          ShaderDataType::Float3  },
+            { "a_TexCoord",     ShaderDataType::Float2  },
+		});
+		LK_CORE_TRACE_TAG("LkOpenGL", "Generated CubeVertexBuffer!");
+
+        //Ref<IndexBuffer> planeIB = IndexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices) - (2 * 6 * sizeof(float)));
+		Ref<IndexBuffer> planeIB = IndexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices));
+        PlaneVertexBuffer->SetIndexBuffer(planeIB);
+#if 0
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
 
@@ -425,6 +518,7 @@ namespace LkEngine {
         // Texture indexing
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+#endif
     }
 
     void GenerateScreenQuadVaoAndVbo(unsigned int& vao, unsigned int& vbo)

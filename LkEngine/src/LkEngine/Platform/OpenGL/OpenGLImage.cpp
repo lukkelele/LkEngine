@@ -239,112 +239,10 @@ namespace LkEngine {
         m_ImageData.Release();
     }
 
-#if 0
-	void OpenGLImage::ApplySpecificationProperties()
-	{
-		ApplyWrap();
-		ApplyFilter();
-	}
-
-	void OpenGLImage::ApplyWrap()
-	{
-		// Texture Wrap
-		if (m_Specification.Wrap == TextureWrap::Clamp)
-		{
-			// S == x, T == y
-			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); 
-			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); 
-
-		}
-		else if (m_Specification.Wrap == TextureWrap::Repeat)
-		{
-			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)); // S: x
-			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)); // T: y
-		}
-	}
-
-	void OpenGLImage::ApplyFilter()
-	{
-		// Texture Filter
-		if (m_Specification.Filter == TextureFilter::Linear)
-		{
-			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		}
-		else if (m_Specification.Filter == TextureFilter::Nearest)
-		{
-			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-			GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-		}
-	}
-#endif
-
 
 	//-------------------------------------------------------------------------------
 	// OpenGLImage2D
 	//-------------------------------------------------------------------------------
-    OpenGLImage2D::OpenGLImage2D(ImageSpecification spec, void* data)
-        : m_Specification(spec)
-	{
-		if (data)
-		{
-			//m_ImageData = Buffer::Copy(data, spec.Size);
-            uint64_t memorySize = Utils::GetMemorySize(spec.Format, spec.Width, spec.Height);
-			m_ImageData = Buffer::Copy(data, memorySize);
-
-			GL_CALL(glGenTextures(1, &m_RendererID));
-			GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
-
-			//GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_ImageData.Data));
-			GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data));
-			GL_CALL(glGenerateTextureMipmap(m_RendererID));
-			//GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
-
-			// Texture Wrap
-			if (m_Specification.Wrap == TextureWrap::Clamp)
-			{
-				// S == x, T == y
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); 
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); 
-
-			}
-			else if (m_Specification.Wrap == TextureWrap::Repeat)
-			{
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)); // S: x
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)); // T: y
-			}
-
-			// Texture Filter
-			if (m_Specification.Filter == TextureFilter::Linear)
-			{
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-			}
-			else if (m_Specification.Filter == TextureFilter::Nearest)
-			{
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			}
-
-			// Anistropic Filtering
-			GLfloat maxAnisotropy;
-			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAnisotropy);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-		else
-		{
-			// Data is null, try to load it from path
-			LK_CORE_TRACE_TAG("OpenGLImage2D", "No data passed to image, tried loading white texture");
-			stbi_set_flip_vertically_on_load(1);
-			int width, height, channels;
-			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
-			if (!data)
-				data = stbi_load("assets/textures/white-texture.png", &width, &height, &channels, 4);
-			m_ImageData = Buffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
-			stbi_image_free(data);
-		}
-    }
-
     OpenGLImage2D::OpenGLImage2D(ImageSpecification spec, Buffer buffer)
 		: m_Specification(spec)
     {
@@ -359,8 +257,7 @@ namespace LkEngine {
 
 			//GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_ImageData.Data));
 			GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data));
-			GL_CALL(glGenerateTextureMipmap(m_RendererID));
-			//GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+			glGenerateTextureMipmap(m_RendererID);
 
 			// Texture Wrap
 			if (m_Specification.Wrap == TextureWrap::Clamp)
@@ -379,13 +276,24 @@ namespace LkEngine {
 			// Texture Filter
 			if (m_Specification.Filter == TextureFilter::Linear)
 			{
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+				//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				LK_CORE_FATAL("TextureFilter::Linear {}", spec.DebugName);
 			}
 			else if (m_Specification.Filter == TextureFilter::Nearest)
 			{
-				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+				//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+				LK_CORE_FATAL("TextureFilter::Nearest {}", spec.DebugName);
+			}
+			else if (m_Specification.Filter == TextureFilter::None)
+			{
+				LK_CORE_FATAL("TextureFilter::None {}", spec.DebugName);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 			}
 
 			// Anistropic Filtering
@@ -407,6 +315,79 @@ namespace LkEngine {
 		}
 
     }
+
+    OpenGLImage2D::OpenGLImage2D(ImageSpecification spec, void* data)
+        : m_Specification(spec)
+	{
+		if (data)
+		{
+			//m_ImageData = Buffer::Copy(data, spec.Size);
+            uint64_t memorySize = Utils::GetMemorySize(spec.Format, spec.Width, spec.Height);
+			m_ImageData = Buffer::Copy(data, memorySize);
+
+			GL_CALL(glGenTextures(1, &m_RendererID));
+			GL_CALL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
+
+			//GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_ImageData.Data));
+			GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data));
+			glGenerateTextureMipmap(m_RendererID);
+			//GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+			//glGenerateMipmap(GL_TEXTURE_2D);
+
+			// Texture Wrap
+			if (m_Specification.Wrap == TextureWrap::Clamp)
+			{
+				// S == x, T == y
+				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)); 
+				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)); 
+
+			}
+			else if (m_Specification.Wrap == TextureWrap::Repeat)
+			{
+				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)); // S: x
+				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)); // T: y
+			}
+
+			// Texture Filter
+			if (m_Specification.Filter == TextureFilter::Linear)
+			{
+				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+				GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+				LK_CORE_ERROR(">> TextureFilter::Linear {}", spec.DebugName);
+			}
+			else if (m_Specification.Filter == TextureFilter::Nearest)
+			{
+				//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				LK_CORE_ERROR(">> TextureFilter::Nearest {}", spec.DebugName);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			}
+			else if (m_Specification.Filter == TextureFilter::None)
+			{
+				LK_CORE_FATAL("TextureFilter::None {}", spec.DebugName);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			}
+
+			// Anistropic Filtering
+			GLfloat maxAnisotropy;
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAnisotropy);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		else
+		{
+			// Data is null, try to load it from path
+			LK_CORE_TRACE_TAG("OpenGLImage2D", "No data passed to image, tried loading white texture");
+			stbi_set_flip_vertically_on_load(1);
+			int width, height, channels;
+			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
+			if (!data)
+				data = stbi_load("assets/textures/white-texture.png", &width, &height, &channels, 4);
+			m_ImageData = Buffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
+			stbi_image_free(data);
+		}
+    }
+
 
     OpenGLImage2D::~OpenGLImage2D()
     {
