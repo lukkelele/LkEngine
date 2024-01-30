@@ -51,14 +51,14 @@ project "ImGui"
             "%{Dependencies.Vulkan.Windows.IncludeDir}"
         }
 
-	filter "system:linux"
-		pic "On"
-		systemversion "latest"
-
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "On"
 
 	filter "configurations:Release"
+		runtime "Release"
+		optimize "On"
+
+	filter "configurations:Dist"
 		runtime "Release"
 		optimize "On"

@@ -42,32 +42,63 @@ Dependencies = {
 		IncludeDir = "%{wks.location}/external/spdlog/",
 	},
 
+	StbImage = {
+		IncludeDir = "%{wks.location}/external/",
+	},
+
 	ImGuizmo = {
 		IncludeDir = "%{wks.location}/external/ImGuizmo/",
 	},
 
+	ImGuiNodeEditor = {
+		IncludeDir = "%{wks.location}/external/imgui-node-editor",
+	},
+
 	VulkanMemoryAllocator = {
 		IncludeDir = "%{wks.location}/external/VulkanMemoryAllocator",
-		Files = {
-		}
 	},
 
 	YamlCPP = {
         IncludeDir = "%{wks.location}/external/yaml-cpp/include",
+        LibDir = "%{wks.location}/external/yaml-cpp/lib",
 	},
 	
 	Glm = {
         IncludeDir = "%{wks.location}/external/glm"
 	},
 
+	Assimp = {
+        IncludeDir = "%{wks.location}/external/assimp/include",
+		Windows = { 
+			LibName = "assimp-vc143-mtd", 
+			DebugLibName = "assimp-vc143-mtd", 
+			LibDir = "%{wks.location}/external/assimp/bin/windows/%{cfg.buildcfg}/" 
+		},
+		Linux = { 
+			LibName = "assimp", 
+			LibDir = "%{wks.location}/external/assimp/bin/linux/" 
+		},
+		Configurations = "Debug,Release"
+	},
+
+	Entt = {
+        IncludeDir = "%{wks.location}/external/entt/include"
+	},
+
+	Choc = {
+        IncludeDir = "%{wks.location}/external/choc"
+	},
+
 }
 
---include "external/glfw/premake5.lua"
---include "external/glad/premake5.lua"
---include "external/imgui/premake5.lua"
---include "external/ImGuizmo/premake5.lua"
---include "external/imgui-node-editor/premake5.lua"
---include "external/box2d/premake5.lua"
---include "external/yaml-cpp/premake5.lua"
---
---include "LkApplication/premake5.lua"
+
+include "external/glfw/premake5.lua"
+include "external/glad/premake5.lua"
+include "external/imgui/premake5.lua"
+include "external/ImGuizmo/premake5.lua"
+include "external/imgui-node-editor/premake5.lua"
+include "external/box2d/premake5.lua"
+include "external/yaml-cpp/premake5.lua"
+
+include "LkApplication/premake5.lua"
+
