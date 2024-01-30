@@ -1,56 +1,69 @@
 project "LkApplication"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
-	staticruntime "off"
+	cppdialect "C++20"
+	staticruntime "Off"
+
+	configurations { "Debug", "Release", "Dist" }
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
-	files
-	{
+	files {
 		"src/**.h",
-		"src/**.cpp"
+		"src/**.cpp",
+
+        "%{wks.location}/external/VulkanMemoryAllocator/vk_mem_alloc.h",
+        "%{wks.location}/external/VulkanMemoryAllocator/vk_mem_alloc.cpp",
 	}
 
-	includedirs
-	{
+	includedirs {
 		"%{wks.location}/LkEngine",
 		"%{wks.location}/LkEngine/src",
-		"%{wks.location}/lib",
-		"%{wks.location}/lib/spdlog",
-		"%{wks.location}/lib/glm",
-		"%{wks.location}/lib/stb_image",
-		"%{wks.location}/lib/glfw/include",
-		"%{wks.location}/lib/glad/include",
-		"%{wks.location}/lib/spdlog/include",
-		"%{wks.location}/lib/entt/src",
-		"%{wks.location}/lib/imgui",
-		"%{wks.location}/lib/ImGuizmo",
-        "%{wks.location}/lib/box2d/include",
-        "%{wks.location}/lib/yaml-cpp/include",
+		"%{wks.location}/external",
+
+        "%{Dependencies.Glfw.IncludeDir}",
+        "%{Dependencies.Glad.IncludeDir}",
+        "%{Dependencies.StbImage.IncludeDir}",
+        "%{Dependencies.Spdlog.IncludeDir}",
+        "%{Dependencies.ImGui.IncludeDir}",
+        "%{Dependencies.ImGuizmo.IncludeDir}",
+        "%{Dependencies.Assimp.IncludeDir}",
+        "%{Dependencies.Entt.IncludeDir}",
+        "%{Dependencies.Glm.IncludeDir}",
+        "%{Dependencies.Box2D.IncludeDir}",
+        "%{Dependencies.YamlCPP.IncludeDir}",
+        "%{Dependencies.Assimp.IncludeDir}",
+
+        "%{wks.location}/external/VulkanMemoryAllocator",
 	}
 
-	links
-	{ 
-		"LkEngine"
-	}
+	links { "LkEngine" }
 
 	filter "system:windows"
 		systemversion "latest"
+        includedirs { 
+            "%{Dependencies.Vulkan.Windows.IncludeDir}",
+        }
+		libdirs {
+            "%{Dependencies.Vulkan.Windows.LibDir}",
+		}
+		links {
+            "%{Dependencies.Vulkan.Windows.LibName}",
+		}
+        postbuildcommands {
+            "{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
+        }
 
 
 	filter "configurations:Debug"
-		defines "LK_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "LK_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "LK_DIST"
 		runtime "Release"
 		optimize "on"
