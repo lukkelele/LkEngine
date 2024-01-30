@@ -1,6 +1,8 @@
 #include "LKpch.h"
 #include "EditorTabManager.h"
 
+#include "LkEngine/Renderer/Framebuffer.h"
+
 
 namespace LkEngine {
 
@@ -22,7 +24,7 @@ namespace LkEngine {
             std::string originalTabName = tabName;
             while (searchedTab != nullptr)
             {
-                LOG_DEBUG("Tab already exists, adding copy marker -> ({})", tabCopies);
+                LK_CORE_DEBUG("Tab already exists, adding copy marker -> ({})", tabCopies);
                 tabName = originalTabName + "(" + std::to_string(tabCopies++) + ")";
                 searchedTab = GetTab(tabName);
             }
@@ -45,7 +47,7 @@ namespace LkEngine {
         if (m_SwitchToNewTabsOnCreation || setAsActive)
             SetActiveTab(tab);
 
-        LOG_DEBUG("New Tab: {}", tabName);
+        LK_CORE_DEBUG("New Tab: {}", tabName);
         return tab;
     }
 
@@ -95,10 +97,10 @@ namespace LkEngine {
 
     void EditorTabManager::PopTab()
     {
-        LOG_DEBUG("EditorTabManager::PopTab() -> m_Tabs.size() == {}", m_Tabs.size());
+        LK_CORE_DEBUG("EditorTabManager::PopTab() -> m_Tabs.size() == {}", m_Tabs.size());
         m_Tabs.erase(m_Tabs.size());
         if (uint8_t tabCount = m_Tabs.size() > 0)
-            LOG_DEBUG("Erase tab: {}", m_Tabs.find(tabCount)->second->Name); // at uses index, erase uses key
+            LK_CORE_DEBUG("Erase tab: {}", m_Tabs.find(tabCount)->second->Name); // at uses index, erase uses key
 
         if (m_Tabs.size() == 0)
         {
@@ -120,7 +122,7 @@ namespace LkEngine {
             auto foundTab = m_Tabs.find(tab->Index);
             if (foundTab != m_Tabs.end())
             {
-                LOG_DEBUG("Removing tab \"{}\"", tab->Name);
+                LK_CORE_DEBUG("Removing tab \"{}\"", tab->Name);
                 m_Tabs.erase(tab->Index);
                 m_TabsToClose.erase(std::find(m_TabsToClose.begin(), m_TabsToClose.end(), tab));
             }

@@ -34,7 +34,7 @@ namespace LkEngine {
         std::vector<s_ptr<Tab>> m_TabsToClose;
         bool m_SwitchToNewTabsOnCreation = false;
 
-        friend class Editor;
+        friend class EditorLayer;
     };
 
 }

@@ -80,7 +80,7 @@ namespace LkEngine {
 
     public:
         NodeEditor* NodeEditorRef = nullptr;
-        s_ptr<Material> MaterialRef = nullptr;
+        Ref<Material> MaterialRef = nullptr;
     };
 
 

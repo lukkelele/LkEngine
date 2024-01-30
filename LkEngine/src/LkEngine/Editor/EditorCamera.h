@@ -105,7 +105,7 @@ namespace LkEngine {
 
 		constexpr static float MIN_SPEED{ 0.0005f }, MAX_SPEED{ 2.0f };
 
-		friend class Editor;
+		friend class EditorLayer;
 		friend class SceneSerializer;
 	};
 

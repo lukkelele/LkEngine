@@ -14,12 +14,13 @@
 
 #include "LkEngine/Project/Project.h"
 
-
 #include "EditorTabManager.h"
 #include "ComponentEditor.h"
 #include "NodeEditor/NodeEditor.h"
 
 #include "LkEngine/ImGui/ImGuiLayer.h"
+
+#include "LkEngine/Asset/MeshImporter.h"
 
 
 namespace LkEngine {
@@ -35,14 +36,14 @@ namespace LkEngine {
 	class Scene;
 	class SceneManagerPanel;
 
-	class Editor : public Layer
+	class EditorLayer : public Layer
 	{
 	public:
 		enum class WindowType
 		{
 			None = 0,
-			Viewport,  // Editor Viewport, 'normal' mode
-			NodeEditor,
+			Viewport,  // EditorLayer Viewport, 'normal' mode
+			NodeEditorLayer,
 		};
 
 		enum GizmoType
@@ -53,8 +54,8 @@ namespace LkEngine {
 		};
 
 	public:
-		Editor();
-		~Editor() = default;
+		EditorLayer();
+		~EditorLayer() = default;
 
 		void OnUpdate();
 		void OnEvent(Event& e) override;
@@ -97,7 +98,7 @@ namespace LkEngine {
 		glm::vec2 GetMenuBarSize() const; 
 		glm::vec2 GetTabBarSize() const;
 
-		static Editor* Get() { return m_Instance; }
+		static EditorLayer* Get() { return m_Instance; }
 
 	private:
 		void RenderViewport();                
@@ -146,13 +147,13 @@ namespace LkEngine {
 		glm::vec2 m_SecondViewportBounds[2];
 		bool m_ShowMetricsTool = false;
 		bool m_ShowStackTool = false;
-		bool m_ShowStyleEditor = false;
+		bool m_ShowStyleEditorLayer = false;
 		int m_GizmoType = GizmoType::Translate;
-		int m_CurrentTabCount = 0; // Incremented to 1 after Editor is initialized
+		int m_CurrentTabCount = 0; // Incremented to 1 after EditorLayer is initialized
 
 		//Ref<Framebuffer> m_Framebuffer;
 
-		Ref<EditorCamera> m_EditorCamera = nullptr;
+		Ref<EditorCamera> m_EditorCamera;
 		SceneManagerPanel* m_SceneManagerPanel = nullptr;
 
 		Ref<Project> m_TargetProject;
@@ -160,7 +161,7 @@ namespace LkEngine {
 
 		NodeEditor* m_NodeEditor;
 		EditorTabManager* m_TabManager;
-		ComponentEditor m_ComponentEditor;
+		ComponentEditor* m_ComponentEditor;
 		ContentBrowser* m_ContentBrowser;
 
 		Window* m_Window = nullptr;
@@ -171,7 +172,7 @@ namespace LkEngine {
 		friend class MaterialEditorTab;
 		friend class SceneManagerPanel;
 		
-		inline static Editor* m_Instance = nullptr;
+		inline static EditorLayer* m_Instance = nullptr;
 	};
 
 }

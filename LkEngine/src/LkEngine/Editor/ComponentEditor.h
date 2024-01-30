@@ -18,7 +18,8 @@ namespace LkEngine {
 
     private:
         void RenderMaterialEditor(Material& material);
-        void RenderTextureEditor(Texture& texture);
+        void RenderTextureEditor(const Ref<Texture> texture);
+        void RenderTextureEditor(const Ref<Texture2D> texture);
 
     private:
         friend class Editor;
