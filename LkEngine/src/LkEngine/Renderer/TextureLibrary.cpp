@@ -45,22 +45,15 @@ namespace LkEngine {
         spec.Name = "white-texture";
         spec.DebugName = "white-texture";
         spec.Path = "assets/textures/white-texture.png";
-
-		//constexpr uint32_t whiteTextureData = 0xFFFFFFFF; // White Pixel
-		//m_WhiteTexture2D = Texture2D::Create(spec, Buffer(&whiteTextureData, sizeof(uint32_t)));
         m_WhiteTexture2D = Texture2D::Create(spec);
-
-        LK_CORE_ASSERT(m_WhiteTexture2D, "m_WhiteTexture2D is nullptr");
         m_Collection2D.insert({ "white-texture", m_WhiteTexture2D });
 
-#if 0
         spec.Name = "black-texture";
 		constexpr uint32_t blackTextureData = 0xFF000000;
 		//m_BlackTexture2D = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
         m_BlackTexture2D = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
         LK_CORE_ASSERT(m_BlackTexture2D, "m_BlackTexture2D is nullptr");
         m_Collection2D.insert({ "black-texture", m_BlackTexture2D });
-#endif
 
 		spec.Format = ImageFormat::RGBA32F;
 		spec.Width = 1024;
@@ -83,7 +76,6 @@ namespace LkEngine {
         spec.SamplerFilter = TextureFilter::Linear;
         spec.GenerateMips = true;
         m_Collection2D.insert({ "wood-container", Texture2D::Create(spec) });
-
     }
 
     TextureLibrary::~TextureLibrary()

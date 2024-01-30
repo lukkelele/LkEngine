@@ -52,21 +52,12 @@ namespace LkEngine {
 		CommandQueue[1] = new RenderCommandQueue();
 
 		Data->m_ShaderLibrary = Ref<ShaderLibrary>::Create();
+
 		Data->m_TextureLibrary = Ref<TextureLibrary>::Create("assets/textures");
 		Data->m_TextureLibrary->Init();
+
 		Data->m_MaterialLibrary = Ref<MaterialLibrary>::Create();
 		Data->m_MaterialLibrary->Init();
-
-		//s_Config.FramesInFlight = glm::min<uint32_t>(s_Config.FramesInFlight, Application::Get().GetWindow().GetSwapChain().GetImageCount());
-
-		TextureSpecification spec;
-#if 0
-		uint32_t whiteTextureData = 0xFFFFFFFF;
-		spec.Format = ImageFormat::RGBA;
-		spec.Width = 1;
-		spec.Height = 1;
-		//Data->WhiteTexture = Texture2D::Create(spec, Buffer(&whiteTextureData, sizeof(uint32_t)));
-#endif
 
 		Data->WhiteTexture = Data->m_TextureLibrary->GetWhiteTexture2D();
 		//Data->BlackTexture = Data->m_TextureLibrary->GetBlackTexture2D();
@@ -74,9 +65,9 @@ namespace LkEngine {
 
 		LK_CORE_ASSERT(Data->WhiteTexture, "Data->WhiteTexture is nullptr");
 
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad", "assets/shaders/Renderer2D_Quad.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Line", "assets/shaders/Renderer2D_Line.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug", "assets/shaders/Renderer2D_Debug.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad",   "assets/shaders/Renderer2D_Quad.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Line",   "assets/shaders/Renderer2D_Line.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug",  "assets/shaders/Renderer2D_Debug.shader");
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen", "assets/shaders/Renderer2D_Screen.shader");
 
 		m_RendererAPI = RendererAPI::Create();

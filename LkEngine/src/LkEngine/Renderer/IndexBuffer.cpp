@@ -4,7 +4,7 @@
 #include "RendererAPI.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLIndexBuffer.h"
-#include "LkEngine/Platform/Vulkan/VulkanIndexBuffer.h"
+//#include "LkEngine/Platform/Vulkan/VulkanIndexBuffer.h"
 
 
 namespace LkEngine {
@@ -13,8 +13,8 @@ namespace LkEngine {
 	{ 
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::Vulkan: return Ref<VulkanIndexBuffer>::Create(buffer, size);
 			case RendererAPIType::OpenGL: return Ref<OpenGLIndexBuffer>::Create(buffer, size);
+			//case RendererAPIType::Vulkan: return Ref<VulkanIndexBuffer>::Create(buffer, size);
 			case RendererAPIType::None:   return nullptr;
 		}
 	}
@@ -23,8 +23,8 @@ namespace LkEngine {
 	{ 
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::Vulkan: return Ref<VulkanIndexBuffer>::Create(size);
 			case RendererAPIType::OpenGL: return Ref<OpenGLIndexBuffer>::Create(size);
+			//case RendererAPIType::Vulkan: return Ref<VulkanIndexBuffer>::Create(size);
 			case RendererAPIType::None:   return nullptr;
 		}
 	}

@@ -1,8 +1,8 @@
 #include "LKpch.h"
 #include "RenderPass.h"
 
-#include "LkEngine/Platform/Vulkan/VulkanRenderPass.h"
 #include "LkEngine/Platform/OpenGL/OpenGLRenderPass.h"
+//#include "LkEngine/Platform/Vulkan/VulkanRenderPass.h"
 
 #include "RendererAPI.h"
 
@@ -13,11 +13,10 @@ namespace LkEngine {
 	{
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::Vulkan:  return Ref<VulkanRenderPass>::Create(spec);
 			case RendererAPIType::OpenGL:  return Ref<OpenGLRenderPass>::Create(spec);
-			case RendererAPIType::None:    LK_CORE_ASSERT(false, "RendererAPI is set to RendererAPIType::None"); return nullptr;
+			//case RendererAPIType::Vulkan:  return Ref<VulkanRenderPass>::Create(spec);
 		}
-		LK_CORE_ASSERT(false, "RenderPass::Create -> No RendererAPI detected");
+		LK_CORE_ASSERT(false, "Could not determine RenderAPI");
 	}
 
 }

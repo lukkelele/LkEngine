@@ -1,37 +1,38 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/Shader.h"
-#include <glad/glad.h>
+#include "Shader.h"
+//#include <glad/glad.h>
 
-#ifdef LK_RENDERER_API_VULKAN
-	#include "LkEngine/Renderer/Vulkan/VulkanShader.h"
-#elif defined(LK_RENDERER_API_OPENGL)
-	#include "LkEngine/Platform/OpenGL/OpenGLShader.h"
-#endif
+#include "LkEngine/Serialization/FileStream.h"
+#include "LkEngine/Serialization/StreamReader.h"
+#include "LkEngine/Serialization/StreamWriter.h"
+
+#include "LkEngine/Platform/OpenGL/OpenGLShader.h"
+//#include "LkEngine/Platform/Vulkan/VulkanShader.h"
+
+
+#include "RendererAPI.h"
+
 
 namespace LkEngine {
 
-	s_ptr<Shader> Shader::Create(const std::string& filePath)
+	Ref<Shader> Shader::Create(const std::string& filepath)
 	{
-	#ifdef LK_RENDERER_API_VULKAN
-		return std::make_shared<VulkanShader>(filePath);
-	#elif defined(LK_RENDERER_API_OPENGL)
-		return std::make_shared<OpenGLShader>(filePath);
-	#else
-		LK_ASSERT(false);
-		return nullptr;
-	#endif
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::OpenGL: return Ref<OpenGLShader>::Create(filepath);
+			//case RendererAPIType::Vulkan: return Ref<VulkanShader>::Create(filepath);
+		}
+		LK_CORE_ASSERT(false, "Could not determine RendererAPI");
 	}
 
-	s_ptr<Shader> Shader::Create(const std::string& vertexPath, const std::string& fragmentPath)
+	Ref<Shader> Shader::Create(const std::string& vertexPath, const std::string& fragmentPath)
 	{
-	#ifdef LK_RENDERER_API_VULKAN
-		return std::make_shared<VulkanShader>(vertexPath, fragmentPath);
-	#elif defined(LK_RENDERER_API_OPENGL)
-		return std::make_shared<OpenGLShader>(vertexPath, fragmentPath);
-	#else
-		LK_ASSERT(false);
-		return nullptr;
-	#endif
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::OpenGL: return Ref<OpenGLShader>::Create(vertexPath, fragmentPath);
+			//case RendererAPIType::Vulkan: return Ref<VulkanShader>::Create(vertexPath, fragmentPath);
+		}
+		LK_CORE_ASSERT(false, "Could not determine RendererAPI");
 	}
 
 	ShaderProgramSource Shader::ParseShader(const std::string& filepath)
@@ -70,9 +71,9 @@ namespace LkEngine {
 		std::string vertex_str = ss[0].str();
 		std::string frag_str = ss[1].str();
 		if (vertex_str.empty())
-			LOG_ERROR("Parsed vertex shader is empty!");
+			LK_CORE_ERROR("Parsed vertex shader is empty!");
 		if (frag_str.empty())
-			LOG_ERROR("Parsed fragment shader is empty!");
+			LK_CORE_ERROR("Parsed fragment shader is empty!");
 
 		return { vertex_str, frag_str };
 	}
@@ -110,9 +111,9 @@ namespace LkEngine {
 		std::string vertex_str = ss[0].str();
 		std::string frag_str = ss[1].str();
 		if (vertex_str.empty())
-			LOG_ERROR("Parsed vertex shader is empty!");
+			LK_CORE_ERROR("Parsed vertex shader is empty!");
 		if (frag_str.empty())
-			LOG_ERROR("Parsed fragment shader is empty!");
+			LK_CORE_ERROR("Parsed fragment shader is empty!");
 
 		return { vertex_str, frag_str };
 	}
@@ -122,16 +123,16 @@ namespace LkEngine {
 	// ShaderLibrary
 	//
 	//============================================================================
-
     ShaderLibrary::ShaderLibrary()
     {
+		m_Instance = Ref<ShaderLibrary>(this);
     }
 
     ShaderLibrary::~ShaderLibrary()
     {
     }
 
-    void ShaderLibrary::Add(const s_ptr<Shader>& shader)
+    void ShaderLibrary::Add(const Ref<Shader>& shader)
     {
     }
 
@@ -141,7 +142,7 @@ namespace LkEngine {
 		m_Shaders[name] = Shader::Create(path);
     }
 
-    s_ptr<Shader>& ShaderLibrary::Get(std::string_view shaderName)
+    Ref<Shader>& ShaderLibrary::Get(std::string_view shaderName)
     {
 		LK_ASSERT(m_Shaders.find(shaderName) != m_Shaders.end());
 		return m_Shaders.at(shaderName);

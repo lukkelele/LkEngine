@@ -22,6 +22,23 @@ namespace LkEngine {
 
     class SceneCamera;
 
+    struct QuadVertex
+    {
+        glm::vec3 Position;
+        glm::vec4 Color;
+        glm::vec2 TexCoord;
+        float TexIndex;
+        float TilingFactor;
+        int EntityID; 
+    };
+
+    struct LineVertex
+    {
+        glm::vec3 Position;
+        glm::vec4 Color;
+        int EntityID; 
+    };
+
 	class Renderer2DAPI : public RefCounted
 	{
 	public:
@@ -79,23 +96,6 @@ namespace LkEngine {
 
         virtual Statistics GetStats() = 0;
         virtual void ResetStats() = 0;
-
-        struct QuadVertex
-        {
-            glm::vec3 Position;
-            glm::vec4 Color;
-            glm::vec2 TexCoord;
-            float TexIndex;
-            float TilingFactor;
-            int EntityID; 
-        };
-
-        struct LineVertex
-        {
-            glm::vec3 Position;
-            glm::vec4 Color;
-            int EntityID; 
-        };
 
         static constexpr glm::vec2 TextureCoords[] = { 
             { 0.0f, 0.0f }, // Bottom left 

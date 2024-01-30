@@ -1,45 +1,60 @@
 #pragma once
+
+
+//
+// TODO:
+// * Need to clean this up
+//
+//
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
+
 #include "LkEngine/Input/Keyboard.h"
 #include "LkEngine/Input/Mouse.h"
 
 
 namespace LkEngine {
 
-	class Camera 
+	class Camera : public RefCounted 
 	{
 	public:
 		enum class ProjectionType { Perspective = 0, Orthographic = 1 };
 		enum class Type { None = 0, Scene = 1, Editor = 2 };
 	public:
 		Camera() = default;
+		Camera(const glm::mat4& projection);
+		Camera(const float degFov, const float width, const float height, const float nearP, const float farP);
 		virtual ~Camera() = default;
 
-		virtual void Update(float ts) = 0;
-		virtual void UpdateView() = 0;
-		virtual void UpdateProjection() = 0;
-		virtual void UpdateViewProjection() = 0;
+		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
 		virtual void SetProjection(glm::mat4& proj) { m_ProjectionMatrix = proj; } 
 
-		glm::mat4 GetView() const { return m_ViewMatrix; }
-		glm::mat4 GetProjection() const { return m_ProjectionMatrix; }
-		glm::mat4 GetViewProjection() const { return m_ViewProjectionMatrix; }
-		glm::mat4& GetInverseViewProjection() { return m_InverseViewProjectionMatrix; }
-		glm::mat4& GetInverseView() { return m_InverseViewMatrix; }
-		glm::mat4& GetInverseProjection() { return m_InverseProjectionMatrix; }
-
 		float GetRotation() { return glm::radians(m_Rotation); }
-		float GetZoom() const { return m_Zoom; }
-		float& GetZoom() { return m_Zoom; }
-		void SetZoom(float zoom) { m_Zoom = zoom; }
 		Type GetType() const { return m_Type; }
 		std::string GetTypeStr() const;
+
+		ProjectionType GetProjectionType() const { return m_ProjectionType; }
+		void SetProjectionType(ProjectionType type) { m_ProjectionType = type; }
+
+
+		float GetPerspectiveNearClip() const { return m_PerspectiveNear; }
+		float GetPerspectiveFarClip() const { return m_PerspectiveFar; }
+		void SetPerspectiveNearClip(float nearClip) { m_PerspectiveNear = nearClip; }
+		void SetPerspectiveFarClip(float farClip) { m_PerspectiveFar = farClip; }
+
+
+		float GetOrthographicSize() const { return m_OrthographicSize; }
+		float GetOrthographicNearClip() const { return m_OrthographicNear; }
+		float GetOrthographicFarClip() const { return m_OrthographicFar; }
+		void SetOrthographicNearClip(float nearClip) { m_OrthographicNear = nearClip; }
+		void SetOrthographicFarClip(float farClip) { m_OrthographicFar = farClip; }
 
 		void SetProjectionMatrix(const glm::mat4 projection)
 		{
@@ -48,47 +63,42 @@ namespace LkEngine {
 
 		void SetPerspectiveProjectionMatrix(const float radFov, const float width, const float height, const float nearP, const float farP)
 		{
-			m_ProjectionMatrix = glm::perspectiveFov(radFov, width, height, farP, nearP);
+			m_ProjectionMatrix = glm::perspectiveFov(radFov, width, height, nearP, farP);
 		}
 
 		void SetOrthoProjectionMatrix(const float width, const float height, const float nearP, const float farP)
 		{
 			m_ProjectionMatrix = glm::ortho(
-				-(width * 0.5f)  * m_Zoom, 
-				 (width * 0.5f)  * m_Zoom, 
-				-(height * 0.5f) * m_Zoom, 
-				 (height * 0.5f) * m_Zoom, 
-				farP, 
-				nearP);
+				-(width  * 0.5f), (width  * 0.5f),
+				-(height * 0.5f), (height * 0.5f),
+				nearP, farP);
 		}
 
 		virtual void SetMouseEnabled(bool enabled) { m_MouseEnabled = enabled; }
 		virtual void SetKeyboardEnabled(bool enabled) { m_KeyboardEnabled = enabled; }
 
 	protected:
-		float m_NearPlane = 0.10f, m_FarPlane = 1000.0f;
-		float m_Zoom = 1.0f;
+		ProjectionType m_ProjectionType = ProjectionType::Perspective;
+		Type m_Type = Type::None;
+
+		float m_DegPerspectiveFOV = 45.0f;
+		float m_PerspectiveNear = 0.1f, m_PerspectiveFar = 1000.0f;
+		float m_OrthographicSize = 10.0f;
+		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
+
+		//float m_Zoom = 0.60f;
 		float m_Rotation = 0.0f;
 		float m_RotationSpeed = 0.0002f;
 		float m_TravelSpeed = 1.0f;
 		float m_MouseSpeed = 1.0f;
 		bool m_MouseEnabled = true;
 		bool m_KeyboardEnabled = true;
-		bool HasMouseMoved;
-		Type m_Type = Type::None;
 
-		glm::mat4 m_ViewMatrix;
-		glm::mat4 m_ProjectionMatrix; 
-		glm::mat4 m_ViewProjectionMatrix; 
-		glm::mat4 m_InverseViewMatrix;
-		glm::mat4 m_InverseProjectionMatrix;
-		glm::mat4 m_InverseViewProjectionMatrix;
+		bool HasMouseMoved = false;
 
-		// ----------------- TO BE FIXED ---------------------
-		// TODO: Automate assignment
-		float m_ViewportWidth;// = 2200;
-		float m_ViewportHeight;// = 1240;
-		float m_AspectRatio;// = float(16.0f / 9.0f);
+		glm::mat4 m_ProjectionMatrix = glm::mat4(1.0f);
+
+		friend class SceneSerializer;
 	};
 
 }

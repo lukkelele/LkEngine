@@ -26,6 +26,7 @@ namespace LkEngine::Color {
     glm::vec4 Color::RGBA::Transparent = { 1.0f, 1.0f, 1.0f, 0.0f };
     glm::vec4 Color::RGBA::White       = { 1.0f, 1.0f, 1.0f, 1.0f };
     glm::vec4 Color::RGBA::Black       = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glm::vec4 Color::RGBA::Gray        = { 0.3f, 0.3f, 0.3f, 1.0f };
     glm::vec4 Color::RGBA::Red         = { 1.0f, 0.0f, 0.0f, 1.0f };
     glm::vec4 Color::RGBA::Green       = { 0.0f, 1.0f, 0.0f, 1.0f };
     glm::vec4 Color::RGBA::Blue        = { 0.0f, 0.0f, 1.0f, 1.0f };

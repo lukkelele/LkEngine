@@ -18,9 +18,6 @@ namespace LkEngine {
     public:
         virtual ~GraphicsContext() = default;
 
-        static Ref<GraphicsContext> Get() { return m_Instance; }
-        static Ref<GraphicsContext> Create(Window* window);
-
         static void SetProfile(const Profile& profile);
         static void SetVersion(int majorVersion, int minorVersion);
 
@@ -34,6 +31,7 @@ namespace LkEngine {
         virtual void SetSourceBlendFunction(const SourceBlendFunction& srcFunc) = 0;
         virtual void SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc) = 0;
         virtual void UpdateResolution(uint16_t width, uint16_t height) = 0;
+        virtual bool GetBlendingEnabled() const = 0;
 
         virtual void SetName(std::string_view name) = 0;
         virtual const std::string GetName() const = 0;
@@ -44,12 +42,12 @@ namespace LkEngine {
         static std::string GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc);
         static std::string GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc);
 
+        static Ref<GraphicsContext> Get() { return m_Instance; }
+        static Ref<GraphicsContext> Create(Window* window);
+
     protected:
         static void HandleViewportEvents();
 
-        // For editor
-        virtual bool& GetBlending() = 0;
-    
     protected:
         inline static Ref<GraphicsContext> m_Instance = nullptr;
 

@@ -3,8 +3,8 @@
 
 #include "LkEngine/Core/TargetPlatform.h"
 
-#include "LkEngine/Platform/Vulkan/VulkanFramebuffer.h"
 #include "LkEngine/Platform/OpenGL/OpenGLFramebuffer.h"
+//#include "LkEngine/Platform/Vulkan/VulkanFramebuffer.h"
 
 #include "LkEngine/Renderer/RendererAPI.h"
 
@@ -15,11 +15,24 @@ namespace LkEngine {
 	{
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::Vulkan:	return Ref<VulkanFramebuffer>::Create(spec);
 			case RendererAPIType::OpenGL:	return Ref<OpenGLFramebuffer>::Create(spec);
+			//case RendererAPIType::Vulkan:	return Ref<VulkanFramebuffer>::Create(spec);
 			case RendererAPIType::None:		return nullptr;
 		}
 		LK_CORE_ASSERT(false, "No framebuffer could be created, no renderer API could be determined");
+	}
+
+	void Framebuffer::TargetSwapChain()
+	{
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::OpenGL:	
+				OpenGLFramebuffer::TargetSwapChain();
+				break;
+			//case RendererAPIType::Vulkan:	
+			// VulkanFramebuffer::TargetSwapChain();
+			//		break;
+		}
 	}
 
 

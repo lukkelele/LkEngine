@@ -7,7 +7,7 @@ namespace LkEngine {
 
     MaterialLibrary::MaterialLibrary()
     {
-        m_Instance = this;
+        m_Instance = Ref<MaterialLibrary>(this);
     }
 
     void MaterialLibrary::Init()
@@ -15,13 +15,13 @@ namespace LkEngine {
         CreateBasicMaterials();
     }
 
-    void MaterialLibrary::Add(s_ptr<Material>& material)
+    void MaterialLibrary::Add(const Ref<Material> material)
     {
         // TODO: Check if material exists
         m_Collection.emplace(material->GetName(), material);
     }
 
-    s_ptr<Material> MaterialLibrary::GetMaterial(std::string_view materialName)
+    Ref<Material> MaterialLibrary::GetMaterial(std::string_view materialName)
     {
         auto it = m_Collection.find(std::string(materialName));
         if (it != m_Collection.end())
@@ -32,19 +32,19 @@ namespace LkEngine {
     void MaterialLibrary::CreateBasicMaterials()
     {
         // Asphalt
-        MaterialProperties asphaltProperties;
-        asphaltProperties.Roughness = 1.0f;
-        asphaltProperties.Friction = 1.0f;
-        asphaltProperties.Density = 1.0f;
-        auto asphalt = std::make_shared<Material>(asphaltProperties);
+        MaterialSpecification asphaltSpec;
+        asphaltSpec.Roughness = 1.0f;
+        asphaltSpec.Friction = 1.0f;
+        asphaltSpec.Density = 1.0f;
+        auto asphalt = Ref<Material>::Create(asphaltSpec);
         asphalt->SetName("BasicMaterial_Asphalt");
         m_Collection.emplace(asphalt->GetName(), asphalt);
 
         // Rubber
-        MaterialProperties rubberProperties;
-        rubberProperties.Density = 0.90f;
-        rubberProperties.Friction = 1.0f;
-        auto rubber = std::make_shared<Material>(rubberProperties);
+        MaterialSpecification rubberSpec;
+        rubberSpec.Density = 0.90f;
+        rubberSpec.Friction = 1.0f;
+        auto rubber = Ref<Material>::Create(rubberSpec);
         rubber->SetName("BasicMaterial_Rubber");
         m_Collection.emplace(rubber->GetName(), rubber);
     }

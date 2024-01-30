@@ -117,45 +117,64 @@ namespace LkEngine {
 		std::string DebugName;
 	};
 	
+	//-------------------------------------------------------------------------------
+	// Image
+	//-------------------------------------------------------------------------------
 	class Image : public RefCounted
 	{
 	public:
 		virtual ~Image() = default;
 	
-		static Ref<Image> Create(ImageSpecification spec, Buffer buffer);
-		static Ref<Image> Create(ImageSpecification spec, void* data = nullptr);
-		static uint32_t BytesPerPixel(ImageFormat format);
-		static uint32_t GetFormatBPP(ImageFormat format);
-		static uint32_t CalculateMipCount(uint32_t width, uint32_t height);
-		static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height);
-		static bool IsDepthFormat(ImageFormat format);
-
-		virtual void Invalidate() = 0;
-		virtual void RT_Invalidate() = 0;
-
-		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		virtual void SetData(const void* data) = 0;
-
-		virtual RendererID& GetRendererID() = 0;
-		virtual RendererID GetRendererID() const = 0;
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		virtual Buffer GetBuffer() const = 0;
 		virtual Buffer& GetBuffer() = 0;
 
+		virtual void Invalidate() = 0;
+		virtual void RT_Invalidate() = 0;
+
+		virtual RendererID& GetRendererID() = 0;
+		virtual RendererID GetRendererID() const = 0;
+
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
-		virtual int64_t GetImageFormat(ImageFormat fmt) = 0;
 
 		virtual const ImageSpecification GetSpecification() const = 0;
 		virtual ImageSpecification& GetSpecification() = 0;
 	
 		virtual void Release() = 0;
 		virtual void AllocateMemory(uint64_t size) = 0;
+
+		static Ref<Image> Create(ImageSpecification spec, Buffer buffer);
+		static Ref<Image> Create(ImageSpecification spec, void* data = nullptr);
 	};
+
+
+	//-------------------------------------------------------------------------------
+	// Image2D
+	//-------------------------------------------------------------------------------
+	class Image2D : public Image
+	{
+	public:
+		virtual ~Image2D() = default;
+
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
+
+		static Ref<Image2D> Create(ImageSpecification spec, Buffer buffer);
+		static Ref<Image2D> Create(ImageSpecification spec, void* data = nullptr);
+	};
+
 
 	namespace Utils {
 
+		int64_t GetImageFormat(ImageFormat format);
+		uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height);
 		std::string ImageFormatToString(const ImageFormat format);
+		uint32_t GetFormatBPP(ImageFormat format);
+		uint32_t BytesPerPixel(ImageFormat format);
+		uint32_t CalculateMipCount(uint32_t width, uint32_t height);
+		bool IsDepthFormat(ImageFormat format);
 
 	}
 

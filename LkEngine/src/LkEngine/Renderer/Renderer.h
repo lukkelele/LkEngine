@@ -104,7 +104,7 @@ namespace LkEngine {
 
 	public:
 		inline static RendererDrawMode DrawMode;
-		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.350f, 1.0f };
+		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.250f, 1.0f };
 	private:
 		inline static uint32_t m_SamplerCount = 0; // Samplers
 		inline static uint32_t m_FramesInFlight = 2;

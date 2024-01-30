@@ -18,6 +18,7 @@ namespace LkEngine {
 
 		// Depth/stencil
 		DEPTH24STENCIL8,
+
 		// Defaults
 		Depth = DEPTH24STENCIL8
 	};
@@ -106,6 +107,7 @@ namespace LkEngine {
 		virtual void Unbind() const = 0;
 		virtual void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const = 0;
 
+		virtual void Clear() = 0;
 		virtual int ReadPixel(uint32_t attachmentIndex, int x, int y) = 0;
 		virtual void ClearAttachment(uint32_t attachmentIndex, int value) = 0;
 		virtual RendererID GetColorAttachmentRendererID(uint32_t index = 0) const = 0;
@@ -115,6 +117,8 @@ namespace LkEngine {
 		virtual uint32_t GetHeight() const = 0;
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& framebufferSpecification);
+
+		static void TargetSwapChain();
 	};
 
 

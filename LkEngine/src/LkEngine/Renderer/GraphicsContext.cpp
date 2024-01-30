@@ -1,12 +1,10 @@
 #include "LKpch.h"
 #include "GraphicsContext.h"
 
-#include <GLFW/glfw3.h>
-
-#include "Platform/Windows/Windows_Window.h"
+#include "LkEngine/Core/Window.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLContext.h"
-#include "LkEngine/Platform/Vulkan/VulkanContext.h"
+//#include "LkEngine/Platform/Vulkan/VulkanContext.h"
 
 #include "RendererAPI.h"
 
@@ -17,8 +15,8 @@ namespace LkEngine {
 	{
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::Vulkan: return Ref<VulkanContext>::Create(window);
 			case RendererAPIType::OpenGL: return Ref<OpenGLContext>::Create(window);
+			//case RendererAPIType::Vulkan: return Ref<VulkanContext>::Create(window);
 			case RendererAPIType::None:   return nullptr;
 		}
 	}
@@ -76,9 +74,9 @@ namespace LkEngine {
 
 	void GraphicsContext::HandleViewportEvents()
 	{
-		auto window = Window::Get();
+		auto& window = Window::Get();
 		int viewport_width, viewport_height;
-		glfwGetWindowSize(window->GetGlfwWindow(), &viewport_width, &viewport_height);
+		glfwGetWindowSize(window.GetGlfwWindow(), &viewport_width, &viewport_height);
 	}
 
 	std::string GraphicsContext::GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc)

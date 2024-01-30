@@ -4,41 +4,50 @@
 
 namespace LkEngine {
 
-    struct MaterialProperties
+    struct MaterialSpecification
     {
         float Roughness = 0.50f;
         float Density = 1.0f;
         float Friction = 0.30f;
 
-        MaterialProperties() = default;
-        MaterialProperties(float roughness, float density, float friction) 
+        MaterialSpecification() = default;
+        MaterialSpecification(float roughness, float density, float friction) 
             : Roughness(roughness) 
             , Density(density)
             , Friction(friction)
         {}
     };
 
-    class Material
+    // TODO: Will need to make separate implementation for each render API
+    // e.g --> OpenGLMaterial 
+
+    class Material : public RefCounted
     {
     public:
-        Material(const MaterialProperties& properties = MaterialProperties());
-        Material(const MaterialProperties& properties, s_ptr<Texture> texture);
-        Material(s_ptr<Texture> texture);
+        Material(const MaterialSpecification& properties = MaterialSpecification());
+        Material(const MaterialSpecification& properties, Ref<Texture> texture);
+        Material(Ref<Texture> texture);
         ~Material() = default;
 
-        const MaterialProperties& GetSpecification() const { return m_Properties; }
-        s_ptr<Texture> GetTexture() { return m_Texture; }
-        void SetTexture(s_ptr<Texture> texture);
+        void SetTexture(const Ref<Texture> texture);
 
-        std::string GetName() const { return m_Name; }
+        Ref<Texture> GetTexture() { return m_Texture; }
+        std::string GetTextureName() { return m_Texture->GetName(); }
+
         void SetName(const std::string& name) { m_Name = name; }
+        std::string GetName() const { return m_Name; }
+
+        void SetRoughness(float roughness) { m_Properties.Roughness = roughness; }
         float GetRoughness() const { return m_Properties.Roughness; }
-        float& GetRoughness() { return m_Properties.Roughness; }
+
+        const MaterialSpecification& GetSpecification() const { return m_Properties; }
+
+        static Ref<Material> Create(const MaterialSpecification& properties = MaterialSpecification());
 
     private:
         std::string m_Name;
-        MaterialProperties m_Properties;
-        s_ptr<Texture> m_Texture = nullptr;
+        MaterialSpecification m_Properties;
+        Ref<Texture> m_Texture;
     };
 
 }

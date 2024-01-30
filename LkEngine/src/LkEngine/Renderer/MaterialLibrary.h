@@ -5,20 +5,21 @@
 
 namespace LkEngine {
 
-    //using MaterialCollection = std::unordered_map<std::string, s_ptr<Material>>;
-    using MaterialCollection = std::unordered_map<std::string, s_ptr<Material>>;
+    //using MaterialCollection = std::unordered_map<std::string, Ref<Material>>;
+    using MaterialCollection = std::unordered_map<std::string, Ref<Material>>;
 
-    class MaterialLibrary
+    class MaterialLibrary : public RefCounted
     {
     public:
         MaterialLibrary();
         ~MaterialLibrary() = default;
 
-        static MaterialLibrary* Get() { return m_Instance; }
+        static Ref<MaterialLibrary> Get() { return m_Instance; }
 
         void Init();
-        void Add(s_ptr<Material>& material);
-        s_ptr<Material> GetMaterial(std::string_view materialName);
+        void Add(const Ref<Material> material);
+
+        Ref<Material> GetMaterial(std::string_view materialName);
         MaterialCollection& GetMaterials() { return m_Collection; }
 
     private:
@@ -27,7 +28,7 @@ namespace LkEngine {
     private:
         MaterialCollection m_Collection;
 
-        inline static MaterialLibrary* m_Instance = nullptr;
+        inline static Ref<MaterialLibrary> m_Instance = nullptr;
     };
 
 }

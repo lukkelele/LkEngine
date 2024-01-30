@@ -2,8 +2,8 @@
 
 #include "RendererAPI.h"
 
-#include "LkEngine/Platform/Vulkan/VulkanPipeline.h"
 #include "LkEngine/Platform/OpenGL/OpenGLPipeline.h"
+//#include "LkEngine/Platform/Vulkan/VulkanPipeline.h"
 
 #include "Shader.h"
 #include "VertexBuffer.h"
@@ -15,8 +15,8 @@ namespace LkEngine {
 	{
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::Vulkan:  return Ref<VulkanPipeline>::Create(spec);
 			case RendererAPIType::OpenGL:  return Ref<OpenGLPipeline>::Create(spec);
+			//case RendererAPIType::Vulkan:  return Ref<VulkanPipeline>::Create(spec);
 			case RendererAPIType::None:    return nullptr;
 		}
 		LK_CORE_ASSERT(false, "Unknown RendererAPI");
