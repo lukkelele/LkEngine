@@ -8,11 +8,11 @@ layout(location = 3) in float    a_TexIndex;
 layout(location = 4) in float    a_TilingFactor;
 layout(location = 5) in int      a_EntityID;
 
-out vec4    v_Color;
-out vec2    v_TexCoord;
-out float   v_TexIndex;
-out float   v_TilingFactor;
-out int     v_EntityID;
+out vec4     v_Color;
+out vec2     v_TexCoord;
+out float    v_TexIndex;
+out float    v_TilingFactor;
+out int      v_EntityID;
 
 uniform mat4 u_TransformMatrix;
 uniform mat4 u_ViewProj;
@@ -23,14 +23,15 @@ void main()
 
     v_Color = a_Color;
     v_TexCoord = a_TexCoord;
-    v_TexIndex = a_TexIndex;
     v_TilingFactor = a_TilingFactor;
     v_EntityID = a_EntityID;
+    v_TexIndex = a_TexIndex;
 }
 
 
 #shader fragment
 #version 450 core
+//#extension GL_ARB_bindless_texture : require
 
 layout(location = 0) out vec4 FragColor;
 
@@ -40,21 +41,11 @@ in float      v_TexIndex;
 in float      v_TilingFactor;
 flat in int   v_EntityID;
 
-uniform sampler2D u_Texture;
-uniform sampler2D u_Textures[32];
+uniform sampler2DArray u_TextureArray;
 
 void main()
 {
-    vec4 tex = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
+    vec4 tex = texture(u_TextureArray, vec3(v_TexCoord, v_TexIndex));
     FragColor = tex * v_Color;
-
-    //vec4 redTint = vec4(1.0, 0.0, 0.0, 1.0); // Red color
-    //float redIntensity = 0.2; // Adjust this value for more or less redness
-
-    // Mix original texture color with red tint
-    //vec4 tintedColor = mix(tex, redTint, redIntensity);
-    //vec4 tintedColor = mix(tex, redTint, v_Color.a);
-
-    // Combine with vertex color if needed
-    //FragColor = tintedColor * v_Color;
 }
+
