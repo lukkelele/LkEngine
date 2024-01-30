@@ -99,8 +99,11 @@ namespace LkEngine {
 				imageSpec.Width = m_Specification.Width;
 				imageSpec.Height = m_Specification.Height;
 				imageSpec.Format = m_ColorAttachmentSpecifications[i].Format;
+				imageSpec.Name = "Framebuffer-Image-" + Utils::ImageFormatToString(m_ColorAttachmentSpecifications[i].Format);
 				imageSpec.DebugName = "Framebuffer-Image-" + Utils::ImageFormatToString(m_ColorAttachmentSpecifications[i].Format);
 				imageSpec.Format = ImageFormat::RGBA32F;
+				imageSpec.Wrap = TextureWrap::None;
+				imageSpec.Filter = TextureFilter::None;
 				imageSpec.Path = "assets/textures/white-texture.png";
 
 				Buffer imageData = Buffer(TextureLibrary::Get()->GetWhiteTexture2D()->GetWriteableBuffer());
@@ -229,6 +232,11 @@ namespace LkEngine {
 
 	void OpenGLFramebuffer::AddResizeCallback(const std::function<void(Ref<Framebuffer>)>& func)
 	{
+	}
+
+	void OpenGLFramebuffer::TargetSwapChain()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 }

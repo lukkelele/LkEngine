@@ -5,7 +5,7 @@
 
 #include "LkEngine/Core/Application.h"
 
-#include <stb_image_resize2.h>
+#include <stb_image/stb_image_resize2.h>
 
 
 namespace LkEngine {

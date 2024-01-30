@@ -38,7 +38,6 @@ namespace LkEngine {
 
 		GL_CALL(glGenBuffers(1, &m_RendererID));
 		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-		//GL_CALL(glBufferData(GL_ARRAY_BUFFER, arrsize * sizeof(float), data, GL_STATIC_DRAW));
 		GL_CALL(glBufferData(GL_ARRAY_BUFFER, size, buffer, GL_STATIC_DRAW));
 
 		LK_CORE_DEBUG_TAG("VertexBuffer", "New vertexbuffer, id: {}, size: {}", m_VertexArrayID, m_LocalData.GetSize());
@@ -91,9 +90,6 @@ namespace LkEngine {
 
 	void OpenGLVertexBuffer::AddVertexBufferToVertexArray()
 	{
-		//BindVertexArray();
-		//Bind();
-
 		GL_CALL(glBindVertexArray(m_VertexArrayID));
 		VertexBufferLayout& layout = GetLayout();
 

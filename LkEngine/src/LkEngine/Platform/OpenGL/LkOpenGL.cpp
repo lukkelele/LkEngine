@@ -311,7 +311,7 @@ namespace LkEngine {
             DebugShader->Set("Model", glm::mat4(1.0f));
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
-        //glBindVertexArray(0);
+		Framebuffer::TargetSwapChain();
     }
 
     void RenderScreenTexture(const glm::mat4& view, const glm::mat4& proj)
@@ -325,7 +325,8 @@ namespace LkEngine {
 			return;
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		Framebuffer::TargetSwapChain();
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0.1f, 0.2f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -337,12 +338,8 @@ namespace LkEngine {
         // Cubes
         {
             // Cube 1
-            //glBindVertexArray(CubeVAO);
-            //glActiveTexture(GL_TEXTURE0);
-            //glBindTexture(GL_TEXTURE_2D, CubeTexture);
 			CubeVertexBuffer->Bind();
 			CubeTexture->Bind();
-            //glBindTexture(GL_TEXTURE_2D, CubeTexture);
             Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
             DebugShader->Set("Model", Model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -356,7 +353,6 @@ namespace LkEngine {
         // Floor
         {
             glBindVertexArray(PlaneVAO);
-            //glBindTexture(GL_TEXTURE_2D, FloorTexture);
 			PlaneTexture->Bind();
             DebugShader->Set("Model", glm::mat4(1.0f));
             glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -366,11 +362,8 @@ namespace LkEngine {
         // Now draw the mirror quad with screen texture
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
         ScreenShader->Bind();
-        glBindVertexArray(QuadVAO);
-
-        //glBindTexture(GL_TEXTURE_2D, TextureColorBufferID);	// use the color attachment texture as the texture of the quad plane
-        unsigned int colorAttachment0 = Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->GetColorAttachmentRendererID(0);
-        glBindTexture(GL_TEXTURE_2D, colorAttachment0);	// use the color attachment texture as the texture of the quad plane
+        Ref<Image2D> colorAttachment0 = Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer().As<OpenGLFramebuffer>()->GetImage(0);
+        glBindTexture(GL_TEXTURE_2D, colorAttachment0->GetRendererID());	// use the color attachment texture as the texture of the quad plane
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         DebugShader->Unbind();
@@ -398,9 +391,7 @@ namespace LkEngine {
         Model = glm::mat4(1.0f);
 
 		CubeVertexBuffer->Bind();
-        glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, CubeTexture);
-		CubeTexture->Bind();
+		CubeTexture->Bind(0);
 
         // Cube 1
         Model = glm::translate(Model, glm::vec3(-1.0f, 0.0f, -1.0f));
@@ -413,7 +404,6 @@ namespace LkEngine {
         DebugShader->Set("Model", Model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        //glBindVertexArray(0);
         DebugShader->Unbind();
 	}
 
@@ -430,7 +420,6 @@ namespace LkEngine {
 
 		glEnable(GL_DEPTH_TEST);
         Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Bind();
-        //glBindVertexArray(PlaneVAO);
 
         Model = glm::mat4(1.0f);
         DebugShader->Bind();
@@ -438,7 +427,6 @@ namespace LkEngine {
         DebugShader->Set("Projection", projection);
 
   		PlaneVertexBuffer->Bind();
-		//glBindTexture(GL_TEXTURE_2D, FloorTexture);
 		PlaneTexture->Bind();
 
 		DebugShader->Set("Model", glm::mat4(1.0f));
@@ -466,26 +454,8 @@ namespace LkEngine {
             { "a_TexCoord",     ShaderDataType::Float2  },
 		});
 		LK_CORE_TRACE_TAG("LkOpenGL", "Generated CubeVertexBuffer!");
-
-        Ref<IndexBuffer> cubeIB = IndexBuffer::Create(Cube_Vertices, sizeof(Cube_Vertices));
-        CubeVertexBuffer->SetIndexBuffer(cubeIB);
-
-#if 0
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Cube_Vertices), &Cube_Vertices, GL_STATIC_DRAW);
-
-        // Vertex indexing
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-        // Texture indexing
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-#endif
+        //Ref<IndexBuffer> cubeIB = IndexBuffer::Create(Cube_Vertices, sizeof(Cube_Vertices));
+        //CubeVertexBuffer->SetIndexBuffer(cubeIB);
     }
 
     void GeneratePlaneVaoAndVbo(unsigned int& vao, unsigned int& vbo)
@@ -499,26 +469,8 @@ namespace LkEngine {
             { "a_TexCoord",     ShaderDataType::Float2  },
 		});
 		LK_CORE_TRACE_TAG("LkOpenGL", "Generated CubeVertexBuffer!");
-
-        //Ref<IndexBuffer> planeIB = IndexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices) - (2 * 6 * sizeof(float)));
-		Ref<IndexBuffer> planeIB = IndexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices));
-        PlaneVertexBuffer->SetIndexBuffer(planeIB);
-#if 0
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Plane_Vertices), &Plane_Vertices, GL_STATIC_DRAW);
-
-        // Vertex indexing
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-        // Texture indexing
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-#endif
+		//Ref<IndexBuffer> planeIB = IndexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices));
+        //PlaneVertexBuffer->SetIndexBuffer(planeIB);
     }
 
     void GenerateScreenQuadVaoAndVbo(unsigned int& vao, unsigned int& vbo)

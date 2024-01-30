@@ -37,6 +37,8 @@ namespace LkEngine {
 
 		RendererID& GetRendererID() { return m_RendererID; }
 
+		static void TargetSwapChain();
+
 	public:
 		//static const uint32_t MaxFramebufferSize = 8192;
 	private:
