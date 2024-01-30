@@ -1,17 +1,20 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/UUID.h"
 #include "LkEngine/Asset/AssetTypes.h"
+
+#include <filesystem>
 
 
 namespace LkEngine {
 
     using AssetHandle = UUID;
 
-    class Asset
+    class Asset : public RefCounted
     {
     public:
+		Asset() = default;
+		//Asset(AssetHandle handle) : Handle(handle) {}
         virtual ~Asset() = default;
 
 		static AssetType GetStaticType() { return AssetType::None; }
@@ -40,5 +43,17 @@ namespace LkEngine {
         AssetHandle Handle = 0;
 		uint16_t Flags = (uint16_t)AssetFlag::None;
     };
+
+	struct AssetMetadata
+	{
+		AssetHandle Handle = 0;
+		AssetType Type;
+
+		std::filesystem::path FilePath;
+		bool IsDataLoaded = false;
+		bool IsMemoryAsset = false;
+
+		bool IsValid() const { return Handle != 0 && !IsMemoryAsset; }
+	};
 
 }

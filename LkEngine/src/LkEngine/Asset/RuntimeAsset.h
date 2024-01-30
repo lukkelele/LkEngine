@@ -10,8 +10,8 @@ namespace LkEngine {
     public:
         virtual void Setup() = 0;
         virtual void Destroy() = 0;
-
         virtual void OnUpdate(float timestep = 1.0f) {}
+        virtual void OnImGuiRender() {}
     };
 
 }
