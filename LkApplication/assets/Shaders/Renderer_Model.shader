@@ -1,8 +1,8 @@
 #shader vertex
-#version 450 core
-
+#version 330 core
 layout (location = 0) in vec3 a_Pos;
-layout (location = 1) in vec2 a_TexCoords;
+layout (location = 1) in vec3 a_Normal;
+layout (location = 2) in vec2 a_TexCoords;
 
 out vec2 v_TexCoords;
 
@@ -18,14 +18,17 @@ void main()
 
 
 #shader fragment
-#version 450 core
+#version 330 core
 out vec4 FragColor;
 
 in vec2 v_TexCoords;
 
-uniform sampler2D Texture1;
+uniform sampler2D u_Diffuse1;
+uniform sampler2D u_Specular1;
+uniform sampler2D u_Normal1;
+uniform sampler2D u_Height1;
 
 void main()
 {    
-    FragColor = texture(Texture1, v_TexCoords);
+    FragColor = texture(u_Diffuse1, v_TexCoords);
 }

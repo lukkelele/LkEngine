@@ -43,6 +43,7 @@ flat in int   v_EntityID;
 
 uniform sampler2DArray u_TextureArray;
 
+
 void main()
 {
     vec4 tex = texture(u_TextureArray, vec3(v_TexCoord, v_TexIndex));
