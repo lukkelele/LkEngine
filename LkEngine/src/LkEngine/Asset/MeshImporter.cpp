@@ -1,110 +1,172 @@
 #include "LKpch.h"
 #include "MeshImporter.h"
 
+#include "LkEngine/Platform/OpenGL/LkOpenGL.h"
+
+#include "LkEngine/Scene/Model.h"
+
 
 namespace LkEngine {
 
-	MeshImporter::MeshImporter()
-	{
-		m_Meshes.clear();
-	}
+    //std::vector<Mesh> MeshImporter::Load(aiNode* mesh, const aiScene* scene, Model& model)
+    void MeshImporter::Load(aiNode* mesh, const aiScene* scene, Model& model)
+    {
+        //std::vector<Mesh> meshes;
+        //std::vector<Mesh>& meshes = model.m_Meshes;
+        //return meshes;
+        m_ModelRef = &model;
+        ProcessNode(mesh, scene, model.m_Meshes);
+    }
 
-	Mesh MeshImporter::Load(std::filesystem::path filepath)
+	std::vector<Mesh> MeshImporter::Load(std::filesystem::path filepath)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filepath.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
 
-		if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) 
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) 
 		{
 			LK_CORE_ERROR_TAG("MeshImporter", "Assimp error: {}", importer.GetErrorString());
 			LK_CORE_ASSERT(false, "Assimp error: {}", importer.GetErrorString());
 		}
 
-		ProcessNode(scene->mRootNode, scene);
+		std::vector<Mesh> meshes;
+		ProcessNode(scene->mRootNode, scene, meshes);
 
-		LK_CORE_DEBUG_TAG("MeshImporter", "Loaded meshes: {}", m_Meshes.size());
-		return m_Meshes[0];
+		return meshes;
 	}
 
-	void MeshImporter::ProcessNode(aiNode* node, const aiScene* scene)
+    void MeshImporter::LoadTextures(aiMesh* mesh, const aiScene* scene, std::vector<Texture_>& textures, Model& model)
+    {
+        // Process materials
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];    
+
+        // We assume a convention for sampler names in the shaders. 
+        // Each diffuse texture should be named as 'u_Diffuse' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
+        // Same applies to other texture as the following list summarizes:
+        // Diffuse: u_Diffuse<N>
+        // Specular: u_Specular<N>
+        // Normal: u_Normal<N>
+        // Height: u_Height<N>
+    
+        // 1. Diffuse maps
+        {
+            std::vector<Texture_> diffuseMaps = model.LoadMaterialTextures(material, aiTextureType_DIFFUSE, "u_Diffuse");
+            textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+        }
+        // 2. Specular maps
+        {
+            std::vector<Texture_> specularMaps = model.LoadMaterialTextures(material, aiTextureType_SPECULAR, "u_Specular");
+            textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        }
+        // 3. Normal maps
+        {
+            std::vector<Texture_> normalMaps = model.LoadMaterialTextures(material, aiTextureType_HEIGHT, "u_Normal");
+            textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+        }
+        // 4. Height maps
+        {
+            std::vector<Texture_> heightMaps = model.LoadMaterialTextures(material, aiTextureType_AMBIENT, "u_Height");
+            textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+        }
+    }
+
+	Mesh MeshImporter::Process(aiMesh* mesh, const aiScene* scene)
 	{
-		LK_CORE_VERIFY(node->mNumMeshes > 0, "aiNode has 0 meshes");
-		// Process all the node's meshes (if any)
-		for (unsigned int i = 0; i < node->mNumMeshes; i++)
-		{
-		    aiMesh* mesh = scene->mMeshes[node->mMeshes[i]]; 
-		    m_Meshes.push_back(ProcessMesh(mesh, scene));			
-		}
-
-		// Do the same for each of its children
-		for (unsigned int i = 0; i < node->mNumChildren; i++)
-		{
-		    ProcessNode(node->mChildren[i], scene);
-		}
-	}
-
-	Mesh MeshImporter::ProcessMesh(aiMesh* mesh, const aiScene* scene)
-	{
-		std::vector<Vertex> vertices;
-		std::vector<unsigned int> indices;
-		std::vector<RendererID> textures;
-
-		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-		{
-		    Vertex vertex;
-
-			// Position
-			glm::vec3 vec(0.0f);
-			vec.x = mesh->mVertices[i].x;
-			vec.y = mesh->mVertices[i].y;
-			vec.z = mesh->mVertices[i].z;
-			vertex.Position = vec;
-
-			// Normals
-			glm::vec3 normal(0.0f);
-			if (mesh->HasNormals())
-			{
-				normal.x = mesh->mNormals[i].x;
-				normal.y = mesh->mNormals[i].y;
-				normal.z = mesh->mNormals[i].z;
-			}
-			vertex.Normal = normal; 
-
-			// Texture coordinates
-			if (mesh->mTextureCoords[0]) 
-			{
-			    glm::vec2 vec2;
-			    vec2.x = mesh->mTextureCoords[0][i].x; 
-			    vec2.y = mesh->mTextureCoords[0][i].y;
-			    vertex.TexCoords = vec2;
-			}
-			else
-			{
-			    vertex.TexCoords = glm::vec2(0.0f, 0.0f);  
-			}
-
-		    vertices.push_back(vertex);
-		}
-
-		// Indices
-		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-		{
-			aiFace face = mesh->mFaces[i];
-		    for (unsigned int j = 0; j < face.mNumIndices; j++)
-				indices.push_back(face.mIndices[j]);
-		} 
-
-		// Material
-		if (mesh->mMaterialIndex >= 0)
-		{
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-			//vector<RendererID> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse"); textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			//vector<RendererID> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular"); textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		}
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        std::vector<Texture_> textures;
+    
+        // Walk through each of the mesh's faces and retrieve the corresponding vertex indices
+        LoadVertices(mesh, vertices);
+        LoadIndices(mesh, indices);
+        LoadTextures(mesh, scene, textures, *m_ModelRef);
 
 		return Mesh(vertices, indices, textures);
 	}
 
+    // Processes each individual mesh located at the node and repeats this process on its children nodes (if any)
+    void MeshImporter::ProcessNode(aiNode* node, const aiScene* scene, std::vector<Mesh>& meshes)
+    {
+        // Process each mesh located at the current node
+        for (unsigned int i = 0; i < node->mNumMeshes; i++)
+        {
+            // The node object only contains indices to index the actual objects in the scene
+            // The scene contains all the data, node is just to keep stuff organized (like relations between nodes)
+            aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+            meshes.push_back(Process(mesh, scene));
+        }
+
+        // After we've processed all of the meshes (if any) we then recursively process each of the children nodes
+        for (unsigned int i = 0; i < node->mNumChildren; i++)
+        {
+            ProcessNode(node->mChildren[i], scene, meshes);
+        }
+    }
+
+    void MeshImporter::LoadVertices(aiMesh* mesh, std::vector<Vertex>& vertices)
+    {
+        // Walk through each of the mesh's vertices
+        for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+        {
+            Vertex vertex{};
+            glm::vec3 vector{};
+
+            // Positions
+            vector.x = mesh->mVertices[i].x;
+            vector.y = mesh->mVertices[i].y;
+            vector.z = mesh->mVertices[i].z;
+            vertex.Position = vector;
+
+            // Normals
+            if (mesh->HasNormals())
+            {
+                vector.x = mesh->mNormals[i].x;
+                vector.y = mesh->mNormals[i].y;
+                vector.z = mesh->mNormals[i].z;
+                vertex.Normal = vector;
+            }
+
+            // Texture Coordinates
+            if(mesh->mTextureCoords[0]) 
+            {
+                glm::vec2 vec{};
+
+                // Assume texture with 2 coordinates
+                vec.x = mesh->mTextureCoords[0][i].x; 
+                vec.y = mesh->mTextureCoords[0][i].y;
+                vertex.TexCoords = vec;
+
+                // Tangent
+                vector.x = mesh->mTangents[i].x;
+                vector.y = mesh->mTangents[i].y;
+                vector.z = mesh->mTangents[i].z;
+                vertex.Tangent = vector;
+
+                // Bitangent
+                vector.x = mesh->mBitangents[i].x;
+                vector.y = mesh->mBitangents[i].y;
+                vector.z = mesh->mBitangents[i].z;
+                vertex.Bitangent = vector;
+            }
+            else
+            {
+                vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+            }
+            vertices.push_back(vertex);
+        }
+    }
+
+    void MeshImporter::LoadIndices(aiMesh* mesh, std::vector<unsigned int>& indices)
+    {
+        for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+        {
+            aiFace face = mesh->mFaces[i];
+            for (unsigned int j = 0; j < face.mNumIndices; j++)
+                indices.push_back(face.mIndices[j]);        
+        }
+    }
+
+#if 0
 	std::vector<Ref<Texture>> MeshImporter::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 	{
 		LK_CORE_INFO_TAG("MeshImporter", "Loading material textures");
@@ -124,6 +186,47 @@ namespace LkEngine {
 		}
 		return textures;
 	}
+#endif
+
+    namespace GLUtils {
+
+        unsigned int TextureFromFile(const char* path, const std::string& m_Directory, bool gamma)
+        {
+            std::string filename = std::string(path);
+            filename = m_Directory + '/' + filename;
+        
+            unsigned int textureID;
+            glGenTextures(1, &textureID);
+        
+            int width, height, nrComponents;
+            unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+            if (data)
+            {
+                GLenum format;
+                if (nrComponents == 1)      format = GL_RED;
+                else if (nrComponents == 3) format = GL_RGB;
+                else if (nrComponents == 4) format = GL_RGBA;
+        
+                glBindTexture(GL_TEXTURE_2D, textureID);
+                glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+        
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        
+                stbi_image_free(data);
+            }
+            else
+            {
+                LK_CORE_ASSERT(false, "Texture failed to load at path: {}", path);
+                stbi_image_free(data);
+            }
+            return textureID;
+        }
+    }
+
 
 
 }

@@ -11,40 +11,36 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "LkEngine/Scene/Mesh.h"
+
 
 namespace LkEngine {
 
-	struct Mesh
-	{
-		std::vector<Vertex> Vertices;
-		std::vector<unsigned int> Indices;
-		std::vector<RendererID> TextureHandles;
-		std::string DebugName;
-
-		Mesh() = default;
-		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<RendererID> textureHandles)
-			: Vertices(vertices)
-			, Indices(indices)
-			, TextureHandles(textureHandles) {}
-	};
+	class Model;
 
 	class MeshImporter
 	{
 	public:
-		MeshImporter();
+		MeshImporter() = default;
 		~MeshImporter() = default;
 
-		Mesh Load(std::filesystem::path filepath);
+		//std::vector<Mesh> Load(aiNode* mesh, const aiScene* scene, Model& model);
+		void Load(aiNode* mesh, const aiScene* scene, Model& model);
+		std::vector<Mesh> Load(std::filesystem::path filepath);
+
+		void ProcessNode(aiNode* node, const aiScene* scene, std::vector<Mesh>& meshes);
+		Mesh Process(aiMesh* mesh, const aiScene* scene);
+
+		static void LoadVertices(aiMesh* mesh, std::vector<Vertex>& vertices);
+		static void LoadIndices(aiMesh* mesh, std::vector<unsigned int>& indices);
+		static void LoadTextures(aiMesh* mesh, const aiScene* scene, std::vector<Texture_>& textures, Model& model);
 
 	private:
-		void ProcessNode(aiNode* node, const aiScene* scene);
-		Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
-
-		std::vector<Ref<Texture>> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
-
-	private:
-		std::vector<Mesh> m_Meshes{};
-
+		Model* m_ModelRef;
 	};
+
+    namespace GLUtils {
+        unsigned int TextureFromFile(const char *path, const std::string& m_Directory, bool gamma = false);
+    }
 
 }
