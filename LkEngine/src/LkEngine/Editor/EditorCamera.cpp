@@ -331,6 +331,8 @@ namespace LkEngine {
 	void EditorCamera::SetPosition(const glm::vec3& position)
 	{
 		m_Position = position;
+		//m_Position = glm::vec3(0.0f);
+		//m_PositionDelta = position;
 		UpdateCameraView();
 	}
 
@@ -377,6 +379,22 @@ namespace LkEngine {
 	unsigned int EditorCamera::GetGizmoMode() const
 	{
 		return (unsigned int)m_GizmoMode;
+	}
+
+	void EditorCamera::ApplyViewMode(ViewMode mode)
+	{
+		switch (mode)
+		{
+			case ViewMode::Classic:
+				return;
+
+			// Fake2D is a projection type of 2D
+			case ViewMode::Fake2D: 
+				m_Pitch = 0.0f;
+				m_Yaw = glm::pi<float>();
+				return;
+		}
+		LK_CORE_ASSERT(false, "Camera::ViewMode unknown!");
 	}
 
 }

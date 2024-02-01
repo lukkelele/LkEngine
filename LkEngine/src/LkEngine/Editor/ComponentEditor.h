@@ -1,20 +1,23 @@
 #pragma once
 
-#include "LkEngine/UI/UICore.h"
+#include "LkEngine/UI/Panel.h"
 
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/Material.h"
 
 
+
 namespace LkEngine {
 
-    class ComponentEditor
+    class ComponentEditor : public Panel
     {
     public:
         ComponentEditor();
         ~ComponentEditor();
 
-        void OnImGuiRender();
+        void Init() override;
+        void OnRender() override;
+        void OnImGuiRender() override;
 
     private:
         void RenderMaterialEditor(Material& material);
@@ -22,7 +25,7 @@ namespace LkEngine {
         void RenderTextureEditor(const Ref<Texture2D> texture);
 
     private:
-        friend class Editor;
+        friend class EditorLayer;
     };
 
 }

@@ -57,6 +57,7 @@ namespace LkEngine {
 		EditorLayer();
 		~EditorLayer() = default;
 
+		void Init();
 		void OnUpdate();
 		void OnEvent(Event& e) override;
 
@@ -68,20 +69,8 @@ namespace LkEngine {
 		void SetScene(Ref<Scene> scene);
 		Ref<Scene> GetCurrentScene() { return m_Scene; }
 
-		void UI_HandleManualWindowResize();
-		void UI_SceneContent();
-		void UI_CreateMenu();
-		void UI_RenderSettingsWindow();
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
 		void SetUpdateWindowFlag(bool flag);
-
-		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize); // Update potential changes in editor docking window sizes/positions
-		void UI_ShowMouseDetails();
-		void UI_ShowViewportAndWindowDetails();
-		void UI_ShowEditorWindowsDetails();
-		void UI_ClearColorModificationMenu();
-
-		//Ref<Framebuffer> GetFramebuffer() { return m_Framebuffer; }
 
 		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
 		EditorTabManager* GetTabManager() { return m_TabManager; }
@@ -107,17 +96,28 @@ namespace LkEngine {
         void DrawImGuizmo(Entity entity);
 		void HandleExternalWindows();
 
+		void UI_MainMenuBar();
+		void UI_HandleManualWindowResize();
+		void UI_SceneContent();
+		void UI_CreateMenu();
+		void UI_RenderSettingsWindow();
+		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize); // Update potential changes in editor docking window sizes/positions
+		void UI_ShowMouseDetails();
+		void UI_ShowViewportAndWindowDetails();
+		void UI_ShowEditorWindowsDetails();
+		void UI_ClearColorModificationMenu();
 		void UI_ViewportTexture();
 		void UI_WindowStatistics();
 		void UI_TabManager();
 
-		void UI_CheckLeftSidebarSize();
-		void UI_CheckRightSidebarSize();
-		void UI_CheckBottomBarSize();
+		void CheckLeftSidebarSize();
+		void CheckRightSidebarSize();
+		void CheckBottomBarSize();
+
+		Ref<Framebuffer>& GetViewportFramebuffer() { return m_ViewportFramebuffer; }
 
 	public:
-		// Flag to determine if an item is currently being created
-		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window
+		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window // FIXME: REMOVE
 		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 }; // TODO: REMOVE/UPDATE
 
 		glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
@@ -131,12 +131,12 @@ namespace LkEngine {
 		bool ShowRenderSettingsWindow = false;
 		bool m_FillSidebarsVertically = true; // Always fill out sidebars vertically
 
-		ImVec2 last_sidebar_left_pos = ImVec2(0, 0);
-		ImVec2 last_sidebar_left_size = ImVec2(0, 0);
-		ImVec2 last_sidebar_right_pos = ImVec2(0, 0);
-		ImVec2 last_sidebar_right_size = ImVec2(0, 0);
-		ImVec2 last_bottombar_pos = ImVec2(0, 0);
-		ImVec2 last_bottombar_size = ImVec2(0, 0);
+		ImVec2 LastSidebarLeftPos = ImVec2(0, 0);
+		ImVec2 LastSidebarLeftSize = ImVec2(0, 0);
+		ImVec2 LastSidebarRightPos = ImVec2(0, 0);
+		ImVec2 LastSidebarRightSize = ImVec2(0, 0);
+		ImVec2 LastBottomBarPos = ImVec2(0, 0);
+		ImVec2 LastBottomBarSize = ImVec2(0, 0);
 
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
@@ -151,7 +151,7 @@ namespace LkEngine {
 		int m_GizmoType = GizmoType::Translate;
 		int m_CurrentTabCount = 0; // Incremented to 1 after EditorLayer is initialized
 
-		//Ref<Framebuffer> m_Framebuffer;
+		Ref<Framebuffer> m_ViewportFramebuffer;
 
 		Ref<EditorCamera> m_EditorCamera;
 		SceneManagerPanel* m_SceneManagerPanel = nullptr;
@@ -171,6 +171,7 @@ namespace LkEngine {
 		friend class NodeEditorTab;
 		friend class MaterialEditorTab;
 		friend class SceneManagerPanel;
+		friend class Renderer;
 		
 		inline static EditorLayer* m_Instance = nullptr;
 	};

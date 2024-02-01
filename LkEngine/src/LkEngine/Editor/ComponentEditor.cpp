@@ -19,6 +19,14 @@ namespace LkEngine {
     {
     }
 
+    void ComponentEditor::Init()
+    {
+    }
+
+    void ComponentEditor::OnRender()
+    {
+    }
+
     void ComponentEditor::OnImGuiRender()
     {
         static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;

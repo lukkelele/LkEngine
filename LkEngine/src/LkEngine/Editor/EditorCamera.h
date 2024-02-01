@@ -48,6 +48,8 @@ namespace LkEngine {
 
 		float GetPitch() const { return m_Pitch; }
 		float GetYaw() const { return m_Yaw; }
+		void SetPitch(float pitch) { m_Pitch = pitch; }
+		float SetYaw(float yaw) { m_Yaw = yaw; }
 
 		void SetActive(bool active) { m_IsActive = active; }
 		void SetPosition(const glm::vec3& position);
@@ -66,6 +68,13 @@ namespace LkEngine {
 
 		inline float GetYawDelta() const { return m_YawDelta; }
 		inline float GetPitchDelta() const { return m_PitchDelta; }
+
+		enum class ViewMode 
+		{ 
+			Classic, 
+			Fake2D 
+		};
+		void ApplyViewMode(ViewMode mode);
 
 	private:
 		glm::mat4 m_ViewMatrix;
@@ -91,11 +100,11 @@ namespace LkEngine {
 
 		GizmoMode m_GizmoMode = GizmoMode::Translate;
 
-		float m_Pitch = 0.0f;
-		float m_Yaw = 0.0f;
+		float m_Pitch = 0.0f, m_Yaw = 0.0f;
 		float m_PitchDelta{}, m_YawDelta{};
 		glm::vec3 m_PositionDelta{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_RightDirection{ 0.0f, 0.0f, 0.0f };
+		bool m_PitchLocked = false, m_YawLocked = false; // Allow values to change or not
 
 		float m_RotationSpeed = 0.28f;
 
@@ -106,6 +115,7 @@ namespace LkEngine {
 		constexpr static float MIN_SPEED{ 0.0005f }, MAX_SPEED{ 2.0f };
 
 		friend class EditorLayer;
+		friend class SceneManagerPanel;
 		friend class SceneSerializer;
 	};
 
