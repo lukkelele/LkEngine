@@ -44,6 +44,7 @@ namespace LkEngine {
 		static uint32_t GetCurrentFrameIndex();
 		static uint32_t RT_GetCurrentFrameIndex();
 
+		static Ref<Framebuffer>& GetViewportFramebuffer();
 		static RendererCapabilities& GetCapabilities();
 
 		static void BeginScene(const SceneCamera& camera);
@@ -114,7 +115,7 @@ namespace LkEngine {
 
 		inline static Renderer* m_Instance = nullptr;
 
-		friend class Editor;
+		friend class EditorLayer;
 	};
 
 }

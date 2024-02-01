@@ -22,6 +22,7 @@ namespace LkEngine {
 		m_Name = specification.Name;
 		if (specification.Name.empty())
 			m_Name = specification.Path;
+		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
 
 		if (specification.Path != "")
 		{
@@ -49,6 +50,7 @@ namespace LkEngine {
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
         imageSpec.Size = Utils::GetMemorySize(specification.Format, specification.Width, specification.Height);
+		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
 
 		m_Name = specification.Name;
 		if (specification.Name.empty())
@@ -69,16 +71,12 @@ namespace LkEngine {
 
 	void OpenGLTexture::Bind(unsigned int slot /*= 0*/) 
 	{
-		if (m_InTextureArray)
-			return;
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
 	}
 
 	void OpenGLTexture::Unbind(unsigned slot)
 	{
-		if (m_InTextureArray)
-			return;
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 	}
@@ -155,15 +153,15 @@ namespace LkEngine {
 		imageSpec.Format = specification.Format;
 		imageSpec.Filter = specification.SamplerFilter;
 		imageSpec.Wrap = specification.SamplerWrap;
+		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
 
 		imageSpec.Size = imageData.GetSize();
-		LK_CORE_WARN_TAG("OpenGLTexture2D", "imageSpec.Size={}", imageSpec.Size);
         uint32_t memorySize = Utils::GetMemorySize(specification.Format, specification.Width, specification.Height);
 		if (imageSpec.Size != memorySize)
 		{
 			int width, height, channels;
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
-			LK_CORE_INFO_TAG("OpenGLTexture2D", "Image {} specification doesn't match the read data size, resizing texture...", m_Specification.DebugName);
+			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Image {} specification doesn't match the read data size, resizing texture...", m_Specification.DebugName);
 			imageData.Data = MemoryUtils::ResizeImageData(data, memorySize, width, height, specification.Width, specification.Height, STBIR_RGBA);
 		}
 		m_Image = Image2D::Create(imageSpec, imageData);
@@ -181,6 +179,7 @@ namespace LkEngine {
 		imageSpec.Format = specification.Format;
 		imageSpec.Filter = specification.SamplerFilter;
 		imageSpec.Wrap = specification.SamplerWrap;
+		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
 
 		// Try to read data from path
 		if (specification.Path.empty() == false)
@@ -194,7 +193,7 @@ namespace LkEngine {
 			if (imageSpec.Size != memorySize)
 			{
 				data = MemoryUtils::ResizeImageData(data, memorySize, width, height, specification.Width, specification.Height, STBIR_RGBA);
-				LK_CORE_INFO_TAG("OpenGLTexture2D", "Image {} specification doesn't match the read data size, resizing texture...", m_Specification.DebugName);
+				//LK_CORE_TAG_TAG("OpenGLTexture2D", "Image {} specification doesn't match the read data size, resizing texture...", m_Specification.DebugName);
 			}
 			m_Image = Image2D::Create(imageSpec, data);
 		}

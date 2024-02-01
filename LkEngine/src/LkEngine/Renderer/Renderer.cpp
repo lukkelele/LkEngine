@@ -24,12 +24,14 @@ namespace LkEngine {
 
 	struct RendererData
 	{
-		Ref<ShaderLibrary> m_ShaderLibrary = nullptr;
-		Ref<TextureLibrary> m_TextureLibrary = nullptr;
-		Ref<MaterialLibrary> m_MaterialLibrary = nullptr;
+		Ref<ShaderLibrary> m_ShaderLibrary;
+		Ref<TextureLibrary> m_TextureLibrary;
+		Ref<MaterialLibrary> m_MaterialLibrary;
 
-		Ref<Texture2D> WhiteTexture = nullptr;
-		Ref<Texture2D> BlackTexture = nullptr;
+		Ref<Texture2D> WhiteTexture;
+		Ref<Texture2D> BlackTexture;
+
+		EditorLayer* Editor;
 	};
 
 	static RendererData* Data = nullptr;
@@ -53,7 +55,7 @@ namespace LkEngine {
 
 		Data->m_ShaderLibrary = Ref<ShaderLibrary>::Create();
 
-		Data->m_TextureLibrary = Ref<TextureLibrary>::Create("assets/textures");
+		Data->m_TextureLibrary = Ref<TextureLibrary>::Create("assets/Textures");
 		Data->m_TextureLibrary->Init();
 
 		Data->m_MaterialLibrary = Ref<MaterialLibrary>::Create();
@@ -65,10 +67,10 @@ namespace LkEngine {
 
 		LK_CORE_ASSERT(Data->WhiteTexture, "Data->WhiteTexture is nullptr");
 
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad",   "assets/shaders/Renderer2D_Quad.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Line",   "assets/shaders/Renderer2D_Line.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug",  "assets/shaders/Renderer2D_Debug.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen", "assets/shaders/Renderer2D_Screen.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad",   "assets/Shaders/Renderer2D_Quad.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Line",   "assets/Shaders/Renderer2D_Line.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug",  "assets/Shaders/Renderer2D_Debug.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen", "assets/Shaders/Renderer2D_Screen.shader");
 
 		m_RendererAPI = RendererAPI::Create();
 		m_RendererAPI->Init();
@@ -121,6 +123,21 @@ namespace LkEngine {
 	uint32_t Renderer::GetRenderQueueSubmissionIndex()
 	{
 		return RenderCommandQueueSubmissionIndex;
+	}
+
+	Ref<Framebuffer>& Renderer::GetViewportFramebuffer()
+	{
+		auto* editor = EditorLayer::Get();
+		// Editor is enabled, thus the render target is a texture that the editor is responsible for
+		if (editor && editor->IsEnabled())
+		{
+			return editor->m_ViewportFramebuffer;
+		}
+		else
+		{
+			// TODO:
+			LK_CORE_ASSERT(false, "Not implemented yet!");
+		}
 	}
 
 	Ref<ShaderLibrary> Renderer::GetShaderLibrary()

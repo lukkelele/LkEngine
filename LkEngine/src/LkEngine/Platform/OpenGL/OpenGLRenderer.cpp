@@ -14,6 +14,7 @@ namespace LkEngine {
 
 	static RendererData* Data = nullptr;
 
+	// TODO: Move all texture init here
     void OpenGLRenderer::Init()
     {
 		Data = new RendererData();
@@ -27,38 +28,41 @@ namespace LkEngine {
         textureSpec.Format = ImageFormat::RGBA32F;
         textureSpec.Width = 200;
         textureSpec.Height = 200;
+		textureSpec.SamplerWrap = TextureWrap::Clamp;
+		textureSpec.SamplerFilter = TextureFilter::Nearest;
 
         // Åle texture 
-        textureSpec.Name = "ale";
-        textureSpec.Path = "assets/textures/misc/ale_200x200.png";
-        textureSpec.SamplerWrap = TextureWrap::Clamp;
-        textureSpec.SamplerFilter = TextureFilter::Nearest;
-        textureSpec.DebugName = "ale";
-        TextureLibrary::Get()->AddTexture2D(textureSpec);
-
+		{
+			textureSpec.Name = "ale";
+			textureSpec.DebugName = "ale";
+			textureSpec.Path = "assets/Textures/misc/ale_500x375.png";
+			//textureSpec.Path = "asset/Textures/misc/ale_200x200.png";
+			TextureLibrary::Get()->AddTexture2D(textureSpec);
+		}
         // Atte texture
-        textureSpec.Name = "atte";
-        textureSpec.Path = "assets/textures/misc/atte_200x200.png";
-        textureSpec.DebugName = "atte";
-        TextureLibrary::Get()->AddTexture2D(textureSpec);
-
+		{
+			textureSpec.Name = "atte";
+			textureSpec.Path = "assets/Textures/misc/atte_200x200.png";
+			textureSpec.DebugName = "atte";
+			textureSpec.SamplerWrap = TextureWrap::Repeat;
+			TextureLibrary::Get()->AddTexture2D(textureSpec);
+		}
         // Ground texture
-        textureSpec.Name = "SuperMario-ground_block";
-        textureSpec.Path = "assets/textures/SuperMario/SuperMario-ground_block.png";
-        textureSpec.DebugName = "groundblock";
-        TextureLibrary::Get()->AddTexture2D(textureSpec);
+		{
+			textureSpec.Name = "SuperMario-ground_block";
+			textureSpec.Path = "assets/Textures/SuperMario/SuperMario-ground_block.png";
+			textureSpec.DebugName = "groundblock";
+			TextureLibrary::Get()->AddTexture2D(textureSpec);
+		}
+        // Nerd Emoji
+		{
+			textureSpec.Name = "NerdEmoji";
+			textureSpec.DebugName = "NerdEmoji";
+			textureSpec.Path = "assets/Textures/misc/nerdEmoji.jpg";
+			textureSpec.Format = ImageFormat::RGBA32F;
+			TextureLibrary::Get()->AddTexture2D(textureSpec);
+		}
 
-        textureSpec.Name = "sky-background-2d";
-        textureSpec.Path = "assets/textures/sky-background-2d.png";
-        textureSpec.SamplerFilter = TextureFilter::Linear;
-        textureSpec.DebugName = "sky";
-        TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-        textureSpec.Name = "SuperMario-gun";
-        textureSpec.Path = "assets/textures/SuperMario/SuperMario-gun.png";
-        textureSpec.SamplerFilter = TextureFilter::Linear;
-        textureSpec.DebugName = "gun";
-        TextureLibrary::Get()->AddTexture2D(textureSpec);
 
         GL_CALL(glGenTextures(1, &m_TextureArray_200x200));
         GL_CALL(glActiveTexture(GL_TEXTURE0));
@@ -78,7 +82,7 @@ namespace LkEngine {
         for (int i = 0; i < textures2D.size(); i++)
         {
 			auto& texture = textures2D[i].second;
-			LK_CORE_DEBUG_TAG("Texture", "Added to sampler2DArray -> {}", texture->GetName());
+			//LK_CORE_DEBUG_TAG("Texture", "Added to sampler2DArray -> {}", texture->GetName());
 			GL_CALL(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, textures2D[i].second->GetImage()->GetBuffer().Data));
         }
 
@@ -91,6 +95,11 @@ namespace LkEngine {
 
 		glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, m_TextureArray_200x200);
+
+		// Setup debugging stuff
+		SetupTexturesAndShaders();
+
+		GraphicsContext::Get()->SetDepthEnabled(true);
     }
 
     void OpenGLRenderer::Shutdown()
@@ -108,14 +117,14 @@ namespace LkEngine {
 
 	void OpenGLRenderer::Clear()
 	{
-		auto& c = Renderer::ClearColor;
-		glClearColor(c.r, c.g, c.b, c.a);
+		Framebuffer::TargetSwapChain();
+		glClearColor(Renderer::ClearColor.r, Renderer::ClearColor.g, Renderer::ClearColor.b, Renderer::ClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		auto& renderer2DFramebuffer = *m_Renderer2D->GetFramebuffer().As<OpenGLFramebuffer>();
-		renderer2DFramebuffer.Bind();
-		renderer2DFramebuffer.Clear();
-		renderer2DFramebuffer.Unbind();
+		auto& viewportFramebuffer = *Renderer::GetViewportFramebuffer();
+		viewportFramebuffer.Bind();
+		viewportFramebuffer.Clear();
+		viewportFramebuffer.Unbind();
 	}
 
 	void OpenGLRenderer::SetDrawMode(const RendererDrawMode& mode)
@@ -230,7 +239,10 @@ namespace LkEngine {
 		Ref<OpenGLShader> shader = pipeline->GetShader();
 		Ref<OpenGLVertexBuffer> vertexBuffer = _vertexBuffer.As<OpenGLVertexBuffer>();
 		Ref<OpenGLRenderCommandBuffer> renderCommandBuffer = _renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
-		Ref<OpenGLFramebuffer> framebuffer = pipeline->GetSpecification().TargetFramebuffer.As<OpenGLFramebuffer>();
+		//Ref<OpenGLFramebuffer> framebuffer = pipeline->GetSpecification().TargetFramebuffer.As<OpenGLFramebuffer>();
+		//framebuffer2D.Bind();
+		//framebuffer2D.BindTexture(0); // Color attachment 0 -> Texture of image format RGBA32F
+		Ref<Framebuffer> framebuffer = Renderer::GetViewportFramebuffer();
 
 		//LK_CORE_DEBUG_TAG("OpenGLRenderer", "RenderGeometry: Framebuffer ID={}", framebuffer->GetRendererID());
 		Renderer::Submit([&]
@@ -249,7 +261,8 @@ namespace LkEngine {
 		Ref<OpenGLShader> shader = _shader.As<OpenGLShader>();
 		Ref<OpenGLVertexBuffer> vertexBuffer = _vertexBuffer.As<OpenGLVertexBuffer>();
 		Ref<OpenGLRenderCommandBuffer> renderCommandBuffer = _renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
-		Ref<OpenGLFramebuffer> framebuffer = pipeline->GetSpecification().TargetFramebuffer.As<OpenGLFramebuffer>();
+		//Ref<OpenGLFramebuffer> framebuffer = pipeline->GetSpecification().TargetFramebuffer.As<OpenGLFramebuffer>();
+		Ref<Framebuffer> framebuffer = Renderer::GetViewportFramebuffer();
 
 		Renderer::Submit([this, renderCommandBuffer, framebuffer, shader, vertexBuffer, indexCount]() 
 		{

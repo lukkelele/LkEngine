@@ -118,7 +118,7 @@ namespace LkEngine {
 
     private:
         friend class Renderer2D;
-        friend class Editor;
+        friend class EditorLayer;
 	};
 
 }

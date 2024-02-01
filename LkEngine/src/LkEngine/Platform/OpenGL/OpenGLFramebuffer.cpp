@@ -31,36 +31,6 @@ namespace LkEngine {
 			LK_CORE_DEBUG_TAG("OpenGLFramebuffer", "Iterating framebuffer texture specification: {}", Utils::ImageFormatToString(spec.Format));
 		}
 		Invalidate();
-
-#if 0
-        glGenFramebuffers(1, &m_RendererID);
-        glGenFramebuffers(1, &m_RendererID);
-        glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
-		LK_CORE_DEBUG_TAG("OpenGLFramebuffer", "Generated renderer ID for framebuffer: {}", m_RendererID);
-
-        // Create a color attachment texture
-		m_ColorAttachments.resize(m_ColorAttachments.size() + 1); // Add slot
-        glGenTextures(1, &m_ColorAttachments[0]);
-        glBindTexture(GL_TEXTURE_2D, m_ColorAttachments[0]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Window::Get().GetWidth(), Window::Get().GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorAttachments[0], 0);
-
-        // Create depth texture
-        glGenTextures(1, &m_DepthAttachment);
-        glBindTexture(GL_TEXTURE_2D, m_DepthAttachment);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, Window::Get().GetWidth(), Window::Get().GetHeight(), 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_DepthAttachment, 0);
-		LK_CORE_DEBUG_TAG("OpenGLFramebuffer", "Created depth attachment {}", m_DepthAttachment);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        {
-            LK_CORE_ERROR_TAG("OpenGLRenderer2D", "Framebuffer is not complete!");
-            exit(EXIT_FAILURE);
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#endif
 	}
 
 	OpenGLFramebuffer::~OpenGLFramebuffer()
@@ -104,6 +74,7 @@ namespace LkEngine {
 				imageSpec.Format = ImageFormat::RGBA32F;
 				imageSpec.Wrap = TextureWrap::None;
 				imageSpec.Filter = TextureFilter::None;
+				imageSpec.Mips = 1; // No mipmapping
 				imageSpec.Path = "assets/textures/white-texture.png";
 
 				Buffer imageData = Buffer(TextureLibrary::Get()->GetWhiteTexture2D()->GetWriteableBuffer());
@@ -191,8 +162,8 @@ namespace LkEngine {
 
 	void OpenGLFramebuffer::BindTexture(uint32_t attachmentIndex, uint32_t slot) const
 	{
-		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_ColorAttachments[attachmentIndex]->GetRendererID()));
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_2D, m_ColorAttachments[attachmentIndex]->GetRendererID());
 	}
 
 	uint32_t OpenGLFramebuffer::GetWidth() const

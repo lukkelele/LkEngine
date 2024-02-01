@@ -23,7 +23,9 @@ namespace LkEngine {
 
     static bool Initialized = false;
     static int Uniform_TextureArray_Quad_Index = 0;
-    static int Uniform_TextureArray_Quad_ActiveUnit = GL_TEXTURE0;
+    static int Uniform_ActiveUnit_TextureArray_Quad = GL_TEXTURE0;
+    static int Uniform_TextureArray_Quad_Skybox_Index = 1;
+    static int Uniform_ActiveUnit_TextureArray_Quad_Skybox = GL_TEXTURE1;
 
     OpenGLRenderer2D::OpenGLRenderer2D(const Renderer2DSpecification& specification) 
         : m_Specification(specification)
@@ -55,18 +57,18 @@ namespace LkEngine {
         m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
         m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
 
-        // Target Framebuffer
+        // Quad Framebuffer
         {
-		    FramebufferSpecification framebufferSpec;
-		    framebufferSpec.Attachments = { ImageFormat::RGBA32F, ImageFormat::DEPTH24STENCIL8 };
-		    framebufferSpec.Samples = 1;
-		    framebufferSpec.ClearColorOnLoad = false;
-		    framebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
-		    framebufferSpec.DebugName = "OpenGLRenderer2D Framebuffer";
-            framebufferSpec.Width = Window::Get().GetWidth();
-            framebufferSpec.Height = Window::Get().GetHeight();
-		    m_TargetFramebuffer = Framebuffer::Create(framebufferSpec);
-            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Color attachment 0: {}", m_TargetFramebuffer->GetColorAttachmentRendererID(0));
+		    FramebufferSpecification quadFramebufferSpec;
+		    quadFramebufferSpec.Attachments = { ImageFormat::RGBA32F, ImageFormat::DEPTH24STENCIL8 };
+		    quadFramebufferSpec.Samples = 1;
+		    quadFramebufferSpec.ClearColorOnLoad = false;
+		    quadFramebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
+		    quadFramebufferSpec.DebugName = "OpenGLRenderer2D_Framebuffer";
+            quadFramebufferSpec.Width = Window::Get().GetWidth();
+            quadFramebufferSpec.Height = Window::Get().GetHeight();
+		    //m_QuadFramebuffer = Framebuffer::Create(quadFramebufferSpec);
+            //LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Color attachment 0: {}", m_QuadFramebuffer->GetColorAttachmentRendererID(0));
         }
 
         // Debug OpenGL VAO's and VBO's
@@ -74,8 +76,8 @@ namespace LkEngine {
             GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
             GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
             GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
-            CubeTexture_ = LoadTexture("assets/textures/container.jpg");
-            FloorTexture_ = LoadTexture("assets/textures/metal.png");
+            CubeTexture_ = LoadTexture("assets/Textures/container.jpg");
+            FloorTexture_ = LoadTexture("assets/Textures/metal.png");
         }
 
         // Quads
@@ -87,7 +89,7 @@ namespace LkEngine {
 
             // Pipeline
             PipelineSpecification quadPipelineSpec;
-            quadPipelineSpec.TargetFramebuffer = m_TargetFramebuffer;
+            //quadPipelineSpec.TargetFramebuffer = m_QuadFramebuffer;
             quadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
             quadPipelineSpec.Shader = m_QuadShader;
 
@@ -156,7 +158,9 @@ namespace LkEngine {
         {
             auto textures2D = TextureLibrary::Get()->GetTextures2D();
             for (int i = 0; i < textures2D.size(); i++)
+            {
                 m_TextureSlots[i] = textures2D[i].second;
+            }
             m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture2D();
 
             m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
@@ -241,8 +245,6 @@ namespace LkEngine {
 		uint32_t frameIndex = Renderer::GetCurrentFrameIndex();
         uint32_t dataSize = 0;
 
-        //m_TargetFramebuffer->Bind();
-
         // Quads
         if (m_QuadIndexCount)
         {
@@ -252,7 +254,7 @@ namespace LkEngine {
             m_QuadShader->Bind();
             m_QuadShader->Set("u_ViewProj", m_CameraBuffer.ViewProjection);
 
-            glActiveTexture(Uniform_TextureArray_Quad_ActiveUnit);
+            glActiveTexture(Uniform_ActiveUnit_TextureArray_Quad);
             m_QuadShader->Set("u_TextureArray", Uniform_TextureArray_Quad_Index);
 
 			//Renderer::BeginRenderPass(m_RenderCommandBuffer, m_QuadPass);
@@ -287,7 +289,6 @@ namespace LkEngine {
         }
 
         m_TextureSlotIndex = 0;
-        //m_TargetFramebuffer->Unbind();
     }
 
     void OpenGLRenderer2D::DrawImage(const Ref<Image> image)

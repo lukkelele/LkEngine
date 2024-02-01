@@ -25,8 +25,7 @@ namespace LkEngine {
     {
         while (GLenum error = glGetError())
         {
-            std::cout << "[OpenGL Error] (" << error << ")\nFUNCTION: " << function <<
-                "\nFILE: " << file << "\nLINE: " << line << std::endl;
+            LK_CORE_ERROR_TAG("OpenGL", "Error: {}   Function: {}   File: {}   Line: {}", error, function, file, line);
             return false;
         }
         return true;
@@ -93,7 +92,7 @@ namespace LkEngine {
     inline static Ref<Shader> ScreenShader = nullptr;
     inline static Ref<Shader> DebugShader = nullptr;
 
-    inline static glm::mat4 Model = glm::mat4(1.0f);
+    inline static glm::mat4 ModelMVP = glm::mat4(1.0f);
     inline static glm::mat4 View = glm::mat4(1.0f);
     inline static glm::mat4 Projection = glm::mat4(1.0f);
 
@@ -162,7 +161,7 @@ namespace LkEngine {
          0.3f,  1.0f,  1.0f, 1.0f
     };
 
-    static unsigned int LoadTexture(char const* path)
+    static unsigned int LoadTexture(const char* path)
     {
         unsigned int textureID;
         glGenTextures(1, &textureID);
@@ -201,6 +200,7 @@ namespace LkEngine {
     void GenerateCubeVaoAndVbo(unsigned int& vao, unsigned int& vbo);
     void GeneratePlaneVaoAndVbo(unsigned int& vao, unsigned int& vbo);
     void GenerateScreenQuadVaoAndVbo(unsigned int& vao, unsigned int& vbo);
+    void SetupTexturesAndShaders();
 
     void RenderMirrorTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
     void RenderScreenTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));

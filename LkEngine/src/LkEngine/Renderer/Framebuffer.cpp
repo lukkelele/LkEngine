@@ -1,8 +1,6 @@
 #include "LKpch.h"
 #include "Framebuffer.h"
 
-#include "LkEngine/Core/TargetPlatform.h"
-
 #include "LkEngine/Platform/OpenGL/OpenGLFramebuffer.h"
 //#include "LkEngine/Platform/Vulkan/VulkanFramebuffer.h"
 
@@ -29,9 +27,6 @@ namespace LkEngine {
 			case RendererAPIType::OpenGL:	
 				OpenGLFramebuffer::TargetSwapChain();
 				break;
-			//case RendererAPIType::Vulkan:	
-			// VulkanFramebuffer::TargetSwapChain();
-			//		break;
 		}
 	}
 

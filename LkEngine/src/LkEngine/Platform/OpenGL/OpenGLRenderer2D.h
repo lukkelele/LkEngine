@@ -45,7 +45,7 @@ namespace LkEngine {
         Ref<Shader> GetQuadShader() override { return m_QuadShader; }
         Ref<Shader> GetLineShader() override { return m_LineShader; }
 
-        Ref<OpenGLFramebuffer> GetFramebuffer() { return m_TargetFramebuffer; }
+        //Ref<OpenGLFramebuffer> GetFramebuffer() { return m_QuadFramebuffer; }
 
         float GetLineWidth() override;
         void SetLineWidth(float width) override;
@@ -93,6 +93,7 @@ namespace LkEngine {
 		Ref<IndexBuffer> m_QuadIndexBuffer;
         Ref<VertexBuffer> m_QuadVertexBuffer;
         glm::vec4 m_QuadVertexPositions[4];
+        //Ref<Framebuffer> m_QuadFramebuffer;
 
         // Line
         float m_LineWidth = 3.0f;
@@ -111,8 +112,6 @@ namespace LkEngine {
 
         std::array<Ref<Texture2D>, MaxTextureSlots> m_TextureSlots;
 
-        Ref<Framebuffer> m_TargetFramebuffer;
-
         struct CameraData
         {
             glm::mat4 ViewProjection;
@@ -122,7 +121,8 @@ namespace LkEngine {
 
         Statistics m_Stats;
 
-        friend class Editor;
+        friend class EditorLayer;
+        friend class OpenGLRenderer;
 	};
 
 

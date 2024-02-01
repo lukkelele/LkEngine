@@ -96,5 +96,12 @@ namespace LkEngine {
 		glm::vec4 m_TintColor = Color::RGBA::Transparent;
 	};
 
+	namespace GLUtils {
+
+		void ApplyTextureFilter(TextureFilter filter, bool mipmap = true);
+		void ApplyTextureWrap(TextureWrap wrap);
+
+	}
+
 
 }
