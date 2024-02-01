@@ -8,6 +8,8 @@
 
 namespace LkEngine {
 
+	constexpr int MAX_BONE_INFLUENCE = 4;
+
 	struct Vertex 
 	{
 		glm::vec3 Position;
@@ -15,7 +17,12 @@ namespace LkEngine {
 		glm::vec2 TexCoords;
 
 		glm::vec3 Tangent;
-		glm::vec3 BiTangent;
+		glm::vec3 Bitangent;
+		
+    	int m_BoneIDs[MAX_BONE_INFLUENCE];
+    	float m_Weights[MAX_BONE_INFLUENCE];
+		//glm::vec4 m_BoneIDs;
+		//glm::vec4 m_Weights;
 	};
 
 	class VertexBuffer : public RefCounted

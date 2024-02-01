@@ -63,7 +63,7 @@ namespace LkEngine {
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 		}
 
-
+		// TODO: Create TextureArray impl
         GL_CALL(glGenTextures(1, &m_TextureArray_200x200));
         GL_CALL(glActiveTexture(GL_TEXTURE0));
         GL_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, m_TextureArray_200x200));
@@ -81,13 +81,22 @@ namespace LkEngine {
         auto textures2D = TextureLibrary::Get()->GetTextures2D();
         for (int i = 0; i < textures2D.size(); i++)
         {
+			// Check the size of texture and add it to its texture array
 			auto& texture = textures2D[i].second;
-			//LK_CORE_DEBUG_TAG("Texture", "Added to sampler2DArray -> {}", texture->GetName());
-			GL_CALL(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, textures2D[i].second->GetImage()->GetBuffer().Data));
+			Ref<OpenGLImage2D> img = textures2D[i].second->GetImage().As<OpenGLImage2D>();
+
+			switch (img->GetWidth())
+			{
+				case 200: // 200x200
+					GL_CALL(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data));
+					break;
+				case 400:
+					GL_CALL(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data));
+					break;
+			}
         }
 
 		Renderer2DSpecification renderer2DSpecification;
-		//renderer2DSpecification.SwapChainTarget = true;
 
 		m_Renderer2D = Ref<OpenGLRenderer2D>::Create(renderer2DSpecification);
 		m_Renderer2D->Init();
@@ -100,6 +109,8 @@ namespace LkEngine {
 		SetupTexturesAndShaders();
 
 		GraphicsContext::Get()->SetDepthEnabled(true);
+
+		SetDrawMode(RendererDrawMode::Triangles);
     }
 
     void OpenGLRenderer::Shutdown()
@@ -133,9 +144,11 @@ namespace LkEngine {
 		{
 			case RendererDrawMode::Lines:
 				m_DrawMode = GL_LINES;
+				m_Renderer2D->m_DrawMode = GL_LINES;
 				break;
 			case RendererDrawMode::Triangles:
 				m_DrawMode = GL_TRIANGLES;
+				m_Renderer2D->m_DrawMode = GL_TRIANGLES;
 				break;
 		}
 	}
@@ -234,42 +247,27 @@ namespace LkEngine {
 
 	void OpenGLRenderer::RenderGeometry(Ref<RenderCommandBuffer> _renderCommandBuffer, Ref<Pipeline> _pipeline, Ref<Material> _material, Ref<VertexBuffer> _vertexBuffer, Ref<IndexBuffer> _indexBuffer, const glm::mat4& transform, uint32_t indexCount /* == 0*/)
 	{
-		Ref<OpenGLPipeline> pipeline = _pipeline.As<OpenGLPipeline>();
-		//Ref<OpenGLShader> shader = _shader.As<OpenGLShader>();
-		Ref<OpenGLShader> shader = pipeline->GetShader();
-		Ref<OpenGLVertexBuffer> vertexBuffer = _vertexBuffer.As<OpenGLVertexBuffer>();
-		Ref<OpenGLRenderCommandBuffer> renderCommandBuffer = _renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
-		//Ref<OpenGLFramebuffer> framebuffer = pipeline->GetSpecification().TargetFramebuffer.As<OpenGLFramebuffer>();
-		//framebuffer2D.Bind();
-		//framebuffer2D.BindTexture(0); // Color attachment 0 -> Texture of image format RGBA32F
-		Ref<Framebuffer> framebuffer = Renderer::GetViewportFramebuffer();
-
-		//LK_CORE_DEBUG_TAG("OpenGLRenderer", "RenderGeometry: Framebuffer ID={}", framebuffer->GetRendererID());
-		Renderer::Submit([&]
-		{
-			framebuffer->Bind();
-			shader->Bind();
-			vertexBuffer->Bind();
-			DrawIndexed(indexCount);
-			framebuffer->Unbind();
-		});
+		LK_CORE_ASSERT(false, "Not implemented");
 	}
 
-	void OpenGLRenderer::RenderGeometry(Ref<RenderCommandBuffer> _renderCommandBuffer, Ref<Pipeline> _pipeline, Ref<Shader> _shader, Ref<VertexBuffer> _vertexBuffer, Ref<IndexBuffer> _indexBuffer, const glm::mat4& transform, uint32_t indexCount /* == 0*/)
+	// TODO: It is required to set the framebuffer in this submission call weirdly enough, even if its set per default in RenderCommandQueue
+	//       Weird bug
+	void OpenGLRenderer::RenderGeometry(Ref<RenderCommandBuffer> _renderCommandBuffer, Ref<Pipeline> pipelineRef, Ref<Shader>& shader, Ref<VertexBuffer>& vertexBuffer, Ref<IndexBuffer>& _indexBuffer, const glm::mat4& transform, uint32_t indexCount /* == 0*/)
 	{
-		Ref<OpenGLPipeline> pipeline = _pipeline.As<OpenGLPipeline>();
-		Ref<OpenGLShader> shader = _shader.As<OpenGLShader>();
-		Ref<OpenGLVertexBuffer> vertexBuffer = _vertexBuffer.As<OpenGLVertexBuffer>();
-		Ref<OpenGLRenderCommandBuffer> renderCommandBuffer = _renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
-		//Ref<OpenGLFramebuffer> framebuffer = pipeline->GetSpecification().TargetFramebuffer.As<OpenGLFramebuffer>();
-		Ref<Framebuffer> framebuffer = Renderer::GetViewportFramebuffer();
-
-		Renderer::Submit([this, renderCommandBuffer, framebuffer, shader, vertexBuffer, indexCount]() 
+		Ref<OpenGLPipeline> pipeline = pipelineRef.As<OpenGLPipeline>();
+		uint32_t textureArray = pipeline->GetBoundTextureArray();
+		auto& framebuffer = Renderer::GetViewportFramebuffer();
+		Renderer::Submit([this, pipeline, framebuffer, shader, vertexBuffer, transform, indexCount, textureArray]() mutable
 		{
 			framebuffer->Bind();
+			//framebuffer->BindTexture(0); // TODO: bind texture array idx here ?
 			shader->Bind();
+			shader->Set("u_TextureArray", textureArray);
+            shader->Set("u_ViewProj", transform);
+			
 			vertexBuffer->Bind();
 			DrawIndexed(indexCount);
+
 			framebuffer->Unbind();
 		});
 	}

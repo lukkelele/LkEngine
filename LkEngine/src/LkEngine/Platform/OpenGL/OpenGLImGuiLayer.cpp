@@ -24,7 +24,7 @@ namespace LkEngine {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     
 
-		io.Fonts->AddFontFromFileTTF("assets/fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
+		io.Fonts->AddFontFromFileTTF("assets/Fonts/SourceCodePro/SourceSansProSemibold.ttf", 20);
 		io.ConfigDockingAlwaysTabBar = false;
 
 		ImGuiStyle& style = ImGui::GetStyle();

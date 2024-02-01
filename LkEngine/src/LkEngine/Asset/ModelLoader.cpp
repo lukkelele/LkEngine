@@ -10,32 +10,23 @@ namespace LkEngine {
 	{
 	}
 
-	Model ModelLoader::Load(std::filesystem::path filepath)
+	Ref<Model> ModelLoader::Load(std::filesystem::path filepath)
 	{
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(filepath.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
         LK_CORE_ASSERT(scene || scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode, "Assimp error, {}", importer.GetErrorString());
 
-        //std::string directory = filepath.string().substr(0, filepath.string().find_last_of('/'));
-        //ProcessNode(scene->mRootNode, scene);
-
-        //Model model = Model();
-        //std::vector<Mesh> meshes;
-        //meshImporter.ProcessNode(scene->mRootNode, scene, meshes);
-        //std::vector<Mesh> meshes = meshImporter.Load(scene->mRootNode, scene, model);
-
-        Model model;
-        MeshImporter meshImporter;
-        // Load meshes to model
-        meshImporter.Load(scene->mRootNode, scene, model);
+        Ref<Model> model = Ref<Model>::Create();
+        MeshImporter meshImporter{};
+        meshImporter.Load(scene, model);
 
         return model;
 	}
 
     Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene *scene)
     {
-        MeshImporter meshImporter;
+        MeshImporter meshImporter{};
 
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -78,7 +69,6 @@ namespace LkEngine {
         
         return Mesh(vertices, indices, textures);
     }
-
 
     // FIXME:
     // Checks all material textures of a given type and loads the textures if they're not loaded yet

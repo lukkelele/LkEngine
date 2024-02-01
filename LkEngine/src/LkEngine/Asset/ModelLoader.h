@@ -13,7 +13,7 @@ namespace LkEngine {
 		ModelLoader(std::filesystem::path filepath);
 		~ModelLoader() = default;
 
-		Model Load(std::filesystem::path filepath);
+		Ref<Model> Load(std::filesystem::path filepath);
 		
 	};
 

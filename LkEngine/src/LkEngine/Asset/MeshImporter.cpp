@@ -8,14 +8,27 @@
 
 namespace LkEngine {
 
-    //std::vector<Mesh> MeshImporter::Load(aiNode* mesh, const aiScene* scene, Model& model)
-    void MeshImporter::Load(aiNode* mesh, const aiScene* scene, Model& model)
+    void MeshImporter::Load(std::filesystem::path filepath, Model* model)
     {
-        //std::vector<Mesh> meshes;
-        //std::vector<Mesh>& meshes = model.m_Meshes;
-        //return meshes;
-        m_ModelRef = &model;
-        ProcessNode(mesh, scene, model.m_Meshes);
+        m_ModelRef = model;
+        model->m_Directory = filepath.string().substr(0, filepath.string().find_last_of('/'));
+
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile(filepath.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+
+        ProcessNode(scene->mRootNode, scene, model->m_Meshes);
+        //Load(scene, model);
+    }
+
+    void MeshImporter::Load(const aiScene* scene, Ref<Model>& model)
+    {
+        Load(scene, model.Raw());
+    }
+
+    void MeshImporter::Load(const aiScene* scene, Model* model)
+    {
+        m_ModelRef = model;
+        ProcessNode(scene->mRootNode, scene, model->m_Meshes);
     }
 
 	std::vector<Mesh> MeshImporter::Load(std::filesystem::path filepath)
@@ -23,24 +36,20 @@ namespace LkEngine {
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filepath.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
 
-		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) 
-		{
-			LK_CORE_ERROR_TAG("MeshImporter", "Assimp error: {}", importer.GetErrorString());
-			LK_CORE_ASSERT(false, "Assimp error: {}", importer.GetErrorString());
-		}
+        LK_CORE_ASSERT(scene || scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode, "Assimp scene error!");
 
-		std::vector<Mesh> meshes;
+        std::vector<Mesh> meshes{};
 		ProcessNode(scene->mRootNode, scene, meshes);
 
 		return meshes;
 	}
 
-    void MeshImporter::LoadTextures(aiMesh* mesh, const aiScene* scene, std::vector<Texture_>& textures, Model& model)
+    void MeshImporter::LoadTextures(aiMesh* mesh, const aiScene* scene, std::vector<Texture_>& textures)
     {
         // Process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];    
 
-        // We assume a convention for sampler names in the shaders. 
+        // We assume a convention for sampler names in the shaders
         // Each diffuse texture should be named as 'u_Diffuse' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
         // Same applies to other texture as the following list summarizes:
         // Diffuse: u_Diffuse<N>
@@ -50,22 +59,22 @@ namespace LkEngine {
     
         // 1. Diffuse maps
         {
-            std::vector<Texture_> diffuseMaps = model.LoadMaterialTextures(material, aiTextureType_DIFFUSE, "u_Diffuse");
+            std::vector<Texture_> diffuseMaps = m_ModelRef->LoadMaterialTextures(material, aiTextureType_DIFFUSE, "u_Diffuse");
             textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         }
         // 2. Specular maps
         {
-            std::vector<Texture_> specularMaps = model.LoadMaterialTextures(material, aiTextureType_SPECULAR, "u_Specular");
+            std::vector<Texture_> specularMaps = m_ModelRef->LoadMaterialTextures(material, aiTextureType_SPECULAR, "u_Specular");
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
         }
         // 3. Normal maps
         {
-            std::vector<Texture_> normalMaps = model.LoadMaterialTextures(material, aiTextureType_HEIGHT, "u_Normal");
+            std::vector<Texture_> normalMaps = m_ModelRef->LoadMaterialTextures(material, aiTextureType_HEIGHT, "u_Normal");
             textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
         }
         // 4. Height maps
         {
-            std::vector<Texture_> heightMaps = model.LoadMaterialTextures(material, aiTextureType_AMBIENT, "u_Height");
+            std::vector<Texture_> heightMaps = m_ModelRef->LoadMaterialTextures(material, aiTextureType_AMBIENT, "u_Height");
             textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
         }
     }
@@ -79,7 +88,7 @@ namespace LkEngine {
         // Walk through each of the mesh's faces and retrieve the corresponding vertex indices
         LoadVertices(mesh, vertices);
         LoadIndices(mesh, indices);
-        LoadTextures(mesh, scene, textures, *m_ModelRef);
+        LoadTextures(mesh, scene, textures);
 
 		return Mesh(vertices, indices, textures);
 	}
@@ -165,28 +174,6 @@ namespace LkEngine {
                 indices.push_back(face.mIndices[j]);        
         }
     }
-
-#if 0
-	std::vector<Ref<Texture>> MeshImporter::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
-	{
-		LK_CORE_INFO_TAG("MeshImporter", "Loading material textures");
-		std::vector<Ref<Texture>> textures;
-		for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
-		{
-		    aiString str;
-		    mat->GetTexture(type, i, &str);
-
-			TextureSpecification spec;
-			spec.Path = str.C_Str();
-			spec.Name = mat->GetName().C_Str();
-			spec.DebugName = mat->GetName().C_Str();
-
-			LK_CORE_TRACE_TAG("MeshImporter", "aiMaterial->GetTexture() --> {}", str.C_Str());
-		    textures.push_back(Texture::Create(spec));
-		}
-		return textures;
-	}
-#endif
 
     namespace GLUtils {
 

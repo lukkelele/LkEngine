@@ -1,5 +1,7 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/RenderCommandQueue.h"
+#include "RenderCommandQueue.h"
+
+#include "Renderer.h"
 
 
 namespace LkEngine {
@@ -18,7 +20,6 @@ namespace LkEngine {
 
 	void* RenderCommandQueue::Allocate(RenderCommandFn fn, uint32_t size)
 	{
-		// TODO: alignment
 		*(RenderCommandFn*)m_CommandBufferPtr = fn;
 		m_CommandBufferPtr += sizeof(RenderCommandFn);
 
@@ -36,6 +37,9 @@ namespace LkEngine {
 	{
 		byte* buffer = m_CommandBuffer;
 
+		auto& viewportFramebuffer = *Renderer::GetViewportFramebuffer();
+		viewportFramebuffer.Bind();
+		viewportFramebuffer.BindTexture(0);
 		for (uint32_t i = 0; i < m_CommandCount; i++)
 		{
 			RenderCommandFn function = *(RenderCommandFn*)buffer;
@@ -46,6 +50,7 @@ namespace LkEngine {
 			function(buffer);
 			buffer += size;
 		}
+		viewportFramebuffer.Unbind();
 
 		m_CommandBufferPtr = m_CommandBuffer;
 		m_CommandCount = 0;

@@ -54,8 +54,7 @@ namespace LkEngine {
 		CommandQueue[1] = new RenderCommandQueue();
 
 		Data->m_ShaderLibrary = Ref<ShaderLibrary>::Create();
-
-		Data->m_TextureLibrary = Ref<TextureLibrary>::Create("assets/Textures");
+		Data->m_TextureLibrary = Ref<TextureLibrary>::Create();
 		Data->m_TextureLibrary->Init();
 
 		Data->m_MaterialLibrary = Ref<MaterialLibrary>::Create();

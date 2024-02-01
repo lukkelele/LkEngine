@@ -1,6 +1,9 @@
 #pragma once
 
 #include "LkEngine/Core/Base.h"
+
+#include "LkEngine/Asset/Asset.h"
+
 #include "LkEngine/Core/Math/Math.h"
 
 #include "LkEngine/Renderer/Material.h"
@@ -173,7 +176,6 @@ namespace LkEngine{
 		operator const SceneCamera& () const { return *Camera; }
 	};
 
-
 	struct RigidBody2DComponent 
 	{
 		enum class Type 
@@ -213,7 +215,6 @@ namespace LkEngine{
 		BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
 	};
 
-
 	struct MaterialComponent : public BaseComponent
 	{
 		Ref<Material> m_Material = nullptr;
@@ -241,6 +242,25 @@ namespace LkEngine{
 		{
 			m_Material = Ref<Material>::Create(material);
 		}
+	};
+
+	struct MeshComponent
+	{
+		AssetHandle MeshHandle;
+		std::vector<UUID> BoneEntityIds; // If mesh is rigged, these are the entities whose transforms will used to "skin" the rig.
+		bool Visible = true;
+
+		MeshComponent() = default;
+		MeshComponent(AssetHandle meshHandle) : MeshHandle(meshHandle) {}
+	};
+
+	struct StaticMeshComponent
+	{
+		AssetHandle StaticMesh;
+		bool Visible = true;
+
+		StaticMeshComponent() = default;
+		StaticMeshComponent(AssetHandle staticMesh) : StaticMesh(staticMesh) {}
 	};
 
 
@@ -275,7 +295,9 @@ namespace LkEngine{
 		CameraComponent,
 		MaterialComponent,
 		RigidBody2DComponent,
-		BoxCollider2DComponent
+		BoxCollider2DComponent,
+		MeshComponent,
+		StaticMeshComponent
 	>;
 
 }

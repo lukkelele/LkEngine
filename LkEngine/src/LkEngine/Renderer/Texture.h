@@ -4,8 +4,12 @@
 
 #include "Image.h"
 
+#include <filesystem>
+
 
 namespace LkEngine {
+
+	typedef std::filesystem::path Path;
 
 	struct TextureSpecification
 	{
@@ -52,7 +56,9 @@ namespace LkEngine {
 		virtual std::string GetName() const = 0;
 		virtual uint32_t GetWidth() const = 0; 
 		virtual uint32_t GetHeight() const = 0; 
-		virtual const std::string& GetPath() const = 0;
+
+		virtual Path GetPath() const = 0;
+		virtual Path& GetPath() = 0;
 
 		static Ref<Texture> Create(const TextureSpecification& specification);
 	};
@@ -89,7 +95,9 @@ namespace LkEngine {
 		virtual std::string GetName() const = 0;
 		virtual uint32_t GetWidth() const = 0;  
 		virtual uint32_t GetHeight() const = 0;
-		virtual const std::string& GetPath() const = 0; 
+
+		virtual Path GetPath() const = 0;
+		virtual Path& GetPath() = 0;
 
 		static Ref<Texture2D> Create(const TextureSpecification& specification);
 		static Ref<Texture2D> Create(const TextureSpecification& specification, Buffer imageData);

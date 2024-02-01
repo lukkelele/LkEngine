@@ -59,13 +59,26 @@ namespace LkEngine {
 	{
 		if (data)
 		{
-            uint64_t memorySize = Utils::GetMemorySize(spec.Format, spec.Width, spec.Height);
-			m_ImageData = Buffer::Copy(data, memorySize);
+			// Inconsistent dimensions, use the largest one for setting buffer memorysize
+			//uint64_t memorySize = Utils::GetMemorySize(spec.Format, spec.Width, spec.Height);
+			//if (spec.Width != spec.Height)
+			//{
+			//	if (spec.Width > spec.Height)
+			//		memorySize = Utils::GetMemorySize(spec.Format, spec.Width, spec.Width);
+			//	else
+			//		memorySize = Utils::GetMemorySize(spec.Format, spec.Height, spec.Height);
+			//}
+
+			//m_ImageData = Buffer::Copy(data, memorySize);
+			m_ImageData = Buffer::Copy(data, m_Specification.Size);
 
 			glGenTextures(1, &m_RendererID);
 			glBindTexture(GL_TEXTURE_2D, m_RendererID);
+			LK_CORE_TRACE("Created OpenGLImage ----- 1");
+
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data);
+			LK_CORE_TRACE("Created OpenGLImage");
 			glGenerateTextureMipmap(m_RendererID);
 
 			GLUtils::ApplyTextureWrap(m_Specification.Wrap);
@@ -76,6 +89,8 @@ namespace LkEngine {
 			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAnisotropy);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
+
+			stbi_image_free(data);
 		}
 		else
 		{
@@ -116,6 +131,7 @@ namespace LkEngine {
 			int width, height, channels;
 			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
 			m_ImageData = Buffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
+
 			stbi_image_free(data);
 		}
     }
@@ -232,17 +248,21 @@ namespace LkEngine {
 
 			GLUtils::ApplyTextureWrap(m_Specification.Wrap);
 			GLUtils::ApplyTextureFilter(m_Specification.Filter, m_Specification.Mips > 1);
+
+			stbi_image_free(data);
 		}
 		else
 		{
 			// Data is null, try to load it from path
 			LK_CORE_TRACE_TAG("OpenGLImage2D", "No data passed to image, tried loading white texture");
 			stbi_set_flip_vertically_on_load(1);
+
 			int width, height, channels;
 			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
 			if (!data)
 				data = stbi_load("assets/Textures/white-texture.png", &width, &height, &channels, 4);
 			m_ImageData = Buffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
+
 			stbi_image_free(data);
 		}
     }

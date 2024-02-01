@@ -43,12 +43,10 @@ namespace LkEngine {
 		ProjectionType GetProjectionType() const { return m_ProjectionType; }
 		void SetProjectionType(ProjectionType type) { m_ProjectionType = type; }
 
-
 		float GetPerspectiveNearClip() const { return m_PerspectiveNear; }
 		float GetPerspectiveFarClip() const { return m_PerspectiveFar; }
 		void SetPerspectiveNearClip(float nearClip) { m_PerspectiveNear = nearClip; }
 		void SetPerspectiveFarClip(float farClip) { m_PerspectiveFar = farClip; }
-
 
 		float GetOrthographicSize() const { return m_OrthographicSize; }
 		float GetOrthographicNearClip() const { return m_OrthographicNear; }
@@ -86,15 +84,12 @@ namespace LkEngine {
 		float m_OrthographicSize = 10.0f;
 		float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
 
-		//float m_Zoom = 0.60f;
 		float m_Rotation = 0.0f;
 		float m_RotationSpeed = 0.0002f;
 		float m_TravelSpeed = 1.0f;
 		float m_MouseSpeed = 1.0f;
 		bool m_MouseEnabled = true;
 		bool m_KeyboardEnabled = true;
-
-		bool HasMouseMoved = false;
 
 		glm::mat4 m_ProjectionMatrix = glm::mat4(1.0f);
 

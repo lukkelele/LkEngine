@@ -21,7 +21,6 @@ namespace LkEngine {
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture_> textureIDs);
         ~Mesh();
 
-        //void Draw(Ref<Shader>& shader);
         void Draw();
     
     private:

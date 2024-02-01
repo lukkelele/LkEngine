@@ -31,16 +31,16 @@ namespace LkEngine {
 		: m_Size(size)
 		, m_Usage(usage)
 	{
-		m_LocalData.Data = buffer;
+		//m_LocalData = Buffer(static_cast<const void*>(buffer), size);
+		m_LocalData = Buffer(buffer, size);
 
-		GL_CALL(glGenVertexArrays(1, &m_VertexArrayID));
-		GL_CALL(glBindVertexArray(m_VertexArrayID));
+		glGenVertexArrays(1, &m_VertexArrayID);
+		glBindVertexArray(m_VertexArrayID);
 
-		GL_CALL(glGenBuffers(1, &m_RendererID));
-		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-		GL_CALL(glBufferData(GL_ARRAY_BUFFER, size, buffer, GL_STATIC_DRAW));
-
-		LK_CORE_DEBUG_TAG("VertexBuffer", "New vertexbuffer, id: {}, size: {}", m_VertexArrayID, m_LocalData.GetSize());
+		glGenBuffers(1, &m_RendererID);
+		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		glBufferData(GL_ARRAY_BUFFER, size, buffer, GL_DYNAMIC_DRAW);
+		//LK_CORE_DEBUG_TAG("VertexBuffer", "New vertexbuffer, id: {}, size: {}", m_VertexArrayID, m_LocalData.GetSize());
 	}
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(uint64_t size, VertexBufferUsage usage)
@@ -49,12 +49,13 @@ namespace LkEngine {
 	{
 		m_LocalData.Allocate(size);
 
-		GL_CALL(glGenVertexArrays(1, &m_VertexArrayID));
-		GL_CALL(glBindVertexArray(m_VertexArrayID));
+		glGenVertexArrays(1, &m_VertexArrayID);
+		glBindVertexArray(m_VertexArrayID);
 
-		GL_CALL(glGenBuffers(1, &m_RendererID));
-		GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-		GL_CALL(glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_STATIC_DRAW));
+		glGenBuffers(1, &m_RendererID);
+		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+		//LK_CORE_DEBUG_TAG("VertexBuffer", "New vertexbuffer, id: {}, size: {}", m_VertexArrayID, m_LocalData.GetSize());
 	}
  
 	OpenGLVertexBuffer::~OpenGLVertexBuffer() 

@@ -68,6 +68,7 @@ namespace LkEngine {
     public:
         static constexpr uint32_t MaxTextureSlots = 32;
     private:
+        int m_DrawMode;
         Renderer2DSpecification m_Specification;
         RenderCommandQueue m_RenderQueue;
 

@@ -1,10 +1,6 @@
 #include "LKpch.h"
 #include "TextureLibrary.h"
 
-#include "LkEngine/Core/IO/File.h"
-
-#include "LkEngine/Utilities/MemoryUtils.h"
-
 
 namespace LkEngine {
 
@@ -14,6 +10,8 @@ namespace LkEngine {
         ".png", 
         ".bmp" 
     };
+
+    namespace fs = std::filesystem;
 
     FileExtension DetermineExtension(const std::filesystem::directory_entry& entry)
     {
@@ -31,8 +29,7 @@ namespace LkEngine {
         return FileExtension::Unknown;
     }
 
-    TextureLibrary::TextureLibrary(const std::string& texturesDir)
-        : m_TexturesDir(texturesDir)
+    TextureLibrary::TextureLibrary()
     {
         m_Instance = Ref<TextureLibrary>(this);
 
@@ -44,38 +41,131 @@ namespace LkEngine {
         spec.SamplerWrap = TextureWrap::None;
         spec.Name = "white-texture";
         spec.DebugName = "white-texture";
-        spec.Path = "assets/textures/white-texture.png";
+        spec.Path = "assets/Textures/white-texture.png";
         m_WhiteTexture2D = Texture2D::Create(spec);
         m_Collection2D.insert({ "white-texture", m_WhiteTexture2D });
 
         spec.Name = "black-texture";
 		constexpr uint32_t blackTextureData = 0xFF000000;
-		//m_BlackTexture2D = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
         m_BlackTexture2D = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
-        LK_CORE_ASSERT(m_BlackTexture2D, "m_BlackTexture2D is nullptr");
+        LK_VERIFY(m_BlackTexture2D, "m_BlackTexture2D is nullptr");
         m_Collection2D.insert({ "black-texture", m_BlackTexture2D });
 
-		spec.Format = ImageFormat::RGBA32F;
-		spec.Width = 1024;
-		spec.Height = 1024;
-        spec.Name = "metal-ground";
-        spec.DebugName = "metal-ground";
-        spec.Path = "assets/textures/metal.png";
-        spec.GenerateMips = true;
-        spec.SamplerWrap = TextureWrap::Repeat;
-        spec.SamplerFilter = TextureFilter::Nearest;
-        m_Collection2D.insert({ "metal-ground", Texture2D::Create(spec) });
+        // Texture: metal
+        {
+		    spec.Format = ImageFormat::RGBA32F;
+		    spec.Width = 1024;
+		    spec.Height = 1024;
+            spec.Name = "metal-ground";
+            spec.DebugName = "metal-ground";
+            spec.Path = "assets/Textures/metal.png";
+            spec.GenerateMips = true;
+            spec.SamplerWrap = TextureWrap::Repeat;
+            spec.SamplerFilter = TextureFilter::Nearest;
+            m_Collection2D.insert({ "metal-ground", Texture2D::Create(spec) });
+        }
 
-		spec.Format = ImageFormat::RGB;
-		spec.Width = 512;
-		spec.Height = 512;
-        spec.Name = "wood-container";
-        spec.DebugName = "wood-container";
-        spec.Path = "assets/textures/container.jpg";
-        spec.SamplerWrap = TextureWrap::Repeat;
-        spec.SamplerFilter = TextureFilter::Linear;
-        spec.GenerateMips = true;
-        m_Collection2D.insert({ "wood-container", Texture2D::Create(spec) });
+        // Texture: wood
+        {
+		    spec.Format = ImageFormat::RGBA32F;
+		    spec.Width = 1024;
+		    spec.Height = 1024;
+            spec.Name = "wood-floor";
+            spec.DebugName = "wood-floor";
+            spec.Path = "assets/Textures/wood.png";
+            spec.GenerateMips = true;
+            spec.SamplerWrap = TextureWrap::Repeat;
+            spec.SamplerFilter = TextureFilter::Linear;
+            m_Collection2D.insert({ "wood-floor", Texture2D::Create(spec) });
+        }
+
+        // Texture: wood container
+        {
+		    spec.Format = ImageFormat::RGB;
+		    spec.Width = 512;
+		    spec.Height = 512;
+            spec.Name = "wood-container";
+            spec.DebugName = "wood-container";
+            spec.Path = "assets/Textures/container.jpg";
+            spec.SamplerWrap = TextureWrap::Repeat;
+            spec.SamplerFilter = TextureFilter::Linear;
+            spec.GenerateMips = false;
+            m_Collection2D.insert({ "wood-container", Texture2D::Create(spec) });
+        }
+
+        // Skybox
+        {
+            TextureSpecification skyboxSpec;
+            skyboxSpec.Width = 200;
+            skyboxSpec.Height = 200;
+            skyboxSpec.Name = "skybox-ice-back";
+            skyboxSpec.DebugName = "skybox-ice-back";
+            skyboxSpec.Path = "assets/Textures/SkyBox/back.jpg";
+            skyboxSpec.GenerateMips = false;
+            skyboxSpec.Format = ImageFormat::RGB;
+            skyboxSpec.SamplerFilter = TextureFilter::Nearest;
+            skyboxSpec.SamplerWrap = TextureWrap::Clamp;
+            m_Collection2D.insert({ "skybox-ice-back", Texture2D::Create(skyboxSpec) });
+        }
+        // Misc
+        {
+            TextureSpecification miscSpec;
+            miscSpec.Width = 200;
+            miscSpec.Height = 200;
+            miscSpec.Name = "lukas-1";
+            miscSpec.DebugName = "lukas-1";
+            miscSpec.Path = "assets/Textures/Misc/lukas1.JPG";
+            miscSpec.GenerateMips = false;
+            miscSpec.Format = ImageFormat::RGB;
+            miscSpec.SamplerFilter = TextureFilter::Nearest;
+            miscSpec.SamplerWrap = TextureWrap::Clamp;
+            m_Collection2D.insert({ "lukas-1", Texture2D::Create(miscSpec) });
+
+            miscSpec.Width = 200;
+            miscSpec.Height = 200;
+            miscSpec.Name = "cowboy-hat";
+            miscSpec.DebugName = "cowboy-hat";
+            miscSpec.Path = "assets/Textures/Misc/cowboy-hat.png";
+            miscSpec.GenerateMips = false;
+            miscSpec.Format = ImageFormat::RGBA32F;
+            miscSpec.SamplerFilter = TextureFilter::Nearest;
+            miscSpec.SamplerWrap = TextureWrap::Clamp;
+            m_Collection2D.insert({ "cowboy-hat", Texture2D::Create(miscSpec) });
+        }
+
+        // TODO: Read fileinfo and determine size and other info instead of manually setting it
+        // Nanosuit
+        {
+            std::unordered_map<std::string, Ref<Texture2D>> nanosuitCollection;
+            constexpr const char* nanosuitDirectory = "assets/Meshes/Template/Nanosuit";
+            TextureSpecification nanosuitSpec;
+
+            nanosuitSpec.Width = 1024;
+            nanosuitSpec.Height = 1024;
+            for (const auto& entry : fs::directory_iterator(nanosuitDirectory))
+            {
+                if (entry.is_regular_file())
+                {
+                    std::string filename = entry.path().filename().string();
+                    std::string fileExt = filename.substr(filename.size() - 3);
+                    //LK_ERROR("File ext: {}", fileExt);
+                    if (fileExt != "jpg" && fileExt != "png" && fileExt != "JPG")
+                    {
+                        LK_ERROR("Found unwanted file extension: {}", fileExt);
+                        continue;
+                    }
+                    if (fileExt == "jpg" || fileExt == "JPG") nanosuitSpec.Format = ImageFormat::RGB;
+                    if (fileExt == "png") nanosuitSpec.Format = ImageFormat::RGBA;
+
+                    nanosuitSpec.Path = nanosuitDirectory + std::string("/") + filename;
+                    //m_Collection2D.insert({ filename, Texture2D::Create(nanosuitSpec) });
+                    
+                    nanosuitCollection.insert({ filename, Texture2D::Create(nanosuitSpec) });
+                    LK_CORE_INFO_TAG("TextureLibrary", "Added nanosuit file: {}", filename);
+                }
+            }
+            m_Collections2D.insert({ "Nanosuit", nanosuitCollection });
+        }
     }
 
     TextureLibrary::~TextureLibrary()
@@ -86,38 +176,7 @@ namespace LkEngine {
 
     void TextureLibrary::Init(bool loadRecursively)
     {
-        namespace fs = std::filesystem;
-
-        if (loadRecursively == true)
-        {
-            TextureSpecification textureSpec;
-            // Find all textures and add to respective texture collections
-            for (const auto& entry : fs::recursive_directory_iterator(m_TexturesDir)) 
-            {
-                if (entry.is_regular_file()) 
-                {
-                    std::string filepath = entry.path().string();
-                    std::string extension = entry.path().extension().string();
-
-                    // Check if the file has an image extension
-                    if (std::find(ImageExtensions.begin(), ImageExtensions.end(), extension) != ImageExtensions.end()) 
-                    {
-                        textureSpec.Name = entry.path().filename().string();
-                        textureSpec.Path = filepath;
-                        LK_CORE_DEBUG("Found image/texture: {}", filepath);
-                        AddTexture2D(textureSpec);
-                    }
-                }
-            }
-        }
         m_Initialized = true;
-    }
-
-    Ref<TextureLibrary> TextureLibrary::Create(const std::string& texturesDir)
-    {
-        if (texturesDir.at(texturesDir.size() - 1) != '/')
-            return Ref<TextureLibrary>::Create(texturesDir + "/");
-        return Ref<TextureLibrary>::Create(texturesDir);
     }
 
     Ref<Texture> TextureLibrary::GetTexture(int textureID)
@@ -237,6 +296,53 @@ namespace LkEngine {
     bool TextureLibrary::VerifyTexturesAreLoaded() const
     {
         return true;
+    }
+
+    bool TextureLibrary::HasTextureWithFilename(const std::string& filename)
+    {
+        for (auto& tex3D : m_Collection)
+        {
+            Ref<Texture>& texture = tex3D.second;
+            if (texture->GetPath().filename() == filename)
+                return true;
+        }
+        for (auto& tex2D : m_Collection2D)
+        {
+            Ref<Texture2D>& texture = tex2D.second;
+            if (texture->GetPath().filename() == filename)
+                return true;
+        }
+
+        return false;
+    }
+
+    Ref<Texture> TextureLibrary::TryToGetTextureWithFilename(const std::string& filename)
+    {
+        LK_CORE_INFO_TAG("TextureLibrary", "Looking for texture with filename: {}", filename);
+        for (auto& tex3D : m_Collection)
+        {
+            Ref<Texture> texture = tex3D.second;
+            if (texture->GetPath().filename() == filename || File::ExtractFilenameWithoutExtension(texture->GetPath().filename().string()) == filename)
+                return texture;
+        }
+        for (auto& tex2D : m_Collection2D)
+        {
+            Ref<Texture2D> texture = tex2D.second;
+            if (texture->GetPath().filename() == filename || File::ExtractFilenameWithoutExtension(texture->GetPath().filename().string()) == filename)
+                return texture;
+        }
+        for (auto& texCollection2D : m_Collections2D)
+        {
+            for (auto& t : texCollection2D.second)
+            {
+                Ref<Texture2D> texture = t.second;
+                if (texture->GetPath().filename() == filename || File::ExtractFilenameWithoutExtension(texture->GetPath().filename().string()) == filename)
+                    return texture;
+            }
+        }
+
+        LK_CORE_ERROR_TAG("TextureLibrary", "Did not find texture: {}", filename);
+        return nullptr;
     }
 
 

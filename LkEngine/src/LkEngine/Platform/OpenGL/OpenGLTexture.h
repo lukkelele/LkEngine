@@ -40,14 +40,16 @@ namespace LkEngine {
 
 		RendererID GetRendererID() const override;
 		RendererID& GetRendererID();
-		std::string GetName() const override { return m_Name; }
+		std::string GetName() const override { return m_Specification.Name; }
 		uint32_t GetWidth() const override { return m_Width; }
 		uint32_t GetHeight() const override { return m_Height; }
-		const std::string& GetPath() const override { return m_FilePath; }
+
+		Path GetPath() const { return m_FilePath; }
+		Path& GetPath() { return m_FilePath; }
 
 	protected:
-		std::string m_Name;
-		std::string m_FilePath;
+		Path m_FilePath;
+
 		Ref<Image> m_Image;
 
 		uint32_t m_Width, m_Height;
@@ -94,14 +96,14 @@ namespace LkEngine {
 		std::string GetName() const override { return m_Specification.Name; }
 		uint32_t GetWidth() const override { return m_Specification.Width; }
 		uint32_t GetHeight() const override { return m_Specification.Height; }
-		const std::string& GetPath() const override { return m_FilePath; }
 
-		void SetInTextureArray(bool inTextureArray) { m_InTextureArray = inTextureArray; }
+		Path GetPath() const { return m_FilePath; }
+		Path& GetPath() { return m_FilePath; }
 
 	private:
-		std::string m_FilePath;
 		Ref<Image2D> m_Image = nullptr;
 		TextureSpecification m_Specification;
+		Path m_FilePath;
 
 		bool m_Loaded = false;
 		bool m_Locked = false;

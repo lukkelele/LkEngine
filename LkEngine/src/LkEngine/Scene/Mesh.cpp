@@ -3,6 +3,8 @@
 
 #include "LkEngine/Platform/OpenGL/LkOpenGL.h"
 
+#include "LkEngine/Renderer/Renderer.h"
+
 
 namespace LkEngine {
 
@@ -29,6 +31,7 @@ namespace LkEngine {
     {
     }
 
+    // TODO: Render submission and setting of textures
     //void Mesh::Draw(Ref<Shader>& shader) 
     void Mesh::Draw()
     {
@@ -49,17 +52,12 @@ namespace LkEngine {
             else if (name == "u_Normal")   number = std::to_string(normalNr++);   // Normal
             else if (name == "u_Height")   number = std::to_string(heightNr++);   // Height
     
-            // Now set the sampler to the correct texture unit and bind texture
-            //shader->Bind();
-            //shader->Set(std::string(name + number), i);
-
             glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
             glBindTexture(GL_TEXTURE_2D, m_TextureIDs[i].id);
         }
         
         m_VertexBuffer->Bind();
         glDrawElements(GL_TRIANGLES, m_VertexBuffer->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
-
         glActiveTexture(GL_TEXTURE0);
     }
 

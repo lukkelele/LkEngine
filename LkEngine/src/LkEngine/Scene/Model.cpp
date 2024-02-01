@@ -5,11 +5,13 @@
 
 #include "LkEngine/Asset/MeshImporter.h"
 
+#include "LkEngine/Renderer/TextureLibrary.h"
+
 
 namespace LkEngine {
 
-    Model::Model(std::vector<Mesh>& meshes)
-        : m_Meshes(meshes)
+    Model::Model()
+        : m_Meshes({})
         , m_GammaCorrection(false)
     {
     }
@@ -17,31 +19,19 @@ namespace LkEngine {
     Model::Model(const std::string& path, bool gammaCorrection) 
         : m_GammaCorrection(gammaCorrection)
     {
-#if 0
-        Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) 
-        {
-            LK_CORE_ASSERT(false, "Assimp error, {}", importer.GetErrorString());
-        }
-        m_Directory = path.substr(0, path.find_last_of('/'));
-
-        ProcessNode(scene->mRootNode, scene);
-#endif
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
         MeshImporter meshImporter = MeshImporter();
 
         m_Directory = path.substr(0, path.find_last_of('/'));
-        meshImporter.Load(scene->mRootNode, scene, *this);
+        //meshImporter.Load(scene->mRootNode, scene, this);
+        meshImporter.Load(scene, this);
     }
 
     void Model::Draw(Ref<Shader> shader)
     {
         for (unsigned int i = 0; i < m_Meshes.size(); i++)
         {
-            //m_Meshes[i].Draw(shader);
             m_Meshes[i].Draw();
         }
     }
@@ -189,15 +179,29 @@ namespace LkEngine {
     // the required info is returned as a Texture struct
     std::vector<Texture_> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
     {
+        std::vector<Ref<Texture>> modelTextures;
         std::vector<Texture_> textures;
+        auto textureLib = TextureLibrary::Get();
+
         for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
         {
-            aiString str;
-            mat->GetTexture(type, i, &str);
+            aiString textureFilename;
+            mat->GetTexture(type, i, &textureFilename);
+            LK_CORE_DEBUG_TAG("Model", "Assimp texture loaded -> {}", textureFilename.C_Str());
+
+            // Check if it exists in library
+            //if (Ref<Texture> loadedTexture = textureLib->TryToGetTextureWithFilename(File::ExtractFilenameWithoutExtension(textureFilename.C_Str())))
+            Ref<Texture> loadedTexture = textureLib->TryToGetTextureWithFilename(textureFilename.C_Str());
+            if (loadedTexture)
+            {
+                // Load it since it already exists
+                LK_CORE_TRACE_TAG("Model", "Found texture with name {}", loadedTexture->GetName());
+                modelTextures.push_back(loadedTexture);
+            }
 
             for (unsigned int j = 0; j < m_TexturesLoaded.size(); j++)
             {
-                if (std::strcmp(m_TexturesLoaded[j].path.data(), str.C_Str()) == 0)
+                if (std::strcmp(m_TexturesLoaded[j].path.data(), textureFilename.C_Str()) == 0)
                 {
                     textures.push_back(m_TexturesLoaded[j]);
                     continue;
@@ -205,12 +209,14 @@ namespace LkEngine {
             }
 
             Texture_ texture;
-            texture.id = GLUtils::TextureFromFile(str.C_Str(), m_Directory);
+            texture.id = GLUtils::TextureFromFile(textureFilename.C_Str(), m_Directory);
             texture.type = typeName;
-            texture.path = str.C_Str();
+            texture.path = textureFilename.C_Str();
             textures.push_back(texture);
             m_TexturesLoaded.push_back(texture);  // Store it as texture loaded for entire model
         }
+
+        LK_WARN("MODEL, RETRIEVED A TOTAL OF {} ", modelTextures.size());
         return textures;
     }
 

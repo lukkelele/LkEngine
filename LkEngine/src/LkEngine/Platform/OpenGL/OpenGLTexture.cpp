@@ -14,25 +14,43 @@ namespace LkEngine {
 		: m_Specification(specification)
 		, m_Width(specification.Width)
 		, m_Height(specification.Height)
+		, m_FilePath(Path(specification.Path))
 	{
+		if (m_Specification.Name.empty())
+		{
+			std::string filename = m_FilePath.filename().string().substr(0, m_FilePath.filename().string().size() - 4);
+			if (m_Specification.DebugName.empty())
+				m_Specification.DebugName = m_Specification.Name;
+		}
 		ImageSpecification imageSpec;
 		imageSpec.Path = specification.Path;
 		imageSpec.Width = specification.Width;
 		imageSpec.Height = specification.Height;
-		m_Name = specification.Name;
-		if (specification.Name.empty())
-			m_Name = specification.Path;
-		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
 
+		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
+		LK_CORE_FATAL("Created filepath: {}", m_FilePath.string());
+
+		// FIXME: This is bugged like biigggg time
 		if (specification.Path != "")
 		{
 			stbi_set_flip_vertically_on_load(1);
 			int width, height, channels;
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
 
-			m_Image = Image::Create(imageSpec, data);
+			// Check if texture isn't quadratic 
+			if (width != height)
+			{
+				if (width > height)
+					height = width;
+				else
+					width = height;
 
-			stbi_image_free(data);
+				imageSpec.Width = width;
+				imageSpec.Height = height;
+			}
+			imageSpec.Size = imageSpec.Width * imageSpec.Height;
+
+			m_Image = Image::Create(imageSpec, data);
 		}
 		else
 		{
@@ -45,6 +63,14 @@ namespace LkEngine {
 		, m_Width(specification.Width)
 		, m_Height(specification.Height)
 	{
+		if (m_Specification.Name.empty())
+		{
+			std::string filename = m_FilePath.filename().string().substr(0, m_FilePath.filename().string().size() - 4);
+			m_Specification.Name = filename;
+			if (m_Specification.DebugName.empty())
+				m_Specification.DebugName = m_Specification.Name;
+		}
+
 		ImageSpecification imageSpec;
 		imageSpec.Path = specification.Path;
 		imageSpec.Width = specification.Width;
@@ -52,9 +78,9 @@ namespace LkEngine {
         imageSpec.Size = Utils::GetMemorySize(specification.Format, specification.Width, specification.Height);
 		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
 
-		m_Name = specification.Name;
-		if (specification.Name.empty())
-			m_Name = specification.Path;
+		m_FilePath = std::filesystem::path(specification.Path);
+		LK_CORE_FATAL("Created filepath: {}", m_FilePath.string());
+
 
 		m_Image = Image::Create(imageSpec, imageData);
 	}
@@ -143,7 +169,15 @@ namespace LkEngine {
 	//------------------------------------------------------------------------------------
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification, Buffer imageData)
 		: m_Specification(specification)
+		, m_FilePath(Path(specification.Path))
 	{
+		if (m_Specification.Name.empty())
+		{
+			std::string filename = m_FilePath.filename().string().substr(0, m_FilePath.filename().string().size() - 4);
+			m_Specification.Name = filename;
+			if (m_Specification.DebugName.empty())
+				m_Specification.DebugName = m_Specification.Name;
+		}
 		ImageSpecification imageSpec;
 		imageSpec.Name = specification.Name;
 		imageSpec.DebugName = specification.DebugName;
@@ -154,6 +188,8 @@ namespace LkEngine {
 		imageSpec.Filter = specification.SamplerFilter;
 		imageSpec.Wrap = specification.SamplerWrap;
 		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
+
+		//m_FilePath = std::filesystem::path(specification.Path);
 
 		imageSpec.Size = imageData.GetSize();
         uint32_t memorySize = Utils::GetMemorySize(specification.Format, specification.Width, specification.Height);
@@ -169,7 +205,15 @@ namespace LkEngine {
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
 		: m_Specification(specification)
+		, m_FilePath(Path(specification.Path))
 	{
+		if (m_Specification.Name.empty())
+		{
+			std::string filename = m_FilePath.filename().string().substr(0, m_FilePath.filename().string().size() - 4);
+			m_Specification.Name = filename;
+			if (m_Specification.DebugName.empty())
+				m_Specification.DebugName = m_Specification.Name;
+		}
 		ImageSpecification imageSpec;
 		imageSpec.Name = specification.Name;
 		imageSpec.DebugName = specification.DebugName;
@@ -180,6 +224,10 @@ namespace LkEngine {
 		imageSpec.Filter = specification.SamplerFilter;
 		imageSpec.Wrap = specification.SamplerWrap;
 		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
+
+		//m_FilePath = Path(specification.Path);
+		m_FilePath = std::filesystem::path(specification.Path);
+		LK_CORE_ERROR("m_FilePath=={},  specification.Path={}", m_FilePath.string(), specification.Path);
 
 		// Try to read data from path
 		if (specification.Path.empty() == false)

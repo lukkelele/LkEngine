@@ -9,6 +9,7 @@
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 
+#include "OpenGLRenderer.h"
 #include "OpenGLUniformBuffer.h"
 #include "OpenGLVertexBuffer.h"
 #include "OpenGLIndexBuffer.h"
@@ -41,7 +42,6 @@ namespace LkEngine {
 
         m_QuadIndexCount = 0;
         m_LineIndexCount = 0;
-
     }
 
     OpenGLRenderer2D::~OpenGLRenderer2D()
@@ -250,18 +250,8 @@ namespace LkEngine {
         {
             dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
+			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, m_CameraBuffer.ViewProjection, m_QuadIndexCount);
 
-            m_QuadShader->Bind();
-            m_QuadShader->Set("u_ViewProj", m_CameraBuffer.ViewProjection);
-
-            glActiveTexture(Uniform_ActiveUnit_TextureArray_Quad);
-            m_QuadShader->Set("u_TextureArray", Uniform_TextureArray_Quad_Index);
-
-			//Renderer::BeginRenderPass(m_RenderCommandBuffer, m_QuadPass);
-			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, glm::mat4(1.0f), m_QuadIndexCount);
-			//Renderer::EndRenderPass(m_RenderCommandBuffer);
-
-            m_QuadShader->Unbind();
             m_Stats.DrawCalls++;
         }
 
@@ -276,6 +266,7 @@ namespace LkEngine {
 
             for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
             {
+                // TODO: This shall be changed in the future, this is for Vulkan and not opengl
                 if (m_TextureSlots[i])
                 {
                     m_TextureSlots[i]->Bind(i);
