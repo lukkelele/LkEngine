@@ -11,12 +11,14 @@ namespace LkEngine {
 		uint64_t Size;
 
 		Buffer()
-			: Data(nullptr), Size(0)
+			: Data(nullptr)
+			, Size(0)
 		{
 		}
 
 		Buffer(const void* data, uint64_t size)
-			: Data((void*)data), Size(size)
+			: Data((void*)data)
+			, Size(size)
 		{
 		}
 
@@ -75,7 +77,7 @@ namespace LkEngine {
 
 		byte* ReadBytes(uint64_t size, uint64_t offset) const
 		{
-			LK_ASSERT(offset + size <= Size, "Buffer overflow!");
+			LK_CORE_ASSERT(offset + size <= Size, "Buffer overflow!");
 			byte* buffer = new byte[size];
 			memcpy(buffer, (byte*)Data + offset, size);
 			return buffer;
@@ -83,7 +85,7 @@ namespace LkEngine {
 
 		void Write(const void* data, uint64_t size, uint64_t offset = 0)
 		{
-			LK_ASSERT(offset + size <= Size, "Buffer overflow!");
+			LK_CORE_ASSERT(offset + size <= Size, "Buffer overflow!");
 			memcpy((byte*)Data + offset, data, size);
 		}
 

@@ -6,6 +6,8 @@
 #include <stb_image/stb_image.h>
 #include <stb_image/stb_image_resize2.h>
 
+#include "LkEngine/Utilities/MemoryUtils.h"
+
 
 namespace LkEngine {
 
@@ -26,7 +28,6 @@ namespace LkEngine {
 
         static bool DoesFileExist(const std::string& filePath);
         static bool HasFileExtension(const std::string& filename);
-        //static std::string ExtractFilenameWithoutExtension(const std::string& filename);
         static std::string ExtractFilenameWithoutExtension(const std::string& filename, const FileExtension& fileExtension = FileExtension::PNG);
         static std::string ExtractFilename(const std::string& filepath);
         static File GetFile(const std::string& filePath);

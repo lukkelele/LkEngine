@@ -26,7 +26,7 @@ namespace LkEngine {
             glm::vec2 center  = 0.5f * (bottomLeft + topRight);
             glm::vec2 extents = 0.5f * glm::vec2(topRight.x - bottomLeft.x, topRight.y - bottomLeft.y);
 
-            glm::vec3 pos = { center.x, center.y, 0.0f };
+            glm::vec3 pos = { center.x, center.y, -10.0f };
             glm::vec2 size = { 2.0f * extents.x, 2.0f * extents.y };
             glm::vec4 col = { color.r, color.g, color.b, color.a };
 
@@ -50,22 +50,22 @@ namespace LkEngine {
 
     void Box2DDebugger::DrawSolidCircle(const b2Vec2& center, float radius, const b2Vec2& axis, const b2Color& color)
     {
-        LOG_TRACE("Box2DDebugger::DrawSolidCircle");
+        LK_CORE_TRACE("Box2DDebugger::DrawSolidCircle");
     }
 
     void Box2DDebugger::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
     {
-        LOG_TRACE("Box2DDebugger::DrawSegment");
+        LK_CORE_TRACE("Box2DDebugger::DrawSegment");
     }
 
     void Box2DDebugger::DrawTransform(const b2Transform& xf)
     {
-        LOG_TRACE("Box2DDebugger::DrawTransform");
+        LK_CORE_TRACE("Box2DDebugger::DrawTransform");
     }
 
     void Box2DDebugger::DrawPoint(const b2Vec2& p, float size, const b2Color& color)
     {
-        LOG_TRACE("Box2DDebugger::DrawPoint");
+        LK_CORE_TRACE("Box2DDebugger::DrawPoint");
     }
 
 }

@@ -147,7 +147,6 @@ namespace LkEngine {
 		static Ref<T> Create(Args&&... args)
 		{
 			return Ref<T>(new T(std::forward<Args>(args)...));
-			//return Ref<T>(new(typeid(T).name()) T(std::forward<Args>(args)...));
 		}
 
 		bool operator==(const Ref<T>& other) const { return m_Instance == other.m_Instance; }

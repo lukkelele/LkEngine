@@ -86,7 +86,7 @@ namespace LkEngine {
     void ComponentEditor::RenderTextureEditor(const Ref<Texture> texture)
     {
         UI::PushID();
-        ImGui::Text("Path: %s", texture->GetPath().c_str());
+        ImGui::Text("Path: %s", texture->GetPath().string().c_str());
         ImGui::Text("Size: (%1.f, %1.f)", texture->GetWidth(), texture->GetHeight());
         UI::PopID();
     }
@@ -94,7 +94,7 @@ namespace LkEngine {
     void ComponentEditor::RenderTextureEditor(const Ref<Texture2D> texture)
     {
         UI::PushID();
-        ImGui::Text("Path: %s", texture->GetPath().c_str());
+        ImGui::Text("Path: %s", texture->GetPath().string().c_str());
         ImGui::Text("Size: (%1.f, %1.f)", texture->GetWidth(), texture->GetHeight());
         UI::PopID();
     }

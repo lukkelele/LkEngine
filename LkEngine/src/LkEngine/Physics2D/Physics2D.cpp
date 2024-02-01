@@ -2,9 +2,11 @@
 #include "Physics2D.h"
 
 #include "LkEngine/Core/Application.h"
-#include "LkEngine/Editor/Editor.h"
+
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
+
+#include "LkEngine/Editor/EditorLayer.h"
 
 
 namespace LkEngine {
@@ -20,6 +22,21 @@ namespace LkEngine {
         std::vector<Raycast2DResult> results = {};
         glm::vec2 mousePos = Mouse::GetScaledPos();
 
+        // Exit early if no camera is attached to the scene
+        auto* editor = EditorLayer::Get();
+        if (editor != nullptr && editor->IsEnabled())
+        {
+            //auto editorCamera = editor->GetEditorCamera();
+        }
+        else
+        {
+            if (scene.GetMainCamera() == nullptr)
+            {
+                LK_CORE_WARN_TAG("Raycast", "Scene {} has no camera attached to it!", scene.GetName());
+                return results;
+            }
+        }
+
         std::vector<Entity> sceneEntities = scene.GetEntities();
         for (auto& entity : sceneEntities)
         {
@@ -29,14 +46,14 @@ namespace LkEngine {
                 auto& sc = entity.Sprite();
                 if (tc.IsStatic() || sc.IsPassthrough())
                     continue;
-                auto& cam = *scene.GetCamera();
 
-                //glm::vec2 camPos = cam.GetPos();
-                //glm::vec2 camPos = cam.GetPosWithOffset();
-                glm::vec2 camPos = cam.GetPos();
-                glm::vec2 camOffset = cam.GetOffset();
-                camPos.x += camOffset.x;
-                camPos.y += camOffset.y; // - or + ?
+               // auto cam = scene.GetMainCamera();
+                auto cam= editor->GetEditorCamera();
+                glm::vec2 camPos = cam->GetPosition();
+
+                //glm::vec2 camOffset = cam.GetOffset();
+                //camPos.x += camOffset.x;
+                //camPos.y += camOffset.y; // - or + ?
 
                 float quadWidth = tc.Scale.x * sc.Size.x;
                 float quadHeight = tc.Scale.y * sc.Size.y;
@@ -47,24 +64,21 @@ namespace LkEngine {
                 // Place the origin in the middle of the screen
                 // This is done by adding half of the window width and height
 
-                auto* editor = Editor::Get();
+                auto* editor = EditorLayer::Get();
                 if (editor && editor->IsEnabled())
                 {
                     // Center the quad
-                    quadPos.x += editor->EditorWindowSize.x * 0.50f + editor->LeftSidebarSize.x;
+                    quadPos.x += editor->EditorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
                     // Only add the tabbar size if there are any tabs 
                     if (editor->GetTabCount() == 0)
-                        quadPos.y += (editor->EditorWindowSize.y * 0.50f) + (editor->BottomBarSize.y - editor->MenuBarSize.y) * Window::Get()->GetScalerY();
-                        //quadPos.y += editor->EditorWindowSize.y * 0.50f + editor->BottomBarSize.y - editor->MenuBarSize.y;
+                        quadPos.y += (editor->EditorWindowSize.y * 0.50f) + (editor->GetBottomBarSize().y - editor->GetMenuBarSize().y) * Window::Get().GetScalerY();
                     else
-                        quadPos.y += (editor->EditorWindowSize.y * 0.50f) + (editor->BottomBarSize.y - editor->MenuBarSize.y - editor->TabBarSize.y) * Window::Get()->GetScalerY();
-                        //quadPos.y += editor->EditorWindowSize.y * 0.50f + editor->BottomBarSize.y - editor->TabBarSize.y - editor->MenuBarSize.y;
-                    //LOG_WARN("Quad Pos ({}, {})", quadPos.x, quadPos.y);
+                        quadPos.y += (editor->EditorWindowSize.y * 0.50f) + (editor->GetBottomBarSize().y - editor->GetMenuBarSize().y - editor->GetTabBarSize().y) * Window::Get().GetScalerY();
                 }
                 else
                 {
-                    quadPos.x += Window::Get()->GetWidth() * 0.50f;
-                    quadPos.y += Window::Get()->GetHeight() * 0.50f;
+                    quadPos.x += Window::Get().GetWidth() * 0.50f;
+                    quadPos.y += Window::Get().GetHeight() * 0.50f;
                 }
 
 
@@ -99,7 +113,7 @@ namespace LkEngine {
                     {
                         float centerX = tc.Translation.x + quadWidth * 0.50f;
                         float centerY = tc.Translation.y + quadHeight * 0.50f;
-                        LOG_WARN("Hit: {} -> ({}, {})", entity.Name().c_str(), mousePos.x, mousePos.y);
+                        LK_CORE_WARN("Hit: {} -> ({}, {})", entity.Name().c_str(), mousePos.x, mousePos.y);
 
                         float x = centerX - mousePos.x;
                         float y = centerY - mousePos.y;

@@ -13,7 +13,6 @@
 
 namespace LkEngine {
 
-    // Forward declaration
     class Window;
 
     class ImGuiLayer : public RefCounted, public Layer
@@ -21,10 +20,7 @@ namespace LkEngine {
     public:
         virtual ~ImGuiLayer() = default;
 
-        //static s_ptr<ImGuiLayer> Create();
-        static Ref<ImGuiLayer> Create();
-
-        virtual void Init(Ref<Window>& window) = 0;
+        virtual void Init() = 0;
         virtual void Shutdown() = 0;
 
         virtual void OnAttach() = 0;
@@ -34,6 +30,15 @@ namespace LkEngine {
         virtual void EndFrame() = 0;
 
         virtual void SetDarkTheme();
+
+        static Ref<ImGuiLayer> Create();
     };
+
+	enum class GizmoMode : unsigned int 
+	{ 
+		Translate = (ImGuizmo::OPERATION::TRANSLATE),
+		Rotate    = (ImGuizmo::OPERATION::ROTATE),
+		Scale     = (ImGuizmo::OPERATION::SCALE)
+	};
 
 }

@@ -18,6 +18,7 @@
 #include "LkEngine/Debug/Debugger.h"
 
 #include "LkEngine/Asset/AssetRegistry.h"
+#include "LkEngine/Asset/MeshImporter.h"
 
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
@@ -32,7 +33,7 @@
 #include "LkEngine/Scene/EntityFactory.h"
 #include "LkEngine/Scene/SceneSerializer.h"
 
-#include "LkEngine/Editor/Editor.h"
+#include "LkEngine/Editor/EditorLayer.h"
 
 #include "LkEngine/Physics/PhysicsSystem.h"
 
@@ -51,15 +52,15 @@ namespace LkEngine {
         void Run();
         void Exit();
         void OnEvent(Event& e);
+        
+        void RenderImGui();
+        void AddScene(Scene& scene);
+        void SetScene(Ref<Scene> scene);
 
         void PushLayer(Layer* layer);
         void PopLayer(Layer* layer);
         void PushOverlay(Layer* layer);
         void PopOverlay(Layer* layer);
-        
-        void RenderImGui();
-        void AddScene(Scene& scene);
-        void SetScene(Ref<Scene> scene);
 
         Window& GetWindow() { return *m_Window; }
         GLFWwindow* GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
@@ -107,9 +108,10 @@ namespace LkEngine {
 
         Ref<Renderer> m_Renderer = nullptr;
         s_ptr<Input> m_Input = nullptr;
-        std::unique_ptr<Window> m_Window = nullptr;
+        std::unique_ptr<Window> m_Window;
 
-        Editor* m_Editor = nullptr;
+        EditorLayer* m_Editor;
+        Debugger* m_Debugger;
 
         PhysicsSystem* m_PhysicsSystem = nullptr;
         Ref<GraphicsContext> m_GraphicsContext = nullptr;
@@ -121,7 +123,6 @@ namespace LkEngine {
 		std::queue<std::function<void()>> m_EventQueue;
 		std::vector<EventCallbackFn> m_EventCallbacks;
 
-        Debugger* m_Debugger = nullptr;
 
         Ref<Scene> m_Scene = nullptr; // Active scene
         Ref<Scene> m_Scenes[8];

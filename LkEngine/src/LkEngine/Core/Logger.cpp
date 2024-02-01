@@ -1,6 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/Core/Logger.h"
 
+
 namespace LkEngine {
 
 	void Logger::Init(std::string logfilename,

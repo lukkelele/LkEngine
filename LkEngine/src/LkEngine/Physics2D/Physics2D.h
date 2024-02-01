@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LkEngine/Core/Base.h"
+
 #include "ContactListener2D.h"
 #include "LkEngine/Scene/Entity.h"
 
@@ -10,6 +12,14 @@ namespace LkEngine {
 
 	// Forward declarations
 	class Scene;
+
+	// Data structure used for creating 2D worlds after deserializing scene data
+	struct Physics2DSpecification
+	{
+		bool Paused = false;
+		bool DebugDrawer = true;
+		glm::vec2 Gravity = glm::vec2(0.0f, -9.20f);
+	};
 
 	struct Raycast2DResult
 	{

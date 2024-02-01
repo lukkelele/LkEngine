@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+
 namespace LkEngine {
 
 	class Timer
@@ -9,21 +10,21 @@ namespace LkEngine {
 	public:
 		Timer() { Reset(); }
 
-		void Timer::Reset() { m_Start = std::chrono::high_resolution_clock::now(); }
+		void Reset() { m_Start = std::chrono::high_resolution_clock::now(); }
 
 		// Get elapsed time since m_Start in nanoseconds
-		float Timer::Elapsed()
+		float Elapsed()
 		{
 			return std::chrono::duration_cast<std::chrono::nanoseconds>
 				(std::chrono::high_resolution_clock::now() - m_Start).count() * 0.001f * 0.001f * 0.001f;
 		}
 
-		float Timer::ElapsedMs()
+		float ElapsedMs()
 		{
 			return Elapsed() * 1000.0f;
 		}
 
-		float Timer::GetDeltaTime()
+		float GetDeltaTime()
 		{
 			float now = ElapsedMs();
 			float deltaTime = now - m_LastTime;
@@ -31,7 +32,7 @@ namespace LkEngine {
 			return deltaTime;
 		}
 
-		static llong Timer::GetTimeSinceEpoch()
+		static llong GetTimeSinceEpoch()
 		{
 			return std::chrono::high_resolution_clock::now().time_since_epoch().count();
 		}

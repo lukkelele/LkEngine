@@ -164,9 +164,6 @@ namespace LkEngine {
 		UI_HandleManualWindowResize();
 		UI::BeginDockSpace(LkEngine_DockSpace);
 
-		//auto renderer2D = Renderer2DAPI::Get().As<OpenGLRenderer2D>();
-		//auto framebuffer2D = renderer2D->GetFramebuffer();
-
 		//=========================================================
 		// Menubar
 		//=========================================================
@@ -405,20 +402,12 @@ namespace LkEngine {
 
 	void EditorLayer::RenderViewport()
 	{
-		//auto& framebuffer2D = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
-		//auto viewportImage = framebuffer2D.GetImage(0);
-		//framebuffer2D.Bind();
-		//framebuffer2D.BindTexture(0); // Color attachment 0 -> Texture of image format RGBA32F
-
-		m_ViewportFramebuffer->Bind();
-		m_ViewportFramebuffer->BindTexture(0); // Color attachment 0 -> Texture of image format RGBA32F
-
-		//RenderMirrorTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-		RenderCubes(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-		RenderFloor(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-
-		//framebuffer2D.Unbind();
-		m_ViewportFramebuffer->Unbind();
+		Renderer::Submit([&]()
+		{
+			//RenderMirrorTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+			RenderCubes(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+			RenderFloor(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+		});
 	}
 
 	void EditorLayer::RenderViewport(Ref<Image> image)
@@ -427,8 +416,6 @@ namespace LkEngine {
 
 	void EditorLayer::UI_ViewportTexture()
 	{
-		//OpenGLFramebuffer& framebuffer = *Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer();
-		//Ref<Image2D> viewportImage = framebuffer.GetImage(0);
 		Ref<Image2D> viewportImage = m_ViewportFramebuffer->GetImage(0);
 
 		UI::Image(viewportImage, ImVec2(EditorWindowSize.x - 2, EditorWindowSize.y + MenuBarSize.y), ImVec2(0, 1), ImVec2(1, 0));
@@ -443,7 +430,6 @@ namespace LkEngine {
 		    }
 		 	ImGui::EndDragDropTarget();
 		}
-		
 	}
 
 	void EditorLayer::HandleExternalWindows()

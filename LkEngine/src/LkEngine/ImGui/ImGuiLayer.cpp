@@ -3,8 +3,8 @@
 
 #include "LkEngine/Renderer/RendererAPI.h"
 
-#include "LkEngine/Platform/Vulkan/VulkanImGuiLayer.h"
 #include "LkEngine/Platform/OpenGL/OpenGLImGuiLayer.h"
+//#include "LkEngine/Platform/Vulkan/VulkanImGuiLayer.h"
 
 
 namespace LkEngine {
@@ -14,8 +14,8 @@ namespace LkEngine {
 	{
 		switch (RendererAPI::Current())
 		{
-			case RendererAPIType::Vulkan: return Ref<VulkanImGuiLayer>::Create();
 			case RendererAPIType::OpenGL: return Ref<OpenGLImGuiLayer>::Create();
+			//case RendererAPIType::Vulkan: return Ref<VulkanImGuiLayer>::Create();
 			case RendererAPIType::None: return nullptr;
 		}
 	}

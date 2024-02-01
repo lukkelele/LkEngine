@@ -1,6 +1,8 @@
 #pragma once
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/Layer.h"
+
+#include "Base.h"
+#include "Layer.h"
+
 
 namespace LkEngine {
 

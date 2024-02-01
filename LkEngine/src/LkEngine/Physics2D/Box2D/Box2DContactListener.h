@@ -2,16 +2,19 @@
 
 #include <box2d/box2d.h>
 
-#define LK_CAST_TO_b2Body(_RUNTIME_BODY) static_cast<b2Body*>(_RUNTIME_BODY)
-
+//
+// TODO: This will get implemented in the future, or just get removed.
+//       I'm not entirely sure if i will ever change the 2D physics system but it could be nice to be able to switch
+//       between multiple API's. Just for the sake of it making everything more difficult
+// 
 
 namespace LkEngine {
 
-    class ContactListener2D : public b2ContactListener
+    class Box2DContactListener : public b2ContactListener
     {
     public:
-        ContactListener2D();
-        virtual ~ContactListener2D();
+        Box2DContactListener();
+        ~Box2DContactListener();
 
         virtual void BeginContact(b2Contact* contact) override;
         virtual void EndContact(b2Contact* contact) override;
@@ -29,6 +32,5 @@ namespace LkEngine {
         }
 
     };
-
 
 }

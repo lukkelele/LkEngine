@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <cstddef>
 #include <array>
+#include <queue>
 
 #include "Ref.h"
 #include "Assert.h"

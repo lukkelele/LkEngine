@@ -18,13 +18,12 @@ namespace LkEngine {
         m_SelectionContext = new SelectionContext(); // Create selection context for UI
 
         m_ImGuiLayer = ImGuiLayer::Create();
-
         m_Debugger = new Debugger();
     }
 
     Application::~Application()
     {
-        LK_CORE_WARN("Terminating application");
+        LK_CORE_WARN_TAG("Application", "Terminating application");
     }
 
     void Application::Init()
@@ -39,15 +38,16 @@ namespace LkEngine {
         m_PhysicsSystem = new PhysicsSystem();
         m_PhysicsSystem->Init();
 
+        m_Editor = new EditorLayer();
+
         m_Renderer = Ref<Renderer>::Create();
         m_Renderer->Init();
 
         m_ImGuiLayer->Init();
         m_ImGuiLayer->SetDarkTheme();
-
         m_Debugger->Init();
 
-        m_Editor = new Editor();
+        m_Editor->Init();
         PushOverlay(m_Editor);
     }
 
@@ -59,19 +59,23 @@ namespace LkEngine {
 			m_Timestep = m_Timer.GetDeltaTime();
 
             Renderer::BeginFrame();
-            {
-                for (Layer* layer : m_LayerStack)
-                    layer->OnUpdate(m_Timestep);
-            }
 
             Input::Update();
 
+            if (m_Editor->IsEnabled())
+            {
+                Renderer::BeginScene(m_Editor->GetEditorCamera()->GetViewProjectionMatrix());
+            }
+
+            // Update layers
+            for (Layer* layer : m_LayerStack)
+                layer->OnUpdate(m_Timestep);
             
+            // TODO: Use 'MainCameraEntity' here
             if (m_Scene)
             {
                 if (m_Editor->IsEnabled())
                 {
-                    Renderer::BeginScene(m_Editor->GetEditorCamera()->GetViewProjectionMatrix());
                     m_Scene->OnRenderEditor(*m_Editor->GetEditorCamera(), m_Timestep);
                 }
                 else
@@ -136,9 +140,6 @@ namespace LkEngine {
 	void Application::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		//dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) { return OnWindowResize(e); });
-		//dispatcher.Dispatch<WindowMinimizeEvent>([this](WindowMinimizeEvent& e) { return OnWindowMinimize(e); });
-		//dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) { return OnWindowClose(e); });
 
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
 		{

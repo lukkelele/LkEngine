@@ -233,7 +233,7 @@ namespace LkEngine {
 		window.GetContext()->UpdateResolution(width, height);
 		LK_CORE_DEBUG("Window Resize: ({}, {})", window.GetWidth(), window.GetHeight());
 
-		auto* editor = Editor::Get();
+		auto* editor = EditorLayer::Get();
 		if (editor && editor->IsEnabled())
 		{
 			float editorWindowWidth = editor->GetEditorWindowSize().x;

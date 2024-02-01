@@ -1,8 +1,8 @@
 #pragma once
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/Logger.h"
-#include "LkEngine/Event/Event.h"
-#include <imgui/imgui.h>
+
+#include "Base.h"
+
+#include "LkEngine/Core/Event/Event.h"
 
 
 namespace LkEngine {

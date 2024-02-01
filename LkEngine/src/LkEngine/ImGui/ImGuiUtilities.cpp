@@ -4,7 +4,6 @@
 
 namespace LkEngine::UI {
 
-
     bool UpdateWindowManualResize(ImGuiWindow* window, ImVec2& newSize, ImVec2& newPosition)
 	{
 		auto CalcWindowSizeAfterConstraint = [](ImGuiWindow* window, const ImVec2& size_desired)

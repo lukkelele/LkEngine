@@ -114,7 +114,7 @@ namespace LkEngine {
 
         inline static Window* m_Instance = nullptr;
 
-        friend class Editor;
+        friend class EditorLayer;
     };
 
 

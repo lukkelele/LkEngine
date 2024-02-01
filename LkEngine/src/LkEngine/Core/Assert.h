@@ -36,6 +36,10 @@
 	#define LK_ASSERT(condition, ...)
 #endif
 
+#define LK_CORE_THROW_ERROR(...) LK_CORE_ASSERT(false, __VA_ARGS__)
+#define LK_THROW_ERROR(...)      LK_ASSERT(false, __VA_ARGS__)
+
+
 #ifdef LK_ENABLE_VERIFY
 	// Internal helpers, do not use directly
 	#if defined(LK_COMPILER_CLANG) || defined(LK_VARIADIC_OPT_DISABLED)

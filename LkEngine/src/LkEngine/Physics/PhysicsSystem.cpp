@@ -23,8 +23,15 @@ namespace LkEngine {
         // 2D Physics
 		static signed int velocityIterations = 20;
 		static signed int positionIterations = 8;
-	    auto& world = Scene::GetActiveScene()->GetBox2DWorld();
-	    world.World->Step((1.0f / 60.0f), velocityIterations, positionIterations);
+
+#if 0
+        auto activeScene = Scene::GetActiveScene();
+        if (activeScene)
+        {
+	        auto& world = activeScene->GetBox2DWorld();
+	        world.World->Step((1.0f / 60.0f), velocityIterations, positionIterations);
+        }
+#endif
     }
 
 
