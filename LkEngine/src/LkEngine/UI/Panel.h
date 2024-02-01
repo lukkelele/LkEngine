@@ -1,0 +1,19 @@
+#pragma once
+
+#include "LkEngine/UI/UICore.h"
+
+
+namespace LkEngine {
+
+	class Panel
+	{
+	public:
+		virtual ~Panel() = default;
+
+		virtual void Init() = 0;
+		
+		virtual void OnRender() = 0;
+		virtual void OnImGuiRender() = 0;
+	};
+
+}

@@ -20,12 +20,10 @@ namespace LkEngine {
 	class Project : public RefCounted
 	{
 	public:
+		Project() = default;
 		Project(const ProjectSpecification& specification);
 		Project(const std::string& name);
 		~Project() = default;
-
-		void OnRender();
-		void OnImGuiRender();
 
 		bool Save();
 		uint64_t GetSize() const;
@@ -34,6 +32,13 @@ namespace LkEngine {
 		const std::string& const GetName() const { return m_Name; }
 
 		const ProjectSpecification& GetSpecification() const { return m_Specification; }
+
+		Ref<Scene> GetTargetScene() const { return Data.TargetScene; }
+		// Basic project to be used as a starter project/for when opening the engine 
+
+		static Ref<Project> CreateEmptyProject();
+		static Ref<Project> CreateDefaultProject();
+		static Ref<Project> CreateDebugProject();
 
 	public:
 		ProjectData Data;
@@ -44,7 +49,7 @@ namespace LkEngine {
 
 		std::filesystem::path m_Filepath;
 
-		friend class Editor;
+		friend class EditorLayer;
 	};
 
 }

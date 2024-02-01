@@ -1,8 +1,10 @@
 #include "LKpch.h"
 #include "UICore.h"
+
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Scene/Entity.h"
-#include "LkEngine/Editor/Editor.h"
+
+#include "LkEngine/Editor/EditorLayer.h"
 
 
 namespace LkEngine::UI {

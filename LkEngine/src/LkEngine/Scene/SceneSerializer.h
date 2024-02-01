@@ -45,6 +45,7 @@ namespace LkEngine {
 		inline static std::string_view FileFilter = "LkEngine Scene (*.lukkelele)\0*.lukkelele\0";
 		inline static std::string_view DefaultExtension = ".lukkelele";
 	private:
+		bool m_IsLoaded = false;
 		Scene* m_Scene = nullptr;
     };
 

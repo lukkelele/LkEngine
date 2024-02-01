@@ -161,7 +161,7 @@ namespace LkEngine {
 
 		friend class Scene;
 		friend class SceneManagerPanel;
-		friend class Editor;
+		friend class EditorLayer;
 	};
 
 }

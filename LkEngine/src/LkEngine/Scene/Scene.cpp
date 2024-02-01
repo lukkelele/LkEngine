@@ -7,7 +7,8 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
 
-#include "LkEngine/Editor/Editor.h"
+#include "LkEngine/Editor/EditorLayer.h"
+
 #include "LkEngine/Debug/Debugger2D.h"
 
 #include "LkEngine/Core/Application.h"
@@ -32,9 +33,9 @@ namespace LkEngine {
 
 		if (editorScene)
 		{
-			m_EditorCamera = Editor::Get()->GetEditorCamera();
+			m_EditorCamera = EditorLayer::Get()->GetEditorCamera();
 			LK_CORE_ASSERT(m_EditorCamera, "EditorCamera is nullptr");
-			Editor::Get()->SetScene(Ref<Scene>(this));
+			EditorLayer::Get()->SetScene(Ref<Scene>(this));
 			Input::SetScene(Ref<Scene>(this)); // REMOVE ME
 			Application::Get()->SetScene(Ref<Scene>(this)); // REMOVE ME
 		}
@@ -66,8 +67,8 @@ namespace LkEngine {
 		
 		if (editorScene)
 		{
-			m_EditorCamera = Editor::Get()->GetEditorCamera();
-			Editor::Get()->SetScene(Ref<Scene>(this));
+			m_EditorCamera = EditorLayer::Get()->GetEditorCamera();
+			EditorLayer::Get()->SetScene(Ref<Scene>(this));
 			Application::Get()->SetScene(Ref<Scene>(this));
 		}
 
@@ -398,11 +399,12 @@ namespace LkEngine {
 		editorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		editorCamera.OnUpdate(ts);
 
-		Renderer::SubmitQuad({ 200, -140, 700 }, { 1200, 1200 }, TextureLibrary::Get()->GetTexture2D("atte"));
-		Renderer::SubmitQuad({ 200, 0, 640 }, { 140, 90 }, Color::RGBA::Red);
-		Renderer::SubmitQuad({ 100, 100, 600 }, { 80, 100 }, Color::RGBA::Blue);
+		//Renderer::SubmitQuad({ 200, -140, 700 }, { 1200, 1200 }, TextureLibrary::Get()->GetTexture2D("atte"));
+		//Renderer::SubmitQuad({ 200, 0, 640 }, { 140, 90 }, Color::RGBA::Red);
+		//Renderer::SubmitQuad({ 100, 100, 600 }, { 80, 100 }, Color::RGBA::Blue);
+		Renderer::SubmitQuad({ 200, -20, 1240 }, { 2000, 1400 }, TextureLibrary::Get()->GetTexture2D("skybox-ice-back"));
 
-		Editor::Get()->OnUpdate();
+		EditorLayer::Get()->OnUpdate();
 
 #if 0
 	#ifdef LK_DEBUG

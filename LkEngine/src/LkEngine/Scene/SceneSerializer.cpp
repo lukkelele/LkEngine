@@ -12,7 +12,7 @@
 
 #include "LkEngine/Scene/Entity.h"
 
-#include "LkEngine/Editor/Editor.h"
+#include "LkEngine/Editor/EditorLayer.h"
 
 
 namespace LkEngine {
@@ -22,18 +22,11 @@ namespace LkEngine {
 	{
 		if (m_Scene == nullptr)
 			m_Scene = new Scene;
-
-		//Box2DWorldComponent& box2dWorld = m_Scene->m_Registry.emplace<Box2DWorldComponent>(m_Scene->m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
-		//box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
-		//Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 	}
 
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 		: m_Scene((Scene*)scene.Raw())
 	{
-		//Box2DWorldComponent& box2dWorld = m_Scene->m_Registry.emplace<Box2DWorldComponent>(m_Scene->m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
-		//box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
-		//Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 	}
 
 	void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
@@ -153,9 +146,9 @@ namespace LkEngine {
 		out << YAML::Key << "Active"      << YAML::Value << m_Scene->m_IsActiveScene;
 		out << YAML::Key << "EditorScene" << YAML::Value << m_Scene->m_EditorScene;
 		out << YAML::Key << "SceneHandle" << YAML::Value << (uint32_t)m_Scene->m_SceneEntity;
-		auto* editor = Editor::Get();
-		if (editor->SelectedEntity)
-			out << YAML::Key << "SelectedEntity" << YAML::Value << Editor::Get()->SelectedEntity.UUID();
+		auto* editor = EditorLayer::Get();
+		if (SELECTION::SelectedEntity)
+			out << YAML::Key << "SelectedEntity" << YAML::Value << SELECTION::SelectedEntity.GetUUID();
 		else
 			out << YAML::Key << "SelectedEntity" << YAML::Value << 0;
 
@@ -218,7 +211,7 @@ namespace LkEngine {
 		uint32_t sceneEntityHandle = data["SceneHandle"].as<uint32_t>();
 
 		// EditorCamera
-		auto& editorCamera = *Editor::Get()->GetEditorCamera();
+		auto& editorCamera = *EditorLayer::Get()->GetEditorCamera();
 		auto editorCameraNode = data["EditorCamera"];
 		if (editorCameraNode)
 			DeserializeEditorCamera(editorCameraNode, editorCamera);
@@ -245,8 +238,8 @@ namespace LkEngine {
 		// Sort IDComponent by by entity handle (which is essentially the order in which they were created)
 		m_Scene->m_Registry.sort<IDComponent>([this](const auto lhs, const auto rhs)
 		{
-			auto lhsEntity = m_Scene->m_EntityMap.find(lhs.ID);
-			auto rhsEntity = m_Scene->m_EntityMap.find(rhs.ID);
+			auto lhsEntity = m_Scene->m_EntityIDMap.find(lhs.ID);
+			auto rhsEntity = m_Scene->m_EntityIDMap.find(rhs.ID);
 			return static_cast<uint32_t>(lhsEntity->second) < static_cast<uint32_t>(rhsEntity->second);
 		});
 
@@ -302,9 +295,9 @@ namespace LkEngine {
 			auto materialComponent = entity["MaterialComponent"];
 			if (materialComponent)
 			{
-				MaterialComponent& material = deserializedEntity.AddComponent<MaterialComponent>();
-				material.m_Material->SetTexture(TextureLibrary::Get()->GetTexture2D(materialComponent["TextureName"].as<std::string>()));
-				LK_CORE_DEBUG_TAG("SceneSerializer", "Deserialized material component, set texture to \"{}\"", material.GetTextureName());
+				MaterialComponent& mc = deserializedEntity.AddComponent<MaterialComponent>();
+				mc.m_Material->SetTexture(TextureLibrary::Get()->GetTexture2D(materialComponent["TextureName"].as<std::string>()));
+				LK_CORE_DEBUG_TAG("SceneSerializer", "Deserialized material component, set texture to \"{}\"", mc.m_Material->GetTextureName());
 			}
 
 			auto cameraComponent = entity["CameraComponent"];
@@ -456,6 +449,8 @@ namespace LkEngine {
 
 	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath)
 	{
+		m_Scene->Clear();
+
 		std::ifstream stream(filepath);
 		std::stringstream strStream;
 		strStream << stream.rdbuf();
@@ -492,24 +487,21 @@ namespace LkEngine {
 			Scene::m_ActiveScene = m_Scene;
 
 			Input::SetScene(Ref<Scene>(m_Scene));
-			Editor::Get()->SetScene(*m_Scene);
+			EditorLayer::Get()->SetScene(m_Scene);
 			Application::Get()->SetScene(Ref<Scene>(m_Scene));
 		}
 		
 		if (m_Scene->m_EditorScene)
 		{
-			m_Scene->m_EditorCamera = Editor::Get()->GetEditorCamera();
+			Scene::m_ActiveScene = m_Scene;
+
+			m_Scene->m_EditorCamera = EditorLayer::Get()->GetEditorCamera();
 			LK_CORE_ASSERT(m_Scene->m_EditorCamera, "SceneSerializer: EditorCamera is nullptr");
 
-			Editor::Get()->SetScene(*m_Scene);
+			EditorLayer::Get()->SetScene(m_Scene);
 			Application::Get()->SetScene(Ref<Scene>(m_Scene));
 			Input::SetScene(Ref<Scene>(m_Scene));
 		}
-
-		// Initiate 2D physics
-		//Box2DWorldComponent& box2dWorld = m_Scene->m_Registry.emplace<Box2DWorldComponent>(m_Scene->m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
-		//box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
-		//Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 
 		return Ref<Scene>(m_Scene);
 	}

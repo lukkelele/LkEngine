@@ -1,6 +1,9 @@
 #pragma once
 
+#include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Buffer.h"
+
+#include <filesystem>
 
 
 namespace LkEngine {

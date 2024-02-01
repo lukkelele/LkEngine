@@ -1,11 +1,12 @@
 #include "LKpch.h"
 #include "ContentBrowser.h"
 
+#include "LkEngine/Core/Window.h"
+
 #include "LkEngine/Renderer/Image.h"
 #include "LkEngine/Renderer/Texture.h"
 
-#include "LkEngine/Core/Window.h"
-#include "LkEngine/Editor/Editor.h"
+#include "LkEngine/Editor/EditorLayer.h"
 
 
 namespace LkEngine {
@@ -27,23 +28,27 @@ namespace LkEngine {
         "Bibi", "Blaine", "Bryn"
     };
 
-
 	ContentBrowser::ContentBrowser()
 	{
+	}
+
+    void ContentBrowser::Init()
+    {
+        // Create icons
 		TextureSpecification textureSpec;
 		textureSpec.Name = "FileIcon";
 		textureSpec.DebugName = "FileIcon";
 		textureSpec.Width = 200;
 		textureSpec.Height = 200;
 		textureSpec.Format = ImageFormat::RGBA32F;
-		textureSpec.Path = "assets/icons/file-icon-48x48.png";
+		textureSpec.Path = "assets/Icons/file-icon-48x48.png";
 		FileIconTexture = Texture2D::Create(textureSpec);
 
 		textureSpec.Name = "FolderIcon";
 		textureSpec.DebugName = "FolderIcon";
-		textureSpec.Path = "assets/icons/folder-icon-64x64.png";
+		textureSpec.Path = "assets/Icons/folder-icon-64x64.png";
         FolderIconTexture = Texture2D::Create(textureSpec);
-	}
+    }
 
 	void ContentBrowser::OnRender()
 	{
@@ -87,7 +92,8 @@ namespace LkEngine {
         {
             //ImGui::SetDragDropPayload(std::to_string(FolderIconTexture->GetRendererID()).c_str(), &FolderIconTexture->GetRendererID(), sizeof(RendererID));
             ImGui::SetDragDropPayload("FOLDER_DATA_TYPE", &folder_data, sizeof(char) * 7);
-            ImGui::Text("%s", ContentBrowser::FolderIconTexture->GetName().c_str());
+            //ImGui::Text("%s", ContentBrowser::FolderIconTexture->GetName().c_str());
+            ImGui::Text("3D CUBE wowww");
 
             ImGui::EndDragDropSource();
         }
@@ -101,7 +107,7 @@ namespace LkEngine {
             ImGui::EndDragDropTarget();
         }
 
-
+#if 0
         if (ImGui::RadioButton("Copy", mode == Mode_Copy)) { mode = Mode_Copy; } ImGui::SameLine();
         if (ImGui::RadioButton("Move", mode == Mode_Move)) { mode = Mode_Move; } ImGui::SameLine();
         if (ImGui::RadioButton("Swap", mode == Mode_Swap)) { mode = Mode_Swap; }
@@ -162,7 +168,6 @@ namespace LkEngine {
             }
             ImGui::TreePop();
         }
-
         if (ImGui::BeginDragDropTarget())
         {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
@@ -178,6 +183,7 @@ namespace LkEngine {
             ImGui::EndDragDropTarget();
         }
 
+#endif
 
 	}
 

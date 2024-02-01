@@ -9,8 +9,6 @@
 
 #include "LkEngine/Editor/EditorCamera.h"
 
-//#include "LkEngine/Physics2D/Physics2DSpecification.h"
-
 #include <entt/entt.hpp>
 
 
@@ -61,6 +59,8 @@ namespace LkEngine {
 		void SetAsActive(bool active) { m_IsActiveScene = active; }
 		void SetAsEditorScene(bool editorScene) { m_EditorScene = editorScene; }
 		void Clear();
+
+		Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
 
 		void Pause(bool paused);
 		void SwitchCamera();
@@ -137,14 +137,14 @@ namespace LkEngine {
 
 		uint16_t m_ViewportWidth, m_ViewportHeight;
 
-		Ref<EditorCamera> m_EditorCamera = nullptr;
-
 		Ref<SceneCamera> m_Camera = nullptr;
 		Ref<SceneCamera> m_Camera2D = nullptr;
+		Ref<EditorCamera> m_EditorCamera = nullptr;
+
 		Ref<SceneRenderer> m_Renderer = nullptr;
 
 		friend class Entity;
-		friend class Editor;
+		friend class EditorLayer;
 		friend class SceneSerializer;
 		friend class SceneManagerPanel;
 	};

@@ -43,7 +43,6 @@ namespace LkEngine {
 
 	void SceneCamera::Update(float ts)
 	{
-		HasMouseMoved = false;
 		if (m_KeyboardEnabled)
 		{
 			// WASD

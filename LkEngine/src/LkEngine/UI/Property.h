@@ -119,7 +119,7 @@ namespace LkEngine::UI {
 		//static void PositionXYZ(uint32_t id, glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
 		static void PositionXYZ(glm::vec3& pos, float step = 1.0f, float min = -2500.0f, float max = 2500.0f, float resetValue = 0.0f, float column_width = 100.0f)
 		{
-			UI::PushID();
+			//UI::PushID();
 			ImGuiIO& io = ImGui::GetIO();
 			auto boldFont = io.Fonts->Fonts[0];
 
@@ -141,6 +141,9 @@ namespace LkEngine::UI {
 				float padding = 20.0f;
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 4));
 
+				//===========================
+				// X
+				//===========================
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 0, 0, 255), 0);
@@ -156,7 +159,9 @@ namespace LkEngine::UI {
 				ImGui::SetNextItemWidth(slider_width);
 				ImGui::DragFloat("##pos-x", &pos.x, step, min, max, "%1.f");
 
+				//===========================
 				// Y
+				//===========================
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.10f, 0.90f, 0.26f, 1.0f));
@@ -168,7 +173,9 @@ namespace LkEngine::UI {
 				ImGui::SetNextItemWidth(slider_width);
 				ImGui::DragFloat("##pos-y", &pos.y, step, min, max, "%1.f");
 
+				//===========================
 				// Z
+				//===========================
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.90f, 0.55f, 0.0f, 0.9f));
@@ -186,12 +193,12 @@ namespace LkEngine::UI {
 			}
 			ImGui::PopStyleVar(2);
 			
-			UI::PopID();
+			//UI::PopID();
 		}
 
 		static void RGBAColor(glm::vec4& color, float column_width = 100.0f)
 		{
-			UI::PushID();
+			UI::PushID("##UI_Property-RGBA_Color");
 			ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));

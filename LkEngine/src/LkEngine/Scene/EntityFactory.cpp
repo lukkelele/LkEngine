@@ -42,7 +42,7 @@ namespace LkEngine {
 		glm::vec2 size = { lineWidth, p1.y - p0.y };
 		float angleRad = atan2((p1.x - p0.x), (p1.y - p0.y));
 		float angleDeg = glm::degrees(angleRad);
-		LOG_DEBUG("Created Line entity with rotation: {} (degrees)", angleDeg);
+		LK_CORE_DEBUG("Created Line entity with rotation: {} (degrees)", angleDeg);
 
 		SpriteComponent sc = SpriteComponent(size, color);
 		TransformComponent tc = TransformComponent({ p0.x, p0.y, 0.0f });
@@ -60,8 +60,8 @@ namespace LkEngine {
 		std::string name = "Quad_" + std::to_string(entityCount);
 		Entity entity = scene.CreateEntity(std::string(name));
 
-		glm::vec2 windowSize = Window::Get()->GetSize();
-		glm::vec2 windowPos = Window::Get()->GetPos();
+		glm::vec2 windowSize = Window::Get().GetSize();
+		glm::vec2 windowPos = Window::Get().GetPos();
 
 		float windowWidth = windowSize.x;
 		float windowHeight = windowSize.y;

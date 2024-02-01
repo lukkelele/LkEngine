@@ -15,6 +15,7 @@ namespace LkEngine {
 		ContentBrowser();
 		~ContentBrowser() = default;
 
+		void Init() override;
 		void OnRender() override;
 		void OnImGuiRender() override;
 

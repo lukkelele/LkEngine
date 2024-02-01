@@ -1,7 +1,10 @@
 #pragma once
+
 #include "LkEngine/Core/Base.h"
+
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
+
 
 namespace LkEngine {
 
@@ -10,9 +13,6 @@ namespace LkEngine {
 	class EntityFactory
 	{
 	public:
-		EntityFactory() = default;
-		~EntityFactory() = default;
-
 		static Entity CreateQuad(Scene& scene, const glm::vec2 pos, const glm::vec2 size, const glm::vec4& color = { 0.50f, 0.50f, 0.50f, 1.0f });
 		static Entity CreateQuad(Scene& scene, const glm::vec3 pos, const glm::vec2 size, const glm::vec4& color = { 0.50f, 0.50f, 0.50f, 1.0f });
 		static Entity CreateLine(Scene& scene, const glm::vec2 p0, const glm::vec2 p1, float lineWidth = 2.0f, const glm::vec4& color = { 0.50f, 0.50f, 0.50f, 1.0f });
