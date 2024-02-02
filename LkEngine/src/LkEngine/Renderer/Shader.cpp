@@ -94,9 +94,6 @@ namespace LkEngine {
 
 		while (getline(streamVertex, line))
 		{
-	#ifdef LK_ENGINE_PRINT_SHADER
-			printf("%s\n", line.c_str());
-	#endif
 			ss[(int)type] << line << '\n';
 		}
 
@@ -104,16 +101,13 @@ namespace LkEngine {
 		type = ShaderType::FRAGMENT;
 		while (getline(streamFrag, line))
 		{
-			//printf("%s\n", line.c_str());
 			ss[(int)type] << line << '\n';
 		}
 
 		std::string vertex_str = ss[0].str();
 		std::string frag_str = ss[1].str();
-		if (vertex_str.empty())
-			LK_CORE_ERROR("Parsed vertex shader is empty!");
-		if (frag_str.empty())
-			LK_CORE_ERROR("Parsed fragment shader is empty!");
+		LK_CORE_ASSERT(vertex_str.empty(), "Parsed vertex shader is empty!");
+		LK_CORE_ASSERT(frag_str.empty(), "Parsed fragment shader is empty!");
 
 		return { vertex_str, frag_str };
 	}
@@ -121,7 +115,6 @@ namespace LkEngine {
 
 	//============================================================================
 	// ShaderLibrary
-	//
 	//============================================================================
     ShaderLibrary::ShaderLibrary()
     {

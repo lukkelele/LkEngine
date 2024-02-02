@@ -345,5 +345,25 @@ namespace LkEngine {
         return nullptr;
     }
 
+    TextureCollection& TextureLibrary::GetTextureCollection(std::string_view collectionName)
+    {
+        for (auto& collection : m_Collections)
+        {
+            if (collection.first == collectionName)
+                return collection.second;
+        }
+        LK_CORE_ASSERT(false, "Couldnt find TextureCollection {}", collectionName);
+    }
+
+    Texture2DCollection& TextureLibrary::GetTexture2DCollection(std::string_view collectionName)
+    {
+        for (auto& collection : m_Collections2D)
+        {
+            if (collection.first == collectionName)
+                return collection.second;
+        }
+        LK_CORE_ASSERT(false, "Couldnt find Texture2DCollection {}", collectionName);
+    }
+
 
 }

@@ -24,15 +24,14 @@ namespace LkEngine {
         MeshImporter meshImporter = MeshImporter();
 
         m_Directory = path.substr(0, path.find_last_of('/'));
-        //meshImporter.Load(scene->mRootNode, scene, this);
         meshImporter.Load(scene, this);
     }
 
-    void Model::Draw(Ref<Shader> shader)
+    void Model::Draw(Ref<Shader>& shader)
     {
         for (unsigned int i = 0; i < m_Meshes.size(); i++)
         {
-            m_Meshes[i].Draw();
+            m_Meshes[i].Draw(shader);
         }
     }
 
@@ -42,15 +41,9 @@ namespace LkEngine {
         const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
         // Check for errors
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) 
-        {
-            //LK_CORE_ERROR("ERROR::ASSIMP:: {}", importer.GetErrorString());
-            //return;
-            LK_CORE_ASSERT(false, "Assimp error, {}", importer.GetErrorString());
-        }
+        LK_CORE_ASSERT(!scene || scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode, "Assimp error, {}", importer.GetErrorString());
 
         m_Directory = path.substr(0, path.find_last_of('/'));
-    
         ProcessNode(scene->mRootNode, scene);
     }
     
@@ -68,89 +61,21 @@ namespace LkEngine {
 
         // After we've processed all of the meshes (if any) we then recursively process each of the children nodes
         for (unsigned int i = 0; i < node->mNumChildren; i++)
-        {
             ProcessNode(node->mChildren[i], scene);
-        }
     }
 
-    Mesh Model::ProcessMesh(aiMesh *mesh, const aiScene *scene)
+    Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
     {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
         std::vector<Texture_> textures;
     
-        // Walk through each of the mesh's vertices
-        for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-        {
-            Vertex vertex{};
-            glm::vec3 vector{};
-
-            // Positions
-            vector.x = mesh->mVertices[i].x;
-            vector.y = mesh->mVertices[i].y;
-            vector.z = mesh->mVertices[i].z;
-            vertex.Position = vector;
-
-            // Normals
-            if (mesh->HasNormals())
-            {
-                vector.x = mesh->mNormals[i].x;
-                vector.y = mesh->mNormals[i].y;
-                vector.z = mesh->mNormals[i].z;
-                vertex.Normal = vector;
-            }
-
-            // Texture Coordinates
-            if(mesh->mTextureCoords[0]) 
-            {
-                glm::vec2 vec;
-
-                // Assume texture with 2 coordinates
-                vec.x = mesh->mTextureCoords[0][i].x; 
-                vec.y = mesh->mTextureCoords[0][i].y;
-                vertex.TexCoords = vec;
-
-                // Tangent
-                vector.x = mesh->mTangents[i].x;
-                vector.y = mesh->mTangents[i].y;
-                vector.z = mesh->mTangents[i].z;
-                vertex.Tangent = vector;
-
-                // Bitangent
-                vector.x = mesh->mBitangents[i].x;
-                vector.y = mesh->mBitangents[i].y;
-                vector.z = mesh->mBitangents[i].z;
-                vertex.Bitangent = vector;
-            }
-            else
-            {
-                vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-            }
-    
-            vertices.push_back(vertex);
-        }
-
-        // Walk through each of the mesh's faces and retrieve the corresponding vertex indices
-        for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-        {
-            aiFace face = mesh->mFaces[i];
-
-            // Retrieve all indices of the face and store them in the indices vector
-            for (unsigned int j = 0; j < face.mNumIndices; j++)
-                indices.push_back(face.mIndices[j]);        
-        }
+        MeshImporter::LoadVertices(mesh, vertices);
+        MeshImporter::LoadIndices(mesh, indices);
 
         // Process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];    
 
-        // We assume a convention for sampler names in the shaders. 
-        // Each diffuse texture should be named as 'u_Diffuse' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-        // Same applies to other texture as the following list summarizes:
-        // Diffuse: u_Diffuse<N>
-        // Specular: u_Specular<N>
-        // Normal: u_Normal<N>
-        // Height: u_Height<N>
-    
         // 1. Diffuse maps
         {
             std::vector<Texture_> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "u_Diffuse");
@@ -171,13 +96,11 @@ namespace LkEngine {
             std::vector<Texture_> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "u_Height");
             textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
         }
+
         return Mesh(vertices, indices, textures);
     }
 
-    // FIXME:
-    // Checks all material textures of a given type and loads the textures if they're not loaded yet
-    // the required info is returned as a Texture struct
-    std::vector<Texture_> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
+    std::vector<Texture_> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string uniformName)
     {
         std::vector<Ref<Texture>> modelTextures;
         std::vector<Texture_> textures;
@@ -187,16 +110,30 @@ namespace LkEngine {
         {
             aiString textureFilename;
             mat->GetTexture(type, i, &textureFilename);
-            LK_CORE_DEBUG_TAG("Model", "Assimp texture loaded -> {}", textureFilename.C_Str());
 
             // Check if it exists in library
-            //if (Ref<Texture> loadedTexture = textureLib->TryToGetTextureWithFilename(File::ExtractFilenameWithoutExtension(textureFilename.C_Str())))
             Ref<Texture> loadedTexture = textureLib->TryToGetTextureWithFilename(textureFilename.C_Str());
             if (loadedTexture)
             {
                 // Load it since it already exists
-                LK_CORE_TRACE_TAG("Model", "Found texture with name {}", loadedTexture->GetName());
+                //LK_CORE_TRACE_TAG("Model", "Found texture with name {}", loadedTexture->GetName());
                 modelTextures.push_back(loadedTexture);
+            }
+            // Proceed to create the texture
+            else
+            {
+                TextureSpecification matTextureSpec;
+                matTextureSpec.Name = type;
+                matTextureSpec.DebugName = type;
+                matTextureSpec.UniformType = Utils::GetTextureUniformType(type);
+
+                //TextureUniformType uniformType = Utils::GetTextureUniformType(type);
+                Ref<Texture> materialTexture = Texture::Create(matTextureSpec);
+                LK_CORE_INFO_TAG("Model", "Created texture: name={}  filepath={}  width={}  height={}", materialTexture->GetName(), materialTexture->GetSpecification().Path, materialTexture->GetWidth(), materialTexture->GetHeight());
+                //m_MaterialTextures.insert({ materialTexture, uniformType });
+                m_Textures.push_back(materialTexture);
+
+                modelTextures.push_back(materialTexture);
             }
 
             for (unsigned int j = 0; j < m_TexturesLoaded.size(); j++)
@@ -210,13 +147,14 @@ namespace LkEngine {
 
             Texture_ texture;
             texture.id = GLUtils::TextureFromFile(textureFilename.C_Str(), m_Directory);
-            texture.type = typeName;
+            texture.type = uniformName;
             texture.path = textureFilename.C_Str();
             textures.push_back(texture);
             m_TexturesLoaded.push_back(texture);  // Store it as texture loaded for entire model
+            //LK_CORE_INFO("Texture.Type={}", uniformName);
         }
 
-        LK_WARN("MODEL, RETRIEVED A TOTAL OF {} ", modelTextures.size());
+        //LK_WARN("MODEL, RETRIEVED A TOTAL OF {} ", modelTextures.size());
         return textures;
     }
 

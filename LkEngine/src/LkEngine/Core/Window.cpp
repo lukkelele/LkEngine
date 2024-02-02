@@ -10,6 +10,8 @@
 
 namespace LkEngine {
 
+	static bool GLFW_Initialized = false;
+
 	static void GLFWErrorCallback(int error, const char* description)
 	{
 		LK_CORE_ERROR_TAG("GLFW", "GLFW Error ({0}): {1}", error, description);
@@ -70,17 +72,11 @@ namespace LkEngine {
 		SetVSync(true);
 		LK_CORE_DEBUG_TAG("Graphics Context", "Name: {}", m_GraphicsContext->GetName());
 
-		//m_SwapChain->Create(&m_Width, &m_Height, true);
-		//m_SwapChain = SwapChain::Create(&m_Width, &m_Height, true);
-
 		glfwSetWindowUserPointer(m_GlfwWindow, &m_Data);
-		//m_SwapChain->Init(&m_Width, &m_Height, true);
-	
 		if (glfwRawMouseMotionSupported())
 		{
 			glfwSetInputMode(m_GlfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 		}
-		glfwSetWindowAttrib(m_GlfwWindow, GLFW_FOCUSED, GL_TRUE);
 		glfwSetInputMode(m_GlfwWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
 		glfwSetInputMode(m_GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		glfwSetWindowSizeLimits(m_GlfwWindow, 420, 280, 2560, 1440);

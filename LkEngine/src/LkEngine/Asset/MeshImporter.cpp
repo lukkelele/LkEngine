@@ -10,14 +10,12 @@ namespace LkEngine {
 
     void MeshImporter::Load(std::filesystem::path filepath, Model* model)
     {
-        m_ModelRef = model;
         model->m_Directory = filepath.string().substr(0, filepath.string().find_last_of('/'));
-
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(filepath.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
-        ProcessNode(scene->mRootNode, scene, model->m_Meshes);
-        //Load(scene, model);
+        //ProcessNode(scene->mRootNode, scene, model->m_Meshes);
+        Load(scene, model);
     }
 
     void MeshImporter::Load(const aiScene* scene, Ref<Model>& model)

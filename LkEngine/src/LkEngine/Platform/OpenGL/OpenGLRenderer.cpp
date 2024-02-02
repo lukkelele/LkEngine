@@ -10,6 +10,8 @@ namespace LkEngine {
 	struct RendererData
 	{
         RendererCapabilities m_RendererCapabilities;
+
+		TextureArray TextureArrays[32];
 	};
 
 	static RendererData* Data = nullptr;
@@ -64,19 +66,12 @@ namespace LkEngine {
 		}
 
 		// TODO: Create TextureArray impl
-        GL_CALL(glGenTextures(1, &m_TextureArray_200x200));
-        GL_CALL(glActiveTexture(GL_TEXTURE0));
-        GL_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, m_TextureArray_200x200));
-
-        GL_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, MaxTexturesPerTextureArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
-        GL_CALL(glGenerateMipmap(GL_TEXTURE_2D_ARRAY));
-
-        //GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+		//m_TextureArray_200x200 = GLUtils::CreateTextureArray(200, 200, 0);
+		m_TextureArray_200x200 = GLUtils::CreateTextureArray(200, 200, 0);
+		m_TextureArray_400x400 = GLUtils::CreateTextureArray(400, 400, 1);
+		Data->TextureArrays[0] = m_TextureArray_200x200;
+		Data->TextureArrays[1] = m_TextureArray_400x400;
+		UnbindTextureArray();
 
         auto textures2D = TextureLibrary::Get()->GetTextures2D();
         for (int i = 0; i < textures2D.size(); i++)
@@ -88,10 +83,15 @@ namespace LkEngine {
 			switch (img->GetWidth())
 			{
 				case 200: // 200x200
-					GL_CALL(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data));
+					LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding texture to 200x200 texture array: {}", img->GetSpecification().Name);
+					BindTextureArray(0);
+					//GL_CALL(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, , 200, 200, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data));
+					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 1, 0, 0, 0, 200, 200, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data);
 					break;
 				case 400:
-					GL_CALL(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data));
+					LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding texture to 400x400 texture array: {}", img->GetSpecification().Name);
+					BindTextureArray(1);
+					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 1, 0, 0, 0, 400, 400, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data);
 					break;
 			}
         }
@@ -103,7 +103,7 @@ namespace LkEngine {
 		LK_VERIFY(m_Renderer2D, "OpenGLRenderer2D (Renderer 2D API) is nullptr!");
 
 		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, m_TextureArray_200x200);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, m_TextureArray_200x200.ID);
 
 		// Setup debugging stuff
 		SetupTexturesAndShaders();
@@ -283,6 +283,24 @@ namespace LkEngine {
 	void OpenGLRenderer::EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer)
 	{
 		auto commandBuffer = renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
+	}
+
+	TextureArray OpenGLRenderer::GetTextureArray(int idx)
+	{
+		return Data->TextureArrays[idx];
+	}
+
+	void OpenGLRenderer::BindTextureArray(int idx)
+	{
+		TextureArray& textureArray = Data->TextureArrays[idx];
+		glActiveTexture(GL_TEXTURE0 + textureArray.Slot);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.ID);
+	}
+
+	void OpenGLRenderer::UnbindTextureArray(int slot)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	}
 
 }

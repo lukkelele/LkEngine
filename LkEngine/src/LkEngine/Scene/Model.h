@@ -10,6 +10,8 @@
 
 #include "Mesh.h"
 
+#include "LkEngine/Renderer/Texture.h"
+
 
 namespace LkEngine {
 
@@ -20,7 +22,7 @@ namespace LkEngine {
         Model(const std::string& path, bool gamma = false);
         Model(const Model&) = default;
 
-        void Draw(Ref<Shader> shader);
+        void Draw(Ref<Shader>& shader);
 
         std::vector<Texture_> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
         
@@ -34,6 +36,9 @@ namespace LkEngine {
         std::vector<Texture_> m_TexturesLoaded;	// Stores all the textures loaded so far
         std::string m_Directory;
         bool m_GammaCorrection;
+
+        std::vector<Ref<Shader>> m_Shaders{};
+        std::vector<Ref<Texture>> m_Textures;	
 
         friend class ModelLoader;
         friend class MeshImporter;

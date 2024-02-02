@@ -70,6 +70,7 @@ namespace LkEngine {
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Line",   "assets/Shaders/Renderer2D_Line.shader");
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug",  "assets/Shaders/Renderer2D_Debug.shader");
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen", "assets/Shaders/Renderer2D_Screen.shader");
+		Renderer::GetShaderLibrary()->Load("BasicModel",        "assets/Shaders/Renderer_Model.shader");
 
 		m_RendererAPI = RendererAPI::Create();
 		m_RendererAPI->Init();

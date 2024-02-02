@@ -9,6 +9,13 @@ namespace LkEngine {
 
     constexpr const char* DEFAULT_TEXTURE_DIR = "assets/Textures";
 
+    typedef std::unordered_map<std::string, Ref<Texture>> TextureCollection;
+    typedef std::unordered_map<std::string, Ref<Texture2D>> Texture2DCollection;
+    typedef std::unordered_map<std::string, TextureCollection> TextureCollectionContainer;
+    typedef std::unordered_map<std::string, Texture2DCollection> Texture2DCollectionContainer;
+    //typedef std::unordered_map<std::string, std::unordered_map<std::string, Ref<Texture>>> TextureCollectionContainer;
+    //typedef std::unordered_map<std::string, std::unordered_map<std::string, Ref<Texture2D>>> Texture2DCollectionContainer;
+
     class TextureLibrary : public RefCounted
     {
     public:
@@ -39,6 +46,9 @@ namespace LkEngine {
 
         Ref<Texture> TryToGetTextureWithFilename(const std::string& filename);
 
+        TextureCollection& GetTextureCollection(std::string_view collectionName);
+        Texture2DCollection& GetTexture2DCollection(std::string_view collectionName);
+
         static Ref<TextureLibrary> Get() { return m_Instance; }
 
     private:
@@ -48,9 +58,8 @@ namespace LkEngine {
         std::unordered_map<std::string, Ref<Texture>> m_Collection;
         std::unordered_map<std::string, Ref<Texture2D>> m_Collection2D;
 
-        // Collections of collections
-        std::unordered_map<std::string, std::unordered_map<std::string, Ref<Texture>>> m_Collections;
-        std::unordered_map<std::string, std::unordered_map<std::string, Ref<Texture2D>>> m_Collections2D;
+        TextureCollectionContainer m_Collections;
+        Texture2DCollectionContainer m_Collections2D;
 
         Ref<Texture2D> m_WhiteTexture2D = nullptr;
         Ref<Texture2D> m_BlackTexture2D = nullptr;

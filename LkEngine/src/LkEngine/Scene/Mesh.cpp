@@ -32,8 +32,7 @@ namespace LkEngine {
     }
 
     // TODO: Render submission and setting of textures
-    //void Mesh::Draw(Ref<Shader>& shader) 
-    void Mesh::Draw()
+    void Mesh::Draw(Ref<Shader>& shader) 
     {
         // Bind appropriate m_TextureIDs
         unsigned int diffuseNr  = 1;
@@ -41,19 +40,34 @@ namespace LkEngine {
         unsigned int normalNr   = 1;
         unsigned int heightNr   = 1;
 
+        // TODO:
+        // Sampler2DArray for textures of duplicate nature in terms of uniform types
+
         for (unsigned int i = 0; i < m_TextureIDs.size(); i++)
         {
             // retrieve texture number (the N in diffuse_textureN)
             std::string number;
-            std::string name = m_TextureIDs[i].type;
+            std::string uniformName = m_TextureIDs[i].type;
 
-            if (name == "u_Diffuse")       number = std::to_string(diffuseNr++);  // Diffuse
-            else if (name == "u_Specular") number = std::to_string(specularNr++); // Specular
-            else if (name == "u_Normal")   number = std::to_string(normalNr++);   // Normal
-            else if (name == "u_Height")   number = std::to_string(heightNr++);   // Height
+            if (uniformName == "u_Diffuse")       number = std::to_string(diffuseNr++);  // Diffuse
+            else if (uniformName == "u_Specular") number = std::to_string(specularNr++); // Specular
+            else if (uniformName == "u_Normal")   number = std::to_string(normalNr++);   // Normal
+            else if (uniformName == "u_Height")   number = std::to_string(heightNr++);   // Height
+
+            //Shader& shader = *m_Shaders[i];
+            shader->Bind();
+            shader->Set((uniformName + number), i);
+            //LK_CORE_DEBUG("Setting [{}]=={}", (uniformName + number), number);
     
             glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
             glBindTexture(GL_TEXTURE_2D, m_TextureIDs[i].id);
+        }
+
+        unsigned int i = 0;
+        for (auto& texture : m_Textures)
+        {
+            //texture->Bind(i);
+            i++;
         }
         
         m_VertexBuffer->Bind();

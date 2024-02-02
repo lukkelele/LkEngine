@@ -44,20 +44,18 @@ namespace LkEngine {
 		uint32_t GetWidth() const override { return m_Width; }
 		uint32_t GetHeight() const override { return m_Height; }
 
-		Path GetPath() const { return m_FilePath; }
-		Path& GetPath() { return m_FilePath; }
+		FilePath GetPath() const { return m_FilePath; }
+		FilePath& GetPath() { return m_FilePath; }
 
 	protected:
-		Path m_FilePath;
-
 		Ref<Image> m_Image;
-
 		uint32_t m_Width, m_Height;
-		float m_ScalerX = 1.0f;
-		float m_ScalerY = 1.0f;
+		TextureSpecification m_Specification;
+		FilePath m_FilePath;
+
+		float m_ScalerX = 1.0f, m_ScalerY = 1.0f;
 		bool m_Loaded = false;
 		bool m_Locked = false;
-		TextureSpecification m_Specification;
 
 		bool m_InTextureArray = false;
 	};
@@ -97,13 +95,13 @@ namespace LkEngine {
 		uint32_t GetWidth() const override { return m_Specification.Width; }
 		uint32_t GetHeight() const override { return m_Specification.Height; }
 
-		Path GetPath() const { return m_FilePath; }
-		Path& GetPath() { return m_FilePath; }
+		FilePath GetPath() const { return m_FilePath; }
+		FilePath& GetPath() { return m_FilePath; }
 
 	private:
 		Ref<Image2D> m_Image = nullptr;
 		TextureSpecification m_Specification;
-		Path m_FilePath;
+		FilePath m_FilePath;
 
 		bool m_Loaded = false;
 		bool m_Locked = false;

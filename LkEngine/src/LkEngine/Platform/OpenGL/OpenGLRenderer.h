@@ -61,14 +61,18 @@ namespace LkEngine {
         Ref<Renderer2DAPI> GetRenderer2D() override { return m_Renderer2D; }
         Ref<Renderer2DAPI> GetRenderer2DAPI() override { return m_Renderer2D; }
 
+        void BindTextureArray(int idx);
+        TextureArray GetTextureArray(int idx);
+        static void UnbindTextureArray(int slot = 0);
+
     private:
         uint8_t m_DrawMode = GL_TRIANGLES;
 
         Ref<OpenGLRenderer2D> m_Renderer2D = nullptr;
         Ref<RenderPass> m_RenderPass = nullptr;
 
-        RendererID m_TextureArray_200x200 = 0;
-        RendererID m_TextureArray_400x400 = 0;
+        TextureArray m_TextureArray_200x200{};
+        TextureArray m_TextureArray_400x400{};
     };
 
 }

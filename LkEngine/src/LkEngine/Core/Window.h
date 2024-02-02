@@ -95,7 +95,6 @@ namespace LkEngine {
 
         std::string m_GlslVersion = "";
         bool m_VSync;
-        bool GLFW_Initialized = false;
 
         WindowSpecification m_Specification;
 

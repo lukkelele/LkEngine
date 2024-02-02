@@ -68,14 +68,11 @@ namespace LkEngine {
 			//	else
 			//		memorySize = Utils::GetMemorySize(spec.Format, spec.Height, spec.Height);
 			//}
-
 			//m_ImageData = Buffer::Copy(data, memorySize);
 			m_ImageData = Buffer::Copy(data, m_Specification.Size);
 
 			glGenTextures(1, &m_RendererID);
 			glBindTexture(GL_TEXTURE_2D, m_RendererID);
-			LK_CORE_TRACE("Created OpenGLImage ----- 1");
-
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data);
 			LK_CORE_TRACE("Created OpenGLImage");
@@ -100,6 +97,8 @@ namespace LkEngine {
 			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
 			m_ImageData = Buffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
 			stbi_image_free(data);
+
+			Invalidate();
 		}
     }
 

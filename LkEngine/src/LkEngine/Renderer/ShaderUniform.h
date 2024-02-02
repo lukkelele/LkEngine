@@ -5,6 +5,8 @@
 #include "LkEngine/Serialization/StreamReader.h"
 #include "LkEngine/Serialization/StreamWriter.h"
 
+#include <glm/glm.hpp>
+
 
 namespace LkEngine {
 
@@ -87,7 +89,6 @@ namespace LkEngine {
 			deserializer->ReadMap(instance.Uniforms);
 		}
 	};
-
 
 	namespace VKUtils {
 

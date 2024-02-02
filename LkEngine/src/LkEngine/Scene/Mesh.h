@@ -21,14 +21,15 @@ namespace LkEngine {
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture_> textureIDs);
         ~Mesh();
 
-        void Draw();
+        void Draw(Ref<Shader>& shader);
     
     private:
         Ref<VertexBuffer> m_VertexBuffer;
         std::vector<Vertex> m_Vertices;
 
         std::vector<Texture_> m_TextureIDs;
-        std::vector<Ref<Texture>> m_Textures;
+
+        std::vector<Ref<Texture>> m_Textures{};
     };
 
 }

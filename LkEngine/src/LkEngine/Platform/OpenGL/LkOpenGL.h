@@ -13,8 +13,12 @@
 
 #include "LkEngine/Renderer/VertexBuffer.h"
 
+#include "LkEngine/Renderer/Texture.h"
+
 
 namespace LkEngine {
+
+    #define GL_CALL(_FUNC) OpenGL_ClearError(); _FUNC; LK_ASSERT(OpenGL_LogCall(#_FUNC, __FILE__, __LINE__))
 
 	static void OpenGL_ClearError() 
 	{ 
@@ -37,10 +41,6 @@ namespace LkEngine {
 		sprintf(buf, "%s", glGetString(GL_VERSION));
 		return buf;
 	}
-
-
-    // OpenGL call macro to use for invoking opengl functions, provides error handling
-    #define GL_CALL(_FUNC) OpenGL_ClearError(); _FUNC; LK_ASSERT(OpenGL_LogCall(#_FUNC, __FILE__, __LINE__))
 
     constexpr int OpenGL_Major_Version = 4;
     constexpr int OpenGL_Minor_Version = 5;
@@ -72,6 +72,15 @@ namespace LkEngine {
         GLenum FramebufferTextureFormatToGL(ImageFormat format);
         std::string FramebufferTextureFormatToString(FramebufferTextureFormat format);
         std::string ImageFormatToString(ImageFormat format);
+
+        TextureArray CreateTextureArray(int width, int height, int slot);
+        void CreateTextureArray(TextureArray& textureArray, int width, int height, int slot);
+
+        static void BindTextureArray(const TextureArray& textureArray)
+        {
+            glActiveTexture(textureArray.Slot);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.ID);
+        }
 
     }
 

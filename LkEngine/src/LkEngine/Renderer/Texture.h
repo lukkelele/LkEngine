@@ -9,7 +9,17 @@
 
 namespace LkEngine {
 
-	typedef std::filesystem::path Path;
+	using FilePath = std::filesystem::path;
+
+	enum class TextureUniformType : uint8_t
+	{
+		Diffuse = 0,
+		Specular,
+		Normal,
+		Height,
+		Emissive,
+		DiffuseRoughness,
+	};
 
 	struct TextureSpecification
 	{
@@ -22,6 +32,8 @@ namespace LkEngine {
 		ImageFormat Format = ImageFormat::RGBA;
 		TextureWrap SamplerWrap = TextureWrap::Clamp;
 		TextureFilter SamplerFilter = TextureFilter::Linear;
+
+		TextureUniformType UniformType;
 
 		bool Storage = false;
 		bool StoreLocally = false;
@@ -57,8 +69,8 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0; 
 		virtual uint32_t GetHeight() const = 0; 
 
-		virtual Path GetPath() const = 0;
-		virtual Path& GetPath() = 0;
+		virtual FilePath GetPath() const = 0;
+		virtual FilePath& GetPath() = 0;
 
 		static Ref<Texture> Create(const TextureSpecification& specification);
 	};
@@ -96,12 +108,19 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0;  
 		virtual uint32_t GetHeight() const = 0;
 
-		virtual Path GetPath() const = 0;
-		virtual Path& GetPath() = 0;
+		virtual FilePath GetPath() const = 0;
+		virtual FilePath& GetPath() = 0;
 
 		static Ref<Texture2D> Create(const TextureSpecification& specification);
 		static Ref<Texture2D> Create(const TextureSpecification& specification, Buffer imageData);
-
 	};
+
+	struct TextureArray
+	{
+		RendererID ID;
+		uint32_t Width, Height;
+		unsigned int Slot;
+	};
+
 
 }

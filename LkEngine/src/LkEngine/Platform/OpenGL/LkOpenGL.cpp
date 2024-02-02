@@ -7,9 +7,12 @@
 #include "OpenGLRenderer.h"
 #include "OpenGLRenderer2D.h"
 #include "OpenGLShader.h"
+#include "OpenGLTexture.h"
 
 
 namespace LkEngine {
+
+	constexpr unsigned int MaxTexturesPerArray = 32;
 
 	namespace GLUtils {
 
@@ -249,6 +252,50 @@ namespace LkEngine {
 			}
 			LK_CORE_ASSERT(false, "Unknown FramebufferTextureFormat");
 		};
+
+		TextureArray CreateTextureArray(int width, int height, int slot)
+		{
+			TextureArray textureArray{};
+			textureArray.Width = width;
+			textureArray.Height = height;
+			textureArray.Slot = slot;
+			//RendererID textureArray{};
+			glGenTextures(1, &textureArray.ID);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.ID);
+
+			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, MaxTexturesPerArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+			//GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+			return textureArray;
+		}
+
+		void CreateTextureArray(TextureArray& textureArray, int width, int height, int slot)
+		{
+			textureArray.Width = width;
+			textureArray.Height = height;
+			textureArray.Slot = slot;
+			glGenTextures(1, &textureArray.ID);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.ID);
+
+			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, MaxTexturesPerArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+			//GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		}
 
 	}
 
