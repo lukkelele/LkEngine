@@ -24,12 +24,6 @@ namespace LkEngine {
 
     static bool Initialized = false;
 
-    struct RendererData
-    {
-    };
-
-    static RendererData* Data;
-
     OpenGLRenderer2D::OpenGLRenderer2D(const OpenGLRenderer2DSpecification& specification) 
         : m_Specification(specification)
         , m_MaxVertices(specification.MaxQuads * 4)
@@ -38,7 +32,6 @@ namespace LkEngine {
         , m_MaxLineIndices(specification.MaxLines * 6)
     {
         m_Renderer2DAPI = this;
-        Data = new RendererData;
 
         m_CameraBuffer = {};
         m_CameraUniformBuffer = {};
@@ -57,8 +50,10 @@ namespace LkEngine {
         const uint32_t framesInFlight = Renderer::GetFramesInFlight();
 
         // Shaders
-        m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
-        m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
+        {
+            m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
+            m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
+        }
 
         // Quad Framebuffer
         {
@@ -73,7 +68,7 @@ namespace LkEngine {
 		    //m_QuadFramebuffer = Framebuffer::Create(quadFramebufferSpec);
         }
 
-        // Debug OpenGL VAO's and VBO's
+        // OpenGL VAO's and VBO's (Debugging)
         {
             GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
             GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
@@ -133,12 +128,10 @@ namespace LkEngine {
                 quadIndices[i + 5] = offset + 0;
                 offset += 4;
             }
+
             Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, m_MaxIndices);
             m_QuadVertexBuffer->SetIndexBuffer(quadIB);
             m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
-
-            LK_CORE_VERIFY(m_QuadVertexBuffer, "m_QuadVertexBuffer is nullptr");
-            LK_CORE_VERIFY(m_QuadVertexBufferPtr, "m_QuadVertexBufferPtr is nullptr");
 
             delete[] quadIndices;
         }
@@ -157,6 +150,7 @@ namespace LkEngine {
             uint32_t* lineIndices = new uint32_t[m_MaxLineIndices];
             for (uint32_t i = 0; i < m_MaxLineIndices; i++)
 		        lineIndices[i] = i;
+
 		    delete[] lineIndices;
         }
 
@@ -166,7 +160,7 @@ namespace LkEngine {
 
             m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
             m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData));
-            LK_CORE_VERIFY(m_CameraUniformBuffer != nullptr, "CameraUniformBuffer is nullptr!");
+            LK_CORE_VERIFY(m_CameraUniformBuffer, "CameraUniformBuffer == NULL");
 
             m_RenderCommandBuffer = RenderCommandBuffer::Create(0, "OpenGLRenderer2D-RenderCommandBuffer");
         }
@@ -240,11 +234,6 @@ namespace LkEngine {
             dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
-            //for (int i = 0; i < TextureArrays.size(); i++)
-            //{
-            //    if (TextureArrays[i])
-            //        TextureArrays[i]->Bind();
-            //}
 			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, m_CameraBuffer.ViewProjection, m_QuadIndexCount);
 
             m_Stats.DrawCalls++;
@@ -299,7 +288,7 @@ namespace LkEngine {
     void OpenGLRenderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         LK_ASSERT(false);
-        float textureIndex = 0; 
+        const float textureIndex = 0; 
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
 
@@ -308,8 +297,8 @@ namespace LkEngine {
             m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i];
             m_QuadVertexBufferPtr->TexCoord = TextureCoords[i];
             m_QuadVertexBufferPtr->Color = color;
-            m_QuadVertexBufferPtr->TexIndex = textureIndex;
-            m_QuadVertexBufferPtr->TexArray = -1;
+            m_QuadVertexBufferPtr->TexIndex = textureIndex; // White texture
+            m_QuadVertexBufferPtr->TexArray = 0;            // White texture
             m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
             m_QuadVertexBufferPtr->EntityID = entityID;
             m_QuadVertexBufferPtr++;
@@ -366,7 +355,6 @@ namespace LkEngine {
             {
                 textureIndex = m_TextureArrays[i]->GetIndexOfTexture(texture);
                 textureArrayIndex = (float)i;
-                //LK_CORE_WARN("Setting TextureArrayIndex={}  TextureIndex={},  TextureName={}", textureArrayIndex, textureIndex, texture->GetName());
                 break;
             }
         }

@@ -18,7 +18,7 @@ namespace LkEngine {
 	};
 
 	static RendererData* Data = nullptr;
-	static uint8_t TextureArrayCount = 0;
+	static int TextureArrayCount = 0;
 
     void OpenGLRenderer::Init()
     {
@@ -31,8 +31,8 @@ namespace LkEngine {
 			textureSpec.Width = 512;
 		    textureSpec.Height = 512;
             textureSpec.Path = "assets/Textures/grass.png";
-            textureSpec.Name = "grass";
-            textureSpec.DebugName = "grass";
+            textureSpec.Name = "grass-512x512";
+            textureSpec.DebugName = "grass-512x512";
             textureSpec.GenerateMips = true;
 			textureSpec.Format = ImageFormat::RGBA32F;
             textureSpec.SamplerWrap = TextureWrap::Repeat;
@@ -44,9 +44,9 @@ namespace LkEngine {
             textureSpec.Name = "skybox-ice-back-512x512";
             textureSpec.DebugName = "skybox-ice-back-512x512";
             textureSpec.GenerateMips = false;
-            textureSpec.Format = ImageFormat::RGB;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
+			textureSpec.Format = ImageFormat::RGBA32F;
             textureSpec.SamplerWrap = TextureWrap::Clamp;
+            textureSpec.SamplerFilter = TextureFilter::Nearest;
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 		}
 		// Textures: 1024x1024
@@ -66,17 +66,15 @@ namespace LkEngine {
 		// Textures: 2048x2048 
 		{
 			TextureSpecification textureSpec;
+			// Wood container
 			textureSpec.Format = ImageFormat::RGBA32F;
 			textureSpec.Width = 2048;
 			textureSpec.Height = 2048;
-			textureSpec.SamplerWrap = TextureWrap::Clamp;
-			textureSpec.SamplerFilter = TextureFilter::Nearest;
-
-			// Wood container
+			textureSpec.Path = "assets/Textures/container.jpg";
 			textureSpec.Name = "container";
 			textureSpec.DebugName = "container";
-			textureSpec.Format = ImageFormat::RGBA;
-			textureSpec.Path = "assets/Textures/container.jpg";
+			textureSpec.SamplerWrap = TextureWrap::Clamp;
+			textureSpec.SamplerFilter = TextureFilter::Nearest;
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 
 			// Bricks
@@ -86,18 +84,12 @@ namespace LkEngine {
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 
 			// Åle texture
-		    textureSpec.Format = ImageFormat::RGBA32F;
-			textureSpec.Width = 2048;
-			textureSpec.Height = 2048;
 			textureSpec.Path = "assets/Textures/Misc/ale_1024x1024.png";
 			textureSpec.Name = "ale1024";
 			textureSpec.DebugName = "ale1024";
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 
 			// Lukas texture
-		    textureSpec.Format = ImageFormat::RGBA32F;
-			textureSpec.Width = 2048;
-			textureSpec.Height = 2048;
 			textureSpec.Path = "assets/Textures/Misc/lukas_1024.jpg";
 			textureSpec.Name = "lukas_1024";
 			textureSpec.DebugName = "lukas-1024x1024";
@@ -105,7 +97,6 @@ namespace LkEngine {
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 
 			// Metal
-		    textureSpec.Format = ImageFormat::RGBA32F;
             textureSpec.Path = "assets/Textures/metal.png";
             textureSpec.Name = "metal-ground";
             textureSpec.DebugName = "metal-ground";
@@ -115,8 +106,6 @@ namespace LkEngine {
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 
 			// Wood
-		    textureSpec.Width = 2048;
-		    textureSpec.Height = 2048;
             textureSpec.Name = "wood";
             textureSpec.DebugName = "wood";
             textureSpec.Path = "assets/Textures/wood.png";
@@ -126,17 +115,14 @@ namespace LkEngine {
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 
 			// Skybox
-            TextureSpecification skyboxSpec;
-            skyboxSpec.Width = 2048;
-            skyboxSpec.Height = 2048;
-            skyboxSpec.Name = "skybox-ice-back";
-            skyboxSpec.DebugName = "skybox-ice-back";
-            skyboxSpec.Path = "assets/Textures/Skybox/back.jpg";
-            skyboxSpec.GenerateMips = false;
-            skyboxSpec.Format = ImageFormat::RGBA32F;
-            skyboxSpec.SamplerFilter = TextureFilter::Nearest;
-            skyboxSpec.SamplerWrap = TextureWrap::Clamp;
-			TextureLibrary::Get()->AddTexture2D(skyboxSpec);
+            textureSpec.Name = "skybox-ice-back";
+            textureSpec.DebugName = "skybox-ice-back";
+            textureSpec.Path = "assets/Textures/Skybox/back.jpg";
+            textureSpec.GenerateMips = false;
+            textureSpec.Format = ImageFormat::RGBA32F;
+            textureSpec.SamplerFilter = TextureFilter::Nearest;
+            textureSpec.SamplerWrap = TextureWrap::Clamp;
+			TextureLibrary::Get()->AddTexture2D(textureSpec);
         }
 
 		// Create texture arrays
@@ -168,7 +154,7 @@ namespace LkEngine {
         for (int i = 0; i < textures2D.size(); i++)
         {
 			Ref<OpenGLImage2D> img = textures2D[i].second->GetImage().As<OpenGLImage2D>();
-			//LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding texture {} to {}x{} texture array", img->GetSpecification().Name, img->GetWidth(), img->GetHeight());
+			//switch (textures2D[i].second->GetWidth())
 			switch (img->GetWidth())
 			{
 				case 512:  GetTextureArray(0)->AddTextureToArray(textures2D[i].second); break;
@@ -182,18 +168,15 @@ namespace LkEngine {
 		m_Renderer2D = Ref<OpenGLRenderer2D>::Create(renderer2DSpec);
 
 		// Add texture array references to OpenGLRenderer2D as well
-		int addedTextureArrays = 0;
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < OpenGLRenderer2D::MaxTextureArrays; i++)
 		{
 			if (Data->TextureArrays[i])
 			{
 				m_Renderer2D->m_TextureArrays[i] = Data->TextureArrays[i];
 				BindTextureArray(i);
-				//LK_CORE_DEBUG_TAG("OpenGLRenderer", "Added texture array {}x{} to OpenGLRenderer2D, number {}", Data->TextureArrays[i]->GetWidth(), Data->TextureArrays[i]->GetHeight(), i);
-				addedTextureArrays++;
+				LK_CORE_DEBUG("Binding texture array: {}", i);
 			}
 		}
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Added {} texture arrays to OpenGLRenderer2D", addedTextureArrays);
 		m_Renderer2D->Init();
 
 		// Setup debugging stuff
@@ -347,7 +330,6 @@ namespace LkEngine {
 	{
 		Ref<OpenGLPipeline> pipeline = pipelineRef.As<OpenGLPipeline>();
 		std::deque<RendererID> boundTextureArrays = pipeline->GetBoundTextureArrays();
-		LK_CORE_DEBUG("BoundTextureArrays: {}", boundTextureArrays.size());
 		auto& framebuffer = Renderer::GetViewportFramebuffer();
 		Renderer::Submit([this, pipeline, framebuffer, shader, vertexBuffer, transform, indexCount, boundTextureArrays]() mutable
 		{
@@ -356,10 +338,8 @@ namespace LkEngine {
 
 			int i = 1;
 			for (RendererID& textureArray : boundTextureArrays)
-			{
 				shader->Set("u_TextureArray" + std::to_string(i++), textureArray);
-			}
-            shader->Set("u_ViewProj", transform);
+            shader->Set("u_ViewProjectionMatrix", transform);
 			
 			vertexBuffer->Bind();
 			DrawIndexed(indexCount);

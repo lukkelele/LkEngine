@@ -182,11 +182,10 @@ namespace LkEngine {
 		{
 			for (int i = 0; i < m_Textures.size(); i++)
 			{
-				//LK_CORE_TRACE("{} GetIndexOfTexture - Current texture: {}", i, m_Textures[i]->GetName());
 				if (m_Textures[i]->GetRendererID() == texture->GetRendererID())
 					return (float)(i); // 
 			}
-			return 0.0f;
+			return 0.0f; // Return 0 to set the index to the first slot, aka white texture
 		}
 
 	public:

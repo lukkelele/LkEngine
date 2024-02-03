@@ -349,7 +349,6 @@ namespace LkEngine {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-		//AddTextureToArray(TextureLibrary::Get()->GetWhiteTexture2D());
 	}
 
 	void TextureArray::Bind()

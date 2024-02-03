@@ -25,6 +25,7 @@ namespace LkEngine {
     TextureLibrary::TextureLibrary()
     {
         m_Instance = Ref<TextureLibrary>(this);
+        m_Collection2D.clear();
 
         // White Texture
 		TextureSpecification spec;
@@ -64,11 +65,11 @@ namespace LkEngine {
 
                     nanosuitSpec.Path = nanosuitDirectory + std::string("/") + filename;
                     nanosuitCollection.insert({ filename, Texture2D::Create(nanosuitSpec) });
-                    //LK_CORE_INFO_TAG("TextureLibrary", "Added nanosuit file: {}", filename);
                 }
             }
             m_Collections2D.insert({ "Nanosuit", nanosuitCollection });
         }
+
     }
 
     TextureLibrary::~TextureLibrary()
@@ -140,9 +141,14 @@ namespace LkEngine {
     {
         for (const auto& entry : m_Collection2D)
         {
+            //LK_CORE_TRACE("Entry: {}   {}", entry.first, entry.second->GetName());
             if (entry.first == File::ExtractFilenameWithoutExtension(textureSpec.Name))
             {
-                LK_CORE_DEBUG("Texture {} already exists in the 2D collection, returning it", textureSpec.Name);
+                //if (textureSpec.Width == entry.second->GetWidth() && textureSpec.Height == entry.second->GetHeight() || entry.first == textureSpec.Name)
+                //{
+                //    LK_CORE_WARN_TAG("TextureLibrary", "Texture {} already exists and has same dimensions as the passed specification, returning it", textureSpec.Name);
+                //    return entry.second;
+                //}
                 return entry.second;
             }
         }
