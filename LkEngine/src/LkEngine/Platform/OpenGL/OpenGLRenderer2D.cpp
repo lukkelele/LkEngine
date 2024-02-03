@@ -23,12 +23,14 @@
 namespace LkEngine {
 
     static bool Initialized = false;
-    static int Uniform_TextureArray_Quad_Index = 0;
-    static int Uniform_ActiveUnit_TextureArray_Quad = GL_TEXTURE0;
-    static int Uniform_TextureArray_Quad_Skybox_Index = 1;
-    static int Uniform_ActiveUnit_TextureArray_Quad_Skybox = GL_TEXTURE1;
 
-    OpenGLRenderer2D::OpenGLRenderer2D(const Renderer2DSpecification& specification) 
+    struct RendererData
+    {
+    };
+
+    static RendererData* Data;
+
+    OpenGLRenderer2D::OpenGLRenderer2D(const OpenGLRenderer2DSpecification& specification) 
         : m_Specification(specification)
         , m_MaxVertices(specification.MaxQuads * 4)
         , m_MaxIndices(specification.MaxQuads * 6)
@@ -36,6 +38,7 @@ namespace LkEngine {
         , m_MaxLineIndices(specification.MaxLines * 6)
     {
         m_Renderer2DAPI = this;
+        Data = new RendererData;
 
         m_CameraBuffer = {};
         m_CameraUniformBuffer = {};
@@ -95,9 +98,13 @@ namespace LkEngine {
             RenderPassSpecification quadPassSpec;
             quadPassSpec.DebugName = "Renderer2D-QuadPass";
             quadPassSpec.Pipeline = Pipeline::Create(quadPipelineSpec);
-            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Created new pipeline {}", quadPipelineSpec.DebugName);
+            Ref<OpenGLPipeline> openglPipeline = quadPassSpec.Pipeline.As<OpenGLPipeline>();
 
+            // Set up quad shader to use the correct amount of texture array uniforms 
+            for (uint8_t textureArray = 0; textureArray< m_Specification.TextureArraysUsed; textureArray++)
+                openglPipeline->BindTextureArray(textureArray);
             m_QuadPass = RenderPass::Create(quadPassSpec);
+            //LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Created new pipeline {}", quadPipelineSpec.DebugName);
             
             m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
             m_QuadVertexBuffer->SetLayout({
@@ -155,9 +162,6 @@ namespace LkEngine {
 
         // Textures
         {
-            //auto textures2D = TextureLibrary::Get()->GetTextures2D();
-            //for (int i = 0; i < textures2D.size(); i++)
-            //    m_TextureSlots[i] = textures2D[i].second;
             m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture2D();
 
             m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
@@ -186,11 +190,6 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        //for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
-        //{
-        //    if (m_TextureArrays[i])
-        //        m_TextureArrays[i]->Bind();
-        //}
         StartBatch();
     }
 
@@ -199,11 +198,6 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetProjectionMatrix() * glm::inverse(transform);
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        //for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
-        //{
-        //    if (m_TextureArrays[i])
-        //        m_TextureArrays[i]->Unbind();
-        //}
         StartBatch();
     }
 
@@ -212,11 +206,6 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = viewProjectionMatrix;
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        //for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
-        //{
-        //    if (m_TextureArrays[i])
-        //        m_TextureArrays[i]->Unbind();
-        //}
         StartBatch();
     }
 
@@ -251,20 +240,15 @@ namespace LkEngine {
             dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
-            for (int i = 1; i < m_TextureArrays.size(); i++)
-            {
-                if (m_TextureArrays[i])
-                {
-                    m_TextureArrays[i]->Bind();
-                    //LK_CORE_WARN("TextureArray-Bound={} slot={}, dim={}x{}", m_TextureArrays[i]->GetRendererID(), m_TextureArrays[i]->GetTextureSlot(), m_TextureArrays[i]->GetWidth(), m_TextureArrays[i]->GetHeight());
-                }
-            }
+            //for (int i = 0; i < TextureArrays.size(); i++)
+            //{
+            //    if (TextureArrays[i])
+            //        TextureArrays[i]->Bind();
+            //}
 			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, m_CameraBuffer.ViewProjection, m_QuadIndexCount);
 
             m_Stats.DrawCalls++;
         }
-
-        m_TextureSlotIndex = 0;
     }
 
     void OpenGLRenderer2D::DrawImage(const Ref<Image> image)
@@ -382,11 +366,10 @@ namespace LkEngine {
             {
                 textureIndex = m_TextureArrays[i]->GetIndexOfTexture(texture);
                 textureArrayIndex = (float)i;
-                LK_CORE_WARN("Setting TextureArrayIndex={}  TextureIndex={},  TextureName={}", textureArrayIndex, textureIndex, texture->GetName());
+                //LK_CORE_WARN("Setting TextureArrayIndex={}  TextureIndex={},  TextureName={}", textureArrayIndex, textureIndex, texture->GetName());
                 break;
             }
         }
-        //LK_CORE_DEBUG("Setting textureIndex to {}", textureIndex);
 
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, pos.z })
             * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -464,5 +447,14 @@ namespace LkEngine {
 	{
         return m_LineVertexBufferPtr;
 	}
+
+    void OpenGLRenderer2D::AddTextureArray(const Ref<TextureArray>& textureArray)
+    {
+        for (int i = 0; i < MaxTextureArrays; i++)
+        {
+            if (m_TextureArrays[i] == nullptr)
+                m_TextureArrays[i] = textureArray;
+        }
+    }
 
 }

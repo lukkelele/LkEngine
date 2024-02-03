@@ -25,4 +25,9 @@ namespace LkEngine {
 		m_Specification.Layout = layout;
 	}
 
+	void OpenGLPipeline::BindTextureArray(const RendererID& rendererID)
+	{
+		m_BoundTextureArrays.push_back(rendererID);
+	}
+
 }

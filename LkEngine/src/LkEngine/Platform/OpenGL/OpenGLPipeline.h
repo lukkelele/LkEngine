@@ -20,11 +20,12 @@ namespace LkEngine {
 		PipelineSpecification& GetSpecification() override { return m_Specification; }
 		const PipelineSpecification& GetSpecification() const override { return m_Specification; }
 
-		uint32_t GetBoundTextureArray() const { return m_BoundTextureArray; }
+		void BindTextureArray(const RendererID& rendererID);
+		std::deque<RendererID> GetBoundTextureArrays() const { return m_BoundTextureArrays; }
 
 	private:
 		PipelineSpecification m_Specification;
-		uint32_t m_BoundTextureArray = 0;
+		std::deque<RendererID> m_BoundTextureArrays{};
 
     };
 

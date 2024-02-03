@@ -4,12 +4,7 @@
 
 namespace LkEngine {
 
-    static std::vector<std::string> ImageExtensions = { 
-        ".jpg", 
-        ".jpeg", 
-        ".png", 
-        ".bmp" 
-    };
+    static std::vector<std::string> ImageExtensions = { ".jpg", ".jpeg", ".png", ".bmp" };
 
     namespace fs = std::filesystem;
 
@@ -22,10 +17,8 @@ namespace LkEngine {
         std::string filepath = entry.path().string();
         std::string fileExtension = entry.path().extension().string();
 
-        if (fileExtension == "png")
-            return FileExtension::PNG;
-        else if (fileExtension == "jpg")
-            return FileExtension::JPG;
+        if (fileExtension == "png")      return FileExtension::PNG;
+        else if (fileExtension == "jpg") return FileExtension::JPG;
         return FileExtension::Unknown;
     }
 
@@ -161,7 +154,7 @@ namespace LkEngine {
 
     Ref<Texture> TextureLibrary::GetWhiteTexture()
     {
-        return m_WhiteTexture2D;
+        return m_WhiteTexture;
     }
 
     Ref<Texture2D> TextureLibrary::GetWhiteTexture2D()
@@ -171,7 +164,7 @@ namespace LkEngine {
 
     Ref<Texture> TextureLibrary::GetBlackTexture()
     {
-        return m_BlackTexture2D;
+        return m_BlackTexture;
     }
 
     Ref<Texture2D> TextureLibrary::GetBlackTexture2D()

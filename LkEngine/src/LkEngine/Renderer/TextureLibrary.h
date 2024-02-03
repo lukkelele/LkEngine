@@ -7,14 +7,10 @@
 
 namespace LkEngine {
 
-    constexpr const char* DEFAULT_TEXTURE_DIR = "assets/Textures";
-
-    typedef std::unordered_map<std::string, Ref<Texture>> TextureCollection;
-    typedef std::unordered_map<std::string, Ref<Texture2D>> Texture2DCollection;
-    typedef std::unordered_map<std::string, TextureCollection> TextureCollectionContainer;
-    typedef std::unordered_map<std::string, Texture2DCollection> Texture2DCollectionContainer;
-    //typedef std::unordered_map<std::string, std::unordered_map<std::string, Ref<Texture>>> TextureCollectionContainer;
-    //typedef std::unordered_map<std::string, std::unordered_map<std::string, Ref<Texture2D>>> Texture2DCollectionContainer;
+    using TextureCollection = std::unordered_map<std::string, Ref<Texture>>;
+    using Texture2DCollection = std::unordered_map<std::string, Ref<Texture2D>>;
+    using TextureCollectionContainer = std::unordered_map<std::string, TextureCollection>;
+    using Texture2DCollectionContainer = std::unordered_map<std::string, Texture2DCollection>;
 
     class TextureLibrary : public RefCounted
     {
@@ -30,7 +26,6 @@ namespace LkEngine {
         Ref<Texture2D> GetTexture2D(const std::string textureName);
 
         Ref<Texture2D> AddTexture2D(const TextureSpecification& texture);
-        std::string GetTexturesDirectoryPath() { return m_TexturesDir; }
 
         void RenameTexture(const std::string& name, const std::string& newName);
         std::vector<std::pair<std::string, Ref<Texture2D>>> GetTextures2D();
@@ -52,16 +47,16 @@ namespace LkEngine {
 
     private:
         bool m_Initialized = false;
-        std::string m_TexturesDir = "assets/Textures";
 
-        std::unordered_map<std::string, Ref<Texture>> m_Collection;
-        std::unordered_map<std::string, Ref<Texture2D>> m_Collection2D;
+        Ref<Texture> m_WhiteTexture;
+        Ref<Texture> m_BlackTexture;
+        Ref<Texture2D> m_WhiteTexture2D;
+        Ref<Texture2D> m_BlackTexture2D;
 
+        TextureCollection m_Collection;
+        Texture2DCollection m_Collection2D;
         TextureCollectionContainer m_Collections;
         Texture2DCollectionContainer m_Collections2D;
-
-        Ref<Texture2D> m_WhiteTexture2D = nullptr;
-        Ref<Texture2D> m_BlackTexture2D = nullptr;
 
         inline static Ref<TextureLibrary> m_Instance = nullptr;
     };

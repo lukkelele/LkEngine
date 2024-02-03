@@ -63,7 +63,6 @@ namespace LkEngine {
         void BindTextureArray(int idx);
         void BindTextureArray(const TextureArrayDimension& dimension);
         Ref<TextureArray> GetTextureArray(int idx);
-        static void UnbindTextureArray(int slot = 0);
 
     private:
         Ref<TextureArray> GetTextureArrayWithDimension(const TextureArrayDimension& dimension);

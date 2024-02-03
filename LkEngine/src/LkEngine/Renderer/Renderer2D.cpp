@@ -11,16 +11,6 @@
 
 namespace LkEngine {
 
-    Ref<Renderer2DAPI> Renderer2D::Create(const Renderer2DSpecification& specification)
-    {
-        switch (RendererAPI::Current())
-        {
-            case RendererAPIType::OpenGL: return m_Renderer2D = Ref<OpenGLRenderer2D>::Create();
-            //case RendererAPIType::Vulkan: return m_Renderer2D = Ref<VulkanRenderer2D>::Create();
-        }
-        LK_CORE_ASSERT(false, "No render api detected");
-    }
-
     void Renderer2D::Init()
     {
     }

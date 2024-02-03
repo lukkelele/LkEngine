@@ -17,8 +17,6 @@ namespace LkEngine {
         uint32_t MaxQuads = 10000;
         uint32_t MaxLines = 1000;
         bool SwapChainTarget = false;
-
-        Renderer2DSpecification() = default;
     };
 
 }

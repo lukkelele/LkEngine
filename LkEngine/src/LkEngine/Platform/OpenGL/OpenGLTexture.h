@@ -182,7 +182,7 @@ namespace LkEngine {
 		{
 			for (int i = 0; i < m_Textures.size(); i++)
 			{
-				LK_CORE_TRACE("{} GetIndexOfTexture - Current texture: {}", i, m_Textures[i]->GetName());
+				//LK_CORE_TRACE("{} GetIndexOfTexture - Current texture: {}", i, m_Textures[i]->GetName());
 				if (m_Textures[i]->GetRendererID() == texture->GetRendererID())
 					return (float)(i); // 
 			}

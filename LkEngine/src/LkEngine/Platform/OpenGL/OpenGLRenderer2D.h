@@ -10,10 +10,15 @@ namespace LkEngine {
 
     class Entity;
 
+    struct OpenGLRenderer2DSpecification : public Renderer2DSpecification
+    {
+        uint8_t TextureArraysUsed = 1;
+    };
+
 	class OpenGLRenderer2D : public Renderer2DAPI
 	{
     public:
-        OpenGLRenderer2D(const Renderer2DSpecification& specification = Renderer2DSpecification());
+        OpenGLRenderer2D(const OpenGLRenderer2DSpecification& specification = OpenGLRenderer2DSpecification());
         ~OpenGLRenderer2D();
 
         void Init() override;
@@ -44,7 +49,7 @@ namespace LkEngine {
         Ref<Shader> GetQuadShader() override { return m_QuadShader; }
         Ref<Shader> GetLineShader() override { return m_LineShader; }
 
-        //Ref<OpenGLFramebuffer> GetFramebuffer() { return m_QuadFramebuffer; }
+        const Renderer2DSpecification& GetSpecification() const override { return m_Specification; }
 
         float GetLineWidth() override;
         void SetLineWidth(float width) override;
@@ -64,12 +69,16 @@ namespace LkEngine {
         QuadVertex*& GetWriteableQuadBuffer() override;
         LineVertex*& GetWriteableLineBuffer() override;
 
+        void AddTextureArray(const Ref<TextureArray>& textureArray);
+
     public:
-        static constexpr uint32_t MaxTextureSlots = 32;
-        static constexpr uint8_t  MaxTextureArrays = 10;
+        static constexpr int MaxTextureSlots = 32;
+        static constexpr int MaxTextureArrays = 10;
     private:
         int m_DrawMode;
-        Renderer2DSpecification m_Specification;
+
+        //Renderer2DSpecification m_Specification;
+        OpenGLRenderer2DSpecification m_Specification;
         RenderCommandQueue m_RenderQueue;
 
         const uint32_t m_MaxVertices;
@@ -91,8 +100,7 @@ namespace LkEngine {
         Ref<Shader> m_QuadShader;
 		Ref<IndexBuffer> m_QuadIndexBuffer;
         Ref<VertexBuffer> m_QuadVertexBuffer;
-        glm::vec4 m_QuadVertexPositions[4];
-        //Ref<Framebuffer> m_QuadFramebuffer;
+        glm::vec4 m_QuadVertexPositions[4] = {};
 
         // Line
         float m_LineWidth = 3.0f;
@@ -105,7 +113,6 @@ namespace LkEngine {
         Ref<Shader> m_LineShader = nullptr;
 		Ref<Material> m_LineMaterial;
 
-        uint32_t m_TextureSlotIndex = 1; // 0 --> White Texture
         Ref<Shader> m_TextureShader = nullptr;
         Ref<Texture2D> m_WhiteTexture = nullptr;
 

@@ -77,7 +77,10 @@ namespace LkEngine {
         virtual void AddTextureToSlot(Ref<Texture2D> texture) = 0;
         virtual void AddTextureToSlot(Ref<Texture2D> texture, int slot) = 0;
 
-        static Ref<Renderer2DAPI> Create(const Renderer2DSpecification& specification);
+        virtual const Renderer2DSpecification& GetSpecification() const = 0;
+
+        //static Ref<Renderer2DAPI> Create(const Renderer2DSpecification& specification);
+        //static Ref<Renderer2DAPI> Create();
         static Ref<Renderer2DAPI> Get() { return m_Renderer2DAPI; }
 
         virtual Ref<Shader> GetQuadShader() = 0;
