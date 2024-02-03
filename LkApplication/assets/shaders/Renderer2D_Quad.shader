@@ -41,12 +41,28 @@ in float      v_TexIndex;
 in float      v_TilingFactor;
 flat in int   v_EntityID;
 
-uniform sampler2DArray u_TextureArray;
+uniform sampler2DArray u_TextureArray1;
+uniform sampler2DArray u_TextureArray2;
+uniform sampler2DArray u_TextureArray3;
+uniform sampler2DArray u_TextureArray4;
+uniform sampler2DArray u_TextureArray5;
 
 
 void main()
 {
-    vec4 tex = texture(u_TextureArray, vec3(v_TexCoord, v_TexIndex));
+    //vec4 tex = vec4(0.0);
+    //switch(int(v_TexIndex)) 
+    //{
+    //    case 0: 
+    //        tex = texture(u_TextureArray1, vec3(v_TexCoord, v_TexIndex));
+    //        break;
+    //    case 3: 
+    //        tex = texture(u_TextureArray3, vec3(v_TexCoord, v_TexIndex));
+    //        break;
+    //    default:
+    //        break;
+    //}
+    vec4 tex = texture(u_TextureArray1, vec3(v_TexCoord, v_TexIndex));
     FragColor = tex * v_Color;
 }
 
