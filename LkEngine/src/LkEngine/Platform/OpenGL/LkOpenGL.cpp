@@ -253,16 +253,17 @@ namespace LkEngine {
 			LK_CORE_ASSERT(false, "Unknown FramebufferTextureFormat");
 		};
 
+#if 0
 		TextureArray CreateTextureArray(int width, int height, int slot)
 		{
 			TextureArray textureArray{};
-			textureArray.Width = width;
-			textureArray.Height = height;
-			textureArray.Slot = slot;
+			textureArray.m_Width = width;
+			textureArray.m_Height = height;
+			textureArray.m_Specification.TextureSlot = slot;
 			//RendererID textureArray{};
-			glGenTextures(1, &textureArray.ID);
+			glGenTextures(1, &textureArray.m_RendererID);
 			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.ID);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.m_RendererID);
 
 			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, MaxTexturesPerArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
@@ -276,15 +277,17 @@ namespace LkEngine {
 
 			return textureArray;
 		}
+#endif
 
-		void CreateTextureArray(TextureArray& textureArray, int width, int height, int slot)
+#if 0
+		void CreateTextureArray(TextureArray* textureArray, int width, int height, int slot)
 		{
-			textureArray.Width = width;
-			textureArray.Height = height;
-			textureArray.Slot = slot;
-			glGenTextures(1, &textureArray.ID);
+			textureArray->m_Width = width;
+			textureArray->m_Height = height;
+			textureArray->m_Specification.TextureSlot = slot;
+			glGenTextures(1, &textureArray->m_RendererID);
 			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.ID);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray->m_RendererID);
 
 			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, MaxTexturesPerArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
@@ -296,6 +299,7 @@ namespace LkEngine {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		}
+#endif
 
 	}
 

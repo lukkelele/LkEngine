@@ -99,7 +99,6 @@ namespace LkEngine {
 	void OpenGLShader::Set(const std::string& name, const glm::ivec4& value)
 	{
 		GL_CALL(glUseProgram(m_RendererID));
-		//GL_CALL(glUniformHandleui64ARB(GetUniformLocation(name), m_HandleARB));
 		GL_CALL(glUniform4i(GetUniformLocation(name), value.x, value.y, value.z, value.w));
 	}
 
@@ -114,7 +113,7 @@ namespace LkEngine {
 			LK_CORE_WARN("[SHADER] Warning: uniform {0} isn't in use", name);
 
 		m_UniformLocationCache[name] = location;
-		LK_CORE_DEBUG("{} in uniform cache --> m_UniformLocationCache[{}] == {}", name, name, location);
+		//LK_CORE_DEBUG("{} in uniform cache --> m_UniformLocationCache[{}] == {}", name, name, location);
 		return location;
 	}
 

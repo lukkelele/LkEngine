@@ -4,7 +4,6 @@
 
 #include "Image.h"
 
-#include <filesystem>
 
 
 namespace LkEngine {
@@ -114,13 +113,5 @@ namespace LkEngine {
 		static Ref<Texture2D> Create(const TextureSpecification& specification);
 		static Ref<Texture2D> Create(const TextureSpecification& specification, Buffer imageData);
 	};
-
-	struct TextureArray
-	{
-		RendererID ID;
-		uint32_t Width, Height;
-		unsigned int Slot;
-	};
-
 
 }

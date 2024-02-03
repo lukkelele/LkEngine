@@ -148,20 +148,17 @@ namespace LkEngine {
                 {
                     std::string filename = entry.path().filename().string();
                     std::string fileExt = filename.substr(filename.size() - 3);
-                    //LK_ERROR("File ext: {}", fileExt);
                     if (fileExt != "jpg" && fileExt != "png" && fileExt != "JPG")
                     {
-                        LK_ERROR("Found unwanted file extension: {}", fileExt);
+                        LK_CORE_ERROR_TAG("TextureLibrary", "Found unwanted file extension: {}", fileExt);
                         continue;
                     }
                     if (fileExt == "jpg" || fileExt == "JPG") nanosuitSpec.Format = ImageFormat::RGB;
                     if (fileExt == "png") nanosuitSpec.Format = ImageFormat::RGBA;
 
                     nanosuitSpec.Path = nanosuitDirectory + std::string("/") + filename;
-                    //m_Collection2D.insert({ filename, Texture2D::Create(nanosuitSpec) });
-                    
                     nanosuitCollection.insert({ filename, Texture2D::Create(nanosuitSpec) });
-                    LK_CORE_INFO_TAG("TextureLibrary", "Added nanosuit file: {}", filename);
+                    //LK_CORE_INFO_TAG("TextureLibrary", "Added nanosuit file: {}", filename);
                 }
             }
             m_Collections2D.insert({ "Nanosuit", nanosuitCollection });
@@ -318,7 +315,7 @@ namespace LkEngine {
 
     Ref<Texture> TextureLibrary::TryToGetTextureWithFilename(const std::string& filename)
     {
-        LK_CORE_INFO_TAG("TextureLibrary", "Looking for texture with filename: {}", filename);
+        //LK_CORE_INFO_TAG("TextureLibrary", "Looking for texture with filename: {}", filename);
         for (auto& tex3D : m_Collection)
         {
             Ref<Texture> texture = tex3D.second;
@@ -340,7 +337,6 @@ namespace LkEngine {
                     return texture;
             }
         }
-
         LK_CORE_ERROR_TAG("TextureLibrary", "Did not find texture: {}", filename);
         return nullptr;
     }

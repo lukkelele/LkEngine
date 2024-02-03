@@ -11,10 +11,9 @@
 #include "OpenGLRenderPass.h"
 #include "OpenGLRenderCommandBuffer.h"
 #include "OpenGLShader.h"
-#include "OpenGLImage.h"
-
+#include "OpenGLTexture.h"
 #include "OpenGLImGuiLayer.h"
-#include "LkOpenGL.h"
+
 
 namespace LkEngine {
 
@@ -62,17 +61,18 @@ namespace LkEngine {
         Ref<Renderer2DAPI> GetRenderer2DAPI() override { return m_Renderer2D; }
 
         void BindTextureArray(int idx);
-        TextureArray GetTextureArray(int idx);
+        void BindTextureArray(const TextureArrayDimension& dimension);
+        Ref<TextureArray> GetTextureArray(int idx);
         static void UnbindTextureArray(int slot = 0);
+
+    private:
+        Ref<TextureArray> GetTextureArrayWithDimension(const TextureArrayDimension& dimension);
 
     private:
         uint8_t m_DrawMode = GL_TRIANGLES;
 
         Ref<OpenGLRenderer2D> m_Renderer2D = nullptr;
         Ref<RenderPass> m_RenderPass = nullptr;
-
-        TextureArray m_TextureArray_200x200{};
-        TextureArray m_TextureArray_400x400{};
     };
 
 }

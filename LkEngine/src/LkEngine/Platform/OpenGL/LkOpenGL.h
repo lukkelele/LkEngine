@@ -13,12 +13,13 @@
 
 #include "LkEngine/Renderer/VertexBuffer.h"
 
-#include "LkEngine/Renderer/Texture.h"
 
 
 namespace LkEngine {
 
     #define GL_CALL(_FUNC) OpenGL_ClearError(); _FUNC; LK_ASSERT(OpenGL_LogCall(#_FUNC, __FILE__, __LINE__))
+
+    class TextureArray;
 
 	static void OpenGL_ClearError() 
 	{ 
@@ -73,17 +74,7 @@ namespace LkEngine {
         std::string FramebufferTextureFormatToString(FramebufferTextureFormat format);
         std::string ImageFormatToString(ImageFormat format);
 
-        TextureArray CreateTextureArray(int width, int height, int slot);
-        void CreateTextureArray(TextureArray& textureArray, int width, int height, int slot);
-
-        static void BindTextureArray(const TextureArray& textureArray)
-        {
-            glActiveTexture(textureArray.Slot);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.ID);
-        }
-
     }
-
 
     //=====================================================================
     // Debugging

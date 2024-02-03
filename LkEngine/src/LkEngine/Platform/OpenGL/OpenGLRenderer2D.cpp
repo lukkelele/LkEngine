@@ -68,7 +68,6 @@ namespace LkEngine {
             quadFramebufferSpec.Width = Window::Get().GetWidth();
             quadFramebufferSpec.Height = Window::Get().GetHeight();
 		    //m_QuadFramebuffer = Framebuffer::Create(quadFramebufferSpec);
-            //LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Color attachment 0: {}", m_QuadFramebuffer->GetColorAttachmentRendererID(0));
         }
 
         // Debug OpenGL VAO's and VBO's
@@ -202,6 +201,11 @@ namespace LkEngine {
             if (m_TextureSlots[i])
                 m_TextureSlots[i]->Unbind(i);
         }
+        for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
+        {
+            if (m_TextureArrays[i])
+                m_TextureArrays[i]->Unbind();
+        }
 
         StartBatch();
     }
@@ -215,6 +219,11 @@ namespace LkEngine {
         {
             if (m_TextureSlots[i])
                 m_TextureSlots[i]->Unbind(i);
+        }
+        for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
+        {
+            if (m_TextureArrays[i])
+                m_TextureArrays[i]->Unbind();
         }
 
         StartBatch();
@@ -250,6 +259,13 @@ namespace LkEngine {
         {
             dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
+
+            for (auto& textureArray : m_TextureArrays)
+            {
+                if (!textureArray)
+                    break;
+                textureArray->Bind();
+            }
 			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, m_CameraBuffer.ViewProjection, m_QuadIndexCount);
 
             m_Stats.DrawCalls++;

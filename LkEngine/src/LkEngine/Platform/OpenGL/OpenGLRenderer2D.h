@@ -3,8 +3,7 @@
 #include "LkEngine/Renderer/Renderer2DAPI.h"
 
 #include "OpenGLFramebuffer.h"
-
-#include <stb_image/stb_image.h>
+#include "OpenGLTexture.h"
 
 
 namespace LkEngine {
@@ -67,12 +66,11 @@ namespace LkEngine {
 
     public:
         static constexpr uint32_t MaxTextureSlots = 32;
+        static constexpr uint8_t  MaxTextureArrays = 10;
     private:
         int m_DrawMode;
         Renderer2DSpecification m_Specification;
         RenderCommandQueue m_RenderQueue;
-
-        RendererID m_TextureArray;
 
         const uint32_t m_MaxVertices;
         const uint32_t m_MaxIndices;
@@ -81,6 +79,7 @@ namespace LkEngine {
         const uint32_t m_MaxLineIndices;
 
 		Ref<RenderCommandBuffer> m_RenderCommandBuffer;
+        //Ref<TextureArray> m_TextureArrays[MaxTextureArrays];
 
         // Quad
         uint32_t m_QuadIndexCount = 0;
@@ -112,6 +111,7 @@ namespace LkEngine {
         Ref<Texture2D> m_WhiteTexture = nullptr;
 
         std::array<Ref<Texture2D>, MaxTextureSlots> m_TextureSlots;
+        std::array<Ref<TextureArray>, MaxTextureArrays> m_TextureArrays;
 
         struct CameraData
         {

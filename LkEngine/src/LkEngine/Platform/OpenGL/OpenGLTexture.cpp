@@ -1,11 +1,11 @@
 #include "LKpch.h"
 #include "OpenGLTexture.h"
 
-#include "LkOpenGL.h"
-
 #include "LkEngine/Core/Application.h"
 
 #include <stb_image/stb_image_resize2.h>
+
+#include "LkOpenGL.h"
 
 
 namespace LkEngine {
@@ -321,5 +321,90 @@ namespace LkEngine {
 	void OpenGLTexture2D::Invalidate()
 	{
 	}
+
+
+	//
+	// TextureArray
+	//
+	TextureArray::TextureArray(const TextureArraySpecification& specification)
+		: m_Specification(specification)
+	{
+		auto [width, height]= ConvertDimensionsToWidthAndHeight(m_Specification.Dimension);
+		m_Width = width;
+		m_Height = height;
+		LK_CORE_INFO_TAG("TextureArray", "Created new array ({}, {})  slot={}", m_Width, m_Height, m_Specification.TextureSlot);
+
+		//GLUtils::CreateTextureArray(*this, m_Width, m_Height, m_Specification.TextureSlot);
+		glGenTextures(1, &m_RendererID);
+		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
+
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, m_Width, m_Height, MaxTexturesPerArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+		//GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	void TextureArray::Bind()
+	{
+		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
+	}
+
+#if 0
+	void TextureArray::Bind(int slot)
+	{
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
+	}
+#endif
+
+	void TextureArray::Unbind()
+	{
+		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+	}
+
+	void TextureArray::UnbindAll(int slot)
+	{
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+	}
+
+	static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const TextureArrayDimension& dimension)
+	{
+		switch (dimension)
+		{
+			case TextureArrayDimension::Dimension_200x200:   return { 200, 200 };
+			case TextureArrayDimension::Dimension_400x400:   return { 400, 400 };
+			case TextureArrayDimension::Dimension_800x800:   return { 800, 800 };
+			case TextureArrayDimension::Dimension_1024x1024: return { 1024, 1024 };
+			case TextureArrayDimension::Dimension_2048x2048: return { 2048, 2048 };
+			case TextureArrayDimension::Dimension_4096x4096: return { 4096, 4096 };
+		}
+		LK_CORE_ASSERT(false, "Unknown TextureArrayDimension");
+	}
+
+	static TextureArrayDimension DetermineDimension(int width, int height)
+	{
+		if (width != height)
+			height = width;
+		switch (width)
+		{
+			case 200:  return TextureArrayDimension::Dimension_200x200;
+			case 400:  return TextureArrayDimension::Dimension_400x400;
+			case 800:  return TextureArrayDimension::Dimension_800x800;
+			case 1024: return TextureArrayDimension::Dimension_1024x1024;
+			case 2048: return TextureArrayDimension::Dimension_2048x2048;
+			case 4096: return TextureArrayDimension::Dimension_4096x4096;
+		}
+		LK_CORE_ASSERT(false, "Unknown dimension arguments, width={}  height={}", width, height);
+	}
+
 
 }

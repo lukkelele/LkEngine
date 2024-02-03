@@ -109,4 +109,84 @@ namespace LkEngine {
 		bool m_InTextureArray = false;
 	};
 
+
+	enum TextureArrayDimension : uint8_t
+	{
+		Dimension_200x200 = 0,
+		Dimension_400x400,
+		Dimension_800x800,
+		Dimension_1024x1024,
+		Dimension_2048x2048,
+		Dimension_4096x4096,
+	};
+
+	struct TextureArraySpecification
+	{
+		TextureArrayDimension Dimension = Dimension_1024x1024;
+		int TextureSlot = 0;
+		TextureArraySpecification() = default;
+	};
+
+	class TextureArray : public RefCounted
+	{
+	public:
+		TextureArray() = default;
+		TextureArray(const TextureArraySpecification& specification);
+
+		void Bind();
+		void Unbind();
+		//void Bind(int slot);
+		static void UnbindAll(int slot = 0);
+
+		const RendererID GetRendererID() const { return m_RendererID; }
+		RendererID& GetRendererID() { return m_RendererID; }
+
+		int GetTextureSlot() const { return m_Specification.TextureSlot; }
+		const TextureArrayDimension& GetDimension() const { return m_Specification.Dimension; }
+		const TextureArraySpecification& GetSpecification() const { return m_Specification; }
+
+		int GetWidth() const { return m_Width; }
+		int GetHeight() const { return m_Height; }
+		void SetWidth(int width) { m_Width = width; }
+		void SetHeight(int height) { m_Height = height; }
+
+		static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const TextureArrayDimension& dimension)
+		{
+			switch (dimension)
+			{
+				case TextureArrayDimension::Dimension_200x200:   return { 200, 200 };
+				case TextureArrayDimension::Dimension_400x400:   return { 400, 400 };
+				case TextureArrayDimension::Dimension_800x800:   return { 800, 800 };
+				case TextureArrayDimension::Dimension_1024x1024: return { 1024, 1024 };
+				case TextureArrayDimension::Dimension_2048x2048: return { 2048, 2048 };
+				case TextureArrayDimension::Dimension_4096x4096: return { 4096, 4096 };
+			}
+			LK_CORE_ASSERT(false, "Unknown TextureArrayDimension");
+		}
+
+		static TextureArrayDimension DetermineDimension(int width, int height)
+		{
+			if (width != height)
+				height = width;
+			switch (width)
+			{
+				case 200:  return TextureArrayDimension::Dimension_200x200;
+				case 400:  return TextureArrayDimension::Dimension_400x400;
+				case 800:  return TextureArrayDimension::Dimension_800x800;
+				case 1024: return TextureArrayDimension::Dimension_1024x1024;
+				case 2048: return TextureArrayDimension::Dimension_2048x2048;
+				case 4096: return TextureArrayDimension::Dimension_4096x4096;
+			}
+			LK_CORE_ASSERT(false, "Unknown dimension arguments, width={}  height={}", width, height);
+		}
+
+	public:
+		static constexpr int MaxTexturesPerArray = 32;
+	public:
+		RendererID m_RendererID;
+		int m_Width, m_Height;
+		TextureArraySpecification m_Specification;
+	};
+
+
 }
