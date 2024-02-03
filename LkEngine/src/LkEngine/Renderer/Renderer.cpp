@@ -66,11 +66,11 @@ namespace LkEngine {
 
 		LK_CORE_ASSERT(Data->WhiteTexture, "Data->WhiteTexture is nullptr");
 
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad",   "assets/Shaders/Renderer2D_Quad.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Line",   "assets/Shaders/Renderer2D_Line.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug",  "assets/Shaders/Renderer2D_Debug.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen", "assets/Shaders/Renderer2D_Screen.shader");
-		Renderer::GetShaderLibrary()->Load("BasicModel",        "assets/Shaders/Renderer_Model.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad",   "assets/Shaders/OpenGL/Renderer2D_Quad.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Line",   "assets/Shaders/OpenGL/Renderer2D_Line.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug",  "assets/Shaders/OpenGL/Renderer2D_Debug.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen", "assets/Shaders/OpenGL/Renderer2D_Screen.shader");
+		Renderer::GetShaderLibrary()->Load("BasicModel",        "assets/Shaders/OpenGL/Renderer_Model.shader");
 
 		m_RendererAPI = RendererAPI::Create();
 		m_RendererAPI->Init();

@@ -7,11 +7,13 @@
 
 namespace LkEngine {
 
+	constexpr uint8_t MaxTexturesArrays = 10;
+
 	struct RendererData
 	{
         RendererCapabilities m_RendererCapabilities;
 
-		Ref<TextureArray> TextureArrays[10];
+		Ref<TextureArray> TextureArrays[MaxTexturesArrays];
 	};
 
 	static RendererData* Data = nullptr;
@@ -36,12 +38,23 @@ namespace LkEngine {
 
         // Åle texture 
 		{
-			textureSpec.Name = "ale";
-			textureSpec.DebugName = "ale";
+			textureSpec.Name = "ale200";
+			textureSpec.DebugName = "ale200";
 			textureSpec.Path = "assets/Textures/misc/ale_500x375.png";
-			//textureSpec.Path = "asset/Textures/misc/ale_200x200.png";
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 		}
+        // Åle texture, 1024x1024
+		{
+			textureSpec.Name = "ale1024";
+			textureSpec.DebugName = "ale1024";
+			textureSpec.Width = 1024;
+			textureSpec.Height = 1024;
+			textureSpec.Path = "assets/Textures/misc/ale_1024x1024.png";
+			TextureLibrary::Get()->AddTexture2D(textureSpec);
+		}
+
+        textureSpec.Width = 200;
+        textureSpec.Height = 200;
         // Atte texture
 		{
 			textureSpec.Name = "atte";
@@ -66,48 +79,36 @@ namespace LkEngine {
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 		}
 
-#if 0
-		GL_CALL(glGenTextures(1, &TEXTURE_ARRAY));
-        GL_CALL(glActiveTexture(GL_TEXTURE0));
-        GL_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, TEXTURE_ARRAY));
-
-        GL_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, MaxTexturesPerTextureArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
-        GL_CALL(glGenerateMipmap(GL_TEXTURE_2D_ARRAY));
-
-        //GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-#endif
-
 		//------------------------------------------------
 		// Create texture arrays
 		//------------------------------------------------
 		TextureArraySpecification textureArraySpec;
 		// Texture Array 0, 200x200
 		{
+			textureArraySpec.Dimension = TextureArrayDimension::Dimension_200x200;
 			textureArraySpec.TextureSlot = 0;
-			textureArraySpec.Dimension = Dimension_200x200;
+			textureArraySpec.DebugName = "TextureArray-200x200";
 			Data->TextureArrays[0] = Ref<TextureArray>::Create(textureArraySpec);
 		}
 		// Texture Array 1, 400x400
 		{
 			textureArraySpec.Dimension = TextureArrayDimension::Dimension_400x400;
 			textureArraySpec.TextureSlot = 1;
+			textureArraySpec.DebugName = "TextureArray-400x400";
 			Data->TextureArrays[1] = Ref<TextureArray>::Create(textureArraySpec);
 		}
 		// Texture Array 2, 800x800
 		{
 			textureArraySpec.Dimension = TextureArrayDimension::Dimension_800x800;
 			textureArraySpec.TextureSlot = 2;
+			textureArraySpec.DebugName = "TextureArray-800x800";
 			Data->TextureArrays[2] = Ref<TextureArray>::Create(textureArraySpec);
 		}
 		// Texture Array 3, 1024x1024
 		{
 			textureArraySpec.Dimension = TextureArrayDimension::Dimension_1024x1024;
 			textureArraySpec.TextureSlot = 3;
+			textureArraySpec.DebugName = "TextureArray-1024x1024";
 			Data->TextureArrays[3] = Ref<TextureArray>::Create(textureArraySpec);
 		}
 
@@ -118,40 +119,40 @@ namespace LkEngine {
 			//auto& texture = textures2D[i].second;
 			Ref<OpenGLImage2D> img = textures2D[i].second->GetImage().As<OpenGLImage2D>();
 
-			LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding texture to {}x{} texture array: {}", img->GetWidth(), img->GetHeight(), img->GetSpecification().Name);
+			LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding texture {} to {}x{} texture array", img->GetSpecification().Name, img->GetWidth(), img->GetHeight());
 			switch (img->GetWidth())
 			{
 				case 200:  // 200x200
-					BindTextureArray(Dimension_200x200);
-					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, 200, 200, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data);
+					GetTextureArray(0)->AddTextureToArray(textures2D[i].second);
 					break;
 				case 400:  // 400x400
-					BindTextureArray(Dimension_400x400);
-					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, 400, 400, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data);
+					GetTextureArray(1)->AddTextureToArray(textures2D[i].second);
 					break;
 				case 800:  // 800x800
-					BindTextureArray(Dimension_800x800);
-					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, 800, 800, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data);
+					GetTextureArray(2)->AddTextureToArray(textures2D[i].second);
 					break;
 				case 1024: // 1024x1024
-					BindTextureArray(Dimension_1024x1024);
-					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, img->GetBuffer().Data);
+					GetTextureArray(3)->AddTextureToArray(textures2D[i].second);
 					break;
 			}
         }
+		//BindTextureArray(3);
 
 		Renderer2DSpecification renderer2DSpecification;
 		Ref<OpenGLRenderer2D> renderer2D = Ref<OpenGLRenderer2D>::Create(renderer2DSpecification);
 
 		// Add texture array references to OpenGLRenderer2D as well
+		int addedTextureArrays = 0;
 		for (int i = 0; i < 10; i++)
 		{
 			if (Data->TextureArrays[i])
 			{
-				renderer2D->m_TextureArrays[i++] = Data->TextureArrays[i];
-				LK_CORE_DEBUG_TAG("OpenGLRenderer", "Added texture array to OpenGLRenderer2D, number {}", i);
+				renderer2D->m_TextureArrays[i] = Data->TextureArrays[i];
+				LK_CORE_DEBUG_TAG("OpenGLRenderer", "Added texture array {}x{} to OpenGLRenderer2D, number {}", Data->TextureArrays[i]->GetWidth(), Data->TextureArrays[i]->GetHeight(), i);
+				addedTextureArrays++;
 			}
 		}
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Added {} texture arrays to OpenGLRenderer2D", addedTextureArrays);
 		m_Renderer2D = renderer2D;
 		m_Renderer2D->Init();
 
@@ -312,7 +313,7 @@ namespace LkEngine {
 			framebuffer->Bind();
 			//framebuffer->BindTexture(0); // TODO: bind texture array idx here ?
 			shader->Bind();
-			shader->Set("u_TextureArray", textureArray);
+			shader->Set("u_TextureArray1", textureArray);
             shader->Set("u_ViewProj", transform);
 			
 			vertexBuffer->Bind();

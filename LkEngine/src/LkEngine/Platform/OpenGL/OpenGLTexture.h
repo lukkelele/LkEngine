@@ -36,8 +36,6 @@ namespace LkEngine {
 		void Load();
 		void Unload();
 
-		void SetInTextureArray(bool inTextureArray) { m_InTextureArray = inTextureArray; }
-
 		RendererID GetRendererID() const override;
 		RendererID& GetRendererID();
 		std::string GetName() const override { return m_Specification.Name; }
@@ -46,6 +44,8 @@ namespace LkEngine {
 
 		FilePath GetPath() const { return m_FilePath; }
 		FilePath& GetPath() { return m_FilePath; }
+
+		uint8_t GetTextureArrayIndex() const { return m_TextureArrayIndex; }
 
 	protected:
 		Ref<Image> m_Image;
@@ -57,7 +57,7 @@ namespace LkEngine {
 		bool m_Loaded = false;
 		bool m_Locked = false;
 
-		bool m_InTextureArray = false;
+		uint8_t m_TextureArrayIndex = 0;
 	};
 
 
@@ -98,6 +98,8 @@ namespace LkEngine {
 		FilePath GetPath() const { return m_FilePath; }
 		FilePath& GetPath() { return m_FilePath; }
 
+		uint8_t GetTextureArrayIndex() const { return m_TextureArrayIndex; }
+
 	private:
 		Ref<Image2D> m_Image = nullptr;
 		TextureSpecification m_Specification;
@@ -106,7 +108,7 @@ namespace LkEngine {
 		bool m_Loaded = false;
 		bool m_Locked = false;
 
-		bool m_InTextureArray = false;
+		uint8_t m_TextureArrayIndex = 0;
 	};
 
 
@@ -124,7 +126,7 @@ namespace LkEngine {
 	{
 		TextureArrayDimension Dimension = Dimension_1024x1024;
 		int TextureSlot = 0;
-		TextureArraySpecification() = default;
+		std::string DebugName;
 	};
 
 	class TextureArray : public RefCounted
@@ -135,8 +137,14 @@ namespace LkEngine {
 
 		void Bind();
 		void Unbind();
-		//void Bind(int slot);
 		static void UnbindAll(int slot = 0);
+
+		void AddTextureToArray(Ref<Texture> texture);
+
+		bool RemoveTextureFromArray(RendererID& rendererID)
+		{
+			//m_TextureIDs.erase(rendererID);
+		}
 
 		const RendererID GetRendererID() const { return m_RendererID; }
 		RendererID& GetRendererID() { return m_RendererID; }
@@ -149,6 +157,55 @@ namespace LkEngine {
 		int GetHeight() const { return m_Height; }
 		void SetWidth(int width) { m_Width = width; }
 		void SetHeight(int height) { m_Height = height; }
+
+		bool HasTexture(const Ref<Texture>& texture)
+		{
+			const RendererID textureRendererID = texture->GetRendererID();
+			for (auto& t : m_Textures)
+			{
+				if (t->GetRendererID() == textureRendererID)
+					return true;
+			}
+			return false;
+		}
+
+		Ref<Texture> GetTextureWithID(RendererID id)
+		{
+			for (auto& t : m_Textures)
+			{
+				if (t->GetRendererID() == id)
+					return t;
+			}
+			return nullptr;
+		}
+
+		float GetIndexOfTexture(const Ref<Texture>& texture)
+		{
+			for (int i = 0; i < m_Textures.size(); i++)
+			{
+				if (m_Textures[i]->GetRendererID() == texture->GetRendererID())
+					return (float)i;
+			}
+			return -1.0f;
+		}
+
+	public:
+		static constexpr int MaxTexturesPerArray = 32;
+	public:
+		RendererID m_RendererID;
+		int m_Width, m_Height;
+		TextureArraySpecification m_Specification;
+
+		//std::vector<Ref<Texture>> m_Textures{};
+		std::deque<Ref<Texture>> m_Textures{};
+		std::vector<RendererID> m_TextureIDs{};
+
+		friend class OpenGLRenderer;
+		friend class OpenGLRenderer2D;
+	};
+
+
+	namespace GLUtils {
 
 		static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const TextureArrayDimension& dimension)
 		{
@@ -180,13 +237,6 @@ namespace LkEngine {
 			LK_CORE_ASSERT(false, "Unknown dimension arguments, width={}  height={}", width, height);
 		}
 
-	public:
-		static constexpr int MaxTexturesPerArray = 32;
-	public:
-		RendererID m_RendererID;
-		int m_Width, m_Height;
-		TextureArraySpecification m_Specification;
-	};
-
+	}
 
 }

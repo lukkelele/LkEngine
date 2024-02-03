@@ -286,6 +286,13 @@ namespace LkEngine {
                 continue;
             textures.push_back(entry);
         }
+        //for (auto& collection : m_Collections2D)
+        //{
+        //    for (auto& entry : collection.second)
+        //    {
+        //        textures.push_back(entry);
+        //    }
+        //}
         return textures;
     }
 

@@ -99,13 +99,13 @@ namespace LkEngine {
 
             m_QuadPass = RenderPass::Create(quadPassSpec);
             
-            // VertexBufferLayout
             m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
             m_QuadVertexBuffer->SetLayout({
                 { "a_Pos",          ShaderDataType::Float3  },
                 { "a_Color",        ShaderDataType::Float4  },
                 { "a_TexCoord",     ShaderDataType::Float2  },
                 { "a_TexIndex",     ShaderDataType::Int,    },
+                { "a_TexArray",     ShaderDataType::Int,    },
                 { "a_TilingFactor", ShaderDataType::Float,  },
                 { "a_EntityID",     ShaderDataType::Int     },
             });
@@ -155,11 +155,11 @@ namespace LkEngine {
 
         // Textures
         {
-            auto textures2D = TextureLibrary::Get()->GetTextures2D();
-            for (int i = 0; i < textures2D.size(); i++)
-            {
-                m_TextureSlots[i] = textures2D[i].second;
-            }
+            //auto textures2D = TextureLibrary::Get()->GetTextures2D();
+            //for (int i = 0; i < textures2D.size(); i++)
+            //{
+            //    m_TextureSlots[i] = textures2D[i].second;
+            //}
             m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture2D();
 
             m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
@@ -182,10 +182,15 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
+        //for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
+        //{
+        //    if (m_TextureSlots[i])
+        //        m_TextureSlots[i]->Unbind();
+        //}
+        for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
         {
-            if (m_TextureSlots[i])
-                m_TextureSlots[i]->Unbind();
+            if (m_TextureArrays[i])
+                m_TextureArrays[i]->Bind();
         }
 
         StartBatch();
@@ -196,16 +201,16 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = camera.GetProjectionMatrix() * glm::inverse(transform);
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
-        {
-            if (m_TextureSlots[i])
-                m_TextureSlots[i]->Unbind(i);
-        }
-        for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
-        {
-            if (m_TextureArrays[i])
-                m_TextureArrays[i]->Unbind();
-        }
+        //for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
+        //{
+        //    if (m_TextureSlots[i])
+        //        m_TextureSlots[i]->Unbind(i);
+        //}
+        //for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
+        //{
+        //    if (m_TextureArrays[i])
+        //        m_TextureArrays[i]->Unbind();
+        //}
 
         StartBatch();
     }
@@ -215,16 +220,16 @@ namespace LkEngine {
         m_CameraBuffer.ViewProjection = viewProjectionMatrix;
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
 
-        for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
-        {
-            if (m_TextureSlots[i])
-                m_TextureSlots[i]->Unbind(i);
-        }
-        for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
-        {
-            if (m_TextureArrays[i])
-                m_TextureArrays[i]->Unbind();
-        }
+        //for (uint32_t i = 1; i < m_TextureSlots.size(); i++)
+        //{
+        //    if (m_TextureSlots[i])
+        //        m_TextureSlots[i]->Unbind(i);
+        //}
+        //for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
+        //{
+        //    if (m_TextureArrays[i])
+        //        m_TextureArrays[i]->Unbind();
+        //}
 
         StartBatch();
     }
@@ -260,38 +265,17 @@ namespace LkEngine {
             dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
-            for (auto& textureArray : m_TextureArrays)
+            for (int i = 0; i < m_TextureArrays.size(); i++)
             {
-                if (!textureArray)
-                    break;
-                textureArray->Bind();
+                //if (m_TextureArrays[i] && m_TextureArrays[i]->m_Textures.size() != 0)
+                if (m_TextureArrays[i])
+                {
+                    m_TextureArrays[i]->Bind();
+                    LK_CORE_WARN("TextureArray-Bound={} slot={}, dim={}x{}", m_TextureArrays[i]->GetRendererID(), m_TextureArrays[i]->GetTextureSlot(), m_TextureArrays[i]->GetWidth(), m_TextureArrays[i]->GetHeight());
+                }
             }
 			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, m_CameraBuffer.ViewProjection, m_QuadIndexCount);
 
-            m_Stats.DrawCalls++;
-        }
-
-        // Lines
-        if (m_LineIndexCount)
-        {
-            uint32_t dataSize = (uint32_t)((uint8_t*)m_LineVertexBufferPtr - (uint8_t*)m_LineVertexBufferBase);
-            m_LineVertexBuffer->SetData(m_LineVertexBufferBase, dataSize);
-
-            m_LineShader->Bind();
-            //m_LineShader->SetUniformMat4f("u_ViewProj", Scene::GetActiveScene()->GetCamera()->GetViewProjection());
-
-            for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
-            {
-                // TODO: This shall be changed in the future, this is for Vulkan and not opengl
-                if (m_TextureSlots[i])
-                {
-                    m_TextureSlots[i]->Bind(i);
-                    m_LineShader->Set("a_Color", m_LineVertexBufferPtr->Color);
-                }
-            }
-            //Renderer::SubmitLines(*m_LineVertexBuffer, m_LineIndexCount);
-
-            m_LineShader->Unbind();
             m_Stats.DrawCalls++;
         }
 
@@ -345,6 +329,7 @@ namespace LkEngine {
                                                                                                           
     void OpenGLRenderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
+        LK_ASSERT(false);
         float textureIndex = 0; 
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
@@ -355,6 +340,8 @@ namespace LkEngine {
             m_QuadVertexBufferPtr->TexCoord = TextureCoords[i];
             m_QuadVertexBufferPtr->Color = color;
             m_QuadVertexBufferPtr->TexIndex = textureIndex;
+            m_QuadVertexBufferPtr->TexArray = -1;
+            //m_QuadVertexBufferPtr->TexArray = textureArrayIndex;
             m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
             m_QuadVertexBufferPtr->EntityID = entityID;
             m_QuadVertexBufferPtr++;
@@ -402,17 +389,31 @@ namespace LkEngine {
             NextBatch();
 
         float textureIndex = 0.0f;
+        float textureArrayIndex = 0.0f;
         const float tilingFactor = 1.0f;
         constexpr size_t quadVertexCount = 4;
 
-        for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
+        //for (uint32_t i = 0; i < m_TextureSlots.size(); i++)
+        //{
+        //    if (m_TextureSlots[i] && m_TextureSlots[i]->GetName() == texture->GetName())
+        //    {
+        //        textureIndex = (float)i;
+        //        break;
+        //    }
+        //}
+        for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
         {
-            if (m_TextureSlots[i] != nullptr && m_TextureSlots[i]->GetName() == texture->GetName())
+            //if (m_TextureArrays[i]) LK_CORE_TRACE("i={}  m_TextureArray-{}", i, m_TextureArrays[i]->GetWidth());
+            if (m_TextureArrays[i] && m_TextureArrays[i]->HasTexture(texture))
             {
-                textureIndex = (float)i;
+                //LK_CORE_ERROR("Setting TextureArrayIndex={}  TextureIndex={},  TextureName={}", i, textureIndex, texture->GetName());
+                textureIndex = m_TextureArrays[i]->GetIndexOfTexture(texture);
+                LK_CORE_ERROR("Setting TextureArrayIndex={}  TextureIndex={},  TextureName={}", i, textureIndex, texture->GetName());
+                textureArrayIndex = (float)i;
                 break;
             }
         }
+        //LK_CORE_DEBUG("Setting textureIndex to {}", textureIndex);
 
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, pos.z })
             * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -423,6 +424,7 @@ namespace LkEngine {
             m_QuadVertexBufferPtr->TexCoord = TextureCoords[i];
             m_QuadVertexBufferPtr->Color = tintColor;
             m_QuadVertexBufferPtr->TexIndex = textureIndex;
+            m_QuadVertexBufferPtr->TexArray = textureArrayIndex;
             m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
             m_QuadVertexBufferPtr->EntityID = entityID;
             m_QuadVertexBufferPtr++;

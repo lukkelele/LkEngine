@@ -329,7 +329,7 @@ namespace LkEngine {
 	TextureArray::TextureArray(const TextureArraySpecification& specification)
 		: m_Specification(specification)
 	{
-		auto [width, height]= ConvertDimensionsToWidthAndHeight(m_Specification.Dimension);
+		auto [width, height]= GLUtils::ConvertDimensionsToWidthAndHeight(m_Specification.Dimension);
 		m_Width = width;
 		m_Height = height;
 		LK_CORE_INFO_TAG("TextureArray", "Created new array ({}, {})  slot={}", m_Width, m_Height, m_Specification.TextureSlot);
@@ -348,6 +348,19 @@ namespace LkEngine {
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		TextureSpecification spec;
+		spec.Format = ImageFormat::RGBA32F;
+		spec.Width = m_Width;
+		spec.Height = m_Height;
+        spec.SamplerFilter = TextureFilter::None;
+        spec.SamplerWrap = TextureWrap::None;
+        spec.Name = "white-texture";
+        spec.DebugName = "white-texture";
+        spec.Path = "assets/Textures/white-texture.png";
+        auto whiteTexture = Texture2D::Create(spec);
+		AddTextureToArray(whiteTexture);
+		LK_CORE_WARN("Added white texture to {}", m_Specification.DebugName);
 	}
 
 	void TextureArray::Bind()
@@ -376,34 +389,20 @@ namespace LkEngine {
 		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	}
 
-	static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const TextureArrayDimension& dimension)
+	void TextureArray::AddTextureToArray(Ref<Texture> texture)
 	{
-		switch (dimension)
-		{
-			case TextureArrayDimension::Dimension_200x200:   return { 200, 200 };
-			case TextureArrayDimension::Dimension_400x400:   return { 400, 400 };
-			case TextureArrayDimension::Dimension_800x800:   return { 800, 800 };
-			case TextureArrayDimension::Dimension_1024x1024: return { 1024, 1024 };
-			case TextureArrayDimension::Dimension_2048x2048: return { 2048, 2048 };
-			case TextureArrayDimension::Dimension_4096x4096: return { 4096, 4096 };
-		}
-		LK_CORE_ASSERT(false, "Unknown TextureArrayDimension");
-	}
+		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
 
-	static TextureArrayDimension DetermineDimension(int width, int height)
-	{
-		if (width != height)
-			height = width;
-		switch (width)
-		{
-			case 200:  return TextureArrayDimension::Dimension_200x200;
-			case 400:  return TextureArrayDimension::Dimension_400x400;
-			case 800:  return TextureArrayDimension::Dimension_800x800;
-			case 1024: return TextureArrayDimension::Dimension_1024x1024;
-			case 2048: return TextureArrayDimension::Dimension_2048x2048;
-			case 4096: return TextureArrayDimension::Dimension_4096x4096;
-		}
-		LK_CORE_ASSERT(false, "Unknown dimension arguments, width={}  height={}", width, height);
+		Buffer imageBuffer = texture->GetWriteableBuffer();
+		LK_ASSERT(imageBuffer.Data, "Data is nullptr");
+		//glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture->Get().Data);
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
+		LK_CORE_WARN_TAG("TextureArray", "Added texture {} to texture array {}x{}  slot={}, i={}", texture->GetName(), m_Width, m_Height, m_Specification.TextureSlot, m_Textures.size());
+		m_Textures.push_back(texture);
+
+		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	}
 
 

@@ -79,7 +79,6 @@ namespace LkEngine {
         const uint32_t m_MaxLineIndices;
 
 		Ref<RenderCommandBuffer> m_RenderCommandBuffer;
-        //Ref<TextureArray> m_TextureArrays[MaxTextureArrays];
 
         // Quad
         uint32_t m_QuadIndexCount = 0;
