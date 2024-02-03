@@ -33,10 +33,11 @@ namespace LkEngine {
     {
         m_Instance = Ref<TextureLibrary>(this);
 
+        // White Texture
 		TextureSpecification spec;
 		spec.Format = ImageFormat::RGBA32F;
-		spec.Width = 200;
-		spec.Height = 200;
+		spec.Width = 2048;
+		spec.Height = 2048;
         spec.SamplerFilter = TextureFilter::None;
         spec.SamplerWrap = TextureWrap::None;
         spec.Name = "white-texture";
@@ -44,94 +45,6 @@ namespace LkEngine {
         spec.Path = "assets/Textures/white-texture.png";
         m_WhiteTexture2D = Texture2D::Create(spec);
         m_Collection2D.insert({ "white-texture", m_WhiteTexture2D });
-
-        spec.Name = "black-texture";
-		constexpr uint32_t blackTextureData = 0xFF000000;
-        m_BlackTexture2D = Texture2D::Create(spec, Buffer(&blackTextureData, sizeof(uint32_t)));
-        LK_VERIFY(m_BlackTexture2D, "m_BlackTexture2D is nullptr");
-        m_Collection2D.insert({ "black-texture", m_BlackTexture2D });
-
-        // Texture: metal
-        {
-		    spec.Format = ImageFormat::RGBA32F;
-		    spec.Width = 1024;
-		    spec.Height = 1024;
-            spec.Name = "metal-ground";
-            spec.DebugName = "metal-ground";
-            spec.Path = "assets/Textures/metal.png";
-            spec.GenerateMips = true;
-            spec.SamplerWrap = TextureWrap::Repeat;
-            spec.SamplerFilter = TextureFilter::Nearest;
-            m_Collection2D.insert({ "metal-ground", Texture2D::Create(spec) });
-        }
-
-        // Texture: wood
-        {
-		    spec.Format = ImageFormat::RGBA32F;
-		    spec.Width = 1024;
-		    spec.Height = 1024;
-            spec.Name = "wood-floor";
-            spec.DebugName = "wood-floor";
-            spec.Path = "assets/Textures/wood.png";
-            spec.GenerateMips = true;
-            spec.SamplerWrap = TextureWrap::Repeat;
-            spec.SamplerFilter = TextureFilter::Linear;
-            m_Collection2D.insert({ "wood-floor", Texture2D::Create(spec) });
-        }
-
-        // Texture: wood container
-        {
-		    spec.Format = ImageFormat::RGB;
-		    spec.Width = 512;
-		    spec.Height = 512;
-            spec.Name = "wood-container";
-            spec.DebugName = "wood-container";
-            spec.Path = "assets/Textures/container.jpg";
-            spec.SamplerWrap = TextureWrap::Repeat;
-            spec.SamplerFilter = TextureFilter::Linear;
-            spec.GenerateMips = false;
-            m_Collection2D.insert({ "wood-container", Texture2D::Create(spec) });
-        }
-
-        // Skybox
-        {
-            TextureSpecification skyboxSpec;
-            skyboxSpec.Width = 200;
-            skyboxSpec.Height = 200;
-            skyboxSpec.Name = "skybox-ice-back";
-            skyboxSpec.DebugName = "skybox-ice-back";
-            skyboxSpec.Path = "assets/Textures/SkyBox/back.jpg";
-            skyboxSpec.GenerateMips = false;
-            skyboxSpec.Format = ImageFormat::RGB;
-            skyboxSpec.SamplerFilter = TextureFilter::Nearest;
-            skyboxSpec.SamplerWrap = TextureWrap::Clamp;
-            m_Collection2D.insert({ "skybox-ice-back", Texture2D::Create(skyboxSpec) });
-        }
-        // Misc
-        {
-            TextureSpecification miscSpec;
-            miscSpec.Width = 200;
-            miscSpec.Height = 200;
-            miscSpec.Name = "lukas-1";
-            miscSpec.DebugName = "lukas-1";
-            miscSpec.Path = "assets/Textures/Misc/lukas1.JPG";
-            miscSpec.GenerateMips = false;
-            miscSpec.Format = ImageFormat::RGB;
-            miscSpec.SamplerFilter = TextureFilter::Nearest;
-            miscSpec.SamplerWrap = TextureWrap::Clamp;
-            m_Collection2D.insert({ "lukas-1", Texture2D::Create(miscSpec) });
-
-            miscSpec.Width = 200;
-            miscSpec.Height = 200;
-            miscSpec.Name = "cowboy-hat";
-            miscSpec.DebugName = "cowboy-hat";
-            miscSpec.Path = "assets/Textures/Misc/cowboy-hat.png";
-            miscSpec.GenerateMips = false;
-            miscSpec.Format = ImageFormat::RGBA32F;
-            miscSpec.SamplerFilter = TextureFilter::Nearest;
-            miscSpec.SamplerWrap = TextureWrap::Clamp;
-            m_Collection2D.insert({ "cowboy-hat", Texture2D::Create(miscSpec) });
-        }
 
         // TODO: Read fileinfo and determine size and other info instead of manually setting it
         // Nanosuit
@@ -282,7 +195,7 @@ namespace LkEngine {
         textures.push_back({ "white-texture", m_WhiteTexture2D });
         for (auto& entry : m_Collection2D)
         {
-            if (entry.second->GetName() == "black-texture" || entry.second->GetName() == "white-texture")
+            if (entry.second->GetName() == "black-texture" || entry.second->GetName() == "white-texture") 
                 continue;
             textures.push_back(entry);
         }

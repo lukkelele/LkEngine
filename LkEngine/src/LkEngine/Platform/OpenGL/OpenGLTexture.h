@@ -115,8 +115,7 @@ namespace LkEngine {
 	enum TextureArrayDimension : uint8_t
 	{
 		Dimension_200x200 = 0,
-		Dimension_400x400,
-		Dimension_800x800,
+		Dimension_512x512,
 		Dimension_1024x1024,
 		Dimension_2048x2048,
 		Dimension_4096x4096,
@@ -125,6 +124,7 @@ namespace LkEngine {
 	struct TextureArraySpecification
 	{
 		TextureArrayDimension Dimension = Dimension_1024x1024;
+		ImageFormat Format = ImageFormat::RGBA;
 		int TextureSlot = 0;
 		std::string DebugName;
 	};
@@ -132,7 +132,6 @@ namespace LkEngine {
 	class TextureArray : public RefCounted
 	{
 	public:
-		TextureArray() = default;
 		TextureArray(const TextureArraySpecification& specification);
 
 		void Bind();
@@ -183,10 +182,11 @@ namespace LkEngine {
 		{
 			for (int i = 0; i < m_Textures.size(); i++)
 			{
+				LK_CORE_TRACE("{} GetIndexOfTexture - Current texture: {}", i, m_Textures[i]->GetName());
 				if (m_Textures[i]->GetRendererID() == texture->GetRendererID())
-					return (float)i;
+					return (float)(i); // 
 			}
-			return -1.0f;
+			return 0.0f;
 		}
 
 	public:
@@ -212,8 +212,7 @@ namespace LkEngine {
 			switch (dimension)
 			{
 				case TextureArrayDimension::Dimension_200x200:   return { 200, 200 };
-				case TextureArrayDimension::Dimension_400x400:   return { 400, 400 };
-				case TextureArrayDimension::Dimension_800x800:   return { 800, 800 };
+				case TextureArrayDimension::Dimension_512x512:   return { 512, 512 };
 				case TextureArrayDimension::Dimension_1024x1024: return { 1024, 1024 };
 				case TextureArrayDimension::Dimension_2048x2048: return { 2048, 2048 };
 				case TextureArrayDimension::Dimension_4096x4096: return { 4096, 4096 };
@@ -228,8 +227,7 @@ namespace LkEngine {
 			switch (width)
 			{
 				case 200:  return TextureArrayDimension::Dimension_200x200;
-				case 400:  return TextureArrayDimension::Dimension_400x400;
-				case 800:  return TextureArrayDimension::Dimension_800x800;
+				case 512:  return TextureArrayDimension::Dimension_512x512;
 				case 1024: return TextureArrayDimension::Dimension_1024x1024;
 				case 2048: return TextureArrayDimension::Dimension_2048x2048;
 				case 4096: return TextureArrayDimension::Dimension_4096x4096;

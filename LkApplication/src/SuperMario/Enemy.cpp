@@ -1,6 +1,6 @@
 #include "Enemy.h"
 
-#include "LkEngine/Editor/Editor.h"
+#include "LkEngine/Editor/EditorLayer.h"
 
 
 
@@ -28,7 +28,6 @@ namespace LkEngine {
         tc.Translation.z = 0.30f;
 
         auto& mc = m_Entity.AddComponent<MaterialComponent>();
-        //mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte"));
 
         RigidBody2DComponent rigidbody;
         rigidbody.BodyType = RigidBody2DComponent::Type::Dynamic;
@@ -77,7 +76,7 @@ namespace LkEngine {
 
     void Enemy::OnImGuiRender()
     {
-        auto* editor = Editor::Get();
+        auto* editor = EditorLayer::Get();
         if (editor && SELECTION::SelectedEntity != m_Entity)
             return;
 

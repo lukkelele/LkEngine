@@ -4,16 +4,15 @@
 
 #include "Player.h"
 
+#include <assimp/Importer.hpp>
 
 
 namespace LkEngine {
 
-    // Forward declaration
     class Enemy;
+    class Model;
 
-    //
     // Super Mario wannabe
-    //
     class GameLayer : public Layer
     {
     public:
@@ -39,11 +38,19 @@ namespace LkEngine {
         Entity m_Ground{};
         Entity m_Background{};
 
+        Model* m_RockModel;
+        Model* m_CubeModel;
+        Model* m_BackpackModel;
+        Model* m_CrisisNanosuit;
+
         glm::vec2 m_BackgroundPos = { 0, 300.0f };
 
         float m_GravityScalar = 3.0f;
 
         std::vector<s_ptr<Enemy>> m_Enemies = {};
+
+        friend class EditorLayer;
+        friend class SceneManagerPanel;
     };
 
 }

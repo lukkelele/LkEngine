@@ -54,6 +54,7 @@ namespace LkEngine {
 		CommandQueue[1] = new RenderCommandQueue();
 
 		Data->m_ShaderLibrary = Ref<ShaderLibrary>::Create();
+
 		Data->m_TextureLibrary = Ref<TextureLibrary>::Create();
 		Data->m_TextureLibrary->Init();
 
@@ -61,10 +62,6 @@ namespace LkEngine {
 		Data->m_MaterialLibrary->Init();
 
 		Data->WhiteTexture = Data->m_TextureLibrary->GetWhiteTexture2D();
-		//Data->BlackTexture = Data->m_TextureLibrary->GetBlackTexture2D();
-		//LK_CORE_ASSERT(Data->BlackTexture, "Data->BlackTexture is nullptr");
-
-		LK_CORE_ASSERT(Data->WhiteTexture, "Data->WhiteTexture is nullptr");
 
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad",   "assets/Shaders/OpenGL/Renderer2D_Quad.shader");
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Line",   "assets/Shaders/OpenGL/Renderer2D_Line.shader");
@@ -276,6 +273,11 @@ namespace LkEngine {
 	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Material> material, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
 	{
 		m_RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, material, vertexBuffer, indexBuffer, transform, indexCount);
+	}
+	
+	Ref<TextureLibrary> Renderer::GetTextureLibrary()
+	{
+		return Data->m_TextureLibrary;
 	}
 
 }

@@ -6,7 +6,7 @@
 
 #include "LkEngine/Core/Window.h"
 
-#include "LkEngine/Editor/Editor.h"
+#include "LkEngine/Editor/EditorLayer.h"
 
 
 namespace LkEngine {

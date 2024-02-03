@@ -96,6 +96,7 @@ namespace LkEngine {
 		static uint32_t GetRenderQueueSubmissionIndex();
 
 		static Ref<ShaderLibrary> GetShaderLibrary();
+		static Ref<TextureLibrary> GetTextureLibrary();
 		static Ref<GraphicsContext> GetContext();
 
 		static Renderer* Get() { return m_Instance; }

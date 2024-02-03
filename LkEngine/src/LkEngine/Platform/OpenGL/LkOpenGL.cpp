@@ -252,55 +252,6 @@ namespace LkEngine {
 			}
 			LK_CORE_ASSERT(false, "Unknown FramebufferTextureFormat");
 		};
-
-#if 0
-		TextureArray CreateTextureArray(int width, int height, int slot)
-		{
-			TextureArray textureArray{};
-			textureArray.m_Width = width;
-			textureArray.m_Height = height;
-			textureArray.m_Specification.TextureSlot = slot;
-			//RendererID textureArray{};
-			glGenTextures(1, &textureArray.m_RendererID);
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.m_RendererID);
-
-			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, MaxTexturesPerArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
-
-			//GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-			return textureArray;
-		}
-#endif
-
-#if 0
-		void CreateTextureArray(TextureArray* textureArray, int width, int height, int slot)
-		{
-			textureArray->m_Width = width;
-			textureArray->m_Height = height;
-			textureArray->m_Specification.TextureSlot = slot;
-			glGenTextures(1, &textureArray->m_RendererID);
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray->m_RendererID);
-
-			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, MaxTexturesPerArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
-
-			//GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		}
-#endif
-
 	}
 
     //unsigned int FramebufferID;
@@ -427,6 +378,7 @@ namespace LkEngine {
 		if (!CubeTexture)
 		{
 			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			return;
 		}
 
 		glEnable(GL_DEPTH_TEST);

@@ -228,6 +228,7 @@ namespace LkEngine {
 			stbi_set_flip_vertically_on_load(1);
 
 			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
+			LK_CORE_ASSERT(data, "Could not read data from {}", specification.Path.c_str());
             uint32_t memorySize = Utils::GetMemorySize(specification.Format, specification.Width, specification.Height);
 			imageSpec.Size = (uint64_t)width * (uint64_t)height * (uint64_t)channels;
 			if (imageSpec.Size != memorySize)
@@ -332,14 +333,12 @@ namespace LkEngine {
 		auto [width, height]= GLUtils::ConvertDimensionsToWidthAndHeight(m_Specification.Dimension);
 		m_Width = width;
 		m_Height = height;
-		LK_CORE_INFO_TAG("TextureArray", "Created new array ({}, {})  slot={}", m_Width, m_Height, m_Specification.TextureSlot);
 
-		//GLUtils::CreateTextureArray(*this, m_Width, m_Height, m_Specification.TextureSlot);
 		glGenTextures(1, &m_RendererID);
 		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
 
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, m_Width, m_Height, MaxTexturesPerArray, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, m_Width, m_Height, 10 /* layers */, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
 		//GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
@@ -349,18 +348,8 @@ namespace LkEngine {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		TextureSpecification spec;
-		spec.Format = ImageFormat::RGBA32F;
-		spec.Width = m_Width;
-		spec.Height = m_Height;
-        spec.SamplerFilter = TextureFilter::None;
-        spec.SamplerWrap = TextureWrap::None;
-        spec.Name = "white-texture";
-        spec.DebugName = "white-texture";
-        spec.Path = "assets/Textures/white-texture.png";
-        auto whiteTexture = Texture2D::Create(spec);
-		AddTextureToArray(whiteTexture);
-		LK_CORE_WARN("Added white texture to {}", m_Specification.DebugName);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+		//AddTextureToArray(TextureLibrary::Get()->GetWhiteTexture2D());
 	}
 
 	void TextureArray::Bind()
@@ -369,23 +358,9 @@ namespace LkEngine {
 		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
 	}
 
-#if 0
-	void TextureArray::Bind(int slot)
-	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
-	}
-#endif
-
 	void TextureArray::Unbind()
 	{
 		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-	}
-
-	void TextureArray::UnbindAll(int slot)
-	{
-		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	}
 
@@ -396,12 +371,11 @@ namespace LkEngine {
 
 		Buffer imageBuffer = texture->GetWriteableBuffer();
 		LK_ASSERT(imageBuffer.Data, "Data is nullptr");
-		//glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture->Get().Data);
 		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
-		LK_CORE_WARN_TAG("TextureArray", "Added texture {} to texture array {}x{}  slot={}, i={}", texture->GetName(), m_Width, m_Height, m_Specification.TextureSlot, m_Textures.size());
 		m_Textures.push_back(texture);
+		//glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GLUtils::ImageFormatToGLDataFormat(texture->GetSpecification().Format), GL_UNSIGNED_BYTE, imageBuffer.Data);
+		//LK_CORE_WARN_TAG("TextureArray", "Added texture {} to texture array {}x{}  slot={}, i={}", texture->GetName(), m_Width, m_Height, m_Specification.TextureSlot, m_Textures.size());
 
-		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	}
 

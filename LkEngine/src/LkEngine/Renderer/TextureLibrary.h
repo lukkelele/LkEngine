@@ -37,7 +37,6 @@ namespace LkEngine {
 
         Ref<Texture> GetWhiteTexture();
         Ref<Texture2D> GetWhiteTexture2D();
-
         Ref<Texture> GetBlackTexture();
         Ref<Texture2D> GetBlackTexture2D();
 
