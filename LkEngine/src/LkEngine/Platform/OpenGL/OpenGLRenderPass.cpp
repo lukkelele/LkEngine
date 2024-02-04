@@ -81,6 +81,10 @@ namespace LkEngine {
 		return nullptr;
 	}
 
+	void OpenGLRenderPass::Terminate()
+	{
+	}
+
 
 
 }

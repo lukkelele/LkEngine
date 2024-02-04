@@ -77,7 +77,7 @@ namespace LkEngine {
 				imageSpec.Mips = 1; // No mipmapping
 				imageSpec.Path = "assets/textures/white-texture.png";
 
-				Buffer imageData = Buffer(TextureLibrary::Get()->GetWhiteTexture2D()->GetWriteableBuffer());
+				Buffer imageData = Buffer(TextureLibrary::Get()->GetWhiteTexture2D()->GetImageBuffer());
 				Ref<Image2D> image = Image2D::Create(imageSpec, imageData);
 				m_ColorAttachments.push_back(image);
 

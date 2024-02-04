@@ -12,6 +12,7 @@
 #include "OpenGLRenderCommandBuffer.h"
 #include "OpenGLShader.h"
 #include "OpenGLTexture.h"
+#include "OpenGLTextureArray.h"
 #include "OpenGLImGuiLayer.h"
 
 
@@ -22,10 +23,10 @@ namespace LkEngine {
     public:
         void Init();
         void Shutdown();
-        void Clear();
 
         void BeginFrame();
         void EndFrame();
+        void Clear();
 
         void DrawIndexed(uint64_t indexCount) override;
         void Draw(VertexBuffer& vb, const Shader& shader);
@@ -62,10 +63,10 @@ namespace LkEngine {
 
         void BindTextureArray(int idx);
         void BindTextureArray(const TextureArrayDimension& dimension);
-        Ref<TextureArray> GetTextureArray(int idx);
+        Ref<OpenGLTextureArray> GetTextureArray(int idx);
 
     private:
-        Ref<TextureArray> GetTextureArrayWithDimension(const TextureArrayDimension& dimension);
+        Ref<OpenGLTextureArray> GetTextureArrayWithDimension(const TextureArrayDimension& dimension);
 
     private:
         uint8_t m_DrawMode = GL_TRIANGLES;

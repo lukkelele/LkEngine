@@ -55,7 +55,7 @@ namespace LkEngine {
             m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
         }
 
-        // Quad Framebuffer
+        // Quad
         {
 		    FramebufferSpecification quadFramebufferSpec;
 		    quadFramebufferSpec.Attachments = { ImageFormat::RGBA32F, ImageFormat::DEPTH24STENCIL8 };
@@ -66,19 +66,7 @@ namespace LkEngine {
             quadFramebufferSpec.Width = Window::Get().GetWidth();
             quadFramebufferSpec.Height = Window::Get().GetHeight();
 		    //m_QuadFramebuffer = Framebuffer::Create(quadFramebufferSpec);
-        }
 
-        // OpenGL VAO's and VBO's (Debugging)
-        {
-            GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
-            GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
-            GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
-            CubeTexture_ = LoadTexture("assets/Textures/container.jpg");
-            FloorTexture_ = LoadTexture("assets/Textures/metal.png");
-        }
-
-        // Quads
-        {
             m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
             m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
             m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
@@ -96,10 +84,9 @@ namespace LkEngine {
             Ref<OpenGLPipeline> openglPipeline = quadPassSpec.Pipeline.As<OpenGLPipeline>();
 
             // Set up quad shader to use the correct amount of texture array uniforms 
-            for (uint8_t textureArray = 0; textureArray< m_Specification.TextureArraysUsed; textureArray++)
+            for (uint8_t textureArray = 0; textureArray < m_Specification.TextureArraysUsed; textureArray++)
                 openglPipeline->BindTextureArray(textureArray);
             m_QuadPass = RenderPass::Create(quadPassSpec);
-            //LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Created new pipeline {}", quadPipelineSpec.DebugName);
             
             m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
             m_QuadVertexBuffer->SetLayout({
@@ -154,16 +141,10 @@ namespace LkEngine {
 		    delete[] lineIndices;
         }
 
-        // Textures
-        {
-            m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture2D();
-
-            m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
-            m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData));
-            LK_CORE_VERIFY(m_CameraUniformBuffer, "CameraUniformBuffer == NULL");
-
-            m_RenderCommandBuffer = RenderCommandBuffer::Create(0, "OpenGLRenderer2D-RenderCommandBuffer");
-        }
+        m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture2D();
+        m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
+        m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData));
+        m_RenderCommandBuffer = RenderCommandBuffer::Create(0, "OpenGLRenderer2D-RenderCommandBuffer");
 
         for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
         {
@@ -172,11 +153,6 @@ namespace LkEngine {
         }
 
         Initialized = true;
-        LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Initialization done");
-    }
-
-    void OpenGLRenderer2D::Shutdown()
-    {
     }
 
     void OpenGLRenderer2D::BeginScene(const SceneCamera& camera)
@@ -238,6 +214,20 @@ namespace LkEngine {
 
             m_Stats.DrawCalls++;
         }
+    }
+
+    void OpenGLRenderer2D::Shutdown()
+    {
+        for (auto& textureArray : m_TextureArrays)
+        {
+            //textureArray->~OpenGLTextureArray();
+        }
+
+        delete m_QuadVertexBufferBase;
+        delete m_QuadVertexBufferPtr;
+
+        delete m_LineVertexBufferBase;
+        delete m_LineVertexBufferPtr;
     }
 
     void OpenGLRenderer2D::DrawImage(const Ref<Image> image)
@@ -436,7 +426,7 @@ namespace LkEngine {
         return m_LineVertexBufferPtr;
 	}
 
-    void OpenGLRenderer2D::AddTextureArray(const Ref<TextureArray>& textureArray)
+    void OpenGLRenderer2D::AddTextureArray(const Ref<OpenGLTextureArray>& textureArray)
     {
         for (int i = 0; i < MaxTextureArrays; i++)
         {

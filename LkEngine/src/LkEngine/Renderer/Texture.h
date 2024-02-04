@@ -8,8 +8,6 @@
 
 namespace LkEngine {
 
-	using FilePath = std::filesystem::path;
-
 	enum class TextureUniformType : uint8_t
 	{
 		Diffuse = 0,
@@ -46,9 +44,10 @@ namespace LkEngine {
 		virtual ~Texture() = default;
 
 		virtual void SetData(void* data, uint32_t size) = 0;
-		virtual Buffer GetWriteableBuffer() = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		virtual void Invalidate() = 0;
+
+		virtual Buffer GetImageBuffer() = 0;
 
 		virtual void Bind(unsigned int slot = 0) = 0;
 		virtual void Unbind(unsigned int slot = 0) = 0;
@@ -68,8 +67,8 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0; 
 		virtual uint32_t GetHeight() const = 0; 
 
-		virtual FilePath GetPath() const = 0;
-		virtual FilePath& GetPath() = 0;
+		virtual std::filesystem::path GetPath() const = 0;
+		virtual std::filesystem::path & GetPath() = 0;
 
 		static Ref<Texture> Create(const TextureSpecification& specification);
 	};
@@ -84,7 +83,7 @@ namespace LkEngine {
 
 		virtual Ref<Image2D> GetImage() = 0;
 
-		virtual Buffer GetWriteableBuffer() = 0;
+		virtual Buffer GetImageBuffer() = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		virtual void Invalidate() = 0;
 
@@ -107,8 +106,8 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0;  
 		virtual uint32_t GetHeight() const = 0;
 
-		virtual FilePath GetPath() const = 0;
-		virtual FilePath& GetPath() = 0;
+		virtual std::filesystem::path GetPath() const = 0;
+		virtual std::filesystem::path & GetPath() = 0;
 
 		static Ref<Texture2D> Create(const TextureSpecification& specification);
 		static Ref<Texture2D> Create(const TextureSpecification& specification, Buffer imageData);

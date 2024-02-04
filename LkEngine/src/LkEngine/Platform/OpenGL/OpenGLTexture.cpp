@@ -201,7 +201,7 @@ namespace LkEngine {
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
 		: m_Specification(specification)
-		, m_FilePath(FilePath(specification.Path))
+		, m_FilePath(std::filesystem::path(specification.Path))
 	{
 		if (m_Specification.Name.empty())
 		{
@@ -309,11 +309,6 @@ namespace LkEngine {
 		return 1;
 	}
 
-	uint64_t OpenGLTexture2D::GetARBHandle() const
-	{ 
-		return glGetTextureHandleARB(m_Image->GetRendererID()); 
-	}
-
 	void OpenGLTexture2D::Resize(uint32_t width, uint32_t height)
 	{
 		m_Image->Resize(width, height);
@@ -323,60 +318,9 @@ namespace LkEngine {
 	{
 	}
 
-
-	//
-	// TextureArray
-	//
-	TextureArray::TextureArray(const TextureArraySpecification& specification)
-		: m_Specification(specification)
-	{
-		auto [width, height]= GLUtils::ConvertDimensionsToWidthAndHeight(m_Specification.Dimension);
-		m_Width = width;
-		m_Height = height;
-
-		glGenTextures(1, &m_RendererID);
-		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
-
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, m_Width, m_Height, 10 /* layers */, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
-
-		//GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 10);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+	uint64_t OpenGLTexture2D::GetARBHandle() const
+	{ 
+		return glGetTextureHandleARB(m_Image->GetRendererID()); 
 	}
-
-	void TextureArray::Bind()
-	{
-		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
-	}
-
-	void TextureArray::Unbind()
-	{
-		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-	}
-
-	void TextureArray::AddTextureToArray(Ref<Texture> texture)
-	{
-		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
-
-		Buffer imageBuffer = texture->GetWriteableBuffer();
-		LK_ASSERT(imageBuffer.Data, "Data is nullptr");
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
-		m_Textures.push_back(texture);
-		//glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GLUtils::ImageFormatToGLDataFormat(texture->GetSpecification().Format), GL_UNSIGNED_BYTE, imageBuffer.Data);
-		//LK_CORE_WARN_TAG("TextureArray", "Added texture {} to texture array {}x{}  slot={}, i={}", texture->GetName(), m_Width, m_Height, m_Specification.TextureSlot, m_Textures.size());
-
-		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-	}
-
 
 }

@@ -94,6 +94,7 @@ namespace LkEngine {
 
 	void Renderer::Shutdown()
 	{
+		m_RendererAPI->Shutdown();
 	}
 
 	void Renderer::SetDrawMode(const RendererDrawMode& drawMode)

@@ -79,6 +79,8 @@ namespace LkEngine {
 		virtual bool Baked() const = 0;
 		virtual void Prepare() = 0;
 
+		virtual void Terminate() = 0;
+
 		static Ref<RenderPass> Create(const RenderPassSpecification& spec);
 	};
 

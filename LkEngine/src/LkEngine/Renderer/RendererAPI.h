@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SwapChain.h"
+#include "Framebuffer.h"
 #include "RenderPass.h"
 #include "RenderCommandBuffer.h"
 #include "RenderCommandQueue.h"
@@ -12,7 +13,7 @@
 #include "TextureLibrary.h"
 #include "MaterialLibrary.h"
 #include "UniformBufferSet.h"
-#include "Framebuffer.h"
+#include "TextureArray.h"
 
 #include "RendererCapabilities.h"
 

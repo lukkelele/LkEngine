@@ -4,6 +4,7 @@
 
 #include "OpenGLFramebuffer.h"
 #include "OpenGLTexture.h"
+#include "OpenGLTextureArray.h"
 
 
 namespace LkEngine {
@@ -69,7 +70,7 @@ namespace LkEngine {
         QuadVertex*& GetWriteableQuadBuffer() override;
         LineVertex*& GetWriteableLineBuffer() override;
 
-        void AddTextureArray(const Ref<TextureArray>& textureArray);
+        void AddTextureArray(const Ref<OpenGLTextureArray>& textureArray);
 
     public:
         static constexpr int MaxTextureSlots = 32;
@@ -77,7 +78,6 @@ namespace LkEngine {
     private:
         int m_DrawMode;
 
-        //Renderer2DSpecification m_Specification;
         OpenGLRenderer2DSpecification m_Specification;
         RenderCommandQueue m_RenderQueue;
 
@@ -93,8 +93,7 @@ namespace LkEngine {
         uint32_t m_QuadIndexCount = 0;
 		Ref<RenderPass> m_QuadPass;
 		Ref<Material> m_QuadMaterial;
-        Ref<Texture2D> m_QuadTextureArray = nullptr;
-        Ref<Texture2D> m_LineTextureArray = nullptr;
+        //Ref<Texture2D> m_QuadTextureArray = nullptr;
         QuadVertex* m_QuadVertexBufferBase = nullptr;
         QuadVertex* m_QuadVertexBufferPtr = nullptr;
         Ref<Shader> m_QuadShader;
@@ -117,7 +116,7 @@ namespace LkEngine {
         Ref<Texture2D> m_WhiteTexture = nullptr;
 
         std::array<Ref<Texture2D>, MaxTextureSlots> m_TextureSlots;
-        std::array<Ref<TextureArray>, MaxTextureArrays> m_TextureArrays;
+        std::array<Ref<OpenGLTextureArray>, MaxTextureArrays> m_TextureArrays;
 
         struct CameraData
         {

@@ -31,6 +31,8 @@ namespace LkEngine {
 		bool Baked() const override;
 		void Prepare() override;
 
+		void Terminate() override;
+
 		bool IsInvalidated(uint32_t set, uint32_t binding) const;
 
     private:

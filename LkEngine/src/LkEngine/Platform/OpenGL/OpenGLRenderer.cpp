@@ -14,7 +14,7 @@ namespace LkEngine {
 	{
         RendererCapabilities m_RendererCapabilities;
 
-		Ref<TextureArray> TextureArrays[MaxTexturesArrays];
+		Ref<OpenGLTextureArray> TextureArrays[MaxTexturesArrays];
 	};
 
 	static RendererData* Data = nullptr;
@@ -125,29 +125,29 @@ namespace LkEngine {
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
         }
 
-		// Create texture arrays
+		// Texture Arrays
 		{
 			TextureArraySpecification textureArraySpec;
 			// 512x512
-			textureArraySpec.Format = ImageFormat::RGBA32F;
+			textureArraySpec.Format = ImageFormat::RGBA;
 			textureArraySpec.TextureSlot = TextureArrayCount;
 			textureArraySpec.Dimension = TextureArrayDimension::Dimension_512x512;
 			textureArraySpec.DebugName = "TextureArray-512x512";
-			Data->TextureArrays[TextureArrayCount++] = Ref<TextureArray>::Create(textureArraySpec);
+			Data->TextureArrays[TextureArrayCount++] = Ref<OpenGLTextureArray>::Create(textureArraySpec);
 
 			// 1024x1024
-			textureArraySpec.Format = ImageFormat::RGBA32F;
+			textureArraySpec.Format = ImageFormat::RGBA;
 			textureArraySpec.TextureSlot = TextureArrayCount;
 			textureArraySpec.Dimension = TextureArrayDimension::Dimension_1024x1024;
 			textureArraySpec.DebugName = "TextureArray-1024x1024";
-			Data->TextureArrays[TextureArrayCount++] = Ref<TextureArray>::Create(textureArraySpec);
+			Data->TextureArrays[TextureArrayCount++] = Ref<OpenGLTextureArray>::Create(textureArraySpec);
 
 			// 2048x2048
-			textureArraySpec.Format = ImageFormat::RGBA32F;
+			textureArraySpec.Format = ImageFormat::RGBA;
 			textureArraySpec.TextureSlot = TextureArrayCount;
 			textureArraySpec.Dimension = TextureArrayDimension::Dimension_2048x2048;
 			textureArraySpec.DebugName = "TextureArray-2048x2048";
-			Data->TextureArrays[TextureArrayCount++] = Ref<TextureArray>::Create(textureArraySpec);
+			Data->TextureArrays[TextureArrayCount++] = Ref<OpenGLTextureArray>::Create(textureArraySpec);
 		}
 
         auto textures2D = TextureLibrary::Get()->GetTextures2D();
@@ -185,10 +185,21 @@ namespace LkEngine {
 		GraphicsContext::Get()->SetDepthEnabled(true);
 
 		SetDrawMode(RendererDrawMode::Triangles);
+
+        // OpenGL VAO's and VBO's (Debugging)
+        {
+            GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
+            GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
+            GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
+            CubeTexture_ = LoadTexture("assets/Textures/container.jpg");
+            FloorTexture_ = LoadTexture("assets/Textures/metal.png");
+        }
     }
 
     void OpenGLRenderer::Shutdown()
     {
+		LK_CORE_WARN_TAG("OpenGLRenderer", "Initiated shutdown");
+		m_RenderPass->Terminate();
     }
 
     void OpenGLRenderer::BeginFrame()
@@ -361,7 +372,7 @@ namespace LkEngine {
 		auto commandBuffer = renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
 	}
 
-	Ref<TextureArray> OpenGLRenderer::GetTextureArray(int idx)
+	Ref<OpenGLTextureArray> OpenGLRenderer::GetTextureArray(int idx)
 	{
 		return Data->TextureArrays[idx];
 	}
@@ -374,11 +385,11 @@ namespace LkEngine {
 
 	void OpenGLRenderer::BindTextureArray(const TextureArrayDimension& dimension)
 	{
-		TextureArray& textureArray = *GetTextureArrayWithDimension(dimension);
+		OpenGLTextureArray& textureArray = *GetTextureArrayWithDimension(dimension);
 		textureArray.Bind();
 	}
 
-	Ref<TextureArray> OpenGLRenderer::GetTextureArrayWithDimension(const TextureArrayDimension& dimension)
+	Ref<OpenGLTextureArray> OpenGLRenderer::GetTextureArrayWithDimension(const TextureArrayDimension& dimension)
 	{
 		for (auto& textureArray : Data->TextureArrays)
 		{
