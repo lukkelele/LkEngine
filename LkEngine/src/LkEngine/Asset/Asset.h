@@ -13,8 +13,6 @@ namespace LkEngine {
     class Asset : public RefCounted
     {
     public:
-		Asset() = default;
-		//Asset(AssetHandle handle) : Handle(handle) {}
         virtual ~Asset() = default;
 
 		static AssetType GetStaticType() { return AssetType::None; }
