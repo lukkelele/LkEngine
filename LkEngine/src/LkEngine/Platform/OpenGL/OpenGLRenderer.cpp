@@ -126,28 +126,21 @@ namespace LkEngine {
         }
 
 		// Texture Arrays
+		constexpr TextureArrayDimension TextureArrayDimensions[] = { 
+			Dimension_512x512, 
+			Dimension_1024x1024, 
+			Dimension_2048x2048 
+		};
+
+		TextureArraySpecification textureArraySpec;
+		for (int i = 0; i < LK_ARRAYSIZE(TextureArrayDimensions); i++)
 		{
-			TextureArraySpecification textureArraySpec;
-			// 512x512
 			textureArraySpec.Format = ImageFormat::RGBA;
 			textureArraySpec.TextureSlot = TextureArrayCount;
-			textureArraySpec.Dimension = TextureArrayDimension::Dimension_512x512;
-			textureArraySpec.DebugName = "TextureArray-512x512";
+			textureArraySpec.Dimension = TextureArrayDimensions[i];
+			textureArraySpec.DebugName = "TextureArray-" + Utils::TextureArrayDimensionToString(TextureArrayDimensions[i]);
 			Data->TextureArrays[TextureArrayCount++] = Ref<OpenGLTextureArray>::Create(textureArraySpec);
-
-			// 1024x1024
-			textureArraySpec.Format = ImageFormat::RGBA;
-			textureArraySpec.TextureSlot = TextureArrayCount;
-			textureArraySpec.Dimension = TextureArrayDimension::Dimension_1024x1024;
-			textureArraySpec.DebugName = "TextureArray-1024x1024";
-			Data->TextureArrays[TextureArrayCount++] = Ref<OpenGLTextureArray>::Create(textureArraySpec);
-
-			// 2048x2048
-			textureArraySpec.Format = ImageFormat::RGBA;
-			textureArraySpec.TextureSlot = TextureArrayCount;
-			textureArraySpec.Dimension = TextureArrayDimension::Dimension_2048x2048;
-			textureArraySpec.DebugName = "TextureArray-2048x2048";
-			Data->TextureArrays[TextureArrayCount++] = Ref<OpenGLTextureArray>::Create(textureArraySpec);
+			LK_CORE_DEBUG_TAG("OpenGLRenderer", "Created texture array {} called \"{}\"", i, textureArraySpec.DebugName);
 		}
 
         auto textures2D = TextureLibrary::Get()->GetTextures2D();

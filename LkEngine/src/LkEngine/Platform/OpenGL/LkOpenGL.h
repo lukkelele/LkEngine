@@ -74,6 +74,108 @@ namespace LkEngine {
         std::string FramebufferTextureFormatToString(FramebufferTextureFormat format);
         std::string ImageFormatToString(ImageFormat format);
 
+		static void ApplyTextureFilter(TextureFilter filter, bool mipmap)
+		{
+			// Texture Filter
+			if (filter == TextureFilter::Linear)
+			{
+				if (mipmap)
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				else
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			}
+			else if (filter == TextureFilter::Nearest)
+			{
+				if (mipmap)
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+				else
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			}
+			else if (filter == TextureFilter::None)
+			{
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			}
+		}
+
+		static void ApplyTextureWrap(TextureWrap wrap)
+		{
+			if (wrap == TextureWrap::Clamp)
+			{
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+
+			}
+			else if (wrap == TextureWrap::Repeat)
+			{
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // S: x
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // T: y
+			}
+		}
+
+		static void ApplyTextureFilter(const RendererID& rendererID, const TextureFilter filter, bool mipmap = true)
+		{
+            switch (filter)
+            {
+                case TextureFilter::Linear:
+			    {
+			    	if (mipmap)
+			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			    	else
+			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    return;
+			    }
+                case TextureFilter::Nearest:
+			    {
+			    	if (mipmap)
+			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			    	else
+			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                    return;
+			    }
+                case TextureFilter::None:
+			    {
+			    	if (mipmap)
+			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+                    else
+			    	    glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                    return;
+			    }
+            }
+
+		}
+
+		static void ApplyTextureWrap(const RendererID& rendererID, const TextureWrap wrap)
+		{
+			switch (wrap)
+			{
+				case TextureWrap::None:
+				{
+					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+					return;
+				}
+				case TextureWrap::Clamp:
+				{
+					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+					return;
+				}
+				case TextureWrap::Repeat:
+				{
+					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+                    return;
+				}
+			}
+            LK_CORE_ASSERT(false, "Unknown TextureWrap {}", (int)wrap);
+		}
+
     }
 
     //=====================================================================

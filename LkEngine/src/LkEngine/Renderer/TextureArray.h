@@ -20,6 +20,7 @@ namespace LkEngine {
 		ImageFormat Format = ImageFormat::RGBA;
 		int TextureSlot = 0;
 		int Layers = 10;
+		int Mipmaps = 5;
 		std::string DebugName;
 	};
 
@@ -51,7 +52,22 @@ namespace LkEngine {
 		virtual int GetIndexOfTexture(const Ref<Texture>& texture) = 0;
 
 		static Ref<TextureArray> Create(const TextureArraySpecification& specification);
-
 	};
+
+	namespace Utils {
+
+		static std::string TextureArrayDimensionToString(TextureArrayDimension dimension)
+		{
+			switch (dimension)
+			{
+				case TextureArrayDimension::Dimension_512x512:   return "512x512";
+				case TextureArrayDimension::Dimension_1024x1024: return "1024x1024";
+				case TextureArrayDimension::Dimension_2048x2048: return "2048x2048";
+				case TextureArrayDimension::Dimension_4096x4096: return "4096x4096";
+			}
+			LK_CORE_ASSERT(false, "Unknown dimension {}", (int)dimension);
+		}
+
+	}
 
 }

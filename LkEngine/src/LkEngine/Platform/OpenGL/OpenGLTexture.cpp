@@ -10,55 +10,30 @@
 
 namespace LkEngine {
 
-	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification, Buffer imageData)
-		: m_Specification(specification)
-		, m_Width(specification.Width)
-		, m_Height(specification.Height)
-		, m_FilePath(std::filesystem::path(specification.Path))
+	OpenGLTexture::OpenGLTexture(const TextureSpecification& textureSpec, Buffer imageData)
+		: m_Specification(textureSpec)
+		, m_Width(textureSpec.Width)
+		, m_Height(textureSpec.Height)
+		, m_FilePath(std::filesystem::path(textureSpec.Path))
 	{
-		if (m_Specification.Name.empty())
-		{
-			std::string filename = m_FilePath.filename().string().substr(0, m_FilePath.filename().string().size() - 4);
-			m_Specification.Name = filename;
-			if (m_Specification.DebugName.empty())
-				m_Specification.DebugName = m_Specification.Name;
-		}
-
-		ImageSpecification imageSpec;
-		imageSpec.Path = specification.Path;
-		imageSpec.Width = specification.Width;
-		imageSpec.Height = specification.Height;
-        imageSpec.Size = Utils::GetMemorySize(specification.Format, specification.Width, specification.Height);
-		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
-
+		ImageSpecification imageSpec(textureSpec);
 		m_Image = Image::Create(imageSpec, imageData);
 	}
 
-	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
-		: m_Specification(specification)
-		, m_Width(specification.Width)
-		, m_Height(specification.Height)
+	OpenGLTexture::OpenGLTexture(const TextureSpecification& textureSpec)
+		: m_Specification(textureSpec)
+		, m_Width(textureSpec.Width)
+		, m_Height(textureSpec.Height)
+		, m_FilePath(std::filesystem::path(textureSpec.Path))
 	{
-		m_FilePath = std::filesystem::path(specification.Path);
-		if (m_Specification.Name.empty())
-		{
-			std::string filename = m_FilePath.filename().string().substr(0, m_FilePath.filename().string().size() - 4);
-			if (m_Specification.DebugName.empty())
-				m_Specification.DebugName = m_Specification.Name;
-		}
-		ImageSpecification imageSpec;
-		imageSpec.Path = specification.Path;
-		imageSpec.Width = specification.Width;
-		imageSpec.Height = specification.Height;
-
-		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
+		ImageSpecification imageSpec(textureSpec);
 
 		// FIXME: This is bugged like biigggg time
-		if (specification.Path != "")
+		if (!m_Specification.Path.empty())
 		{
 			stbi_set_flip_vertically_on_load(1);
 			int width, height, channels;
-			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
+			stbi_uc* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
 
 			// Check if texture isn't quadratic 
 			if (width != height)
@@ -88,19 +63,17 @@ namespace LkEngine {
 
 	OpenGLTexture::~OpenGLTexture()
 	{
-		GL_CALL(glDeleteTextures(1, &m_Image->GetRendererID()));
+		m_Image->Release();
 	}
 
-	void OpenGLTexture::Bind(unsigned int slot /*= 0*/) 
+	void OpenGLTexture::Bind(unsigned int slot) 
 	{
-		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
+		glBindTextureUnit(slot, m_Image->GetRendererID());
 	}
 
 	void OpenGLTexture::Unbind(unsigned slot)
 	{
-		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+		glBindTextureUnit(slot, 0);
 	}
 
 	RendererID OpenGLTexture::GetRendererID() const
@@ -142,7 +115,6 @@ namespace LkEngine {
 	void OpenGLTexture::Unlock()
 	{
 		m_Locked = false;
-		// Submit to renderer
 	}
 
 	void OpenGLTexture::Load()
@@ -163,102 +135,65 @@ namespace LkEngine {
 	//------------------------------------------------------------------------------------
 	// OpenGLTexture 2D
 	//------------------------------------------------------------------------------------
-	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification, Buffer imageData)
-		: m_Specification(specification)
+	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& textureSpec, Buffer imageData)
+		: m_Specification(textureSpec)
+		, m_Width(textureSpec.Width)
+		, m_Height(textureSpec.Height)
+		, m_FilePath(std::filesystem::path(textureSpec.Path))
 	{
-		m_FilePath = std::filesystem::path(specification.Path);
-		if (m_Specification.Name.empty())
-		{
-			std::string filename = m_FilePath.filename().string().substr(0, m_FilePath.filename().string().size() - 4);
-			m_Specification.Name = filename;
-			if (m_Specification.DebugName.empty())
-				m_Specification.DebugName = m_Specification.Name;
-		}
-		ImageSpecification imageSpec;
-		imageSpec.Name = specification.Name;
-		imageSpec.DebugName = specification.DebugName;
-		imageSpec.Path = specification.Path;
-		imageSpec.Width = specification.Width;
-		imageSpec.Height = specification.Height;
-		imageSpec.Format = specification.Format;
-		imageSpec.Filter = specification.SamplerFilter;
-		imageSpec.Wrap = specification.SamplerWrap;
-		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
+		ImageSpecification imageSpec(textureSpec);
+		uint32_t memorySize = imageSpec.Size; // Calculated in ImageSpecification constructor
 
-		//m_FilePath = std::filesystem::path(specification.Path);
-
-		imageSpec.Size = imageData.GetSize();
-        uint32_t memorySize = Utils::GetMemorySize(specification.Format, specification.Width, specification.Height);
-		if (imageSpec.Size != memorySize)
+		if (imageSpec.Size != imageData.GetSize())
 		{
 			int width, height, channels;
-			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
+			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &width, &height, &channels, 4);
 			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Image {} specification doesn't match the read data size, resizing texture...", m_Specification.DebugName);
-			imageData.Data = MemoryUtils::ResizeImageData(data, memorySize, width, height, specification.Width, specification.Height, STBIR_RGBA);
+			imageData.Data = MemoryUtils::ResizeImageData(data, memorySize, width, height, textureSpec.Width, textureSpec.Height, STBIR_RGBA);
 		}
 		m_Image = Image2D::Create(imageSpec, imageData);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& specification)
-		: m_Specification(specification)
-		, m_FilePath(std::filesystem::path(specification.Path))
+	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& textureSpec)
+		: m_Specification(textureSpec)
+		, m_Width(textureSpec.Width)
+		, m_Height(textureSpec.Height)
+		, m_FilePath(std::filesystem::path(textureSpec.Path))
 	{
-		if (m_Specification.Name.empty())
-		{
-			std::string filename = m_FilePath.filename().string().substr(0, m_FilePath.filename().string().size() - 4);
-			m_Specification.Name = filename;
-			if (m_Specification.DebugName.empty())
-				m_Specification.DebugName = m_Specification.Name;
-		}
-		ImageSpecification imageSpec;
-		imageSpec.Name = specification.Name;
-		imageSpec.DebugName = specification.DebugName;
-		imageSpec.Width = specification.Width;
-		imageSpec.Height = specification.Height;
-		imageSpec.Path = specification.Path;
-		imageSpec.Format = specification.Format;
-		imageSpec.Filter = specification.SamplerFilter;
-		imageSpec.Wrap = specification.SamplerWrap;
-		m_Specification.GenerateMips ? imageSpec.Mips = 2 : imageSpec.Mips = 1;
+		ImageSpecification imageSpec(textureSpec);
 
-		// Try to read data from path
-		if (specification.Path.empty() == false)
+		if (!textureSpec.Path.empty())
 		{
 			int width, height, channels;
 			stbi_set_flip_vertically_on_load(1);
 
-			stbi_uc* data = stbi_load(specification.Path.c_str(), &width, &height, &channels, 4);
-			LK_CORE_ASSERT(data, "Could not read data from {}", specification.Path.c_str());
-            uint32_t memorySize = Utils::GetMemorySize(specification.Format, specification.Width, specification.Height);
+			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &width, &height, &channels, 4);
+            uint32_t dataSize = Utils::GetMemorySize(textureSpec.Format, textureSpec.Width, textureSpec.Height);
 			imageSpec.Size = (uint64_t)width * (uint64_t)height * (uint64_t)channels;
-			if (imageSpec.Size != memorySize)
-			{
-				data = MemoryUtils::ResizeImageData(data, memorySize, width, height, specification.Width, specification.Height, STBIR_RGBA);
-				//LK_CORE_TAG_TAG("OpenGLTexture2D", "Image {} specification doesn't match the read data size, resizing texture...", m_Specification.DebugName);
-			}
+			if (imageSpec.Size != dataSize)
+				data = MemoryUtils::ResizeImageData(data, dataSize, width, height, textureSpec.Width, textureSpec.Height, STBIR_RGBA);
 			m_Image = Image2D::Create(imageSpec, data);
 		}
 		else
 		{
-			LK_CORE_WARN_TAG("OpenGLTexture", "Passed buffer is nullptr");
+			LK_CORE_WARN_TAG("OpenGLTexture2D", "Passed buffer is nullptr");
 			m_Image = Image2D::Create(imageSpec, nullptr);
 		}
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
+		m_Image->Release();
 	}
 
 	void OpenGLTexture2D::Bind(unsigned int slot /*= 0*/)
 	{
-		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, m_Image->GetRendererID()));
+		glBindTextureUnit(slot, m_Image->GetRendererID());
 	}
 
 	void OpenGLTexture2D::Unbind(unsigned slot)
 	{
-		GL_CALL(glActiveTexture(GL_TEXTURE0 + slot));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+		glBindTextureUnit(slot, 0);
 	}
 
 	RendererID OpenGLTexture2D::GetRendererID() const
@@ -286,7 +221,6 @@ namespace LkEngine {
 	void OpenGLTexture2D::Unlock()
 	{
 		m_Locked = false;
-		// Submit to renderer
 	}
 
 	void OpenGLTexture2D::Load()
@@ -306,7 +240,7 @@ namespace LkEngine {
 
 	uint32_t OpenGLTexture2D::GetMipLevelCount() const
 	{
-		return 1;
+		return m_Image->GetSpecification().Mips;
 	}
 
 	void OpenGLTexture2D::Resize(uint32_t width, uint32_t height)
@@ -316,6 +250,7 @@ namespace LkEngine {
 
 	void OpenGLTexture2D::Invalidate()
 	{
+		m_Image->Invalidate();
 	}
 
 	uint64_t OpenGLTexture2D::GetARBHandle() const

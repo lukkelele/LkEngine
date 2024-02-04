@@ -106,10 +106,12 @@ namespace LkEngine {
 			LK_CORE_ASSERT(false, "Unknown dimension arguments, width={}  height={}", width, height);
 		}
 
-		static void GenerateTextureArrayImage(const TextureArraySpecification& specification)
+		static void GenerateTextureArrayImage(RendererID& rendererID, const TextureArraySpecification& specification)
 		{
 			auto [width, height] = GLUtils::ConvertDimensionsToWidthAndHeight(specification.Dimension);
-			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), width, height, specification.Layers, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), GL_UNSIGNED_BYTE, nullptr);
+			//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), width, height, specification.Layers, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), GL_UNSIGNED_BYTE, nullptr);
+			//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), width, height, specification.Layers, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), GL_UNSIGNED_BYTE, nullptr);
+			glTextureStorage3D(rendererID, specification.Layers, ImageFormatToGLDataFormat(specification.Format), width, height, 0);
 		}
 
 	}

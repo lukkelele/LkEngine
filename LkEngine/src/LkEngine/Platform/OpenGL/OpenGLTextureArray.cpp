@@ -11,13 +11,12 @@ namespace LkEngine {
 		m_Width = width;
 		m_Height = height;
 
+#if 0
 		glGenTextures(1, &m_RendererID);
 		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
 
-		//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, m_Width, m_Height, m_Specification.Layers, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLUtils::ImageFormatToGLDataFormat(m_Specification.Format), m_Width, m_Height, m_Specification.Layers, 0, GLUtils::ImageFormatToGLDataFormat(m_Specification.Format), GL_UNSIGNED_BYTE, nullptr);
-		GLUtils::GenerateTextureArrayImage(specification);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, m_Width, m_Height, 10 /* layers */, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
 		//GL_CALL(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
@@ -28,6 +27,22 @@ namespace LkEngine {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+#endif
+
+		glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &m_RendererID);
+		glTextureStorage3D(m_RendererID, 1, GL_RGBA32F, m_Width, m_Height, m_Specification.Layers);
+
+		// Since we're using immutable storage, mipmap generation should be reconsidered.
+		// If mipmaps are needed, you must specify the correct number of levels in glTextureStorage3D and generate them after filling the texture.
+		// glGenerateTextureMipmap is the DSA function for mipmap generation but decide if mipmaps are necessary for your texture array.
+		glGenerateTextureMipmap(m_RendererID);
+		
+		// Set texture parameters using DSA functions
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Adjust if mipmaps are used
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MAX_LEVEL, 10); // Only necessary if using mipmaps
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
 	OpenGLTextureArray::~OpenGLTextureArray()
@@ -39,28 +54,24 @@ namespace LkEngine {
 
 	void OpenGLTextureArray::Bind()
 	{
-		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
+		//glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
+		//glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
+		glBindTextureUnit(m_Specification.TextureSlot, m_RendererID);
 	}
 
 	void OpenGLTextureArray::Unbind()
 	{
-		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+		//glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
+		//glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+		glBindTextureUnit(m_Specification.TextureSlot, 0);
 	}
 
 	void OpenGLTextureArray::AddTextureToArray(Ref<Texture> texture)
 	{
-		glActiveTexture(GL_TEXTURE0 + m_Specification.TextureSlot);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_RendererID);
-
 		Buffer imageBuffer = texture->GetImageBuffer();
-		LK_CORE_ASSERT(imageBuffer.Data, "Data is nullptr");
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
-		//glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GLUtils::ImageFormatToGLDataFormat(texture->GetSpecification().Format), GL_UNSIGNED_BYTE, imageBuffer.Data);
+		LK_CORE_ASSERT(imageBuffer.Data, "Texture data from \"{}\" is NULL", texture->GetName());
+		glTextureSubImage3D(m_RendererID, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
 		m_Textures.push_back(texture);
-
-		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	}
 
 	bool OpenGLTextureArray::RemoveTextureFromArray(RendererID& rendererID)
@@ -69,7 +80,7 @@ namespace LkEngine {
 		{
 			if (texture->GetRendererID() == rendererID)
 			{
-				// TODO: Pop reference to texture here
+				// TODO: Pop reference texture here
 			}
 		}
 		return true;

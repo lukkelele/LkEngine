@@ -92,9 +92,9 @@ namespace LkEngine {
 		RendererID& GetRendererID();
 		uint64_t GetARBHandle() const; 
 
+		uint32_t GetWidth() const override { return m_Width; }
+		uint32_t GetHeight() const override { return m_Height; }
 		std::string GetName() const override { return m_Specification.Name; }
-		uint32_t GetWidth() const override { return m_Specification.Width; }
-		uint32_t GetHeight() const override { return m_Specification.Height; }
 
 		std::filesystem::path GetPath() const { return m_FilePath; }
 		std::filesystem::path& GetPath() { return m_FilePath; }
@@ -104,6 +104,7 @@ namespace LkEngine {
 
 	private:
 		Ref<Image2D> m_Image = nullptr;
+		uint32_t m_Width, m_Height;
 		TextureSpecification m_Specification;
 		std::filesystem::path m_FilePath;
 

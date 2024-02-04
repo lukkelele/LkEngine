@@ -8,36 +8,6 @@
 
 namespace LkEngine {
 
-	enum class TextureUniformType : uint8_t
-	{
-		Diffuse = 0,
-		Specular,
-		Normal,
-		Height,
-		Emissive,
-		DiffuseRoughness,
-	};
-
-	struct TextureSpecification
-	{
-		std::string Path = "";
-		std::string Name = "";
-		uint32_t Width = 1;
-		uint32_t Height = 1;
-		bool GenerateMips = true;
-
-		ImageFormat Format = ImageFormat::RGBA;
-		TextureWrap SamplerWrap = TextureWrap::Clamp;
-		TextureFilter SamplerFilter = TextureFilter::Linear;
-
-		TextureUniformType UniformType;
-
-		bool Storage = false;
-		bool StoreLocally = false;
-
-		std::string DebugName;
-	};
-
 	class Texture : public RefCounted
 	{
 	public:

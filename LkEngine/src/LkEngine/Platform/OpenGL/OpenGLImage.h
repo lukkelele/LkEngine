@@ -57,8 +57,8 @@ namespace LkEngine {
 	class OpenGLImage2D : public Image2D
 	{
 	public:
-		OpenGLImage2D(ImageSpecification spec, Buffer buffer);
-		OpenGLImage2D(ImageSpecification spec, void* data = nullptr);
+		OpenGLImage2D(const ImageSpecification spec, Buffer buffer);
+		OpenGLImage2D(const ImageSpecification spec, void* data = nullptr);
 		~OpenGLImage2D();
 
 		void Invalidate() override;
