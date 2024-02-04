@@ -93,7 +93,6 @@ namespace LkEngine {
         uint32_t m_QuadIndexCount = 0;
 		Ref<RenderPass> m_QuadPass;
 		Ref<Material> m_QuadMaterial;
-        //Ref<Texture2D> m_QuadTextureArray = nullptr;
         QuadVertex* m_QuadVertexBufferBase = nullptr;
         QuadVertex* m_QuadVertexBufferPtr = nullptr;
         Ref<Shader> m_QuadShader;

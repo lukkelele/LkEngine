@@ -134,7 +134,7 @@ namespace LkEngine {
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 			char* message = (char*)_malloca(length * sizeof(char));
 			glGetShaderInfoLog(id, length, &length, message);
-			LK_CORE_FATAL_TAG("OpenGLShader", "Failed to compile {} shader, \"{}\"", (type == GL_VERTEX_SHADER ? "vertex" : "fragment"), message);
+			LK_CORE_FATAL_TAG("OpenGLShader", "Failed to compile {} shader at {}, \"{}\"", (type == GL_VERTEX_SHADER ? "vertex" : "fragment"), m_FilePath, message);
 
 			glDeleteShader(id);
 			return 0;

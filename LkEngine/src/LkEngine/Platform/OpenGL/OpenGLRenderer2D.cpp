@@ -90,13 +90,12 @@ namespace LkEngine {
             
             m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
             m_QuadVertexBuffer->SetLayout({
-                { "a_Pos",          ShaderDataType::Float3  },
-                { "a_Color",        ShaderDataType::Float4  },
-                { "a_TexCoord",     ShaderDataType::Float2  },
-                { "a_TexIndex",     ShaderDataType::Int,    },
-                { "a_TexArray",     ShaderDataType::Float,  },
-                { "a_TilingFactor", ShaderDataType::Float,  },
-                { "a_EntityID",     ShaderDataType::Int     },
+                { "a_Position",       ShaderDataType::Float3  },
+                { "a_Color",          ShaderDataType::Float4  },
+                { "a_Texcoord",       ShaderDataType::Float2  },
+                { "a_TexIndex",       ShaderDataType::Float,  },
+                { "a_TexArray",       ShaderDataType::Float,  },
+                { "a_TilingFactor",   ShaderDataType::Float,  },
             });
 
             m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
@@ -145,7 +144,7 @@ namespace LkEngine {
 
         m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
         m_CameraUniformBuffer = Ref<OpenGLUniformBuffer>::Create(sizeof(CameraData));
-        m_CameraUniformBuffer->SetBinding(m_QuadShader, "UB_Camera", 0); // Default to binding = 0 in Renderer_Quad.shader
+        m_CameraUniformBuffer->SetBinding(m_QuadShader, "UB_Camera", 0); // Binding is set default to 0 in Renderer_Quad.shader
 
         m_RenderCommandBuffer = RenderCommandBuffer::Create(0, "OpenGLRenderer2D-RenderCommandBuffer");
 
@@ -154,7 +153,6 @@ namespace LkEngine {
             if (m_TextureArrays[i])
             {
                 m_TextureArrays[i]->Bind();
-                //m_QuadShader->Set("u_TextureArray" + std::to_string(i + 1), m_TextureArrays[i]->GetRendererID());
             }
         }
 
@@ -292,12 +290,11 @@ namespace LkEngine {
         for (size_t i = 0; i < quadVertexCount; i++)
         {
             m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i];
-            m_QuadVertexBufferPtr->TexCoord = TextureCoords[i];
+            m_QuadVertexBufferPtr->Texcoord = TextureCoords[i];
             m_QuadVertexBufferPtr->Color = color;
             m_QuadVertexBufferPtr->TexIndex = textureIndex; // White texture
             m_QuadVertexBufferPtr->TexArray = 0;            // White texture
             m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
-            m_QuadVertexBufferPtr->EntityID = entityID;
             m_QuadVertexBufferPtr++;
         }
 
@@ -362,12 +359,11 @@ namespace LkEngine {
         for (size_t i = 0; i < quadVertexCount; i++)
         {
             m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i];
-            m_QuadVertexBufferPtr->TexCoord = TextureCoords[i];
             m_QuadVertexBufferPtr->Color = tintColor;
+            m_QuadVertexBufferPtr->Texcoord = TextureCoords[i];
             m_QuadVertexBufferPtr->TexIndex = textureIndex;
             m_QuadVertexBufferPtr->TexArray = textureArrayIndex;
             m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
-            m_QuadVertexBufferPtr->EntityID = entityID;
             m_QuadVertexBufferPtr++;
         }
 

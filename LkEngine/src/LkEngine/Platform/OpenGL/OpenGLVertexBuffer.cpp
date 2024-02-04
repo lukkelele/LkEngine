@@ -31,7 +31,6 @@ namespace LkEngine {
 		: m_Size(size)
 		, m_Usage(usage)
 	{
-		//m_LocalData = Buffer(static_cast<const void*>(buffer), size);
 		m_LocalData = Buffer(buffer, size);
 
 		glGenVertexArrays(1, &m_VertexArrayID);
@@ -40,7 +39,6 @@ namespace LkEngine {
 		glGenBuffers(1, &m_RendererID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ARRAY_BUFFER, size, buffer, GL_DYNAMIC_DRAW);
-		//LK_CORE_DEBUG_TAG("VertexBuffer", "New vertexbuffer, id: {}, size: {}", m_VertexArrayID, m_LocalData.GetSize());
 	}
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(uint64_t size, VertexBufferUsage usage)

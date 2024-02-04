@@ -77,6 +77,12 @@ namespace LkEngine {
 			textureSpec.SamplerFilter = TextureFilter::Nearest;
 			TextureLibrary::Get()->AddTexture2D(textureSpec);
 
+			// Wood container 2
+			textureSpec.Path = "assets/Textures/container2.png";
+			textureSpec.Name = "container2";
+			textureSpec.DebugName = "container2";
+			TextureLibrary::Get()->AddTexture2D(textureSpec);
+
 			// Bricks
 			textureSpec.Path = "assets/Textures/bricks_orange.jpg";
 			textureSpec.Name = "bricks";

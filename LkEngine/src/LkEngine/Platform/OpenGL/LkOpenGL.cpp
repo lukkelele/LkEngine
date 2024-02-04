@@ -273,7 +273,7 @@ namespace LkEngine {
 		{
 			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("brickwall");
 			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
 			return;
 		}
@@ -322,7 +322,7 @@ namespace LkEngine {
 		{
 			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("brickwall");
 			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
 			return;
 		}
@@ -377,18 +377,19 @@ namespace LkEngine {
 	{
 		if (!CubeTexture)
 		{
-			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("container");
 			return;
 		}
 
 		glEnable(GL_DEPTH_TEST);
 
-        //Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Bind();
 		Renderer::GetViewportFramebuffer()->Bind();
 
         DebugShader->Bind();
         DebugShader->Set("u_ViewMatrix", view);
         DebugShader->Set("u_ProjectionMatrix", projection);
+        //DebugShader->Set("u_ViewProjectionMatrix", viewProjection);
+
         ModelMVP = glm::mat4(1.0f);
 
 		CubeVertexBuffer->Bind();
@@ -409,16 +410,6 @@ namespace LkEngine {
 
 		Framebuffer::TargetSwapChain();
 	}
-
-		//if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
-		//{
-		//	ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
-		//	DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-		//	CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
-		//	PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
-		//	return;
-		//}
-		//if (!CubeTexture) CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
 
 	void RenderFloor(const glm::mat4& view, const glm::mat4& projection)
 	{
@@ -446,16 +437,19 @@ namespace LkEngine {
     {
 		CubeVertexBuffer = VertexBuffer::Create(Cube_Vertices, sizeof(Cube_Vertices));
 		CubeVertexBuffer->SetLayout({
-            { "a_Pos",          ShaderDataType::Float3  },
-            { "a_TexCoord",     ShaderDataType::Float2  },
+            { "a_Position",      ShaderDataType::Float3  },
+            { "a_Color",         ShaderDataType::Float4  },
+            { "a_Texcoord",      ShaderDataType::Float2  },
+            { "a_TexIndex",      ShaderDataType::Float,  },
+            { "a_TexArray",      ShaderDataType::Float,  },
+            { "a_TilingFactor",  ShaderDataType::Float,  },
 		});
-		LK_CORE_TRACE_TAG("LkOpenGL", "Generated CubeVertexBuffer!");
 
 		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 		{
 			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture2D("wood-container");
+			CubeTexture = TextureLibrary::Get()->GetTexture2D("brickwall");
 			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
 			return;
 		}
@@ -465,8 +459,8 @@ namespace LkEngine {
 	{
 		if (!DebugShader)  DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
 		if (!ScreenShader) ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
-		if (!CubeTexture)  CubeTexture  = TextureLibrary::Get()->GetTexture2D("wood-container");
-		if (!PlaneTexture) PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
+		if (!CubeTexture)  CubeTexture  = TextureLibrary::Get()->GetTexture2D("brickwall");
+		if (!PlaneTexture) PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal");
 	}
 
     void GeneratePlaneVaoAndVbo(unsigned int& vao, unsigned int& vbo)
@@ -477,7 +471,7 @@ namespace LkEngine {
 		PlaneVertexBuffer = VertexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices));
 		PlaneVertexBuffer->SetLayout({
             { "a_Pos",          ShaderDataType::Float3  },
-            { "a_TexCoord",     ShaderDataType::Float2  },
+            { "a_Texcoord",     ShaderDataType::Float2  },
 		});
 		LK_CORE_TRACE_TAG("LkOpenGL", "Generated CubeVertexBuffer!");
     }
