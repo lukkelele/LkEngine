@@ -342,8 +342,9 @@ namespace LkEngine {
 
 			int i = 1;
 			for (RendererID& textureArray : boundTextureArrays)
+			{
 				shader->Set("u_TextureArray" + std::to_string(i++), textureArray);
-            shader->Set("u_ViewProjectionMatrix", transform);
+			}
 			
 			vertexBuffer->Bind();
 			DrawIndexed(indexCount);

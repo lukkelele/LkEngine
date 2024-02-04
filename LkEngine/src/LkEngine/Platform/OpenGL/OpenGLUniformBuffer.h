@@ -1,11 +1,11 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
-
 #include "LkEngine/Renderer/UniformBuffer.h"
 
 
 namespace LkEngine {
+
+    class Shader;
 
     class OpenGLUniformBuffer : public UniformBuffer
     {
@@ -18,6 +18,8 @@ namespace LkEngine {
 
         void Bind();
         void Unbind();
+
+        void SetBinding(const Ref<Shader>& targetShader, std::string_view ubName, uint32_t blockIndex);
 
     private:
         RendererID m_ID;

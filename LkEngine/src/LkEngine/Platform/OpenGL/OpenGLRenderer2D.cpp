@@ -142,15 +142,22 @@ namespace LkEngine {
         }
 
         m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture2D();
+
         m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
-        m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData));
+        m_CameraUniformBuffer = Ref<OpenGLUniformBuffer>::Create(sizeof(CameraData));
+        m_CameraUniformBuffer->SetBinding(m_QuadShader, "UB_Camera", 0); // Default to binding = 0 in Renderer_Quad.shader
+
         m_RenderCommandBuffer = RenderCommandBuffer::Create(0, "OpenGLRenderer2D-RenderCommandBuffer");
 
         for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
         {
             if (m_TextureArrays[i])
+            {
                 m_TextureArrays[i]->Bind();
+                //m_QuadShader->Set("u_TextureArray" + std::to_string(i + 1), m_TextureArrays[i]->GetRendererID());
+            }
         }
+
 
         Initialized = true;
     }
@@ -220,7 +227,7 @@ namespace LkEngine {
     {
         for (auto& textureArray : m_TextureArrays)
         {
-            //textureArray->~OpenGLTextureArray();
+            textureArray->~OpenGLTextureArray();
         }
 
         delete m_QuadVertexBufferBase;

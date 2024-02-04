@@ -43,6 +43,8 @@ namespace LkEngine {
         TextureCollection& GetTextureCollection(std::string_view collectionName);
         Texture2DCollection& GetTexture2DCollection(std::string_view collectionName);
 
+        void AddCollection(std::string_view directoryPath);
+
         static Ref<TextureLibrary> Get() { return m_Instance; }
 
     private:

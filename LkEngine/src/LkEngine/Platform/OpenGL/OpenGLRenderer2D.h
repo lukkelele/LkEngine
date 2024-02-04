@@ -123,7 +123,7 @@ namespace LkEngine {
             glm::mat4 ViewProjection;
         } m_CameraBuffer;
 
-        Ref<UniformBuffer> m_CameraUniformBuffer;
+        Ref<OpenGLUniformBuffer> m_CameraUniformBuffer;
 
         Statistics m_Stats;
 

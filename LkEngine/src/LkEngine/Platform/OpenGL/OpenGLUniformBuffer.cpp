@@ -43,4 +43,18 @@ namespace LkEngine {
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
+	void OpenGLUniformBuffer::SetBinding(const Ref<Shader>& targetShader, std::string_view ubName, uint32_t blockIndex)
+	{
+		uint32_t ubIndex = glGetUniformBlockIndex(targetShader->GetRendererID(), std::string(ubName).c_str());
+		if (ubIndex == blockIndex)
+		{
+			LK_CORE_DEBUG("Uniformbuffer is already bound to {} for block \"{}\"", blockIndex, ubName);
+			return;
+		}
+		glUniformBlockBinding(targetShader->GetRendererID(), ubIndex, blockIndex);
+		LK_CORE_DEBUG_TAG("OpenGLUniformBuffer", "Updated buffer binding, block index is now set to {} for block {}", blockIndex, ubName);
+		//glUniformBlockBinding(targetShader->GetRendererID(), m_ID, blockIndex);
+	}
+
+
 }

@@ -39,7 +39,6 @@ namespace LkEngine {
         static float GetLineWidth();
         static void SetLineWidth(float width);
 
-        //static Ref<Renderer2DAPI> Create(const Renderer2DSpecification& specification);
         void SetRenderer(const Ref<Renderer2DAPI>& renderer) { m_Renderer2D = renderer; }
 
     protected:

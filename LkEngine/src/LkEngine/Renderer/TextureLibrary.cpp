@@ -144,12 +144,12 @@ namespace LkEngine {
             //LK_CORE_TRACE("Entry: {}   {}", entry.first, entry.second->GetName());
             if (entry.first == File::ExtractFilenameWithoutExtension(textureSpec.Name))
             {
-                //if (textureSpec.Width == entry.second->GetWidth() && textureSpec.Height == entry.second->GetHeight() || entry.first == textureSpec.Name)
-                //{
-                //    LK_CORE_WARN_TAG("TextureLibrary", "Texture {} already exists and has same dimensions as the passed specification, returning it", textureSpec.Name);
-                //    return entry.second;
-                //}
-                return entry.second;
+                if (textureSpec.Width == entry.second->GetWidth() && textureSpec.Height == entry.second->GetHeight() || entry.first == textureSpec.Name)
+                {
+                    LK_CORE_WARN_TAG("TextureLibrary", "Texture {} already exists and has same dimensions as the passed specification, returning it", textureSpec.Name);
+                    return entry.second;
+                }
+                //return entry.second;
             }
         }
         Ref<Texture2D> texture2D = Texture2D::Create(textureSpec);
@@ -198,13 +198,16 @@ namespace LkEngine {
                 continue;
             textures.push_back(entry);
         }
-        //for (auto& collection : m_Collections2D)
-        //{
-        //    for (auto& entry : collection.second)
-        //    {
-        //        textures.push_back(entry);
-        //    }
-        //}
+// Causes crashes
+#if 0 
+        for (auto& collection : m_Collections2D)
+        {
+            for (auto& entry : collection.second)
+            {
+                textures.push_back(entry);
+            }
+        }
+#endif
         return textures;
     }
 
@@ -278,6 +281,11 @@ namespace LkEngine {
                 return collection.second;
         }
         LK_CORE_ASSERT(false, "Couldnt find Texture2DCollection {}", collectionName);
+    }
+
+    void TextureLibrary::AddCollection(std::string_view directoryPath)
+    {
+        auto directory = std::filesystem::path(directoryPath);
     }
 
 
