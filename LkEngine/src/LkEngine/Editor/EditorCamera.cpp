@@ -94,7 +94,6 @@ namespace LkEngine {
 			LK_CORE_DEBUG_TAG("EditorCamera", "SCALE MODE");
 		}
 
-
 		if (Input::IsMouseButtonDown(MouseButton::Right) && !Input::IsKeyDown(KeyCode::LeftAlt))
 		{
 			m_CameraMode = Mode::Flycam;

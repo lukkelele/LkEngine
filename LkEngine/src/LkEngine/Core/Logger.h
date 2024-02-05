@@ -122,6 +122,7 @@ namespace LkEngine {
 #define LK_FATAL(...)                   ::LkEngine::Logger::PrintMessage(::LkEngine::Logger::Type::Client, ::LkEngine::Logger::Level::Fatal, "", __VA_ARGS__)
 
 #define LOG_ASSET(...) 			        ::LkEngine::Logger::GetAssetLogger()->debug(__VA_ARGS__)
+#define LK_ASSET_LOG(...) 			    ::LkEngine::Logger::GetAssetLogger()->debug(__VA_ARGS__)
 
 
 namespace LkEngine {

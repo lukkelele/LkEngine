@@ -1,14 +1,18 @@
 #pragma once
 
+#include "LkEngine/Asset/AssetManager.h"
+
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/ImGui/ImGuiLayer.h"
+
+#include "LkEngine/Serialization/FileStream.h"
 
 
 namespace LkEngine {
 
 	struct ProjectSpecification
 	{
-		std::string Name = "LukkeleleProject1";
+		std::string Name = "LkProject1";
 		bool Blank = false;
 	};
 
@@ -36,9 +40,14 @@ namespace LkEngine {
 		Ref<Scene> GetTargetScene() const { return Data.TargetScene; }
 		// Basic project to be used as a starter project/for when opening the engine 
 
-		static Ref<Project> CreateEmptyProject();
-		static Ref<Project> CreateDefaultProject();
-		static Ref<Project> CreateDebugProject();
+		static void SetActive(Ref<Project> project);
+
+		static Ref<Project> CreateEmptyProject(bool setActive = true);
+		static Ref<Project> CreateDefaultProject(bool setActive = true);
+		static Ref<Project> CreateDebugProject(bool setActive = true);
+
+		static Ref<Project> Current() { return m_ActiveProject; }
+		static Ref<AssetManager> GetAssetManager() { return m_AssetManager; }
 
 	public:
 		ProjectData Data;
@@ -48,6 +57,9 @@ namespace LkEngine {
 		ProjectSpecification m_Specification;
 
 		std::filesystem::path m_Filepath;
+
+		inline static Ref<Project> m_ActiveProject;
+		inline static Ref<AssetManager> m_AssetManager;
 
 		friend class EditorLayer;
 	};

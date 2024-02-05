@@ -15,12 +15,27 @@ namespace LkEngine {
 		: m_Specification(specification)
 		, m_Name(specification.Name)
 	{
-
+		m_AssetManager = Ref<AssetManager>::Create();
 	}
 
 	Project::Project(const std::string& name)
 		: m_Name(name)
 	{
+	}
+
+	void Project::SetActive(Ref<Project> project)
+	{
+		if (m_ActiveProject)
+		{
+			m_AssetManager = nullptr;
+		}
+
+		m_ActiveProject = project;
+		if (m_ActiveProject)
+		{
+			m_AssetManager = Ref<AssetManager>::Create();
+		}
+
 	}
 
 	// Save project data, aka serialize to disk
@@ -40,15 +55,21 @@ namespace LkEngine {
 		return 0;
 	}
 
-	Ref<Project> Project::CreateEmptyProject()
+	Ref<Project> Project::CreateEmptyProject(bool setActive)
 	{
 		Ref<Project> project = Ref<Project>::Create("UntitledProject");
 		project->Data.TargetScene = Ref<Scene>::Create("StarterScene", true, true);
+
+		if (setActive)
+		{
+			m_ActiveProject = project;
+		}
+
 		return project;
 	}
 
 	// TODO
-	Ref<Project> Project::CreateDefaultProject()
+	Ref<Project> Project::CreateDefaultProject(bool setActive)
 	{
 		Ref<Project> project = Ref<Project>::Create("UntitledProject");
 		project->Data.TargetScene = Ref<Scene>::Create("StarterScene", true, true);
@@ -76,11 +97,14 @@ namespace LkEngine {
 		cc.Camera = Ref<SceneCamera>::Create();
 		cc.Camera->SetPerspective(60.0f, 0.10f, 5000.0f);
 
+		if (setActive)
+			m_ActiveProject = project;
+
 		return project;
 	}
 
 	// TODO
-	Ref<Project> Project::CreateDebugProject()
+	Ref<Project> Project::CreateDebugProject(bool setActive)
 	{
 		Ref<Project> project = Ref<Project>::Create("UntitledProject");
 		project->Data.TargetScene = Ref<Scene>::Create("StarterScene", true, true);
@@ -106,6 +130,9 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("Project", "Creating scene camera and setting it to perspective");
 		cc.Camera = Ref<SceneCamera>::Create();
 		cc.Camera->SetPerspective(60.0f, 0.10f, 5000.0f);
+
+		if (setActive)
+			m_ActiveProject = project;
 
 		return project;
 	}

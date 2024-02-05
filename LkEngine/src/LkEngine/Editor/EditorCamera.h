@@ -77,7 +77,6 @@ namespace LkEngine {
 		void ApplyViewMode(ViewMode mode);
 
 	private:
-		glm::mat4 m_ViewMatrix;
 		glm::vec3 m_Position{}, m_Direction{}, m_FocalPoint{};
 		glm::vec3 m_Origin = { 0.0f, 0.0f, 0.0f };
 

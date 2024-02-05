@@ -26,7 +26,7 @@ namespace LkEngine {
 
 	static glm::vec2 MenuBarSize = { 0.0f, 30.0f };
 	static glm::vec2 TabBarSize = { 0.0f, 34.0f };
-	static glm::vec2 BottomBarSize = { 0.0f, 340.0f };
+	static glm::vec2 BottomBarSize = { 0.0f, 240.0f };
 	static glm::vec2 LeftSidebarSize = { 340.0f, 0.0f };
 	static glm::vec2 RightSidebarSize = { 340.0f, 0.0f };
 	static glm::vec2 BottomBarPos = { 0.0f, 0.0f };
@@ -78,45 +78,38 @@ namespace LkEngine {
 		m_Window->SetHeight(EditorWindowSize.y);
 
         // Viewport Framebuffer
-        {
-		    FramebufferSpecification framebufferSpec;
-		    framebufferSpec.Attachments = { ImageFormat::RGBA32F, ImageFormat::DEPTH24STENCIL8 };
-		    framebufferSpec.Samples = 1;
-		    framebufferSpec.ClearColorOnLoad = false;
-		    framebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
-		    framebufferSpec.DebugName = "EditorLayer-Framebuffer";
-            framebufferSpec.Width = Window::Get().GetWidth();
-            framebufferSpec.Height = Window::Get().GetHeight();
-		    m_ViewportFramebuffer = Framebuffer::Create(framebufferSpec);
-            LK_CORE_DEBUG_TAG("Editor", "Color attachment 0: {}", m_ViewportFramebuffer->GetColorAttachmentRendererID(0));
-        }
+		FramebufferSpecification framebufferSpec;
+		framebufferSpec.Attachments = { ImageFormat::RGBA32F, ImageFormat::DEPTH24STENCIL8 };
+		framebufferSpec.Samples = 1;
+		framebufferSpec.ClearColorOnLoad = false;
+		framebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
+		framebufferSpec.DebugName = "EditorLayer-Framebuffer";
+        framebufferSpec.Width = Window::Get().GetWidth();
+        framebufferSpec.Height = Window::Get().GetHeight();
+		m_ViewportFramebuffer = Framebuffer::Create(framebufferSpec);
+        LK_CORE_DEBUG_TAG("Editor", "Color attachment 0: {}", m_ViewportFramebuffer->GetColorAttachmentRendererID(0));
 
 		// Camera system
-		{
-			m_EditorCamera = Ref<EditorCamera>::Create(60.0f, Window::Get().GetWidth(), Window::Get().GetHeight(), 0.10f, 2400.0f);
-			m_EditorCamera->SetPosition({ -10, 4, -10 });
-			m_EditorCamera->m_Pitch = 0.0f;
-			m_EditorCamera->m_Yaw = glm::pi<float>();
-		}
+		m_EditorCamera = Ref<EditorCamera>::Create(60.0f, Window::Get().GetWidth(), Window::Get().GetHeight(), 0.10f, 2400.0f);
+		m_EditorCamera->SetPosition({ -10, 4, -10 });
+		m_EditorCamera->m_Pitch = 0.0f;
+		m_EditorCamera->m_Yaw = glm::pi<float>();
 
 		// UI Panels
-		{
-			m_SceneManagerPanel->Init();
-			m_ContentBrowser->Init();
-			m_ComponentEditor->Init();
-		}
+		m_SceneManagerPanel->Init();
+		m_ContentBrowser->Init();
+		m_ComponentEditor->Init();
 
 		// Tab manager
-		{
-			m_TabManager = new EditorTabManager();
-			m_TabManager->Init();
-			auto viewportTab = m_TabManager->NewTab("Viewport", EditorTabType::Viewport, true);
-		}
+		m_TabManager = new EditorTabManager();
+		m_TabManager->Init();
+		auto viewportTab = m_TabManager->NewTab("Viewport", EditorTabType::Viewport, true);
 
 		// Default project
 		{
 			// TODO: Parse config or cache to determine most recent project and go from there
-			m_TargetProject = Project::CreateEmptyProject();
+			m_TargetProject = Project::CreateEmptyProject(true /* == set as active*/);
+			Project::SetActive(m_TargetProject);
 			SetScene(m_TargetProject->Data.TargetScene);
 		}
 	}
@@ -185,32 +178,35 @@ namespace LkEngine {
 
 			m_SceneManagerPanel->UI_CameraSettings();
 
-			auto& texture = CubeTexture;
-			auto textures2D = TextureLibrary::Get()->GetTextures2D();
-			std::string textureName = texture->GetName();
-			if (ImGui::BeginCombo("Cubes", textureName.c_str(), ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoPreview))
+			if (CubeTexture)
 			{
-				for (auto& tex : textures2D)
+				auto& texture = CubeTexture;
+				auto textures2D = TextureLibrary::Get()->GetTextures2D();
+				std::string textureName = texture->GetName();
+				if (ImGui::BeginCombo("Cubes", textureName.c_str(), ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoPreview))
 				{
-					if (ImGui::Selectable(tex.first.c_str()))
+					for (auto& tex : textures2D)
 					{
-						//mc.SetTexture(tex.second);
-						CubeTexture = tex.second;
+						if (ImGui::Selectable(tex.first.c_str()))
+						{
+							//mc.SetTexture(tex.second);
+							CubeTexture = tex.second;
+						}
 					}
+					ImGui::EndCombo();
 				}
-				ImGui::EndCombo();
-			}
-			if (ImGui::BeginCombo("Floor", textureName.c_str(), ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoPreview))
-			{
-				for (auto& tex : textures2D)
+				if (ImGui::BeginCombo("Floor", textureName.c_str(), ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoPreview))
 				{
-					if (ImGui::Selectable(tex.first.c_str()))
+					for (auto& tex : textures2D)
 					{
-						//mc.SetTexture(tex.second);
-						PlaneTexture = tex.second;
+						if (ImGui::Selectable(tex.first.c_str()))
+						{
+							//mc.SetTexture(tex.second);
+							PlaneTexture = tex.second;
+						}
 					}
+					ImGui::EndCombo();
 				}
-				ImGui::EndCombo();
 			}
 
 			//----------------------------------------------------
@@ -269,7 +265,7 @@ namespace LkEngine {
 				static ImVec2 modeButtonSize = { 50.0f, 50.0f };
 				static ImVec4 modeButtonBgColor = { 0, 0, 0, 0 };
 				static ImVec4 modeButtonTintColor = { 1, 1, 1, 1 };
-				std::string textureName = "ale";
+				std::string textureName = "ale1024";
 				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LK_CORE_DEBUG("Push tab");
@@ -405,8 +401,8 @@ namespace LkEngine {
 		Renderer::Submit([&]()
 		{
 			//RenderMirrorTexture(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-			RenderCubes(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
-			RenderFloor(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+			//RenderCubes(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
+			//RenderFloor(m_EditorCamera->GetViewMatrix(), m_EditorCamera->GetProjectionMatrix());
 		});
 	}
 
@@ -483,15 +479,12 @@ namespace LkEngine {
 			LK_CORE_ASSERT(false, "Entity doesnt have a transform component");
 			return;
 		}
-		//auto& targetFramebuffer = *Renderer::GetViewportFramebuffer();
 
 		auto& tc = entity.Transform();
         glm::mat4 transform_matrix = tc.GetTransform();
         auto& cameraPosition = m_EditorCamera->GetPosition();
         auto& viewMatrix = m_EditorCamera->GetViewMatrix();
         auto& projectionMatrix = m_EditorCamera->GetProjectionMatrix();
-
-		SpriteComponent& sc = entity.Sprite();
 
 		float pos_x = m_SecondViewportBounds[0].x;
 		float pos_y = m_SecondViewportBounds[0].y;
@@ -622,11 +615,8 @@ namespace LkEngine {
 	{
 		if (ImGui::Begin("Render Settings", &ShowRenderSettingsWindow, ImGuiWindowFlags_NoDocking))
 		{
-			//auto graphicsCtx = Ref<GraphicsContext>();
-			//GraphicsContext* graphicsCtx = Ref<GraphicsContext>().Raw();
 			Ref<GraphicsContext> graphicsCtx = GraphicsContext::Get();
 
-			//bool& blending = GraphicsContext::Get()->GetBlending();
 			bool blending = graphicsCtx->GetBlendingEnabled();
 			if (ImGui::Checkbox("Blending", &blending))
 			{
@@ -636,17 +626,22 @@ namespace LkEngine {
 					graphicsCtx->SetBlendingEnabled(false);
 			}
 
-			if (ImGui::BeginCombo("Drawmode", Renderer::GetDrawModeStr().c_str(), NULL))
+			std::string currentTopology{};
+			if (Renderer::GetPrimitiveTopology() == RenderTopology::Triangles)
+				currentTopology = "Triangles";
+			else if (Renderer::GetPrimitiveTopology() == RenderTopology::Lines)
+				currentTopology = "Lines";
+			if (ImGui::BeginCombo("Topology", currentTopology.c_str(), NULL))
 			{
 				if (ImGui::MenuItem("Triangles"))
 				{
 					LK_CORE_DEBUG("Selected new drawmode 'Triangles'");
-					Renderer::SetDrawMode(RendererDrawMode::Triangles);
+					Renderer::SetPrimitiveTopology(RenderTopology::Triangles);
 				}
 				if (ImGui::MenuItem("Lines"))
 				{
 					LK_CORE_DEBUG("Selected new drawmode 'Lines'");
-					Renderer::SetDrawMode(RendererDrawMode::Lines);
+					Renderer::SetPrimitiveTopology(RenderTopology::Lines);
 				}
 
 				ImGui::EndCombo();
@@ -747,7 +742,7 @@ namespace LkEngine {
 			static const ImVec4 bgColor = ImVec4(0, 0, 0, 0);
 			static const ImVec2 imageSize = ImVec2(60, 60);
 
-			static std::string textureName = "ale";
+			static std::string textureName = "ale1024";
 			// Rectangle Image
 			auto rectangleTexture = textureLibrary->GetTexture2D(textureName);
 			if (ImGui::ImageButton("##RectangleImage", (void*)rectangleTexture->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
