@@ -70,6 +70,7 @@ namespace LkEngine {
             tc.Translation.z = 0.90; // Z-fighting
         }
 
+#if 0
         if (m_Entity.HasComponent<MaterialComponent>())
         {
             m_Entity.Material().SetTexture(TextureLibrary::Get()->GetTexture2D("atte"));
@@ -109,12 +110,13 @@ namespace LkEngine {
             m_GunEntity = Scene::GetActiveScene()->CreateEntity("Big-Gun");
             auto& gunTC = m_GunEntity.AddComponent<TransformComponent>();
             auto& gunSC = m_GunEntity.AddComponent<SpriteComponent>();
-            auto& gunMC = m_GunEntity.AddComponent<MaterialComponent>();
             gunSC.SetSize(100, 90);
-            gunMC.SetTexture(TextureLibrary::Get()->GetTexture2D("SuperMario-gun"));
+            //auto& gunMC = m_GunEntity.AddComponent<MaterialComponent>();
+            //gunMC.SetTexture(TextureLibrary::Get()->GetTexture2D("SuperMario-gun"));
             gunTC.Translation.x = m_Pos.x + gunSC.GetSize().x;
             gunTC.Translation.y = m_Pos.y + gunSC.GetSize().y;
         }
+#endif
     }
 
     void Player::Destroy()

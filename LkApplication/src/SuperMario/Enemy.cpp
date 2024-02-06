@@ -27,7 +27,7 @@ namespace LkEngine {
         auto& tc = m_Entity.AddComponent<TransformComponent>();
         tc.Translation.z = 0.30f;
 
-        auto& mc = m_Entity.AddComponent<MaterialComponent>();
+        //auto& mc = m_Entity.AddComponent<MaterialComponent>();
 
         RigidBody2DComponent rigidbody;
         rigidbody.BodyType = RigidBody2DComponent::Type::Dynamic;

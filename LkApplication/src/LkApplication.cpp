@@ -35,7 +35,7 @@ int main()
     app.PushLayer(&superMarioGameLayer);
 
     app.Run();
-    app.Exit();
+    app.Shutdown();
 
     return 0;
 }

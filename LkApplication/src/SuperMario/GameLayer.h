@@ -25,11 +25,6 @@ namespace LkEngine {
         void OnImGuiRender() override;
 
     private:
-        void CreateGround();
-        void CreateSky();
-        float Ground_GetLeftBound();
-
-    private:
         Ref<Scene> m_Scene = nullptr;
 
         s_ptr<Renderer2DAPI> m_Renderer2D = nullptr;
