@@ -41,12 +41,12 @@ namespace LkEngine {
 		textureSpec.Width = 200;
 		textureSpec.Height = 200;
 		textureSpec.Format = ImageFormat::RGBA32F;
-		textureSpec.Path = "assets/Icons/file-icon-48x48.png";
+		textureSpec.Path = "Assets/Icons/file-icon-48x48.png";
 		FileIconTexture = Texture2D::Create(textureSpec);
 
 		textureSpec.Name = "FolderIcon";
 		textureSpec.DebugName = "FolderIcon";
-		textureSpec.Path = "assets/Icons/folder-icon-64x64.png";
+		textureSpec.Path = "Assets/Icons/folder-icon-64x64.png";
         FolderIconTexture = Texture2D::Create(textureSpec);
     }
 
@@ -62,6 +62,7 @@ namespace LkEngine {
 		    LK_CORE_DEBUG_TAG("ContentBrowser", "Clicked FileIcon!");
 		}
 
+        // File Icon
         static std::string file_data = "FILE";
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
@@ -83,6 +84,7 @@ namespace LkEngine {
 
         ImGui::SameLine();
 
+        // Folder Icon
         static std::string folder_data = "FOLDER";
 		if (ImGui::ImageButton((void*)FolderIconTexture->GetRendererID(), ImVec2(48, 48), ImVec2(0, 0)))
 		{
@@ -182,7 +184,6 @@ namespace LkEngine {
 			}
             ImGui::EndDragDropTarget();
         }
-
 #endif
 
 	}
