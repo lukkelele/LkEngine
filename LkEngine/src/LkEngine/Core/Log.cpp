@@ -1,10 +1,10 @@
 #include "LKpch.h"
-#include "LkEngine/Core/Logger.h"
+#include "LkEngine/Core/Log.h"
 
 
 namespace LkEngine {
 
-	void Logger::Init(std::string logfilename,
+	void Log::Init(std::string logfilename,
 		           std::string coreLoggerName,
 			       std::string clientLoggerName)
 	{

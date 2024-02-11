@@ -20,6 +20,7 @@
 #include "Ref.h"
 #include "Assert.h"
 #include "UUID.h"
+#include "String.h"
 
 
 namespace LkEngine {
