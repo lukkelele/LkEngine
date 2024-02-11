@@ -68,10 +68,22 @@ namespace LkEngine {
 
 	void OpenGLTextureArray::AddTextureToArray(Ref<Texture> texture)
 	{
+		//Buffer imageBuffer = texture.As<Texture2D>()->GetImageBuffer();
 		Buffer imageBuffer = texture->GetImageBuffer();
 		LK_CORE_ASSERT(imageBuffer.Data, "Texture data from \"{}\" is NULL", texture->GetName());
 		glTextureSubImage3D(m_RendererID, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
 		m_Textures.push_back(texture);
+
+#if 0
+		if (texture->GetType() == TextureType::Texture2D)
+		{
+			Ref<Texture2D> texture2D = texture.As<Texture2D>();
+			Buffer imageBuffer = texture2D->GetImageBuffer();
+			LK_CORE_ASSERT(imageBuffer.Data, "Texture data from \"{}\" is NULL", texture2D->GetName());
+			glTextureSubImage3D(m_RendererID, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
+			m_Textures.push_back(texture2D);
+		}
+#endif
 	}
 
 	bool OpenGLTextureArray::RemoveTextureFromArray(RendererID& rendererID)

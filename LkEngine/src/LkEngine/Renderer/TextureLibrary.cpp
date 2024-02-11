@@ -34,17 +34,18 @@ namespace LkEngine {
 		spec.Height = 2048;
         spec.SamplerFilter = TextureFilter::None;
         spec.SamplerWrap = TextureWrap::None;
+        spec.Path = "Assets/Textures/white-texture.png";
         spec.Name = "white-texture";
         spec.DebugName = "white-texture";
-        spec.Path = "assets/Textures/white-texture.png";
         m_WhiteTexture2D = Texture2D::Create(spec);
         m_Collection2D.insert({ "white-texture", m_WhiteTexture2D });
 
         // TODO: Read fileinfo and determine size and other info instead of manually setting it
+#if 0
         // Nanosuit
         {
             std::unordered_map<std::string, Ref<Texture2D>> nanosuitCollection;
-            constexpr const char* nanosuitDirectory = "assets/Meshes/Template/Nanosuit";
+            constexpr const char* nanosuitDirectory = "Assets/Meshes/Template/Nanosuit";
             TextureSpecification nanosuitSpec;
 
             nanosuitSpec.Width = 1024;
@@ -69,7 +70,7 @@ namespace LkEngine {
             }
             m_Collections2D.insert({ "Nanosuit", nanosuitCollection });
         }
-
+#endif
     }
 
     TextureLibrary::~TextureLibrary()

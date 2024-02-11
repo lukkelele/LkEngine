@@ -75,7 +75,7 @@ namespace LkEngine {
 				imageSpec.Wrap = TextureWrap::None;
 				imageSpec.Filter = TextureFilter::None;
 				imageSpec.Mips = 1; // No mipmapping
-				imageSpec.Path = "assets/textures/white-texture.png";
+				imageSpec.Path = "Assets/textures/white-texture.png";
 
 				Buffer imageData = Buffer(TextureLibrary::Get()->GetWhiteTexture2D()->GetImageBuffer());
 				Ref<Image2D> image = Image2D::Create(imageSpec, imageData);
@@ -162,8 +162,9 @@ namespace LkEngine {
 
 	void OpenGLFramebuffer::BindTexture(uint32_t attachmentIndex, uint32_t slot) const
 	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, m_ColorAttachments[attachmentIndex]->GetRendererID());
+		//glActiveTexture(GL_TEXTURE0 + slot);
+		//glBindTexture(GL_TEXTURE_2D, m_ColorAttachments[attachmentIndex]->GetRendererID());
+		glBindTextureUnit(slot, m_ColorAttachments[attachmentIndex]->GetRendererID());
 	}
 
 	uint32_t OpenGLFramebuffer::GetWidth() const
@@ -178,6 +179,8 @@ namespace LkEngine {
 
 	Ref<Image> OpenGLFramebuffer::GetImage(uint32_t attachmentIndex) const
 	{
+		LK_CORE_VERIFY(attachmentIndex < m_ColorAttachments.size());
+		LK_CORE_VERIFY(m_ColorAttachments[attachmentIndex], "Color attachment {} is nullptr!", attachmentIndex);
 		return m_ColorAttachments[attachmentIndex];
 	}
 	

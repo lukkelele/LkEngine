@@ -49,4 +49,17 @@ namespace LkEngine {
 		LK_CORE_ASSERT(false, "Coult not determine render API");
 	}
 
+
+	Ref<TextureCube> TextureCube::Create(const TextureSpecification& specification, Buffer imageData)
+	{
+		switch (RendererAPI::Current())
+		{
+			case RendererAPIType::OpenGL: return Ref<OpenGLTextureCube>::Create(specification, imageData);
+			//case RendererAPIType::Vulkan: return Ref<VulkanTextureCube>::Create(specification, imageData);
+		}
+		LK_CORE_ASSERT(false, "Unknown RendererAPI");
+		return nullptr;
+	}
+
+
 }

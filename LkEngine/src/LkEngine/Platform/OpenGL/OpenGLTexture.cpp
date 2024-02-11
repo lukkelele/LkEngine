@@ -66,15 +66,22 @@ namespace LkEngine {
 		m_Image->Release();
 	}
 
-	void OpenGLTexture::Bind(unsigned int slot) 
+	void OpenGLTexture::Bind(uint32_t slot) const
 	{
 		glBindTextureUnit(slot, m_Image->GetRendererID());
 	}
 
-	void OpenGLTexture::Unbind(unsigned slot)
+	void OpenGLTexture::Unbind(uint32_t slot) const
 	{
 		glBindTextureUnit(slot, 0);
 	}
+
+#if 0
+	const RendererID& OpenGLTexture::GetRendererID() const
+	{
+		return m_Image->GetRendererID();
+	}
+#endif
 
 	RendererID OpenGLTexture::GetRendererID() const
 	{
@@ -105,6 +112,8 @@ namespace LkEngine {
 
 	void OpenGLTexture::Invalidate()
 	{
+		LK_CORE_WARN_TAG("OpenGLTexture", "Invalidate called, no impl!");
+		LK_CORE_ASSERT(false);
 	}
 
 	void OpenGLTexture::Lock()
@@ -167,6 +176,7 @@ namespace LkEngine {
 			int width, height, channels;
 			stbi_set_flip_vertically_on_load(1);
 
+			LK_CORE_DEBUG_TAG("OpenGLTexture2D", "Loading image from path \"{}\"", m_FilePath.string());
 			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &width, &height, &channels, 4);
             uint32_t dataSize = Utils::GetMemorySize(textureSpec.Format, textureSpec.Width, textureSpec.Height);
 			imageSpec.Size = (uint64_t)width * (uint64_t)height * (uint64_t)channels;
@@ -186,12 +196,12 @@ namespace LkEngine {
 		m_Image->Release();
 	}
 
-	void OpenGLTexture2D::Bind(unsigned int slot /*= 0*/)
+	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
 		glBindTextureUnit(slot, m_Image->GetRendererID());
 	}
 
-	void OpenGLTexture2D::Unbind(unsigned slot)
+	void OpenGLTexture2D::Unbind(uint32_t slot) const
 	{
 		glBindTextureUnit(slot, 0);
 	}
@@ -257,5 +267,64 @@ namespace LkEngine {
 	{ 
 		return glGetTextureHandleARB(m_Image->GetRendererID()); 
 	}
+
+	OpenGLTextureCube::OpenGLTextureCube(const TextureSpecification& specification, Buffer data)
+		: m_Specification(specification)
+		, m_LocalData(data)
+	{
+	}
+
+	OpenGLTextureCube::~OpenGLTextureCube()
+	{
+	}
+
+	void OpenGLTextureCube::Bind(uint32_t slot) const
+	{
+	}
+
+	ImageFormat OpenGLTextureCube::GetFormat() const
+	{
+		return ImageFormat();
+	}
+
+	uint32_t OpenGLTextureCube::GetWidth() const
+	{
+		return 0;
+	}
+
+	uint32_t OpenGLTextureCube::GetHeight() const
+	{
+		return 0;
+	}
+
+	uint32_t OpenGLTextureCube::GetMipLevelCount() const
+	{
+		return 0;
+	}
+
+	RendererID OpenGLTextureCube::GetRendererID() const
+	{
+		//return m_Image->GetRendererID();
+		return 0;
+	}
+
+	RendererID& OpenGLTextureCube::GetRendererID() 
+	{
+		//return m_Image->GetRendererID();
+		RendererID i = 0;
+		return i;
+	}
+
+	const std::filesystem::path& OpenGLTextureCube::GetPath() const
+	{
+		// TODO: insert return statement here
+		return m_Filepath;
+	}
+
+	const std::string& OpenGLTextureCube::GetName() const
+	{
+		return m_Specification.Name;
+	}
+
 
 }
