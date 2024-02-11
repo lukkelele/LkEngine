@@ -16,6 +16,8 @@ namespace LkEngine {
 
 		TextureCreated, TextureDeleted,	
 
+		SceneCreated, SceneDeleted, 
+
 		// Physics
 		ConstraintAdded, ConstraintRemoved, ConstraintAltered,
 		RigidbodyAdded, RigidbodyRemoved, RigidbodyAltered,
