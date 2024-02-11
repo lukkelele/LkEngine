@@ -11,6 +11,7 @@
 
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/Core/Event/SceneEvent.h"
 
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/DockSpace.h"
@@ -105,13 +106,10 @@ namespace LkEngine {
 		m_TabManager->Init();
 		auto viewportTab = m_TabManager->NewTab("Viewport", EditorTabType::Viewport, true);
 
-		// Default project
-		{
-			// TODO: Parse config or cache to determine most recent project and go from there
-			m_TargetProject = Project::CreateEmptyProject(true /* == set as active*/);
-			Project::SetActive(m_TargetProject);
-			SetScene(m_TargetProject->Data.TargetScene);
-		}
+		// TODO: Parse config or cache to determine most recent project and go from there
+		m_Project = Project::CreateEmptyProject("Editor", true);
+		Project::SetActive(m_Project);
+		//SetScene(m_Project->m_Scene);
 	}
 
 	void EditorLayer::OnUpdate()
@@ -161,7 +159,6 @@ namespace LkEngine {
 		// Menubar
 		//=========================================================
 		UI_MainMenuBar();
-
 
 		//=========================================================
 		// Left Sidebar
@@ -329,8 +326,14 @@ namespace LkEngine {
 			LastSidebarRightSize = windowSize;
 
 			ImGui::Separator();
+
+			// Testing: Create new cube in scene
+			if (ImGui::Button("Create Cube"))
+			{
+				CreateCube();
+			}
 		}
-		ImGui::End();
+		ImGui::End(); // UI_SIDEBAR_RIGHT
 
 		// Draw component below the content in the right sidebar
 		SceneManagerPanel::DrawComponents(SELECTION::SelectedEntity);
@@ -419,10 +422,24 @@ namespace LkEngine {
 		// Drag'n'drop feature, used to drag items from content browser to the scene
 		if (ImGui::BeginDragDropTarget())
 		{
-		    const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FOLDER_DATA_TYPE", ImGuiDragDropFlags_None);
+			// Accept Content Browser payloads
+		    const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CB_PAYLOAD", ImGuiDragDropFlags_None);
 			if (payload)
 		    {
-				LK_CORE_WARN_TAG("ViewportTexture", "AcceptDragDropPayload  Size={}", (int)payload->SourceId);
+				// Payload data is sent in string format
+				std::string data = std::string(static_cast<const char*>(payload->Data));
+
+				if (data == "CUBE")
+				{
+					CreateCube();
+				}
+				else if (data == "CIRCLE")
+				{
+				}
+				else if (data == "CYLINDER")
+				{
+				}
+
 		    }
 		 	ImGui::EndDragDropTarget();
 		}
@@ -439,6 +456,11 @@ namespace LkEngine {
 			UI_ShowEditorWindowsDetails();
 			ImGui::End();
 		}
+	}
+
+	void EditorLayer::RegisterEvent(Event& e)
+	{
+		m_EventCallback(e);
 	}
 
 	void EditorLayer::OnEvent(Event& e)
@@ -467,6 +489,20 @@ namespace LkEngine {
 			}
 			case EventType::KeyReleased:
 			{
+				break;
+			}
+
+			case EventType::SceneCreated:
+			{
+				LK_CORE_DEBUG_TAG("Editor", "Handling SceneCreated event");
+				SceneCreatedEvent& sceneEvent = static_cast<SceneCreatedEvent&>(e);
+
+				Ref<Scene> newScene = sceneEvent.GetScene();
+				m_Scene = newScene;
+				m_SceneManagerPanel->SetScene(newScene);
+				newScene->m_EditorCamera->SetActive(true);
+				Application::Get()->SetScene(newScene);
+
 				break;
 			}
 		}
@@ -1055,8 +1091,8 @@ namespace LkEngine {
 	{
 		m_Scene = scene;
 		m_SceneManagerPanel->SetScene(scene);
-		Application::Get()->SetScene(scene);
 		scene->m_EditorCamera->SetActive(true);
+		Application::Get()->SetScene(scene);
 	}
 
 	void EditorLayer::CheckBottomBarSize()
@@ -1157,12 +1193,12 @@ namespace LkEngine {
 				// Save project
 				if (ImGui::MenuItem("Save")) 
 				{ 
-					m_TargetProject->Save();
+					m_Project->Save();
 				}
 				// New project
 				if (ImGui::MenuItem("New")) 
 				{ 
-					m_TargetProject = Ref<Project>::Create("Project1");
+					m_Project = Ref<Project>::Create("Project1");
 				}
 				// Load existing project
 				if (ImGui::MenuItem("Load")) 
@@ -1212,13 +1248,51 @@ namespace LkEngine {
 
 			// Horizontal space
 			ImGui::Dummy(ImVec2(40, 0));
-			if (ImGui::BeginMenu(std::string("Project: " + m_TargetProject->GetName()).c_str()))
+			if (ImGui::BeginMenu(std::string("Project: " + m_Project->GetName()).c_str()))
 			{
 				ImGui::EndMenu();
 			}
 
 		}
 		ImGui::EndMainMenuBar();
+	}
+
+	Entity EditorLayer::CreateCube()
+	{
+		AssetHandle cubeHandle = AssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Cube.obj");
+		Ref<Mesh> cubeMesh = AssetManager::GetAsset<Mesh>(cubeHandle);
+		LK_CORE_DEBUG_TAG("Editor", "Cube Handle: {}", cubeHandle);
+
+		LK_CORE_DEBUG_TAG("Editor", "Creating Cube");
+		Entity newCubeEntity = m_Scene->CreateEntity();
+
+		auto assetList = m_Scene->GetAssetList();
+		for (auto& assetHandle : assetList)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "Iterating asset: {}", assetHandle);
+			Ref<Mesh> mesh = AssetManager::GetAsset<Mesh>(assetHandle);
+			if (mesh == cubeMesh)
+			{
+				// The cube is in the scene
+				auto entities = m_Scene->GetEntities();
+				for (auto& entity : entities)
+				{
+					if (entity.HasComponent<MeshComponent>())
+					{
+						MeshComponent& entityMC = entity.Mesh();
+						if (entityMC.Mesh == assetHandle)
+						{
+							m_Scene->CopyComponentIfExists<MeshComponent>(newCubeEntity, m_Scene->m_Registry, entity);
+							m_Scene->CopyComponentIfExists<TagComponent>(newCubeEntity, m_Scene->m_Registry, entity);
+
+							LK_CORE_VERIFY(newCubeEntity.HasComponent<MeshComponent>() && newCubeEntity.HasComponent<TagComponent>());
+						}
+					}
+				}
+			}
+		}
+
+		return newCubeEntity;
 	}
 
 }

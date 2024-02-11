@@ -59,12 +59,14 @@ namespace LkEngine {
 
 		void Init();
 		void OnUpdate();
-		void OnEvent(Event& e) override;
 
 		void OnRender();
 		void OnImGuiRender();
 
-		bool IsEnabled() { return m_Enabled; }
+		void OnEvent(Event& e) override;
+		void RegisterEvent(Event& e);
+		void SetEventCallback(const EventCallbackFn& callback) { m_EventCallback = callback; }
+
 		Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
 		void SetScene(Ref<Scene> scene);
 		Ref<Scene> GetCurrentScene() { return m_Scene; }
@@ -86,6 +88,8 @@ namespace LkEngine {
 		float GetViewportScalerY() const; 
 		glm::vec2 GetMenuBarSize() const; 
 		glm::vec2 GetTabBarSize() const;
+
+		bool IsEnabled() const { return m_Enabled; }
 
 		static EditorLayer* Get() { return m_Instance; }
 
@@ -115,6 +119,8 @@ namespace LkEngine {
 		void CheckBottomBarSize();
 
 		Ref<Framebuffer>& GetViewportFramebuffer() { return m_ViewportFramebuffer; }
+
+		Entity CreateCube();
 
 	public:
 		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window // FIXME: REMOVE
@@ -151,13 +157,14 @@ namespace LkEngine {
 		int m_GizmoType = GizmoType::Translate;
 		int m_CurrentTabCount = 0; // Incremented to 1 after EditorLayer is initialized
 
-		Ref<Framebuffer> m_ViewportFramebuffer;
+        EventCallbackFn m_EventCallback;
 
+		Ref<Framebuffer> m_ViewportFramebuffer;
 		Ref<EditorCamera> m_EditorCamera;
+
 		SceneManagerPanel* m_SceneManagerPanel = nullptr;
 
-		Ref<Project> m_TargetProject;
-		Ref<Project> m_CachedProjects[5];
+		Ref<Project> m_Project;
 
 		NodeEditor* m_NodeEditor;
 		EditorTabManager* m_TabManager;
