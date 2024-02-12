@@ -10,7 +10,6 @@
 namespace LkEngine {
 
     class Enemy;
-    class Model;
 
     // Super Mario wannabe
     class GameLayer : public Layer
@@ -32,11 +31,6 @@ namespace LkEngine {
 
         Entity m_Ground{};
         Entity m_Background{};
-
-        Model* m_RockModel;
-        Model* m_CubeModel;
-        Model* m_BackpackModel;
-        Model* m_CrisisNanosuit;
 
         glm::vec2 m_BackgroundPos = { 0, 300.0f };
 
