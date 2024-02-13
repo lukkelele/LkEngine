@@ -41,7 +41,7 @@ uniform sampler2D u_Diffuse1;
 uniform sampler2D u_Specular1;
 uniform sampler2D u_Normal1;
 uniform sampler2D u_Height1;
-// Removed the height map sampler since it's not used in this example
+
 
 void main()
 {    
@@ -69,6 +69,6 @@ void main()
 
     vec3 FinalColor = ambient + diffuse + specular;
 
-    //FragColor = vec4(FinalColor, 1.0); // Use calculated lighting color
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0); // Use calculated lighting color
+    FragColor = vec4(FinalColor, 1.0); // Use calculated lighting color
+    //FragColor = vec4(1.0, 1.0, 1.0, 1.0); // Use calculated lighting color
 }
