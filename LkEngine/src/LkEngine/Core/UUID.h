@@ -17,7 +17,6 @@ namespace LkEngine {
 
 }
 
-
 namespace std {
 	template <typename T> struct hash;
 

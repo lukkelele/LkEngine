@@ -17,8 +17,7 @@
 
 #include "LkEngine/Debug/Debugger.h"
 
-#include "LkEngine/Asset/AssetRegistry.h"
-#include "LkEngine/Asset/MeshImporter.h"
+#include "LkEngine/Asset/AssetManager.h"
 
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
@@ -50,7 +49,7 @@ namespace LkEngine {
 
         void Init();
         void Run();
-        void Exit();
+        void Shutdown();
         void OnEvent(Event& e);
         
         void RenderImGui();
@@ -65,7 +64,7 @@ namespace LkEngine {
         Window& GetWindow() { return *m_Window; }
         GLFWwindow* GetGlfwWindow() { return m_Window->GetGlfwWindow(); }
         Ref<Renderer> GetRenderer() const { return m_Renderer; }
-        Ref<GraphicsContext> GetGraphicsContext() { return m_GraphicsContext; }
+        Ref<RenderContext> GetRenderContext() { return m_RenderContext; }
         const ApplicationSpecification GetSpecification() const { return m_Specification;  }
 
         Timestep GetTimestep() const { return m_Timestep; }
@@ -96,36 +95,36 @@ namespace LkEngine {
 			}
 		}
 
+		Ref<Project> GetProject() { return m_Project; }
+
     private:
-        ApplicationSpecification m_Specification;
         Timer m_Timer;
-        Layer* m_MainLayer = nullptr; 
         LayerStack m_LayerStack;
-        AssetRegistry m_AssetRegistry;
-
-        uint32_t m_CurrentFrameIndex = 0;
-        SelectionContext* m_SelectionContext = nullptr;
-
-        Ref<Renderer> m_Renderer = nullptr;
-        s_ptr<Input> m_Input = nullptr;
-        std::unique_ptr<Window> m_Window;
-
-        EditorLayer* m_Editor;
-        Debugger* m_Debugger;
-
-        PhysicsSystem* m_PhysicsSystem = nullptr;
-        Ref<GraphicsContext> m_GraphicsContext = nullptr;
-        Ref<ImGuiLayer> m_ImGuiLayer = nullptr;
+        ApplicationSpecification m_Specification;
 
         Timestep m_LastTimestep, m_Timestep;
+
+        Scope<Window> m_Window;
+        Scope<Input> m_Input;
+
+        Ref<Renderer> m_Renderer;
+        uint32_t m_CurrentFrameIndex = 0;
+
+        Ref<RenderContext> m_RenderContext;
+        Ref<ImGuiLayer> m_ImGuiLayer;
+
+        Scope<EditorLayer> m_Editor;
+        Scope<Debugger> m_Debugger;
+        Scope<PhysicsSystem> m_PhysicsSystem;
+        Scope<SelectionContext> m_SelectionContext;
 
 		std::mutex m_EventQueueMutex;
 		std::queue<std::function<void()>> m_EventQueue;
 		std::vector<EventCallbackFn> m_EventCallbacks;
 
+        Ref<Project> m_Project;
 
         Ref<Scene> m_Scene = nullptr; // Active scene
-        Ref<Scene> m_Scenes[8];
 
         inline static Application* m_Instance = nullptr;
     };

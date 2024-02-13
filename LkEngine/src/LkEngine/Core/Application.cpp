@@ -12,33 +12,34 @@ namespace LkEngine {
         m_Instance = this;
         m_Timer.Reset();
 
-        Logger::Init("LkEngine.log");
+        Log::Init("LkEngine.log");
 
         m_Window = std::make_unique<Window>(specification);
-        m_SelectionContext = new SelectionContext(); // Create selection context for UI
+        m_SelectionContext = std::make_unique<SelectionContext>();
 
         m_ImGuiLayer = ImGuiLayer::Create();
-        m_Debugger = new Debugger();
+        m_Debugger = std::make_unique<Debugger>();
     }
 
     Application::~Application()
     {
         LK_CORE_WARN_TAG("Application", "Terminating application");
+        Shutdown();
     }
 
     void Application::Init()
     {
-        m_AssetRegistry.Clear();
         m_Window->Init();
 		m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
 
-        m_GraphicsContext = m_Window->GetContext();
+        m_RenderContext = m_Window->GetRenderContext();
         Input::Init();
 
-        m_PhysicsSystem = new PhysicsSystem();
+        m_PhysicsSystem = std::make_unique<PhysicsSystem>();
         m_PhysicsSystem->Init();
 
-        m_Editor = new EditorLayer();
+        m_Editor = std::make_unique<EditorLayer>();
+		m_Editor->SetEventCallback([this](Event& e) { m_Editor->OnEvent(e); });
 
         m_Renderer = Ref<Renderer>::Create();
         m_Renderer->Init();
@@ -48,7 +49,8 @@ namespace LkEngine {
         m_Debugger->Init();
 
         m_Editor->Init();
-        PushOverlay(m_Editor);
+
+        PushOverlay(m_Editor.get());
     }
 
     void Application::Run()
@@ -107,10 +109,14 @@ namespace LkEngine {
 		}
     }
 
-    void Application::Exit()
+    void Application::Shutdown()
     {
-        m_GraphicsContext->Destroy();
-        m_Window->Exit();
+        LK_CORE_WARN_TAG("Application", "Renderer->Shutdown()");
+        m_Renderer->Shutdown();
+
+        LK_CORE_WARN_TAG("Application", "Window->Shutdown()");
+        m_Window->Shutdown();
+        LK_CORE_WARN_TAG("Application", "Window shutdown");
     }
 
     void Application::PushLayer(Layer* layer)
@@ -190,11 +196,7 @@ namespace LkEngine {
 
     void Application::AddScene(Scene& scene)
     {
-		//Input::SetScene(Ref<Scene>(&scene));
 		Input::SetScene(Ref<Scene>(&scene));
-        //m_Scenes[Scene::GetSceneCount()] = std::shared_ptr<Scene>(&scene);
-        m_Scenes[Scene::GetSceneCount()] = Ref<Scene>(&scene);
-        LK_CORE_DEBUG("Added scene: {}, scene count: {}", scene.GetName(), Scene::GetSceneCount());
     }
     
     void Application::SetScene(Ref<Scene> scene)

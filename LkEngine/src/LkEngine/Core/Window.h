@@ -6,7 +6,7 @@
 #include "Base.h"
 #include "ApplicationConfig.h"
 
-#include "LkEngine/Renderer/GraphicsContext.h"
+#include "LkEngine/Renderer/RenderContext.h"
 #include "LkEngine/Renderer/SwapChain.h"
 #include "LkEngine/Renderer/RenderPass.h"
 
@@ -44,7 +44,7 @@ namespace LkEngine {
         void Init();
         void SwapBuffers();
         void ProcessEvents();
-        void Exit();
+        void Shutdown();
 
         GLFWwindow* GetGlfwWindow() const { return m_GlfwWindow; }
         inline uint32_t GetWidth() const { return m_Width; }
@@ -63,13 +63,13 @@ namespace LkEngine {
 
         Ref<SwapChain> GetSwapChain();
         Ref<RenderPass> GetRenderPass();
-        Ref<GraphicsContext> GetContext() { return m_GraphicsContext; }
+        Ref<RenderContext> GetRenderContext() { return m_RenderContext; }
 
         void SetWidth(uint32_t width); // { m_Width = width; }
         void SetHeight(uint32_t height); // { m_Height = height; }
         void SetViewportWidth(uint32_t width) { m_ViewportWidth = width; }
         void SetViewportHeight(uint32_t height) { m_ViewportHeight = height; }
-        void SetDepthEnabled(bool enabled) { m_GraphicsContext->SetDepthEnabled(enabled); }
+        void SetDepthEnabled(bool enabled) { m_RenderContext->SetDepthEnabled(enabled); }
 
         float GetScalerX() const;
         float GetScalerY() const;
@@ -109,7 +109,7 @@ namespace LkEngine {
 
         Ref<Pipeline> m_Pipeline = nullptr;
         Ref<SwapChain> m_SwapChain = nullptr;
-        Ref<GraphicsContext> m_GraphicsContext = nullptr;
+        Ref<RenderContext> m_RenderContext = nullptr;
 
         inline static Window* m_Instance = nullptr;
 

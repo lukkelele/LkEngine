@@ -47,12 +47,12 @@ namespace LkEngine {
 		}
 
 		// Set context profile and the version to use for the Renderer API
-		GraphicsContext::SetProfile(GraphicsContext::Profile::Core);
+		RenderContext::SetProfile(RenderContext::Profile::Core);
 
 		switch (RendererAPI::Current())
 		{
 			case RendererAPIType::OpenGL: 
-				GraphicsContext::SetVersion(4, 5);
+				RenderContext::SetVersion(4, 5);
 				break;
 		}
 
@@ -64,13 +64,13 @@ namespace LkEngine {
 		LK_CORE_ASSERT(m_GlfwWindow != nullptr);
 		glfwMakeContextCurrent(m_GlfwWindow);
 
-		m_GraphicsContext = GraphicsContext::Create(this);
-		m_GraphicsContext->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
+		m_RenderContext = RenderContext::Create(this);
+		m_RenderContext->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
 
-		m_GraphicsContext->SetName("OpenGL-Context");
+		m_RenderContext->SetName("OpenGL-Context");
 
 		SetVSync(true);
-		LK_CORE_DEBUG_TAG("Graphics Context", "Name: {}", m_GraphicsContext->GetName());
+		LK_CORE_DEBUG_TAG("Graphics Context", "Name: {}", m_RenderContext->GetName());
 
 		glfwSetWindowUserPointer(m_GlfwWindow, &m_Data);
 		if (glfwRawMouseMotionSupported())
@@ -171,8 +171,9 @@ namespace LkEngine {
 		glfwPollEvents();
 	}
 	
-	void Window::Exit()
+	void Window::Shutdown()
 	{
+        m_RenderContext->Destroy();
 		glfwDestroyWindow(m_GlfwWindow);
 		glfwTerminate();
 	}
@@ -226,7 +227,7 @@ namespace LkEngine {
 		window.SetViewportHeight(size_y);
 		window.SetWidth(width);
 		window.SetHeight(height);
-		window.GetContext()->UpdateResolution(width, height);
+		window.GetRenderContext()->UpdateResolution(width, height);
 		LK_CORE_DEBUG("Window Resize: ({}, {})", window.GetWidth(), window.GetHeight());
 
 		auto* editor = EditorLayer::Get();
@@ -241,7 +242,7 @@ namespace LkEngine {
 			
 			window.SetWidth(editorWindowWidth);
 			window.SetHeight(editorWindowHeight);
-			window.GetContext()->UpdateResolution(editorWindowWidth, editorWindowHeight);
+			window.GetRenderContext()->UpdateResolution(editorWindowWidth, editorWindowHeight);
 
 			// Set the window size to be that of the editor window size,
 			// this is because of the other docking windows in the Editor that occopy screen space
