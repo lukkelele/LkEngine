@@ -69,6 +69,30 @@ namespace LkEngine {
         DebugShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
         DebugShader->Set("Texture1", 0);
 
+        LK_CORE_WARN_TAG("GameLayer", "Creating Skybox");
+		SkyboxVertexBuffer = VertexBuffer::Create(Skybox_Vertices, sizeof(Skybox_Vertices));
+		SkyboxVertexBuffer->SetLayout({
+            { "a_Position",      ShaderDataType::Float3  },
+            //{ "a_Normal",        ShaderDataType::Float3  },
+            //{ "a_Texcoord",      ShaderDataType::Float2  },
+		});
+        SkyboxShader = Renderer::GetShaderLibrary()->Get("Renderer_Skybox");
+
+        // Skybox
+        TextureSpecification skyboxSpec;
+        std::vector<std::filesystem::path> facePaths = {
+            "Assets/Textures/Skybox/right.jpg",
+            "Assets/Textures/Skybox/left.jpg",
+            "Assets/Textures/Skybox/top.jpg",
+            "Assets/Textures/Skybox/bottom.jpg",
+            "Assets/Textures/Skybox/front.jpg",
+            "Assets/Textures/Skybox/back.jpg",
+        };
+        SkyboxTexture = TextureCube::Create(skyboxSpec, facePaths);
+        SkyboxTexture->Bind(0);
+        SkyboxShader->Bind();
+        SkyboxShader->Set("u_Skybox", 0);
+        LK_CORE_WARN_TAG("GameLayer", "Skybox created!");
     }
 
     void GameLayer::OnDetach()
@@ -96,10 +120,8 @@ namespace LkEngine {
                     glm::mat4 model = glm::mat4(1.0f);
                     model = glm::translate(model, tc.Translation);
 
-				    //Ref<Material> material = AssetManager::GetAsset<MaterialAsset>(mesh->GetMaterialHandle(0))->GetMaterial();
                     Ref<Material> material = mesh->GetMaterial(0);
                     Ref<Texture2D> materialTexture = material->GetTexture("wood-container");
-                    LK_CORE_ASSERT(materialTexture, "Material Texture is NULLPTR");
 
                     Ref<Shader> matShader = material->GetShader();
 
@@ -113,6 +135,23 @@ namespace LkEngine {
                 });
             }
         }
+
+		Renderer::GetViewportFramebuffer()->Bind();
+
+        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+        SkyboxShader->Bind();
+        auto& camera = *EditorLayer::Get()->GetEditorCamera();
+        glm::mat4 viewMatrix = glm::mat4(glm::mat3(camera.GetViewMatrix())); // Make TextureCube follow us
+        glm::mat4 projectionMatrix = camera.GetProjectionMatrix();
+        SkyboxShader->Set("u_ViewProjectionMatrix", projectionMatrix * viewMatrix);
+        SkyboxShader->Set("u_CameraPos", EditorLayer::Get()->GetEditorCamera()->GetViewMatrix());
+        SkyboxShader->Set("u_Model", glm::mat4(30));
+        SkyboxVertexBuffer->Bind();
+        SkyboxTexture->Bind(0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDepthFunc(GL_LESS); 
+
+        Framebuffer::TargetSwapChain();
 
 #if 0
         // Crysis Nanosuit
