@@ -30,6 +30,8 @@ namespace LkEngine {
 		static void SubmitImage(const Ref<Image> image);
 		static void SubmitImage(const Ref<Image2D> image);
 
+		static void SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform);
+
 		static void SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID = 0);
 		static void SubmitLines(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
         static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
@@ -40,6 +42,8 @@ namespace LkEngine {
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID = 0);
 		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& color, uint64_t entityID = 0);
 		static void SubmitIndexed(VertexBuffer& vb, unsigned int count);
+
+		static void DrawMesh(Ref<Mesh>& mesh, const Ref<Shader> shader);
 
 		static uint32_t GetCurrentFrameIndex();
 		static uint32_t RT_GetCurrentFrameIndex();
@@ -88,33 +92,42 @@ namespace LkEngine {
 
 		static uint32_t GetFramesInFlight() { return m_FramesInFlight; }
 
-		static void SetDrawMode(const RendererDrawMode& drawMode);
-		static RendererDrawMode& GetDrawMode() { return DrawMode; }
-		static std::string GetDrawModeStr();
+		static void SetPrimitiveTopology(const RenderTopology& topology);
+		static RenderTopology& GetPrimitiveTopology() { return PrimitiveTopology; }
 		static RenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
 		static uint32_t GetRenderQueueSubmissionIndex();
 
 		static Ref<ShaderLibrary> GetShaderLibrary();
 		static Ref<TextureLibrary> GetTextureLibrary();
-		static Ref<GraphicsContext> GetContext();
+		static Ref<MaterialLibrary> GetMaterialLibrary();
+		static Ref<RenderContext> GetContext();
 
-		static Renderer* Get() { return m_Instance; }
-		static Ref<RendererAPI> GetRendererAPI() { return m_RendererAPI; }
-		static Ref<Renderer2DAPI> GetRenderer2D() { return m_Renderer2DAPI; }
-		static Ref<Renderer2DAPI> GetRenderer2DAPI() { return m_Renderer2DAPI; }
+		static Renderer* Get() { return s_Instance; }
+		static Ref<RendererAPI> GetRendererAPI() { return s_RendererAPI; }
+		static Ref<Renderer2DAPI> GetRenderer2D() { return s_Renderer2DAPI; }
+		static Ref<Renderer2DAPI> GetRenderer2DAPI() { return s_Renderer2DAPI; }
+
+		static Ref<Texture> GetWhiteTexture();
+
+		static void RegisterShaderDependency(Ref<Shader> shader, Ref<Material> material);
+
+		static void SetDepthFunction(const DepthFunction& depthFunc);
+
+	private:
+		static void LoadTextures();
 
 	public:
-		inline static RendererDrawMode DrawMode;
+		inline static RenderTopology PrimitiveTopology;
 		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.250f, 1.0f };
 	private:
 		inline static uint32_t m_SamplerCount = 0; // Samplers
 		inline static uint32_t m_FramesInFlight = 2;
 
-		inline static Ref<RendererAPI> m_RendererAPI = nullptr;
-		inline static Ref<Renderer2DAPI> m_Renderer2DAPI = nullptr;
+		inline static Ref<RendererAPI> s_RendererAPI = nullptr;
+		inline static Ref<Renderer2DAPI> s_Renderer2DAPI = nullptr;
 
-		inline static Renderer* m_Instance = nullptr;
+		inline static Renderer* s_Instance = nullptr;
 
 		friend class EditorLayer;
 	};

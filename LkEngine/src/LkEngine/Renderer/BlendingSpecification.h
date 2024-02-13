@@ -21,14 +21,29 @@ namespace LkEngine {
         One_Minus_SourceAlpha,
     };
 
+	enum class DepthFunction
+	{
+		Never,
+		Less,
+		Equal,
+		LessOrEqual,
+        Greater,
+		NotEqual,
+		GreaterOrEqual,
+		Always
+	};
+
     struct BlendFunction
     {
         SourceBlendFunction Source;
         DestinationBlendFunction Destination;
+
         BlendFunction() 
-            : Source(SourceBlendFunction::Alpha), Destination(DestinationBlendFunction::One_Minus_SourceAlpha) {}
+            : Source(SourceBlendFunction::Alpha)
+            , Destination(DestinationBlendFunction::One_Minus_SourceAlpha) {}
         BlendFunction(const SourceBlendFunction& source, const DestinationBlendFunction& destination)
-            : Source(source), Destination(destination) {}
+            : Source(source)
+            , Destination(destination) {}
     };
 
 }
