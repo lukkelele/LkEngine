@@ -190,8 +190,9 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
-		virtual const ImageSpecification GetSpecification() const = 0;
-		virtual ImageSpecification& GetSpecification() = 0;
+		//virtual const ImageSpecification GetSpecification() const = 0;
+		//virtual ImageSpecification& GetSpecification() = 0;
+		virtual const ImageSpecification& GetSpecification() const = 0;
 	
 		virtual void Release() = 0;
 		virtual void AllocateMemory(uint64_t size) = 0;

@@ -26,18 +26,16 @@ namespace LkEngine {
     {
         glm::vec3 Position;
         glm::vec4 Color;
-        glm::vec2 TexCoord;
+        glm::vec2 Texcoord;
         float TexIndex;
         float TexArray;
         float TilingFactor;
-        int EntityID; 
     };
 
     struct LineVertex
     {
         glm::vec3 Position;
         glm::vec4 Color;
-        int EntityID; 
     };
 
 	class Renderer2DAPI : public RefCounted

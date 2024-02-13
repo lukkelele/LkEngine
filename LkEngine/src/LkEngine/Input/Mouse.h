@@ -1,7 +1,5 @@
 #pragma once
 
-#include <utility>
-
 #include <glm/glm.hpp>
 
 #include "LkEngine/Input/MouseCodes.h"
@@ -9,24 +7,26 @@
 
 namespace LkEngine {
 
-	// Forward declaration
-	class Window;
-
 	class Mouse
 	{
 	public:
 		static void Init();
-		static void SetActiveWindow(Window* window);
 
 		static glm::vec2 GetPos();
 		static glm::vec2 GetRawPos();
-		static bool IsButtonPressed(MouseCode button);
+
+		static void Enable();
+		static void Disable();
+
+		static bool IsButtonPressed(MouseButton button);
+		static bool IsButtonDown(MouseButton button);
+
 		static float GetMouseX();
 		static float GetMouseY();
+
 		static void SetPos(float x, float y); 
 		static void SetScaledPos(float x, float y);
-		static glm::vec2 GetMousePosNormalized();
-		static glm::vec2 GetCenterPos(); // { return CenterPos; }
+		static glm::vec2 GetCenterPos(); 
 		static glm::vec2 GetScaledPos();
 		static glm::vec2 GetScaledCenterPos();
 
@@ -38,7 +38,7 @@ namespace LkEngine {
 		inline static glm::vec2 CenterPos = { 0.0f, 0.0f }; 
 		inline static glm::vec2 ScaledCenterPos = { 0.0f, 0.0f };
 	private:
-		inline static Window* m_ActiveWindow = nullptr;
+		//inline static Window* m_ActiveWindow = nullptr;
 		friend class Window;
 	};
 

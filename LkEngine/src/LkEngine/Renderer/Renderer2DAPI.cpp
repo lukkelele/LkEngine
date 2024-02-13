@@ -7,7 +7,3 @@
 //#include "LkEngine/Platform/Vulkan/VulkanRenderer2D.h"
 
 
-namespace LkEngine {
-
-
-}

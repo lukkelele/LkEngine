@@ -1,8 +1,8 @@
 #pragma once
-#include "LkEngine/Input/Keycodes.h"
+
 #include <utility>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
+#include "LkEngine/Input/Keycodes.h"
 
 
 namespace LkEngine {
@@ -10,6 +10,8 @@ namespace LkEngine {
 	class Keyboard
 	{
 	public:
+		static void Init();
+
 		static bool IsKeyPressed(KeyCode key);
 	};
 }
