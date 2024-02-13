@@ -82,7 +82,7 @@ namespace LkEngine {
 		static AssetHandle AddMemoryOnlyAsset(Ref<TAsset> asset)
 		{
 			static_assert(std::is_base_of<Asset, TAsset>::value, "AddMemoryOnlyAsset only works for types derived from Asset");
-			asset->Handle = AssetHandle(); // NOTE(Yan): should handle generation happen here?
+			asset->Handle = AssetHandle(); 
 
 			Project::GetAssetManager()->AddMemoryOnlyAsset(asset);
 			return asset->Handle;

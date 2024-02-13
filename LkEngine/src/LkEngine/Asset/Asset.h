@@ -49,7 +49,8 @@ namespace LkEngine {
 		std::filesystem::path FilePath;
 		bool IsDataLoaded = false;
 		bool IsMemoryAsset = false;
-		bool IsValid() const { return Handle != 0 && !IsMemoryAsset; }
+		//bool IsValid() const { return Handle != 0 && !IsMemoryAsset; }
+		bool IsValid() const { return Handle != 0; }
 	};
 
 }
