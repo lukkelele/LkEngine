@@ -26,6 +26,7 @@ namespace LkEngine {
 		Font,
 		Skeleton,
 		Animation,
+		EnvMap
 	};
 
 	namespace Utils {

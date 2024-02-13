@@ -169,9 +169,13 @@ namespace LkEngine {
 		CheckLeftSidebarSize();
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
-			static bool blendingEnabled = GraphicsContext::Get()->GetBlendingEnabled();
+			Ref<RenderContext> renderContext = Window::Get().GetRenderContext();
+			static bool blendingEnabled = renderContext->GetBlendingEnabled();
 			if (ImGui::Checkbox("Depth Testing", &blendingEnabled))
+			{
+				//renderContext->SetDepthEnabled(blendingEnabled);
 				m_Window->SetDepthEnabled(blendingEnabled);
+			}
 
 			m_SceneManagerPanel->UI_CameraSettings();
 
@@ -263,13 +267,13 @@ namespace LkEngine {
 				static ImVec4 modeButtonBgColor = { 0, 0, 0, 0 };
 				static ImVec4 modeButtonTintColor = { 1, 1, 1, 1 };
 				std::string textureName = "ale1024";
-				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture2D(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
+				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LK_CORE_DEBUG("Push tab");
 					m_TabManager->NewTab(fmt::format("Node EditorLayer-{}", m_TabManager->GetTabCount()), EditorTabType::NodeEditor);
 				}
 				ImGui::SameLine();
-				if (ImGui::ImageButton("##ModeButton-NodeEditorLayer", (void*)TextureLibrary::Get()->GetTexture2D(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
+				if (ImGui::ImageButton("##ModeButton-NodeEditorLayer", (void*)TextureLibrary::Get()->GetTexture(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LK_CORE_DEBUG("Pop tab");
 					if (m_TabManager->GetTabCount() > 1)
@@ -651,7 +655,7 @@ namespace LkEngine {
 	{
 		if (ImGui::Begin("Render Settings", &ShowRenderSettingsWindow, ImGuiWindowFlags_NoDocking))
 		{
-			Ref<GraphicsContext> graphicsCtx = GraphicsContext::Get();
+			Ref<RenderContext> graphicsCtx = Renderer::GetContext();
 
 			bool blending = graphicsCtx->GetBlendingEnabled();
 			if (ImGui::Checkbox("Blending", &blending))
@@ -780,7 +784,7 @@ namespace LkEngine {
 
 			static std::string textureName = "ale1024";
 			// Rectangle Image
-			auto rectangleTexture = textureLibrary->GetTexture2D(textureName);
+			auto rectangleTexture = textureLibrary->GetTexture(textureName);
 			if (ImGui::ImageButton("##RectangleImage", (void*)rectangleTexture->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LK_CORE_TRACE("Clicked RectangleImage -> Selecting rectangle shape");
@@ -803,7 +807,7 @@ namespace LkEngine {
 			ImGui::SameLine(0, 2);
 
 			// Circle Image
-			if (ImGui::ImageButton("##CircleImage", (void*)textureLibrary->GetTexture2D(textureName)->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
+			if (ImGui::ImageButton("##CircleImage", (void*)textureLibrary->GetTexture(textureName)->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LK_CORE_TRACE("Clicked CircleImage -> Selecting circle shape");
 				InCreateItemProcess = true;
@@ -819,7 +823,7 @@ namespace LkEngine {
 			ImGui::SameLine(0, 2);
 
 			// Triangle Image
-			if (ImGui::ImageButton("##TriangleImage", (void*)textureLibrary->GetTexture2D(textureName)->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
+			if (ImGui::ImageButton("##TriangleImage", (void*)textureLibrary->GetTexture(textureName)->GetRendererID(), imageSize, ImVec2(1, 1), ImVec2(0, 0), bgColor, tintColor))
 			{
 				LK_CORE_TRACE("Clicked TriangleImage -> Selecting triangle shape");
 				InCreateItemProcess = true;
@@ -1007,7 +1011,7 @@ namespace LkEngine {
 			}
 
 			// Reapply viewport settings starting from a lower point of the left sidebar and the bottom bar height
-			GraphicsContext::Get()->SetViewport(EditorWindowPos, EditorWindowSize);
+			Window::Get().GetRenderContext()->SetViewport(EditorWindowPos, EditorWindowSize);
 
 			WindowsHaveChangedInSize = false;
 			ShouldUpdateWindowSizes = true; // Tell UI to set the window size ONCE

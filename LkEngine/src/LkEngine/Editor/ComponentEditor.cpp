@@ -5,6 +5,7 @@
 
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Renderer/MaterialLibrary.h"
+#include "LkEngine/Renderer/Renderer.h"
 
 #include "LkEngine/ImGui/ImGuiUtilities.h"
 
@@ -33,7 +34,7 @@ namespace LkEngine {
         if (ImGui::TreeNodeEx("Materials", treeNodeFlags))
         {
             static std::string selected_material = "";
-            auto& materials = MaterialLibrary::Get()->GetMaterials();
+            auto& materials = Renderer::GetMaterialLibrary()->GetMaterials();
             for (std::pair<std::string, Ref<Material>> materialEntry: materials)
             {
                 std::string materialName = materialEntry.first;
@@ -76,11 +77,11 @@ namespace LkEngine {
 
     void ComponentEditor::RenderMaterialEditor(Material& material)
     {
-        UI::PushID();
-        float roughness = material.GetRoughness();
-        ImGui::SliderFloat("Path: %s", &roughness, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-        material.SetRoughness(roughness);
-        UI::PopID();
+        //UI::PushID();
+        //float roughness = material.GetRoughness();
+        //ImGui::SliderFloat("Path: %s", &roughness, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        //material.SetRoughness(roughness);
+        //UI::PopID();
     }
 
     void ComponentEditor::RenderTextureEditor(const Ref<Texture> texture)

@@ -5,35 +5,44 @@
 #include "LkEngine/Scene/SceneSerializer.h"
 
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/Core/Event/SceneEvent.h"
 
 #include "LkEngine/Renderer/TextureLibrary.h"
+
+#include "LkEngine/Editor/EditorLayer.h"
+
+#include "LkEngine/Asset/AssetManager.h"
 
 
 namespace LkEngine {
 
-	Project::Project(const ProjectSpecification& specification)
-		: m_Specification(specification)
-		, m_Name(specification.Name)
-	{
-		m_AssetManager = Ref<AssetManager>::Create();
-	}
-
 	Project::Project(const std::string& name)
 		: m_Name(name)
 	{
+		s_RuntimeAssetManager = Ref<RuntimeAssetManager>::Create();
 	}
 
 	void Project::SetActive(Ref<Project> project)
 	{
-		if (m_ActiveProject)
+		if (s_ActiveProject != project)
 		{
-			m_AssetManager = nullptr;
+			s_RuntimeAssetManager = nullptr;
 		}
 
-		m_ActiveProject = project;
-		if (m_ActiveProject)
+		s_ActiveProject = project;
+		if (s_ActiveProject)
 		{
-			m_AssetManager = Ref<AssetManager>::Create();
+			if (project->s_RuntimeAssetManager)
+			{
+				LK_CORE_INFO_TAG("Project", "RuntimeAssetManager was already initialized for project {}", project->GetName());
+				s_RuntimeAssetManager = project->s_RuntimeAssetManager;
+			}
+			else
+			{
+				LK_CORE_WARN_TAG("Project", "RuntimeAssetManager was NOT initialized for project {}, initializing...", project->GetName());
+				s_RuntimeAssetManager = Ref<RuntimeAssetManager>::Create();
+				s_RuntimeAssetManager->Init();
+			}
 		}
 
 	}
@@ -42,10 +51,7 @@ namespace LkEngine {
 	bool Project::Save()
 	{
 		LK_CORE_INFO_TAG("Project", "Saving project {}", m_Name);
-		if (Data.TargetScene != nullptr)
-		{
-			SceneSerializer sceneSerializer(Data.TargetScene);
-		}
+		//SceneSerializer sceneSerializer(Data.TargetScene);
 
 		return true;
 	}
@@ -55,29 +61,35 @@ namespace LkEngine {
 		return 0;
 	}
 
-	Ref<Project> Project::CreateEmptyProject(bool setActive)
+	Ref<Project> Project::CreateEmptyProject(std::string_view projectName, bool setActive)
 	{
-		Ref<Project> project = Ref<Project>::Create("UntitledProject");
-		project->Data.TargetScene = Ref<Scene>::Create("StarterScene", true, true);
+		Ref<Project> project = Ref<Project>::Create(std::string(projectName));
+		project->m_Scene = Ref<Scene>::Create("StarterScene", true, true);
 
 		if (setActive)
 		{
-			m_ActiveProject = project;
+			//SetActive(project);
+			//s_ActiveProject = project;
+		}
+
+		if (EditorLayer::Get() && EditorLayer::Get()->IsEnabled())
+		{
+			SceneCreatedEvent e(project->m_Scene);
+			EditorLayer::Get()->RegisterEvent(e);
 		}
 
 		return project;
 	}
 
 	// TODO
-	Ref<Project> Project::CreateDefaultProject(bool setActive)
+	Ref<Project> Project::CreateDefaultProject(std::string_view projectName, bool setActive)
 	{
 		Ref<Project> project = Ref<Project>::Create("UntitledProject");
-		project->Data.TargetScene = Ref<Scene>::Create("StarterScene", true, true);
 
 		LK_CORE_DEBUG_TAG("Project", "Creating platform entity");
-		Entity basePlatform = project->Data.TargetScene->CreateEntity("Platform");
+		Entity basePlatform = project->m_Scene->CreateEntity("Platform");
 		auto& sc = basePlatform.AddComponent<SpriteComponent>();
-		auto& mc = basePlatform.AddComponent<MaterialComponent>();
+		//auto& mc = basePlatform.AddComponent<MaterialComponent>();
 		auto& cc = basePlatform.AddComponent<CameraComponent>();
 		LK_CORE_DEBUG_TAG("Project", "Created transform, sprite, material and camera components for platform entity");
 
@@ -90,15 +102,15 @@ namespace LkEngine {
 		tc.Translation.x = sc.Size.x * 0.50f;
 		tc.Translation.y = sc.Size.y * 0.50f;
 
-		LK_CORE_DEBUG_TAG("Project", "Setting texture2D");
-		mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
+		//LK_CORE_DEBUG_TAG("Project", "Setting texture2D");
+		//mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
 
 		LK_CORE_DEBUG_TAG("Project", "Creating scene camera and setting it to perspective");
 		cc.Camera = Ref<SceneCamera>::Create();
 		cc.Camera->SetPerspective(60.0f, 0.10f, 5000.0f);
 
 		if (setActive)
-			m_ActiveProject = project;
+			s_ActiveProject = project;
 
 		return project;
 	}
@@ -107,12 +119,10 @@ namespace LkEngine {
 	Ref<Project> Project::CreateDebugProject(bool setActive)
 	{
 		Ref<Project> project = Ref<Project>::Create("UntitledProject");
-		project->Data.TargetScene = Ref<Scene>::Create("StarterScene", true, true);
 
 		LK_CORE_DEBUG_TAG("Project", "Creating base entity");
-		Entity atteEntity = project->Data.TargetScene->CreateEntity("Atte");
+		Entity atteEntity = project->m_Scene->CreateEntity("Atte");
 		auto& sc = atteEntity.AddComponent<SpriteComponent>();
-		auto& mc = atteEntity.AddComponent<MaterialComponent>();
 		auto& cc = atteEntity.AddComponent<CameraComponent>();
 		LK_CORE_DEBUG_TAG("Project", "Created transform, sprite, material and camera components for base entity");
 
@@ -124,15 +134,12 @@ namespace LkEngine {
 		tc.Translation.x = sc.Size.x * 0.50f;
 		tc.Translation.y = sc.Size.y * 0.50f;
 
-		LK_CORE_DEBUG_TAG("Project", "Setting texture2D");
-		mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
-
 		LK_CORE_DEBUG_TAG("Project", "Creating scene camera and setting it to perspective");
 		cc.Camera = Ref<SceneCamera>::Create();
 		cc.Camera->SetPerspective(60.0f, 0.10f, 5000.0f);
 
 		if (setActive)
-			m_ActiveProject = project;
+			s_ActiveProject = project;
 
 		return project;
 	}

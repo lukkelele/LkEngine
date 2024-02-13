@@ -1,40 +1,31 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Material.h"
 
+#include "LkEngine/Platform/OpenGL/OpenGLMaterial.h"
+
+#include "RendererAPI.h"
+
 
 namespace LkEngine {
 
-	//-------------------------------------------------------------------------------
-	// Material
-	//-------------------------------------------------------------------------------
-    Material::Material(const MaterialSpecification& properties)
-        : m_Properties(properties)
+    Ref<Material> Material::Create(const Ref<Shader>& shader, const std::string& name)
     {
+        switch (RendererAPI::Current())
+        {
+            case RendererAPIType::OpenGL: return Ref<OpenGLMaterial>::Create(shader, name);
+            //case RendererAPIType::Vulkan:: break;
+        }
+        LK_CORE_ASSERT(false, "Unknown renderer API");
     }
 
-    Material::Material(const MaterialSpecification& properties, Ref<Texture> texture)
-        : m_Properties(properties)
-        , m_Texture(texture)
+    Ref<Material> Material::Copy(const Ref<Material>& other, const std::string& name)
     {
+        switch (RendererAPI::Current())
+        {
+            case RendererAPIType::OpenGL: return Ref<OpenGLMaterial>::Create(other, name);
+            //case RendererAPIType::Vulkan:: break;
+        }
+        LK_CORE_ASSERT(false, "Unknown renderer API");
     }
-
-    Material::Material(Ref<Texture> texture)
-        : m_Properties(MaterialSpecification())
-        , m_Texture(texture)
-    {
-    }
-
-    void Material::SetTexture(Ref<Texture> texture)
-    {
-        m_Texture = texture;
-        // ... do work
-    }
-
-    Ref<Material> Material::Create(const MaterialSpecification& properties)
-    {
-        return Ref<Material>::Create(properties);
-    }
-
-
 
 }

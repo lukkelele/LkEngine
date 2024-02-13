@@ -84,6 +84,7 @@ namespace LkEngine {
         ImGui::PopStyleVar(1);
 
 
+#if 0
         ImGui::SetNextWindowBgAlpha(0.2f);
 		ImGui::SetNextWindowPos({ editor->GetLeftSidebarSize().x + (editor->EditorWindowSize.x * (1 - div)), (editor->GetMenuBarSize().y + editor->GetTabBarSize().y)}, ImGuiCond_Always);
 		ImGui::SetNextWindowSize({ editor->EditorWindowSize.x * div, editor->EditorWindowSize.y }, ImGuiCond_Always);
@@ -121,6 +122,7 @@ namespace LkEngine {
             }
         }
         UI::End();
+#endif
     }
 
 
