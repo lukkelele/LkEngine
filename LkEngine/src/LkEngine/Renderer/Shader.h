@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LkEngine/Core/Hash.h"
+
 #include "ShaderUniform.h"
 #include "ShaderResource.h"
 
@@ -40,6 +42,8 @@ namespace LkEngine {
 		ShaderProgramSource ParseShader(const std::string& filepath);
 		ShaderProgramSource ParseShaders(const std::string& vertexPath, const std::string& fragmentPath);
 
+		virtual size_t GetHash() = 0;
+
 		static const char* ConvertUniformType(const TextureUniformType& type)
 		{
 			switch (type)
@@ -53,6 +57,7 @@ namespace LkEngine {
 			}
 			LK_CORE_ASSERT(false, "Could not convert the TextureUniformType {}", (int)type);
 		}
+
 	};
 
 
