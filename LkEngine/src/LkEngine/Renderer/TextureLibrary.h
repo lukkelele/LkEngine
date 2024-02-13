@@ -20,20 +20,15 @@ namespace LkEngine {
 
         void Init(bool loadRecursively = false);
 
-        Ref<Texture> GetTexture(int textureID);
-        Ref<Texture> GetTexture(const std::string textureName);
-        Ref<Texture2D> GetTexture2D(int textureID);
-        Ref<Texture2D> GetTexture2D(const std::string textureName);
-
-        Ref<Texture2D> AddTexture2D(const TextureSpecification& texture);
+        Ref<Texture2D> GetTexture(int textureID);
+        Ref<Texture2D> GetTexture(const std::string textureName);
+        Ref<Texture2D> AddTexture(const TextureSpecification& texture);
 
         void RenameTexture(const std::string& name, const std::string& newName);
         std::vector<std::pair<std::string, Ref<Texture2D>>> GetTextures2D();
 
-        Ref<Texture> GetWhiteTexture();
-        Ref<Texture2D> GetWhiteTexture2D();
-        Ref<Texture> GetBlackTexture();
-        Ref<Texture2D> GetBlackTexture2D();
+        Ref<Texture2D> GetWhiteTexture();
+        Ref<Texture2D> GetBlackTexture();
 
         bool HasTextureWithFilename(const std::string& filename);
         bool VerifyTexturesAreLoaded() const;
@@ -50,13 +45,11 @@ namespace LkEngine {
     private:
         bool m_Initialized = false;
 
-        Ref<Texture> m_WhiteTexture;
-        Ref<Texture> m_BlackTexture;
-        Ref<Texture2D> m_WhiteTexture2D;
-        Ref<Texture2D> m_BlackTexture2D;
+        Ref<Texture2D> m_WhiteTexture;
+        Ref<Texture2D> m_BlackTexture;
 
-        TextureCollection m_Collection;
-        Texture2DCollection m_Collection2D;
+        //TextureCollection m_Collection;
+        std::unordered_map<std::string, Ref<Texture2D>> m_Collection2D;
         TextureCollectionContainer m_Collections;
         Texture2DCollectionContainer m_Collections2D;
 

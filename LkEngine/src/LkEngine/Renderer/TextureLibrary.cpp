@@ -37,11 +37,12 @@ namespace LkEngine {
         spec.Path = "Assets/Textures/white-texture.png";
         spec.Name = "white-texture";
         spec.DebugName = "white-texture";
-        m_WhiteTexture2D = Texture2D::Create(spec);
-        m_Collection2D.insert({ "white-texture", m_WhiteTexture2D });
+        m_WhiteTexture = Texture2D::Create(spec);
+        m_Collection2D.insert({ "white-texture", m_WhiteTexture });
 
-        // TODO: Read fileinfo and determine size and other info instead of manually setting it
+        Init();
 #if 0
+        // TODO: Read fileinfo and determine size and other info instead of manually setting it
         // Nanosuit
         {
             std::unordered_map<std::string, Ref<Texture2D>> nanosuitCollection;
@@ -75,15 +76,123 @@ namespace LkEngine {
 
     TextureLibrary::~TextureLibrary()
     {
-        m_Collection.clear();
+        //m_Collection.clear();
         m_Collection2D.clear();
     }
 
     void TextureLibrary::Init(bool loadRecursively)
     {
+		// Textures: 512x512
+		{
+			TextureSpecification textureSpec;
+			// Grass
+			textureSpec.Width = 512;
+		    textureSpec.Height = 512;
+            textureSpec.Path = "Assets/Textures/grass.png";
+            textureSpec.Name = "grass-512x512";
+            textureSpec.DebugName = "grass-512x512";
+            textureSpec.GenerateMips = true;
+			textureSpec.Format = ImageFormat::RGBA32F;
+            textureSpec.SamplerWrap = TextureWrap::Repeat;
+            textureSpec.SamplerFilter = TextureFilter::Linear;
+			AddTexture(textureSpec);
+
+			// Ice Skybox 
+            textureSpec.Path = "Assets/Textures/Skybox/back.jpg";
+            textureSpec.Name = "skybox-ice-back-512x512";
+            textureSpec.DebugName = "skybox-ice-back-512x512";
+            textureSpec.GenerateMips = false;
+			textureSpec.Format = ImageFormat::RGBA32F;
+            textureSpec.SamplerWrap = TextureWrap::Clamp;
+            textureSpec.SamplerFilter = TextureFilter::Nearest;
+			AddTexture(textureSpec);
+		}
+		// Textures: 1024x1024
+		{
+			TextureSpecification textureSpec;
+			// Brickwall
+			textureSpec.Width = 1024;
+		    textureSpec.Height = 1024;
+            textureSpec.Path = "Assets/Textures/brickwall.jpg";
+            textureSpec.Name = "brickwall";
+            textureSpec.DebugName = "brickwall";
+            textureSpec.GenerateMips = true;
+            textureSpec.SamplerWrap = TextureWrap::Repeat;
+            textureSpec.SamplerFilter = TextureFilter::Linear;
+			AddTexture(textureSpec);
+		}
+		// Textures: 2048x2048 
+		{
+			TextureSpecification textureSpec;
+			// Wood container
+			textureSpec.Format = ImageFormat::RGBA32F;
+			textureSpec.Width = 2048;
+			textureSpec.Height = 2048;
+			textureSpec.Path = "Assets/Textures/container.jpg";
+			textureSpec.Name = "wood-container";
+			textureSpec.DebugName = "wood-container";
+			textureSpec.SamplerWrap = TextureWrap::Clamp;
+			textureSpec.SamplerFilter = TextureFilter::Nearest;
+			AddTexture(textureSpec);
+
+			// Wood container 2
+			textureSpec.Path = "Assets/Textures/container2.png";
+			textureSpec.Name = "wood-container2";
+			textureSpec.DebugName = "wood-container2";
+			AddTexture(textureSpec);
+
+			// Bricks
+			textureSpec.Path = "Assets/Textures/bricks_orange.jpg";
+			textureSpec.Name = "bricks";
+			textureSpec.DebugName = "bricks";
+			AddTexture(textureSpec);
+
+			// Åle texture
+			textureSpec.Path = "Assets/Textures/Misc/ale_1024x1024.png";
+			textureSpec.Name = "ale1024";
+			textureSpec.DebugName = "ale1024";
+			AddTexture(textureSpec);
+
+			// Lukas texture
+			textureSpec.Path = "Assets/Textures/Misc/lukas_1024.jpg";
+			textureSpec.Name = "lukas_1024";
+			textureSpec.DebugName = "lukas-1024x1024";
+			textureSpec.SamplerWrap = TextureWrap::Repeat;
+			AddTexture(textureSpec);
+
+			// Metal
+            textureSpec.Path = "Assets/Textures/metal.png";
+            textureSpec.Name = "metal-ground";
+            textureSpec.DebugName = "metal-ground";
+            textureSpec.GenerateMips = true;
+            textureSpec.SamplerWrap = TextureWrap::Repeat;
+            textureSpec.SamplerFilter = TextureFilter::Nearest;
+			AddTexture(textureSpec);
+
+			// Wood
+            textureSpec.Name = "wood";
+            textureSpec.DebugName = "wood";
+            textureSpec.Path = "Assets/Textures/wood.png";
+            textureSpec.GenerateMips = true;
+            textureSpec.SamplerWrap = TextureWrap::Repeat;
+            textureSpec.SamplerFilter = TextureFilter::Linear;
+			AddTexture(textureSpec);
+
+			// Skybox
+            textureSpec.Name = "skybox-ice-back";
+            textureSpec.DebugName = "skybox-ice-back";
+            textureSpec.Path = "Assets/Textures/Skybox/back.jpg";
+            textureSpec.GenerateMips = false;
+            textureSpec.Format = ImageFormat::RGBA32F;
+            textureSpec.SamplerFilter = TextureFilter::Nearest;
+            textureSpec.SamplerWrap = TextureWrap::Clamp;
+			AddTexture(textureSpec);
+        }
+
         m_Initialized = true;
     }
 
+#if 0
     Ref<Texture> TextureLibrary::GetTexture(int textureID)
     {
         if (m_Collection.empty())
@@ -110,8 +219,9 @@ namespace LkEngine {
         }
         return nullptr;
     }
+#endif
 
-    Ref<Texture2D> TextureLibrary::GetTexture2D(int textureID)
+    Ref<Texture2D> TextureLibrary::GetTexture(int textureID)
     {
         if (m_Collection2D.empty())
             throw std::runtime_error("2D Texture library is empty");
@@ -124,7 +234,7 @@ namespace LkEngine {
         }
     } 
 
-    Ref<Texture2D> TextureLibrary::GetTexture2D(const std::string textureName)
+    Ref<Texture2D> TextureLibrary::GetTexture(const std::string textureName)
     {
         if (m_Collection2D.empty())
             throw std::runtime_error("2D Texture library is empty");
@@ -138,7 +248,7 @@ namespace LkEngine {
         return nullptr;
     }
 
-    Ref<Texture2D> TextureLibrary::AddTexture2D(const TextureSpecification& textureSpec)
+    Ref<Texture2D> TextureLibrary::AddTexture(const TextureSpecification& textureSpec)
     {
         for (const auto& entry : m_Collection2D)
         {
@@ -159,24 +269,14 @@ namespace LkEngine {
         return texture2D;
     }
 
-    Ref<Texture> TextureLibrary::GetWhiteTexture()
+    Ref<Texture2D> TextureLibrary::GetWhiteTexture()
     {
         return m_WhiteTexture;
     }
 
-    Ref<Texture2D> TextureLibrary::GetWhiteTexture2D()
-    {
-        return m_WhiteTexture2D;
-    }
-
-    Ref<Texture> TextureLibrary::GetBlackTexture()
+    Ref<Texture2D> TextureLibrary::GetBlackTexture()
     {
         return m_BlackTexture;
-    }
-
-    Ref<Texture2D> TextureLibrary::GetBlackTexture2D()
-    {
-        return m_BlackTexture2D;
     }
 
     void TextureLibrary::RenameTexture(const std::string& name, const std::string& newName)
@@ -189,10 +289,11 @@ namespace LkEngine {
         m_Collection2D.erase(it);
     }
 
+
     std::vector<std::pair<std::string, Ref<Texture2D>>> TextureLibrary::GetTextures2D()
     {
         std::vector<std::pair<std::string, Ref<Texture2D>>> textures;
-        textures.push_back({ "white-texture", m_WhiteTexture2D });
+        textures.push_back({ "white-texture", m_WhiteTexture });
         for (auto& entry : m_Collection2D)
         {
             if (entry.second->GetName() == "black-texture" || entry.second->GetName() == "white-texture") 
@@ -220,12 +321,6 @@ namespace LkEngine {
 
     bool TextureLibrary::HasTextureWithFilename(const std::string& filename)
     {
-        for (auto& tex3D : m_Collection)
-        {
-            Ref<Texture>& texture = tex3D.second;
-            if (texture->GetPath().filename() == filename)
-                return true;
-        }
         for (auto& tex2D : m_Collection2D)
         {
             Ref<Texture2D>& texture = tex2D.second;
@@ -239,12 +334,6 @@ namespace LkEngine {
     Ref<Texture> TextureLibrary::TryToGetTextureWithFilename(const std::string& filename)
     {
         //LK_CORE_INFO_TAG("TextureLibrary", "Looking for texture with filename: {}", filename);
-        for (auto& tex3D : m_Collection)
-        {
-            Ref<Texture> texture = tex3D.second;
-            if (texture->GetPath().filename() == filename || File::ExtractFilenameWithoutExtension(texture->GetPath().filename().string()) == filename)
-                return texture;
-        }
         for (auto& tex2D : m_Collection2D)
         {
             Ref<Texture2D> texture = tex2D.second;
