@@ -29,10 +29,8 @@ namespace LkEngine {
 		uint32_t GetWidth() const override { return m_Specification.Width; }
 		uint32_t GetHeight() const override { return m_Specification.Height; }
 
-		const ImageSpecification GetSpecification() const { return m_Specification; }
-		ImageSpecification& GetSpecification() { return m_Specification; }
-
-		uint64_t GetARBHandle() const { return m_HandleARB; } // TODO: Remove
+		const ImageSpecification& GetSpecification() const { return m_Specification; }
+		//ImageSpecification& GetSpecification() { return m_Specification; }
 
 	private:
 		void Release() override;
@@ -40,7 +38,6 @@ namespace LkEngine {
 
 	private:
 		RendererID m_RendererID = 0;
-		uint64_t m_HandleARB = 0;
 
 		ImageSpecification m_Specification;
 		std::string m_FilePath;
@@ -75,10 +72,9 @@ namespace LkEngine {
 		uint32_t GetWidth() const override { return m_Specification.Width; }
 		uint32_t GetHeight() const override { return m_Specification.Height; }
 
-		const ImageSpecification GetSpecification() const { return m_Specification; }
-		ImageSpecification& GetSpecification() { return m_Specification; }
-
-		uint64_t GetARBHandle() const { return m_HandleARB; } // TODO: Remove
+		const ImageSpecification& GetSpecification() const { return m_Specification; }
+		//const ImageSpecification GetSpecification() const { return m_Specification; }
+		//ImageSpecification& GetSpecification() { return m_Specification; }
 
 	private:
 		void Release() override;
@@ -86,10 +82,9 @@ namespace LkEngine {
 
 	private:
 		RendererID m_RendererID = 0;
-		uint64_t m_HandleARB = 0;
 
 		ImageSpecification m_Specification;
-		std::string m_FilePath;
+		std::filesystem::path m_FilePath;
 
 		Buffer m_ImageData;
 

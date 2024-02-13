@@ -262,6 +262,9 @@ namespace LkEngine {
     unsigned int PlaneVAO, PlaneVBO;
     unsigned int QuadVAO, QuadVBO;
 
+	RendererID SkyboxVAO;
+	unsigned int SkyboxVBO;
+
     Ref<VertexBuffer> CubeVertexBuffer;
     Ref<VertexBuffer> PlaneVertexBuffer;
 	Ref<Texture2D> CubeTexture;
@@ -273,8 +276,8 @@ namespace LkEngine {
 		{
 			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture2D("brickwall");
-			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
+			CubeTexture = TextureLibrary::Get()->GetTexture("wood-container");
+			PlaneTexture = TextureLibrary::Get()->GetTexture("metal-ground");
 			return;
 		}
 
@@ -322,8 +325,8 @@ namespace LkEngine {
 		{
 			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture2D("brickwall");
-			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
+			CubeTexture = TextureLibrary::Get()->GetTexture("wood-container");
+			PlaneTexture = TextureLibrary::Get()->GetTexture("metal-ground");
 			return;
 		}
 
@@ -377,7 +380,7 @@ namespace LkEngine {
 	{
 		if (!CubeTexture)
 		{
-			CubeTexture = TextureLibrary::Get()->GetTexture2D("container");
+			CubeTexture = TextureLibrary::Get()->GetTexture("wood-container");
 			return;
 		}
 
@@ -449,8 +452,8 @@ namespace LkEngine {
 		{
 			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture2D("brickwall");
-			PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal-ground");
+			CubeTexture = TextureLibrary::Get()->GetTexture("brickwall");
+			PlaneTexture = TextureLibrary::Get()->GetTexture("metal-ground");
 			return;
 		}
     }
@@ -459,8 +462,8 @@ namespace LkEngine {
 	{
 		if (!DebugShader)  DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
 		if (!ScreenShader) ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
-		if (!CubeTexture)  CubeTexture  = TextureLibrary::Get()->GetTexture2D("brickwall");
-		if (!PlaneTexture) PlaneTexture = TextureLibrary::Get()->GetTexture2D("metal");
+		if (!CubeTexture)  CubeTexture  = TextureLibrary::Get()->GetTexture("wood-container");
+		if (!PlaneTexture) PlaneTexture = TextureLibrary::Get()->GetTexture("metal");
 	}
 
     void GeneratePlaneVaoAndVbo(unsigned int& vao, unsigned int& vbo)

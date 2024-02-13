@@ -36,10 +36,13 @@ namespace LkEngine {
 		unsigned int CompileShader(unsigned int type, const std::string& source) override;
 		unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) override;
 
+		size_t GetHash() override;
+
 	private:
 		RendererID m_RendererID;
 		std::unordered_map<std::string, int> m_UniformLocationCache;
 
-		std::string m_FilePath, m_VertexPath, m_FragmentPath;
+		std::filesystem::path m_FilePath;
+		std::string m_VertexPath, m_FragmentPath;
     };
 }

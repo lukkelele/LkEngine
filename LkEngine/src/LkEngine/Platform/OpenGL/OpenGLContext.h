@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LkEngine/Renderer/GraphicsContext.h"
+#include "LkEngine/Renderer/RenderContext.h"
 
 
 namespace LkEngine {
@@ -8,7 +8,7 @@ namespace LkEngine {
     class Window;
     class OpenGLSwapChain;
 
-    class OpenGLContext : public GraphicsContext
+    class OpenGLContext : public RenderContext
     {
     public:
         OpenGLContext(Window* window);
@@ -16,10 +16,13 @@ namespace LkEngine {
 
         void Init(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) override;
         void Destroy() override;
+        GLFWwindow* GetGlfwWindow() override { return m_GlfwWindow; }
+
         void SetViewport(const glm::vec2& pos, const glm::vec2& size) override;
         void UpdateResolution(uint16_t width, uint16_t height) override;
+
         void SetDepthEnabled(bool enabled) override;
-        GLFWwindow* GetGlfwWindow() override { return m_GlfwWindow; }
+        void SetDepthFunction(const DepthFunction& depthFunc) override;
         void SetBlendingEnabled(bool enabled) override;
         void SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) override;
         void SetSourceBlendFunction(const SourceBlendFunction& srcFunc) override;
@@ -38,13 +41,14 @@ namespace LkEngine {
         bool m_DepthEnabled = true;
         bool m_BlendingEnabled = true;
         BlendFunction m_BlendFunction;
+        DepthFunction m_DepthFunction;
 
         std::string m_Name;
 
-        GLFWwindow* m_GlfwWindow = nullptr;
-        s_ptr<Window> m_Window = nullptr;
+        Window* m_Window;
+        GLFWwindow* m_GlfwWindow;
 
-        Ref<OpenGLSwapChain> m_SwapChain = nullptr;
+        Ref<OpenGLSwapChain> m_SwapChain;
 
         friend class Editor;
     };

@@ -76,7 +76,7 @@ namespace LkEngine {
         static constexpr int MaxTextureSlots = 32;
         static constexpr int MaxTextureArrays = 10;
     private:
-        int m_DrawMode;
+        int m_Topology;
 
         OpenGLRenderer2DSpecification m_Specification;
         RenderCommandQueue m_RenderQueue;

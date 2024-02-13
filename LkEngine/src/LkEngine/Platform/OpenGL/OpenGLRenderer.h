@@ -6,6 +6,7 @@
 
 #include "OpenGLPipeline.h"
 #include "OpenGLFramebuffer.h"
+#include "OpenGLContext.h"
 #include "OpenGLVertexBuffer.h"
 #include "OpenGLIndexBuffer.h"
 #include "OpenGLRenderPass.h"
@@ -35,6 +36,8 @@ namespace LkEngine {
         void SubmitImage(const Ref<Image> image) override;
         void SubmitImage(const Ref<Image2D> image) override;
 
+        void SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform);
+
         void BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass, bool explicitClear = false) override;
         void EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer) override;
         void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount) override;
@@ -54,7 +57,8 @@ namespace LkEngine {
 
         void SubmitLine(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) override;
 
-        void SetDrawMode(const RendererDrawMode& mode);
+        void SetPrimitiveTopology(const RenderTopology& mode) override;
+        void SetDepthFunction(const DepthFunction& depthFunc) override;
 
         RendererCapabilities& GetCapabilities() override;
 
@@ -69,10 +73,26 @@ namespace LkEngine {
         Ref<OpenGLTextureArray> GetTextureArrayWithDimension(const TextureArrayDimension& dimension);
 
     private:
-        uint8_t m_DrawMode = GL_TRIANGLES;
+        uint8_t m_Topology = GL_TRIANGLES;
 
-        Ref<OpenGLRenderer2D> m_Renderer2D = nullptr;
-        Ref<RenderPass> m_RenderPass = nullptr;
+        Ref<OpenGLContext> m_RenderContext;
+        Ref<OpenGLRenderer2D> m_Renderer2D;
+        Ref<RenderPass> m_RenderPass;
     };
+
+    namespace GLUtils {
+
+        inline static int PrimitiveTopologyToOpenGL(const PrimitiveTopology& topology)
+        {
+            switch (topology)
+            {
+                case PrimitiveTopology::Triangles:  return GL_TRIANGLES;
+                case PrimitiveTopology::Lines:      return GL_LINES;
+                case PrimitiveTopology::Points:     return GL_POINTS;
+            }
+            LK_CORE_ASSERT(false, "Unknown topology!");
+        }
+
+    }
 
 }

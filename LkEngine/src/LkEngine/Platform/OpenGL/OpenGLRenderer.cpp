@@ -4,6 +4,8 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/Renderer2D.h"
 
+#include "LkEngine/Core/Window.h"
+
 
 namespace LkEngine {
 
@@ -24,112 +26,7 @@ namespace LkEngine {
     {
 		Data = new RendererData();
 
-		// Textures: 512x512
-		{
-			TextureSpecification textureSpec;
-			// Grass
-			textureSpec.Width = 512;
-		    textureSpec.Height = 512;
-            textureSpec.Path = "assets/Textures/grass.png";
-            textureSpec.Name = "grass-512x512";
-            textureSpec.DebugName = "grass-512x512";
-            textureSpec.GenerateMips = true;
-			textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-			// Ice Skybox 
-            textureSpec.Path = "assets/Textures/Skybox/back.jpg";
-            textureSpec.Name = "skybox-ice-back-512x512";
-            textureSpec.DebugName = "skybox-ice-back-512x512";
-            textureSpec.GenerateMips = false;
-			textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerWrap = TextureWrap::Clamp;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-		}
-		// Textures: 1024x1024
-		{
-			TextureSpecification textureSpec;
-			// Brickwall
-			textureSpec.Width = 1024;
-		    textureSpec.Height = 1024;
-            textureSpec.Path = "assets/Textures/brickwall.jpg";
-            textureSpec.Name = "brickwall";
-            textureSpec.DebugName = "brickwall";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-		}
-		// Textures: 2048x2048 
-		{
-			TextureSpecification textureSpec;
-			// Wood container
-			textureSpec.Format = ImageFormat::RGBA32F;
-			textureSpec.Width = 2048;
-			textureSpec.Height = 2048;
-			textureSpec.Path = "assets/Textures/container.jpg";
-			textureSpec.Name = "container";
-			textureSpec.DebugName = "container";
-			textureSpec.SamplerWrap = TextureWrap::Clamp;
-			textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-			// Wood container 2
-			textureSpec.Path = "assets/Textures/container2.png";
-			textureSpec.Name = "container2";
-			textureSpec.DebugName = "container2";
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-			// Bricks
-			textureSpec.Path = "assets/Textures/bricks_orange.jpg";
-			textureSpec.Name = "bricks";
-			textureSpec.DebugName = "bricks";
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-			// Åle texture
-			textureSpec.Path = "assets/Textures/Misc/ale_1024x1024.png";
-			textureSpec.Name = "ale1024";
-			textureSpec.DebugName = "ale1024";
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-			// Lukas texture
-			textureSpec.Path = "assets/Textures/Misc/lukas_1024.jpg";
-			textureSpec.Name = "lukas_1024";
-			textureSpec.DebugName = "lukas-1024x1024";
-			textureSpec.SamplerWrap = TextureWrap::Repeat;
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-			// Metal
-            textureSpec.Path = "assets/Textures/metal.png";
-            textureSpec.Name = "metal-ground";
-            textureSpec.DebugName = "metal-ground";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-			// Wood
-            textureSpec.Name = "wood";
-            textureSpec.DebugName = "wood";
-            textureSpec.Path = "assets/Textures/wood.png";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-
-			// Skybox
-            textureSpec.Name = "skybox-ice-back";
-            textureSpec.DebugName = "skybox-ice-back";
-            textureSpec.Path = "assets/Textures/Skybox/back.jpg";
-            textureSpec.GenerateMips = false;
-            textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-            textureSpec.SamplerWrap = TextureWrap::Clamp;
-			TextureLibrary::Get()->AddTexture2D(textureSpec);
-        }
+		m_RenderContext = Window::Get().GetRenderContext().As<OpenGLContext>();
 
 		// Texture Arrays
 		constexpr TextureArrayDimension TextureArrayDimensions[] = { 
@@ -149,11 +46,10 @@ namespace LkEngine {
 			LK_CORE_DEBUG_TAG("OpenGLRenderer", "Created texture array {} called \"{}\"", i, textureArraySpec.DebugName);
 		}
 
-        auto textures2D = TextureLibrary::Get()->GetTextures2D();
+        auto textures2D = Renderer::GetTextureLibrary()->GetTextures2D();
         for (int i = 0; i < textures2D.size(); i++)
         {
 			Ref<OpenGLImage2D> img = textures2D[i].second->GetImage().As<OpenGLImage2D>();
-			//switch (textures2D[i].second->GetWidth())
 			switch (img->GetWidth())
 			{
 				case 512:  GetTextureArray(0)->AddTextureToArray(textures2D[i].second); break;
@@ -173,31 +69,27 @@ namespace LkEngine {
 			{
 				m_Renderer2D->m_TextureArrays[i] = Data->TextureArrays[i];
 				BindTextureArray(i);
-				LK_CORE_DEBUG("Binding texture array: {}", i);
 			}
 		}
 		m_Renderer2D->Init();
 
+		m_RenderContext->SetDepthEnabled(true);
+
+		SetPrimitiveTopology(RenderTopology::Triangles);
+
 		// Setup debugging stuff
 		SetupTexturesAndShaders();
-
-		GraphicsContext::Get()->SetDepthEnabled(true);
-
-		SetDrawMode(RendererDrawMode::Triangles);
-
-        // OpenGL VAO's and VBO's (Debugging)
         {
             GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
             GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
             GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
-            CubeTexture_ = LoadTexture("assets/Textures/container.jpg");
-            FloorTexture_ = LoadTexture("assets/Textures/metal.png");
+            CubeTexture_ = LoadTexture("Assets/Textures/container.jpg");
+            FloorTexture_ = LoadTexture("Assets/Textures/metal.png");
         }
     }
 
     void OpenGLRenderer::Shutdown()
     {
-		LK_CORE_WARN_TAG("OpenGLRenderer", "Initiated shutdown");
 		m_RenderPass->Terminate();
     }
 
@@ -222,29 +114,51 @@ namespace LkEngine {
 		viewportFramebuffer.Unbind();
 	}
 
-	void OpenGLRenderer::SetDrawMode(const RendererDrawMode& mode)
+	void OpenGLRenderer::SetPrimitiveTopology(const RenderTopology& mode)
 	{
 		switch (mode)
 		{
-			case RendererDrawMode::Lines:
-				m_DrawMode = GL_LINES;
-				m_Renderer2D->m_DrawMode = GL_LINES;
+			case RenderTopology::Lines:
+				m_Topology = GL_LINES;
+				m_Renderer2D->m_Topology = GL_LINES;
 				break;
-			case RendererDrawMode::Triangles:
-				m_DrawMode = GL_TRIANGLES;
-				m_Renderer2D->m_DrawMode = GL_TRIANGLES;
+			case RenderTopology::Triangles:
+				m_Topology = GL_TRIANGLES;
+				m_Renderer2D->m_Topology = GL_TRIANGLES;
 				break;
 		}
 	}
 
+	void OpenGLRenderer::SetDepthFunction(const DepthFunction& depthFunc)
+	{
+		m_RenderContext->SetDepthFunction(depthFunc);
+	}
+
 	void OpenGLRenderer::Draw(VertexBuffer& vb, const Shader& shader)
 	{
-		glDrawElements(m_DrawMode, vb.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		shader.Bind();
+		glDrawElements(m_Topology, vb.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRenderer::Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
 	{
-		glDrawElements(m_DrawMode, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(m_Topology, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+	}
+
+	void OpenGLRenderer::SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform)
+	{
+		Renderer::Submit([&] 
+		{
+			MeshSource& source = *mesh->GetMeshSource();
+			VertexBuffer& vb = *source.GetVertexBuffer();
+			IndexBuffer& ib = *vb.GetIndexBuffer();
+
+			shader->Bind();
+
+			vb.Bind();
+			glDrawElements(m_Topology, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+			//glDrawElements(GLUtils::PrimitiveTopologyToOpenGL(m_Topology), ib.GetCount(), GL_UNSIGNED_INT, ib.GetLocalData().Data);
+		});
 	}
 
 	void OpenGLRenderer::SubmitImage(const Ref<Image> image)
@@ -264,12 +178,12 @@ namespace LkEngine {
 
 	void OpenGLRenderer::SubmitIndexed(unsigned int indexCount)
 	{
-		glDrawElements(m_DrawMode, indexCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(m_Topology, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRenderer::DrawIndexed(uint64_t indexCount)
 	{
-		glDrawElements(m_DrawMode, indexCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(m_Topology, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)

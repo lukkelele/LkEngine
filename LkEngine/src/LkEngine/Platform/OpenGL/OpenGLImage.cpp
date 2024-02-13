@@ -97,31 +97,6 @@ namespace LkEngine {
 
     void OpenGLImage::Invalidate()
     {
-#if 0
-		Buffer imageData = Buffer::Copy(m_ImageData);
-		if (m_RendererID)
-		{
-            Release();
-		}
-
-		m_ImageData = imageData;
-        GLenum internalFormat = GLUtils::OpenGLImageInternalFormat(m_Specification.Format);
-        uint32_t mipCount = Utils::CalculateMipCount(m_Specification.Width, m_Specification.Height);
-		std::string imageFormatString = Utils::ImageFormatToString(m_Specification.Format);
-
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-		glTextureStorage2D(m_RendererID, mipCount, internalFormat, m_Specification.Width, m_Specification.Height);
-        if (m_ImageData)
-        {
-            GLenum format = GLUtils::OpenGLImageFormat(m_Specification.Format);
-            GLenum dataType = GLUtils::OpenGLFormatDataType(m_Specification.Format);
-			glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Specification.Width, m_Specification.Height, format, dataType, m_ImageData.Data);
-			if (m_Specification.Mips > 1)
-				glGenerateTextureMipmap(m_RendererID);
-        }
-		GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-#endif
 		Buffer imageData = Buffer::Copy(m_ImageData);
 		if (m_RendererID)
             Release();

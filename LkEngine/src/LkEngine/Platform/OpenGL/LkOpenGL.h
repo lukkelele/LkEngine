@@ -185,6 +185,8 @@ namespace LkEngine {
     extern unsigned int CubeVAO, CubeVBO;
     extern unsigned int PlaneVAO, PlaneVBO;
     extern unsigned int QuadVAO, QuadVBO;
+    extern RendererID SkyboxVAO;
+    extern unsigned int SkyboxVBO;
 
     extern Ref<VertexBuffer> CubeVertexBuffer;
     extern Ref<VertexBuffer> PlaneVertexBuffer;
@@ -193,6 +195,12 @@ namespace LkEngine {
 
     inline static Ref<Shader> ScreenShader = nullptr;
     inline static Ref<Shader> DebugShader = nullptr;
+
+    // Skybox
+    inline static Ref<VertexBuffer> SkyboxVertexBuffer;
+    inline static Ref<TextureCube> SkyboxTexture;
+    inline static Ref<Shader> SkyboxShader;
+    inline static unsigned int CubemapTexture;
 
     inline static glm::mat4 ModelMVP = glm::mat4(1.0f);
     inline static glm::mat4 View = glm::mat4(1.0f);
@@ -262,6 +270,49 @@ namespace LkEngine {
          0.3f,  0.7f,  1.0f, 0.0f,
          0.3f,  1.0f,  1.0f, 1.0f
     };
+    static float Skybox_Vertices[] = {
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
 
     static unsigned int LoadTexture(const char* path)
     {
@@ -311,6 +362,69 @@ namespace LkEngine {
     
     Ref<Shader> GetDebugShader();
     Ref<Shader> GetScreenShader();
+
+	static unsigned int LoadCubemap(std::vector<std::string> faces)
+	{
+		unsigned int textureID;
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+		int width, height, nrChannels;
+		for (unsigned int i = 0; i < faces.size(); i++)
+		{
+		    unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		    if (data)
+		    {
+		        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+		                     0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+		        );
+		        stbi_image_free(data);
+		    }
+		    else
+		    {
+                LK_CORE_ASSERT(false, "Failed to load texture {}", faces[i]);
+		        stbi_image_free(data);
+		    }
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		return textureID;
+	}  
+
+    static void GenerateSkybox(RendererID& skyboxVAO, RendererID& skyboxVBO)
+    {
+        glGenVertexArrays(1, &skyboxVAO);
+        glGenBuffers(1, &skyboxVBO);
+        glBindVertexArray(skyboxVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Skybox_Vertices), &Skybox_Vertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+        SkyboxShader = Shader::Create("Assets/Shaders/OpenGL/Skybox.shader");
+        SkyboxShader->Bind();
+        SkyboxShader->Set("skybox", 0);
+    }
+
+    static void RenderSkybox(RendererID& texture, const glm::mat4& view, const glm::mat4& projection)
+    {
+        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+        SkyboxShader->Bind();
+        SkyboxShader->Set("view", view);
+        SkyboxShader->Set("projection", projection);
+
+        // Skybox Cube
+        glBindVertexArray(SkyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        glDepthFunc(GL_LESS); // set depth function back to default
+    }
 
 }
 

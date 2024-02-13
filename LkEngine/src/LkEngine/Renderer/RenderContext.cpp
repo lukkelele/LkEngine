@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "GraphicsContext.h"
+#include "RenderContext.h"
 
 #include "LkEngine/Core/Window.h"
 
@@ -11,17 +11,17 @@
 
 namespace LkEngine {
 
-	Ref<GraphicsContext> GraphicsContext::Create(Window* window)
+	Ref<RenderContext> RenderContext::Create(Window* window)
 	{
 		switch (RendererAPI::Current())
 		{
 			case RendererAPIType::OpenGL: return Ref<OpenGLContext>::Create(window);
 			//case RendererAPIType::Vulkan: return Ref<VulkanContext>::Create(window);
-			case RendererAPIType::None:   return nullptr;
 		}
+		LK_CORE_ASSERT(false, "Unknown RendererAPI");
 	}
 
-	void GraphicsContext::SetProfile(const Profile& profile)
+	void RenderContext::SetProfile(const Profile& profile)
 	{
 		RendererAPIType renderAPI = RendererAPI::Current();
 
@@ -56,7 +56,7 @@ namespace LkEngine {
 
 	}
 
-	void GraphicsContext::SetVersion(int majorVersion, int minorVersion)
+	void RenderContext::SetVersion(int majorVersion, int minorVersion)
 	{
 		switch (RendererAPI::Current())
 		{
@@ -72,14 +72,14 @@ namespace LkEngine {
 		LK_CORE_ASSERT(false, "SetVersion(MAJOR, MINOR) failed, neither Vulkan or OpenGL was detected");
 	}
 
-	void GraphicsContext::HandleViewportEvents()
+	void RenderContext::HandleViewportEvents()
 	{
 		auto& window = Window::Get();
 		int viewport_width, viewport_height;
 		glfwGetWindowSize(window.GetGlfwWindow(), &viewport_width, &viewport_height);
 	}
 
-	std::string GraphicsContext::GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc)
+	std::string RenderContext::GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc)
 	{
 		switch (srcFunc)
 		{
@@ -92,7 +92,7 @@ namespace LkEngine {
 		}
 	}
 
-	std::string GraphicsContext::GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc)
+	std::string RenderContext::GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc)
 	{
 		switch (dstFunc)
 		{

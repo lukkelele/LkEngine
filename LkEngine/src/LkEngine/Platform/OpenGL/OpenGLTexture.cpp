@@ -10,140 +10,6 @@
 
 namespace LkEngine {
 
-	OpenGLTexture::OpenGLTexture(const TextureSpecification& textureSpec, Buffer imageData)
-		: m_Specification(textureSpec)
-		, m_Width(textureSpec.Width)
-		, m_Height(textureSpec.Height)
-		, m_FilePath(std::filesystem::path(textureSpec.Path))
-	{
-		ImageSpecification imageSpec(textureSpec);
-		m_Image = Image::Create(imageSpec, imageData);
-	}
-
-	OpenGLTexture::OpenGLTexture(const TextureSpecification& textureSpec)
-		: m_Specification(textureSpec)
-		, m_Width(textureSpec.Width)
-		, m_Height(textureSpec.Height)
-		, m_FilePath(std::filesystem::path(textureSpec.Path))
-	{
-		ImageSpecification imageSpec(textureSpec);
-
-		// FIXME: This is bugged like biigggg time
-		if (!m_Specification.Path.empty())
-		{
-			stbi_set_flip_vertically_on_load(1);
-			int width, height, channels;
-			stbi_uc* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
-
-			// Check if texture isn't quadratic 
-			if (width != height)
-			{
-				if (width > height)
-					height = width;
-				else
-					width = height;
-
-				imageSpec.Width = width;
-				imageSpec.Height = height;
-			}
-			imageSpec.Size = imageSpec.Width * imageSpec.Height;
-
-			m_Image = Image::Create(imageSpec, data);
-		}
-		else
-		{
-			m_Image = Image::Create(imageSpec, nullptr);
-		}
-	}
-
-	OpenGLTexture::OpenGLTexture(const OpenGLTexture& texture)
-		: OpenGLTexture(texture.GetSpecification())
-	{
-	}
-
-	OpenGLTexture::~OpenGLTexture()
-	{
-		m_Image->Release();
-	}
-
-	void OpenGLTexture::Bind(uint32_t slot) const
-	{
-		glBindTextureUnit(slot, m_Image->GetRendererID());
-	}
-
-	void OpenGLTexture::Unbind(uint32_t slot) const
-	{
-		glBindTextureUnit(slot, 0);
-	}
-
-#if 0
-	const RendererID& OpenGLTexture::GetRendererID() const
-	{
-		return m_Image->GetRendererID();
-	}
-#endif
-
-	RendererID OpenGLTexture::GetRendererID() const
-	{
-		return m_Image->GetRendererID();
-	}
-
-	RendererID& OpenGLTexture::GetRendererID() 
-	{
-		return m_Image->GetRendererID();
-	}
-
-	void OpenGLTexture::SetData(void* data, uint32_t size)
-	{
-		GLenum dataFormat = GLUtils::ImageFormatToGLDataFormat(m_Specification.Format);
-		uint32_t bpp = GLUtils::ImageFormatToGLDataFormat(m_Specification.Format) == GL_RGBA ? 4 : 3;
-		glTextureSubImage2D(m_Image->GetRendererID(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
-	}
-
-	uint32_t OpenGLTexture::GetMipLevelCount() const
-	{
-		return 1;
-	}
-
-	uint64_t OpenGLTexture::GetARBHandle() const
-	{ 
-		return glGetTextureHandleARB(m_Image->GetRendererID()); 
-	}
-
-	void OpenGLTexture::Invalidate()
-	{
-		LK_CORE_WARN_TAG("OpenGLTexture", "Invalidate called, no impl!");
-		LK_CORE_ASSERT(false);
-	}
-
-	void OpenGLTexture::Lock()
-	{
-		m_Locked = true;
-	}
-
-	void OpenGLTexture::Unlock()
-	{
-		m_Locked = false;
-	}
-
-	void OpenGLTexture::Load()
-	{
-		m_Loaded = true;
-	}
-
-	void OpenGLTexture::Unload()
-	{
-		m_Loaded = false;
-	}
-
-	void OpenGLTexture::Resize(uint32_t width, uint32_t height)
-	{
-		m_Image->Resize(width, height);
-	}
-
-	//------------------------------------------------------------------------------------
-	// OpenGLTexture 2D
-	//------------------------------------------------------------------------------------
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& textureSpec, Buffer imageData)
 		: m_Specification(textureSpec)
 		, m_Width(textureSpec.Width)
@@ -268,10 +134,39 @@ namespace LkEngine {
 		return glGetTextureHandleARB(m_Image->GetRendererID()); 
 	}
 
-	OpenGLTextureCube::OpenGLTextureCube(const TextureSpecification& specification, Buffer data)
+
+
+	OpenGLTextureCube::OpenGLTextureCube(const TextureSpecification& specification, std::vector<std::filesystem::path> facePaths)
 		: m_Specification(specification)
-		, m_LocalData(data)
+		, m_Width(specification.Width)
+		, m_Height(specification.Height)
 	{
+		//glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &m_RendererID);
+		//glBindTextureUnit(0, m_RendererID);
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+
+		int width, height, channels;
+		stbi_set_flip_vertically_on_load(false);
+		for (unsigned int i = 0; i < facePaths.size(); i++)
+		{
+			std::filesystem::path& facePath = facePaths[i];
+			stbi_uc* data = stbi_load(facePath.string().c_str(), &width, &height, &channels, 4);
+			LK_CORE_VERIFY(data, "OpenGLTextureCube, failed to load data for face path \"{}\"", facePath.string());
+
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+
+			LK_CORE_DEBUG_TAG("OpenGLTextureCube", "Created face {} with texture image: {}", i, facePath.string());
+		}
+		stbi_set_flip_vertically_on_load(true);
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	}
 
 	OpenGLTextureCube::~OpenGLTextureCube()
@@ -280,21 +175,24 @@ namespace LkEngine {
 
 	void OpenGLTextureCube::Bind(uint32_t slot) const
 	{
+		glActiveTexture(GL_TEXTURE0 + slot);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
 	}
 
 	ImageFormat OpenGLTextureCube::GetFormat() const
 	{
-		return ImageFormat();
+		return m_Specification.Format;
 	}
 
 	uint32_t OpenGLTextureCube::GetWidth() const
 	{
-		return 0;
+		return m_Width;
 	}
 
 	uint32_t OpenGLTextureCube::GetHeight() const
 	{
-		return 0;
+		return m_Height;
 	}
 
 	uint32_t OpenGLTextureCube::GetMipLevelCount() const
@@ -304,20 +202,16 @@ namespace LkEngine {
 
 	RendererID OpenGLTextureCube::GetRendererID() const
 	{
-		//return m_Image->GetRendererID();
-		return 0;
+		return m_RendererID;
 	}
 
 	RendererID& OpenGLTextureCube::GetRendererID() 
 	{
-		//return m_Image->GetRendererID();
-		RendererID i = 0;
-		return i;
+		return m_RendererID;
 	}
 
 	const std::filesystem::path& OpenGLTextureCube::GetPath() const
 	{
-		// TODO: insert return statement here
 		return m_Filepath;
 	}
 

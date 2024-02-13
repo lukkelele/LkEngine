@@ -13,12 +13,15 @@ namespace LkEngine {
 
 	OpenGLContext::OpenGLContext(Window* window)
     {
-		m_Instance = Ref<OpenGLContext>(this);
-	    m_Window = s_ptr<Window>(window);
+		m_Window = window;
 		m_GlfwWindow = m_Window->GetGlfwWindow();
 	}
 
     OpenGLContext::~OpenGLContext()
+    {
+    }
+
+    void OpenGLContext::Destroy()
     {
     }
 
@@ -53,9 +56,37 @@ namespace LkEngine {
 			glDisable(GL_BLEND);
 	}
 
-    void OpenGLContext::Destroy()
-    {
-    }
+	void OpenGLContext::SetDepthFunction(const DepthFunction& depthFunc)
+	{
+		m_DepthFunction = depthFunc;
+		switch (m_DepthFunction)
+		{
+			case DepthFunction::Never:
+				glDepthFunc(GL_NEVER);
+				break;
+			case DepthFunction::Less:
+				glDepthFunc(GL_LESS);
+				break;
+			case DepthFunction::Equal:
+				glDepthFunc(GL_EQUAL);
+				break;
+			case DepthFunction::LessOrEqual:
+				glDepthFunc(GL_LEQUAL);
+				break;
+			case DepthFunction::Greater:
+				glDepthFunc(GL_GREATER);
+				break;
+			case DepthFunction::NotEqual:
+				glDepthFunc(GL_NOTEQUAL);
+				break;
+			case DepthFunction::GreaterOrEqual:
+				glDepthFunc(GL_GEQUAL);
+				break;
+			case DepthFunction::Always:
+				glDepthFunc(GL_ALWAYS);
+				break;
+		}
+	}
 
 	void OpenGLContext::UpdateResolution(uint16_t width, uint16_t height)
 	{

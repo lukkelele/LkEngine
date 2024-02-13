@@ -6,10 +6,10 @@
 
 namespace LkEngine {
 
-	OpenGLShader::OpenGLShader(const std::string& filePath)
+	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
-		m_FilePath = filePath;   
-		ShaderProgramSource source = ParseShader(filePath);
+		m_FilePath = std::filesystem::path(filepath);   
+		ShaderProgramSource source = ParseShader(filepath);
 		m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
 	}
 
@@ -42,6 +42,12 @@ namespace LkEngine {
 		GL_CALL(glUniform1i(GetUniformLocation(name), value));
 	}
 
+	void OpenGLShader::Set(const std::string& name, bool value)
+	{
+		GL_CALL(glUseProgram(m_RendererID));
+		GL_CALL(glUniform1i(GetUniformLocation(name), (int)value));
+	}
+
 	void OpenGLShader::Set(const std::string& name, float value)
 	{
 		GL_CALL(glUseProgram(m_RendererID));
@@ -60,12 +66,6 @@ namespace LkEngine {
 		GL_CALL(glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w));
 	}
 
-	void OpenGLShader::Set(const std::string& name, bool value)
-	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform1i(GetUniformLocation(name), (int)value));
-	}
-
 	void OpenGLShader::Set(const std::string& name, const glm::vec2& value)
 	{
 		GL_CALL(glUseProgram(m_RendererID));
@@ -74,32 +74,32 @@ namespace LkEngine {
 
 	void OpenGLShader::Set(const std::string& name, const glm::vec3& value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0]));
-	}
-
-	void OpenGLShader::Set(const std::string& name, const glm::mat4& value)
-	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]));
+		glUseProgram(m_RendererID);
+		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0]);
 	}
 
 	void OpenGLShader::Set(const std::string& name, const glm::ivec2& value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform2i(GetUniformLocation(name), value.x, value.y));
+		glUseProgram(m_RendererID);
+		glUniform2i(GetUniformLocation(name), value.x, value.y);
 	}
 
 	void OpenGLShader::Set(const std::string& name, const glm::ivec3& value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform3i(GetUniformLocation(name), value.x, value.y, value.z));
+		glUseProgram(m_RendererID);
+		glUniform3i(GetUniformLocation(name), value.x, value.y, value.z);
 	}
 
 	void OpenGLShader::Set(const std::string& name, const glm::ivec4& value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform4i(GetUniformLocation(name), value.x, value.y, value.z, value.w));
+		glUseProgram(m_RendererID);
+		glUniform4i(GetUniformLocation(name), value.x, value.y, value.z, value.w);
+	}
+
+	void OpenGLShader::Set(const std::string& name, const glm::mat4& value)
+	{
+		glUseProgram(m_RendererID);
+		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]);
 	}
 
 	int OpenGLShader::GetUniformLocation(const std::string& name)
@@ -139,6 +139,7 @@ namespace LkEngine {
 			glDeleteShader(id);
 			return 0;
 		}
+
 		return id;
 	}
 
@@ -152,13 +153,15 @@ namespace LkEngine {
 		glAttachShader(program, fs);
 		glLinkProgram(program);
 		glValidateProgram(program);
-
-		// NOTE: Detach shaders instead of deleting IF needed for debugging 
 		glDeleteShader(vs);
 		glDeleteShader(fs);
 
 		return program;
 	}
 
+	size_t OpenGLShader::GetHash()
+	{
+		return Hash::GenerateFNVHash(m_FilePath.string());
+	}
 
 }

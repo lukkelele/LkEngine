@@ -60,7 +60,7 @@ namespace LkEngine {
 		FramebufferTextureSpecification m_DepthAttachmentSpecification;
 		std::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecifications;
 
-		Ref<Image2D> m_Image;
+		//Ref<Image2D> m_Image;
     };
 
 

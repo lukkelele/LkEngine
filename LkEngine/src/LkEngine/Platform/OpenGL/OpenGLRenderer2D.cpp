@@ -65,16 +65,16 @@ namespace LkEngine {
 		    quadFramebufferSpec.DebugName = "OpenGLRenderer2D_Framebuffer";
             quadFramebufferSpec.Width = Window::Get().GetWidth();
             quadFramebufferSpec.Height = Window::Get().GetHeight();
-		    //m_QuadFramebuffer = Framebuffer::Create(quadFramebufferSpec);
+		    Ref<Framebuffer> quadFramebuffer = Framebuffer::Create(quadFramebufferSpec);
 
             m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
             m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
             m_QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
             m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
-            // Pipeline
+            // Quad Pipeline
             PipelineSpecification quadPipelineSpec;
-            //quadPipelineSpec.TargetFramebuffer = m_QuadFramebuffer;
+            quadPipelineSpec.TargetFramebuffer = nullptr;
             quadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
             quadPipelineSpec.Shader = m_QuadShader;
 
@@ -82,8 +82,9 @@ namespace LkEngine {
             quadPassSpec.DebugName = "Renderer2D-QuadPass";
             quadPassSpec.Pipeline = Pipeline::Create(quadPipelineSpec);
             Ref<OpenGLPipeline> openglPipeline = quadPassSpec.Pipeline.As<OpenGLPipeline>();
+            m_QuadMaterial = Material::Create(m_QuadShader, "QuadMaterial");
 
-            // Set up quad shader to use the correct amount of texture array uniforms 
+            // Use correct amount of texture array uniforms
             for (uint8_t textureArray = 0; textureArray < m_Specification.TextureArraysUsed; textureArray++)
                 openglPipeline->BindTextureArray(textureArray);
             m_QuadPass = RenderPass::Create(quadPassSpec);
@@ -99,7 +100,6 @@ namespace LkEngine {
             });
 
             m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
-
             uint32_t* quadIndices = new uint32_t[m_MaxIndices];
             uint32_t offset = 0;
             for (uint32_t i = 0; i < m_MaxIndices; i += 6)
@@ -140,7 +140,8 @@ namespace LkEngine {
 		    delete[] lineIndices;
         }
 
-        m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture2D();
+        //m_WhiteTexture = Renderer::GetTextureLibrary()->GetWhiteTexture();
+        m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture();
 
         m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
         m_CameraUniformBuffer = Ref<OpenGLUniformBuffer>::Create(sizeof(CameraData));
@@ -151,11 +152,8 @@ namespace LkEngine {
         for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
         {
             if (m_TextureArrays[i])
-            {
                 m_TextureArrays[i]->Bind();
-            }
         }
-
 
         Initialized = true;
     }
