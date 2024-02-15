@@ -1,5 +1,5 @@
 # LkEngine :shaved_ice: 
-> Graphics Engine written in C++20<br>
+> Game Engine written in C++20<br>
 >
 > New version of my first engine **LukkelEngine** ([repo](https://github.com/lukkelele/LukkelEngine/tree/main)).<br>
 ---
@@ -18,10 +18,15 @@
 
 ## About 
 
-I began LkEngine as a project to learn more about C++ and graphics programming.<br>
-There was an earlier version of **LkEngine** called **LukkelEngine** but after putting the project
-on pause for about 8-9 months, I decided I wanted to start over.
-and because of this, lots of focus was aimed towards things such as 3D objects and rigid bodies.<br>
+LkEngine is a game engine written in C\++20 and modern OpenGL. <br>
+I began LkEngine as a project to learn more about C++ and graphics programming in general.<br>
+There was an earlier version called **LukkelEngine** but after putting the project
+on pause for about 8-9 months, I decided I wanted to start over and thus **LkEngine** was born.<br>
+<br>
+With that said, my goals for the project are the following:
+1. To learn 
+2. Have fun
+
 
 ## Setup and Installation
 **TODO**
@@ -36,25 +41,27 @@ and because of this, lots of focus was aimed towards things such as 3D objects a
 - Assimp
 - yaml-cpp
 
-## Implemented Features / TODO
+## Implemented features
 <!---------------------- Checklist --------------------------->
 
-### Features
 :white_check_mark: Window callbacks (resize, minimize) <br>
 :white_check_mark: Event system  <br>
 :white_check_mark: Camera system (in progress)<br>
 :white_check_mark: Sprite rendering<br>
 :white_check_mark: ECS (Entity Component System) (in progress) <br>
 :white_check_mark: Render submission system<br>
-:black_square_button: Collision system<br>
 :white_check_mark: 2D Physics and Raycasting <br>
-:black_square_button: 3D Physics and Raycasting <br>
 :white_check_mark: Asset manager (in progress) <br>
 :white_check_mark: Mesh loading (in progress) <br>
-:black_square_button: Renderer debugging tools (e.g drawing lines in world space) <br>
 :white_check_mark: Serialization (in progress) <br>
 
 ... and more to come
+## TODO
+:black_square_button: Runtime application (instead of just sandbox)<br>
+:black_square_button: Profiling<br>
+:black_square_button: Vulkan renderer <br>
+:black_square_button: Renderer debugging tools (e.g drawing lines in world space) <br>
+:black_square_button: 3D Physics and Raycasting <br>
 
 <!------------------------------------------------------------>
 
@@ -67,7 +74,7 @@ and because of this, lots of focus was aimed towards things such as 3D objects a
 
 ### February 15, 2024
 Last couple of weeks has mostly been work on assets and asset loading. <br>
-Some nice improvements can be seen though, especially with the cubemap.
+Some nice improvements can be seen though, especially with the new environment cubemap.
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-2024-02-15_1.png" width=740 height=440>
 	<p align="center">
@@ -76,11 +83,13 @@ Some nice improvements can be seen though, especially with the cubemap.
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-2024-02-15_2.png" width=740 height=440>
 	<p align="center">
+	</p>
 </div>
 
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-2024-02-15_3.png" width=740 height=440>
 	<p align="center">
+	</p>
 </div>
 
 <br>
@@ -88,8 +97,9 @@ Some nice improvements can be seen though, especially with the cubemap.
 ### February 4, 2024
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-2024-02-04.png" width=740 height=440>
-	Faulty renderered mesh because of misaligned vertexbuffer and shader layout
 	<p align="center">
+	Faulty renderered mesh because of a misaligned vertexbuffer and shader layout
+	</p>
 </div>
 
 <br>
@@ -98,22 +108,23 @@ Some nice improvements can be seen though, especially with the cubemap.
 Some 3D rendering, the **Translate** and **Rotate** gizmo modes can be seen as well.
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-2024-01-28_1.png" width=740 height=440>
-	<p align="center">
+	<p align="center"> </p>
 </div>
 
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-2024-01-28_2.png" width=740 height=440>
 	<p align="center">
+	</p>
 </div>
 
 <br>
 
 ### January 1, 2024
-The current look of the engine. Lots to polish. The creation of scene entities through the UI is what's focused for now. 
-Which means that the UI is what I spend the most time on.
+The current look of the engine. Lots to polish.
 <div align="center">
 	<img align="center" src="/doc/img/LkEngine-2024-01-01.png" width=740 height=440>
 	<p align="center">
+	</p>
 </div>
 
 Once again thanks to Atilla for his handsome face. I need to add new images for 
