@@ -71,7 +71,9 @@ namespace LkEngine {
 
             // Update layers
             for (Layer* layer : m_LayerStack)
+            {
                 layer->OnUpdate(m_Timestep);
+            }
             
             // TODO: Use 'MainCameraEntity' here
             if (m_Scene)

@@ -30,7 +30,6 @@ namespace LkEngine {
 		uint32_t GetHeight() const override { return m_Specification.Height; }
 
 		const ImageSpecification& GetSpecification() const { return m_Specification; }
-		//ImageSpecification& GetSpecification() { return m_Specification; }
 
 	private:
 		void Release() override;
@@ -73,8 +72,6 @@ namespace LkEngine {
 		uint32_t GetHeight() const override { return m_Specification.Height; }
 
 		const ImageSpecification& GetSpecification() const { return m_Specification; }
-		//const ImageSpecification GetSpecification() const { return m_Specification; }
-		//ImageSpecification& GetSpecification() { return m_Specification; }
 
 	private:
 		void Release() override;

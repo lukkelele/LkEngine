@@ -3,6 +3,7 @@
 #include "LkEngine/Core/Base.h"
 
 #include "LkEngine/Asset/Asset.h"
+#include "LkEngine/Asset/MaterialAsset.h"
 
 #include "LkEngine/Core/Math/Math.h"
 
@@ -215,54 +216,37 @@ namespace LkEngine{
 		BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
 	};
 
-	struct MaterialComponent : public BaseComponent
-	{
-		Ref<Material> m_Material = nullptr;
-
-		Ref<Material> GetMaterial() const { return m_Material; }
-
-		Ref<Texture2D> GetTexture() 
-		{ 
-			LK_CORE_ASSERT(m_Material, "No material bound to component!");
-			return m_Material->GetTexture(); 
-		}
-
-		void SetTexture(Ref<Texture> texture) 
-		{ 
-			m_Material->SetTexture(texture); 
-		}
-
-		MaterialComponent()
-		{
-			MaterialSpecification specification;
-			//specification.Friction = 0.50f;
-			m_Material = Material::Create(specification);
-		}
-		MaterialComponent(Ref<Material> material) 
-		{
-			m_Material = Ref<Material>::Create(material);
-		}
-	};
-
 	struct MeshComponent
 	{
-		AssetHandle MeshHandle;
-		std::vector<UUID> BoneEntityIds; // If mesh is rigged, these are the entities whose transforms will used to "skin" the rig.
+		AssetHandle Mesh;
+		uint32_t SubmeshIndex = 0;
+		Ref<LkEngine::MaterialTable> MaterialTable = Ref<LkEngine::MaterialTable>::Create();
+		std::vector<UUID> BoneEntityIds; // If mesh is rigged, these are the entities whose transforms will used to "skin" the rig
 		bool Visible = true;
 
 		MeshComponent() = default;
-		MeshComponent(AssetHandle meshHandle) : MeshHandle(meshHandle) {}
+		MeshComponent(const MeshComponent& other)
+			: Mesh(other.Mesh), SubmeshIndex(other.SubmeshIndex)
+			, MaterialTable(Ref<LkEngine::MaterialTable>::Create(other.MaterialTable))
+			, BoneEntityIds(other.BoneEntityIds) {}
+		MeshComponent(AssetHandle mesh, uint32_t submeshIndex = 0)
+			: Mesh(mesh), SubmeshIndex(submeshIndex) {}
 	};
 
 	struct StaticMeshComponent
 	{
 		AssetHandle StaticMesh;
+		Ref<LkEngine::MaterialTable> MaterialTable = Ref<LkEngine::MaterialTable>::Create();
 		bool Visible = true;
 
 		StaticMeshComponent() = default;
-		StaticMeshComponent(AssetHandle staticMesh) : StaticMesh(staticMesh) {}
+		StaticMeshComponent(const StaticMeshComponent& other)
+			: StaticMesh(other.StaticMesh)
+			, MaterialTable(Ref<LkEngine::MaterialTable>::Create(other.MaterialTable))
+			, Visible(other.Visible) {}
+		StaticMeshComponent(AssetHandle staticMesh)
+			: StaticMesh(staticMesh) {}
 	};
-
 
 	struct Box2DWorldComponent 
 	{
@@ -281,6 +265,10 @@ namespace LkEngine{
 		bool HasDebugDrawerAttached() const { return DebugDrawerAttached; }
 	};
 
+	struct SceneComponent
+	{
+		UUID SceneID;
+	};
 
 	template<typename... Component>
 	struct ComponentGroup
@@ -293,11 +281,11 @@ namespace LkEngine{
 		TransformComponent,
 		SpriteComponent,
 		CameraComponent,
-		MaterialComponent,
 		RigidBody2DComponent,
 		BoxCollider2DComponent,
 		MeshComponent,
-		StaticMeshComponent
+		StaticMeshComponent,
+		SceneComponent	
 	>;
 
 }

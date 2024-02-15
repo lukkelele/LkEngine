@@ -75,9 +75,11 @@ namespace LkEngine {
     private:
         uint8_t m_Topology = GL_TRIANGLES;
 
-        Ref<OpenGLContext> m_RenderContext;
         Ref<OpenGLRenderer2D> m_Renderer2D;
-        Ref<RenderPass> m_RenderPass;
+        Ref<OpenGLContext> m_RenderContext;
+
+        Ref<OpenGLRenderPass> m_GeometricPass;
+        Ref<OpenGLRenderPass> m_RenderPass2D;
     };
 
     namespace GLUtils {

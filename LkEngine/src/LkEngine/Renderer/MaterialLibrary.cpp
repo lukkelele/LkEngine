@@ -16,11 +16,8 @@ namespace LkEngine {
 
     void MaterialLibrary::Init()
     {
-        Ref<Material> BaseMaterial = Material::Create(Renderer::GetShaderLibrary()->Get("BasicModel"), "BaseMaterial");
-		BaseMaterial->SetTexture(TextureLibrary::Get()->GetTexture("wood-container"));
-        LK_CORE_VERIFY(TextureLibrary::Get()->GetTexture("wood-container"));
+        Ref<Material> BaseMaterial = Material::Create(Renderer::GetShaderLibrary()->Get("Renderer_Model"), "BaseMaterial");
         m_Collection.emplace(BaseMaterial->GetName(), BaseMaterial);
-        LK_CORE_TRACE_TAG("MaterialLibrary", "Created BaseMaterial and attach the texture \"{}\" to it", BaseMaterial->GetTexture("")->GetName());
 
         LK_CORE_DEBUG_TAG("MaterialLibrary", "Creating basic materials");
         CreateBasicMaterials();
@@ -45,7 +42,7 @@ namespace LkEngine {
     {
         // Asphalt
         {
-            Ref<Material> asphalt = Material::Create(Renderer::GetShaderLibrary()->Get("BasicModel"), "Basic_Asphalt");
+            Ref<Material> asphalt = Material::Create(Renderer::GetShaderLibrary()->Get("Renderer_Model"), "Basic_Asphalt");
             Ref<MaterialAsset> materialAsset(asphalt);
             m_Collection.emplace(asphalt->GetName(), asphalt);
             m_LoadedMaterialAssets.emplace(materialAsset->Handle, materialAsset);
@@ -54,7 +51,7 @@ namespace LkEngine {
 
         // Rubber
         {
-            Ref<Material> rubber = Material::Create(Renderer::GetShaderLibrary()->Get("BasicModel"), "Basic_Rubber");
+            Ref<Material> rubber = Material::Create(Renderer::GetShaderLibrary()->Get("Renderer_Model"), "Basic_Rubber");
             Ref<MaterialAsset> materialAsset(rubber);
             m_Collection.emplace(rubber->GetName(), rubber);
             m_LoadedMaterialAssets.emplace(materialAsset->Handle, materialAsset);

@@ -29,8 +29,6 @@ namespace LkEngine {
 		void Bind() const override;
 
 	private:
-		void BindVertexArray();
-		void UnbindVertexArray();
 		void AddVertexBufferToVertexArray();
 		void AddVertexBuffer(VertexBuffer& vb);
 
@@ -43,7 +41,7 @@ namespace LkEngine {
 		Ref<IndexBuffer> m_IndexBuffer = nullptr;
 		VertexBufferLayout m_BufferLayout;
 
-		unsigned int m_VertexArrayID = 0;
+		RendererID m_VertexArrayID = 0;
 		unsigned int m_VertexBufferIndex = 0;
     };
 

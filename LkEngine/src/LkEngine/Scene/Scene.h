@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_set>
+
 #include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Timer.h"
 
@@ -116,6 +118,8 @@ namespace LkEngine {
 		static std::string GetActiveSceneName() { if (m_ActiveScene) { return m_ActiveScene->GetName(); } return ""; }
 		static uint8_t GetSceneCount() { return m_SceneCounter; }
 		static Ref<Scene> GetActiveScene() { return m_ActiveScene; }
+
+		std::unordered_set<AssetHandle> GetAssetList();
 
 	private:
 		inline static Scene* m_ActiveScene = nullptr;

@@ -10,7 +10,7 @@ namespace LkEngine {
 	OpenGLRenderPass::OpenGLRenderPass(const RenderPassSpecification& specification)
 		: m_Specification(specification)
 	{
-		LK_CORE_VERIFY(m_Specification.Pipeline != nullptr, "OpenGLRenderPass::m_Specification.Pipeline is nullptr!");
+		//LK_CORE_VERIFY(m_Specification.Pipeline != nullptr, "OpenGLRenderPass::m_Specification.Pipeline is nullptr!");
 	}
 
 	OpenGLRenderPass::~OpenGLRenderPass()

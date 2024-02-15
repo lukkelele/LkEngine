@@ -35,7 +35,11 @@ namespace LkEngine {
 	{
 		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
 
-		LOG_ASSET("Contains handle {}", handle);
+		bool hasHandle = m_AssetRegistry.find(handle) != m_AssetRegistry.end();
+		if (!hasHandle)
+		{
+		}
+		LOG_ASSET("Contains handle: {}", hasHandle ? "YES" : "no");
 		return m_AssetRegistry.find(handle) != m_AssetRegistry.end();
 	}
 

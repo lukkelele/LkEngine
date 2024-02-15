@@ -21,7 +21,15 @@ namespace LkEngine {
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data);
 			LK_CORE_TRACE("Created OpenGLImage");
-			glGenerateTextureMipmap(m_RendererID);
+			//glGenerateTextureMipmap(m_RendererID);
+
+			if (m_Specification.Mips > 1)
+			{
+				glGenerateTextureMipmap(m_RendererID);
+				LK_CORE_DEBUG_TAG("OpenGLImage", "ImageSpecification::Mips > 1 ==> Generating mipmap");
+			}
+			else
+				LK_CORE_DEBUG_TAG("OpenGLImage", "ImageSpecification::Mips < 1 ==> Not generating mipmap");
 
 			GLUtils::ApplyTextureWrap(m_Specification.Wrap);
 			GLUtils::ApplyTextureFilter(m_Specification.Filter, m_Specification.Mips > 1);
@@ -61,7 +69,12 @@ namespace LkEngine {
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data);
 			if (m_Specification.Mips > 1)
+			{
 				glGenerateTextureMipmap(m_RendererID);
+				LK_CORE_DEBUG_TAG("OpenGLImage", "ImageSpecification::Mips > 1 ==> Generating mipmap");
+			}
+			else
+				LK_CORE_DEBUG_TAG("OpenGLImage", "ImageSpecification::Mips < 1 ==> Not generating mipmap");
 
 			GLUtils::ApplyTextureWrap(m_Specification.Wrap);
 			GLUtils::ApplyTextureFilter(m_Specification.Filter, m_Specification.Mips > 1);
@@ -148,8 +161,17 @@ namespace LkEngine {
 			glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 			glTextureStorage2D(m_RendererID, spec.Mips, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height);
 			glTextureSubImage2D(m_RendererID, 0, 0, 0, spec.Width, spec.Height, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, m_ImageData.Data);
+
+			//if (m_Specification.Mips > 1)
+			//	glGenerateTextureMipmap(m_RendererID);
+
 			if (m_Specification.Mips > 1)
+			{
 				glGenerateTextureMipmap(m_RendererID);
+				LK_CORE_DEBUG_TAG("OpenGLImage2D", "ImageSpecification::Mips > 1 ==> Generating mipmap");
+			}
+			else
+				LK_CORE_DEBUG_TAG("OpenGLImage2D", "ImageSpecification::Mips < 1 ==> Not generating mipmap");
 
 			GLUtils::ApplyTextureWrap(m_RendererID, m_Specification.Wrap);
 			GLUtils::ApplyTextureFilter(m_RendererID, m_Specification.Filter, m_Specification.Mips > 1);
@@ -179,8 +201,17 @@ namespace LkEngine {
 			glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 			glTextureStorage2D(m_RendererID, Utils::CalculateMipCount(spec.Width, spec.Height), GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height);
 			glTextureSubImage2D(m_RendererID, 0, 0, 0, spec.Width, spec.Height, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, m_ImageData.Data);
+
+			//if (m_Specification.Mips > 1)
+			//	glGenerateTextureMipmap(m_RendererID);
+
 			if (m_Specification.Mips > 1)
+			{
 				glGenerateTextureMipmap(m_RendererID);
+				LK_CORE_DEBUG_TAG("OpenGLImage2D", "ImageSpecification::Mips > 1 ==> Generating mipmap");
+			}
+			else
+				LK_CORE_DEBUG_TAG("OpenGLImage2D", "ImageSpecification::Mips < 1 ==> Not generating mipmap");
 
 			GLUtils::ApplyTextureWrap(m_RendererID, m_Specification.Wrap);
 			GLUtils::ApplyTextureFilter(m_RendererID, m_Specification.Filter, m_Specification.Mips > 1);

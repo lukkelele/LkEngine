@@ -64,7 +64,7 @@ namespace LkEngine {
 
 	void OpenGLVertexBuffer::Bind() const
 	{
-		GL_CALL(glBindVertexArray(m_VertexArrayID));
+		glBindVertexArray(m_VertexArrayID);
 	}
 
 	void OpenGLVertexBuffer::SetData(void* buffer, uint64_t size, uint64_t offset)
@@ -152,8 +152,7 @@ namespace LkEngine {
 
 	void OpenGLVertexBuffer::AddVertexBuffer(VertexBuffer& vb)
 	{
-		//glBindVertexArray(m_VertexArrayID);
-		BindVertexArray();
+		glBindVertexArray(m_VertexArrayID);
 		vb.Bind();
 		VertexBufferLayout& layout = vb.GetLayout();
 
@@ -214,6 +213,7 @@ namespace LkEngine {
 		}
 	}
 
+#if 0
 	void OpenGLVertexBuffer::BindVertexArray()
 	{
 		GL_CALL(glBindVertexArray(m_VertexArrayID));
@@ -223,11 +223,11 @@ namespace LkEngine {
 	{
 		GL_CALL(glBindVertexArray(0));
 	}
+#endif
 
 	void OpenGLVertexBuffer::SetIndexBuffer(const Ref<IndexBuffer> indexBuffer)
 	{
-		BindVertexArray();
-		Bind();
+		glBindVertexArray(m_VertexArrayID);
 		indexBuffer->Bind();
 		m_IndexBuffer = indexBuffer;
 	}

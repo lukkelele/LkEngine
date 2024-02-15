@@ -108,7 +108,8 @@ namespace LkEngine {
 		static Ref<Renderer2DAPI> GetRenderer2D() { return s_Renderer2DAPI; }
 		static Ref<Renderer2DAPI> GetRenderer2DAPI() { return s_Renderer2DAPI; }
 
-		static Ref<Texture> GetWhiteTexture();
+		static Ref<Texture2D> GetWhiteTexture();
+		static Ref<TextureCube> GetWhiteTextureCube();
 
 		static void RegisterShaderDependency(Ref<Shader> shader, Ref<Material> material);
 

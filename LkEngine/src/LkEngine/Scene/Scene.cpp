@@ -16,11 +16,6 @@
 
 namespace LkEngine {
 
-	struct SceneComponent
-	{
-		UUID SceneID;
-	};
-
 	Scene::Scene(bool editorScene)
 		: m_EditorScene(editorScene)
 		, m_Name("")
@@ -216,9 +211,6 @@ namespace LkEngine {
 	template<>
 	void Scene::OnComponentAdded<SpriteComponent>(Entity entity, SpriteComponent& sprite)
 	{
-		if (entity.HasComponent<MaterialComponent>())
-		{
-		}
 	}
 
 	template<>
@@ -227,7 +219,13 @@ namespace LkEngine {
 	}
 
 	template<>
-	void Scene::OnComponentAdded<MaterialComponent>(Entity entity, MaterialComponent& mc)
+	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& mesh)
+	{
+		// Add asset handle
+	}
+
+	template<>
+	void Scene::OnComponentAdded<StaticMeshComponent>(Entity entity, StaticMeshComponent& staticMesh)
 	{
 	}
 
@@ -399,10 +397,7 @@ namespace LkEngine {
 		editorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		editorCamera.OnUpdate(ts);
 
-		//Renderer::SubmitQuad({ 200, -140, 700 }, { 1200, 1200 }, TextureLibrary::Get()->GetTexture2D("atte"));
-		//Renderer::SubmitQuad({ 200, 0, 640 }, { 140, 90 }, Color::RGBA::Red);
-		//Renderer::SubmitQuad({ 100, 100, 600 }, { 80, 100 }, Color::RGBA::Blue);
-		Renderer::SubmitQuad({ 200, -20, 1240 }, { 2000, 1400 }, TextureLibrary::Get()->GetTexture2D("skybox-ice-back"));
+		Renderer::SubmitQuad({ 200, -20, 1350 }, { 3000, 1800 }, TextureLibrary::Get()->GetTexture("skybox-ice-back"));
 
 		EditorLayer::Get()->OnUpdate();
 
@@ -502,7 +497,178 @@ namespace LkEngine {
 				Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 			}
 		}
-
 	}
+
+	static void InsertMeshMaterials(Ref<MeshSource> meshSource, std::unordered_set<AssetHandle>& assetList)
+	{
+		// Mesh materials
+		const auto& materials = meshSource->GetMaterials();
+		for (auto material : materials)
+		{
+			Ref<Texture2D> albedoTexture = material->GetTexture("u_AlbedoTexture");
+			if (albedoTexture && albedoTexture->Handle) // White texture has Handle == 0
+				assetList.insert(albedoTexture->Handle);
+
+			Ref<Texture2D> normalTexture = material->GetTexture("u_NormalTexture");
+			if (normalTexture && albedoTexture->Handle)
+				assetList.insert(normalTexture->Handle);
+
+			Ref<Texture2D> metalnessTexture = material->GetTexture("u_MetalnessTexture");
+			if (metalnessTexture && albedoTexture->Handle)
+				assetList.insert(metalnessTexture->Handle);
+
+			Ref<Texture2D> roughnessTexture = material->GetTexture("u_RoughnessTexture");
+			if (roughnessTexture && albedoTexture->Handle)
+				assetList.insert(roughnessTexture->Handle);
+		}
+	}
+
+
+	std::unordered_set<AssetHandle> Scene::GetAssetList()
+	{
+		std::unordered_set<AssetHandle> assetList;
+		std::unordered_set<AssetHandle> missingAssets;
+
+		// MeshComponent
+		{
+			auto view = m_Registry.view<MeshComponent>();
+			for (auto entity : view)
+			{
+				auto& mc = m_Registry.get<MeshComponent>(entity);
+				if (mc.Mesh)
+				{
+					if (AssetManager::IsMemoryAsset(mc.Mesh))
+					{
+						LK_CORE_DEBUG_TAG("Scene", "Asset {} is memory asset", mc.Mesh);
+						//continue;
+					}
+
+					if (AssetManager::IsAssetHandleValid(mc.Mesh))
+					{
+						assetList.insert(mc.Mesh);
+
+						// MeshSource is required too
+						Ref<Mesh> mesh = AssetManager::GetAsset<Mesh>(mc.Mesh);
+						if (!mesh)
+							continue;
+
+						Ref<MeshSource> meshSource = mesh->GetMeshSource();
+						if (meshSource && AssetManager::IsAssetHandleValid(meshSource->Handle))
+						{
+							assetList.insert(meshSource->Handle);
+							InsertMeshMaterials(meshSource, assetList);
+						}
+					}
+					else
+					{
+						missingAssets.insert(mc.Mesh);
+					}
+				}
+
+				if (mc.MaterialTable)
+				{
+					auto& materialAssets = mc.MaterialTable->GetMaterials();
+					for (auto& [index, materialAssetHandle] : materialAssets)
+					{
+						if (AssetManager::IsAssetHandleValid(materialAssetHandle))
+						{
+							assetList.insert(materialAssetHandle);
+
+							Ref<MaterialAsset> materialAsset = AssetManager::GetAsset<MaterialAsset>(materialAssetHandle);
+
+							std::array<Ref<Texture2D>, 4> textures = {
+								materialAsset->GetAlbedoMap(),
+								materialAsset->GetNormalMap(),
+								materialAsset->GetMetalnessMap(),
+								materialAsset->GetRoughnessMap()
+							};
+
+							// Textures
+							for (auto& texture : textures)
+							{
+								if (texture)
+									assetList.insert(texture->Handle);
+							}
+						}
+						else
+						{
+							missingAssets.insert(materialAssetHandle);
+						}
+					}
+				}
+			}
+		}
+
+		// StaticMeshComponent
+		{
+			auto view = m_Registry.view<StaticMeshComponent>();
+			for (auto entity : view)
+			{
+				auto& mc = m_Registry.get<StaticMeshComponent>(entity);
+				if (mc.StaticMesh)
+				{
+					if (AssetManager::IsMemoryAsset(mc.StaticMesh))
+					{
+						//continue;
+					}
+
+					if (AssetManager::IsAssetHandleValid(mc.StaticMesh))
+					{
+						assetList.insert(mc.StaticMesh);
+
+						// MeshSource is required too
+						Ref<StaticMesh> mesh = AssetManager::GetAsset<StaticMesh>(mc.StaticMesh);
+						Ref<MeshSource> meshSource = mesh->GetMeshSource();
+						if (meshSource && AssetManager::IsAssetHandleValid(meshSource->Handle))
+						{
+							assetList.insert(meshSource->Handle);
+							InsertMeshMaterials(meshSource, assetList);
+						}
+					}
+					else
+					{
+						missingAssets.insert(mc.StaticMesh);
+					}
+				}
+
+				if (mc.MaterialTable)
+				{
+					auto& materialAssets = mc.MaterialTable->GetMaterials();
+					for (auto& [index, materialAssetHandle] : materialAssets)
+					{
+						if (AssetManager::IsAssetHandleValid(materialAssetHandle))
+						{
+							assetList.insert(materialAssetHandle);
+
+							Ref<MaterialAsset> materialAsset = AssetManager::GetAsset<MaterialAsset>(materialAssetHandle);
+
+							std::array<Ref<Texture2D>, 4> textures = {
+								materialAsset->GetAlbedoMap(),
+								materialAsset->GetNormalMap(),
+								materialAsset->GetMetalnessMap(),
+								materialAsset->GetRoughnessMap()
+							};
+
+							// Textures
+							for (auto texture : textures)
+							{
+								if (texture)
+									assetList.insert(texture->Handle);
+							}
+						}
+						else
+						{
+							missingAssets.insert(materialAssetHandle);
+						}
+					}
+				}
+			}
+		}
+
+		LK_CORE_DEBUG_TAG("Scene", "Returning asset list of size={}", assetList.size());
+		return assetList;
+	}
+
+
 
 }

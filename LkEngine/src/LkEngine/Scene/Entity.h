@@ -92,9 +92,9 @@ namespace LkEngine {
 		TransformComponent& Transform() { return GetComponent<TransformComponent>(); }
 		SpriteComponent& Sprite() { return GetComponent<SpriteComponent>(); }
 		CameraComponent& Camera() { return GetComponent<CameraComponent>(); }
-		MaterialComponent& Material() { return GetComponent<MaterialComponent>(); }
 		RigidBody2DComponent& RigidBody2D() { return GetComponent<RigidBody2DComponent>(); }
 		BoxCollider2DComponent& BoxCollider2D() { return GetComponent<BoxCollider2DComponent>(); }
+		MeshComponent& Mesh() { return GetComponent<MeshComponent>(); }
 
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 		operator entt::entity() const { return m_EntityHandle; }

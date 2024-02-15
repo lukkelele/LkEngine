@@ -14,6 +14,18 @@
 
 namespace LkEngine {
 
+	void DumpAttachedComponents(Entity entity)
+	{
+		if (entity.HasComponent<IDComponent>() && (uint32_t)entity.GetUUID() != 0)
+		{
+			LK_CORE_DEBUG_TAG("SceneManagerPanel", "DrawEntityNode Failed for entity {}", entity.GetUUID());
+			LK_CORE_DEBUG_TAG("SceneManagerPanel", "IDComponent: {}", entity.HasComponent<IDComponent>());
+			LK_CORE_DEBUG_TAG("SceneManagerPanel", "TagComponent: {}", entity.HasComponent<TagComponent>());
+			LK_CORE_DEBUG_TAG("SceneManagerPanel", "TransformComponent: {}", entity.HasComponent<TransformComponent>());
+			LK_CORE_DEBUG_TAG("SceneManagerPanel", "SpriteComponent: {}", entity.HasComponent<SpriteComponent>());
+		}
+	}
+
 	SceneManagerPanel::SceneManagerPanel()
 		: m_Scene(nullptr)
 	{
@@ -40,8 +52,7 @@ namespace LkEngine {
 
 		if (m_Scene)
 		{
-			ImGui::SeparatorText("Current Scene");
-			//auto& registry = m_Scene->GetRegistry();
+			ImGui::SeparatorText(fmt::format("Current Scene - {}", m_Scene->m_Name).c_str());
 			ImGui::Text("Entities: %d", m_Scene->m_Registry.size());
 			m_Scene->m_Registry.each([&](auto entityID)
 			{
@@ -199,13 +210,14 @@ namespace LkEngine {
 			
 		});
 
+#if 0
 		//---------------------------------------------------------------------------
 		// Material Component
 		//---------------------------------------------------------------------------
 		DrawComponent<MaterialComponent>("Material", entity, [&entity](auto& mc)
 		{
 			auto texture = mc.GetTexture();
-			if (texture == nullptr)
+			if (!texture)
 				return;
 
 			auto textures2D = TextureLibrary::Get()->GetTextures2D();
@@ -251,6 +263,7 @@ namespace LkEngine {
 				ImGui::EndTable();
 			}
 		});
+#endif
 
 		UI::EndSubwindow();
 	}
@@ -310,32 +323,15 @@ namespace LkEngine {
 			ImGui::SliderFloat3("##SpriteColor", &sc.Size.x, 0.0f, 800.0f, "%1.f");
 		}
 
-		if (SELECTION::SelectedEntity.HasComponent<MaterialComponent>())
-		{
-			MaterialComponent& mc = SELECTION::SelectedEntity.Material();
-			auto currentTexture = mc.GetTexture();
-			if (currentTexture != nullptr)
-			{
-				ImGui::Text("Texture: %s", currentTexture);
-			}
-		}
-
         ImGui::EndChild();
 		UI::PopID();
     }
 
 	void SceneManagerPanel::DrawEntityNode(Entity entity)
 	{
-		if (!entity || entity.HasComponent<IDComponent>() == false || entity.HasComponent<TagComponent>() == false)
+		if (!entity || !entity.HasComponent<IDComponent>() || !entity.HasComponent<TagComponent>())
 		{
-			if ((uint32_t)entity.m_EntityHandle != 0)
-			{
-				LK_CORE_DEBUG_TAG("SceneManagerPanel", "DrawEntityNode Failed for {}", entity.m_EntityHandle);
-				LK_CORE_DEBUG_TAG("SceneManagerPanel", "IDComponent: {}", entity.HasComponent<IDComponent>());
-				LK_CORE_DEBUG_TAG("SceneManagerPanel", "TagComponent: {}", entity.HasComponent<TagComponent>());
-				LK_CORE_DEBUG_TAG("SceneManagerPanel", "TransformComponent: {}", entity.HasComponent<TransformComponent>());
-				LK_CORE_DEBUG_TAG("SceneManagerPanel", "SpriteComponent: {}", entity.HasComponent<SpriteComponent>());
-			}
+			DumpAttachedComponents(entity);
 			return;
 		}
 

@@ -332,7 +332,6 @@ namespace LkEngine {
     void OpenGLRenderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID)
     {
         LK_CORE_ASSERT(texture, "Passed texture to DrawQuad was nullptr");
-
         if (m_QuadIndexCount >= m_MaxIndices)
             NextBatch();
 

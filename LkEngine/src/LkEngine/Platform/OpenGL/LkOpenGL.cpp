@@ -274,10 +274,7 @@ namespace LkEngine {
     {
 		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 		{
-			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
-			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture("wood-container");
-			PlaneTexture = TextureLibrary::Get()->GetTexture("metal-ground");
+			SetupTexturesAndShaders();
 			return;
 		}
 
@@ -323,10 +320,7 @@ namespace LkEngine {
     {
 		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 		{
-			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
-			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture("wood-container");
-			PlaneTexture = TextureLibrary::Get()->GetTexture("metal-ground");
+			SetupTexturesAndShaders();
 			return;
 		}
 
@@ -380,7 +374,8 @@ namespace LkEngine {
 	{
 		if (!CubeTexture)
 		{
-			CubeTexture = TextureLibrary::Get()->GetTexture("wood-container");
+			//CubeTexture = TextureLibrary::Get()->GetTexture("wood-container");
+			SetupTexturesAndShaders();
 			return;
 		}
 
@@ -450,10 +445,7 @@ namespace LkEngine {
 
 		if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 		{
-			ScreenShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Screen");
-			DebugShader  = Renderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-			CubeTexture = TextureLibrary::Get()->GetTexture("brickwall");
-			PlaneTexture = TextureLibrary::Get()->GetTexture("metal-ground");
+			SetupTexturesAndShaders();
 			return;
 		}
     }

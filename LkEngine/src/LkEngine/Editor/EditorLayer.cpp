@@ -107,9 +107,12 @@ namespace LkEngine {
 		auto viewportTab = m_TabManager->NewTab("Viewport", EditorTabType::Viewport, true);
 
 		// TODO: Parse config or cache to determine most recent project and go from there
+		// New project and/or setting the project to active triggers an event that 
+		// handles the redirection of input and physics 
 		m_Project = Project::CreateEmptyProject("Editor", true);
 		Project::SetActive(m_Project);
-		//SetScene(m_Project->m_Scene);
+
+		m_ViewportFramebuffer->Bind();
 	}
 
 	void EditorLayer::OnUpdate()
@@ -169,11 +172,11 @@ namespace LkEngine {
 		CheckLeftSidebarSize();
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
+			// TODO: just use m_Window here to access the render context
 			Ref<RenderContext> renderContext = Window::Get().GetRenderContext();
 			static bool blendingEnabled = renderContext->GetBlendingEnabled();
 			if (ImGui::Checkbox("Depth Testing", &blendingEnabled))
 			{
-				//renderContext->SetDepthEnabled(blendingEnabled);
 				m_Window->SetDepthEnabled(blendingEnabled);
 			}
 
@@ -266,7 +269,7 @@ namespace LkEngine {
 				static ImVec2 modeButtonSize = { 50.0f, 50.0f };
 				static ImVec4 modeButtonBgColor = { 0, 0, 0, 0 };
 				static ImVec4 modeButtonTintColor = { 1, 1, 1, 1 };
-				std::string textureName = "ale1024";
+				constexpr const char* textureName = "ale1024";
 				if (ImGui::ImageButton("##ModeButton-NormalMode", (void*)TextureLibrary::Get()->GetTexture(textureName)->GetRendererID(), modeButtonSize, ImVec2(1, 1), ImVec2(0, 0), modeButtonBgColor, modeButtonTintColor))
 				{
 					LK_CORE_DEBUG("Push tab");
@@ -1263,17 +1266,14 @@ namespace LkEngine {
 
 	Entity EditorLayer::CreateCube()
 	{
-		AssetHandle cubeHandle = AssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Cube.obj");
+		AssetHandle cubeHandle = AssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Cube.gltf");
 		Ref<Mesh> cubeMesh = AssetManager::GetAsset<Mesh>(cubeHandle);
-		LK_CORE_DEBUG_TAG("Editor", "Cube Handle: {}", cubeHandle);
 
-		LK_CORE_DEBUG_TAG("Editor", "Creating Cube");
 		Entity newCubeEntity = m_Scene->CreateEntity();
 
 		auto assetList = m_Scene->GetAssetList();
 		for (auto& assetHandle : assetList)
 		{
-			LK_CORE_DEBUG_TAG("Editor", "Iterating asset: {}", assetHandle);
 			Ref<Mesh> mesh = AssetManager::GetAsset<Mesh>(assetHandle);
 			if (mesh == cubeMesh)
 			{
@@ -1288,7 +1288,6 @@ namespace LkEngine {
 						{
 							m_Scene->CopyComponentIfExists<MeshComponent>(newCubeEntity, m_Scene->m_Registry, entity);
 							m_Scene->CopyComponentIfExists<TagComponent>(newCubeEntity, m_Scene->m_Registry, entity);
-
 							LK_CORE_VERIFY(newCubeEntity.HasComponent<MeshComponent>() && newCubeEntity.HasComponent<TagComponent>());
 						}
 					}

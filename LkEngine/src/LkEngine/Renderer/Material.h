@@ -58,8 +58,8 @@ namespace LkEngine {
 		virtual glm::mat4& GetMatrix4(const std::string& name) = 0;
 
 		virtual void SetTexture(Ref<Texture> texture) = 0;
-		virtual Ref<Texture2D> GetTexture(const std::string& name) = 0;
-		virtual Ref<Texture2D> TryGetTexture(const std::string& name) = 0;
+		virtual Ref<Texture2D> GetTexture(const std::string& name = "") = 0;
+		virtual Ref<Texture2D> TryGetTexture(const std::string& name = "") = 0;
 		virtual Ref<TextureCube> GetTextureCube(const std::string& name) = 0;
 		virtual Ref<TextureCube> TryGetTextureCube(const std::string& name) = 0;
 

@@ -1,22 +1,29 @@
 #include "LKpch.h"
-#include "LkEngine/Input/Mouse.h"
-#include "LkEngine/Renderer/GraphicsContext.h"
-#include "LkEngine/UI/DockSpace.h"
+#include "Mouse.h"
+
+#include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
+
+#include "LkEngine/Renderer/RenderContext.h"
+
 #include "LkEngine/Editor/EditorLayer.h"
 
 
 namespace LkEngine {
 
+	static bool Initialized = false;
+
 	void Mouse::Init()
 	{
-		if (m_ActiveWindow == nullptr)
-			m_ActiveWindow = Window::Get();
+		if (Initialized)
+			return;
+
+		Initialized = true;
 	}
 
-	bool Mouse::IsButtonPressed(MouseCode button)
+	bool Mouse::IsButtonPressed(MouseButton button)
 	{
-		GLFWwindow* window = GraphicsContext::Get()->GetGlfwWindow();
+		GLFWwindow* window = Window::Get().GetGlfwWindow();
 		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
 		return state == GLFW_PRESS;
 	}
@@ -24,14 +31,15 @@ namespace LkEngine {
 	glm::vec2 Mouse::GetPos()
 	{
 		double xpos, ypos;
-		glfwGetCursorPos(GraphicsContext::Get()->GetGlfwWindow(), &xpos, &ypos);
+		//glfwGetCursorPos(RenderContext::Get()->GetGlfwWindow(), &xpos, &ypos);
+		glfwGetCursorPos(Window::Get().GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
 		Pos.x = x;
 		Pos.y = y;
 
-		Mouse::CenterPos.x = (x / m_ActiveWindow->GetWidth()) * 2.0f - 1.0f;
-		Mouse::CenterPos.y = ((y / m_ActiveWindow->GetHeight()) * 2.0f - 1.0f) * -1.0f; 
+		Mouse::CenterPos.x = (x / Window::Get().GetWidth()) * 2.0f - 1.0f;
+		Mouse::CenterPos.y = ((y / Window::Get().GetHeight()) * 2.0f - 1.0f) * -1.0f;
 
 		return Pos;
 	}
@@ -39,7 +47,7 @@ namespace LkEngine {
 	glm::vec2 Mouse::GetRawPos()
 	{
 		double xpos, ypos;
-		glfwGetCursorPos(m_ActiveWindow->GetGlfwWindow(), &xpos, &ypos);
+		glfwGetCursorPos(Window::Get().GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
 		return { x, y };
@@ -72,41 +80,70 @@ namespace LkEngine {
 	// position when it is being run because of the editor docking windows
 	glm::vec2 Mouse::GetCenterPos() 
 	{ 
-		CenterPos.x = (Pos.x / m_ActiveWindow->GetWidth()) * 2.0f - 1.0f;
-		CenterPos.y = ((Pos.y / m_ActiveWindow->GetHeight()) * 2.0f - 1.0f) * 1.0f;
-		ScaledCenterPos.x = (CenterPos.x * m_ActiveWindow->GetWidth()) / m_ActiveWindow->GetScalerX();
-		ScaledCenterPos.y = (CenterPos.y * m_ActiveWindow->GetHeight()) / m_ActiveWindow->GetScalerY();
+		CenterPos.x = (Pos.x / Window::Get().GetWidth()) * 2.0f - 1.0f;
+		CenterPos.y = ((Pos.y / Window::Get().GetHeight()) * 2.0f - 1.0f) * 1.0f;
+		ScaledCenterPos.x = (CenterPos.x * Window::Get().GetWidth()) / Window::Get().GetScalerX();
+		ScaledCenterPos.y = (CenterPos.y * Window::Get().GetHeight()) / Window::Get().GetScalerY();
 		return CenterPos;
 	}
 
 	glm::vec2 Mouse::GetScaledPos()
 	{
-		Mouse::ScaledPos.x = (Pos.x) / m_ActiveWindow->GetScalerX();
-		Mouse::ScaledPos.y = (Pos.y) / m_ActiveWindow->GetScalerY();
-		//Mouse::ScaledPos.x = GetMouseX() / m_ActiveWindow->GetScalerX();
-		//Mouse::ScaledPos.y = GetMouseY() / m_ActiveWindow->GetScalerY();
 		return ScaledPos;
 	}
 
 	glm::vec2 Mouse::GetScaledCenterPos()
 	{
-		GetCenterPos(); // GetCenterPos updates ScaledCenterPos
 		return ScaledCenterPos;
 	}
 
-	glm::vec2 Mouse::GetMousePosNormalized()
+	//void Mouse::SetActiveWindow(Window* window)
+	//{
+	//	m_ActiveWindow = window;
+	//}
+
+	bool Mouse::IsButtonDown(MouseButton button)
 	{
-		glm::vec2 mouse_pos = GetPos();
-		float window_width = DockSpace::CenterWindowSize.x;
-		float window_height = DockSpace::CenterWindowSize.y;
-		double norm_mouse_x = mouse_pos.x / window_width;
-		double norm_mouse_y = 1.0 - (mouse_pos.y / window_height);
-		return { norm_mouse_x, norm_mouse_y };
+		bool imguiEnabled = Application::Get()->GetSpecification().ImGuiEnabled;
+		if (imguiEnabled == false)
+		{
+			auto& window = Application::Get()->GetWindow();
+			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(window.GetGlfwWindow()), static_cast<int32_t>(button));
+			return state == GLFW_PRESS;
+		}
+
+		ImGuiContext* context = ImGui::GetCurrentContext();
+		bool pressed = false;
+		for (ImGuiViewport* viewport : context->Viewports)
+		{
+			if (!viewport->PlatformUserData)
+				continue;
+
+			// The first member is GLFWwindow handle
+			GLFWwindow* windowHandle = *(GLFWwindow**)viewport->PlatformUserData; 
+			if (!windowHandle)
+				continue;
+
+			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(windowHandle), static_cast<int32_t>(button));
+			if (state == GLFW_PRESS || state == GLFW_REPEAT)
+			{
+				pressed = true;
+				break;
+			}
+		}
+		return pressed;
 	}
 
-	void Mouse::SetActiveWindow(Window* window)
+	void Mouse::Enable()
 	{
-		m_ActiveWindow = window;
+		Input::SetCursorMode(CursorMode::Normal);
+		UI::SetInputEnabled(true);
+	}
+
+	void Mouse::Disable()
+	{
+		Input::SetCursorMode(CursorMode::Locked);
+		UI::SetInputEnabled(false);
 	}
 
 }

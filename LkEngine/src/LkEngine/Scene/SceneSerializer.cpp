@@ -72,16 +72,16 @@ namespace LkEngine {
 			out << YAML::EndMap; // SpriteComponent
 		}
 
-		if (entity.HasComponent<MaterialComponent>())
-		{
-			out << YAML::Key << "MaterialComponent";
-			out << YAML::BeginMap; // MaterialComponent
+		//if (entity.HasComponent<MaterialComponent>())
+		//{
+		//	out << YAML::Key << "MaterialComponent";
+		//	out << YAML::BeginMap; // MaterialComponent
 
-			auto& material = entity.GetComponent<MaterialComponent>();
-			out << YAML::Key << "TextureName" << YAML::Value << material.GetTexture()->GetName();
+		//	auto& material = entity.GetComponent<MaterialComponent>();
+		//	out << YAML::Key << "TextureName" << YAML::Value << material.GetTexture()->GetName();
 
-			out << YAML::EndMap; // SpriteComponent
-		}
+		//	out << YAML::EndMap; // SpriteComponent
+		//}
 
 		if (entity.HasComponent<CameraComponent>())
 		{
@@ -292,13 +292,13 @@ namespace LkEngine {
 				sprite.Color = spriteComponent["Color"].as<glm::vec4>(glm::vec4(0.0f));
 			}
 
-			auto materialComponent = entity["MaterialComponent"];
-			if (materialComponent)
-			{
-				MaterialComponent& mc = deserializedEntity.AddComponent<MaterialComponent>();
-				mc.m_Material->SetTexture(TextureLibrary::Get()->GetTexture2D(materialComponent["TextureName"].as<std::string>()));
-				LK_CORE_DEBUG_TAG("SceneSerializer", "Deserialized material component, set texture to \"{}\"", mc.m_Material->GetTextureName());
-			}
+			//auto materialComponent = entity["MaterialComponent"];
+			//if (materialComponent)
+			//{
+			//	MaterialComponent& mc = deserializedEntity.AddComponent<MaterialComponent>();
+			//	mc.m_Material->SetTexture(TextureLibrary::Get()->GetTexture2D(materialComponent["TextureName"].as<std::string>()));
+			//	LK_CORE_DEBUG_TAG("SceneSerializer", "Deserialized material component, set texture to \"{}\"", mc.m_Material->GetTextureName());
+			//}
 
 			auto cameraComponent = entity["CameraComponent"];
 			if (cameraComponent)

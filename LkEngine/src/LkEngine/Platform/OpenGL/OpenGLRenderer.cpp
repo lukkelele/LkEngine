@@ -74,8 +74,21 @@ namespace LkEngine {
 		m_Renderer2D->Init();
 
 		m_RenderContext->SetDepthEnabled(true);
-
 		SetPrimitiveTopology(RenderTopology::Triangles);
+
+
+		// Render Passes
+		{
+			// Geometric
+			RenderPassSpecification renderPassSpec;
+			renderPassSpec.DebugName = "OpenGL_GeometricRenderPass";
+			m_GeometricPass = Ref<OpenGLRenderPass>::Create(renderPassSpec);
+
+			// 2D
+			renderPassSpec.DebugName = "OpenGL_Renderer2DRenderPass";
+			m_RenderPass2D = Ref<OpenGLRenderPass>::Create(renderPassSpec);
+		}
+
 
 		// Setup debugging stuff
 		SetupTexturesAndShaders();
@@ -90,7 +103,7 @@ namespace LkEngine {
 
     void OpenGLRenderer::Shutdown()
     {
-		m_RenderPass->Terminate();
+		m_GeometricPass->Terminate();
     }
 
     void OpenGLRenderer::BeginFrame()
@@ -108,7 +121,7 @@ namespace LkEngine {
 		glClearColor(Renderer::ClearColor.r, Renderer::ClearColor.g, Renderer::ClearColor.b, Renderer::ClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		auto& viewportFramebuffer = *Renderer::GetViewportFramebuffer();
+		Framebuffer& viewportFramebuffer = *Renderer::GetViewportFramebuffer();
 		viewportFramebuffer.Bind();
 		viewportFramebuffer.Clear();
 		viewportFramebuffer.Unbind();
@@ -116,6 +129,7 @@ namespace LkEngine {
 
 	void OpenGLRenderer::SetPrimitiveTopology(const RenderTopology& mode)
 	{
+		// No need to call RenderContext here as the topology is used for draw calls
 		switch (mode)
 		{
 			case RenderTopology::Lines:

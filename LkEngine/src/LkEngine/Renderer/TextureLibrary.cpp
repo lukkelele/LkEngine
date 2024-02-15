@@ -117,9 +117,22 @@ namespace LkEngine {
             textureSpec.Name = "brickwall";
             textureSpec.DebugName = "brickwall";
             textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
+            textureSpec.SamplerWrap = TextureWrap::Clamp;
+            textureSpec.SamplerFilter = TextureFilter::Nearest;
 			AddTexture(textureSpec);
+
+			// Wood container
+			textureSpec.Format = ImageFormat::RGBA32F;
+			textureSpec.Width = 512;
+			textureSpec.Height = 512;
+			textureSpec.Path = "Assets/Textures/container.jpg";
+			textureSpec.Name = "wood-container_512x512";
+			textureSpec.DebugName = "wood-container_512x512";
+			textureSpec.SamplerWrap = TextureWrap::Clamp;
+			textureSpec.SamplerFilter = TextureFilter::Nearest;
+            textureSpec.GenerateMips = true;
+			AddTexture(textureSpec);
+
 		}
 		// Textures: 2048x2048 
 		{
@@ -132,7 +145,8 @@ namespace LkEngine {
 			textureSpec.Name = "wood-container";
 			textureSpec.DebugName = "wood-container";
 			textureSpec.SamplerWrap = TextureWrap::Clamp;
-			textureSpec.SamplerFilter = TextureFilter::Nearest;
+			textureSpec.SamplerFilter = TextureFilter::Linear;
+            textureSpec.GenerateMips = true;
 			AddTexture(textureSpec);
 
 			// Wood container 2
@@ -148,6 +162,7 @@ namespace LkEngine {
 			AddTexture(textureSpec);
 
 			// Åle texture
+			textureSpec.Format = ImageFormat::RGBA32F;
 			textureSpec.Path = "Assets/Textures/Misc/ale_1024x1024.png";
 			textureSpec.Name = "ale1024";
 			textureSpec.DebugName = "ale1024";
@@ -157,7 +172,6 @@ namespace LkEngine {
 			textureSpec.Path = "Assets/Textures/Misc/lukas_1024.jpg";
 			textureSpec.Name = "lukas_1024";
 			textureSpec.DebugName = "lukas-1024x1024";
-			textureSpec.SamplerWrap = TextureWrap::Repeat;
 			AddTexture(textureSpec);
 
 			// Metal
@@ -174,8 +188,8 @@ namespace LkEngine {
             textureSpec.DebugName = "wood";
             textureSpec.Path = "Assets/Textures/wood.png";
             textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
+            textureSpec.SamplerWrap = TextureWrap::Clamp;
+            textureSpec.SamplerFilter = TextureFilter::Nearest;
 			AddTexture(textureSpec);
 
 			// Skybox
@@ -184,8 +198,8 @@ namespace LkEngine {
             textureSpec.Path = "Assets/Textures/Skybox/back.jpg";
             textureSpec.GenerateMips = false;
             textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
             textureSpec.SamplerWrap = TextureWrap::Clamp;
+            textureSpec.SamplerFilter = TextureFilter::Nearest;
 			AddTexture(textureSpec);
         }
 

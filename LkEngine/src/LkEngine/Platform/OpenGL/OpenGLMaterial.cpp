@@ -11,6 +11,7 @@ namespace LkEngine {
         , m_Name(name)
     {
 		Renderer::RegisterShaderDependency(m_Shader, this);
+        m_Texture = Renderer::GetWhiteTexture();
     }
 
    	OpenGLMaterial::OpenGLMaterial(Ref<Material> material, const std::string& name)
@@ -21,7 +22,14 @@ namespace LkEngine {
 		if (name.empty())
 			m_Name = material->GetName();
         
-        m_Texture = material->GetTexture("");
+        if (Ref<Texture2D> texture = material->GetTexture(""))
+        {
+            m_Texture = texture;
+        }
+        else
+        {
+            m_Texture = Renderer::GetWhiteTexture();
+        }
 
 		Ref<OpenGLMaterial> glMaterial = material.As<OpenGLMaterial>();
 		m_UniformStorageBuffer = Buffer::Copy(glMaterial->m_UniformStorageBuffer.Data, glMaterial->m_UniformStorageBuffer.Size);

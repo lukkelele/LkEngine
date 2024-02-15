@@ -13,8 +13,8 @@ namespace LkEngine {
 	class OpenGLTexture2D : public Texture2D
 	{
 	public:
-		OpenGLTexture2D(const TextureSpecification& specification); 
 		OpenGLTexture2D(const TextureSpecification& specification, Buffer imageData);
+		OpenGLTexture2D(const TextureSpecification& specification); 
 		~OpenGLTexture2D();
 
 		void SetData(void* data, uint32_t size) override;

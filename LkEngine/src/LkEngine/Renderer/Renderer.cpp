@@ -68,7 +68,7 @@ namespace LkEngine {
 		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen",  "Assets/Shaders/OpenGL/Renderer2D_Screen.shader");
 		Renderer::GetShaderLibrary()->Load("Renderer_Debug",     "Assets/Shaders/OpenGL/Renderer_Debug.shader");
 		Renderer::GetShaderLibrary()->Load("Renderer_Skybox",    "Assets/Shaders/OpenGL/Renderer_Skybox.shader");
-		Renderer::GetShaderLibrary()->Load("BasicModel",         "Assets/Shaders/OpenGL/Renderer_Model.shader");
+		Renderer::GetShaderLibrary()->Load("Renderer_Model",     "Assets/Shaders/OpenGL/Renderer_Model.shader");
 
 		Data->m_TextureLibrary = Ref<TextureLibrary>::Create();
 		Data->WhiteTexture = Data->m_TextureLibrary->GetWhiteTexture();
@@ -283,9 +283,16 @@ namespace LkEngine {
 		return Data->m_TextureLibrary;
 	}
 
-	Ref<Texture> Renderer::GetWhiteTexture()
+	Ref<Texture2D> Renderer::GetWhiteTexture()
 	{
-		return Data->m_TextureLibrary->GetWhiteTexture();
+		//return Data->m_TextureLibrary->GetWhiteTexture();
+		return Data->WhiteTexture;
+	}
+
+	Ref<TextureCube> Renderer::GetWhiteTextureCube()
+	{
+		LK_CORE_ASSERT(false, "Not implemented!");
+		return nullptr;
 	}
 
 	void Renderer::DrawMesh(Ref<Mesh>& mesh, const Ref<Shader> shader)
@@ -412,7 +419,6 @@ namespace LkEngine {
 			TextureLibrary::Get()->AddTexture(textureSpec);
         }
 	}
-
 
 	void Renderer::SetDepthFunction(const DepthFunction& depthFunc)
 	{
