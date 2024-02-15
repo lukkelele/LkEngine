@@ -121,14 +121,15 @@ namespace LkEngine {
                     model = glm::translate(model, tc.Translation);
 
                     Ref<Material> material = mesh->GetMaterial(0);
-                    Ref<Texture2D> materialTexture = material->GetTexture("wood-container");
+                    Ref<Texture2D> materialTexture = material->GetTexture();
 
                     Ref<Shader> matShader = material->GetShader();
 
-                    materialTexture->Bind();
                     matShader->Bind();
                     matShader->Set("u_Model", model);
                     matShader->Set("u_ViewProjectionMatrix", EditorLayer::Get()->GetEditorCamera()->GetViewProjectionMatrix());
+                    matShader->Set("u_Texture0", 0);
+                    materialTexture->Bind(0);
 
                     mesh->GetVertexBuffer()->Bind();
 		            glDrawElements(GL_TRIANGLES, mesh->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
@@ -136,22 +137,33 @@ namespace LkEngine {
             }
         }
 
-		Renderer::GetViewportFramebuffer()->Bind();
+		//Renderer::GetViewportFramebuffer()->Bind();
 
-        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-        SkyboxShader->Bind();
-        auto& camera = *EditorLayer::Get()->GetEditorCamera();
-        glm::mat4 viewMatrix = glm::mat4(glm::mat3(camera.GetViewMatrix())); // Make TextureCube follow us
-        glm::mat4 projectionMatrix = camera.GetProjectionMatrix();
-        SkyboxShader->Set("u_ViewProjectionMatrix", projectionMatrix * viewMatrix);
-        SkyboxShader->Set("u_CameraPos", EditorLayer::Get()->GetEditorCamera()->GetViewMatrix());
-        SkyboxShader->Set("u_Model", glm::mat4(30));
-        SkyboxVertexBuffer->Bind();
-        SkyboxTexture->Bind(0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glDepthFunc(GL_LESS); 
+        //glDepthFunc(GL_LEQUAL);  // Change depth function so depth test passes when values are equal to depth buffer's content
 
-        Framebuffer::TargetSwapChain();
+        Renderer::Submit([&]()
+        {
+            Renderer::SetDepthFunction(DepthFunction::LessOrEqual);
+
+            SkyboxShader->Bind();
+            auto& camera = *EditorLayer::Get()->GetEditorCamera();
+            glm::mat4 viewMatrix = glm::mat4(glm::mat3(camera.GetViewMatrix())); // Make TextureCube follow us
+            glm::mat4 projectionMatrix = camera.GetProjectionMatrix();
+
+            constexpr unsigned int SKYBOX_MODEL_SIZE = 100;
+
+            SkyboxShader->Set("u_ViewProjectionMatrix", projectionMatrix * viewMatrix);
+            SkyboxShader->Set("u_CameraPos", camera.GetViewMatrix());
+            SkyboxShader->Set("u_Model", glm::mat4(SKYBOX_MODEL_SIZE));
+            SkyboxVertexBuffer->Bind();
+            SkyboxTexture->Bind(0);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+
+            //glDepthFunc(GL_LESS); 
+            Renderer::SetDepthFunction(DepthFunction::Less);
+        });
+
+        //Framebuffer::TargetSwapChain();
 
 #if 0
         // Crysis Nanosuit
