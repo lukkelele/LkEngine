@@ -14,45 +14,47 @@
     - [LkEngine](#lkengine-development)
     - [LukkelEngine (old)](#lukkelengine-old)
 
+---
+
 ## About 
 
-When I began my first engine **LukkelEngine** I had lots to learn about graphics and engines (I still do),
+I began LkEngine as a project to learn more about C++ and graphics programming.<br>
+There was an earlier version of **LkEngine** called **LukkelEngine** but after putting the project
+on pause for about 8-9 months, I decided I wanted to start over.
 and because of this, lots of focus was aimed towards things such as 3D objects and rigid bodies.<br>
-This caused some flaws in the base design that I wasn't too happy with.<br>
-<br>
-That is why **LkEngine** will focus towards 2D in the beginning and when I feel as if the engine is ready I 
-will begin to implement 3D features.
-This is done to create a better base to expand on in the future.<br>
-<br>
-When the 2D implementation is done, the plan is to create a game such as **Super Mario** or **Pokémon** 
-(similar to a 'classical' Gameboy game).
 
 ## Setup and Installation
+**TODO**
 
-### Prerequisites
+### Dependencies
 - glfw3
 - Vulkan
 - OpenGL4
 - spdlog
 - ImGui
 - ImGuizmo
+- Assimp
+- yaml-cpp
 
-
-## Todo
+## Implemented Features / TODO
 <!---------------------- Checklist --------------------------->
 
-### 2D 
-:white_check_mark: Ortographic camera<br>
+### Features
+:white_check_mark: Window callbacks (resize, minimize) <br>
+:white_check_mark: Event system  <br>
+:white_check_mark: Camera system (in progress)<br>
 :white_check_mark: Sprite rendering<br>
+:white_check_mark: ECS (Entity Component System) (in progress) <br>
+:white_check_mark: Render submission system<br>
 :black_square_button: Collision system<br>
-:black_square_button: Grid creation<br>
-:white_check_mark: Raycasting <br>
-:black_square_button: Physics <br>
+:white_check_mark: 2D Physics and Raycasting <br>
+:black_square_button: 3D Physics and Raycasting <br>
+:white_check_mark: Asset manager (in progress) <br>
+:white_check_mark: Mesh loading (in progress) <br>
+:black_square_button: Renderer debugging tools (e.g drawing lines in world space) <br>
+:white_check_mark: Serialization (in progress) <br>
 
-### 3D
-:black_square_button: Raycasting <br>
-:black_square_button: Physics <br>
-:black_square_button: Rigidbody constraints <br>
+... and more to come
 
 <!------------------------------------------------------------>
 
@@ -62,6 +64,35 @@ When the 2D implementation is done, the plan is to create a game such as **Super
 # Development
 
 ## LkEngine Development
+
+### February 15, 2024
+Last couple of weeks has mostly been work on assets and asset loading. <br>
+Some nice improvements can be seen though, especially with the cubemap.
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-2024-02-15_1.png" width=740 height=440>
+	<p align="center">
+</div>
+
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-2024-02-15_2.png" width=740 height=440>
+	<p align="center">
+</div>
+
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-2024-02-15_3.png" width=740 height=440>
+	<p align="center">
+</div>
+
+<br>
+
+### February 4, 2024
+<div align="center">
+	<img align="center" src="/doc/img/LkEngine-2024-02-04.png" width=740 height=440>
+	Faulty renderered mesh because of misaligned vertexbuffer and shader layout
+	<p align="center">
+</div>
+
+<br>
 
 ### January 28, 2024
 Some 3D rendering, the **Translate** and **Rotate** gizmo modes can be seen as well.
@@ -75,6 +106,7 @@ Some 3D rendering, the **Translate** and **Rotate** gizmo modes can be seen as w
 	<p align="center">
 </div>
 
+<br>
 
 ### January 1, 2024
 The current look of the engine. Lots to polish. The creation of scene entities through the UI is what's focused for now. 
