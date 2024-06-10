@@ -39,10 +39,41 @@
 **/.vs
 **/CMakeFiles
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+# Ignore docs for now
+**/docs
+=======
+<<<<<<< HEAD
+>>>>>>> 1340a63 (Update gitignore)
 External/**/examples
 External/**/tests
 External/**/docs
 External/**/Makefile
+<<<<<<< HEAD
+=======
+=======
+# Ignore docs for now
+**/docs/
+>>>>>>> 514e21c (Update gitignore)
+**/docs/*.css
+**/docs/*.scss
+**/docs/*.html
+**/docs/*.dox
+**/docs/*.dox
+# Ignore GLFW examples and tests
+<<<<<<< HEAD
+**/GLFW/examples
+**/GLFW/examples
+**/glfw/tests
+**/glfw/tests
+=======
+**/glfw/tests
+**/glfw/tests
+>>>>>>> dc3b817 (Update gitignore)
+>>>>>>> 514e21c (Update gitignore)
+>>>>>>> 1340a63 (Update gitignore)
 
 **/bin
 **/*bin-int*
@@ -58,8 +89,14 @@ External/**/Makefile
 **/.idea
 **/*.swp
 
-# LkEngine Binaries and Object files 
-**/Binaries
-**/Binaries-Int
-**/Intermediate
+# LkEngine Binaries and Object files
+Binaries
+Binaries-Int
+Intermediate
 
+**/*.tlog
+
+!**/*.c
+!**/*.h
+!**/*.cpp
+!**/*.hpp
