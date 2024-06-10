@@ -39,40 +39,19 @@
 **/.vs
 **/CMakeFiles
 
-<<<<<<< HEAD
-# Ignore docs for now
-**/docs
-=======
-<<<<<<< HEAD
-External/**/examples
-External/**/tests
-External/**/docs
-External/**/Makefile
-=======
-# Ignore docs for now
-**/docs/
->>>>>>> 514e21c (Update gitignore)
 **/docs/*.css
 **/docs/*.scss
 **/docs/*.html
 **/docs/*.dox
 **/docs/*.dox
+
 # Ignore GLFW examples and tests
-<<<<<<< HEAD
-**/GLFW/examples
-**/GLFW/examples
+**/glfw/examples
 **/glfw/tests
-**/glfw/tests
-=======
-**/glfw/tests
-**/glfw/tests
->>>>>>> dc3b817 (Update gitignore)
->>>>>>> 514e21c (Update gitignore)
 
 **/bin
 **/*bin-int*
 **/out
-**/out/*
 **/build*
 **/*build*
 **/*.vcxproj*
