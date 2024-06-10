@@ -6,15 +6,18 @@
 *.lo
 *.o
 *.obj
+**/*.obj
 
 # Precompiled Headers
 *.gch
 *.pch
+**/*.pch
 
 # Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
+**/*.dll
 
 # Fortran module files
 *.mod
@@ -44,8 +47,10 @@
 **/docs/*.dox
 **/docs/*.dox
 # Ignore GLFW examples and tests
-lib/GLFW/examples
-lib/GLFW/tests
+**/GLFW/examples
+**/GLFW/examples
+**/glfw/tests
+**/glfw/tests
 
 **/bin
 **/*bin-int*
@@ -55,11 +60,15 @@ lib/GLFW/tests
 **/*build*
 **/*.vcxproj*
 
-*.sln
-lib/*.sln
 **/*.sln
 **/*.ini
-*/*.ini
-
 
 **/*.log
+**/.idea
+**/*.swp
+
+# LkEngine Binaries and Object files
+**/Binaries
+**/Binaries-Int
+**/Intermediate
+
