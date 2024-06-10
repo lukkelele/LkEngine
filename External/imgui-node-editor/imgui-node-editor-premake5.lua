@@ -1,10 +1,11 @@
 project "imgui-node-editor"
 	kind "StaticLib"
 	language "C++"
-    cppdialect "C++17"
+   	cppdialect "C++17"
+	staticruntime "On"
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir (TargetDirectory)
+	objdir (IntermediateDirectory)
 
     defines { "IMGUI_DEFINE_MATH_OPERATORS" }
 
@@ -23,11 +24,10 @@ project "imgui-node-editor"
 		"crude_json.cpp",
 	}
 
-    includedirs
-    {
-		"${wks.location}/external/imgui",
-		"../imgui"
-    }
+    	includedirs
+    	{
+		"%{ExternalDirectory}/imgui",
+    	}
 
 	filter "system:windows"
 		systemversion "latest"
@@ -37,16 +37,13 @@ project "imgui-node-editor"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "LK_DEBUG"
 		runtime "Debug"
-		symbols "on"
+		symbols "On"
 
 	filter "configurations:Release"
-		defines "LK_RELEASE"
 		runtime "Release"
-		optimize "on"
+		optimize "On"
 
 	filter "configurations:Dist"
-		defines "LK_DIST"
 		runtime "Release"
-		optimize "on"
+		optimize "On"

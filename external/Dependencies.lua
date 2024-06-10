@@ -1,8 +1,8 @@
---|===========================================================
+--|//////////////////////////////////////////////////////////|
 --| LkEngine 
 --|
 --| Dependencies
---|===========================================================
+--|//////////////////////////////////////////////////////////|
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
@@ -16,89 +16,89 @@ Dependencies = {
 		Linux =  {
 			LibName = "vulkan",
 			IncludeDir = "%{VULKAN_SDK}/include/",
-			LibDir = "%{VULKAN_SDK}/external/",
+			LibDir = "%{VULKAN_SDK}/External/",
 		},
 	},
 
 	Glfw = {
-        IncludeDir = "%{wks.location}/external/glfw/include",
-		LibDir = "%{wks.location}/external/glfw/lib",
+        IncludeDir = "%{wks.location}/External/glfw/include",
+		LibDir = "%{wks.location}/External/glfw/lib",
 	},
 
 	ImGui = {
-        IncludeDir = "%{wks.location}/external/imgui",
+        IncludeDir = "%{wks.location}/External/imgui",
 	},
 
 	Glad = {
-        IncludeDir = "%{wks.location}/external/glad/include",
+        IncludeDir = "%{wks.location}/External/glad/include",
 	},
 
 	Box2D = {
 		LibName = "box2d",
-		IncludeDir = "%{wks.location}/external/box2d/include",
+		IncludeDir = "%{wks.location}/External/box2d/include",
 	},
 
 	Spdlog = {
-		IncludeDir = "%{wks.location}/external/spdlog/",
+		IncludeDir = "%{wks.location}/External/spdlog/",
 	},
 
 	StbImage = {
-		IncludeDir = "%{wks.location}/external/",
+		IncludeDir = "%{wks.location}/External/",
 	},
 
 	ImGuizmo = {
-		IncludeDir = "%{wks.location}/external/ImGuizmo/",
+		IncludeDir = "%{wks.location}/External/ImGuizmo/",
 	},
 
 	ImGuiNodeEditor = {
-		IncludeDir = "%{wks.location}/external/imgui-node-editor",
+		IncludeDir = "%{wks.location}/External/imgui-node-editor",
 	},
 
 	VulkanMemoryAllocator = {
-		IncludeDir = "%{wks.location}/external/VulkanMemoryAllocator",
+		IncludeDir = "%{wks.location}/External/VulkanMemoryAllocator",
 	},
 
 	YamlCPP = {
-        IncludeDir = "%{wks.location}/external/yaml-cpp/include",
-        LibDir = "%{wks.location}/external/yaml-cpp/lib",
+        IncludeDir = "%{wks.location}/External/yaml-cpp/include",
+        LibDir = "%{wks.location}/External/yaml-cpp/lib",
 	},
 	
 	Glm = {
-        IncludeDir = "%{wks.location}/external/glm"
+        IncludeDir = "%{wks.location}/External/glm"
 	},
 
 	Assimp = {
-        IncludeDir = "%{wks.location}/external/assimp/include",
+        IncludeDir = "%{wks.location}/External/assimp/include",
 		Windows = { 
 			LibName = "assimp-vc143-mt", 
 			DebugLibName = "assimp-vc143-mtd", 
-			LibDir = "%{wks.location}/external/assimp/bin/windows/%{cfg.buildcfg}/" 
+			LibDir = "%{wks.location}/External/assimp/bin/windows/%{cfg.buildcfg}/" 
 		},
 		Linux = { 
 			LibName = "assimp", 
-			LibDir = "%{wks.location}/external/assimp/bin/linux/" 
+			LibDir = "%{wks.location}/External/assimp/bin/linux/" 
 		},
 		Configurations = "Debug,Release"
 	},
 
 	Entt = {
-        IncludeDir = "%{wks.location}/external/entt/include"
+        IncludeDir = "%{wks.location}/External/entt/include"
 	},
 
 	Choc = {
-        IncludeDir = "%{wks.location}/external/choc"
+        IncludeDir = "%{wks.location}/External/choc"
 	},
 
 }
 
 
-include "external/glfw/premake5.lua"
-include "external/glad/premake5.lua"
-include "external/imgui/premake5.lua"
-include "external/ImGuizmo/premake5.lua"
-include "external/imgui-node-editor/premake5.lua"
-include "external/box2d/premake5.lua"
-include "external/yaml-cpp/premake5.lua"
+include "External/glfw/glfw-premake5.lua"
+include "External/glad/glad-premake5.lua"
+include "External/imgui/imgui-premake5.lua"
+include "External/ImGuizmo/ImGuizmo-premake5.lua"
+include "External/imgui-node-editor/imgui-node-editor-premake5.lua"
+include "External/box2d/box2d-premake5.lua"
+include "External/yaml-cpp/yaml-cpp-premake5.lua"
 
-include "LkApplication/premake5.lua"
+include "LkApplication/LkApplication.lua"
 

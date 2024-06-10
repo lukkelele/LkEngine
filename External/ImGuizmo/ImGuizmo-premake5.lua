@@ -1,14 +1,15 @@
 project "ImGuizmo"
    kind "StaticLib"
-	language "C++"
+   language "C++"
    cppdialect "C++17"
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir (TargetDirectory)
+	objdir (IntermediateDirectory)
 
    defines { "IMGUI_DEFINE_MATH_OPERATORS" }
 
-	files {
+	files
+   {
       "ImGuizmo.h",
       "ImGuizmo.cpp",
       "ImGradient.h",
@@ -22,9 +23,7 @@ project "ImGuizmo"
       "GraphEditor.cpp",
 	}
 
-   includedirs {
-      "../imgui"
-   }
+   includedirs { "../imgui" }
 
 	filter "system:windows"
 		systemversion "latest"
