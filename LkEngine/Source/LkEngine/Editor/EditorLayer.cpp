@@ -383,6 +383,27 @@ namespace LkEngine {
 				WindowsHaveChangedInSize = true;
 			LastBottomBarPos = ImGui::GetWindowPos();
 			LastBottomBarSize = windowSize;
+
+			//=================== TEMPORARY TESTING ============================
+
+			//if (ImGui::Button("Open a texture"))
+			//{
+			//    ifd::FileDialog::Instance().Open("TextureOpenDialog", "Open a texture", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga){.png,.jpg,.jpeg,.bmp,.tga},.*");
+			//}
+
+#if 0
+			if (ifd::FileDialog::Instance().IsDone("TextureOpenDialog")) 
+			{
+			    if (ifd::FileDialog::Instance().HasResult()) 
+			    {
+			    	//std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+			    	auto res = ifd::FileDialog::Instance().GetResult().u8string();
+			    	printf("OPEN[%s]\n", res.c_str());
+			    }
+			    ifd::FileDialog::Instance().Close(); 
+			}
+#endif
+			//=================== TEMPORARY TESTING ============================
 		}
 		ImGui::End();
 

@@ -173,9 +173,20 @@ namespace LkEngine {
 	
 	void Window::Shutdown()
 	{
-        m_RenderContext->Destroy();
-		glfwDestroyWindow(m_GlfwWindow);
-		glfwTerminate();
+		if (m_RenderContext)
+		{
+			m_RenderContext->Destroy();
+			m_RenderContext->~RenderContext();
+			m_RenderContext = nullptr;
+		}
+		if (m_GlfwWindow)
+		{
+			glfwDestroyWindow(m_GlfwWindow);
+			glfwTerminate();
+
+			delete m_GlfwWindow;
+			m_GlfwWindow = nullptr;
+		}
 	}
 	
 	void Window::SetVSync(bool enabled)
@@ -187,25 +198,10 @@ namespace LkEngine {
 			glfwSwapInterval(0);
 	}
 
-	glm::vec2 Window::GetPos() const
-	{
-		return m_Pos; 
-	}
-
-	glm::vec2 Window::GetSize() const
-	{
-		return glm::vec2(m_Width, m_Height);
-	}
-
 	void Window::SetSize(const glm::vec2& size)
 	{
 		m_Width = size.x;
 		m_Height = size.y;
-	}
-
-	glm::vec2 Window::GetViewportSize() const
-	{
-		return { m_ViewportWidth, m_ViewportHeight };
 	}
 
     void Window::SetWidth(uint32_t width) 

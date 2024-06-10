@@ -105,7 +105,8 @@ namespace LkEngine {
             if (stop < 0) 
                 stop = static_cast<int>(m_Length) + stop;
 
-            LK_ASSERT((start > stop || start < 0 || stop > static_cast<int>(m_Length)), "String::Slice, invalid slice range ({}, {}) with length={}", start, stop, m_Length)
+            LK_ASSERT((start > stop || start < 0 || stop > static_cast<int>(m_Length)), 
+                "String::Slice, invalid slice range ({}, {}) with length={}", start, stop, m_Length)
         
             size_t newLength = static_cast<size_t>(stop) - start;
             wchar_t* sliceData = new wchar_t[newLength + 1];

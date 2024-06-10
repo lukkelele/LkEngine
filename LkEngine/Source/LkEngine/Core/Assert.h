@@ -22,8 +22,8 @@
 #ifdef LK_ENABLE_ASSERTS
 	// Internal helpers, do not use directly
 	#if defined(LK_COMPILER_CLANG) || defined(LK_VARIADIC_OPT_DISABLED)
-		#define LK_CORE_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Core, "Assertion Failed", ##__VA_ARGS__)
-		#define LK_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Client, "Assertion Failed", ##__VA_ARGS__)
+		#define LK_CORE_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::EType::Core, "Assertion Failed", ##__VA_ARGS__)
+		#define LK_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::EType::Client, "Assertion Failed", ##__VA_ARGS__)
 	#else
 		#define LK_CORE_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Core, "Assertion Failed" __VA_OPT__(,) __VA_ARGS__)
 		#define LK_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Client, "Assertion Failed" __VA_OPT__(,) __VA_ARGS__)
@@ -43,8 +43,8 @@
 #ifdef LK_ENABLE_VERIFY
 	// Internal helpers, do not use directly
 	#if defined(LK_COMPILER_CLANG) || defined(LK_VARIADIC_OPT_DISABLED)
-		#define LK_CORE_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Core, "Verify Failed", ##__VA_ARGS__)
-		#define LK_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Client, "Verify Failed", ##__VA_ARGS__)
+		#define LK_CORE_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::EType::Core, "Verify Failed", ##__VA_ARGS__)
+		#define LK_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::EType::Client, "Verify Failed", ##__VA_ARGS__)
 	#else
 		#define LK_CORE_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Core, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
 		#define LK_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Client, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)

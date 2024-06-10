@@ -51,25 +51,25 @@ namespace LkEngine {
         inline uint32_t GetHeight() const { return m_Height; }
         inline uint32_t GetViewportWidth()  const { return m_ViewportWidth; }
         inline uint32_t GetViewportHeight() const { return m_ViewportHeight; }
-        glm::vec2 GetViewportSize() const;
-        glm::vec2 GetSize() const;
-        glm::vec2 GetPos() const;
+	    inline glm::vec2 GetPos() const { return m_Pos; }
+	    inline glm::vec2 GetSize() const { return glm::vec2(m_Width, m_Height); }
+		inline glm::vec2 GetViewportSize() const { return { m_ViewportWidth, m_ViewportHeight }; }
+        inline std::string GetTitle() const { return m_Title; }
+        inline std::string GetShaderVersion() const { return m_GlslVersion;  }
+
         void SetSize(const glm::vec2& size);
         void SetVSync(bool enabled);
-        bool IsVSyncEnabled() const { return m_VSync; }
-
-        std::string GetTitle() const { return m_Title; }
-        std::string GetShaderVersion() const { return m_GlslVersion;  }
+        inline bool IsVSyncEnabled() const { return m_VSync; }
 
         Ref<SwapChain> GetSwapChain();
         Ref<RenderPass> GetRenderPass();
-        Ref<RenderContext> GetRenderContext() { return m_RenderContext; }
+        inline Ref<RenderContext> GetRenderContext() { return m_RenderContext; }
 
         void SetWidth(uint32_t width); // { m_Width = width; }
         void SetHeight(uint32_t height); // { m_Height = height; }
-        void SetViewportWidth(uint32_t width) { m_ViewportWidth = width; }
-        void SetViewportHeight(uint32_t height) { m_ViewportHeight = height; }
-        void SetDepthEnabled(bool enabled) { m_RenderContext->SetDepthEnabled(enabled); }
+        inline void SetViewportWidth(uint32_t width) { m_ViewportWidth = width; }
+        inline void SetViewportHeight(uint32_t height) { m_ViewportHeight = height; }
+        inline void SetDepthEnabled(bool enabled) { m_RenderContext->SetDepthEnabled(enabled); }
 
         float GetScalerX() const;
         float GetScalerY() const;

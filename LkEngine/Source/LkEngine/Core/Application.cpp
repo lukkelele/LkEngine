@@ -193,7 +193,9 @@ namespace LkEngine {
         //if (m_Editor->IsEnabled()) m_Editor->OnImGuiRender();
 
         for (int i = 0; i < m_LayerStack.Size(); i++)
+        {
             m_LayerStack[i]->OnImGuiRender();
+        }
     }
 
     void Application::AddScene(Scene& scene)
