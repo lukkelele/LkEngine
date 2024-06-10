@@ -14,7 +14,7 @@
 
 namespace LkEngine {
 
-    class Window;
+    class LWindow;
 
     class ImGuiLayer : public RefCounted, public Layer
     {

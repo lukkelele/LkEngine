@@ -3,8 +3,10 @@
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 
-#include "Base.h"
-#include "ApplicationConfig.h"
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/String.h"
+#include "LkEngine/Core/ApplicationConfig.h"
 
 #include "LkEngine/Renderer/RenderContext.h"
 #include "LkEngine/Renderer/SwapChain.h"
@@ -13,63 +15,67 @@
 
 namespace LkEngine {
 
-	struct WindowSpecification
+	struct FWindowSpecification
 	{
-		std::string Title = "LkEngine";
+		//std::string Title = "LkEngine v2.0.1";
+        /// @TODO: Get version
+		LString Title = "LkEngine v2.0.1";
 		uint32_t Width = 1600;
 		uint32_t Height = 1080;
 		bool Decorated = true;
 		bool Fullscreen = false;
 		bool VSync = true;
         bool StartMaximized = false;
-		std::filesystem::path IconPath;
+        std::filesystem::path IconPath{};
 
-        WindowSpecification() = default;
-        WindowSpecification(const ApplicationSpecification& appSpecification)
-            : Title(appSpecification.Title)
-            , Width(appSpecification.Width)
-            , Height(appSpecification.Height)
-            , Fullscreen(appSpecification.Fullscreen)
+        FWindowSpecification() = default;
+        FWindowSpecification(const ApplicationSpecification& ApplicationSpec)
+            : Title(ApplicationSpec.Title)
+            , Width(ApplicationSpec.Width)
+            , Height(ApplicationSpec.Height)
+            , Fullscreen(ApplicationSpec.Fullscreen)
             , Decorated(true)
-            , VSync(appSpecification.VSync)
-            , StartMaximized(appSpecification.StartMaximized) {}
+            , VSync(ApplicationSpec.VSync)
+            , StartMaximized(ApplicationSpec.StartMaximized) 
+        {
+        }
 	};
 
-    class Window 
+    class LWindow : public LObject
     {
     public:
-        Window(const WindowSpecification& specification);
-        ~Window();
+        LWindow(const FWindowSpecification& WindowSpecification);
+        ~LWindow();
 
         void Init();
         void SwapBuffers();
         void ProcessEvents();
         void Shutdown();
 
-        GLFWwindow* GetGlfwWindow() const { return m_GlfwWindow; }
-        inline uint32_t GetWidth() const { return m_Width; }
-        inline uint32_t GetHeight() const { return m_Height; }
-        inline uint32_t GetViewportWidth()  const { return m_ViewportWidth; }
-        inline uint32_t GetViewportHeight() const { return m_ViewportHeight; }
-	    inline glm::vec2 GetPos() const { return m_Pos; }
-	    inline glm::vec2 GetSize() const { return glm::vec2(m_Width, m_Height); }
-		inline glm::vec2 GetViewportSize() const { return { m_ViewportWidth, m_ViewportHeight }; }
-        inline std::string GetTitle() const { return m_Title; }
-        inline std::string GetShaderVersion() const { return m_GlslVersion;  }
+        FORCEINLINE GLFWwindow* GetGlfwWindow() const { return m_GlfwWindow; }
+        FORCEINLINE uint32_t GetWidth() const { return m_Width; }
+        FORCEINLINE uint32_t GetHeight() const { return m_Height; }
+        FORCEINLINE uint32_t GetViewportWidth()  const { return m_ViewportWidth; }
+        FORCEINLINE uint32_t GetViewportHeight() const { return m_ViewportHeight; }
+	    FORCEINLINE glm::vec2 GetPos() const { return m_Pos; }
+	    FORCEINLINE glm::vec2 GetSize() const { return glm::vec2(m_Width, m_Height); }
+		FORCEINLINE glm::vec2 GetViewportSize() const { return { m_ViewportWidth, m_ViewportHeight }; }
+        FORCEINLINE std::string GetTitle() const { return m_Title; }
+        FORCEINLINE std::string GetShaderVersion() const { return m_GlslVersion;  }
+        FORCEINLINE bool IsVSyncEnabled() const { return m_VSync; }
+        FORCEINLINE void SetViewportWidth(uint32_t width) { m_ViewportWidth = width; }
+        FORCEINLINE void SetViewportHeight(uint32_t height) { m_ViewportHeight = height; }
+        FORCEINLINE void SetDepthEnabled(bool enabled) { m_RenderContext->SetDepthEnabled(enabled); }
+        FORCEINLINE Ref<RenderContext> GetRenderContext() { return m_RenderContext; }
 
         void SetSize(const glm::vec2& size);
         void SetVSync(bool enabled);
-        inline bool IsVSyncEnabled() const { return m_VSync; }
 
         Ref<SwapChain> GetSwapChain();
         Ref<RenderPass> GetRenderPass();
-        inline Ref<RenderContext> GetRenderContext() { return m_RenderContext; }
 
         void SetWidth(uint32_t width); // { m_Width = width; }
         void SetHeight(uint32_t height); // { m_Height = height; }
-        inline void SetViewportWidth(uint32_t width) { m_ViewportWidth = width; }
-        inline void SetViewportHeight(uint32_t height) { m_ViewportHeight = height; }
-        inline void SetDepthEnabled(bool enabled) { m_RenderContext->SetDepthEnabled(enabled); }
 
         float GetScalerX() const;
         float GetScalerY() const;
@@ -84,7 +90,7 @@ namespace LkEngine {
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
-        static Window& Get() { return *m_Instance; }
+        FORCEINLINE static LWindow& Get() { return *m_Instance; }
 
     private:
         std::string m_Title = "";
@@ -96,7 +102,7 @@ namespace LkEngine {
         std::string m_GlslVersion = "";
         bool m_VSync;
 
-        WindowSpecification m_Specification;
+        FWindowSpecification Specification;
 
         struct WindowData
         {
@@ -111,7 +117,7 @@ namespace LkEngine {
         Ref<SwapChain> m_SwapChain = nullptr;
         Ref<RenderContext> m_RenderContext = nullptr;
 
-        inline static Window* m_Instance = nullptr;
+        inline static LWindow* m_Instance = nullptr;
 
         friend class EditorLayer;
     };

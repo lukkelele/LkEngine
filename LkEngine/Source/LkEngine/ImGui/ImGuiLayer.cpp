@@ -9,14 +9,13 @@
 
 namespace LkEngine {
 
-	//s_ptr<ImGuiLayer> ImGuiLayer::Create()
 	Ref<ImGuiLayer> ImGuiLayer::Create()
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLImGuiLayer>::Create();
+			case ERendererAPI::OpenGL: return Ref<OpenGLImGuiLayer>::Create();
 			//case RendererAPIType::Vulkan: return Ref<VulkanImGuiLayer>::Create();
-			case RendererAPIType::None: return nullptr;
+			case ERendererAPI::None: return nullptr;
 		}
 	}
 

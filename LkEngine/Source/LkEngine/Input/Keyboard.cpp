@@ -13,16 +13,18 @@ namespace LkEngine {
 	void Keyboard::Init()
 	{
 		if (Initialized)
+		{
 			return;
+		}
 
 		Initialized = true;
 	}
 
-	bool Keyboard::IsKeyPressed(KeyCode key)
+	bool Keyboard::IsKeyPressed(const KeyCode key)
 	{
-		GLFWwindow* window = Application::Get()->GetWindow().GetGlfwWindow();
-		int keyState = glfwGetKey(window, static_cast<int32_t>(key));
-		return keyState == GLFW_PRESS;
+		GLFWwindow* GlfwWindow = LApplication::Get()->GetWindow().GetGlfwWindow();
+		const int KeyState = glfwGetKey(GlfwWindow, static_cast<int32_t>(key));
+		return KeyState == GLFW_PRESS;
 	}
 
 }

@@ -5,47 +5,58 @@
 
 namespace LkEngine {
 
-    class Window;
+    class LWindow;
     class OpenGLSwapChain;
 
     class OpenGLContext : public RenderContext
     {
     public:
-        OpenGLContext(Window* window);
+        OpenGLContext(LWindow* InWindowRef);
         ~OpenGLContext();
 
-        void Init(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) override;
+        void Init(const ESourceBlendFunction& InSourceBlendFunction, 
+                  const EDestinationBlendFunction& InDestinationBlendFunction) override;
         void Destroy() override;
+
         GLFWwindow* GetGlfwWindow() override { return m_GlfwWindow; }
 
         void SetViewport(const glm::vec2& pos, const glm::vec2& size) override;
         void UpdateResolution(uint16_t width, uint16_t height) override;
 
         void SetDepthEnabled(bool enabled) override;
-        void SetDepthFunction(const DepthFunction& depthFunc) override;
+        void SetDepthFunction(const EDepthFunction& depthFunc) override;
         void SetBlendingEnabled(bool enabled) override;
-        void SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc) override;
-        void SetSourceBlendFunction(const SourceBlendFunction& srcFunc) override;
-        void SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc) override;
+        void SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
+                              const EDestinationBlendFunction& InDestinationBlendFunction) override;
+        void SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction) override;
+        void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction) override;
 
-        void SetName(std::string_view name) override { m_Name = std::string(name); }
+        FORCEINLINE void SetName(std::string_view InName) override 
+        { 
+            //m_Name = std::string(name); 
+            //m_Name = name.data();
+            m_Name = InName;
+        }
+
         const std::string GetName() const { return m_Name; }
         
         std::string GetCurrentSourceBlendFunctionName() const override;
         std::string GetCurrentDestinationBlendFunctionName() const override;
 
-        bool GetBlendingEnabled() const override { return m_BlendingEnabled; } 
+        bool GetBlendingEnabled() const override { return bBlendingEnabled; } 
 
     private:
         std::string m_GlslVersion = "";
-        bool m_DepthEnabled = true;
-        bool m_BlendingEnabled = true;
-        BlendFunction m_BlendFunction;
-        DepthFunction m_DepthFunction;
+
+        bool bDepthEnabled = true;
+        bool bBlendingEnabled = true;
+
+        FBlendFunction BlendFunction{};
+        EDepthFunction DepthFunction;
 
         std::string m_Name;
 
-        Window* m_Window;
+        LWindow* m_Window;
         GLFWwindow* m_GlfwWindow;
 
         Ref<OpenGLSwapChain> m_SwapChain;

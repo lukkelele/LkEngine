@@ -23,7 +23,7 @@ namespace LkEngine {
 		RendererID& GetRendererID() override { return m_RendererID; }
 
 		int GetTextureSlot() const override { return m_Specification.TextureSlot; }
-		const TextureArrayDimension& GetDimension() const override { return m_Specification.Dimension; }
+		const ETextureArrayDimension& GetDimension() const override { return m_Specification.TextureArrayDimension; }
 		const TextureArraySpecification& GetSpecification() const override { return m_Specification; }
 
 		int GetWidth() const override { return m_Width; }
@@ -78,40 +78,44 @@ namespace LkEngine {
 
 	namespace GLUtils {
 
-		static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const TextureArrayDimension& dimension)
+		static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const ETextureArrayDimension& TextureArrayDimension)
 		{
-			switch (dimension)
+			switch (TextureArrayDimension)
 			{
-				case TextureArrayDimension::Dimension_200x200:   return { 200, 200 };
-				case TextureArrayDimension::Dimension_512x512:   return { 512, 512 };
-				case TextureArrayDimension::Dimension_1024x1024: return { 1024, 1024 };
-				case TextureArrayDimension::Dimension_2048x2048: return { 2048, 2048 };
-				case TextureArrayDimension::Dimension_4096x4096: return { 4096, 4096 };
+				case ETextureArrayDimension::Dimension_200x200:   return { 200, 200 };
+				case ETextureArrayDimension::Dimension_512x512:   return { 512, 512 };
+				case ETextureArrayDimension::Dimension_1024x1024: return { 1024, 1024 };
+				case ETextureArrayDimension::Dimension_2048x2048: return { 2048, 2048 };
+				case ETextureArrayDimension::Dimension_4096x4096: return { 4096, 4096 };
 			}
 			LK_CORE_ASSERT(false, "Unknown OpenGLTextureArrayDimension");
 		}
 
-		static TextureArrayDimension DetermineDimension(int width, int height)
+		static ETextureArrayDimension DetermineDimension(int width, int height)
 		{
 			if (width != height)
+			{
 				height = width;
+			}
+
 			switch (width)
 			{
-				case 200:  return TextureArrayDimension::Dimension_200x200;
-				case 512:  return TextureArrayDimension::Dimension_512x512;
-				case 1024: return TextureArrayDimension::Dimension_1024x1024;
-				case 2048: return TextureArrayDimension::Dimension_2048x2048;
-				case 4096: return TextureArrayDimension::Dimension_4096x4096;
+				case 200:  return ETextureArrayDimension::Dimension_200x200;
+				case 512:  return ETextureArrayDimension::Dimension_512x512;
+				case 1024: return ETextureArrayDimension::Dimension_1024x1024;
+				case 2048: return ETextureArrayDimension::Dimension_2048x2048;
+				case 4096: return ETextureArrayDimension::Dimension_4096x4096;
 			}
+
 			LK_CORE_ASSERT(false, "Unknown dimension arguments, width={}  height={}", width, height);
 		}
 
-		static void GenerateTextureArrayImage(RendererID& rendererID, const TextureArraySpecification& specification)
+		static void GenerateTextureArrayImage(RendererID& rendererID, const TextureArraySpecification& Specification)
 		{
-			auto [width, height] = GLUtils::ConvertDimensionsToWidthAndHeight(specification.Dimension);
+			auto [Width, Height] = GLUtils::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
 			//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), width, height, specification.Layers, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), GL_UNSIGNED_BYTE, nullptr);
 			//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), width, height, specification.Layers, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), GL_UNSIGNED_BYTE, nullptr);
-			glTextureStorage3D(rendererID, specification.Layers, ImageFormatToGLDataFormat(specification.Format), width, height, 0);
+			glTextureStorage3D(rendererID, Specification.Layers, ImageFormatToGLDataFormat(Specification.Format), Width, Height, 0);
 		}
 
 	}

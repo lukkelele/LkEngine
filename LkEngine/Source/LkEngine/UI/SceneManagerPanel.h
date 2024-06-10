@@ -19,11 +19,11 @@ namespace LkEngine {
 		void OnRender() override;
 		void OnImGuiRender() override;
 
-		void DrawEntityNode(Entity entity);
-		static void DrawComponents(Entity entity);
+		void DrawEntityNode(LEntity entity);
+		static void DrawComponents(LEntity entity);
 
 		template<typename T, typename UIFunction>
-		static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction);
+		static void DrawComponent(const std::string& name, LEntity entity, UIFunction uiFunction);
 
 		template<typename T>
 		void DisplayAddComponentEntry(const std::string& entryName);
@@ -39,7 +39,7 @@ namespace LkEngine {
 		Ref<Scene> m_Scene;
 
 		Ref<Scene> m_ComponentCopyScene;
-		Entity m_ComponentCopyEntity;
+		LEntity m_ComponentCopyEntity;
 	};
 
 }

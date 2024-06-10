@@ -7,10 +7,10 @@
 
 namespace LkEngine {
 
-    enum class PhysicsAPIType
+    enum class EPhysicsAPI
     {
-        None = 0,
-        Bullet
+        Null = 0,
+        Bullet3, /* bullet3 */
     };
 
     class PhysicsSystem
@@ -20,17 +20,22 @@ namespace LkEngine {
         ~PhysicsSystem() = default;
 
         static PhysicsSystem* Get() { return m_Instance; }
-        static void SetPhysicsAPI(PhysicsAPIType physicsAPI);
 
         void Init();
-        void Simulate(Timestep ts);
-        PhysicsAPIType GetPhysicsAPIType() const { return m_PhysicsAPIType; }
-        Timestep GetStep() const { return m_Step; }
+        void Simulate(const FTimestep DeltaTime);
+
+        FORCEINLINE static EPhysicsAPI GetPhysicsAPI() { return PhysicsAPI; }
+
+        FORCEINLINE static void SetPhysicsAPI(EPhysicsAPI InPhysicsAPI) 
+        { 
+            PhysicsAPI = InPhysicsAPI; 
+        }
 
     private:
-        Timestep m_Step = (1.0f / 60);
+        FTimestep Timestep = (1.0f / 60.0f);
 
-        inline static PhysicsAPIType m_PhysicsAPIType;
+        inline static EPhysicsAPI PhysicsAPI = EPhysicsAPI::Null;
+
         inline static PhysicsSystem* m_Instance = nullptr;
     };
 

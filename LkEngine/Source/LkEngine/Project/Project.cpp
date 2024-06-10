@@ -87,10 +87,10 @@ namespace LkEngine {
 		Ref<Project> project = Ref<Project>::Create("UntitledProject");
 
 		LK_CORE_DEBUG_TAG("Project", "Creating platform entity");
-		Entity basePlatform = project->m_Scene->CreateEntity("Platform");
-		auto& sc = basePlatform.AddComponent<SpriteComponent>();
+		LEntity basePlatform = project->m_Scene->CreateEntity("Platform");
+		SpriteComponent& sc = basePlatform.AddComponent<SpriteComponent>();
 		//auto& mc = basePlatform.AddComponent<MaterialComponent>();
-		auto& cc = basePlatform.AddComponent<CameraComponent>();
+		CameraComponent& cc = basePlatform.AddComponent<CameraComponent>();
 		LK_CORE_DEBUG_TAG("Project", "Created transform, sprite, material and camera components for platform entity");
 
 		sc.SetSize(20, 20);
@@ -121,9 +121,9 @@ namespace LkEngine {
 		Ref<Project> project = Ref<Project>::Create("UntitledProject");
 
 		LK_CORE_DEBUG_TAG("Project", "Creating base entity");
-		Entity atteEntity = project->m_Scene->CreateEntity("Atte");
-		auto& sc = atteEntity.AddComponent<SpriteComponent>();
-		auto& cc = atteEntity.AddComponent<CameraComponent>();
+		LEntity atteEntity = project->m_Scene->CreateEntity("Atte");
+		SpriteComponent& sc = atteEntity.AddComponent<SpriteComponent>();
+		CameraComponent& cc = atteEntity.AddComponent<CameraComponent>();
 		LK_CORE_DEBUG_TAG("Project", "Created transform, sprite, material and camera components for base entity");
 
 		sc.SetSize(10, 10);

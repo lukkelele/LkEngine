@@ -11,9 +11,9 @@
 
 namespace LkEngine {
 
-	OpenGLContext::OpenGLContext(Window* window)
+	OpenGLContext::OpenGLContext(LWindow* InWindowRef)
     {
-		m_Window = window;
+		m_Window = InWindowRef;
 		m_GlfwWindow = m_Window->GetGlfwWindow();
 	}
 
@@ -25,7 +25,8 @@ namespace LkEngine {
     {
     }
 
-    void OpenGLContext::Init(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc)
+    void OpenGLContext::Init(const ESourceBlendFunction& InSourceBlendFunction, 
+		                     const EDestinationBlendFunction& InDestinationBlendFunction)
     {
 		GLenum err = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (err == 0)
@@ -39,7 +40,7 @@ namespace LkEngine {
 
 		SetBlendingEnabled(true);
 		SetDepthEnabled(false);
-		SetBlendFunction(srcFunc, dstFunc);
+		SetBlendFunction(InSourceBlendFunction, InDestinationBlendFunction);
     }
 
 	void OpenGLContext::SetViewport(const glm::vec2& pos, const glm::vec2& size)
@@ -49,40 +50,44 @@ namespace LkEngine {
 
 	void OpenGLContext::SetBlendingEnabled(bool enabled)
 	{
-		m_BlendingEnabled = enabled;
-		if (m_BlendingEnabled)
+		bBlendingEnabled = enabled;
+		if (bBlendingEnabled)
+		{
 			glEnable(GL_BLEND);
+		}
 		else
+		{
 			glDisable(GL_BLEND);
+		}
 	}
 
-	void OpenGLContext::SetDepthFunction(const DepthFunction& depthFunc)
+	void OpenGLContext::SetDepthFunction(const EDepthFunction& InDepthFunction)
 	{
-		m_DepthFunction = depthFunc;
-		switch (m_DepthFunction)
+		DepthFunction = InDepthFunction;
+		switch (DepthFunction)
 		{
-			case DepthFunction::Never:
+			case EDepthFunction::Never:
 				glDepthFunc(GL_NEVER);
 				break;
-			case DepthFunction::Less:
+			case EDepthFunction::Less:
 				glDepthFunc(GL_LESS);
 				break;
-			case DepthFunction::Equal:
+			case EDepthFunction::Equal:
 				glDepthFunc(GL_EQUAL);
 				break;
-			case DepthFunction::LessOrEqual:
+			case EDepthFunction::LessOrEqual:
 				glDepthFunc(GL_LEQUAL);
 				break;
-			case DepthFunction::Greater:
+			case EDepthFunction::Greater:
 				glDepthFunc(GL_GREATER);
 				break;
-			case DepthFunction::NotEqual:
+			case EDepthFunction::NotEqual:
 				glDepthFunc(GL_NOTEQUAL);
 				break;
-			case DepthFunction::GreaterOrEqual:
+			case EDepthFunction::GreaterOrEqual:
 				glDepthFunc(GL_GEQUAL);
 				break;
-			case DepthFunction::Always:
+			case EDepthFunction::Always:
 				glDepthFunc(GL_ALWAYS);
 				break;
 		}
@@ -100,8 +105,8 @@ namespace LkEngine {
 
 	void OpenGLContext::SetDepthEnabled(bool enabled)
 	{
-		m_DepthEnabled = enabled;
-		if (m_DepthEnabled)
+		bDepthEnabled = enabled;
+		if (bDepthEnabled)
 		{
 			glEnable(GL_DEPTH_TEST);
 			return;
@@ -109,37 +114,44 @@ namespace LkEngine {
 		glDisable(GL_DEPTH_TEST);
 	}
 
-	void OpenGLContext::SetBlendFunction(const SourceBlendFunction& srcFunc, const DestinationBlendFunction& dstFunc)
+	void OpenGLContext::SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
+		                                 const EDestinationBlendFunction& InDestinationBlendFunction)
 	{
-		LK_CORE_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(srcFunc));
-		LK_CORE_DEBUG("Setting destination blend function: {}", GetDestinationBlendFunctionName(dstFunc));
-		glBlendFunc(GLUtils::GetOpenGLSourceBlendFunction(srcFunc), GLUtils::GetOpenGLDestinationBlendFunction(dstFunc));
-		m_BlendFunction.Source = srcFunc;
-		m_BlendFunction.Destination = dstFunc;
+		LK_CORE_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(InSourceBlendFunction));
+		LK_CORE_DEBUG("Setting destination blend function: {}", GetDestinationBlendFunctionName(InDestinationBlendFunction));
+		glBlendFunc(GLUtils::GetOpenGLSourceBlendFunction(InSourceBlendFunction), GLUtils::GetOpenGLDestinationBlendFunction(InDestinationBlendFunction));
+		BlendFunction.Source = InSourceBlendFunction;
+		BlendFunction.Destination = InDestinationBlendFunction;
 	}
 
-	void OpenGLContext::SetSourceBlendFunction(const SourceBlendFunction& srcFunc)
+	void OpenGLContext::SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction)
 	{
-		m_BlendFunction.Source = srcFunc;
-		LK_CORE_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(srcFunc));
-		glBlendFunc(GLUtils::GetOpenGLSourceBlendFunction(m_BlendFunction.Source), GLUtils::GetOpenGLDestinationBlendFunction(m_BlendFunction.Destination));
+		BlendFunction.Source = InSourceBlendFunction;
+		LK_CORE_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(InSourceBlendFunction));
+		glBlendFunc(
+			GLUtils::GetOpenGLSourceBlendFunction(BlendFunction.Source), 
+			GLUtils::GetOpenGLDestinationBlendFunction(BlendFunction.Destination)
+		);
 	}
 
-    void OpenGLContext::SetDestinationBlendFunction(const DestinationBlendFunction& dstFunc)
+    void OpenGLContext::SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction)
 	{
-		m_BlendFunction.Destination = dstFunc;
-		LK_CORE_DEBUG("Setting source blend function: {}", GetDestinationBlendFunctionName(dstFunc));
-		glBlendFunc(GLUtils::GetOpenGLSourceBlendFunction(m_BlendFunction.Source), GLUtils::GetOpenGLDestinationBlendFunction(m_BlendFunction.Destination));
+		BlendFunction.Destination = InDestinationBlendFunction;
+		LK_CORE_DEBUG("Setting source blend function: {}", GetDestinationBlendFunctionName(InDestinationBlendFunction));
+		glBlendFunc(
+			GLUtils::GetOpenGLSourceBlendFunction(BlendFunction.Source), 
+			GLUtils::GetOpenGLDestinationBlendFunction(BlendFunction.Destination)
+		);
 	}
 
 	std::string OpenGLContext::GetCurrentSourceBlendFunctionName() const
 	{
-		return GetSourceBlendFunctionName(m_BlendFunction.Source);
+		return GetSourceBlendFunctionName(BlendFunction.Source);
 	}
 
 	std::string OpenGLContext::GetCurrentDestinationBlendFunctionName() const
 	{
-		return GetDestinationBlendFunctionName(m_BlendFunction.Destination);
+		return GetDestinationBlendFunctionName(BlendFunction.Destination);
 	}
 
 

@@ -15,6 +15,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/Buffer.h"
-#include "LkEngine/Core/Log.h"
+#include "LkEngine/Core/Core.h"
+//#include "LkEngine/Core/Memory/Buffer.h"
+#include "LkEngine/Core/Log.h" /* @FIXME: Move to Core.h */

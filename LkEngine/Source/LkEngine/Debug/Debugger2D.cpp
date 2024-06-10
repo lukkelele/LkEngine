@@ -10,7 +10,7 @@
 
 namespace LkEngine {
 
-    s_ptr<Debugger2D> Debugger2D::Create()
+    TSharedPtr<Debugger2D> Debugger2D::Create()
     {
     #ifdef LK_PHYSICS_API_BOX2D
         return std::make_shared<Box2DDebugger>();

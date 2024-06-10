@@ -16,3 +16,7 @@
     #error "Unknown platform!"
 #endif 
 
+
+#if defined(LK_PLATFORM_WINDOWS) && defined(LK_PLATFORM_LINUX)
+#error "Both Windows and Linux platforms are defined, only one allowed!"
+#endif

@@ -19,7 +19,7 @@
 
 namespace LkEngine {
 
-    class OpenGLRenderer : public RendererAPI
+    class OpenGLRenderer : public LRendererAPI
     {
     public:
         void Init();
@@ -38,7 +38,9 @@ namespace LkEngine {
 
         void SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform);
 
-        void BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass, bool explicitClear = false) override;
+        void BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, 
+                             Ref<RenderPass> renderPass, 
+                             bool explicitClear = false) override;
         void EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer) override;
         void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount) override;
         void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Shader>& shader, Ref<VertexBuffer>& vertexBuffer, Ref<IndexBuffer>& indexBuffer, const glm::mat4& transform, uint32_t indexCount) override;
@@ -57,8 +59,8 @@ namespace LkEngine {
 
         void SubmitLine(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) override;
 
-        void SetPrimitiveTopology(const RenderTopology& mode) override;
-        void SetDepthFunction(const DepthFunction& depthFunc) override;
+        void SetPrimitiveTopology(const ERenderTopology& InRenderTopology) override;
+        void SetDepthFunction(const EDepthFunction& InDepthFunction) override;
 
         RendererCapabilities& GetCapabilities() override;
 
@@ -66,11 +68,11 @@ namespace LkEngine {
         Ref<Renderer2DAPI> GetRenderer2DAPI() override { return m_Renderer2D; }
 
         void BindTextureArray(int idx);
-        void BindTextureArray(const TextureArrayDimension& dimension);
+        void BindTextureArray(const ETextureArrayDimension& TextureArrayDimension);
         Ref<OpenGLTextureArray> GetTextureArray(int idx);
 
     private:
-        Ref<OpenGLTextureArray> GetTextureArrayWithDimension(const TextureArrayDimension& dimension);
+        Ref<OpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension);
 
     private:
         uint8_t m_Topology = GL_TRIANGLES;

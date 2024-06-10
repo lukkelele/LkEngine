@@ -54,18 +54,20 @@ namespace LkEngine {
 		static void BeginScene(const SceneCamera& camera);
 		static void BeginScene(const glm::mat4& viewProjection);
 
-		template<typename FuncT>
-		static void Submit(FuncT&& func)
+		template<typename TFunction>
+		static void Submit(TFunction&& Function)
 		{
-			auto renderCmd = [](void* ptr) 
+			auto RenderCommand = [](void* Ptr) 
 			{
-				auto pFunc = (FuncT*)ptr;
-				(*pFunc)();
-				pFunc->~FuncT();
+				auto FunctionPtr = (TFunction*)Ptr;
+				//(*pFunc)();
+				//pFunc->~FuncT();
+				(*FunctionPtr)();
+				FunctionPtr->~TFunction();
 			};
 
-			auto storageBuffer = GetRenderCommandQueue().Allocate(renderCmd, sizeof(func));
-			new (storageBuffer) FuncT(std::forward<FuncT>(func));
+			auto StorageBuffer = GetRenderCommandQueue().Allocate(RenderCommand, sizeof(Function));
+			new (StorageBuffer) TFunction(std::forward<TFunction>(Function));
 		}
 
 		template<typename FuncT>
@@ -92,8 +94,9 @@ namespace LkEngine {
 
 		static uint32_t GetFramesInFlight() { return m_FramesInFlight; }
 
-		static void SetPrimitiveTopology(const RenderTopology& topology);
-		static RenderTopology& GetPrimitiveTopology() { return PrimitiveTopology; }
+		static void SetPrimitiveTopology(const ERenderTopology& InRenderTopology);
+		static ERenderTopology GetPrimitiveTopology() { return PrimitiveTopology; }
+
 		static RenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
 		static uint32_t GetRenderQueueSubmissionIndex();
@@ -104,29 +107,32 @@ namespace LkEngine {
 		static Ref<RenderContext> GetContext();
 
 		static Renderer* Get() { return s_Instance; }
-		static Ref<RendererAPI> GetRendererAPI() { return s_RendererAPI; }
+
+		/// @FIXME: remove all these Getters
+		static Ref<LRendererAPI> GetRendererAPI() { return RendererAPI; }
 		static Ref<Renderer2DAPI> GetRenderer2D() { return s_Renderer2DAPI; }
 		static Ref<Renderer2DAPI> GetRenderer2DAPI() { return s_Renderer2DAPI; }
 
 		static Ref<Texture2D> GetWhiteTexture();
 		static Ref<TextureCube> GetWhiteTextureCube();
 
-		static void RegisterShaderDependency(Ref<Shader> shader, Ref<Material> material);
+		static void RegisterShaderDependency(Ref<Shader> InShader, Ref<Material> InMaterial);
 
-		static void SetDepthFunction(const DepthFunction& depthFunc);
+		static void SetDepthFunction(const EDepthFunction& InDepthFunction);
 
 	private:
 		static void LoadTextures();
 
 	public:
-		inline static RenderTopology PrimitiveTopology;
+		inline static ERenderTopology PrimitiveTopology;
 		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.250f, 1.0f };
 	private:
 		inline static uint32_t m_SamplerCount = 0; // Samplers
 		inline static uint32_t m_FramesInFlight = 2;
 
-		inline static Ref<RendererAPI> s_RendererAPI = nullptr;
-		inline static Ref<Renderer2DAPI> s_Renderer2DAPI = nullptr;
+		/* Render API */
+		inline static Ref<LRendererAPI> RendererAPI = nullptr;
+		inline static Ref<Renderer2DAPI> s_Renderer2DAPI = nullptr; /// @FIXME: Add L prefix to Renderer2DAPI class
 
 		inline static Renderer* s_Instance = nullptr;
 

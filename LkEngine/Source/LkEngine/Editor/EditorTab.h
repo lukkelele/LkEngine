@@ -19,9 +19,11 @@ namespace LkEngine {
         TextureEditor
     };
 
-    class Tab
+    class LTab
     {
     public:
+        virtual ~LTab() = default;
+
         std::string Name = "";
         EditorTabType Type = EditorTabType::None;
         bool Closed = false;
@@ -32,11 +34,10 @@ namespace LkEngine {
 
         EditorTabType GetTabType() const { return Type; }
 
-        virtual ~Tab() = default;
     };
 
 
-    class ViewportTab : public Tab
+    class ViewportTab : public LTab
     {
     public:
         ViewportTab(std::string_view name) 
@@ -53,7 +54,7 @@ namespace LkEngine {
     };
 
 
-    class NodeEditorTab : public Tab
+    class NodeEditorTab : public LTab
     {
     public:
         NodeEditorTab(std::string_view name);
@@ -67,8 +68,7 @@ namespace LkEngine {
         NodeEditor* NodeEditorRef = nullptr;
     };
 
-
-    class MaterialEditorTab: public Tab
+    class MaterialEditorTab: public LTab
     {
     public:
         MaterialEditorTab(std::string_view name);

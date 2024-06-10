@@ -9,7 +9,7 @@
 
 namespace LkEngine {
 
-    Application* m_App = nullptr;
+    LApplication* Application = nullptr; /* REMOVE ME */
 
 	void Input::Init()
 	{
@@ -37,7 +37,7 @@ namespace LkEngine {
 				LK_CORE_TRACE("De-selecting (clicked escape)");
 				if (editor && editor->IsEnabled())
 				{
-					Entity entity = { (entt::entity)0, m_Scene.Raw()};
+					LEntity entity = { (entt::entity)0, m_Scene.Raw()};
 					SELECTION::SelectedEntity = entity;
 				}
 			}
@@ -52,7 +52,8 @@ namespace LkEngine {
 		{
 			LK_CORE_DEBUG("Hitcast result == 1");
 		    Raycast2DResult raycast = raycastResults.at(0);
-		    Entity entity = raycast.HitEntity;
+		    LEntity entity = raycast.HitEntity;
+
 		    //if ((Mouse::IsButtonPressed(MouseButton::ButtonLeft) && Editor::SelectedEntity != raycast.HitEntity))
 		    if (Mouse::IsButtonPressed(MouseButton::Left))
 		    {
@@ -83,27 +84,27 @@ namespace LkEngine {
 
 	bool Input::IsMouseButtonPressed(MouseButton button)
 	{
-		return m_MouseData.find(button) != m_MouseData.end() && m_MouseData[button].State == KeyState::Pressed;
+		return ((m_MouseData.find(button) != m_MouseData.end()) && (m_MouseData[button].State == KeyState::Pressed));
 	}
 
 	bool Input::IsMouseButtonHeld(MouseButton button)
 	{
-		return m_MouseData.find(button) != m_MouseData.end() && m_MouseData[button].State == KeyState::Held;
+		return ((m_MouseData.find(button) != m_MouseData.end()) && (m_MouseData[button].State == KeyState::Held));
 	}
 
 	bool Input::IsMouseButtonDown(MouseButton button)
 	{
-		bool imguiEnabled = Application::Get()->GetSpecification().ImGuiEnabled;
+		bool imguiEnabled = LApplication::Get()->GetSpecification().ImGuiEnabled;
 		if (imguiEnabled == false)
 		{
-			auto& window = Application::Get()->GetWindow();
-			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(window.GetGlfwWindow()), static_cast<int32_t>(button));
+			LWindow & Window = LApplication::Get()->GetWindow();
+			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), static_cast<int32_t>(button));
 			return state == GLFW_PRESS;
 		}
 	
-		Window& window = Application::Get()->GetWindow();
-		LK_CORE_ASSERT(&window != nullptr, "Window is nullptr");
-		auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(window.GetGlfwWindow()), static_cast<int32_t>(button));
+		LWindow& Window = LApplication::Get()->GetWindow();
+		LK_CORE_ASSERT(&Window != nullptr, "Window is nullptr");
+		auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), static_cast<int32_t>(button));
 		return state == GLFW_PRESS;
 
 		//------------------------------------------------------------
@@ -147,26 +148,26 @@ namespace LkEngine {
 
 	bool Input::IsKeyPressed(Key key)
 	{
-		return m_KeyData.find(key) != m_KeyData.end() && m_KeyData[key].State == KeyState::Pressed;
+		return ((m_KeyData.find(key) != m_KeyData.end()) && (m_KeyData[key].State == KeyState::Pressed));
 	}
 
 	bool Input::IsKeyHeld(Key key)
 	{
-		return m_KeyData.find(key) != m_KeyData.end() && m_KeyData[key].State == KeyState::Held;
+		return ((m_KeyData.find(key) != m_KeyData.end()) && (m_KeyData[key].State == KeyState::Held));
 	}
 
 	bool Input::IsKeyDown(Key keycode)
 	{
-		bool enableImGui = Application::Get()->GetSpecification().ImGuiEnabled;
-		if (!enableImGui)
+		const bool bEnableImGui = LApplication::Get()->GetSpecification().ImGuiEnabled;
+		if (!bEnableImGui)
 		{
-			auto& window = Application::Get()->GetWindow();
+			auto& window = LApplication::Get()->GetWindow();
 			auto state = glfwGetKey(static_cast<GLFWwindow*>(window.GetGlfwWindow()), static_cast<int32_t>(keycode));
 			return state == GLFW_PRESS || state == GLFW_REPEAT;
 		}
 		
-		auto& window = Application::Get()->GetWindow();
-		GLFWwindow* win = static_cast<GLFWwindow*>(window.GetGlfwWindow());
+		LWindow& WindowRef = LApplication::Get()->GetWindow();
+		GLFWwindow* win = static_cast<GLFWwindow*>(WindowRef.GetGlfwWindow());
 		bool pressed = false;
 		auto state = glfwGetKey(win, static_cast<int32_t>(keycode));
 		if (state == GLFW_PRESS || state == GLFW_REPEAT)
@@ -207,17 +208,19 @@ namespace LkEngine {
 
 	void Input::SetCursorMode(CursorMode mode)
 	{
-		auto& window = Application::Get()->GetWindow();
-		glfwSetInputMode(static_cast<GLFWwindow*>(window.GetGlfwWindow()), GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
+		LWindow& Window = LApplication::Get()->GetWindow();
+		glfwSetInputMode(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
 
-		if (Application::Get()->GetSpecification().ImGuiEnabled)
+		if (LApplication::Get()->GetSpecification().ImGuiEnabled)
+		{
 			UI::SetInputEnabled(mode == CursorMode::Normal);
+		}
 	}
 
 	CursorMode Input::GetCursorMode()
 	{
-		auto& window = Application::Get()->GetWindow();
-		return (CursorMode)(glfwGetInputMode(static_cast<GLFWwindow*>(window.GetGlfwWindow()), GLFW_CURSOR) - GLFW_CURSOR_NORMAL);
+		LWindow& Window = LApplication::Get()->GetWindow();
+		return (CursorMode)(glfwGetInputMode(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), GLFW_CURSOR) - GLFW_CURSOR_NORMAL);
 	}
 
 	void Input::UpdateKeyState(KeyCode key, KeyState newState)

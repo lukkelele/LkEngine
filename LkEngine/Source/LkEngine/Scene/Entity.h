@@ -1,24 +1,27 @@
 #pragma once
 
+#include <vector>
+
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
 
 #include <glm/glm.hpp>
 
 #include <entt/entt.hpp>
 
-#include <vector>
 
 
 namespace LkEngine {
 
-	class Entity 
+	class LEntity : public LObject
 	{
 	public:
-		Entity() = default;
-		Entity(entt::entity handle, Scene* scene);
-		Entity(const Entity& other) = default;
-		~Entity() = default;
+		LEntity() = default;
+		LEntity(entt::entity handle, Scene* scene);
+		LEntity(const LEntity& Other) = default;
+		~LEntity() = default;
 
 		void OnUpdate(float ts) {}
 
@@ -101,31 +104,37 @@ namespace LkEngine {
 		operator TransformComponent&() { return GetComponent<TransformComponent>(); }
 
 		operator bool () const;
-		bool operator==(const Entity& other) const { return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene; }
-		bool operator!=(const Entity& other) const { return !(*this == other); }
+		bool operator==(const LEntity& Other) const { return m_EntityHandle == Other.m_EntityHandle && m_Scene == Other.m_Scene; }
+		bool operator!=(const LEntity& Other) const { return !(*this == Other); }
 
-		Entity GetParent() const;
+		LEntity GetParent() const;
 		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
 
-		void SetParent(Entity parent)
+		void SetParent(LEntity parent)
 		{
-			Entity currentParent = GetParent();
-			if (currentParent == parent)
+			LEntity CurrentParent = GetParent();
+			if (CurrentParent == parent)
+			{
 				return;
+			}
 
 			// If changing parent, remove child from existing parent
-			if (currentParent)
-				currentParent.RemoveChild(*this);
+			if (CurrentParent)
+			{
+				CurrentParent.RemoveChild(*this);
+			}
 
 			// Setting to null is okay
 			SetParentUUID(parent.GetUUID());
 
 			if (parent)
 			{
-				auto& parentChildren = parent.Children();
-				UUID uuid = GetUUID();
+				auto& parentChildren = parent.GetChildren();
+				const UUID uuid = GetUUID();
 				if (std::find(parentChildren.begin(), parentChildren.end(), uuid) == parentChildren.end())
+				{
 					parentChildren.emplace_back(GetUUID());
+				}
 			}
 		}
 
@@ -133,25 +142,26 @@ namespace LkEngine {
 
 		void SetParentUUID(UUID parent) { GetComponent<RelationshipComponent>().ParentHandle = parent; }
 		UUID GetParentUUID() const { return GetComponent<RelationshipComponent>().ParentHandle; }
-		std::vector<UUID>& Children() { return GetComponent<RelationshipComponent>().Children; }
-		const std::vector<UUID>& Children() const { return GetComponent<RelationshipComponent>().Children; }
+		std::vector<UUID>& GetChildren() { return GetComponent<RelationshipComponent>().Children; }
+		const std::vector<UUID>& GetChildren() const { return GetComponent<RelationshipComponent>().Children; }
 
-		bool RemoveChild(Entity child)
+		bool RemoveChild(LEntity Child)
 		{
-			UUID childId = child.GetUUID();
-			std::vector<UUID>& children = Children();
-			auto it = std::find(children.begin(), children.end(), childId);
-			if (it != children.end())
+			const UUID ChildID = Child.GetUUID();
+			std::vector<UUID>& Children = GetChildren();
+			/* FIXME: Use compressed if statement */
+			auto Iter = std::find(Children.begin(), Children.end(), ChildID);
+			if (Iter != Children.end())
 			{
-				children.erase(it);
+				Children.erase(Iter);
 				return true;
 			}
 
 			return false;
 		}
 
-		bool IsAncestorOf(Entity entity) const;
-		bool IsDescendantOf(Entity entity) const { return entity.IsAncestorOf(*this); }
+		bool IsAncestorOf(LEntity entity) const;
+		bool IsDescendantOf(LEntity entity) const { return entity.IsAncestorOf(*this); }
 
 		const entt::entity& _ENTITY_HANDLE() const { return m_EntityHandle; } // Temporary debugging
 

@@ -9,7 +9,7 @@
 
 namespace LkEngine {
 
-    s_ptr<PhysicsAPI> PhysicsAPI::Create()
+    TSharedPtr<PhysicsAPI> PhysicsAPI::Create()
     {
     #ifdef LK_PHYSICS_API_BULLET3
         return std::make_shared<BulletPhysics>();

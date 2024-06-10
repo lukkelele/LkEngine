@@ -6,18 +6,30 @@ namespace LkEngine {
 
     BulletScene::BulletScene()
     {
+        // empty for now
     }
 
     BulletScene::~BulletScene()
     {
+        // empty for now
     }
 
-    s_ptr<PhysicsBody> BulletScene::GetEntityBodyByID(UUID entityID) const
+    void BulletScene::Simulate(const float DeltaTime)
+    {
+        // empty for now
+    }
+
+    void BulletScene::Destroy()
+    {
+        // empty for now
+    }
+
+    TSharedPtr<PhysicsBody> BulletScene::GetEntityBodyByID(UUID entityID) const
     {
         return nullptr;
     }
 
-    void BulletScene::DestroyBody(Entity entity)
+    void BulletScene::DestroyBody(LEntity Entity)
     {
     }
 

@@ -19,14 +19,14 @@ namespace LkEngine {
 	};
 	static std::unordered_map<size_t, ShaderDependencies> s_ShaderDependencies;
 
-	void RendererAPI::SetAPI(RendererAPIType api)
+	void LRendererAPI::SetAPI(ERendererAPI InRendererAPI)
 	{
-		RendererAPI::m_CurrentRendererAPI = api;
+		LRendererAPI::RendererAPI = InRendererAPI;
 	}
 
 	Ref<RenderContext> Renderer::GetContext()
 	{
-		return Application::Get()->GetWindow().GetRenderContext();
+		return LApplication::Get()->GetWindow().GetRenderContext();
 	}
 
 	struct RendererData
@@ -56,7 +56,7 @@ namespace LkEngine {
 	{
 		Data = new RendererData();
 
-		PrimitiveTopology = RenderTopology::Triangles;
+		PrimitiveTopology = ERenderTopology::Triangles;
 		CommandQueue[0] = new RenderCommandQueue();
 		CommandQueue[1] = new RenderCommandQueue();
 
@@ -76,38 +76,38 @@ namespace LkEngine {
 
 		Data->m_MaterialLibrary = Ref<MaterialLibrary>::Create();
 
-		s_RendererAPI = RendererAPI::Create();
-		s_RendererAPI->Init();
+		RendererAPI = LRendererAPI::Create();
+		RendererAPI->Init();
 
-		s_Renderer2DAPI = s_RendererAPI->GetRenderer2DAPI();
+		s_Renderer2DAPI = RendererAPI->GetRenderer2DAPI();
 	}
 
 	void Renderer::Clear()
 	{
-		s_RendererAPI->Clear();
+		RendererAPI->Clear();
 	}
 
 	void Renderer::BeginFrame()
 	{
         Renderer::SwapQueues();
-		s_RendererAPI->BeginFrame();
+		RendererAPI->BeginFrame();
 	}
 
 	void Renderer::EndFrame()
 	{
 		CommandQueue[GetRenderQueueIndex()]->Execute();
-		s_RendererAPI->EndFrame();
+		RendererAPI->EndFrame();
 	}
 
 	void Renderer::Shutdown()
 	{
-		s_RendererAPI->Shutdown();
+		RendererAPI->Shutdown();
 	}
 
-	void Renderer::SetPrimitiveTopology(const RenderTopology& topology)
+	void Renderer::SetPrimitiveTopology(const ERenderTopology& InRenderTopology)
 	{
-		PrimitiveTopology = topology;
-		s_RendererAPI->SetPrimitiveTopology(topology);
+		PrimitiveTopology = InRenderTopology;
+		RendererAPI->SetPrimitiveTopology(InRenderTopology);
 	}
 
 	void Renderer::SwapQueues()
@@ -153,22 +153,22 @@ namespace LkEngine {
 
 	void Renderer::SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform)
 	{
-		s_RendererAPI->SubmitMesh(mesh, shader, transform);
+		RendererAPI->SubmitMesh(mesh, shader, transform);
 	}
 
 	void Renderer::SubmitImage(const Ref<Image> image)
 	{
-		s_RendererAPI->SubmitImage(image);
+		RendererAPI->SubmitImage(image);
 	}
 
 	void Renderer::SubmitImage(const Ref<Image2D> image)
 	{
-		s_RendererAPI->SubmitImage(image);
+		RendererAPI->SubmitImage(image);
 	}
 
 	void Renderer::SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
 	{
-		s_RendererAPI->SubmitLine(p0, p1, color, entityID);
+		RendererAPI->SubmitLine(p0, p1, color, entityID);
 	}
 
 	void Renderer::SubmitLines(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
@@ -177,9 +177,13 @@ namespace LkEngine {
 		vb.Bind();
 		ib.Bind();
 
-		SetPrimitiveTopology(RenderTopology::Lines);
-		s_RendererAPI->Draw(vb, ib, shader);
-		SetPrimitiveTopology(RenderTopology::Triangles);
+		ERenderTopology InitialTopology = GetPrimitiveTopology();
+		SetPrimitiveTopology(ERenderTopology::Lines);
+		RendererAPI->Draw(vb, ib, shader);
+
+		/* Reset initial topology */
+		SetPrimitiveTopology(InitialTopology);
+		//SetPrimitiveTopology(ERenderTopology::Triangles);
 	}
 
 	void Renderer::SubmitIndexed(VertexBuffer& vb, unsigned int count)
@@ -187,42 +191,42 @@ namespace LkEngine {
         vb.Bind();
         //auto ib = vb.GetIndexBuffer();
 		//if (ib != nullptr) int indexCount = count ? count : ib->GetCount();
-		s_RendererAPI->SubmitIndexed(count);
+		RendererAPI->SubmitIndexed(count);
 	}
 
 	void Renderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
 	{
-		s_RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);
+		RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);
 	}
 
 	void Renderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
 	{
-		s_RendererAPI->SubmitQuad(pos, size, color, entityID);
+		RendererAPI->SubmitQuad(pos, size, color, entityID);
 	}
 
 	void Renderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
 	{
-		s_RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, texture, entityID);
+		RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, texture, entityID);
 	}
 
 	void Renderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
 	{
-		s_RendererAPI->SubmitQuad(pos, size, texture, 0.0f, entityID);
+		RendererAPI->SubmitQuad(pos, size, texture, 0.0f, entityID);
 	}
 
 	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID)
     {
-        s_RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, color, tc.Rotation2D, entityID);
+        RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, color, tc.Rotation2D, entityID);
     }
 
 	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
     {
-        s_RendererAPI->SubmitQuad(tc.Translation, size, texture, tc.Rotation2D, entityID);
+        RendererAPI->SubmitQuad(tc.Translation, size, texture, tc.Rotation2D, entityID);
     }
 
 	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& color, uint64_t entityID)
     {
-        s_RendererAPI->SubmitQuad(tc.Translation, size, texture, color, tc.Rotation2D, entityID);
+        RendererAPI->SubmitQuad(tc.Translation, size, texture, color, tc.Rotation2D, entityID);
     }
 
 	// REMOVE
@@ -239,43 +243,43 @@ namespace LkEngine {
 
 	RendererCapabilities& Renderer::GetCapabilities()
 	{
-		return s_RendererAPI->GetCapabilities();
+		return RendererAPI->GetCapabilities();
 	}
 
 	uint32_t Renderer::GetCurrentFrameIndex()
 	{
-		return Application::Get()->GetCurrentFrameIndex();
+		return LApplication::Get()->GetCurrentFrameIndex();
 	}
 
 	uint32_t Renderer::RT_GetCurrentFrameIndex()
 	{
 		// Swapchain owns the RenderThread frame index
-		return Application::Get()->GetWindow().GetSwapChain()->GetCurrentBufferIndex();
+		return LApplication::Get()->GetWindow().GetSwapChain()->GetCurrentBufferIndex();
 	}
 
 	void Renderer::BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass)
 	{
-		s_RendererAPI->BeginRenderPass(renderCommandBuffer, renderPass, false);
+		RendererAPI->BeginRenderPass(renderCommandBuffer, renderPass, false);
 	}
 
 	void Renderer::EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer)
 	{
-		s_RendererAPI->EndRenderPass(renderCommandBuffer);
+		RendererAPI->EndRenderPass(renderCommandBuffer);
 	}
 
 	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
 	{
-		s_RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, vertexBuffer, indexBuffer, transform, indexCount);
+		RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, vertexBuffer, indexBuffer, transform, indexCount);
 	}
 
 	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Shader> shader, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
 	{
-		s_RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, shader, vertexBuffer, indexBuffer, transform, indexCount);
+		RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, shader, vertexBuffer, indexBuffer, transform, indexCount);
 	}
 
 	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Material> material, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
 	{
-		s_RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, material, vertexBuffer, indexBuffer, transform, indexCount);
+		RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, material, vertexBuffer, indexBuffer, transform, indexCount);
 	}
 	
 	Ref<TextureLibrary> Renderer::GetTextureLibrary()
@@ -297,7 +301,7 @@ namespace LkEngine {
 
 	void Renderer::DrawMesh(Ref<Mesh>& mesh, const Ref<Shader> shader)
 	{
-		s_RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *shader);
+		RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *shader);
 	}
 
 	void Renderer::RegisterShaderDependency(Ref<Shader> shader, Ref<Material> material)
@@ -420,9 +424,9 @@ namespace LkEngine {
         }
 	}
 
-	void Renderer::SetDepthFunction(const DepthFunction& depthFunc)
+	void Renderer::SetDepthFunction(const EDepthFunction& InDepthFunction)
 	{
-		s_RendererAPI->SetDepthFunction(depthFunc);
+		RendererAPI->SetDepthFunction(InDepthFunction);
 	}
 
 

@@ -1,0 +1,22 @@
+///|//////////////////////////////////////////////////////
+/// LCodeGenerator
+///
+///
+///|//////////////////////////////////////////////////////
+#pragma once
+
+
+
+namespace LkEngine {
+
+	class LCodeGenerator
+	{
+	public:
+		LCodeGenerator();
+		~LCodeGenerator() = default;
+
+
+	private:
+	};
+
+}

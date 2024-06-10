@@ -205,7 +205,7 @@ namespace LkEngine {
 		// Cube
 		{
 			std::filesystem::path filepath("Assets/Meshes/Cube.gltf");
-			Entity cubeEntity = Project::Current()->GetScene()->CreateEntity("Cube");
+			LEntity cubeEntity = Project::Current()->GetScene()->CreateEntity("Cube");
 			Ref<Mesh> cube = ImportAsset<Mesh>(filepath.string());
 			MeshComponent& meshComponent = cubeEntity.AddComponent<MeshComponent>(cube->Handle);
 

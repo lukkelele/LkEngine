@@ -140,9 +140,9 @@ namespace LkEngine::Math {
 	{
 		// Convert screen coordinates to normalized device coordinates
 		auto& io = ImGui::GetIO();
-		auto& window = Window::Get();
-		int width = window.GetWidth();
-		int height = window.GetHeight();
+		LWindow& Window = LWindow::Get();
+		int width = Window.GetWidth();
+		int height = Window.GetHeight();
 		glm::vec4 clipCoords = glm::vec4(
 			2.0f * screenCoords.x / width - 1.0f,
 			1.0f - 2.0f * screenCoords.y / height,

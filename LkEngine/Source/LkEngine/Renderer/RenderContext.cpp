@@ -11,44 +11,55 @@
 
 namespace LkEngine {
 
-	Ref<RenderContext> RenderContext::Create(Window* window)
+	Ref<RenderContext> RenderContext::Create(LWindow* WindowRef)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLContext>::Create(window);
+			case ERendererAPI::OpenGL:
+			{
+				return Ref<OpenGLContext>::Create(WindowRef);
+			}
+
+			/// @FIXME:
 			//case RendererAPIType::Vulkan: return Ref<VulkanContext>::Create(window);
+
+			case ERendererAPI::None: break;
 		}
+
 		LK_CORE_ASSERT(false, "Unknown RendererAPI");
+		return nullptr;
 	}
 
-	void RenderContext::SetProfile(const Profile& profile)
+	void RenderContext::SetProfile(const EProfile& InProfile)
 	{
-		RendererAPIType renderAPI = RendererAPI::Current();
+		ERendererAPI RenderAPI = LRendererAPI::Current();
 
-		switch (profile)
+		switch (InProfile)
 		{
-			case Profile::Core:
+			case EProfile::Core:
 			{
-				if (renderAPI == RendererAPIType::Vulkan)
+				if (RenderAPI == ERendererAPI::Vulkan)
 				{
 					glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 				}
-				else if (renderAPI == RendererAPIType::OpenGL)
+				else if (RenderAPI == ERendererAPI::OpenGL)
 				{
-					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Set core profile
+					/* Core Profile */
+					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 				}
 
 				break;
 			}
-			case Profile::Compability:
+			case EProfile::Compability:
 			{
-				if (renderAPI == RendererAPIType::Vulkan)
+				if (RenderAPI == ERendererAPI::Vulkan)
 				{
 					glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 				}
-				else if (renderAPI == RendererAPIType::OpenGL)
+				else if (RenderAPI == ERendererAPI::OpenGL)
 				{
-					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE); // Set core profile
+					/* Compability Profile */
+					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 				}
 				break;
 			}
@@ -56,51 +67,57 @@ namespace LkEngine {
 
 	}
 
-	void RenderContext::SetVersion(int majorVersion, int minorVersion)
+	void RenderContext::SetVersion(const int MajorVersion, const int MinorVersion)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::Vulkan: return;
-			case RendererAPIType::OpenGL:
+			case ERendererAPI::Vulkan: 
 			{
-				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion); 
-				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
+				/* -- Empty -- */
+				return;
+			}
+			case ERendererAPI::OpenGL:
+			{
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, MajorVersion); 
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, MinorVersion);
 				return;
 			}
 
 		}
+
 		LK_CORE_ASSERT(false, "SetVersion(MAJOR, MINOR) failed, neither Vulkan or OpenGL was detected");
 	}
 
 	void RenderContext::HandleViewportEvents()
 	{
-		auto& window = Window::Get();
-		int viewport_width, viewport_height;
-		glfwGetWindowSize(window.GetGlfwWindow(), &viewport_width, &viewport_height);
+		LWindow& WindowRef = LWindow::Get();
+		int ViewportWidth{};
+		int ViewportHeight;
+		glfwGetWindowSize(WindowRef.GetGlfwWindow(), &ViewportWidth, &ViewportHeight);
 	}
 
-	std::string RenderContext::GetSourceBlendFunctionName(const SourceBlendFunction& srcFunc)
+	std::string RenderContext::GetSourceBlendFunctionName(const ESourceBlendFunction& InSourceFunction)
 	{
-		switch (srcFunc)
+		switch (InSourceFunction)
 		{
-			case SourceBlendFunction::Zero:  return "Zero";
-			case SourceBlendFunction::One:   return "One";
-			case SourceBlendFunction::Alpha: return "Alpha";
-			case SourceBlendFunction::Color: return "Color";
-			case SourceBlendFunction::One_Minus_DestinationAlpha: return "One_Minus_DestinationAlpha";
+			case ESourceBlendFunction::Zero:  return "Zero";
+			case ESourceBlendFunction::One:   return "One";
+			case ESourceBlendFunction::Alpha: return "Alpha";
+			case ESourceBlendFunction::Color: return "Color";
+			case ESourceBlendFunction::One_Minus_DestinationAlpha: return "One_Minus_DestinationAlpha";
 			default: throw std::runtime_error("Source blend function name could not be retrieved correctly");
 		}
 	}
 
-	std::string RenderContext::GetDestinationBlendFunctionName(const DestinationBlendFunction& dstFunc)
+	std::string RenderContext::GetDestinationBlendFunctionName(const EDestinationBlendFunction& InDestinationFunction)
 	{
-		switch (dstFunc)
+		switch (InDestinationFunction)
 		{
-			case DestinationBlendFunction::Zero:  return "Zero";
-			case DestinationBlendFunction::One:   return "One";
-			case DestinationBlendFunction::Alpha: return "Alpha";
-			case DestinationBlendFunction::Color: return "Color";
-			case DestinationBlendFunction::One_Minus_SourceAlpha: return "One_Minus_SourceAlpha";
+			case EDestinationBlendFunction::Zero:  return "Zero";
+			case EDestinationBlendFunction::One:   return "One";
+			case EDestinationBlendFunction::Alpha: return "Alpha";
+			case EDestinationBlendFunction::Color: return "Color";
+			case EDestinationBlendFunction::One_Minus_SourceAlpha: return "One_Minus_SourceAlpha";
 			default: throw std::runtime_error("Destination blend function name could not be retrieved correctly");
 		}
 	}

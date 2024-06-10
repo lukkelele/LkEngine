@@ -5,35 +5,46 @@
 
 namespace LkEngine {
 
-	Entity::Entity(entt::entity handle, Scene* scene)
-		: m_EntityHandle(handle), m_Scene(scene)
+	LEntity::LEntity(entt::entity handle, Scene* scene)
+		: m_EntityHandle(handle)
+		, m_Scene(scene)
 	{
 	}
 
-	Entity Entity::GetParent() const
+	LEntity LEntity::GetParent() const
 	{
 		return m_Scene->TryGetEntityWithUUID(GetParentUUID());
 	}
 
-	bool Entity::IsAncestorOf(Entity entity) const
+	bool LEntity::IsAncestorOf(LEntity Entity) const
 	{
-		const auto& children = Children();
-		if (children.empty())
-			return false;
-
-		for (UUID child : children)
+		const auto& Children = GetChildren();
+		if (Children.empty())
 		{
-			if (child == entity.GetUUID())
-				return true;
+			return false;
 		}
 
-		for (UUID child : children)
+		for (UUID Child : Children)
 		{
-			if (m_Scene->GetEntityWithUUID(child).IsAncestorOf(entity))
+			if (Child == Entity.GetUUID())
+			{
 				return true;
+			}
+		}
+
+		for (const UUID Child : Children)
+		{
+			if (m_Scene->GetEntityWithUUID(Child).IsAncestorOf(Entity))
+			{
+				return true;
+			}
 		}
 		return false;
 	}
 
-	Entity::operator bool() const { return (m_EntityHandle != entt::null) && m_Scene && m_Scene->m_Registry.valid(m_EntityHandle); }
+	LEntity::operator bool() const 
+	{ 
+		return (m_EntityHandle != entt::null) && m_Scene && m_Scene->m_Registry.valid(m_EntityHandle); 
+	}
+
 }

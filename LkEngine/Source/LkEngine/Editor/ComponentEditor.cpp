@@ -35,20 +35,22 @@ namespace LkEngine {
         {
             static std::string selected_material = "";
             auto& materials = Renderer::GetMaterialLibrary()->GetMaterials();
-            for (std::pair<std::string, Ref<Material>> materialEntry: materials)
+            for (std::pair<std::string, Ref<Material>> MaterialEntry : materials)
             {
-                std::string materialName = materialEntry.first;
-			    const bool is_selected = (materialName == selected_material);
-                if (ImGui::Selectable(materialName.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAllColumns))
+                const std::string& MaterialName = MaterialEntry.first;
+			    const bool is_selected = (MaterialName == selected_material);
+                if (ImGui::Selectable(MaterialName.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAllColumns))
                 {
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                     {
-                        selected_material = materialName;
+                        selected_material = MaterialName;
                         // Create new edit tab for the material
-                        auto* tabManager = EditorLayer::Get()->GetTabManager();
-                        auto newTab = tabManager->NewTab(fmt::format("Edit - {}", materialName.c_str()), EditorTabType::MaterialEditor);
-                        MaterialEditorTab& materialEditorTab = static_cast<MaterialEditorTab&>(*newTab.get());
-                        materialEditorTab.MaterialRef = materialEntry.second;
+                        TSharedPtr<LTab> NewTab = LEditorTabManager::NewTab(
+                            fmt::format("Edit - {}", MaterialName.c_str()), 
+                            EditorTabType::MaterialEditor
+                        );
+                        MaterialEditorTab& MaterialEditorTabRef = static_cast<MaterialEditorTab&>(*NewTab.get());
+                        MaterialEditorTabRef.MaterialRef = MaterialEntry.second;
                     }
                 }
 

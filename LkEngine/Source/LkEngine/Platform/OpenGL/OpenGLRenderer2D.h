@@ -9,7 +9,7 @@
 
 namespace LkEngine {
 
-    class Entity;
+    class LEntity;
 
     struct OpenGLRenderer2DSpecification : public Renderer2DSpecification
     {
@@ -120,7 +120,7 @@ namespace LkEngine {
         struct CameraData
         {
             glm::mat4 ViewProjection;
-        } m_CameraBuffer;
+        } m_CameraBuffer{};
 
         Ref<OpenGLUniformBuffer> m_CameraUniformBuffer;
 

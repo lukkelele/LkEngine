@@ -16,28 +16,28 @@ namespace LkEngine {
 
 	namespace GLUtils {
 
-		int GetOpenGLSourceBlendFunction(const SourceBlendFunction& srcFunc)
+		int GetOpenGLSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction)
 		{
-			switch (srcFunc)
+			switch (InSourceBlendFunction)
 			{
-				case SourceBlendFunction::Zero:  return GL_ZERO;
-				case SourceBlendFunction::One:   return GL_ONE;
-				case SourceBlendFunction::Alpha: return GL_ALPHA;
-				case SourceBlendFunction::Color: return GL_COLOR;
-				case SourceBlendFunction::One_Minus_DestinationAlpha: return GL_ONE_MINUS_DST_ALPHA;
+				case ESourceBlendFunction::Zero:  return GL_ZERO;
+				case ESourceBlendFunction::One:   return GL_ONE;
+				case ESourceBlendFunction::Alpha: return GL_ALPHA;
+				case ESourceBlendFunction::Color: return GL_COLOR;
+				case ESourceBlendFunction::One_Minus_DestinationAlpha: return GL_ONE_MINUS_DST_ALPHA;
 				default: throw std::runtime_error("Source blend function could not be retrieved correctly");
 			}
 		}
 	
-		int GetOpenGLDestinationBlendFunction(const DestinationBlendFunction& dstFunc)
+		int GetOpenGLDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction)
 		{
-			switch (dstFunc)
+			switch (InDestinationBlendFunction)
 			{
-				case DestinationBlendFunction::Zero:  return GL_ZERO;
-				case DestinationBlendFunction::One:   return GL_ONE;
-				case DestinationBlendFunction::Alpha: return GL_ALPHA;
-				case DestinationBlendFunction::Color: return GL_COLOR;
-				case DestinationBlendFunction::One_Minus_SourceAlpha: return GL_ONE_MINUS_SRC_ALPHA;
+				case EDestinationBlendFunction::Zero:  return GL_ZERO;
+				case EDestinationBlendFunction::One:   return GL_ONE;
+				case EDestinationBlendFunction::Alpha: return GL_ALPHA;
+				case EDestinationBlendFunction::Color: return GL_COLOR;
+				case EDestinationBlendFunction::One_Minus_SourceAlpha: return GL_ONE_MINUS_SRC_ALPHA;
 				default: throw std::runtime_error("Destination blend function could not be retrieved correctly");
 			}
 		}
@@ -49,12 +49,12 @@ namespace LkEngine {
 
 		void PrintOpenGLExtensions()
 		{
-			int n;
-			glGetIntegerv(GL_NUM_EXTENSIONS, &n);
-			for (int i = 0; i < n; i++)
+			int Extensions{};
+			glGetIntegerv(GL_NUM_EXTENSIONS, &Extensions);
+			for (int Index = 0; Index < Extensions; Index++)
 			{
-				const GLubyte* extension = glGetStringi(GL_EXTENSIONS, i);
-				LK_CORE_DEBUG_TAG("OpenGL Extension", "{}", extension);
+				const GLubyte* Extension = glGetStringi(GL_EXTENSIONS, Index);
+				LK_CORE_DEBUG_TAG("OpenGL Extension", "{}", Extension);
 			}
 		}
 

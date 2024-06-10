@@ -17,14 +17,14 @@ namespace LkEngine {
 		LK_CORE_ERROR_TAG("GLFW", "GLFW Error ({0}): {1}", error, description);
 	}
 
-	Window::Window(const WindowSpecification& specification)
-		: m_Specification(specification)
-		, m_Title(specification.Title)
-		, m_Width(specification.Width)
-		, m_Height(specification.Height)
-		, m_ViewportWidth(specification.Width)
-		, m_ViewportHeight(specification.Height)
-		, m_VSync(specification.VSync)
+	LWindow::LWindow(const FWindowSpecification& WindowSpecification)
+		: Specification(WindowSpecification)
+		, m_Title(WindowSpecification.Title)
+		, m_Width(WindowSpecification.Width)
+		, m_Height(WindowSpecification.Height)
+		, m_ViewportWidth(WindowSpecification.Width)
+		, m_ViewportHeight(WindowSpecification.Height)
+		, m_VSync(WindowSpecification.VSync)
 	{
 		m_Instance = this;
 
@@ -34,11 +34,11 @@ namespace LkEngine {
 		m_Data.Height = m_Height;
 	}
 
-	Window::~Window()
+	LWindow::~LWindow()
 	{
 	}
 	
-	void Window::Init()
+	void LWindow::Init()
 	{
 		if (GLFW_Initialized == false)
 		{
@@ -47,25 +47,31 @@ namespace LkEngine {
 		}
 
 		// Set context profile and the version to use for the Renderer API
-		RenderContext::SetProfile(RenderContext::Profile::Core);
+		RenderContext::SetProfile(RenderContext::EProfile::Core);
 
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: 
+			case ERendererAPI::OpenGL: 
+			{
 				RenderContext::SetVersion(4, 5);
 				break;
+			}
 		}
 
-		m_Data.Title = m_Specification.Title;
-		m_Data.Width = m_Specification.Width;
-		m_Data.Height = m_Specification.Height;
+		m_Data.Title = Specification.Title;
+		m_Data.Width = Specification.Width;
+		m_Data.Height = Specification.Height;
 	
 		m_GlfwWindow = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title.c_str(), nullptr, nullptr);
 		LK_CORE_ASSERT(m_GlfwWindow != nullptr);
 		glfwMakeContextCurrent(m_GlfwWindow);
 
+		/* Create RenderContext */
 		m_RenderContext = RenderContext::Create(this);
-		m_RenderContext->Init(SourceBlendFunction::Alpha, DestinationBlendFunction::One_Minus_SourceAlpha);
+		m_RenderContext->Init(
+			ESourceBlendFunction::Alpha, 
+			EDestinationBlendFunction::One_Minus_SourceAlpha
+		);
 
 		m_RenderContext->SetName("OpenGL-Context");
 
@@ -165,13 +171,13 @@ namespace LkEngine {
 		GLFW_Initialized = true;
 	}
 
-	void Window::SwapBuffers()
+	void LWindow::SwapBuffers()
 	{
 		glfwSwapBuffers(m_GlfwWindow);
 		glfwPollEvents();
 	}
 	
-	void Window::Shutdown()
+	void LWindow::Shutdown()
 	{
 		if (m_RenderContext)
 		{
@@ -184,41 +190,44 @@ namespace LkEngine {
 			glfwDestroyWindow(m_GlfwWindow);
 			glfwTerminate();
 
-			delete m_GlfwWindow;
 			m_GlfwWindow = nullptr;
 		}
 	}
 	
-	void Window::SetVSync(bool enabled)
+	void LWindow::SetVSync(bool enabled)
 	{
 		m_VSync = enabled;
 		if (m_VSync)
+		{
 			glfwSwapInterval(1);
+		}
 		else
+		{
 			glfwSwapInterval(0);
+		}
 	}
 
-	void Window::SetSize(const glm::vec2& size)
+	void LWindow::SetSize(const glm::vec2& size)
 	{
 		m_Width = size.x;
 		m_Height = size.y;
 	}
 
-    void Window::SetWidth(uint32_t width) 
+    void LWindow::SetWidth(uint32_t width) 
 	{ 
 		m_Width = width; 
 	}
 
-    void Window::SetHeight(uint32_t height) 
+    void LWindow::SetHeight(uint32_t height) 
 	{ 
 		m_Height = height; 
 	}
 
-	void Window::WindowResizeCallback(GLFWwindow* glfwWindow, int width, int height)
+	void LWindow::WindowResizeCallback(GLFWwindow* glfwWindow, int width, int height)
 	{
 		int size_x, size_y;
 		glfwGetWindowSize(glfwWindow, &size_x, &size_y);
-		auto& window = Window::Get();
+		auto& window = LWindow::Get();
 		window.SetViewportWidth(size_x);
 		window.SetViewportHeight(size_y);
 		window.SetWidth(width);
@@ -248,57 +257,57 @@ namespace LkEngine {
 		}
 	}
 
-	void Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	void LWindow::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 	}
 
-	float Window::GetScalerX() const
+	float LWindow::GetScalerX() const
 	{
 		return m_ViewportScalers.x;
 	}
 	
-	float Window::GetScalerY() const
+	float LWindow::GetScalerY() const
 	{
 		return m_ViewportScalers.y;
 	}
 
-	glm::vec2 Window::GetScalers() const
+	glm::vec2 LWindow::GetScalers() const
 	{
 		return m_ViewportScalers;
 	}
 
-	void Window::SetScalerX(float x)
+	void LWindow::SetScalerX(float x)
 	{
 		m_ViewportScalers.x = x;
 	}
 
-	void Window::SetScalerY(float y)
+	void LWindow::SetScalerY(float y)
 	{
 		m_ViewportScalers.y = y;
 	}
 
-	void Window::SetScalers(float x, float y)
+	void LWindow::SetScalers(float x, float y)
 	{
 		m_ViewportScalers.x = x;
 		m_ViewportScalers.y = y;
 	}
 
-	void Window::SetScalers(const glm::vec2& scalers)
+	void LWindow::SetScalers(const glm::vec2& scalers)
 	{
 		m_ViewportScalers = scalers;
 	}
 
-	Ref<SwapChain> Window::GetSwapChain()
+	Ref<SwapChain> LWindow::GetSwapChain()
 	{
 		return m_SwapChain;
 	}
 
-	Ref<RenderPass> Window::GetRenderPass()
+	Ref<RenderPass> LWindow::GetRenderPass()
 	{
 		return nullptr;
 	}
 
-	void Window::ProcessEvents()
+	void LWindow::ProcessEvents()
 	{
 		glfwPollEvents();
 		Input::Update();

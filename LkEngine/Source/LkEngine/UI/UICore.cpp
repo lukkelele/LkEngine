@@ -209,14 +209,14 @@ namespace LkEngine::UI {
 		ImGui::PopStyleVar(1);
     }
 
-    void BeginViewport(const char* viewportID, Window* window, ImGuiViewport* viewport)
+    void BeginViewport(const char* viewportID, LWindow* WindowRef, ImGuiViewport* viewport)
     {
 		ImGui::SetNextWindowPos(viewport->Pos);
 		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
 
-		auto* glfwWindow = window->GetGlfwWindow();
-		bool isMaximized = (bool)glfwGetWindowAttrib(glfwWindow, GLFW_MAXIMIZED);
+		GLFWwindow* GlfwWindow= WindowRef->GetGlfwWindow();
+		const bool bIsMaximized = (bool)glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -267,9 +267,14 @@ namespace LkEngine::UI {
     void PopStyleStack()
     {
         if (PushedStyleColors > 0)
+        {
             PopStyleColor(PushedStyleColors);
+        }
+
         if (PushedStyleVars > 0)
+        {
             PopStyleVar(PushedStyleVars);
+        }
     }
 
 }

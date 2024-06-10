@@ -11,16 +11,29 @@
 
 namespace LkEngine {
 
-	Ref<Pipeline> Pipeline::Create(const PipelineSpecification& spec)
+	Ref<Pipeline> Pipeline::Create(const FPipelineSpecification& InPipelineSpecification)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL:  return Ref<OpenGLPipeline>::Create(spec);
-			//case RendererAPIType::Vulkan:  return Ref<VulkanPipeline>::Create(spec);
-			case RendererAPIType::None:    return nullptr;
+			case ERendererAPI::OpenGL:
+			{
+				return Ref<OpenGLPipeline>::Create(InPipelineSpecification);
+			}
+
+			case ERendererAPI::Vulkan:
+			{
+				LK_CORE_ASSERT(false, "Vulkan not supported!");
+				return nullptr;
+				//return Ref<VulkanPipeline>::Create(spec);
+			}
+			case ERendererAPI::None:    
+			{
+				LK_CORE_ASSERT(false, "Render API is none");
+				return nullptr;
+			}
 		}
+
 		LK_CORE_ASSERT(false, "Unknown RendererAPI");
-		throw std::runtime_error("Pipeline::Create   Unknown RendererAPI");
 	}
 
 

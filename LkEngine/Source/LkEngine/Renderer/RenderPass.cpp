@@ -9,14 +9,23 @@
 
 namespace LkEngine {
 
-	Ref<RenderPass> RenderPass::Create(const RenderPassSpecification& spec)
+	Ref<RenderPass> RenderPass::Create(const RenderPassSpecification& Specification)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL:  return Ref<OpenGLRenderPass>::Create(spec);
+			case ERendererAPI::OpenGL: 
+			{
+				return Ref<OpenGLRenderPass>::Create(Specification);
+			}
+
+			/// @FIXME
 			//case RendererAPIType::Vulkan:  return Ref<VulkanRenderPass>::Create(spec);
+
+			case ERendererAPI::None: break;
 		}
-		LK_CORE_ASSERT(false, "Could not determine RenderAPI");
+
+		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
 }

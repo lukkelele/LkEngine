@@ -14,7 +14,7 @@
 
 namespace LkEngine {
 
-	void DumpAttachedComponents(Entity entity)
+	static void DumpAttachedComponents(LEntity entity)
 	{
 		if (entity.HasComponent<IDComponent>() && (uint32_t)entity.GetUUID() != 0)
 		{
@@ -52,11 +52,11 @@ namespace LkEngine {
 
 		if (m_Scene)
 		{
-			ImGui::SeparatorText(fmt::format("Current Scene - {}", m_Scene->m_Name).c_str());
+			ImGui::SeparatorText(fmt::format("Current Scene - {}", m_Scene->Name).c_str());
 			ImGui::Text("Entities: %d", m_Scene->m_Registry.size());
 			m_Scene->m_Registry.each([&](auto entityID)
 			{
-				Entity entity{ entityID, m_Scene.Raw() };
+				LEntity entity{ entityID, m_Scene.Raw() };
 				DrawEntityNode(entity);
 			});
 
@@ -77,7 +77,7 @@ namespace LkEngine {
 				for (size_t i = 0; i < count; i++)
 				{
 					UUID entityID = *(((UUID*)payload->Data) + i);
-					Entity entity = m_Scene->GetEntityWithUUID(entityID);
+					LEntity entity = m_Scene->GetEntityWithUUID(entityID);
 					m_Scene->UnparentEntity(entity);
 				}
 			}
@@ -86,7 +86,7 @@ namespace LkEngine {
 	}
 
 	template<typename T, typename UIFunction>
-	void SceneManagerPanel::DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+	void SceneManagerPanel::DrawComponent(const std::string& name, LEntity entity, UIFunction uiFunction)
 	{
 		static const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen 
 			| ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth
@@ -147,7 +147,7 @@ namespace LkEngine {
 		}
 	}
 
-	void SceneManagerPanel::DrawComponents(Entity entity)
+	void SceneManagerPanel::DrawComponents(LEntity entity)
 	{
 		if (!entity)
 			return;
@@ -286,11 +286,13 @@ namespace LkEngine {
         auto& scene = *Scene::GetActiveScene();
         //Entity entity = scene.GetEntityWithUUID(SelectedEntityID);
 		if (!SelectionContext::SelectedEntity)
+		{
 			return;
+		}
 
-		Entity& selectedEntity = SelectionContext::SelectedEntity;
+		LEntity& selectedEntity = SelectionContext::SelectedEntity;
 
-		Window& window = *EditorLayer::Get()->m_Window;
+		LWindow& WindowRef = *EditorLayer::Get()->Window;
 		static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove;
 
 		UI::PushID("UI_SELECTED_ENTITY_PROPERTIES");
@@ -327,7 +329,7 @@ namespace LkEngine {
 		UI::PopID();
     }
 
-	void SceneManagerPanel::DrawEntityNode(Entity entity)
+	void SceneManagerPanel::DrawEntityNode(LEntity entity)
 	{
 		if (!entity || !entity.HasComponent<IDComponent>() || !entity.HasComponent<TagComponent>())
 		{
@@ -395,7 +397,7 @@ namespace LkEngine {
 			{
 				LK_CORE_DEBUG_TAG("SceneManagerPanel", "Button clicked -> 2D Mode");
 				auto& editorCamera = *m_Scene->GetEditorCamera();
-				editorCamera.ApplyViewMode(EditorCamera::ViewMode::Fake2D);
+				editorCamera.ApplyViewMode(LEditorCamera::ViewMode::Fake2D);
 				editorCamera.SetPosition({ -10, 8, -10 });
 			}
 

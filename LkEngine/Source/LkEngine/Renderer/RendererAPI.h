@@ -24,13 +24,13 @@
 
 namespace LkEngine {
 
-	enum class RenderTopology
+	enum class ERenderTopology
 	{ 
 		Lines, 
 		Triangles 
 	};
 	
-    class RendererAPI : public RefCounted
+    class LRendererAPI : public RefCounted
     {
 	public:
 		virtual void Init() = 0;
@@ -67,23 +67,25 @@ namespace LkEngine {
 
 		virtual void SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, uint64_t entityID = 0) = 0;
 
-		virtual void SetPrimitiveTopology(const RenderTopology& topology) = 0;
-		virtual void SetDepthFunction(const DepthFunction& depthFunc) = 0;
+		virtual void SetPrimitiveTopology(const ERenderTopology& InRenderTopology) = 0;
+		virtual void SetDepthFunction(const EDepthFunction& InDepthFunction) = 0;
 
 		virtual RendererCapabilities& GetCapabilities() = 0;
 
-		static Ref<RendererAPI> Create();
-		static RendererAPIType Current() { return m_CurrentRendererAPI; }
-		static void SetAPI(RendererAPIType api);
+		static Ref<LRendererAPI> Create();
+
+		/** Get current render API type. */
+		FORCEINLINE static ERendererAPI Current() { return RendererAPI; }
+
+		static void SetAPI(ERendererAPI InRendererApiType);
 
 		virtual Ref<Renderer2DAPI> GetRenderer2D() = 0;
 		virtual Ref<Renderer2DAPI> GetRenderer2DAPI() = 0;
 
-		
 	protected:
-		inline static RendererAPIType m_CurrentRendererAPI = RendererAPIType::OpenGL;
+		inline static ERendererAPI RendererAPI = ERendererAPI::OpenGL;
 
-		friend class Editor;
+		friend class LEditor;
 		friend class Renderer;
     };
 

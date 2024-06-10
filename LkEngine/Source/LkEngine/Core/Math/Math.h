@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef GLM_ENABLE_EXPERIMENTAL
-    #define GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
 #endif
 
 #include <glm/glm.hpp>
@@ -16,15 +16,19 @@
 #include <random>
 #include <time.h>
 
+#include "LkEngine/Core/Math/Vector.h"
+#include "LkEngine/Core/Math/Rotator.h"
+#include "LkEngine/Core/Math/Quaternion.h"
+
 
 namespace LkEngine {
     struct TransformComponent;
 }
 
-// box2d
+/* Box2D. */
 struct b2Vec2;
 struct b2Vec3;
-
+/* ImGui. */
 struct ImVec2;
 struct ImVec4;
 

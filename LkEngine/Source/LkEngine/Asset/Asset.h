@@ -1,9 +1,12 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/Asset/AssetTypes.h"
-
 #include <filesystem>
+
+#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
+
+#include "LkEngine/Asset/AssetTypes.h"
 
 
 namespace LkEngine {

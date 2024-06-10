@@ -6,7 +6,7 @@
 #include <stb_image/stb_image.h>
 #include <stb_image/stb_image_resize2.h>
 
-#include "LkEngine/Utilities/MemoryUtils.h"
+#include "LkEngine/Utility/MemoryUtils.h"
 
 
 namespace LkEngine {

@@ -5,7 +5,7 @@
 
 namespace LkEngine {
 
-	enum TextureArrayDimension : uint8_t
+	enum ETextureArrayDimension : uint8_t
 	{
 		Dimension_200x200 = 0,
 		Dimension_512x512,
@@ -16,7 +16,7 @@ namespace LkEngine {
 
 	struct TextureArraySpecification
 	{
-		TextureArrayDimension Dimension = Dimension_1024x1024;
+		ETextureArrayDimension TextureArrayDimension = ETextureArrayDimension::Dimension_1024x1024;
 		ImageFormat Format = ImageFormat::RGBA;
 		int TextureSlot = 0;
 		int Layers = 10;
@@ -39,7 +39,7 @@ namespace LkEngine {
 		virtual RendererID& GetRendererID() = 0;
 
 		virtual int GetTextureSlot() const = 0;
-		virtual const TextureArrayDimension& GetDimension() const = 0;
+		virtual const ETextureArrayDimension& GetDimension() const = 0;
 		virtual const TextureArraySpecification& GetSpecification() const = 0;
 
 		virtual int GetWidth() const = 0;
@@ -56,16 +56,17 @@ namespace LkEngine {
 
 	namespace Utils {
 
-		static std::string TextureArrayDimensionToString(TextureArrayDimension dimension)
+		static std::string TextureArrayDimensionToString(ETextureArrayDimension TextureArrayDimension)
 		{
-			switch (dimension)
+			switch (TextureArrayDimension)
 			{
-				case TextureArrayDimension::Dimension_512x512:   return "512x512";
-				case TextureArrayDimension::Dimension_1024x1024: return "1024x1024";
-				case TextureArrayDimension::Dimension_2048x2048: return "2048x2048";
-				case TextureArrayDimension::Dimension_4096x4096: return "4096x4096";
+				case ETextureArrayDimension::Dimension_512x512:   return "512x512";
+				case ETextureArrayDimension::Dimension_1024x1024: return "1024x1024";
+				case ETextureArrayDimension::Dimension_2048x2048: return "2048x2048";
+				case ETextureArrayDimension::Dimension_4096x4096: return "4096x4096";
 			}
-			LK_CORE_ASSERT(false, "Unknown dimension {}", (int)dimension);
+
+			LK_CORE_ASSERT(false, "Unknown dimension {}", static_cast<int>(TextureArrayDimension));
 		}
 
 	}

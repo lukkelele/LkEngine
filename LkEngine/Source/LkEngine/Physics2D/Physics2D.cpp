@@ -20,7 +20,7 @@ namespace LkEngine {
     std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(Scene& scene)
     {
         std::vector<Raycast2DResult> results = {};
-        glm::vec2 mousePos = Mouse::GetScaledPos();
+        glm::vec2 MousePos = Mouse::GetScaledPos();
 
         // Exit early if no camera is attached to the scene
         auto* editor = EditorLayer::Get();
@@ -37,48 +37,53 @@ namespace LkEngine {
             }
         }
 
-        std::vector<Entity> sceneEntities = scene.GetEntities();
-        for (auto& entity : sceneEntities)
+        std::vector<LEntity> SceneEntities = scene.GetEntities();
+        for (LEntity& Entity : SceneEntities)
         {
-            if (entity.HasComponent<TransformComponent>() && entity.HasComponent<SpriteComponent>())
+            if (Entity.HasComponent<TransformComponent>() && Entity.HasComponent<SpriteComponent>())
             {
-                auto& tc = entity.Transform();
-                auto& sc = entity.Sprite();
+                TransformComponent& tc = Entity.Transform();
+                SpriteComponent& sc = Entity.Sprite();
                 if (tc.IsStatic() || sc.IsPassthrough())
+                {
                     continue;
+                }
 
-               // auto cam = scene.GetMainCamera();
-                auto cam= editor->GetEditorCamera();
+                auto cam = editor->GetEditorCamera();
                 glm::vec2 camPos = cam->GetPosition();
-
-                //glm::vec2 camOffset = cam.GetOffset();
-                //camPos.x += camOffset.x;
-                //camPos.y += camOffset.y; // - or + ?
 
                 float quadWidth = tc.Scale.x * sc.Size.x;
                 float quadHeight = tc.Scale.y * sc.Size.y;
-                glm::vec2 quadPos = { tc.Translation.x, tc.Translation.y };
+                glm::vec2 QuadPos = { tc.Translation.x, tc.Translation.y };
 
                 // The position is placed in between the upper two points.
 
-                // Place the origin in the middle of the screen
-                // This is done by adding half of the window width and height
+                // Place the origin in the middle of the screen.
+                // This is done by adding half of the window width and height.
 
-                auto* editor = EditorLayer::Get();
+                EditorLayer* editor = EditorLayer::Get();
                 if (editor && editor->IsEnabled())
                 {
                     // Center the quad
-                    quadPos.x += editor->EditorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+                    QuadPos.x += editor->EditorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
                     // Only add the tabbar size if there are any tabs 
                     if (editor->GetTabCount() == 0)
-                        quadPos.y += (editor->EditorWindowSize.y * 0.50f) + (editor->GetBottomBarSize().y - editor->GetMenuBarSize().y) * Window::Get().GetScalerY();
+                    {
+                        QuadPos.y += (editor->EditorWindowSize.y * 0.50f) 
+                            + (editor->GetBottomBarSize().y - editor->GetMenuBarSize().y) 
+                            * LWindow::Get().GetScalerY();
+                    }
                     else
-                        quadPos.y += (editor->EditorWindowSize.y * 0.50f) + (editor->GetBottomBarSize().y - editor->GetMenuBarSize().y - editor->GetTabBarSize().y) * Window::Get().GetScalerY();
+                    {
+                        QuadPos.y += (editor->EditorWindowSize.y * 0.50f) 
+                            + (editor->GetBottomBarSize().y - editor->GetMenuBarSize().y - editor->GetTabBarSize().y) 
+                            * LWindow::Get().GetScalerY();
+                    }
                 }
                 else
                 {
-                    quadPos.x += Window::Get().GetWidth() * 0.50f;
-                    quadPos.y += Window::Get().GetHeight() * 0.50f;
+                    QuadPos.x += LWindow::Get().GetWidth() * 0.50f;
+                    QuadPos.y += LWindow::Get().GetHeight() * 0.50f;
                 }
 
 
@@ -93,33 +98,33 @@ namespace LkEngine {
                 // Bottom left: Move half size to right, down entire sprite height
                 // Top left: Move half size to left, stay at y
                 // Top right: Move half size to right, stay at y
-                glm::vec2 spritePoint_BottomLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y - quadHeight };
-                glm::vec2 spritePoint_BottomRight = { quadPos.x + quadWidth * 0.50f, quadPos.y - quadHeight };
-                glm::vec2 spritePoint_TopLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y };
-                glm::vec2 spritePoint_TopRight = { quadPos.x + quadWidth * 0.50f, quadPos.y };
+                glm::vec2 SpritePoint_BottomLeft = { QuadPos.x - quadWidth * 0.50f, QuadPos.y - quadHeight };
+                glm::vec2 SpritePoint_BottomRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y - quadHeight };
+                glm::vec2 SpritePoint_TopLeft = { QuadPos.x - quadWidth * 0.50f, QuadPos.y };
+                glm::vec2 SpritePoint_TopRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y };
             #if 0
-                glm::vec2 spritePoint_BottomLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y - quadHeight * 0.50f };
-                glm::vec2 spritePoint_BottomRight = { quadPos.x + quadWidth * 0.50f, quadPos.y - quadHeight * 0.50f };
-                glm::vec2 spritePoint_TopLeft = { quadPos.x - quadWidth * 0.50f, quadPos.y + quadHeight * 0.50f };
-                glm::vec2 spritePoint_TopRight = { quadPos.x + quadWidth * 0.50f, quadPos.y + quadHeight * 0.50f };
+                glm::vec2 SpritePoint_BottomLeft = { QuadPos.x - quadWidth * 0.50f, QuadPos.y - quadHeight * 0.50f };
+                glm::vec2 SpritePoint_BottomRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y - quadHeight * 0.50f };
+                glm::vec2 SpritePoint_TopLeft = { QuadPos.x - quadWidth * 0.50f, QuadPos.y + quadHeight * 0.50f };
+                glm::vec2 SpritePoint_TopRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y + quadHeight * 0.50f };
             #endif
 
                 if (Mouse::IsButtonPressed(MouseButton::Button0))
                 {
                     // Add camera position to adjust for camera placement in the world
-                    bool within_x_boundaries = (mousePos.x + camPos.x >= spritePoint_BottomLeft.x) && (mousePos.x + camPos.x <= spritePoint_TopRight.x);
-                    bool within_y_boundaries = (mousePos.y + camPos.y <= spritePoint_TopLeft.y) && (mousePos.y + camPos.y >= spritePoint_BottomRight.y);
+                    bool within_x_boundaries = (MousePos.x + camPos.x >= SpritePoint_BottomLeft.x) && (MousePos.x + camPos.x <= SpritePoint_TopRight.x);
+                    bool within_y_boundaries = (MousePos.y + camPos.y <= SpritePoint_TopLeft.y) && (MousePos.y + camPos.y >= SpritePoint_BottomRight.y);
                     if (within_x_boundaries && within_y_boundaries)
                     {
                         float centerX = tc.Translation.x + quadWidth * 0.50f;
                         float centerY = tc.Translation.y + quadHeight * 0.50f;
-                        LK_CORE_WARN("Hit: {} -> ({}, {})", entity.Name().c_str(), mousePos.x, mousePos.y);
+                        LK_CORE_WARN("Hit: {} -> ({}, {})", Entity.Name().c_str(), MousePos.x, MousePos.y);
 
-                        float x = centerX - mousePos.x;
-                        float y = centerY - mousePos.y;
-                        glm::vec2 intersection = { x, y };
-                        float distance = sqrt(pow(x, 2) + pow(y, 2));
-                        results.push_back(Raycast2DResult(entity, intersection, { 0, 0 }, distance));
+                        float x = centerX - MousePos.x;
+                        float y = centerY - MousePos.y;
+                        glm::vec2 Intersection = { x, y };
+                        float Distance = sqrt(pow(x, 2) + pow(y, 2));
+                        results.push_back(Raycast2DResult(Entity, Intersection, { 0, 0 }, Distance));
                     }
                 }
             }

@@ -8,18 +8,27 @@ namespace LkEngine {
     class PhysicsBody
     {
     public:
-		PhysicsBody(Entity entity)
-			: m_Entity(entity)
+		PhysicsBody(LEntity Entity)
+			: m_Entity(Entity)
 		{
 		}
 
-		virtual ~PhysicsBody() = default;
+		virtual ~PhysicsBody()
+		{
+		}
 
-		Entity GetEntity() { return m_Entity; }
-		const Entity& GetEntity() const { return m_Entity; }
+		FORCEINLINE LEntity GetEntity() 
+		{ 
+			return m_Entity; 
+		}
+
+		FORCEINLINE const LEntity& GetEntity() const 
+		{ 
+			return m_Entity; 
+		}
 
 	protected:
-		Entity m_Entity;
+		LEntity m_Entity;
     };
 
 }

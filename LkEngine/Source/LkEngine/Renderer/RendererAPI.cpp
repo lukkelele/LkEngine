@@ -7,13 +7,23 @@
 
 namespace LkEngine {
 
-    Ref<RendererAPI> RendererAPI::Create()
+    Ref<LRendererAPI> LRendererAPI::Create()
     {
-        switch (RendererAPI::Current())
+        switch (LRendererAPI::Current())
         {
-            case RendererAPIType::OpenGL: return Ref<OpenGLRenderer>::Create();
-            //case RendererAPIType::Vulkan: return Ref<VulkanRenderer>::Create();
+            case ERendererAPI::OpenGL: 
+            {
+                return Ref<OpenGLRenderer>::Create();
+            }
+
+            case ERendererAPI::Vulkan: 
+            {
+                LK_CORE_ASSERT(false, "Vulkan not supported");
+                return nullptr;
+                //return Ref<VulkanRenderer>::Create();
+            }
         }
+
         LK_CORE_ASSERT(false, "No Render API detected");
     }
 

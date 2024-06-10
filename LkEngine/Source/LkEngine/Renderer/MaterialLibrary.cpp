@@ -34,7 +34,10 @@ namespace LkEngine {
         auto it = m_Collection.find(std::string(materialName));
         LK_CORE_VERIFY(it != m_Collection.end());
         if (it != m_Collection.end())
+        {
             return it->second;
+        }
+
         return nullptr;
     }
 

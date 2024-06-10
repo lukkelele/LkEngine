@@ -8,7 +8,7 @@ namespace LkEngine {
     BulletPhysics::BulletPhysics()
     {
         m_PhysicsAPI = this;
-        PhysicsSystem::SetPhysicsAPI(PhysicsAPIType::Bullet);
+        PhysicsSystem::SetPhysicsAPI(EPhysicsAPI::Bullet3);
     }
 
 }

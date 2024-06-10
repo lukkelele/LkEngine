@@ -27,7 +27,7 @@ namespace LkEngine {
 
     void Debugger::DrawCursor(float x, float y)
     {
-        auto& window = Window::Get();
+        LWindow& WindowRef = LWindow::Get();
         Renderer::Submit([&]()
         {
         });

@@ -11,12 +11,21 @@ namespace LkEngine {
 
 	Ref<UniformBuffer> UniformBuffer::Create(uint64_t size)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLUniformBuffer>::Create(size);
+			case ERendererAPI::OpenGL: 
+			{
+				return Ref<OpenGLUniformBuffer>::Create(size);
+			}
+
+			/// @FIXME
 			//case RendererAPIType::Vulkan: return Ref<VulkanUniformBuffer>::Create(size);
+
+			case ERendererAPI::None: break;
 		}
-		LK_CORE_ASSERT(false, "UniformBuffer::Create(), RendererAPI could not be determined");
+
+		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
 }

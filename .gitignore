@@ -39,10 +39,14 @@
 **/.vs
 **/CMakeFiles
 
-External/**/examples
-External/**/tests
-External/**/docs
-External/**/Makefile
+# Ignore docs for now
+**/docs/*.css
+**/docs/*.scss
+**/docs/*.html
+**/docs/*.dox
+**/docs/*.dox
+**/glfw/examples
+**/glfw/tests
 
 **/bin
 **/*bin-int*
@@ -58,8 +62,10 @@ External/**/Makefile
 **/.idea
 **/*.swp
 
-# LkEngine Binaries and Object files 
-**/Binaries
-**/Binaries-Int
-**/Intermediate
+# LkEngine Binaries and Object files
+Binaries
+Binaries-Int
+Intermediate
+
+**/*.tlog
 

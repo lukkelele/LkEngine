@@ -12,6 +12,6 @@ namespace LkEngine {
 	public:
 		static void Init();
 
-		static bool IsKeyPressed(KeyCode key);
+		static bool IsKeyPressed(const KeyCode key);
 	};
 }

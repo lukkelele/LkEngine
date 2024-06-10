@@ -9,16 +9,16 @@
 
 namespace LkEngine {
 
-	Entity EntityFactory::CreateQuad(Scene& scene, const glm::vec2 pos, const glm::vec2 size, const glm::vec4& color)
+	LEntity EntityFactory::CreateQuad(Scene& scene, const glm::vec2 pos, const glm::vec2 size, const glm::vec4& color)
 	{
 		return CreateQuad(scene, { pos.x, pos.y, 0.0f }, size, color);
 	}
 
-	Entity EntityFactory::CreateQuad(Scene& scene, const glm::vec3 pos, const glm::vec2 size, const glm::vec4& color)
+	LEntity EntityFactory::CreateQuad(Scene& scene, const glm::vec3 pos, const glm::vec2 size, const glm::vec4& color)
 	{
 		int entityCount = scene.GetEntityCount();
 		std::string name = "Quad_" + std::to_string(entityCount);
-		Entity entity = scene.CreateEntity(std::string(name));
+		LEntity entity = scene.CreateEntity(std::string(name));
 
 		SpriteComponent sc = SpriteComponent(size, color);
 		TransformComponent tc = TransformComponent(pos);
@@ -33,11 +33,11 @@ namespace LkEngine {
 	}
 
 	// TODO: Fix this so the angle between p0 and p1 makes it so size in x axis equals lineWidth and then rotate
-	Entity EntityFactory::CreateLine(Scene& scene, const glm::vec2 p0, const glm::vec2 p1, float lineWidth, const glm::vec4& color)
+	LEntity EntityFactory::CreateLine(Scene& scene, const glm::vec2 p0, const glm::vec2 p1, float lineWidth, const glm::vec4& color)
 	{
 		int entityCount = scene.GetEntityCount();
 		std::string name = "Line_" + std::to_string(entityCount);
-		Entity entity = scene.CreateEntity(std::string(name));
+		LEntity entity = scene.CreateEntity(std::string(name));
 
 		glm::vec2 size = { lineWidth, p1.y - p0.y };
 		float angleRad = atan2((p1.x - p0.x), (p1.y - p0.y));
@@ -54,14 +54,14 @@ namespace LkEngine {
 		return entity;
 	}
 
-	Entity EntityFactory::CreateGrid(Scene& scene, int rows, int columns, float spacingX, float spacingY)
+	LEntity EntityFactory::CreateGrid(Scene& scene, int rows, int columns, float spacingX, float spacingY)
 	{
 		int entityCount = scene.GetEntityCount();
 		std::string name = "Quad_" + std::to_string(entityCount);
-		Entity entity = scene.CreateEntity(std::string(name));
+		LEntity entity = scene.CreateEntity(std::string(name));
 
-		glm::vec2 windowSize = Window::Get().GetSize();
-		glm::vec2 windowPos = Window::Get().GetPos();
+		glm::vec2 windowSize = LWindow::Get().GetSize();
+		glm::vec2 windowPos = LWindow::Get().GetPos();
 
 		float windowWidth = windowSize.x;
 		float windowHeight = windowSize.y;

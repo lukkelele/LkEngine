@@ -4,12 +4,12 @@
 
 namespace LkEngine {
 
-	OpenGLTextureArray::OpenGLTextureArray(const TextureArraySpecification& specification)
-		: m_Specification(specification)
+	OpenGLTextureArray::OpenGLTextureArray(const TextureArraySpecification& Specification)
+		: m_Specification(Specification)
 	{
-		auto [width, height] = GLUtils::ConvertDimensionsToWidthAndHeight(m_Specification.Dimension);
-		m_Width = width;
-		m_Height = height;
+		auto [Width, Height] = GLUtils::ConvertDimensionsToWidthAndHeight(m_Specification.TextureArrayDimension);
+		m_Width = Width;
+		m_Height = Height;
 
 		glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &m_RendererID);
 		glTextureStorage3D(m_RendererID, 1, GL_RGBA32F, m_Width, m_Height, m_Specification.Layers);

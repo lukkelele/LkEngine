@@ -23,12 +23,12 @@ namespace LkEngine {
 
 	struct Raycast2DResult
 	{
-		Entity HitEntity;
+		LEntity HitEntity;
 		glm::vec2 Point;
 		glm::vec2 Normal;
 		float Distance; // World units
 
-		Raycast2DResult(Entity entity, glm::vec2 point, glm::vec2 normal, float distance)
+		Raycast2DResult(LEntity entity, glm::vec2 point, glm::vec2 normal, float distance)
 			: HitEntity(entity)
 			, Point(point)
 			, Normal(normal)

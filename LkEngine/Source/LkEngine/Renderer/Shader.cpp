@@ -17,22 +17,37 @@ namespace LkEngine {
 
 	Ref<Shader> Shader::Create(const std::string& filepath)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLShader>::Create(filepath);
+			case ERendererAPI::OpenGL:
+			{
+				return Ref<OpenGLShader>::Create(filepath);
+			}
+
+			/// @FIXME
 			//case RendererAPIType::Vulkan: return Ref<VulkanShader>::Create(filepath);
+
+			case ERendererAPI::None: break;
 		}
-		LK_CORE_ASSERT(false, "Could not determine RendererAPI");
+
+		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
 	Ref<Shader> Shader::Create(const std::string& vertexPath, const std::string& fragmentPath)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLShader>::Create(vertexPath, fragmentPath);
+			case ERendererAPI::OpenGL: return Ref<OpenGLShader>::Create(vertexPath, fragmentPath);
+
+			/// @FIXME
 			//case RendererAPIType::Vulkan: return Ref<VulkanShader>::Create(vertexPath, fragmentPath);
+
+			case ERendererAPI::None: break;
 		}
-		LK_CORE_ASSERT(false, "Could not determine RendererAPI");
+
+		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
 	ShaderProgramSource Shader::ParseShader(const std::string& filepath)
@@ -70,10 +85,16 @@ namespace LkEngine {
 
 		std::string vertex_str = ss[0].str();
 		std::string frag_str = ss[1].str();
+
+		/* Check for errors */
 		if (vertex_str.empty())
+		{
 			LK_CORE_ERROR("Parsed vertex shader is empty!");
+		}
 		if (frag_str.empty())
+		{
 			LK_CORE_ERROR("Parsed fragment shader is empty!");
+		}
 
 		return { vertex_str, frag_str };
 	}

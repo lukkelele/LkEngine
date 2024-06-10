@@ -5,6 +5,8 @@
 
 namespace LkEngine {
 
+	using namespace std::chrono_literals;
+
 	class Timer
 	{
 	public:

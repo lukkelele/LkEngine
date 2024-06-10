@@ -18,26 +18,30 @@ namespace LkEngine {
 
     void ContactListener2D::BeginContact(b2Contact* contact)
     {
-        //LK_CORE_WARN("ContactListener: BeginContact");
         auto scene = Scene::GetActiveScene();
 
         UUID aID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
         UUID bID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 
-        Entity a = scene->GetEntityWithUUID(aID);
-        Entity b = scene->GetEntityWithUUID(bID);
+        LEntity a = scene->GetEntityWithUUID(aID);
+        LEntity b = scene->GetEntityWithUUID(bID);
 
-        // Exit if no contact
+        /* Exit if no contact. */
         if (!a || !b)
+        {
             return;
+        }
 
         auto& aBody = a.RigidBody2D();
         auto& bBody = b.RigidBody2D();
 
         // If either body is static, exit.
         // This is because of debugging purposes to track dynamic collisions
-        if (aBody.BodyType == RigidBody2DComponent::Type::Static || bBody.BodyType == RigidBody2DComponent::Type::Static)
+        if (aBody.BodyType == RigidBody2DComponent::Type::Static 
+            || bBody.BodyType == RigidBody2DComponent::Type::Static)
+        {
             return;
+        }
         
 
         LK_CORE_WARN("BeginContact --> ({}   and   {})", a.Name(), b.Name());
@@ -51,10 +55,10 @@ namespace LkEngine {
         auto scene = Scene::GetActiveScene();
         UUID aID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
         UUID bID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
-        Entity a = scene->GetEntityWithUUID(aID);
-        Entity b = scene->GetEntityWithUUID(bID);
+        LEntity a = scene->GetEntityWithUUID(aID);
+        LEntity b = scene->GetEntityWithUUID(bID);
 
-        // Exit if no contact
+        /* Exit if no contact. */
         if (!a || !b)
         {
             return;
@@ -65,8 +69,12 @@ namespace LkEngine {
 
         // If either body is static, exit.
         // This is because of debugging purposes to track dynamic collisions
-        if (aBody.BodyType == RigidBody2DComponent::Type::Static || bBody.BodyType == RigidBody2DComponent::Type::Static)
+        if (aBody.BodyType == RigidBody2DComponent::Type::Static 
+            || bBody.BodyType == RigidBody2DComponent::Type::Static)
+        {
             return;
+        }
+
 
         LK_CORE_WARN("EndContact --> ({}   and   {})", a.Name(), b.Name());
     }

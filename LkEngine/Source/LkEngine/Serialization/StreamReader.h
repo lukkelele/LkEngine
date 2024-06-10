@@ -1,7 +1,8 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/Buffer.h"
+//#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/Memory/Buffer.h"
 
 #include <filesystem>
 

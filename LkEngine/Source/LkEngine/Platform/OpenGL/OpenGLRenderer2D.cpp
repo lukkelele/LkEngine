@@ -63,8 +63,8 @@ namespace LkEngine {
 		    quadFramebufferSpec.ClearColorOnLoad = false;
 		    quadFramebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
 		    quadFramebufferSpec.DebugName = "OpenGLRenderer2D_Framebuffer";
-            quadFramebufferSpec.Width = Window::Get().GetWidth();
-            quadFramebufferSpec.Height = Window::Get().GetHeight();
+            quadFramebufferSpec.Width = LWindow::Get().GetWidth();
+            quadFramebufferSpec.Height = LWindow::Get().GetHeight();
 		    Ref<Framebuffer> quadFramebuffer = Framebuffer::Create(quadFramebufferSpec);
 
             m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
@@ -73,7 +73,7 @@ namespace LkEngine {
             m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
             // Quad Pipeline
-            PipelineSpecification quadPipelineSpec;
+            FPipelineSpecification quadPipelineSpec{};
             quadPipelineSpec.TargetFramebuffer = nullptr;
             quadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
             quadPipelineSpec.Shader = m_QuadShader;

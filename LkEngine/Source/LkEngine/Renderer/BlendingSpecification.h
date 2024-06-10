@@ -3,7 +3,7 @@
 
 namespace LkEngine {
 
-    enum class SourceBlendFunction
+    enum class ESourceBlendFunction
     {
         Zero = 0,
         One,
@@ -12,7 +12,7 @@ namespace LkEngine {
         One_Minus_DestinationAlpha
     };
 
-    enum class DestinationBlendFunction 
+    enum class EDestinationBlendFunction 
     {
         Zero = 0,
         One,
@@ -21,9 +21,9 @@ namespace LkEngine {
         One_Minus_SourceAlpha,
     };
 
-	enum class DepthFunction
+	enum class EDepthFunction
 	{
-		Never,
+		Never = 0,
 		Less,
 		Equal,
 		LessOrEqual,
@@ -33,17 +33,22 @@ namespace LkEngine {
 		Always
 	};
 
-    struct BlendFunction
+    struct FBlendFunction
     {
-        SourceBlendFunction Source;
-        DestinationBlendFunction Destination;
+        ESourceBlendFunction Source{};
+        EDestinationBlendFunction Destination;
 
-        BlendFunction() 
-            : Source(SourceBlendFunction::Alpha)
-            , Destination(DestinationBlendFunction::One_Minus_SourceAlpha) {}
-        BlendFunction(const SourceBlendFunction& source, const DestinationBlendFunction& destination)
-            : Source(source)
-            , Destination(destination) {}
+        FBlendFunction() 
+            : Source(ESourceBlendFunction::Alpha)
+            , Destination(EDestinationBlendFunction::One_Minus_SourceAlpha) 
+        {
+        }
+        FBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
+                       const EDestinationBlendFunction& InDestinationBlendFunction)
+            : Source(InSourceBlendFunction)
+            , Destination(InDestinationBlendFunction)
+        {
+        }
     };
 
 }

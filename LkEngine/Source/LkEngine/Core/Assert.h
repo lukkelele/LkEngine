@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Base.h"
-#include "Log.h"
+//#include "Base.h"
+//#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Log.h"
 
 
 #ifdef LK_PLATFORM_WINDOWS

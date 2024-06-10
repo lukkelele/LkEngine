@@ -112,11 +112,9 @@ namespace LkEngine{
 			Rotation = quat;
 			RotationEuler = glm::eulerAngles(Rotation);
 
-			// Attempt to avoid 180deg flips in the Euler angles when using SetRotation(quat)
-			if (
-				(fabs(RotationEuler.x - originalEuler.x) == glm::pi<float>()) &&
-				(fabs(RotationEuler.z - originalEuler.z) == glm::pi<float>())
-			)
+			/* Attempt to avoid 180deg flips in the Euler angles when using SetRotation(quat). */
+			if ((fabs(RotationEuler.x - originalEuler.x) == glm::pi<float>()) 
+				&& (fabs(RotationEuler.z - originalEuler.z) == glm::pi<float>()))
 			{
 				RotationEuler.x = originalEuler.x;
 				RotationEuler.y = glm::pi<float>() - RotationEuler.y;
@@ -150,7 +148,6 @@ namespace LkEngine{
             , Color(color) 
         {}
 
-        //glm::vec2& GetSize() { return Size; }
         const glm::vec2& GetSize() const { return Size; }
 		const glm::vec4& GetColor() const { return Color; }
         float GetWidth() const { return Size.x; }

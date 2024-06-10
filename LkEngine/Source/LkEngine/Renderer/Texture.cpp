@@ -10,43 +10,77 @@ namespace LkEngine {
 
 	Ref<Texture> Texture::Create(const TextureSpecification& textureSpec)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLTexture2D>::Create(textureSpec);
-			//case RendererAPIType::OpenGL: return Ref<OpenGLTexture>::Create(textureSpec);
-			//case RendererAPIType::Vulkan: return Ref<VulkanTexture>::Create(textureSpec);
+			case ERendererAPI::OpenGL: 
+			{
+				return Ref<OpenGLTexture2D>::Create(textureSpec);
+			}
+
+			/// @FIXME
+			//case RendererAPIType::Vulkan: return Ref<VulkanTexture2D>::Create(specification, imageData);
+
+			case ERendererAPI::None: break;
 		}
-		LK_CORE_ASSERT(false, "Coult not determine render API");
+
+		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
 	Ref<Texture2D> Texture2D::Create(const TextureSpecification& specification, Buffer imageData)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLTexture2D>::Create(specification, imageData);
+			case ERendererAPI::OpenGL: 
+			{
+				return Ref<OpenGLTexture2D>::Create(specification, imageData);
+			}
+
+			/// @FIXME
 			//case RendererAPIType::Vulkan: return Ref<VulkanTexture2D>::Create(specification, imageData);
+
+			case ERendererAPI::None: break;
 		}
-		LK_CORE_ASSERT(false, "Coult not determine render API");
+
+		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
 	Ref<Texture2D> Texture2D::Create(const TextureSpecification& specification)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLTexture2D>::Create(specification);
+			case ERendererAPI::OpenGL: 
+			{
+				return Ref<OpenGLTexture2D>::Create(specification);
+			}
+
+			/// @FIXME
             //case RendererAPIType::Vulkan: return Ref<VulkanTexture>::Create(specification);
+
+			case ERendererAPI::None: break;
 		}
-		LK_CORE_ASSERT(false, "Coult not determine render API");
+
+		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
 	Ref<TextureCube> TextureCube::Create(const TextureSpecification& specification, std::vector<std::filesystem::path> facePaths)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLTextureCube>::Create(specification, facePaths);
+			case ERendererAPI::OpenGL: 
+			{
+				return Ref<OpenGLTextureCube>::Create(specification, facePaths);
+			}
+
+			/// @FIXME
 			//case RendererAPIType::Vulkan: return Ref<VulkanTextureCube>::Create(specification, imageData);
+
+			case ERendererAPI::None: break;
 		}
-		LK_CORE_ASSERT(false, "Unknown RendererAPI");
+
+		LK_CORE_ASSERT(false, "Invalid Render API");
 		return nullptr;
 	}
 

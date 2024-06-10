@@ -1,7 +1,8 @@
 #pragma once 
 
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/UUID.h"
+//#include "LkEngine/Core/Base.h"
+//#include "LkEngine/Core/Hash/UUID.h"
+#include "LkEngine/Core/Core.h"
 
 
 namespace LkEngine {
@@ -33,17 +34,17 @@ namespace LkEngine {
 
 		inline AssetType AssetTypeFromString(std::string_view assetType)
 		{
-			if (assetType == "None")                return AssetType::None;
-			if (assetType == "Scene")               return AssetType::Scene;
-			if (assetType == "Prefab")              return AssetType::Prefab;
-			if (assetType == "Mesh")                return AssetType::Mesh;
-			if (assetType == "StaticMesh")          return AssetType::StaticMesh;
-			if (assetType == "MeshSource")          return AssetType::MeshSource;
-			if (assetType == "Material")            return AssetType::Material;
-			if (assetType == "Texture")             return AssetType::Texture;
-			if (assetType == "Font")                return AssetType::Font;
-			if (assetType == "Skeleton")            return AssetType::Skeleton;
-			if (assetType == "Animation")           return AssetType::Animation;
+			if (assetType == "None")           return AssetType::None;
+			if (assetType == "Scene")          return AssetType::Scene;
+			if (assetType == "Prefab")         return AssetType::Prefab;
+			if (assetType == "Mesh")           return AssetType::Mesh;
+			if (assetType == "StaticMesh")     return AssetType::StaticMesh;
+			if (assetType == "MeshSource")     return AssetType::MeshSource;
+			if (assetType == "Material")       return AssetType::Material;
+			if (assetType == "Texture")        return AssetType::Texture;
+			if (assetType == "Font")           return AssetType::Font;
+			if (assetType == "Skeleton")       return AssetType::Skeleton;
+			if (assetType == "Animation")      return AssetType::Animation;
 
 			return AssetType::None;
 		}

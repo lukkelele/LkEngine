@@ -8,7 +8,7 @@ namespace LkEngine {
     class PhysicsAPI
     {
     public:
-        static s_ptr<PhysicsAPI> Create();
+        static TSharedPtr<PhysicsAPI> Create();
         static PhysicsAPI* Get() { return m_PhysicsAPI; }
 
     protected:

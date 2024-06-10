@@ -2,9 +2,6 @@
 
 #include "LkEngine/Core/Base.h"
 
-//#include "VertexBuffer.h"
-//#include "Framebuffer.h"
-
 #include "PipelineSpecification.h"
 
 
@@ -29,14 +26,13 @@ namespace LkEngine {
 	public:
 		virtual ~Pipeline() = default;
 
-		virtual PipelineSpecification& GetSpecification() = 0;
-		virtual const PipelineSpecification& GetSpecification() const = 0;
+		virtual FPipelineSpecification& GetSpecification() = 0;
+		virtual const FPipelineSpecification& GetSpecification() const = 0;
 		virtual void Invalidate() = 0;
 		virtual Ref<Shader> GetShader() const = 0;
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 
-		static Ref<Pipeline> Create(const PipelineSpecification& spec);
+		static Ref<Pipeline> Create(const FPipelineSpecification& InPipelineSpecification);
 	};
-
 
 }

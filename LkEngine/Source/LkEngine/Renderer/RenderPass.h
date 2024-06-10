@@ -8,6 +8,7 @@
 
 namespace LkEngine {
 
+	/// @FIXME: Add E prefix
 	enum class RenderPassResourceType : uint16_t
 	{
 		None = 0,
@@ -20,6 +21,7 @@ namespace LkEngine {
 		Image2D
 	};
 
+	/// @FIXME: Add E prefix
 	enum class RenderPassInputType : uint16_t
 	{
 		None = 0,

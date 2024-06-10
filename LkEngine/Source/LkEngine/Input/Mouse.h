@@ -37,9 +37,9 @@ namespace LkEngine {
 		// Mouse position with origin (0, 0) in the center of the screen
 		inline static glm::vec2 CenterPos = { 0.0f, 0.0f }; 
 		inline static glm::vec2 ScaledCenterPos = { 0.0f, 0.0f };
+
 	private:
-		//inline static Window* m_ActiveWindow = nullptr;
-		friend class Window;
+		friend class LWindow;
 	};
 
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "LkEngine/Core/Thread.h"
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/Math/Math.h"
 
@@ -32,7 +33,7 @@ namespace LkEngine {
     constexpr const char* UI_SELECTED_ENTITY_INFO = "##lkengine-selected-entity-info";
 
 	class Scene;
-	class SceneManagerPanel;
+	class LSceneManagerPanel;
 
 	class EditorLayer : public Layer
 	{
@@ -47,8 +48,8 @@ namespace LkEngine {
 		enum GizmoType
 		{
 			Translate = 7 << 0,
-			Rotate = 7 << 3,
-			Scale = 7 << 6
+			Rotate    = 7 << 3,
+			Scale     = 7 << 6
 		};
 
 	public:
@@ -61,21 +62,26 @@ namespace LkEngine {
 		void OnRender();
 		void OnImGuiRender();
 
-		void OnEvent(Event& e) override;
-		void RegisterEvent(Event& e);
-		void SetEventCallback(const EventCallbackFn& callback) { m_EventCallback = callback; }
+		void OnEvent(LEvent& e) override;
+		void RegisterEvent(LEvent& e);
 
-		Ref<EditorCamera> GetEditorCamera() { return m_EditorCamera; }
+		void SetEventCallback(const EventCallbackFn& callback) 
+		{ 
+			m_EventCallback = callback; 
+		}
+
+		FORCEINLINE Ref<LEditorCamera> GetEditorCamera() { return EditorCamera; }
 		void SetScene(Ref<Scene> scene);
 		Ref<Scene> GetCurrentScene() { return m_Scene; }
 
 		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
 		void SetUpdateWindowFlag(bool flag);
 
-		WindowType GetCurrentWindowType() const { return m_ActiveWindowType; }
-		EditorTabManager* GetTabManager() { return m_TabManager; }
-		int GetTabCount() const { return m_TabManager->GetTabCount(); }
-		std::string GetCurrentTabName() const { return m_TabManager->GetActiveTabName(); }
+		WindowType GetCurrentWindowType() const 
+		{ 
+			return m_ActiveWindowType; 
+		}
+
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
 		float GetEditorWindowHeight() const;
@@ -95,7 +101,7 @@ namespace LkEngine {
 		void RenderViewport();                
 		void RenderViewport(Ref<Image> image); 
 
-        void DrawImGuizmo(Entity entity);
+        void DrawImGuizmo(LEntity Entity);
 		void HandleExternalWindows();
 
 		void UI_MainMenuBar();
@@ -118,7 +124,7 @@ namespace LkEngine {
 
 		Ref<Framebuffer>& GetViewportFramebuffer() { return m_ViewportFramebuffer; }
 
-		Entity CreateCube();
+		LEntity CreateCube();
 
 	public:
 		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window // FIXME: REMOVE
@@ -145,6 +151,8 @@ namespace LkEngine {
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
 	private:
+		LEditorTabManager& TabManager;
+
 		Ref<Scene> m_Scene = nullptr;
 		bool m_Enabled = true;
 		glm::vec2 m_ViewportBounds[2];
@@ -153,29 +161,30 @@ namespace LkEngine {
 		bool m_ShowStackTool = false;
 		bool m_ShowStyleEditorLayer = false;
 		int m_GizmoType = GizmoType::Translate;
-		int m_CurrentTabCount = 0; // Incremented to 1 after EditorLayer is initialized
+		//int m_CurrentTabCount = 0; // Incremented to 1 after EditorLayer is initialized
 
         EventCallbackFn m_EventCallback;
 
 		Ref<Framebuffer> m_ViewportFramebuffer;
-		Ref<EditorCamera> m_EditorCamera;
+		Ref<LEditorCamera> EditorCamera;
 
-		SceneManagerPanel* m_SceneManagerPanel = nullptr;
+		TSharedPtr<LSceneManagerPanel> SceneManagerPanel;
 
 		Ref<Project> m_Project;
 
 		NodeEditor* m_NodeEditor;
-		EditorTabManager* m_TabManager;
-		ComponentEditor* m_ComponentEditor;
+		//LEditorTabManager* m_TabManager{};
+		ComponentEditor* m_ComponentEditor{};
 		ContentBrowser* m_ContentBrowser;
 
-		Window* m_Window = nullptr;
+		LWindow* Window = nullptr;
 		WindowType m_ActiveWindowType;
 
+		/// REWORK
 		friend class Physics2D; // For getting UI window size when raycasting
 		friend class NodeEditorTab;
 		friend class MaterialEditorTab;
-		friend class SceneManagerPanel;
+		friend class LSceneManagerPanel; 
 		friend class Renderer;
 		
 		inline static EditorLayer* m_Instance = nullptr;

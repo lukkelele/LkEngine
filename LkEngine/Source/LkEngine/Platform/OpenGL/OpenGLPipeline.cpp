@@ -6,10 +6,10 @@
 
 namespace LkEngine {
 
-	OpenGLPipeline::OpenGLPipeline(const PipelineSpecification& specification)
-		: m_Specification(specification)
+	OpenGLPipeline::OpenGLPipeline(const FPipelineSpecification& InPipelineSpecification)
+		: PipelineSpecification(InPipelineSpecification)
 	{
-		m_Specification.RenderAPI = RendererAPIType::OpenGL;
+		PipelineSpecification.RenderAPI = ERendererAPI::OpenGL;
 	}
 
 	OpenGLPipeline::~OpenGLPipeline()
@@ -22,12 +22,12 @@ namespace LkEngine {
 
 	void OpenGLPipeline::SetLayout(const VertexBufferLayout& layout)
 	{
-		m_Specification.Layout = layout;
+		PipelineSpecification.Layout = layout;
 	}
 
 	void OpenGLPipeline::BindTextureArray(const RendererID& rendererID)
 	{
-		m_BoundTextureArrays.push_back(rendererID);
+		BoundTextureArrays.push_back(rendererID);
 	}
 
 }

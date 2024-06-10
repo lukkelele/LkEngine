@@ -14,9 +14,10 @@ namespace LkEngine {
 	//-------------------------------------------------------------------------------
 	Ref<Image> Image::Create(ImageSpecification spec, Buffer buffer)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLImage>::Create(spec, buffer);
+			/// @FIXME
+			case ERendererAPI::OpenGL: return Ref<OpenGLImage>::Create(spec, buffer);
 			//case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
 		}
 		LK_CORE_ASSERT(false, "No RenderAPI detected");
@@ -24,11 +25,13 @@ namespace LkEngine {
 
 	Ref<Image> Image::Create(ImageSpecification spec, void* buffer)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLImage>::Create(spec, buffer);
+			/// @FIXME
+			case ERendererAPI::OpenGL: return Ref<OpenGLImage>::Create(spec, buffer);
 			//case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
 		}
+
 		LK_CORE_ASSERT(false, "No RenderAPI detected");
 	}
 
@@ -38,21 +41,25 @@ namespace LkEngine {
 	//-------------------------------------------------------------------------------
 	Ref<Image2D> Image2D::Create(ImageSpecification spec, Buffer buffer)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLImage2D>::Create(spec, buffer);
+			case ERendererAPI::OpenGL: return Ref<OpenGLImage2D>::Create(spec, buffer);
+			/// @FIXME
 			//case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
 		}
+
 		LK_CORE_ASSERT(false, "No RenderAPI detected");
 	}
 
 	Ref<Image2D> Image2D::Create(ImageSpecification spec, void* buffer)
 	{
-		switch (RendererAPI::Current())
+		switch (LRendererAPI::Current())
 		{
-			case RendererAPIType::OpenGL: return Ref<OpenGLImage2D>::Create(spec, buffer);
+			case ERendererAPI::OpenGL: return Ref<OpenGLImage2D>::Create(spec, buffer);
+			/// @FIXME
 			//case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
 		}
+
 		LK_CORE_ASSERT(false, "No RenderAPI detected");
 	}
 

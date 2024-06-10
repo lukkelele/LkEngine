@@ -8,9 +8,6 @@
 
 namespace LkEngine {
 
-    //-----------------------------------------------------------
-    // NodeEditorTab
-    //-----------------------------------------------------------
     NodeEditorTab::NodeEditorTab(std::string_view name) 
     {
         Name = std::string(name);

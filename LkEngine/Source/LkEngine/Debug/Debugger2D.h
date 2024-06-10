@@ -8,7 +8,6 @@
 
 namespace LkEngine {
 
-    // Forward declaration
     class Scene;
 
     class Debugger2D
@@ -20,26 +19,30 @@ namespace LkEngine {
             Shape          = 1 << 1,
             Joints         = 1 << 2,
         };
+
     public:
         virtual ~Debugger2D() = default;
 
-        static s_ptr<Debugger2D> Create();
-        static Debugger2D* Get() { return m_Instance; }
-        static void SetType(Physics2D::API type) { m_API = type; }
-        static Physics2D::API GetCurrentAPI() { return m_API; }
+        static TSharedPtr<Debugger2D> Create();
 
-        static ShapeType Determine2DShapeToDraw(int vertexCount)
+        FORCEINLINE static void SetType(Physics2D::API InAPI) { m_API = InAPI; }
+        FORCEINLINE static Physics2D::API GetCurrentAPI() { return m_API; }
+
+        static Debugger2D* Get() { return m_Instance; }
+
+        FORCEINLINE static EShapeType Determine2DShapeToDraw(const int VertexCount)
         {
-            switch (vertexCount)
+            switch (VertexCount)
             {
-                case 3: return ShapeType::Triangle;
-                case 4: return ShapeType::Quad;
+                case 3: return EShapeType::Triangle;
+                case 4: return EShapeType::Quad;
             }
-            return ShapeType::Null;
+            return EShapeType::Null;
         }
 
     protected:
         inline static Physics2D::API m_API = Physics2D::API::None;
         inline static Debugger2D* m_Instance = nullptr;
     };
+
 }

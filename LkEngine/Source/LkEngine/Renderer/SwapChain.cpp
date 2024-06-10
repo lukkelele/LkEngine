@@ -14,13 +14,14 @@ namespace LkEngine {
 
     Ref<SwapChain> SwapChain::Create(uint32_t* width, uint32_t* height, bool vsync)
     {
-        switch (RendererAPI::Current())
+        switch (LRendererAPI::Current())
         {
-            case RendererAPIType::OpenGL: 
+            case ERendererAPI::OpenGL: 
             {
-                Ref<OpenGLSwapChain> swapchain = Ref<OpenGLSwapChain>::Create();
-                swapchain->Create(width, height, vsync);
-                return swapchain;
+                /// @FIXME: Rename local var SwapchainRef whenever LSwapChain exists
+                Ref<OpenGLSwapChain> SwapchainRef = Ref<OpenGLSwapChain>::Create();
+                SwapchainRef->Create(width, height, vsync);
+                return SwapchainRef;
             }
 
             //case RendererAPIType::Vulkan: 
@@ -29,8 +30,12 @@ namespace LkEngine {
             //    vulkanSwapChain->Create(width, height, vsync);
             //    return vulkanSwapChain;
             //}
+
+            case ERendererAPI::None: break;
         }
-        LK_CORE_ASSERT(false, "RendererAPI could not get determined");
+
+        LK_CORE_ASSERT(false, "Invalid Render API");
+        return nullptr;
     }
 
 }

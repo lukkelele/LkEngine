@@ -10,13 +10,11 @@
 #include "LkEngine/Scene/Components.h"
 
 
-// Forward declarations
 namespace LkEngine {
-    class Window;
-    class Entity;
-}
 
-namespace LkEngine {
+    class LWindow;
+    class LEntity;
+
     constexpr const char* LkEngine_DockSpace = "##LkEngine-DockSpace";
 }
 
@@ -50,7 +48,7 @@ namespace LkEngine::UI {
     const char* GetSelectedEntityWindowName();
 
     void BeginDockSpace(const char* dockspaceID);
-    void BeginViewport(const char* viewportID, Window* window, ImGuiViewport* viewport);
+    void BeginViewport(const char* viewportID, LWindow* WindowRef, ImGuiViewport* viewport);
 
     // Implemented in either OpenGLImgui.cpp or VulkanImGui.cpp
     void Image(const Ref<Texture2D>& texture, const ImVec2& size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), const ImVec4& tint_col = ImVec4(1, 1, 1, 1), const ImVec4& border_col = ImVec4(0, 0, 0, 0));

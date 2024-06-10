@@ -5,8 +5,8 @@
 #include "LkEngine/Renderer/BlendingSpecification.h"
 #include "LkEngine/Renderer/Image.h"
 
-#include "LkEngine/Utilities/StringUtils.h"
-#include "LkEngine/Utilities/MemoryUtils.h"
+#include "LkEngine/Utility/StringUtils.h"
+#include "LkEngine/Utility/MemoryUtils.h"
 
 #include "LkEngine/Renderer/Framebuffer.h"
 #include "LkEngine/Renderer/Shader.h"
@@ -50,8 +50,8 @@ namespace LkEngine {
 
     namespace GLUtils {
 
-        int GetOpenGLSourceBlendFunction(const SourceBlendFunction& srcFunc);
-        int GetOpenGLDestinationBlendFunction(const DestinationBlendFunction& dstFunc);
+        int GetOpenGLSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction);
+        int GetOpenGLDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction);
 
         const GLubyte* GetExtensions();
         void PrintOpenGLExtensions();

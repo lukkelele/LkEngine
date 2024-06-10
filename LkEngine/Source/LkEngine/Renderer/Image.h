@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <stb_image/stb_image.h>
 
-#include "LkEngine/Core/Buffer.h"
+#include "LkEngine/Core/Memory/Buffer.h"
 
 #include "BlendingSpecification.h"
 #include "Color.h"

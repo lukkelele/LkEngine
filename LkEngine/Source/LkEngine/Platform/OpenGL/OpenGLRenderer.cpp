@@ -26,10 +26,10 @@ namespace LkEngine {
     {
 		Data = new RendererData();
 
-		m_RenderContext = Window::Get().GetRenderContext().As<OpenGLContext>();
+		m_RenderContext = LWindow::Get().GetRenderContext().As<OpenGLContext>();
 
 		// Texture Arrays
-		constexpr TextureArrayDimension TextureArrayDimensions[] = { 
+		constexpr ETextureArrayDimension TextureArrayDimensions[] = { 
 			Dimension_512x512, 
 			Dimension_1024x1024, 
 			Dimension_2048x2048 
@@ -40,7 +40,7 @@ namespace LkEngine {
 		{
 			textureArraySpec.Format = ImageFormat::RGBA;
 			textureArraySpec.TextureSlot = TextureArrayCount;
-			textureArraySpec.Dimension = TextureArrayDimensions[i];
+			textureArraySpec.TextureArrayDimension = TextureArrayDimensions[i];
 			textureArraySpec.DebugName = "TextureArray-" + Utils::TextureArrayDimensionToString(TextureArrayDimensions[i]);
 			Data->TextureArrays[TextureArrayCount++] = Ref<OpenGLTextureArray>::Create(textureArraySpec);
 			LK_CORE_DEBUG_TAG("OpenGLRenderer", "Created texture array {} called \"{}\"", i, textureArraySpec.DebugName);
@@ -74,8 +74,8 @@ namespace LkEngine {
 		m_Renderer2D->Init();
 
 		m_RenderContext->SetDepthEnabled(true);
-		SetPrimitiveTopology(RenderTopology::Triangles);
-
+		/* Default to triangles */
+		SetPrimitiveTopology(ERenderTopology::Triangles);
 
 		// Render Passes
 		{
@@ -127,25 +127,30 @@ namespace LkEngine {
 		viewportFramebuffer.Unbind();
 	}
 
-	void OpenGLRenderer::SetPrimitiveTopology(const RenderTopology& mode)
+	void OpenGLRenderer::SetPrimitiveTopology(const ERenderTopology& InRenderTopology)
 	{
 		// No need to call RenderContext here as the topology is used for draw calls
-		switch (mode)
+		switch (InRenderTopology)
 		{
-			case RenderTopology::Lines:
+			case ERenderTopology::Lines:
+			{
 				m_Topology = GL_LINES;
 				m_Renderer2D->m_Topology = GL_LINES;
 				break;
-			case RenderTopology::Triangles:
+			}
+
+			case ERenderTopology::Triangles:
+			{
 				m_Topology = GL_TRIANGLES;
 				m_Renderer2D->m_Topology = GL_TRIANGLES;
 				break;
+			}
 		}
 	}
 
-	void OpenGLRenderer::SetDepthFunction(const DepthFunction& depthFunc)
+	void OpenGLRenderer::SetDepthFunction(const EDepthFunction& InDepthFunction)
 	{
-		m_RenderContext->SetDepthFunction(depthFunc);
+		m_RenderContext->SetDepthFunction(InDepthFunction);
 	}
 
 	void OpenGLRenderer::Draw(VertexBuffer& vb, const Shader& shader)
@@ -311,20 +316,23 @@ namespace LkEngine {
 		textureArray.Bind();
 	}
 
-	void OpenGLRenderer::BindTextureArray(const TextureArrayDimension& dimension)
+	void OpenGLRenderer::BindTextureArray(const ETextureArrayDimension& TextureArrayDimension)
 	{
-		OpenGLTextureArray& textureArray = *GetTextureArrayWithDimension(dimension);
+		OpenGLTextureArray& textureArray = *GetTextureArrayWithDimension(TextureArrayDimension);
 		textureArray.Bind();
 	}
 
-	Ref<OpenGLTextureArray> OpenGLRenderer::GetTextureArrayWithDimension(const TextureArrayDimension& dimension)
+	Ref<OpenGLTextureArray> OpenGLRenderer::GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension)
 	{
-		for (auto& textureArray : Data->TextureArrays)
+		for (Ref<OpenGLTextureArray>& TextureArray : Data->TextureArrays)
 		{
-			if (textureArray->m_Specification.Dimension == dimension)
-				return textureArray;
+			if (TextureArray->m_Specification.TextureArrayDimension == TextureArrayDimension)
+			{
+				return TextureArray;
+			}
 		}
-		LK_CORE_ASSERT(false, "Couldn't find TextureArray with dimension {}...", (int)dimension);
+
+		LK_CORE_ASSERT(false, "Couldn't find TextureArray with dimension {}...", static_cast<int>(TextureArrayDimension));
 	}
 
 }

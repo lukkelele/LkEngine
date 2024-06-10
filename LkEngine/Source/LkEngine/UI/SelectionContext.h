@@ -13,7 +13,7 @@ namespace LkEngine {
 			Context = this;
 		}
 
-		static void SelectEntity(Entity e)
+		static void SelectEntity(LEntity e)
 		{
 			LastSelectedEntity = SelectedEntity;
 			SelectedEntity = e;
@@ -33,14 +33,16 @@ namespace LkEngine {
 		static SelectionContext* Get() { return Context; }
 
 	public:
-		inline static Entity SelectedEntity{};
-		inline static Entity LastSelectedEntity{};
+		inline static LEntity SelectedEntity{};
+		inline static LEntity LastSelectedEntity{};
 
 		inline static SelectionContext* Context = nullptr;
 
-		inline static constexpr Entity NULL_ENTITY{};
+		//inline static const LEntity NULL_ENTITY{};
+		inline static LEntity NULL_ENTITY{};
 	};
 
+	/// @FIXME
 	using SELECT = SelectionContext;
 	using SELECTION = SelectionContext;
 

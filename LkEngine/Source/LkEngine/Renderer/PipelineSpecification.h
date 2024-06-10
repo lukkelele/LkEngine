@@ -14,6 +14,7 @@ namespace LkEngine {
 	class VertexBufferLayout;
 	class Shader;
 
+	/// @TODO: Prefix E for enumeration
 	enum class PrimitiveTopology
 	{
 		None = 0,
@@ -25,6 +26,7 @@ namespace LkEngine {
 		TriangleFan
 	};
 
+	/// @TODO: Prefix E for enumeration
 	enum class DepthCompareOperator
 	{
 	    None = 0,
@@ -38,10 +40,11 @@ namespace LkEngine {
 	    Always,
 	};
 
-	struct PipelineSpecification
+	struct FPipelineSpecification
 	{
-		Ref<Shader> Shader;
-		Ref<Framebuffer> TargetFramebuffer;
+		Ref<Shader> Shader{ nullptr };
+		Ref<Framebuffer> TargetFramebuffer{ nullptr };
+
 		VertexBufferLayout Layout;
 		VertexBufferLayout InstanceLayout;
 		VertexBufferLayout BoneInfluenceLayout;
@@ -57,7 +60,7 @@ namespace LkEngine {
 
 		std::string DebugName;
 
-		RendererAPIType RenderAPI = RendererAPIType::None;
+		ERendererAPI RenderAPI = ERendererAPI::None;
 
 		void SetLayout(const VertexBufferLayout& layout) { Layout = layout; }
 	};

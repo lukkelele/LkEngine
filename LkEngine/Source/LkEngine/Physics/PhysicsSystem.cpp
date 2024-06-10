@@ -4,11 +4,6 @@
 
 namespace LkEngine {
 
-    void PhysicsSystem::SetPhysicsAPI(PhysicsAPIType physicsAPI)
-    {
-        m_PhysicsAPIType = physicsAPI;
-    }
-
     PhysicsSystem::PhysicsSystem()
     {
         m_Instance = this;
@@ -18,11 +13,11 @@ namespace LkEngine {
     {
     }
 
-    void PhysicsSystem::Simulate(Timestep ts)
+    void PhysicsSystem::Simulate(const FTimestep DeltaTime)
     {
         // 2D Physics
-		static signed int velocityIterations = 20;
-		static signed int positionIterations = 8;
+		static signed int VelocityIterations = 20;
+		static signed int PositionIterations = 8;
 
 #if 0
         auto activeScene = Scene::GetActiveScene();

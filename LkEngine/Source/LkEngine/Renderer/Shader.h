@@ -44,7 +44,7 @@ namespace LkEngine {
 
 		virtual size_t GetHash() = 0;
 
-		static const char* ConvertUniformType(const TextureUniformType& type)
+		FORCEINLINE static const char* ConvertUniformType(const TextureUniformType& type)
 		{
 			switch (type)
 			{
@@ -55,6 +55,7 @@ namespace LkEngine {
 				case TextureUniformType::DiffuseRoughness: return "u_DiffuseRoughness";
 				case TextureUniformType::Emissive:         return "u_Emissive";
 			}
+
 			LK_CORE_ASSERT(false, "Could not convert the TextureUniformType {}", (int)type);
 		}
 

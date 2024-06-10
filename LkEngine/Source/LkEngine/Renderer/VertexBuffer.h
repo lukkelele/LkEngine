@@ -1,10 +1,10 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/Buffer.h"
+#include "LkEngine/Core/Core.h"
 
 #include "IndexBuffer.h"
 #include "VertexBufferLayout.h"
+
 
 namespace LkEngine {
 

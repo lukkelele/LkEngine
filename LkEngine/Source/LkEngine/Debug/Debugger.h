@@ -14,7 +14,7 @@ namespace LkEngine {
         ~Debugger();
 
         static Debugger* Get() { return m_Instance; }
-        static s_ptr<Debugger2D> GetDebugger2D() { return m_Debugger2D; }
+        static TSharedPtr<Debugger2D> GetDebugger2D() { return m_Debugger2D; }
 
         void Init();
 
@@ -25,7 +25,7 @@ namespace LkEngine {
 
     private:
         inline static Debugger* m_Instance = nullptr;
-        inline static s_ptr<Debugger2D> m_Debugger2D = nullptr;
+        inline static TSharedPtr<Debugger2D> m_Debugger2D = nullptr;
     };
 
 }

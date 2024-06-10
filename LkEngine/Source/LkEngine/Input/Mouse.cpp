@@ -23,23 +23,23 @@ namespace LkEngine {
 
 	bool Mouse::IsButtonPressed(MouseButton button)
 	{
-		GLFWwindow* window = Window::Get().GetGlfwWindow();
-		auto state = glfwGetMouseButton(window, static_cast<int32_t>(button));
-		return state == GLFW_PRESS;
+		GLFWwindow* GlfwWindow = LWindow::Get().GetGlfwWindow();
+		int MouseButtonState = glfwGetMouseButton(GlfwWindow, static_cast<int32_t>(button));
+		return MouseButtonState == GLFW_PRESS;
 	}
 
 	glm::vec2 Mouse::GetPos()
 	{
 		double xpos, ypos;
 		//glfwGetCursorPos(RenderContext::Get()->GetGlfwWindow(), &xpos, &ypos);
-		glfwGetCursorPos(Window::Get().GetGlfwWindow(), &xpos, &ypos);
+		glfwGetCursorPos(LWindow::Get().GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
 		Pos.x = x;
 		Pos.y = y;
 
-		Mouse::CenterPos.x = (x / Window::Get().GetWidth()) * 2.0f - 1.0f;
-		Mouse::CenterPos.y = ((y / Window::Get().GetHeight()) * 2.0f - 1.0f) * -1.0f;
+		Mouse::CenterPos.x = (x / LWindow::Get().GetWidth()) * 2.0f - 1.0f;
+		Mouse::CenterPos.y = ((y / LWindow::Get().GetHeight()) * 2.0f - 1.0f) * -1.0f;
 
 		return Pos;
 	}
@@ -47,7 +47,7 @@ namespace LkEngine {
 	glm::vec2 Mouse::GetRawPos()
 	{
 		double xpos, ypos;
-		glfwGetCursorPos(Window::Get().GetGlfwWindow(), &xpos, &ypos);
+		glfwGetCursorPos(LWindow::Get().GetGlfwWindow(), &xpos, &ypos);
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
 		return { x, y };
@@ -80,10 +80,10 @@ namespace LkEngine {
 	// position when it is being run because of the editor docking windows
 	glm::vec2 Mouse::GetCenterPos() 
 	{ 
-		CenterPos.x = (Pos.x / Window::Get().GetWidth()) * 2.0f - 1.0f;
-		CenterPos.y = ((Pos.y / Window::Get().GetHeight()) * 2.0f - 1.0f) * 1.0f;
-		ScaledCenterPos.x = (CenterPos.x * Window::Get().GetWidth()) / Window::Get().GetScalerX();
-		ScaledCenterPos.y = (CenterPos.y * Window::Get().GetHeight()) / Window::Get().GetScalerY();
+		CenterPos.x = (Pos.x / LWindow::Get().GetWidth()) * 2.0f - 1.0f;
+		CenterPos.y = ((Pos.y / LWindow::Get().GetHeight()) * 2.0f - 1.0f) * 1.0f;
+		ScaledCenterPos.x = (CenterPos.x * LWindow::Get().GetWidth()) / LWindow::Get().GetScalerX();
+		ScaledCenterPos.y = (CenterPos.y * LWindow::Get().GetHeight()) / LWindow::Get().GetScalerY();
 		return CenterPos;
 	}
 
@@ -104,33 +104,38 @@ namespace LkEngine {
 
 	bool Mouse::IsButtonDown(MouseButton button)
 	{
-		bool imguiEnabled = Application::Get()->GetSpecification().ImGuiEnabled;
-		if (imguiEnabled == false)
+		const bool bImGuiEnabled = LApplication::Get()->GetSpecification().ImGuiEnabled;
+		if (bImGuiEnabled == false)
 		{
-			auto& window = Application::Get()->GetWindow();
-			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(window.GetGlfwWindow()), static_cast<int32_t>(button));
-			return state == GLFW_PRESS;
+			LWindow& Window = LApplication::Get()->GetWindow();
+			const int MouseButtonState = glfwGetMouseButton(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), static_cast<int32_t>(button));
+			return MouseButtonState == GLFW_PRESS;
 		}
 
 		ImGuiContext* context = ImGui::GetCurrentContext();
 		bool pressed = false;
-		for (ImGuiViewport* viewport : context->Viewports)
+		for (ImGuiViewport* Viewport : context->Viewports)
 		{
-			if (!viewport->PlatformUserData)
+			if (!Viewport->PlatformUserData)
+			{
 				continue;
+			}
 
 			// The first member is GLFWwindow handle
-			GLFWwindow* windowHandle = *(GLFWwindow**)viewport->PlatformUserData; 
-			if (!windowHandle)
+			GLFWwindow* WindowHandle = *(GLFWwindow**)Viewport->PlatformUserData; 
+			if (!WindowHandle)
+			{
 				continue;
+			}
 
-			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(windowHandle), static_cast<int32_t>(button));
-			if (state == GLFW_PRESS || state == GLFW_REPEAT)
+			const int State = glfwGetMouseButton(static_cast<GLFWwindow*>(WindowHandle), static_cast<int32_t>(button));
+			if (State == GLFW_PRESS || State == GLFW_REPEAT)
 			{
 				pressed = true;
 				break;
 			}
 		}
+
 		return pressed;
 	}
 

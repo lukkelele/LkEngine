@@ -13,24 +13,24 @@ namespace LkEngine {
 		m_PerspectiveFar = farClip;
 	}
 
-	void SceneCamera::SetOrthographic(float width, float height, float nearClip, float farClip)
+	void SceneCamera::SetOrthographic(float Width, float Height, float nearClip, float farClip)
 	{
 		m_ProjectionType = ProjectionType::Orthographic;
 		m_OrthographicNear = nearClip;
 		m_OrthographicFar = farClip;
 	}
 
-	void SceneCamera::SetViewportSize(uint32_t width, uint32_t height)
+	void SceneCamera::SetViewportSize(uint32_t Width, uint32_t Height)
 	{
 		UpdateView();
 		switch (m_ProjectionType)
 		{
 			case ProjectionType::Perspective:
-				SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), (float)width, (float)height, m_PerspectiveNear, m_PerspectiveFar);
+				SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), (float)Width, (float)Height, m_PerspectiveNear, m_PerspectiveFar);
 				break;
 
 			case ProjectionType::Orthographic:
-				SetOrthoProjectionMatrix(width, height, m_OrthographicNear, m_OrthographicFar);
+				SetOrthoProjectionMatrix(Width, Height, m_OrthographicNear, m_OrthographicFar);
 				break;
 		}
 	}
@@ -75,25 +75,26 @@ namespace LkEngine {
 		if (m_MouseEnabled)
 		{
 		}
-        auto& window = Window::Get();
-		SetViewportSize(window.GetViewportWidth(), window.GetViewportHeight());
+
+        LWindow& Window = LWindow::Get();
+		SetViewportSize(Window.GetViewportWidth(), Window.GetViewportHeight());
 	}
 
 	void SceneCamera::UpdateProjection()
 	{
-		float left, right, bottom, top;
-		float width, height;
+		float Width, Height;
+		float Left, Right, Bottom, Top;
 
-		auto& window = Window::Get();
-		width = window.GetViewportWidth();
-		height = window.GetViewportWidth();
+		LWindow& Window = LWindow::Get();
+		Width = Window.GetViewportWidth();
+		Height = Window.GetViewportWidth();
 
-		left = -width / 2.0f;
-		right = width / 2.0f;
-		bottom = -height / 2.0f;
-		top = height / 2.0f;
+		Left = -Width / 2.0f;
+		Right = Width / 2.0f;
+		Bottom = -Height / 2.0f;
+		Top = Height / 2.0f;
 
-		m_ProjectionMatrix = glm::ortho(left, right, bottom, top);
+		m_ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top);
 	}
 
 	void SceneCamera::UpdateView()

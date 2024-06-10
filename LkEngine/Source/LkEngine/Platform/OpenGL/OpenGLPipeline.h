@@ -9,23 +9,24 @@ namespace LkEngine {
     class OpenGLPipeline : public Pipeline
     {
     public:
-		OpenGLPipeline(const PipelineSpecification& spec);
+		OpenGLPipeline(const FPipelineSpecification& InPipelineSpecification);
 		~OpenGLPipeline() override;
 
 		void Invalidate() override;
 
 		void SetLayout(const VertexBufferLayout& layout) override;
-		Ref<Shader> GetShader() const override { return m_Specification.Shader; }
+		Ref<Shader> GetShader() const override { return PipelineSpecification.Shader; }
 
-		PipelineSpecification& GetSpecification() override { return m_Specification; }
-		const PipelineSpecification& GetSpecification() const override { return m_Specification; }
+		FORCEINLINE FPipelineSpecification& GetSpecification() override { return PipelineSpecification; }
+		FORCEINLINE const FPipelineSpecification& GetSpecification() const override { return PipelineSpecification; }
 
 		void BindTextureArray(const RendererID& rendererID);
-		std::deque<RendererID> GetBoundTextureArrays() const { return m_BoundTextureArrays; }
+
+		FORCEINLINE std::deque<RendererID> GetBoundTextureArrays() const { return BoundTextureArrays; }
 
 	private:
-		PipelineSpecification m_Specification;
-		std::deque<RendererID> m_BoundTextureArrays{};
+		FPipelineSpecification PipelineSpecification;
+		std::deque<RendererID> BoundTextureArrays{};
 
     };
 

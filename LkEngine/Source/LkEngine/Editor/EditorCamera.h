@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/Timestep.h"
 #include "LkEngine/Renderer/Camera.h"
 
 #include "LkEngine/Input/Keyboard.h"
@@ -13,15 +15,19 @@
 
 namespace LkEngine {
 
-	class EditorCamera : public Camera
+	class LEditorCamera : public Camera
 	{
 	public:
-		EditorCamera(const float degFov, const float width, const float height, const float nearP, const float farP); 
+		LEditorCamera(const float DegFov, 
+					  const float Width, 
+					  const float Height, 
+					  const float NearP, 
+					  const float FarP); 
 
 		void Init();
-		void OnUpdate(const Timestep ts);
+		void OnUpdate(const FTimestep DeltaTime);
 		void UpdateCameraView();
-		void OnEvent(Event& e);
+		void OnEvent(LEvent& e);
 
 		void SetPerspective(float verticalFOV, float nearClip = 0.1f, float farClip = 1000.0f);
 		void SetOrthographic(float width, float height, float nearClip = -1.0f, float farClip = 1.0f);
@@ -38,7 +44,14 @@ namespace LkEngine {
 
 		glm::vec3 GetUpDirection() const;
 		glm::vec3 GetRightDirection() const;
-		glm::vec3 GetForwardDirection() const;
+		//glm::vec3 GetForwardDirection() const;
+
+		template<typename T = glm::vec3>
+		T GetForwardDirection() const
+		{
+			return T(glm::rotate(GetOrientation(), glm::vec3(0.0f, 0.0f, -1.0f)));
+		}
+
 		const glm::vec3& GetPosition() const { return m_Position; }
 		const glm::vec3& GetOrigin() const { return m_Origin; }
 		glm::quat GetOrientation() const;
@@ -54,6 +67,14 @@ namespace LkEngine {
 		void SetActive(bool active) { m_IsActive = active; }
 		void SetPosition(const glm::vec3& position);
 
+		/// REMOVE
+		enum class ViewMode 
+		{ 
+			Classic, 
+			Fake2D 
+		};
+		void ApplyViewMode(ViewMode mode);
+
 	private:
 		bool OnKeyPress(KeyPressedEvent& e);
 		bool OnMouseScroll(MouseScrolledEvent& e);
@@ -68,13 +89,6 @@ namespace LkEngine {
 
 		inline float GetYawDelta() const { return m_YawDelta; }
 		inline float GetPitchDelta() const { return m_PitchDelta; }
-
-		enum class ViewMode 
-		{ 
-			Classic, 
-			Fake2D 
-		};
-		void ApplyViewMode(ViewMode mode);
 
 	private:
 		glm::vec3 m_Position{}, m_Direction{}, m_FocalPoint{};
@@ -99,8 +113,11 @@ namespace LkEngine {
 
 		GizmoMode m_GizmoMode = GizmoMode::Translate;
 
-		float m_Pitch = 0.0f, m_Yaw = 0.0f;
-		float m_PitchDelta{}, m_YawDelta{};
+		float m_Pitch = 0.0f;
+		float m_PitchDelta{};
+		float m_Yaw = 0.0f;
+		float m_YawDelta{};
+
 		glm::vec3 m_PositionDelta{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_RightDirection{ 0.0f, 0.0f, 0.0f };
 		bool m_PitchLocked = false, m_YawLocked = false; // Allow values to change or not

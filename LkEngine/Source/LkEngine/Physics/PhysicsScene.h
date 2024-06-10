@@ -10,12 +10,16 @@ namespace LkEngine {
     public:
         virtual ~PhysicsScene() = default;
 
-		virtual void Simulate(float ts) = 0;
+		virtual void Simulate(const float DeltaTime) = 0;
 		virtual void Destroy() = 0;
 
-		s_ptr<PhysicsBody> GetEntityBodyByID(UUID entityID) const;
-		s_ptr<PhysicsBody> GetEntityBody(Entity entity) const { return GetEntityBodyByID(entity.GetUUID()); }
-		virtual void DestroyBody(Entity entity) = 0;
+		virtual TSharedPtr<PhysicsBody> GetEntityBodyByID(UUID EntityID) const = 0;
+		virtual TSharedPtr<PhysicsBody> GetEntityBody(LEntity Entity) const 
+        { 
+            return GetEntityBodyByID(Entity.GetUUID()); 
+        }
+
+		virtual void DestroyBody(LEntity Entity) = 0;
 
         virtual float GetGravity() const = 0;
     };

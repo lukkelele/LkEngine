@@ -22,8 +22,8 @@ namespace LkEngine {
         UUID aID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
         UUID bID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 
-        Entity a = scene->GetEntityWithUUID(aID);
-        Entity b = scene->GetEntityWithUUID(bID);
+        LEntity a = scene->GetEntityWithUUID(aID);
+        LEntity b = scene->GetEntityWithUUID(bID);
 
         LK_CORE_WARN("BeginContact --> ({}   and   {})", a.Name(), b.Name());
         // Exit if no contact
@@ -40,8 +40,8 @@ namespace LkEngine {
         UUID aID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
         UUID bID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 
-        Entity a = scene->GetEntityWithUUID(aID);
-        Entity b = scene->GetEntityWithUUID(bID);
+        LEntity a = scene->GetEntityWithUUID(aID);
+        LEntity b = scene->GetEntityWithUUID(bID);
 
         LK_CORE_WARN("EndContact --> ({}   and   {})", a.Name(), b.Name());
     }

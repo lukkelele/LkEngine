@@ -21,7 +21,9 @@ namespace LkEngine {
 		: m_Scene(scene)
 	{
 		if (m_Scene == nullptr)
+		{
 			m_Scene = new Scene;
+		}
 	}
 
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
@@ -29,7 +31,7 @@ namespace LkEngine {
 	{
 	}
 
-	void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
+	void SceneSerializer::SerializeEntity(YAML::Emitter& out, LEntity entity)
 	{
 		UUID uuid = entity.GetComponent<IDComponent>().ID;
 		out << YAML::BeginMap; // Entity
@@ -154,7 +156,9 @@ namespace LkEngine {
 
 		// EditorCamera
 		if (editor && editor->GetEditorCamera())
+		{
 			SerializeEditorCamera(out, *editor->GetEditorCamera());
+		}
 
 		// 2D Physics
 		out << YAML::Key << "Physics2D";
@@ -194,16 +198,18 @@ namespace LkEngine {
 		out << YAML::EndMap;
 	}
 
-	bool SceneSerializer::DeserializeFromYAML(const std::string& yamlString)
+	bool SceneSerializer::DeserializeFromYAML(const std::string& YamlString)
 	{
-		YAML::Node data = YAML::Load(yamlString);
+		YAML::Node data = YAML::Load(YamlString);
 		if (!data["Scene"])
+		{
 			return false;
+		}
 
-		// Scene
-		// Parse scene name, if its currently the active scene and if it's an editor scene or not
-		std::string sceneName = data["Scene"].as<std::string>(); 
-		m_Scene->SetName(sceneName);
+		/* Scene */
+		/* Parse scene name, if its currently the active scene and if it's an editor scene or not. */
+		std::string SceneName = data["Scene"].as<std::string>(); 
+		m_Scene->SetName(SceneName);
 		bool isActiveScene = data["Active"].as<std::string>() == "true" ? true : false;
 		m_Scene->SetAsActive(isActiveScene);
 		bool editorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
@@ -211,20 +217,24 @@ namespace LkEngine {
 		uint32_t sceneEntityHandle = data["SceneHandle"].as<uint32_t>();
 
 		// EditorCamera
-		auto& editorCamera = *EditorLayer::Get()->GetEditorCamera();
+		//Ref<LEditorCamera> editorCamera = EditorLayer::Get()->GetEditorCamera();
+		Ref<LEditorCamera> editorCamera = EditorLayer::Get()->GetEditorCamera();
 		auto editorCameraNode = data["EditorCamera"];
 		if (editorCameraNode)
-			DeserializeEditorCamera(editorCameraNode, editorCamera);
+		{
+			DeserializeEditorCamera(editorCameraNode, *editorCamera);
+		}
 
 		// Physics2D
 		auto physics2DNode = data["Physics2D"];
 		if (physics2DNode)
 		{
-			Physics2DSpecification physics2DSpec;
-			
-			physics2DSpec.Paused = physics2DNode["Paused"].as<bool>();
-			physics2DSpec.Gravity = physics2DNode["Gravity"].as<glm::vec2>(glm::vec2(0.0f));
-			physics2DSpec.DebugDrawer = physics2DNode["DebugDrawer"].as<bool>();
+			/// @FIXME: WHAT IS THIS DOING HERE ???????????
+			/// MOVE AWAY FROM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			//Physics2DSpecification physics2DSpec;
+			//physics2DSpec.Paused = physics2DNode["Paused"].as<bool>();
+			//physics2DSpec.Gravity = physics2DNode["Gravity"].as<glm::vec2>(glm::vec2(0.0f));
+			//physics2DSpec.DebugDrawer = physics2DNode["DebugDrawer"].as<bool>();
 			// <<<<<<< Set physics parameters for the existing 2D world here >>>>>>>>
 			//m_Scene->Initiate2DPhysics(physics2DSpec);
 		}
@@ -232,15 +242,17 @@ namespace LkEngine {
 		// Entities
 		auto entities = data["Entities"];
 		if (entities)
+		{
 			DeserializeEntities(entities, m_Scene);
+		}
 
 
 		// Sort IDComponent by by entity handle (which is essentially the order in which they were created)
-		m_Scene->m_Registry.sort<IDComponent>([this](const auto lhs, const auto rhs)
+		m_Scene->m_Registry.sort<IDComponent>([this](const auto Lhs, const auto Rhs)
 		{
-			auto lhsEntity = m_Scene->m_EntityIDMap.find(lhs.ID);
-			auto rhsEntity = m_Scene->m_EntityIDMap.find(rhs.ID);
-			return static_cast<uint32_t>(lhsEntity->second) < static_cast<uint32_t>(rhsEntity->second);
+			auto LhsEntity = m_Scene->m_EntityIDMap.find(Lhs.ID);
+			auto RhsEntity = m_Scene->m_EntityIDMap.find(Rhs.ID);
+			return static_cast<uint32_t>(LhsEntity->second) < static_cast<uint32_t>(RhsEntity->second);
 		});
 
 		return true;
@@ -265,9 +277,11 @@ namespace LkEngine {
 			std::string name;
 			auto tagComponent = entity["TagComponent"];
 			if (tagComponent)
+			{
 				name = tagComponent["Tag"].as<std::string>();
+			}
 
-			Entity deserializedEntity = scene->CreateEntityWithID(uuid, name);
+			LEntity deserializedEntity = scene->CreateEntityWithID(uuid, name);
 
 			auto transformComponent = entity["TransformComponent"];
 			if (transformComponent)
@@ -277,10 +291,16 @@ namespace LkEngine {
 				auto& transform = deserializedEntity.AddComponent<TransformComponent>();
 				transform.Translation = transformComponent["Position"].as<glm::vec3>(glm::vec3(0.0f));
 				auto rotationNode = transformComponent["Rotation"];
+
 				if (rotationNode.size() == 4)
+				{
 					transform.SetRotation(transformComponent["Rotation"].as<glm::quat>(glm::quat()));
+				}
 				else
+				{
 					transform.SetRotationEuler(transformComponent["Rotation"].as<glm::vec3>(glm::vec3(0.0f)));
+				}
+
 				transform.Scale = transformComponent["Scale"].as<glm::vec3>();
 			}
 
@@ -343,7 +363,7 @@ namespace LkEngine {
 		}
 	}
 
-	void SceneSerializer::SerializeEditorCamera(YAML::Emitter& out, EditorCamera& editorCamera)
+	void SceneSerializer::SerializeEditorCamera(YAML::Emitter& out, LEditorCamera& editorCamera)
 	{
 		out << YAML::Key << "EditorCamera" << YAML::Value;
 		out << YAML::BeginMap;
@@ -385,7 +405,7 @@ namespace LkEngine {
 		out << YAML::EndMap;
 	}
 
-	void SceneSerializer::DeserializeEditorCamera(YAML::Node& editorCameraNode, EditorCamera& editorCamera)
+	void SceneSerializer::DeserializeEditorCamera(YAML::Node& editorCameraNode, LEditorCamera& editorCamera)
 	{
 		if (editorCameraNode)
 		{
@@ -438,12 +458,18 @@ namespace LkEngine {
 
 			// Camera Mode, Flycam or Arcball
 			int cameraMode = editorCameraNode["CameraMode"].as<int>();
-			if (cameraMode == (int)EditorCamera::Mode::Flycam)
-				editorCamera.m_CameraMode = EditorCamera::Mode::Flycam;
-			else if (cameraMode == (int)EditorCamera::Mode::Arcball)
-				editorCamera.m_CameraMode = EditorCamera::Mode::Arcball;
+			if (cameraMode == static_cast<int>(LEditorCamera::Mode::Flycam))
+			{
+				editorCamera.m_CameraMode = LEditorCamera::Mode::Flycam;
+			}
+			else if (cameraMode == static_cast<int>(LEditorCamera::Mode::Arcball))
+			{
+				editorCamera.m_CameraMode = LEditorCamera::Mode::Arcball;
+			}
 			else
-				editorCamera.m_CameraMode = EditorCamera::Mode::None;
+			{
+				editorCamera.m_CameraMode = LEditorCamera::Mode::None;
+			}
 		}
 	}
 
@@ -479,8 +505,8 @@ namespace LkEngine {
 		if (m_Scene == nullptr)
 			LK_CORE_ASSERT(false, "SceneSerializer::GetLoadedScene  m_Scene == nullptr");
 
-		m_Scene->m_ViewportWidth = Window::Get().GetViewportWidth();
-		m_Scene->m_ViewportHeight = Window::Get().GetViewportHeight();
+		m_Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
+		m_Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
 
 		if (m_Scene->m_IsActiveScene)
 		{
@@ -488,18 +514,18 @@ namespace LkEngine {
 
 			Input::SetScene(Ref<Scene>(m_Scene));
 			EditorLayer::Get()->SetScene(m_Scene);
-			Application::Get()->SetScene(Ref<Scene>(m_Scene));
+			LApplication::Get()->SetScene(Ref<Scene>(m_Scene));
 		}
 		
 		if (m_Scene->m_EditorScene)
 		{
 			Scene::m_ActiveScene = m_Scene;
 
-			m_Scene->m_EditorCamera = EditorLayer::Get()->GetEditorCamera();
-			LK_CORE_ASSERT(m_Scene->m_EditorCamera, "SceneSerializer: EditorCamera is nullptr");
+			m_Scene->EditorCamera = EditorLayer::Get()->GetEditorCamera();
+			LK_CORE_ASSERT(m_Scene->EditorCamera, "SceneSerializer: EditorCamera is nullptr");
 
 			EditorLayer::Get()->SetScene(m_Scene);
-			Application::Get()->SetScene(Ref<Scene>(m_Scene));
+			LApplication::Get()->SetScene(Ref<Scene>(m_Scene));
 			Input::SetScene(Ref<Scene>(m_Scene));
 		}
 

@@ -11,10 +11,14 @@ namespace LkEngine {
         BulletScene();
         ~BulletScene();
 
-		s_ptr<PhysicsBody> GetEntityBodyByID(UUID entityID) const;
-        void DestroyBody(Entity entity);
+        virtual void Simulate(const float DeltaTime) override;
+        virtual void Destroy() override;
 
-        float GetGravity() const;
+		virtual TSharedPtr<PhysicsBody> GetEntityBodyByID(UUID entityID) const override;
+        virtual void DestroyBody(LEntity Entity) override;
+
+        virtual float GetGravity() const override;
+
     };
 
 }

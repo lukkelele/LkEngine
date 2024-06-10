@@ -1,41 +1,31 @@
 #include "LkEngine/Core/Application.h"
 
-//#include "LkEngine/Platform/OpenGL/LkOpenGL.h"
-//#include "LkEngine/Platform/Vulkan/LkVulkan.h"
 
-#include "SuperMario/GameLayer.h"
-
-
-constexpr uint32_t SCREEN_WIDTH = 1920;
-constexpr uint32_t SCREEN_HEIGHT = 1080;
-
-using namespace LkEngine;
-
-
-class LkApplication : public LkEngine::Application
+/**
+ * LkApplication
+ * 
+ *  Runtime application.
+ */
+class LkApplication : public LkEngine::LApplication
 {
 public:
-    LkApplication(LkEngine::ApplicationSpecification props = LkEngine::ApplicationSpecification("Sandbox", SCREEN_WIDTH, SCREEN_HEIGHT))
-        : LkEngine::Application(props) 
+    LkApplication(LkEngine::ApplicationSpecification Specification)
+        : LkEngine::LApplication(Specification) 
     {
     }
 
-    ~LkApplication()
-    {
-    }
+    ~LkApplication() = default;
 };
 
 
 int main()
 {
-    LkApplication app;
-    app.Init();
+    LkEngine::ApplicationSpecification ApplicationSpec("LkEditor", 1920, 1080);
 
-    GameLayer superMarioGameLayer;
-    app.PushLayer(&superMarioGameLayer);
-
-    app.Run();
-    app.Shutdown();
+    LkApplication Application(ApplicationSpec);
+    Application.Initialize();
+    Application.Run();
+    Application.Shutdown();
 
     return 0;
 }

@@ -32,6 +32,8 @@ namespace LkEngine {
 		m_AssetLogger ->set_level(spdlog::level::debug);
 		m_AssetLogger ->flush_on(spdlog::level::debug);
 		spdlog::register_logger(m_AssetLogger);
+
+		//spdlog::set_default_logger(m_CoreLogger);
 	}
 
 }
