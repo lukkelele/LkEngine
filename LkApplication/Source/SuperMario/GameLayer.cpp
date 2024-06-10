@@ -12,6 +12,8 @@
 
 #include "LkEngine/Platform/OpenGL/OpenGLRenderer.h"
 
+#include <imgui/ImFileDialog.h>
+
 //#define DONT_SAVE_SCENE
 #define USE_SAVED_SCENE
 
@@ -93,6 +95,33 @@ namespace LkEngine {
         SkyboxShader->Bind();
         SkyboxShader->Set("u_Skybox", 0);
         LK_CORE_WARN_TAG("GameLayer", "Skybox created!");
+
+
+#if 0
+        LK_CORE_WARN_TAG("GameLayer", "Creating FileDialog 'CreateTexture'");
+        ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* 
+        {
+            GLuint tex;
+            glGenTextures(1, &tex);
+            glBindTexture(GL_TEXTURE_2D, tex);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            return (void*)tex;
+        };
+
+        LK_CORE_WARN_TAG("GameLayer", "Creating FileDialog 'DeleteTexture'");
+        ifd::FileDialog::Instance().DeleteTexture = [](void* Tex) 
+        {
+            const GLuint& TexID = *static_cast<GLuint*>(Tex);
+            glDeleteTextures(1, &TexID);
+        };
+#endif
     }
 
     void GameLayer::OnDetach()
@@ -101,12 +130,12 @@ namespace LkEngine {
 
     void GameLayer::OnUpdate(float ts)
     {
-        auto entities = m_Scene->GetEntities();
-        for (Entity& entity : entities)
+        auto Entities = m_Scene->GetEntities();
+        for (Entity& entity : Entities)
         {
             if (entity.HasComponent<SpriteComponent>())
             {
-                glm::vec2 size = { entity.Sprite().Size.x * entity.Transform().Scale.x, entity.Sprite().Size.y * entity.Transform().Scale.y };
+                glm::vec2 Size = { entity.Sprite().Size.x * entity.Transform().Scale.x, entity.Sprite().Size.y * entity.Transform().Scale.y };
                 //Renderer::SubmitQuad(entity.Transform().Translation, size, entity.().GetTexture(), entity.GetUUID());
             }
             if (entity.HasComponent<MeshComponent>())

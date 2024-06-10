@@ -2,25 +2,24 @@ project "LkApplication"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++20"
-	staticruntime "Off"
+	staticruntime "On"
 
 	configurations { "Debug", "Release", "Dist" }
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir (TargetDirectory)
+	objdir (IntermediateDirectory)
 
-	files {
-		"src/**.h",
-		"src/**.cpp",
-
-        "%{wks.location}/external/VulkanMemoryAllocator/vk_mem_alloc.h",
-        "%{wks.location}/external/VulkanMemoryAllocator/vk_mem_alloc.cpp",
+	files 
+	{
+		"Source/**.h",
+		"Source/**.cpp",
 	}
 
 	includedirs {
 		"%{wks.location}/LkEngine",
-		"%{wks.location}/LkEngine/src",
-		"%{wks.location}/external",
+		"%{wks.location}/LkEngine/Source",
+
+		"%{ExternalDirectory}",
 
         "%{Dependencies.Glfw.IncludeDir}",
         "%{Dependencies.Glad.IncludeDir}",
@@ -35,35 +34,39 @@ project "LkApplication"
         "%{Dependencies.YamlCPP.IncludeDir}",
         "%{Dependencies.Assimp.IncludeDir}",
 
-        "%{wks.location}/external/VulkanMemoryAllocator",
+        --"%{wks.location}/External/VulkanMemoryAllocator",
 	}
 
 	links { "LkEngine" }
 
 	filter "system:windows"
 		systemversion "latest"
-        includedirs { 
-            "%{Dependencies.Vulkan.Windows.IncludeDir}",
+        includedirs 
+		{ 
+            --"%{Dependencies.Vulkan.Windows.IncludeDir}",
         }
-		libdirs {
-            "%{Dependencies.Vulkan.Windows.LibDir}",
+		libdirs 
+		{
+            --"%{Dependencies.Vulkan.Windows.LibDir}",
 		}
-		links {
-            "%{Dependencies.Vulkan.Windows.LibName}",
+		links 
+		{
+            --"%{Dependencies.Vulkan.Windows.LibName}",
 		}
-        postbuildcommands {
+        postbuildcommands 
+		{
             "{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
         }
 
 
 	filter "configurations:Debug"
 		runtime "Debug"
-		symbols "on"
+		symbols "On"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		optimize "On"
 
 	filter "configurations:Dist"
 		runtime "Release"
-		optimize "on"
+		optimize "On"
