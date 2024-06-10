@@ -39,23 +39,14 @@
 **/.vs
 **/CMakeFiles
 
-# Ignore docs for now
-**/docs
-**/docs/*.css
-**/docs/*.scss
-**/docs/*.html
-**/docs/*.dox
-**/docs/*.dox
-# Ignore GLFW examples and tests
-**/GLFW/examples
-**/GLFW/examples
-**/glfw/tests
-**/glfw/tests
+External/**/examples
+External/**/tests
+External/**/docs
+External/**/Makefile
 
 **/bin
 **/*bin-int*
 **/out
-**/out/*
 **/build*
 **/*build*
 **/*.vcxproj*
@@ -67,7 +58,7 @@
 **/.idea
 **/*.swp
 
-# LkEngine Binaries and Object files
+# LkEngine Binaries and Object files 
 **/Binaries
 **/Binaries-Int
 **/Intermediate
