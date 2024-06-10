@@ -4,9 +4,7 @@ workspace "LkEngine"
 
     configurations { "Debug", "Release", "Dist" }
 
-    flags { 
-        "MultiProcessorCompile" 
-    }
+    flags { "MultiProcessorCompile" }
 
     filter "configurations:Debug"
         defines { "LK_DEBUG" }
@@ -23,10 +21,13 @@ workspace "LkEngine"
         runtime "Release"
         optimize "On"
 
-        
-outputdir = "%{cfg.buildcfg}-%{cfg.system}"
 
-include "external/Dependencies.lua"
+ExternalDirectory = "%{wks.location}/External"
+AssetsDirectory = "%{wks.location}/Assets"
+BuildOutputDirectory = "%{cfg.buildcfg}-%{cfg.system}"
+TargetDirectory = "%{wks.location}/Binaries/" .. BuildOutputDirectory .. "/%{prj.name}"
+IntermediateDirectory = "%{wks.location}/Intermediate/" .. BuildOutputDirectory .. "/%{prj.name}"
+include "External/Dependencies.lua"
 
 
 project "LkEngine"
@@ -34,15 +35,16 @@ project "LkEngine"
     kind "StaticLib"
     language "C++"
     cppdialect "C++20"
-    staticruntime "Off"
+    staticruntime "On"
 
-    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir (TargetDirectory)
+	objdir (IntermediateDirectory)
 
     pchheader "LKpch.h"
-    pchsource "LkEngine/src/LKpch.cpp"
+    pchsource "LkEngine/Source/LKpch.cpp"
 
-    defines {
+    defines 
+    {
         "LK_RENDERER_API_OPENGL",
         "LK_PHYSICS_API_BULLET3",
         "LK_PHYSICS_API_BOX2D",
@@ -53,32 +55,30 @@ project "LkEngine"
         "IMGUI_DEFINE_MATH_OPERATORS",
     }
 
-    files { 
+    files
+    { 
         "%{wks.location}/LkEngine/**.h",
         "%{wks.location}/LkEngine/**.cpp",
 
-        "%{wks.location}/LkEngine/src/**.h",
-        "%{wks.location}/LkEngine/src/**.cpp",
+        "%{wks.location}/LkEngine/Source/**.h",
+        "%{wks.location}/LkEngine/Source/**.cpp",
 
-        "%{wks.location}/external/stb_image/**.h",
-        "%{wks.location}/external/stb_image/**.cpp",
-
-        "%{wks.location}/external/VulkanMemoryAllocator/vk_mem_alloc.h",
-        "%{wks.location}/external/VulkanMemoryAllocator/vk_mem_alloc.cpp",
+        "%{ExternalDirectory}/stb_image/**.h",
+        "%{ExternalDirectory}/stb_image/**.cpp",
    	}
 
-    libdirs {
+    libdirs 
+    {
         "%{Dependencies.Glfw.LibDir}",
         "%{Dependencies.YamlCPP.LibDir}",
     }
 
-    includedirs {
-        "%{prj.name}",
+    includedirs 
+    {
+        "%{wks.location}/LkEngine/Source",
+        "%{wks.location}/LkEngine/Source/LkEngine",
 
-        "%{wks.location}/LkEngine/src",
-        "%{wks.location}/LkEngine/src/LkEngine",
-
-        "%{wks.location}/external",
+        "%{ExternalDirectory}",
 
         "%{Dependencies.Glfw.IncludeDir}",
         "%{Dependencies.Glad.IncludeDir}",
@@ -93,8 +93,6 @@ project "LkEngine"
         "%{Dependencies.YamlCPP.IncludeDir}",
         "%{Dependencies.Choc.IncludeDir}",
         "%{Dependencies.ImGuiNodeEditor.IncludeDir}",
-
-        "${wks.location}/external/VulkanMemoryAllocator",
     }
 
     links {
@@ -109,23 +107,26 @@ project "LkEngine"
     }
 
 	filter "system:windows"
-		defines { 
+		defines 
+        { 
             "LK_PLATFORM_WINDOWS",
             "_IMGUI_WIN32",
             "_CRT_SECURE_NO_WARNINGS",
             "_GLM_WIN32",
-            "VK_PROTOTYPES",
-            "VK_USE_PLATFORM_WIN32_KHR",
+            --"VK_PROTOTYPES",
+            --"VK_USE_PLATFORM_WIN32_KHR",
 		}
-        includedirs { 
-            "%{Dependencies.Vulkan.Windows.IncludeDir}" 
+        includedirs 
+        { 
+            --"%{Dependencies.Vulkan.Windows.IncludeDir}" 
         }
-        libdirs { 
-            "%{Dependencies.Vulkan.Windows.LibDir}",
+        libdirs 
+        { 
+            --"%{Dependencies.Vulkan.Windows.LibDir}",
             "%{Dependencies.Assimp.Windows.LibDir}",
         }
         links {
-            "%{Dependencies.Vulkan.Windows.LibName}",
+            --"%{Dependencies.Vulkan.Windows.LibName}",
             "%{Dependencies.Assimp.Windows.LibName}",
         }
         postbuildcommands {
