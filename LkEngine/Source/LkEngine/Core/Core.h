@@ -1,7 +1,8 @@
-///|//////////////////////////////////////////////////////
-/// Core
-///
-///|//////////////////////////////////////////////////////
+/******************************************************************
+ * Core
+ *
+ *
+ *******************************************************************/
 #pragma once
 
 #include "LkEngine/Core/PlatformDetection.h"
@@ -20,10 +21,13 @@
 #include <array>
 #include <queue>
 
+#include "LkEngine/Core/Assert.h"
+#include "LkEngine/Core/Log.h"
+
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/CoreTypes.h"
+#include "LkEngine/Core/TypeTrait.h"
 
-#include "LkEngine/Core/Assert.h"
 #include "LkEngine/Core/Exception.h"
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Core/Memory/MemoryPtr.h"
@@ -31,4 +35,15 @@
 #include "LkEngine/Core/Memory/Ref.h"
 #include "LkEngine/Core/Hash/UUID.h"
 
-//#include "LkEngine/Core/Log.h" /* TEST THIS OUT ! */
+
+namespace LkEngine
+{
+	/** ERendererAPI */
+	enum class ERendererAPI
+	{
+		None = 0,
+		OpenGL,
+		Vulkan
+	};
+}
+

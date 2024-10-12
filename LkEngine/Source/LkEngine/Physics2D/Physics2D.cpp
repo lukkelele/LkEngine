@@ -11,22 +11,22 @@
 
 namespace LkEngine {
 
-    std::vector<Raycast2DResult> Physics2D::Raycast(Scene& scene, const glm::vec2& point0, const glm::vec2& point1)
+    std::vector<Raycast2DResult> Physics2D::Raycast(LScene& scene, const glm::vec2& point0, const glm::vec2& point1)
     {
         std::vector<Raycast2DResult> results = {};
         return results;
     }
 
-    std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(Scene& scene)
+    std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(LScene& scene)
     {
         std::vector<Raycast2DResult> results = {};
         glm::vec2 MousePos = Mouse::GetScaledPos();
 
         // Exit early if no camera is attached to the scene
-        auto* editor = EditorLayer::Get();
-        if (editor != nullptr && editor->IsEnabled())
+        auto* Editor = LEditorLayer::Get();
+        if (Editor && Editor->IsEnabled())
         {
-            //auto editorCamera = editor->GetEditorCamera();
+            //auto EditorCamera = Editor->GetEditorCamera();
         }
         else
         {
@@ -40,16 +40,16 @@ namespace LkEngine {
         std::vector<LEntity> SceneEntities = scene.GetEntities();
         for (LEntity& Entity : SceneEntities)
         {
-            if (Entity.HasComponent<TransformComponent>() && Entity.HasComponent<SpriteComponent>())
+            if (Entity.HasComponent<LTransformComponent>() && Entity.HasComponent<LSpriteComponent>())
             {
-                TransformComponent& tc = Entity.Transform();
-                SpriteComponent& sc = Entity.Sprite();
+                LTransformComponent& tc = Entity.Transform();
+                LSpriteComponent& sc = Entity.GetComponent<LSpriteComponent>();
                 if (tc.IsStatic() || sc.IsPassthrough())
                 {
                     continue;
                 }
 
-                auto cam = editor->GetEditorCamera();
+                auto cam = Editor->GetEditorCamera();
                 glm::vec2 camPos = cam->GetPosition();
 
                 float quadWidth = tc.Scale.x * sc.Size.x;
@@ -61,23 +61,23 @@ namespace LkEngine {
                 // Place the origin in the middle of the screen.
                 // This is done by adding half of the window width and height.
 
-                EditorLayer* editor = EditorLayer::Get();
-                if (editor && editor->IsEnabled())
+                LEditorLayer* Editor = LEditorLayer::Get();
+                if (Editor && Editor->IsEnabled())
                 {
                     // Center the quad
-                    QuadPos.x += editor->EditorWindowSize.x * 0.50f + editor->GetLeftSidebarSize().x;
+                    QuadPos.x += Editor->EditorWindowSize.x * 0.50f + Editor->GetLeftSidebarSize().x;
                     // Only add the tabbar size if there are any tabs 
-                    if (editor->GetTabCount() == 0)
+                    if (LEditorTabManager::GetTabCount() == 0)
                     {
-                        QuadPos.y += (editor->EditorWindowSize.y * 0.50f) 
-                            + (editor->GetBottomBarSize().y - editor->GetMenuBarSize().y) 
-                            * LWindow::Get().GetScalerY();
+                        QuadPos.y += (Editor->EditorWindowSize.y * 0.50f) 
+                                  + (Editor->GetBottomBarSize().y - Editor->GetMenuBarSize().y) 
+                                  * LWindow::Get().GetScalerY();
                     }
                     else
                     {
-                        QuadPos.y += (editor->EditorWindowSize.y * 0.50f) 
-                            + (editor->GetBottomBarSize().y - editor->GetMenuBarSize().y - editor->GetTabBarSize().y) 
-                            * LWindow::Get().GetScalerY();
+                        QuadPos.y += (Editor->EditorWindowSize.y * 0.50f) 
+                                  + (Editor->GetBottomBarSize().y - Editor->GetMenuBarSize().y - Editor->GetTabBarSize().y) 
+                                  * LWindow::Get().GetScalerY();
                     }
                 }
                 else
@@ -109,7 +109,7 @@ namespace LkEngine {
                 glm::vec2 SpritePoint_TopRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y + quadHeight * 0.50f };
             #endif
 
-                if (Mouse::IsButtonPressed(MouseButton::Button0))
+                if (Mouse::IsButtonPressed(EMouseButton::Button0))
                 {
                     // Add camera position to adjust for camera placement in the world
                     bool within_x_boundaries = (MousePos.x + camPos.x >= SpritePoint_BottomLeft.x) && (MousePos.x + camPos.x <= SpritePoint_TopRight.x);
@@ -129,6 +129,7 @@ namespace LkEngine {
                 }
             }
         }
+
         return results;
     }
 

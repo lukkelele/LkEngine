@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ranges>
+
 #include "Texture.h"
 
 #include "LkEngine/Core/IO/File.h"
@@ -7,53 +9,61 @@
 
 namespace LkEngine {
 
-    using TextureCollection = std::unordered_map<std::string, Ref<Texture>>;
-    using Texture2DCollection = std::unordered_map<std::string, Ref<Texture2D>>;
-    using TextureCollectionContainer = std::unordered_map<std::string, TextureCollection>;
-    using Texture2DCollectionContainer = std::unordered_map<std::string, Texture2DCollection>;
+    /// DONT USE THESE.....................
+    using TTexturePair = std::pair<std::string, TObjectPtr<LTexture>>;
+    using TTextureMap = std::unordered_map<std::string, TObjectPtr<LTexture>>;
 
-    class TextureLibrary : public RefCounted
+    using TTexture2DPair = std::pair<std::string, TObjectPtr<LTexture2D>>;
+    using TTexture2DMap = std::unordered_map<std::string, TObjectPtr<LTexture2D>>;
+
+    using TextureCollectionContainer = std::unordered_map<std::string, TTextureMap>;
+    using Texture2DCollectionContainer = std::unordered_map<std::string, TTexture2DMap>;
+    /// .....................
+
+    class LTextureLibrary : public LObject
     {
     public:
-        TextureLibrary();
-        ~TextureLibrary();
+        LTextureLibrary();
+        ~LTextureLibrary();
 
-        void Init(bool loadRecursively = false);
+        void Initialize(bool loadRecursively = false);
 
-        Ref<Texture2D> GetTexture(int textureID);
-        Ref<Texture2D> GetTexture(const std::string textureName);
-        Ref<Texture2D> AddTexture(const TextureSpecification& texture);
+        TObjectPtr<LTexture2D> GetTexture(const int TextureID);
+        TObjectPtr<LTexture2D> GetTexture(const std::string textureName);
+        TObjectPtr<LTexture2D> AddTexture(const TextureSpecification& texture);
+
+        std::vector<std::pair<std::string, TObjectPtr<LTexture2D>>> GetTextures2D();
+        int GetTextures2D(std::vector<TTexture2DPair>& TextureContainer);
 
         void RenameTexture(const std::string& name, const std::string& newName);
-        std::vector<std::pair<std::string, Ref<Texture2D>>> GetTextures2D();
 
-        Ref<Texture2D> GetWhiteTexture();
-        Ref<Texture2D> GetBlackTexture();
+        TObjectPtr<LTexture2D> GetWhiteTexture();
+        TObjectPtr<LTexture2D> GetBlackTexture();
 
         bool HasTextureWithFilename(const std::string& filename);
-        bool VerifyTexturesAreLoaded() const;
+        bool VerifyTexturesAreLoaded();
 
-        Ref<Texture> TryToGetTextureWithFilename(const std::string& filename);
+        TObjectPtr<LTexture> TryToGetTextureWithFilename(const std::string& filename);
 
-        TextureCollection& GetTextureCollection(std::string_view collectionName);
-        Texture2DCollection& GetTexture2DCollection(std::string_view collectionName);
+        TTextureMap& GetTextureCollection(std::string_view collectionName);
+        TTexture2DMap& GetTexture2DCollection(std::string_view collectionName);
 
         void AddCollection(std::string_view directoryPath);
 
-        static Ref<TextureLibrary> Get() { return m_Instance; }
+        static LTextureLibrary& Get();
 
     private:
-        bool m_Initialized = false;
+        //bool bInitialized = false;
 
-        Ref<Texture2D> m_WhiteTexture;
-        Ref<Texture2D> m_BlackTexture;
+        TObjectPtr<LTexture2D> m_WhiteTexture{};
+        TObjectPtr<LTexture2D> m_BlackTexture{};
 
-        //TextureCollection m_Collection;
-        std::unordered_map<std::string, Ref<Texture2D>> m_Collection2D;
         TextureCollectionContainer m_Collections;
-        Texture2DCollectionContainer m_Collections2D;
 
-        inline static Ref<TextureLibrary> m_Instance = nullptr;
+        std::unordered_map<std::string, TObjectPtr<LTexture2D>> m_Collection2D;
+        std::unordered_map<std::string, TTexture2DMap> m_Collections2D;
+
+        //inline static TObjectPtr<LTextureLibrary> m_Instance = nullptr;
     };
 
 }

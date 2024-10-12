@@ -1,14 +1,13 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 #include "PipelineSpecification.h"
 
 
 namespace LkEngine {
 
-	class Shader;
-	class VertexBuffer;
+	class LShader; 
 
 	struct PipelineStatistics
 	{
@@ -21,18 +20,23 @@ namespace LkEngine {
 		uint64_t ComputeShaderInvocations = 0;
 	};
 
-	class Pipeline : public RefCounted
+	class LPipeline : public LObject
 	{
 	public:
-		virtual ~Pipeline() = default;
+		virtual ~LPipeline() = default;
 
 		virtual FPipelineSpecification& GetSpecification() = 0;
 		virtual const FPipelineSpecification& GetSpecification() const = 0;
 		virtual void Invalidate() = 0;
-		virtual Ref<Shader> GetShader() const = 0;
+
+		virtual TObjectPtr<LShader> GetShader() const = 0;
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 
-		static Ref<Pipeline> Create(const FPipelineSpecification& InPipelineSpecification);
+		/** Factory function. */
+		static TObjectPtr<LPipeline> Create(const FPipelineSpecification& InPipelineSpecification);
+
+	private:
+		LCLASS(LPipeline)
 	};
 
 }

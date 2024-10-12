@@ -29,9 +29,9 @@ namespace LkEngine {
 		aiProcess_ValidateDataStructure |   // Validation
 		aiProcess_GlobalScale;              // e.g. convert cm to m for fbx import (and other formats where cm is native)
 
-	namespace Utils {
-
-		glm::mat4 Mat4FromAIMatrix4x4(const aiMatrix4x4& matrix)
+	namespace Utils 
+	{
+		static glm::mat4 Mat4FromAIMatrix4x4(const aiMatrix4x4& matrix)
 		{
 			glm::mat4 result{};
 			//the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
@@ -43,7 +43,7 @@ namespace LkEngine {
 		}
 
 #if MESH_DEBUG_LOG
-		void PrintNode(aiNode* node, size_t depth)
+		static void PrintNode(aiNode* node, size_t depth)
 		{
 			LK_MESH_LOG("{0:^{1}}{2} {{", "", depth * 3, node->mName.C_Str());
 			++depth;
@@ -74,9 +74,9 @@ namespace LkEngine {
 		//AssimpLogStream::Initialize();
 	}
 
-	Ref<MeshSource> AssimpMeshImporter::ImportToMeshSource()
+	TObjectPtr<MeshSource> AssimpMeshImporter::ImportToMeshSource()
 	{
-		Ref<MeshSource> meshSource = Ref<MeshSource>::Create();
+		TObjectPtr<MeshSource> meshSource = TObjectPtr<MeshSource>::Create();
 
 		LK_CORE_INFO_TAG("Mesh", "Loading mesh: {0}", m_Path.string());
 
@@ -167,7 +167,7 @@ namespace LkEngine {
 			MeshNode& rootNode = meshSource->m_Nodes.emplace_back();
 			TraverseNodes(meshSource, scene->mRootNode, 0);
 
-			for (const auto& submesh : meshSource->m_Submeshes)
+			for (const Submesh& submesh : meshSource->m_Submeshes)
 			{
 				AABB transformedSubmeshAABB = submesh.BoundingBox;
 				glm::vec3 min = glm::vec3(submesh.Transform * glm::vec4(transformedSubmeshAABB.Min, 1.0f));
@@ -188,17 +188,25 @@ namespace LkEngine {
 		}
 
 		if (meshSource->m_Vertices.size())
-			meshSource->m_VertexBuffer = VertexBuffer::Create(meshSource->m_Vertices.data(), (uint32_t)(meshSource->m_Vertices.size() * sizeof(Vertex)));
+		{
+			meshSource->m_VertexBuffer = LVertexBuffer::Create(meshSource->m_Vertices.data(), 
+															   static_cast<uint32_t>(meshSource->m_Vertices.size() * sizeof(Vertex)));
+		}
 
 		if (meshSource->m_Indices.size())
-			meshSource->m_IndexBuffer = IndexBuffer::Create(meshSource->m_Indices.data(), (uint32_t)(meshSource->m_Indices.size() * sizeof(Index)));
-
-		//meshSource->DumpVertexBuffer();
+		{
+			meshSource->m_IndexBuffer = LIndexBuffer::Create(meshSource->m_Indices.data(), 
+															 static_cast<uint32_t>(meshSource->m_Indices.size() * sizeof(Index)));
+		}
 
 		return meshSource;
 	}
 
-	void AssimpMeshImporter::TraverseNodes(Ref<MeshSource> meshSource, void* assimpNode, uint32_t nodeIndex, const glm::mat4& parentTransform, uint32_t level)
+	void AssimpMeshImporter::TraverseNodes(TObjectPtr<MeshSource> meshSource, 
+										   void* assimpNode, 
+										   uint32_t nodeIndex, 
+										   const glm::mat4& parentTransform, 
+										   const uint32_t level)
 	{
 		aiNode* aNode = (aiNode*)assimpNode;
 

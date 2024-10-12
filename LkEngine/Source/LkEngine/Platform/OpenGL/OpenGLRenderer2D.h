@@ -16,61 +16,130 @@ namespace LkEngine {
         uint8_t TextureArraysUsed = 1;
     };
 
-	class OpenGLRenderer2D : public Renderer2DAPI
+	class LOpenGLRenderer2D : public IRenderer2DAPI, public LObject
 	{
     public:
-        OpenGLRenderer2D(const OpenGLRenderer2DSpecification& specification = OpenGLRenderer2DSpecification());
-        ~OpenGLRenderer2D();
+        LOpenGLRenderer2D(const OpenGLRenderer2DSpecification& InSpecification = OpenGLRenderer2DSpecification());
+        ~LOpenGLRenderer2D() = default;
 
-        void Init() override;
-        void Shutdown() override;
-        void BeginScene(const SceneCamera& camera) override;
-        void BeginScene(const SceneCamera& camera, const glm::mat4& transform) override;
-        void BeginScene(const glm::mat4& viewProjectionMatrix) override;
-        void EndScene() override;
-        void Flush() override;
+        virtual void Init() override;
+        virtual void Shutdown() override;
 
-        void DrawImage(const Ref<Image> image) override;
+        virtual void BeginScene(const LSceneCamera& camera) override;
+        virtual void BeginScene(const LSceneCamera& camera, const glm::mat4& transform) override;
+        virtual void BeginScene(const glm::mat4& viewProjectionMatrix) override;
+        virtual void EndScene() override;
+        virtual void Flush() override;
 
-        void DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0) override;
-        void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) override;
-        void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) override;
-        void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) override;
-        void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) override; 
-        void DrawQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture2D> texture2D, float rotation, uint64_t entityID = 0) override; 
-        void DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D> texture, float rotation, uint64_t entityID = 0) override; 
-        void DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID = 0) override; 
+        virtual void DrawImage(const TObjectPtr<LImage> image) override;
 
-        void DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) override;
-        void DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) override;
+        // DrawQuad
+        virtual void DrawQuad(const glm::mat4& transform, 
+                              const glm::vec4& color, 
+                              const uint64_t entityID = 0) override;
 
-        void DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID = 0) override;
-        void DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, uint64_t entityID = 0) override;
+        virtual void DrawQuad(const glm::vec2& pos,
+                              const glm::vec2& size, 
+                              const glm::vec4& color, 
+                              const uint64_t entityID = 0) override;
 
-        Ref<Shader> GetQuadShader() override { return m_QuadShader; }
-        Ref<Shader> GetLineShader() override { return m_LineShader; }
+        virtual void DrawQuad(const glm::vec3& pos, 
+                              const glm::vec2& size, 
+                              const glm::vec4& color, 
+                              const uint64_t entityID = 0) override;
+
+        virtual void DrawQuad(const glm::vec2& pos, 
+                              const glm::vec2& size, 
+                              const glm::vec4& color, 
+                              const float rotation, 
+                              uint64_t entityID = 0) override;
+
+        virtual void DrawQuad(const glm::vec3& pos, 
+                              const glm::vec2& size, 
+                              const glm::vec4& color, 
+                              const float rotation, 
+                              const uint64_t entityID = 0) override; 
+
+        virtual void DrawQuad(const glm::vec2& pos, 
+                              const glm::vec2& size, 
+                              TObjectPtr<LTexture2D> texture2D, 
+                              const float rotation, 
+                              const uint64_t entityID = 0) override; 
+
+        virtual void DrawQuad(const glm::vec3& pos, 
+                              const glm::vec2& size, 
+                              TObjectPtr<LTexture2D> texture, 
+                              const float rotation, 
+                              const uint64_t entityID = 0) override; 
+
+        virtual void DrawQuad(const glm::vec3& pos, 
+                              const glm::vec2& size, 
+                              TObjectPtr<LTexture2D> texture, 
+                              const glm::vec4& tintColor, 
+                              float rotation, 
+                              uint64_t entityID = 0) override; 
+        // ~DrawQuad
+
+        /// FIXME
+        // DrawRotatedQuad
+        virtual void DrawRotatedQuad(const glm::vec2& pos, 
+                                     const glm::vec2& size, 
+                                     const glm::vec4& color, 
+                                     const float rotation, 
+                                     uint64_t entityID = 0) override;
+
+        virtual void DrawRotatedQuad(const glm::vec3& pos, 
+                                     const glm::vec2& size, 
+                                     const glm::vec4& color, 
+                                     const float rotation, 
+                                     uint64_t entityID = 0) override;
+        // ~DrawRotatedQuad
+
+        // DrawLine
+        virtual void DrawLine(const glm::vec2& p0, 
+                              const glm::vec2& p1, 
+                              const glm::vec4& color, 
+                              uint64_t entityID = 0) override;
+
+        virtual void DrawLine(const glm::vec3& p0, 
+                              const glm::vec3& p1, 
+                              const glm::vec4& color, 
+                              uint64_t entityID = 0) override;
+        // ~DrawLine
+
+        TObjectPtr<LShader> GetQuadShader() override
+        { 
+            return m_QuadShader; 
+        }
+
+        TObjectPtr<LShader> GetLineShader() override 
+        { 
+            return m_LineShader; 
+        }
 
         const Renderer2DSpecification& GetSpecification() const override { return m_Specification; }
 
-        float GetLineWidth() override;
-        void SetLineWidth(float width) override;
+        /// FIXME
+        virtual float GetLineWidth() override;
+        virtual void SetLineWidth(float width) override;
 
-        void AddTextureToSlot(Ref<Texture2D> texture) override;
-        void AddTextureToSlot(Ref<Texture2D> texture, int slot) override;
+        virtual void AddTextureToSlot(TObjectPtr<LTexture2D> texture) override;
+        virtual void AddTextureToSlot(TObjectPtr<LTexture2D> texture, int slot) override;
 
         void ResetStats() override;
         Statistics GetStats() override;
 
     private:
-        void StartBatch() override;
-        void NextBatch() override;
+        virtual void StartBatch() override;
+        virtual void NextBatch() override;
 
-        void AddQuadBuffer() override;
-        void AddLineBuffer() override;
-        QuadVertex*& GetWriteableQuadBuffer() override;
-        LineVertex*& GetWriteableLineBuffer() override;
+        virtual void AddQuadBuffer() override;
+        virtual void AddLineBuffer() override;
 
-        void AddTextureArray(const Ref<OpenGLTextureArray>& textureArray);
+        virtual QuadVertex*& GetWriteableQuadBuffer() override;
+        virtual LineVertex*& GetWriteableLineBuffer() override;
+
+        void AddTextureArray(const TObjectPtr<OpenGLTextureArray>& textureArray);
 
     public:
         static constexpr int MaxTextureSlots = 32;
@@ -87,47 +156,54 @@ namespace LkEngine {
         const uint32_t m_MaxLineVertices;
         const uint32_t m_MaxLineIndices;
 
-		Ref<RenderCommandBuffer> m_RenderCommandBuffer;
+		TObjectPtr<LRenderCommandBuffer> m_RenderCommandBuffer;
 
-        // Quad
+        /* Quad. */
         uint32_t m_QuadIndexCount = 0;
-		Ref<RenderPass> m_QuadPass;
-		Ref<Material> m_QuadMaterial;
+		TObjectPtr<LRenderPass> m_QuadPass;
+		TObjectPtr<LMaterial> m_QuadMaterial;
         QuadVertex* m_QuadVertexBufferBase = nullptr;
         QuadVertex* m_QuadVertexBufferPtr = nullptr;
-        Ref<Shader> m_QuadShader;
-		Ref<IndexBuffer> m_QuadIndexBuffer;
-        Ref<VertexBuffer> m_QuadVertexBuffer;
+        TObjectPtr<LShader> m_QuadShader;
+		TObjectPtr<LIndexBuffer> m_QuadIndexBuffer;
+        TObjectPtr<LVertexBuffer> m_QuadVertexBuffer;
         glm::vec4 m_QuadVertexPositions[4] = {};
 
-        // Line
+        /* Line.*/
         float m_LineWidth = 3.0f;
         uint32_t m_LineIndexCount = 0;
-        Ref<VertexBuffer> m_LineVertexBuffer;
+        TObjectPtr<LVertexBuffer> m_LineVertexBuffer;
 
         LineVertex* m_LineVertexBufferBase = nullptr;
         LineVertex* m_LineVertexBufferPtr = nullptr;
-        Ref<IndexBuffer> m_LineIndexBuffer = nullptr;
-        Ref<Shader> m_LineShader = nullptr;
-		Ref<Material> m_LineMaterial;
+        TObjectPtr<LIndexBuffer> m_LineIndexBuffer = nullptr;
+        TObjectPtr<LShader> m_LineShader = nullptr;
+		TObjectPtr<LMaterial> m_LineMaterial;
 
-        Ref<Shader> m_TextureShader = nullptr;
-        Ref<Texture2D> m_WhiteTexture = nullptr;
+        TObjectPtr<LShader> m_TextureShader = nullptr;
+        TObjectPtr<LTexture2D> m_WhiteTexture = nullptr;
 
-        std::array<Ref<Texture2D>, MaxTextureSlots> m_TextureSlots;
-        std::array<Ref<OpenGLTextureArray>, MaxTextureArrays> m_TextureArrays;
+        /* Texture Slots. */
+        std::array<TObjectPtr<LTexture2D>, MaxTextureSlots> m_TextureSlots;
+
+        /* Texture Arrays. */
+        std::array<TObjectPtr<OpenGLTextureArray>, MaxTextureArrays> m_TextureArrays;
 
         struct CameraData
         {
-            glm::mat4 ViewProjection;
-        } m_CameraBuffer{};
+            glm::mat4 ViewProjection{};
+        };
+        CameraData m_CameraBuffer{};
 
-        Ref<OpenGLUniformBuffer> m_CameraUniformBuffer;
+        TObjectPtr<LOpenGLUniformBuffer> m_CameraUniformBuffer;
 
         Statistics m_Stats;
 
-        friend class EditorLayer;
-        friend class OpenGLRenderer;
+        friend class LEditorLayer;
+        friend class LOpenGLRenderer;
+        friend class OpenGLRenderer; /// REMOVE
+
+        LCLASS(LOpenGLRenderer2D)
 	};
 
 

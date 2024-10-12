@@ -2,41 +2,40 @@
 #include "VertexBuffer.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLVertexBuffer.h"
-//#include "LkEngine/Platform/Vulkan/VulkanVertexBuffer.h"
 
 #include "RendererAPI.h"
 
 
 namespace LkEngine {
 
-	Ref<VertexBuffer> VertexBuffer::Create(void* buffer, uint64_t size, VertexBufferUsage usage) 
+	TObjectPtr<LVertexBuffer> LVertexBuffer::Create(void* InBuffer, 
+													const uint64_t InSize, 
+													const EVertexBufferUsage InBufferUsage) 
 	{ 
 		switch (LRendererAPI::Current())
 		{
-			case ERendererAPI::OpenGL: return Ref<OpenGLVertexBuffer>::Create(buffer, size, usage);
-
-			/// @FIXME
-			//case RendererAPIType::Vulkan: return Ref<VulkanVertexBuffer>::Create(buffer, size, usage);
+			case ERendererAPI::OpenGL: return TObjectPtr<OpenGLVertexBuffer>::Create(InBuffer, InSize, InBufferUsage);
 
 			case ERendererAPI::None: break;
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Renderer API");
+		return nullptr;
 	}
 
-	Ref<VertexBuffer> VertexBuffer::Create(uint64_t size, VertexBufferUsage usage) 
+	TObjectPtr<LVertexBuffer> LVertexBuffer::Create(const uint64_t InSize, const EVertexBufferUsage InBufferUsage) 
 	{ 
 		switch (LRendererAPI::Current())
 		{
-			case ERendererAPI::OpenGL: return Ref<OpenGLVertexBuffer>::Create(size, usage);
-
-			/// @FIXME
-			//case RendererAPIType::Vulkan: return Ref<VulkanVertexBuffer>::Create(size, usage);
+			case ERendererAPI::OpenGL: return TObjectPtr<OpenGLVertexBuffer>::Create(InSize, InBufferUsage);
 
 			case ERendererAPI::None: break;
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Renderer API");
+		return nullptr;
 	}
 
 }

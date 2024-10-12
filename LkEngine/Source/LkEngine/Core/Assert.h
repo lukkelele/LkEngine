@@ -1,60 +1,58 @@
+/******************************************************************
+ * Assert
+ *
+ * Macros for core assertion setup.
+ *******************************************************************/
 #pragma once
 
-//#include "Base.h"
-//#include "LkEngine/Core/Base.h"
-#include "LkEngine/Core/Log.h"
+#include "PlatformDetection.h"
 
-
-#ifdef LK_PLATFORM_WINDOWS
-	#define LK_DEBUG_BREAK __debugbreak()
+/** 
+ * Variadic argument support.
+ */
+#if defined(LK_COMPILER_MSC)
+#	define LK_VARIADIC_ARGS   1
+#	define LK_ENABLE_VERIFY   1
 #elif defined(LK_COMPILER_CLANG)
-	#define LK_DEBUG_BREAK __builtin_debugtrap()
+#	define LK_VARIADIC_ARGS   1
+#	define LK_ENABLE_VERIFY   1
 #else
-	#define LK_DEBUG_BREAK
+#	define LK_VARIADIC_ARGS   1
+#	define LK_ENABLE_VERIFY   1
 #endif
 
-#ifdef LK_DEBUG
-	#define LK_ENABLE_ASSERTS
+/** 
+ * Asserts. 
+ */
+#if LK_ENABLE_ASSERTS
+#	if LK_VARIADIC_ARGS
+#		define LK_CORE_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Core, "Assertion Failed", ##__VA_ARGS__)
+#		define LK_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Client, "Assertion Failed", ##__VA_ARGS__)
+#	else
+#		define LK_CORE_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Core, "Assertion Failed" __VA_OPT__(,) __VA_ARGS__)
+#		define LK_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Client, "Assertion Failed" __VA_OPT__(,) __VA_ARGS__)
+#	endif
+#	define LK_CORE_ASSERT(condition, ...) { if(!(condition)) { LK_CORE_ASSERT_MESSAGE_INTERNAL(__VA_ARGS__); LK_DEBUG_BREAK; } }
+#	define LK_ASSERT(condition, ...) { if(!(condition)) { LK_ASSERT_MESSAGE_INTERNAL(__VA_ARGS__); LK_DEBUG_BREAK; } }
+#else
+#	define LK_CORE_ASSERT(condition, ...)   static_cast<void>(0)
+#	define LK_ASSERT(condition, ...)        static_cast<void>(0)
 #endif
 
-#define LK_ENABLE_VERIFY
-#define LK_VARIADIC_OPT_DISABLED
-
-#ifdef LK_ENABLE_ASSERTS
-	// Internal helpers, do not use directly
-	#if defined(LK_COMPILER_CLANG) || defined(LK_VARIADIC_OPT_DISABLED)
-		#define LK_CORE_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::EType::Core, "Assertion Failed", ##__VA_ARGS__)
-		#define LK_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::EType::Client, "Assertion Failed", ##__VA_ARGS__)
-	#else
-		#define LK_CORE_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Core, "Assertion Failed" __VA_OPT__(,) __VA_ARGS__)
-		#define LK_ASSERT_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Client, "Assertion Failed" __VA_OPT__(,) __VA_ARGS__)
-	#endif
-
-	#define LK_CORE_ASSERT(condition, ...) { if(!(condition)) { LK_CORE_ASSERT_MESSAGE_INTERNAL(__VA_ARGS__); LK_DEBUG_BREAK; } }
-	#define LK_ASSERT(condition, ...) { if(!(condition)) { LK_ASSERT_MESSAGE_INTERNAL(__VA_ARGS__); LK_DEBUG_BREAK; } }
+/** 
+ * Verify.
+ */
+#if LK_ENABLE_VERIFY
+#	if LK_VARIADIC_ARGS
+#		define LK_CORE_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Core, "Verify Failed", ##__VA_ARGS__)
+#		define LK_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Client, "Verify Failed", ##__VA_ARGS__)
+#	else
+#		define LK_CORE_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Core, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
+#		define LK_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Client, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
+#	endif
+#	define LK_CORE_VERIFY(condition, ...) { if (!(condition)) { LK_CORE_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); LK_DEBUG_BREAK; } }
+#	define LK_VERIFY(condition, ...) { if (!(condition)) { LK_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); LK_DEBUG_BREAK; } }
 #else
-	#define LK_CORE_ASSERT(condition, ...)
-	#define LK_ASSERT(condition, ...)
-#endif
-
-#define LK_CORE_THROW_ERROR(...) LK_CORE_ASSERT(false, __VA_ARGS__)
-#define LK_THROW_ERROR(...)      LK_ASSERT(false, __VA_ARGS__)
-
-
-#ifdef LK_ENABLE_VERIFY
-	// Internal helpers, do not use directly
-	#if defined(LK_COMPILER_CLANG) || defined(LK_VARIADIC_OPT_DISABLED)
-		#define LK_CORE_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::EType::Core, "Verify Failed", ##__VA_ARGS__)
-		#define LK_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::EType::Client, "Verify Failed", ##__VA_ARGS__)
-	#else
-		#define LK_CORE_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Core, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
-		#define LK_VERIFY_MESSAGE_INTERNAL(...)  ::LkEngine::Log::PrintAssertMessage(::LkEngine::Log::Type::Client, "Verify Failed" __VA_OPT__(,) __VA_ARGS__)
-	#endif
-
-	#define LK_CORE_VERIFY(condition, ...) { if (!(condition)) { LK_CORE_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); LK_DEBUG_BREAK; } }
-	#define LK_VERIFY(condition, ...) { if (!(condition)) { LK_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); LK_DEBUG_BREAK; } }
-
-#else
-	#define LK_CORE_VERIFY(condition, ...)
-	#define LK_VERIFY(condition, ...)
+#	define LK_CORE_VERIFY(condition, ...)
+#	define LK_VERIFY(condition, ...)
 #endif

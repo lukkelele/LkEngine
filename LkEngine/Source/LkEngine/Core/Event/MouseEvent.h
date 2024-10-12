@@ -7,7 +7,7 @@
 
 namespace LkEngine {
 
-	class MouseMovedEvent : public Event
+	class MouseMovedEvent : public LEvent
 	{
 	public:
 		MouseMovedEvent(const float x, const float y) 
@@ -17,7 +17,7 @@ namespace LkEngine {
 		float GetY() const { return m_MouseY; }
 
 		const char* GetName() const override { return "MouseMoved"; }
-		EventType GetEventType() const override { return EventType::MouseMoved; }
+		EEventType GetEventType() const override { return EEventType::MouseMoved; }
 
 		std::string ToString() const override
 		{
@@ -30,7 +30,7 @@ namespace LkEngine {
 		float m_MouseX, m_MouseY;
 	};
 
-	class MouseScrolledEvent : public Event
+	class MouseScrolledEvent : public LEvent
 	{
 	public:
 		MouseScrolledEvent(const float xOffset, const float yOffset)
@@ -41,7 +41,7 @@ namespace LkEngine {
 		float GetYOffset() const { return m_YOffset; }
 
 		const char* GetName() const override { return "MouseScrolled"; }
-		EventType GetEventType() const override { return EventType::MouseScrolled; }
+		EEventType GetEventType() const override { return EEventType::MouseScrolled; }
 
 		std::string ToString() const override
 		{
@@ -54,67 +54,99 @@ namespace LkEngine {
 		float m_XOffset, m_YOffset;
 	};
 
-	class MouseButtonEvent : public Event
+	class LMouseButtonEvent : public LEvent
 	{
 	protected:
-		MouseButtonEvent(MouseButton button)
-			: m_Button(button) {}
+		LMouseButtonEvent(EMouseButton Button)
+			: m_Button(Button) {}
 
 	public:
-		inline MouseButton GetMouseButton() const { return m_Button; }
-		const char* GetName() const override { return "MouseButton"; }
+		FORCEINLINE EMouseButton GetMouseButton() const 
+		{ 
+			return m_Button; 
+		}
+
+		const char* GetName() const override 
+		{ 
+			return "MouseButton"; 
+		}
+
+		glm::vec2 GetCoordinates() const
+		{
+			return Coordinates;
+		}
 
 	protected:
-		MouseButton m_Button;
+		EMouseButton m_Button;
+		glm::vec2 Coordinates = { 0.0f, 0.0f };
 	};
 
-	class MouseButtonPressedEvent : public MouseButtonEvent
+	class LMouseButtonPressedEvent : public LMouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(MouseButton button)
-			: MouseButtonEvent(button) {}
+		LMouseButtonPressedEvent() = delete;
+		LMouseButtonPressedEvent(const EMouseButton Button, const glm::vec2& InCoordinates)
+			: LMouseButtonEvent(Button) 
+		{
+			Coordinates = InCoordinates;
+		}
 
-		const char* GetName() const override { return "MouseButtonPressed"; }
-		EventType GetEventType() const override { return EventType::MouseButtonPressed; }
+		FORCEINLINE const char* GetName() const override { return "MouseButtonPressed"; }
+		FORCEINLINE EEventType GetEventType() const override { return EEventType::MouseButtonPressed; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonPressedEvent: " << (int)m_Button;
+			ss << "MouseButtonPressedEvent: " << static_cast<int>(m_Button) 
+				<< ", Coords: [" << Coordinates.x << ", " << Coordinates.y << "]";
 			return ss.str();
 		}
 	};
 
-	class MouseButtonReleasedEvent : public MouseButtonEvent
+	class LMouseButtonReleasedEvent : public LMouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(MouseButton button)
-			: MouseButtonEvent(button) {}
+		LMouseButtonReleasedEvent() = delete;
+		LMouseButtonReleasedEvent(const EMouseButton Button, const glm::vec2& InCoordinates)
+			: LMouseButtonEvent(Button) 
+		{
+			Coordinates = InCoordinates;
+		}
 
-		const char* GetName() const override { return "MouseButtonReleased"; }
-		EventType GetEventType() const override { return EventType::MouseButtonPressed; }
+		FORCEINLINE const char* GetName() const override { return "MouseButtonReleased"; }
+		FORCEINLINE EEventType GetEventType() const override { return EEventType::MouseButtonPressed; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonReleasedEvent: " << (int)m_Button;
+			ss << "MouseButtonReleasedEvent: " << static_cast<int>(m_Button) 
+				<< ", Coords: [" << Coordinates.x << ", " << Coordinates.y << "]";
+
 			return ss.str();
 		}
 	};
 
-	class MouseButtonDownEvent : public MouseButtonEvent
+	class LMouseButtonDownEvent : public LMouseButtonEvent
 	{
 	public:
-		MouseButtonDownEvent(MouseButton button)
-			: MouseButtonEvent(button) {}
+		LMouseButtonDownEvent(EMouseButton Button)
+			: LMouseButtonEvent(Button) {}
 
-		const char* GetName() const override { return "MouseButtonDown"; }
-		EventType GetEventType() const override { return EventType::MouseButtonDown; }
+		const char* GetName() const override 
+		{
+			return "MouseButtonDown"; 
+		}
+
+		EEventType GetEventType() const override 
+		{ 
+			return EEventType::MouseButtonDown; 
+		}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
 			ss << "MouseButtonDownEvent: " << (int)m_Button;
+
 			return ss.str();
 		}
 	};

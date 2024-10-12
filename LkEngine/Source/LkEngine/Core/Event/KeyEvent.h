@@ -7,7 +7,7 @@
 
 namespace LkEngine {
 
-	class KeyEvent : public Event
+	class KeyEvent : public LEvent
 	{
 	protected:
 		KeyEvent(KeyCode keycode) 
@@ -16,7 +16,7 @@ namespace LkEngine {
 	public:
 		inline KeyCode GetKeyCode() const { return m_KeyCode; }
 
-		EventType GetEventType() const { return EventType::Key; }
+		EEventType GetEventType() const { return EEventType::Key; }
 		const char* GetName() const override { return "Key"; }
 
 	protected:
@@ -33,7 +33,7 @@ namespace LkEngine {
 		inline int GetRepeatCount() const { return m_RepeatCount; }
 
 		const char* GetName() const override { return "KeyPressed"; }
-		EventType GetEventType() const { return EventType::KeyPressed; }
+		EEventType GetEventType() const { return EEventType::KeyPressed; }
 
 		std::string ToString() const override
 		{
@@ -53,7 +53,7 @@ namespace LkEngine {
 			: KeyEvent(keycode) {}
 
 		const char* GetName() const override { return "KeyReleased"; }
-		EventType GetEventType() const { return EventType::KeyReleased; }
+		EEventType GetEventType() const { return EEventType::KeyReleased; }
 
 		std::string ToString() const override
 		{
@@ -70,7 +70,7 @@ namespace LkEngine {
 			: KeyEvent(keycode) {}
 
 		const char* GetName() const override { return "KeyTyped"; }
-		EventType GetEventType() const { return EventType::KeyTyped; }
+		EEventType GetEventType() const { return EEventType::KeyTyped; }
 
 		std::string ToString() const override
 		{

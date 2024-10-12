@@ -8,7 +8,7 @@ namespace LkEngine {
 
 	class LApplication;
 
-	class LWindowsCrashHandler : public LCrashHandler
+	class LWindowsCrashHandler : public ICrashHandler
 	{
 	public:
 		LWindowsCrashHandler(LApplication* ApplicationRef);
@@ -16,8 +16,8 @@ namespace LkEngine {
 		~LWindowsCrashHandler();
 
 		virtual LString GenerateApplicationCrashDump() override;
-
 		virtual void LogCrashInformation(LStringView CrashInformation) override;
+		virtual LString CaptureBackTraceOnStack() override;
 
 	private:
 		/* Reference to application instance. */

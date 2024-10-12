@@ -7,7 +7,7 @@ struct GLFWwindow;
 
 namespace LkEngine {
 
-	class OpenGLSwapChain : public SwapChain
+	class OpenGLSwapChain : public LSwapChain
 	{
 	public:
 		OpenGLSwapChain() = default;
@@ -33,6 +33,8 @@ namespace LkEngine {
 	private:
 		uint32_t m_Width, m_Height;
 		uint32_t m_ImageCount = 0;
+
+		LCLASS(OpenGLSwapChain)
 	};
 
 }

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Renderer/Texture.h"
 
 
 namespace LkEngine {
 
-	class Framebuffer;
+	class LFramebuffer;
 
 	enum class FramebufferTextureFormat
 	{
@@ -76,30 +76,33 @@ namespace LkEngine {
 		bool Transfer = false; // Transfer operation flag
 		bool Blend = true;
 
-		Ref<Framebuffer> ExistingFramebuffer;
+		TObjectPtr<LFramebuffer> ExistingFramebuffer;
 
 		// Note: these are used to attach multi-layered color/depth images 
-		Ref<Image> ExistingImage;
+		TObjectPtr<LImage> ExistingImage;
 		std::vector<uint32_t> ExistingImageLayers;
 		
-		std::map<uint32_t, Ref<Image>> ExistingImages;
+		std::map<uint32_t, TObjectPtr<LImage>> ExistingImages;
 
 		std::string DebugName;
 
 		FramebufferSpecification() = default;
 	};
 
-	class Framebuffer : public RefCounted
+	using FResizeCallback = std::function<void(TObjectPtr<LFramebuffer>)>;
+
+	class LFramebuffer : public LObject
 	{
 	public:
-		virtual ~Framebuffer() = default;
+		virtual ~LFramebuffer() = default;
 
 		virtual void Invalidate() = 0;
 		virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) = 0;
-		virtual void AddResizeCallback(const std::function<void(Ref<Framebuffer>)>& func) = 0;
+		virtual void AddResizeCallback(const FResizeCallback& Func) = 0;
+		//virtual void AddResizeCallback(const std::function<void(TObjectPtr<LFramebuffer>)>& Func) = 0;
 
-		virtual Ref<Image> GetImage(uint32_t attachmentIndex = 0) const = 0;
-		virtual Ref<Image> GetDepthImage() const = 0;
+		virtual TObjectPtr<LImage> GetImage(uint32_t attachmentIndex = 0) const = 0;
+		virtual TObjectPtr<LImage> GetDepthImage() const = 0;
 		virtual size_t GetColorAttachmentCount() const = 0;
 		virtual bool HasDepthAttachment() const = 0;
 
@@ -116,9 +119,12 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
-		static Ref<Framebuffer> Create(const FramebufferSpecification& framebufferSpecification);
+		static TObjectPtr<LFramebuffer> Create(const FramebufferSpecification& framebufferSpecification);
 
 		static void TargetSwapChain(); /// @FIXME: REMOVE THIS 
+
+	private:
+		LCLASS(LFramebuffer)
 	};
 
 

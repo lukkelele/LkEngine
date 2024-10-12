@@ -1,17 +1,22 @@
 #pragma once
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
 #include "LkEngine/Core/Memory/Buffer.h"
 
 
 namespace LkEngine {
 
-	class IndexBuffer : public RefCounted
+	class LIndexBuffer : public LObject
 	{	
 	public:
-		virtual ~IndexBuffer() = default;
+		virtual ~LIndexBuffer() = default;
 
-		virtual void SetData(void* buffer, uint64_t size, uint64_t offset = 0) = 0;
-		virtual Buffer GetLocalData() = 0;
+		virtual void SetData(void* buffer, 
+							 const uint64_t size, 
+							 const uint64_t offset = 0) = 0;
+
+		virtual FBuffer GetLocalData() = 0;
 
 		virtual void Bind() const = 0;
 
@@ -21,8 +26,11 @@ namespace LkEngine {
 		virtual RendererID GetRendererID() const = 0;
 		virtual RendererID& GetRendererID() = 0;
 
-		static Ref<IndexBuffer> Create(uint64_t size);
-		static Ref<IndexBuffer> Create(void* data, uint64_t size = 0);
+		static TObjectPtr<LIndexBuffer> Create(const uint64_t InSize);
+		static TObjectPtr<LIndexBuffer> Create(void* data, const uint64_t InSize = 0);
+
+	private:
+		LCLASS(LIndexBuffer)
 	};
 
 }

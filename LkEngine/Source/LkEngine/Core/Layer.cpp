@@ -4,8 +4,8 @@
 
 namespace LkEngine {
 
-	Layer::Layer(const std::string& layerName)
-		: m_Name(layerName)
+	LLayer::LLayer(std::string_view InName)
+		: Name(InName)
 	{
 	}
 

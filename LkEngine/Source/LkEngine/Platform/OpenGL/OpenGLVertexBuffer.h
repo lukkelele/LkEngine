@@ -5,40 +5,58 @@
 
 namespace LkEngine {
 
-    class OpenGLVertexBuffer : public VertexBuffer
+    class OpenGLVertexBuffer : public LVertexBuffer
     {
 	public:
-		OpenGLVertexBuffer(void* data, uint64_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
-		OpenGLVertexBuffer(uint64_t size, VertexBufferUsage usage = VertexBufferUsage::Dynamic);
+		OpenGLVertexBuffer(void* data, 
+						   const uint64_t InSize, 
+						   const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
+		OpenGLVertexBuffer(const uint64_t InSize, 
+						   const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
 		~OpenGLVertexBuffer();
 
-		void SetData(void* data, uint64_t size, uint64_t offset = 0) override;
-		void RT_SetData(void* buffer, uint64_t size, uint64_t offset = 0) override;
+		virtual void SetData(void* data, uint64_t InSize, uint64_t offset = 0) override;
+		virtual void RT_SetData(void* buffer, uint64_t InSize, uint64_t offset = 0) override;
 
-		Buffer GetLocalData() override { return m_LocalData; }
-		uint64_t GetSize() const override { return m_Size; }
+		virtual FBuffer GetLocalData() override { return m_LocalData; }
+		virtual uint64_t GetSize() const override { return m_Size; }
 
-		void SetIndexBuffer(const Ref<IndexBuffer> ib) override;
-		void SetLayout(const VertexBufferLayout& layout) override; 
-		Ref<IndexBuffer> GetIndexBuffer() override { return m_IndexBuffer; }
-		VertexBufferLayout GetLayout() const override { return m_BufferLayout; }
-		VertexBufferLayout& GetLayout() override { return m_BufferLayout; }
+		virtual void SetIndexBuffer(const TObjectPtr<LIndexBuffer> ib) override;
+		virtual void SetLayout(const VertexBufferLayout& layout) override; 
 
-		RendererID GetRendererID() const { return m_RendererID; }
+		virtual TObjectPtr<LIndexBuffer> GetIndexBuffer() override 
+		{ 
+			return m_IndexBuffer; 
+		}
 
-		void Bind() const override;
+		FORCEINLINE virtual VertexBufferLayout GetLayout() const override 
+		{ 
+			return m_BufferLayout; 
+		}
+
+		FORCEINLINE virtual VertexBufferLayout& GetLayout() override 
+		{ 
+			return m_BufferLayout; 
+		}
+
+		FORCEINLINE RendererID GetRendererID() const 
+		{ 
+			return m_RendererID; 
+		}
+
+		virtual void Bind() const override;
 
 	private:
 		void AddVertexBufferToVertexArray();
-		void AddVertexBuffer(VertexBuffer& vb);
+		void AddVertexBuffer(LVertexBuffer& VertexBuffer);
 
 	private:
-		RendererID m_RendererID;
-		Buffer m_LocalData;
+		RendererID m_RendererID = 0;
+		FBuffer m_LocalData{};
 		uint64_t m_Size = 0;
-		VertexBufferUsage m_Usage;
+		EVertexBufferUsage m_Usage = EVertexBufferUsage::None;
 
-		Ref<IndexBuffer> m_IndexBuffer = nullptr;
+		TObjectPtr<LIndexBuffer> m_IndexBuffer = nullptr;
 		VertexBufferLayout m_BufferLayout;
 
 		RendererID m_VertexArrayID = 0;

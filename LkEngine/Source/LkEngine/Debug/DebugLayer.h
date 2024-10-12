@@ -8,47 +8,22 @@
 
 namespace LkEngine {
 
-    class Scene;
+    class LScene;
     class LEntity;
 
-    class DebugLayer : public Layer
+    class DebugLayer : public LLayer
     {
     public:
         DebugLayer();
         ~DebugLayer() = default;
 
-        void OnAttach() override;
-        void OnDetach() override;
-        void OnUpdate(float ts) override;
-        void OnImGuiRender() override;
+        virtual void OnAttach() override;
+        virtual void OnDetach() override;
+        virtual void OnUpdate(float ts) override;
+        virtual void OnImGuiRender() override;
 
     public:
         inline static int s_DebugEntities = 0;
     };
-
-    namespace Debug 
-    {
-        FORCEINLINE static void PrintVec2(const glm::vec2& vec, const std::string& message = "")
-        {
-            printf("[DEBUG] Vec2 (%f, %f): %s\n", vec.x, vec.y, message.c_str());
-        }
-
-        FORCEINLINE static void PrintVec3(const glm::vec3& vec, const std::string& message = "")
-        {
-            printf("[DEBUG] Vec3 (%f, %f, %f): %s\n", vec.x, vec.y, vec.z, message.c_str());
-        }
-
-        LEntity CreateDebugSprite(Scene& scene, 
-                                  const glm::vec2& size = { 100.0f, 100.0f },
-                                  const glm::vec2& pos = { 0.0f, 0.0f },
-                                  const glm::vec4& color = Color::Generate());
-
-        LEntity CreateDebugSprite(Scene& scene, 
-                                  const glm::vec2& size = { 100.0f, 100.0f },
-                                  const glm::vec3& pos = { 0.0f, 0.0f, 0.0f },
-                                  const glm::vec4& color = Color::Generate());
-
-
-    }
 
 }

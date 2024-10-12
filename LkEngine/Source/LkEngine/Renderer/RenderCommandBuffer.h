@@ -6,10 +6,13 @@
 
 namespace LkEngine {
 
-	class RenderCommandBuffer : public RefCounted
+	/**
+	 * LRenderCommandBuffer
+	 */
+	class LRenderCommandBuffer : public LObject
 	{
 	public:
-		virtual ~RenderCommandBuffer() = default;
+		virtual ~LRenderCommandBuffer() = default;
 
 		virtual void Begin() = 0;
 		virtual void End() = 0;
@@ -21,8 +24,11 @@ namespace LkEngine {
 		virtual uint32_t BeginTimestampQuery() = 0;
 		virtual void EndTimestampQuery(uint32_t queryID) = 0;
 
-		static Ref<RenderCommandBuffer> Create(uint32_t count = 0, const std::string& debugName = "");
-		static Ref<RenderCommandBuffer> CreateFromSwapChain(const std::string& debugName = "");
+		static TObjectPtr<LRenderCommandBuffer> Create(const uint32_t count = 0, const std::string& debugName = "");
+		static TObjectPtr<LRenderCommandBuffer> CreateFromSwapChain(const std::string& debugName = "");
+
+	private:
+		LCLASS(LRenderCommandBuffer)
 	};
 
 

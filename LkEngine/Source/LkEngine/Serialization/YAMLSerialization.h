@@ -12,26 +12,30 @@
 #include <glm/glm.hpp>
 
 
-namespace YAML {
+/**
+ * Specializations for encode, decode and convert from yaml-cpp.
+ */
+namespace YAML 
+{
 
 	template<>
 	struct convert<glm::vec2>
 	{
-		static Node encode(const glm::vec2& rhs)
+		static Node encode(const glm::vec2& RHS)
 		{
 			Node node;
-			node.push_back(rhs.x);
-			node.push_back(rhs.y);
+			node.push_back(RHS.x);
+			node.push_back(RHS.y);
 			return node;
 		}
 
-		static bool decode(const Node& node, glm::vec2& rhs)
+		static bool decode(const Node& node, glm::vec2& RHS)
 		{
 			if (!node.IsSequence() || node.size() != 2)
 				return false;
 
-			rhs.x = node[0].as<float>();
-			rhs.y = node[1].as<float>();
+			RHS.x = node[0].as<float>();
+			RHS.y = node[1].as<float>();
 			return true;
 		}
 	};
@@ -39,23 +43,23 @@ namespace YAML {
 	template<>
 	struct convert<glm::vec3>
 	{
-		static Node encode(const glm::vec3& rhs)
+		static Node encode(const glm::vec3& RHS)
 		{
 			Node node;
-			node.push_back(rhs.x);
-			node.push_back(rhs.y);
-			node.push_back(rhs.z);
+			node.push_back(RHS.x);
+			node.push_back(RHS.y);
+			node.push_back(RHS.z);
 			return node;
 		}
 
-		static bool decode(const Node& node, glm::vec3& rhs)
+		static bool decode(const Node& node, glm::vec3& RHS)
 		{
 			if (!node.IsSequence() || node.size() != 3)
 				return false;
 
-			rhs.x = node[0].as<float>();
-			rhs.y = node[1].as<float>();
-			rhs.z = node[2].as<float>();
+			RHS.x = node[0].as<float>();
+			RHS.y = node[1].as<float>();
+			RHS.z = node[2].as<float>();
 			return true;
 		}
 	};
@@ -63,25 +67,25 @@ namespace YAML {
 	template<>
 	struct convert<glm::vec4>
 	{
-		static Node encode(const glm::vec4& rhs)
+		static Node encode(const glm::vec4& RHS)
 		{
 			Node node;
-			node.push_back(rhs.x);
-			node.push_back(rhs.y);
-			node.push_back(rhs.z);
-			node.push_back(rhs.w);
+			node.push_back(RHS.x);
+			node.push_back(RHS.y);
+			node.push_back(RHS.z);
+			node.push_back(RHS.w);
 			return node;
 		}
 
-		static bool decode(const Node& node, glm::vec4& rhs)
+		static bool decode(const Node& node, glm::vec4& RHS)
 		{
 			if (!node.IsSequence() || node.size() != 4)
 				return false;
 
-			rhs.x = node[0].as<float>();
-			rhs.y = node[1].as<float>();
-			rhs.z = node[2].as<float>();
-			rhs.w = node[3].as<float>();
+			RHS.x = node[0].as<float>();
+			RHS.y = node[1].as<float>();
+			RHS.z = node[2].as<float>();
+			RHS.w = node[3].as<float>();
 			return true;
 		}
 	};
@@ -89,42 +93,42 @@ namespace YAML {
 	template<>
 	struct convert<glm::quat>
 	{
-		static Node encode(const glm::quat& rhs)
+		static Node encode(const glm::quat& RHS)
 		{
 			Node node;
-			node.push_back(rhs.w);
-			node.push_back(rhs.x);
-			node.push_back(rhs.y);
-			node.push_back(rhs.z);
+			node.push_back(RHS.w);
+			node.push_back(RHS.x);
+			node.push_back(RHS.y);
+			node.push_back(RHS.z);
 			return node;
 		}
 
-		static bool decode(const Node& node, glm::quat& rhs)
+		static bool decode(const Node& node, glm::quat& RHS)
 		{
 			if (!node.IsSequence() || node.size() != 4)
 				return false;
 
-			rhs.w = node[0].as<float>();
-			rhs.x = node[1].as<float>();
-			rhs.y = node[2].as<float>();
-			rhs.z = node[3].as<float>();
+			RHS.w = node[0].as<float>();
+			RHS.x = node[1].as<float>();
+			RHS.y = node[2].as<float>();
+			RHS.z = node[3].as<float>();
 			return true;
 		}
 	};
 
 	template<>
-	struct convert<LkEngine::AssetHandle>
+	struct convert<LkEngine::FAssetHandle>
 	{
-		static Node encode(const LkEngine::AssetHandle& rhs)
+		static Node encode(const LkEngine::FAssetHandle& RHS)
 		{
 			Node node;
-			node.push_back((uint64_t)rhs);
+			node.push_back((uint64_t)RHS);
 			return node;
 		}
 
-		static bool decode(const Node& node, LkEngine::AssetHandle& rhs)
+		static bool decode(const Node& node, LkEngine::FAssetHandle& RHS)
 		{
-			rhs = node.as<uint64_t>();
+			RHS = node.as<uint64_t>();
 			return true;
 		}
 	};

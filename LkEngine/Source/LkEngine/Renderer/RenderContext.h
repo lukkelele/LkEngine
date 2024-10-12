@@ -1,16 +1,20 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
 
 #include "BlendingSpecification.h"
 
 struct GLFWwindow;
 
+
 namespace LkEngine {
 
     class LWindow;
 
-    class RenderContext : public RefCounted
+    //class LRenderContext : public RefCounted
+    class LRenderContext : public LObject
     {
     public:
         enum class EProfile 
@@ -20,7 +24,10 @@ namespace LkEngine {
         };
 
     public:
-        virtual ~RenderContext() = default;
+        virtual ~LRenderContext() = default;
+
+        //static Ref<RenderContext> Create(LWindow* WindowRef);
+        static TObjectPtr<LRenderContext> Create(LWindow* InWindow);
 
         static void SetProfile(const EProfile& InProfile);
         static void SetVersion(const int MajorVersion, const int MinorVersion);
@@ -30,9 +37,9 @@ namespace LkEngine {
         virtual GLFWwindow* GetGlfwWindow() = 0;
         virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) = 0;
 
-        virtual void SetDepthEnabled(bool enabled) = 0;
-        virtual void SetDepthFunction(const EDepthFunction& depthFunc) = 0;
-        virtual void SetBlendingEnabled(bool enabled) = 0;
+        virtual void SetDepthEnabled(const bool InEnabled) = 0;
+        virtual void SetDepthFunction(const EDepthFunction& InDepthFunc) = 0;
+        virtual void SetBlendingEnabled(const bool InEnabled) = 0;
         virtual void SetBlendFunction(const ESourceBlendFunction& InSourceFunc, const EDestinationBlendFunction& InDestinationFunc) = 0;
         virtual void SetSourceBlendFunction(const ESourceBlendFunction& InSourceFunc) = 0;
         virtual void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationFunc) = 0;
@@ -49,13 +56,14 @@ namespace LkEngine {
         static std::string GetSourceBlendFunctionName(const ESourceBlendFunction& SourceBlendFunc);
         static std::string GetDestinationBlendFunctionName(const EDestinationBlendFunction& DestinationFunction);
 
-        static Ref<RenderContext> Create(LWindow* WindowRef);
-
     protected:
         static void HandleViewportEvents();
 
     protected:
         friend class LEditor;
+
+    private:
+        LCLASS(LRenderContext);
     };
 
 }

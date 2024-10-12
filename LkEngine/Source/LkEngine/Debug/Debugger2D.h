@@ -2,13 +2,11 @@
 
 #include <glm/glm.hpp>
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Physics2D/Physics2D.h"
 
 
 namespace LkEngine {
-
-    class Scene;
 
     class Debugger2D
     {

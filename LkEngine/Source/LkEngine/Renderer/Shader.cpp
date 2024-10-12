@@ -15,42 +15,38 @@
 
 namespace LkEngine {
 
-	Ref<Shader> Shader::Create(const std::string& filepath)
+	TObjectPtr<LShader> LShader::Create(const std::string& InFilepath)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL:
 			{
-				return Ref<OpenGLShader>::Create(filepath);
+				return TObjectPtr<OpenGLShader>::Create(InFilepath);
 			}
 
-			/// @FIXME
-			//case RendererAPIType::Vulkan: return Ref<VulkanShader>::Create(filepath);
-
 			case ERendererAPI::None: break;
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Render API");
 		return nullptr;
 	}
 
-	Ref<Shader> Shader::Create(const std::string& vertexPath, const std::string& fragmentPath)
+	TObjectPtr<LShader> LShader::Create(const std::string& vertexPath, const std::string& fragmentPath)
 	{
 		switch (LRendererAPI::Current())
 		{
-			case ERendererAPI::OpenGL: return Ref<OpenGLShader>::Create(vertexPath, fragmentPath);
-
-			/// @FIXME
-			//case RendererAPIType::Vulkan: return Ref<VulkanShader>::Create(vertexPath, fragmentPath);
+			case ERendererAPI::OpenGL: return TObjectPtr<OpenGLShader>::Create(vertexPath, fragmentPath);
 
 			case ERendererAPI::None: break;
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Render API");
 		return nullptr;
 	}
 
-	ShaderProgramSource Shader::ParseShader(const std::string& filepath)
+	ShaderProgramSource LShader::ParseShader(const std::string& filepath)
 	{
 		enum class ShaderType
 		{
@@ -72,14 +68,20 @@ namespace LkEngine {
 			if (line.find("#shader") != std::string::npos)
 			{
 				if (line.find("vertex") != std::string::npos)
+				{
 					type = ShaderType::VERTEX;
+				}
 				else if (line.find("fragment") != std::string::npos)
+				{
 					type = ShaderType::FRAGMENT;
+				}
 			} 
 			else
 			{	// Use ShaderType to append lines appropriately 
 				if (type != ShaderType::NONE)
+				{
 					ss[(int)type] << line << '\n';
+				}
 			}
 		}
 
@@ -99,7 +101,7 @@ namespace LkEngine {
 		return { vertex_str, frag_str };
 	}
 
-	ShaderProgramSource Shader::ParseShaders(const std::string& vertexPath, const std::string& fragmentPath)
+	ShaderProgramSource LShader::ParseShaders(const std::string& vertexPath, const std::string& fragmentPath)
 	{
 		enum class ShaderType
 		{
@@ -138,30 +140,19 @@ namespace LkEngine {
 	//============================================================================
 	// ShaderLibrary
 	//============================================================================
-    ShaderLibrary::ShaderLibrary()
-    {
-		m_Instance = Ref<ShaderLibrary>(this);
-    }
-
-    ShaderLibrary::~ShaderLibrary()
+    void LShaderLibrary::Add(const TObjectPtr<LShader>& shader)
     {
     }
 
-    void ShaderLibrary::Add(const Ref<Shader>& shader)
+    void LShaderLibrary::Load(std::string_view name, const std::string& path)
     {
+		Shaders[name] = LShader::Create(path);
     }
 
-    void ShaderLibrary::Load(std::string_view name, const std::string& path)
+    TObjectPtr<LShader>& LShaderLibrary::Get(std::string_view shaderName)
     {
-		//m_Shaders[std::string(name)] = Shader::Create(path);
-		m_Shaders[name] = Shader::Create(path);
+		LK_ASSERT((Shaders.find(shaderName) != Shaders.end()));
+		return Shaders.at(shaderName);
     }
-
-    Ref<Shader>& ShaderLibrary::Get(std::string_view shaderName)
-    {
-		LK_ASSERT(m_Shaders.find(shaderName) != m_Shaders.end());
-		return m_Shaders.at(shaderName);
-    }
-
 
 }

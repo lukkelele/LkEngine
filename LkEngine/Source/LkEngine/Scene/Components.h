@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 #include "LkEngine/Asset/Asset.h"
 #include "LkEngine/Asset/MaterialAsset.h"
@@ -16,45 +16,50 @@
 
 namespace LkEngine{
 
-	// Component such as IDComponent and TagComponent are not in need of deriving BaseComponent as 
-	// they cannot and should not be removed at all
-	struct BaseComponent
+	/** 
+	 * IComponent
+	 * 
+	 *  Component interface.
+	 */
+	struct IComponent
 	{
-		bool Removable = true;
+		virtual ~IComponent() = default;
+
+		virtual std::string ToString() const = 0;
 	};
 
-	struct IDComponent 
+	struct LIDComponent 
 	{
 		UUID ID;
 
 		operator UUID() { return ID; }
 	};
 
-	struct TagComponent
+	struct LTagComponent
 	{
 		std::string Tag;
 
-		TagComponent() = default;
-		TagComponent(const TagComponent& other) = default;
-		TagComponent(const std::string& tag)
+		LTagComponent() = default;
+		LTagComponent(const LTagComponent& other) = default;
+		LTagComponent(const std::string& tag)
 			: Tag(tag) {}
 
 		operator std::string& () { return Tag; }
 		operator const std::string& () const { return Tag; }
 	};
 
-	struct RelationshipComponent
+	struct LRelationshipComponent
 	{
 		UUID ParentHandle = 0;
 		std::vector<UUID> Children;
 
-		RelationshipComponent() = default;
-		RelationshipComponent(const RelationshipComponent& other) = default;
-		RelationshipComponent(UUID parent) : ParentHandle(parent) {}
+		LRelationshipComponent() = default;
+		LRelationshipComponent(const UUID InParentHandle) : ParentHandle(InParentHandle) {}
+		LRelationshipComponent(const LRelationshipComponent& Other) = default;
 	};
 
 	// TODO: Patch out the use of Rotation2D and just use the Rotation quaternion
-    struct TransformComponent 
+    struct LTransformComponent : public IComponent
     {
 	public:
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
@@ -65,11 +70,11 @@ namespace LkEngine{
 
 	public:
 		float Rotation2D = 0.0f;
-		bool Static = false;
+		bool bIsStatic = false;
 
-		TransformComponent() = default;
-		TransformComponent(const TransformComponent& other) = default;
-		TransformComponent(const glm::vec3& Translation) : Translation(Translation) {}
+		LTransformComponent() = default;
+		LTransformComponent(const LTransformComponent& other) = default;
+		LTransformComponent(const glm::vec3& Translation) : Translation(Translation) {}
 
 		glm::vec3 GetTranslation() const { return Translation; }
 		glm::vec3 GetScale() const { return Scale; }
@@ -122,18 +127,24 @@ namespace LkEngine{
 			}
 		}
 
-		bool IsStatic() const { return Static; }
+		FORCEINLINE bool IsStatic() const { return bIsStatic; }
+
+		virtual std::string ToString() const override
+		{
+			return std::string("LTransformComponent::ToString() | TODO");
+		}
+
 	};
 
 
-    struct SpriteComponent 
+    struct LSpriteComponent 
     {
         std::string FilePath;
         glm::vec2 Size;
         glm::vec4 Color; 
 		bool Passthrough = false;
 
-        SpriteComponent(const std::string& filepath, 
+        LSpriteComponent(const std::string& filepath, 
                         const glm::vec2& size = { 100.0f, 100.0f }, 
                         const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
             : FilePath(filepath)
@@ -141,7 +152,7 @@ namespace LkEngine{
             , Color(color) 
 		{}
 
-        SpriteComponent(const glm::vec2& size = { 0.0f, 0.0f },
+        LSpriteComponent(const glm::vec2& size = { 0.0f, 0.0f },
                         const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
             : FilePath("")
             , Size(size)
@@ -158,23 +169,31 @@ namespace LkEngine{
 		bool IsPassthrough() const { return Passthrough; }
     };
 
-
-	struct CameraComponent
+	struct LCameraComponent
 	{
 		enum class Type { None = -1, Perspective, Orthographic };
 		Type ProjectionType = Type::None;
 
-		Ref<SceneCamera> Camera;
+		TObjectPtr<LSceneCamera> Camera;
 		bool Primary = false;
 
-		CameraComponent() = default;
-		CameraComponent(const CameraComponent& other) = default;
+		LCameraComponent() = default;
+		LCameraComponent(const LCameraComponent& Other) = default;
 		
-		operator SceneCamera& () { return *Camera; }
-		operator const SceneCamera& () const { return *Camera; }
+		operator LSceneCamera& () { return *Camera; }
+		operator const LSceneCamera& () const { return *Camera; }
 	};
 
-	struct RigidBody2DComponent 
+	/** ERigidBodyType */
+	enum class ERigidBodyType 
+	{ 
+		None = -1, 
+		Static,   // 0
+		Dynamic,  // 1
+		Kinematic // 2
+	};
+
+	struct LRigidBody2DComponent 
 	{
 		enum class Type 
 		{ 
@@ -193,13 +212,13 @@ namespace LkEngine{
 		bool IsBullet = false;
 		void* RuntimeBody = nullptr; // Assigned at component creation
 
-		RigidBody2DComponent() : BodyType(Type::Dynamic) {}
-		RigidBody2DComponent(Type type) : BodyType(type) {}
-		RigidBody2DComponent(const RigidBody2DComponent& other) = default;
+		LRigidBody2DComponent() : BodyType(Type::Dynamic) {}
+		LRigidBody2DComponent(Type type) : BodyType(type) {}
+		LRigidBody2DComponent(const LRigidBody2DComponent& other) = default;
 	};
 
 
-	struct BoxCollider2DComponent
+	struct LBoxCollider2DComponent
 	{
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		glm::vec2 Size = { 0.50f, 0.50f };
@@ -209,40 +228,46 @@ namespace LkEngine{
 		bool IsSensor = false;
 		void* RuntimeBody = nullptr; // Assigned at component creation
 
-		BoxCollider2DComponent() = default;
-		BoxCollider2DComponent(const BoxCollider2DComponent& other) = default;
+		LBoxCollider2DComponent() = default;
+		LBoxCollider2DComponent(const LBoxCollider2DComponent& other) = default;
 	};
 
-	struct MeshComponent
+	struct LMeshComponent
 	{
-		AssetHandle Mesh;
+		FAssetHandle Mesh;
 		uint32_t SubmeshIndex = 0;
-		Ref<LkEngine::MaterialTable> MaterialTable = Ref<LkEngine::MaterialTable>::Create();
+		TObjectPtr<LMaterialTable> MaterialTable = TObjectPtr<LMaterialTable>::Create();
 		std::vector<UUID> BoneEntityIds; // If mesh is rigged, these are the entities whose transforms will used to "skin" the rig
 		bool Visible = true;
 
-		MeshComponent() = default;
-		MeshComponent(const MeshComponent& other)
+		LMeshComponent() = default;
+		LMeshComponent(const LMeshComponent& other)
 			: Mesh(other.Mesh), SubmeshIndex(other.SubmeshIndex)
-			, MaterialTable(Ref<LkEngine::MaterialTable>::Create(other.MaterialTable))
+			, MaterialTable(TObjectPtr<LkEngine::LMaterialTable>::Create(other.MaterialTable))
 			, BoneEntityIds(other.BoneEntityIds) {}
-		MeshComponent(AssetHandle mesh, uint32_t submeshIndex = 0)
-			: Mesh(mesh), SubmeshIndex(submeshIndex) {}
+		LMeshComponent(FAssetHandle InMesh, uint32_t submeshIndex = 0)
+			: Mesh(InMesh), SubmeshIndex(submeshIndex) {}
 	};
 
-	struct StaticMeshComponent
+	struct LStaticMeshComponent
 	{
-		AssetHandle StaticMesh;
-		Ref<LkEngine::MaterialTable> MaterialTable = Ref<LkEngine::MaterialTable>::Create();
+		FAssetHandle StaticMesh;
+		TObjectPtr<LMaterialTable> MaterialTable = TObjectPtr<LMaterialTable>::Create();
 		bool Visible = true;
 
-		StaticMeshComponent() = default;
-		StaticMeshComponent(const StaticMeshComponent& other)
+		LStaticMeshComponent() = default;
+
+		LStaticMeshComponent(const LStaticMeshComponent& other)
 			: StaticMesh(other.StaticMesh)
-			, MaterialTable(Ref<LkEngine::MaterialTable>::Create(other.MaterialTable))
-			, Visible(other.Visible) {}
-		StaticMeshComponent(AssetHandle staticMesh)
-			: StaticMesh(staticMesh) {}
+			, MaterialTable(TObjectPtr<LMaterialTable>::Create(other.MaterialTable))
+			, Visible(other.Visible) 
+		{
+		}
+
+		LStaticMeshComponent(FAssetHandle staticMesh)
+			: StaticMesh(staticMesh) 
+		{
+		}
 	};
 
 	struct Box2DWorldComponent 
@@ -256,33 +281,51 @@ namespace LkEngine{
 			auto g = World->GetGravity();
 			return glm::vec2(g.x, g.y);
 		}
-		int GetBodyCount() const { return World->GetBodyCount(); }
-		int GetContactCount() const { return World->GetContactCount(); }
-		bool IsPaused() const { return World->IsLocked(); }
-		bool HasDebugDrawerAttached() const { return DebugDrawerAttached; }
+
+		int GetBodyCount() const 
+		{ 
+			LK_VERIFY(World);
+			return World->GetBodyCount(); }
+
+		int GetContactCount() const 
+		{ 
+			LK_VERIFY(World);
+			return World->GetContactCount(); 
+		}
+
+		FORCEINLINE bool IsPaused() const 
+		{ 
+			LK_VERIFY(World);
+			return World->IsLocked(); 
+		}
+
+		FORCEINLINE bool HasDebugDrawerAttached() const 
+		{ 
+			return DebugDrawerAttached; 
+		}
 	};
 
-	struct SceneComponent
+	struct LSceneComponent
 	{
-		UUID SceneID;
+		UUID SceneID{};
 	};
 
-	template<typename... Component>
+	template<typename... TComponent>
 	struct ComponentGroup
 	{
 	};
 
 	using AllComponents = ComponentGroup<
-		IDComponent, 
-		TagComponent, 
-		TransformComponent,
-		SpriteComponent,
-		CameraComponent,
-		RigidBody2DComponent,
-		BoxCollider2DComponent,
-		MeshComponent,
-		StaticMeshComponent,
-		SceneComponent	
+		LIDComponent, 
+		LTagComponent, 
+		LTransformComponent,
+		LSpriteComponent,
+		LCameraComponent,
+		LRigidBody2DComponent,
+		LBoxCollider2DComponent,
+		LMeshComponent,
+		LStaticMeshComponent,
+		LSceneComponent	
 	>;
 
 }

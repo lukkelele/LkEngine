@@ -9,8 +9,12 @@
 
 namespace LkEngine {
 
-	LEditorCamera::LEditorCamera(const float degFov, const float width, const float height, const float nearP, const float farP)
-		: Camera(glm::perspectiveFov(glm::radians(degFov), width, height, farP, nearP))
+	LEditorCamera::LEditorCamera(const float degFov, 
+								 const float width, 
+								 const float height, 
+								 const float nearP, 
+								 const float farP)
+		: LCamera(glm::perspectiveFov(glm::radians(degFov), width, height, farP, nearP))
 	{
 		m_PerspectiveNear = nearP;
 		m_PerspectiveFar = farP;
@@ -64,7 +68,6 @@ namespace LkEngine {
 			LK_CORE_DEBUG_TAG("EditorCamera", "SCALE MODE");
 		}
 
-		//if ((Input::IsMouseButtonDown(EMouseButton::Right)) && (!Input::IsKeyDown(KeyCode::LeftAlt)))
 		if ((Input::IsMouseButtonDown(EMouseButton::Button1)) && (!Input::IsKeyDown(KeyCode::LeftAlt)))
 		{
 			m_CameraMode = Mode::Flycam;

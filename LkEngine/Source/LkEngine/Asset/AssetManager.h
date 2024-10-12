@@ -7,92 +7,118 @@
 
 namespace LkEngine {
 
-	class AssetManager : public RefCounted
+	class LAssetManager
 	{
 	public:
-		static bool IsAssetHandleValid(AssetHandle assetHandle) { return Project::GetRuntimeAssetManager()->IsAssetHandleValid(assetHandle); }
-		static AssetType GetAssetType(AssetHandle assetHandle) { return Project::GetRuntimeAssetManager()->GetAssetType(assetHandle); }
-		static bool ReloadData(AssetHandle assetHandle) { return Project::GetRuntimeAssetManager()->ReloadData(assetHandle); }
+		FORCEINLINE static bool IsAssetHandleValid(FAssetHandle AssetHandle) 
+		{ 
+			return LProject::GetRuntimeAssetManager()->IsAssetHandleValid(AssetHandle); 
+		}
+
+		FORCEINLINE static EAssetType GetAssetType(FAssetHandle AssetHandle) 
+		{ 
+			return LProject::GetRuntimeAssetManager()->GetAssetType(AssetHandle); 
+		}
+
+		FORCEINLINE static bool ReloadData(FAssetHandle AssetHandle) 
+		{ 
+			return LProject::GetRuntimeAssetManager()->ReloadData(AssetHandle); 
+		}
+
+		FORCEINLINE static int GetTextures2D(std::vector<TTexture2DPair>& TextureContainer)
+		{ 
+			return LProject::GetRuntimeAssetManager()->GetTextures2D(TextureContainer);
+		}
+
+		FORCEINLINE static const std::vector<TTexture2DPair>& GetTextures2D()
+		{ 
+			return LProject::GetRuntimeAssetManager()->GetTextures2D();
+		}
 
 		template<typename T>
-		static Ref<T> GetAsset(AssetHandle assetHandle)
+		static TObjectPtr<T> GetAsset(FAssetHandle AssetHandle)
 		{
-			Ref<Asset> asset = Project::GetRuntimeAssetManager()->GetAsset(assetHandle);
+			TObjectPtr<LAsset> asset = LProject::GetRuntimeAssetManager()->GetAsset(AssetHandle);
 			return asset.As<T>();
 		}
 
 		template<typename T>
-		static std::unordered_set<AssetHandle> GetAllAssetsWithType()
+		static std::unordered_set<FAssetHandle> GetAllAssetsWithType()
 		{
-			return Project::GetAssetManager()->GetAllAssetsWithType(T::GetStaticType());
+			/// TODO: Static checks on T
+			return LProject::GetAssetManager()->GetAllAssetsWithType(T::GetStaticType());
 		}
 
-		static const std::unordered_map<AssetHandle, Ref<Asset>>& GetLoadedAssets() 
+		static const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetLoadedAssets() 
 		{ 
-			return Project::GetRuntimeAssetManager()->GetLoadedAssets(); 
+			return LProject::GetRuntimeAssetManager()->GetLoadedAssets(); 
 		}
 
-		static const std::unordered_map<AssetHandle, Ref<Asset>>& GetMemoryOnlyAssets() 
+		static const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetMemoryOnlyAssets() 
 		{ 
-			return Project::GetRuntimeAssetManager()->GetMemoryOnlyAssets(); 
+			return LProject::GetRuntimeAssetManager()->GetMemoryOnlyAssets(); 
 		}
 
-		static AssetHandle GetAssetHandleFromFilePath(const std::filesystem::path& filepath)
+		static FAssetHandle GetAssetHandleFromFilePath(const std::filesystem::path& filepath)
 		{
-			return Project::GetRuntimeAssetManager()->GetAssetHandleFromFilePath(filepath);
+			return LProject::GetRuntimeAssetManager()->GetAssetHandleFromFilePath(filepath);
 		}
 
 		template<typename TAsset, typename... TArgs>
-		static AssetHandle CreateMemoryOnlyAsset(TArgs&&... args)
+		static FAssetHandle CreateMemoryOnlyAsset(TArgs&&... args)
 		{
-			static_assert(std::is_base_of<Asset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
+			static_assert(std::is_base_of<LAsset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
 
-			Ref<TAsset> asset = Ref<TAsset>::Create(std::forward<TArgs>(args)...);
-			asset->Handle = AssetHandle(); 
+			TObjectPtr<TAsset> asset = TObjectPtr<TAsset>::Create(std::forward<TArgs>(args)...);
+			asset->Handle = FAssetHandle(); 
 
-			Project::GetRuntimeAssetManager()->AddMemoryOnlyAsset(asset);
+			LProject::GetRuntimeAssetManager()->AddMemoryOnlyAsset(asset);
 			return asset->Handle;
 		}
 
 		template<typename TAsset, typename... TArgs>
-		static AssetHandle CreateMemoryOnlyRendererAsset(TArgs&&... args)
+		static FAssetHandle CreateMemoryOnlyRendererAsset(TArgs&&... args)
 		{
-			static_assert(std::is_base_of<Asset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
+			static_assert(std::is_base_of<LAsset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
 
-			Ref<TAsset> asset = TAsset::Create(std::forward<TArgs>(args)...);
-			asset->Handle = AssetHandle();
+			TObjectPtr<TAsset> asset = TAsset::Create(std::forward<TArgs>(args)...);
+			asset->Handle = FAssetHandle();
 
-			Project::GetAssetManager()->AddMemoryOnlyAsset(asset);
+			LProject::GetAssetManager()->AddMemoryOnlyAsset(asset);
+
 			return asset->Handle;
 		}
 
 		template<typename TAsset, typename... TArgs>
-		static AssetHandle CreateMemoryOnlyAssetWithHandle(AssetHandle handle, TArgs&&... args)
+		static FAssetHandle CreateMemoryOnlyAssetWithHandle(FAssetHandle handle, TArgs&&... args)
 		{
-			static_assert(std::is_base_of<Asset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
+			static_assert(std::is_base_of_v<LAsset, TAsset>, "CreateMemoryOnlyAsset only works for types derived from Asset");
 
-			Ref<TAsset> asset = Ref<TAsset>::Create(std::forward<TArgs>(args)...);
+			TObjectPtr<TAsset> asset = TObjectPtr<TAsset>::Create(std::forward<TArgs>(args)...);
 			asset->Handle = handle;
 
-			Project::GetAssetManager()->AddMemoryOnlyAsset(asset);
+			LProject::GetAssetManager()->AddMemoryOnlyAsset(asset);
 			return asset->Handle;
 		}
 
 		template<typename TAsset>
-		static AssetHandle AddMemoryOnlyAsset(Ref<TAsset> asset)
+		static FAssetHandle AddMemoryOnlyAsset(TObjectPtr<TAsset> asset)
 		{
-			static_assert(std::is_base_of<Asset, TAsset>::value, "AddMemoryOnlyAsset only works for types derived from Asset");
-			asset->Handle = AssetHandle(); 
+			static_assert(std::is_base_of_v<LAsset, TAsset>, "AddMemoryOnlyAsset only works for types derived from Asset");
+			asset->Handle = FAssetHandle(); 
 
-			Project::GetAssetManager()->AddMemoryOnlyAsset(asset);
+			LProject::GetAssetManager()->AddMemoryOnlyAsset(asset);
 			return asset->Handle;
 		}
 
-		static bool IsMemoryAsset(AssetHandle handle) { return Project::GetRuntimeAssetManager()->IsMemoryAsset(handle); }
+		static bool IsMemoryAsset(FAssetHandle handle) 
+		{ 
+			return LProject::GetRuntimeAssetManager()->IsMemoryAsset(handle); 
+		}
 
-		static void RemoveAsset(AssetHandle handle)
+		static void RemoveAsset(FAssetHandle InHandle)
 		{
-			//Project::GetRuntimeAssetManager()->RemoveAsset(handle);
+			LK_UNUSED(InHandle);
 		}
 
 	};

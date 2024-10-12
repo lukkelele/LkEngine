@@ -11,25 +11,21 @@
 
 namespace LkEngine {
 
-	OpenGLContext::OpenGLContext(LWindow* InWindowRef)
+	LOpenGLContext::LOpenGLContext(LWindow* InWindowRef)
     {
 		m_Window = InWindowRef;
 		m_GlfwWindow = m_Window->GetGlfwWindow();
 	}
 
-    OpenGLContext::~OpenGLContext()
+    void LOpenGLContext::Destroy()
     {
     }
 
-    void OpenGLContext::Destroy()
-    {
-    }
-
-    void OpenGLContext::Init(const ESourceBlendFunction& InSourceBlendFunction, 
+    void LOpenGLContext::Init(const ESourceBlendFunction& InSourceBlendFunction, 
 		                     const EDestinationBlendFunction& InDestinationBlendFunction)
     {
-		GLenum err = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		if (err == 0)
+		const GLenum GladError = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		if (GladError == 0)
 		{
 			printf("[ERROR] Error starting GLAD");
 			exit(EXIT_FAILURE);
@@ -40,15 +36,16 @@ namespace LkEngine {
 
 		SetBlendingEnabled(true);
 		SetDepthEnabled(false);
+
 		SetBlendFunction(InSourceBlendFunction, InDestinationBlendFunction);
     }
 
-	void OpenGLContext::SetViewport(const glm::vec2& pos, const glm::vec2& size)
+	void LOpenGLContext::SetViewport(const glm::vec2& pos, const glm::vec2& size)
 	{
 		glViewport(pos.x, pos.y, size.x, size.y);
 	}
 
-	void OpenGLContext::SetBlendingEnabled(bool enabled)
+	void LOpenGLContext::SetBlendingEnabled(bool enabled)
 	{
 		bBlendingEnabled = enabled;
 		if (bBlendingEnabled)
@@ -61,7 +58,7 @@ namespace LkEngine {
 		}
 	}
 
-	void OpenGLContext::SetDepthFunction(const EDepthFunction& InDepthFunction)
+	void LOpenGLContext::SetDepthFunction(const EDepthFunction& InDepthFunction)
 	{
 		DepthFunction = InDepthFunction;
 		switch (DepthFunction)
@@ -93,7 +90,7 @@ namespace LkEngine {
 		}
 	}
 
-	void OpenGLContext::UpdateResolution(uint16_t width, uint16_t height)
+	void LOpenGLContext::UpdateResolution(uint16_t width, uint16_t height)
 	{
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImVec2 pos = viewport->WorkPos;
@@ -103,9 +100,9 @@ namespace LkEngine {
 		io.DisplaySize = ImVec2(width, height);
 	}
 
-	void OpenGLContext::SetDepthEnabled(bool enabled)
+	void LOpenGLContext::SetDepthEnabled(const bool InEnabled)
 	{
-		bDepthEnabled = enabled;
+		bDepthEnabled = InEnabled;
 		if (bDepthEnabled)
 		{
 			glEnable(GL_DEPTH_TEST);
@@ -114,7 +111,7 @@ namespace LkEngine {
 		glDisable(GL_DEPTH_TEST);
 	}
 
-	void OpenGLContext::SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
+	void LOpenGLContext::SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
 		                                 const EDestinationBlendFunction& InDestinationBlendFunction)
 	{
 		LK_CORE_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(InSourceBlendFunction));
@@ -124,7 +121,7 @@ namespace LkEngine {
 		BlendFunction.Destination = InDestinationBlendFunction;
 	}
 
-	void OpenGLContext::SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction)
+	void LOpenGLContext::SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction)
 	{
 		BlendFunction.Source = InSourceBlendFunction;
 		LK_CORE_DEBUG("Setting source blend function: {}", GetSourceBlendFunctionName(InSourceBlendFunction));
@@ -134,7 +131,7 @@ namespace LkEngine {
 		);
 	}
 
-    void OpenGLContext::SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction)
+    void LOpenGLContext::SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction)
 	{
 		BlendFunction.Destination = InDestinationBlendFunction;
 		LK_CORE_DEBUG("Setting source blend function: {}", GetDestinationBlendFunctionName(InDestinationBlendFunction));
@@ -144,12 +141,12 @@ namespace LkEngine {
 		);
 	}
 
-	std::string OpenGLContext::GetCurrentSourceBlendFunctionName() const
+	std::string LOpenGLContext::GetCurrentSourceBlendFunctionName() const
 	{
 		return GetSourceBlendFunctionName(BlendFunction.Source);
 	}
 
-	std::string OpenGLContext::GetCurrentDestinationBlendFunctionName() const
+	std::string LOpenGLContext::GetCurrentDestinationBlendFunctionName() const
 	{
 		return GetDestinationBlendFunctionName(BlendFunction.Destination);
 	}

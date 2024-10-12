@@ -18,27 +18,26 @@ namespace LkEngine {
 	}
 
 
-	void OpenGLRenderPass::SetInput(std::string_view name, Ref<Image> image)
+	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LImage> image)
 	{
 
 	}
 
-	void OpenGLRenderPass::SetInput(std::string_view name, Ref<Texture2D> texture)
+	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LTexture2D> texture)
 	{
 
 	}
 
-	void OpenGLRenderPass::SetInput(std::string_view name, Ref<UniformBuffer> uniformBuffer)
+	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LUniformBuffer> uniformBuffer)
 	{
 	}
 
-
-	Ref<Image> OpenGLRenderPass::GetOutput(uint32_t index)
+	TObjectPtr<LImage> OpenGLRenderPass::GetOutput(uint32_t index)
 	{
 		return nullptr;
 	}
 
-	Ref<Image> OpenGLRenderPass::GetDepthOutput()
+	TObjectPtr<LImage> OpenGLRenderPass::GetDepthOutput()
 	{
 		return nullptr;
 	}
@@ -71,12 +70,12 @@ namespace LkEngine {
 		return false;
 	}
 
-	Ref<Pipeline> OpenGLRenderPass::GetPipeline() const
+	TObjectPtr<LPipeline> OpenGLRenderPass::GetPipeline() const
 	{
 		return m_Specification.Pipeline;
 	}
 
-	Ref<Framebuffer> OpenGLRenderPass::GetTargetFramebuffer() const
+	TObjectPtr<LFramebuffer> OpenGLRenderPass::GetTargetFramebuffer() const
 	{
 		return nullptr;
 	}

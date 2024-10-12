@@ -5,23 +5,25 @@
 
 namespace LkEngine {
 
-    class OpenGLImGuiLayer : public ImGuiLayer
+    class LOpenGLImGuiLayer : public LImGuiLayer
     {
     public:
-        OpenGLImGuiLayer();
-        ~OpenGLImGuiLayer();
+        LOpenGLImGuiLayer() = default;
+        ~LOpenGLImGuiLayer() = default;
 
-        void Init();
-        void Shutdown();
+        virtual void Initialize() override;
+        virtual void Shutdown() override;
 
-        void OnAttach() {}
-        void OnDetach() {}
+        virtual void OnAttach() override {}
+        virtual void OnDetach() override {}
 
-        void BeginFrame();
-        void EndFrame();
+        virtual void BeginFrame() override;
+        virtual void EndFrame() override;
 
     private:
-        bool m_Initialized = false;
+        bool bInitialized = false;
+
+        LCLASS(LOpenGLImGuiLayer);
     };
 
 }

@@ -1,6 +1,11 @@
+/******************************************************************
+ * Encoder
+ *
+ *
+ *******************************************************************/
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/String.h"
 
 #include "EncoderType.h"
@@ -20,8 +25,7 @@ namespace LkEngine {
 		template<>
 		inline static LString Encode<EncodingFormat::Base64>(const unsigned char* Data, const size_t Length)
 		{
-			assert(Data != nullptr);
-			assert(Length > 0);
+			LK_CORE_ASSERT(Data && (Length > 0));
 
 			static const char* Base64Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 

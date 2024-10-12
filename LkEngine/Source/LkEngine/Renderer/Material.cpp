@@ -8,27 +8,29 @@
 
 namespace LkEngine {
 
-    Ref<Material> Material::Create(const Ref<Shader>& shader, const std::string& name)
+    TObjectPtr<LMaterial> LMaterial::Create(const TObjectPtr<LShader>& Shader, const std::string& name)
     {
         switch (LRendererAPI::Current())
         {
-            case ERendererAPI::OpenGL: return Ref<OpenGLMaterial>::Create(shader, name);
-            /// @FIXME
-            //case RendererAPIType::Vulkan:: break;
+            case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLMaterial>::Create(Shader, name);
+            default: break;
         }
 
         LK_CORE_ASSERT(false, "Unknown renderer API");
+        return nullptr;
     }
 
-    Ref<Material> Material::Copy(const Ref<Material>& other, const std::string& name)
+    TObjectPtr<LMaterial> LMaterial::Copy(const TObjectPtr<LMaterial>& other, const std::string& name)
     {
         switch (LRendererAPI::Current())
         {
-            case ERendererAPI::OpenGL: return Ref<OpenGLMaterial>::Create(other, name);
-            /// @FIXME
-            //case RendererAPIType::Vulkan:: break;
+            case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLMaterial>::Create(other, name);
+
+            default: break;
         }
+
         LK_CORE_ASSERT(false, "Unknown renderer API");
+        return nullptr;
     }
 
 }

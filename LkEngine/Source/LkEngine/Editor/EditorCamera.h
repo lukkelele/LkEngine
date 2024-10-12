@@ -15,7 +15,10 @@
 
 namespace LkEngine {
 
-	class LEditorCamera : public Camera
+	/**
+	 * LEditorCamera
+	 */
+	class LEditorCamera : public LCamera
 	{
 	public:
 		LEditorCamera(const float DegFov, 
@@ -67,7 +70,7 @@ namespace LkEngine {
 		void SetActive(bool active) { m_IsActive = active; }
 		void SetPosition(const glm::vec3& position);
 
-		/// REMOVE
+		/// TODO: REMOVE
 		enum class ViewMode 
 		{ 
 			Classic, 
@@ -130,9 +133,9 @@ namespace LkEngine {
 
 		constexpr static float MIN_SPEED{ 0.0005f }, MAX_SPEED{ 2.0f };
 
-		friend class EditorLayer;
-		friend class SceneManagerPanel;
-		friend class SceneSerializer;
+		friend class LEditorLayer;
+		friend class LSceneManagerPanel;
+		friend class LSceneSerializer;
 	};
 
 }

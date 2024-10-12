@@ -1,66 +1,140 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 
 namespace LkEngine {
 
-	struct Buffer
+	struct FBuffer
 	{
-		void* Data;
-		uint64_t Size;
+		explicit FBuffer(const void* InData, const uint64_t InSize)
+			: Data((void*)InData)
+			, Size(InSize)
+		{
+		}
 
-		Buffer()
+		FBuffer()
 			: Data(nullptr)
 			, Size(0)
 		{
 		}
 
-		Buffer(const void* data, uint64_t size)
-			: Data((void*)data)
-			, Size(size)
+		~FBuffer()
 		{
+			Release();
 		}
 
-		static Buffer Copy(const Buffer& other)
+		FBuffer(const FBuffer& Other)
+			: Data(nullptr)
+			, Size(Other.Size)
 		{
-			Buffer buffer;
-			buffer.Allocate(other.Size);
-			memcpy(buffer.Data, other.Data, other.Size);
-			return buffer;
+			if (Other.Data && (Other.Size > 0))
+			{
+				/* Perform deep copy. */
+				Allocate(Other.Size);
+				if (Data)
+				{
+					memcpy(Data, Other.Data, Other.Size);
+				}
+			}
 		}
 
-		static Buffer Copy(const void* data, uint64_t size)
+		FBuffer(FBuffer&& Other) noexcept
+			: Data(Other.Data)
+			, Size(Other.Size)
 		{
-			Buffer buffer;
+			/* Do NOT invoke Release here to prevent double call to 'free'. */
+			Other.Data = nullptr;
+			Other.Size = 0;
+		}
+
+		FBuffer& operator=(const FBuffer& Other) noexcept
+		{
+			if (this != &Other)
+			{
+				/* Release current buffer if it exists. */
+				Release();
+
+				if (Other.Data && Other.Size > 0)
+				{
+					/* Perform deep copy. */
+					Allocate(Other.Size);
+					memcpy(Data, Other.Data, Other.Size);
+					Size = Other.Size;
+				}
+				else
+				{
+					Data = nullptr;
+					Size = 0;
+				}
+			}
+
+			return *this;
+		}
+
+		FBuffer& operator=(FBuffer&& Other) noexcept
+		{
+			if (this != &Other)
+			{
+				delete[](byte*)Data;
+
+				/* Transfer ownership. */
+				Allocate(Other.Size);
+				memcpy(Data, Other.Data, Other.Size);
+
+				Size = Other.Size;
+
+				Other.Data = nullptr;
+				Other.Size = 0;
+			}
+
+			return *this;
+		}
+
+		FORCEINLINE static FBuffer Copy(const FBuffer& Other)
+		{
+			FBuffer Buffer;
+			Buffer.Allocate(Other.Size);
+			memcpy(Buffer.Data, Other.Data, Other.Size);
+
+			return Buffer;
+		}
+
+		FORCEINLINE static FBuffer Copy(const void* data, uint64_t size)
+		{
+			FBuffer buffer;
 			buffer.Allocate(size);
 			memcpy(buffer.Data, data, size);
 			return buffer;
 		}
 
-		void Allocate(uint64_t size)
+		void Allocate(const uint64_t InSize)
 		{
+			LK_CORE_ASSERT(InSize > 0, "Allocate failed, invalid size: {}", InSize);
+
 			delete[](byte*)Data;
 			Data = nullptr;
 
-			if (size == 0)
-				return;
-
-			Data = new byte[size];
-			Size = size;
+			Data = new byte[InSize];
+			Size = InSize;
 		}
 
 		void Release()
 		{
-			delete[](byte*)Data;
-			Data = nullptr;
-			Size = 0;
+			if (Data)
+			{
+				delete[](byte*)Data;
+				Data = nullptr;
+				Size = 0;
+			}
 		}
 
 		void ZeroInitialize()
 		{
-			if (Data)
+			if (Size > 0)
+			{
 				memset(Data, 0, Size);
+			}
 		}
 
 		template<typename T>
@@ -77,7 +151,7 @@ namespace LkEngine {
 
 		byte* ReadBytes(uint64_t size, uint64_t offset) const
 		{
-			LK_CORE_ASSERT(offset + size <= Size, "Buffer overflow!");
+			LK_CORE_ASSERT(offset + size <= Size, "FBuffer overflow!");
 			byte* buffer = new byte[size];
 			memcpy(buffer, (byte*)Data + offset, size);
 			return buffer;
@@ -85,14 +159,12 @@ namespace LkEngine {
 
 		void Write(const void* data, uint64_t size, uint64_t offset = 0)
 		{
-			LK_CORE_ASSERT(offset + size <= Size, "Buffer overflow!");
+			LK_CORE_ASSERT(offset + size <= Size, "FBuffer overflow!");
 			memcpy((byte*)Data + offset, data, size);
 		}
 
-		operator bool() const
-		{
-			return Data;
-		}
+		operator bool() { return (Data && (Size > 0)); }
+		operator bool() const { return (Data && (Size > 0)); }
 
 		byte& operator[](int index)
 		{
@@ -111,18 +183,22 @@ namespace LkEngine {
 		}
 
 		inline uint64_t GetSize() const { return Size; }
+
+	public:
+		void* Data = nullptr;
+		uint64_t Size = 0;
 	};
 
-	struct BufferSafe : public Buffer
+	struct FBufferSafe : public FBuffer
 	{
-		~BufferSafe()
+		~FBufferSafe()
 		{
 			Release();
 		}
 
-		static BufferSafe Copy(const void* data, uint64_t size)
+		static FBufferSafe Copy(const void* data, uint64_t size)
 		{
-			BufferSafe buffer;
+			FBufferSafe buffer;
 			buffer.Allocate(size);
 			memcpy(buffer.Data, data, size);
 			return buffer;

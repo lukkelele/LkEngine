@@ -45,21 +45,21 @@ namespace LkEngine {
 		glBindTextureUnit(m_Specification.TextureSlot, 0);
 	}
 
-	void OpenGLTextureArray::AddTextureToArray(Ref<Texture> texture)
+	void OpenGLTextureArray::AddTextureToArray(TObjectPtr<LTexture> texture)
 	{
 #if 0
-		//Buffer imageBuffer = texture.As<Texture2D>()->GetImageBuffer();
-		Buffer imageBuffer = texture->GetImageBuffer();
-		LK_CORE_ASSERT(imageBuffer.Data, "Texture data from \"{}\" is NULL", texture->GetName());
-		glTextureSubImage3D(m_RendererID, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
+		//Buffer ImageBuffer = texture.As<Texture2D>()->GetImageBuffer();
+		Buffer ImageBuffer = texture->GetImageBuffer();
+		LK_CORE_ASSERT(ImageBuffer.Data, "Texture data from \"{}\" is NULL", texture->GetName());
+		glTextureSubImage3D(m_RendererID, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, ImageBuffer.Data);
 		m_Textures.push_back(texture);
 #endif
 		if (texture->GetType() == TextureType::Texture2D)
 		{
-			Ref<Texture2D> texture2D = texture.As<Texture2D>();
-			Buffer imageBuffer = texture2D->GetImageBuffer();
-			LK_CORE_ASSERT(imageBuffer.Data, "Texture data from \"{}\" is NULL", texture2D->GetName());
-			glTextureSubImage3D(m_RendererID, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer.Data);
+			TObjectPtr<LTexture2D> texture2D = texture.As<LTexture2D>();
+			FBuffer ImageBuffer = texture2D->GetImageBuffer();
+			LK_CORE_ASSERT(ImageBuffer.Data, "Texture data from \"{}\" is NULL", texture2D->GetName());
+			glTextureSubImage3D(m_RendererID, 0, 0, 0, m_Textures.size(), m_Width, m_Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, ImageBuffer.Data);
 			m_Textures.push_back(texture2D);
 		}
 	}

@@ -1,7 +1,8 @@
-/// ///////////////////////////////////////////////////////////////
-/// Object
-///
-/// //////////////////////////////////////////////////////////////
+/******************************************************************
+ * LObject
+ *
+ *
+ *******************************************************************/
 #pragma once
 
 #include <typeindex>
@@ -21,6 +22,9 @@ namespace LkEngine {
 
 	using FObjectHandle = UUID;
 
+	template<typename T>
+	class TObjectPtr;
+
 	template<typename FunctionType>
 	class TFunction;
 
@@ -33,6 +37,7 @@ namespace LkEngine {
 			: Handle(Other.Handle)
 			, bInitialized(Other.bInitialized)
 			, Flags(Other.Flags)
+			, Name(Other.Name)
 		{
 		}
 
@@ -92,6 +97,7 @@ namespace LkEngine {
 
 		FORCEINLINE uint32_t GetReferenceCount() const { return ReferenceCount.load(); }
 
+	private:
 		/* FIXME: Make these private and only accessable through TObjectPtr. */
 		FORCEINLINE void IncrementReferenceCount() const { ReferenceCount++; }
 		FORCEINLINE void DecrementReferenceCount() const { ReferenceCount--; }
@@ -107,8 +113,10 @@ namespace LkEngine {
 
 		/* Runtime name. */
 		std::string Name{};
-	};
 
+		template<typename T>
+		friend class TObjectPtr;
+	};
 
 	struct FInternalLObjectUtility
 	{
@@ -118,7 +126,12 @@ namespace LkEngine {
 		}
 	};
 
-	//extern TFunction<bool(const LObject*)> GIsObjectSelectedInEditor;
+	/**
+	 * GIsObjectSelectedInEditor
+	 *
+	 *  Check to see if an object is selected.
+	 */
+	extern TFunction<bool(const LObject*)> GIsObjectSelectedInEditor;
 
 	FORCEINLINE bool IsValid(const LObject* Object)
 	{

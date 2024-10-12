@@ -85,6 +85,7 @@ namespace LkEngine {
 		{
 			DecRef();
 			m_Instance = nullptr;
+
 			return *this;
 		}
 

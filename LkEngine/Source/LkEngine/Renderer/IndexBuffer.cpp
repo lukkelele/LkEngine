@@ -9,40 +9,38 @@
 
 namespace LkEngine {
 
-	Ref<IndexBuffer> IndexBuffer::Create(void* buffer, uint64_t size)
+	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(void* InBuffer, const uint64_t InSize)
 	{ 
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				return Ref<OpenGLIndexBuffer>::Create(buffer, size);
+				return TObjectPtr<OpenGLIndexBuffer>::Create(InBuffer, InSize);
 			}
 
-			/// @FIXME
-			//case RendererAPIType::Vulkan: return Ref<VulkanIndexBuffer>::Create(buffer, size);
-
 			case ERendererAPI::None: break;
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
-	Ref<IndexBuffer> IndexBuffer::Create(uint64_t size)
+	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(const uint64_t size)
 	{ 
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				return Ref<OpenGLIndexBuffer>::Create(size);
+				return TObjectPtr<OpenGLIndexBuffer>::Create(size);
 			}
 
-			/// @FIXME
-			//case RendererAPIType::Vulkan: return Ref<VulkanIndexBuffer>::Create(size);
-
 			case ERendererAPI::None: break;
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Render API");
+		return nullptr;
 	}
 
 }

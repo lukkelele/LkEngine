@@ -2,25 +2,23 @@
 #include "RendererAPI.h"
 
 #include "LkEngine/Platform/OpenGl/OpenGLRenderer.h"
-//#include "LkEngine/Platform/Vulkan/VulkanRenderer.h"
 
 
 namespace LkEngine {
 
-    Ref<LRendererAPI> LRendererAPI::Create()
+    TObjectPtr<LRendererAPI> LRendererAPI::Create()
     {
         switch (LRendererAPI::Current())
         {
             case ERendererAPI::OpenGL: 
             {
-                return Ref<OpenGLRenderer>::Create();
+                return TObjectPtr<OpenGLRenderer>::Create();
             }
 
             case ERendererAPI::Vulkan: 
             {
                 LK_CORE_ASSERT(false, "Vulkan not supported");
                 return nullptr;
-                //return Ref<VulkanRenderer>::Create();
             }
         }
 

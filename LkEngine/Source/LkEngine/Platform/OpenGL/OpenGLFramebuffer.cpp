@@ -11,14 +11,14 @@
 
 namespace LkEngine {
 
-	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& framebufferSpecification)
+	LOpenGLFramebuffer::LOpenGLFramebuffer(const FramebufferSpecification& framebufferSpecification)
 		: m_Specification(framebufferSpecification)
 		, m_Width(framebufferSpecification.Width)
 		, m_Height(framebufferSpecification.Height)
 		, m_ClearColor(framebufferSpecification.ClearColor)
 		, m_DepthAttachmentSpecification(ImageFormat::DEPTH24STENCIL8)
 	{
-		for (auto& spec : m_Specification.Attachments.Attachments)
+		for (FramebufferTextureSpecification& spec: m_Specification.Attachments.Attachments)
 		{
 			if (!Utils::IsDepthFormat(spec.Format))
 			{
@@ -30,17 +30,19 @@ namespace LkEngine {
 			}
 			LK_CORE_DEBUG_TAG("OpenGLFramebuffer", "Iterating framebuffer texture specification: {}", Utils::ImageFormatToString(spec.Format));
 		}
+
 		Invalidate();
 	}
 
-	OpenGLFramebuffer::~OpenGLFramebuffer()
+	LOpenGLFramebuffer::~LOpenGLFramebuffer()
 	{
 		glDeleteFramebuffers(1, &m_RendererID);
 		m_ColorAttachments.clear();
+
 		glDeleteTextures(1, &m_DepthAttachment);
 	}
 
-	void OpenGLFramebuffer::Invalidate()
+	void LOpenGLFramebuffer::Invalidate()
 	{
 		if (m_RendererID)
 		{
@@ -57,11 +59,11 @@ namespace LkEngine {
 		glCreateFramebuffers(1, &m_RendererID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 
-		// Color Attachments
+		/* Color Attachments. */
 		if (m_ColorAttachmentSpecifications.size())
 		{
-			//m_ColorAttachments.resize(m_ColorAttachmentSpecifications.size());
-			LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Creating {} color attachments {} multisampling", m_ColorAttachments.size(), multisample ? "with" : "without");
+			LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Creating {} color attachments {} multisampling", 
+							  m_ColorAttachmentSpecifications.size(), multisample ? "with" : "without");
 
 			for (size_t i = 0; i < m_ColorAttachmentSpecifications.size(); i++)
 			{
@@ -77,8 +79,13 @@ namespace LkEngine {
 				imageSpec.Mips = 1; // No mipmapping
 				imageSpec.Path = "Assets/textures/white-texture.png";
 
-				Buffer imageData = Buffer(TextureLibrary::Get()->GetWhiteTexture()->GetImageBuffer());
-				Ref<Image2D> image = Image2D::Create(imageSpec, imageData);
+				//FBuffer imageData = FBuffer(LTextureLibrary::Get().GetWhiteTexture()->GetImageBuffer());
+				//TObjectPtr<LImage2D> image = LImage2D::Create(imageSpec, imageData);
+				FBuffer imageData = FBuffer(LTextureLibrary::Get().GetWhiteTexture()->GetImageBuffer());
+				LK_CORE_VERIFY(imageData.Data, "Image data from the white texture is NULL");
+				LK_CORE_DEBUG_TAG("LOpenGLFramebuffer", "Creating image with data from texture: {}", LTextureLibrary::Get().GetWhiteTexture()->GetName());
+				TObjectPtr<LImage2D> image = LImage2D::Create(imageSpec, imageData);
+
 				m_ColorAttachments.push_back(image);
 
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_ColorAttachments[0]->GetRendererID(), 0);
@@ -94,9 +101,15 @@ namespace LkEngine {
 			switch (m_DepthAttachmentSpecification.Format)
 			{
 				case ImageFormat::DEPTH24STENCIL8:
-					GLUtils::AttachDepthTexture(m_DepthAttachment, m_Specification.Samples, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, m_Specification.Width, m_Specification.Height);
+					GLUtils::AttachDepthTexture(m_DepthAttachment, 
+												m_Specification.Samples, 
+												GL_DEPTH24_STENCIL8, 
+												GL_DEPTH_STENCIL_ATTACHMENT, 
+												m_Specification.Width, 
+												m_Specification.Height);
 					break;
 			}
+
 			LK_CORE_DEBUG_TAG("OpenGLFramebuffer", "Created depth texture with an image format of DEPTH24STENCIL8");
 		}
 
@@ -106,19 +119,19 @@ namespace LkEngine {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void OpenGLFramebuffer::Clear()
+	void LOpenGLFramebuffer::Clear()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		//BindTexture(0);
 
-		auto& c = Renderer::ClearColor;
+		const glm::vec4& c = LRenderer::ClearColor;
         glClearColor(c.r, c.g, c.b, c.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	int OpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
+	int LOpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
 	{
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
 		int pixelData;
@@ -126,20 +139,20 @@ namespace LkEngine {
 		return pixelData;
 	}
 
-	void OpenGLFramebuffer::ClearAttachment(uint32_t attachmentIndex, int value)
+	void LOpenGLFramebuffer::ClearAttachment(uint32_t attachmentIndex, int value)
 	{
 		LK_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(), "Attachment index < m_ColorAttachments.size()");
 		FramebufferTextureSpecification& spec = m_ColorAttachmentSpecifications[attachmentIndex];
 		glClearTexImage(m_ColorAttachments[attachmentIndex], 0, GLUtils::FramebufferTextureFormatToGL(spec.Format), GL_INT, &value);
 	}
 
-	uint32_t OpenGLFramebuffer::GetColorAttachmentRendererID(uint32_t index) const
+	uint32_t LOpenGLFramebuffer::GetColorAttachmentRendererID(uint32_t index) const
 	{
 		LK_CORE_ASSERT(index < m_ColorAttachments.size(), "Index is larger than the size of the color attachments array!");
 		return m_ColorAttachments[index];
 	}
 
-	void OpenGLFramebuffer::Bind() const
+	void LOpenGLFramebuffer::Bind() const
 	{
 		LK_CORE_VERIFY(m_Specification.Width > 0 && m_Specification.Height > 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
@@ -147,12 +160,12 @@ namespace LkEngine {
 		glViewport(0, 0, m_Specification.Width, m_Specification.Height);
 	}
 
-	void OpenGLFramebuffer::Unbind() const
+	void LOpenGLFramebuffer::Unbind() const
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height, bool forceRecreate)
+	void LOpenGLFramebuffer::Resize(uint32_t width, uint32_t height, bool forceRecreate)
 	{
 		m_Specification.Width = width;
 		m_Specification.Height = height;
@@ -160,55 +173,55 @@ namespace LkEngine {
 		Invalidate();
 	}
 
-	void OpenGLFramebuffer::BindTexture(uint32_t attachmentIndex, uint32_t slot) const
+	void LOpenGLFramebuffer::BindTexture(uint32_t attachmentIndex, uint32_t slot) const
 	{
 		//glActiveTexture(GL_TEXTURE0 + slot);
 		//glBindTexture(GL_TEXTURE_2D, m_ColorAttachments[attachmentIndex]->GetRendererID());
 		glBindTextureUnit(slot, m_ColorAttachments[attachmentIndex]->GetRendererID());
 	}
 
-	uint32_t OpenGLFramebuffer::GetWidth() const
+	uint32_t LOpenGLFramebuffer::GetWidth() const
 	{
 		return m_Width;
 	}
 
-	uint32_t OpenGLFramebuffer::GetHeight() const
+	uint32_t LOpenGLFramebuffer::GetHeight() const
 	{
 		return m_Height;
 	}
 
-	Ref<Image> OpenGLFramebuffer::GetImage(uint32_t attachmentIndex) const
+	TObjectPtr<LImage> LOpenGLFramebuffer::GetImage(uint32_t attachmentIndex) const
 	{
 		LK_CORE_VERIFY(attachmentIndex < m_ColorAttachments.size());
 		LK_CORE_VERIFY(m_ColorAttachments[attachmentIndex], "Color attachment {} is nullptr!", attachmentIndex);
 		return m_ColorAttachments[attachmentIndex];
 	}
 	
-	const FramebufferSpecification& OpenGLFramebuffer::GetSpecification() const
+	const FramebufferSpecification& LOpenGLFramebuffer::GetSpecification() const
 	{
 		return m_Specification;
 	}
 
-	Ref<Image> OpenGLFramebuffer::GetDepthImage() const
+	TObjectPtr<LImage> LOpenGLFramebuffer::GetDepthImage() const
 	{
 		return nullptr;
 	}
 
-	size_t OpenGLFramebuffer::GetColorAttachmentCount() const
+	size_t LOpenGLFramebuffer::GetColorAttachmentCount() const
 	{
 		return m_ColorAttachments.size();
 	}
 
-	bool OpenGLFramebuffer::HasDepthAttachment() const
+	bool LOpenGLFramebuffer::HasDepthAttachment() const
 	{
 		return m_DepthAttachment >= 0;
 	}
 
-	void OpenGLFramebuffer::AddResizeCallback(const std::function<void(Ref<Framebuffer>)>& func)
+	void LOpenGLFramebuffer::AddResizeCallback(const FResizeCallback& InFunction)
 	{
 	}
 
-	void OpenGLFramebuffer::TargetSwapChain()
+	void LOpenGLFramebuffer::TargetSwapChain()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}

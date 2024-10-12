@@ -2,65 +2,67 @@
 #include "LkEngine/Renderer/Image.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLImage.h"
-//#include "LkEngine/Platform/Vulkan/VulkanImage.h"
 
 #include "LkEngine/Renderer/RendererAPI.h"
 
 
 namespace LkEngine {
 
-	//-------------------------------------------------------------------------------
-	// Image
-	//-------------------------------------------------------------------------------
-	Ref<Image> Image::Create(ImageSpecification spec, Buffer buffer)
+	TObjectPtr<LImage> LImage::Create(const ImageSpecification& InImageSpecification, FBuffer InImageBuffer)
 	{
 		switch (LRendererAPI::Current())
 		{
-			/// @FIXME
-			case ERendererAPI::OpenGL: return Ref<OpenGLImage>::Create(spec, buffer);
-			//case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
+			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage>::Create(InImageSpecification, std::move(InImageBuffer));
+
+			default: break;
 		}
+
 		LK_CORE_ASSERT(false, "No RenderAPI detected");
+		return nullptr;
 	}
 
-	Ref<Image> Image::Create(ImageSpecification spec, void* buffer)
+	TObjectPtr<LImage> LImage::Create(const ImageSpecification& InImageSpecification, void* InData)
 	{
 		switch (LRendererAPI::Current())
 		{
-			/// @FIXME
-			case ERendererAPI::OpenGL: return Ref<OpenGLImage>::Create(spec, buffer);
-			//case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
+			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage>::Create(InImageSpecification, InData);
+
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "No RenderAPI detected");
+		return nullptr;
 	}
 
 
-	//-------------------------------------------------------------------------------
-	// Image2D
-	//-------------------------------------------------------------------------------
-	Ref<Image2D> Image2D::Create(ImageSpecification spec, Buffer buffer)
+	/*************************************************************************************
+	 * LImage2D
+	 ************************************************************************************/
+	TObjectPtr<LImage2D> LImage2D::Create(const ImageSpecification& InImageSpecification, FBuffer InBuffer)
 	{
 		switch (LRendererAPI::Current())
 		{
-			case ERendererAPI::OpenGL: return Ref<OpenGLImage2D>::Create(spec, buffer);
-			/// @FIXME
-			//case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
+			//case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage2D>::Create(InImageSpecification, InBuffer);
+			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage2D>::Create(InImageSpecification, std::move(InBuffer));
+
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "No RenderAPI detected");
+		return nullptr;
 	}
 
-	Ref<Image2D> Image2D::Create(ImageSpecification spec, void* buffer)
+	TObjectPtr<LImage2D> LImage2D::Create(const ImageSpecification& InImageSpecification, void* InData)
 	{
 		switch (LRendererAPI::Current())
 		{
-			case ERendererAPI::OpenGL: return Ref<OpenGLImage2D>::Create(spec, buffer);
-			/// @FIXME
-			//case RendererAPIType::Vulkan: return Ref<VulkanImage>::Create(spec, buffer);
+			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage2D>::Create(InImageSpecification, InData);
+
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "No RenderAPI detected");
+		return nullptr;
 	}
 
 

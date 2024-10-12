@@ -7,10 +7,10 @@
 
 namespace LkEngine {
 
+    /// @FIXME: DONT SET VERSION HERE
+    /// USE YAML CONFIG INSTEAD !!!!!!
     struct ApplicationSpecification
     {
-		//std::string Title = "LkEngine v2.0.1";
-        /// @TODO: Get version
 		LString Title = "LkEngine v2.0.1";
         uint16_t Width = 1650;
         uint16_t Height = 1080;
@@ -20,7 +20,6 @@ namespace LkEngine {
         bool StartMaximized = false;
         bool ImGuiEnabled = true;
 
-        //std::string WorkingDirectory{};
         LString WorkingDirectory{};
 
         ApplicationSpecification() = default;

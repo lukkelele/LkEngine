@@ -16,23 +16,18 @@ namespace LkEngine {
 	void Mouse::Init()
 	{
 		if (Initialized)
+		{
 			return;
+		}
 
 		Initialized = true;
-	}
-
-	bool Mouse::IsButtonPressed(MouseButton button)
-	{
-		GLFWwindow* GlfwWindow = LWindow::Get().GetGlfwWindow();
-		int MouseButtonState = glfwGetMouseButton(GlfwWindow, static_cast<int32_t>(button));
-		return MouseButtonState == GLFW_PRESS;
 	}
 
 	glm::vec2 Mouse::GetPos()
 	{
 		double xpos, ypos;
-		//glfwGetCursorPos(RenderContext::Get()->GetGlfwWindow(), &xpos, &ypos);
 		glfwGetCursorPos(LWindow::Get().GetGlfwWindow(), &xpos, &ypos);
+
 		float x = static_cast<float>(xpos);
 		float y = static_cast<float>(ypos);
 		Pos.x = x;
@@ -44,13 +39,28 @@ namespace LkEngine {
 		return Pos;
 	}
 
+	LVector2 Mouse::GetPosition()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(LWindow::Get().GetGlfwWindow(), &xpos, &ypos);
+
+		float x = static_cast<float>(xpos);
+		float y = static_cast<float>(ypos);
+		Pos.x = x;
+		Pos.y = y;
+
+		Mouse::CenterPos.x = (x / LWindow::Get().GetWidth()) * 2.0f - 1.0f;
+		Mouse::CenterPos.y = ((y / LWindow::Get().GetHeight()) * 2.0f - 1.0f) * -1.0f;
+
+		return { x, y };
+	}
+
 	glm::vec2 Mouse::GetRawPos()
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(LWindow::Get().GetGlfwWindow(), &xpos, &ypos);
-		float x = static_cast<float>(xpos);
-		float y = static_cast<float>(ypos);
-		return { x, y };
+
+		return { static_cast<float>(xpos), static_cast<float>(ypos) };
 	}
 
 	void Mouse::SetScaledPos(float x, float y)
@@ -97,57 +107,53 @@ namespace LkEngine {
 		return ScaledCenterPos;
 	}
 
-	//void Mouse::SetActiveWindow(Window* window)
-	//{
-	//	m_ActiveWindow = window;
-	//}
-
-	bool Mouse::IsButtonDown(MouseButton button)
+	bool Mouse::IsButtonPressed(const EMouseButton Button)
 	{
 		const bool bImGuiEnabled = LApplication::Get()->GetSpecification().ImGuiEnabled;
 		if (bImGuiEnabled == false)
 		{
 			LWindow& Window = LApplication::Get()->GetWindow();
-			const int MouseButtonState = glfwGetMouseButton(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), static_cast<int32_t>(button));
+			const int MouseButtonState = glfwGetMouseButton(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), 
+															static_cast<int32_t>(Button));
+
 			return MouseButtonState == GLFW_PRESS;
 		}
 
-		ImGuiContext* context = ImGui::GetCurrentContext();
-		bool pressed = false;
-		for (ImGuiViewport* Viewport : context->Viewports)
+		bool bPressed = false;
+		for (ImGuiViewport* Viewport : ImGui::GetCurrentContext()->Viewports)
 		{
 			if (!Viewport->PlatformUserData)
 			{
 				continue;
 			}
 
-			// The first member is GLFWwindow handle
+			// The first member is the GLFWwindow handle.
 			GLFWwindow* WindowHandle = *(GLFWwindow**)Viewport->PlatformUserData; 
 			if (!WindowHandle)
 			{
 				continue;
 			}
 
-			const int State = glfwGetMouseButton(static_cast<GLFWwindow*>(WindowHandle), static_cast<int32_t>(button));
-			if (State == GLFW_PRESS || State == GLFW_REPEAT)
+			const int State = glfwGetMouseButton(static_cast<GLFWwindow*>(WindowHandle), static_cast<int32_t>(Button));
+			if ((State == GLFW_PRESS) || (State == GLFW_REPEAT))
 			{
-				pressed = true;
+				bPressed = true;
 				break;
 			}
 		}
 
-		return pressed;
+		return bPressed;
 	}
 
 	void Mouse::Enable()
 	{
-		Input::SetCursorMode(CursorMode::Normal);
+		Input::SetCursorMode(ECursorMode::Normal);
 		UI::SetInputEnabled(true);
 	}
 
 	void Mouse::Disable()
 	{
-		Input::SetCursorMode(CursorMode::Locked);
+		Input::SetCursorMode(ECursorMode::Locked);
 		UI::SetInputEnabled(false);
 	}
 

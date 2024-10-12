@@ -1,6 +1,8 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
 #include "LkEngine/Core/Layer.h"
 
 #include <imgui/imgui.h>
@@ -16,12 +18,13 @@ namespace LkEngine {
 
     class LWindow;
 
-    class ImGuiLayer : public RefCounted, public Layer
+    //class LImGuiLayer : public LObject, public LLayer
+    class LImGuiLayer : public LLayer
     {
     public:
-        virtual ~ImGuiLayer() = default;
+        virtual ~LImGuiLayer() = default;
 
-        virtual void Init() = 0;
+        virtual void Initialize() = 0;
         virtual void Shutdown() = 0;
 
         virtual void OnAttach() = 0;
@@ -32,7 +35,10 @@ namespace LkEngine {
 
         virtual void SetDarkTheme();
 
-        static Ref<ImGuiLayer> Create();
+        static TObjectPtr<LImGuiLayer> Create();
+
+    private:
+        LCLASS(LImGuiLayer);
     };
 
 	enum class GizmoMode : unsigned int 

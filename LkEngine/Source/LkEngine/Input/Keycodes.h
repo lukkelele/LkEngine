@@ -103,5 +103,23 @@ namespace LkEngine {
 		Released
 	};
 
+	/// @FIXME: Temporary until metadata is available.
+	namespace Enum
+	{
+		FORCEINLINE static constexpr const char* ToString(const KeyState State)
+		{
+			switch (State)
+			{
+				case KeyState::None:      return "None";
+				case KeyState::Pressed:   return "Pressed";
+				case KeyState::Held:      return "Held";
+				case KeyState::Released:  return "Released";
+			}
+
+			assert(false);
+			return nullptr;
+		}
+	}
+
 }
 

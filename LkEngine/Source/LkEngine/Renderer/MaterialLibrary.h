@@ -2,32 +2,46 @@
 
 #include "Material.h"
 
+///
+/// UPDATE / REFACTOR
+///
 
 namespace LkEngine {
 
-    class MaterialAsset;
+    class LMaterialAsset;
 
-    class MaterialLibrary : public RefCounted
+    class LMaterialLibrary : public LObject, public RefCounted
     {
     public:
-        MaterialLibrary();
-        ~MaterialLibrary() = default;
+        static LMaterialLibrary& Get();
 
-        void Init();
-        void Add(const Ref<Material> material);
+        void Initialize();
+        void Add(const TObjectPtr<LMaterial> InMaterial);
 
-        Ref<Material> GetMaterial(std::string_view materialName);
-        std::unordered_map<std::string, Ref<Material>>& GetMaterials() { return m_Collection; }
-        std::unordered_map<AssetHandle, Ref<MaterialAsset>>& GetLoadedMaterialAssets() { return m_LoadedMaterialAssets; }
+        TObjectPtr<LMaterial> GetMaterial(std::string_view InMaterialName);
 
-        Ref<Material> GetBaseMaterial();
+        FORCEINLINE std::unordered_map<std::string, TObjectPtr<LMaterial>>& GetMaterials() 
+        { 
+            return m_Collection; 
+        }
+
+        FORCEINLINE std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>>& GetLoadedMaterialAssets() 
+        { 
+            return m_LoadedMaterialAssets; 
+        }
+
+        /** Return the base (NULL) material. */
+        TObjectPtr<LMaterial> GetBaseMaterial();
 
     private:
+        /** Initialization for basic materials. */
         void CreateBasicMaterials();
 
     private:
-        std::unordered_map<std::string, Ref<Material>> m_Collection;
-		std::unordered_map<AssetHandle, Ref<MaterialAsset>> m_LoadedMaterialAssets;
+        inline static std::unordered_map<std::string, TObjectPtr<LMaterial>> m_Collection;
+		inline static std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>> m_LoadedMaterialAssets;
+
+        LCLASS(LMaterialLibrary)
     };
 
 }

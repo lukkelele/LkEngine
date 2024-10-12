@@ -97,8 +97,9 @@ namespace LkEngine {
         inline static std::vector<TSharedPtr<LTab>> TabsToClose{};
         inline static bool bSwitchToNewTabsOnCreation = false;
 
-        friend class EditorLayer;
+        friend class LEditorLayer;
     };
+
 
 	template<>
 	inline static TSharedPtr<LTab> LEditorTabManager::GetTab(const uint8_t TabIndex)

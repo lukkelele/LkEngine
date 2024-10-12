@@ -4,14 +4,16 @@
 
 namespace LkEngine {
 
-	void StreamReader::ReadBuffer(Buffer& buffer, uint32_t size)
+	void StreamReader::ReadBuffer(FBuffer& Buffer, uint32_t size)
 	{
-		buffer.Size = size;
+		Buffer.Size = size;
 		if (size == 0)
-			ReadData((char*)&buffer.Size, sizeof(uint32_t));
+		{
+			ReadData((char*)&Buffer.Size, sizeof(uint32_t));
+		}
 
-		buffer.Allocate(buffer.Size);
-		ReadData((char*)buffer.Data, buffer.Size);
+		Buffer.Allocate(Buffer.Size);
+		ReadData((char*)Buffer.Data, Buffer.Size);
 	}
 
 	void StreamReader::ReadString(std::string& string)

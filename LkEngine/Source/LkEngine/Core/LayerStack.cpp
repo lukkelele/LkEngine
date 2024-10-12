@@ -4,45 +4,49 @@
 
 namespace LkEngine {
 
-	LayerStack::~LayerStack()
+	LLayerStack::~LLayerStack()
 	{
-		for (Layer* layer : m_Layers)
+		for (LLayer* Layer : m_Layers)
 		{
-			layer->OnDetach();
-			delete layer;
-			layer = nullptr;
+			PopLayer(Layer);
 		}
 	}
 
-	void LayerStack::PushLayer(Layer* layer)
+	void LLayerStack::PushLayer(LLayer* Layer)
 	{
-		m_Layers.emplace(m_Layers.begin() + m_LayerInsertIndex, layer);
+		auto Iter = m_Layers.emplace((m_Layers.begin() + m_LayerInsertIndex), Layer);
 		m_LayerInsertIndex++;
+
+		(*Iter)->OnAttach();
 	}
 
-	void LayerStack::PushOverlay(Layer* overlay)
+	void LLayerStack::PushOverlay(LLayer* Overlay)
 	{
-		m_Layers.emplace_back(overlay);
+		auto Iter = m_Layers.emplace_back(Overlay);
+
+		Iter->OnAttach();
 	}
 
-	void LayerStack::PopLayer(Layer* layer)
+	void LLayerStack::PopLayer(LLayer* Layer)
 	{
-		auto it = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, layer);
-		if (it != m_Layers.begin() + m_LayerInsertIndex)
+		auto Iter = std::find(m_Layers.begin(), m_Layers.begin() + m_LayerInsertIndex, Layer);
+		if (Iter != (m_Layers.begin() + m_LayerInsertIndex))
 		{
-			layer->OnDetach();
-			m_Layers.erase(it);
+			Layer->OnDetach();
+
+			m_Layers.erase(Iter);
 			m_LayerInsertIndex--;
 		}
 	}
 
-	void LayerStack::PopOverlay(Layer* overlay)
+	void LLayerStack::PopOverlay(LLayer* Overlay)
 	{
-		auto it = std::find(m_Layers.begin() + m_LayerInsertIndex, m_Layers.end(), overlay);
-		if (it != m_Layers.end())
+		auto Iter = std::find(m_Layers.begin() + m_LayerInsertIndex, m_Layers.end(), Overlay);
+		if (Iter != m_Layers.end())
 		{
-			overlay->OnDetach();
-			m_Layers.erase(it);
+			Overlay->OnDetach();
+
+			m_Layers.erase(Iter);
 		}
 	}
 }

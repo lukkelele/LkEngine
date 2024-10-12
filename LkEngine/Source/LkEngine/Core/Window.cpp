@@ -4,13 +4,8 @@
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Renderer/Renderer.h"
 
-//#include "LkEngine/Platform/Vulkan/VulkanContext.h"
-//#include "LkEngine/Platform/Vulkan/VulkanPipeline.h"
-
 
 namespace LkEngine {
-
-	static bool GLFW_Initialized = false;
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{
@@ -26,12 +21,16 @@ namespace LkEngine {
 		, m_ViewportHeight(WindowSpecification.Height)
 		, m_VSync(WindowSpecification.VSync)
 	{
-		m_Instance = this;
+		Instance = this;
 
-		// Window Data
+		/* Window Data. */
 		m_Data.Title = m_Title;
 		m_Data.Width = m_Width;
 		m_Data.Height = m_Height;
+
+		LCLASS_REGISTER();
+
+		LK_CORE_DEBUG_TAG("Window", "StaticClassName: \"{}\"", StaticClass());
 	}
 
 	LWindow::~LWindow()
@@ -40,20 +39,20 @@ namespace LkEngine {
 	
 	void LWindow::Init()
 	{
-		if (GLFW_Initialized == false)
+		if (!bGlfwInitialized)
 		{
 			LK_ASSERT(glfwInit() == GLFW_TRUE, "GLFW failed to initialize, glfwInit() != GLFW_TRUE");
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}
 
 		// Set context profile and the version to use for the Renderer API
-		RenderContext::SetProfile(RenderContext::EProfile::Core);
+		LRenderContext::SetProfile(LRenderContext::EProfile::Core);
 
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				RenderContext::SetVersion(4, 5);
+				LRenderContext::SetVersion(4, 5);
 				break;
 			}
 		}
@@ -66,19 +65,21 @@ namespace LkEngine {
 		LK_CORE_ASSERT(m_GlfwWindow != nullptr);
 		glfwMakeContextCurrent(m_GlfwWindow);
 
-		/* Create RenderContext */
-		m_RenderContext = RenderContext::Create(this);
-		m_RenderContext->Init(
+		/* Create render context. */
+		RenderContext = LRenderContext::Create(this);
+		RenderContext->Init(
 			ESourceBlendFunction::Alpha, 
 			EDestinationBlendFunction::One_Minus_SourceAlpha
 		);
 
-		m_RenderContext->SetName("OpenGL-Context");
+		RenderContext->SetName("OpenGL-Context");
 
 		SetVSync(true);
-		LK_CORE_DEBUG_TAG("Graphics Context", "Name: {}", m_RenderContext->GetName());
+		LK_CORE_DEBUG_TAG("Graphics Context", "Name: {}", RenderContext->GetName());
 
 		glfwSetWindowUserPointer(m_GlfwWindow, &m_Data);
+
+		/* Input, mouse and keyboard. */
 		if (glfwRawMouseMotionSupported())
 		{
 			glfwSetInputMode(m_GlfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -86,6 +87,8 @@ namespace LkEngine {
 		glfwSetInputMode(m_GlfwWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
 		glfwSetInputMode(m_GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		glfwSetWindowSizeLimits(m_GlfwWindow, 420, 280, 2560, 1440);
+
+		// Callback functions.
 		glfwSetWindowSizeCallback(m_GlfwWindow, WindowResizeCallback);
 
 		glfwSetKeyCallback(m_GlfwWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -127,24 +130,32 @@ namespace LkEngine {
 		});
 
 		// Mouse button callback
-#if 0
-		glfwSetMouseButtonCallback(m_GlfwWindow, [](GLFWwindow* window, int button, int action, int mods)
+#if 1
+		glfwSetMouseButtonCallback(m_GlfwWindow, [](GLFWwindow* GlfwWindow, int Button, int Action, int Modifiers)
 		{
-			auto& data = *((WindowData*)glfwGetWindowUserPointer(window));
-			switch (action)
+			WindowData& Data = *((WindowData*)glfwGetWindowUserPointer(GlfwWindow));
+			switch (Action)
 			{
 				case GLFW_PRESS:
 				{
-					Input::UpdateButtonState((MouseButton)button, KeyState::Pressed);
-					MouseButtonPressedEvent event((MouseButton)button);
-					data.EventCallback(event);
+					Input::UpdateButtonState(static_cast<EMouseButton>(Button), KeyState::Pressed);
+
+					double MousePosX, MousePosY;
+					glfwGetCursorPos(GlfwWindow, &MousePosX, &MousePosY);
+					LMouseButtonPressedEvent Event(static_cast<EMouseButton>(Button), 
+												   { MousePosX, MousePosY });
+					Data.EventCallback(Event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					Input::UpdateButtonState((MouseButton)button, KeyState::Released);
-					MouseButtonReleasedEvent event((MouseButton)button);
-					data.EventCallback(event);
+					Input::UpdateButtonState(static_cast<EMouseButton>(Button), KeyState::Released);
+
+					double MousePosX, MousePosY;
+					glfwGetCursorPos(GlfwWindow, &MousePosX, &MousePosY);
+					LMouseButtonReleasedEvent Event(static_cast<EMouseButton>(Button), 
+												   { MousePosX, MousePosY });
+					Data.EventCallback(Event);
 					break;
 				}
 			}
@@ -168,7 +179,7 @@ namespace LkEngine {
 			data.EventCallback(event);
 		});
 
-		GLFW_Initialized = true;
+		bGlfwInitialized = true;
 	}
 
 	void LWindow::SwapBuffers()
@@ -179,11 +190,12 @@ namespace LkEngine {
 	
 	void LWindow::Shutdown()
 	{
-		if (m_RenderContext)
+		if (RenderContext)
 		{
-			m_RenderContext->Destroy();
-			m_RenderContext->~RenderContext();
-			m_RenderContext = nullptr;
+			RenderContext->Destroy();
+			//RenderContext->~LRenderContext();
+			RenderContext.Release();
+			RenderContext = nullptr;
 		}
 		if (m_GlfwWindow)
 		{
@@ -235,25 +247,24 @@ namespace LkEngine {
 		window.GetRenderContext()->UpdateResolution(width, height);
 		LK_CORE_DEBUG("Window Resize: ({}, {})", window.GetWidth(), window.GetHeight());
 
-		auto* editor = EditorLayer::Get();
-		if (editor && editor->IsEnabled())
+		if (LEditorLayer* Editor = LEditorLayer::Get(); Editor && Editor->IsEnabled())
 		{
-			float editorWindowWidth = editor->GetEditorWindowSize().x;
-			float editorWindowHeight = editor->GetEditorWindowSize().y;
+			float EditorWindowWidth = Editor->GetEditorWindowSize().x;
+			float EditorWindowHeight = Editor->GetEditorWindowSize().y;
 
-			// Scale the resolution for the editor 'main' window
-			editorWindowWidth /= window.GetScalerX();
-			editorWindowHeight /= window.GetScalerY();
+			// Scale the resolution for the Editor 'main' window
+			EditorWindowWidth /= window.GetScalerX();
+			EditorWindowHeight /= window.GetScalerY();
 			
-			window.SetWidth(editorWindowWidth);
-			window.SetHeight(editorWindowHeight);
-			window.GetRenderContext()->UpdateResolution(editorWindowWidth, editorWindowHeight);
+			window.SetWidth(EditorWindowWidth);
+			window.SetHeight(EditorWindowHeight);
+			window.GetRenderContext()->UpdateResolution(EditorWindowWidth, EditorWindowHeight);
 
-			// Set the window size to be that of the editor window size,
+			// Set the window size to be that of the Editor window size,
 			// this is because of the other docking windows in the Editor that occopy screen space
-			editor->SetUpdateWindowFlag(true);
+			Editor->SetUpdateWindowFlag(true);
 
-			LK_CORE_DEBUG("Editor enabled, setting width and height to -> ({}, {})", editorWindowWidth, editorWindowHeight);
+			LK_CORE_DEBUG("Editor enabled, setting width and height to -> ({}, {})", EditorWindowWidth, EditorWindowHeight);
 		}
 	}
 
@@ -297,12 +308,12 @@ namespace LkEngine {
 		m_ViewportScalers = scalers;
 	}
 
-	Ref<SwapChain> LWindow::GetSwapChain()
+	TObjectPtr<LSwapChain> LWindow::GetSwapChain()
 	{
 		return m_SwapChain;
 	}
 
-	Ref<RenderPass> LWindow::GetRenderPass()
+	TObjectPtr<LRenderPass> LWindow::GetRenderPass()
 	{
 		return nullptr;
 	}
@@ -312,8 +323,5 @@ namespace LkEngine {
 		glfwPollEvents();
 		Input::Update();
 	}
-
-
-
 
 }

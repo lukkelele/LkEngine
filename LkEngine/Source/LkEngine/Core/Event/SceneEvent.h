@@ -7,35 +7,47 @@
 
 namespace LkEngine {
 
-    class SceneCreatedEvent : public Event
+    class SceneCreatedEvent : public LEvent
     {
 	public:
-		SceneCreatedEvent(Ref<Scene> scene)
-			: m_Scene(scene) {}
+		/// USE HARDREF's here
+		SceneCreatedEvent(TObjectPtr<LScene> InCreatedScene)
+			: Scene(InCreatedScene) 
+		{
+		}
 
-		Ref<Scene> GetScene() { return m_Scene; }
+		FORCEINLINE TObjectPtr<LScene> GetScene() 
+		{ 
+			return Scene; 
+		}
 
-		EventType GetEventType() const { return EventType::SceneCreated; }
+		EEventType GetEventType() const { return EEventType::SceneCreated; }
 		const char* GetName() const override { return "SceneCreated"; }
 
 	private:
-		Ref<Scene> m_Scene = nullptr;
+		TObjectPtr<LScene> Scene = nullptr;
     };
 
 
-    class SceneDeletedEvent : public Event
+    class SceneDeletedEvent : public LEvent
     {
 	public:
-		SceneDeletedEvent(Ref<Scene> scene)
-			: m_Scene(scene) {}
+		/// USE HARDREF's here
+		SceneDeletedEvent(TObjectPtr<LScene> scene)
+			: m_Scene(scene) 
+		{
+		}
 
-		Ref<Scene> GetScene() { return m_Scene; }
+		TObjectPtr<LScene> GetScene() 
+		{ 
+			return m_Scene; 
+		}
 
-		EventType GetEventType() const { return EventType::SceneDeleted; }
+		EEventType GetEventType() const { return EEventType::SceneDeleted; }
 		const char* GetName() const override { return "SceneDeleted"; }
 
 	private:
-		Ref<Scene> m_Scene = nullptr;
+		TObjectPtr<LScene> m_Scene = nullptr;
     };
 
 }

@@ -8,16 +8,16 @@
 
 namespace LkEngine {
 
-	class Scene;
-	class Renderer;
-	class Renderer2D;
-	class Renderer2DAPI;
-	class Pipeline;
-	class RenderPass;
+	class LScene;
+	class LRenderer;
+	class LRenderer2D;
+	class IRenderer2DAPI;
+	class LPipeline;
+	class LRenderPass;
 
 	struct SceneRendererCamera
 	{
-		Ref<LkEngine::Camera> Camera = nullptr;
+		TObjectPtr<LCamera> Camera{};
 		glm::mat4 ViewMatrix = glm::mat4(1.0f);
 	};
 
@@ -26,9 +26,13 @@ namespace LkEngine {
 		uint32_t ShadowCascades = 4;
 	};
 
-    class SceneRenderer : public RefCounted
+    class LSceneRenderer : public LObject
     {
-	public:
+    public:
+		LSceneRenderer(TObjectPtr<LScene> scene, 
+					   const SceneRendererSpecification& InSpecification = SceneRendererSpecification());
+		~LSceneRenderer() = default;
+
 		struct Statistics
 		{
 			uint32_t DrawCalls = 0;
@@ -36,17 +40,12 @@ namespace LkEngine {
 			uint32_t Instances = 0;
 			float TotalGPUTime = 0.0f;
 		};
-    public:
-		SceneRenderer(Ref<Scene> scene, const SceneRendererSpecification& specification = SceneRendererSpecification());
-		~SceneRenderer() = default;
 
 		void Init();
 		void Shutdown();
 
 		void BeginScene(const SceneRendererCamera& camera);
 		void EndScene();
-
-		Ref<Renderer2DAPI> GetRenderer2D(); 
 
 	public:
 		struct UBCamera
@@ -62,21 +61,25 @@ namespace LkEngine {
 			glm::vec2 NDCToViewAdd;
 			glm::vec2 DepthUnpackConsts;
 			glm::vec2 CameraTanHalfFOV;
-		} CameraDataUB;
+		};
+		UBCamera CameraDataUB;
+
 	private:
 		SceneRendererSpecification m_Specification;
-		Ref<Scene> m_Scene = nullptr;
+		TObjectPtr<LScene> m_Scene = nullptr;
 
-		struct SceneInfo
+		struct FSceneData
 		{
 			SceneRendererCamera SceneCamera;
-		} m_SceneData;
+		};
+		FSceneData SceneData;
 
-		Ref<Pipeline> m_GeometryPipeline;
-		Ref<RenderPass> m_GeometryPass;
+		TObjectPtr<LPipeline> m_GeometryPipeline;
+		TObjectPtr<LRenderPass> m_GeometryPass;
 
-		Ref<Renderer2DAPI> m_Renderer2D = nullptr;
-		Ref<UniformBufferSet> m_UBSCamera;
+		TObjectPtr<LUniformBufferSet> m_UBSCamera;
+
+		LCLASS(LSceneRenderer)
     };
 
 }

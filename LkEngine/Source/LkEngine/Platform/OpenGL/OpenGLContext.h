@@ -8,11 +8,11 @@ namespace LkEngine {
     class LWindow;
     class OpenGLSwapChain;
 
-    class OpenGLContext : public RenderContext
+    class LOpenGLContext : public LRenderContext
     {
     public:
-        OpenGLContext(LWindow* InWindowRef);
-        ~OpenGLContext();
+        LOpenGLContext(LWindow* InWindowRef);
+        ~LOpenGLContext() = default;
 
         void Init(const ESourceBlendFunction& InSourceBlendFunction, 
                   const EDestinationBlendFunction& InDestinationBlendFunction) override;
@@ -23,7 +23,7 @@ namespace LkEngine {
         void SetViewport(const glm::vec2& pos, const glm::vec2& size) override;
         void UpdateResolution(uint16_t width, uint16_t height) override;
 
-        void SetDepthEnabled(bool enabled) override;
+        void SetDepthEnabled(const bool InEnabled) override;
         void SetDepthFunction(const EDepthFunction& depthFunc) override;
         void SetBlendingEnabled(bool enabled) override;
         void SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
@@ -31,19 +31,16 @@ namespace LkEngine {
         void SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction) override;
         void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction) override;
 
-        FORCEINLINE void SetName(std::string_view InName) override 
-        { 
-            //m_Name = std::string(name); 
-            //m_Name = name.data();
-            m_Name = InName;
-        }
-
-        const std::string GetName() const { return m_Name; }
+        FORCEINLINE void SetName(std::string_view InName) override { m_Name = InName; }
+        FORCEINLINE const std::string GetName() const { return m_Name; }
         
-        std::string GetCurrentSourceBlendFunctionName() const override;
-        std::string GetCurrentDestinationBlendFunctionName() const override;
+        virtual std::string GetCurrentSourceBlendFunctionName() const override;
+        virtual std::string GetCurrentDestinationBlendFunctionName() const override;
 
-        bool GetBlendingEnabled() const override { return bBlendingEnabled; } 
+        FORCEINLINE virtual bool GetBlendingEnabled() const override 
+        { 
+            return bBlendingEnabled; 
+        } 
 
     private:
         std::string m_GlslVersion = "";
@@ -59,9 +56,11 @@ namespace LkEngine {
         LWindow* m_Window;
         GLFWwindow* m_GlfwWindow;
 
-        Ref<OpenGLSwapChain> m_SwapChain;
+        TObjectPtr<OpenGLSwapChain> m_SwapChain;
 
         friend class Editor;
+
+        LCLASS(LOpenGLContext);
     };
 
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
+
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/ImGui/ImGuiLayer.h"
 
@@ -10,49 +13,61 @@
 
 namespace LkEngine {
 
-	class Project : public RefCounted
+	class LProject : public LObject
 	{
 	public:
-		Project() = default;
-		Project(const std::string& name);
-		~Project() = default;
+		LProject() = default;
+		LProject(std::string_view InProjectName);
+		~LProject() = default;
 
-		static Ref<Project> Current() { return s_ActiveProject; }
+		static TObjectPtr<LProject> Current() { return ActiveProject; }
 
 		bool Save();
 		uint64_t GetSize() const;
 
 		std::filesystem::path GetFilepath() const { return m_Filepath; }
-		const std::string& const GetName() const { return m_Name; }
-		Ref<Scene> GetScene() { return m_Scene; }
+		const std::string& GetName() const { return m_Name; }
 
-		static void SetActive(Ref<Project> project);
+		FORCEINLINE TObjectPtr<LScene> GetScene() 
+		{ 
+			return Scene; 
+		}
 
-		static Ref<Project> CreateEmptyProject(std::string_view projectName, bool setActive = true);
-		static Ref<Project> CreateDefaultProject(std::string_view projectName, bool setActive = true);
-		static Ref<Project> CreateDebugProject(bool setActive = true);
+		static void SetActive(TObjectPtr<LProject> project);
 
-		static Ref<RuntimeAssetManager> GetRuntimeAssetManager() { return s_RuntimeAssetManager; }
-		static bool IsActiveProject(const Ref<Project>& project) { return s_ActiveProject == project; }
+		static TObjectPtr<LProject> CreateEmptyProject(std::string_view projectName, const bool bSetAsActive = true);
+		static TObjectPtr<LProject> CreateDefaultProject(std::string_view projectName, const bool bSetAsActive = true);
+		static TObjectPtr<LProject> CreateDebugProject(const bool bSetAsActive = true);
 
-		struct ProjectData
+		static TObjectPtr<LRuntimeAssetManager> GetRuntimeAssetManager() 
+		{ 
+			return RuntimeAssetManager; 
+		}
+
+		static bool IsActiveProject(const TObjectPtr<LProject>& project) 
+		{ 
+			return (ActiveProject == project);
+		}
+
+		struct FProjectData
 		{
-
 		};
 
 	public:
-		ProjectData Data;
+		FProjectData ProjectData;
 		inline static std::string_view DefaultExtension = ".lkproj";
 	private:
 		std::string m_Name;
 		std::filesystem::path m_Filepath;
 
-		Ref<Scene> m_Scene;
+		TObjectPtr<LScene> Scene{};
 
-		inline static Ref<Project> s_ActiveProject;
-		inline static Ref<RuntimeAssetManager> s_RuntimeAssetManager;
+		inline static TObjectPtr<LProject> ActiveProject{};
+		inline static TObjectPtr<LRuntimeAssetManager> RuntimeAssetManager{};
 
-		friend class EditorLayer;
+		friend class LEditorLayer;
+
+		LCLASS(LProject)
 	};
 
 }

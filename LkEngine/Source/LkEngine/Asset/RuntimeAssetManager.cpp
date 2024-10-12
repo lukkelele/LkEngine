@@ -10,230 +10,278 @@
 
 namespace LkEngine {
 
-    static AssetMetadata NullMetadata;
+	static FAssetMetadata NullMetadata{};
 
-    RuntimeAssetManager::RuntimeAssetManager()
-    {
-    }
-
-    RuntimeAssetManager::~RuntimeAssetManager()
-    {
-    }
-	
-	void RuntimeAssetManager::Init()
+	/** 
+	 * FRuntimeCache 
+	 *
+	 *  Cached and loaded assets.
+	 */
+	struct FRuntimeCache
 	{
-		LoadMaterials();
-		LoadPrimitiveShapes(); // Default shapes, cube etc
+		std::vector<TTexture2DPair> Textures2D{};
+	};
+
+	static FRuntimeCache RuntimeCache{};
+
+
+	LRuntimeAssetManager::LRuntimeAssetManager()
+		: TextureLibrary(LTextureLibrary::Get())
+	{
 	}
 
-	void RuntimeAssetManager::AddMemoryOnlyAsset(Ref<Asset> asset)
+	void LRuntimeAssetManager::Initialize(const EInitFlag AssetInitialization)
+	{
+		LObject::Initialize();
+		if (AssetInitialization == EInitFlag::NoInit)
+		{
+			/* Do nothing. */
+			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Skipping initialization of LMaterialLibrary");
+		}
+		else if (AssetInitialization == EInitFlag::True)
+		{
+			LoadMaterials();
+
+			/* Load all primitive shapes. */
+			LoadPrimitiveShapes();
+
+			/* Load textures into cache. */
+			TextureLibrary.GetTextures2D(RuntimeCache.Textures2D);
+		}
+	}
+
+	void LRuntimeAssetManager::AddMemoryOnlyAsset(TObjectPtr<LAsset> asset)
 	{
 		m_MemoryAssets[asset->Handle] = asset;
 	}
 
-	bool RuntimeAssetManager::ReloadData(AssetHandle assetHandle)
+	bool LRuntimeAssetManager::ReloadData(FAssetHandle AssetHandle)
 	{
 		LK_CORE_ASSERT(false, "Not implemented");
 		return true;
 	}
 
-	bool RuntimeAssetManager::IsAssetHandleValid(AssetHandle assetHandle)
+	bool LRuntimeAssetManager::IsAssetHandleValid(FAssetHandle AssetHandle)
 	{
-		if (assetHandle == 0)
+		if (AssetHandle == 0)
+		{
 			return false;
+		}
 
-		return IsMemoryAsset(assetHandle);
+		return IsMemoryAsset(AssetHandle);
 	}
 
-	AssetType RuntimeAssetManager::GetAssetType(AssetHandle assetHandle)
+	EAssetType LRuntimeAssetManager::GetAssetType(FAssetHandle AssetHandle)
 	{
-		Ref<Asset> asset = GetAsset(assetHandle);
-		if (!asset)
-			return AssetType::None;
+		if (TObjectPtr<LAsset> Asset = GetAsset(AssetHandle))
+		{
+			return Asset->GetAssetType();
+		}
 
-		return asset->GetAssetType();
+		return EAssetType::None;
 	}
 
 	template<typename T>
-	Ref<T> RuntimeAssetManager::ImportAsset(std::filesystem::path filepath)
+	TObjectPtr<T> LRuntimeAssetManager::ImportAsset(std::filesystem::path AssetFilepath)
 	{
+		LK_UNUSED(AssetFilepath);
 	}
 	
 	template<>
-    Ref<Mesh> RuntimeAssetManager::ImportAsset<Mesh>(std::filesystem::path filepath)
+    TObjectPtr<Mesh> LRuntimeAssetManager::ImportAsset<Mesh>(std::filesystem::path filepath)
     {
         AssimpMeshImporter meshImporter = AssimpMeshImporter(filepath);
-        Ref<MeshSource> source = meshImporter.ImportToMeshSource();
-		Ref<Mesh> mesh = Ref<Mesh>::Create(source);
+
+        TObjectPtr<MeshSource> source = meshImporter.ImportToMeshSource();
+		TObjectPtr<Mesh> mesh = TObjectPtr<Mesh>::Create(source);
 
 		m_LoadedAssets[mesh->Handle] = mesh;
-		LK_CORE_INFO_TAG("RuntimeAssetManager", "Loaded mesh with {} vertices, {} indices and a handle of '{}'", source->GetVertices().size(), source->GetIndices().size(), mesh->Handle);
+		LK_CORE_TRACE_TAG("RuntimeAssetManager", "Loaded mesh with {} vertices, {} indices and a handle of '{}'", 
+						  source->GetVertices().size(), source->GetIndices().size(), mesh->Handle);
 
 		return m_LoadedAssets[mesh->Handle];
     }
 
-    Ref<Asset> RuntimeAssetManager::GetAsset(AssetHandle assetHandle)
+	TObjectPtr<LAsset> LRuntimeAssetManager::GetAsset(FAssetHandle AssetHandle)
     {
-		if (IsMemoryAsset(assetHandle))
-			return m_MemoryAssets[assetHandle];
+		if (IsMemoryAsset(AssetHandle))
+		{
+			return m_MemoryAssets[AssetHandle];
+		}
 
-		auto& metadata = GetMetadataInternal(assetHandle);
+		FAssetMetadata& metadata = GetMetadataInternal(AssetHandle);
 		if (!metadata.IsValid())
 		{
-			LK_CORE_WARN_TAG("RuntimeAssetManager", "Metadata is invalid for {}", assetHandle);
+			LK_CORE_WARN_TAG("RuntimeAssetManager", "Metadata is invalid for {}", AssetHandle);
 			return nullptr;
 		}
 
-		Ref<Asset> asset = nullptr;
+		TObjectPtr<LAsset> Asset = nullptr;
 		if (!metadata.IsDataLoaded)
 		{
 			if (!metadata.IsDataLoaded)
+			{
 				return nullptr;
+			}
 
-			m_LoadedAssets[assetHandle] = asset;
+			m_LoadedAssets[AssetHandle] = Asset;
 		}
 		else
 		{
-			asset = m_LoadedAssets[assetHandle];
+			Asset = m_LoadedAssets[AssetHandle];
 		}
 
-		return asset;
+		return Asset;
     }
 
-    const AssetMetadata& RuntimeAssetManager::GetMetadata(AssetHandle handle)
+    const FAssetMetadata& LRuntimeAssetManager::GetMetadata(FAssetHandle handle)
 	{
-		if (m_AssetRegistry.Contains(handle))
-			return m_AssetRegistry[handle];
+		if (AssetRegistry.Contains(handle))
+		{
+			return AssetRegistry[handle];
+		}
 
 		return NullMetadata;
 	}
 
-    AssetMetadata& RuntimeAssetManager::GetMetadataInternal(AssetHandle handle)
+    FAssetMetadata& LRuntimeAssetManager::GetMetadataInternal(FAssetHandle handle)
 	{
-		if (m_AssetRegistry.Contains(handle))
-	    	return m_AssetRegistry[handle];
+		if (AssetRegistry.Contains(handle))
+		{
+	    	return AssetRegistry[handle];
+		}
 
 	    return NullMetadata; 
 	}
 
-    AssetHandle RuntimeAssetManager::GetAssetHandleFromFilePath(const std::filesystem::path& filepath)
+    FAssetHandle LRuntimeAssetManager::GetAssetHandleFromFilePath(const std::filesystem::path& filepath)
 	{
 		return GetMetadata(filepath).Handle;
 	}
 
-    const AssetMetadata& RuntimeAssetManager::GetMetadata(const Ref<Asset>& asset)
+    const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const TObjectPtr<LAsset>& asset)
 	{
 		return GetMetadata(asset->Handle);
 	}
 
-	const AssetMetadata& RuntimeAssetManager::GetMetadata(const std::filesystem::path& filepath)
+	const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const std::filesystem::path& filepath)
 	{
-		LK_CORE_ASSERT(m_AssetRegistry.Count() > 0, "AssetRegistry is empty!");
-		const auto relativePath = GetRelativePath(filepath);
-		for (auto& [handle, metadata] : m_AssetRegistry)
+		LK_CORE_ASSERT(AssetRegistry.Count() > 0, "AssetRegistry is empty!");
+
+		const std::filesystem::path RelativePath = GetRelativePath(filepath);
+		for (auto& [handle, metadata] : AssetRegistry)
 		{
-			if (metadata.FilePath == relativePath)
+			if (metadata.FilePath == RelativePath)
+			{
 				return metadata;
+			}
 		}
+
 		return NullMetadata;
 	}
 
-	std::filesystem::path RuntimeAssetManager::GetRelativePath(const std::filesystem::path& filepath)
+	std::filesystem::path LRuntimeAssetManager::GetRelativePath(const std::filesystem::path& filepath)
 	{
-		std::filesystem::path relativePath = filepath.lexically_normal();
-		std::string temp = filepath.string();
-		LK_CORE_INFO("Returning relative filepath -> {}", relativePath.string());
-		return relativePath;
+		/* Return rvalue so we trigger move semantics for performance. */
+		return filepath.lexically_normal();
 	}
 
-	void RuntimeAssetManager::WriteRegistryToFile()
+	void LRuntimeAssetManager::WriteRegistryToFile()
 	{
 	}
 
-	AssetType RuntimeAssetManager::GetAssetTypeFromExtension(const std::string& extension)
+	EAssetType LRuntimeAssetManager::GetAssetTypeFromExtension(const std::string& extension)
 	{
 		LK_CORE_ASSERT(false, "Not implemented yet!");
-		return AssetType::None;
+		return EAssetType::None;
 	}
 
-	AssetType RuntimeAssetManager::GetAssetTypeFromPath(const std::filesystem::path& path)
+	EAssetType LRuntimeAssetManager::GetAssetTypeFromPath(const std::filesystem::path& path)
 	{
 		LK_CORE_ASSERT(false, "Not implemented yet!");
 		return GetAssetTypeFromExtension(path.extension().string());
 	}
 
-	void RuntimeAssetManager::LoadMaterials()
+	const std::vector<TTexture2DPair>& LRuntimeAssetManager::GetTextures2D() const
 	{
-		Ref<MaterialLibrary> materialLib = Renderer::GetMaterialLibrary();
+		return RuntimeCache.Textures2D;
+	}
+
+	int LRuntimeAssetManager::GetTextures2D(std::vector<TTexture2DPair>& TextureContainer)
+	{
+		return TextureLibrary.GetTextures2D(TextureContainer);
+	}
+
+	void LRuntimeAssetManager::LoadMaterials()
+	{
+		LMaterialLibrary& MaterialLibrary = LMaterialLibrary::Get();
 
 		// Asphalt
 		{
-			Ref<Material> asphaltMat = materialLib->GetMaterial("Basic_Asphalt");
-			asphaltMat->SetTexture(TextureLibrary::Get()->GetWhiteTexture());
-			Ref<MaterialAsset> asphaltMatAsset = Ref<MaterialAsset>::Create(asphaltMat);
-			m_MemoryAssets[asphaltMatAsset->Handle] = asphaltMatAsset;
+			TObjectPtr<LMaterial> AsphaltMaterial = MaterialLibrary.GetMaterial("Basic_Asphalt");
+			AsphaltMaterial->SetTexture(TextureLibrary.GetWhiteTexture());
+			TObjectPtr<LMaterialAsset> AsphaltMaterialAsset = TObjectPtr<LMaterialAsset>::Create(AsphaltMaterial);
+			m_MemoryAssets[AsphaltMaterialAsset->Handle] = AsphaltMaterialAsset;
 
-			AssetMetadata metadata;
-			metadata.Handle = asphaltMatAsset->Handle;
-			metadata.Type = AssetType::Material;
-			m_AssetRegistry[asphaltMatAsset->Handle] = metadata;
+			FAssetMetadata metadata;
+			metadata.Handle = AsphaltMaterialAsset->Handle;
+			metadata.Type = EAssetType::Material;
+			AssetRegistry[AsphaltMaterialAsset->Handle] = metadata;
 		}
 
 		// Rubber
 		{
-			Ref<Material> rubberMat = materialLib->GetMaterial("Basic_Rubber");
-			rubberMat->SetTexture(TextureLibrary::Get()->GetWhiteTexture());
-			Ref<MaterialAsset> rubberMatAsset = Ref<MaterialAsset>::Create(rubberMat);
-			m_MemoryAssets[rubberMatAsset->Handle] = rubberMatAsset;
+			TObjectPtr<LMaterial> RubberMaterial = MaterialLibrary.GetMaterial("Basic_Rubber");
+			RubberMaterial->SetTexture(TextureLibrary.GetWhiteTexture());
 
-			AssetMetadata metadata;
-			metadata.Handle = rubberMatAsset->Handle;
-			metadata.Type = AssetType::Material;
-			m_AssetRegistry[rubberMatAsset->Handle] = metadata;
+			TObjectPtr<LMaterialAsset> RubberMaterialAsset = TObjectPtr<LMaterialAsset>::Create(RubberMaterial);
+			m_MemoryAssets[RubberMaterialAsset->Handle] = RubberMaterialAsset;
+
+			FAssetMetadata metadata;
+			metadata.Handle = RubberMaterialAsset->Handle;
+			metadata.Type = EAssetType::Material;
+			AssetRegistry[RubberMaterialAsset->Handle] = metadata;
 		}
 	}
 
-    void RuntimeAssetManager::LoadPrimitiveShapes()
+    void LRuntimeAssetManager::LoadPrimitiveShapes()
     {
 		LK_CORE_INFO_TAG("RuntimeAssetManager", "Creating primitive shapes");
 
-		Ref<Project> project = Project::Current();
-		Ref<TextureLibrary> TextureLib = Renderer::GetTextureLibrary();
-		Ref<MaterialLibrary> MaterialLib = Renderer::GetMaterialLibrary();
+		TObjectPtr<LProject> project = LProject::Current();
+		LMaterialLibrary& MaterialLibrary = LMaterialLibrary::Get();
 
 		LK_CORE_WARN_TAG("RuntimeAssetManager", "Loading primitive shapes for project {}", project->GetName());
 		// Cube
 		{
 			std::filesystem::path filepath("Assets/Meshes/Cube.gltf");
-			LEntity cubeEntity = Project::Current()->GetScene()->CreateEntity("Cube");
-			Ref<Mesh> cube = ImportAsset<Mesh>(filepath.string());
-			MeshComponent& meshComponent = cubeEntity.AddComponent<MeshComponent>(cube->Handle);
+			LEntity cubeEntity = LProject::Current()->GetScene()->CreateEntity("Cube");
+			TObjectPtr<Mesh> cube = ImportAsset<Mesh>(filepath.string());
+			LMeshComponent& MeshComponent = cubeEntity.AddComponent<LMeshComponent>(cube->Handle);
 
+			LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
 			// Assign the cube with the 'BaseMaterial'
-			Ref<Material> baseMaterial = MaterialLib->GetBaseMaterial();
-            baseMaterial->SetTexture(TextureLib->GetTexture("wood-container_512x512"));
-            //baseMaterial->SetTexture(TextureLib->GetTexture("wood-container"));
-            //baseMaterial->SetTexture(TextureLib->GetTexture("bricks"));
-			Ref<MaterialAsset> baseMatAsset = Ref<MaterialAsset>::Create(baseMaterial);
+			TObjectPtr<LMaterial> baseMaterial = MaterialLibrary.GetBaseMaterial();
+            baseMaterial->SetTexture(TextureLibrary.GetTexture("wood-container_512x512"));
+			TObjectPtr<LMaterialAsset> baseMatAsset = TObjectPtr<LMaterialAsset>::Create(baseMaterial);
 
-			cube->m_Materials->SetMaterial(0, baseMatAsset->Handle);
-			LK_CORE_ASSERT(TextureLib->GetTexture("wood-container"), "Texture wood-container is nullptr!");
+			cube->Materials->SetMaterial(0, baseMatAsset->Handle);
 			LK_CORE_ASSERT(baseMaterial->GetTexture(""), "BaseMaterial texture is nullptr");
 
-			AssetMetadata cubeMetadata;
+			FAssetMetadata cubeMetadata;
 			cubeMetadata.Handle = cube->Handle;
-			cubeMetadata.Type = AssetType::Mesh;
+			cubeMetadata.Type = EAssetType::Mesh;
 			cubeMetadata.FilePath = filepath;
 			cubeMetadata.IsDataLoaded = true;
-			m_AssetRegistry[cube->Handle] = cubeMetadata;
+			AssetRegistry[cube->Handle] = cubeMetadata;
 
-			AssetMetadata baseMaterialAssetMetadata;
-			baseMaterialAssetMetadata.Handle = baseMatAsset->Handle;
-			baseMaterialAssetMetadata.Type = AssetType::Material;
-			baseMaterialAssetMetadata.IsDataLoaded = true;
-			m_AssetRegistry[baseMatAsset->Handle] = baseMaterialAssetMetadata;
+			FAssetMetadata baseMaterialFAssetMetadata;
+			baseMaterialFAssetMetadata.Handle = baseMatAsset->Handle;
+			baseMaterialFAssetMetadata.Type = EAssetType::Material;
+			baseMaterialFAssetMetadata.IsDataLoaded = true;
+			AssetRegistry[baseMatAsset->Handle] = baseMaterialFAssetMetadata;
 
-			Ref<MeshSource> cubeSource = cube->GetMeshSource();
+			TObjectPtr<MeshSource> cubeSource = cube->GetMeshSource();
 			cubeSource->m_VertexBuffer->SetLayout({
 			    { "a_Position",      ShaderDataType::Float3  },
 			    { "a_Normal",        ShaderDataType::Float3  },
@@ -248,8 +296,8 @@ namespace LkEngine {
 
 			// Test out the retrieval of the texture before continuing
 			{
-				AssetHandle cubeMaterialHandle = cube->GetMaterials()->GetMaterialHandle(0);
-				Ref<Material> cubeMaterial = AssetManager::GetAsset<MaterialAsset>(cube->GetMaterials()->GetMaterialHandle(0))->GetMaterial();
+				FAssetHandle cubeMaterialHandle = cube->GetMaterials()->GetMaterialHandle(0);
+				TObjectPtr<LMaterial> cubeMaterial = LAssetManager::GetAsset<LMaterialAsset>(cube->GetMaterials()->GetMaterialHandle(0))->GetMaterial();
 				LK_CORE_VERIFY(cubeMaterial, "Retrieved material for CUBE is nullptr!");
 			}
 

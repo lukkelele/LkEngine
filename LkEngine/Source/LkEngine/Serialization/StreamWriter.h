@@ -13,18 +13,18 @@ namespace LkEngine {
 		virtual bool IsStreamGood() const = 0;
 		virtual uint64_t GetStreamPosition() = 0;
 		virtual void SetStreamPosition(uint64_t position) = 0;
-		virtual bool WriteData(const char* data, size_t size) = 0;
+		virtual bool WriteData(const char* data, const size_t size) = 0;
 		
 		operator bool() const { return IsStreamGood(); }
 
-		void WriteBuffer(Buffer buffer, bool writeSize = true);
+		void WriteBuffer(FBuffer buffer, bool bWriteSize = true);
 		void WriteZero(uint64_t size);
 		void WriteString(const std::string& string);
 
 		template<typename T>
 		void WriteRaw(const T& type)
 		{
-			bool success = WriteData((char*)&type, sizeof(T));
+			const bool success = WriteData((char*)&type, sizeof(T));
 		}
 
 		template<typename T>
@@ -34,49 +34,69 @@ namespace LkEngine {
 		}
 
 		template<typename Key, typename Value>
-		void WriteMap(const std::map<Key, Value>& map, bool writeSize = true)
+		void WriteMap(const std::map<Key, Value>& map, const bool bWriteSize = true)
 		{
-			if (writeSize)
+			if (bWriteSize)
+			{
 				WriteRaw<uint32_t>((uint32_t)map.size());
+			}
 
 			for (const auto& [key, value] : map)
 			{
 				if constexpr (std::is_trivial<Key>())
+				{
 					WriteRaw<Key>(key);
+				}
 				else
+				{
 					WriteObject<Key>(key);
+				}
 
 				if constexpr (std::is_trivial<Value>())
+				{
 					WriteRaw<Value>(value);
+				}
 				else
+				{
 					WriteObject<Value>(value);
+				}
 			}
 		}
 
 		template<typename Key, typename Value>
-		void WriteMap(const std::unordered_map<Key, Value>& map, bool writeSize = true)
+		void WriteMap(const std::unordered_map<Key, Value>& map, const bool bWriteSize = true)
 		{
-			if (writeSize)
+			if (bWriteSize)
+			{
 				WriteRaw<uint32_t>((uint32_t)map.size());
+			}
 
 			for (const auto& [key, value] : map)
 			{
 				if constexpr (std::is_trivial<Key>())
+				{
 					WriteRaw<Key>(key);
+				}
 				else
+				{
 					WriteObject<Key>(key);
+				}
 
 				if constexpr (std::is_trivial<Value>())
+				{
 					WriteRaw<Value>(value);
+				}
 				else
+				{
 					WriteObject<Value>(value);
+				}
 			}
 		}
 
 		template<typename Value>
-		void WriteMap(const std::unordered_map<std::string, Value>& map, bool writeSize = true)
+		void WriteMap(const std::unordered_map<std::string, Value>& map, bool bWriteSize = true)
 		{
-			if (writeSize)
+			if (bWriteSize)
 				WriteRaw<uint32_t>((uint32_t)map.size());
 
 			for (const auto& [key, value] : map)
@@ -91,9 +111,9 @@ namespace LkEngine {
 		}
 
 		template<typename T>
-		void WriteArray(const std::vector<T>& array, bool writeSize = true)
+		void WriteArray(const std::vector<T>& array, bool bWriteSize = true)
 		{
-			if (writeSize)
+			if (bWriteSize)
 				WriteRaw<uint32_t>((uint32_t)array.size());
 
 			for (const auto& element : array)
@@ -108,9 +128,9 @@ namespace LkEngine {
 	};
 
 	template<>
-	inline void StreamWriter::WriteArray(const std::vector<std::string>& array, bool writeSize)
+	inline void StreamWriter::WriteArray(const std::vector<std::string>& array, bool bWriteSize)
 	{
-		if (writeSize)
+		if (bWriteSize)
 			WriteRaw<uint32_t>((uint32_t)array.size());
 
 		for (const auto& element : array)

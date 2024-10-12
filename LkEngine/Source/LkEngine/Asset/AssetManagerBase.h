@@ -10,10 +10,13 @@
 
 namespace LkEngine {
 
-    class AssetManagerBase : public RefCounted
+    class LAssetManagerBase : public LObject
     {
     public:
-        virtual ~AssetManagerBase() = default;
+        virtual ~LAssetManagerBase() = default;
+
+    private:
+        LCLASS(LAssetManagerBase)
     };
 
 }

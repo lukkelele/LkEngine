@@ -5,24 +5,47 @@
 
 namespace LkEngine {
 
-	typedef enum class MouseButton : uint16_t
+	/** EMouseButton */
+	enum class EMouseButton : uint16_t
 	{
-		Button0 = 0,
-		Button1 = 1,
-		Button2 = 2,
-		Button3 = 3,
-		Button4 = 4,
-		Button5 = 5,
-		Left = Button0,
-		Right = Button1,
-		Middle = Button2
-	} Button;
+		Button0, // Left
+		Button1, // Right
+		Button2, // Middle
+		Button3,
+		Button4,
+		Button5,
 
-	enum class CursorMode
+		None,
+		Invalid,
+	};
+
+	/** ECursorMode */
+	enum class ECursorMode
 	{
 		Normal = 0,
 		Hidden = 1,
 		Locked = 2
 	};
+
+	/// @FIXME: Temporary until metadata is available.
+	namespace Enum
+	{
+		FORCEINLINE static constexpr const char* ToString(const EMouseButton MouseButton)
+		{
+			switch (MouseButton)
+			{
+				case EMouseButton::Button0:  return "Button0";
+				case EMouseButton::Button1:  return "Button1";
+				case EMouseButton::Button2:  return "Button2";
+				case EMouseButton::Button3:  return "Button3";
+				case EMouseButton::Button4:  return "Button4";
+				case EMouseButton::Button5:  return "Button5";
+				case EMouseButton::None:     return "None";
+			}
+
+			assert(false);
+			return nullptr;
+		}
+	}
 
 }

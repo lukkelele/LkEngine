@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "LkEngine/Input/MouseCodes.h"
+#include "LkEngine/Core/Math/Vector.h"
 
 
 namespace LkEngine {
@@ -13,13 +14,14 @@ namespace LkEngine {
 		static void Init();
 
 		static glm::vec2 GetPos();
+		static LVector2 GetPosition();
 		static glm::vec2 GetRawPos();
 
 		static void Enable();
 		static void Disable();
 
-		static bool IsButtonPressed(MouseButton button);
-		static bool IsButtonDown(MouseButton button);
+		//static bool IsButtonPressed(const EMouseButton Button);
+		static bool IsButtonPressed(const EMouseButton button);
 
 		static float GetMouseX();
 		static float GetMouseY();

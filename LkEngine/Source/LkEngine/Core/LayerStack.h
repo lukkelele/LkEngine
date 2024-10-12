@@ -1,36 +1,37 @@
 #pragma once
 
-#include "Base.h"
 #include "Layer.h"
 
 
 namespace LkEngine {
 
-	class LayerStack
+	class LLayerStack : public LObject
 	{
 	public:
-		LayerStack() = default;
-		~LayerStack();
+		LLayerStack() = default;
+		~LLayerStack();
 
-		void PushLayer(Layer* layer);
-		void PushOverlay(Layer* overlay);
-		void PopLayer(Layer* layer);
-		void PopOverlay(Layer* overlay);
+		void PushLayer(LLayer* layer);
+		void PushOverlay(LLayer* overlay);
+		void PopLayer(LLayer* layer);
+		void PopOverlay(LLayer* overlay);
 
-		Layer* operator[](size_t index)
+		LLayer* operator[](const size_t LayerIndex)
 		{
-			LK_ASSERT(index >= 0 && index < m_Layers.size());
-			return m_Layers[index];
+			LK_ASSERT((LayerIndex >= 0) && (LayerIndex < m_Layers.size()), "Invalid layer index: {}", LayerIndex);
+			return m_Layers[LayerIndex];
 		}
 
-		uint8_t Size() const { return m_Layers.size(); }
+		FORCEINLINE uint8_t Size() const { return m_Layers.size(); }
 
-		std::vector<Layer*>::iterator begin() { return m_Layers.begin(); }
-		std::vector<Layer*>::iterator end() { return m_Layers.end(); }
+		std::vector<LLayer*>::iterator begin() { return m_Layers.begin(); }
+		std::vector<LLayer*>::iterator end() { return m_Layers.end(); }
 
 	private:
-		std::vector<Layer*> m_Layers;
+		std::vector<LLayer*> m_Layers;
 		unsigned int m_LayerInsertIndex = 0;
+
+		LCLASS(LLayerStack);
 	};
 
 

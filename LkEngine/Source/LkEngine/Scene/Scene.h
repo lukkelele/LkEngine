@@ -2,7 +2,7 @@
 
 #include <unordered_set>
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Core/String.h"
 #include "LkEngine/Core/LObject/Object.h"
@@ -21,31 +21,34 @@ namespace LkEngine {
 
 	class LEntity;
 	class World;
-	class Renderer;
-	class SceneRenderer;
+	class LRenderer;
+	class LSceneRenderer;
 	struct Physics2DSpecification;
 
 	using EntityMap = std::unordered_map<UUID, LEntity>;
 
-	class Scene : public LObject, public Asset
+	//class LScene : public LObject, public LAsset
+	class LScene : public LAsset
 	{
 	public:
-		Scene(const bool bIsEditorScene = true);
-		Scene(const LString& SceneName, bool bIsActiveScene = true, bool bIsEditorScene = false);
-		~Scene();
+		LScene(const bool bIsEditorScene = true);
+		LScene(const LString& SceneName, bool bIsActiveScene = true, bool bIsEditorScene = false);
+		~LScene();
 
-		void OnRender(Ref<SceneRenderer> renderer, FTimestep Timestep);
-		void OnRenderEditor(LEditorCamera& editorCamera, FTimestep Timestep);
+		void OnRender(TObjectPtr<LSceneRenderer> InSceneRenderer, FTimestep Timestep);
+		void OnRenderEditor(LEditorCamera& InEditorCamera, FTimestep Timestep);
 		void EndScene();
 
-		static Ref<Scene> CreateEmpty();
+		static TObjectPtr<LScene> CreateEmpty();
 
 		LEntity GetMainCameraEntity();
 		std::vector<LEntity> GetEntities();
 		FORCEINLINE uint64_t GetEntityCount() const { return m_EntityIDMap.size(); }
 		void SortEntities();
+
 		LEntity FindEntity(std::string_view name);
-		LEntity GetEntityWithUUID(UUID uuid);
+		LEntity GetEntityWithUUID(UUID uuid) const;
+
 		entt::registry& GetRegistry() { return m_Registry; }
 		void DestroyEntity(LEntity Entity);
 		bool HasEntity(LEntity Entity) const;
@@ -65,20 +68,25 @@ namespace LkEngine {
 		void SetAsEditorScene(bool bIsEditorScene) { m_EditorScene = bIsEditorScene; }
 		void Clear();
 
-		Ref<LEditorCamera> GetEditorCamera() { return EditorCamera; }
+		TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
 
 		void Pause(bool paused);
+
 		void SwitchCamera();
-		void SetCamera(Ref<SceneCamera> cam);
-		void SetCamera(SceneCamera* cam);
-		void SetEditorCamera(const Ref<LEditorCamera> EditorCamera);
-		Ref<SceneCamera> GetMainCamera() { return m_Camera; }
-		UUID GetUUID() const { return m_SceneID; }
+		void SetCamera(TObjectPtr<LSceneCamera> InSceneCamera);
+		void SetCamera(LSceneCamera* InSceneCamera);
+		void SetEditorCamera(const TObjectPtr<LEditorCamera> EditorCamera);
+		TObjectPtr<LSceneCamera> GetMainCamera() { return m_Camera; }
+
+		FORCEINLINE UUID GetUUID() const 
+		{ 
+			return m_SceneID; 
+		}
 
 		Box2DWorldComponent& GetBox2DWorld();
 		void Initiate2DPhysics(const Physics2DSpecification& PhysicsSpecification);
 
-		void CopyTo(Ref<Scene>& target);
+		void CopyTo(TObjectPtr<LScene>& TargetScene);
 
 		template<typename T>
 		void OnComponentAdded(LEntity Entity, T& TComponent);
@@ -91,14 +99,16 @@ namespace LkEngine {
 			auto SourceEntities = SourceRegistry.view<T>();
 			for (auto SourceEntity : SourceEntities)
 			{
-				entt::entity destEntity = enttMap.at(SourceRegistry.get<IDComponent>(SourceEntity).ID);
+				entt::entity destEntity = enttMap.at(SourceRegistry.get<LIDComponent>(SourceEntity).ID);
 				auto& SourceComponent = SourceRegistry.get<T>(SourceEntity);
 				auto& destComponent = DestinationRegistry.emplace_or_replace<T>(destEntity, SourceComponent);
 			}
 		}
 
 		template<typename TComponent>
-		void CopyComponentIfExists(entt::entity Destination, entt::registry& DestinationRegistry, entt::entity Source)
+		void CopyComponentIfExists(entt::entity Destination, 
+								   entt::registry& DestinationRegistry, 
+								   entt::entity Source)
 		{
 			if (m_Registry.has<TComponent>(Source))
 			{
@@ -108,9 +118,14 @@ namespace LkEngine {
 		}
 
 		template<typename TComponent>
-		static void CopyComponentFromScene(LEntity Destination, Ref<Scene> DestinationScene, LEntity Source, Ref<Scene> SourceScene)
+		static void CopyComponentFromScene(LEntity Destination, 
+										   TObjectPtr<LScene> DestinationScene, 
+										   LEntity Source, 
+										   TObjectPtr<LScene> SourceScene)
 		{
-			SourceScene->CopyComponentIfExists<TComponent>((entt::entity)Destination, DestinationScene->m_Registry, (entt::entity)Source);
+			SourceScene->CopyComponentIfExists<TComponent>((entt::entity)Destination, 
+														   DestinationScene->m_Registry, 
+														   (entt::entity)Source);
 		}
 
 		template<typename... Components>
@@ -119,7 +134,7 @@ namespace LkEngine {
 			return m_Registry.view<Components...>();
 		}
 
-		static void SetActiveScene(Ref<Scene>& scene);
+		static void SetActiveScene(TObjectPtr<LScene> InScene);
 
 		FORCEINLINE static std::string GetActiveSceneName()
 		{
@@ -132,17 +147,25 @@ namespace LkEngine {
 		}
 
 		static uint8_t GetSceneCount() { return m_SceneCounter; }
-		static Ref<Scene> GetActiveScene() { return m_ActiveScene; }
 
-		std::unordered_set<AssetHandle> GetAssetList();
+		static TObjectPtr<LScene> GetActiveScene() 
+		{ 
+			return m_ActiveScene; 
+		}
+
+		std::unordered_set<FAssetHandle> GetAssetList();
 
 	private:
-		inline static Scene* m_ActiveScene = nullptr;
+		//inline static LScene* m_ActiveScene = nullptr;
+		inline static TObjectPtr<LScene> m_ActiveScene = nullptr;
+
 		inline static uint8_t m_SceneCounter = 0;
 	private:
 		std::string Name = "";
+		UUID m_SceneID = 0; // Replace with AssetHandle.
+		FAssetHandle AssetHandle;
 		entt::entity m_SceneEntity;
-		UUID m_SceneID = 0;
+
 		bool m_Paused = false;
 		int m_Frames = 0;
 
@@ -151,21 +174,23 @@ namespace LkEngine {
 
 		Timer m_Timer;
 		bool m_EditorScene = false; // Blank scene
-		AssetHandle m_AssetHandle;
 		bool m_IsActiveScene = false;
 
-		uint16_t m_ViewportWidth, m_ViewportHeight;
+		uint16_t m_ViewportWidth = 0;
+		uint16_t m_ViewportHeight = 0;
 
-		Ref<SceneCamera> m_Camera = nullptr;
-		Ref<SceneCamera> m_Camera2D = nullptr;
-		Ref<LEditorCamera> EditorCamera = nullptr;
+		TObjectPtr<LSceneCamera> m_Camera = nullptr;
+		TObjectPtr<LSceneCamera> m_Camera2D = nullptr;
+		TObjectPtr<LEditorCamera> EditorCamera = nullptr;
 
-		Ref<SceneRenderer> m_Renderer = nullptr;
+		TObjectPtr<LSceneRenderer> m_Renderer = nullptr;
 
 		friend class LEntity;
-		friend class EditorLayer;
-		friend class SceneSerializer;
-		friend class SceneManagerPanel;
+		friend class LEditorLayer;
+		friend class LSceneSerializer;
+		friend class LSceneManagerPanel;
+
+		LCLASS(LScene);
 	};
 
 }

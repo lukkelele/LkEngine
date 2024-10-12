@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 
 namespace LkEngine {
@@ -8,17 +8,17 @@ namespace LkEngine {
 	class RenderCommandQueue
 	{
 	public:
-		typedef void(*RenderCommandFn)(void*);
+		typedef void(*FRenderCommandFn)(void*);
 
 		RenderCommandQueue();
 		~RenderCommandQueue();
 
-		void* Allocate(RenderCommandFn func, uint32_t size);
+		void* Allocate(FRenderCommandFn CommandFunction, const uint32_t Size);
 		void Execute();
 
 	private:
-		uint8_t* m_CommandBuffer;
-		uint8_t* m_CommandBufferPtr;
+		uint8_t* m_CommandBuffer{};
+		uint8_t* m_CommandBufferPtr{};
 		uint32_t m_CommandCount = 0;
 	};
 

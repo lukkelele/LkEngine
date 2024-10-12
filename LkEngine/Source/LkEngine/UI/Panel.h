@@ -5,10 +5,10 @@
 
 namespace LkEngine {
 
-	class Panel
+	class IPanel
 	{
 	public:
-		virtual ~Panel() = default;
+		virtual ~IPanel() = default;
 
 		virtual void Init() = 0;
 		

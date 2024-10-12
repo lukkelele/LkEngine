@@ -14,9 +14,10 @@ namespace LkEngine {
 
 	struct ShaderDependencies
 	{
-		std::vector<Ref<Pipeline>> Pipelines;
-		std::vector<Ref<Material>> Materials;
+		std::vector<TObjectPtr<LPipeline>> Pipelines{};
+		std::vector<TObjectPtr<LMaterial>> Materials{};
 	};
+
 	static std::unordered_map<size_t, ShaderDependencies> s_ShaderDependencies;
 
 	void LRendererAPI::SetAPI(ERendererAPI InRendererAPI)
@@ -24,119 +25,119 @@ namespace LkEngine {
 		LRendererAPI::RendererAPI = InRendererAPI;
 	}
 
-	Ref<RenderContext> Renderer::GetContext()
+	struct FRendererData
 	{
-		return LApplication::Get()->GetWindow().GetRenderContext();
-	}
+		TObjectPtr<LShaderLibrary> m_ShaderLibrary;
+		TObjectPtr<LTextureLibrary> TextureLibrary;
+		TObjectPtr<LMaterialLibrary> MaterialLibrary;
 
-	struct RendererData
-	{
-		Ref<ShaderLibrary> m_ShaderLibrary;
-		Ref<TextureLibrary> m_TextureLibrary;
-		Ref<MaterialLibrary> m_MaterialLibrary;
+		TObjectPtr<LTexture2D> WhiteTexture;
+		TObjectPtr<LTexture2D> BlackTexture;
 
-		Ref<Texture2D> WhiteTexture;
-		Ref<Texture2D> BlackTexture;
-
-		EditorLayer* Editor;
+		LEditorLayer* Editor = nullptr;
 	};
 
-	static RendererData* Data = nullptr;
+	static FRendererData* RendererData = nullptr;
 	constexpr static uint32_t RenderCommandQueueCount = 2;
 	static RenderCommandQueue* CommandQueue[RenderCommandQueueCount];
 	static std::atomic<uint32_t> RenderCommandQueueSubmissionIndex = 0;
 	static RenderCommandQueue ResourceFreeQueue[3];
 
-	Renderer::Renderer()
+	LRenderer::LRenderer()
 	{
 		s_Instance = this;
 	}
 
-	void Renderer::Init()
+	void LRenderer::Initialize()
 	{
-		Data = new RendererData();
+		RendererData = new FRendererData();
 
 		PrimitiveTopology = ERenderTopology::Triangles;
 		CommandQueue[0] = new RenderCommandQueue();
 		CommandQueue[1] = new RenderCommandQueue();
 
-		Data->m_ShaderLibrary = Ref<ShaderLibrary>::Create();
+		LK_CORE_DEBUG_TAG("Renderer", "Creating shader library");
+		RendererData->m_ShaderLibrary = TObjectPtr<LShaderLibrary>::Create();
 
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Quad",    "Assets/Shaders/OpenGL/Renderer2D_Quad.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Line",    "Assets/Shaders/OpenGL/Renderer2D_Line.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Debug",   "Assets/Shaders/OpenGL/Renderer2D_Debug.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer2D_Screen",  "Assets/Shaders/OpenGL/Renderer2D_Screen.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer_Debug",     "Assets/Shaders/OpenGL/Renderer_Debug.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer_Skybox",    "Assets/Shaders/OpenGL/Renderer_Skybox.shader");
-		Renderer::GetShaderLibrary()->Load("Renderer_Model",     "Assets/Shaders/OpenGL/Renderer_Model.shader");
+		if (TObjectPtr<LShaderLibrary> ShaderLibrary = GetShaderLibrary())
+		{
+			LK_CORE_DEBUG_TAG("Renderer", "Loading shaders");
+			ShaderLibrary->Load("Renderer2D_Quad",    "Assets/Shaders/OpenGL/Renderer2D_Quad.shader");
+			ShaderLibrary->Load("Renderer2D_Line",    "Assets/Shaders/OpenGL/Renderer2D_Line.shader");
+			ShaderLibrary->Load("Renderer2D_Debug",   "Assets/Shaders/OpenGL/Renderer2D_Debug.shader");
+			ShaderLibrary->Load("Renderer2D_Screen",  "Assets/Shaders/OpenGL/Renderer2D_Screen.shader");
+			ShaderLibrary->Load("Renderer_Debug",     "Assets/Shaders/OpenGL/Renderer_Debug.shader");
+			ShaderLibrary->Load("Renderer_Skybox",    "Assets/Shaders/OpenGL/Renderer_Skybox.shader");
+			ShaderLibrary->Load("Renderer_Model",     "Assets/Shaders/OpenGL/Renderer_Model.shader");
+		}
 
-		Data->m_TextureLibrary = Ref<TextureLibrary>::Create();
-		Data->WhiteTexture = Data->m_TextureLibrary->GetWhiteTexture();
-		//LoadTextures();
+		LK_CORE_DEBUG_TAG("Renderer", "Creating texture library");
+		RendererData->TextureLibrary = TObjectPtr<LTextureLibrary>(&LTextureLibrary::Get());
+		RendererData->WhiteTexture = RendererData->TextureLibrary->GetWhiteTexture();
+		
 
-		Data->m_MaterialLibrary = Ref<MaterialLibrary>::Create();
+		LK_CORE_DEBUG_TAG("Renderer", "Creating material library");
+		RendererData->MaterialLibrary = TObjectPtr<LMaterialLibrary>::Create();
 
 		RendererAPI = LRendererAPI::Create();
 		RendererAPI->Init();
-
-		s_Renderer2DAPI = RendererAPI->GetRenderer2DAPI();
 	}
 
-	void Renderer::Clear()
+	void LRenderer::Clear()
 	{
 		RendererAPI->Clear();
 	}
 
-	void Renderer::BeginFrame()
+	void LRenderer::BeginFrame()
 	{
-        Renderer::SwapQueues();
+        LRenderer::SwapQueues();
 		RendererAPI->BeginFrame();
 	}
 
-	void Renderer::EndFrame()
+	void LRenderer::EndFrame()
 	{
 		CommandQueue[GetRenderQueueIndex()]->Execute();
 		RendererAPI->EndFrame();
 	}
 
-	void Renderer::Shutdown()
+	void LRenderer::Shutdown()
 	{
 		RendererAPI->Shutdown();
 	}
 
-	void Renderer::SetPrimitiveTopology(const ERenderTopology& InRenderTopology)
+	void LRenderer::SetPrimitiveTopology(const ERenderTopology& InRenderTopology)
 	{
 		PrimitiveTopology = InRenderTopology;
 		RendererAPI->SetPrimitiveTopology(InRenderTopology);
 	}
 
-	void Renderer::SwapQueues()
+	void LRenderer::SwapQueues()
 	{
 		RenderCommandQueueSubmissionIndex = (RenderCommandQueueSubmissionIndex + 1) % RenderCommandQueueCount;
 	}
 
-	RenderCommandQueue& Renderer::GetRenderCommandQueue()
+	RenderCommandQueue& LRenderer::GetRenderCommandQueue()
 	{
 		return *CommandQueue[RenderCommandQueueSubmissionIndex];
 	}
 
-	uint32_t Renderer::GetRenderQueueIndex()
+	uint32_t LRenderer::GetRenderQueueIndex()
 	{
 		return (RenderCommandQueueSubmissionIndex + 1) % RenderCommandQueueCount;
 	}
 
-	uint32_t Renderer::GetRenderQueueSubmissionIndex()
+	uint32_t LRenderer::GetRenderQueueSubmissionIndex()
 	{
 		return RenderCommandQueueSubmissionIndex;
 	}
 
-	Ref<Framebuffer>& Renderer::GetViewportFramebuffer()
+	TObjectPtr<LFramebuffer>& LRenderer::GetViewportFramebuffer()
 	{
-		auto* editor = EditorLayer::Get();
-		// Editor is enabled, thus the render target is a texture that the editor is responsible for
-		if (editor && editor->IsEnabled())
+		/// FIXME
+		// Editor is enabled, thus the render target is a texture that the Editor is responsible for
+		if (LEditorLayer* Editor = LEditorLayer::Get(); Editor && Editor->IsEnabled())
 		{
-			return editor->m_ViewportFramebuffer;
+			return Editor->m_ViewportFramebuffer;
 		}
 		else
 		{
@@ -145,33 +146,35 @@ namespace LkEngine {
 		}
 	}
 
-	Ref<ShaderLibrary> Renderer::GetShaderLibrary()
+	TObjectPtr<LShaderLibrary> LRenderer::GetShaderLibrary()
 	{
-		LK_CORE_ASSERT(Data->m_ShaderLibrary != nullptr, "ShaderLibrary is nullptr!");
-		return Data->m_ShaderLibrary;
+		LK_CORE_ASSERT(RendererData->m_ShaderLibrary, "ShaderLibrary is nullptr!");
+		return RendererData->m_ShaderLibrary;
 	}
 
-	void Renderer::SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform)
+	void LRenderer::SubmitMesh(TObjectPtr<Mesh>& mesh, 
+							   TObjectPtr<LShader>& shader, 
+							   const glm::mat4& transform)
 	{
 		RendererAPI->SubmitMesh(mesh, shader, transform);
 	}
 
-	void Renderer::SubmitImage(const Ref<Image> image)
+	void LRenderer::SubmitImage(const TObjectPtr<LImage> image)
 	{
 		RendererAPI->SubmitImage(image);
 	}
 
-	void Renderer::SubmitImage(const Ref<Image2D> image)
+	void LRenderer::SubmitImage(const TObjectPtr<LImage2D> image)
 	{
 		RendererAPI->SubmitImage(image);
 	}
 
-	void Renderer::SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
+	void LRenderer::SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
 	{
 		RendererAPI->SubmitLine(p0, p1, color, entityID);
 	}
 
-	void Renderer::SubmitLines(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) 
+	void LRenderer::SubmitLines(const LVertexBuffer& vb, const LIndexBuffer& ib, const LShader& shader) 
 	{
 		shader.Bind();
 		vb.Bind();
@@ -183,139 +186,170 @@ namespace LkEngine {
 
 		/* Reset initial topology */
 		SetPrimitiveTopology(InitialTopology);
-		//SetPrimitiveTopology(ERenderTopology::Triangles);
 	}
 
-	void Renderer::SubmitIndexed(VertexBuffer& vb, unsigned int count)
+	void LRenderer::SubmitIndexed(LVertexBuffer& VertexBuffer, const uint32_t Count)
 	{
-        vb.Bind();
-        //auto ib = vb.GetIndexBuffer();
-		//if (ib != nullptr) int indexCount = count ? count : ib->GetCount();
-		RendererAPI->SubmitIndexed(count);
+        VertexBuffer.Bind();
+		RendererAPI->SubmitIndexed(Count);
 	}
 
-	void Renderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+	void LRenderer::SubmitQuad(const glm::vec2& pos, 
+							   const glm::vec2& size, 
+							   const glm::vec4& color, 
+							   const uint64_t entityID)
 	{
 		RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);
 	}
 
-	void Renderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+	void LRenderer::SubmitQuad(const glm::vec3& pos, 
+							   const glm::vec2& size, 
+							   const glm::vec4& color, 
+							   uint64_t entityID)
 	{
 		RendererAPI->SubmitQuad(pos, size, color, entityID);
 	}
 
-	void Renderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
+	void LRenderer::SubmitQuad(const glm::vec2& pos, 
+							   const glm::vec2& size, 
+							   TObjectPtr<LTexture> texture, 
+							   uint64_t entityID)
 	{
 		RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, texture, entityID);
 	}
 
-	void Renderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
+	void LRenderer::SubmitQuad(const glm::vec3& pos, 
+							   const glm::vec2& size, 
+							   TObjectPtr<LTexture> texture, 
+							   uint64_t entityID)
 	{
 		RendererAPI->SubmitQuad(pos, size, texture, 0.0f, entityID);
 	}
 
-	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID)
+	void LRenderer::SubmitSprite(LTransformComponent& tc, 
+								 const glm::vec2& size, 
+								 const glm::vec4 color, 
+								 uint64_t entityID)
     {
-        RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, size, color, tc.Rotation2D, entityID);
+        RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, 
+								size, 
+								color, 
+								tc.Rotation2D, 
+								entityID);
     }
 
-	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID)
+	void LRenderer::SubmitSprite(LTransformComponent& tc, 
+								 const glm::vec2& size, 
+								 TObjectPtr<LTexture> texture, 
+								 uint64_t entityID)
     {
         RendererAPI->SubmitQuad(tc.Translation, size, texture, tc.Rotation2D, entityID);
     }
 
-	void Renderer::SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& color, uint64_t entityID)
+	void LRenderer::SubmitSprite(LTransformComponent& tc, 
+								 const glm::vec2& size, 
+								 TObjectPtr<LTexture> texture, 
+								 const glm::vec4& color, 
+								 uint64_t entityID)
     {
         RendererAPI->SubmitQuad(tc.Translation, size, texture, color, tc.Rotation2D, entityID);
     }
 
 	// REMOVE
-	void Renderer::BeginScene(const SceneCamera& camera)
+	void LRenderer::BeginScene(const LSceneCamera& InSceneCamera)
 	{
-		s_Renderer2DAPI->BeginScene(camera);
+		//Renderer2DAPI->BeginScene(InSceneCamera);
 	}
 
 	// REMOVE
-	void Renderer::BeginScene(const glm::mat4& viewProjectionMatrix)
+	void LRenderer::BeginScene(const glm::mat4& viewProjectionMatrix)
 	{
-		s_Renderer2DAPI->BeginScene(viewProjectionMatrix);
+		//Renderer2DAPI->BeginScene(viewProjectionMatrix);
 	}
 
-	RendererCapabilities& Renderer::GetCapabilities()
+	RendererCapabilities& LRenderer::GetCapabilities()
 	{
 		return RendererAPI->GetCapabilities();
 	}
 
-	uint32_t Renderer::GetCurrentFrameIndex()
+	uint32_t LRenderer::GetCurrentFrameIndex()
 	{
 		return LApplication::Get()->GetCurrentFrameIndex();
 	}
 
-	uint32_t Renderer::RT_GetCurrentFrameIndex()
+	uint32_t LRenderer::RT_GetCurrentFrameIndex()
 	{
 		// Swapchain owns the RenderThread frame index
 		return LApplication::Get()->GetWindow().GetSwapChain()->GetCurrentBufferIndex();
 	}
 
-	void Renderer::BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass)
+	void LRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, TObjectPtr<LRenderPass> renderPass)
 	{
 		RendererAPI->BeginRenderPass(renderCommandBuffer, renderPass, false);
 	}
 
-	void Renderer::EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer)
+	void LRenderer::EndRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer)
 	{
 		RendererAPI->EndRenderPass(renderCommandBuffer);
 	}
 
-	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+								   TObjectPtr<LPipeline> pipeline, 
+								   TObjectPtr<LVertexBuffer> vertexBuffer, 
+								   TObjectPtr<LIndexBuffer> indexBuffer, 
+								   const glm::mat4& transform, 
+								   uint32_t IndexCount /*= 0*/)
 	{
-		RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, vertexBuffer, indexBuffer, transform, indexCount);
+		//RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, vertexBuffer, indexBuffer, transform, IndexCount);
 	}
 
-	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Shader> shader, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+								   TObjectPtr<LPipeline> pipeline, 
+								   TObjectPtr<LShader> shader, 
+								   TObjectPtr<LVertexBuffer> vertexBuffer, 
+								   TObjectPtr<LIndexBuffer> indexBuffer, 
+								   const glm::mat4& transform, 
+								   const uint32_t indexCount /*= 0*/)
 	{
-		RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, shader, vertexBuffer, indexBuffer, transform, indexCount);
+		//RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, shader, vertexBuffer, indexBuffer, transform, indexCount);
 	}
 
-	void Renderer::RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Material> material, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount /*= 0*/)
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+								   TObjectPtr<LPipeline> pipeline, 
+								   TObjectPtr<LMaterial> material, 
+								   TObjectPtr<LVertexBuffer> vertexBuffer, 
+								   TObjectPtr<LIndexBuffer> indexBuffer, 
+								   const glm::mat4& Transform, 
+								   const uint32_t IndexCount /*= 0*/)
 	{
-		RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, material, vertexBuffer, indexBuffer, transform, indexCount);
+		//RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, material, vertexBuffer, indexBuffer, Transform, IndexCount);
 	}
 	
-	Ref<TextureLibrary> Renderer::GetTextureLibrary()
+	TObjectPtr<LTexture2D> LRenderer::GetWhiteTexture()
 	{
-		return Data->m_TextureLibrary;
+		return RendererData->WhiteTexture;
 	}
 
-	Ref<Texture2D> Renderer::GetWhiteTexture()
-	{
-		//return Data->m_TextureLibrary->GetWhiteTexture();
-		return Data->WhiteTexture;
-	}
-
-	Ref<TextureCube> Renderer::GetWhiteTextureCube()
+	TObjectPtr<LTextureCube> LRenderer::GetWhiteTextureCube()
 	{
 		LK_CORE_ASSERT(false, "Not implemented!");
 		return nullptr;
 	}
 
-	void Renderer::DrawMesh(Ref<Mesh>& mesh, const Ref<Shader> shader)
+	void LRenderer::DrawMesh(Ref<Mesh>& mesh, const TObjectPtr<LShader> shader)
 	{
-		RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *shader);
+		//RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *shader);
 	}
 
-	void Renderer::RegisterShaderDependency(Ref<Shader> shader, Ref<Material> material)
+	void LRenderer::RegisterShaderDependency(TObjectPtr<LShader> shader, TObjectPtr<LMaterial> material)
 	{
 		s_ShaderDependencies[shader->GetHash()].Materials.push_back(material);
 	}
 
-	Ref<MaterialLibrary> Renderer::GetMaterialLibrary()
+	void LRenderer::LoadTextures()
 	{
-		return Data->m_MaterialLibrary;
-	}
+		LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
 
-	void Renderer::LoadTextures()
-	{
 		// Textures: 512x512
 		{
 			TextureSpecification textureSpec;
@@ -329,7 +363,7 @@ namespace LkEngine {
 			textureSpec.Format = ImageFormat::RGBA32F;
             textureSpec.SamplerWrap = TextureWrap::Repeat;
             textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 
 			// Ice Skybox 
             textureSpec.Path = "Assets/Textures/Skybox/back.jpg";
@@ -339,7 +373,7 @@ namespace LkEngine {
 			textureSpec.Format = ImageFormat::RGBA32F;
             textureSpec.SamplerWrap = TextureWrap::Clamp;
             textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 		}
 		// Textures: 1024x1024
 		{
@@ -353,8 +387,9 @@ namespace LkEngine {
             textureSpec.GenerateMips = true;
             textureSpec.SamplerWrap = TextureWrap::Repeat;
             textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 		}
+
 		// Textures: 2048x2048 
 		{
 			TextureSpecification textureSpec;
@@ -367,32 +402,32 @@ namespace LkEngine {
 			textureSpec.DebugName = "wood-container";
 			textureSpec.SamplerWrap = TextureWrap::Clamp;
 			textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 
 			// Wood container 2
 			textureSpec.Path = "Assets/Textures/container2.png";
 			textureSpec.Name = "wood-container2";
 			textureSpec.DebugName = "wood-container2";
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 
 			// Bricks
 			textureSpec.Path = "Assets/Textures/bricks_orange.jpg";
 			textureSpec.Name = "bricks";
 			textureSpec.DebugName = "bricks";
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 
 			// Åle texture
 			textureSpec.Path = "Assets/Textures/Misc/ale_1024x1024.png";
 			textureSpec.Name = "ale1024";
 			textureSpec.DebugName = "ale1024";
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 
 			// Lukas texture
 			textureSpec.Path = "Assets/Textures/Misc/lukas_1024.jpg";
 			textureSpec.Name = "lukas_1024";
 			textureSpec.DebugName = "lukas-1024x1024";
 			textureSpec.SamplerWrap = TextureWrap::Repeat;
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 
 			// Metal
             textureSpec.Path = "Assets/Textures/metal.png";
@@ -401,7 +436,7 @@ namespace LkEngine {
             textureSpec.GenerateMips = true;
             textureSpec.SamplerWrap = TextureWrap::Repeat;
             textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 
 			// Wood
             textureSpec.Name = "wood";
@@ -410,7 +445,7 @@ namespace LkEngine {
             textureSpec.GenerateMips = true;
             textureSpec.SamplerWrap = TextureWrap::Repeat;
             textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
 
 			// Skybox
             textureSpec.Name = "skybox-ice-back";
@@ -420,11 +455,11 @@ namespace LkEngine {
             textureSpec.Format = ImageFormat::RGBA32F;
             textureSpec.SamplerFilter = TextureFilter::Nearest;
             textureSpec.SamplerWrap = TextureWrap::Clamp;
-			TextureLibrary::Get()->AddTexture(textureSpec);
+			TextureLibrary.AddTexture(textureSpec);
         }
 	}
 
-	void Renderer::SetDepthFunction(const EDepthFunction& InDepthFunction)
+	void LRenderer::SetDepthFunction(const EDepthFunction& InDepthFunction)
 	{
 		RendererAPI->SetDepthFunction(InDepthFunction);
 	}

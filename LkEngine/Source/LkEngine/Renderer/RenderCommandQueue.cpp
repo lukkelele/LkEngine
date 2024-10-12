@@ -18,39 +18,42 @@ namespace LkEngine {
 		delete[] m_CommandBuffer;
 	}
 
-	void* RenderCommandQueue::Allocate(RenderCommandFn fn, uint32_t size)
+	void* RenderCommandQueue::Allocate(FRenderCommandFn CommandFunction, const uint32_t InSize)
 	{
-		*(RenderCommandFn*)m_CommandBufferPtr = fn;
-		m_CommandBufferPtr += sizeof(RenderCommandFn);
+		*(FRenderCommandFn*)m_CommandBufferPtr = CommandFunction;
+		m_CommandBufferPtr += sizeof(FRenderCommandFn);
 
-		*(uint32_t*)m_CommandBufferPtr = size;
+		*(uint32_t*)m_CommandBufferPtr = InSize;
 		m_CommandBufferPtr += sizeof(uint32_t);
 
 		void* memory = m_CommandBufferPtr;
-		m_CommandBufferPtr += size;
+		m_CommandBufferPtr += InSize;
 
 		m_CommandCount++;
+
 		return memory;
 	}
 
 	void RenderCommandQueue::Execute()
 	{
-		byte* buffer = m_CommandBuffer;
+		byte* CommandBuffer = m_CommandBuffer;
 
-		auto& viewportFramebuffer = *Renderer::GetViewportFramebuffer();
-		viewportFramebuffer.Bind();
-		viewportFramebuffer.BindTexture(0);
+		LFramebuffer& ViewportFramebuffer = *LRenderer::GetViewportFramebuffer();
+		ViewportFramebuffer.Bind();
+		ViewportFramebuffer.BindTexture(0);
+
 		for (uint32_t i = 0; i < m_CommandCount; i++)
 		{
-			RenderCommandFn function = *(RenderCommandFn*)buffer;
-			buffer += sizeof(RenderCommandFn);
+			FRenderCommandFn Function = *(FRenderCommandFn*)CommandBuffer;
+			CommandBuffer += sizeof(FRenderCommandFn);
 
-			uint32_t size = *(uint32_t*)buffer;
-			buffer += sizeof(uint32_t);
-			function(buffer);
-			buffer += size;
+			const uint32_t Size = *(uint32_t*)CommandBuffer;
+			CommandBuffer += sizeof(uint32_t);
+			Function(CommandBuffer);
+			CommandBuffer += Size;
 		}
-		viewportFramebuffer.Unbind();
+
+		ViewportFramebuffer.Unbind();
 
 		m_CommandBufferPtr = m_CommandBuffer;
 		m_CommandCount = 0;

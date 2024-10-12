@@ -2,82 +2,109 @@
 
 #include "AssetManagerBase.h"
 
+#include "LkEngine/Renderer/TextureLibrary.h"
+
 
 namespace LkEngine {
 
-    class RuntimeAssetManager : public AssetManagerBase
+    class LRuntimeAssetManager : public LAssetManagerBase
     {
     public:
-        RuntimeAssetManager();
-        ~RuntimeAssetManager();
+		LRuntimeAssetManager();
+		~LRuntimeAssetManager() = default;
 
-		void Init();
+		void Initialize(const EInitFlag AssetInitialization = EInitFlag::True);
 
 		template<typename T>
-		Ref<T> ImportAsset(std::filesystem::path filepath);
+		TObjectPtr<T> ImportAsset(std::filesystem::path filepath);
 
-        Ref<Asset> GetAsset(AssetHandle asset);
-		AssetType GetAssetType(AssetHandle assetHandle);
-        bool IsMemoryAsset(AssetHandle handle) { return m_MemoryAssets.contains(handle); }
+        TObjectPtr<LAsset> GetAsset(FAssetHandle asset);
 
-		bool ReloadData(AssetHandle assetHandle);
-		void AddMemoryOnlyAsset(Ref<Asset> asset);
-		bool IsAssetHandleValid(AssetHandle assetHandle);
+		EAssetType GetAssetType(FAssetHandle assetHandle);
+        bool IsMemoryAsset(FAssetHandle handle) { return m_MemoryAssets.contains(handle); }
 
-        const AssetMetadata& GetMetadata(AssetHandle handle);
-        const AssetMetadata& GetMetadata(const Ref<Asset>& asset);
-        const AssetMetadata& GetMetadata(const std::filesystem::path& filepath);
-        AssetMetadata& GetMetadataInternal(AssetHandle handle);
+		bool ReloadData(FAssetHandle assetHandle);
+		void AddMemoryOnlyAsset(TObjectPtr<LAsset> asset);
+		bool IsAssetHandleValid(FAssetHandle assetHandle);
 
-        AssetHandle GetAssetHandleFromFilePath(const std::filesystem::path& filepath);
-		AssetType GetAssetTypeFromExtension(const std::string& extension);
-		AssetType GetAssetTypeFromPath(const std::filesystem::path& path);
+        const FAssetMetadata& GetMetadata(FAssetHandle handle);
+        const FAssetMetadata& GetMetadata(const TObjectPtr<LAsset>& asset);
+        const FAssetMetadata& GetMetadata(const std::filesystem::path& filepath);
+        FAssetMetadata& GetMetadataInternal(FAssetHandle handle);
+
+        FAssetHandle GetAssetHandleFromFilePath(const std::filesystem::path& filepath);
+		EAssetType GetAssetTypeFromExtension(const std::string& extension);
+		EAssetType GetAssetTypeFromPath(const std::filesystem::path& path);
 
         std::filesystem::path GetRelativePath(const std::filesystem::path& filepath);
 		void WriteRegistryToFile();
 
 		template<typename T>
-		Ref<T> GetAsset(const std::string& filepath)
+		TObjectPtr<T> GetAsset(const std::string& filepath)
 		{
-			Ref<Asset> asset = GetAsset(GetAssetHandleFromFilePath(filepath));
-			return asset.As<T>();
+			/* TODO: Static validity check for retrieved asset cast to T. */
+			TObjectPtr<LAsset> Asset = GetAsset(GetAssetHandleFromFilePath(filepath));
+			return Asset.As<T>();
 		}
 
-		template<typename T, typename... Args>
-		Ref<T> CreateNewAsset(const std::string& filename, const std::string& directoryPath, Args&&... args)
+		template<typename T, typename... TArgs>
+		TObjectPtr<T> CreateNewAsset(const std::string& filename, 
+									 const std::string& directoryPath, 
+									 TArgs&&... args)
 		{
-			static_assert(std::is_base_of<Asset, T>::value, "CreateNewAsset only works for types derived from Asset");
+			static_assert(std::is_base_of_v<LAsset, T>, "CreateNewAsset only works for assets derived from LAsset");
 
-			AssetMetadata metadata;
-			metadata.Handle = AssetHandle();
+			FAssetMetadata metadata;
+			metadata.Handle = FAssetHandle();
+
 			if (directoryPath.empty() || directoryPath == ".")
+			{
 				metadata.FilePath = filename;
+			}
 			else
+			{
 				metadata.FilePath = GetRelativePath(directoryPath + "/" + filename);
+			}
+
 			metadata.IsDataLoaded = true;
 			metadata.Type = T::GetStaticType();
 
-			m_AssetRegistry[metadata.Handle] = metadata;
+			AssetRegistry[metadata.Handle] = metadata;
 
-			Ref<T> asset = Ref<T>::Create(std::forward<Args>(args)...);
+			TObjectPtr<T> asset = TObjectPtr<T>::Create(std::forward<TArgs>(args)...);
 			asset->Handle = metadata.Handle;
 			m_LoadedAssets[asset->Handle] = asset;
 
 			return asset;
 		}
 
-		const std::unordered_map<AssetHandle, Ref<Asset>>& GetLoadedAssets() { return m_LoadedAssets; }
-		const std::unordered_map<AssetHandle, Ref<Asset>>& GetMemoryOnlyAssets() { return m_MemoryAssets; }
+		const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetLoadedAssets() 
+		{ 
+			return m_LoadedAssets;
+		}
+
+		const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetMemoryOnlyAssets() 
+		{ 
+			return m_MemoryAssets;
+		}
+
+		/**
+		 * GetTextures2D
+		 */
+		const std::vector<TTexture2DPair>& GetTextures2D() const;
+		int GetTextures2D(std::vector<TTexture2DPair>& TextureContainer);
 
 	private:
 		void LoadMaterials();
 		void LoadPrimitiveShapes();
 
     private:
-        std::unordered_map<AssetHandle, Ref<Asset>> m_LoadedAssets;
-		std::unordered_map<AssetHandle, Ref<Asset>> m_MemoryAssets;
+        std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> m_LoadedAssets;
+		std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> m_MemoryAssets;
 
-        AssetRegistry m_AssetRegistry;
+        LAssetRegistry AssetRegistry;
+
+		LTextureLibrary& TextureLibrary;
     };
 
 }

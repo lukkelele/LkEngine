@@ -1,11 +1,10 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/Math/MathLibrary.h"
 
 #include "LkEngine/Serialization/StreamReader.h"
 #include "LkEngine/Serialization/StreamWriter.h"
-
-#include <glm/glm.hpp>
 
 
 namespace LkEngine {

@@ -23,53 +23,53 @@ namespace LkEngine {
 
 	OpenGLShader::~OpenGLShader()
 	{
-		GL_CALL(glDeleteProgram(m_RendererID));
+		LK_OpenGL(glDeleteProgram(m_RendererID));
 	}
 
 	void OpenGLShader::Bind() const
 	{
-		GL_CALL(glUseProgram(m_RendererID));
+		LK_OpenGL(glUseProgram(m_RendererID));
 	}
 
 	void OpenGLShader::Unbind() const
 	{
-		GL_CALL(glUseProgram(0));
+		LK_OpenGL(glUseProgram(0));
 	}
 
 	void OpenGLShader::Set(const std::string& name, int value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform1i(GetUniformLocation(name), value));
+		LK_OpenGL(glUseProgram(m_RendererID));
+		LK_OpenGL(glUniform1i(GetUniformLocation(name), value));
 	}
 
 	void OpenGLShader::Set(const std::string& name, bool value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform1i(GetUniformLocation(name), (int)value));
+		LK_OpenGL(glUseProgram(m_RendererID));
+		LK_OpenGL(glUniform1i(GetUniformLocation(name), (int)value));
 	}
 
 	void OpenGLShader::Set(const std::string& name, float value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform1f(GetUniformLocation(name), value));
+		LK_OpenGL(glUseProgram(m_RendererID));
+		LK_OpenGL(glUniform1f(GetUniformLocation(name), value));
 	}
 
 	void OpenGLShader::Set(const std::string& name, uint32_t value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform1i(GetUniformLocation(name), value));
+		LK_OpenGL(glUseProgram(m_RendererID));
+		LK_OpenGL(glUniform1i(GetUniformLocation(name), value));
 	}
 
 	void OpenGLShader::Set(const std::string& name, const glm::vec4& value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w));
+		LK_OpenGL(glUseProgram(m_RendererID));
+		LK_OpenGL(glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w));
 	}
 
 	void OpenGLShader::Set(const std::string& name, const glm::vec2& value)
 	{
-		GL_CALL(glUseProgram(m_RendererID));
-		GL_CALL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0]));
+		LK_OpenGL(glUseProgram(m_RendererID));
+		LK_OpenGL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0]));
 	}
 
 	void OpenGLShader::Set(const std::string& name, const glm::vec3& value)
@@ -108,7 +108,7 @@ namespace LkEngine {
 			return m_UniformLocationCache[name];
 
 		int location;
-		GL_CALL(location = glGetUniformLocation(m_RendererID, name.c_str()));
+		LK_OpenGL(location = glGetUniformLocation(m_RendererID, name.c_str()));
 		if (location == -1)
 			LK_CORE_WARN("[SHADER] Warning: uniform {0} isn't in use", name);
 

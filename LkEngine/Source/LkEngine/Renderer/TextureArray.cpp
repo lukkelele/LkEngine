@@ -4,7 +4,7 @@
 #include "RendererAPI.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLTextureArray.h"
-//#include "LkEngine/Platform/Vulkan/VulkanTextureArray.h"
+
 
 namespace LkEngine {
 
@@ -17,10 +17,8 @@ namespace LkEngine {
                 return Ref<OpenGLTextureArray>::Create(specification);
             }
 
-            /// @FIXME
-            //case RendererAPIType::Vulkan: return Ref<VulkanTextureArray>::Create(specification);
-
             case ERendererAPI::None: break;
+            default: break;
         }
 
         LK_CORE_ASSERT(false, "Invalid Render API");

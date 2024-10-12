@@ -1,5 +1,8 @@
 #pragma once
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
+
 #include "LkEngine/Core/Hash.h"
 
 #include "ShaderUniform.h"
@@ -10,13 +13,14 @@
 
 namespace LkEngine {
 
-	class Shader : public RefCounted
+	class LShader : public LObject
 	{
 	public:
-		virtual ~Shader() = default;
+		virtual ~LShader() = default;
 
-		static Ref<Shader> Create(const std::string& filepath); 
-		static Ref<Shader> Create(const std::string& vertexPath, const std::string& fragmentPath); 
+		static TObjectPtr<LShader> Create(const std::string& InFilepath); 
+		static TObjectPtr<LShader> Create(const std::string& InVertexPath, 
+										  const std::string& fragmentPath); 
 
 		virtual RendererID GetRendererID() const = 0;
 		virtual RendererID& GetRendererID() = 0;
@@ -61,24 +65,24 @@ namespace LkEngine {
 
 	};
 
-
-    class ShaderLibrary : public RefCounted
+    /**
+     * LShaderLibrary
+	 * 
+	 *  Library for shaders.
+     */
+    class LShaderLibrary : public LObject
     {
     public:
-        ShaderLibrary();
-        ~ShaderLibrary();
+		LShaderLibrary() = default;
+		~LShaderLibrary() = default;
 
-		static Ref<ShaderLibrary> GetLibrary() { return m_Instance; }
+        TObjectPtr<LShader>& Get(std::string_view shaderName);
 
-        Ref<Shader>& Get(std::string_view shaderName);
-
-        void Add(const Ref<Shader>& shader);
-		void Load(std::string_view name, const std::string& path);
+        void Add(const TObjectPtr<LShader>& shader);
+		void Load(std::string_view InName, const std::string& InFilepath);
 
     private:
-        std::unordered_map<std::string_view, Ref<Shader>> m_Shaders;
-
-		inline static Ref<ShaderLibrary> m_Instance = nullptr;
+        inline static std::unordered_map<std::string_view, TObjectPtr<LShader>> Shaders;
     };
 
 

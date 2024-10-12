@@ -28,7 +28,7 @@ namespace LkEngine {
     void Debugger::DrawCursor(float x, float y)
     {
         LWindow& WindowRef = LWindow::Get();
-        Renderer::Submit([&]()
+        LRenderer::Submit([&]()
         {
         });
     }
@@ -52,11 +52,17 @@ namespace LkEngine {
 
         int b2DrawFlags = 0;
         if (drawFlags == Debugger2D::DrawMode2D::Shape)
+        {
             drawFlags = b2Draw::e_shapeBit;
+        }
         else if (drawFlags == (Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints))
+        {
             drawFlags = b2Draw::e_shapeBit | b2Draw::e_jointBit;
+        }
         else
+        {
             drawFlags = 0;
+        }
 
 		drawDebugger->SetFlags(b2Draw::e_shapeBit);
 

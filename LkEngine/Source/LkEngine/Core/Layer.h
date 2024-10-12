@@ -1,27 +1,44 @@
 #pragma once
 
-#include "Base.h"
+#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/LObject/Object.h"
 
 #include "LkEngine/Core/Event/Event.h"
 
 
 namespace LkEngine {
 
-	class Layer
+	/**
+	 * LLayer
+	 *
+	 * Base layer implementation.
+	 */
+	class LLayer : public virtual LObject
 	{
 	public:
-		Layer(const std::string& name = "Layer");
-		virtual ~Layer() = default;
+		LLayer(std::string_view InName = "Layer");
+		virtual ~LLayer() = default;
 
+		/** */
 		virtual void OnAttach() {}
+		/** */
 		virtual void OnDetach() {}
-		virtual void OnUpdate(float ts) {}
-		virtual void OnImGuiRender() {}
-		virtual void OnEvent(Event& event) {}
 
-		const std::string& GetName() const { return m_Name; }
+		/** */
+		virtual void OnUpdate(float ts) {}
+		/** */
+		virtual void OnImGuiRender() {}
+
+		virtual void OnEvent(LEvent& event) 
+		{
+		}
+
+		std::string_view GetName() const { return Name; }
 
 	protected:
-		std::string m_Name;
+		std::string Name{};
+
+	private:
+		LCLASS(LLayer);
 	};
 }

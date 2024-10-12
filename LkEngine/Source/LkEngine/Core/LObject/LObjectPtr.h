@@ -1,9 +1,7 @@
-///|//////////////////////////////////////////////////////////////
-/// LObjectPtr
-///
-/// Object Pointer
-///
-///|//////////////////////////////////////////////////////////////
+/******************************************************************
+ * LObjectPtr
+ * 
+ *******************************************************************/
 #pragma once
 
 #include <unordered_set>
@@ -18,6 +16,7 @@ namespace LkEngine {
 	 * TObjectPtr_Internal
 	 * 
 	 *  Management of live references.
+	 *  For internal use by TObjectPtr.
 	 */
 	namespace TObjectPtr_Internal
 	{
@@ -29,26 +28,37 @@ namespace LkEngine {
 		static bool IsLive(void* ObjectInstance);
 	}
 
-
 	/**
 	 * TObjectPtr
 	 * 
 	 *  Smart pointer implementation for LObject derived classes.
 	 */
 	template<typename T>
-	struct TObjectPtr
+	class TObjectPtr
 	{
 	public:
 		TObjectPtr(T* Instance = nullptr)
 			: ObjectPtr(Instance)
 		{
-			Pointer_IncrementReferenceCount();
+			TObjectPtr_IncrementReferenceCount();
+		}
+
+		TObjectPtr(T& Object) 
+			: ObjectPtr(&Object)
+		{
+			TObjectPtr_IncrementReferenceCount();
+		}
+
+		TObjectPtr(const T& Object)
+			: ObjectPtr(const_cast<std::remove_const_t<T>*>(&Object))
+		{
+			TObjectPtr_IncrementReferenceCount();
 		}
 
 		TObjectPtr(const TObjectPtr<T>& Other)
 			: ObjectPtr(Other.ObjectPtr)
 		{
-			Pointer_IncrementReferenceCount();
+			TObjectPtr_IncrementReferenceCount();
 		}
 
 		TObjectPtr(TObjectPtr<T>&& Other) noexcept
@@ -56,32 +66,14 @@ namespace LkEngine {
 		{
 			Other.ObjectPtr = nullptr;
 
-			Pointer_IncrementReferenceCount();
+			TObjectPtr_IncrementReferenceCount();
 		}
-
-		/// Disabled for now.
-		/// Prob not used.
-	#if 0
-		/* Object reference. */
-		TObjectPtr(T& Object) 
-			: ObjectPtr(&Object)
-		{
-			Pointer_IncrementReferenceCount();
-		}
-
-		/* Const object reference. */
-		TObjectPtr(const T& Object)
-			: ObjectPtr(const_cast<std::remove_const_t<T>*>(&Object))
-		{
-			Pointer_IncrementReferenceCount();
-		}
-	#endif
 
 		template<typename R>
 		TObjectPtr(const TObjectPtr<R>& Other)
 		{
 			ObjectPtr = (T*)Other.ObjectPtr;
-			Pointer_IncrementReferenceCount();
+			TObjectPtr_IncrementReferenceCount();
 		}
 
 		template<typename R>
@@ -93,12 +85,12 @@ namespace LkEngine {
 
 		~TObjectPtr()
 		{
-			Pointer_DecrementReferenceCount();
+			TObjectPtr_DecrementReferenceCount();
 		}
 
 		TObjectPtr& operator=(Type_Nullptr)
 		{
-			Pointer_DecrementReferenceCount();
+			TObjectPtr_DecrementReferenceCount();
 			ObjectPtr = nullptr;
 
 			return *this;
@@ -111,8 +103,8 @@ namespace LkEngine {
 				return *this;
 			}
 
-			Other.Pointer_IncrementReferenceCount();
-			Pointer_DecrementReferenceCount();
+			Other.TObjectPtr_IncrementReferenceCount();
+			TObjectPtr_DecrementReferenceCount();
 
 			ObjectPtr = Other.ObjectPtr;
 
@@ -122,8 +114,8 @@ namespace LkEngine {
 		template<typename R>
 		TObjectPtr& operator=(const TObjectPtr<R>& Other)
 		{
-			Other.Pointer_IncrementReferenceCount();
-			Pointer_DecrementReferenceCount();
+			Other.TObjectPtr_IncrementReferenceCount();
+			TObjectPtr_DecrementReferenceCount();
 
 			ObjectPtr = Other.ObjectPtr;
 
@@ -133,7 +125,7 @@ namespace LkEngine {
 		template<typename R>
 		TObjectPtr& operator=(TObjectPtr<R>&& Other)
 		{
-			Pointer_DecrementReferenceCount();
+			TObjectPtr_DecrementReferenceCount();
 
 			ObjectPtr = Other.ObjectPtr;
 			Other.ObjectPtr = nullptr;
@@ -177,7 +169,7 @@ namespace LkEngine {
 
 		void Reset(T* ObjectRef = nullptr)
 		{
-			Pointer_DecrementReferenceCount();
+			TObjectPtr_DecrementReferenceCount();
 
 			ObjectPtr = ObjectRef;
 		}
@@ -195,7 +187,7 @@ namespace LkEngine {
 		template<typename ...TArgs>
 		static TObjectPtr<T> Create(TArgs&&... Args);
 
-		bool EqualsObject(const TObjectPtr<T>& Other) const 
+		bool IsEqual(const TObjectPtr<T>& Other) const 
 		{
 			/* Validity check so no dereferencing of nullptr happends. */
 			if (ObjectPtr == nullptr || Other.ObjectPtr == nullptr)
@@ -207,7 +199,7 @@ namespace LkEngine {
 		}
 
 	private:
-		FORCEINLINE void Pointer_IncrementReferenceCount() const
+		FORCEINLINE void TObjectPtr_IncrementReferenceCount() const
 		{
 			if (ObjectPtr)
 			{
@@ -216,7 +208,7 @@ namespace LkEngine {
 			}
 		}
 
-		FORCEINLINE void Pointer_DecrementReferenceCount() const
+		FORCEINLINE void TObjectPtr_DecrementReferenceCount() const
 		{
 			if (ObjectPtr)
 			{
@@ -236,39 +228,8 @@ namespace LkEngine {
 		mutable T* ObjectPtr;
 
 		template<class R>
-		friend struct TObjectPtr;
+		friend class TObjectPtr;
 	};
-
-#if 0
-	static std::unordered_set<void*> LiveReferences;
-	static std::mutex LiveReferenceMutex;
-
-	template<typename T>
-	FORCEINLINE void TObjectPtr<T>::AddToLiveReferences(void* ObjectInstance)
-	{
-		std::scoped_lock<std::mutex> ScopedLock(LiveReferenceMutex);
-		LK_CORE_ASSERT(ObjectInstance != nullptr);
-		LiveReferences.insert(ObjectInstance);
-	}
-
-	template<typename T>
-	FORCEINLINE void TObjectPtr<T>::RemoveFromLiveReferences(void* ObjectInstance)
-	{
-		std::scoped_lock<std::mutex> ScopedLock(LiveReferenceMutex);
-		LK_CORE_ASSERT(ObjectInstance != nullptr);
-		LK_CORE_ASSERT(LiveReferences.find(ObjectInstance) != LiveReferences.end());
-
-		LiveReferences.erase(ObjectInstance);
-	}
-
-	template<typename T>
-	FORCEINLINE bool TObjectPtr<T>::IsLive(void* ObjectInstance)
-	{
-		LK_CORE_ASSERT(ObjectInstance != nullptr);
-
-		return LiveReferences.find(ObjectInstance) != LiveReferences.end();
-	}
-#endif
 
 }
 

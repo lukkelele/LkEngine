@@ -1,20 +1,31 @@
 #pragma once 
 
-//#include "LkEngine/Core/Base.h"
-//#include "LkEngine/Core/Hash/UUID.h"
 #include "LkEngine/Core/Core.h"
 
 
 namespace LkEngine {
 
-	enum class AssetFlag : uint16_t
+	/**
+	 * AssetFlag enum.
+	 * Allows bitwise logic without any casting.
+	 */
+	namespace AssetFlag
 	{
-		None    = 0 << 0,
-		Missing = 1 << 0,
-		Invalid = 1 << 1
-	};
+		enum Type : uint16_t
+		{
+			None       = 0 << 0,
+			Missing    = 1 << 1,
+			Invalid    = 1 << 2
+		};
+	}
+	using EAssetFlag = AssetFlag::Type;
 
-	enum class AssetType : uint16_t
+	/**
+	 * EAssetType
+	 * 
+	 *  Type of asset.
+	 */
+	enum class EAssetType : uint16_t
 	{
 		None = 0,
 		Scene,
@@ -27,43 +38,45 @@ namespace LkEngine {
 		Font,
 		Skeleton,
 		Animation,
-		EnvMap
+		EnvMap,
+		Audio
 	};
 
-	namespace Utils {
 
-		inline AssetType AssetTypeFromString(std::string_view assetType)
+	namespace Enum 
+	{
+		inline EAssetType AssetTypeFromString(std::string_view AssetType)
 		{
-			if (assetType == "None")           return AssetType::None;
-			if (assetType == "Scene")          return AssetType::Scene;
-			if (assetType == "Prefab")         return AssetType::Prefab;
-			if (assetType == "Mesh")           return AssetType::Mesh;
-			if (assetType == "StaticMesh")     return AssetType::StaticMesh;
-			if (assetType == "MeshSource")     return AssetType::MeshSource;
-			if (assetType == "Material")       return AssetType::Material;
-			if (assetType == "Texture")        return AssetType::Texture;
-			if (assetType == "Font")           return AssetType::Font;
-			if (assetType == "Skeleton")       return AssetType::Skeleton;
-			if (assetType == "Animation")      return AssetType::Animation;
+			if (AssetType == "None")           return EAssetType::None;
+			if (AssetType == "Scene")          return EAssetType::Scene;
+			if (AssetType == "Prefab")         return EAssetType::Prefab;
+			if (AssetType == "Mesh")           return EAssetType::Mesh;
+			if (AssetType == "StaticMesh")     return EAssetType::StaticMesh;
+			if (AssetType == "MeshSource")     return EAssetType::MeshSource;
+			if (AssetType == "Material")       return EAssetType::Material;
+			if (AssetType == "Texture")        return EAssetType::Texture;
+			if (AssetType == "Font")           return EAssetType::Font;
+			if (AssetType == "Skeleton")       return EAssetType::Skeleton;
+			if (AssetType == "Animation")      return EAssetType::Animation;
 
-			return AssetType::None;
+			return EAssetType::None;
 		}
 
-		inline std::string AssetTypeToString(const AssetType& assetType)
+		inline static constexpr const char* AssetTypeToString(const EAssetType AssetType)
 		{
-			if (assetType == AssetType::None)          return "None";
-			if (assetType == AssetType::Scene)         return "Scene";
-			if (assetType == AssetType::Prefab)        return "Prefab";
-			if (assetType == AssetType::Mesh)          return "Mesh";
-			if (assetType == AssetType::StaticMesh)    return "StaticMesh";
-			if (assetType == AssetType::MeshSource)    return "MeshSource";
-			if (assetType == AssetType::Material)      return "Material";
-			if (assetType == AssetType::Texture)       return "Texture";
-			if (assetType == AssetType::Font)          return "Font";
-			if (assetType == AssetType::Skeleton)      return "Skeleton";
-			if (assetType == AssetType::Animation)     return "Animation";
+			if (AssetType == EAssetType::None)          return "None";
+			if (AssetType == EAssetType::Scene)         return "Scene";
+			if (AssetType == EAssetType::Prefab)        return "Prefab";
+			if (AssetType == EAssetType::Mesh)          return "Mesh";
+			if (AssetType == EAssetType::StaticMesh)    return "StaticMesh";
+			if (AssetType == EAssetType::MeshSource)    return "MeshSource";
+			if (AssetType == EAssetType::Material)      return "Material";
+			if (AssetType == EAssetType::Texture)       return "Texture";
+			if (AssetType == EAssetType::Font)          return "Font";
+			if (AssetType == EAssetType::Skeleton)      return "Skeleton";
+			if (AssetType == EAssetType::Animation)     return "Animation";
 
-			return "NullAssetType";
+			return "EAssetType::None";
 		}
 
 	}

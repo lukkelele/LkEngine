@@ -5,9 +5,9 @@
 
 namespace LkEngine {
 
-	class Scene;
+	class LScene;
 
-	class SceneCamera : public Camera
+	class LSceneCamera : public LCamera
 	{
 	public:
 		void SetPerspective(float verticalFOV, float nearClip = 0.1f, float farClip = 1000.0f);

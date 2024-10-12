@@ -3,31 +3,43 @@
 #include "LkEngine/Renderer/Pipeline.h"
 
 
-
 namespace LkEngine {
 
-    class OpenGLPipeline : public Pipeline
+    class LOpenGLPipeline : public LPipeline
     {
     public:
-		OpenGLPipeline(const FPipelineSpecification& InPipelineSpecification);
-		~OpenGLPipeline() override;
+		LOpenGLPipeline(const FPipelineSpecification& InPipelineSpecification);
+		~LOpenGLPipeline() = default;
 
-		void Invalidate() override;
+		virtual void Invalidate() override;
 
-		void SetLayout(const VertexBufferLayout& layout) override;
-		Ref<Shader> GetShader() const override { return PipelineSpecification.Shader; }
+		virtual void SetLayout(const VertexBufferLayout& layout) override;
 
-		FORCEINLINE FPipelineSpecification& GetSpecification() override { return PipelineSpecification; }
-		FORCEINLINE const FPipelineSpecification& GetSpecification() const override { return PipelineSpecification; }
+		FORCEINLINE virtual TObjectPtr<LShader> GetShader() const override 
+		{ 
+			return PipelineSpecification.Shader; 
+		}
+
+		FORCEINLINE virtual FPipelineSpecification& GetSpecification() override 
+		{ 
+			return PipelineSpecification; 
+		}
+
+		FORCEINLINE virtual const FPipelineSpecification& GetSpecification() const override 
+		{ 
+			return PipelineSpecification; 
+		}
 
 		void BindTextureArray(const RendererID& rendererID);
 
-		FORCEINLINE std::deque<RendererID> GetBoundTextureArrays() const { return BoundTextureArrays; }
+		FORCEINLINE std::deque<RendererID> GetBoundTextureArrays() const 
+		{
+			return BoundTextureArrays; 
+		}
 
 	private:
 		FPipelineSpecification PipelineSpecification;
 		std::deque<RendererID> BoundTextureArrays{};
-
     };
 
 }

@@ -5,7 +5,7 @@
 
 namespace LkEngine {
 
-	class AssetEvent : public Event
+	class AssetEvent : public LEvent
 	{
 	public:
 		virtual ~AssetEvent() = default;

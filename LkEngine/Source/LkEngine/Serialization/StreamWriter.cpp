@@ -3,19 +3,23 @@
 
 namespace LkEngine {
 
-	void StreamWriter::WriteBuffer(Buffer buffer, bool writeSize)
+	void StreamWriter::WriteBuffer(FBuffer buffer, const bool bWriteSize)
 	{
-		if (writeSize)
+		if (bWriteSize)
+		{
 			WriteData((char*)&buffer.Size, sizeof(uint32_t));
+		}
 
 		WriteData((char*)buffer.Data, buffer.Size);
 	}
 
-	void StreamWriter::WriteZero(uint64_t size)
+	void StreamWriter::WriteZero(const uint64_t size)
 	{
 		char zero = 0;
 		for (uint64_t i = 0; i < size; i++)
+		{
 			WriteData(&zero, 1);
+		}
 	}
 
 	void StreamWriter::WriteString(const std::string& string)

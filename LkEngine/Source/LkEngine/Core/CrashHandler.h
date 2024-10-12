@@ -1,25 +1,44 @@
+/******************************************************************
+ * CrashHandler
+ *
+ *******************************************************************/
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/String.h"
 
 
 namespace LkEngine {
 
+	class LCrashHandler;
 	class LApplication;
+
+	class ICrashHandler
+	{
+	public:
+		virtual ~ICrashHandler() = default;
+
+	protected:
+		virtual LString GenerateApplicationCrashDump() = 0;
+		virtual void LogCrashInformation(LStringView CrashInformation) = 0;
+		virtual LString CaptureBackTraceOnStack() = 0;
+
+		friend class LCrashHandler;
+	};
 
 	class LCrashHandler
 	{
 	public:
-		virtual ~LCrashHandler() = default;
+		static void AttachInstance(LApplication* ApplicationRef);
 
-		virtual LString GenerateApplicationCrashDump() = 0;
-		virtual void LogCrashInformation(LStringView CrashInformation) = 0;
+	private:
+		static void SignalHandler(const int Signal);
 
-		static TUniquePtr<LCrashHandler> Create(LApplication* ApplicationRef);
+	private:
+		/** CrashHandler reference, type depends on platform. */
+		inline static TUniquePtr<ICrashHandler> CrashHandler = nullptr;
 
-	protected:
-		inline static LCrashHandler* Instance = nullptr;
+		inline static bool bIsShuttingDown = false;
 	};
 
 }

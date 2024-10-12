@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 #include "VertexBuffer.h"
 #include "Framebuffer.h"
@@ -9,10 +9,9 @@
 
 namespace LkEngine {
 
-	class Framebuffer;
-	class VertexBuffer;
+	class LFramebuffer;
+	class LShader;
 	class VertexBufferLayout;
-	class Shader;
 
 	/// @TODO: Prefix E for enumeration
 	enum class PrimitiveTopology
@@ -42,8 +41,8 @@ namespace LkEngine {
 
 	struct FPipelineSpecification
 	{
-		Ref<Shader> Shader{ nullptr };
-		Ref<Framebuffer> TargetFramebuffer{ nullptr };
+		TObjectPtr<LShader> Shader = nullptr;
+		TObjectPtr<LFramebuffer> TargetFramebuffer = nullptr;
 
 		VertexBufferLayout Layout;
 		VertexBufferLayout InstanceLayout;
@@ -58,11 +57,14 @@ namespace LkEngine {
 		bool Wireframe = false;
 		float LineWidth = 1.0f;
 
-		std::string DebugName;
+		std::string DebugName{};
 
 		ERendererAPI RenderAPI = ERendererAPI::None;
 
-		void SetLayout(const VertexBufferLayout& layout) { Layout = layout; }
+		FORCEINLINE void SetLayout(const VertexBufferLayout& layout) 
+		{ 
+			Layout = layout; 
+		}
 	};
 
 

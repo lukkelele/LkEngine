@@ -1,18 +1,18 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 #include <sstream>
 
 
 namespace LkEngine {
 
-	enum class EventType
+	enum class EEventType
 	{
 		Null = 0,
-		WindowFocus, WindowLostFocus, WindowMoved, WindowResize, WindowClose,
 		Key, KeyPressed, KeyReleased, KeyTyped,
 		MouseButtonPressed, MouseButtonReleased, MouseButtonDown, MouseMoved, MouseScrolled,
+		WindowFocus, WindowLostFocus, WindowMoved, WindowResize, WindowClose,
 
 		TextureCreated, TextureDeleted,	
 
@@ -24,14 +24,14 @@ namespace LkEngine {
 		Collision, Separation
 	};
 
-	class Event
+	class LEvent
 	{
 	public:
-		virtual ~Event() {}
+		virtual ~LEvent() {}
 
 		bool Handled = false;
 
-		virtual EventType GetEventType() const = 0;
+		virtual EEventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
 
 		virtual std::string ToString() const { return GetName(); }
@@ -42,7 +42,9 @@ namespace LkEngine {
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
-		EventDispatcher(Event& event) : m_Event(event) {}
+		EventDispatcher(LEvent& Event) : m_Event(Event) 
+		{
+		}
 
 		template<typename T>
 		bool Dispatch(EventFn<T> func)
@@ -55,15 +57,16 @@ namespace LkEngine {
 			}
 			return false;
 		}
+
 	private:
-		Event& m_Event;
+		LEvent& m_Event;
 	};
 
-	inline std::ostream& operator<<(std::ostream& os, const Event& e)
+	inline std::ostream& operator<<(std::ostream& os, const LEvent& e)
 	{
 		return os << e.ToString();
 	}
 
-	using EventCallbackFn = std::function<void(Event&)>;
+	using FEventCallback = std::function<void(LEvent&)>;
 
 }

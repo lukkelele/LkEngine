@@ -11,7 +11,7 @@
 
 namespace LkEngine {
 
-	static Ref<Image> FileIconImage;
+    static TObjectPtr<LImage> FileIconImage{};
 
     enum Mode
     {
@@ -28,11 +28,7 @@ namespace LkEngine {
         "Bibi", "Blaine", "Bryn"
     };
 
-	ContentBrowser::ContentBrowser()
-	{
-	}
-
-    void ContentBrowser::Init()
+    void LContentBrowser::Init()
     {
         // Create icons
 		TextureSpecification textureSpec;
@@ -42,22 +38,22 @@ namespace LkEngine {
 		textureSpec.Height = 200;
 		textureSpec.Format = ImageFormat::RGBA32F;
 		textureSpec.Path = "Assets/Icons/file-icon-48x48.png";
-		FileIconTexture = Texture2D::Create(textureSpec);
+		FileIconTexture = LTexture2D::Create(textureSpec);
 
 		textureSpec.Name = "FolderIcon";
 		textureSpec.DebugName = "FolderIcon";
 		textureSpec.Path = "Assets/Icons/folder-icon-64x64.png";
-        FolderIconTexture = Texture2D::Create(textureSpec);
+        FolderIconTexture = LTexture2D::Create(textureSpec);
     }
 
-	void ContentBrowser::OnRender()
+	void LContentBrowser::OnRender()
 	{
 	}
 
-	void ContentBrowser::OnImGuiRender()
+	void LContentBrowser::OnImGuiRender()
 	{
 
-		if (ImGui::ImageButton((void*)ContentBrowser::FileIconTexture->GetRendererID(), ImVec2(48, 48), ImVec2(0, 0)))
+		if (ImGui::ImageButton((void*)LContentBrowser::FileIconTexture->GetRendererID(), ImVec2(48, 48), ImVec2(0, 0)))
 		{
 		    LK_CORE_DEBUG_TAG("ContentBrowser", "Clicked FileIcon!");
 		}
@@ -67,7 +63,7 @@ namespace LkEngine {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
             ImGui::SetDragDropPayload("FILE_DATA_TYPE", &file_data, sizeof(char) * 4);
-            ImGui::Text("%s", ContentBrowser::FileIconTexture->GetName().c_str());
+            ImGui::Text("%s", LContentBrowser::FileIconTexture->GetName().data());
 
             ImGui::EndDragDropSource();
         }
@@ -94,7 +90,7 @@ namespace LkEngine {
         {
             std::string payloadData = "CUBE";
             ImGui::SetDragDropPayload("CB_PAYLOAD", payloadData.c_str(), payloadData.size() + 1);
-            //ImGui::Text("%s", ContentBrowser::FolderIconTexture->GetName().c_str());
+            //ImGui::Text("%s", LContentBrowser::FolderIconTexture->GetName().c_str());
             ImGui::Text("3D CUBE wowww");
 
             ImGui::EndDragDropSource();

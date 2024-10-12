@@ -16,39 +16,42 @@
 
 namespace LkEngine {
 
-	Scene::Scene(bool bIsEditorScene)
+	LScene::LScene(bool bIsEditorScene)
 		: m_EditorScene(bIsEditorScene)
 		, Name("")
 	{
 		m_SceneEntity = m_Registry.create();
-		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_SceneID);
+		m_Registry.emplace<LSceneComponent>(m_SceneEntity, m_SceneID);
 
 		m_ViewportWidth = LWindow::Get().GetViewportWidth();
 		m_ViewportHeight = LWindow::Get().GetViewportHeight();
 
 		if (bIsEditorScene)
 		{
-			EditorCamera = EditorLayer::Get()->GetEditorCamera();
+			EditorCamera = LEditorLayer::Get()->GetEditorCamera();
 			LK_CORE_ASSERT(EditorCamera, "EditorCamera is nullptr");
-			EditorLayer::Get()->SetScene(Ref<Scene>(this));
-			Input::SetScene(Ref<Scene>(this)); // REMOVE ME
-			LApplication::Get()->SetScene(Ref<Scene>(this)); // REMOVE ME
+
+			LEditorLayer::Get()->SetScene(TObjectPtr<LScene>(this));
+
+			Input::SetScene(TObjectPtr<LScene>(this)); // REMOVE ME
 		}
 
+	#if LK_PHYSICS_ENABLED
 		// Initiate 2D physics
 		Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
 		box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
 		Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+	#endif
 
 		LK_CORE_DEBUG_TAG("Scene", "New scene created {}", Name);
 	}
 
-	Scene::Scene(const LString& InName, bool bIsActiveScene, bool bIsEditorScene)
+	LScene::LScene(const LString& InName, bool bIsActiveScene, bool bIsEditorScene)
 		: m_EditorScene(bIsEditorScene)
 		, Name(InName)
 	{
 		m_SceneEntity = m_Registry.create();
-		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_SceneID);
+		m_Registry.emplace<LSceneComponent>(m_SceneEntity, m_SceneID);
 
 		m_ViewportWidth = LWindow::Get().GetViewportWidth();
 		m_ViewportHeight = LWindow::Get().GetViewportHeight();
@@ -57,47 +60,48 @@ namespace LkEngine {
 		{
 			m_IsActiveScene = true;
 			m_ActiveScene = this;
-			Input::SetScene(Ref<Scene>(this));
+			Input::SetScene(TObjectPtr<LScene>(this));
 		}
 		
 		if (bIsEditorScene)
 		{
-			EditorCamera = EditorLayer::Get()->GetEditorCamera();
-			EditorLayer::Get()->SetScene(Ref<Scene>(this));
-			LApplication::Get()->SetScene(Ref<Scene>(this));
+			EditorCamera = LEditorLayer::Get()->GetEditorCamera();
+			LEditorLayer::Get()->SetScene(TObjectPtr<LScene>(this));
 		}
 
+	#if LK_PHYSICS_ENABLED
 		/* Initialize 2D physics. */
 		Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
 		box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
 		Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+	#endif
 
 		LK_CORE_DEBUG_TAG("Scene", "New scene created {}", Name);
 	}
 
-	Scene::~Scene()
+	LScene::~LScene()
 	{
 		/* TODO: */
 	}
 
-	LEntity Scene::CreateEntity(const std::string& name)
+	LEntity LScene::CreateEntity(const std::string& name)
 	{
 		return CreateChildEntity({}, name);
 	}
 
-	LEntity Scene::CreateChildEntity(LEntity Parent, const std::string& name)
+	LEntity LScene::CreateChildEntity(LEntity Parent, const std::string& name)
 	{
-		LEntity entity = LEntity{ m_Registry.create(), this };
-		IDComponent& idComponent = entity.AddComponent<IDComponent>();
+		LEntity entity = LEntity { m_Registry.create(), this };
+		LIDComponent& idComponent = entity.AddComponent<LIDComponent>();
 		idComponent.ID = {};
 
-		entity.AddComponent<TransformComponent>();
+		entity.AddComponent<LTransformComponent>();
 		if (!name.empty())
 		{
-			entity.AddComponent<TagComponent>(name);
+			entity.AddComponent<LTagComponent>(name);
 		}
 
-		entity.AddComponent<RelationshipComponent>();
+		entity.AddComponent<LRelationshipComponent>();
 
 		if (Parent)
 		{
@@ -111,29 +115,34 @@ namespace LkEngine {
 		return entity;
 	}
 
-	LEntity Scene::CreateEntityWithID(UUID uuid, const std::string& name)
+	LEntity LScene::CreateEntityWithID(UUID uuid, const std::string& name)
 	{
 		LEntity entity = { m_Registry.create(), this };
-		entity.AddComponent<IDComponent>(uuid);
-		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
+		entity.AddComponent<LIDComponent>(uuid);
+
+		LTagComponent& TagComponent = entity.AddComponent<LTagComponent>();
+		TagComponent.Tag = name.empty() ? "Entity" : name;
 		m_EntityIDMap[uuid] = entity;
 
 		return entity;
 	}
 
 	// TODO: Change name to GetEntityWithID
-	LEntity Scene::GetEntityWithUUID(UUID uuid)
+	LEntity LScene::GetEntityWithUUID(UUID ID) const
 	{
-		if (m_EntityIDMap.find(uuid) != m_EntityIDMap.end())
+		LK_CORE_VERIFY(m_EntityIDMap.find(ID) != m_EntityIDMap.end(), "Entity with ID \"{}\" is not present in the scene", ID);
+		return m_EntityIDMap.at(ID);
+#if 0
+		if (m_EntityIDMap.find(ID) != m_EntityIDMap.end())
 		{
-			return { m_EntityIDMap.at(uuid), this };
+			return { m_EntityIDMap.at(ID), this };
 		}
 
 		return { entt::null, nullptr };
+#endif
 	}
 
-	LEntity Scene::TryGetEntityWithUUID(UUID id) const
+	LEntity LScene::TryGetEntityWithUUID(UUID id) const
 	{
 		if (const auto Iter = m_EntityIDMap.find(id); Iter != m_EntityIDMap.end())
 		{
@@ -143,12 +152,12 @@ namespace LkEngine {
 		return LEntity{};
 	}
 
-	LEntity Scene::FindEntity(std::string_view name)
+	LEntity LScene::FindEntity(std::string_view name)
 	{
-		auto view = m_Registry.view<TagComponent>();
+		auto view = m_Registry.view<LTagComponent>();
 		for (auto entity : view)
 		{
-			const TagComponent& tc = view.get<TagComponent>(entity);
+			const LTagComponent& tc = view.get<LTagComponent>(entity);
 			if (tc.Tag == name)
 			{
 				return LEntity{ entity , this };
@@ -158,21 +167,21 @@ namespace LkEngine {
 		return {};
 	}
 
-	void Scene::DestroyEntity(LEntity entity)
+	void LScene::DestroyEntity(LEntity entity)
 	{
 		m_EntityIDMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);
 		LK_CORE_DEBUG("Entity {} deleted", entity.Name());
 	}
 
-	bool Scene::IsEntityInRegistry(LEntity entity) const
+	bool LScene::IsEntityInRegistry(LEntity entity) const
 	{
-		return m_Registry.has<IDComponent>(entity);
+		return m_Registry.has<LIDComponent>(entity);
 	}
 
-	std::vector<LEntity> Scene::GetEntities()
+	std::vector<LEntity> LScene::GetEntities()
 	{
-		auto view = m_Registry.view<IDComponent>();
+		auto view = m_Registry.view<LIDComponent>();
 		std::vector<LEntity> entities{};
 		for (const auto& entity : view)
 		{
@@ -182,21 +191,21 @@ namespace LkEngine {
 		return entities;
 	}
 
-	bool Scene::HasEntity(LEntity entity) const
+	bool LScene::HasEntity(LEntity entity) const
 	{
-		return (m_Registry.has<IDComponent>(entity) 
+		return (m_Registry.has<LIDComponent>(entity) 
 			&& (entity.m_Scene != nullptr) 
 			&& (entity.m_EntityHandle != entt::null));
 	}
 
-	Ref<Scene> Scene::CreateEmpty()
+	TObjectPtr<LScene> LScene::CreateEmpty()
 	{
-		return Ref<Scene>::Create("Empty", false, false);
+		return TObjectPtr<LScene>::Create("Empty", false, false);
 	}
 
-	void Scene::SortEntities()
+	void LScene::SortEntities()
 	{
-		m_Registry.sort<IDComponent>([&](const auto Lhs, const auto Rhs)
+		m_Registry.sort<LIDComponent>([&](const auto Lhs, const auto Rhs)
 		{
 			auto LhsEntity = m_EntityIDMap.find(Lhs.ID);
 			auto RhsEntity = m_EntityIDMap.find(Rhs.ID);
@@ -204,79 +213,91 @@ namespace LkEngine {
 		});
 	}
 
-	void Scene::Pause(bool paused)
+	void LScene::Pause(bool paused)
 	{
 		m_Paused = paused;
 		//m_World->Pause(paused);
 	}
 
-	void Scene::SwitchCamera()
+	void LScene::SwitchCamera()
 	{
 	}
 
 	template<typename T>
-	void Scene::OnComponentAdded(LEntity Entity, T& TComponent)
+	void LScene::OnComponentAdded(LEntity Entity, T& TComponent)
 	{
 		LK_UNUSED(Entity); 
 		LK_UNUSED(TComponent);
 	}
 
 	template<>
-	void Scene::OnComponentAdded<IDComponent>(LEntity Entity, IDComponent& id) 
+	void LScene::OnComponentAdded<LIDComponent>(LEntity Entity, LIDComponent& id) 
 	{
 	}
 
 	template<>
-	void Scene::OnComponentAdded<TransformComponent>(LEntity Entity, TransformComponent& rigidbody)
+	void LScene::OnComponentAdded<LTransformComponent>(LEntity Entity, LTransformComponent& rigidbody)
 	{
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SpriteComponent>(LEntity Entity, SpriteComponent& sprite)
+	void LScene::OnComponentAdded<LSpriteComponent>(LEntity Entity, LSpriteComponent& SpriteComponent)
 	{
 	}
 
 	template<>
-	void Scene::OnComponentAdded<CameraComponent>(LEntity Entity, CameraComponent& camera)
+	void LScene::OnComponentAdded<LCameraComponent>(LEntity Entity, LCameraComponent& LCameraComponent)
 	{
 	}
 
 	template<>
-	void Scene::OnComponentAdded<MeshComponent>(LEntity Entity, MeshComponent& mesh)
+	void LScene::OnComponentAdded<LMeshComponent>(LEntity Entity, LMeshComponent& MeshComponent)
 	{
 		// Add asset handle
 	}
 
 	template<>
-	void Scene::OnComponentAdded<StaticMeshComponent>(LEntity Entity, StaticMeshComponent& staticMesh)
+	void LScene::OnComponentAdded<LStaticMeshComponent>(LEntity Entity, LStaticMeshComponent& StaticMeshComponent)
 	{
 	}
 
 	template<>
-	void Scene::OnComponentAdded<RigidBody2DComponent>(LEntity Entity, RigidBody2DComponent& rigidBody2DComponent)
+	void LScene::OnComponentAdded<LRigidBody2DComponent>(LEntity Entity, LRigidBody2DComponent& rigidBody2DComponent)
 	{
 		auto sceneView = m_Registry.view<Box2DWorldComponent>();
 		auto& world = m_Registry.get<Box2DWorldComponent>(sceneView.front()).World;
 
 		LEntity e = { Entity, this };
 		UUID entityID = e.GetUUID();
-		TransformComponent& transform = e.Transform();
-		auto& rigidBody2D = m_Registry.get<RigidBody2DComponent>(Entity);
+		LTransformComponent& transform = e.Transform();
+		auto& rigidBody2D = m_Registry.get<LRigidBody2DComponent>(Entity);
 
 		b2BodyDef bodyDef;
 		switch (rigidBody2D.BodyType)
 		{
-			case RigidBody2DComponent::Type::Static: 
+			case LRigidBody2DComponent::Type::Static:
+			{
 				bodyDef.type = b2_staticBody;
 				break;
-			case RigidBody2DComponent::Type::Dynamic: 
+			}
+
+			case LRigidBody2DComponent::Type::Dynamic: 
+			{
 				bodyDef.type = b2_dynamicBody;
 				break;
-			case RigidBody2DComponent::Type::Kinematic: 
+			}
+
+			case LRigidBody2DComponent::Type::Kinematic: 
+			{
 				bodyDef.type = b2_kinematicBody;
 				break;
+			}
+
 			default:
+			{
 				LK_CORE_ASSERT(false, "Rigidbody2DComponent was incorrectly created");
+				break;
+			}
 		}
 
 		bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
@@ -294,22 +315,23 @@ namespace LkEngine {
 		body->SetBullet(rigidBody2D.IsBullet);
 		body->GetUserData().pointer = (uintptr_t)entityID;
 		rigidBody2D.RuntimeBody = body;
-		//LK_CORE_DEBUG("OnComponentAdded<RigidBody2DComponent>  {}", entity.Name());
+		//LK_CORE_DEBUG("OnComponentAdded<LRigidBody2DComponent>  {}", entity.Name());
 	}
 
 	template<>
-	void Scene::OnComponentAdded<BoxCollider2DComponent>(LEntity Entity, BoxCollider2DComponent& boxColliderComponent)
+	void LScene::OnComponentAdded<LBoxCollider2DComponent>(LEntity InEntity, LBoxCollider2DComponent& boxColliderComponent)
 	{
-		LEntity e = { Entity, this };
-		auto& transform = e.Transform();
+		LEntity Entity = { InEntity, this };
+		auto& transform = Entity.Transform();
 
-		if (e.HasComponent<RigidBody2DComponent>())
+		if (Entity.HasComponent<LRigidBody2DComponent>())
 		{
-			LK_ASSERT(transform.Scale.x * boxColliderComponent.Size.x > 0 && transform.Scale.y * boxColliderComponent.Size.y > 0);
-
-			auto& rigidBody2D = e.RigidBody2D();
+			auto& rigidBody2D = Entity.GetComponent<LRigidBody2DComponent>();
 			b2Body* body = static_cast<b2Body*>(rigidBody2D.RuntimeBody);
-			LK_ASSERT(body != nullptr);
+
+			LK_ASSERT((transform.Scale.x * boxColliderComponent.Size.x > 0)
+					  && (transform.Scale.y * boxColliderComponent.Size.y > 0));
+			LK_ASSERT(body, "RigidBody b2Body is nullptr");
 
 			b2PolygonShape polygonShape;
 			polygonShape.SetAsBox(transform.Scale.x * boxColliderComponent.Size.x, transform.Scale.y * boxColliderComponent.Size.y);
@@ -324,7 +346,7 @@ namespace LkEngine {
 		}
 	}
 
-	void Scene::ParentEntity(LEntity Entity, LEntity Parent)
+	void LScene::ParentEntity(LEntity Entity, LEntity Parent)
 	{
 		if (Parent.IsDescendantOf(Entity))
 		{
@@ -353,7 +375,7 @@ namespace LkEngine {
 		//ConvertToLocalSpace(entity);
 	}
 
-	void Scene::UnparentEntity(LEntity Entity, bool bConvertToWorldSpace)
+	void LScene::UnparentEntity(LEntity Entity, bool bConvertToWorldSpace)
 	{
 		LEntity Parent = TryGetEntityWithUUID(Entity.GetParentUUID());
 
@@ -366,12 +388,14 @@ namespace LkEngine {
 		ParentChildren.erase(std::remove(ParentChildren.begin(), ParentChildren.end(), Entity.GetUUID()), ParentChildren.end());
 
 		//if (bConvertToWorldSpace)
-			//ConvertToWorldSpace(entity);
+		//{
+		//	ConvertToWorldSpace(entity);
+		//}
 
 		Entity.SetParentUUID(0);
 	}
 
-	void Scene::CopyTo(Ref<Scene>& target)
+	void LScene::CopyTo(TObjectPtr<LScene>& target)
 	{
 		LK_CORE_DEBUG_TAG("Scene", "Starting to copy scene \"{}\"", Name);
 
@@ -379,32 +403,32 @@ namespace LkEngine {
 		target->m_EditorScene = m_EditorScene;
 
 		std::unordered_map<UUID, entt::entity> enttMap;
-		auto idComponents = m_Registry.view<IDComponent>();
+		auto idComponents = m_Registry.view<LIDComponent>();
 		for (auto entity : idComponents)
 		{
-			const auto uuid = m_Registry.get<IDComponent>(entity).ID; // Retrieve entity UUID
-			const auto& name = m_Registry.get<TagComponent>(entity).Tag;     // Retrieve the name of the entity
+			const auto uuid = m_Registry.get<LIDComponent>(entity).ID; // Retrieve entity UUID
+			const auto& name = m_Registry.get<LTagComponent>(entity).Tag;     // Retrieve the name of the entity
 			LEntity e = target->CreateEntityWithID(uuid, name);        // Create identical entity on the target scene 
 			enttMap[uuid] = e.m_EntityHandle;
 		}
 
 #if 0
-		auto targetView = target->m_Registry.view<IDComponent>();
+		auto targetView = target->m_Registry.view<LIDComponent>();
 		for (auto entity : targetView)
 		{
-			//UUID id = targetView.get<IDComponent>(entity).ID;
+			//UUID id = targetView.get<LIDComponent>(entity).ID;
 			target->m_Registry.destroy(entity);
 		}
 #endif
 
-		CopyComponent<TagComponent>(target->m_Registry, m_Registry, enttMap);
-		CopyComponent<TransformComponent>(target->m_Registry, m_Registry, enttMap);
-		CopyComponent<SpriteComponent>(target->m_Registry, m_Registry, enttMap);
-		CopyComponent<CameraComponent>(target->m_Registry, m_Registry, enttMap);
-		CopyComponent<RigidBody2DComponent>(target->m_Registry, m_Registry, enttMap);
-		CopyComponent<BoxCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<LTagComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<LTransformComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<LSpriteComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<LCameraComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<LRigidBody2DComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<LBoxCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
 
-		// This ensures a consistent ordering when iterating IDComponent's in the UI_SceneContent menu
+		// This ensures a consistent ordering when iterating LIDComponent's in the UI_SceneContent menu
 		target->SortEntities();
 		//target->SetPhysics2DGravity(GetPhysics2DGravity());
 
@@ -412,41 +436,38 @@ namespace LkEngine {
 		target->m_ViewportHeight = m_ViewportHeight;
 	}
 
-	void Scene::OnRender(Ref<SceneRenderer> renderer, FTimestep Timestep)
+	void LScene::OnRender(TObjectPtr<LSceneRenderer> renderer, FTimestep Timestep)
 	{
 		SceneRendererCamera sceneCamera;
 		sceneCamera.Camera = m_Camera;
 		sceneCamera.ViewMatrix = m_Camera->GetViewMatrix();
+
 		renderer->BeginScene(sceneCamera);
 	}
 
-	void Scene::OnRenderEditor(LEditorCamera& editorCamera, FTimestep Timestep)
+	void LScene::OnRenderEditor(LEditorCamera& EditorCamera, FTimestep Timestep)
 	{
-		editorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
-		editorCamera.OnUpdate(Timestep);
+		EditorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+		EditorCamera.OnUpdate(Timestep);
 
-		Renderer::SubmitQuad({ 200, -20, 1350 }, { 3000, 1800 }, TextureLibrary::Get()->GetTexture("skybox-ice-back"));
+		/* FIXME: This should NOT be here ... */
+		LRenderer::SubmitQuad({ 200, -20, 1350 }, 
+							  { 3000, 1800 }, 
+							  LTextureLibrary::Get().GetTexture("skybox-ice-back"));
 
-		EditorLayer::Get()->OnUpdate();
-
-#if 0
-	#ifdef LK_DEBUG
-		auto& world = GetBox2DWorld();
-		world.World->DebugDraw();
-	#endif
-#endif
+		LEditorLayer::Get()->OnUpdate(); /// UPDATE
 	}
 
-	LEntity Scene::GetMainCameraEntity()
+	LEntity LScene::GetMainCameraEntity()
 	{
-		auto view = m_Registry.view<CameraComponent>();
+		auto view = m_Registry.view<LCameraComponent>();
 		for (auto Entity : view)
 		{
-			auto& CameraComponentRef = view.get<CameraComponent>(Entity);
-			if (CameraComponentRef.Primary)
+			auto& LCameraComponentRef = view.get<LCameraComponent>(Entity);
+			if (LCameraComponentRef.Primary)
 			{
-				LK_CORE_ASSERT(CameraComponentRef.Camera->GetOrthographicSize() 
-					|| CameraComponentRef.Camera->GetDegPerspectiveVerticalFOV(), "Camera is not fully initialized");
+				LK_CORE_ASSERT(LCameraComponentRef.Camera->GetOrthographicSize() 
+					|| LCameraComponentRef.Camera->GetDegPerspectiveVerticalFOV(), "Camera is not fully initialized");
 				return { Entity, this };
 			}
 		}
@@ -455,64 +476,67 @@ namespace LkEngine {
 	}
 
 #if 0
-	void Scene::BeginScene(Timestep ts)
+	void LScene::BeginScene(Timestep ts)
 	{
 		if (m_Camera == nullptr)
 			return;
 		BeginScene(*m_Camera, ts);
 	}
 
-	void Scene::BeginScene(SceneCamera& cam, Timestep ts)
+	void LScene::BeginScene(SceneCamera& cam, Timestep ts)
 	{
 		cam.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		cam.Update(ts);
 	}
 #endif
 
-	void Scene::EndScene()
+	void LScene::EndScene()
 	{
 		GetBox2DWorld().World->DebugDraw();
 	}
 
-	void Scene::SetCamera(Ref<SceneCamera> cam)
+	void LScene::SetCamera(TObjectPtr<LSceneCamera> cam)
 	{ 
 		m_Camera = cam;
 	}
 
-	void Scene::SetCamera(SceneCamera* cam)
+	void LScene::SetCamera(LSceneCamera* cam)
 	{ 
-		m_Camera = Ref<SceneCamera>(cam);
+		m_Camera = TObjectPtr<LSceneCamera>(cam);
 	}
 
-	void Scene::SetEditorCamera(const Ref<LEditorCamera> InEditorCamera)
+	void LScene::SetEditorCamera(const TObjectPtr<LEditorCamera> InEditorCamera)
 	{ 
 		EditorCamera = InEditorCamera;
 	}
 
-	Box2DWorldComponent& Scene::GetBox2DWorld()
+	Box2DWorldComponent& LScene::GetBox2DWorld()
 	{
 		return m_Registry.get<Box2DWorldComponent>(m_SceneEntity);
 	}
 
-	void Scene::SetActiveScene(Ref<Scene>& scene)
+	void LScene::SetActiveScene(TObjectPtr<LScene> InScene)
 	{
-		m_ActiveScene = scene.Raw();
+		// TODO: Verify scene validity
+		m_ActiveScene = InScene;
 	}
 
-	void Scene::Clear()
+	void LScene::Clear()
 	{
 		m_Registry.clear<AllComponents>();
 	}
 
-	void Scene::Initiate2DPhysics(const Physics2DSpecification& specification)
+	void LScene::Initiate2DPhysics(const Physics2DSpecification& specification)
 	{
 		// Check to see if there already exists a 2D world for the scene and exit function if it does
 		if (m_Registry.has<Box2DWorldComponent>(m_SceneEntity) == true)
 		{
 			LK_CORE_DEBUG_TAG("Scene", "2D physics already initialized for the scene \"{}\"", Name);
 			auto& box2dWorld = m_Registry.get<Box2DWorldComponent>(m_SceneEntity);
-			if (box2dWorld.HasDebugDrawerAttached() == false && specification.DebugDrawer == true)
-				Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+			if (!box2dWorld.HasDebugDrawerAttached() && specification.DebugDrawer)
+			{
+				//Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+			}
 		}
 		else
 		{
@@ -523,36 +547,37 @@ namespace LkEngine {
 			// Attach debug drawer
 			if (specification.DebugDrawer)
 			{
-				Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+				//Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 			}
 		}
 	}
 
-	static void InsertMeshMaterials(Ref<MeshSource> meshSource, std::unordered_set<AssetHandle>& assetList)
+	static void InsertMeshMaterials(TObjectPtr<MeshSource> meshSource, 
+									std::unordered_set<FAssetHandle>& assetList)
 	{
 		// Mesh materials
 		const auto& materials = meshSource->GetMaterials();
-		for (auto material : materials)
+		for (const auto& material : materials)
 		{
-			Ref<Texture2D> albedoTexture = material->GetTexture("u_AlbedoTexture");
+			TObjectPtr<LTexture2D> albedoTexture = material->GetTexture("u_AlbedoTexture");
 			if (albedoTexture && albedoTexture->Handle) // White texture has Handle == 0
 			{
 				assetList.insert(albedoTexture->Handle);
 			}
 
-			Ref<Texture2D> normalTexture = material->GetTexture("u_NormalTexture");
+			TObjectPtr<LTexture2D> normalTexture = material->GetTexture("u_NormalTexture");
 			if (normalTexture && albedoTexture->Handle)
 			{
 				assetList.insert(normalTexture->Handle);
 			}
 
-			Ref<Texture2D> metalnessTexture = material->GetTexture("u_MetalnessTexture");
+			TObjectPtr<LTexture2D> metalnessTexture = material->GetTexture("u_MetalnessTexture");
 			if (metalnessTexture && albedoTexture->Handle)
 			{
 				assetList.insert(metalnessTexture->Handle);
 			}
 
-			Ref<Texture2D> roughnessTexture = material->GetTexture("u_RoughnessTexture");
+			TObjectPtr<LTexture2D> roughnessTexture = material->GetTexture("u_RoughnessTexture");
 			if (roughnessTexture && albedoTexture->Handle)
 			{
 
@@ -562,36 +587,39 @@ namespace LkEngine {
 	}
 
 
-	std::unordered_set<AssetHandle> Scene::GetAssetList()
+	std::unordered_set<FAssetHandle> LScene::GetAssetList()
 	{
-		std::unordered_set<AssetHandle> assetList;
-		std::unordered_set<AssetHandle> missingAssets;
+		std::unordered_set<FAssetHandle> assetList;
+		std::unordered_set<FAssetHandle> missingAssets;
 
-		// MeshComponent
+		// LMeshComponent
 		{
-			auto view = m_Registry.view<MeshComponent>();
+			auto view = m_Registry.view<LMeshComponent>();
 			for (auto entity : view)
 			{
-				auto& mc = m_Registry.get<MeshComponent>(entity);
+				auto& mc = m_Registry.get<LMeshComponent>(entity);
 				if (mc.Mesh)
 				{
-					if (AssetManager::IsMemoryAsset(mc.Mesh))
+					if (LAssetManager::IsMemoryAsset(mc.Mesh))
 					{
 						LK_CORE_DEBUG_TAG("Scene", "Asset {} is memory asset", mc.Mesh);
 						//continue;
 					}
 
-					if (AssetManager::IsAssetHandleValid(mc.Mesh))
+					if (LAssetManager::IsAssetHandleValid(mc.Mesh))
 					{
+						/* FIXME: Should this be inserted before MeshSource is validated? */
 						assetList.insert(mc.Mesh);
 
-						// MeshSource is required too
-						Ref<Mesh> mesh = AssetManager::GetAsset<Mesh>(mc.Mesh);
+						/* MeshSource is required too. */
+						TObjectPtr<Mesh> mesh = LAssetManager::GetAsset<Mesh>(mc.Mesh);
 						if (!mesh)
+						{
 							continue;
+						}
 
-						Ref<MeshSource> meshSource = mesh->GetMeshSource();
-						if (meshSource && AssetManager::IsAssetHandleValid(meshSource->Handle))
+						TObjectPtr<MeshSource> meshSource = mesh->GetMeshSource();
+						if (meshSource && LAssetManager::IsAssetHandleValid(meshSource->Handle))
 						{
 							assetList.insert(meshSource->Handle);
 							InsertMeshMaterials(meshSource, assetList);
@@ -608,24 +636,26 @@ namespace LkEngine {
 					auto& materialAssets = mc.MaterialTable->GetMaterials();
 					for (auto& [index, materialAssetHandle] : materialAssets)
 					{
-						if (AssetManager::IsAssetHandleValid(materialAssetHandle))
+						if (LAssetManager::IsAssetHandleValid(materialAssetHandle))
 						{
 							assetList.insert(materialAssetHandle);
 
-							Ref<MaterialAsset> materialAsset = AssetManager::GetAsset<MaterialAsset>(materialAssetHandle);
+							TObjectPtr<LMaterialAsset> materialAsset = LAssetManager::GetAsset<LMaterialAsset>(materialAssetHandle);
 
-							std::array<Ref<Texture2D>, 4> textures = {
+							std::array<TObjectPtr<LTexture2D>, 4> textures = {
 								materialAsset->GetAlbedoMap(),
 								materialAsset->GetNormalMap(),
 								materialAsset->GetMetalnessMap(),
 								materialAsset->GetRoughnessMap()
 							};
 
-							// Textures
-							for (auto& texture : textures)
+							/* Textures. */
+							for (const TObjectPtr<LTexture2D>& Texture : textures)
 							{
-								if (texture)
-									assetList.insert(texture->Handle);
+								if (Texture)
+								{
+									assetList.insert(Texture->Handle);
+								}
 							}
 						}
 						else
@@ -637,27 +667,27 @@ namespace LkEngine {
 			}
 		}
 
-		// StaticMeshComponent
+		// LStaticMeshComponent
 		{
-			auto view = m_Registry.view<StaticMeshComponent>();
+			auto view = m_Registry.view<LStaticMeshComponent>();
 			for (auto entity : view)
 			{
-				auto& mc = m_Registry.get<StaticMeshComponent>(entity);
+				auto& mc = m_Registry.get<LStaticMeshComponent>(entity);
 				if (mc.StaticMesh)
 				{
-					if (AssetManager::IsMemoryAsset(mc.StaticMesh))
+					if (LAssetManager::IsMemoryAsset(mc.StaticMesh))
 					{
 						//continue;
 					}
 
-					if (AssetManager::IsAssetHandleValid(mc.StaticMesh))
+					if (LAssetManager::IsAssetHandleValid(mc.StaticMesh))
 					{
 						assetList.insert(mc.StaticMesh);
 
 						// MeshSource is required too
-						Ref<StaticMesh> mesh = AssetManager::GetAsset<StaticMesh>(mc.StaticMesh);
-						Ref<MeshSource> meshSource = mesh->GetMeshSource();
-						if (meshSource && AssetManager::IsAssetHandleValid(meshSource->Handle))
+						TObjectPtr<StaticMesh> mesh = LAssetManager::GetAsset<StaticMesh>(mc.StaticMesh);
+						TObjectPtr<MeshSource> meshSource = mesh->GetMeshSource();
+						if (meshSource && LAssetManager::IsAssetHandleValid(meshSource->Handle))
 						{
 							assetList.insert(meshSource->Handle);
 							InsertMeshMaterials(meshSource, assetList);
@@ -674,13 +704,13 @@ namespace LkEngine {
 					auto& materialAssets = mc.MaterialTable->GetMaterials();
 					for (auto& [index, materialAssetHandle] : materialAssets)
 					{
-						if (AssetManager::IsAssetHandleValid(materialAssetHandle))
+						if (LAssetManager::IsAssetHandleValid(materialAssetHandle))
 						{
 							assetList.insert(materialAssetHandle);
 
-							Ref<MaterialAsset> materialAsset = AssetManager::GetAsset<MaterialAsset>(materialAssetHandle);
+							TObjectPtr<LMaterialAsset> materialAsset = LAssetManager::GetAsset<LMaterialAsset>(materialAssetHandle);
 
-							std::array<Ref<Texture2D>, 4> textures = {
+							std::array<TObjectPtr<LTexture2D>, 4> textures = {
 								materialAsset->GetAlbedoMap(),
 								materialAsset->GetNormalMap(),
 								materialAsset->GetMetalnessMap(),
@@ -688,10 +718,12 @@ namespace LkEngine {
 							};
 
 							// Textures
-							for (auto texture : textures)
+							for (const TObjectPtr<LTexture2D>& texture : textures)
 							{
 								if (texture)
+								{
 									assetList.insert(texture->Handle);
+								}
 							}
 						}
 						else

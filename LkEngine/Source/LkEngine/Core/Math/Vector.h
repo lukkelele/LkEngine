@@ -8,9 +8,60 @@
 
 namespace LkEngine {
 
+	/**
+	 * TVector2
+	 */
 	template<typename T>
 	class TVector2
 	{
+	public:
+		TVector2()
+			: X(T())
+			, Y(T())
+		{
+		} 
+
+		TVector2(const T InX, const T InY)
+			: X(InX)
+			, Y(InY)
+		{
+		} 
+
+		TVector2(const glm::vec2& InVec)
+			: X(InVec.x)
+			, Y(InVec.y)
+		{
+		} 
+
+		TVector2& operator+=(const TVector2& Other)
+		{
+			X += Other.X;
+			Y += Other.Y;
+			return *this;
+		}
+
+		TVector2& operator-=(const TVector2& Other)
+		{
+			X -= Other.X;
+			Y -= Other.Y;
+			return *this;
+		}
+
+		TVector2 operator-(const TVector2& Other) const 
+		{
+			return TVector2((X - Other.X), (Y - Other.Y));
+		}
+
+		TVector2 operator+(const TVector2& Other) const 
+		{
+			return TVector2((X + Other.X), (Y + Other.Y));
+		}
+
+		static float Distance(const TVector2& A, const TVector2& B)
+		{
+			return 0.0f;
+		}
+
 	public:
 		T X;
 		T Y;
@@ -24,36 +75,47 @@ namespace LkEngine {
 
 	using LVector2 = TVector2<float>;
 
+
+	/**
+	 * TVector
+	 */
 	template<typename T>
-	class TVector
+	class TVector3
 	{
 	public:
-		TVector()
+		TVector3()
 			: X(T())
 			, Y(T())
 			, Z(T()) 
 		{
 		} 
 
-		TVector(T InX, T InY, T InZ)
+		TVector3(T InX, T InY, T InZ)
 			: X(InX)
 			, Y(InY)
 			, Z(InZ) 
 		{
 		}
 
-		TVector(T InXYZ)
+		TVector3(T InXYZ)
 			: X(InXYZ)
 			, Y(InXYZ)
 			, Z(InXYZ) 
 		{
 		}
 
-		~TVector() 
+		TVector3(const glm::vec3& InVec)
+			: X(InVec.x)
+			, Y(InVec.y)
+			, Z(InVec.z) 
+		{
+		}
+
+		~TVector3() 
 		{
 		} 
 
-		TVector& operator+=(const TVector& Other)
+		TVector3& operator+=(const TVector3& Other)
 		{
 			X += Other.X;
 			Y += Other.Y;
@@ -61,7 +123,7 @@ namespace LkEngine {
 			return *this;
 		}
 
-		TVector& operator-=(const TVector& Other)
+		TVector3& operator-=(const TVector3& Other)
 		{
 			X -= Other.X;
 			Y -= Other.Y;
@@ -69,22 +131,22 @@ namespace LkEngine {
 			return *this;
 		}
 
-		TVector operator-(const TVector& Other) const 
+		TVector3 operator-(const TVector3& Other) const 
 		{
-			return TVector(X - Other.X, Y - Other.Y, Z - Other.Z);
+			return TVector3((X - Other.X), (Y - Other.Y), (Z - Other.Z));
 		}
 
-		TVector operator+(const TVector& Other) const 
+		TVector3 operator+(const TVector3& Other) const 
 		{
-			return TVector(X + Other.X, Y + Other.Y, Z + Other.Z);
+			return TVector3((X + Other.X), (Y + Other.Y), (Z + Other.Z));
 		}
 
-		static float Distance(const TVector& A, const TVector& B)
+		static float Distance(const TVector3& A, const TVector3& B)
 		{
 			return 0.0f;
 		}
 
-		TVector Normalize()
+		TVector3 Normalize()
 		{
 			/// @FIXME:
 			return { };
@@ -92,12 +154,11 @@ namespace LkEngine {
 
 		LString ToString() const
 		{
-			return LString::Format("{{ {0}, {1}, {2} }}", X, Y, Z);
+			return LString::Format("({:.2f}, {:.2f}, {:.2f})", X, Y, Z);
 		}
 
-		friend std::ostream& operator<<(std::ostream& os, const TVector& Vector) 
+		friend std::ostream& operator<<(std::ostream& os, const TVector3& Vector) 
 		{
-			//os << "{ " << Vector.X << ", " << Vector.Y << ", " << Vector.Z << " }";
 			os << *Vector.ToString();
 			return os;
 		}
@@ -112,6 +173,6 @@ namespace LkEngine {
 		T X, Y, Z;
 	};
 
-	using LVector = TVector<float>;
+	using LVector = TVector3<float>;
 
 }

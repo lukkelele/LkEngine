@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 #include "LkEngine/Renderer/Material.h"
 
@@ -68,6 +68,9 @@ namespace LkEngine {
         NodeEditor* NodeEditorRef = nullptr;
     };
 
+    /**
+     * LMaterialEditorTab
+     */
     class MaterialEditorTab: public LTab
     {
     public:
@@ -80,7 +83,7 @@ namespace LkEngine {
 
     public:
         NodeEditor* NodeEditorRef = nullptr;
-        Ref<Material> MaterialRef = nullptr;
+        TObjectPtr<LMaterial> MaterialRef = nullptr;
     };
 
 

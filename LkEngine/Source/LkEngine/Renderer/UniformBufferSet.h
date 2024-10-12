@@ -5,18 +5,25 @@
 
 namespace LkEngine {
 
-	class UniformBufferSet : public RefCounted
+	/**
+	 * LUniformBufferSet
+	 */
+	class LUniformBufferSet : public LObject
 	{
 	public:
-		virtual ~UniformBufferSet() {}
+		virtual ~LUniformBufferSet() {}
 
-		virtual Ref<UniformBuffer> Get() = 0;
-		virtual Ref<UniformBuffer> RT_Get() = 0;
-		virtual Ref<UniformBuffer> Get(uint32_t frame) = 0;
+		virtual TObjectPtr<LUniformBuffer> Get() = 0;
+		virtual TObjectPtr<LUniformBuffer> RT_Get() = 0;
+		virtual TObjectPtr<LUniformBuffer> Get(uint32_t frame) = 0;
 
-		virtual void Set(Ref<UniformBuffer> uniformBuffer, uint32_t frame) = 0;
+		virtual void Set(TObjectPtr<LUniformBuffer> uniformBuffer, uint32_t frame) = 0;
 
-		static Ref<UniformBufferSet> Create(uint32_t size, uint32_t framesInFlight = 0);
+		static TObjectPtr<LUniformBufferSet> Create(const uint32_t size, 
+													const uint32_t framesInFlight = 0);
+
+	private:
+		LCLASS(LUniformBufferSet)
 	};
 
 

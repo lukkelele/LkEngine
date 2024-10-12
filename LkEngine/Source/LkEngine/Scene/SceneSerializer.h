@@ -7,18 +7,19 @@
 #include "LkEngine/Asset/Asset.h"
 
 
-namespace YAML {
+namespace YAML
+{
 	class Emitter;
 	class Node;
 }
 
 namespace LkEngine {
 
-    class SceneSerializer
+    class LSceneSerializer : public LObject
     {
     public:
-		SceneSerializer(Scene* Scene = nullptr); /// @FIXME
-		SceneSerializer(const Ref<Scene>& Scene);
+		LSceneSerializer(LScene* Scene = nullptr); /// @FIXME
+		LSceneSerializer(const TObjectPtr<LScene>& Scene);
 
 		void Serialize(const std::filesystem::path& Filepath);
 		bool Deserialize(const std::filesystem::path& Filepath);
@@ -26,16 +27,16 @@ namespace LkEngine {
 		void SerializeToYAML(YAML::Emitter& out);
 		bool DeserializeFromYAML(const std::string& YamlString);
 
-		// Retreive the most recent deserialized Scene
-		Ref<Scene> LoadScene();
+		/** Retreive the most recent deserialized scene. */
+		TObjectPtr<LScene> LoadScene();
 
-		void SerializeRuntime(AssetHandle Scene);
-		bool DeserializeRuntime(AssetHandle Scene);
+		void SerializeRuntime(FAssetHandle Scene);
+		bool DeserializeRuntime(FAssetHandle Scene);
 
 	private:
 		static void SerializeEntity(YAML::Emitter& out, LEntity Entity);
-		static void DeserializeEntities(YAML::Node& EntitiesNode, Ref<Scene> Scene);
-		static void DeserializeEntities(YAML::Node& EntitiesNode, Scene* Scene);
+		static void DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> Scene);
+		static void DeserializeEntities(YAML::Node& EntitiesNode, LScene* Scene);
 
 		static void SerializeEditorCamera(YAML::Emitter& out, LEditorCamera& editorCamera);
 		static void DeserializeEditorCamera(YAML::Node& editorCameraNode, LEditorCamera& Scene);
@@ -46,7 +47,9 @@ namespace LkEngine {
 
 	private:
 		bool m_IsLoaded = false;
-		Scene* m_Scene = nullptr;
+		LScene* m_Scene = nullptr;
+
+		LCLASS(LSceneSerializer);
     };
 
 }

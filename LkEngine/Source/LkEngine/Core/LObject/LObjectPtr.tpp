@@ -7,8 +7,9 @@ namespace LkEngine {
 	{
 		std::scoped_lock<std::mutex> ScopedLock(LiveReferenceMutex);
 		LK_CORE_ASSERT(Instance);
-		//LK_CORE_DEBUG_TAG("LObjectPtr", "Adding to live references: {}", static_cast<LObject*>(Instance)->GetStaticClass());
-		//std::printf("[LObjectPtr] Adding to live references: %s\n", static_cast<LObject*>(Instance)->GetStaticClass().c_str());
+	#if 0 // REQUIRE LOG INITIALIZATION IN EARLIER STAGES OF STARTUP
+		LK_CORE_DEBUG_TAG("LObjectPtr", "Adding to live references: {}", static_cast<LObject*>(Instance)->GetStaticClass());
+	#endif
 		LiveReferences.insert(Instance);
 	}
 
@@ -16,17 +17,17 @@ namespace LkEngine {
 	{
 		std::scoped_lock<std::mutex> ScopedLock(LiveReferenceMutex);
 		LK_CORE_ASSERT(Instance, "Failed to remove instance from live references, passed instance is nullptr");
-		//LK_CORE_DEBUG_TAG("LObjectPtr", "Removing from live references: {}", static_cast<LObject*>(Instance)->GetStaticClass());
 
-		//LK_CORE_ASSERT(LiveReferences.find(Instance) != LiveReferences.end());
 		if (LiveReferences.find(Instance) != LiveReferences.end())
 		{
 			LiveReferences.erase(Instance);
 		}
 		else
 		{
+	#if 0 // DISABLED RIGHT NOW
 			LK_CORE_DEBUG_TAG("TObjectPtr", "Was not able to remove {} from live references with {} active references ", 
 							  static_cast<LObject*>(Instance)->GetStaticClass(), static_cast<LObject*>(Instance)->GetReferenceCount());
+	#endif
 		}
 	}
 
@@ -40,7 +41,7 @@ namespace LkEngine {
 	template<typename ...TArgs>
 	TObjectPtr<T> TObjectPtr<T>::Create(TArgs&&... Args)
 	{
-	#if 0
+	#if LK_USE_GC // Garbage Collector not used for now
 		TObjectPtr<T> NewObject(new T(std::forward<TArgs>(Args)...));
 		// TODO: Handle initialization of object - assign to garbage collector.
 		return NewObject;

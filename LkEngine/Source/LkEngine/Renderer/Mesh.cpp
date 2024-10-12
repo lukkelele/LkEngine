@@ -6,7 +6,9 @@
 
 namespace LkEngine {
 
-    MeshSource::MeshSource(const std::vector<Vertex>& vertices, const std::vector<Index>& indices, const glm::mat4& transform)
+    MeshSource::MeshSource(const std::vector<Vertex>& vertices, 
+						   const std::vector<Index>& indices, 
+						   const glm::mat4& transform)
 		: m_Vertices(vertices)
 		, m_Indices(indices)
 	{
@@ -19,26 +21,35 @@ namespace LkEngine {
 		submesh.Transform = transform;
 		m_Submeshes.push_back(submesh);
 
-		m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(m_Vertices.size() * sizeof(Vertex)));
-		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)(m_Indices.size() * sizeof(Index)));
+		m_VertexBuffer = LVertexBuffer::Create(m_Vertices.data(), 
+											   (uint32_t)(m_Vertices.size() * sizeof(Vertex)));
+		m_IndexBuffer = LIndexBuffer::Create(m_Indices.data(), 
+											 (uint32_t)(m_Indices.size() * sizeof(Index)));
 	}
 
-	MeshSource::MeshSource(const std::vector<Vertex>& vertices, const std::vector<Index>& indices, const std::vector<Submesh>& submeshes)
+	MeshSource::MeshSource(const std::vector<Vertex>& vertices, 
+						   const std::vector<Index>& indices, 
+						   const std::vector<Submesh>& submeshes)
 		: m_Vertices(vertices)
 		, m_Indices(indices)
 		, m_Submeshes(submeshes)
 	{
 		Handle = {};
 
-		m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(m_Vertices.size() * sizeof(Vertex)));
-		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)(m_Indices.size() * sizeof(Index)));
+		m_VertexBuffer = LVertexBuffer::Create(m_Vertices.data(), 
+											   (uint32_t)(m_Vertices.size() * sizeof(Vertex)));
+
+		m_IndexBuffer = LIndexBuffer::Create(m_Indices.data(), (uint32_t)(m_Indices.size() * sizeof(Index)));
 	}
 
 	static std::string LevelToSpaces(uint32_t level)
 	{
 		std::string result = "";
 		for (uint32_t i = 0; i < level; i++)
+		{
 			result += "--";
+		}
+
 		return result;
 	}
 
@@ -63,47 +74,47 @@ namespace LkEngine {
 	}
 
 
-	Mesh::Mesh(Ref<MeshSource> meshSource)
+	Mesh::Mesh(TObjectPtr<MeshSource> meshSource)
 		: m_MeshSource(meshSource)
 	{
-		// Generate a new asset handle
+		/* Generate a new asset handle. */
 		Handle = {};
 
 		SetSubmeshes({});
 
-		const auto& meshMaterials = meshSource->GetMaterials();
-		m_Materials = Ref<MaterialTable>::Create((uint32_t)meshMaterials.size());
+		const std::vector<TObjectPtr<LMaterial>>& meshMaterials = meshSource->GetMaterials();
+		Materials = TObjectPtr<LMaterialTable>::Create((uint32_t)meshMaterials.size());
 
 		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials!", Handle, (uint32_t)meshMaterials.size());
 		for (size_t i = 0; i < meshMaterials.size(); i++)
 		{
-			Ref<MaterialAsset> materialAsset = Ref<MaterialAsset>::Create(meshMaterials[i]);
-			m_Materials->SetMaterial((uint32_t)i, materialAsset->Handle);
+			TObjectPtr<LMaterialAsset> materialAsset = TObjectPtr<LMaterialAsset>::Create(meshMaterials[i]);
+			Materials->SetMaterial((uint32_t)i, materialAsset->Handle);
 			LK_CORE_TRACE_TAG("Mesh", "Setting material indexed {}", i);
 		}
 	}
 
-	Mesh::Mesh(Ref<MeshSource> meshSource, const std::vector<uint32_t>& submeshes)
+	Mesh::Mesh(TObjectPtr<MeshSource> meshSource, const std::vector<uint32_t>& submeshes)
 		: m_MeshSource(meshSource)
 	{
 		Handle = {};
 		SetSubmeshes(submeshes);
 
 		const auto& meshMaterials = meshSource->GetMaterials();
-		m_Materials = Ref<MaterialTable>::Create((uint32_t)meshMaterials.size());
+		Materials = TObjectPtr<LMaterialTable>::Create((uint32_t)meshMaterials.size());
 
 		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials!", Handle, (uint32_t)meshMaterials.size());
 		for (size_t i = 0; i < meshMaterials.size(); i++)
 		{
-			Ref<MaterialAsset> materialAsset = Ref<MaterialAsset>::Create(meshMaterials[i]);
-			m_Materials->SetMaterial((uint32_t)i, materialAsset->Handle);
+			TObjectPtr<LMaterialAsset> materialAsset = TObjectPtr<LMaterialAsset>::Create(meshMaterials[i]);
+			Materials->SetMaterial((uint32_t)i, materialAsset->Handle);
 			LK_CORE_TRACE_TAG("Mesh", "Setting material indexed {}", i);
 		}
 	}
 
 	Mesh::Mesh(const Ref<Mesh>& other)
 		: m_MeshSource(other->m_MeshSource)
-		, m_Materials(other->m_Materials)
+		, Materials(other->Materials)
 	{
 		SetSubmeshes(other->m_Submeshes);
 	}
@@ -127,17 +138,18 @@ namespace LkEngine {
 		}
 	}
 
-	Ref<Material> Mesh::GetMaterial(int idx)
+	TObjectPtr<LMaterial> Mesh::GetMaterial(const int Index)
 	{
-		AssetHandle asset = m_Materials->GetMaterialHandle(idx);
-		return AssetManager::GetAsset<MaterialAsset>(asset)->GetMaterial();
+		/* TODO: Validate index */
+		FAssetHandle asset = Materials->GetMaterialHandle(Index);
+		return LAssetManager::GetAsset<LMaterialAsset>(asset)->GetMaterial();
 	}
 
 
 	//-----------------------------------------------------
 	// StaticMesh 
 	//-----------------------------------------------------
-	StaticMesh::StaticMesh(Ref<MeshSource> meshSource)
+	StaticMesh::StaticMesh(TObjectPtr<MeshSource> meshSource)
 		: m_MeshSource(meshSource)
 	{
 		// Generate a new asset handle
@@ -147,14 +159,14 @@ namespace LkEngine {
 
 		const auto& meshMaterials = meshSource->GetMaterials();
 		uint32_t numMaterials = static_cast<uint32_t>(meshMaterials.size());
-		m_Materials = Ref<MaterialTable>::Create(numMaterials);
+		Materials = TObjectPtr<LMaterialTable>::Create(numMaterials);
 		for (uint32_t i = 0; i < numMaterials; i++)
 		{
-			m_Materials->SetMaterial(i, AssetManager::CreateMemoryOnlyAsset<MaterialAsset>(meshMaterials[i]));
+			Materials->SetMaterial(i, LAssetManager::CreateMemoryOnlyAsset<LMaterialAsset>(meshMaterials[i]));
 		}
 	}
 
-	StaticMesh::StaticMesh(Ref<MeshSource> meshSource, const std::vector<uint32_t>& submeshes)
+	StaticMesh::StaticMesh(TObjectPtr<MeshSource> meshSource, const std::vector<uint32_t>& submeshes)
 		: m_MeshSource(meshSource)
 	{
 		// Generate a new asset handle
@@ -164,16 +176,16 @@ namespace LkEngine {
 
 		const auto& meshMaterials = meshSource->GetMaterials();
 		uint32_t numMaterials = static_cast<uint32_t>(meshMaterials.size());
-		m_Materials = Ref<MaterialTable>::Create(numMaterials);
+		Materials = TObjectPtr<LMaterialTable>::Create(numMaterials);
 		for (uint32_t i = 0; i < numMaterials; i++)
 		{
-			m_Materials->SetMaterial(i, AssetManager::CreateMemoryOnlyAsset<MaterialAsset>(meshMaterials[i]));
+			Materials->SetMaterial(i, LAssetManager::CreateMemoryOnlyAsset<LMaterialAsset>(meshMaterials[i]));
 		}
 	}
 
 	StaticMesh::StaticMesh(const Ref<StaticMesh>& other)
 		: m_MeshSource(other->m_MeshSource)
-		, m_Materials(other->m_Materials)
+		, Materials(other->Materials)
 	{
 		SetSubmeshes(other->m_Submeshes);
 	}

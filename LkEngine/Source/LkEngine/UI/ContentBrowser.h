@@ -7,22 +7,22 @@
 
 namespace LkEngine {
 
-	class Texture;
-
-	class ContentBrowser : public Panel
+	/**
+	 * LContentBrowser
+	 */
+	class LContentBrowser : public IPanel
 	{
 	public:
-		ContentBrowser();
-		~ContentBrowser() = default;
+		LContentBrowser() = default;
+		~LContentBrowser() = default;
 
 		void Init() override;
 		void OnRender() override;
 		void OnImGuiRender() override;
 
 	public:
-		inline static Ref<Texture> FileIconTexture;
-		inline static Ref<Texture> FolderIconTexture;
-
+		inline static TObjectPtr<LTexture> FileIconTexture;
+		inline static TObjectPtr<LTexture> FolderIconTexture;
 	};
 
 }

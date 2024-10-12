@@ -30,7 +30,7 @@ namespace LkEngine {
 		Triangles 
 	};
 	
-    class LRendererAPI : public RefCounted
+    class LRendererAPI : public LObject
     {
 	public:
 		virtual void Init() = 0;
@@ -40,30 +40,102 @@ namespace LkEngine {
 		virtual void EndFrame() = 0;
 		virtual void Clear() = 0;
 
-		virtual void SubmitImage(const Ref<Image> image) = 0;
-		virtual void SubmitImage(const Ref<Image2D> image) = 0;
+		virtual void SubmitImage(const TObjectPtr<LImage> Image) = 0;
+		virtual void SubmitImage(const TObjectPtr<LImage2D> Image) = 0;
 
-		virtual void BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass, bool explicitClear = false) = 0;
-		virtual void EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer) = 0;
-		virtual void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount = 0) = 0;
-		virtual void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Shader>& shader, Ref<VertexBuffer>& vertexBuffer, Ref<IndexBuffer>& indexBuffer, const glm::mat4& transform, uint32_t indexCount = 0) = 0;
-		virtual void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Material> material, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount = 0) = 0;
+		virtual void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer,
+									 TObjectPtr<LRenderPass> renderPass, 
+									 bool InExplicitClear = false) = 0;
 
-		virtual void Draw(VertexBuffer& vb, const Shader& shader) = 0;
-		virtual void Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader) = 0;
-        virtual void DrawIndexed(uint64_t indexCount) = 0;
+		virtual void EndRenderPass(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer) = 0;
 
-		virtual void SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform) = 0;
-		virtual void SubmitIndexed(unsigned int indexCount) = 0;
+		// RenderGeometry
+		virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer, 
+									TObjectPtr<LPipeline> InPipeline, 
+									TObjectPtr<LVertexBuffer> InVertexBuffer, 
+									TObjectPtr<LIndexBuffer> InIndexBuffer, 
+									const glm::mat4& InTransform, 
+									uint32_t IndexCount = 0) = 0;
 
-		virtual void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
-		virtual void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
-		virtual void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;
-		virtual void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;
-		virtual void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture, float rotation, uint64_t entityID = 0) = 0;
-		virtual void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, float rotation, uint64_t entityID = 0) = 0;
-		virtual void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID) = 0;
-		virtual void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID) = 0;
+		virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer, 
+									TObjectPtr<LPipeline> InPipeline, 
+									TObjectPtr<LShader>& shader, 
+									TObjectPtr<LVertexBuffer>& InVertexBuffer, 
+									TObjectPtr<LIndexBuffer>& InIndexBuffer, 
+									const glm::mat4& InTransform, 
+									const uint32_t IndexCount = 0) = 0;
+
+		virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer, 
+									TObjectPtr<LPipeline> InPipeline, 
+									TObjectPtr<LMaterial> InMaterial, 
+									TObjectPtr<LVertexBuffer> InVertexBuffer, 
+									TObjectPtr<LIndexBuffer> InIndexBuffer, 
+									const glm::mat4& InTransform, 
+									const uint32_t IndexCount = 0) = 0;
+		// ~RenderGeometry
+
+		// Draw
+		virtual void Draw(const LVertexBuffer& vb, const LIndexBuffer& ib, const LShader& shader) = 0;
+		virtual void Draw(LVertexBuffer& vb, const LShader& shader) = 0;
+		// ~Draw
+
+        virtual void DrawIndexed(uint64_t IndexCount) = 0;
+
+		virtual void SubmitMesh(TObjectPtr<Mesh>& mesh, 
+								TObjectPtr<LShader>& shader, 
+								const glm::mat4& InTransform) = 0;
+
+		virtual void SubmitIndexed(unsigned int IndexCount) = 0;
+
+		// SubmitQuad
+		virtual void SubmitQuad(const glm::vec2& pos, 
+								const glm::vec2& size, 
+								const glm::vec4& color, 
+								uint64_t entityID = 0) = 0;
+
+		virtual void SubmitQuad(const glm::vec3& pos, 
+								const glm::vec2& size, 
+								const glm::vec4& color, 
+								uint64_t entityID = 0) = 0;
+
+		virtual void SubmitQuad(const glm::vec2& pos, 
+								const glm::vec2& size, 
+								const glm::vec4& color, 
+								const float rotation, 
+								uint64_t entityID = 0) = 0;
+
+		virtual void SubmitQuad(const glm::vec3& pos, 
+								const glm::vec2& size, 
+								const glm::vec4& color, 
+								const float rotation, 
+								uint64_t entityID = 0) = 0;
+
+		virtual void SubmitQuad(const glm::vec2& pos, 
+								const glm::vec2& size, 
+								TObjectPtr<LTexture> texture, 
+								float rotation, 
+								uint64_t entityID = 0) = 0;
+
+		virtual void SubmitQuad(const glm::vec3& pos, 
+								const glm::vec2& size, 
+								TObjectPtr<LTexture> texture, 
+								const float rotation, 
+								uint64_t entityID = 0) = 0;
+
+		virtual void SubmitQuad(const glm::vec2& pos, 
+								const glm::vec2& size, 
+								TObjectPtr<LTexture> texture, 
+								const glm::vec4& tintColor, 
+								const float rotation, 
+								uint64_t entityID) = 0;
+
+		virtual void SubmitQuad(const glm::vec3& pos, 
+								const glm::vec2& size, 
+								TObjectPtr<LTexture> texture, 
+								const glm::vec4& tintColor, 
+								const float rotation, 
+								uint64_t entityID) = 0;
+		// ~SubmitQuad
 
 		virtual void SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, uint64_t entityID = 0) = 0;
 
@@ -72,22 +144,37 @@ namespace LkEngine {
 
 		virtual RendererCapabilities& GetCapabilities() = 0;
 
-		static Ref<LRendererAPI> Create();
+		static TObjectPtr<LRendererAPI> Create();
 
-		/** Get current render API type. */
+		/** Get current RendererAPI. */
 		FORCEINLINE static ERendererAPI Current() { return RendererAPI; }
 
 		static void SetAPI(ERendererAPI InRendererApiType);
-
-		virtual Ref<Renderer2DAPI> GetRenderer2D() = 0;
-		virtual Ref<Renderer2DAPI> GetRenderer2DAPI() = 0;
 
 	protected:
 		inline static ERendererAPI RendererAPI = ERendererAPI::OpenGL;
 
 		friend class LEditor;
-		friend class Renderer;
+		friend class LRenderer;
+
+	private:
+		LCLASS(LRendererAPI);
     };
+
+	namespace Enum
+	{
+		FORCEINLINE static constexpr const char* ToString(const ERenderTopology RenderTopology)
+		{
+			switch (RenderTopology)
+			{
+				case ERenderTopology::Lines:     return "Lines";
+				case ERenderTopology::Triangles: return "Triangles";
+			}
+
+			LK_CORE_ASSERT(false);
+			return nullptr;
+		}
+	}
 
 }
 

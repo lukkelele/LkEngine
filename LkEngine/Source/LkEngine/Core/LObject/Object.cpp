@@ -8,8 +8,8 @@ namespace LkEngine {
 
 	LObject::LObject()
 		: Handle(FObjectHandle())
+		, Name("LObject")
 	{
-		//LCLASS_REGISTER();
 	}
 
 	void LObject::Initialize()
@@ -19,9 +19,9 @@ namespace LkEngine {
 		LK_CORE_VERIFY(Handle != 0, "Object initialization failed, handle is 0");
 	}
 
+	/* TODO */
 	bool LObject::IsSelected() const
 	{
-		/// TODO
 		return false;
 	}
 

@@ -1,6 +1,7 @@
 #include "LKpch.h"
 #include "Box2DContactListener.h"
-#include "LkEngine/Core/Base.h"
+
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 
@@ -17,33 +18,34 @@ namespace LkEngine {
 
     void Box2DContactListener::BeginContact(b2Contact* contact)
     {
-        auto scene = Scene::GetActiveScene();
-
-        UUID aID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
-        UUID bID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
-
-        LEntity a = scene->GetEntityWithUUID(aID);
-        LEntity b = scene->GetEntityWithUUID(bID);
-
-        LK_CORE_WARN("BeginContact --> ({}   and   {})", a.Name(), b.Name());
-        // Exit if no contact
-        if (!a || !b)
+        if (TObjectPtr<LScene> Scene = LScene::GetActiveScene())
         {
-            return;
+			UUID aID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+			UUID bID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
+
+			LEntity a = Scene->GetEntityWithUUID(aID);
+			LEntity b = Scene->GetEntityWithUUID(bID);
+			LK_CORE_DEBUG_TAG("Box2DContactListener", "BeginContact --> ({}   and   {})", a.Name(), b.Name());
+
+			/* Exit if no contact.*/
+			if (!a || !b)
+			{
+				return;
+			}
         }
     }
 
     void Box2DContactListener::EndContact(b2Contact* contact) 
     {
-        auto scene = Scene::GetActiveScene();
+        if (TObjectPtr<LScene> Scene = LScene::GetActiveScene())
+        {
+			UUID aID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+			UUID bID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 
-        UUID aID = (UUID)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
-        UUID bID = (UUID)contact->GetFixtureB()->GetBody()->GetUserData().pointer;
-
-        LEntity a = scene->GetEntityWithUUID(aID);
-        LEntity b = scene->GetEntityWithUUID(bID);
-
-        LK_CORE_WARN("EndContact --> ({}   and   {})", a.Name(), b.Name());
+			LEntity a = Scene->GetEntityWithUUID(aID);
+			LEntity b = Scene->GetEntityWithUUID(bID);
+			LK_CORE_DEBUG_TAG("Box2DContactListener", "EndContact --> ({}   and   {})", a.Name(), b.Name());
+        }
     }
 
 }

@@ -62,6 +62,7 @@ project "LkEngine"
 
         "%{wks.location}/LkEngine/Source/**.h",
         "%{wks.location}/LkEngine/Source/**.cpp",
+        "%{wks.location}/LkEngine/Source/**.tpp",
 
         "%{ExternalDirectory}/stb_image/**.h",
         "%{ExternalDirectory}/stb_image/**.cpp",

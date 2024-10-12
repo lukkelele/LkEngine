@@ -4,22 +4,23 @@
 #include "LkEngine/Renderer/RendererAPI.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLImGuiLayer.h"
-//#include "LkEngine/Platform/Vulkan/VulkanImGuiLayer.h"
 
 
 namespace LkEngine {
 
-	Ref<ImGuiLayer> ImGuiLayer::Create()
+	TObjectPtr<LImGuiLayer> LImGuiLayer::Create()
 	{
 		switch (LRendererAPI::Current())
 		{
-			case ERendererAPI::OpenGL: return Ref<OpenGLImGuiLayer>::Create();
-			//case RendererAPIType::Vulkan: return Ref<VulkanImGuiLayer>::Create();
-			case ERendererAPI::None: return nullptr;
+			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImGuiLayer>::Create();
+			case ERendererAPI::None:   return nullptr;
 		}
+
+		LK_CORE_ASSERT(false, "");
+		return nullptr;
 	}
 
-    void ImGuiLayer::SetDarkTheme()
+    void LImGuiLayer::SetDarkTheme()
     {
 		ImGui::StyleColorsDark();
 		auto& colors = ImGui::GetStyle().Colors;

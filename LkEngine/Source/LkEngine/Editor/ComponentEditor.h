@@ -9,23 +9,23 @@
 
 namespace LkEngine {
 
-    class ComponentEditor : public Panel
+    class LComponentEditor : public IPanel
     {
     public:
-        ComponentEditor();
-        ~ComponentEditor();
+        LComponentEditor() = default;
+        ~LComponentEditor() = default;
 
         void Init() override;
         void OnRender() override;
         void OnImGuiRender() override;
 
     private:
-        void RenderMaterialEditor(Material& material);
-        void RenderTextureEditor(const Ref<Texture> texture);
-        void RenderTextureEditor(const Ref<Texture2D> texture);
+        void RenderMaterialEditor(LMaterial& Material);
+        void RenderTextureEditor(const TObjectPtr<LTexture> texture);
+        void RenderTextureEditor(const TObjectPtr<LTexture2D> texture);
 
     private:
-        friend class EditorLayer;
+        friend class LEditorLayer; /// REMOVE
     };
 
 }

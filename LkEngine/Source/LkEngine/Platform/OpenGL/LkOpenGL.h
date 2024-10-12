@@ -2,11 +2,12 @@
 
 #include <glad/glad.h>
 
+#include "LkEngine/Core/Memory/MemoryUtils.h"
+
 #include "LkEngine/Renderer/BlendingSpecification.h"
 #include "LkEngine/Renderer/Image.h"
 
 #include "LkEngine/Utility/StringUtils.h"
-#include "LkEngine/Utility/MemoryUtils.h"
 
 #include "LkEngine/Renderer/Framebuffer.h"
 #include "LkEngine/Renderer/Shader.h"
@@ -17,29 +18,42 @@
 
 namespace LkEngine {
 
-    #define GL_CALL(_FUNC) OpenGL_ClearError(); _FUNC; LK_ASSERT(OpenGL_LogCall(#_FUNC, __FILE__, __LINE__))
-
     class TextureArray;
 
-	static void OpenGL_ClearError() 
+    /**
+     * LK_OpenGL
+     * 
+     *  Macro for invoking OpenGL functions.
+     *  Handles potential errors and logs them before issuing a crash.
+     */
+    #define LK_OpenGL(_OPENGL_FUNCTION) \
+        OpenGL_ClearError(); \
+        _OPENGL_FUNCTION; \
+        LK_ASSERT(OpenGL_LogCall(#_OPENGL_FUNCTION, __FILE__, __LINE__))
+
+
+	FORCEINLINE static void OpenGL_ClearError() 
 	{ 
 		while (glGetError() != GL_NO_ERROR); 
 	}
 
-    static bool OpenGL_LogCall(const char* function, const char* file, int line)
+    FORCEINLINE static bool OpenGL_LogCall(const char* InFunction, const char* InFile, int InLine)
     {
-        while (GLenum error = glGetError())
+        while (GLenum Error = glGetError())
         {
-            LK_CORE_ERROR_TAG("OpenGL", "Error: {}   Function: {}   File: {}   Line: {}", error, function, file, line);
+            LK_CORE_ERROR_TAG("OpenGL", "Error: {}   Function: {}   File: {}   Line: {}", Error, InFunction, InFile, InLine);
             return false;
         }
+
         return true;
     }
 
-	static const char* OpenGL_GetVersion()
+	FORCEINLINE static const char* OpenGL_GetVersion()
 	{
-		char buf[120];
-		sprintf(buf, "%s", glGetString(GL_VERSION));
+		char buf[140];
+		//sprintf(buf, "%s", glGetString(GL_VERSION));
+		sprintf_s(buf, ARRAYSIZE(buf), "%s", glGetString(GL_VERSION));
+
 		return buf;
 	}
 
@@ -79,18 +93,28 @@ namespace LkEngine {
 			// Texture Filter
 			if (filter == TextureFilter::Linear)
 			{
-				if (mipmap)
+                if (mipmap)
+                {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-				else
+                }
+                else
+                {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                }
+
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			}
 			else if (filter == TextureFilter::Nearest)
 			{
-				if (mipmap)
+                if (mipmap)
+                {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-				else
+                }
+                else
+                {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                }
+
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			}
 			else if (filter == TextureFilter::None)
@@ -106,7 +130,6 @@ namespace LkEngine {
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
-
 			}
 			else if (wrap == TextureWrap::Repeat)
 			{
@@ -150,7 +173,7 @@ namespace LkEngine {
 
 		}
 
-		static void ApplyTextureWrap(const RendererID& rendererID, const TextureWrap wrap)
+		static void ApplyTextureWrap(const RendererID rendererID, const TextureWrap wrap)
 		{
 			switch (wrap)
 			{
@@ -176,6 +199,20 @@ namespace LkEngine {
             LK_CORE_ASSERT(false, "Unknown TextureWrap {}", (int)wrap);
 		}
 
+		FORCEINLINE static float SampleDepth(int x, int y, int WindowWidth, int WindowHeight) 
+		{
+			GLint Viewport[4];
+			glGetIntegerv(GL_VIEWPORT, Viewport);
+
+			// Screen coordinates to OpenGL viewport coordinates
+			y = WindowHeight - y;
+
+			float Depth = 0.0f;
+			glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &Depth);
+
+			return Depth;  // Depth is returned in normalized [0.0, 1.0] 
+		}
+
     }
 
     //=====================================================================
@@ -188,18 +225,18 @@ namespace LkEngine {
     extern RendererID SkyboxVAO;
     extern unsigned int SkyboxVBO;
 
-    extern Ref<VertexBuffer> CubeVertexBuffer;
-    extern Ref<VertexBuffer> PlaneVertexBuffer;
-    extern Ref<Texture2D> CubeTexture;
-    extern Ref<Texture2D> PlaneTexture;
+    extern TObjectPtr<LVertexBuffer> CubeVertexBuffer;
+    extern TObjectPtr<LVertexBuffer> PlaneVertexBuffer;
+    extern TObjectPtr<LTexture2D> CubeTexture;
+    extern TObjectPtr<LTexture2D> PlaneTexture;
 
-    inline static Ref<Shader> ScreenShader = nullptr;
-    inline static Ref<Shader> DebugShader = nullptr;
+    inline static TObjectPtr<LShader> ScreenShader = nullptr;
+    inline static TObjectPtr<LShader> DebugShader = nullptr;
 
     // Skybox
-    inline static Ref<VertexBuffer> SkyboxVertexBuffer;
-    inline static Ref<TextureCube> SkyboxTexture;
-    inline static Ref<Shader> SkyboxShader;
+    inline static TObjectPtr<LVertexBuffer> SkyboxVertexBuffer;
+    inline static TObjectPtr<LTextureCube> SkyboxTexture;
+    inline static TObjectPtr<LShader> SkyboxShader;
     inline static unsigned int CubemapTexture;
 
     inline static glm::mat4 ModelMVP = glm::mat4(1.0f);
@@ -404,8 +441,8 @@ namespace LkEngine {
     void RenderCubes(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
     void RenderFloor(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
     
-    Ref<Shader> GetDebugShader();
-    Ref<Shader> GetScreenShader();
+    TObjectPtr<LShader> GetDebugShader();
+    TObjectPtr<LShader> GetScreenShader();
 
 	static unsigned int LoadCubemap(std::vector<std::string> faces)
 	{
@@ -449,7 +486,7 @@ namespace LkEngine {
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-        SkyboxShader = Shader::Create("Assets/Shaders/OpenGL/Skybox.shader");
+        SkyboxShader = LShader::Create("Assets/Shaders/OpenGL/Skybox.shader");
         SkyboxShader->Bind();
         SkyboxShader->Set("skybox", 0);
     }

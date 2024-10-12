@@ -6,11 +6,11 @@
 
 namespace LkEngine {
 
-	OpenGLRenderCommandBuffer::OpenGLRenderCommandBuffer(uint32_t count, std::string debugName) 
+	OpenGLRenderCommandBuffer::OpenGLRenderCommandBuffer(uint32_t Count, std::string_view InDebugName) 
 	{
 	}
 
-	OpenGLRenderCommandBuffer::OpenGLRenderCommandBuffer(std::string debugName, bool swapchain)
+	OpenGLRenderCommandBuffer::OpenGLRenderCommandBuffer(std::string_view InDebugName, bool bSwapchain)
 	{
 	}
 
@@ -31,9 +31,10 @@ namespace LkEngine {
 	{
 	}
 	
-	const PipelineStatistics& OpenGLRenderCommandBuffer::GetPipelineStatistics(uint32_t frameIndex) const
+	const PipelineStatistics& OpenGLRenderCommandBuffer::GetPipelineStatistics(const uint32_t FrameIndex) const
 	{
-		(void)(frameIndex); // unused for now
+		/* Unused for now. */
+		LK_UNUSED(FrameIndex);
 		return m_PipelineStatistics;
 	}
 

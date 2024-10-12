@@ -25,26 +25,55 @@ namespace LkEngine {
         void Init();
         void Shutdown();
 
-        void BeginFrame();
-        void EndFrame();
-        void Clear();
+        virtual void BeginFrame() override;
+        virtual void EndFrame() override;
+        virtual void Clear() override;
 
-        void DrawIndexed(uint64_t indexCount) override;
-        void Draw(VertexBuffer& vb, const Shader& shader);
-        void Draw(const VertexBuffer& vb, const IndexBuffer& ib, const Shader& shader);
+        virtual void DrawIndexed(uint64_t indexCount) override;
 
-        void SubmitImage(const Ref<Image> image) override;
-        void SubmitImage(const Ref<Image2D> image) override;
+        void Draw(LVertexBuffer& vb, const LShader& shader);
 
-        void SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform);
+        virtual void Draw(const LVertexBuffer& vb,
+                          const LIndexBuffer& ib,
+                          const LShader& shader); // override;
 
-        void BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, 
-                             Ref<RenderPass> renderPass, 
-                             bool explicitClear = false) override;
-        void EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer) override;
-        void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount) override;
-        void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Shader>& shader, Ref<VertexBuffer>& vertexBuffer, Ref<IndexBuffer>& indexBuffer, const glm::mat4& transform, uint32_t indexCount) override;
-        void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Material> material, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount) override;
+        virtual void SubmitImage(const TObjectPtr<LImage> image) override;
+        virtual void SubmitImage(const TObjectPtr<LImage2D> image) override;
+
+        void SubmitMesh(TObjectPtr<Mesh>& mesh, 
+                        TObjectPtr<LShader>& shader, 
+                        const glm::mat4& transform);
+
+        virtual void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+                                     TObjectPtr<LRenderPass> renderPass, 
+                                     bool bExplicitClear = false) override;
+
+        virtual void EndRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer) override;
+
+        // RenderGeometry
+        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+                                    TObjectPtr<LPipeline> pipeline, 
+                                    TObjectPtr<LVertexBuffer> vertexBuffer, 
+                                    TObjectPtr<LIndexBuffer> indexBuffer, 
+                                    const glm::mat4& transform, 
+                                    uint32_t indexCount) override;
+
+        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+                                    TObjectPtr<LPipeline> pipeline, 
+                                    TObjectPtr<LShader>& shader, 
+                                    TObjectPtr<LVertexBuffer>& vertexBuffer, 
+                                    TObjectPtr<LIndexBuffer>& indexBuffer, 
+                                    const glm::mat4& transform, 
+                                    const uint32_t indexCount) override;
+
+        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+                                    TObjectPtr<LPipeline> pipeline, 
+                                    TObjectPtr<LMaterial> material, 
+                                    TObjectPtr<LVertexBuffer> vertexBuffer, 
+                                    TObjectPtr<LIndexBuffer> indexBuffer, 
+                                    const glm::mat4& transform, 
+                                    const uint32_t indexCount) override;
+        // ~RenderGeometry
 
 		void SubmitIndexed(unsigned int count) override;
 
@@ -52,36 +81,61 @@ namespace LkEngine {
         void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) override;
         void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) override;
         void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) override;
-        void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture, float rotation, uint64_t entityID = 0) override;
-        void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, float rotation, uint64_t entityID = 0) override;
-        void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID) override;
-        void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID) override;
 
-        void SubmitLine(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) override;
+        void SubmitQuad(const glm::vec2& pos, 
+                        const glm::vec2& size, 
+                        TObjectPtr<LTexture> texture, 
+                        const float rotation, 
+                        uint64_t entityID = 0) override;
+
+        void SubmitQuad(const glm::vec3& pos, 
+                        const glm::vec2& size, 
+                        TObjectPtr<LTexture> texture, 
+                        const float rotation, 
+                        uint64_t entityID = 0) override;
+
+        void SubmitQuad(const glm::vec2& pos, 
+                        const glm::vec2& size, 
+                        TObjectPtr<LTexture> texture, 
+                        const glm::vec4& tintColor, 
+                        const float rotation, 
+                        uint64_t entityID) override;
+
+        void SubmitQuad(const glm::vec3& pos, 
+                        const glm::vec2& size, 
+                        TObjectPtr<LTexture> texture, 
+                        const glm::vec4& tintColor, 
+                        const float rotation, 
+                        uint64_t entityID) override;
+
+        void SubmitLine(const glm::vec2& pos, 
+                        const glm::vec2& size, 
+                        const glm::vec4& color, 
+                        uint64_t entityID = 0) override;
 
         void SetPrimitiveTopology(const ERenderTopology& InRenderTopology) override;
         void SetDepthFunction(const EDepthFunction& InDepthFunction) override;
 
         RendererCapabilities& GetCapabilities() override;
 
-        Ref<Renderer2DAPI> GetRenderer2D() override { return m_Renderer2D; }
-        Ref<Renderer2DAPI> GetRenderer2DAPI() override { return m_Renderer2D; }
-
         void BindTextureArray(int idx);
-        void BindTextureArray(const ETextureArrayDimension& TextureArrayDimension);
-        Ref<OpenGLTextureArray> GetTextureArray(int idx);
+        void BindTextureArray(const ETextureArrayDimension& InTextureArrayDimension);
+
+        TObjectPtr<OpenGLTextureArray> GetTextureArray(const int Index);
 
     private:
-        Ref<OpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension);
+        TObjectPtr<OpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension);
 
     private:
         uint8_t m_Topology = GL_TRIANGLES;
 
-        Ref<OpenGLRenderer2D> m_Renderer2D;
-        Ref<OpenGLContext> m_RenderContext;
+        TObjectPtr<LOpenGLRenderer2D> Renderer2D;
+        TObjectPtr<LOpenGLContext> RenderContext;
 
-        Ref<OpenGLRenderPass> m_GeometricPass;
-        Ref<OpenGLRenderPass> m_RenderPass2D;
+        TObjectPtr<OpenGLRenderPass> m_GeometricPass;
+        TObjectPtr<OpenGLRenderPass> m_RenderPass2D;
+
+        LCLASS(OpenGLRenderer)
     };
 
     namespace GLUtils {
@@ -95,6 +149,7 @@ namespace LkEngine {
                 case PrimitiveTopology::Points:     return GL_POINTS;
             }
             LK_CORE_ASSERT(false, "Unknown topology!");
+            return -1;
         }
 
     }

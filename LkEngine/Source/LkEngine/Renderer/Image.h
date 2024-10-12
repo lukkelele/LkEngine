@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <stb_image/stb_image.h>
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
 #include "LkEngine/Core/Memory/Buffer.h"
 
 #include "BlendingSpecification.h"
@@ -127,7 +129,9 @@ namespace LkEngine {
 		glm::uvec4 UIntValues;
 	};
 
-	namespace Utils {
+	/// RENAME
+	namespace Utils 
+	{
 		static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height);
 		static uint32_t CalculateMipCount(uint32_t width, uint32_t height);
 		static uint32_t BytesPerPixel(ImageFormat format);
@@ -156,10 +160,14 @@ namespace LkEngine {
 
 		ImageSpecification() = default;
 		ImageSpecification(const TextureSpecification& textureSpec)
-			: Width(textureSpec.Width), Height(textureSpec.Height)
-			, Path(textureSpec.Path), Format(textureSpec.Format)
-			, Filter(textureSpec.SamplerFilter), Wrap(textureSpec.SamplerWrap)
-			, Name(textureSpec.Name), DebugName(textureSpec.DebugName)
+			: Width(textureSpec.Width)
+			, Height(textureSpec.Height)
+			, Path(textureSpec.Path)
+			, Format(textureSpec.Format)
+			, Filter(textureSpec.SamplerFilter)
+			, Wrap(textureSpec.SamplerWrap)
+			, Name(textureSpec.Name)
+			, DebugName(textureSpec.DebugName)
 		{
 			textureSpec.GenerateMips ? Mips = Utils::CalculateMipCount(textureSpec.Width, textureSpec.Height) : Mips = 1;
 			Size = Utils::GetMemorySize(textureSpec.Format, textureSpec.Width, textureSpec.Height);
@@ -170,16 +178,16 @@ namespace LkEngine {
 	//-------------------------------------------------------------------------------
 	// Image
 	//-------------------------------------------------------------------------------
-	class Image : public RefCounted
+	class LImage : public LObject
 	{
 	public:
-		virtual ~Image() = default;
+		virtual ~LImage() = default;
 	
-		virtual void SetData(const void* data) = 0;
-		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		virtual void SetData(const void* InData) = 0;
+		virtual void Resize(const uint32_t InWidth, const uint32_t InHeight) = 0;
 
-		virtual Buffer GetBuffer() const = 0;
-		virtual Buffer& GetBuffer() = 0;
+		virtual FBuffer GetBuffer() const = 0;
+		virtual FBuffer& GetBuffer() = 0;
 
 		virtual void Invalidate() = 0;
 		virtual void RT_Invalidate() = 0;
@@ -190,36 +198,40 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
-		//virtual const ImageSpecification GetSpecification() const = 0;
-		//virtual ImageSpecification& GetSpecification() = 0;
 		virtual const ImageSpecification& GetSpecification() const = 0;
 	
 		virtual void Release() = 0;
-		virtual void AllocateMemory(uint64_t size) = 0;
+		virtual void AllocateMemory(const uint64_t InSize) = 0;
 
-		static Ref<Image> Create(ImageSpecification spec, Buffer buffer);
-		static Ref<Image> Create(ImageSpecification spec, void* data = nullptr);
+		/** Factory functions. */
+		static TObjectPtr<LImage> Create(const ImageSpecification& InSpecification, FBuffer InBuffer);
+		static TObjectPtr<LImage> Create(const ImageSpecification& InSpecification, void* InData = nullptr);
 	};
 
 
 	//-------------------------------------------------------------------------------
 	// Image2D
 	//-------------------------------------------------------------------------------
-	class Image2D : public Image
+	class LImage2D : public LImage
 	{
 	public:
-		virtual ~Image2D() = default;
+		virtual ~LImage2D() = default;
 
-		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		virtual void Resize(const uint32_t InWidth, const uint32_t InHeight) = 0;
 
-		static Ref<Image2D> Create(ImageSpecification spec, Buffer buffer);
-		static Ref<Image2D> Create(ImageSpecification spec, void* data = nullptr);
+		/** Factory functions. */
+		static TObjectPtr<LImage2D> Create(const ImageSpecification& InSpecification, FBuffer InBuffer);
+		static TObjectPtr<LImage2D> Create(const ImageSpecification& InSpecification, void* InData = nullptr);
 	};
 
 
-	namespace Utils {
-
-		static int64_t GetImageFormat(ImageFormat format)
+	/**
+	 * FIXME: Update and move this.
+	 * Utils
+	 */
+	namespace Utils 
+	{
+		FORCEINLINE static int64_t GetImageFormat(ImageFormat format)
 		{
 			switch (format)
 			{
@@ -230,7 +242,7 @@ namespace LkEngine {
 			return 0;
 		}
 
-		static uint32_t GetFormatBPP(ImageFormat format)
+		FORCEINLINE static uint32_t GetFormatBPP(ImageFormat format)
 		{
 			switch (format)
 			{
@@ -240,16 +252,17 @@ namespace LkEngine {
 				case ImageFormat::RGBA16F: return 2 * 4;
 				case ImageFormat::RGBA32F: return 4 * 4;
 			}
+
 			LK_CORE_ASSERT(false, "GetFormatBPP failed, format not recognized!");
 			return 0;
 		}
 
-		static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height)
+		FORCEINLINE static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height)
 		{
 			return width * height * GetFormatBPP(format);
 		}
 
-		static std::string ImageFormatToString(const ImageFormat format)
+		FORCEINLINE static std::string ImageFormatToString(const ImageFormat format)
 		{
 			switch (format)
 			{

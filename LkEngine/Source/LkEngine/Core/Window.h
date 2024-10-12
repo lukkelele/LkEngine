@@ -3,8 +3,9 @@
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/Base.h"
+
 #include "LkEngine/Core/String.h"
 #include "LkEngine/Core/ApplicationConfig.h"
 
@@ -57,26 +58,28 @@ namespace LkEngine {
         FORCEINLINE uint32_t GetHeight() const { return m_Height; }
         FORCEINLINE uint32_t GetViewportWidth()  const { return m_ViewportWidth; }
         FORCEINLINE uint32_t GetViewportHeight() const { return m_ViewportHeight; }
-	    FORCEINLINE glm::vec2 GetPos() const { return m_Pos; }
-	    FORCEINLINE glm::vec2 GetSize() const { return glm::vec2(m_Width, m_Height); }
-		FORCEINLINE glm::vec2 GetViewportSize() const { return { m_ViewportWidth, m_ViewportHeight }; }
+        FORCEINLINE glm::vec2 GetPos() const { return m_Pos; }
+        FORCEINLINE glm::vec2 GetSize() const { return glm::vec2(m_Width, m_Height); }
+        FORCEINLINE glm::vec2 GetViewportSize() const { return { m_ViewportWidth, m_ViewportHeight }; }
         FORCEINLINE std::string GetTitle() const { return m_Title; }
-        FORCEINLINE std::string GetShaderVersion() const { return m_GlslVersion;  }
+        FORCEINLINE std::string GetShaderVersion() const { return m_GlslVersion; }
         FORCEINLINE bool IsVSyncEnabled() const { return m_VSync; }
         FORCEINLINE void SetViewportWidth(uint32_t width) { m_ViewportWidth = width; }
         FORCEINLINE void SetViewportHeight(uint32_t height) { m_ViewportHeight = height; }
-        FORCEINLINE void SetDepthEnabled(bool enabled) { m_RenderContext->SetDepthEnabled(enabled); }
-        FORCEINLINE Ref<RenderContext> GetRenderContext() { return m_RenderContext; }
+        FORCEINLINE void SetDepthEnabled(bool enabled) { RenderContext->SetDepthEnabled(enabled); }
+        FORCEINLINE TObjectPtr<LRenderContext> GetRenderContext() { return RenderContext; }
 
         void SetSize(const glm::vec2& size);
         void SetVSync(bool enabled);
 
-        Ref<SwapChain> GetSwapChain();
-        Ref<RenderPass> GetRenderPass();
+        /// REMOVE
+        TObjectPtr<LSwapChain> GetSwapChain();
+        TObjectPtr<LRenderPass> GetRenderPass();
 
         void SetWidth(uint32_t width); // { m_Width = width; }
         void SetHeight(uint32_t height); // { m_Height = height; }
 
+        /// UPDATE
         float GetScalerX() const;
         float GetScalerY() const;
         glm::vec2 GetScalers() const;
@@ -85,12 +88,19 @@ namespace LkEngine {
         void SetScalers(float x, float y);
         void SetScalers(const glm::vec2& scalers);
 
-        // Callbacks
-		void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
+        /* TODO : Event category. */
+        FORCEINLINE void SetEventCallback(const FEventCallback& Callback)
+        {
+            m_Data.EventCallback = Callback;
+        }
+
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
-        FORCEINLINE static LWindow& Get() { return *m_Instance; }
+        FORCEINLINE static LWindow& Get()
+        {
+            return *Instance;
+        }
 
     private:
         std::string m_Title = "";
@@ -108,18 +118,25 @@ namespace LkEngine {
         {
             std::string Title;
             uint32_t Width, Height;
-            EventCallbackFn EventCallback;
-        } m_Data;
+            FEventCallback EventCallback;
+        };
+
+        WindowData m_Data{};
 
         GLFWwindow* m_GlfwWindow = nullptr;
 
-        Ref<Pipeline> m_Pipeline = nullptr;
-        Ref<SwapChain> m_SwapChain = nullptr;
-        Ref<RenderContext> m_RenderContext = nullptr;
+        TObjectPtr<LPipeline> m_Pipeline = nullptr;
+        TObjectPtr<LSwapChain> m_SwapChain = nullptr;
+        TObjectPtr<LRenderContext> RenderContext = nullptr;
 
-        inline static LWindow* m_Instance = nullptr;
+	    inline static bool bGlfwInitialized = false;
 
-        friend class EditorLayer;
+        inline static LWindow* Instance = nullptr;
+
+        friend class LEditorLayer;
+
+    private:
+        LCLASS(LWindow);
     };
 
 

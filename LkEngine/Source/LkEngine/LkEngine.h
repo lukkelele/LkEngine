@@ -11,6 +11,10 @@
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/Window.h"
 
+/* LObject. */
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
+
 #include "LkEngine/Core/IO/File.h"
 
 #include "LkEngine/Input/Mouse.h"

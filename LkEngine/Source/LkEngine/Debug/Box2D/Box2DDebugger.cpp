@@ -30,7 +30,7 @@ namespace LkEngine {
             glm::vec2 size = { 2.0f * extents.x, 2.0f * extents.y };
             glm::vec4 col = { color.r, color.g, color.b, color.a };
 
-            Renderer::SubmitQuad(pos, size, col, 0);
+            LRenderer::SubmitQuad(pos, size, col, 0);
         }
         // Triangle
         else if (vertexCount == 3)

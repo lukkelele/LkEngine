@@ -6,52 +6,45 @@ namespace LkEngine {
     
 	static std::mutex s_AssetRegistryMutex;
 
-	AssetMetadata& AssetRegistry::operator[](const AssetHandle handle)
+	FAssetMetadata& LAssetRegistry::operator[](const FAssetHandle AssetHandle)
 	{
 		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
 
-		LOG_ASSET("Retrieving handle {}", handle);
-		return m_AssetRegistry[handle];
+		LOG_ASSET("Retrieving AssetHandle {}", AssetHandle);
+		return m_AssetRegistry[AssetHandle];
 	}
 
-	const AssetMetadata& AssetRegistry::Get(const AssetHandle handle) const
+	const FAssetMetadata& LAssetRegistry::Get(const FAssetHandle AssetHandle) const
+	{
+		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
+		LK_ASSERT(m_AssetRegistry.find(AssetHandle) != m_AssetRegistry.end());
+
+		return m_AssetRegistry.at(AssetHandle);
+	}
+
+	FAssetMetadata& LAssetRegistry::Get(const FAssetHandle AssetHandle)
 	{
 		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
 
-		LK_ASSERT(m_AssetRegistry.find(handle) != m_AssetRegistry.end());
-		LOG_ASSET("Retrieving const handle {}", handle);
-		return m_AssetRegistry.at(handle);
+		return m_AssetRegistry[AssetHandle];
 	}
 
-	AssetMetadata& AssetRegistry::Get(const AssetHandle handle)
+	bool LAssetRegistry::Contains(const FAssetHandle AssetHandle) const
 	{
 		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
 
-		LOG_ASSET("Retrieving handle {}", handle);
-		return m_AssetRegistry[handle];
+		return m_AssetRegistry.find(AssetHandle) != m_AssetRegistry.end();
 	}
 
-	bool AssetRegistry::Contains(const AssetHandle handle) const
+	size_t LAssetRegistry::Remove(const FAssetHandle AssetHandle)
 	{
 		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
 
-		bool hasHandle = m_AssetRegistry.find(handle) != m_AssetRegistry.end();
-		if (!hasHandle)
-		{
-		}
-		LOG_ASSET("Contains handle: {}", hasHandle ? "YES" : "no");
-		return m_AssetRegistry.find(handle) != m_AssetRegistry.end();
+		LOG_ASSET("Removing AssetHandle", AssetHandle);
+		return m_AssetRegistry.erase(AssetHandle);
 	}
 
-	size_t AssetRegistry::Remove(const AssetHandle handle)
-	{
-		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
-
-		LOG_ASSET("Removing handle", handle);
-		return m_AssetRegistry.erase(handle);
-	}
-
-	void AssetRegistry::Clear()
+	void LAssetRegistry::Clear()
 	{
 		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
 

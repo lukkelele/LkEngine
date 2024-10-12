@@ -4,33 +4,30 @@
 #include "LkEngine/Core/Window.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLContext.h"
-//#include "LkEngine/Platform/Vulkan/VulkanContext.h"
 
 #include "RendererAPI.h"
 
 
 namespace LkEngine {
 
-	Ref<RenderContext> RenderContext::Create(LWindow* WindowRef)
+	TObjectPtr<LRenderContext> LRenderContext::Create(LWindow* WindowRef)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL:
 			{
-				return Ref<OpenGLContext>::Create(WindowRef);
+				return TObjectPtr<LOpenGLContext>::Create(WindowRef);
 			}
 
-			/// @FIXME:
-			//case RendererAPIType::Vulkan: return Ref<VulkanContext>::Create(window);
-
 			case ERendererAPI::None: break;
+			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Unknown RendererAPI");
 		return nullptr;
 	}
 
-	void RenderContext::SetProfile(const EProfile& InProfile)
+	void LRenderContext::SetProfile(const EProfile& InProfile)
 	{
 		ERendererAPI RenderAPI = LRendererAPI::Current();
 
@@ -64,16 +61,15 @@ namespace LkEngine {
 				break;
 			}
 		}
-
 	}
 
-	void RenderContext::SetVersion(const int MajorVersion, const int MinorVersion)
+	void LRenderContext::SetVersion(const int MajorVersion, const int MinorVersion)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::Vulkan: 
 			{
-				/* -- Empty -- */
+				/* Empty for now. */
 				return;
 			}
 			case ERendererAPI::OpenGL:
@@ -88,15 +84,16 @@ namespace LkEngine {
 		LK_CORE_ASSERT(false, "SetVersion(MAJOR, MINOR) failed, neither Vulkan or OpenGL was detected");
 	}
 
-	void RenderContext::HandleViewportEvents()
+	void LRenderContext::HandleViewportEvents()
 	{
 		LWindow& WindowRef = LWindow::Get();
-		int ViewportWidth{};
+		int ViewportWidth;
 		int ViewportHeight;
+
 		glfwGetWindowSize(WindowRef.GetGlfwWindow(), &ViewportWidth, &ViewportHeight);
 	}
 
-	std::string RenderContext::GetSourceBlendFunctionName(const ESourceBlendFunction& InSourceFunction)
+	std::string LRenderContext::GetSourceBlendFunctionName(const ESourceBlendFunction& InSourceFunction)
 	{
 		switch (InSourceFunction)
 		{
@@ -109,7 +106,7 @@ namespace LkEngine {
 		}
 	}
 
-	std::string RenderContext::GetDestinationBlendFunctionName(const EDestinationBlendFunction& InDestinationFunction)
+	std::string LRenderContext::GetDestinationBlendFunctionName(const EDestinationBlendFunction& InDestinationFunction)
 	{
 		switch (InDestinationFunction)
 		{

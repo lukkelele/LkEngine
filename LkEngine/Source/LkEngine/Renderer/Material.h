@@ -19,10 +19,11 @@ namespace LkEngine {
             , Friction(friction) {}
     };
 
-    class Material : public RefCounted
+	/// UPDATE THIS...
+    class LMaterial : public LObject
     {
     public:
-        virtual ~Material() = default;
+        virtual ~LMaterial() = default;
 
 		virtual void Invalidate() = 0;
 		virtual void OnShaderReloaded() = 0;
@@ -41,10 +42,12 @@ namespace LkEngine {
 		virtual void Set(const std::string& name, const glm::mat3& value) = 0;
 		virtual void Set(const std::string& name, const glm::mat4& value) = 0;
 
-		virtual void Set(const std::string& name, const Ref<Texture2D>& texture) = 0;
-		virtual void Set(const std::string& name, const Ref<Texture2D>& texture, uint32_t arrayIndex) = 0;
-		virtual void Set(const std::string& name, const Ref<Image2D>& image) = 0;
-		//virtual void Set(const std::string& name, const Ref<TextureCube>& texture) = 0;
+		virtual void Set(const std::string& name, const TObjectPtr<LTexture2D>& texture) = 0;
+		virtual void Set(const std::string& name, 
+						 const TObjectPtr<LTexture2D>& texture, 
+						 uint32_t arrayIndex) = 0;
+		virtual void Set(const std::string& name, const TObjectPtr<LImage2D>& image) = 0;
+		//virtual void Set(const std::string& name, const TObjectPtr<LTextureCube>& texture) = 0;
 		//virtual void Set(const std::string& name, const Ref<ImageView>& image) = 0;
 
 		virtual float& GetFloat(const std::string& name) = 0;
@@ -57,17 +60,23 @@ namespace LkEngine {
 		virtual glm::mat3& GetMatrix3(const std::string& name) = 0;
 		virtual glm::mat4& GetMatrix4(const std::string& name) = 0;
 
-		virtual void SetTexture(Ref<Texture> texture) = 0;
-		virtual Ref<Texture2D> GetTexture(const std::string& name = "") = 0;
-		virtual Ref<Texture2D> TryGetTexture(const std::string& name = "") = 0;
-		virtual Ref<TextureCube> GetTextureCube(const std::string& name) = 0;
-		virtual Ref<TextureCube> TryGetTextureCube(const std::string& name) = 0;
+		virtual void SetTexture(TObjectPtr<LTexture> texture) = 0;
 
-		virtual Ref<Shader> GetShader() = 0;
+		virtual TObjectPtr<LTexture2D> GetTexture(const std::string& name = "") = 0;
+		virtual const TObjectPtr<LTexture2D>& GetTexture(const std::string& name = "") const = 0;
+		virtual TObjectPtr<LTexture2D> TryGetTexture(const std::string& name = "") = 0;
+
+		virtual TObjectPtr<LTextureCube> GetTextureCube(const std::string& name) = 0;
+		virtual TObjectPtr<LTextureCube> TryGetTextureCube(const std::string& name) = 0;
+
+		virtual TObjectPtr<LShader> GetShader() = 0;
 		virtual const std::string& GetName() const = 0;
 
-    	static Ref<Material> Create(const Ref<Shader>& shader, const std::string& name = "");
-		static Ref<Material> Copy(const Ref<Material>& other, const std::string& name = "");
+    	static TObjectPtr<LMaterial> Create(const TObjectPtr<LShader>& Shader, const std::string& Name = "");
+		static TObjectPtr<LMaterial> Copy(const TObjectPtr<LMaterial>& Other, const std::string& name = "");
+
+	private:
+		LCLASS(LMaterial)
     };
 
 }

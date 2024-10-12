@@ -11,8 +11,8 @@ namespace LkEngine {
 	{
 		enum Type
 		{
-			NullAllowed, /** Null is okay, only assert on incorrect type */
-			NullChecked  /** Null is not allowed, assert on incorrect type or null */
+			NullAllowed,
+			NullChecked
 		};
 	};
 

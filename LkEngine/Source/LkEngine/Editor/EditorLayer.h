@@ -1,16 +1,24 @@
+/******************************************************************
+ * EditorLayer
+ *
+ * Main editor. 
+ *******************************************************************/
 #pragma once
 
 #include "LkEngine/Core/Thread.h"
 #include "LkEngine/Core/Layer.h"
+#include "LkEngine/Core/Delegate/Delegate.h"
+#include "LkEngine/Core/SelectionContext.h"
 #include "LkEngine/Core/Math/Math.h"
 
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
 
+#include "LkEngine/Editor/EditorGlobals.h"
+
 #include "LkEngine/Renderer/Framebuffer.h"
 
 #include "LkEngine/UI/UICore.h"
-#include "LkEngine/UI/SelectionContext.h"
 #include "LkEngine/UI/ContentBrowser.h"
 
 #include "LkEngine/Project/Project.h"
@@ -24,64 +32,73 @@
 
 namespace LkEngine {
 
-    constexpr const char* UI_CORE_VIEWPORT = "##lkengine-core-viewport";
-    constexpr const char* UI_RENDER_WINDOW = "##lkengine-render-window";
-    constexpr const char* UI_TOP_BAR = "##lkengine-top-bar";
-    constexpr const char* UI_BOTTOM_BAR = "##lkengine-lower-bar";
-    constexpr const char* UI_SIDEBAR_LEFT = "##lkengine-sidebar-left";
-    constexpr const char* UI_SIDEBAR_RIGHT = "##lkengine-sidebar-right";
-    constexpr const char* UI_SELECTED_ENTITY_INFO = "##lkengine-selected-entity-info";
-
-	class Scene;
+	class LScene;
 	class LSceneManagerPanel;
 
-	class EditorLayer : public Layer
+	/** EEditorWindowType */
+	enum class EEditorWindowType
+	{
+		None = 0,
+		Viewport,  // EditorLayer Viewport, 'normal' mode
+		NodeEditorLayer,
+	};
+
+	/** EGizmoType */
+	enum class EGizmoType
+	{
+		Translate = 7 << 0,
+		Rotate    = 7 << 3,
+		Scale     = 7 << 6
+	};
+
+	class LEditorLayer : public LLayer
 	{
 	public:
-		enum class WindowType
-		{
-			None = 0,
-			Viewport,  // EditorLayer Viewport, 'normal' mode
-			NodeEditorLayer,
-		};
+		LEditorLayer();
+		~LEditorLayer() = default;
 
-		enum GizmoType
-		{
-			Translate = 7 << 0,
-			Rotate    = 7 << 3,
-			Scale     = 7 << 6
-		};
-
-	public:
-		EditorLayer();
-		~EditorLayer() = default;
-
-		void Init();
+		void Initialize();
 		void OnUpdate();
 
 		void OnRender();
 		void OnImGuiRender();
 
-		void OnEvent(LEvent& e) override;
-		void RegisterEvent(LEvent& e);
+		virtual void OnEvent(LEvent& Event) override;
+		void RegisterEvent(LEvent& Event);
 
-		void SetEventCallback(const EventCallbackFn& callback) 
+		/* FIXME: Event category */
+		FORCEINLINE void SetEventCallback(const FEventCallback& Callback) 
 		{ 
-			m_EventCallback = callback; 
+			m_EventCallback = Callback; 
 		}
 
-		FORCEINLINE Ref<LEditorCamera> GetEditorCamera() { return EditorCamera; }
-		void SetScene(Ref<Scene> scene);
-		Ref<Scene> GetCurrentScene() { return m_Scene; }
+		void TestCallback(const LObject& Object)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "TestCallback: {}, ReferenceCount={}", Object.GetName(), Object.GetReferenceCount());
+		}
 
-		const char* UI_GetSelectedEntityWindowName() { return SelectedEntityWindow.c_str(); }
+		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() 
+		{ 
+			return EditorCamera; 
+		}
+
+		void SetScene(TObjectPtr<LScene> scene);
+
+		FORCEINLINE TObjectPtr<LScene> GetCurrentScene() 
+		{ 
+			return m_Scene; 
+		}
+
+		const char* UI_GetSelectedEntityWindowName() 
+		{ 
+			return SelectedEntityWindow.c_str(); 
+		}
+
 		void SetUpdateWindowFlag(bool flag);
 
-		WindowType GetCurrentWindowType() const 
-		{ 
-			return m_ActiveWindowType; 
-		}
+		FORCEINLINE EEditorWindowType GetCurrentWindowType() const { return CurrentWindowType; }
 
+		/* FIXME: Update all of these, refactor away. */
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
 		float GetEditorWindowHeight() const;
@@ -93,13 +110,13 @@ namespace LkEngine {
 		glm::vec2 GetMenuBarSize() const; 
 		glm::vec2 GetTabBarSize() const;
 
-		bool IsEnabled() const { return m_Enabled; }
+		FORCEINLINE bool IsEnabled() const { return m_Enabled; }
 
-		static EditorLayer* Get() { return m_Instance; }
+		FORCEINLINE static LEditorLayer* Get() { return Instance; }
 
 	private:
 		void RenderViewport();                
-		void RenderViewport(Ref<Image> image); 
+		void RenderViewport(TObjectPtr<LImage> Image); 
 
         void DrawImGuizmo(LEntity Entity);
 		void HandleExternalWindows();
@@ -122,7 +139,7 @@ namespace LkEngine {
 		void CheckRightSidebarSize();
 		void CheckBottomBarSize();
 
-		Ref<Framebuffer>& GetViewportFramebuffer() { return m_ViewportFramebuffer; }
+		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return m_ViewportFramebuffer; }
 
 		LEntity CreateCube();
 
@@ -151,43 +168,57 @@ namespace LkEngine {
 		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
 	private:
+		inline static glm::vec2 MenuBarSize = { 0.0f, 30.0f };
+		inline static glm::vec2 TabBarSize = { 0.0f, 34.0f };
+		inline static glm::vec2 BottomBarSize = { 0.0f, 240.0f };
+		inline static glm::vec2 LeftSidebarSize = { 340.0f, 0.0f };
+		inline static glm::vec2 RightSidebarSize = { 340.0f, 0.0f };
+		inline static glm::vec2 BottomBarPos = { 0.0f, 0.0f };
+		inline static glm::vec2 LeftSidebarPos = { 0.0f, 0.0f };
+		inline static glm::vec2 RightSidebarPos = { 0.0f, 0.0f };
+
+		inline static bool bWindowsHaveChangedInSize = true;
+		inline static bool bShowEditorWindowSizesWindow = false;
+	private:
 		LEditorTabManager& TabManager;
 
-		Ref<Scene> m_Scene = nullptr;
+		TObjectPtr<LScene> m_Scene = nullptr;
 		bool m_Enabled = true;
 		glm::vec2 m_ViewportBounds[2];
 		glm::vec2 m_SecondViewportBounds[2];
+
 		bool m_ShowMetricsTool = false;
 		bool m_ShowStackTool = false;
 		bool m_ShowStyleEditorLayer = false;
-		int m_GizmoType = GizmoType::Translate;
-		//int m_CurrentTabCount = 0; // Incremented to 1 after EditorLayer is initialized
 
-        EventCallbackFn m_EventCallback;
+		EGizmoType m_GizmoType = EGizmoType::Translate;
 
-		Ref<Framebuffer> m_ViewportFramebuffer;
-		Ref<LEditorCamera> EditorCamera;
+        FEventCallback m_EventCallback; /// UPDATE ME
+
+		TObjectPtr<LFramebuffer> m_ViewportFramebuffer;
+		TObjectPtr<LEditorCamera> EditorCamera;
 
 		TSharedPtr<LSceneManagerPanel> SceneManagerPanel;
 
-		Ref<Project> m_Project;
+		TObjectPtr<LProject> m_Project;
 
+		// Editor
 		NodeEditor* m_NodeEditor;
-		//LEditorTabManager* m_TabManager{};
-		ComponentEditor* m_ComponentEditor{};
-		ContentBrowser* m_ContentBrowser;
+		TUniquePtr<LComponentEditor> ComponentEditor{};
+		TUniquePtr<LContentBrowser> ContentBrowser;
+		// ~Editor
 
 		LWindow* Window = nullptr;
-		WindowType m_ActiveWindowType;
+		EEditorWindowType CurrentWindowType = EEditorWindowType::None;
 
 		/// REWORK
 		friend class Physics2D; // For getting UI window size when raycasting
 		friend class NodeEditorTab;
 		friend class MaterialEditorTab;
 		friend class LSceneManagerPanel; 
-		friend class Renderer;
+		friend class LRenderer;
 		
-		inline static EditorLayer* m_Instance = nullptr;
+		inline static LEditorLayer* Instance = nullptr;
 	};
 
 }

@@ -24,7 +24,7 @@ namespace LkEngine {
 		std::string DebugName;
 	};
 
-	class TextureArray : public RefCounted
+	class TextureArray : public LObject, public RefCounted
 	{
 	public:
 		virtual ~TextureArray() = default;
@@ -32,7 +32,7 @@ namespace LkEngine {
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
-		virtual void AddTextureToArray(Ref<Texture> texture) = 0;
+		virtual void AddTextureToArray(TObjectPtr<LTexture> texture) = 0;
 		virtual bool RemoveTextureFromArray(RendererID& rendererID) = 0;
 
 		virtual const RendererID GetRendererID() const = 0;
@@ -47,11 +47,14 @@ namespace LkEngine {
 		virtual void SetWidth(int width) = 0;
 		virtual void SetHeight(int height) = 0;
 
-		virtual bool HasTexture(const Ref<Texture>& texture) = 0;
-		virtual Ref<Texture> GetTextureWithID(RendererID id) = 0;
-		virtual int GetIndexOfTexture(const Ref<Texture>& texture) = 0;
+		virtual bool HasTexture(const TObjectPtr<LTexture>& texture) = 0;
+		virtual TObjectPtr<LTexture> GetTextureWithID(RendererID id) = 0;
+		virtual int GetIndexOfTexture(const TObjectPtr<LTexture>& texture) = 0;
 
 		static Ref<TextureArray> Create(const TextureArraySpecification& specification);
+
+	private:
+		LCLASS(TextureArray)
 	};
 
 	namespace Utils {

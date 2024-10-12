@@ -2,7 +2,8 @@
 
 #include <filesystem>
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
+
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/LObjectPtr.h"
 
@@ -11,49 +12,90 @@
 
 namespace LkEngine {
 
-    using AssetHandle = UUID;
+    using FAssetHandle = UUID;
 
-    class Asset : public RefCounted
+	/// TODO: Documentation
+    /**
+     * LAsset
+	 *
+	 *  Base asset class.
+     */
+    class LAsset : public LObject
     {
     public:
-        virtual ~Asset() = default;
+        virtual ~LAsset() = default;
 
-		static AssetType GetStaticType() { return AssetType::None; }
-		virtual AssetType GetAssetType() const { return AssetType::None; }
+		FORCEINLINE static EAssetType GetStaticType() { return EAssetType::None; }
 
-		virtual bool operator==(const Asset& other) const
+		/**
+		 * GetAssetType
+		 *
+		 *  Implemented by LASSET.
+		 */
+		FORCEINLINE virtual EAssetType GetAssetType() const { return EAssetType::None; }
+
+		virtual bool operator==(const LAsset& Other) const
 		{
-			return Handle == other.Handle;
+			return Handle == Other.Handle;
 		}
 		
-		virtual bool operator!=(const Asset& other) const
+		virtual bool operator!=(const LAsset& Other) const
 		{
-			return !(*this == other);
+			return !(*this == Other);
 		}
 
-		bool IsFlagSet(AssetFlag flag) const { return (uint16_t)flag & Flags; }
-		void SetFlag(AssetFlag flag, bool value = true)
+		FORCEINLINE bool IsFlagSet(EAssetFlag InFlag) const 
+		{ 
+			return (InFlag & Flags);
+		}
+
+		void SetFlag(AssetFlag::Type InFlag, bool InValue = true)
 		{
-			if (value)
-				Flags |= (uint16_t)flag;
+			if (InValue)
+			{
+				Flags |= InFlag;
+			}
 			else
-				Flags &= ~(uint16_t)flag;
+			{
+				Flags &= ~InFlag;
+			}
 		}
 
     public:
-        AssetHandle Handle = 0;
+        FAssetHandle Handle = 0;
 		uint16_t Flags = (uint16_t)AssetFlag::None;
+
+	private:
+		LCLASS(LAsset)
     };
 
-	struct AssetMetadata
+	/**
+	 * LAudioAsset
+	 */
+	class LAudioAsset : public LAsset
 	{
-		AssetHandle Handle = 0;
-		AssetType Type;
+	public:
+		LAudioAsset() = default;
+		~LAudioAsset() = default;
+
+		FORCEINLINE static EAssetType GetStaticType() { return EAssetType::Audio; }
+
+	private:
+		LASSET(LAudioAsset)
+	};
+
+	struct FAssetMetadata
+	{
+		FAssetHandle Handle = 0;
+		EAssetType Type;
 		std::filesystem::path FilePath;
 		bool IsDataLoaded = false;
 		bool IsMemoryAsset = false;
-		//bool IsValid() const { return Handle != 0 && !IsMemoryAsset; }
-		bool IsValid() const { return Handle != 0; }
+
+		FORCEINLINE bool IsValid() const 
+		{ 
+			return (Handle != 0);
+		}
 	};
 
 }

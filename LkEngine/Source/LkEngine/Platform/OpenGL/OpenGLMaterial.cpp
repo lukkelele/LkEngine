@@ -6,145 +6,151 @@
 
 namespace LkEngine {
 
-    OpenGLMaterial::OpenGLMaterial(const Ref<Shader>& shader, const std::string& name)
-        : m_Shader(shader.As<OpenGLShader>())
-        , m_Name(name)
+    LOpenGLMaterial::LOpenGLMaterial(const TObjectPtr<LShader>& InShader, const std::string& InName)
+        : Shader(InShader.As<OpenGLShader>())
+        , Name(InName)
     {
-		Renderer::RegisterShaderDependency(m_Shader, this);
-        m_Texture = Renderer::GetWhiteTexture();
+		//LRenderer::RegisterShaderDependency(Shader, this);
+		//LRenderer::RegisterShaderDependency(Shader, (*this).As<LMaterial>());
+
+        Texture = LRenderer::GetWhiteTexture();
     }
 
-   	OpenGLMaterial::OpenGLMaterial(Ref<Material> material, const std::string& name)
-		: m_Shader(material->GetShader().As<OpenGLShader>())
-        , m_Name(name)
+   	LOpenGLMaterial::LOpenGLMaterial(TObjectPtr<LMaterial> material, const std::string& InName)
+		: Shader(material->GetShader().As<OpenGLShader>())
+        , Name(InName)
 	{
-		Renderer::RegisterShaderDependency(m_Shader, this);
-		if (name.empty())
-			m_Name = material->GetName();
-        
-        if (Ref<Texture2D> texture = material->GetTexture(""))
+		//LRenderer::RegisterShaderDependency(Shader, this);
+		//LRenderer::RegisterShaderDependency(Shader, (*this).As<LMaterial>());
+
+        if (InName.empty())
         {
-            m_Texture = texture;
+			Name = material->GetName();
+        }
+        
+        if (TObjectPtr<LTexture2D> MaterialTexture = material->GetTexture(""))
+        {
+            Texture = MaterialTexture;
         }
         else
         {
-            m_Texture = Renderer::GetWhiteTexture();
+            Texture = LRenderer::GetWhiteTexture();
         }
 
-		Ref<OpenGLMaterial> glMaterial = material.As<OpenGLMaterial>();
-		m_UniformStorageBuffer = Buffer::Copy(glMaterial->m_UniformStorageBuffer.Data, glMaterial->m_UniformStorageBuffer.Size);
-        //m_Texture = glMaterial->GetTexture("");
+		TObjectPtr<LOpenGLMaterial> glMaterial = material.As<LOpenGLMaterial>();
+		m_UniformStorageBuffer = FBuffer::Copy(glMaterial->m_UniformStorageBuffer.Data, 
+                                               glMaterial->m_UniformStorageBuffer.Size);
 
         LK_CORE_WARN_TAG("OpenGLMaterial", "Created new material based on another material called \"{}\"", material->GetName());
 	}
 
-    OpenGLMaterial::~OpenGLMaterial()
+    void LOpenGLMaterial::Invalidate()
     {
     }
 
-    void OpenGLMaterial::Invalidate()
+    void LOpenGLMaterial::OnShaderReloaded()
     {
     }
 
-    void OpenGLMaterial::OnShaderReloaded()
+    void LOpenGLMaterial::SetTexture(TObjectPtr<LTexture> InTexture)
+    {
+        LK_CORE_ASSERT(InTexture, "Passed texture is nullptr");
+        Texture = InTexture.As<LTexture2D>();
+        LK_CORE_WARN_TAG("OpenGLMaterial", "Set texture {} to material \"{}\"", Texture->GetName(), Name);
+    }
+
+    TObjectPtr<LTexture2D> LOpenGLMaterial::GetTexture(const std::string& name)
+    {
+        //LK_CORE_ASSERT(Texture, "LOpenGLMaterial::m_Texture ({}) is nullptr!", Name);
+        return Texture;
+    }
+
+    const TObjectPtr<LTexture2D>& LOpenGLMaterial::GetTexture(const std::string& name) const
+    {
+        return Texture;
+    }
+
+    TObjectPtr<LTexture2D> LOpenGLMaterial::TryGetTexture(const std::string& name)
+    {
+        return Texture;
+    }
+
+    void LOpenGLMaterial::Set(const std::string& name, int value)
     {
     }
 
-    void OpenGLMaterial::SetTexture(Ref<Texture> texture)
-    {
-        LK_CORE_ASSERT(texture);
-        m_Texture = texture.As<Texture2D>();
-        LK_CORE_ASSERT(m_Texture, "OpenGLMaterial::m_Texture ({}) is nullptr even after setting it with {}", m_Name, texture->GetName());
-        LK_CORE_WARN_TAG("OpenGLMaterial", "Set texture {} to material \"{}\"", texture->GetName(), m_Name);
-    }
-
-    Ref<Texture2D> OpenGLMaterial::GetTexture(const std::string& name)
-    {
-        //LK_CORE_ASSERT(m_Texture, "OpenGLMaterial::m_Texture ({}) is nullptr!", m_Name);
-        return m_Texture;
-    }
-
-    Ref<Texture2D> OpenGLMaterial::TryGetTexture(const std::string& name)
-    {
-        return m_Texture;
-    }
-
-    void OpenGLMaterial::Set(const std::string& name, int value)
-    {
-    }
-
-    void OpenGLMaterial::Set(const std::string& name, bool value)
+    void LOpenGLMaterial::Set(const std::string& name, bool value)
     {
         LK_CORE_INFO_TAG("OpenGLMaterial", "Setting (bool) value {}", value);
     }
 
-    void OpenGLMaterial::Set(const std::string& name, float value)
+    void LOpenGLMaterial::Set(const std::string& name, float value)
     {
         LK_CORE_INFO_TAG("OpenGLMaterial", "Setting (float) value {}", value);
     }
 
-    void OpenGLMaterial::Set(const std::string& name, uint32_t value)
+    void LOpenGLMaterial::Set(const std::string& name, uint32_t value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const glm::vec2& value)
+    void LOpenGLMaterial::Set(const std::string& name, const glm::vec2& value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const glm::vec3& value)
+    void LOpenGLMaterial::Set(const std::string& name, const glm::vec3& value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const glm::vec4& value)
+    void LOpenGLMaterial::Set(const std::string& name, const glm::vec4& value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const glm::ivec2& value)
+    void LOpenGLMaterial::Set(const std::string& name, const glm::ivec2& value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const glm::ivec3& value)
+    void LOpenGLMaterial::Set(const std::string& name, const glm::ivec3& value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const glm::ivec4& value)
+    void LOpenGLMaterial::Set(const std::string& name, const glm::ivec4& value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const glm::mat3& value)
+    void LOpenGLMaterial::Set(const std::string& name, const glm::mat3& value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const glm::mat4& value)
+    void LOpenGLMaterial::Set(const std::string& name, const glm::mat4& value)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const Ref<Texture2D>& texture)
+    void LOpenGLMaterial::Set(const std::string& name, const TObjectPtr<LTexture2D>& texture)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const Ref<Texture2D>& texture, uint32_t arrayIndex)
+    void LOpenGLMaterial::Set(const std::string& name, const TObjectPtr<LTexture2D>& texture, uint32_t arrayIndex)
     {
     }
 
-    void OpenGLMaterial::Set(const std::string& name, const Ref<Image2D>& image)
+    void LOpenGLMaterial::Set(const std::string& name, const TObjectPtr<LImage2D>& image)
     {
     }
 
-    float& OpenGLMaterial::GetFloat(const std::string& name)
+    float& LOpenGLMaterial::GetFloat(const std::string& name)
     {
         float f = 0;
         return f;
     }
 
-    int32_t& OpenGLMaterial::GetInt(const std::string& name)
+    int32_t& LOpenGLMaterial::GetInt(const std::string& name)
     {
         LK_CORE_ASSERT(false);
         int32_t i = 0;
         return i;
     }
 
-    uint32_t& OpenGLMaterial::GetUInt(const std::string& name)
+    uint32_t& LOpenGLMaterial::GetUInt(const std::string& name)
     {
         // TODO: insert return statement here
         LK_CORE_ASSERT(false);
@@ -152,7 +158,7 @@ namespace LkEngine {
         return i;
     }
 
-    bool& OpenGLMaterial::GetBool(const std::string& name)
+    bool& LOpenGLMaterial::GetBool(const std::string& name)
     {
         // TODO: insert return statement here
         LK_CORE_ASSERT(false);
@@ -160,55 +166,55 @@ namespace LkEngine {
         return boolean;
     }
 
-    glm::vec2& OpenGLMaterial::GetVector2(const std::string& name)
+    glm::vec2& LOpenGLMaterial::GetVector2(const std::string& name)
     {
         LK_CORE_ASSERT(false);
         glm::vec2 vec2(0.0f);
         return vec2;
     }
 
-    glm::vec3& OpenGLMaterial::GetVector3(const std::string& name)
+    glm::vec3& LOpenGLMaterial::GetVector3(const std::string& name)
     {
         // TODO: insert return statement here
         glm::vec3 vec3(0.0f);
         return vec3;
     }
 
-    glm::vec4& OpenGLMaterial::GetVector4(const std::string& name)
+    glm::vec4& LOpenGLMaterial::GetVector4(const std::string& name)
     {
-        //m_Shader->GetUniforms
+        //Shader->GetUniforms
         glm::vec4 vec4(0.0f);
         return vec4;
     }
 
-    glm::mat3& OpenGLMaterial::GetMatrix3(const std::string& name)
+    glm::mat3& LOpenGLMaterial::GetMatrix3(const std::string& name)
     {
         glm::mat3 mat(1.0f);
         return mat;
     }
 
-    glm::mat4& OpenGLMaterial::GetMatrix4(const std::string& name)
+    glm::mat4& LOpenGLMaterial::GetMatrix4(const std::string& name)
     {
         glm::mat4 mat(1.0f);
         return mat;
     }
 
-    Ref<Shader> OpenGLMaterial::GetShader()
+    TObjectPtr<LShader> LOpenGLMaterial::GetShader()
     {
-        return m_Shader;
+        return Shader;
     }
 
-    const std::string& OpenGLMaterial::GetName() const
+    const std::string& LOpenGLMaterial::GetName() const
     {
-        return m_Name;
+        return Name;
     }
 
-    Ref<TextureCube> OpenGLMaterial::GetTextureCube(const std::string& name)
+    TObjectPtr<LTextureCube> LOpenGLMaterial::GetTextureCube(const std::string& name)
     {
         return nullptr;
     }
 
-    Ref<TextureCube> OpenGLMaterial::TryGetTextureCube(const std::string& name)
+    TObjectPtr<LTextureCube> LOpenGLMaterial::TryGetTextureCube(const std::string& name)
     {
         return nullptr;
     }

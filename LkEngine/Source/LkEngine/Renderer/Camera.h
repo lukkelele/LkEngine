@@ -1,11 +1,16 @@
 #pragma once
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
 
-//
-// TODO:
-// * Need to clean this up
-//
-//
+#include "LkEngine/Input/Keyboard.h"
+#include "LkEngine/Input/Mouse.h"
+
+///
+/// TODO:
+/// * Need to clean this up
+///
+///
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -16,25 +21,30 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include "LkEngine/Input/Keyboard.h"
-#include "LkEngine/Input/Mouse.h"
-
 
 namespace LkEngine {
 
-	class Camera : public RefCounted 
+	class LCamera : public LObject
 	{
 	public:
 		enum class ProjectionType { Perspective = 0, Orthographic = 1 };
 		enum class Type { None = 0, Scene = 1, Editor = 2 };
 	public:
-		Camera() = default;
-		Camera(const glm::mat4& projection);
-		Camera(const float degFov, const float width, const float height, const float nearP, const float farP);
-		virtual ~Camera() = default;
+		LCamera() = default;
+		LCamera(const glm::mat4& projection);
+		LCamera(const float degFov, 
+				const float width, 
+				const float height, 
+				const float nearP, 
+				const float farP);
+		virtual ~LCamera() = default;
 
 		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
-		virtual void SetProjection(glm::mat4& proj) { m_ProjectionMatrix = proj; } 
+
+		virtual void SetProjection(glm::mat4& proj) 
+		{ 
+			m_ProjectionMatrix = proj;
+		}
 
 		float GetRotation() { return glm::radians(m_Rotation); }
 		Type GetType() const { return m_Type; }

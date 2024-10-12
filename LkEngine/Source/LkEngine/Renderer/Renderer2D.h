@@ -5,19 +5,25 @@
 
 namespace LkEngine {
 
-    class SceneCamera;
+    class LSceneCamera;
 
-    class Renderer2D : public RefCounted
+    /// @FIXME:
+    /// Rewrite this
+    /// Too many virtual nested calls here.
+    /// Performance SUCKS
+
+    //class Renderer2D : public RefCounted
+    class LRenderer2D : public RefCounted
     {
     public:
         static void Init();
         static void Shutdown();
-        static void BeginScene(const SceneCamera& camera);
-        static void BeginScene(const SceneCamera& camera, const glm::mat4& transform);
+        static void BeginScene(const LSceneCamera& camera);
+        static void BeginScene(const LSceneCamera& camera, const glm::mat4& transform);
         static void EndScene();
         static void Flush();
 
-        static void DrawImage(const Ref<Image> image);
+        static void DrawImage(const TObjectPtr<LImage> image);
 
         static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0);
 
@@ -26,9 +32,14 @@ namespace LkEngine {
         static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
         static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
 
-        static void DrawQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture2D, float rotation, uint64_t entityID = 0);
-        static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, float rotation, uint64_t entityID = 0);
-        static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID = 0);
+        static void DrawQuad(const glm::vec2& pos, 
+                             const glm::vec2& size, 
+                             TObjectPtr<LTexture> texture2D, 
+                             float rotation, 
+                             uint64_t entityID = 0);
+
+        static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, TObjectPtr<LTexture> texture, float rotation, uint64_t entityID = 0);
+        static void DrawQuad(const glm::vec3& pos, const glm::vec2& size, TObjectPtr<LTexture> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID = 0);
 
         static void DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
         static void DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0);
@@ -39,10 +50,15 @@ namespace LkEngine {
         static float GetLineWidth();
         static void SetLineWidth(float width);
 
-        void SetRenderer(const Ref<Renderer2DAPI>& renderer) { m_Renderer2D = renderer; }
+        /// FIXME: REMOVE
+        FORCEINLINE void SetRenderer(IRenderer2DAPI* InRenderer) 
+        { 
+            LK_UNUSED(InRenderer);
+            //Renderer2D = InRenderer; 
+        }
 
     protected:
-        inline static Ref<Renderer2DAPI> m_Renderer2D = nullptr;
+        inline static TUniquePtr<IRenderer2DAPI> Renderer2D = nullptr;
 
         friend class RendererAPI;
     };

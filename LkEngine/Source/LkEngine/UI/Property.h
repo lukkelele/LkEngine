@@ -1,28 +1,31 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
-#include "LkEngine/UI/UICore.h"
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/UI/UICore.h"
+#include "LkEngine/Core/Math/MathLibrary.h"
 
 #include <imgui/imgui.h>
 #include <imgui_internal.h>
-#include <glm/glm.hpp>
 
 
 namespace LkEngine::UI {
 
+	/// FIXME: REFACTOR THIS
     namespace Property {
 
-		static void Rotation2D(TransformComponent& transform)
+		static void Rotation2D(LTransformComponent& transform)
 		{
 			UI::PushID();
-			auto rot = transform.GetRotation();
-			ImGui::SliderFloat2("Rot", &rot.x, -6.0f, 6.0f, "%.3f");
-			transform.SetRotation(rot);
+			{
+				auto rot = transform.GetRotation();
+				ImGui::SliderFloat2("Rot", &rot.x, -6.0f, 6.0f, "%.3f");
+				transform.SetRotation(rot);
+			}
 			UI::PopID();
 		}
 
-		static void Scale2D(uint32_t id, TransformComponent& transform)
+		static void Scale2D(uint32_t id, LTransformComponent& transform)
 		{
 			UI::PushID();
 

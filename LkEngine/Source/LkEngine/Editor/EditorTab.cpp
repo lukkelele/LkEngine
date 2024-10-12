@@ -64,14 +64,14 @@ namespace LkEngine {
     //       Basically just replicate what's done in Editor, but I have no energy to do that now lol
     void MaterialEditorTab::OnImGuiRender()
     {
-        auto* editor = EditorLayer::Get();
+        LEditorLayer* Editor = LEditorLayer::Get();
         static float div = 0.30f;
 
         static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar
             | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
-        ImVec2 nodeWindowSize = ImVec2(editor->EditorWindowSize.x * (1 - div), editor->EditorWindowSize.y);
-		ImGui::SetNextWindowPos({ editor->m_SecondViewportBounds[0].x, (editor->GetMenuBarSize().y + editor->GetTabBarSize().y)}, ImGuiCond_Always);
+        ImVec2 nodeWindowSize = ImVec2(Editor->EditorWindowSize.x * (1 - div), Editor->EditorWindowSize.y);
+		ImGui::SetNextWindowPos({ Editor->m_SecondViewportBounds[0].x, (Editor->GetMenuBarSize().y + Editor->GetTabBarSize().y)}, ImGuiCond_Always);
 		ImGui::SetNextWindowSize(nodeWindowSize, ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(0, nodeWindowSize.y), ImGuiCond_Always);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -83,8 +83,8 @@ namespace LkEngine {
 
 #if 0
         ImGui::SetNextWindowBgAlpha(0.2f);
-		ImGui::SetNextWindowPos({ editor->GetLeftSidebarSize().x + (editor->EditorWindowSize.x * (1 - div)), (editor->GetMenuBarSize().y + editor->GetTabBarSize().y)}, ImGuiCond_Always);
-		ImGui::SetNextWindowSize({ editor->EditorWindowSize.x * div, editor->EditorWindowSize.y }, ImGuiCond_Always);
+		ImGui::SetNextWindowPos({ Editor->GetLeftSidebarSize().x + (Editor->EditorWindowSize.x * (1 - div)), (Editor->GetMenuBarSize().y + Editor->GetTabBarSize().y)}, ImGuiCond_Always);
+		ImGui::SetNextWindowSize({ Editor->EditorWindowSize.x * div, Editor->EditorWindowSize.y }, ImGuiCond_Always);
         UI::Begin(MaterialRef->GetName().c_str(), windowFlags);
         {
             // Roughness

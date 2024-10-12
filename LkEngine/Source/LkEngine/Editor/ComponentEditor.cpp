@@ -12,34 +12,28 @@
 
 namespace LkEngine {
 
-    ComponentEditor::ComponentEditor()
+    void LComponentEditor::Init()
     {
     }
 
-    ComponentEditor::~ComponentEditor()
+    void LComponentEditor::OnRender()
     {
     }
 
-    void ComponentEditor::Init()
-    {
-    }
-
-    void ComponentEditor::OnRender()
-    {
-    }
-
-    void ComponentEditor::OnImGuiRender()
+    void LComponentEditor::OnImGuiRender()
     {
         static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;
         if (ImGui::TreeNodeEx("Materials", treeNodeFlags))
         {
             static std::string selected_material = "";
-            auto& materials = Renderer::GetMaterialLibrary()->GetMaterials();
-            for (std::pair<std::string, Ref<Material>> MaterialEntry : materials)
+
+            auto& Materials = LMaterialLibrary::Get().GetMaterials();
+            for (std::pair<std::string, TObjectPtr<LMaterial>> MaterialEntry : Materials)
             {
                 const std::string& MaterialName = MaterialEntry.first;
-			    const bool is_selected = (MaterialName == selected_material);
-                if (ImGui::Selectable(MaterialName.c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAllColumns))
+			    const bool bIsSelected = (MaterialName == selected_material);
+
+                if (ImGui::Selectable(MaterialName.c_str(), bIsSelected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAllColumns))
                 {
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                     {
@@ -49,20 +43,23 @@ namespace LkEngine {
                             fmt::format("Edit - {}", MaterialName.c_str()), 
                             EditorTabType::MaterialEditor
                         );
+
                         MaterialEditorTab& MaterialEditorTabRef = static_cast<MaterialEditorTab&>(*NewTab.get());
                         MaterialEditorTabRef.MaterialRef = MaterialEntry.second;
                     }
                 }
 
-                if (is_selected)
+                if (bIsSelected)
+                {
                     ImGui::SetItemDefaultFocus();
+                }
             }
 
             ImGui::TreePop();
         }
         if (ImGui::TreeNodeEx("Textures", treeNodeFlags))
         {
-            for (auto& texture2DEntry : TextureLibrary::Get()->GetTextures2D())
+            for (auto& texture2DEntry : LTextureLibrary::Get().GetTextures2D())
             {
                 auto& texture2D = texture2DEntry.second;
                 if (ImGui::TreeNodeEx(texture2DEntry.first.c_str(), treeNodeFlags))
@@ -77,7 +74,7 @@ namespace LkEngine {
         ImGui::Separator();
     }
 
-    void ComponentEditor::RenderMaterialEditor(Material& material)
+    void LComponentEditor::RenderMaterialEditor(LMaterial& Material)
     {
         //UI::PushID();
         //float roughness = material.GetRoughness();
@@ -86,7 +83,7 @@ namespace LkEngine {
         //UI::PopID();
     }
 
-    void ComponentEditor::RenderTextureEditor(const Ref<Texture> texture)
+    void LComponentEditor::RenderTextureEditor(const TObjectPtr<LTexture> texture)
     {
         UI::PushID();
         ImGui::Text("Path: %s", texture->GetPath().string().c_str());
@@ -94,7 +91,7 @@ namespace LkEngine {
         UI::PopID();
     }
 
-    void ComponentEditor::RenderTextureEditor(const Ref<Texture2D> texture)
+    void LComponentEditor::RenderTextureEditor(const TObjectPtr<LTexture2D> texture)
     {
         UI::PushID();
         ImGui::Text("Path: %s", texture->GetPath().string().c_str());

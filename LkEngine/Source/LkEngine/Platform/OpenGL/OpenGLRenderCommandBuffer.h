@@ -5,11 +5,11 @@
 
 namespace LkEngine {
 
-	class OpenGLRenderCommandBuffer : public RenderCommandBuffer
+	class OpenGLRenderCommandBuffer : public LRenderCommandBuffer
 	{
 	public:
-		OpenGLRenderCommandBuffer(uint32_t count = 0, std::string debugName = "");
-		OpenGLRenderCommandBuffer(std::string debugName, bool swapchain);
+		OpenGLRenderCommandBuffer(uint32_t Count = 0, std::string_view InDebugName = "");
+		OpenGLRenderCommandBuffer(std::string_view InDebugName, bool bSwapchain);
 		~OpenGLRenderCommandBuffer() override;
 
 		virtual void Begin() override;
@@ -24,10 +24,10 @@ namespace LkEngine {
 			return m_ExecutionGPUTimes[frameIndex][queryIndex / 2];
 		}
 
-		const PipelineStatistics& GetPipelineStatistics(uint32_t frameIndex) const;
+		virtual const PipelineStatistics& GetPipelineStatistics(const uint32_t frameIndex) const override;
 
-		uint32_t BeginTimestampQuery() override;
-		void EndTimestampQuery(uint32_t queryID) override;
+		virtual uint32_t BeginTimestampQuery() override;
+		virtual void EndTimestampQuery(uint32_t queryID) override;
 
 	private:
 		std::string m_DebugName;

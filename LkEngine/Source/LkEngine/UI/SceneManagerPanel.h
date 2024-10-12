@@ -8,11 +8,12 @@
 
 namespace LkEngine {
 
-	class SceneManagerPanel : public Panel
+	class LSceneManagerPanel : public IPanel
 	{
 	public:
-		SceneManagerPanel();
-		SceneManagerPanel(const Ref<Scene>& scene);
+		LSceneManagerPanel();
+		LSceneManagerPanel(const TObjectPtr<LScene>& InScene);
+		~LSceneManagerPanel();
 
 		void Init();
 
@@ -22,23 +23,29 @@ namespace LkEngine {
 		void DrawEntityNode(LEntity entity);
 		static void DrawComponents(LEntity entity);
 
+		/**
+		 * DrawComponent
+		 */
 		template<typename T, typename UIFunction>
-		static void DrawComponent(const std::string& name, LEntity entity, UIFunction uiFunction);
+		static void DrawComponent(const std::string& name, 
+								  LEntity entity, 
+								  UIFunction uiFunction);
 
 		template<typename T>
-		void DisplayAddComponentEntry(const std::string& entryName);
+		void DisplayAddComponentEntry(const std::string& InComponentEntryName);
 
 		void UI_SelectedEntityProperties();
 
-		void SetScene(const Ref<Scene>& scene);
+		void SetScene(const TObjectPtr<LScene>& scene);
 		std::pair<float, float> GetMouseViewportSpace(bool primaryViewport);
 
 		void UI_CameraSettings();
 
 	private:
-		Ref<Scene> m_Scene;
+		TObjectPtr<LScene> m_Scene;
+		TObjectPtr<LScene> m_ComponentCopyScene;
 
-		Ref<Scene> m_ComponentCopyScene;
+		/// FIXME: REWORK THIS
 		LEntity m_ComponentCopyEntity;
 	};
 

@@ -24,14 +24,14 @@ namespace LkEngine {
 
     static bool Initialized = false;
 
-    OpenGLRenderer2D::OpenGLRenderer2D(const OpenGLRenderer2DSpecification& specification) 
+    LOpenGLRenderer2D::LOpenGLRenderer2D(const OpenGLRenderer2DSpecification& specification) 
         : m_Specification(specification)
         , m_MaxVertices(specification.MaxQuads * 4)
         , m_MaxIndices(specification.MaxQuads * 6)
         , m_MaxLineVertices(specification.MaxLines * 2)
         , m_MaxLineIndices(specification.MaxLines * 6)
     {
-        m_Renderer2DAPI = this;
+        Renderer2DAPI = this;
 
         m_CameraBuffer = {};
         m_CameraUniformBuffer = {};
@@ -40,19 +40,15 @@ namespace LkEngine {
         m_LineIndexCount = 0;
     }
 
-    OpenGLRenderer2D::~OpenGLRenderer2D()
-    {
-    }
-
-    void OpenGLRenderer2D::Init()
+    void LOpenGLRenderer2D::Init()
     {
         LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Initializing");
-        const uint32_t framesInFlight = Renderer::GetFramesInFlight();
+        const uint32_t framesInFlight = LRenderer::GetFramesInFlight();
 
         // Shaders
         {
-            m_QuadShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Quad");
-            m_LineShader = Renderer::GetShaderLibrary()->Get("Renderer2D_Line");
+            m_QuadShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Quad");
+            m_LineShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Line");
         }
 
         // Quad
@@ -65,7 +61,7 @@ namespace LkEngine {
 		    quadFramebufferSpec.DebugName = "OpenGLRenderer2D_Framebuffer";
             quadFramebufferSpec.Width = LWindow::Get().GetWidth();
             quadFramebufferSpec.Height = LWindow::Get().GetHeight();
-		    Ref<Framebuffer> quadFramebuffer = Framebuffer::Create(quadFramebufferSpec);
+		    TObjectPtr<LFramebuffer> quadFramebuffer = LFramebuffer::Create(quadFramebufferSpec);
 
             m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
             m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
@@ -80,16 +76,18 @@ namespace LkEngine {
 
             RenderPassSpecification quadPassSpec;
             quadPassSpec.DebugName = "Renderer2D-QuadPass";
-            quadPassSpec.Pipeline = Pipeline::Create(quadPipelineSpec);
-            Ref<OpenGLPipeline> openglPipeline = quadPassSpec.Pipeline.As<OpenGLPipeline>();
-            m_QuadMaterial = Material::Create(m_QuadShader, "QuadMaterial");
+            quadPassSpec.Pipeline = LPipeline::Create(quadPipelineSpec);
+            TObjectPtr<LOpenGLPipeline> OpenGLPipeline = quadPassSpec.Pipeline.As<LOpenGLPipeline>();
+            m_QuadMaterial = LMaterial::Create(m_QuadShader, "QuadMaterial");
 
             // Use correct amount of texture array uniforms
             for (uint8_t textureArray = 0; textureArray < m_Specification.TextureArraysUsed; textureArray++)
-                openglPipeline->BindTextureArray(textureArray);
-            m_QuadPass = RenderPass::Create(quadPassSpec);
+            {
+                OpenGLPipeline->BindTextureArray(textureArray);
+            }
+            m_QuadPass = LRenderPass::Create(quadPassSpec);
             
-            m_QuadVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
+            m_QuadVertexBuffer = LVertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
             m_QuadVertexBuffer->SetLayout({
                 { "a_Position",       ShaderDataType::Float3  },
                 { "a_Color",          ShaderDataType::Float4  },
@@ -115,7 +113,7 @@ namespace LkEngine {
                 offset += 4;
             }
 
-            Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, m_MaxIndices);
+            TObjectPtr<LIndexBuffer> quadIB = LIndexBuffer::Create(quadIndices, m_MaxIndices);
             m_QuadVertexBuffer->SetIndexBuffer(quadIB);
             m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
 
@@ -124,7 +122,7 @@ namespace LkEngine {
 
         // Lines
         {
-            m_LineVertexBuffer = VertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
+            m_LineVertexBuffer = LVertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
             VertexBufferLayout lineVertexBufLayout{ };
             m_LineVertexBuffer->SetLayout({
                 { "a_Pos",       ShaderDataType::Float3, },
@@ -133,32 +131,34 @@ namespace LkEngine {
             });
             m_LineVertexBufferBase = new LineVertex[m_MaxVertices];
 
-            uint32_t* lineIndices = new uint32_t[m_MaxLineIndices];
+            uint32_t* LineIndices = new uint32_t[m_MaxLineIndices];
             for (uint32_t i = 0; i < m_MaxLineIndices; i++)
-		        lineIndices[i] = i;
-
-		    delete[] lineIndices;
+            {
+		        LineIndices[i] = i;
+            }
+		    delete[] LineIndices;
         }
 
-        //m_WhiteTexture = Renderer::GetTextureLibrary()->GetWhiteTexture();
-        m_WhiteTexture = TextureLibrary::Get()->GetWhiteTexture();
+        m_WhiteTexture = LTextureLibrary::Get().GetWhiteTexture();
 
         m_CameraBuffer.ViewProjection = glm::mat4(1.0f);
-        m_CameraUniformBuffer = Ref<OpenGLUniformBuffer>::Create(sizeof(CameraData));
+        m_CameraUniformBuffer = TObjectPtr<LOpenGLUniformBuffer>::Create(sizeof(CameraData));
         m_CameraUniformBuffer->SetBinding(m_QuadShader, "UB_Camera", 0); // Binding is set default to 0 in Renderer_Quad.shader
 
-        m_RenderCommandBuffer = RenderCommandBuffer::Create(0, "OpenGLRenderer2D-RenderCommandBuffer");
+        m_RenderCommandBuffer = LRenderCommandBuffer::Create(0, "OpenGLRenderer2D-RenderCommandBuffer");
 
         for (uint32_t i = 0; i < m_TextureArrays.size(); i++)
         {
             if (m_TextureArrays[i])
+            {
                 m_TextureArrays[i]->Bind();
+            }
         }
 
         Initialized = true;
     }
 
-    void OpenGLRenderer2D::BeginScene(const SceneCamera& camera)
+    void LOpenGLRenderer2D::BeginScene(const LSceneCamera& camera)
     {
         m_CameraBuffer.ViewProjection = camera.GetViewProjectionMatrix();
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
@@ -166,7 +166,7 @@ namespace LkEngine {
         StartBatch();
     }
 
-    void OpenGLRenderer2D::BeginScene(const SceneCamera& camera, const glm::mat4& transform)
+    void LOpenGLRenderer2D::BeginScene(const LSceneCamera& camera, const glm::mat4& transform)
     {
         m_CameraBuffer.ViewProjection = camera.GetProjectionMatrix() * glm::inverse(transform);
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
@@ -174,7 +174,7 @@ namespace LkEngine {
         StartBatch();
     }
 
-    void OpenGLRenderer2D::BeginScene(const glm::mat4& viewProjectionMatrix)
+    void LOpenGLRenderer2D::BeginScene(const glm::mat4& viewProjectionMatrix)
     {
         m_CameraBuffer.ViewProjection = viewProjectionMatrix;
         m_CameraUniformBuffer->SetData(&m_CameraBuffer, sizeof(CameraData));
@@ -182,7 +182,7 @@ namespace LkEngine {
         StartBatch();
     }
 
-    void OpenGLRenderer2D::StartBatch()
+    void LOpenGLRenderer2D::StartBatch()
     {
         m_QuadIndexCount = 0;
         m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
@@ -191,20 +191,20 @@ namespace LkEngine {
         m_LineVertexBufferPtr = m_LineVertexBufferBase;
     }
 
-    void OpenGLRenderer2D::NextBatch()
+    void LOpenGLRenderer2D::NextBatch()
     {
         Flush();
         StartBatch();
     }
 
-    void OpenGLRenderer2D::EndScene()
+    void LOpenGLRenderer2D::EndScene()
     {
         Flush();
     }
 
-    void OpenGLRenderer2D::Flush()
+    void LOpenGLRenderer2D::Flush()
     {
-		uint32_t frameIndex = Renderer::GetCurrentFrameIndex();
+		uint32_t frameIndex = LRenderer::GetCurrentFrameIndex();
         uint32_t dataSize = 0;
 
         // Quads
@@ -213,13 +213,19 @@ namespace LkEngine {
             dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
-			Renderer::RenderGeometry(m_RenderCommandBuffer, m_QuadPass->GetPipeline(), m_QuadShader, m_QuadVertexBuffer, m_QuadIndexBuffer, m_CameraBuffer.ViewProjection, m_QuadIndexCount);
+			LRenderer::RenderGeometry(m_RenderCommandBuffer, 
+                                      m_QuadPass->GetPipeline(), 
+                                      m_QuadShader, 
+                                      m_QuadVertexBuffer, 
+                                      m_QuadIndexBuffer, 
+                                      m_CameraBuffer.ViewProjection, 
+                                      m_QuadIndexCount);
 
             m_Stats.DrawCalls++;
         }
     }
 
-    void OpenGLRenderer2D::Shutdown()
+    void LOpenGLRenderer2D::Shutdown()
     {
         for (auto& textureArray : m_TextureArrays)
         {
@@ -233,16 +239,16 @@ namespace LkEngine {
         delete m_LineVertexBufferPtr;
     }
 
-    void OpenGLRenderer2D::DrawImage(const Ref<Image> image)
+    void LOpenGLRenderer2D::DrawImage(const TObjectPtr<LImage> image)
     {
     }
 
-    void OpenGLRenderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
     {
         DrawQuad({ pos.x, pos.y, 0.0f }, size, color);
     }
 
-    void OpenGLRenderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
     {
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
             * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -250,17 +256,17 @@ namespace LkEngine {
         DrawQuad(transform, color, entityID);
     }
 
-    void OpenGLRenderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
     {
         DrawQuad({ pos.x, pos.y, 0.0f }, size, color, rotation, entityID);
     }
 
-    void OpenGLRenderer2D::DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawRotatedQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
     {                                                                                                     
         DrawQuad({ pos.x, pos.y, 0.0f }, size, color, rotation);                                   
     } 
 
-    void OpenGLRenderer2D::DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawRotatedQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
     {
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
             * glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
@@ -269,7 +275,7 @@ namespace LkEngine {
         DrawQuad(transform, color, entityID);
     }
 
-    void OpenGLRenderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
     {
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)
             * glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
@@ -278,7 +284,7 @@ namespace LkEngine {
         DrawQuad(transform, color, entityID);
     }
                                                                                                           
-    void OpenGLRenderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID)
     {
         LK_ASSERT(false);
         const float textureIndex = 0; 
@@ -300,12 +306,12 @@ namespace LkEngine {
         m_Stats.QuadCount++;
     }
 
-    void OpenGLRenderer2D::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint64_t entityID)
     {
         DrawLine({ p0.x, p0.y, 0.0f }, { p1.x, p1.y, 0.0f }, color, entityID);
     }
 
-    void OpenGLRenderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, uint64_t entityID)
     {
         m_LineVertexBufferPtr->Position = p0;
         m_LineVertexBufferPtr->Color = color;
@@ -319,21 +325,36 @@ namespace LkEngine {
         m_Stats.LineCount++;
     }
 
-    void OpenGLRenderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture2D> texture2D, float rotation, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawQuad(const glm::vec2& pos, 
+                                     const glm::vec2& size, 
+                                     TObjectPtr<LTexture2D> texture2D, 
+                                     const float rotation, 
+                                     const uint64_t entityID)
     {
         DrawQuad({ pos.x, pos.y, 0.0f }, size, texture2D, rotation, entityID);
     }
 
-    void OpenGLRenderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D> texture, float rotation, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawQuad(const glm::vec3& pos, 
+                                     const glm::vec2& size, 
+                                     TObjectPtr<LTexture2D> texture, 
+                                     const float rotation, 
+                                     const uint64_t entityID)
     {
         DrawQuad(pos, size, texture, { 1.0f, 1.0f, 1.0f, 1.0f }, rotation, entityID);
     }
 
-    void OpenGLRenderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture2D> texture, const glm::vec4& tintColor, float rotation, uint64_t entityID)
+    void LOpenGLRenderer2D::DrawQuad(const glm::vec3& pos, 
+                                     const glm::vec2& size, 
+                                     TObjectPtr<LTexture2D> texture, 
+                                     const glm::vec4& tintColor, 
+                                     const float rotation, 
+                                     const uint64_t entityID)
     {
         LK_CORE_ASSERT(texture, "Passed texture to DrawQuad was nullptr");
         if (m_QuadIndexCount >= m_MaxIndices)
+        {
             NextBatch();
+        }
 
         float textureIndex = 0.0f;
         float textureArrayIndex = 0.0f;
@@ -368,29 +389,29 @@ namespace LkEngine {
         m_Stats.QuadCount++;
     }
 
-    float OpenGLRenderer2D::GetLineWidth()
+    float LOpenGLRenderer2D::GetLineWidth()
     {
         return m_LineWidth;
     }
 
-    void OpenGLRenderer2D::SetLineWidth(float width)
+    void LOpenGLRenderer2D::SetLineWidth(float width)
     {
     }
 
-    void OpenGLRenderer2D::ResetStats()
+    void LOpenGLRenderer2D::ResetStats()
     {
     }
 
-    Renderer2DAPI::Statistics OpenGLRenderer2D::GetStats()
+    IRenderer2DAPI::Statistics LOpenGLRenderer2D::GetStats()
     {
         return m_Stats;
     }
 
-    void OpenGLRenderer2D::AddTextureToSlot(Ref<Texture2D> texture)
+    void LOpenGLRenderer2D::AddTextureToSlot(TObjectPtr<LTexture2D> texture)
     {
         for (int i = 1; i < MaxTextureSlots; i++)
         {
-            if (m_TextureSlots[i] == nullptr)
+            if (!m_TextureSlots[i])
             {
                 m_TextureSlots[i] = texture;
                 LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Added texture \"{}\" to slot {}!", texture->GetName(), i);
@@ -399,7 +420,7 @@ namespace LkEngine {
         }
     }
 
-    void OpenGLRenderer2D::AddTextureToSlot(Ref<Texture2D> texture, int slot)
+    void LOpenGLRenderer2D::AddTextureToSlot(TObjectPtr<LTexture2D> texture, int slot)
     {
         if (m_TextureSlots[slot] == nullptr)
         {
@@ -408,30 +429,32 @@ namespace LkEngine {
         }
     }
 
-	void OpenGLRenderer2D::AddQuadBuffer()
+	void LOpenGLRenderer2D::AddQuadBuffer()
 	{
 	}
 
-	void OpenGLRenderer2D::AddLineBuffer()
+	void LOpenGLRenderer2D::AddLineBuffer()
 	{
 	}
 
-	QuadVertex*& OpenGLRenderer2D::GetWriteableQuadBuffer()
+	QuadVertex*& LOpenGLRenderer2D::GetWriteableQuadBuffer()
 	{
 		return m_QuadVertexBufferPtr;
 	}
 
-	LineVertex*& OpenGLRenderer2D::GetWriteableLineBuffer()
+	LineVertex*& LOpenGLRenderer2D::GetWriteableLineBuffer()
 	{
         return m_LineVertexBufferPtr;
 	}
 
-    void OpenGLRenderer2D::AddTextureArray(const Ref<OpenGLTextureArray>& textureArray)
+    void LOpenGLRenderer2D::AddTextureArray(const TObjectPtr<OpenGLTextureArray>& textureArray)
     {
         for (int i = 0; i < MaxTextureArrays; i++)
         {
             if (m_TextureArrays[i] == nullptr)
+            {
                 m_TextureArrays[i] = textureArray;
+            }
         }
     }
 

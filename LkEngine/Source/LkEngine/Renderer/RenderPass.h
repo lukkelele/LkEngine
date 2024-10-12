@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 #include "UniformBuffer.h"
 #include "Pipeline.h"
@@ -51,29 +51,30 @@ namespace LkEngine {
 
 	struct RenderPassSpecification
 	{
-		Ref<Pipeline> Pipeline;
+		TObjectPtr<LPipeline> Pipeline{};
+
 		glm::vec4 MarkerColor;
 
 		std::string DebugName;
 	};
 
-	class RenderPass : public RefCounted
+	class LRenderPass : public LObject
 	{
 	public:
-		virtual ~RenderPass() = default;
+		virtual ~LRenderPass() = default;
 
 		virtual RenderPassSpecification& GetSpecification() = 0;
 		virtual const RenderPassSpecification& GetSpecification() const = 0;
 
-		virtual Ref<Pipeline> GetPipeline() const = 0;
-		virtual Ref<Framebuffer> GetTargetFramebuffer() const = 0;
+		virtual TObjectPtr<LPipeline> GetPipeline() const = 0;
+		virtual TObjectPtr<LFramebuffer> GetTargetFramebuffer() const = 0;
 
-		virtual void SetInput(std::string_view name, Ref<Image> image) = 0;
-		virtual void SetInput(std::string_view name, Ref<Texture2D> texture) = 0;
-		virtual void SetInput(std::string_view name, Ref<UniformBuffer> uniformBuffer) = 0;
+		virtual void SetInput(std::string_view name, TObjectPtr<LImage> image) = 0;
+		virtual void SetInput(std::string_view name, TObjectPtr<LTexture2D> texture) = 0;
+		virtual void SetInput(std::string_view name, TObjectPtr<LUniformBuffer> uniformBuffer) = 0;
 
-		virtual Ref<Image> GetOutput(uint32_t index) = 0;
-		virtual Ref<Image> GetDepthOutput() = 0;
+		virtual TObjectPtr<LImage> GetOutput(uint32_t index) = 0;
+		virtual TObjectPtr<LImage> GetDepthOutput() = 0;
 		virtual uint32_t GetFirstSetIndex() const =0;
 
 		virtual bool Validate() = 0;
@@ -83,7 +84,10 @@ namespace LkEngine {
 
 		virtual void Terminate() = 0;
 
-		static Ref<RenderPass> Create(const RenderPassSpecification& spec);
+		static TObjectPtr<LRenderPass> Create(const RenderPassSpecification& spec);
+
+	private:
+		LCLASS(LRenderPass)
 	};
 
 

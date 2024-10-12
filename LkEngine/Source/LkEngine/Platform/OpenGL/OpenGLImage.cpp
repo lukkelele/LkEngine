@@ -6,30 +6,79 @@
 
 namespace LkEngine {
 
-	//-------------------------------------------------------------------------------
-	// OpenGLImage
-	//-------------------------------------------------------------------------------
-    OpenGLImage::OpenGLImage(ImageSpecification spec, void* data)
-        : m_Specification(spec)
-	{
-		if (data)
+    LOpenGLImage::LOpenGLImage(const ImageSpecification& InImageSpecification, FBuffer&& InBuffer)
+		: m_Specification(InImageSpecification)
+		, m_ImageData(std::move(InBuffer))
+    {
+		if (m_ImageData.Data)
 		{
-			m_ImageData = Buffer::Copy(data, m_Specification.Size);
+		#if 0
+            const uint64_t ImageSize = Utils::GetMemorySize(InImageSpecification.Format, 
+															InImageSpecification.Width, 
+															InImageSpecification.Height);
+		#endif
 
 			glGenTextures(1, &m_RendererID);
 			glBindTexture(GL_TEXTURE_2D, m_RendererID);
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data);
-			LK_CORE_TRACE("Created OpenGLImage");
-			//glGenerateTextureMipmap(m_RendererID);
+			glTexImage2D(GL_TEXTURE_2D, 
+						 0, 
+						 GLUtils::OpenGLImageInternalFormat(InImageSpecification.Format), 
+						 InImageSpecification.Width, 
+						 InImageSpecification.Height, 
+						 0, 
+						 GLUtils::OpenGLImageFormat(InImageSpecification.Format), 
+						 GL_UNSIGNED_BYTE, 
+						 (const void*)m_ImageData.Data);
 
 			if (m_Specification.Mips > 1)
 			{
 				glGenerateTextureMipmap(m_RendererID);
-				LK_CORE_DEBUG_TAG("OpenGLImage", "ImageSpecification::Mips > 1 ==> Generating mipmap");
 			}
-			else
-				LK_CORE_DEBUG_TAG("OpenGLImage", "ImageSpecification::Mips < 1 ==> Not generating mipmap");
+
+			GLUtils::ApplyTextureWrap(m_Specification.Wrap);
+			GLUtils::ApplyTextureFilter(m_Specification.Filter, m_Specification.Mips > 1);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	#if 0 /* FIXME: Remove */
+		else
+		{
+			// Data is null, try to load it from path
+			stbi_set_flip_vertically_on_load(1);
+			int width, height, channels;
+			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
+			m_ImageData = FBuffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
+
+			stbi_image_free(data);
+		}
+	#endif
+    }
+
+    LOpenGLImage::LOpenGLImage(const ImageSpecification& InImageSpecification, void* InData)
+        : m_Specification(InImageSpecification)
+	{
+		if (InData)
+		{
+			m_ImageData = FBuffer::Copy(InData, m_Specification.Size);
+
+			glGenTextures(1, &m_RendererID);
+			glBindTexture(GL_TEXTURE_2D, m_RendererID);
+
+			glTexImage2D(GL_TEXTURE_2D, 
+						 0, 
+						 GLUtils::OpenGLImageInternalFormat(InImageSpecification.Format), 
+						 InImageSpecification.Width, 
+						 InImageSpecification.Height, 
+						 0, 
+						 GLUtils::OpenGLImageFormat(InImageSpecification.Format), 
+						 GL_UNSIGNED_BYTE, 
+						 (const void*)m_ImageData.Data);
+
+			if (m_Specification.Mips > 1)
+			{
+				glGenerateTextureMipmap(m_RendererID);
+			}
 
 			GLUtils::ApplyTextureWrap(m_Specification.Wrap);
 			GLUtils::ApplyTextureFilter(m_Specification.Filter, m_Specification.Mips > 1);
@@ -40,244 +89,255 @@ namespace LkEngine {
 
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			stbi_image_free(data);
+			/* Clean up resources. */
+			stbi_image_free(InData);
 		}
+	#if 0 /* FIXME: Remove */
 		else
 		{
-			// Data is null, try to load it from path
-			stbi_set_flip_vertically_on_load(1);
+			/* TODO: I don't really like this approach. Should prob just crash here. */
+			/* Data is null, try to load it from path. */
+
 			int width, height, channels;
-			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
-			m_ImageData = Buffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
-			stbi_image_free(data);
+			stbi_set_flip_vertically_on_load(1);
+
+			void* LoadedImageData = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
+			m_ImageData = FBuffer(LoadedImageData, Utils::GetMemorySize(m_Specification.Format, width, height));
+
+			/* Clean up resources. */
+			stbi_image_free(LoadedImageData);
 
 			Invalidate();
 		}
+	#endif
     }
 
-    OpenGLImage::OpenGLImage(ImageSpecification spec, Buffer buffer)
-		: m_Specification(spec)
+    LOpenGLImage::~LOpenGLImage()
     {
-		if (buffer.Data)
-		{
-			//m_ImageData = Buffer::Copy(data, spec.Size);
-            uint64_t memorySize = Utils::GetMemorySize(spec.Format, spec.Width, spec.Height);
-			//m_ImageData = Buffer::Copy(data, memorySize);
-
-			glGenTextures(1, &m_RendererID);
-			glBindTexture(GL_TEXTURE_2D, m_RendererID);
-
-			glTexImage2D(GL_TEXTURE_2D, 0, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height, 0, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, (const void*)m_ImageData.Data);
-			if (m_Specification.Mips > 1)
-			{
-				glGenerateTextureMipmap(m_RendererID);
-				LK_CORE_DEBUG_TAG("OpenGLImage", "ImageSpecification::Mips > 1 ==> Generating mipmap");
-			}
-			else
-				LK_CORE_DEBUG_TAG("OpenGLImage", "ImageSpecification::Mips < 1 ==> Not generating mipmap");
-
-			GLUtils::ApplyTextureWrap(m_Specification.Wrap);
-			GLUtils::ApplyTextureFilter(m_Specification.Filter, m_Specification.Mips > 1);
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-		else
-		{
-			// Data is null, try to load it from path
-			stbi_set_flip_vertically_on_load(1);
-			int width, height, channels;
-			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
-			m_ImageData = Buffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
-
-			stbi_image_free(data);
-		}
+		//LK_OpenGL(glMakeTextureHandleNonResidentARB(m_HandleARB));
     }
 
-    OpenGLImage::~OpenGLImage()
-    {
-		//GL_CALL(glMakeTextureHandleNonResidentARB(m_HandleARB));
-    }
-
-	void OpenGLImage::SetData(const void* data)
+	void LOpenGLImage::SetData(const void* data)
     {
 		m_ImageData.Release();
 		m_ImageData.Data = (void*)data;
     }
 
-    void OpenGLImage::Resize(uint32_t width, uint32_t height)
+    void LOpenGLImage::Resize(uint32_t width, uint32_t height)
     {
     }
 
-    void OpenGLImage::Invalidate()
+    void LOpenGLImage::Invalidate()
     {
-		Buffer imageData = Buffer::Copy(m_ImageData);
+		FBuffer imageData = FBuffer::Copy(m_ImageData);
 		if (m_RendererID)
+		{
             Release();
+		}
 
 		m_ImageData = imageData;
         GLenum internalFormat = GLUtils::OpenGLImageInternalFormat(m_Specification.Format);
-        //uint32_t mipCount = Utils::CalculateMipCount(m_Specification.Width, m_Specification.Height);
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-		glTextureStorage2D(m_RendererID, Utils::CalculateMipCount(m_Specification.Width, m_Specification.Height), 
-			GLUtils::OpenGLImageInternalFormat(m_Specification.Format), m_Specification.Width, m_Specification.Height);
+		glTextureStorage2D(m_RendererID, 
+						   Utils::CalculateMipCount(m_Specification.Width, m_Specification.Height), 
+						   GLUtils::OpenGLImageInternalFormat(m_Specification.Format), 
+						   m_Specification.Width, 
+						   m_Specification.Height);
+
         if (m_ImageData)
         {
-			glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Specification.Width, m_Specification.Height, 
-				GLUtils::OpenGLImageFormat(m_Specification.Format), GLUtils::OpenGLFormatDataType(m_Specification.Format), m_ImageData.Data);
-			if (m_Specification.Mips > 1)
-				glGenerateTextureMipmap(m_RendererID);
-        }
+			glTextureSubImage2D(m_RendererID, 
+								0, 
+								0, 
+								0, 
+								m_Specification.Width, 
+								m_Specification.Height, 
+								GLUtils::OpenGLImageFormat(m_Specification.Format), 
+								GLUtils::OpenGLFormatDataType(m_Specification.Format), 
+								(const void*)m_ImageData.Data);
 
+			if (m_Specification.Mips > 1)
+			{
+				glGenerateTextureMipmap(m_RendererID);
+			}
+        }
     }
 
-	void OpenGLImage::RT_Invalidate()
+	void LOpenGLImage::RT_Invalidate()
 	{
 	}
 
-    void OpenGLImage::AllocateMemory(uint64_t size)
+    void LOpenGLImage::AllocateMemory(uint64_t size)
     {
     }
 
-    void OpenGLImage::Release()
+    void LOpenGLImage::Release()
     {
         if (m_RendererID)
         {
             glDeleteTextures(1, &m_RendererID);
             m_RendererID = 0;
         }
+
         m_ImageData.Release();
     }
 
 
-	//-------------------------------------------------------------------------------
-	// OpenGLImage2D
-	//-------------------------------------------------------------------------------
-    OpenGLImage2D::OpenGLImage2D(const ImageSpecification spec, Buffer buffer)
-		: m_Specification(spec)
+    LOpenGLImage2D::LOpenGLImage2D(const ImageSpecification& InImageSpecification, FBuffer&& InBuffer)
+		: m_Specification(InImageSpecification)
+		, m_ImageData(std::move(InBuffer))
     {
-		if (buffer.Data)
+		if (m_ImageData)
 		{
-			glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-			glTextureStorage2D(m_RendererID, spec.Mips, GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height);
-			glTextureSubImage2D(m_RendererID, 0, 0, 0, spec.Width, spec.Height, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, m_ImageData.Data);
+			LK_OpenGL(glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID));
+			LK_CORE_ASSERT(m_RendererID != 0, "RendererID is 0");
 
-			//if (m_Specification.Mips > 1)
-			//	glGenerateTextureMipmap(m_RendererID);
+			LK_OpenGL(glTextureStorage2D(m_RendererID,
+					  m_Specification.Mips,
+					  GLUtils::OpenGLImageInternalFormat(m_Specification.Format),
+					  m_Specification.Width,
+					  m_Specification.Height));
 
+			LK_CORE_VERIFY(m_ImageData.Data, "Image data is nullptr");
+			LK_OpenGL(glTextureSubImage2D(m_RendererID,
+					  0,
+					  0,
+					  0,
+					  m_Specification.Width,
+					  m_Specification.Height,
+					  GLUtils::OpenGLImageFormat(m_Specification.Format),
+					  GL_UNSIGNED_BYTE,
+					  (const void*)m_ImageData.Data));
+
+			//LK_CORE_DEBUG_TAG("OpenGLImage2D", "Generate Texture Mipmap");
 			if (m_Specification.Mips > 1)
 			{
 				glGenerateTextureMipmap(m_RendererID);
-				LK_CORE_DEBUG_TAG("OpenGLImage2D", "ImageSpecification::Mips > 1 ==> Generating mipmap");
 			}
-			else
-				LK_CORE_DEBUG_TAG("OpenGLImage2D", "ImageSpecification::Mips < 1 ==> Not generating mipmap");
 
 			GLUtils::ApplyTextureWrap(m_RendererID, m_Specification.Wrap);
-			GLUtils::ApplyTextureFilter(m_RendererID, m_Specification.Filter, m_Specification.Mips > 1);
+			GLUtils::ApplyTextureFilter(m_RendererID, 
+										m_Specification.Filter, 
+										m_Specification.Mips > 1);
 		}
-		else
-		{
-			// Data is null, try to load it from path
-			stbi_set_flip_vertically_on_load(1);
-			int width, height, channels;
-			void* data = stbi_load(m_Specification.Path.c_str(), &width, &height, &channels, 4);
-			if (!data)
-				data = stbi_load("assets/Textures/white-texture.png", &width, &height, &channels, 4);
-			m_ImageData = Buffer(data, Utils::GetMemorySize(m_Specification.Format, width, height));
-			stbi_image_free(data);
-		}
-
     }
 
-    OpenGLImage2D::OpenGLImage2D(const ImageSpecification spec, void* data)
-        : m_Specification(spec)
+    LOpenGLImage2D::LOpenGLImage2D(const ImageSpecification& InImageSpecification, void* InData)
+        : m_Specification(InImageSpecification)
 	{
-		if (data)
+		if (InData)
 		{
-            uint64_t memorySize = Utils::GetMemorySize(spec.Format, spec.Width, spec.Height);
-			m_ImageData = Buffer::Copy(data, memorySize);
+            const uint64_t ImageSize = Utils::GetMemorySize(InImageSpecification.Format, 
+															InImageSpecification.Width, 
+															InImageSpecification.Height);
+			m_ImageData = FBuffer(InData, ImageSize);
 
-			glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-			glTextureStorage2D(m_RendererID, Utils::CalculateMipCount(spec.Width, spec.Height), GLUtils::OpenGLImageInternalFormat(spec.Format), spec.Width, spec.Height);
-			glTextureSubImage2D(m_RendererID, 0, 0, 0, spec.Width, spec.Height, GLUtils::OpenGLImageFormat(spec.Format), GL_UNSIGNED_BYTE, m_ImageData.Data);
+			LK_OpenGL(glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID));
 
-			//if (m_Specification.Mips > 1)
-			//	glGenerateTextureMipmap(m_RendererID);
+			LK_OpenGL(glTextureStorage2D(m_RendererID, 
+					  Utils::CalculateMipCount(InImageSpecification.Width, InImageSpecification.Height), 
+					  GLUtils::OpenGLImageInternalFormat(InImageSpecification.Format), 
+					  InImageSpecification.Width, 
+					  InImageSpecification.Height));
+
+			LK_OpenGL(glTextureSubImage2D(
+				m_RendererID, 
+				0, 
+				0, 
+				0, 
+				InImageSpecification.Width, 
+				InImageSpecification.Height, 
+				GLUtils::OpenGLImageFormat(InImageSpecification.Format), 
+				GL_UNSIGNED_BYTE, 
+				(const void*)m_ImageData.Data)
+			);
 
 			if (m_Specification.Mips > 1)
 			{
-				glGenerateTextureMipmap(m_RendererID);
-				LK_CORE_DEBUG_TAG("OpenGLImage2D", "ImageSpecification::Mips > 1 ==> Generating mipmap");
+				LK_OpenGL(glGenerateTextureMipmap(m_RendererID));
 			}
-			else
-				LK_CORE_DEBUG_TAG("OpenGLImage2D", "ImageSpecification::Mips < 1 ==> Not generating mipmap");
 
 			GLUtils::ApplyTextureWrap(m_RendererID, m_Specification.Wrap);
-			GLUtils::ApplyTextureFilter(m_RendererID, m_Specification.Filter, m_Specification.Mips > 1);
+			GLUtils::ApplyTextureFilter(m_RendererID,
+										m_Specification.Filter,
+										(m_Specification.Mips > 1));
 
-			stbi_image_free(data);
-		}
-		else
-		{
-			LK_CORE_ASSERT(false, "Passed data was NULL, image spec: {}", spec.Name);
+			/* Clean up used assigned image data. */
+			stbi_image_free(InData);
 		}
     }
 
-    OpenGLImage2D::~OpenGLImage2D()
+    LOpenGLImage2D::~LOpenGLImage2D()
     {
 		Release();
     }
 
-	void OpenGLImage2D::SetData(const void* data)
+	void LOpenGLImage2D::SetData(const void* data)
     {
 		m_ImageData.Release();
 		m_ImageData.Data = (void*)data;
     }
 
-    void OpenGLImage2D::Resize(uint32_t width, uint32_t height)
+    void LOpenGLImage2D::Resize(uint32_t width, uint32_t height)
     {
-		LK_CORE_DEBUG_TAG("OpenGLImage", "Resize ({}, {})", width, height);
+		LK_CORE_DEBUG_TAG("LOpenGLImage", "Resize ({}, {})", width, height);
     }
 
-    void OpenGLImage2D::Invalidate()
+    void LOpenGLImage2D::Invalidate()
     {
-		Buffer imageData = Buffer::Copy(m_ImageData);
+		//FBuffer imageData = FBuffer::Copy(m_ImageData);
+		FBuffer imageData = m_ImageData;
 		if (m_RendererID)
+		{
             Release();
+		}
 
 		m_ImageData = imageData;
-        GLenum internalFormat = GLUtils::OpenGLImageInternalFormat(m_Specification.Format);
-        uint32_t mipCount = Utils::CalculateMipCount(m_Specification.Width, m_Specification.Height);
+        const GLenum internalFormat = GLUtils::OpenGLImageInternalFormat(m_Specification.Format);
+        const uint32_t mipCount = Utils::CalculateMipCount(m_Specification.Width, m_Specification.Height);
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-		glTextureStorage2D(m_RendererID, mipCount, internalFormat, m_Specification.Width, m_Specification.Height);
+		glTextureStorage2D(m_RendererID, 
+						   mipCount, 
+						   internalFormat, 
+						   m_Specification.Width, 
+						   m_Specification.Height);
         if (m_ImageData)
         {
-            GLenum format = GLUtils::OpenGLImageFormat(m_Specification.Format);
-            GLenum dataType = GLUtils::OpenGLFormatDataType(m_Specification.Format);
-			LK_CORE_VERIFY(m_ImageData.Data != nullptr, "Image data is nullptr");
-			glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Specification.Width, m_Specification.Height, GLUtils::OpenGLImageFormat(m_Specification.Format), dataType, m_ImageData.Data);
+			LK_OpenGL(glTextureSubImage2D(m_RendererID, 
+					  0, 
+					  0, 
+					  0, 
+					  m_Specification.Width, 
+					  m_Specification.Height, 
+					  GLUtils::OpenGLImageFormat(m_Specification.Format), 
+					  GLUtils::OpenGLFormatDataType(m_Specification.Format),
+					  (const void*)m_ImageData.Data)); 
+
 			if (m_Specification.Mips > 1)
+			{
 				glGenerateTextureMipmap(m_RendererID);
+			}
         }
     }
 
-	void OpenGLImage2D::RT_Invalidate()
+	void LOpenGLImage2D::RT_Invalidate()
 	{
 	}
 
-    void OpenGLImage2D::AllocateMemory(uint64_t size)
+    void LOpenGLImage2D::AllocateMemory(uint64_t size)
     {
     }
 
-    void OpenGLImage2D::Release()
+    void LOpenGLImage2D::Release()
     {
         if (m_RendererID)
         {
             glDeleteTextures(1, &m_RendererID);
             m_RendererID = 0;
         }
+
         m_ImageData.Release();
     }
 

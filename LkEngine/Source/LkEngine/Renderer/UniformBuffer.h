@@ -1,19 +1,30 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
+
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
 
 
 namespace LkEngine {
 
-    class UniformBuffer : public RefCounted
+    class LUniformBuffer : public LObject
     {
     public:
-        virtual ~UniformBuffer() = default;
+        virtual ~LUniformBuffer() = default;
 
-        static Ref<UniformBuffer> Create(uint64_t size);
+        static TObjectPtr<LUniformBuffer> Create(const uint64_t size);
 
-        virtual void SetData(const void* data, uint64_t size, uint64_t offset = 0) = 0;
-        virtual void RT_SetData(const void* data, uint64_t size, uint64_t offset = 0) = 0;
+        virtual void SetData(const void* data, 
+                             const uint64_t size, 
+                             const uint64_t offset = 0) = 0;
+
+        virtual void RT_SetData(const void* data, 
+                                const uint64_t size, 
+                                const uint64_t offset = 0) = 0;
+
+    private:
+        LCLASS(LUniformBuffer)
     };
 
 }

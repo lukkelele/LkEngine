@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
 
 #include "ContactListener2D.h"
 #include "LkEngine/Scene/Entity.h"
@@ -10,8 +10,7 @@
 
 namespace LkEngine {
 
-	// Forward declarations
-	class Scene;
+	class LScene;
 
 	// Data structure used for creating 2D worlds after deserializing scene data
 	struct Physics2DSpecification
@@ -32,7 +31,17 @@ namespace LkEngine {
 			: HitEntity(entity)
 			, Point(point)
 			, Normal(normal)
-			, Distance(distance) {}
+			, Distance(distance) 
+		{
+		}
+
+		FORCEINLINE std::string ToString() const
+		{
+			std::ostringstream oss;
+			oss << "Normal: " << Normal.x << ", " << Normal.y << "\n";
+
+			return oss.str();
+		}
 	};
 
 	class Physics2D
@@ -40,8 +49,8 @@ namespace LkEngine {
 	public:
 		enum class API { None = 0, Box2D = 1 };
 	public:
-		static std::vector<Raycast2DResult> Raycast(Scene& scene, const glm::vec2& point0, const glm::vec2& point1);
-		static std::vector<Raycast2DResult> RaycastFromScreen(Scene& scene);
+		static std::vector<Raycast2DResult> Raycast(LScene& scene, const glm::vec2& point0, const glm::vec2& point1);
+		static std::vector<Raycast2DResult> RaycastFromScreen(LScene& scene);
 	};
 
 

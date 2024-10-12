@@ -1,10 +1,9 @@
 #pragma once
 
-//#include "LkEngine/Core/Base.h"
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/Memory/Buffer.h"
 
-#include <filesystem>
+//#include <filesystem> /// REMOVE
 
 
 namespace LkEngine {
@@ -19,7 +18,7 @@ namespace LkEngine {
 		virtual void SetStreamPosition(uint64_t position) = 0;
 		virtual bool ReadData(char* destination, size_t size) = 0;
 
-		void ReadBuffer(Buffer& buffer, uint32_t size = 0);
+		void ReadBuffer(FBuffer& Buffer, uint32_t size = 0);
 		void ReadString(std::string& string);
 
 		operator bool() const { return IsStreamGood(); }
@@ -41,20 +40,30 @@ namespace LkEngine {
 		void ReadMap(std::map<Key, Value>& map, uint32_t size = 0)
 		{
 			if (size == 0)
+			{
 				ReadRaw<uint32_t>(size);
+			}
 
 			for (uint32_t i = 0; i < size; i++)
 			{
 				Key key;
 				if constexpr (std::is_trivial<Key>())
+				{
 					ReadRaw<Key>(key);
+				}
 				else
+				{
 					ReadObject<Key>(key);
+				}
 
 				if constexpr (std::is_trivial<Value>())
+				{
 					ReadRaw<Value>(map[key]);
+				}
 				else
+				{
 					ReadObject<Value>(map[key]);
+				}
 			}
 		}
 

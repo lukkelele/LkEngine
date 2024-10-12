@@ -16,7 +16,7 @@ namespace LkEngine {
 		void Bind() override;
 		void Unbind() override;
 
-		void AddTextureToArray(Ref<Texture> texture) override;
+		void AddTextureToArray(TObjectPtr<LTexture> texture) override;
 		bool RemoveTextureFromArray(RendererID& rendererID) override;
 
 		const RendererID GetRendererID() const override { return m_RendererID; }
@@ -31,7 +31,7 @@ namespace LkEngine {
 		void SetWidth(int width) override { m_Width = width; }
 		void SetHeight(int height) override { m_Height = height; }
 
-		bool HasTexture(const Ref<Texture>& texture) override
+		bool HasTexture(const TObjectPtr<LTexture>& texture) override
 		{
 			const RendererID textureRendererID = texture->GetRendererID();
 			for (auto& t : m_Textures)
@@ -42,7 +42,7 @@ namespace LkEngine {
 			return false;
 		}
 
-		Ref<Texture> GetTextureWithID(RendererID id) override
+		TObjectPtr<LTexture> GetTextureWithID(RendererID id) override
 		{
 			for (auto& t : m_Textures)
 			{
@@ -52,7 +52,7 @@ namespace LkEngine {
 			return nullptr;
 		}
 
-		int GetIndexOfTexture(const Ref<Texture>& texture) override
+		int GetIndexOfTexture(const TObjectPtr<LTexture>& texture) override
 		{
 			for (int i = 0; i < m_Textures.size(); i++)
 			{
@@ -69,7 +69,7 @@ namespace LkEngine {
 		int m_Width, m_Height;
 		TextureArraySpecification m_Specification;
 
-		std::deque<Ref<Texture>> m_Textures{};
+		std::deque<TObjectPtr<LTexture>> m_Textures{};
 
 		friend class OpenGLRenderer;
 		friend class OpenGLRenderer2D;

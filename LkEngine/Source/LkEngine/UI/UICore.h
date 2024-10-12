@@ -10,12 +10,21 @@
 #include "LkEngine/Scene/Components.h"
 
 
-namespace LkEngine {
-
+namespace LkEngine 
+{
     class LWindow;
     class LEntity;
 
-    constexpr const char* LkEngine_DockSpace = "##LkEngine-DockSpace";
+    static constexpr const char* LkEngine_DockSpace = "##LkEngine-DockSpace";
+    
+	/// UPDATE/REFACTOR
+    static constexpr const char* UI_CORE_VIEWPORT = "##lkengine-core-viewport";
+    static constexpr const char* UI_RENDER_WINDOW = "##lkengine-render-window";
+    static constexpr const char* UI_TOP_BAR = "##lkengine-top-bar";
+    static constexpr const char* UI_BOTTOM_BAR = "##lkengine-lower-bar";
+    static constexpr const char* UI_SIDEBAR_LEFT = "##lkengine-sidebar-left";
+    static constexpr const char* UI_SIDEBAR_RIGHT = "##lkengine-sidebar-right";
+    static constexpr const char* UI_SELECTED_ENTITY_INFO = "##lkengine-selected-entity-info";
 }
 
 namespace LkEngine::UI {
@@ -50,11 +59,35 @@ namespace LkEngine::UI {
     void BeginDockSpace(const char* dockspaceID);
     void BeginViewport(const char* viewportID, LWindow* WindowRef, ImGuiViewport* viewport);
 
-    // Implemented in either OpenGLImgui.cpp or VulkanImGui.cpp
-    void Image(const Ref<Texture2D>& texture, const ImVec2& size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), const ImVec4& tint_col = ImVec4(1, 1, 1, 1), const ImVec4& border_col = ImVec4(0, 0, 0, 0));
-    void Image(const Ref<Texture2D>& image, const glm::vec2& size, const glm::vec2& uv0 = glm::vec2(0, 0), const glm::vec2& uv1 = glm::vec2(1, 1), const glm::vec4& tint_col = glm::vec4(1, 1, 1, 1), const glm::vec4& border_col = glm::vec4(0, 0, 0, 0));
-    void Image(const Ref<Image2D>& image, const ImVec2& size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), const ImVec4& tint_col = ImVec4(1, 1, 1, 1), const ImVec4& border_col = ImVec4(0, 0, 0, 0));
-    void Image(const Ref<Image2D>& image, const glm::vec2& size, const glm::vec2& uv0 = glm::vec2(0, 0), const glm::vec2& uv1 = glm::vec2(1, 1), const glm::vec4& tint_col = glm::vec4(1, 1, 1, 1), const glm::vec4& border_col = glm::vec4(0, 0, 0, 0));
+    // 
+    void Image(const TObjectPtr<LTexture2D>& texture, 
+               const ImVec2& size, 
+               const ImVec2& uv0 = ImVec2(0, 0), 
+               const ImVec2& uv1 = ImVec2(1, 1), 
+               const ImVec4& tint_col = ImVec4(1, 1, 1, 1), 
+               const ImVec4& border_col = ImVec4(0, 0, 0, 0));
+
+    void Image(const TObjectPtr<LTexture2D>& image, 
+               const glm::vec2& size, 
+               const glm::vec2& uv0 = glm::vec2(0, 0), 
+               const glm::vec2& uv1 = glm::vec2(1, 1), 
+               const glm::vec4& tint_col = glm::vec4(1, 1, 1, 1), 
+               const glm::vec4& border_col = glm::vec4(0, 0, 0, 0));
+
+    void Image(const TObjectPtr<LImage2D>& image, 
+               const ImVec2& size, 
+               const ImVec2& uv0 = ImVec2(0, 0), 
+               const ImVec2& uv1 = ImVec2(1, 1), 
+               const ImVec4& tint_col = ImVec4(1, 1, 1, 1), 
+               const ImVec4& border_col = ImVec4(0, 0, 0, 0));
+
+    void Image(const TObjectPtr<LImage2D>& image, 
+               const glm::vec2& size, 
+               const glm::vec2& uv0 = glm::vec2(0, 0), 
+               const glm::vec2& uv1 = glm::vec2(1, 1), 
+               const glm::vec4& tint_col = glm::vec4(1, 1, 1, 1), 
+               const glm::vec4& border_col = glm::vec4(0, 0, 0, 0));
+    // ~
 
     void PushStyleVar(ImGuiStyleVar styleVar, const ImVec2& var);
     void PushStyleVar(ImGuiStyleVar styleVar, const glm::vec2& var);
@@ -65,7 +98,7 @@ namespace LkEngine::UI {
     void PopStyleColor(uint8_t popVars = 1);
     void PopStyleStack(); // Pop entire stack 
    
-
+    /* Flags. */
     extern ImGuiWindowFlags CoreViewportFlags;
     extern ImGuiWindowFlags HostWindowFlags;
     extern ImGuiWindowFlags SidebarFlags;

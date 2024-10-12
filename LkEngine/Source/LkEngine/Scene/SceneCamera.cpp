@@ -1,11 +1,12 @@
 #include "LKpch.h"
 #include "LkEngine/Scene/SceneCamera.h"
-#include "LkEngine/Core/Application.h"
+
+#include "LkEngine/Core/Application.h" /// REMOVE
 
 
 namespace LkEngine {
 
-	void SceneCamera::SetPerspective(float degVerticalFOV, float nearClip, float farClip)
+	void LSceneCamera::SetPerspective(float degVerticalFOV, float nearClip, float farClip)
 	{
 		m_ProjectionType = ProjectionType::Perspective;
 		m_DegPerspectiveFOV = degVerticalFOV;
@@ -13,14 +14,14 @@ namespace LkEngine {
 		m_PerspectiveFar = farClip;
 	}
 
-	void SceneCamera::SetOrthographic(float Width, float Height, float nearClip, float farClip)
+	void LSceneCamera::SetOrthographic(float Width, float Height, float nearClip, float farClip)
 	{
 		m_ProjectionType = ProjectionType::Orthographic;
 		m_OrthographicNear = nearClip;
 		m_OrthographicFar = farClip;
 	}
 
-	void SceneCamera::SetViewportSize(uint32_t Width, uint32_t Height)
+	void LSceneCamera::SetViewportSize(uint32_t Width, uint32_t Height)
 	{
 		UpdateView();
 		switch (m_ProjectionType)
@@ -35,13 +36,13 @@ namespace LkEngine {
 		}
 	}
 
-	void SceneCamera::UpdateViewProjection()
+	void LSceneCamera::UpdateViewProjection()
 	{
 		UpdateView(); 
 		UpdateProjection();
 	}
 
-	void SceneCamera::Update(float ts)
+	void LSceneCamera::Update(float ts)
 	{
 		if (m_KeyboardEnabled)
 		{
@@ -70,8 +71,8 @@ namespace LkEngine {
 			{
 				//m_Zoom -= 0.010f;
 			}
-
 		}
+
 		if (m_MouseEnabled)
 		{
 		}
@@ -80,7 +81,7 @@ namespace LkEngine {
 		SetViewportSize(Window.GetViewportWidth(), Window.GetViewportHeight());
 	}
 
-	void SceneCamera::UpdateProjection()
+	void LSceneCamera::UpdateProjection()
 	{
 		float Width, Height;
 		float Left, Right, Bottom, Top;
@@ -97,9 +98,9 @@ namespace LkEngine {
 		m_ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top);
 	}
 
-	void SceneCamera::UpdateView()
+	void LSceneCamera::UpdateView()
 	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), { m_Pos.x + m_Offset.x, m_Pos.y + m_Offset.y, m_Pos.z + m_Offset.z }) *
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), { (m_Pos.x + m_Offset.x), (m_Pos.y + m_Offset.y), (m_Pos.z + m_Offset.z) }) *
 			glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0, 0, 1));
 
 		m_ViewMatrix = glm::inverse(transform);

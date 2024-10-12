@@ -5,25 +5,25 @@
 
 namespace LkEngine {
 	
-    class OpenGLFramebuffer : public Framebuffer
+    class LOpenGLFramebuffer : public LFramebuffer
     {
     public:
-		OpenGLFramebuffer(const FramebufferSpecification& framebufferSpecification);
-        ~OpenGLFramebuffer();
+		LOpenGLFramebuffer(const FramebufferSpecification& framebufferSpecification);
+        ~LOpenGLFramebuffer();
         
-		void Invalidate() override;
-		int ReadPixel(uint32_t attachmentIndex, int x, int y) override;
-		void ClearAttachment(uint32_t attachmentIndex, int value) override;
-		void Clear() override;
-		uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const override;
+		virtual void Invalidate() override;
+		virtual int ReadPixel(uint32_t attachmentIndex, int x, int y) override;
+		virtual void ClearAttachment(uint32_t attachmentIndex, int value) override;
+		virtual void Clear() override;
+		virtual uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const override;
 
-		void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) override;
-		void AddResizeCallback(const std::function<void(Ref<Framebuffer>)>& func) override;
-		Ref<Image> GetImage(uint32_t attachmentIndex = 0) const override;
+		virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) override;
+		virtual void AddResizeCallback(const FResizeCallback& InFunction) override;
+		virtual TObjectPtr<LImage> GetImage(uint32_t attachmentIndex = 0) const override;
 
-		Ref<Image> GetDepthImage() const override;
-		size_t GetColorAttachmentCount() const override;
-		bool HasDepthAttachment() const override;
+		virtual TObjectPtr<LImage> GetDepthImage() const override;
+		virtual size_t GetColorAttachmentCount() const override;
+		virtual bool HasDepthAttachment() const override;
 
 		void BindTexture(uint32_t attachmentIndex = 0, uint32_t slot = 0) const;
 		void Bind() const override;
@@ -44,23 +44,20 @@ namespace LkEngine {
 	private:
 		RendererID m_RendererID;
 
-		uint64_t m_Width;
-		uint64_t m_Height;
+		uint64_t m_Width{};
+		uint64_t m_Height{};
 
 		unsigned int m_TextureAttachment0;
 		unsigned int m_TextureAttachment1;
 		unsigned int m_DepthAttachment = 0;
 
 		glm::vec4 m_ClearColor;
-		std::vector<Ref<Image2D>> m_ColorAttachments;
+		std::vector<TObjectPtr<LImage2D>> m_ColorAttachments;
 		std::vector<uint32_t> m_ColorAttachmentRendererIDs;
-		//std::vector<Ref<Image2D>> m_ColorAttachmentImages;
 
 		FramebufferSpecification m_Specification;
 		FramebufferTextureSpecification m_DepthAttachmentSpecification;
 		std::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecifications;
-
-		//Ref<Image2D> m_Image;
     };
 
 

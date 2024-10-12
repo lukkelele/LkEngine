@@ -1,6 +1,8 @@
 #pragma once
 
-#include "LkEngine/Core/Base.h"
+#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
 
 #include "LkEngine/Input/Mouse.h"
 #include "LkEngine/Input/Keycodes.h"
@@ -8,23 +10,23 @@
 #include "LkEngine/Core/Event/KeyEvent.h"
 #include "LkEngine/Core/Event/MouseEvent.h"
 
-#include "LkEngine/Scene/Scene.h"
-
 
 namespace LkEngine {
 
-    //class Scene;
+    class LScene;
 
-	struct KeyData
+	using ButtonState = KeyState;
+
+	struct FKeyData
 	{
-		KeyCode Key;
+		KeyCode Key{};
 		KeyState State = KeyState::None;
 		KeyState OldState = KeyState::None;
 	};
 
-	struct ButtonData
+	struct FButtonData
 	{
-		MouseButton Button;
+		EMouseButton Button = EMouseButton::None;
 		KeyState State = KeyState::None;
 		KeyState OldState = KeyState::None;
 	};
@@ -35,37 +37,52 @@ namespace LkEngine {
 		static void Init();
 
 		static void Update();
-		static void SetScene(const Ref<Scene>& scene); 
+		static void SetScene(const TObjectPtr<LScene>& InScene); 
 
-		static float GetMouseX() { return Mouse::GetMouseX(); }
-		static float GetMouseY() { return Mouse::GetMouseY(); }
+		FORCEINLINE static float GetMouseX() 
+		{ 
+			return Mouse::GetMouseX(); 
+		}
+
+		FORCEINLINE static float GetMouseY() 
+		{ 
+			return Mouse::GetMouseY(); 
+		}
 
 		static bool IsKeyPressed(Key key);
 		static bool IsKeyHeld(Key key);
 		static bool IsKeyDown(Key key);
-		static bool IsKeyReleased(Key key);
+		static bool IsKeyReleased(const KeyCode key);
 
-		static bool IsMouseButtonPressed(MouseButton button);
-		static bool IsMouseButtonHeld(MouseButton button);
-		static bool IsMouseButtonDown(MouseButton button);
-		static bool IsMouseButtonReleased(MouseButton button);
+		static bool IsMouseButtonPressed(const EMouseButton Button);
+		static bool IsMouseButtonHeld(const EMouseButton Button);
+		static bool IsMouseButtonDown(const EMouseButton Button);
+		static bool IsMouseButtonReleased(const EMouseButton Button);
+		static bool IsAnyMouseButtonPressed();
 
 		static std::pair<float, float> GetMousePosition();
 
-		static void SetCursorMode(CursorMode mode);
-		static CursorMode GetCursorMode();
+		static void SetCursorMode(ECursorMode mode);
+		static ECursorMode GetCursorMode();
 
-		static void UpdateKeyState(KeyCode key, KeyState newState);
-		static void UpdateButtonState(MouseButton button, KeyState newState);
+		static void UpdateKeyState(KeyCode key, KeyState NewState);
+		static void UpdateButtonState(const EMouseButton Button, KeyState NewState);
 
 		static void TransitionPressedKeys();
 		static void TransitionPressedButtons();
 
-    private:
-        inline static Ref<Scene> m_Scene = nullptr;
+		FORCEINLINE static EMouseButton GetLastMouseButton() 
+		{ 
+			return LastMouseButton; 
+		}
 
-		inline static std::map<KeyCode, KeyData> m_KeyData;
-		inline static std::map<MouseButton, ButtonData> m_MouseData;
+    private:
+        inline static TObjectPtr<LScene> Scene = nullptr;
+
+		inline static EMouseButton LastMouseButton = EMouseButton::None;
+
+		inline static std::map<KeyCode, FKeyData> m_KeyData;
+		inline static std::map<EMouseButton, FButtonData> m_MouseData;
     };
 
 }

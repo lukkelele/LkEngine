@@ -10,31 +10,38 @@
 namespace LkEngine::UI {
 
     ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_None
-        | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
-        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
+        | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
+        | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus 
+        | ImGuiWindowFlags_NoInputs;
         //| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar;
 
     ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_None
-        | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
+        | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
+        | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus 
+        | ImGuiWindowFlags_NoInputs;
 
     ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_None
-        | ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoTabBar;
+        | ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode 
+        | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoTabBar;
 
     ImGuiWindowFlags MenuBarFlags = ImGuiWindowFlags_MenuBar
         | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
 
     ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
-        | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
-        | ImGuiWindowFlags_NoMove;
+        | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus 
+        | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoMove;
 
     ImGuiWindowFlags SidebarDockspaceFlags = ImGuiDockNodeFlags_NoDockingSplitMe | ImGuiDockNodeFlags_NoTabBar;
 
-    ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking
-        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+    ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
+        | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus 
+        | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
-    ImGuiWindowFlags ViewportTextureFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+    ImGuiWindowFlags ViewportTextureFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
+        | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar 
         | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize;
 
     static uint32_t Counter = 0;
@@ -76,25 +83,25 @@ namespace LkEngine::UI {
 
     bool IsInputEnabled()
     {
-        const auto& io = ImGui::GetIO();
+        const ImGuiIO& io = ImGui::GetIO();
         return (io.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0 && (io.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0;
     }
 
     bool IsMouseEnabled()
     {
-        const auto& io = ImGui::GetIO();
+        const ImGuiIO& io = ImGui::GetIO();
         return (io.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0;
     }
 
     bool IsKeyboardEnabled()
     {
-        const auto& io = ImGui::GetIO();
+        const ImGuiIO& io = ImGui::GetIO();
         return (io.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0;
     }
 
     void SetInputEnabled(bool enabled)
     {
-        auto& io = ImGui::GetIO();
+        ImGuiIO& io = ImGui::GetIO();
 
         if (enabled)
         {
@@ -130,7 +137,8 @@ namespace LkEngine::UI {
                 currentNavWindow = currentNavWindow->RootWindow;
             }
         }
-        return currentNavWindow == ImGui::FindWindowByName(windowName);
+
+        return (currentNavWindow == ImGui::FindWindowByName(windowName));
     }
 
     void Begin(std::string windowTitle, ImGuiWindowFlags windowFlags, bool* open)
@@ -152,8 +160,6 @@ namespace LkEngine::UI {
 
     void End()
     {
-        //if (PushedStyleColors > 0) PopStyleColor(PushedStyleColors);
-        //if (PushedStyleVars > 0)   PopStyleVar(PushedStyleVars);
         ImGui::End();
         UI::PopID();
     }
@@ -189,7 +195,7 @@ namespace LkEngine::UI {
 
     void BeginDockSpace(const char* dockspaceID)
     {
-		auto& style = ImGui::GetStyle();
+		ImGuiStyle& style = ImGui::GetStyle();
 
 		if (UI::DockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
 		{

@@ -5,27 +5,36 @@
 
 namespace LkEngine {
 
-    class Shader;
+    class LShader;
 
-    class OpenGLUniformBuffer : public UniformBuffer
+    class LOpenGLUniformBuffer : public LUniformBuffer
     {
     public:
-        OpenGLUniformBuffer(uint64_t size);
-        ~OpenGLUniformBuffer();
+        LOpenGLUniformBuffer(const uint64_t size);
+        ~LOpenGLUniformBuffer();
 
-        void SetData(const void* data, uint64_t size, uint64_t offset = 0) override;
-        void RT_SetData(const void* data, uint64_t size, uint64_t offset = 0) override;
+        virtual void SetData(const void* data, 
+                             const uint64_t size, 
+                             const uint64_t offset = 0) override;
+
+        virtual void RT_SetData(const void* data, 
+                                const uint64_t size, 
+                                const uint64_t offset = 0) override;
 
         void Bind();
         void Unbind();
 
-        void SetBinding(const Ref<Shader>& targetShader, std::string_view ubName, uint32_t blockIndex);
+        void SetBinding(const TObjectPtr<LShader>& targetShader, 
+                        std::string_view ubName, 
+                        const uint32_t blockIndex);
 
     private:
         RendererID m_ID;
 		uint64_t m_Size = 0;
 		std::string m_Name;
         uint8_t* m_LocalData = nullptr;
+
+        LCLASS(LOpenGLUniformBuffer)
     };
 
 }

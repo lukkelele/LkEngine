@@ -8,6 +8,7 @@
 
 namespace LkEngine {
 
+	/// MOVE
 	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
 	{
 		switch (type)
@@ -27,39 +28,42 @@ namespace LkEngine {
 		return 0;
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(void* buffer, uint64_t size, VertexBufferUsage usage)
-		: m_Size(size)
-		, m_Usage(usage)
+
+	OpenGLVertexBuffer::OpenGLVertexBuffer(void* InBuffer, 
+										   const uint64_t InSize, 
+										   const EVertexBufferUsage InBufferUsage)
+		: m_Size(InSize)
+		, m_Usage(InBufferUsage)
 	{
-		m_LocalData = Buffer(buffer, size);
+		m_LocalData = FBuffer(InBuffer, InSize);
 
 		glGenVertexArrays(1, &m_VertexArrayID);
 		glBindVertexArray(m_VertexArrayID);
 
 		glGenBuffers(1, &m_RendererID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferData(GL_ARRAY_BUFFER, size, buffer, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, InSize, InBuffer, GL_DYNAMIC_DRAW);
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(uint64_t size, VertexBufferUsage usage)
-		: m_Size(size)
-		, m_Usage(usage)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const uint64_t InSize, 
+										   const EVertexBufferUsage InBufferUsage)
+		: m_Size(InSize)
+		, m_Usage(InBufferUsage)
 	{
-		m_LocalData.Allocate(size);
+		m_LocalData.Allocate(InSize);
 
-		glGenVertexArrays(1, &m_VertexArrayID);
-		glBindVertexArray(m_VertexArrayID);
+		LK_OpenGL(glGenVertexArrays(1, &m_VertexArrayID));
+		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
 
-		glGenBuffers(1, &m_RendererID);
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
-		//LK_CORE_DEBUG_TAG("VertexBuffer", "New vertexbuffer, id: {}, size: {}", m_VertexArrayID, m_LocalData.GetSize());
+		LK_OpenGL(glGenBuffers(1, &m_RendererID));
+		LK_OpenGL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+		LK_OpenGL(glBufferData(GL_ARRAY_BUFFER, InSize, nullptr, GL_DYNAMIC_DRAW));
 	}
  
 	OpenGLVertexBuffer::~OpenGLVertexBuffer() 
 	{
-		GL_CALL(glDeleteVertexArrays(1, &m_VertexArrayID));
-		GL_CALL(glDeleteBuffers(1, &m_RendererID));
+		LK_OpenGL(glDeleteVertexArrays(1, &m_VertexArrayID));
+		LK_OpenGL(glDeleteBuffers(1, &m_RendererID));
 	}
 
 	void OpenGLVertexBuffer::Bind() const
@@ -67,18 +71,18 @@ namespace LkEngine {
 		glBindVertexArray(m_VertexArrayID);
 	}
 
-	void OpenGLVertexBuffer::SetData(void* buffer, uint64_t size, uint64_t offset)
+	void OpenGLVertexBuffer::SetData(void* InData, uint64_t InSize, uint64_t InOffset)
 	{
-		m_LocalData.Data = buffer;
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferSubData(GL_ARRAY_BUFFER, offset, size, buffer);
+		m_LocalData.Data = InData;
+		LK_OpenGL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+		LK_OpenGL(glBufferSubData(GL_ARRAY_BUFFER, InOffset, InSize, InData));
 	}
 
-	void OpenGLVertexBuffer::RT_SetData(void* buffer, uint64_t size, uint64_t offset)
+	void OpenGLVertexBuffer::RT_SetData(void* InData, uint64_t InSize, uint64_t offset)
 	{
-		m_LocalData.Data = buffer;
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferSubData(GL_ARRAY_BUFFER, offset, size, buffer);
+		m_LocalData.Data = InData;
+		LK_OpenGL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+		LK_OpenGL(glBufferSubData(GL_ARRAY_BUFFER, offset, InSize, InData));
 	}
 
 	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout)
@@ -89,7 +93,7 @@ namespace LkEngine {
 
 	void OpenGLVertexBuffer::AddVertexBufferToVertexArray()
 	{
-		GL_CALL(glBindVertexArray(m_VertexArrayID));
+		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
 		VertexBufferLayout& layout = GetLayout();
 
 		for (const auto& element : layout)
@@ -150,13 +154,13 @@ namespace LkEngine {
 
 	}
 
-	void OpenGLVertexBuffer::AddVertexBuffer(VertexBuffer& vb)
+	void OpenGLVertexBuffer::AddVertexBuffer(LVertexBuffer& VertexBuffer)
 	{
 		glBindVertexArray(m_VertexArrayID);
-		vb.Bind();
-		VertexBufferLayout& layout = vb.GetLayout();
+		VertexBuffer.Bind();
+		VertexBufferLayout& layout = VertexBuffer.GetLayout();
 
-		for (const auto& element : layout)
+		for (const VertexBufferElement& element : layout)
 		{
 			switch (element.Type)
 			{
@@ -216,16 +220,16 @@ namespace LkEngine {
 #if 0
 	void OpenGLVertexBuffer::BindVertexArray()
 	{
-		GL_CALL(glBindVertexArray(m_VertexArrayID));
+		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
 	}
 
 	void OpenGLVertexBuffer::UnbindVertexArray()
 	{
-		GL_CALL(glBindVertexArray(0));
+		LK_OpenGL(glBindVertexArray(0));
 	}
 #endif
 
-	void OpenGLVertexBuffer::SetIndexBuffer(const Ref<IndexBuffer> indexBuffer)
+	void OpenGLVertexBuffer::SetIndexBuffer(const TObjectPtr<LIndexBuffer> indexBuffer)
 	{
 		glBindVertexArray(m_VertexArrayID);
 		indexBuffer->Bind();

@@ -17,44 +17,46 @@
 
 namespace LkEngine {
 
-	SceneSerializer::SceneSerializer(Scene* scene)
-		: m_Scene(scene)
+	LSceneSerializer::LSceneSerializer(LScene* Scene)
+		: m_Scene(Scene)
 	{
 		if (m_Scene == nullptr)
 		{
-			m_Scene = new Scene;
+			/// Make shared pointer.
+			m_Scene = new LScene;
 		}
 	}
 
-	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
-		: m_Scene((Scene*)scene.Raw())
+	/// FIXME
+	LSceneSerializer::LSceneSerializer(const TObjectPtr<LScene>& Scene)
+		: m_Scene((LScene*)Scene.Get())
 	{
 	}
 
-	void SceneSerializer::SerializeEntity(YAML::Emitter& out, LEntity entity)
+	void LSceneSerializer::SerializeEntity(YAML::Emitter& out, LEntity entity)
 	{
-		UUID uuid = entity.GetComponent<IDComponent>().ID;
+		UUID uuid = entity.GetComponent<LIDComponent>().ID;
 		out << YAML::BeginMap; // Entity
 		out << YAML::Key << "Entity";
 		out << YAML::Value << uuid;
 
-		if (entity.HasComponent<TagComponent>())
+		if (entity.HasComponent<LTagComponent>())
 		{
-			out << YAML::Key << "TagComponent";
-			out << YAML::BeginMap; // TagComponent
+			out << YAML::Key << "LTagComponent";
+			out << YAML::BeginMap; // LTagComponent
 
-			auto& tag = entity.GetComponent<TagComponent>().Tag;
+			auto& tag = entity.GetComponent<LTagComponent>().Tag;
 			out << YAML::Key << "Tag" << YAML::Value << tag;
 
-			out << YAML::EndMap; // TagComponent
+			out << YAML::EndMap; // LTagComponent
 		}
 
-		if (entity.HasComponent<TransformComponent>())
+		if (entity.HasComponent<LTransformComponent>())
 		{
 			out << YAML::Key << "TransformComponent";
 			out << YAML::BeginMap; // TransformComponent
 
-			auto& transform = entity.GetComponent<TransformComponent>();
+			auto& transform = entity.GetComponent<LTransformComponent>();
 			out << YAML::Key << "Position" << YAML::Value << transform.Translation;
 			out << YAML::Key << "Rotation" << YAML::Value << transform.GetRotationEuler();
 			out << YAML::Key << "Scale" << YAML::Value << transform.Scale;
@@ -62,12 +64,12 @@ namespace LkEngine {
 			out << YAML::EndMap; // TransformComponent
 		}
 
-		if (entity.HasComponent<SpriteComponent>())
+		if (entity.HasComponent<LSpriteComponent>())
 		{
 			out << YAML::Key << "SpriteComponent";
 			out << YAML::BeginMap; // SpriteComponent
 
-			auto& sprite = entity.GetComponent<SpriteComponent>();
+			auto& sprite = entity.GetComponent<LSpriteComponent>();
 			out << YAML::Key << "Size" << YAML::Value << sprite.GetSize();
 			out << YAML::Key << "Color" << YAML::Value << sprite.GetColor();
 
@@ -85,42 +87,42 @@ namespace LkEngine {
 		//	out << YAML::EndMap; // SpriteComponent
 		//}
 
-		if (entity.HasComponent<CameraComponent>())
+		if (entity.HasComponent<LCameraComponent>())
 		{
-			out << YAML::Key << "CameraComponent";
-			out << YAML::BeginMap; // CameraComponent
+			out << YAML::Key << "LCameraComponent";
+			out << YAML::BeginMap; // LCameraComponent
 
-			auto& cameraComponent = entity.GetComponent<CameraComponent>();
-			Camera& camera = *cameraComponent.Camera;
+			LCameraComponent& CameraComponent = entity.GetComponent<LCameraComponent>();
+			LCamera& Camera = *CameraComponent.Camera;
 
 			out << YAML::Key << "Camera" << YAML::Value;
 			out << YAML::BeginMap; // Camera
-			out << YAML::Key << "ProjectionType" << YAML::Value << (int)camera.GetProjectionType();
-			out << YAML::Key << "OrthographicNear" << YAML::Value << camera.GetOrthographicNearClip();
-			out << YAML::Key << "OrthographicFar" << YAML::Value << camera.GetOrthographicFarClip();
+			out << YAML::Key << "ProjectionType" << YAML::Value << static_cast<int>(Camera.GetProjectionType());
+			out << YAML::Key << "OrthographicNear" << YAML::Value << Camera.GetOrthographicNearClip();
+			out << YAML::Key << "OrthographicFar" << YAML::Value << Camera.GetOrthographicFarClip();
 			out << YAML::EndMap; // Camera
 
-			out << YAML::EndMap; // CameraComponent
+			out << YAML::EndMap; // LCameraComponent
 		}
 
-		if (entity.HasComponent<RigidBody2DComponent>())
+		if (entity.HasComponent<LRigidBody2DComponent>())
 		{
-			out << YAML::Key << "RigidBody2DComponent";
-			out << YAML::BeginMap; // RigidBody2DComponent
+			out << YAML::Key << "LRigidBody2DComponent";
+			out << YAML::BeginMap; // LRigidBody2DComponent
 
-			auto& rigidbody2DComponent = entity.GetComponent<RigidBody2DComponent>();
-			out << YAML::Key << "BodyType" << YAML::Value << (int)rigidbody2DComponent.BodyType;
+			auto& rigidbody2DComponent = entity.GetComponent<LRigidBody2DComponent>();
+			out << YAML::Key << "BodyType" << YAML::Value << static_cast<int>(rigidbody2DComponent.BodyType);
 			out << YAML::Key << "FixedRotation" << YAML::Value << rigidbody2DComponent.FixedRotation;
 
-			out << YAML::EndMap; // RigidBody2DComponent
+			out << YAML::EndMap; // LRigidBody2DComponent
 		}
 
-		if (entity.HasComponent<BoxCollider2DComponent>())
+		if (entity.HasComponent<LBoxCollider2DComponent>())
 		{
 			out << YAML::Key << "BoxCollider2DComponent";
 			out << YAML::BeginMap; // BoxCollider2DComponent
 
-			auto& boxCollider2DComponent = entity.GetComponent<BoxCollider2DComponent>();
+			auto& boxCollider2DComponent = entity.GetComponent<LBoxCollider2DComponent>();
 			out << YAML::Key << "Offset" << YAML::Value << boxCollider2DComponent.Offset;
 			out << YAML::Key << "Size" << YAML::Value << boxCollider2DComponent.Size;
 			out << YAML::Key << "Density" << YAML::Value << boxCollider2DComponent.Density;
@@ -132,7 +134,7 @@ namespace LkEngine {
 		out << YAML::EndMap; // Entity
 	}
 
-	void SceneSerializer::Serialize(const std::filesystem::path& filepath)
+	void LSceneSerializer::Serialize(const std::filesystem::path& filepath)
 	{
 		YAML::Emitter out;
 		SerializeToYAML(out);
@@ -141,37 +143,44 @@ namespace LkEngine {
 		fout << out.c_str();
 	}
 
-	void SceneSerializer::SerializeToYAML(YAML::Emitter& out)
+	void LSceneSerializer::SerializeToYAML(YAML::Emitter& out)
 	{
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene"       << YAML::Value << m_Scene->GetName();
 		out << YAML::Key << "Active"      << YAML::Value << m_Scene->m_IsActiveScene;
 		out << YAML::Key << "EditorScene" << YAML::Value << m_Scene->m_EditorScene;
-		out << YAML::Key << "SceneHandle" << YAML::Value << (uint32_t)m_Scene->m_SceneEntity;
-		auto* editor = EditorLayer::Get();
+		out << YAML::Key << "SceneHandle" << YAML::Value << static_cast<uint32_t>(m_Scene->m_SceneEntity);
+
+		LEditorLayer* Editor = LEditorLayer::Get();
+#if 0
 		if (SELECTION::SelectedEntity)
+		{
 			out << YAML::Key << "SelectedEntity" << YAML::Value << SELECTION::SelectedEntity.GetUUID();
+		}
 		else
+		{
 			out << YAML::Key << "SelectedEntity" << YAML::Value << 0;
+		}
+#endif
 
 		// EditorCamera
-		if (editor && editor->GetEditorCamera())
+		if (Editor && Editor->GetEditorCamera())
 		{
-			SerializeEditorCamera(out, *editor->GetEditorCamera());
+			SerializeEditorCamera(out, *Editor->GetEditorCamera());
 		}
 
 		// 2D Physics
 		out << YAML::Key << "Physics2D";
 		out << YAML::Value << YAML::BeginMap;
 		{
-			auto& world2D = m_Scene->GetBox2DWorld();
-			if (&world2D != nullptr)
+			Box2DWorldComponent& World2DComponent = m_Scene->GetBox2DWorld();
+			if (&World2DComponent != nullptr)
 			{
-				out << YAML::Key << "Paused" << YAML::Value << world2D.IsPaused();
-				out << YAML::Key << "Gravity" << YAML::Value << world2D.GetGravity();
-				out << YAML::Key << "DebugDrawer" << YAML::Value << world2D.HasDebugDrawerAttached();
-				out << YAML::Key << "BodyCount" << YAML::Value << world2D.GetBodyCount();
-				out << YAML::Key << "ContactCount" << YAML::Value << world2D.GetContactCount();
+				out << YAML::Key << "Paused" << YAML::Value << World2DComponent.IsPaused();
+				out << YAML::Key << "Gravity" << YAML::Value << World2DComponent.GetGravity();
+				out << YAML::Key << "DebugDrawer" << YAML::Value << World2DComponent.HasDebugDrawerAttached();
+				out << YAML::Key << "BodyCount" << YAML::Value << World2DComponent.GetBodyCount();
+				out << YAML::Key << "ContactCount" << YAML::Value << World2DComponent.GetContactCount();
 			}
 			else
 			{
@@ -185,20 +194,24 @@ namespace LkEngine {
 		{
 			// Sort entities by UUID 
 			std::map<UUID, entt::entity> sortedEntityMap;
-			auto idComponentView = m_Scene->m_Registry.view<IDComponent>();
-			for (auto entity : idComponentView)
-				sortedEntityMap[idComponentView.get<IDComponent>(entity).ID] = entity;
+			auto idComponentView = m_Scene->m_Registry.view<LIDComponent>();
+			for (const entt::entity entity : idComponentView)
+			{
+				sortedEntityMap[idComponentView.get<LIDComponent>(entity).ID] = entity;
+			}
 	
 			// Serialize sorted entities
-			for (auto [id, entity] : sortedEntityMap)
+			for (const auto& [id, entity] : sortedEntityMap)
+			{
 				SerializeEntity(out, { entity, m_Scene->m_ActiveScene });
+			}
 		}
 		out << YAML::EndSeq;
 
 		out << YAML::EndMap;
 	}
 
-	bool SceneSerializer::DeserializeFromYAML(const std::string& YamlString)
+	bool LSceneSerializer::DeserializeFromYAML(const std::string& YamlString)
 	{
 		YAML::Node data = YAML::Load(YamlString);
 		if (!data["Scene"])
@@ -210,21 +223,24 @@ namespace LkEngine {
 		/* Parse scene name, if its currently the active scene and if it's an editor scene or not. */
 		std::string SceneName = data["Scene"].as<std::string>(); 
 		m_Scene->SetName(SceneName);
-		bool isActiveScene = data["Active"].as<std::string>() == "true" ? true : false;
-		m_Scene->SetAsActive(isActiveScene);
-		bool editorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
-		m_Scene->SetAsEditorScene(editorScene);
+
+		const bool bIsActiveScene = data["Active"].as<std::string>() == "true" ? true : false;
+		m_Scene->SetAsActive(bIsActiveScene);
+
+		const bool bIsEditorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
+		m_Scene->SetAsEditorScene(bIsEditorScene);
 		uint32_t sceneEntityHandle = data["SceneHandle"].as<uint32_t>();
 
-		// EditorCamera
-		//Ref<LEditorCamera> editorCamera = EditorLayer::Get()->GetEditorCamera();
-		Ref<LEditorCamera> editorCamera = EditorLayer::Get()->GetEditorCamera();
-		auto editorCameraNode = data["EditorCamera"];
-		if (editorCameraNode)
+		/* EditorCamera. */
+		auto EditorCameraNode = data["EditorCamera"];
+		if (EditorCameraNode)
 		{
-			DeserializeEditorCamera(editorCameraNode, *editorCamera);
+			TObjectPtr<LEditorCamera> EditorCamera = LEditorLayer::Get()->GetEditorCamera();
+			DeserializeEditorCamera(EditorCameraNode, *EditorCamera);
 		}
 
+		/// FIXME
+	#if 0
 		// Physics2D
 		auto physics2DNode = data["Physics2D"];
 		if (physics2DNode)
@@ -238,17 +254,18 @@ namespace LkEngine {
 			// <<<<<<< Set physics parameters for the existing 2D world here >>>>>>>>
 			//m_Scene->Initiate2DPhysics(physics2DSpec);
 		}
+	#endif
 
 		// Entities
-		auto entities = data["Entities"];
+		YAML::Node entities = data["Entities"];
 		if (entities)
 		{
 			DeserializeEntities(entities, m_Scene);
 		}
 
 
-		// Sort IDComponent by by entity handle (which is essentially the order in which they were created)
-		m_Scene->m_Registry.sort<IDComponent>([this](const auto Lhs, const auto Rhs)
+		// Sort LIDComponent by by entity handle (which is essentially the order in which they were created)
+		m_Scene->m_Registry.sort<LIDComponent>([this](const auto Lhs, const auto Rhs)
 		{
 			auto LhsEntity = m_Scene->m_EntityIDMap.find(Lhs.ID);
 			auto RhsEntity = m_Scene->m_EntityIDMap.find(Rhs.ID);
@@ -258,24 +275,24 @@ namespace LkEngine {
 		return true;
 	}
 
-	void SceneSerializer::SerializeRuntime(AssetHandle scene)
+	void LSceneSerializer::SerializeRuntime(FAssetHandle scene)
 	{
 		LK_CORE_ASSERT(false, "SerializeRuntime: Not implemented yet");
 	}
 
-	void SceneSerializer::DeserializeEntities(YAML::Node& entitiesNode, Ref<Scene> scene)
+	void LSceneSerializer::DeserializeEntities(YAML::Node& entitiesNode, TObjectPtr<LScene> scene)
 	{
 		DeserializeEntities(entitiesNode, scene);
 	}
 
-	void SceneSerializer::DeserializeEntities(YAML::Node& entitiesNode, Scene* scene)
+	void LSceneSerializer::DeserializeEntities(YAML::Node& entitiesNode, LScene* scene)
 	{
 		for (auto entity : entitiesNode)
 		{
 			uint64_t uuid = entity["Entity"].as<uint64_t>();
 
 			std::string name;
-			auto tagComponent = entity["TagComponent"];
+			auto tagComponent = entity["LTagComponent"];
 			if (tagComponent)
 			{
 				name = tagComponent["Tag"].as<std::string>();
@@ -283,12 +300,12 @@ namespace LkEngine {
 
 			LEntity deserializedEntity = scene->CreateEntityWithID(uuid, name);
 
-			auto transformComponent = entity["TransformComponent"];
+			const YAML::Node transformComponent = entity["TransformComponent"];
 			if (transformComponent)
 			{
 				// Entities always have transforms
 				//LK_CORE_DEBUG_TAG("SceneSerializer", "Parsing TransformComponent");
-				auto& transform = deserializedEntity.AddComponent<TransformComponent>();
+				auto& transform = deserializedEntity.AddComponent<LTransformComponent>();
 				transform.Translation = transformComponent["Position"].as<glm::vec3>(glm::vec3(0.0f));
 				auto rotationNode = transformComponent["Rotation"];
 
@@ -307,9 +324,9 @@ namespace LkEngine {
 			auto spriteComponent = entity["SpriteComponent"];
 			if (spriteComponent)
 			{
-				auto& sprite = deserializedEntity.AddComponent<SpriteComponent>();
-				sprite.Size = spriteComponent["Size"].as<glm::vec2>(glm::vec2(0.0f));
-				sprite.Color = spriteComponent["Color"].as<glm::vec4>(glm::vec4(0.0f));
+				LSpriteComponent& SpriteComponent = deserializedEntity.AddComponent<LSpriteComponent>();
+				SpriteComponent.Size = spriteComponent["Size"].as<glm::vec2>(glm::vec2(0.0f));
+				SpriteComponent.Color = spriteComponent["Color"].as<glm::vec4>(glm::vec4(0.0f));
 			}
 
 			//auto materialComponent = entity["MaterialComponent"];
@@ -320,39 +337,47 @@ namespace LkEngine {
 			//	LK_CORE_DEBUG_TAG("SceneSerializer", "Deserialized material component, set texture to \"{}\"", mc.m_Material->GetTextureName());
 			//}
 
-			auto cameraComponent = entity["CameraComponent"];
+			auto cameraComponent = entity["LCameraComponent"];
 			if (cameraComponent)
 			{
-				CameraComponent& component = deserializedEntity.AddComponent<CameraComponent>();
-				const auto& cameraNode = cameraComponent["Camera"];
+				LCameraComponent& component = deserializedEntity.AddComponent<LCameraComponent>();
+				const YAML::Node& cameraNode = cameraComponent["Camera"];
 
-				component.Camera = Ref<SceneCamera>::Create();
+				component.Camera = TObjectPtr<LSceneCamera>::Create();
 				auto& camera = component.Camera;
 
 				if (cameraNode.IsMap())
 				{
 					if (cameraNode["ProjectionType"])
-						camera->SetProjectionType((SceneCamera::ProjectionType)cameraNode["ProjectionType"].as<int>());
+					{
+						camera->SetProjectionType((LSceneCamera::ProjectionType)cameraNode["ProjectionType"].as<int>());
+					}
+
 					if (cameraNode["OrthographicNear"])
+					{
 						camera->SetOrthographicNearClip(cameraNode["OrthographicNear"].as<float>());
+					}
+
 					if (cameraNode["OrthographicFar"])
+					{
 						camera->SetOrthographicFarClip(cameraNode["OrthographicFar"].as<float>());
+					}
 				}
 
 			}
 
-			auto rigidBody2DComponent = entity["RigidBody2DComponent"];
+			auto rigidBody2DComponent = entity["LRigidBody2DComponent"];
 			if (rigidBody2DComponent)
 			{
-				auto& component = deserializedEntity.AddComponent<RigidBody2DComponent>();
-				component.BodyType = (RigidBody2DComponent::Type)rigidBody2DComponent["BodyType"].as<int>();
+				auto& component = deserializedEntity.AddComponent<LRigidBody2DComponent>();
+				component.BodyType = (LRigidBody2DComponent::Type)rigidBody2DComponent["BodyType"].as<int>();
 				component.FixedRotation = rigidBody2DComponent["FixedRotation"] ? rigidBody2DComponent["FixedRotation"].as<bool>() : false;
 			}
 
-			auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
+			const YAML::Node boxCollider2DComponent = entity["BoxCollider2DComponent"];
 			if (boxCollider2DComponent)
 			{
-				auto& component = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+				auto& component = deserializedEntity.AddComponent<LBoxCollider2DComponent>();
 				component.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 				component.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 				component.Density = boxCollider2DComponent["Density"] ? boxCollider2DComponent["Density"].as<float>() : 1.0f;
@@ -363,24 +388,24 @@ namespace LkEngine {
 		}
 	}
 
-	void SceneSerializer::SerializeEditorCamera(YAML::Emitter& out, LEditorCamera& editorCamera)
+	void LSceneSerializer::SerializeEditorCamera(YAML::Emitter& out, LEditorCamera& EditorCamera)
 	{
 		out << YAML::Key << "EditorCamera" << YAML::Value;
 		out << YAML::BeginMap;
 		{
-			out << YAML::Key << "Position"   << YAML::Value << editorCamera.GetPosition();
-			out << YAML::Key << "Origin"     << YAML::Value << editorCamera.GetOrigin();
-			out << YAML::Key << "Distance"   << YAML::Value << editorCamera.GetDistance();
-			out << YAML::Key << "FocalPoint" << YAML::Value << editorCamera.GetFocalPoint();
+			out << YAML::Key << "Position"   << YAML::Value << EditorCamera.GetPosition();
+			out << YAML::Key << "Origin"     << YAML::Value << EditorCamera.GetOrigin();
+			out << YAML::Key << "Distance"   << YAML::Value << EditorCamera.GetDistance();
+			out << YAML::Key << "FocalPoint" << YAML::Value << EditorCamera.GetFocalPoint();
 
 			//----------------------------------------------------------------
 			// Perspective 
 			out << YAML::Key << "Perspective" << YAML::Value;
 			out << YAML::Value << YAML::BeginMap;
 			{
-				out << YAML::Key << "DegPerspectiveFOV" << YAML::Value << editorCamera.GetPerspectiveDegFov();
-				out << YAML::Key << "PerspectiveNear"   << YAML::Value << editorCamera.GetPerspectiveNearClip();
-				out << YAML::Key << "PerspectiveFar"    << YAML::Value << editorCamera.GetPerspectiveFarClip();
+				out << YAML::Key << "DegPerspectiveFOV" << YAML::Value << EditorCamera.GetPerspectiveDegFov();
+				out << YAML::Key << "PerspectiveNear"   << YAML::Value << EditorCamera.GetPerspectiveNearClip();
+				out << YAML::Key << "PerspectiveFar"    << YAML::Value << EditorCamera.GetPerspectiveFarClip();
 			}
 			out << YAML::Value << YAML::EndMap;
 			//----------------------------------------------------------------
@@ -390,90 +415,94 @@ namespace LkEngine {
 			out << YAML::Key << "Orthographic" << YAML::Value;
 			out << YAML::Value << YAML::BeginMap;
 			{
-				out << YAML::Key << "OrthographicSize" << YAML::Value << editorCamera.GetOrthographicSize();
-				out << YAML::Key << "OrthographicNear" << YAML::Value << editorCamera.GetOrthographicNearClip();
-				out << YAML::Key << "OrthographicFar"  << YAML::Value << editorCamera.GetOrthographicFarClip();
+				out << YAML::Key << "OrthographicSize" << YAML::Value << EditorCamera.GetOrthographicSize();
+				out << YAML::Key << "OrthographicNear" << YAML::Value << EditorCamera.GetOrthographicNearClip();
+				out << YAML::Key << "OrthographicFar"  << YAML::Value << EditorCamera.GetOrthographicFarClip();
 			}
 			out << YAML::Value << YAML::EndMap;
 			//----------------------------------------------------------------
 
-			out << YAML::Key << "Pitch"          << YAML::Value << editorCamera.GetPitch();
-			out << YAML::Key << "Yaw"            << YAML::Value << editorCamera.GetYaw();
-			out << YAML::Key << "ProjectionType" << YAML::Value << (int)editorCamera.GetProjectionType();
-			out << YAML::Key << "CameraMode"     << YAML::Value << (int)editorCamera.m_CameraMode;
+			out << YAML::Key << "Pitch"          << YAML::Value << EditorCamera.GetPitch();
+			out << YAML::Key << "Yaw"            << YAML::Value << EditorCamera.GetYaw();
+			out << YAML::Key << "ProjectionType" << YAML::Value << (int)EditorCamera.GetProjectionType();
+			out << YAML::Key << "CameraMode"     << YAML::Value << (int)EditorCamera.m_CameraMode;
 		}
 		out << YAML::EndMap;
 	}
 
-	void SceneSerializer::DeserializeEditorCamera(YAML::Node& editorCameraNode, LEditorCamera& editorCamera)
+	void LSceneSerializer::DeserializeEditorCamera(YAML::Node& EditorCameraNode, LEditorCamera& EditorCamera)
 	{
-		if (editorCameraNode)
+		if (EditorCameraNode)
 		{
 			// Position, origin, distance and focalpoint
-			editorCamera.m_Position = editorCameraNode["Position"].as<glm::vec3>(glm::vec3(0.0f));
-			editorCamera.m_Origin = editorCameraNode["Origin"].as<glm::vec3>(glm::vec3(0.0f));
-			editorCamera.m_Distance = editorCameraNode["Distance"].as<float>();
-			editorCamera.m_FocalPoint = editorCameraNode["FocalPoint"].as<glm::vec3>(glm::vec3(0.0f));
+			EditorCamera.m_Position = EditorCameraNode["Position"].as<glm::vec3>(glm::vec3(0.0f));
+			EditorCamera.m_Origin = EditorCameraNode["Origin"].as<glm::vec3>(glm::vec3(0.0f));
+			EditorCamera.m_Distance = EditorCameraNode["Distance"].as<float>();
+			EditorCamera.m_FocalPoint = EditorCameraNode["FocalPoint"].as<glm::vec3>(glm::vec3(0.0f));
 
 			// Perspective data
-			const auto perspectiveCameraNode = editorCameraNode["Perspective"];
+			const auto perspectiveCameraNode = EditorCameraNode["Perspective"];
 			if (perspectiveCameraNode.IsMap())
 			{
-				editorCamera.m_DegPerspectiveFOV = perspectiveCameraNode["DegPerspectiveFOV"].as<float>();
-				editorCamera.m_PerspectiveNear = perspectiveCameraNode["PerspectiveNear"].as<float>();
-				editorCamera.m_PerspectiveFar = perspectiveCameraNode["PerspectiveFar"].as<float>();
-				editorCamera.SetPerspectiveNearClip(editorCamera.m_PerspectiveNear);
-				editorCamera.SetPerspectiveFarClip(editorCamera.m_PerspectiveFar);
-				editorCamera.SetPerspectiveProjectionMatrix(
-					glm::radians(editorCamera.m_DegPerspectiveFOV), 
-					editorCamera.m_ViewportWidth,
-					editorCamera.m_ViewportHeight,
-					editorCamera.m_PerspectiveNear,
-					editorCamera.m_PerspectiveFar);
-				editorCamera.SetPerspective(editorCamera.m_DegPerspectiveFOV, editorCamera.m_PerspectiveNear, editorCamera.m_PerspectiveFar);
-				//LK_CORE_DEBUG_TAG("SceneSerializer", "Set editor camera farP={} and nearP={}", editorCamera.m_PerspectiveFar, editorCamera.m_PerspectiveNear);
+				EditorCamera.m_DegPerspectiveFOV = perspectiveCameraNode["DegPerspectiveFOV"].as<float>();
+				EditorCamera.m_PerspectiveNear = perspectiveCameraNode["PerspectiveNear"].as<float>();
+				EditorCamera.m_PerspectiveFar = perspectiveCameraNode["PerspectiveFar"].as<float>();
+				EditorCamera.SetPerspectiveNearClip(EditorCamera.m_PerspectiveNear);
+				EditorCamera.SetPerspectiveFarClip(EditorCamera.m_PerspectiveFar);
+				EditorCamera.SetPerspectiveProjectionMatrix(
+					glm::radians(EditorCamera.m_DegPerspectiveFOV), 
+					EditorCamera.m_ViewportWidth,
+					EditorCamera.m_ViewportHeight,
+					EditorCamera.m_PerspectiveNear,
+					EditorCamera.m_PerspectiveFar);
+				EditorCamera.SetPerspective(EditorCamera.m_DegPerspectiveFOV, EditorCamera.m_PerspectiveNear, EditorCamera.m_PerspectiveFar);
+				//LK_CORE_DEBUG_TAG("SceneSerializer", "Set editor camera farP={} and nearP={}", EditorCamera.m_PerspectiveFar, EditorCamera.m_PerspectiveNear);
 			}
 
 			// Orthographic data
-			const auto orthographicCameraNode = editorCameraNode["Orthographic"];
+			const auto orthographicCameraNode = EditorCameraNode["Orthographic"];
 			if (orthographicCameraNode.IsMap())
 			{
-				editorCamera.m_OrthographicSize = orthographicCameraNode["OrthographicSize"].as<float>();
-				editorCamera.m_OrthographicNear = orthographicCameraNode["OrthographicNear"].as<float>();
-				editorCamera.m_OrthographicFar  = orthographicCameraNode["OrthographicFar"].as<float>();
-				editorCamera.SetOrthographicNearClip(editorCamera.m_OrthographicNear);
-				editorCamera.SetOrthographicFarClip(editorCamera.m_OrthographicFar);
+				EditorCamera.m_OrthographicSize = orthographicCameraNode["OrthographicSize"].as<float>();
+				EditorCamera.m_OrthographicNear = orthographicCameraNode["OrthographicNear"].as<float>();
+				EditorCamera.m_OrthographicFar  = orthographicCameraNode["OrthographicFar"].as<float>();
+				EditorCamera.SetOrthographicNearClip(EditorCamera.m_OrthographicNear);
+				EditorCamera.SetOrthographicFarClip(EditorCamera.m_OrthographicFar);
 			}
 
 			// Pitch and yaw
-			editorCamera.m_Pitch = editorCameraNode["Pitch"].as<float>();
-			editorCamera.m_Yaw = editorCameraNode["Yaw"].as<float>();
+			EditorCamera.m_Pitch = EditorCameraNode["Pitch"].as<float>();
+			EditorCamera.m_Yaw = EditorCameraNode["Yaw"].as<float>();
 
 			// Projection Type, Perspective or Orthographic
-			int projectionType = editorCameraNode["ProjectionType"].as<int>();
-			if (projectionType == (int)Camera::ProjectionType::Perspective)
-				editorCamera.m_ProjectionType = Camera::ProjectionType::Perspective;
-			else if (projectionType == (int)Camera::ProjectionType::Orthographic)
-				editorCamera.m_ProjectionType = Camera::ProjectionType::Orthographic;
+			const int projectionType = EditorCameraNode["ProjectionType"].as<int>();
+			if (projectionType == (int)LCamera::ProjectionType::Perspective)
+			{
+				EditorCamera.m_ProjectionType = LCamera::ProjectionType::Perspective;
+			}
+			else if (projectionType == (int)LCamera::ProjectionType::Orthographic)
+			{
+				EditorCamera.m_ProjectionType = LCamera::ProjectionType::Orthographic;
+			}
 
 			// Camera Mode, Flycam or Arcball
-			int cameraMode = editorCameraNode["CameraMode"].as<int>();
+			const int cameraMode = EditorCameraNode["CameraMode"].as<int>();
 			if (cameraMode == static_cast<int>(LEditorCamera::Mode::Flycam))
 			{
-				editorCamera.m_CameraMode = LEditorCamera::Mode::Flycam;
+				EditorCamera.m_CameraMode = LEditorCamera::Mode::Flycam;
 			}
 			else if (cameraMode == static_cast<int>(LEditorCamera::Mode::Arcball))
 			{
-				editorCamera.m_CameraMode = LEditorCamera::Mode::Arcball;
+				EditorCamera.m_CameraMode = LEditorCamera::Mode::Arcball;
 			}
 			else
 			{
-				editorCamera.m_CameraMode = LEditorCamera::Mode::None;
+				EditorCamera.m_CameraMode = LEditorCamera::Mode::None;
 			}
 		}
 	}
 
-	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath)
+	bool LSceneSerializer::Deserialize(const std::filesystem::path& filepath)
 	{
 		m_Scene->Clear();
 
@@ -493,43 +522,51 @@ namespace LkEngine {
 		return true;
 	}
 
-	bool SceneSerializer::DeserializeRuntime(AssetHandle scene)
+	bool LSceneSerializer::DeserializeRuntime(FAssetHandle scene)
 	{
 		// Not implemented
 		LK_CORE_ASSERT(false, "DeserializeRuntime: Not implemented yet");
 		return true;
 	}
 
-	Ref<Scene> SceneSerializer::LoadScene()
+	TObjectPtr<LScene> LSceneSerializer::LoadScene()
 	{
-		if (m_Scene == nullptr)
-			LK_CORE_ASSERT(false, "SceneSerializer::GetLoadedScene  m_Scene == nullptr");
+		LK_CORE_ASSERT(m_Scene, "LSceneSerializer::GetLoadedScene  m_Scene == nullptr");
 
 		m_Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
 		m_Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
 
+#if 0
+		///
+		/// CRITICAL: FIX THIS AWFUL CODE!!!!!!!!!!!!
+		/// 
 		if (m_Scene->m_IsActiveScene)
 		{
-			Scene::m_ActiveScene = m_Scene;
+			LScene::m_ActiveScene = m_Scene;
 
-			Input::SetScene(Ref<Scene>(m_Scene));
-			EditorLayer::Get()->SetScene(m_Scene);
-			LApplication::Get()->SetScene(Ref<Scene>(m_Scene));
+			/// FIXME:
+			Input::SetScene(TObjectPtr<LScene>(m_Scene));
+			LEditorLayer::Get()->SetScene(m_Scene);
+			LApplication::Get()->SetScene(TObjectPtr<LScene>(m_Scene));
 		}
 		
 		if (m_Scene->m_EditorScene)
 		{
-			Scene::m_ActiveScene = m_Scene;
+			LScene::m_ActiveScene = m_Scene;
 
-			m_Scene->EditorCamera = EditorLayer::Get()->GetEditorCamera();
+			m_Scene->EditorCamera = LEditorLayer::Get()->GetEditorCamera();
 			LK_CORE_ASSERT(m_Scene->EditorCamera, "SceneSerializer: EditorCamera is nullptr");
 
-			EditorLayer::Get()->SetScene(m_Scene);
-			LApplication::Get()->SetScene(Ref<Scene>(m_Scene));
-			Input::SetScene(Ref<Scene>(m_Scene));
+			/// FIXME:
+			LEditorLayer::Get()->SetScene(m_Scene);
+			LApplication::Get()->SetScene(TObjectPtr<LScene>(m_Scene));
+			Input::SetScene(TObjectPtr<LScene>(m_Scene));
 		}
 
-		return Ref<Scene>(m_Scene);
+		return TObjectPtr<LScene>(m_Scene);
+#endif
+
+		return nullptr;
 	}
 
 }

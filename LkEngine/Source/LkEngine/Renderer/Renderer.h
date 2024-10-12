@@ -3,56 +3,120 @@
 #include "RendererAPI.h"
 #include "Renderer2DAPI.h"
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/LObjectPtr.h"
+
 #include "LkEngine/Scene/Components.h"
 
 
 namespace LkEngine {
 
-	class Renderer : public RefCounted
+	class LRenderer : public LObject
 	{
 	public:
-		Renderer();
-		~Renderer() = default;
+		LRenderer();
+		~LRenderer() = default;
 
-		static void Init();
+		/** Initialize the renderer by creating the pipeline components. */
+		static void Initialize();
 		static void Shutdown();
+
 		static void Clear();
 		static void BeginFrame();
 		static void EndFrame();
 		static void SwapQueues();
 
-		static void BeginRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<RenderPass> renderPass);
-		static void EndRenderPass(Ref<RenderCommandBuffer> renderCommandBuffer);
-		static void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount = 0);
-		static void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Shader> shader, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount = 0);
-		static void RenderGeometry(Ref<RenderCommandBuffer> renderCommandBuffer, Ref<Pipeline> pipeline, Ref<Material> material, Ref<VertexBuffer> vertexBuffer, Ref<IndexBuffer> indexBuffer, const glm::mat4& transform, uint32_t indexCount = 0);
+		static void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+									TObjectPtr<LRenderPass> renderPass);
 
-		static void SubmitImage(const Ref<Image> image);
-		static void SubmitImage(const Ref<Image2D> image);
+		static void EndRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer);
 
-		static void SubmitMesh(Ref<Mesh>& mesh, Ref<Shader>& shader, const glm::mat4& transform);
+		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+								   TObjectPtr<LPipeline> pipeline, 
+								   TObjectPtr<LVertexBuffer> VertexBuffer, 
+								   TObjectPtr<LIndexBuffer> indexBuffer, 
+								   const glm::mat4& transform, 
+								   const uint32_t indexCount = 0);
+
+		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer,
+								   TObjectPtr<LPipeline> pipeline, 
+								   TObjectPtr<LShader> shader, 
+								   TObjectPtr<LVertexBuffer> VertexBuffer, 
+								   TObjectPtr<LIndexBuffer> indexBuffer, 
+								   const glm::mat4& transform, 
+								   const uint32_t indexCount = 0);
+
+		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer,
+								   TObjectPtr<LPipeline> pipeline, 
+								   TObjectPtr<LMaterial> material, 
+								   TObjectPtr<LVertexBuffer> VertexBuffer, 
+								   TObjectPtr<LIndexBuffer> indexBuffer, 
+								   const glm::mat4& transform, 
+								   const uint32_t indexCount = 0);
+
+		static void SubmitImage(const TObjectPtr<LImage> image);
+		static void SubmitImage(const TObjectPtr<LImage2D> image);
+
+		static void SubmitMesh(TObjectPtr<Mesh>& mesh, 
+							   TObjectPtr<LShader>& shader, 
+							   const glm::mat4& transform);
 
 		static void SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID = 0);
-		static void SubmitLines(const VertexBuffer& va, const IndexBuffer& ib, const Shader& shader);
-        static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
-        static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0);
-        static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID = 0);
-        static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID = 0);
-		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, const glm::vec4 color, uint64_t entityID = 0);
-		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, uint64_t entityID = 0);
-		static void SubmitSprite(TransformComponent& tc, const glm::vec2& size, Ref<Texture> texture, const glm::vec4& color, uint64_t entityID = 0);
-		static void SubmitIndexed(VertexBuffer& vb, unsigned int count);
 
-		static void DrawMesh(Ref<Mesh>& mesh, const Ref<Shader> shader);
+		static void SubmitLines(const LVertexBuffer& va, 
+								const LIndexBuffer& ib, 
+								const LShader& shader);
+
+		// SubmitQuad
+        static void SubmitQuad(const glm::vec2& pos, 
+							   const glm::vec2& size, 
+							   const glm::vec4& color, 
+							   uint64_t entityID = 0);
+
+        static void SubmitQuad(const glm::vec3& pos, 
+							   const glm::vec2& size, 
+							   const glm::vec4& color, 
+							   uint64_t entityID = 0);
+
+        static void SubmitQuad(const glm::vec2& pos, 
+							   const glm::vec2& size, 
+							   TObjectPtr<LTexture> texture, 
+							   uint64_t entityID = 0);
+
+        static void SubmitQuad(const glm::vec3& pos, 
+							   const glm::vec2& size, 
+							   TObjectPtr<LTexture> texture, 
+							   uint64_t entityID = 0);
+		// ~SubmitQuad
+
+		static void SubmitSprite(LTransformComponent& tc, 
+								 const glm::vec2& size, 
+								 const glm::vec4 color, 
+								 uint64_t entityID = 0);
+
+		static void SubmitSprite(LTransformComponent& tc, 
+								 const glm::vec2& size, 
+								 TObjectPtr<LTexture> texture, 
+								 uint64_t entityID = 0);
+
+		static void SubmitSprite(LTransformComponent& tc, 
+								 const glm::vec2& size, 
+								 TObjectPtr<LTexture> texture, 
+								 const glm::vec4& color, 
+								 uint64_t entityID = 0);
+
+		static void SubmitIndexed(LVertexBuffer& vb, const uint32_t count);
+
+		static void DrawMesh(Ref<Mesh>& mesh, const TObjectPtr<LShader> shader);
 
 		static uint32_t GetCurrentFrameIndex();
 		static uint32_t RT_GetCurrentFrameIndex();
 
-		static Ref<Framebuffer>& GetViewportFramebuffer();
+		static TObjectPtr<LFramebuffer>& GetViewportFramebuffer();
 		static RendererCapabilities& GetCapabilities();
 
-		static void BeginScene(const SceneCamera& camera);
-		static void BeginScene(const glm::mat4& viewProjection);
+		static void BeginScene(const LSceneCamera& camera);
+		static void BeginScene(const glm::mat4& ViewProjection);
 
 		template<typename TFunction>
 		static void Submit(TFunction&& Function)
@@ -60,8 +124,6 @@ namespace LkEngine {
 			auto RenderCommand = [](void* Ptr) 
 			{
 				auto FunctionPtr = (TFunction*)Ptr;
-				//(*pFunc)();
-				//pFunc->~FuncT();
 				(*FunctionPtr)();
 				FunctionPtr->~TFunction();
 			};
@@ -70,21 +132,21 @@ namespace LkEngine {
 			new (StorageBuffer) TFunction(std::forward<TFunction>(Function));
 		}
 
-		template<typename FuncT>
-		static void SubmitResourceFree(FuncT&& func)
+		template<typename TFunction>
+		static void SubmitResourceFree(TFunction&& Function)
 		{
-			auto renderCmd = [](void* ptr) 
+			auto RenderCmd = [](void* Ptr) 
 			{
-				auto pFunc = (FuncT*)ptr;
-				(*pFunc)();
-				pFunc->~FuncT();
+				auto FunctionPtr = (TFunction*)Ptr;
+				(*FunctionPtr)();
+				FunctionPtr->~TFunction();
 			};
 
-			Submit([renderCmd, func]()
+			Submit([RenderCmd, Function]()
 			{
-				const uint32_t index = Renderer::RT_GetCurrentFrameIndex();
-				auto storageBuffer = GetRenderCommandQueue().Allocate(renderCmd, sizeof(func));
-				new (storageBuffer) FuncT(std::forward<FuncT>((FuncT&&)func));
+				const uint32_t index = LRenderer::RT_GetCurrentFrameIndex();
+				auto StorageBuffer = GetRenderCommandQueue().Allocate(RenderCmd, sizeof(Function));
+				new (StorageBuffer) TFunction(std::forward<TFunction>((TFunction&&)Function));
 			});
 		}
 
@@ -95,28 +157,23 @@ namespace LkEngine {
 		static uint32_t GetFramesInFlight() { return m_FramesInFlight; }
 
 		static void SetPrimitiveTopology(const ERenderTopology& InRenderTopology);
-		static ERenderTopology GetPrimitiveTopology() { return PrimitiveTopology; }
+		FORCEINLINE static ERenderTopology GetPrimitiveTopology() { return PrimitiveTopology; }
 
 		static RenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
 		static uint32_t GetRenderQueueSubmissionIndex();
 
-		static Ref<ShaderLibrary> GetShaderLibrary();
-		static Ref<TextureLibrary> GetTextureLibrary();
-		static Ref<MaterialLibrary> GetMaterialLibrary();
-		static Ref<RenderContext> GetContext();
+		static TObjectPtr<LShaderLibrary> GetShaderLibrary();
 
-		static Renderer* Get() { return s_Instance; }
+		static LRenderer* Get() { return s_Instance; }
 
 		/// @FIXME: remove all these Getters
-		static Ref<LRendererAPI> GetRendererAPI() { return RendererAPI; }
-		static Ref<Renderer2DAPI> GetRenderer2D() { return s_Renderer2DAPI; }
-		static Ref<Renderer2DAPI> GetRenderer2DAPI() { return s_Renderer2DAPI; }
+		static TObjectPtr<LRendererAPI> GetRendererAPI() { return RendererAPI; }
 
-		static Ref<Texture2D> GetWhiteTexture();
-		static Ref<TextureCube> GetWhiteTextureCube();
+		static TObjectPtr<LTexture2D> GetWhiteTexture();
+		static TObjectPtr<LTextureCube> GetWhiteTextureCube();
 
-		static void RegisterShaderDependency(Ref<Shader> InShader, Ref<Material> InMaterial);
+		static void RegisterShaderDependency(TObjectPtr<LShader> InShader, TObjectPtr<LMaterial> InMaterial);
 
 		static void SetDepthFunction(const EDepthFunction& InDepthFunction);
 
@@ -131,12 +188,13 @@ namespace LkEngine {
 		inline static uint32_t m_FramesInFlight = 2;
 
 		/* Render API */
-		inline static Ref<LRendererAPI> RendererAPI = nullptr;
-		inline static Ref<Renderer2DAPI> s_Renderer2DAPI = nullptr; /// @FIXME: Add L prefix to Renderer2DAPI class
+		inline static TObjectPtr<LRendererAPI> RendererAPI = nullptr;
 
-		inline static Renderer* s_Instance = nullptr;
+		inline static LRenderer* s_Instance = nullptr;
 
-		friend class EditorLayer;
+		friend class LEditorLayer;
+
+		LCLASS(LRenderer)
 	};
 
 }
