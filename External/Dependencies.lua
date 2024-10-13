@@ -59,8 +59,8 @@ Dependencies = {
 	},
 
 	YamlCPP = {
-        IncludeDir = "%{wks.location}/External/yaml-cpp/include",
-        LibDir = "%{wks.location}/External/yaml-cpp/lib",
+        	IncludeDir = "%{wks.location}/External/yaml-cpp/include",
+        	LibDir = "%{wks.location}/External/yaml-cpp/lib",
 	},
 	
 	Glm = {
@@ -82,11 +82,11 @@ Dependencies = {
 	},
 
 	Entt = {
-        IncludeDir = "%{wks.location}/External/entt/include"
+        	IncludeDir = "%{wks.location}/External/entt/include"
 	},
 
 	Choc = {
-        IncludeDir = "%{wks.location}/External/choc"
+        	IncludeDir = "%{wks.location}/External/choc"
 	},
 
 }
