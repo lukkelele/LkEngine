@@ -40,14 +40,6 @@ namespace LkEngine::Meta {
 		char value[N];
 	};
 
-#if 0
-	template<typename T>
-	FORCEINLINE std::string_view GetType()
-	{
-		return typeid(T).name();
-	}
-#endif
-
 	template <typename T>
 	static std::string TypeName()
 	{
