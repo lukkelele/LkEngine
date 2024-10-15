@@ -33,8 +33,6 @@ project "LkApplication"
         "%{Dependencies.Box2D.IncludeDir}",
         "%{Dependencies.YamlCPP.IncludeDir}",
         "%{Dependencies.Assimp.IncludeDir}",
-
-        --"%{wks.location}/External/VulkanMemoryAllocator",
 	}
 
 	links { "LkEngine" }

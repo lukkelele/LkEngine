@@ -22,11 +22,13 @@ workspace "LkEngine"
         optimize "On"
 
 
-ExternalDirectory = "%{wks.location}/External"
-AssetsDirectory = "%{wks.location}/Assets"
 BuildOutputDirectory = "%{cfg.buildcfg}-%{cfg.system}"
 TargetDirectory = "%{wks.location}/Binaries/" .. BuildOutputDirectory .. "/%{prj.name}"
 IntermediateDirectory = "%{wks.location}/Intermediate/" .. BuildOutputDirectory .. "/%{prj.name}"
+
+ExternalDirectory = "%{wks.location}/External"
+AssetsDirectory = "%{wks.location}/Assets"
+
 include "External/Dependencies.lua"
 
 
@@ -53,6 +55,7 @@ project "LkEngine"
         "_CRT_SECURE_NO_WARNINGS",
 		"YAML_CPP_STATIC_DEFINE",
         "IMGUI_DEFINE_MATH_OPERATORS",
+        "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING"
     }
 
     files
@@ -85,6 +88,7 @@ project "LkEngine"
         "%{Dependencies.Glad.IncludeDir}",
         "%{Dependencies.ImGui.IncludeDir}",
         "%{Dependencies.ImGuizmo.IncludeDir}",
+        "%{Dependencies.ImGuiNodeEditor.IncludeDir}",
         "%{Dependencies.Assimp.IncludeDir}",
         "%{Dependencies.Entt.IncludeDir}",
         "%{Dependencies.StbImage.IncludeDir}",
@@ -92,11 +96,10 @@ project "LkEngine"
         "%{Dependencies.Spdlog.IncludeDir}",
         "%{Dependencies.Box2D.IncludeDir}",
         "%{Dependencies.YamlCPP.IncludeDir}",
-        "%{Dependencies.Choc.IncludeDir}",
-        "%{Dependencies.ImGuiNodeEditor.IncludeDir}",
     }
 
-    links {
+    links 
+    {
         "GLFW",
         "ImGui",
         "ImGuizmo",
@@ -126,13 +129,24 @@ project "LkEngine"
             --"%{Dependencies.Vulkan.Windows.LibDir}",
             "%{Dependencies.Assimp.Windows.LibDir}",
         }
-        links {
+
+        links 
+        {
             --"%{Dependencies.Vulkan.Windows.LibName}",
             "%{Dependencies.Assimp.Windows.LibName}",
         }
-        postbuildcommands {
+
+        postbuildcommands 
+        {
             "{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
         }
+
+        -- Enable new standard-conforming preprocessor for MSVC.
+		buildoptions 
+        { 
+            "/Zc:preprocessor" 
+        }
+
 
 	filter "configurations:Debug"
 		defines "LK_DEBUG"
