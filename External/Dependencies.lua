@@ -82,23 +82,27 @@ Dependencies = {
 	},
 
 	Entt = {
-        	IncludeDir = "%{wks.location}/External/entt/include"
-	},
-
-	Choc = {
-        	IncludeDir = "%{wks.location}/External/choc"
-	},
+        	IncludeDir = "%{wks.location}/External/entt/include" 
+	}
 
 }
 
 
-include "External/glfw/glfw-premake5.lua"
-include "External/glad/glad-premake5.lua"
-include "External/imgui/imgui-premake5.lua"
-include "External/ImGuizmo/ImGuizmo-premake5.lua"
-include "External/imgui-node-editor/imgui-node-editor-premake5.lua"
-include "External/box2d/box2d-premake5.lua"
-include "External/yaml-cpp/yaml-cpp-premake5.lua"
+--include "External/glfw/glfw-premake5.lua"
+--include "External/glad/glad-premake5.lua"
+--include "External/imgui/imgui-premake5.lua"
+--include "External/ImGuizmo/ImGuizmo-premake5.lua"
+--include "External/imgui-node-editor/imgui-node-editor-premake5.lua"
+--include "External/box2d/box2d-premake5.lua"
+--include "External/yaml-cpp/yaml-cpp-premake5.lua"
+
+include "External/glfw-premake5.lua"
+include "External/glad-premake5.lua"
+include "External/imgui-premake5.lua"
+include "External/ImGuizmo-premake5.lua"
+include "External/imgui-node-editor-premake5.lua"
+include "External/yaml-cpp-premake5.lua"
+include "External/box2d-premake5.lua"
 
 include "LkApplication/LkApplication.lua"
 
