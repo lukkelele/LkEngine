@@ -489,6 +489,7 @@ namespace LkEngine {
         }
 
         LK_CORE_ASSERT(false, "Failed to find collection: {}", collectionName);
+        return m_Collections.at(0); /* Will crash. */
     }
 
     TTexture2DMap& LTextureLibrary::GetTexture2DCollection(std::string_view collectionName)
@@ -503,11 +504,13 @@ namespace LkEngine {
         }
 
         LK_CORE_ASSERT(false, "Failed to find collection: {}", collectionName);
+        return m_Collections2D.at(0); /* Will crash. */
     }
 
-    void LTextureLibrary::AddCollection(std::string_view directoryPath)
+    void LTextureLibrary::AddCollection(std::string_view InDirectoryPath)
     {
-        auto directory = std::filesystem::path(directoryPath);
+        std::filesystem::path Directory = std::filesystem::path(InDirectoryPath);
+        LK_MARK_FUNC_NOT_IMPLEMENTED();
     }
 
     LTextureLibrary& LTextureLibrary::Get()

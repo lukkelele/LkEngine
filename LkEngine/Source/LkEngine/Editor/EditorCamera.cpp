@@ -200,11 +200,18 @@ namespace LkEngine {
 		switch (m_ProjectionType)
 		{
 		case ProjectionType::Perspective:
-			SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), (float)width, (float)height, m_PerspectiveNear, m_PerspectiveFar);
+			SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), 
+										   static_cast<float>(width),
+										   static_cast<float>(height), 
+										   m_PerspectiveNear, 
+										   m_PerspectiveFar);
 			break;
 
 		case ProjectionType::Orthographic:
-			SetOrthoProjectionMatrix(width, height, m_OrthographicNear, m_OrthographicFar);
+			SetOrthoProjectionMatrix(static_cast<float>(width), 
+									 static_cast<float>(height), 
+									 m_OrthographicNear, 
+									 m_OrthographicFar);
 			break;
 		}
 	}

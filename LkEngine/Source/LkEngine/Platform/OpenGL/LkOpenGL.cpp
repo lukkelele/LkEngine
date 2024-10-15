@@ -58,22 +58,6 @@ namespace LkEngine {
 			}
 		}
 
-		GLenum OpenGLImageFormat(ImageFormat format)
-		{
-			switch (format)
-			{
-				case ImageFormat::RGB:     return GL_RGB;
-				case ImageFormat::RGBA:
-				case ImageFormat::RGBA8:
-				case ImageFormat::RGBA16F:
-				case ImageFormat::RGBA32F: return GL_RGBA;
-
-				case ImageFormat::SRGB:    return GL_SRGB;
-				case ImageFormat::SRGBA:   return GL_SRGB_ALPHA;
-			}
-			LK_CORE_ASSERT(false, "Unknown OpenGLImageFormat {}", Utils::ImageFormatToString(format));
-		}
-
 		GLenum OpenGLImageInternalFormat(ImageFormat format)
 		{
 			switch (format)

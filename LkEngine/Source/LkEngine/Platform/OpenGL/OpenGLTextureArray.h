@@ -89,6 +89,7 @@ namespace LkEngine {
 				case ETextureArrayDimension::Dimension_4096x4096: return { 4096, 4096 };
 			}
 			LK_CORE_ASSERT(false, "Unknown OpenGLTextureArrayDimension");
+			return {};
 		}
 
 		static ETextureArrayDimension DetermineDimension(int width, int height)
@@ -108,6 +109,7 @@ namespace LkEngine {
 			}
 
 			LK_CORE_ASSERT(false, "Unknown dimension arguments, width={}  height={}", width, height);
+			return {};
 		}
 
 		static void GenerateTextureArrayImage(RendererID& rendererID, const TextureArraySpecification& Specification)

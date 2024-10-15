@@ -63,9 +63,9 @@ namespace LkEngine {
                    const ImVec2& uv0, 
                    const ImVec2& uv1, 
                    const ImVec4& tint_col, 
-                   const ImVec4& border_col)
+                   const ImVec4& BorderColumn)
     {
-        ImGui::Image((ImTextureID)texture->GetRendererID(), size, uv0, uv1, tint_col, border_col);
+        ImGui::Image((ImTextureID)texture->GetRendererID(), size, uv0, uv1, tint_col, BorderColumn);
     }
 
     void UI::Image(const TObjectPtr<LTexture2D>& texture, 
@@ -73,14 +73,15 @@ namespace LkEngine {
                    const glm::vec2& uv0, 
                    const glm::vec2& uv1, 
                    const glm::vec4& tint_col, 
-                   const glm::vec4& border_col)
+                   const glm::vec4& BorderColumn)
     {
-        ImGui::Image((ImTextureID)texture->GetRendererID(), 
+        //ImGui::Image((ImTextureID)texture->GetRendererID(), 
+        ImGui::Image(reinterpret_cast<ImTextureID>(texture->GetRendererID()),
                      ImVec2(size.x, size.y), 
                      ImVec2(uv0.x, uv0.y), 
                      ImVec2(uv1.x, uv1.y), 
                      ImVec4(tint_col.r, tint_col.g, tint_col.b, tint_col.a), 
-                     ImVec4(border_col.r, border_col.g, border_col.b, border_col.a));
+                     ImVec4(BorderColumn.r, BorderColumn.g, BorderColumn.b, BorderColumn.a));
     }
 
     void UI::Image(const TObjectPtr<LImage2D>& image, 
@@ -88,9 +89,15 @@ namespace LkEngine {
                    const ImVec2& uv0, 
                    const ImVec2& uv1, 
                    const ImVec4& tint_col, 
-                   const ImVec4& border_col)
+                   const ImVec4& BorderColumn)
     {
-        ImGui::Image((ImTextureID)image->GetRendererID(), size, uv0, uv1, tint_col, border_col);
+        //ImGui::Image((ImTextureID)image->GetRendererID(), 
+        ImGui::Image(reinterpret_cast<ImTextureID>(image->GetRendererID()),
+                     size, 
+                     uv0, 
+                     uv1, 
+                     tint_col, 
+                     BorderColumn);
     }
 
     void UI::Image(const TObjectPtr<LImage2D>& image, 
@@ -98,14 +105,14 @@ namespace LkEngine {
                    const glm::vec2& uv0, 
                    const glm::vec2& uv1, 
                    const glm::vec4& tint_col, 
-                   const glm::vec4& border_col)
+                   const glm::vec4& BorderColumn)
     {
         ImGui::Image((ImTextureID)image->GetRendererID(), 
                      ImVec2(size.x, size.y), 
                      ImVec2(uv0.x, uv0.y), 
                      ImVec2(uv1.x, uv1.y), 
                      ImVec4(tint_col.r, tint_col.g, tint_col.b, tint_col.a), 
-                     ImVec4(border_col.r, border_col.g, border_col.b, border_col.a));
+                     ImVec4(BorderColumn.r, BorderColumn.g, BorderColumn.b, BorderColumn.a));
     }
 
 }

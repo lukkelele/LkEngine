@@ -4,56 +4,25 @@
 
 namespace LkEngine {
 
-    TObjectPtr<LScene> Test_ScenePtr{};
-    TObjectPtr<LEntity> Test_EntityPtr{};
-
-    LApplication::LApplication(const ApplicationSpecification& Specification)
-        : m_Specification(Specification)
+    LApplication::LApplication(const ApplicationSpecification& InSpecification)
+        : Specification(InSpecification)
+        , Log(LLog::Instance())
         , MetadataRegistry(LMetadataRegistry::Get())
         , ThreadManager(LThreadManager::Instance())
     {
         m_Instance = this;
         m_Timer.Reset();
 
-        LLog::Initialize("LkEngine.log");
-        LK_CORE_INFO_TAG("Application", "Starting LkEngine");
+        LCrashHandler::AttachInstance(this);
 
-        LK_CORE_WARN_TAG("Application", "Getting Metadata Registry");
+        LK_CORE_TRACE_TAG("Application", "Getting Metadata Registry");
         LMetadataRegistry& MetadataRegistry = LMetadataRegistry::Get();
 
-        for (const auto& [ StaticClassName, StaticClassMetadata ] : MetadataRegistry.GetStaticClassRegistry())
-        {
-            LK_CORE_INFO(" Registered Static Class: \"{}\"", StaticClassName);
-        }
-
-        LK_CORE_DEBUG_TAG("Application", "Creating window");
-        Window = MakeUnique<LWindow>(Specification);
+        LK_CORE_TRACE_TAG("Application", "Creating window");
+        Window = MakeUnique<LWindow>(InSpecification);
         MetadataRegistry.RegisterObject("Window", Window);
 
         ImGuiLayer = LImGuiLayer::Create();
-
-        LCrashHandler::AttachInstance(this);
-
-#if 0 // TEST THREAD MANAGER
-        /** Setup testing for thread submission. */
-        FThreadStartArgs Test_Thread1_StartArgs{};
-        Test_Thread1_StartArgs.bRunAfterCreation = true;
-
-        auto Test_ThreadFunc1 = [](int a, int b)
-		{
-            int LoopCount = 0;
-            while (true)
-            {
-				LK_CORE_INFO_TAG("Test_Thread1", "Count={}", LoopCount++);
-                std::this_thread::sleep_for(4s);
-            }
-		};
-
-        LK_CORE_WARN("Creating Test_Thread1");
-        FThreadStartArgs Test_Thread2_StartArgs{};
-        Test_Thread2_StartArgs.bRunAfterCreation = true;
-        ThreadManager.CreateThread(Test_Thread2_StartArgs, ThreadFunction_TestCommandQueue, std::ref(Test_ThreadData2));
-#endif
     }
 
     LApplication::~LApplication()
@@ -114,7 +83,7 @@ namespace LkEngine {
              */
             if (Editor->IsEnabled())
             {
-        #if 0
+        #if 1
                 TObjectPtr<LEditorCamera> Camera = Editor->GetEditorCamera();
                 LRenderer::BeginScene(Camera->GetViewProjectionMatrix());
 
@@ -124,6 +93,7 @@ namespace LkEngine {
 					layer->OnUpdate(Timestep);
 				}
 
+            #if 0 /// DISABLED FOR NOW
 				if (Scene)
 				{
 					Scene->OnRenderEditor(*Camera, Timestep);
@@ -131,13 +101,23 @@ namespace LkEngine {
                     /* Flush 2D renderer. */
 					m_Renderer->GetRenderer2D()->EndScene(); 
 				}
+            #endif
         #endif
             }
             
-			if (m_Specification.ImGuiEnabled)
+			if (Specification.ImGuiEnabled)
 			{
-				LRenderer::Submit([Application]() { Application->RenderImGui(); });
-				LRenderer::Submit([=]() { ImGuiLayer->EndFrame(); });
+				//LRenderer::Submit([Application]() 
+				LRenderer::Submit([&Application]() 
+                { 
+                    Application->RenderImGui(); 
+                });
+
+				//LRenderer::Submit([=]()
+				LRenderer::Submit([&]()
+                { 
+                    ImGuiLayer->EndFrame(); 
+                });
 			}
 
 			LRenderer::EndFrame();
@@ -169,37 +149,10 @@ namespace LkEngine {
         }
     }
 
-#if 0
-    void LApplication::PushLayer(LLayer* layer)
-    {
-        LayerStack.PushLayer(layer);
-        layer->OnAttach();
-    }
-
-    void LApplication::PushOverlay(LLayer* layer)
-    {
-        LayerStack.PushOverlay(layer);
-        layer->OnAttach();
-    }
-
-    void LApplication::PopLayer(LLayer* layer)
-    {
-        LayerStack.PopLayer(layer);
-        layer->OnDetach();
-    }
-
-    void LApplication::PopOverlay(LLayer* layer)
-    {
-        LayerStack.PopOverlay(layer);
-        layer->OnDetach();
-    }
-#endif
-
 	void LApplication::OnEvent(LEvent& Event)
 	{
 		EventDispatcher Dispatcher(Event);
 
-		//for (auto LayerIter = LayerStack.end(); LayerIter != LayerStack.begin(); )
 		for (LLayer* Layer : LayerStack)
 		{
 			Layer->OnEvent(Event);

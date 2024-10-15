@@ -4,7 +4,6 @@
 #include "RendererAPI.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLIndexBuffer.h"
-//#include "LkEngine/Platform/Vulkan/VulkanIndexBuffer.h"
 
 
 namespace LkEngine {
@@ -26,13 +25,13 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(const uint64_t size)
+	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(const uint64_t InSize)
 	{ 
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				return TObjectPtr<OpenGLIndexBuffer>::Create(size);
+				return TObjectPtr<OpenGLIndexBuffer>::Create(InSize);
 			}
 
 			case ERendererAPI::None: break;

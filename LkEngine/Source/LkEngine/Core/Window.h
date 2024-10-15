@@ -76,8 +76,8 @@ namespace LkEngine {
         TObjectPtr<LSwapChain> GetSwapChain();
         TObjectPtr<LRenderPass> GetRenderPass();
 
-        void SetWidth(uint32_t width); // { m_Width = width; }
-        void SetHeight(uint32_t height); // { m_Height = height; }
+		FORCEINLINE void SetWidth(const uint32_t width) { m_Width = width; }
+		FORCEINLINE void SetHeight(const uint32_t height) { m_Height = height; }
 
         /// UPDATE
         float GetScalerX() const;

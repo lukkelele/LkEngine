@@ -6,11 +6,26 @@
 
 namespace LkEngine::MemoryUtils {
 
-	static unsigned char* ResizeImageData(void* data, uint64_t memorySizeInBytes, size_t oldWidth, size_t oldHeight, size_t newWidth, size_t newHeight, stbir_pixel_layout pixelLayout = STBIR_RGBA)
+	static unsigned char* ResizeImageData(const void* Data, 
+										  const uint64_t MemorySizeInBytes, 
+										  const int OldWidth, 
+										  const int OldHeight, 
+										  const int NewWidth, 
+										  const int NewHeight, 
+										  const stbir_pixel_layout PixelLayout = STBIR_RGBA)
 	{
-		stbi_uc* resizedMemoryAlloc = (stbi_uc*)malloc(memorySizeInBytes);
-		stbir_resize_uint8_linear((stbi_uc*)data, oldWidth, oldHeight, 0, resizedMemoryAlloc, newWidth, newHeight, 0, pixelLayout);
-		return resizedMemoryAlloc;
+		stbi_uc* ResizedMemoryAlloc = (stbi_uc*)malloc(MemorySizeInBytes);
+		stbir_resize_uint8_linear((stbi_uc*)Data, 
+								  OldWidth, 
+								  OldHeight, 
+								  0, 
+								  ResizedMemoryAlloc, 
+								  NewWidth, 
+								  NewHeight, 
+								  0, 
+								  PixelLayout);
+
+		return ResizedMemoryAlloc;
 	}
 
 }

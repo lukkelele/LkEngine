@@ -20,21 +20,21 @@ namespace LkEngine {
 		LK_CORE_VERIFY(std::filesystem::is_regular_file(m_FilePath), 
 					   "Texture file is not valid, \"{}\"", m_FilePath.string());
 
-		ImageSpecification imageSpec(textureSpec);
-		uint32_t memorySize = imageSpec.Size; // Calculated in ImageSpecification constructor
+		ImageSpecification ImageSpec(textureSpec);
+		const uint64_t memorySize = ImageSpec.Size; /* Calculated in ImageSpecification constructor. */
 
 	#if 0
-		if (imageSpec.Size != InBuffer.GetSize())
+		if (ImageSpec.Size != InBuffer.GetSize())
 		{
-			int width, height, channels;
-			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &width, &height, &channels, 4);
+			int Width, Height, Channels;
+			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &Width, &Height, &Channels, 4);
 			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Image {} specification doesn't match the "
 							  "read data size, resizing texture...", m_Specification.DebugName);
-			InBuffer.Data = MemoryUtils::ResizeImageData(data, memorySize, width, height, textureSpec.Width, textureSpec.Height, STBIR_RGBA);
+			InBuffer.Data = MemoryUtils::ResizeImageData(data, memorySize, Width, Height, textureSpec.Width, textureSpec.Height, STBIR_RGBA);
 		}
 	#endif
 
-		m_Image = LImage2D::Create(imageSpec, InBuffer);
+		m_Image = LImage2D::Create(ImageSpec, InBuffer);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& textureSpec)
@@ -46,29 +46,30 @@ namespace LkEngine {
 	{
 		LK_CORE_VERIFY(std::filesystem::is_regular_file(m_FilePath), 
 					   "Texture file is not valid, \"{}\"", m_FilePath.string());
-		ImageSpecification imageSpec(textureSpec);
+		ImageSpecification ImageSpec(textureSpec);
 
 		if (!textureSpec.Path.empty())
 		{
-			int width, height, channels;
+			int Width, Height, Channels;
 			stbi_set_flip_vertically_on_load(1);
 
 			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Loading image from path \"{}\"", m_FilePath.string());
-			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &width, &height, &channels, 4);
-            const uint32_t dataSize = Utils::GetMemorySize(textureSpec.Format, textureSpec.Width, textureSpec.Height);
+			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &Width, &Height, &Channels, 4);
 
-			imageSpec.Size = (uint64_t)width * (uint64_t)height * (uint64_t)channels;
-			if (imageSpec.Size != dataSize)
+            const uint32_t DataSize = Utils::GetMemorySize(textureSpec.Format, textureSpec.Width, textureSpec.Height);
+
+			ImageSpec.Size = (uint64_t)Width * (uint64_t)Height * (uint64_t)Channels;
+			if (ImageSpec.Size != DataSize)
 			{
-				data = MemoryUtils::ResizeImageData(data, dataSize, width, height, textureSpec.Width, textureSpec.Height, STBIR_RGBA);
+				data = MemoryUtils::ResizeImageData(data, DataSize, Width, Height, textureSpec.Width, textureSpec.Height, STBIR_RGBA);
 			}
 
-			m_Image = LImage2D::Create(imageSpec, data);
+			m_Image = LImage2D::Create(ImageSpec, data);
 		}
 		else
 		{
 			LK_CORE_WARN_TAG("OpenGLTexture2D", "Passed buffer is nullptr");
-			m_Image = LImage2D::Create(imageSpec, nullptr);
+			m_Image = LImage2D::Create(ImageSpec, nullptr);
 		}
 	}
 
@@ -85,16 +86,6 @@ namespace LkEngine {
 	void OpenGLTexture2D::Unbind(uint32_t slot) const
 	{
 		glBindTextureUnit(slot, 0);
-	}
-
-	RendererID OpenGLTexture2D::GetRendererID() const
-	{
-		return m_Image->GetRendererID();
-	}
-
-	RendererID& OpenGLTexture2D::GetRendererID() 
-	{
-		return m_Image->GetRendererID();
 	}
 
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
@@ -138,9 +129,9 @@ namespace LkEngine {
 		return m_Image->GetSpecification().Mips;
 	}
 
-	void OpenGLTexture2D::Resize(uint32_t width, uint32_t height)
+	void OpenGLTexture2D::Resize(uint32_t Width, uint32_t Height)
 	{
-		m_Image->Resize(width, height);
+		m_Image->Resize(Width, Height);
 	}
 
 	void OpenGLTexture2D::Invalidate()
@@ -165,16 +156,16 @@ namespace LkEngine {
 		glGenTextures(1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
 
-		int width, height, channels;
+		int Width, Height, Channels;
 		stbi_set_flip_vertically_on_load(false);
 		for (unsigned int i = 0; i < facePaths.size(); i++)
 		{
 			std::filesystem::path& facePath = facePaths[i];
-			stbi_uc* data = stbi_load(facePath.string().c_str(), &width, &height, &channels, 4);
+			stbi_uc* data = stbi_load(facePath.string().c_str(), &Width, &Height, &Channels, 4);
 			LK_CORE_VERIFY(data, "OpenGLTextureCube, failed to load data for face path \"{}\"", facePath.string());
 
-			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA32F, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			stbi_image_free(data);
 
 			LK_CORE_DEBUG_TAG("OpenGLTextureCube", "Created face {} with texture image: {}", i, facePath.string());

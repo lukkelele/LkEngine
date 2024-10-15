@@ -10,24 +10,24 @@ namespace LkEngine {
     class OpenGLIndexBuffer : public LIndexBuffer
     {
 	public:
-		OpenGLIndexBuffer(uint32_t size);
-		OpenGLIndexBuffer(void* buffer, uint32_t size);
+		OpenGLIndexBuffer(const uint64_t InSize);
+		OpenGLIndexBuffer(void* InData, const uint64_t InSize);
         ~OpenGLIndexBuffer();
 
-		void SetData(void* buffer, uint64_t size, uint64_t offset = 0) override;
+		void SetData(void* InData, const uint64_t InSize, const uint64_t InOffset = 0) override;
 
-		FBuffer GetLocalData() override 
+		FORCEINLINE virtual FBuffer GetLocalData() override 
 		{ 
 			return FBuffer::Copy(m_LocalData.Data, m_Size); 
 		}
 
-		unsigned int GetCount() const { return m_Count;  }
-		uint64_t GetSize() const override { return m_Size; }
+		FORCEINLINE virtual uint64_t GetSize() const override { return m_Size; }
+		FORCEINLINE virtual unsigned int GetCount() const override { return m_Count;  }
 
-		void Bind() const override;
+		virtual void Bind() const override;
 
-		RendererID GetRendererID() const override { return m_RendererID; }
-		RendererID& GetRendererID() override { return m_RendererID; }
+		FORCEINLINE virtual RendererID GetRendererID() const override { return m_RendererID; }
+		FORCEINLINE virtual RendererID& GetRendererID() override { return m_RendererID; }
 
 	private:
 		RendererID m_RendererID = 0;

@@ -219,20 +219,10 @@ namespace LkEngine {
 		}
 	}
 
-	void LWindow::SetSize(const glm::vec2& size)
+	void LWindow::SetSize(const glm::vec2& InSize)
 	{
-		m_Width = size.x;
-		m_Height = size.y;
-	}
-
-    void LWindow::SetWidth(uint32_t width) 
-	{ 
-		m_Width = width; 
-	}
-
-    void LWindow::SetHeight(uint32_t height) 
-	{ 
-		m_Height = height; 
+		m_Width = static_cast<decltype(m_Width)>(InSize.x);
+		m_Height = static_cast<decltype(m_Height)>(InSize.y);
 	}
 
 	void LWindow::WindowResizeCallback(GLFWwindow* glfwWindow, int width, int height)
@@ -256,7 +246,7 @@ namespace LkEngine {
 			EditorWindowWidth /= window.GetScalerX();
 			EditorWindowHeight /= window.GetScalerY();
 			
-			window.SetWidth(EditorWindowWidth);
+			window.SetWidth(static_cast<uint32_t>(EditorWindowWidth));
 			window.SetHeight(EditorWindowHeight);
 			window.GetRenderContext()->UpdateResolution(EditorWindowWidth, EditorWindowHeight);
 

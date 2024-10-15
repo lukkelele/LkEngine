@@ -67,7 +67,7 @@ namespace LkEngine {
 
 		FORCEINLINE int GetClassRegistrySize() const 
 		{ 
-			return StaticClassRegistry.size(); 
+			return static_cast<int>(StaticClassRegistry.size());
 		}
 
 		FORCEINLINE const std::unordered_map<std::string, FClassMetadata>& GetStaticClassRegistry() const

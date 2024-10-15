@@ -146,13 +146,13 @@ namespace LkEngine {
 			char* NewData = new char[m_Length + StringLength + 1]; // +1 for null terminator
 			if (m_Data)
 			{
-				std::strcpy(NewData, m_Data);
+				strcpy_s(NewData, (m_Length + 1), m_Data);
 			}
 
 			// Append the new string.
-			std::strcpy(NewData + m_Length, String);
+			strcpy_s((NewData + m_Length), (StringLength + 1), String);
 
-			// Delete old data and update the member variables.
+			// Delete old data and update members.
 			delete[] m_Data;
 			m_Data = NewData;
 			m_Length += StringLength;

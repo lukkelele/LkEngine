@@ -71,7 +71,27 @@ namespace LkEngine {
         void PrintOpenGLExtensions();
 
         GLenum OpenGLFormatDataType(ImageFormat format);
-        GLenum OpenGLImageFormat(ImageFormat format);
+
+        FORCEINLINE static GLenum OpenGLImageFormat(const ImageFormat InFormat)
+        {
+            switch (InFormat)
+            {
+                case ImageFormat::RGB:     return GL_RGB;
+
+                /* RGBA */
+                case ImageFormat::RGBA:
+                case ImageFormat::RGBA8:
+                case ImageFormat::RGBA16F:
+                case ImageFormat::RGBA32F: return GL_RGBA;
+
+                /* SRGB */
+                case ImageFormat::SRGB:    return GL_SRGB;
+                case ImageFormat::SRGBA:   return GL_SRGB_ALPHA;
+            }
+            LK_CORE_ASSERT(false, "Unknown OpenGLImageFormat {}", Utils::ImageFormatToString(InFormat));
+            return GL_INVALID_ENUM;
+        }
+
         GLenum OpenGLImageInternalFormat(ImageFormat format);
         GLenum OpenGLSamplerWrap(TextureWrap wrap);
         GLenum OpenGLSamplerFilter(TextureFilter filter, bool mipmap);
@@ -81,14 +101,16 @@ namespace LkEngine {
         void BindTexture(bool multisampled, uint32_t id);
         void CreateTextures(bool multisampled, uint32_t* outID, uint32_t count);
         GLenum TextureTarget(bool multisampled);
+
         void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index);
         void AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, uint32_t width, uint32_t height);
         bool IsDepthFormat(ImageFormat format);
         GLenum FramebufferTextureFormatToGL(ImageFormat format);
+
         std::string FramebufferTextureFormatToString(FramebufferTextureFormat format);
         std::string ImageFormatToString(ImageFormat format);
 
-		static void ApplyTextureFilter(TextureFilter filter, bool mipmap)
+		FORCEINLINE static void ApplyTextureFilter(TextureFilter filter, bool mipmap)
 		{
 			// Texture Filter
 			if (filter == TextureFilter::Linear)
@@ -144,29 +166,47 @@ namespace LkEngine {
             {
                 case TextureFilter::Linear:
 			    {
-			    	if (mipmap)
+                    if (mipmap)
+                    {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			    	else
+                    }
+                    else
+                    {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    }
+
 			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    return;
+
+                    break;
 			    }
+
                 case TextureFilter::Nearest:
 			    {
-			    	if (mipmap)
+                    if (mipmap)
+                    {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-			    	else
+                    }
+                    else
+                    {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                    }
 			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                    return;
+
+                    break;
 			    }
+
                 case TextureFilter::None:
 			    {
-			    	if (mipmap)
+                    if (mipmap)
+                    {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+                    }
                     else
+                    {
 			    	    glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                    }
 			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
                     return;
 			    }
             }

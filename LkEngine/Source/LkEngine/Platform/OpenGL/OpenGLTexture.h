@@ -43,8 +43,16 @@ namespace LkEngine {
 		virtual void Unload() override;
 
 		virtual bool Loaded() const override { return m_Loaded; }
-		virtual RendererID GetRendererID() const override;
-		virtual RendererID& GetRendererID() override;
+
+		FORCEINLINE virtual RendererID GetRendererID() const override
+		{
+			return m_Image->GetRendererID();
+		}
+
+		FORCEINLINE virtual RendererID& GetRendererID() override
+		{
+			return m_Image->GetRendererID();
+		}
 
 		FORCEINLINE virtual uint32_t GetWidth() const override { return m_Width; }
 		FORCEINLINE virtual uint32_t GetHeight() const override { return m_Height; }

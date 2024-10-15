@@ -22,7 +22,10 @@ namespace LkEngine {
 			return m_Layers[LayerIndex];
 		}
 
-		FORCEINLINE uint8_t Size() const { return m_Layers.size(); }
+		FORCEINLINE int Size() const 
+		{ 
+			return static_cast<int>(m_Layers.size()); 
+		}
 
 		std::vector<LLayer*>::iterator begin() { return m_Layers.begin(); }
 		std::vector<LLayer*>::iterator end() { return m_Layers.end(); }

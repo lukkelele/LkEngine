@@ -4,8 +4,9 @@
 
 namespace LkEngine {
 
-    OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t size)
-		: m_Size(size)
+    OpenGLIndexBuffer::OpenGLIndexBuffer(const uint64_t InSize)
+		: m_Size(InSize)
+		, m_Count(InSize / sizeof(decltype(InSize)))
     {
 		LK_OpenGL(glCreateBuffers(1, &m_RendererID));
 		LK_OpenGL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
@@ -14,16 +15,15 @@ namespace LkEngine {
 		//LK_OpenGL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)); // UNBIND
     }
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(void* buffer, uint32_t size)
-		: m_Size(size)
-		, m_Count(size / sizeof(unsigned int))
+	OpenGLIndexBuffer::OpenGLIndexBuffer(void* InData, const uint64_t InSize)
+		: m_Size(InSize)
+		, m_Count(InSize / sizeof(decltype(InSize)))
 	{
 		LK_OpenGL(glCreateBuffers(1, &m_RendererID));
 		LK_OpenGL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
 		LK_OpenGL(glNamedBufferData(m_RendererID, m_Size, nullptr, GL_DYNAMIC_DRAW));
-		//LOG_DEBUG("New IndexBuffer, id: {}, size: {}, count: {}", m_RendererID, size, m_Count);
 		
-		SetData(buffer, size, 0);
+		SetData(InData, InSize, 0);
 	}
 	 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer() 
@@ -36,11 +36,12 @@ namespace LkEngine {
 		LK_OpenGL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
 	}
 
-	void OpenGLIndexBuffer::SetData(void* buffer, uint64_t size, uint64_t offset)
+	void OpenGLIndexBuffer::SetData(void* InData, const uint64_t InSize, const uint64_t InOffset)
 	{
-		m_LocalData = FBuffer::Copy(buffer, size);
-		m_Size = size;
-		glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+		m_LocalData = FBuffer::Copy(InData, InSize);
+		m_Size = InSize;
+
+		glNamedBufferSubData(m_RendererID, InOffset, m_Size, m_LocalData.Data);
 	}
 
 }

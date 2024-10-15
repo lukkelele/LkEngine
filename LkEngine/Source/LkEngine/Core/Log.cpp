@@ -4,7 +4,24 @@
 
 namespace LkEngine {
 
-	void LLog::Initialize(std::string_view logfilename, 
+	LLog::LLog()
+	{
+		// TODO: Read config
+		Initialize("LkEditor.log", "CORE", "CLIENT");
+	}
+
+	LLog::~LLog()
+	{
+		// TODO
+	}
+
+	LLog& LLog::Instance()
+	{
+		static LLog Instance;
+		return Instance;
+	}
+
+	void LLog::Initialize(std::string_view logfilename,
 						  std::string_view coreLoggerName, 
 						  std::string_view clientLoggerName)
 	{

@@ -59,6 +59,11 @@ namespace LkEngine {
 			ELogLevel Filter = ELogLevel::Debug;
 		};
 
+		LLog();
+		~LLog();
+
+		static LLog& Instance();
+
 		static void Initialize(std::string_view LogfileName = "Logger.log", 
 							   std::string_view CoreLoggerName = "CORE", 
 							   std::string_view ClientLoggerName = "CLIENT");

@@ -185,5 +185,13 @@ namespace LkEngine::Meta {
 		}, Members);
 	}
 
+	/* Function argument type deduction. */
+	// A utility template to deduce the argument type of the function
+	template <typename TClass, typename ReturnType, typename Argument>
+	Argument DeduceArgumentType(ReturnType(TClass::*Function)(Argument))
+	{
+		return Argument{};
+	}
+
 }
 

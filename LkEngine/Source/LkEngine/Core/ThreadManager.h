@@ -35,7 +35,10 @@ namespace LkEngine {
 
 		void UpdateThreads();
 
-		FORCEINLINE uint8_t GetThreadPoolSize() const { return ThreadPool.size(); }
+		FORCEINLINE int GetThreadPoolSize() const 
+		{ 
+			return static_cast<int>(ThreadPool.size());
+		}
 
 		FORCEINLINE void StartThread(const uint8_t ThreadIndex)
 		{

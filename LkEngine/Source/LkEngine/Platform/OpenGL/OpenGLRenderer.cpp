@@ -221,7 +221,7 @@ namespace LkEngine {
 
 	void OpenGLRenderer::DrawIndexed(uint64_t indexCount)
 	{
-		glDrawElements(m_Topology, indexCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(m_Topology, static_cast<GLsizei>(indexCount), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)

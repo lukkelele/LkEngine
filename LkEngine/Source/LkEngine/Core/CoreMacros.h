@@ -26,7 +26,7 @@
 #elif defined(__GNUC__)
 #	define LK_FUNC_SIG __PRETTY_FUNCTION__
 #elif defined(_MSC_VER)
-#	define LK_FUNC_SIG __FUNCSIG__
+#	define LK_FUNCSIG __FUNCSIG__
 #else
 #	error "Unsupported compiler"
 #endif
@@ -54,6 +54,11 @@
 	#define FORCEINLINE __forceinline
 	#define LK_ITOA(c, buf, size, p)  void() // FIXME
 #endif
+
+/* Mark a function 'Not implemented'. */
+#define LK_MARK_FUNC_NOT_IMPLEMENTED(...) \
+	LK_CORE_ASSERT(false, "Not implemented - {}" __VA_OPT__("\nNote: {}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))
+	//LK_CORE_ASSERT(false, "Not implemented - {}\nNote: {}", LK_FUNCSIG, __VA_ARGS__)
 
 namespace LkEngine 
 {

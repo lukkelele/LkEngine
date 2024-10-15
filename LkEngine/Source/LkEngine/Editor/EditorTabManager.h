@@ -45,9 +45,9 @@ namespace LkEngine {
             }
         }
 
-        FORCEINLINE static uint8_t GetTabCount()
+        FORCEINLINE static int GetTabCount()
         { 
-            return Tabs.size(); 
+            return static_cast<int>(Tabs.size());
         }
 
         FORCEINLINE static TSharedPtr<LTab> GetActiveTab() 

@@ -12,9 +12,9 @@ namespace LkEngine {
 	public:
 		virtual ~LIndexBuffer() = default;
 
-		virtual void SetData(void* buffer, 
-							 const uint64_t size, 
-							 const uint64_t offset = 0) = 0;
+		virtual void SetData(void* InData, 
+							 const uint64_t InSize, 
+							 const uint64_t InOffset = 0) = 0;
 
 		virtual FBuffer GetLocalData() = 0;
 
@@ -27,7 +27,7 @@ namespace LkEngine {
 		virtual RendererID& GetRendererID() = 0;
 
 		static TObjectPtr<LIndexBuffer> Create(const uint64_t InSize);
-		static TObjectPtr<LIndexBuffer> Create(void* data, const uint64_t InSize = 0);
+		static TObjectPtr<LIndexBuffer> Create(void* Data, const uint64_t InSize = 0);
 
 	private:
 		LCLASS(LIndexBuffer)

@@ -64,8 +64,8 @@ namespace LkEngine {
 	void LEditorLayer::Initialize()
 	{
 		Window->SetScalers(ViewportScalers.x, ViewportScalers.y);
-		Window->SetWidth(EditorWindowSize.x);
-		Window->SetHeight(EditorWindowSize.y);
+		Window->SetWidth(static_cast<uint32_t>(EditorWindowSize.x));
+		Window->SetHeight(static_cast<uint32_t>(EditorWindowSize.y));
 
         // Viewport Framebuffer
 		FramebufferSpecification framebufferSpec;
@@ -722,8 +722,12 @@ namespace LkEngine {
 		ImVec2 newSize, newPosition;
 		if (!maximized && UI::UpdateWindowManualResize(ImGui::GetCurrentWindow(), newSize, newPosition))
 		{
-			glfwSetWindowPos(window, newPosition.x, newPosition.y);
-			glfwSetWindowSize(window, newSize.x, newSize.y);
+			glfwSetWindowPos(window, 
+							 static_cast<int>(newPosition.x), 
+							 static_cast<int>(newPosition.y));
+			glfwSetWindowSize(window, 
+							  static_cast<int>(newSize.x), 
+							  static_cast<int>(newSize.y));
 		}
 	}
 
@@ -931,7 +935,7 @@ namespace LkEngine {
 			TObjectPtr<LTexture> RectangleTexture = LTextureLibrary::Get().GetTexture(TextureName);
 			if (ImGui::ImageButton(
 					"##RectangleImage", 
-					(void*)RectangleTexture->GetRendererID(), 
+					reinterpret_cast<ImTextureID>(RectangleTexture->GetRendererID()),
 					imageSize, 
 					ImVec2(1, 1), 
 					ImVec2(0, 0), 
@@ -963,7 +967,7 @@ namespace LkEngine {
 			// Circle Image
 			if (ImGui::ImageButton(
 					"##CircleImage", 
-					(void*)LTextureLibrary::Get().GetTexture(TextureName)->GetRendererID(), 
+					reinterpret_cast<ImTextureID>(LTextureLibrary::Get().GetTexture(TextureName)->GetRendererID()),
 					imageSize, 
 					ImVec2(1, 1), 
 					ImVec2(0, 0), 
@@ -987,7 +991,7 @@ namespace LkEngine {
 			// Triangle Image
 			if (ImGui::ImageButton(
 					"##TriangleImage", 
-					(void*)LTextureLibrary::Get().GetTexture(TextureName)->GetRendererID(), 
+					reinterpret_cast<ImTextureID>(LTextureLibrary::Get().GetTexture(TextureName)->GetRendererID()),
 					imageSize, 
 					ImVec2(1, 1), 
 					ImVec2(0, 0), 

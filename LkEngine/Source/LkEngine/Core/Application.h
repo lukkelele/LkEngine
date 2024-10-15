@@ -47,7 +47,7 @@ namespace LkEngine {
     class LApplication : public LObject
     {
     public:
-        LApplication(const ApplicationSpecification& props = ApplicationSpecification());
+        LApplication(const ApplicationSpecification& InSpecification = ApplicationSpecification());
         ~LApplication();
 
         void Initialize();
@@ -117,7 +117,10 @@ namespace LkEngine {
 
         FORCEINLINE TObjectPtr<LProject> GetProject() { return Project; }
 
-        const ApplicationSpecification GetSpecification() const { return m_Specification; }
+        const ApplicationSpecification& GetSpecification() const 
+        { 
+            return Specification; 
+        }
 
         FTimestep GetTimestep() const { return Timestep; } // REMOVE ME
         uint32_t GetCurrentFrameIndex() const { return m_CurrentFrameIndex; }
@@ -127,15 +130,17 @@ namespace LkEngine {
         FThreadData Test_ThreadData2{};
 
     private:
+        ApplicationSpecification Specification;
+
         bool bRunning = false;
         Timer m_Timer;
-        LLayerStack LayerStack;
-        ApplicationSpecification m_Specification;
 
         FTimestep Timestep{};
         FTimestep LastTimestep{};
 
+        LLog& Log;
         LMetadataRegistry& MetadataRegistry;
+        LLayerStack LayerStack;
         LThreadManager& ThreadManager;
 
         TUniquePtr<LWindow> Window;
