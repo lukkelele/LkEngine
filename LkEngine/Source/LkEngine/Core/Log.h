@@ -39,7 +39,8 @@ namespace LkEngine {
 	{ 
 		Core = 0, 
 		Client,
-		Asset
+		UI,
+		Asset,
 	};
 
 	struct FLoggerInitArguments
@@ -52,11 +53,19 @@ namespace LkEngine {
 	class LLog 
 	{
 	public:
-		/** FTagDetails */
+		/** 
+		 * FTagDetails 
+		 */
 		struct FTagDetails
 		{
 			bool Enabled = true;
 			ELogLevel Filter = ELogLevel::Debug;
+
+			FTagDetails() = default;
+			FTagDetails(const ELogLevel InFilter)
+				: Filter(InFilter) 
+			{
+			}
 		};
 
 		LLog();
@@ -68,9 +77,10 @@ namespace LkEngine {
 							   std::string_view CoreLoggerName = "CORE", 
 							   std::string_view ClientLoggerName = "CLIENT");
 
-		static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return m_CoreLogger; }
-		static std::shared_ptr<spdlog::logger>& GetClientLogger() { return m_ClientLogger; }
-		static std::shared_ptr<spdlog::logger>& GetAssetLogger() { return m_AssetLogger; }
+		FORCEINLINE static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return CoreLogger; }
+		FORCEINLINE static std::shared_ptr<spdlog::logger>& GetClientLogger() { return ClientLogger; }
+		FORCEINLINE static std::shared_ptr<spdlog::logger>& GetUILogger() { return UILogger; }
+		FORCEINLINE static std::shared_ptr<spdlog::logger>& GetAssetLogger() { return AssetLogger; }
 
 		FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger(const ELoggerType LoggerType)
 		{
@@ -78,7 +88,8 @@ namespace LkEngine {
 			{
 				case ELoggerType::Core:   return GetCoreLogger();
 				case ELoggerType::Client: return GetClientLogger();
-				case ELoggerType::Asset:  return GetClientLogger();
+				case ELoggerType::UI:     return GetUILogger();
+				case ELoggerType::Asset:  return GetAssetLogger();
 				default: break;
 			}
 
@@ -93,7 +104,7 @@ namespace LkEngine {
 		template<typename... TArgs>
 		static void PrintAssertMessage(ELoggerType LoggerType, std::string_view Prefix , TArgs&&... Args);
 
-		static const char* LevelToString(ELogLevel Level)
+		FORCEINLINE static const char* LevelToString(ELogLevel Level)
 		{
 			switch (Level)
 			{
@@ -108,7 +119,8 @@ namespace LkEngine {
 			return "";
 		}
 
-		static ELogLevel LevelFromString(std::string_view InString)
+		/* TODO: Convert InString to lowercase before check takes place. */
+		FORCEINLINE static ELogLevel LevelFromString(std::string_view InString)
 		{
 			if (InString == "Trace")   return ELogLevel::Trace;
 			if (InString == "Info")    return ELogLevel::Info;
@@ -120,12 +132,51 @@ namespace LkEngine {
 			return ELogLevel::Info;
 		}
 
-	private:
-		inline static std::shared_ptr<spdlog::logger> m_CoreLogger = nullptr;
-		inline static std::shared_ptr<spdlog::logger> m_ClientLogger = nullptr;
-		inline static std::shared_ptr<spdlog::logger> m_AssetLogger = nullptr;
+		/**
+		 * @brief Convert a ELogLevel to spdlog::level.
+		 */
+		FORCEINLINE static constexpr spdlog::level::level_enum ToSpdlogLevel(const ELogLevel Level)
+		{
+			switch (Level)
+			{
+				case ELogLevel::Trace:   return spdlog::level::trace;
+				case ELogLevel::Info:    return spdlog::level::info;
+				case ELogLevel::Warn:    return spdlog::level::warn;
+				case ELogLevel::Error:   return spdlog::level::err;
+				case ELogLevel::Fatal:   return spdlog::level::critical;
+			}
 
-		inline static std::map<std::string, FTagDetails> m_EnabledTags;
+			throw "Invalid log level";
+			return spdlog::level::info;
+		}
+
+		/**
+		 * @brief Get the name of a logger by using the logger type.
+		 */
+		FORCEINLINE static std::string_view GetLoggerName(const ELoggerType LoggerType)
+		{
+			switch (LoggerType)
+			{
+				case ELoggerType::Core:   return GetCoreLogger()->name();
+				case ELoggerType::Client: return GetClientLogger()->name();
+				case ELoggerType::UI:     return GetUILogger()->name();
+				case ELoggerType::Asset:  return GetAssetLogger()->name();
+				default: break;
+			}
+
+			LK_CORE_ASSERT(false, "Invalid logger type");
+			return "";
+		}
+
+
+	private:
+		inline static std::shared_ptr<spdlog::logger> CoreLogger = nullptr;
+		inline static std::shared_ptr<spdlog::logger> ClientLogger = nullptr;
+		inline static std::shared_ptr<spdlog::logger> UILogger = nullptr;
+		inline static std::shared_ptr<spdlog::logger> AssetLogger = nullptr;
+
+		/* Tag details for every logger type. */
+		inline static std::map<std::string, FTagDetails> EnabledTags;
 	};
 
 }
@@ -146,11 +197,27 @@ namespace LkEngine {
 #define LK_CORE_FATAL_TAG(_TAG, ...)    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Fatal, _TAG, __VA_ARGS__)
 
 /* Client Logging. */
-#define LK_TRACE(...)                   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Trace, "", __VA_ARGS__)
-#define LK_INFO(...)                    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Info, "", __VA_ARGS__)
-#define LK_WARN(...)                    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Warn, "", __VA_ARGS__)
-#define LK_ERROR(...)                   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Warn, "", __VA_ARGS__)
-#define LK_FATAL(...)                   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Fatal, "", __VA_ARGS__)
+#define LK_CLIENT_TRACE(...)            ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Trace, "", __VA_ARGS__)
+#define LK_CLIENT_DEBUG(...)            ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Info, "", __VA_ARGS__)
+#define LK_CLIENT_INFO(...)             ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Info, "", __VA_ARGS__)
+#define LK_CLIENT_WARN(...)             ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Warn, "", __VA_ARGS__)
+#define LK_CLIENT_ERROR(...)            ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Error, "", __VA_ARGS__)
+#define LK_CLIENT_FATAL(...)            ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Fatal, "", __VA_ARGS__)
+
+/* UI Logging. */
+#define LK_UI_TRACE(...)                ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Trace, "", __VA_ARGS__)
+#define LK_UI_DEBUG(...)                ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Debug, "", __VA_ARGS__)
+#define LK_UI_INFO(...)                 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Info, "", __VA_ARGS__)
+#define LK_UI_WARN(...)                 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Warn, "", __VA_ARGS__)
+#define LK_UI_ERROR(...)                ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Error, "", __VA_ARGS__)
+#define LK_UI_FATAL(...)                ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Fatal, "", __VA_ARGS__)
+
+#define LK_UI_TRACE_TAG(_TAG, ...)      ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Trace, _TAG, __VA_ARGS__)
+#define LK_UI_DEBUG_TAG(_TAG, ...)      ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Debug, _TAG, __VA_ARGS__)
+#define LK_UI_INFO_TAG(_TAG, ...)       ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Info, _TAG, __VA_ARGS__)
+#define LK_UI_WARN_TAG(_TAG, ...)       ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Warn, _TAG, __VA_ARGS__)
+#define LK_UI_ERROR_TAG(_TAG, ...)      ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Error, _TAG, __VA_ARGS__)
+#define LK_UI_FATAL_TAG(_TAG, ...)      ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Fatal, _TAG, __VA_ARGS__)
 
 /* FIXME: In the future */
 /* Asset Logging. */
@@ -164,10 +231,10 @@ namespace LkEngine {
 	void LLog::PrintMessage(ELoggerType LoggerType, ELogLevel Level, 
 							std::string_view Tag, TArgs&&... Args)
 	{
-		FTagDetails& TagDetails = m_EnabledTags[std::string(Tag)];
+		FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];
 		if (TagDetails.Enabled && TagDetails.Filter <= Level)
 		{
-			std::shared_ptr<spdlog::logger>& Logger = (LoggerType == ELoggerType::Core) ? GetCoreLogger() : GetClientLogger();
+			std::shared_ptr<spdlog::logger>& Logger = LLog::GetLogger(LoggerType);
 			std::string LogString = Tag.empty() ? "{0}{1}" : "[{0}] {1}";
 			switch (Level)
 			{
