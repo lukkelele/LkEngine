@@ -7,7 +7,7 @@
 
 namespace LkEngine {
 
-	TObjectPtr<LTexture> LTexture::Create(const TextureSpecification& textureSpec)
+	TObjectPtr<LTexture> LTexture::Create(const FTextureSpecification& textureSpec)
 	{
 		switch (LRendererAPI::Current())
 		{
@@ -16,60 +16,60 @@ namespace LkEngine {
 				return TObjectPtr<OpenGLTexture2D>::Create(textureSpec);
 			}
 
+			case ERendererAPI::Vulkan:
 			case ERendererAPI::None: break;
-			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Render API");
 		return nullptr;
 	}
 
-	TObjectPtr<LTexture2D> LTexture2D::Create(const TextureSpecification& specification, FBuffer BufferData)
+	TObjectPtr<LTexture2D> LTexture2D::Create(const FTextureSpecification& Specification, FBuffer BufferData)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				return TObjectPtr<OpenGLTexture2D>::Create(specification, BufferData);
+				return TObjectPtr<OpenGLTexture2D>::Create(Specification, BufferData);
 			}
 
+			case ERendererAPI::Vulkan:
 			case ERendererAPI::None: break;
-			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Render API");
 		return nullptr;
 	}
 
-	TObjectPtr<LTexture2D> LTexture2D::Create(const TextureSpecification& specification)
+	TObjectPtr<LTexture2D> LTexture2D::Create(const FTextureSpecification& Specification)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				return TObjectPtr<OpenGLTexture2D>::Create(specification);
+				return TObjectPtr<OpenGLTexture2D>::Create(Specification);
 			}
 
+			case ERendererAPI::Vulkan:
 			case ERendererAPI::None: break;
-			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Render API");
 		return nullptr;
 	}
 
-	TObjectPtr<LTextureCube> LTextureCube::Create(const TextureSpecification& specification, 
-												  const std::vector<std::filesystem::path>& facePaths)
+	TObjectPtr<LTextureCube> LTextureCube::Create(const FTextureSpecification& specification, 
+												  const std::vector<std::filesystem::path>& InFacePaths)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				return TObjectPtr<OpenGLTextureCube>::Create(specification, facePaths);
+				return TObjectPtr<OpenGLTextureCube>::Create(specification, InFacePaths);
 			}
 
+			case ERendererAPI::Vulkan:
 			case ERendererAPI::None: break;
-			default: break;
 		}
 
 		LK_CORE_ASSERT(false, "Invalid Render API");

@@ -9,20 +9,16 @@
 
 namespace LkEngine {
 
-	TObjectPtr<LFramebuffer> LFramebuffer::Create(const FramebufferSpecification& spec)
+	TObjectPtr<LFramebuffer> LFramebuffer::Create(const FFramebufferSpecification& InSpecification)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL:	
 			{
-				return TObjectPtr<LOpenGLFramebuffer>::Create(spec);
-			}
-			case ERendererAPI::Vulkan:	
-			{
-				LK_CORE_ASSERT(false, "Vulkan not supported");
-				return nullptr;
+				return TObjectPtr<LOpenGLFramebuffer>::Create(InSpecification);
 			}
 
+			case ERendererAPI::Vulkan:	
 			default: break;
 		}
 
@@ -30,7 +26,6 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	/// @FIXME: REMOVE THIS 
 	void LFramebuffer::TargetSwapChain()
 	{
 		switch (LRendererAPI::Current())
@@ -40,6 +35,9 @@ namespace LkEngine {
 				LOpenGLFramebuffer::TargetSwapChain();
 				break;
 			}
+
+			case ERendererAPI::Vulkan:	
+			default: break;
 		}
 	}
 

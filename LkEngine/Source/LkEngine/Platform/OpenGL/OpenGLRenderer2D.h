@@ -31,7 +31,7 @@ namespace LkEngine {
         virtual void EndScene() override;
         virtual void Flush() override;
 
-        virtual void DrawImage(const TObjectPtr<LImage> image) override;
+        virtual void DrawImage(const TObjectPtr<LImage>& Image) override;
 
         // DrawQuad
         virtual void DrawQuad(const glm::mat4& transform, 
@@ -150,9 +150,8 @@ namespace LkEngine {
         OpenGLRenderer2DSpecification m_Specification;
         RenderCommandQueue m_RenderQueue;
 
-        const uint32_t m_MaxVertices;
-        const uint32_t m_MaxIndices;
-
+        const uint32_t m_MaxVertices = 0;
+        const uint32_t m_MaxIndices = 0;
         const uint32_t m_MaxLineVertices;
         const uint32_t m_MaxLineIndices;
 

@@ -27,12 +27,13 @@ namespace LkEngine {
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-        LApplication& ApplicationRef = *LApplication::Get();
+        /* Get reference to window. */
+        LApplication& Application = *LApplication::Get();
+        LWindow& Window = Application.GetWindow();
 
-        LWindow& Window = ApplicationRef.GetWindow();
 	    ImGui_ImplGlfw_InitForOpenGL(Window.GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(Window.GetShaderVersion().c_str());
-		LK_CORE_INFO_TAG("ImGuiLayer (OpenGL)", "ImGui Version: {}", ImGui::GetVersion());
+		LK_CORE_DEBUG_TAG("ImGuiLayer - OpenGL", "ImGui Version: {}", ImGui::GetVersion());
 
 		bInitialized = true;
     }

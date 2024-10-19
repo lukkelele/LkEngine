@@ -13,15 +13,12 @@ namespace LkEngine {
 
     static FileExtension DetermineExtension(const std::filesystem::directory_entry& Entry)
     {
-        if (Entry.is_regular_file() == false)
+        if (!Entry.is_regular_file())
         {
             return FileExtension::Unknown;
         }
 
-        const std::string Filename = Entry.path().filename().string();
-        const std::string filepath = Entry.path().string();
         const std::string fileExtension = Entry.path().extension().string();
-
         if (fileExtension == "png")
         {
             return FileExtension::PNG;
@@ -39,51 +36,18 @@ namespace LkEngine {
         m_Collection2D.clear();
 
         /* Create white texture. */
-		TextureSpecification spec;
-		spec.Format = ImageFormat::RGBA32F;
-		spec.Width = 2048;
-		spec.Height = 2048;
-        spec.SamplerFilter = TextureFilter::None;
-        spec.SamplerWrap = TextureWrap::None;
-        spec.Path = "Assets/Textures/white-texture.png";
-        spec.Name = "white-texture";
-        spec.DebugName = "white-texture";
-        m_WhiteTexture = LTexture2D::Create(spec);
+		FTextureSpecification Specification;
+		Specification.Format = EImageFormat::RGBA32F;
+		Specification.Width = 2048;
+		Specification.Height = 2048;
+        Specification.SamplerFilter = ETextureFilter::None;
+        Specification.SamplerWrap = ETextureWrap::None;
+        Specification.Path = "Assets/Textures/white-texture.png";
+        Specification.Name = "white-texture";
+        Specification.DebugName = "white-texture";
+        m_WhiteTexture = LTexture2D::Create(Specification);
+
         m_Collection2D.insert({ "white-texture", m_WhiteTexture });
-
-        //Initialize();
-
-    #if LK_TEST_LoadNanoSuit
-        // TODO: Read fileinfo and determine size and other info instead of manually setting it
-        // Nanosuit
-        {
-            std::unordered_map<std::string, TObjectPtr<LTexture2D>> nanosuitCollection;
-            constexpr const char* nanosuitDirectory = "Assets/Meshes/Template/Nanosuit";
-            TextureSpecification nanosuitSpec;
-
-            nanosuitSpec.Width = 1024;
-            nanosuitSpec.Height = 1024;
-            for (const auto& Entry : fs::directory_iterator(nanosuitDirectory))
-            {
-                if (Entry.is_regular_file())
-                {
-                    std::string Filename = Entry.path().Filename().string();
-                    std::string fileExt = Filename.substr(Filename.size() - 3);
-                    if (fileExt != "jpg" && fileExt != "png" && fileExt != "JPG")
-                    {
-                        LK_CORE_ERROR_TAG("TextureLibrary", "Found unwanted file extension: {}", fileExt);
-                        continue;
-                    }
-                    if (fileExt == "jpg" || fileExt == "JPG") nanosuitSpec.Format = ImageFormat::RGB;
-                    if (fileExt == "png") nanosuitSpec.Format = ImageFormat::RGBA;
-
-                    nanosuitSpec.Path = nanosuitDirectory + std::string("/") + Filename;
-                    nanosuitCollection.insert({ Filename, Texture2D::Create(nanosuitSpec) });
-                }
-            }
-            m_Collections2D.insert({ "Nanosuit", nanosuitCollection });
-        }
-    #endif
     }
 
     LTextureLibrary::~LTextureLibrary()
@@ -102,123 +66,125 @@ namespace LkEngine {
 
 		// Textures: 512x512
 		{
-			TextureSpecification textureSpec;
+			FTextureSpecification TextureSpecification;
+
 			// Grass
-			textureSpec.Width = 512;
-		    textureSpec.Height = 512;
-            textureSpec.Path = "Assets/Textures/grass.png";
-            textureSpec.Name = "grass-512x512";
-            textureSpec.DebugName = "grass-512x512";
-            textureSpec.GenerateMips = true;
-			textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
-			AddTexture(textureSpec);
+			TextureSpecification.Width = 512;
+		    TextureSpecification.Height = 512;
+            TextureSpecification.Path = "Assets/Textures/grass.png";
+            TextureSpecification.Name = "grass-512x512";
+            TextureSpecification.DebugName = "grass-512x512";
+            TextureSpecification.GenerateMips = true;
+			TextureSpecification.Format = EImageFormat::RGBA32F;
+            TextureSpecification.SamplerWrap = ETextureWrap::Repeat;
+            TextureSpecification.SamplerFilter = ETextureFilter::Linear;
+			AddTexture(TextureSpecification);
 
 			// Ice Skybox 
-            textureSpec.Path = "Assets/Textures/Skybox/back.jpg";
-            textureSpec.Name = "skybox-ice-back-512x512";
-            textureSpec.DebugName = "skybox-ice-back-512x512";
-            textureSpec.GenerateMips = false;
-			textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerWrap = TextureWrap::Clamp;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			AddTexture(textureSpec);
+            TextureSpecification.Path = "Assets/Textures/Skybox/back.jpg";
+            TextureSpecification.Name = "skybox-ice-back-512x512";
+            TextureSpecification.DebugName = "skybox-ice-back-512x512";
+            TextureSpecification.GenerateMips = false;
+			TextureSpecification.Format = EImageFormat::RGBA32F;
+            TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
+            TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
+			AddTexture(TextureSpecification);
 		}
+
 		// Textures: 1024x1024
 		{
-			TextureSpecification textureSpec;
+			FTextureSpecification TextureSpecification;
 			// Brickwall
-			textureSpec.Width = 1024;
-		    textureSpec.Height = 1024;
-            textureSpec.Path = "Assets/Textures/brickwall.jpg";
-            textureSpec.Name = "brickwall";
-            textureSpec.DebugName = "brickwall";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Clamp;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			AddTexture(textureSpec);
+			TextureSpecification.Width = 1024;
+		    TextureSpecification.Height = 1024;
+            TextureSpecification.Path = "Assets/Textures/brickwall.jpg";
+            TextureSpecification.Name = "brickwall";
+            TextureSpecification.DebugName = "brickwall";
+            TextureSpecification.GenerateMips = true;
+            TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
+            TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
+			AddTexture(TextureSpecification);
 
 			// Wood container
-			textureSpec.Format = ImageFormat::RGBA32F;
-			textureSpec.Width = 512;
-			textureSpec.Height = 512;
-			textureSpec.Path = "Assets/Textures/container.jpg";
-			textureSpec.Name = "wood-container_512x512";
-			textureSpec.DebugName = "wood-container_512x512";
-			textureSpec.SamplerWrap = TextureWrap::Clamp;
-			textureSpec.SamplerFilter = TextureFilter::Nearest;
-            textureSpec.GenerateMips = true;
-			AddTexture(textureSpec);
+			TextureSpecification.Format = EImageFormat::RGBA32F;
+			TextureSpecification.Width = 512;
+			TextureSpecification.Height = 512;
+			TextureSpecification.Path = "Assets/Textures/container.jpg";
+			TextureSpecification.Name = "wood-container_512x512";
+			TextureSpecification.DebugName = "wood-container_512x512";
+			TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
+			TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
+            TextureSpecification.GenerateMips = true;
+			AddTexture(TextureSpecification);
 
 		}
 		// Textures: 2048x2048 
 		{
-            TextureSpecification textureSpec{};
+            FTextureSpecification TextureSpecification{};
 			// Wood container
-			textureSpec.Format = ImageFormat::RGBA32F;
-			textureSpec.Width = 2048;
-			textureSpec.Height = 2048;
-			textureSpec.Path = "Assets/Textures/container.jpg";
-			textureSpec.Name = "wood-container";
-			textureSpec.DebugName = "wood-container";
-			textureSpec.SamplerWrap = TextureWrap::Clamp;
-			textureSpec.SamplerFilter = TextureFilter::Linear;
-            textureSpec.GenerateMips = true;
-			AddTexture(textureSpec);
+			TextureSpecification.Format = EImageFormat::RGBA32F;
+			TextureSpecification.Width = 2048;
+			TextureSpecification.Height = 2048;
+			TextureSpecification.Path = "Assets/Textures/container.jpg";
+			TextureSpecification.Name = "wood-container";
+			TextureSpecification.DebugName = "wood-container";
+			TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
+			TextureSpecification.SamplerFilter = ETextureFilter::Linear;
+            TextureSpecification.GenerateMips = true;
+			AddTexture(TextureSpecification);
 
 			// Wood container 2
-			textureSpec.Path = "Assets/Textures/container2.png";
-			textureSpec.Name = "wood-container2";
-			textureSpec.DebugName = "wood-container2";
-			AddTexture(textureSpec);
+			TextureSpecification.Path = "Assets/Textures/container2.png";
+			TextureSpecification.Name = "wood-container2";
+			TextureSpecification.DebugName = "wood-container2";
+			AddTexture(TextureSpecification);
 
 			// Bricks
-			textureSpec.Path = "Assets/Textures/bricks_orange.jpg";
-			textureSpec.Name = "bricks";
-			textureSpec.DebugName = "bricks";
-			AddTexture(textureSpec);
+			TextureSpecification.Path = "Assets/Textures/bricks_orange.jpg";
+			TextureSpecification.Name = "bricks";
+			TextureSpecification.DebugName = "bricks";
+			AddTexture(TextureSpecification);
 
 			// Åle texture
-			textureSpec.Format = ImageFormat::RGBA32F;
-			textureSpec.Path = "Assets/Textures/Misc/ale_1024x1024.png";
-			textureSpec.Name = "ale1024";
-			textureSpec.DebugName = "ale1024";
-			AddTexture(textureSpec);
+			TextureSpecification.Format = EImageFormat::RGBA32F;
+			TextureSpecification.Path = "Assets/Textures/Misc/ale_1024x1024.png";
+			TextureSpecification.Name = "ale1024";
+			TextureSpecification.DebugName = "ale1024";
+			AddTexture(TextureSpecification);
 
 			// Lukas texture
-			textureSpec.Path = "Assets/Textures/Misc/lukas_1024.jpg";
-			textureSpec.Name = "lukas_1024";
-			textureSpec.DebugName = "lukas-1024x1024";
-			AddTexture(textureSpec);
+			TextureSpecification.Path = "Assets/Textures/Misc/lukas_1024.jpg";
+			TextureSpecification.Name = "lukas_1024";
+			TextureSpecification.DebugName = "lukas-1024x1024";
+			AddTexture(TextureSpecification);
 
 			// Metal
-            textureSpec.Path = "Assets/Textures/metal.png";
-            textureSpec.Name = "metal-ground";
-            textureSpec.DebugName = "metal-ground";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			AddTexture(textureSpec);
+            TextureSpecification.Path = "Assets/Textures/metal.png";
+            TextureSpecification.Name = "metal-ground";
+            TextureSpecification.DebugName = "metal-ground";
+            TextureSpecification.GenerateMips = true;
+            TextureSpecification.SamplerWrap = ETextureWrap::Repeat;
+            TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
+			AddTexture(TextureSpecification);
 
 			// Wood
-            textureSpec.Name = "wood";
-            textureSpec.DebugName = "wood";
-            textureSpec.Path = "Assets/Textures/wood.png";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Clamp;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			AddTexture(textureSpec);
+            TextureSpecification.Name = "wood";
+            TextureSpecification.DebugName = "wood";
+            TextureSpecification.Path = "Assets/Textures/wood.png";
+            TextureSpecification.GenerateMips = true;
+            TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
+            TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
+			AddTexture(TextureSpecification);
 
 			// Skybox
-            textureSpec.Name = "skybox-ice-back";
-            textureSpec.DebugName = "skybox-ice-back";
-            textureSpec.Path = "Assets/Textures/Skybox/back.jpg";
-            textureSpec.GenerateMips = false;
-            textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerWrap = TextureWrap::Clamp;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			AddTexture(textureSpec);
+            TextureSpecification.Name = "skybox-ice-back";
+            TextureSpecification.DebugName = "skybox-ice-back";
+            TextureSpecification.Path = "Assets/Textures/Skybox/back.jpg";
+            TextureSpecification.GenerateMips = false;
+            TextureSpecification.Format = EImageFormat::RGBA32F;
+            TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
+            TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
+			AddTexture(TextureSpecification);
         }
 
         bInitialized = true;
@@ -234,9 +200,9 @@ namespace LkEngine {
             return nullptr;
         }
 
-        for (auto iter = m_Collection2D.begin(); iter != m_Collection2D.end(); ++iter)
+        for (auto Iter = m_Collection2D.begin(); Iter != m_Collection2D.end(); ++Iter)
         {
-            auto& texture = *iter;
+            auto& texture = *Iter;
             if (texture.second->GetRendererID() == textureID)
             {
                 return texture.second;
@@ -244,7 +210,7 @@ namespace LkEngine {
         }
     } 
 
-    TObjectPtr<LTexture2D> LTextureLibrary::GetTexture(const std::string textureName)
+    TObjectPtr<LTexture2D> LTextureLibrary::GetTexture(std::string_view TextureName)
     {
         LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
         if (m_Collection2D.empty())
@@ -253,39 +219,37 @@ namespace LkEngine {
             return nullptr;
         }
 
-        //auto FindTexture = [&]()
-
-        for (auto iter = m_Collection2D.begin(); iter != m_Collection2D.end(); ++iter)
+        for (auto Iter = m_Collection2D.begin(); Iter != m_Collection2D.end(); ++Iter)
         {
-            auto& texture = *iter;
-            if (File::ExtractFilenameWithoutExtension(texture.first, FileExtension::PNG) == textureName)
+            auto& Texture = *Iter;
+            if (File::ExtractFilenameWithoutExtension(Texture.first, FileExtension::PNG) == TextureName)
             {
-                return texture.second;
+                return Texture.second;
             }
         }
 
         return nullptr;
     }
 
-    TObjectPtr<LTexture2D> LTextureLibrary::AddTexture(const TextureSpecification& textureSpec)
+    TObjectPtr<LTexture2D> LTextureLibrary::AddTexture(const FTextureSpecification& TextureSpecification)
     {
         for (const TTexture2DPair& Entry : m_Collection2D)
         {
-            if (Entry.first == File::ExtractFilenameWithoutExtension(textureSpec.Name))
+            if (Entry.first == File::ExtractFilenameWithoutExtension(TextureSpecification.Name))
             {
-                if (((textureSpec.Width == Entry.second->GetWidth()) 
-                    && (textureSpec.Height == Entry.second->GetHeight()))
-                    || (Entry.first == textureSpec.Name))
+                if (((TextureSpecification.Width == Entry.second->GetWidth()) 
+                    && (TextureSpecification.Height == Entry.second->GetHeight()))
+                    || (Entry.first == TextureSpecification.Name))
                 {
                     LK_CORE_WARN_TAG("TextureLibrary", "Texture {} already exists and has same dimensions "
-                                     "as the passed specification, returning it", textureSpec.Name);
+                                     "as the passed Specificationification, returning it", TextureSpecification.Name);
                     return Entry.second;
                 }
             }
         }
 
-        TObjectPtr<LTexture2D> texture2D = LTexture2D::Create(textureSpec);
-        m_Collection2D.insert({ textureSpec.Name, texture2D });
+        TObjectPtr<LTexture2D> texture2D = LTexture2D::Create(TextureSpecification);
+        m_Collection2D.insert({ TextureSpecification.Name, texture2D });
 
         return texture2D;
     }
@@ -479,7 +443,7 @@ namespace LkEngine {
     TTextureMap& LTextureLibrary::GetTextureCollection(std::string_view collectionName)
     {
         LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
-        /// UPDATE: Dont iterate like this here
+        /// UPDATE: Dont Iterate like this here
         for (auto& collection : m_Collections)
         {
             if (collection.first == collectionName)

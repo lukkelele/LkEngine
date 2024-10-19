@@ -14,6 +14,11 @@ namespace LkEngine {
         virtual void Initialize() override;
         virtual void Shutdown() override;
 
+        /**
+         * @brief TODO
+         */
+        virtual void OnUpdate(const float DeltaTime) {}
+
         virtual void OnAttach() override {}
         virtual void OnDetach() override {}
 

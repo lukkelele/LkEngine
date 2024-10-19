@@ -37,15 +37,15 @@ namespace LkEngine {
 			Dimension_2048x2048 
 		};
 
-		TextureArraySpecification textureArraySpec;
+		FTextureArraySpecification TextureArraySpec;
 		for (int i = 0; i < LK_ARRAYSIZE(TextureArrayDimensions); i++)
 		{
-			textureArraySpec.Format = ImageFormat::RGBA;
-			textureArraySpec.TextureSlot = TextureArrayCount;
-			textureArraySpec.TextureArrayDimension = TextureArrayDimensions[i];
-			textureArraySpec.DebugName = "TextureArray-" + Utils::TextureArrayDimensionToString(TextureArrayDimensions[i]);
-			RendererData->TextureArrays[TextureArrayCount++] = TObjectPtr<OpenGLTextureArray>::Create(textureArraySpec);
-			LK_CORE_DEBUG_TAG("OpenGLRenderer", "Created texture array {} called \"{}\"", i, textureArraySpec.DebugName);
+			TextureArraySpec.ImageFormat = EImageFormat::RGBA;
+			TextureArraySpec.TextureSlot = TextureArrayCount;
+			TextureArraySpec.TextureArrayDimension = TextureArrayDimensions[i];
+			TextureArraySpec.DebugName = "TextureArray-" + Utils::TextureArrayDimensionToString(TextureArrayDimensions[i]);
+			RendererData->TextureArrays[TextureArrayCount++] = TObjectPtr<OpenGLTextureArray>::Create(TextureArraySpec);
+			LK_CORE_TRACE_TAG("OpenGLRenderer", "Created texture array {} called \"{}\"", i, TextureArraySpec.DebugName);
 		}
 
         //auto Textures2D = LTextureLibrary::Get().GetTextures2D();
@@ -102,7 +102,7 @@ namespace LkEngine {
 			m_RenderPass2D = TObjectPtr<OpenGLRenderPass>::Create(renderPassSpec);
 		}
 
-	#if 0
+	#if 1
 		/* Setup debugging stuff. */
 		SetupTexturesAndShaders();
         {
@@ -377,7 +377,7 @@ namespace LkEngine {
 	{
 		for (TObjectPtr<OpenGLTextureArray>& TextureArray : RendererData->TextureArrays)
 		{
-			if (TextureArray->m_Specification.TextureArrayDimension == TextureArrayDimension)
+			if (TextureArray->Specification.TextureArrayDimension == TextureArrayDimension)
 			{
 				return TextureArray;
 			}

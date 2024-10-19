@@ -58,127 +58,137 @@ namespace LkEngine {
 			}
 		}
 
-		GLenum OpenGLImageInternalFormat(ImageFormat format)
+		GLenum OpenGLImageInternalFormat(EImageFormat Format)
 		{
-			switch (format)
+			switch (Format)
 			{
-				case ImageFormat::RGB:             return GL_RGB8;
-				case ImageFormat::RGBA:            return GL_RGBA8;
-				case ImageFormat::RGBA8:           return GL_RGBA8;
-				case ImageFormat::RGBA16F:         return GL_RGBA16F;
-				case ImageFormat::RGBA32F:         return GL_RGBA32F;
-				case ImageFormat::DEPTH24STENCIL8: return GL_DEPTH24_STENCIL8;
-				case ImageFormat::DEPTH32F:        return GL_DEPTH_COMPONENT32F;
+				case EImageFormat::RGB:             return GL_RGB8;
+				case EImageFormat::RGBA:            return GL_RGBA8;
+				case EImageFormat::RGBA8:           return GL_RGBA8;
+				case EImageFormat::RGBA16F:         return GL_RGBA16F;
+				case EImageFormat::RGBA32F:         return GL_RGBA32F;
+				case EImageFormat::DEPTH24STENCIL8: return GL_DEPTH24_STENCIL8;
+				case EImageFormat::DEPTH32F:        return GL_DEPTH_COMPONENT32F;
+
+				default:
+					LK_CORE_ASSERT(false, "Invalid OpenGLImageFormat {}", static_cast<int>(Format));
 			}
-			LK_CORE_ASSERT(false, "Unknown OpenGLImageFormat {}", Utils::ImageFormatToString(format));
 		}
 
-		GLenum OpenGLFormatDataType(ImageFormat format)
+		GLenum OpenGLFormatDataType(EImageFormat ImageFormat)
 		{
-			switch (format)
+			switch (ImageFormat)
 			{
-				case ImageFormat::RGB:
-				case ImageFormat::RGBA:    
-				case ImageFormat::RGBA8:   return GL_UNSIGNED_BYTE;
-				case ImageFormat::RGBA16F:
-				case ImageFormat::RGBA32F: return GL_FLOAT;
+				case EImageFormat::RGB:
+				case EImageFormat::RGBA:    
+				case EImageFormat::RGBA8:   return GL_UNSIGNED_BYTE;
+				case EImageFormat::RGBA16F:
+				case EImageFormat::RGBA32F: return GL_FLOAT;
+
+				default:
+					LK_CORE_ASSERT(false, "Unknown OpenGLFormatDataType {}", static_cast<int>(ImageFormat));
 			}
-			LK_CORE_ASSERT(false, "Unknown OpenGLFormatDataType {}", Utils::ImageFormatToString(format));
 		}
 
-		GLenum OpenGLSamplerWrap(TextureWrap wrap)
+		GLenum OpenGLSamplerWrap(ETextureWrap TextureWrap)
 		{
-			switch (wrap)
+			switch (TextureWrap)
 			{
-				case TextureWrap::Clamp:   return GL_CLAMP_TO_EDGE;
-				case TextureWrap::Repeat:  return GL_REPEAT;
+				case ETextureWrap::Clamp:   return GL_CLAMP_TO_EDGE;
+				case ETextureWrap::Repeat:  return GL_REPEAT;
 			}
-			LK_CORE_ASSERT(false, "Unknown OpenGLSamplerWrap: {}", (int)wrap);
+			LK_CORE_ASSERT(false, "Unknown OpenGLSamplerWrap: {}", static_cast<int>(TextureWrap));
 		}
 
-		GLenum OpenGLSamplerFilter(TextureFilter filter, bool mipmap)
+		GLenum OpenGLSamplerFilter(const ETextureFilter TextureFilter, const bool bUseMipmap)
 		{
-			switch (filter)
+			switch (TextureFilter)
 			{
-				case TextureFilter::Linear:  return mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
-				case TextureFilter::Nearest: return mipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST;
+				case ETextureFilter::Linear:  return bUseMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
+				case ETextureFilter::Nearest: return bUseMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST;
 			}
-			LK_CORE_ASSERT(false, "Unknown OpenGLSamplerFilter: {}, mipmap: {}", (int)filter, mipmap);
+			LK_CORE_ASSERT(false, "Unknown OpenGLSamplerFilter: {}, mipmap: {}", static_cast<int>(TextureFilter), bUseMipmap);
 		}
 
-		GLenum ImageFormatToGLDataFormat(ImageFormat format)
+		GLenum ImageFormatToGLDataFormat(EImageFormat ImageFormat)
 		{
-			switch (format)
+			switch (ImageFormat)
 			{
-				case ImageFormat::RGBA:   
-				case ImageFormat::RGBA8:   
-				case ImageFormat::RGBA16F:   
-				case ImageFormat::RGBA32F:  return GL_RGBA;
+				case EImageFormat::RGBA:   
+				case EImageFormat::RGBA8:   
+				case EImageFormat::RGBA16F:   
+				case EImageFormat::RGBA32F:  return GL_RGBA;
 
-				case ImageFormat::RG8:     
-				case ImageFormat::RG16F:     
-				case ImageFormat::RG32F:    return GL_RG;
+				case EImageFormat::RG8:     
+				case EImageFormat::RG16F:     
+				case EImageFormat::RG32F:    return GL_RG;
 
-				case ImageFormat::RGB:  
-				case ImageFormat::RGB8:     return GL_RGB;
+				case EImageFormat::RGB:  
+				case EImageFormat::RGB8:     return GL_RGB;
 
-				case ImageFormat::RED8UI:
-				case ImageFormat::RED16UI:
-				case ImageFormat::RED32UI:  return GL_RED_INTEGER;
-				case ImageFormat::RED32F:   return GL_RED_INTEGER;
+				case EImageFormat::RED8UI:
+				case EImageFormat::RED16UI:
+				case EImageFormat::RED32UI:  return GL_RED_INTEGER;
+				case EImageFormat::RED32F:   return GL_RED_INTEGER;
 
 			}
-			LK_CORE_ASSERT(false, "Unknown ImageFormat: {}", Utils::ImageFormatToString(format));
+
+			LK_CORE_ASSERT(false, "Invalid ImageFormat: {}", static_cast<int>(ImageFormat));
 		}
 
-		GLenum ImageFormatToGLInternalFormat(ImageFormat format)
+		GLenum ImageFormatToGLInternalFormat(EImageFormat ImageFormat)
 		{
-			switch (format)
+			switch (ImageFormat)
 			{
-				case ImageFormat::RGB:      return GL_RGB32F;
-				case ImageFormat::RGB8:     return GL_RGB8;
+				case EImageFormat::RGB:      return GL_RGB32F;
+				case EImageFormat::RGB8:     return GL_RGB8;
 
-				case ImageFormat::RGBA:     return GL_RGBA32F;
-				case ImageFormat::RGBA8:    return GL_RGBA8;
-				case ImageFormat::RGBA16F:  return GL_RGBA16F;
-				case ImageFormat::RGBA32F:  return GL_RGBA32F;
+				case EImageFormat::RGBA:     return GL_RGBA32F;
+				case EImageFormat::RGBA8:    return GL_RGBA8;
+				case EImageFormat::RGBA16F:  return GL_RGBA16F;
+				case EImageFormat::RGBA32F:  return GL_RGBA32F;
 
-				case ImageFormat::RG16F:    return GL_RG16F;
-				case ImageFormat::RG32F:    return GL_RG32F;
+				case EImageFormat::RG16F:    return GL_RG16F;
+				case EImageFormat::RG32F:    return GL_RG32F;
 
-				case ImageFormat::RED8UI:   return GL_R8UI;
-				case ImageFormat::RED16UI:  return GL_R16UI;
-				case ImageFormat::RED32UI:  return GL_R32UI;
-				case ImageFormat::RED32F:   return GL_R32F;
+				case EImageFormat::RED8UI:   return GL_R8UI;
+				case EImageFormat::RED16UI:  return GL_R16UI;
+				case EImageFormat::RED32UI:  return GL_R32UI;
+				case EImageFormat::RED32F:   return GL_R32F;
 			}
-			LK_CORE_ASSERT(false, "Unknown internal ImageFormat: {}", Utils::ImageFormatToString(format));
+
+			LK_CORE_ASSERT(false, "Invalid internal ImageFormat: {}", static_cast<int>(ImageFormat));
 		}
 
-		GLenum TextureTarget(bool multisampled)
+		GLenum TextureTarget(const bool bMultisampled)
 		{
-			return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+			return (bMultisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D);
 		}
 
-		void CreateTextures(bool multisampled, uint32_t* outID, uint32_t count)
+		void CreateTextures(const bool bMultisampled, uint32_t* OutTextureID, const uint32_t Count)
 		{
-			glCreateTextures(TextureTarget(multisampled), count, outID);
+			glCreateTextures(TextureTarget(bMultisampled), Count, OutTextureID);
 		}
 
-		void BindTexture(bool multisampled, uint32_t id)
+		void BindTexture(bool bMultisampled, uint32_t id)
 		{
-			glBindTexture(TextureTarget(multisampled), id);
+			glBindTexture(TextureTarget(bMultisampled), id);
 		}
 
-		void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index)
+		void AttachColorTexture(const uint32_t id, 
+								const int Samples, 
+								const GLenum InternalFormat, 
+								const GLenum Format, 
+								const uint32_t Width, uint32_t Height, int Index)
 		{
-			bool multisampled = samples > 1;
-			if (multisampled)
+			bool bMultisampled = Samples > 1;
+			if (bMultisampled)
 			{
-				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internalFormat, width, height, GL_FALSE);
+				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, InternalFormat, Width, Height, GL_FALSE);
 			}
 			else
 			{
-				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
+				glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, Width, Height, 0, Format, GL_UNSIGNED_BYTE, nullptr);
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -186,19 +196,19 @@ namespace LkEngine {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			}
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, TextureTarget(multisampled), id, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + Index, TextureTarget(bMultisampled), id, 0);
 		}
 
-		void AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, uint32_t width, uint32_t height)
+		void AttachDepthTexture(uint32_t id, int Samples, GLenum Format, GLenum attachmentType, uint32_t Width, uint32_t Height)
 		{
-			bool multisampled = samples > 1;
-			if (multisampled)
+			bool bMultisampled = Samples > 1;
+			if (bMultisampled)
 			{
-				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, format, width, height, GL_FALSE);
+				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, Format, Width, Height, GL_FALSE);
 			}
 			else
 			{
-				glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
+				glTexStorage2D(GL_TEXTURE_2D, 1, Format, Width, Height);
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -206,39 +216,40 @@ namespace LkEngine {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			}
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, TextureTarget(multisampled), id, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, TextureTarget(bMultisampled), id, 0);
 		}
 
-		GLenum FramebufferTextureFormatToGL(ImageFormat format)
+		GLenum FramebufferTextureFormatToGL(EImageFormat ImageFormat)
 		{
-			switch (format)
+			switch (ImageFormat)
 			{
-				case ImageFormat::RGBA8:            return GL_RGBA8;
-				case ImageFormat::RGBA16F:          return GL_RGBA16F;
-				case ImageFormat::RGBA32F:          return GL_RGBA32F;
-				case ImageFormat::RED8UI:      
-				case ImageFormat::RED8UN:      
-				case ImageFormat::RED16UI:       
-				case ImageFormat::RED32UI:          return GL_RED_INTEGER;
-				case ImageFormat::DEPTH24STENCIL8:  return GL_DEPTH24_STENCIL8;
+				case EImageFormat::RGBA8:            return GL_RGBA8;
+				case EImageFormat::RGBA16F:          return GL_RGBA16F;
+				case EImageFormat::RGBA32F:          return GL_RGBA32F;
+				case EImageFormat::RED8UI:      
+				case EImageFormat::RED8UN:      
+				case EImageFormat::RED16UI:       
+				case EImageFormat::RED32UI:          return GL_RED_INTEGER;
+				case EImageFormat::DEPTH24STENCIL8:  return GL_DEPTH24_STENCIL8;
 			}
-			LK_CORE_ASSERT(false, "FramebufferTextureFormatToGL: ImageFormat not recognized!");
+
+			LK_CORE_ASSERT(false, "FramebufferTextureFormatToGL  ImageFormat not recognized");
 		}
 
-        std::string FramebufferTextureFormatToString(FramebufferTextureFormat format)
+        std::string FramebufferTextureFormatToString(EFramebufferTextureFormat FramebufferTextureFormat)
 		{
-			switch (format)
+			switch (FramebufferTextureFormat)
 			{
-				case FramebufferTextureFormat::RGBA8:           return "RGBA8";
-				case FramebufferTextureFormat::RED_INTEGER:     return "RED_INTEGER";
-				case FramebufferTextureFormat::DEPTH24STENCIL8: return "DEPTH24STENCIL8";
-				case FramebufferTextureFormat::None:            return "None";
+				case EFramebufferTextureFormat::RGBA8:           return "RGBA8";
+				case EFramebufferTextureFormat::RED_INTEGER:     return "RED_INTEGER";
+				case EFramebufferTextureFormat::DEPTH24STENCIL8: return "DEPTH24STENCIL8";
+				case EFramebufferTextureFormat::None:            return "None";
 			}
-			LK_CORE_ASSERT(false, "Unknown FramebufferTextureFormat");
+
+			LK_CORE_ASSERT(false, "Invalid FramebufferTextureFormat");
 		};
 	}
 
-    //unsigned int FramebufferID;
     unsigned int TextureColorBufferID, DepthTextureID;
     unsigned int CubeTexture_, FloorTexture_;
 
@@ -409,9 +420,7 @@ namespace LkEngine {
 		DebugShader->Set("u_Model", glm::mat4(1.0f));
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		//Renderer::GetViewportFramebuffer()->Unbind();
 		LFramebuffer::TargetSwapChain();
-        //Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Unbind();
 	}
 
     void GenerateCubeVaoAndVbo(unsigned int& vao, unsigned int& vbo)
@@ -485,11 +494,11 @@ namespace LkEngine {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Quad_Vertices), &Quad_Vertices, GL_STATIC_DRAW);
 
-        // Vertex indexing
+        // Vertex Indexing
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
-        // Texture indexing
+        // Texture Indexing
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     }

@@ -10,69 +10,86 @@ namespace LkEngine {
 	class OpenGLTextureArray : public TextureArray
 	{
 	public:
-		OpenGLTextureArray(const TextureArraySpecification& specification);
+		OpenGLTextureArray(const FTextureArraySpecification& InSpecification);
 		~OpenGLTextureArray();
 
-		void Bind() override;
-		void Unbind() override;
+		virtual void Bind() override;
+		virtual void Unbind() override;
 
-		void AddTextureToArray(TObjectPtr<LTexture> texture) override;
-		bool RemoveTextureFromArray(RendererID& rendererID) override;
+		virtual void AddTextureToArray(const TObjectPtr<LTexture> Texture) override;
+		virtual bool RemoveTextureFromArray(const RendererID TextureID) override;
 
-		const RendererID GetRendererID() const override { return m_RendererID; }
-		RendererID& GetRendererID() override { return m_RendererID; }
-
-		int GetTextureSlot() const override { return m_Specification.TextureSlot; }
-		const ETextureArrayDimension& GetDimension() const override { return m_Specification.TextureArrayDimension; }
-		const TextureArraySpecification& GetSpecification() const override { return m_Specification; }
-
-		int GetWidth() const override { return m_Width; }
-		int GetHeight() const override { return m_Height; }
-		void SetWidth(int width) override { m_Width = width; }
-		void SetHeight(int height) override { m_Height = height; }
-
-		bool HasTexture(const TObjectPtr<LTexture>& texture) override
-		{
-			const RendererID textureRendererID = texture->GetRendererID();
-			for (auto& t : m_Textures)
-			{
-				if (t->GetRendererID() == textureRendererID)
-					return true;
-			}
-			return false;
+		FORCEINLINE virtual const RendererID GetRendererID() const override 
+		{ 
+			return m_RendererID; 
 		}
 
-		TObjectPtr<LTexture> GetTextureWithID(RendererID id) override
+		FORCEINLINE virtual RendererID& GetRendererID() override 
+		{ 
+			return m_RendererID; 
+		}
+
+		FORCEINLINE virtual int GetTextureSlot() const override 
+		{ 
+			return Specification.TextureSlot; 
+		}
+
+		FORCEINLINE virtual const FTextureArraySpecification& GetSpecification() const override 
+		{ 
+			return Specification; 
+		}
+
+		FORCEINLINE virtual const ETextureArrayDimension& GetDimension() const override 
+		{ 
+			return Specification.TextureArrayDimension; 
+		}
+
+		FORCEINLINE virtual int GetWidth() const override { return m_Width; }
+		FORCEINLINE virtual int GetHeight() const override { return m_Height; }
+		FORCEINLINE virtual void SetWidth(const int NewWidth) override { m_Width = NewWidth; }
+		FORCEINLINE virtual void SetHeight(const int NewHeight) override { m_Height = NewHeight; }
+
+		FORCEINLINE virtual bool HasTexture(const TObjectPtr<LTexture>& Texture) override
 		{
-			for (auto& t : m_Textures)
+			return (TextureIDSet.find(Texture->GetRendererID()) != TextureIDSet.end());
+		}
+
+		FORCEINLINE virtual TObjectPtr<LTexture> GetTextureWithID(RendererID TextureID) override
+		{
+			if (auto Iter = IndexCache.find(TextureID); Iter != IndexCache.end())
 			{
-				if (t->GetRendererID() == id)
-					return t;
+				return (Textures.at((*Iter).second));
 			}
+
+			LK_ASSERT(false, "GetTextureWithID failed with ID: {}", TextureID);
 			return nullptr;
 		}
 
-		int GetIndexOfTexture(const TObjectPtr<LTexture>& texture) override
+		FORCEINLINE virtual int GetIndexOfTexture(const TObjectPtr<LTexture>& Texture) override
 		{
-			for (int i = 0; i < m_Textures.size(); i++)
+			for (int i = 0; i < Textures.size(); i++)
 			{
-				if (m_Textures[i]->GetRendererID() == texture->GetRendererID())
+				if (Textures[i]->GetRendererID() == Texture->GetRendererID())
+				{
 					return i;
+				}
 			}
+
 			return 0; 
 		}
 
 	public:
 		static constexpr int MaxTexturesPerArray = 32;
 	public:
-		RendererID m_RendererID;
-		int m_Width, m_Height;
-		TextureArraySpecification m_Specification;
+		RendererID m_RendererID = 0;
+		FTextureArraySpecification Specification{};
 
-		std::deque<TObjectPtr<LTexture>> m_Textures{};
+		int m_Width = 0;
+		int m_Height = 0;
 
-		friend class OpenGLRenderer;
-		friend class OpenGLRenderer2D;
+		std::deque<TObjectPtr<LTexture>> Textures{};
+		std::unordered_map<RendererID, int> IndexCache{};
+		std::unordered_set<RendererID> TextureIDSet{};
 	};
 
 
@@ -108,16 +125,19 @@ namespace LkEngine {
 				case 4096: return ETextureArrayDimension::Dimension_4096x4096;
 			}
 
-			LK_CORE_ASSERT(false, "Unknown dimension arguments, width={}  height={}", width, height);
+			LK_CORE_ASSERT(false, "Invalid dimension arguments,  width={}  height={}", width, height);
 			return {};
 		}
 
-		static void GenerateTextureArrayImage(RendererID& rendererID, const TextureArraySpecification& Specification)
+		static void GenerateTextureArrayImage(RendererID& ID, const FTextureArraySpecification& Specification)
 		{
 			auto [Width, Height] = GLUtils::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
-			//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), width, height, specification.Layers, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), GL_UNSIGNED_BYTE, nullptr);
-			//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), width, height, specification.Layers, 0, GLUtils::ImageFormatToGLDataFormat(specification.Format), GL_UNSIGNED_BYTE, nullptr);
-			glTextureStorage3D(rendererID, Specification.Layers, ImageFormatToGLDataFormat(Specification.Format), Width, Height, 0);
+			LK_OpenGL(glTextureStorage3D(ID, 
+					                     Specification.Layers, 
+							             ImageFormatToGLDataFormat(Specification.ImageFormat), 
+							             Width, 
+							             Height, 
+							             0));
 		}
 
 	}

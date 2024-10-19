@@ -149,10 +149,10 @@ namespace LkEngine {
 		Shaders[name] = LShader::Create(path);
     }
 
-    TObjectPtr<LShader>& LShaderLibrary::Get(std::string_view shaderName)
+    TObjectPtr<LShader>& LShaderLibrary::Get(std::string_view ShaderName)
     {
-		LK_ASSERT((Shaders.find(shaderName) != Shaders.end()));
-		return Shaders.at(shaderName);
+		LK_ASSERT((Shaders.find(ShaderName) != Shaders.end()));
+		return Shaders.at(ShaderName);
     }
 
 }

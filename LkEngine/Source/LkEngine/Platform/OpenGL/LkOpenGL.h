@@ -70,52 +70,65 @@ namespace LkEngine {
         const GLubyte* GetExtensions();
         void PrintOpenGLExtensions();
 
-        GLenum OpenGLFormatDataType(ImageFormat format);
+        GLenum OpenGLFormatDataType(EImageFormat Format);
 
-        FORCEINLINE static GLenum OpenGLImageFormat(const ImageFormat InFormat)
+        FORCEINLINE static GLenum OpenGLImageFormat(const EImageFormat ImageFormat)
         {
-            switch (InFormat)
+            switch (ImageFormat)
             {
-                case ImageFormat::RGB:     return GL_RGB;
+                case EImageFormat::RGB:     return GL_RGB;
 
                 /* RGBA */
-                case ImageFormat::RGBA:
-                case ImageFormat::RGBA8:
-                case ImageFormat::RGBA16F:
-                case ImageFormat::RGBA32F: return GL_RGBA;
+                case EImageFormat::RGBA:
+                case EImageFormat::RGBA8:
+                case EImageFormat::RGBA16F:
+                case EImageFormat::RGBA32F: return GL_RGBA;
 
                 /* SRGB */
-                case ImageFormat::SRGB:    return GL_SRGB;
-                case ImageFormat::SRGBA:   return GL_SRGB_ALPHA;
+                case EImageFormat::SRGB:    return GL_SRGB;
+                case EImageFormat::SRGBA:   return GL_SRGB_ALPHA;
             }
-            LK_CORE_ASSERT(false, "Unknown OpenGLImageFormat {}", Utils::ImageFormatToString(InFormat));
+
+            LK_CORE_ASSERT(false, "Unknown OpenGLImageFormat {}", static_cast<int>(ImageFormat));
             return GL_INVALID_ENUM;
         }
 
-        GLenum OpenGLImageInternalFormat(ImageFormat format);
-        GLenum OpenGLSamplerWrap(TextureWrap wrap);
-        GLenum OpenGLSamplerFilter(TextureFilter filter, bool mipmap);
-        GLenum ImageFormatToGLDataFormat(ImageFormat format);
-        GLenum ImageFormatToGLInternalFormat(ImageFormat format);
+        GLenum OpenGLImageInternalFormat(const EImageFormat Format);
+        GLenum OpenGLSamplerWrap(const ETextureWrap TextureWrap);
+        GLenum OpenGLSamplerFilter(const ETextureFilter TextureFilter, const bool bEnableMipMap);
+        GLenum ImageFormatToGLDataFormat(const EImageFormat Format);
+        GLenum ImageFormatToGLInternalFormat(const EImageFormat Format);
 
-        void BindTexture(bool multisampled, uint32_t id);
-        void CreateTextures(bool multisampled, uint32_t* outID, uint32_t count);
-        GLenum TextureTarget(bool multisampled);
+        void BindTexture(const bool bMultisampled, const uint32_t TextureID);
+        void CreateTextures(const bool bMultisampled, uint32_t* OutTextureID, uint32_t Count);
+        GLenum TextureTarget(const bool bMultisampled);
 
-        void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index);
-        void AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, uint32_t width, uint32_t height);
-        bool IsDepthFormat(ImageFormat format);
-        GLenum FramebufferTextureFormatToGL(ImageFormat format);
+        void AttachColorTexture(const uint32_t id, 
+                                const int Samples, 
+                                const GLenum InternalFormat, 
+                                const GLenum Format, 
+                                const uint32_t Width, 
+                                const uint32_t Height, 
+                                const int Index);
 
-        std::string FramebufferTextureFormatToString(FramebufferTextureFormat format);
-        std::string ImageFormatToString(ImageFormat format);
+        void AttachDepthTexture(const uint32_t id, 
+                                const int Samples, 
+                                const GLenum Format, 
+                                const GLenum AttachmentType, 
+                                const uint32_t Width, 
+                                const uint32_t Height);
 
-		FORCEINLINE static void ApplyTextureFilter(TextureFilter filter, bool mipmap)
+        bool IsDepthFormat(const EImageFormat Format);
+        GLenum FramebufferTextureFormatToGL(const EImageFormat Format);
+
+        std::string FramebufferTextureFormatToString(const EFramebufferTextureFormat Format);
+        std::string ImageFormatToString(const EImageFormat ImageFormat);
+
+		FORCEINLINE static void ApplyTextureFilter(ETextureFilter TextureFilter, bool bGenerateMipmap)
 		{
-			// Texture Filter
-			if (filter == TextureFilter::Linear)
+			if (TextureFilter == ETextureFilter::Linear)
 			{
-                if (mipmap)
+                if (bGenerateMipmap)
                 {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
                 }
@@ -126,9 +139,9 @@ namespace LkEngine {
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			}
-			else if (filter == TextureFilter::Nearest)
+			else if (TextureFilter == ETextureFilter::Nearest)
 			{
-                if (mipmap)
+                if (bGenerateMipmap)
                 {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
                 }
@@ -139,34 +152,34 @@ namespace LkEngine {
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			}
-			else if (filter == TextureFilter::None)
+			else if (TextureFilter == ETextureFilter::None)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			}
 		}
 
-		static void ApplyTextureWrap(TextureWrap wrap)
+		static void ApplyTextureWrap(ETextureWrap TextureWrap)
 		{
-			if (wrap == TextureWrap::Clamp)
+			if (TextureWrap == ETextureWrap::Clamp)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
 			}
-			else if (wrap == TextureWrap::Repeat)
+			else if (TextureWrap == ETextureWrap::Repeat)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // S: x
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // T: y
 			}
 		}
 
-		static void ApplyTextureFilter(const RendererID& rendererID, const TextureFilter filter, bool mipmap = true)
+		static void ApplyTextureFilter(const RendererID& rendererID, const ETextureFilter TextureFilter, bool bGenerateMipmap = true)
 		{
-            switch (filter)
+            switch (TextureFilter)
             {
-                case TextureFilter::Linear:
+                case ETextureFilter::Linear:
 			    {
-                    if (mipmap)
+                    if (bGenerateMipmap)
                     {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
                     }
@@ -180,9 +193,10 @@ namespace LkEngine {
                     break;
 			    }
 
-                case TextureFilter::Nearest:
+                case ETextureFilter::Nearest:
 			    {
-                    if (mipmap)
+            #if 0
+                    if (bGenerateMipmap)
                     {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
                     }
@@ -190,14 +204,18 @@ namespace LkEngine {
                     {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                     }
+            #endif
+			    	LK_OpenGL(glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, (bGenerateMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST)));
+
 			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
                     break;
 			    }
 
-                case TextureFilter::None:
+                case ETextureFilter::None:
 			    {
-                    if (mipmap)
+            #if 0
+                    if (bGenerateMipmap)
                     {
 			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
                     }
@@ -205,52 +223,61 @@ namespace LkEngine {
                     {
 			    	    glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                     }
-			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            #endif
+			    	LK_OpenGL(glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, (bGenerateMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST)));
+			    	LK_OpenGL(glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 
                     return;
 			    }
             }
-
 		}
 
-		static void ApplyTextureWrap(const RendererID rendererID, const TextureWrap wrap)
+		static void ApplyTextureWrap(const RendererID rendererID, const ETextureWrap TextureWrap)
 		{
-			switch (wrap)
+			switch (TextureWrap)
 			{
-				case TextureWrap::None:
+				case ETextureWrap::None:
 				{
 					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT); 
 					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
-					return;
+                    break;
 				}
-				case TextureWrap::Clamp:
+
+				case ETextureWrap::Clamp:
 				{
 					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT); 
 					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
-					return;
+                    break;
 				}
-				case TextureWrap::Repeat:
+
+				case ETextureWrap::Repeat:
 				{
 					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
-                    return;
+                    break;
 				}
+
+                default: 
+                    LK_CORE_ASSERT(false, "Unknown TextureWrap {}", static_cast<int>(TextureWrap));
+                    return;
 			}
-            LK_CORE_ASSERT(false, "Unknown TextureWrap {}", (int)wrap);
 		}
 
+        /**
+		 * Depth is returned normalized i.e in range { 0.0, 1.0 }
+         */
 		FORCEINLINE static float SampleDepth(int x, int y, int WindowWidth, int WindowHeight) 
 		{
 			GLint Viewport[4];
 			glGetIntegerv(GL_VIEWPORT, Viewport);
 
-			// Screen coordinates to OpenGL viewport coordinates
+			/* Convert screen coordinates to OpenGL viewport coordinates. */
 			y = WindowHeight - y;
 
 			float Depth = 0.0f;
 			glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &Depth);
 
-			return Depth;  // Depth is returned in normalized [0.0, 1.0] 
+			return Depth;
 		}
 
     }
@@ -440,20 +467,20 @@ namespace LkEngine {
         unsigned int textureID;
         glGenTextures(1, &textureID);
 
-        int width, height, channels;
-        unsigned char* data = stbi_load(path, &width, &height, &channels, 0);
+        int Width, Height, channels;
+        unsigned char* data = stbi_load(path, &Width, &Height, &channels, 0);
         if (data)
         {
-            GLenum format;
+            GLenum Format;
             if (channels == 1)
-                format = GL_RED;
+                Format = GL_RED;
             else if (channels == 3)
-                format = GL_RGB;
+                Format = GL_RGB;
             else if (channels == 4)
-                format = GL_RGBA;
+                Format = GL_RGBA;
 
             glBindTexture(GL_TEXTURE_2D, textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -490,14 +517,14 @@ namespace LkEngine {
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-		int width, height, nrChannels;
+		int Width, Height, nrChannels;
 		for (unsigned int i = 0; i < faces.size(); i++)
 		{
-		    unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		    unsigned char* data = stbi_load(faces[i].c_str(), &Width, &Height, &nrChannels, 0);
 		    if (data)
 		    {
 		        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
-		                     0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+		                     0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
 		        );
 		        stbi_image_free(data);
 		    }

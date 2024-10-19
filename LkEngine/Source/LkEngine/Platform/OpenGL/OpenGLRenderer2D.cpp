@@ -24,12 +24,12 @@ namespace LkEngine {
 
     static bool Initialized = false;
 
-    LOpenGLRenderer2D::LOpenGLRenderer2D(const OpenGLRenderer2DSpecification& specification) 
-        : m_Specification(specification)
-        , m_MaxVertices(specification.MaxQuads * 4)
-        , m_MaxIndices(specification.MaxQuads * 6)
-        , m_MaxLineVertices(specification.MaxLines * 2)
-        , m_MaxLineIndices(specification.MaxLines * 6)
+    LOpenGLRenderer2D::LOpenGLRenderer2D(const OpenGLRenderer2DSpecification& InSpecification) 
+        : m_Specification(InSpecification)
+        , m_MaxVertices(InSpecification.MaxQuads * 4)
+        , m_MaxIndices(InSpecification.MaxQuads * 6)
+        , m_MaxLineVertices(InSpecification.MaxLines * 2)
+        , m_MaxLineIndices(InSpecification.MaxLines * 6)
     {
         Renderer2DAPI = this;
 
@@ -53,15 +53,18 @@ namespace LkEngine {
 
         // Quad
         {
-		    FramebufferSpecification quadFramebufferSpec;
-		    quadFramebufferSpec.Attachments = { ImageFormat::RGBA32F, ImageFormat::DEPTH24STENCIL8 };
-		    quadFramebufferSpec.Samples = 1;
-		    quadFramebufferSpec.ClearColorOnLoad = false;
-		    quadFramebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
-		    quadFramebufferSpec.DebugName = "OpenGLRenderer2D_Framebuffer";
-            quadFramebufferSpec.Width = LWindow::Get().GetWidth();
-            quadFramebufferSpec.Height = LWindow::Get().GetHeight();
-		    TObjectPtr<LFramebuffer> quadFramebuffer = LFramebuffer::Create(quadFramebufferSpec);
+            FFramebufferSpecification QuadFramebufferSpec{};
+		    QuadFramebufferSpec.Attachments = {
+                EImageFormat::RGBA32F, 
+                EImageFormat::DEPTH24STENCIL8 
+            };
+		    QuadFramebufferSpec.Samples = 1;
+		    QuadFramebufferSpec.ClearColorOnLoad = false;
+		    QuadFramebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
+		    QuadFramebufferSpec.DebugName = "OpenGLRenderer2D_Framebuffer";
+            QuadFramebufferSpec.Width = LWindow::Get().GetWidth();
+            QuadFramebufferSpec.Height = LWindow::Get().GetHeight();
+		    TObjectPtr<LFramebuffer> QuadFramebuffer = LFramebuffer::Create(QuadFramebufferSpec);
 
             m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
             m_QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
@@ -69,23 +72,23 @@ namespace LkEngine {
             m_QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
             // Quad Pipeline
-            FPipelineSpecification quadPipelineSpec{};
-            quadPipelineSpec.TargetFramebuffer = nullptr;
-            quadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
-            quadPipelineSpec.Shader = m_QuadShader;
+            FPipelineSpecification QuadPipelineSpec{};
+            QuadPipelineSpec.TargetFramebuffer = nullptr;
+            QuadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
+            QuadPipelineSpec.Shader = m_QuadShader;
 
-            RenderPassSpecification quadPassSpec;
-            quadPassSpec.DebugName = "Renderer2D-QuadPass";
-            quadPassSpec.Pipeline = LPipeline::Create(quadPipelineSpec);
-            TObjectPtr<LOpenGLPipeline> OpenGLPipeline = quadPassSpec.Pipeline.As<LOpenGLPipeline>();
+            RenderPassSpecification QuadPassSpec;
+            QuadPassSpec.DebugName = "Renderer2D-QuadPass";
+            QuadPassSpec.Pipeline = LPipeline::Create(QuadPipelineSpec);
+            TObjectPtr<LOpenGLPipeline> OpenGLPipeline = QuadPassSpec.Pipeline.As<LOpenGLPipeline>();
             m_QuadMaterial = LMaterial::Create(m_QuadShader, "QuadMaterial");
 
             // Use correct amount of texture array uniforms
-            for (uint8_t textureArray = 0; textureArray < m_Specification.TextureArraysUsed; textureArray++)
+            for (uint8_t ArrayIndex = 0; ArrayIndex < m_Specification.TextureArraysUsed; ArrayIndex++)
             {
-                OpenGLPipeline->BindTextureArray(textureArray);
+                OpenGLPipeline->BindTextureArray(ArrayIndex);
             }
-            m_QuadPass = LRenderPass::Create(quadPassSpec);
+            m_QuadPass = LRenderPass::Create(QuadPassSpec);
             
             m_QuadVertexBuffer = LVertexBuffer::Create(m_MaxVertices * sizeof(QuadVertex));
             m_QuadVertexBuffer->SetLayout({
@@ -98,26 +101,29 @@ namespace LkEngine {
             });
 
             m_QuadVertexBufferBase = new QuadVertex[m_MaxVertices];
-            uint32_t* quadIndices = new uint32_t[m_MaxIndices];
-            uint32_t offset = 0;
+            uint32_t* QuadIndices = new uint32_t[m_MaxIndices];
+            uint32_t Offset = 0;
+
             for (uint32_t i = 0; i < m_MaxIndices; i += 6)
             {
                 // First triangle, 0->1->2
-                quadIndices[i + 0] = offset + 0;
-                quadIndices[i + 1] = offset + 1;
-                quadIndices[i + 2] = offset + 2;
+                QuadIndices[i + 0] = Offset + 0;
+                QuadIndices[i + 1] = Offset + 1;
+                QuadIndices[i + 2] = Offset + 2;
+
                 // Second triangle, 2->3->0
-                quadIndices[i + 3] = offset + 2;
-                quadIndices[i + 4] = offset + 3;
-                quadIndices[i + 5] = offset + 0;
-                offset += 4;
+                QuadIndices[i + 3] = Offset + 2;
+                QuadIndices[i + 4] = Offset + 3;
+                QuadIndices[i + 5] = Offset + 0;
+
+                Offset += 4;
             }
 
-            TObjectPtr<LIndexBuffer> quadIB = LIndexBuffer::Create(quadIndices, m_MaxIndices);
+            TObjectPtr<LIndexBuffer> quadIB = LIndexBuffer::Create(QuadIndices, m_MaxIndices);
             m_QuadVertexBuffer->SetIndexBuffer(quadIB);
             m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
 
-            delete[] quadIndices;
+            delete[] QuadIndices;
         }
 
         // Lines
@@ -210,7 +216,8 @@ namespace LkEngine {
         // Quads
         if (m_QuadIndexCount)
         {
-            dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
+            //dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
+            dataSize = static_cast<uint32_t>((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
             m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
 			LRenderer::RenderGeometry(m_RenderCommandBuffer, 
@@ -227,9 +234,10 @@ namespace LkEngine {
 
     void LOpenGLRenderer2D::Shutdown()
     {
-        for (auto& textureArray : m_TextureArrays)
+        for (TObjectPtr<OpenGLTextureArray>& TextureArray : m_TextureArrays)
         {
-            textureArray->~OpenGLTextureArray();
+            //TextureArray->~OpenGLTextureArray();
+            //TextureArray->Destroy();
         }
 
         delete m_QuadVertexBufferBase;
@@ -239,8 +247,9 @@ namespace LkEngine {
         delete m_LineVertexBufferPtr;
     }
 
-    void LOpenGLRenderer2D::DrawImage(const TObjectPtr<LImage> image)
+    void LOpenGLRenderer2D::DrawImage(const TObjectPtr<LImage>& Image)
     {
+        LK_UNUSED(Image);
     }
 
     void LOpenGLRenderer2D::DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)

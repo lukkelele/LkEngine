@@ -4,7 +4,7 @@
 #include <stb_image/stb_image.h>
 
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 #include "LkEngine/Core/Memory/Buffer.h"
 
 #include "BlendingSpecification.h"
@@ -15,7 +15,7 @@
 
 namespace LkEngine {
 
-	enum class ImageFormat
+	enum class EImageFormat
 	{
 		None = 0,
 		RED8UN,
@@ -48,7 +48,7 @@ namespace LkEngine {
 		Depth = DEPTH24STENCIL8,
 	};
 
-	enum class ImageUsage
+	enum class EImageUsage
 	{
 		None = 0,
 		Texture,
@@ -56,35 +56,35 @@ namespace LkEngine {
 		Storage,
 	};
 
-	enum class TextureWrap
+	enum class ETextureWrap
 	{
 		None = 0,
 		Clamp,
 		Repeat
 	};
 
-	enum class TextureFilter
+	enum class ETextureFilter
 	{
 		None = 0,
 		Linear,
 		Nearest
 	};
 
-	enum class TextureType
+	enum class ETextureType
 	{
 		None = 0,
 		Texture2D,
 		TextureCube
 	};
 
-	enum class TextureAnistropicFiltering
+	enum class ETextureAnistropicFiltering
 	{
 		None = 0,
 		Bilnear,
 		Trilnear
 	};
 
-	enum class TextureUniformType : uint8_t
+	enum class ETextureUniformType : uint8_t
 	{
 		Diffuse = 0,
 		Specular,
@@ -94,7 +94,7 @@ namespace LkEngine {
 		DiffuseRoughness,
 	};
 
-	struct TextureSpecification
+	struct FTextureSpecification
 	{
 		std::string Path = "";
 		std::string Name = "";
@@ -102,11 +102,11 @@ namespace LkEngine {
 		uint32_t Height = 1;
 		bool GenerateMips = true;
 
-		ImageFormat Format = ImageFormat::RGBA;
-		TextureWrap SamplerWrap = TextureWrap::Clamp;
-		TextureFilter SamplerFilter = TextureFilter::Linear;
+		EImageFormat Format = EImageFormat::RGBA;
+		ETextureWrap SamplerWrap = ETextureWrap::Clamp;
+		ETextureFilter SamplerFilter = ETextureFilter::Linear;
 
-		TextureUniformType UniformType;
+		ETextureUniformType UniformType = ETextureUniformType::Diffuse;
 
 		bool Storage = false;
 		bool StoreLocally = false;
@@ -114,7 +114,7 @@ namespace LkEngine {
 		std::string DebugName;
 	};
 
-	struct ImageSubresourceRange
+	struct FImageSubresourceRange
 	{
 		uint32_t BaseMip = 0;
 		uint32_t MipCount = UINT_MAX;
@@ -129,15 +129,14 @@ namespace LkEngine {
 		glm::uvec4 UIntValues;
 	};
 
-	/// RENAME
-	namespace Utils 
+	namespace ImageUtils 
 	{
-		static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height);
-		static uint32_t CalculateMipCount(uint32_t width, uint32_t height);
-		static uint32_t BytesPerPixel(ImageFormat format);
+		static uint32_t GetMemorySize(const EImageFormat ImageFormat, const uint32_t Width, const uint32_t Height);
+		static uint32_t CalculateMipCount(const uint32_t Width, const uint32_t Height);
+		static uint32_t BytesPerPixel(const EImageFormat ImageFormat);
 	}
 
-	struct ImageSpecification
+	struct FImageSpecification
 	{
 		uint32_t Width = 1;
 		uint32_t Height = 1;
@@ -146,33 +145,33 @@ namespace LkEngine {
 		std::string Path = "";
 		uint64_t Size = 0;
 
-		ImageFormat Format = ImageFormat::RGBA;
-		ImageUsage Usage = ImageUsage::Texture;
-		TextureWrap Wrap = TextureWrap::Clamp;
-		TextureFilter Filter = TextureFilter::Linear;
-		TextureAnistropicFiltering AnistropicFiltering = TextureAnistropicFiltering::Trilnear;
+		EImageFormat Format = EImageFormat::RGBA;
+		EImageUsage Usage = EImageUsage::Texture;
+		ETextureWrap Wrap = ETextureWrap::Clamp;
+		ETextureFilter Filter = ETextureFilter::Linear;
+		ETextureAnistropicFiltering AnistropicFiltering = ETextureAnistropicFiltering::Trilnear;
 
 		bool Deinterleaved = false;
 		bool Transfer = false; // Will it be used for transfer ops?
 
-		std::string Name = "";
-		std::string DebugName;
+		std::string Name{};
+		std::string DebugName{};
 
-		ImageSpecification() = default;
-		ImageSpecification(const TextureSpecification& textureSpec)
-			: Width(textureSpec.Width)
-			, Height(textureSpec.Height)
-			, Path(textureSpec.Path)
-			, Format(textureSpec.Format)
-			, Filter(textureSpec.SamplerFilter)
-			, Wrap(textureSpec.SamplerWrap)
-			, Name(textureSpec.Name)
-			, DebugName(textureSpec.DebugName)
+		FImageSpecification() = default;
+		FImageSpecification(const FTextureSpecification& InSpecification)
+			: Width(InSpecification.Width)
+			, Height(InSpecification.Height)
+			, Path(InSpecification.Path)
+			, Format(InSpecification.Format)
+			, Filter(InSpecification.SamplerFilter)
+			, Wrap(InSpecification.SamplerWrap)
+			, Name(InSpecification.Name)
+			, DebugName(InSpecification.DebugName)
 		{
-			textureSpec.GenerateMips ? Mips = Utils::CalculateMipCount(textureSpec.Width, textureSpec.Height) : Mips = 1;
-			Size = Utils::GetMemorySize(textureSpec.Format, textureSpec.Width, textureSpec.Height);
+			InSpecification.GenerateMips ? Mips = ImageUtils::CalculateMipCount(InSpecification.Width, InSpecification.Height) : Mips = 1;
+			Size = ImageUtils::GetMemorySize(InSpecification.Format, InSpecification.Width, InSpecification.Height);
 		}
-		~ImageSpecification() = default;
+		~FImageSpecification() = default;
 	};
 	
 	//-------------------------------------------------------------------------------
@@ -198,14 +197,14 @@ namespace LkEngine {
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 
-		virtual const ImageSpecification& GetSpecification() const = 0;
+		virtual const FImageSpecification& GetSpecification() const = 0;
 	
 		virtual void Release() = 0;
 		virtual void AllocateMemory(const uint64_t InSize) = 0;
 
 		/** Factory functions. */
-		static TObjectPtr<LImage> Create(const ImageSpecification& InSpecification, FBuffer InBuffer);
-		static TObjectPtr<LImage> Create(const ImageSpecification& InSpecification, void* InData = nullptr);
+		static TObjectPtr<LImage> Create(const FImageSpecification& InSpecification, FBuffer InBuffer);
+		static TObjectPtr<LImage> Create(const FImageSpecification& InSpecification, void* InData = nullptr);
 	};
 
 
@@ -220,94 +219,94 @@ namespace LkEngine {
 		virtual void Resize(const uint32_t InWidth, const uint32_t InHeight) = 0;
 
 		/** Factory functions. */
-		static TObjectPtr<LImage2D> Create(const ImageSpecification& InSpecification, FBuffer InBuffer);
-		static TObjectPtr<LImage2D> Create(const ImageSpecification& InSpecification, void* InData = nullptr);
+		static TObjectPtr<LImage2D> Create(const FImageSpecification& InSpecification, FBuffer InBuffer);
+		static TObjectPtr<LImage2D> Create(const FImageSpecification& InSpecification, void* InData = nullptr);
 	};
 
 
-	/**
-	 * FIXME: Update and move this.
-	 * Utils
-	 */
-	namespace Utils 
+	namespace ImageUtils 
 	{
-		FORCEINLINE static int64_t GetImageFormat(ImageFormat format)
+		FORCEINLINE static int64_t GetImageFormat(EImageFormat ImageFormat)
 		{
-			switch (format)
+			switch (ImageFormat)
 			{
-				case ImageFormat::RGBA:    return 4;
-				case ImageFormat::RGBA32F: return 16;
-				case ImageFormat::None:	   return 0;
+				case EImageFormat::RGBA:	return 4;
+				case EImageFormat::RGBA32F:	return 16;
+				case EImageFormat::None:	return 0;
 			}
+
 			return 0;
 		}
 
-		FORCEINLINE static uint32_t GetFormatBPP(ImageFormat format)
+		FORCEINLINE static uint32_t GetFormatBPP(EImageFormat ImageFormat)
 		{
-			switch (format)
+			switch (ImageFormat)
 			{
-				case ImageFormat::RGB:
-				case ImageFormat::RGBA8:   return 4;
-				case ImageFormat::RGBA:    return 4;
-				case ImageFormat::RGBA16F: return 2 * 4;
-				case ImageFormat::RGBA32F: return 4 * 4;
+				case EImageFormat::RGB:
+				case EImageFormat::RGBA8:     return 4;
+				case EImageFormat::RGBA:      return 4;
+				case EImageFormat::RGBA16F:   return 2 * 4;
+				case EImageFormat::RGBA32F:   return 4 * 4;
 			}
 
 			LK_CORE_ASSERT(false, "GetFormatBPP failed, format not recognized!");
 			return 0;
 		}
 
-		FORCEINLINE static uint32_t GetMemorySize(ImageFormat format, uint32_t width, uint32_t height)
+		FORCEINLINE static uint32_t GetMemorySize(EImageFormat ImageFormat, const uint32_t Width, const uint32_t Height)
 		{
-			return width * height * GetFormatBPP(format);
+			return (Width * Height * GetFormatBPP(ImageFormat));
 		}
 
-		FORCEINLINE static std::string ImageFormatToString(const ImageFormat format)
+		FORCEINLINE static std::string ImageFormatToString(const EImageFormat ImageFormat)
+		{
+			switch (ImageFormat)
+			{
+				case EImageFormat::RG8:               return "RG8";
+				case EImageFormat::RGB:               return "RGB";
+				case EImageFormat::RGBA:              return "RGBA";
+				case EImageFormat::RG16F:             return "RG16F";
+				case EImageFormat::RGBA8:             return "RGBA8";
+				case EImageFormat::RGBA16F:           return "RGBA16F";
+				case EImageFormat::RGBA32F:           return "RGBA32F";
+				case EImageFormat::SRGB:              return "SRGB";
+				case EImageFormat::SRGBA:             return "SRGBA";
+				case EImageFormat::RED32F:            return "RED32F";
+				case EImageFormat::RED8UI:            return "RED8UI";
+				case EImageFormat::RED8UN:            return "RED8UN";
+				case EImageFormat::RED16UI:			  return "RED16UI";
+				case EImageFormat::RED32UI:           return "RED32UI";
+				case EImageFormat::B10R11G11UF:       return "B10R11G11UF";
+				case EImageFormat::DEPTH24STENCIL8:   return "DEPTH24STENCIL8";
+			}
+
+			LK_CORE_ASSERT(false, "Invalid enum value of ImageFormat: {}", static_cast<int>(ImageFormat));
+		}
+
+		static uint32_t BytesPerPixel(EImageFormat format)
 		{
 			switch (format)
 			{
-				case ImageFormat::RG8:               return "RG8";
-				case ImageFormat::RGB:               return "RGB";
-				case ImageFormat::RGBA:              return "RGBA";
-				case ImageFormat::RG16F:             return "RG16F";
-				case ImageFormat::RGBA8:             return "RGBA8";
-				case ImageFormat::RGBA16F:           return "RGBA16F";
-				case ImageFormat::RGBA32F:           return "RGBA32F";
-				case ImageFormat::SRGB:              return "SRGB";
-				case ImageFormat::SRGBA:             return "SRGBA";
-				case ImageFormat::RED32F:            return "RED32F";
-				case ImageFormat::RED8UI:            return "RED8UI";
-				case ImageFormat::RED8UN:            return "RED8UN";
-				case ImageFormat::RED16UI:			 return "RED16UI";
-				case ImageFormat::RED32UI:           return "RED32UI";
-				case ImageFormat::B10R11G11UF:       return "B10R11G11UF";
-				case ImageFormat::DEPTH24STENCIL8:   return "DEPTH24STENCIL8";
+				case EImageFormat::RGBA:    return 4;
+				case EImageFormat::RGBA32F: return 16;
+				case EImageFormat::None:	return 0;
 			}
-			LK_CORE_ASSERT(false, "Unknown ImageFormat!");
-		}
 
-		static uint32_t BytesPerPixel(ImageFormat format)
-		{
-			switch (format)
-			{
-				case ImageFormat::RGBA:    return 4;
-				case ImageFormat::RGBA32F: return 16;
-				case ImageFormat::None:	   return 0;
-			}
 			return 0;
 		}
 
-		static uint32_t CalculateMipCount(uint32_t width, uint32_t height)
+		FORCEINLINE static uint32_t CalculateMipCount(const uint32_t Width, const uint32_t Height)
 		{
-			return (uint32_t)std::floor(std::log2(glm::min(width, height))) + 1;
+			return static_cast<uint32_t>(std::floor(std::log2(glm::min(Width, Height))) + 1);
 		}
 
-		static bool IsDepthFormat(ImageFormat format)
+		FORCEINLINE static bool IsDepthFormat(EImageFormat ImageFormat)
 		{
-			switch (format)
+			switch (ImageFormat)
 			{
-				case ImageFormat::DEPTH24STENCIL8:  return true;
+				case EImageFormat::DEPTH24STENCIL8: return true;
 			}
+
 			return false;
 		}
 

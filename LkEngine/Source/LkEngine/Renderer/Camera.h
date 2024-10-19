@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Input/Keyboard.h"
 #include "LkEngine/Input/Mouse.h"

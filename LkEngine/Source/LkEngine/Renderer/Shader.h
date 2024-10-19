@@ -1,9 +1,9 @@
 #pragma once
 
-#include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
-
 #include "LkEngine/Core/Hash.h"
+
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "ShaderUniform.h"
 #include "ShaderResource.h"
@@ -48,19 +48,19 @@ namespace LkEngine {
 
 		virtual size_t GetHash() = 0;
 
-		FORCEINLINE static const char* ConvertUniformType(const TextureUniformType& type)
+		FORCEINLINE static const char* ConvertUniformType(const ETextureUniformType& Type)
 		{
-			switch (type)
+			switch (Type)
 			{
-				case TextureUniformType::Diffuse:          return "u_Diffuse";
-				case TextureUniformType::Specular:         return "u_Specular";
-				case TextureUniformType::Normal:           return "u_Normal"; // rename ambient?
-				case TextureUniformType::Height:           return "u_Height";
-				case TextureUniformType::DiffuseRoughness: return "u_DiffuseRoughness";
-				case TextureUniformType::Emissive:         return "u_Emissive";
+				case ETextureUniformType::Diffuse:          return "u_Diffuse";
+				case ETextureUniformType::Specular:         return "u_Specular";
+				case ETextureUniformType::Normal:           return "u_Normal"; // FIXME: Rename to 'Ambient'?
+				case ETextureUniformType::Height:           return "u_Height";
+				case ETextureUniformType::DiffuseRoughness: return "u_DiffuseRoughness";
+				case ETextureUniformType::Emissive:         return "u_Emissive";
 			}
 
-			LK_CORE_ASSERT(false, "Could not convert the TextureUniformType {}", (int)type);
+			LK_CORE_ASSERT(false, "Could not convert the TextureUniformType {}", static_cast<int>(Type));
 		}
 
 	};

@@ -29,8 +29,8 @@ namespace LkEngine {
         void Initialize(bool loadRecursively = false);
 
         TObjectPtr<LTexture2D> GetTexture(const int TextureID);
-        TObjectPtr<LTexture2D> GetTexture(const std::string textureName);
-        TObjectPtr<LTexture2D> AddTexture(const TextureSpecification& texture);
+        TObjectPtr<LTexture2D> GetTexture(std::string_view TextureName);
+        TObjectPtr<LTexture2D> AddTexture(const FTextureSpecification& TextureSpecification);
 
         std::vector<std::pair<std::string, TObjectPtr<LTexture2D>>> GetTextures2D();
         int GetTextures2D(std::vector<TTexture2DPair>& TextureContainer);

@@ -4,7 +4,7 @@
 #include "Renderer2DAPI.h"
 
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Scene/Components.h"
 
@@ -117,6 +117,7 @@ namespace LkEngine {
 
 		static void BeginScene(const LSceneCamera& camera);
 		static void BeginScene(const glm::mat4& ViewProjection);
+		static void EndScene();
 
 		template<typename TFunction>
 		static void Submit(TFunction&& Function)

@@ -3,7 +3,7 @@
 #include "LkEngine/Core/Core.h"
 
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 
 namespace LkEngine {

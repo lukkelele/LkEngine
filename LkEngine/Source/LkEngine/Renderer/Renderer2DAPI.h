@@ -34,11 +34,10 @@ namespace LkEngine {
 
     struct LineVertex
     {
-        glm::vec3 Position;
-        glm::vec4 Color;
+        glm::vec3 Position{};
+        glm::vec4 Color{};
     };
 
-	//class IRenderer2DAPI : public RefCounted
 	class IRenderer2DAPI
 	{
 	public:
@@ -53,7 +52,7 @@ namespace LkEngine {
         virtual void Flush() = 0;
         virtual void EndScene() = 0;
 
-        virtual void DrawImage(const TObjectPtr<LImage> Image) = 0;
+        virtual void DrawImage(const TObjectPtr<LImage>& Image) = 0;
 
         virtual void DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0) = 0;
         virtual void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;

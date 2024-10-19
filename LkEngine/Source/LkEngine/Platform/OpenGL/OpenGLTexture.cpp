@@ -10,58 +10,46 @@
 
 namespace LkEngine {
 
-	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& textureSpec, FBuffer InBuffer)
-		: m_Specification(textureSpec)
-		, m_Width(textureSpec.Width)
-		, m_Height(textureSpec.Height)
-		, m_FilePath(std::filesystem::path(textureSpec.Path))
+	OpenGLTexture2D::OpenGLTexture2D(const FTextureSpecification& InSpecification, FBuffer InBuffer)
+		: Specification(InSpecification)
+		, m_Width(InSpecification.Width)
+		, m_Height(InSpecification.Height)
+		, m_FilePath(std::filesystem::path(InSpecification.Path))
 		, FileName(m_FilePath.filename().string())
 	{
 		LK_CORE_VERIFY(std::filesystem::is_regular_file(m_FilePath), 
 					   "Texture file is not valid, \"{}\"", m_FilePath.string());
 
-		ImageSpecification ImageSpec(textureSpec);
-		const uint64_t memorySize = ImageSpec.Size; /* Calculated in ImageSpecification constructor. */
-
-	#if 0
-		if (ImageSpec.Size != InBuffer.GetSize())
-		{
-			int Width, Height, Channels;
-			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &Width, &Height, &Channels, 4);
-			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Image {} specification doesn't match the "
-							  "read data size, resizing texture...", m_Specification.DebugName);
-			InBuffer.Data = MemoryUtils::ResizeImageData(data, memorySize, Width, Height, textureSpec.Width, textureSpec.Height, STBIR_RGBA);
-		}
-	#endif
-
+		FImageSpecification ImageSpec(InSpecification);
 		m_Image = LImage2D::Create(ImageSpec, InBuffer);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const TextureSpecification& textureSpec)
-		: m_Specification(textureSpec)
-		, m_Width(textureSpec.Width)
-		, m_Height(textureSpec.Height)
-		, m_FilePath(std::filesystem::path(textureSpec.Path))
+	OpenGLTexture2D::OpenGLTexture2D(const FTextureSpecification& InSpecification)
+		: Specification(InSpecification)
+		, m_Width(InSpecification.Width)
+		, m_Height(InSpecification.Height)
+		, m_FilePath(std::filesystem::path(InSpecification.Path))
 		, FileName(m_FilePath.filename().string())
 	{
-		LK_CORE_VERIFY(std::filesystem::is_regular_file(m_FilePath), 
-					   "Texture file is not valid, \"{}\"", m_FilePath.string());
-		ImageSpecification ImageSpec(textureSpec);
+		LK_CORE_VERIFY(std::filesystem::is_regular_file(m_FilePath), "Path is not valid: \"{}\"", m_FilePath.string());
+		FImageSpecification ImageSpec(Specification);
 
-		if (!textureSpec.Path.empty())
+		if (!Specification.Path.empty())
 		{
 			int Width, Height, Channels;
 			stbi_set_flip_vertically_on_load(1);
 
 			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Loading image from path \"{}\"", m_FilePath.string());
-			stbi_uc* data = stbi_load(textureSpec.Path.c_str(), &Width, &Height, &Channels, 4);
+			stbi_uc* data = stbi_load(Specification.Path.c_str(), &Width, &Height, &Channels, 4);
 
-            const uint32_t DataSize = Utils::GetMemorySize(textureSpec.Format, textureSpec.Width, textureSpec.Height);
+            const uint32_t DataSize = ImageUtils::GetMemorySize(Specification.Format, 
+																Specification.Width, 
+																Specification.Height);
 
 			ImageSpec.Size = (uint64_t)Width * (uint64_t)Height * (uint64_t)Channels;
 			if (ImageSpec.Size != DataSize)
 			{
-				data = MemoryUtils::ResizeImageData(data, DataSize, Width, Height, textureSpec.Width, textureSpec.Height, STBIR_RGBA);
+				data = MemoryUtils::ResizeImageData(data, DataSize, Width, Height, InSpecification.Width, InSpecification.Height, STBIR_RGBA);
 			}
 
 			m_Image = LImage2D::Create(ImageSpec, data);
@@ -78,30 +66,30 @@ namespace LkEngine {
 		m_Image->Release();
 	}
 
-	void OpenGLTexture2D::Bind(uint32_t slot) const
+	void OpenGLTexture2D::Bind(uint32_t Slot) const
 	{
-		glBindTextureUnit(slot, m_Image->GetRendererID());
+		glBindTextureUnit(Slot, m_Image->GetRendererID());
 	}
 
-	void OpenGLTexture2D::Unbind(uint32_t slot) const
+	void OpenGLTexture2D::Unbind(uint32_t Slot) const
 	{
-		glBindTextureUnit(slot, 0);
+		glBindTextureUnit(Slot, 0);
 	}
 
-	void OpenGLTexture2D::SetData(void* data, uint32_t size)
+	void OpenGLTexture2D::SetData(void* InData, const uint32_t InSize)
 	{
-		const GLenum dataFormat = GLUtils::ImageFormatToGLDataFormat(m_Specification.Format);
-		const uint32_t bpp = dataFormat == GL_RGBA ? 4 : 3;
+		const GLenum DataFormat = GLUtils::ImageFormatToGLDataFormat(Specification.Format);
+		//const uint32_t BPP = (DataFormat == GL_RGBA ? 4 : 3);
 
 		glTextureSubImage2D(m_Image->GetRendererID(), 
 							0, 
 							0, 
 							0, 
-							m_Specification.Width, 
-							m_Specification.Height, 
-							dataFormat, 
+							Specification.Width, 
+							Specification.Height, 
+							DataFormat, 
 							GL_UNSIGNED_BYTE, 
-							data);
+							InData);
 	}
 
 	void OpenGLTexture2D::Lock()
@@ -129,9 +117,9 @@ namespace LkEngine {
 		return m_Image->GetSpecification().Mips;
 	}
 
-	void OpenGLTexture2D::Resize(uint32_t Width, uint32_t Height)
+	void OpenGLTexture2D::Resize(const uint32_t NewWidth, const uint32_t NewHeight)
 	{
-		m_Image->Resize(Width, Height);
+		m_Image->Resize(NewWidth, NewHeight);
 	}
 
 	void OpenGLTexture2D::Invalidate()
@@ -145,11 +133,10 @@ namespace LkEngine {
 	}
 
 
-
-	OpenGLTextureCube::OpenGLTextureCube(const TextureSpecification& specification, std::vector<std::filesystem::path> facePaths)
-		: m_Specification(specification)
-		, m_Width(specification.Width)
-		, m_Height(specification.Height)
+	OpenGLTextureCube::OpenGLTextureCube(const FTextureSpecification& InSpecification, std::vector<std::filesystem::path> InFacePaths)
+		: Specification(InSpecification)
+		, m_Width(InSpecification.Width)
+		, m_Height(InSpecification.Height)
 	{
 		//glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &m_RendererID);
 		//glBindTextureUnit(0, m_RendererID);
@@ -158,14 +145,23 @@ namespace LkEngine {
 
 		int Width, Height, Channels;
 		stbi_set_flip_vertically_on_load(false);
-		for (unsigned int i = 0; i < facePaths.size(); i++)
+		for (unsigned int i = 0; i < InFacePaths.size(); i++)
 		{
-			std::filesystem::path& facePath = facePaths[i];
+			std::filesystem::path& facePath = InFacePaths[i];
 			stbi_uc* data = stbi_load(facePath.string().c_str(), &Width, &Height, &Channels, 4);
-			LK_CORE_VERIFY(data, "OpenGLTextureCube, failed to load data for face path \"{}\"", facePath.string());
+			LK_CORE_VERIFY(data, "OpenGLTextureCube failed to load data for face path: \"{}\"", facePath.string());
 
 			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA32F, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+						 0, 
+						 GL_RGBA32F, 
+						 Width, 
+						 Height, 
+						 0, 
+						 GL_RGBA, 
+						 GL_UNSIGNED_BYTE, 
+						 data);
+
 			stbi_image_free(data);
 
 			LK_CORE_DEBUG_TAG("OpenGLTextureCube", "Created face {} with texture image: {}", i, facePath.string());
@@ -183,9 +179,9 @@ namespace LkEngine {
 	{
 	}
 
-	void OpenGLTextureCube::Bind(uint32_t slot) const
+	void OpenGLTextureCube::Bind(const uint32_t Slot) const
 	{
-		glActiveTexture(GL_TEXTURE0 + slot);
+		glActiveTexture(GL_TEXTURE0 + Slot);
 		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
 	}

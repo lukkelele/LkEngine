@@ -8,16 +8,16 @@
 
 namespace LkEngine {
 
-    Ref<TextureArray> TextureArray::Create(const TextureArraySpecification& specification)
+    TObjectPtr<TextureArray> TextureArray::Create(const FTextureArraySpecification& Specification)
     {
         switch (LRendererAPI::Current())
         {
             case ERendererAPI::OpenGL: 
             {
-                return Ref<OpenGLTextureArray>::Create(specification);
+                return TObjectPtr<OpenGLTextureArray>::Create(Specification);
             }
 
-            case ERendererAPI::None: break;
+            case ERendererAPI::Vulkan:
             default: break;
         }
 

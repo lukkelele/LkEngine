@@ -1,7 +1,6 @@
 #include "LKpch.h"
 #include "Renderer.h"
 
-//#include "RendererAPI.h"
 #include "Texture.h"
 #include "RenderContext.h"
 
@@ -73,8 +72,8 @@ namespace LkEngine {
 
 		LK_CORE_DEBUG_TAG("Renderer", "Creating texture library");
 		RendererData->TextureLibrary = TObjectPtr<LTextureLibrary>(&LTextureLibrary::Get());
+		RendererData->TextureLibrary->Initialize();
 		RendererData->WhiteTexture = RendererData->TextureLibrary->GetWhiteTexture();
-		
 
 		LK_CORE_DEBUG_TAG("Renderer", "Creating material library");
 		RendererData->MaterialLibrary = TObjectPtr<LMaterialLibrary>::Create();
@@ -267,6 +266,10 @@ namespace LkEngine {
 		//Renderer2DAPI->BeginScene(viewProjectionMatrix);
 	}
 
+	void LRenderer::EndScene()
+	{
+	}
+
 	RendererCapabilities& LRenderer::GetCapabilities()
 	{
 		return RendererAPI->GetCapabilities();
@@ -350,112 +353,116 @@ namespace LkEngine {
 	{
 		LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
 
-		// Textures: 512x512
+		/* Textures: 512x512 */
 		{
-			TextureSpecification textureSpec;
-			// Grass
-			textureSpec.Width = 512;
-		    textureSpec.Height = 512;
-            textureSpec.Path = "Assets/Textures/grass.png";
-            textureSpec.Name = "grass-512x512";
-            textureSpec.DebugName = "grass-512x512";
-            textureSpec.GenerateMips = true;
-			textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary.AddTexture(textureSpec);
+			FTextureSpecification Specification{};
 
-			// Ice Skybox 
-            textureSpec.Path = "Assets/Textures/Skybox/back.jpg";
-            textureSpec.Name = "skybox-ice-back-512x512";
-            textureSpec.DebugName = "skybox-ice-back-512x512";
-            textureSpec.GenerateMips = false;
-			textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerWrap = TextureWrap::Clamp;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary.AddTexture(textureSpec);
-		}
-		// Textures: 1024x1024
-		{
-			TextureSpecification textureSpec;
-			// Brickwall
-			textureSpec.Width = 1024;
-		    textureSpec.Height = 1024;
-            textureSpec.Path = "Assets/Textures/brickwall.jpg";
-            textureSpec.Name = "brickwall";
-            textureSpec.DebugName = "brickwall";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary.AddTexture(textureSpec);
+			/* Grass. */
+			Specification.Width = 512;
+		    Specification.Height = 512;
+            Specification.Path = "Assets/Textures/grass.png";
+            Specification.Name = "grass-512x512";
+            Specification.DebugName = "grass-512x512";
+            Specification.GenerateMips = true;
+			Specification.Format = EImageFormat::RGBA32F;
+            Specification.SamplerWrap = ETextureWrap::Repeat;
+            Specification.SamplerFilter = ETextureFilter::Linear;
+			TextureLibrary.AddTexture(Specification);
+
+			/* Ice Skybox. */
+            Specification.Path = "Assets/Textures/Skybox/back.jpg";
+            Specification.Name = "skybox-ice-back-512x512";
+            Specification.DebugName = "skybox-ice-back-512x512";
+            Specification.GenerateMips = false;
+			Specification.Format = EImageFormat::RGBA32F;
+            Specification.SamplerWrap = ETextureWrap::Clamp;
+            Specification.SamplerFilter = ETextureFilter::Nearest;
+			TextureLibrary.AddTexture(Specification);
 		}
 
-		// Textures: 2048x2048 
+		/* Textures: 1024x1024 */
 		{
-			TextureSpecification textureSpec;
-			// Wood container
-			textureSpec.Format = ImageFormat::RGBA32F;
-			textureSpec.Width = 2048;
-			textureSpec.Height = 2048;
-			textureSpec.Path = "Assets/Textures/container.jpg";
-			textureSpec.Name = "wood-container";
-			textureSpec.DebugName = "wood-container";
-			textureSpec.SamplerWrap = TextureWrap::Clamp;
-			textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary.AddTexture(textureSpec);
+			FTextureSpecification Specification{};
 
-			// Wood container 2
-			textureSpec.Path = "Assets/Textures/container2.png";
-			textureSpec.Name = "wood-container2";
-			textureSpec.DebugName = "wood-container2";
-			TextureLibrary.AddTexture(textureSpec);
+			/* Brickwall. */
+			Specification.Width = 1024;
+		    Specification.Height = 1024;
+            Specification.Path = "Assets/Textures/brickwall.jpg";
+            Specification.Name = "brickwall";
+            Specification.DebugName = "brickwall";
+            Specification.GenerateMips = true;
+            Specification.SamplerWrap = ETextureWrap::Repeat;
+            Specification.SamplerFilter = ETextureFilter::Linear;
+			TextureLibrary.AddTexture(Specification);
+		}
 
-			// Bricks
-			textureSpec.Path = "Assets/Textures/bricks_orange.jpg";
-			textureSpec.Name = "bricks";
-			textureSpec.DebugName = "bricks";
-			TextureLibrary.AddTexture(textureSpec);
+		/* Textures: 2048x2048 */
+		{
+			FTextureSpecification Specification{};
 
-			// Åle texture
-			textureSpec.Path = "Assets/Textures/Misc/ale_1024x1024.png";
-			textureSpec.Name = "ale1024";
-			textureSpec.DebugName = "ale1024";
-			TextureLibrary.AddTexture(textureSpec);
+			/* Wood Container. */
+			Specification.Format = EImageFormat::RGBA32F;
+			Specification.Width = 2048;
+			Specification.Height = 2048;
+			Specification.Path = "Assets/Textures/container.jpg";
+			Specification.Name = "wood-container";
+			Specification.DebugName = "wood-container";
+			Specification.SamplerWrap = ETextureWrap::Clamp;
+			Specification.SamplerFilter = ETextureFilter::Nearest;
+			TextureLibrary.AddTexture(Specification);
 
-			// Lukas texture
-			textureSpec.Path = "Assets/Textures/Misc/lukas_1024.jpg";
-			textureSpec.Name = "lukas_1024";
-			textureSpec.DebugName = "lukas-1024x1024";
-			textureSpec.SamplerWrap = TextureWrap::Repeat;
-			TextureLibrary.AddTexture(textureSpec);
+			/* Wood Container 2. */
+			Specification.Path = "Assets/Textures/container2.png";
+			Specification.Name = "wood-container2";
+			Specification.DebugName = "wood-container2";
+			TextureLibrary.AddTexture(Specification);
 
-			// Metal
-            textureSpec.Path = "Assets/Textures/metal.png";
-            textureSpec.Name = "metal-ground";
-            textureSpec.DebugName = "metal-ground";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-			TextureLibrary.AddTexture(textureSpec);
+			/* Bricks. */
+			Specification.Path = "Assets/Textures/bricks_orange.jpg";
+			Specification.Name = "bricks";
+			Specification.DebugName = "bricks";
+			TextureLibrary.AddTexture(Specification);
 
-			// Wood
-            textureSpec.Name = "wood";
-            textureSpec.DebugName = "wood";
-            textureSpec.Path = "Assets/Textures/wood.png";
-            textureSpec.GenerateMips = true;
-            textureSpec.SamplerWrap = TextureWrap::Repeat;
-            textureSpec.SamplerFilter = TextureFilter::Linear;
-			TextureLibrary.AddTexture(textureSpec);
+			/* Åle texture. */
+			Specification.Path = "Assets/Textures/Misc/ale_1024x1024.png";
+			Specification.Name = "ale1024";
+			Specification.DebugName = "ale1024";
+			TextureLibrary.AddTexture(Specification);
 
-			// Skybox
-            textureSpec.Name = "skybox-ice-back";
-            textureSpec.DebugName = "skybox-ice-back";
-            textureSpec.Path = "Assets/Textures/Skybox/back.jpg";
-            textureSpec.GenerateMips = false;
-            textureSpec.Format = ImageFormat::RGBA32F;
-            textureSpec.SamplerFilter = TextureFilter::Nearest;
-            textureSpec.SamplerWrap = TextureWrap::Clamp;
-			TextureLibrary.AddTexture(textureSpec);
+			/* Lukas Texture. */
+			Specification.Path = "Assets/Textures/Misc/lukas_1024.jpg";
+			Specification.Name = "lukas_1024";
+			Specification.DebugName = "lukas-1024x1024";
+			Specification.SamplerWrap = ETextureWrap::Repeat;
+			TextureLibrary.AddTexture(Specification);
+
+			/* Metal. */
+            Specification.Path = "Assets/Textures/metal.png";
+            Specification.Name = "metal-ground";
+            Specification.DebugName = "metal-ground";
+            Specification.GenerateMips = true;
+            Specification.SamplerWrap = ETextureWrap::Repeat;
+            Specification.SamplerFilter = ETextureFilter::Nearest;
+			TextureLibrary.AddTexture(Specification);
+
+			/* Wood. */
+            Specification.Name = "wood";
+            Specification.DebugName = "wood";
+            Specification.Path = "Assets/Textures/wood.png";
+            Specification.GenerateMips = true;
+            Specification.SamplerWrap = ETextureWrap::Repeat;
+            Specification.SamplerFilter = ETextureFilter::Linear;
+			TextureLibrary.AddTexture(Specification);
+
+			/* Ice Skybox. */
+            Specification.Name = "skybox-ice-back";
+            Specification.DebugName = "skybox-ice-back";
+            Specification.Path = "Assets/Textures/Skybox/back.jpg";
+            Specification.GenerateMips = false;
+            Specification.Format = EImageFormat::RGBA32F;
+            Specification.SamplerFilter = ETextureFilter::Nearest;
+            Specification.SamplerWrap = ETextureWrap::Clamp;
+			TextureLibrary.AddTexture(Specification);
         }
 	}
 
