@@ -6,7 +6,8 @@
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Core/String.h"
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
+#include "LkEngine/Core/Delegate/Delegate.h"
 
 #include "LkEngine/Asset/Asset.h"
 
@@ -27,7 +28,11 @@ namespace LkEngine {
 
 	using EntityMap = std::unordered_map<UUID, LEntity>;
 
-	//class LScene : public LObject, public LAsset
+	LK_DECLARE_MULTICAST_DELEGATE(FOnSceneSetActive, const TObjectPtr<LScene>&);
+
+	/** OnSceneSetActive. */
+	static FOnSceneSetActive GOnSceneSetActive;
+
 	class LScene : public LAsset
 	{
 	public:

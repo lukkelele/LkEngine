@@ -19,9 +19,7 @@ namespace LkEngine {
         PhysicsSystem();
         ~PhysicsSystem() = default;
 
-        static PhysicsSystem* Get() { return m_Instance; }
-
-        void Init();
+        void Initialize() {}
         void Simulate(const FTimestep DeltaTime);
 
         FORCEINLINE static EPhysicsAPI GetPhysicsAPI() { return PhysicsAPI; }
@@ -30,6 +28,9 @@ namespace LkEngine {
         { 
             PhysicsAPI = InPhysicsAPI; 
         }
+
+        /// REMOVE ?
+        static PhysicsSystem* Get() { return m_Instance; }
 
     private:
         FTimestep Timestep = (1.0f / 60.0f);

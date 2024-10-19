@@ -1,7 +1,11 @@
+/******************************************************************
+ * LProject
+ * 
+ *******************************************************************/
 #pragma once
 
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/ImGui/ImGuiLayer.h"

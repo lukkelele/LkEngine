@@ -11,18 +11,17 @@ namespace LkEngine {
         , ThreadManager(LThreadManager::Instance())
     {
         m_Instance = this;
+
+        Global::SetRuntimeArguments(Specification.Argc, Specification.Argv);
+
         m_Timer.Reset();
 
         LCrashHandler::AttachInstance(this);
 
-        LK_CORE_TRACE_TAG("Application", "Getting Metadata Registry");
-        LMetadataRegistry& MetadataRegistry = LMetadataRegistry::Get();
-
         LK_CORE_TRACE_TAG("Application", "Creating window");
         Window = MakeUnique<LWindow>(InSpecification);
         MetadataRegistry.RegisterObject("Window", Window);
-
-        ImGuiLayer = LImGuiLayer::Create();
+        //ImGuiLayer = LImGuiLayer::Create();
     }
 
     LApplication::~LApplication()
@@ -45,90 +44,67 @@ namespace LkEngine {
 
         Input::Init();
 
-        m_PhysicsSystem = MakeUnique<PhysicsSystem>();
-        m_PhysicsSystem->Init();
-
-        /* Setup EditorLayer. */
-        Editor = MakeUnique<LEditorLayer>();
-		Editor->SetEventCallback([this](LEvent& Event) 
-        { 
-            Editor->OnEvent(Event); 
-        });
-
         /* Initialize the renderer. */
-        m_Renderer = TObjectPtr<LRenderer>::Create();
-        m_Renderer->Initialize();
+        Renderer = TObjectPtr<LRenderer>::Create();
+        Renderer->Initialize();
 
+        ImGuiLayer = LImGuiLayer::Create();
         ImGuiLayer->Initialize();
         ImGuiLayer->SetDarkTheme();
 
+        /* Create EditorLayer. */
+        Editor = MakeUnique<LEditorLayer>();
         Editor->Initialize();
-
-        PushOverlay(Editor.get());
+        LayerStack.PushOverlay(Editor.get());
     }
 
     void LApplication::Run()
     {
         bRunning = true;
-		while (!glfwWindowShouldClose(Window->GetGlfwWindow()))
+
+        LApplication* Application = this;
+        GLFWwindow* GlfwWindow = Window->GetGlfwWindow();
+
+		while (!glfwWindowShouldClose(GlfwWindow))
 		{
-            LApplication* Application = this;
 			Timestep = m_Timer.GetDeltaTime();
 
             Input::Update();
             LRenderer::BeginFrame();
 
-            /**
-             * LkEditor
-             */
+            /** LkEditor */
             if (Editor->IsEnabled())
             {
-        #if 1
-                TObjectPtr<LEditorCamera> Camera = Editor->GetEditorCamera();
-                LRenderer::BeginScene(Camera->GetViewProjectionMatrix());
+                TObjectPtr<LEditorCamera> EditorCamera = Editor->GetEditorCamera();
+                LRenderer::BeginScene(EditorCamera->GetViewProjectionMatrix());
 
-                /* Update layers. */
-				for (LLayer* layer : LayerStack)
+                /* Update all layers. */
+				for (TObjectPtr<LLayer>& Layer : LayerStack)
 				{
-					layer->OnUpdate(Timestep);
+					Layer->OnUpdate(Timestep);
 				}
 
-            #if 0 /// DISABLED FOR NOW
-				if (Scene)
-				{
-					Scene->OnRenderEditor(*Camera, Timestep);
-
-                    /* Flush 2D renderer. */
-					m_Renderer->GetRenderer2D()->EndScene(); 
-				}
-            #endif
-        #endif
+                LRenderer::EndScene();
             }
             
+            /* UI */
 			if (Specification.ImGuiEnabled)
 			{
-				//LRenderer::Submit([Application]() 
-				LRenderer::Submit([&Application]() 
+				LRenderer::Submit([Application]() 
                 { 
-                    Application->RenderImGui(); 
+                    Application->RenderUI(); 
                 });
 
-				//LRenderer::Submit([=]()
-				LRenderer::Submit([&]()
-                { 
-                    ImGuiLayer->EndFrame(); 
-                });
+				LRenderer::Submit([&]() { ImGuiLayer->EndFrame(); });
 			}
 
 			LRenderer::EndFrame();
 
-			/* Submit buffer swap on render thread. */
+			/* Submit the buffer swap. */
 			LRenderer::Submit([&]()
 			{
 				Window->SwapBuffers();
 			});
-
-            m_PhysicsSystem->Simulate(Timestep);
 
 		    m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % LRenderer::GetFramesInFlight();
             LastTimestep = Timestep;
@@ -142,18 +118,38 @@ namespace LkEngine {
         if (bRunning)
         {
 			LK_CORE_WARN_TAG("Application", "Renderer->Shutdown()");
-			m_Renderer->Shutdown();
+			Renderer->Shutdown();
 
 			LK_CORE_WARN_TAG("Application", "Window->Shutdown()");
 			Window->Shutdown();
         }
     }
 
+    /* FIXME */
+    LString LApplication::GenerateCrashDump()
+    {
+        return "[TODO] CRASHDUMP";
+    }
+
+    void LApplication::RenderUI()
+    {
+        /* Bind to default framebuffer before any UI rendering takes place. */
+		LFramebuffer::TargetSwapChain();
+
+        ImGuiLayer->BeginFrame();
+
+        for (TObjectPtr<LLayer>& Layer : LayerStack)
+        {
+            Layer->OnImGuiRender();
+        }
+    }
+
+    /// FIXME: 
 	void LApplication::OnEvent(LEvent& Event)
 	{
 		EventDispatcher Dispatcher(Event);
 
-		for (LLayer* Layer : LayerStack)
+		for (TObjectPtr<LLayer>& Layer : LayerStack)
 		{
 			Layer->OnEvent(Event);
             if (Event.Handled)
@@ -192,21 +188,5 @@ namespace LkEngine {
 			EventQueue.pop();
 		}
 	}
-
-    /* FIXME */
-    LString LApplication::GenerateCrashDump()
-    {
-        return "<< LkEngine CRASHDUMP >>";
-    }
-
-    void LApplication::RenderImGui()
-    {
-        ImGuiLayer->BeginFrame();
-
-        for (int i = 0; i < LayerStack.Size(); i++)
-        {
-            LayerStack[i]->OnImGuiRender();
-        }
-    }
 
 }

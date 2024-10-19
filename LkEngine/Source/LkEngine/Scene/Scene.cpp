@@ -450,12 +450,14 @@ namespace LkEngine {
 		EditorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
 		EditorCamera.OnUpdate(Timestep);
 
+#if 0
 		/* FIXME: This should NOT be here ... */
 		LRenderer::SubmitQuad({ 200, -20, 1350 }, 
 							  { 3000, 1800 }, 
 							  LTextureLibrary::Get().GetTexture("skybox-ice-back"));
 
 		LEditorLayer::Get()->OnUpdate(); /// UPDATE
+#endif
 	}
 
 	LEntity LScene::GetMainCameraEntity()

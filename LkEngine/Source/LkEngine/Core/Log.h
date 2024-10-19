@@ -1,3 +1,8 @@
+/******************************************************************
+ * LLog
+ *
+ * Logger class and logging implementation for the entire engine. 
+ *******************************************************************/
 #pragma once
 
 #include "LkEngine/Core/CoreMacros.h"
@@ -5,6 +10,7 @@
 #include <stdint.h>
 #include <cstring>
 #include <map>
+#include <filesystem>
 
 /* Ignore warnings raised inside external headers. */
 #pragma warning(push, 0)
@@ -23,6 +29,8 @@
 
 
 namespace LkEngine {
+
+	static std::filesystem::path LogDirectory{ "Logs/" };
 
 	/** ELogLevel */
 	enum class ELogLevel : int

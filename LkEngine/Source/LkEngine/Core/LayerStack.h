@@ -11,28 +11,74 @@ namespace LkEngine {
 		LLayerStack() = default;
 		~LLayerStack();
 
-		void PushLayer(LLayer* layer);
-		void PushOverlay(LLayer* overlay);
-		void PopLayer(LLayer* layer);
-		void PopOverlay(LLayer* overlay);
-
-		LLayer* operator[](const size_t LayerIndex)
+		FORCEINLINE void PushLayer(LLayer* Layer)
 		{
-			LK_ASSERT((LayerIndex >= 0) && (LayerIndex < m_Layers.size()), "Invalid layer index: {}", LayerIndex);
-			return m_Layers[LayerIndex];
+			if (auto Iter = Layers.emplace((Layers.begin() + InsertIndex), Layer); Iter != Layers.end())
+			{
+				InsertIndex++;
+				(*Iter)->OnAttach();
+			}
 		}
 
-		FORCEINLINE int Size() const 
+		FORCEINLINE void PushOverlay(TObjectPtr<LLayer> Overlay)
+		{
+			if (Layers.emplace_back(Overlay))
+			{
+				Overlay->OnAttach();
+			}
+		}
+
+		FORCEINLINE void PopLayer(TObjectPtr<LLayer> Layer)
+		{
+			auto Iter = std::find(Layers.begin(), Layers.begin() + InsertIndex, Layer);
+			if (Iter != (Layers.begin() + InsertIndex))
+			{
+				Layer->OnDetach();
+
+				Layers.erase(Iter);
+				InsertIndex--;
+			}
+		}
+
+		FORCEINLINE void PopOverlay(TObjectPtr<LLayer> Overlay)
+		{
+			auto Iter = std::find(Layers.begin() + InsertIndex, Layers.end(), Overlay);
+			if (Iter != Layers.end())
+			{
+				Overlay->OnDetach();
+
+				Layers.erase(Iter);
+			}
+		}
+
+		TObjectPtr<LLayer> operator[](const size_t LayerIndex)
+		{
+			LK_ASSERT((LayerIndex >= 0) && (LayerIndex < Layers.size()), "Invalid layer index: {}", LayerIndex);
+			return Layers[LayerIndex];
+		}
+
+		TObjectPtr<LLayer> operator[](const size_t LayerIndex) const
+		{
+			LK_ASSERT((LayerIndex >= 0) && (LayerIndex < Layers.size()), "Invalid layer index: {}", LayerIndex);
+			return Layers.at(LayerIndex);
+		}
+
+		/**
+		 * @brief Get the count of layers.
+		 */
+		FORCEINLINE int Count() const 
 		{ 
-			return static_cast<int>(m_Layers.size()); 
+			return static_cast<int>(Layers.size()); 
 		}
 
-		std::vector<LLayer*>::iterator begin() { return m_Layers.begin(); }
-		std::vector<LLayer*>::iterator end() { return m_Layers.end(); }
+		// Iterator
+		std::vector<TObjectPtr<LLayer>>::iterator begin() { return Layers.begin(); }
+		std::vector<TObjectPtr<LLayer>>::iterator end() { return Layers.end(); }
+		// ~Iterator
 
 	private:
-		std::vector<LLayer*> m_Layers;
-		unsigned int m_LayerInsertIndex = 0;
+		std::vector<TObjectPtr<LLayer>> Layers;
+		unsigned int InsertIndex = 0;
 
 		LCLASS(LLayerStack);
 	};

@@ -2,6 +2,7 @@
 
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Core/Event/Event.h"
 
@@ -13,31 +14,30 @@ namespace LkEngine {
 	 *
 	 * Base layer implementation.
 	 */
-	class LLayer : public virtual LObject
+	class LLayer : public LObject
 	{
 	public:
 		LLayer(std::string_view InName = "Layer");
 		virtual ~LLayer() = default;
 
-		/** */
 		virtual void OnAttach() {}
-		/** */
 		virtual void OnDetach() {}
 
-		/** */
-		virtual void OnUpdate(float ts) {}
-		/** */
+		virtual void OnUpdate(const float Timestep) = 0;
 		virtual void OnImGuiRender() {}
 
-		virtual void OnEvent(LEvent& event) 
-		{
+		virtual void OnEvent(LEvent& Event) 
+		{ 
+			LK_UNUSED(Event);
 		}
 
-		std::string_view GetName() const { return Name; }
+		FORCEINLINE std::string_view GetName() const 
+		{ 
+			return Name; 
+		}
 
 	protected:
 		std::string Name{};
-
 	private:
 		LCLASS(LLayer);
 	};

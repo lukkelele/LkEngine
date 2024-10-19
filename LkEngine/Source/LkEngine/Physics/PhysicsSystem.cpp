@@ -9,10 +9,6 @@ namespace LkEngine {
         m_Instance = this;
     }
 
-    void PhysicsSystem::Init()
-    {
-    }
-
     void PhysicsSystem::Simulate(const FTimestep DeltaTime)
     {
         // 2D Physics

@@ -1,5 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/Core/Log.h"
+#include "LkEngine/Core/Time.h"
+#include "LkEngine/Core/Globals.h"
 
 
 namespace LkEngine {
@@ -7,7 +9,16 @@ namespace LkEngine {
 	LLog::LLog()
 	{
 		// TODO: Read configuration and application args.
-		Initialize("LkEditor.log", "CORE", "CLIENT");
+		Initialize(
+			LString::Format("LkEditor-{}.log", Time::CurrentTimestamp()).CStr(),
+			"CORE", 
+			"CLIENT"
+		);
+
+		LogDirectory = std::filesystem::current_path();
+		LK_CORE_DEBUG("Default Log Directory: {}", LogDirectory.string());
+
+		/* TODO: Only allow X amount of logfiles to exist. */
 	}
 
 	LLog::~LLog()
@@ -21,9 +32,9 @@ namespace LkEngine {
 		return Instance;
 	}
 
-	void LLog::Initialize(std::string_view logfilename,
+	void LLog::Initialize(std::string_view InLogFilename,
 						  std::string_view InCoreLoggerName, 
-						  std::string_view clientLoggerName)
+						  std::string_view InClientLoggerName)
 	{
 		/* 
 		 * TODO: Should parse from config and/or args from commandline to set the log levels 
@@ -31,9 +42,11 @@ namespace LkEngine {
 		 */
 		using ColorSinkType = spdlog::sinks::stdout_color_sink_mt;
 
+		/* Terminal sink. */
 		static constexpr const char* ColorSinkPattern  = "%^[%H:%M:%S] [%n] %v%$";
-		static constexpr const char* FileSinkPattern   = "[%H:%M:%S] [%n] %v";
 		static constexpr const char* UISinkPattern     = "%^[%H:%M:%S] [%n] %v%$";
+		/* Logfile sink. */
+		static constexpr const char* FileSinkPattern   = "[%H:%M:%S] [%l] [%n] %v";
 
 		/* Set log level names to UPPERCASE. */
 		spdlog::level::level_string_views[spdlog::level::trace]    = "TRACE";
@@ -47,7 +60,8 @@ namespace LkEngine {
 		std::vector<spdlog::sink_ptr> LogSinks;
 		LogSinks.reserve(2);
 		LogSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfilename.data(), true));
+		const std::string Logfile = LogDirectory.string() + std::string(InLogFilename);
+		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logfile, true));
 
 		LogSinks[0]->set_pattern(ColorSinkPattern);
 		LogSinks[1]->set_pattern(FileSinkPattern);
@@ -62,7 +76,7 @@ namespace LkEngine {
 
 		/* Client Logger. */
 		{
-			ClientLogger = MakeShared<spdlog::logger>(clientLoggerName.data(), LogSinks.begin(), LogSinks.end());
+			ClientLogger = MakeShared<spdlog::logger>(InClientLoggerName.data(), LogSinks.begin(), LogSinks.end());
 			ClientLogger->set_level(spdlog::level::trace);
 			ClientLogger->flush_on(spdlog::level::trace);
 			spdlog::register_logger(ClientLogger);

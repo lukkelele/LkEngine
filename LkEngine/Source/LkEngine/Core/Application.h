@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/Globals.h"
 
 #include "LkEngine/Core/ApplicationConfig.h"
 #include "LkEngine/Core/Window.h"
@@ -16,7 +17,7 @@
 #include "LkEngine/Core/MetadataRegistry.h"
 
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Input/Input.h"
 
@@ -56,28 +57,7 @@ namespace LkEngine {
 
         void OnEvent(LEvent& e);
 
-        void RenderImGui();
-
-        FORCEINLINE void PushLayer(LLayer* Layer)
-        {
-			LayerStack.PushLayer(Layer);
-        }
-
-        FORCEINLINE void PopLayer(LLayer* Layer)
-        {
-			LayerStack.PopLayer(Layer);
-        }
-
-        FORCEINLINE void PushOverlay(LLayer* Layer)
-        {
-            LayerStack.PushOverlay(Layer);
-        }
-
-        FORCEINLINE void PopOverlay(LLayer* Layer)
-        {
-            LayerStack.PopOverlay(Layer);
-        }
-
+        void RenderUI();
         void ProcessEvents();
 
         /// TODO: Add event category to bundle the callback with.
@@ -146,7 +126,7 @@ namespace LkEngine {
         TUniquePtr<LWindow> Window;
         TUniquePtr<Input> m_Input;
 
-        TObjectPtr<LRenderer> m_Renderer;
+        TObjectPtr<LRenderer> Renderer;
         uint32_t m_CurrentFrameIndex = 0;
 
         TUniquePtr<LEditorLayer> Editor;

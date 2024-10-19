@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/LObjectPtr.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
@@ -11,7 +11,6 @@
 #include <glm/glm.hpp>
 
 #include <entt/entt.hpp>
-
 
 
 namespace LkEngine {
