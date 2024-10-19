@@ -39,6 +39,7 @@ namespace LkEngine {
 
     struct Node;
 
+    /// Patch this.
     struct Pin
     {
         ed::PinId ID;
@@ -53,15 +54,17 @@ namespace LkEngine {
         }
     };
     
+    /// Patch this.
     struct Node
     {
         ed::NodeId ID;
         std::string Name;
-        std::vector<Pin> Inputs;
-        std::vector<Pin> Outputs;
         ImColor Color;
         NodeType Type;
         ImVec2 Size;
+
+        std::vector<Pin> Inputs;
+        std::vector<Pin> Outputs;
 
         std::string State;
         std::string SavedState;
@@ -72,6 +75,7 @@ namespace LkEngine {
         }
     };
 
+    /// Patch this.
     struct Link
     {
         ed::LinkId ID;

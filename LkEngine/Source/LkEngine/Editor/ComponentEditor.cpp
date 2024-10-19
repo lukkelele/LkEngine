@@ -12,15 +12,12 @@
 
 namespace LkEngine {
 
-    void LComponentEditor::Init()
+    void LComponentEditor::Initialize()
     {
+        // TODO
     }
 
-    void LComponentEditor::OnRender()
-    {
-    }
-
-    void LComponentEditor::OnImGuiRender()
+    void LComponentEditor::OnRenderUI()
     {
         static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;
         if (ImGui::TreeNodeEx("Materials", treeNodeFlags))
@@ -59,12 +56,12 @@ namespace LkEngine {
         }
         if (ImGui::TreeNodeEx("Textures", treeNodeFlags))
         {
-            for (auto& texture2DEntry : LTextureLibrary::Get().GetTextures2D())
+            for (auto& Texture2DEntry : LTextureLibrary::Get().GetTextures2D())
             {
-                auto& texture2D = texture2DEntry.second;
-                if (ImGui::TreeNodeEx(texture2DEntry.first.c_str(), treeNodeFlags))
+                auto& Texture2D = Texture2DEntry.second;
+                if (ImGui::TreeNodeEx(Texture2DEntry.first.c_str(), treeNodeFlags))
                 {
-                    RenderTextureEditor(texture2D);
+                    RenderTextureEditor(Texture2D);
                     ImGui::TreePop();
                 }
             }
@@ -83,19 +80,19 @@ namespace LkEngine {
         //UI::PopID();
     }
 
-    void LComponentEditor::RenderTextureEditor(const TObjectPtr<LTexture> texture)
+    void LComponentEditor::RenderTextureEditor(const TObjectPtr<LTexture>& Texture)
     {
         UI::PushID();
-        ImGui::Text("Path: %s", texture->GetPath().string().c_str());
-        ImGui::Text("Size: (%1.f, %1.f)", texture->GetWidth(), texture->GetHeight());
+        ImGui::Text("Path: %s", Texture->GetPath().string().c_str());
+        ImGui::Text("Size: (%1.f, %1.f)", Texture->GetWidth(), Texture->GetHeight());
         UI::PopID();
     }
 
-    void LComponentEditor::RenderTextureEditor(const TObjectPtr<LTexture2D> texture)
+    void LComponentEditor::RenderTextureEditor(const TObjectPtr<LTexture2D>& Texture)
     {
         UI::PushID();
-        ImGui::Text("Path: %s", texture->GetPath().string().c_str());
-        ImGui::Text("Size: (%1.f, %1.f)", texture->GetWidth(), texture->GetHeight());
+        ImGui::Text("Path: %s", Texture->GetPath().string().c_str());
+        ImGui::Text("Size: (%1.f, %1.f)", Texture->GetWidth(), Texture->GetHeight());
         UI::PopID();
     }
 

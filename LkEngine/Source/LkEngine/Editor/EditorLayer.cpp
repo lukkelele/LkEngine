@@ -20,15 +20,19 @@
 #include "LkEngine/UI/SceneManagerPanel.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLRenderer.h"
+#include "EditorLayer.h"
 
 
 namespace LkEngine {
+
+	static bool bInit = false;
 
 	static TObjectPtr<LTexture2D> FloorTexture;
 	static TObjectPtr<LTexture2D> CubeTexture;
 
 	LEditorLayer::LEditorLayer()
-		: TabManager(LEditorTabManager::Get())
+		: LLayer("EditorLayer")
+		, TabManager(LEditorTabManager::Get())
 	    , m_Scene(nullptr)
 		, m_Enabled(true)
 	{
@@ -59,48 +63,57 @@ namespace LkEngine {
 		SceneManagerPanel = MakeShared<LSceneManagerPanel>();
 		ContentBrowser = MakeUnique<LContentBrowser>();
 		ComponentEditor = MakeUnique<LComponentEditor>();
+
+		LEditorLayer& Editor = *this;
+		auto EventCallback = [&Editor](LEvent& Event) { Editor.OnEvent(Event); };
+		LK_CORE_TRACE_TAG("Editor", "Setting event callback to OnEvent");
+		SetEventCallback(EventCallback);
 	}
 
 	void LEditorLayer::Initialize()
 	{
+		LObject::Initialize();
+		LK_ASSERT(bInit == false, "EditorLayer already initialized");
+
 		Window->SetScalers(ViewportScalers.x, ViewportScalers.y);
 		Window->SetWidth(static_cast<uint32_t>(EditorWindowSize.x));
 		Window->SetHeight(static_cast<uint32_t>(EditorWindowSize.y));
 
         // Viewport Framebuffer
-		FramebufferSpecification framebufferSpec;
-		framebufferSpec.Attachments = { ImageFormat::RGBA32F, ImageFormat::DEPTH24STENCIL8 };
-		framebufferSpec.Samples = 1;
-		framebufferSpec.ClearColorOnLoad = false;
-		framebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
-		framebufferSpec.DebugName = "EditorLayer-Framebuffer";
-        framebufferSpec.Width = LWindow::Get().GetWidth();
-        framebufferSpec.Height = LWindow::Get().GetHeight();
-		m_ViewportFramebuffer = LFramebuffer::Create(framebufferSpec);
-	#if 0 /* DISABLE TEMPORARILY */
-        LK_CORE_DEBUG_TAG("Editor", "Color attachment 0: {}", m_ViewportFramebuffer->GetColorAttachmentRendererID(0));
-	#endif
+		FFramebufferSpecification FramebufferSpec;
+		FramebufferSpec.Attachments = { 
+			EImageFormat::RGBA32F, 
+			EImageFormat::DEPTH24STENCIL8 
+		};
+		FramebufferSpec.Samples = 1;
+		FramebufferSpec.ClearColorOnLoad = false;
+		FramebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
+		FramebufferSpec.DebugName = "EditorLayer-Framebuffer";
+        FramebufferSpec.Width = LWindow::Get().GetWidth();
+        FramebufferSpec.Height = LWindow::Get().GetHeight();
+		m_ViewportFramebuffer = LFramebuffer::Create(FramebufferSpec);
 
 		// Camera system
-		EditorCamera = TObjectPtr<LEditorCamera>::Create(60.0f, 
-														 Window->GetWidth(), 
-														 Window->GetHeight(), 
-														 0.10f, 
-														 2400.0f);
+		EditorCamera = TObjectPtr<LEditorCamera>::Create(60.0f,                /* FOV    */
+														 Window->GetWidth(),   /* Width  */
+														 Window->GetHeight(),  /* Height */
+														 0.10f,                /* ZNear  */
+														 2400.0f);             /* ZFar   */
+
+		/// FIXME:
 		EditorCamera->SetPosition({ -10, 4, -10 });
 		EditorCamera->m_Pitch = 0.0f;
 		EditorCamera->m_Yaw = glm::pi<float>();
 
 		// UI Panels
-		SceneManagerPanel->Init();
-		ContentBrowser->Init();
-		ComponentEditor->Init();
+		SceneManagerPanel->Initialize();
+		ContentBrowser->Initialize();
+		ComponentEditor->Initialize();
 
 		// TODO: Parse config or cache to determine most recent project and go from there
 		// New project and/or setting the project to active triggers an event that 
 		// handles the redirection of input and physics 
 		m_Project = LProject::CreateEmptyProject("Editor", true);
-		//LProject::SetActive(m_Project);
 
 		m_ViewportFramebuffer->Bind();
 
@@ -115,9 +128,11 @@ namespace LkEngine {
 
 		LObject Test1;
 		GEditorOnSelectionChanged.Broadcast(Test1);
+
+		bInit = true;
 	}
 
-	void LEditorLayer::OnUpdate()
+	void LEditorLayer::OnUpdate(const float DeltaTime)
 	{
 		// The window space is calculated from topleft corner, so remove Mouse::Pos.y to get the actual cursor placement
 		{
@@ -130,6 +145,12 @@ namespace LkEngine {
 
 			Mouse::CenterPos.x = (Mouse::Pos.x / Window->GetWidth()) * 2.0f - 1.0f;
 			Mouse::CenterPos.y = ((Mouse::Pos.y / Window->GetHeight()) * 2.0f - 1.0f) * -1.0f;
+		}
+
+		if (EditorCamera)
+		{
+			EditorCamera->SetViewportSize(EditorWindowSize.x, EditorWindowSize.y);
+			EditorCamera->OnUpdate(DeltaTime);
 		}
 
 		RenderViewport();
@@ -149,7 +170,7 @@ namespace LkEngine {
 		auto& colors = style.Colors;
 		io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
 
-		ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
+		ImGuiViewportP* Viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
 		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 
@@ -160,20 +181,14 @@ namespace LkEngine {
 		}
 #endif
 
-
-		UI::BeginViewport(UI_CORE_VIEWPORT, Window, viewport);
+		UI::BeginViewport(UI_CORE_VIEWPORT, Window, Viewport);
 		UI_HandleManualWindowResize();
 		UI::BeginDockSpace(LkEngine_DockSpace);
 
-		//=========================================================
-		// Menubar
-		//=========================================================
 		UI_MainMenuBar();
 
-		//=========================================================
-		// Left Sidebar
-		//=========================================================
-		ImGuiID DockspaceID_LeftSidebar = ImGui::GetID("Dockspace_LeftSidebar");
+		/* Left Sidebar. */
+		const ImGuiID DockspaceID_LeftSidebar = ImGui::GetID("Dockspace_LeftSidebar");
 		static bool ResetDockspace_LeftSidebar = true;
 
 		CheckLeftSidebarSize();
@@ -181,8 +196,6 @@ namespace LkEngine {
 		{
 			static bool bBlendingEnabled = false;
 
-			// TODO: just use Window here to access the render context
-			//Ref<RenderContext> renderContext = LWindow::Get().GetRenderContext();
 			TObjectPtr<LRenderContext> RenderContext = LWindow::Get().GetRenderContext();
 			bBlendingEnabled = RenderContext->GetBlendingEnabled();
 
@@ -196,6 +209,7 @@ namespace LkEngine {
 			/* Retrieve the cached textures. */
 			const std::vector<TTexture2DPair>& textures2D = LAssetManager::GetTextures2D();
 
+		#if LK_UI_RENDER_GEOMETRIC_SHAPES_MENU
 			if (CubeTexture)
 			{
 				std::string_view TextureName = CubeTexture->GetName();
@@ -205,7 +219,6 @@ namespace LkEngine {
 					{
 						if (ImGui::Selectable(TextureEntry.first.c_str()))
 						{
-							//mc.SetTexture(tex.second);
 							CubeTexture = TextureEntry.second;
 						}
 					}
@@ -227,7 +240,10 @@ namespace LkEngine {
 					ImGui::EndCombo(); // Floor
 				}
 			}
+		#endif
 
+
+		#if LK_UI_USE_COLORS_MENU
 			//----------------------------------------------------
 			// Colors
 			//----------------------------------------------------
@@ -237,7 +253,9 @@ namespace LkEngine {
 				UI_ClearColorModificationMenu();
 				ImGui::TreePop();
 			}
+		#endif
 
+		#if LK_UI_USE_EDITORLAYER_CAMERA
 			//----------------------------------------------------
 			// EditorLayer Camera
 			//----------------------------------------------------
@@ -281,6 +299,7 @@ namespace LkEngine {
 				ImGui::SliderFloat("Yaw", &EditorCamera->m_Yaw, -12.0f, 12.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 			}
 			ImGui::EndGroup();
+		#endif
 
 			/* DISABLE FOR NOW */
 	#if LK_UI_USE_MODE_SELECTOR
@@ -337,7 +356,7 @@ namespace LkEngine {
 			ImGui::EndGroup();
 	#endif
 
-			SceneManagerPanel->OnImGuiRender();
+			SceneManagerPanel->OnRenderUI();
 
 			const ImVec2 WindowSize = ImGui::GetWindowSize();
 			const ImVec2 windowPos = ImGui::GetWindowPos();
@@ -358,15 +377,17 @@ namespace LkEngine {
 		CheckRightSidebarSize();
 		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
 		{
-			ComponentEditor->OnImGuiRender();
+			ComponentEditor->OnRenderUI();
 
-			// Window Information
+			/* Window Information. */
 			if (ImGui::TreeNode("Window Information"))
 			{
 				UI_ShowViewportAndWindowDetails();
-				ImGui::TreePop();
+
+				ImGui::TreePop(); /* ~Window Information */
 			}
-			// Mouse Information
+
+			/* Mouse Information. */
 			if (ImGui::TreeNode("Mouse Information"))
 			{
 				UI_ShowMouseDetails();
@@ -382,11 +403,13 @@ namespace LkEngine {
 
 			ImGui::Separator();
 
+		#if 0 
 			// Testing: Create new cube in scene
 			if (ImGui::Button("Create Cube"))
 			{
 				CreateCube();
 			}
+		#endif
 		}
 		ImGui::End(); // UI_SIDEBAR_RIGHT
 
@@ -404,7 +427,7 @@ namespace LkEngine {
 		{
 			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
 			//ImGui::SetNextWindowSize(ImVec2(EditorWindowSize.x, EditorWindowSize.y), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(EditorWindowSize.x, viewport->Size.y - (BottomBarSize.y + MenuBarSize.y)), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(EditorWindowSize.x, Viewport->Size.y - (BottomBarSize.y + MenuBarSize.y)), ImGuiCond_Always);
 			UI::Begin(UI::VIEWPORT_TEXTURE, UI::ViewportTextureFlags);
 			{
 				UI_ViewportTexture(); // Actual scene image
@@ -431,7 +454,7 @@ namespace LkEngine {
 		CheckBottomBarSize();
 		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 		{
-			ContentBrowser->OnImGuiRender();
+			ContentBrowser->OnRenderUI();
 
 			const ImVec2 WindowSize = ImGui::GetWindowSize();
 			if (WindowSize.x != BottomBarSize.x || WindowSize.y != BottomBarSize.y)
@@ -441,30 +464,10 @@ namespace LkEngine {
 			LastBottomBarPos = ImGui::GetWindowPos();
 			LastBottomBarSize = WindowSize;
 
-			//=================== TEMPORARY TESTING ============================
-
-			//if (ImGui::Button("Open a texture"))
-			//{
-			//    ifd::FileDialog::Instance().Open("TextureOpenDialog", "Open a texture", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga){.png,.jpg,.jpeg,.bmp,.tga},.*");
-			//}
-
-#if 0
-			if (ifd::FileDialog::Instance().IsDone("TextureOpenDialog")) 
-			{
-			    if (ifd::FileDialog::Instance().HasResult()) 
-			    {
-			    	//std::string res = ifd::FileDialog::Instance().GetResult().u8string();
-			    	auto res = ifd::FileDialog::Instance().GetResult().u8string();
-			    	printf("OPEN[%s]\n", res.c_str());
-			    }
-			    ifd::FileDialog::Instance().Close(); 
-			}
-#endif
-			//=================== TEMPORARY TESTING ============================
 		}
 		ImGui::End();
 
-		// Tab bar
+		/* Render tabs. */
 		UI_TabManager();
 
 		// If the window sizes have been adjusted, set the bool member to false
@@ -474,8 +477,8 @@ namespace LkEngine {
 			ShouldUpdateWindowSizes = false; 
 		}
 
-		glm::vec2 viewportSize = { viewport->WorkSize.x, viewport->WorkSize.y };
-		UI_SyncEditorWindowSizes(viewportSize);
+		glm::vec2 ViewportSize = { Viewport->WorkSize.x, Viewport->WorkSize.y };
+		UI_SyncEditorWindowSizes(ViewportSize);
 
 		// FIXME: What does this even do?...
 		// Take care of tabs here.
@@ -489,12 +492,14 @@ namespace LkEngine {
 
 	void LEditorLayer::RenderViewport()
 	{
+	#if 0 
 		LRenderer::Submit([&]()
 		{
-			//RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
-			//RenderCubes(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
-			//RenderFloor(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+			RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+			RenderCubes(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+			RenderFloor(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
 		});
+	#endif
 	}
 
 	void LEditorLayer::RenderViewport(TObjectPtr<LImage> image)
@@ -503,9 +508,9 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_ViewportTexture()
 	{
-		TObjectPtr<LImage2D> viewportImage = m_ViewportFramebuffer->GetImage(0);
+		TObjectPtr<LImage2D> ViewportImage = m_ViewportFramebuffer->GetImage(0);
 
-		UI::Image(viewportImage, ImVec2(EditorWindowSize.x - 2, EditorWindowSize.y + MenuBarSize.y), ImVec2(0, 1), ImVec2(1, 0));
+		UI::Image(ViewportImage, ImVec2(EditorWindowSize.x - 2, EditorWindowSize.y + MenuBarSize.y), ImVec2(0, 1), ImVec2(1, 0));
 
 		// Drag'n'drop feature, used to drag items from content browser to the scene
 		if (ImGui::BeginDragDropTarget())
@@ -1073,7 +1078,7 @@ namespace LkEngine {
 	void LEditorLayer::SetUpdateWindowFlag(bool flag) 
 	{ 
 		// Window width and height has been changed as this function has been called,
-		// therefore need to update the viewport bounds
+		// therefore need to update the Viewport bounds
 		ShouldUpdateWindowSizes = flag; 
 
 		m_ViewportBounds[0] = { 0, 0 };
@@ -1140,11 +1145,11 @@ namespace LkEngine {
 		ImGui::EndGroup();
 	}
 
-	void LEditorLayer::UI_SyncEditorWindowSizes(const glm::vec2& viewportSize)
+	void LEditorLayer::UI_SyncEditorWindowSizes(const glm::vec2& ViewportSize)
 	{
 		// Update editor window size
-		EditorWindowSize.x = viewportSize.x - (LeftSidebarSize.x + RightSidebarSize.x);
-		EditorWindowSize.y = viewportSize.y - (BottomBarSize.y + MenuBarSize.y);
+		EditorWindowSize.x = ViewportSize.x - (LeftSidebarSize.x + RightSidebarSize.x);
+		EditorWindowSize.y = ViewportSize.y - (BottomBarSize.y + MenuBarSize.y);
 
 		// Top right point/bound
 		m_SecondViewportBounds[0] = { LeftSidebarSize.x, BottomBarSize.y };
@@ -1154,7 +1159,7 @@ namespace LkEngine {
 		};
 
 		// Check to see if any of the editor windows have changed in size and if they have
-		// then readjust the viewport
+		// then readjust the Viewport
 		if (bWindowsHaveChangedInSize)
 		{
 			LeftSidebarSize = { LastSidebarLeftSize.x, LastSidebarLeftSize.y };
@@ -1162,21 +1167,21 @@ namespace LkEngine {
 			BottomBarSize = { LastBottomBarSize.x, LastBottomBarSize.y };
 
 			EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
-			EditorWindowSize.x = viewportSize.x - LeftSidebarSize.x - RightSidebarSize.x;
+			EditorWindowSize.x = ViewportSize.x - LeftSidebarSize.x - RightSidebarSize.x;
 
 			// Only take the size of the TabBar into account if any tabs exist
 			if (TabManager.GetTabCount() > 1)
 			{
-				EditorWindowSize.y = viewportSize.y - BottomBarSize.y;
+				EditorWindowSize.y = ViewportSize.y - BottomBarSize.y;
 			}
 			else
 			{
-				EditorWindowSize.y = viewportSize.y - BottomBarSize.y + TabBarSize.y;
+				EditorWindowSize.y = ViewportSize.y - BottomBarSize.y + TabBarSize.y;
 			}
 
 			EditorWindowPos.y -= MenuBarSize.y;
 
-			// Update viewport scalers as the resolution has been altered
+			// Update Viewport scalers as the resolution has been altered
 			ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
 			ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
 
@@ -1186,11 +1191,11 @@ namespace LkEngine {
 
 			if (m_FillSidebarsVertically)
 			{
-				LeftSidebarSize.y = viewportSize.y;
-				RightSidebarSize.y = viewportSize.y;
+				LeftSidebarSize.y = ViewportSize.y;
+				RightSidebarSize.y = ViewportSize.y;
 			}
 
-			// Reapply viewport settings starting from a lower point of the left sidebar and the bottom bar height
+			// Reapply Viewport settings starting from a lower point of the left sidebar and the bottom bar height
 			LWindow::Get().GetRenderContext()->SetViewport(EditorWindowPos, EditorWindowSize);
 
 			bWindowsHaveChangedInSize = false;
@@ -1220,9 +1225,9 @@ namespace LkEngine {
 	{
 		if (ShouldUpdateWindowSizes)
 		{
-			auto viewport = ImGui::GetWindowViewport();
+			ImGuiViewport* Viewport = ImGui::GetWindowViewport();
 			ImGui::SetNextWindowPos(ImVec2(0, MenuBarSize.y), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(LeftSidebarSize.x, viewport->WorkSize.y), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(LeftSidebarSize.x, Viewport->WorkSize.y), ImGuiCond_Always);
 		}
 	}
 
@@ -1230,52 +1235,23 @@ namespace LkEngine {
 	{
 		if (ShouldUpdateWindowSizes)
 		{
-			auto viewport = ImGui::GetWindowViewport();
-			ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
+			ImGuiViewport* Viewport = ImGui::GetWindowViewport();
+			ImGui::SetNextWindowPos(ImVec2(Viewport->Size.x - RightSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(RightSidebarSize.x, RightSidebarSize.y), ImGuiCond_Always);
 		}
 	}
 
-	glm::vec2 LEditorLayer::GetLeftSidebarSize() const 
-	{ 
-		return LeftSidebarSize; 
-	}
-
-	glm::vec2 LEditorLayer::GetRightSidebarSize() const
-	{ 
-		return RightSidebarSize; 
-	}
-
-	glm::vec2 LEditorLayer::GetBottomBarSize() const
+	void LEditorLayer::SetScene(TObjectPtr<LScene> InScene)
 	{
-		return BottomBarSize;
-	}
+		m_Scene = InScene;
 
-	float LEditorLayer::GetViewportScalerX() const 
-	{ 
-		return ViewportScalers.x; 
-	}
+		GOnSceneSetActive.Broadcast(m_Scene);
+		//SceneManagerPanel->SetScene(InScene);
 
-	float LEditorLayer::GetViewportScalerY() const 
-	{ 
-		return ViewportScalers.y; 
-	}
-
-	glm::vec2 LEditorLayer::GetMenuBarSize() const 
-	{ 
-		return MenuBarSize; 
-	}
-
-	glm::vec2 LEditorLayer::GetTabBarSize() const
-	{
-		return TabBarSize; 
-	}
-
-	void LEditorLayer::SetScene(TObjectPtr<LScene> scene)
-	{
-		m_Scene = scene;
-		SceneManagerPanel->SetScene(scene);
-		scene->EditorCamera->SetActive(true);
+		if (InScene->EditorCamera)
+		{
+			InScene->EditorCamera->SetActive(true);
+		}
 	}
 
 	void LEditorLayer::CheckBottomBarSize()
@@ -1294,28 +1270,27 @@ namespace LkEngine {
 		static int LastTabCount = 0;
 		const int CurrentTabCount = TabManager.GetTabCount();
 
-		auto viewport = ImGui::GetWindowViewport();
+		ImGuiViewport* Viewport = ImGui::GetWindowViewport();
 
 		if (CurrentTabCount > 1)
 		{
-			// Apply viewport update as the tabbar height might've changed
+			/* Update the tab bar height as it might have changed. */
 			ImGui::SetNextWindowPos({ LeftSidebarSize.x, MenuBarSize.y }, ImGuiCond_Always);
-			ImGui::SetNextWindowSize({ viewport->WorkSize.x, TabBarSize.y }, ImGuiCond_Always);
+			ImGui::SetNextWindowSize({ Viewport->WorkSize.x, TabBarSize.y }, ImGuiCond_Always);
 			ImGui::Begin("##LkTabBar", nullptr, UI::TabBarFlags);
 			{
 				if (ImGui::BeginTabBar("MainTab", ImGuiTabBarFlags_Reorderable))
 				{
 					for (const TabEntry& Entry: TabManager.Tabs)
 					{
-						static constexpr float padding = { 36.0f };
+						static constexpr float Padding = { 36.0f };
 
 						LTab& Tab = *Entry.second;
-						//const bool bIsTabSelected = (TabManager::GetActiveTab()->Index == Tab.Index);
 						const bool bIsTabSelected = (TabManager.GetActiveTab()->Index == Tab.Index);
 
 						if (bIsTabSelected)
 						{
-							ImGui::SetNextItemWidth(ImGui::CalcTextSize(Tab.Name.c_str()).x + padding);
+							ImGui::SetNextItemWidth(ImGui::CalcTextSize(Tab.Name.c_str()).x + Padding);
 						}
 						if (ImGui::BeginTabItem(Entry.second->Name.c_str(), nullptr))
 						{
@@ -1323,8 +1298,8 @@ namespace LkEngine {
 							{
 								ImVec2 pos = (ImGui::GetItemRectMin());
 								pos.x = ImGui::GetItemRectMax().x;
-								pos.x -= padding * 0.75f;
-								pos.y += padding * (1.0f / 8.0f);
+								pos.x -= Padding * 0.75f;
+								pos.y += Padding * (1.0f / 8.0f);
 
 								if (ImGui::CloseButton(ImGui::GetID(UI::GenerateID()), pos))
 								{

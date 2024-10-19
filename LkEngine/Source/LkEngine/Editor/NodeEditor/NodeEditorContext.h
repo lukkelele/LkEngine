@@ -7,22 +7,26 @@ namespace LkEngine {
 
     namespace NE = ax::NodeEditor;
 
-    class NodeEditorContext
+    class LNodeEditorContext
     {
     public:
-        NodeEditorContext();
-        ~NodeEditorContext();
+        LNodeEditorContext();
+        ~LNodeEditorContext();
 
-        static void SetEditorContext(NodeEditorContext* context);
+        void Initialize();
+        void Destroy();
 
-        void Init();
         void SetAsCurrentEditorContext();
 
-        NE::EditorContext* GetContext() { return m_EditorContext; }
+        FORCEINLINE NE::EditorContext* GetContext() 
+        { 
+            return EditorContext; 
+        }
+
+        static void SetEditorContext(LNodeEditorContext* InContext);
 
     private:
-        NE::EditorContext* m_EditorContext = nullptr;
-
+        NE::EditorContext* EditorContext = nullptr;
     };
 
 }

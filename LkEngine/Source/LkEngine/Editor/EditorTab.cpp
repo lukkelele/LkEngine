@@ -8,21 +8,17 @@
 
 namespace LkEngine {
 
-    NodeEditorTab::NodeEditorTab(std::string_view name) 
+    NodeEditorTab::NodeEditorTab(std::string_view InName) 
     {
-        Name = std::string(name);
+        Name = InName;
         Type = EditorTabType::NodeEditor;
-        NodeEditorRef = new NodeEditor(name);
-    }
 
-    NodeEditorTab::NodeEditorTab(std::string_view name, const EditorTabType tabType) 
-        : NodeEditorTab(name) 
-    {
+        NodeEditor = TObjectPtr<LNodeEditor>::Create(InName);
     }
 
     NodeEditorTab::~NodeEditorTab()
     {
-       NodeEditorRef->Destroy();
+       NodeEditor->Destroy();
     }
 
     void NodeEditorTab::OnRender() 
@@ -31,7 +27,7 @@ namespace LkEngine {
 
     void NodeEditorTab::OnImGuiRender()
     {
-        NodeEditorRef->OnImGuiRender();
+        NodeEditor->OnImGuiRender();
     }
 
 
@@ -39,21 +35,17 @@ namespace LkEngine {
     //-----------------------------------------------------------
     // MaterialEditorTab
     //-----------------------------------------------------------
-    MaterialEditorTab::MaterialEditorTab(std::string_view name) 
+    MaterialEditorTab::MaterialEditorTab(std::string_view InName) 
     {
-        Name = std::string(name);
+        Name = InName;
         Type = EditorTabType::MaterialEditor;
-        NodeEditorRef = new NodeEditor(name);
-    }
 
-    MaterialEditorTab::MaterialEditorTab(std::string_view name, const EditorTabType tabType) 
-        : MaterialEditorTab(name) 
-    {
+        NodeEditor = TObjectPtr<LNodeEditor>::Create(InName);
     }
 
     MaterialEditorTab::~MaterialEditorTab()
     {
-        NodeEditorRef->Destroy();
+        NodeEditor->Destroy();
     }
 
     void MaterialEditorTab::OnRender()
@@ -67,8 +59,9 @@ namespace LkEngine {
         LEditorLayer* Editor = LEditorLayer::Get();
         static float div = 0.30f;
 
-        static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoScrollbar
-            | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+        static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDocking 
+            | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse 
+            | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
         ImVec2 nodeWindowSize = ImVec2(Editor->EditorWindowSize.x * (1 - div), Editor->EditorWindowSize.y);
 		ImGui::SetNextWindowPos({ Editor->m_SecondViewportBounds[0].x, (Editor->GetMenuBarSize().y + Editor->GetTabBarSize().y)}, ImGuiCond_Always);
@@ -76,10 +69,10 @@ namespace LkEngine {
         ImGui::SetNextWindowSize(ImVec2(0, nodeWindowSize.y), ImGuiCond_Always);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         //UI::Begin(windowFlags);
-        NodeEditorRef->OnImGuiRender(nodeWindowSize);
+        NodeEditor->OnImGuiRender(nodeWindowSize);
         //UI::End();
-        ImGui::PopStyleVar(1);
 
+        ImGui::PopStyleVar(1);
 
 #if 0
         ImGui::SetNextWindowBgAlpha(0.2f);

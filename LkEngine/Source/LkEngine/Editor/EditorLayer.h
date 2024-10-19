@@ -57,8 +57,9 @@ namespace LkEngine {
 		LEditorLayer();
 		~LEditorLayer() = default;
 
-		void Initialize();
-		void OnUpdate();
+		virtual void Initialize() override;
+
+		virtual void OnUpdate(const float DeltaTime) override;
 
 		void OnRender();
 		void OnImGuiRender();
@@ -96,21 +97,23 @@ namespace LkEngine {
 
 		void SetUpdateWindowFlag(bool flag);
 
+		FORCEINLINE bool IsEnabled() const { return m_Enabled; }
 		FORCEINLINE EEditorWindowType GetCurrentWindowType() const { return CurrentWindowType; }
 
 		/* FIXME: Update all of these, refactor away. */
 		glm::vec2 GetEditorWindowSize() const;
 		float GetEditorWindowWidth() const;
 		float GetEditorWindowHeight() const;
-		glm::vec2 GetLeftSidebarSize() const;
-		glm::vec2 GetRightSidebarSize() const;
-		glm::vec2 GetBottomBarSize() const; 
-		float GetViewportScalerX() const; 
-		float GetViewportScalerY() const; 
-		glm::vec2 GetMenuBarSize() const; 
-		glm::vec2 GetTabBarSize() const;
 
-		FORCEINLINE bool IsEnabled() const { return m_Enabled; }
+		FORCEINLINE glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
+		FORCEINLINE glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
+		FORCEINLINE glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
+
+		FORCEINLINE float GetViewportScalerX() const { return ViewportScalers.x; }
+		FORCEINLINE float GetViewportScalerY() const { return ViewportScalers.y; }
+
+		FORCEINLINE glm::vec2 GetMenuBarSize() const { return MenuBarSize; }
+		FORCEINLINE glm::vec2 GetTabBarSize() const { return TabBarSize; }
 
 		FORCEINLINE static LEditorLayer* Get() { return Instance; }
 
@@ -123,10 +126,14 @@ namespace LkEngine {
 
 		void UI_MainMenuBar();
 		void UI_HandleManualWindowResize();
+
 		void UI_SceneContent();
 		void UI_CreateMenu();
 		void UI_RenderSettingsWindow();
-		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize); // Update potential changes in editor docking window sizes/positions
+
+		// Update potential changes in editor docking window sizes/positions.
+		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize);
+
 		void UI_ShowMouseDetails();
 		void UI_ShowViewportAndWindowDetails();
 		void UI_ShowEditorWindowsDetails();
@@ -203,7 +210,7 @@ namespace LkEngine {
 		TObjectPtr<LProject> m_Project;
 
 		// Editor
-		NodeEditor* m_NodeEditor;
+		TUniquePtr<LNodeEditor> NodeEditor;
 		TUniquePtr<LComponentEditor> ComponentEditor{};
 		TUniquePtr<LContentBrowser> ContentBrowser;
 		// ~Editor

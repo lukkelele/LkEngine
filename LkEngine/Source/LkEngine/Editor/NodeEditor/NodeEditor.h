@@ -1,5 +1,8 @@
 #pragma once
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
+
 #include <imgui-node-editor/imgui_node_editor.h>
 #include <imgui-node-editor/imgui_node_editor_internal.h>
 
@@ -11,16 +14,21 @@ namespace LkEngine {
 
     namespace NE = ax::NodeEditor; 
 
-    class NodeEditor
+    class LNodeEditor : public LObject
     {
     public:
-        NodeEditor(std::string_view name);
-        ~NodeEditor();
+        LNodeEditor(std::string_view InName);
+        ~LNodeEditor() = default;
 
         void OnRender();
         void OnImGuiRender(const ImVec2& windowSize = ImVec2(0, 0));
         void Destroy();
-        NodeEditorContext* GetEditorContext() { return m_EditorContext; }
+
+        FORCEINLINE LNodeEditorContext* GetEditorContext() 
+        { 
+            return EditorContext; 
+        }
+
         void ActivateContext();
 
         void BuildNode(Node* node);
@@ -28,17 +36,20 @@ namespace LkEngine {
         Node* SpawnBranchNode();
         int GetNextID();
         ed::LinkId GetNextLinkID();
+
         float GetTouchProgress(ed::NodeId id);
         void UpdateTouch();
         void TouchNode(NE::NodeId id);
+
         Node* FindNode(NE::NodeId id);
         Link* FindLink(NE::LinkId id);
         Pin* FindPin(NE::PinId id);
+        void IterateNodes();
+
         bool IsPinLinked(NE::PinId id);
         bool CanCreateLink(Pin* a, Pin* b);
         void DrawPinIcon(const Pin& pin, bool connected, int alpha);
         ImColor GetIconColor(PinType type);
-        void IterateNodes();
 
     private:
         void Save();
@@ -51,18 +62,21 @@ namespace LkEngine {
         NE::PinId ContextPinID = 0;
         bool CreateNewNode = false;
     private:
-        std::string m_Name;
-        NodeEditorContext* m_EditorContext = nullptr;
+        std::string Name{};
+        LNodeEditorContext* EditorContext = nullptr;
 
-        std::vector<Node> m_Nodes;
-        std::vector<Link> m_Links;
+        /* TODO: use std::array */
+        std::vector<Node> m_Nodes{};
+        std::vector<Link> m_Links{};
 
         int m_NextID = 1;
 
         std::map<NE::NodeId, float, NodeIdLess> m_NodeTouchTime;
-        float m_TouchTime = 1.0f;
 
+        float m_TouchTime = 1.0f;
         int m_PinIconSize = 24;
+
+        LCLASS(LNodeEditor);
     };
 
 }

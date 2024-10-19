@@ -4,28 +4,35 @@
 
 namespace LkEngine {
 
-    NodeEditorContext::NodeEditorContext()
+    LNodeEditorContext::LNodeEditorContext()
     {
     }
 
-    NodeEditorContext::~NodeEditorContext()
+    LNodeEditorContext::~LNodeEditorContext()
     {
     }
 
-    void NodeEditorContext::SetEditorContext(NodeEditorContext* context)
+    void LNodeEditorContext::Initialize()
     {
-        NE::SetCurrentEditor(context->GetContext());
+        // FIXME:
+        EditorContext = NE::CreateEditor();
+        NE::SetCurrentEditor(EditorContext);
     }
 
-    void NodeEditorContext::Init()
+    void LNodeEditorContext::Destroy()
     {
-        m_EditorContext = NE::CreateEditor();
-        NE::SetCurrentEditor(m_EditorContext);
     }
 
-    void NodeEditorContext::SetAsCurrentEditorContext()
+    void LNodeEditorContext::SetAsCurrentEditorContext()
     {
-        NE::SetCurrentEditor(m_EditorContext);
+        // FIXME:
+        NE::SetCurrentEditor(EditorContext);
+    }
+
+    void LNodeEditorContext::SetEditorContext(LNodeEditorContext* InEditorContext)
+    {
+        // FIXME:
+        NE::SetCurrentEditor(InEditorContext->GetContext());
     }
 
 }

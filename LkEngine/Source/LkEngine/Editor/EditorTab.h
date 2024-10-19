@@ -58,14 +58,13 @@ namespace LkEngine {
     {
     public:
         NodeEditorTab(std::string_view name);
-        NodeEditorTab(std::string_view name, const EditorTabType tabType);
         ~NodeEditorTab();
 
         void OnRender() override;
         void OnImGuiRender() override;
 
     public:
-        NodeEditor* NodeEditorRef = nullptr;
+        TObjectPtr<LNodeEditor> NodeEditor{};
     };
 
     /**
@@ -74,15 +73,14 @@ namespace LkEngine {
     class MaterialEditorTab: public LTab
     {
     public:
-        MaterialEditorTab(std::string_view name);
-        MaterialEditorTab(std::string_view name, const EditorTabType tabType);
+        MaterialEditorTab(std::string_view InName);
         ~MaterialEditorTab();
 
         void OnRender() override;
         void OnImGuiRender() override;
 
     public:
-        NodeEditor* NodeEditorRef = nullptr;
+        TObjectPtr<LNodeEditor> NodeEditor{};
         TObjectPtr<LMaterial> MaterialRef = nullptr;
     };
 

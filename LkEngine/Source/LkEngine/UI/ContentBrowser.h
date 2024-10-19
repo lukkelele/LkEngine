@@ -16,9 +16,10 @@ namespace LkEngine {
 		LContentBrowser() = default;
 		~LContentBrowser() = default;
 
-		void Init() override;
-		void OnRender() override;
-		void OnImGuiRender() override;
+		virtual void Initialize() override;
+
+		virtual void OnRender() override;
+		virtual void OnRenderUI() override;
 
 	public:
 		inline static TObjectPtr<LTexture> FileIconTexture;

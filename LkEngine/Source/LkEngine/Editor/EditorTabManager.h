@@ -28,7 +28,7 @@ namespace LkEngine {
 			if (Tab && (Tab->GetTabType() == EditorTabType::NodeEditor))
 			{
 				TSharedPtr<NodeEditorTab> NodeTab = std::static_pointer_cast<NodeEditorTab>(Tab);
-				NodeTab->NodeEditorRef->ActivateContext();
+				NodeTab->NodeEditor->ActivateContext();
 			}
         }
 
@@ -40,7 +40,7 @@ namespace LkEngine {
 				if (Tab && (Tab->GetTabType() == EditorTabType::NodeEditor))
 				{
 					TSharedPtr<NodeEditorTab> NodeTab = std::static_pointer_cast<NodeEditorTab>(Tab);
-					NodeTab->NodeEditorRef->ActivateContext();
+					NodeTab->NodeEditor->ActivateContext();
 				}
             }
         }

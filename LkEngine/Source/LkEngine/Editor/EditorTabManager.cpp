@@ -20,51 +20,49 @@ namespace LkEngine {
         bSwitchToNewTabsOnCreation = InSwitchToNewTabsOnCreation;
     }
 
-    TSharedPtr<LTab> LEditorTabManager::NewTab(std::string tabName, const EditorTabType tabType, bool setAsActive)
+    TSharedPtr<LTab> LEditorTabManager::NewTab(std::string TabName, const EditorTabType TabType, bool bSetAsActive)
     {
-        auto searchedTab = GetTab(tabName);
-        if (searchedTab != nullptr)
+        TSharedPtr<LTab> SearchedTab = GetTab(TabName);
+        if (SearchedTab)
         {
-            unsigned int tabCopies = 1;
-            std::string originalTabName = tabName;
-            while (searchedTab != nullptr)
+            unsigned int TabCopies = 1;
+            std::string originalTabName = TabName;
+
+            while (SearchedTab != nullptr)
             {
-                LK_CORE_DEBUG("Tab already exists, adding copy marker -> ({})", tabCopies);
-                tabName = originalTabName + "(" + std::to_string(tabCopies++) + ")";
-                searchedTab = GetTab(tabName);
+                LK_CORE_DEBUG("Tab already exists, adding copy marker -> ({})", TabCopies);
+                TabName = originalTabName + "(" + std::to_string(TabCopies++) + ")";
+                SearchedTab = GetTab(TabName);
             }
         }
         
-        TSharedPtr<LTab> tab = nullptr;
-        if (tabType == EditorTabType::Viewport)
+        /// FIXME
+        TSharedPtr<LTab> Tab = nullptr;
+        if (TabType == EditorTabType::Viewport)
         {
-            tab = std::make_shared<ViewportTab>(tabName, tabType);
+            Tab = MakeShared<ViewportTab>(TabName);
         }
-        else if (tabType == EditorTabType::NodeEditor)
+        else if (TabType == EditorTabType::NodeEditor)
         {
-            tab = std::make_shared<NodeEditorTab>(tabName);
+            Tab = MakeShared<NodeEditorTab>(TabName);
         }
-        else if (tabType == EditorTabType::MaterialEditor)
+        else if (TabType == EditorTabType::MaterialEditor)
         {
-            tab = std::make_shared<MaterialEditorTab>(tabName, tabType);
-        }
-
-        UUID tabIndex = UUID();
-        tab->Index = tabIndex;
-        Tabs.emplace(tabIndex, tab);
-
-        LK_CORE_ASSERT(tab, "New tab could not be created");
-        if (tab == nullptr)
-        {
-            LK_CORE_ASSERT(false, "New tab could not be created");
-        }
-        if (bSwitchToNewTabsOnCreation || setAsActive)
-        {
-            SetActiveTab(tab);
+            Tab = MakeShared<MaterialEditorTab>(TabName);
         }
 
-        LK_CORE_DEBUG("New Tab: {}", tabName);
-        return tab;
+        UUID TabIndex = UUID();
+        Tab->Index = TabIndex;
+        Tabs.emplace(TabIndex, Tab);
+
+        LK_CORE_ASSERT(Tab, "New Tab could not be created");
+        if (bSwitchToNewTabsOnCreation || bSetAsActive)
+        {
+            SetActiveTab(Tab);
+        }
+
+        LK_CORE_DEBUG("New Tab: {}", TabName);
+        return Tab;
     }
 
     void LEditorTabManager::PopTab()
@@ -73,7 +71,7 @@ namespace LkEngine {
         Tabs.erase(Tabs.size());
         if (uint8_t TabCount = Tabs.size(); TabCount > 0)
         {
-            LK_CORE_DEBUG("Erase tab: {}", Tabs.find(TabCount)->second->Name); // at uses index, erase uses key
+            LK_CORE_DEBUG("Erase Tab: {}", Tabs.find(TabCount)->second->Name); // at uses index, erase uses key
         }
 
         if (Tabs.size() == 0)
@@ -89,9 +87,9 @@ namespace LkEngine {
         {
             if (const auto& Entry = Tabs.find((*Iter)->Index); Entry->second)
             {
-				//TSharedPtr<LTab> FoundTab = Tabs.find((*Iter)->Index);
                 TSharedPtr<LTab>& Tab = Entry->second;
-				LK_CORE_DEBUG("Removing tab \"{}\"", Tab->Name);
+				LK_CORE_DEBUG("Removing Tab \"{}\"", Tab->Name);
+
 				Tabs.erase(Tab->Index);
 				Iter = TabsToClose.erase(std::find(TabsToClose.begin(), TabsToClose.end(), Tab));
             }

@@ -14,6 +14,7 @@
 
 namespace LkEngine {
 
+	/* Log helper function. */
 	static void DumpAttachedComponents(LEntity entity)
 	{
 		if (entity.HasComponent<LIDComponent>() && (static_cast<uint32_t>(entity.GetUUID()) != 0))
@@ -37,12 +38,17 @@ namespace LkEngine {
 	{
 	}
 
-	LSceneManagerPanel::~LSceneManagerPanel()
+	void LSceneManagerPanel::Initialize()
 	{
-	}
+		LK_UI_TRACE_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
+		LK_UI_DEBUG_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
+		LK_UI_INFO_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
+		LK_UI_WARN_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
+		LK_UI_ERROR_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
+		LK_UI_FATAL_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
+		GOnSceneSetActive.Add(this, &LSceneManagerPanel::SetScene);
+		//SceneManagerPanel->SetScene(InScene);
 
-	void LSceneManagerPanel::Init()
-	{
 		m_ComponentCopyScene = LScene::CreateEmpty();
 		m_ComponentCopyEntity = m_ComponentCopyScene->CreateEntity();
 	}
@@ -51,7 +57,7 @@ namespace LkEngine {
 	{
 	}
 
-	void LSceneManagerPanel::OnImGuiRender()
+	void LSceneManagerPanel::OnRenderUI()
 	{
 		const ImRect WindowContent = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
 

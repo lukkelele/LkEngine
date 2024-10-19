@@ -28,32 +28,36 @@ namespace LkEngine {
         "Bibi", "Blaine", "Bryn"
     };
 
-    void LContentBrowser::Init()
+    void LContentBrowser::Initialize()
     {
-        // Create icons
-		TextureSpecification textureSpec;
-		textureSpec.Name = "FileIcon";
-		textureSpec.DebugName = "FileIcon";
-		textureSpec.Width = 200;
-		textureSpec.Height = 200;
-		textureSpec.Format = ImageFormat::RGBA32F;
-		textureSpec.Path = "Assets/Icons/file-icon-48x48.png";
-		FileIconTexture = LTexture2D::Create(textureSpec);
+        /* Create icons. */
+        FTextureSpecification TextureSpec{};
 
-		textureSpec.Name = "FolderIcon";
-		textureSpec.DebugName = "FolderIcon";
-		textureSpec.Path = "Assets/Icons/folder-icon-64x64.png";
-        FolderIconTexture = LTexture2D::Create(textureSpec);
+		TextureSpec.Name = "FileIcon";
+		TextureSpec.DebugName = "FileIcon";
+		TextureSpec.Width = 200;
+		TextureSpec.Height = 200;
+		TextureSpec.Format = EImageFormat::RGBA32F;
+		TextureSpec.Path = "Assets/Icons/file-icon-48x48.png";
+		FileIconTexture = LTexture2D::Create(TextureSpec);
+
+		TextureSpec.Name = "FolderIcon";
+		TextureSpec.DebugName = "FolderIcon";
+		TextureSpec.Path = "Assets/Icons/folder-icon-64x64.png";
+        FolderIconTexture = LTexture2D::Create(TextureSpec);
     }
 
 	void LContentBrowser::OnRender()
 	{
 	}
 
-	void LContentBrowser::OnImGuiRender()
+	void LContentBrowser::OnRenderUI()
 	{
-
-		if (ImGui::ImageButton((void*)LContentBrowser::FileIconTexture->GetRendererID(), ImVec2(48, 48), ImVec2(0, 0)))
+		if (ImGui::ImageButton(
+				reinterpret_cast<ImTextureID>(LContentBrowser::FileIconTexture->GetRendererID()), 
+				ImVec2(48, 48), 
+				ImVec2(0, 0))
+            )
 		{
 		    LK_CORE_DEBUG_TAG("ContentBrowser", "Clicked FileIcon!");
 		}
@@ -75,8 +79,10 @@ namespace LkEngine {
 
                 LK_CORE_DEBUG_TAG("ContentBrowser", "File - AcceptDragDropPayload  Size={}", (int)payload->SourceId);
             }
+
             ImGui::EndDragDropTarget();
         }
+        // ~File Icon
 
         ImGui::SameLine();
 
