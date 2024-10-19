@@ -15,7 +15,8 @@ project "LkApplication"
 		"Source/**.cpp",
 	}
 
-	includedirs {
+	includedirs 
+	{
 		"%{wks.location}/LkEngine",
 		"%{wks.location}/LkEngine/Source",
 
@@ -39,21 +40,15 @@ project "LkApplication"
 
 	filter "system:windows"
 		systemversion "latest"
-        includedirs 
-		{ 
-            --"%{Dependencies.Vulkan.Windows.IncludeDir}",
-        }
-		libdirs 
-		{
-            --"%{Dependencies.Vulkan.Windows.LibDir}",
-		}
-		links 
-		{
-            --"%{Dependencies.Vulkan.Windows.LibName}",
-		}
+
         postbuildcommands 
 		{
             "{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
+        }
+
+		linkoptions 
+        { 
+            "/IGNORE:4006", -- Ignore 'already defined' warning for object files.
         }
 
 

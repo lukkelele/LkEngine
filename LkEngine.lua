@@ -117,22 +117,19 @@ project "LkEngine"
             "_IMGUI_WIN32",
             "_CRT_SECURE_NO_WARNINGS",
             "_GLM_WIN32",
-            --"VK_PROTOTYPES",
-            --"VK_USE_PLATFORM_WIN32_KHR",
 		}
+
         includedirs 
         { 
-            --"%{Dependencies.Vulkan.Windows.IncludeDir}" 
         }
+
         libdirs 
         { 
-            --"%{Dependencies.Vulkan.Windows.LibDir}",
             "%{Dependencies.Assimp.Windows.LibDir}",
         }
 
         links 
         {
-            --"%{Dependencies.Vulkan.Windows.LibName}",
             "%{Dependencies.Assimp.Windows.LibName}",
         }
 
@@ -145,6 +142,11 @@ project "LkEngine"
 		buildoptions 
         { 
             "/Zc:preprocessor" 
+        }
+
+        linkoptions 
+        { 
+            "/IGNORE:4006", -- Ignore 'already defined' warning for object files.
         }
 
 

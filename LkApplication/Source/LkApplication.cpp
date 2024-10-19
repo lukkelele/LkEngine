@@ -18,9 +18,15 @@ public:
 };
 
 
-int main()
+int main(int Argc, char* Argv[])
 {
-    LkEngine::ApplicationSpecification ApplicationSpec("LkEditor", 1920, 1080);
+    LkEngine::ApplicationSpecification ApplicationSpec = {
+        .Title = "LkEditor",
+        .Width = 1920,
+        .Height = 1080,
+    };
+    ApplicationSpec.Argc = Argc;
+    ApplicationSpec.Argv = Argv;
 
     LkApplication Application(ApplicationSpec);
     Application.Initialize();
