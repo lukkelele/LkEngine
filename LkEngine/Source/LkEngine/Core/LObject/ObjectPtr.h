@@ -233,4 +233,4 @@ namespace LkEngine {
 
 }
 
-#include "LObjectPtr.tpp"
+#include "ObjectPtr.tpp"

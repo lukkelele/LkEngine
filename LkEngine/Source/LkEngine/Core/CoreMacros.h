@@ -8,8 +8,6 @@
 #include <typeinfo>
 #include <regex>
 
-#include "LkEngine/Core/Memory/MemoryPtr.h"
-
 
 #define LK_UNUSED(_VAR)         ((void)(_VAR))
 #define LK_ARRAYSIZE(_ARR)      (static_cast<int>((sizeof(_ARR) / sizeof(*(_ARR))))) 
@@ -57,62 +55,7 @@
 
 /* Mark a function 'Not implemented'. */
 #define LK_MARK_FUNC_NOT_IMPLEMENTED(...) \
-	LK_CORE_ASSERT(false, "Not implemented - {}" __VA_OPT__("\nNote: {}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))
-	//LK_CORE_ASSERT(false, "Not implemented - {}\nNote: {}", LK_FUNCSIG, __VA_ARGS__)
-
-namespace LkEngine 
-{
-	template <typename T>
-	FORCEINLINE T ImplicitConv(std::type_identity_t<T> Object)
-	{
-		return Object;
-	}
-}
-
-#if 0
-inline static std::string CleanClassName(const char* InClassName)
-{
-	std::string CleanName = InClassName;
-
-	static const std::string Keyword_Class   = "class ";
-	static const std::string Keyword_Struct  = "struct ";
-	static const std::string Suffix_Pointer  = "__ptr";
-	static const std::string Suffix_PointerSymbol = "*";
-
-	/* Remove keywords like class and struct. */
-	if (CleanName.find(Keyword_Class) == 0)
-	{
-		CleanName = CleanName.substr(Keyword_Class.length());
-	}
-	else if (CleanName.find(Keyword_Struct) == 0)
-	{
-		CleanName = CleanName.substr(Keyword_Struct.length());
-	}
-
-	/* Find and remove namespaces(keep only the class name). */
-	const size_t Position = CleanName.find_last_of("::");
-	if (Position != std::string::npos)
-	{
-		CleanName = CleanName.substr(Position + 1);  // Extract class name after the last "::"
-	}
-
-	/* Remove any "__ptrXX" entries(e.g., __ptr64, __ptr32). */
-    std::regex Regex_Pointer("__ptr[0-9]+");
-    CleanName = std::regex_replace(CleanName, Regex_Pointer, "");
-
-	auto RemoveSuffixPredicate = [](const char InCharacter)
-	{
-		return InCharacter == '*' 
-			|| InCharacter == ' ' 
-			|| InCharacter == '_';
-	};
-
-	/* Remove pointer suffixes. */
-    CleanName.erase(std::remove_if(CleanName.begin(), CleanName.end(), RemoveSuffixPredicate), CleanName.end());
-
-    return CleanName;
-}
-#endif
+	LK_CORE_ASSERT(false, "[ Function not implemented ]\n{}" __VA_OPT__("\nDev note: {}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))
 
 /**
  * LCLASS
@@ -130,7 +73,7 @@ inline static std::string CleanClassName(const char* InClassName)
 	private: \
 		void LK_META_CLASS_REGISTER_FUNC() \
 		{ \
-			if constexpr (!std::is_same_v<LkEngine::LObject, LkEngine::##ClassName>) \
+			if constexpr (!std::is_same_v<::LkEngine::LObject, ::LkEngine::ClassName>) \
 			{ \
 				LMetadataRegistry::Get().Register(#ClassName, this); \
 			} \
