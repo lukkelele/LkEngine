@@ -20,8 +20,7 @@ project "LkApplication"
 		"%{wks.location}/LkEngine",
 		"%{wks.location}/LkEngine/Source",
 
-		"%{ExternalDirectory}",
-
+		--"%{ExternalDirectory}",
         "%{Dependencies.Glfw.IncludeDir}",
         "%{Dependencies.Glad.IncludeDir}",
         "%{Dependencies.StbImage.IncludeDir}",
