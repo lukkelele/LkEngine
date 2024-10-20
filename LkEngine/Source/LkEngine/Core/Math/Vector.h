@@ -27,6 +27,14 @@ namespace LkEngine {
 		{
 		} 
 
+		template<typename R>
+		TVector2(const R InX, const R InY)
+			: X(InX)
+			, Y(InY)
+		{
+			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
+		} 
+
 		TVector2(const glm::vec2& InVec)
 			: X(InVec.x)
 			, Y(InVec.y)
@@ -68,6 +76,9 @@ namespace LkEngine {
 
 		static_assert(std::disjunction_v<
 			std::is_same<T, int>, 
+			std::is_same<T, uint16_t>, 
+			std::is_same<T, uint32_t>, 
+			std::is_same<T, uint64_t>, 
 			std::is_same<T, float>, 
 			std::is_same<T, double>
 		>, "TVector2 can only be instantiated with int, float or double.");

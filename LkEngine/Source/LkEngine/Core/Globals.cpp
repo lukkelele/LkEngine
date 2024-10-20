@@ -5,7 +5,9 @@
 namespace LkEngine::Global {
 
 	static FRuntimeArguments RuntimeArguments;
-	static std::filesystem::path WorkingDirectory{};
+
+	static std::filesystem::path WorkingDir{};
+	static std::filesystem::path BinaryDir{};
 
 	void SetRuntimeArguments(const int InArgc, char* InArgv[])
 	{
@@ -16,11 +18,14 @@ namespace LkEngine::Global {
 		RuntimeArguments.Argv = InArgv;
 		if (RuntimeArguments.Argc >= 1)
 		{
-			WorkingDirectory = std::filesystem::path(RuntimeArguments.Argv[0]);
+			BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]);
 		}
 
-		LK_CORE_TRACE("RuntimeArgs   Argc={} Argv=\"{}\" WorkingDirectory=\"{}\"", 
-					  RuntimeArguments.Argc, *RuntimeArguments.Argv, WorkingDirectory.string());
+		WorkingDir = std::filesystem::current_path();
+
+		LK_CORE_TRACE("RuntimeArgs  Argc={} Argv=\"{}\" WorkingDir=\"{}\" BinaryDir=\"{}\"", 
+					  RuntimeArguments.Argc, *RuntimeArguments.Argv, 
+					  WorkingDir.string(), BinaryDir.string());
 		bArgumentsSet = true;
 	}
 
@@ -29,9 +34,14 @@ namespace LkEngine::Global {
 		return RuntimeArguments;
 	}
 
-	std::filesystem::path GetWorkingDirectory()
+	std::filesystem::path GetWorkingDir()
 	{
-		return WorkingDirectory;
+		return WorkingDir;
+	}
+
+	std::filesystem::path GetBinaryDir()
+	{
+		return BinaryDir;
 	}
 
 }

@@ -18,7 +18,7 @@ namespace LkEngine {
 
 	void StreamReader::ReadString(std::string& string)
 	{
-		size_t size;
+		size_t size = 0;
 		ReadData((char*)&size, sizeof(size_t));
 
 		string.resize(size);

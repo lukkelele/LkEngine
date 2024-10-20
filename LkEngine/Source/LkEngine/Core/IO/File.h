@@ -11,7 +11,7 @@
 
 namespace LkEngine {
 
-    enum class FileExtension
+    enum class EFileExtension
     {
         Unknown = -1,
         PNG     = 3,
@@ -20,21 +20,52 @@ namespace LkEngine {
         PY      = 2
     };
 
-    class File
+    enum class EFileExtensionLength
+    {
+        None = 0,
+        PNG  = 3,
+        JPG  = 3,
+        LUA  = 3,
+        PY   = 2
+    };
+
+    class LFile
     {
     public:
-        File(const std::string& InFilePath);
-        ~File() = default;
+        LFile(const std::string& InFilePath);
+        ~LFile() = default;
 
+        template<typename T>
+        FORCEINLINE static bool DoesFileExist(T FilePath)
+        {
+            LK_UNUSED(FilePath);
+            return false;
+        }
+
+        template<>
         FORCEINLINE static bool DoesFileExist(std::string_view InFilePath)
         {
             return std::filesystem::exists(InFilePath) && !std::filesystem::is_directory(InFilePath);
         }
 
+        template<>
+        FORCEINLINE static bool DoesFileExist(std::filesystem::path InFilePath)
+        {
+            return std::filesystem::exists(InFilePath) && !std::filesystem::is_directory(InFilePath);
+        }
+
+    #if 0
         /**
-         * HasFileExtension
-         *  
-         *  Check if file has ANY file extension.
+         * @brief Check if a file exists.
+         */
+        FORCEINLINE static bool DoesFileExist(std::string_view InFilePath)
+        {
+            return std::filesystem::exists(InFilePath) && !std::filesystem::is_directory(InFilePath);
+        }
+    #endif
+
+        /**
+         * @brief Check if file has ANY file extension.
          */
         FORCEINLINE static bool HasFileExtension(const std::string& filename)
         {
@@ -47,21 +78,35 @@ namespace LkEngine {
 			return true;
         }
 
-        static std::string ExtractFilenameWithoutExtension(const std::string& filename, const FileExtension& fileExtension = FileExtension::PNG);
-        static std::string ExtractFilename(const std::string& filepath);
-        static File GetFile(const std::string& InFilePath);
-        static std::vector<File> GetFilesInDirectory(const std::string& directory);
+        static std::string ExtractFilename(std::string_view InFilePath)
+        {
+            const size_t Pos = InFilePath.find_last_of("/\\");
+            if (Pos != std::string::npos)
+            {
+                return std::string(InFilePath.substr(Pos + 1));
+            }
 
-        std::string GetName() const { return m_Name; }
-        std::string GetPath() const { return m_Path; }
-        std::string GetParentPath() const;
-        void SetPath(const std::string& InFilePath) { m_Path = InFilePath; }
-        void PrintInformation() const;
+            return {};
+        }
+
+        static int GetFilesInDirectory(std::string_view Directory, std::vector<LFile>& Files);
+
+        FORCEINLINE std::string GetName() const { return Name; }
+        FORCEINLINE std::string GetPath() const { return Path.string(); }
+
+        FORCEINLINE std::filesystem::path GetParentPath() const
+        {
+            return Path.parent_path();
+        }
+
+        FORCEINLINE void SetPath(const std::string& InFilePath) 
+        { 
+            Path = InFilePath; 
+        }
 
     private:
-        std::string m_Name;
-        std::string m_Path;
-        std::filesystem::path m_PathObject;
+        std::filesystem::path Path{};
+        std::string Name{};
     };
 
 }

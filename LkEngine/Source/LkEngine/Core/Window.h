@@ -5,8 +5,9 @@
 
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/LObject/Object.h"
-
 #include "LkEngine/Core/String.h"
+#include "LkEngine/Core/Delegate/Delegate.h"
+
 #include "LkEngine/Core/ApplicationConfig.h"
 
 #include "LkEngine/Renderer/RenderContext.h"
@@ -42,99 +43,181 @@ namespace LkEngine {
         }
 	};
 
+    /**
+     * LWindow
+     */
     class LWindow : public LObject
     {
+		LK_DECLARE_MULTICAST_DELEGATE(FOnWindowSizeUpdated, const uint16_t, const uint16_t);
+		LK_DECLARE_MULTICAST_DELEGATE(FOnWindowScalersUpdated, const float, const float);
+
+		LK_DECLARE_MULTICAST_DELEGATE(FOnViewportSizeUpdated, const uint16_t, const uint16_t);
+		LK_DECLARE_MULTICAST_DELEGATE(FOnViewportScalersUpdated, const float, const float);
+
     public:
         LWindow(const FWindowSpecification& WindowSpecification);
         ~LWindow();
 
-        void Init();
+        virtual void Initialize() override;
+
         void SwapBuffers();
         void ProcessEvents();
         void Shutdown();
 
         FORCEINLINE GLFWwindow* GetGlfwWindow() const { return m_GlfwWindow; }
-        FORCEINLINE uint32_t GetWidth() const { return m_Width; }
-        FORCEINLINE uint32_t GetHeight() const { return m_Height; }
-        FORCEINLINE uint32_t GetViewportWidth()  const { return m_ViewportWidth; }
-        FORCEINLINE uint32_t GetViewportHeight() const { return m_ViewportHeight; }
-        FORCEINLINE glm::vec2 GetPos() const { return m_Pos; }
-        FORCEINLINE glm::vec2 GetSize() const { return glm::vec2(m_Width, m_Height); }
-        FORCEINLINE glm::vec2 GetViewportSize() const { return { m_ViewportWidth, m_ViewportHeight }; }
+
+        FORCEINLINE LVector2 GetSize() const { return Size; }
+        FORCEINLINE uint32_t GetWidth() const { return Size.X; }
+        FORCEINLINE uint32_t GetHeight() const { return Size.Y; }
+        FORCEINLINE uint32_t GetViewportWidth()  const { return ViewportSize.X; }
+        FORCEINLINE uint32_t GetViewportHeight() const { return ViewportSize.Y; }
+
+        FORCEINLINE LVector2 GetPos() const { return m_Pos; }
+        FORCEINLINE LVector2 GetViewportSize() const { return ViewportSize; }
+
         FORCEINLINE std::string GetTitle() const { return m_Title; }
         FORCEINLINE std::string GetShaderVersion() const { return m_GlslVersion; }
         FORCEINLINE bool IsVSyncEnabled() const { return m_VSync; }
-        FORCEINLINE void SetViewportWidth(uint32_t width) { m_ViewportWidth = width; }
-        FORCEINLINE void SetViewportHeight(uint32_t height) { m_ViewportHeight = height; }
         FORCEINLINE void SetDepthEnabled(bool enabled) { RenderContext->SetDepthEnabled(enabled); }
         FORCEINLINE TObjectPtr<LRenderContext> GetRenderContext() { return RenderContext; }
 
-        void SetSize(const glm::vec2& size);
-        void SetVSync(bool enabled);
+        FORCEINLINE void SetSize(const glm::vec2& InSize)
+        {
+            //if ((m_Width != InSize.x) || (m_Height != InSize.y))
+            if ((Size.X != InSize.x) || (Size.Y != InSize.y))
+            {
+                Size.X = static_cast<decltype(Size.X)>(InSize.x); // / m_ViewportScalers.x;
+                Size.Y = static_cast<decltype(Size.Y)>(InSize.y); // / m_ViewportScalers.y;
+                LK_CORE_ERROR_TAG("Window", "Width={}  Height={}  Scalers={{{}, {}}}", 
+                                  Size.X, Size.Y, m_ViewportScalers.X, m_ViewportScalers.Y);
+
+                OnWindowSizeUpdated.Broadcast(Size.X, Size.Y);
+            }
+        }
+
+        FORCEINLINE void SetViewportWidth(const uint32_t NewWidth) 
+        { 
+            if (ViewportSize.X != NewWidth)
+            {
+                ViewportSize.Y = NewWidth; 
+            }
+        }
+
+        FORCEINLINE void SetViewportHeight(const uint32_t NewHeight) 
+        { 
+            if (ViewportSize.Y != NewHeight)
+            {
+                ViewportSize.Y = static_cast<decltype(ViewportSize.Y)>(NewHeight); 
+
+                OnWindowSizeUpdated.Broadcast(ViewportSize.X, ViewportSize.Y);
+            }
+        }
+
+        void SetVSync(const bool InEnabled);
 
         /// REMOVE
         TObjectPtr<LSwapChain> GetSwapChain();
         TObjectPtr<LRenderPass> GetRenderPass();
 
-		FORCEINLINE void SetWidth(const uint32_t width) { m_Width = width; }
-		FORCEINLINE void SetHeight(const uint32_t height) { m_Height = height; }
+		FORCEINLINE void SetWidth(const uint32_t NewWidth) 
+        { 
+            if (Size.X != NewWidth)
+            {
+                Size.X = static_cast<decltype(Size.X)>(NewWidth); 
 
-        /// UPDATE
-        float GetScalerX() const;
-        float GetScalerY() const;
-        glm::vec2 GetScalers() const;
-        void SetScalerX(float x);
-        void SetScalerY(float y);
-        void SetScalers(float x, float y);
-        void SetScalers(const glm::vec2& scalers);
+                OnWindowSizeUpdated.Broadcast(Size.X, Size.Y);
+            }
+        }
+
+		FORCEINLINE void SetHeight(const uint32_t NewHeight) 
+        { 
+            if (Size.Y != NewHeight)
+            {
+                Size.Y = static_cast<decltype(Size.Y)>(NewHeight); 
+
+                OnWindowSizeUpdated.Broadcast(Size.X, Size.Y);
+            }
+        }
+
+        /// 
+        /// UPDATE ALL THIS 
+        /// 
+
+		FORCEINLINE float GetScalerX() const { return m_ViewportScalers.X; }
+		FORCEINLINE float GetScalerY() const { return m_ViewportScalers.Y; }
+		FORCEINLINE LVector2 GetScalers() const { return m_ViewportScalers; }
+
+		FORCEINLINE void SetScalerX(const const float InX)
+		{
+			m_ViewportScalers.X = InX;
+		}
+
+		FORCEINLINE void SetScalerY(const float InY)
+		{
+			m_ViewportScalers.Y = InY;
+		}
+
+		FORCEINLINE void SetScalers(const float InX, const float InY)
+		{
+			m_ViewportScalers.X = InX;
+			m_ViewportScalers.Y = InY;
+		}
+
+		FORCEINLINE void SetScalers(const glm::vec2& InScalers)
+		{
+			m_ViewportScalers = InScalers;
+		}
 
         /* TODO : Event category. */
         FORCEINLINE void SetEventCallback(const FEventCallback& Callback)
         {
-            m_Data.EventCallback = Callback;
+            Data.EventCallback = Callback;
         }
 
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
-        FORCEINLINE static LWindow& Get()
-        {
-            return *Instance;
-        }
+        FORCEINLINE static LWindow& Get() { return *Instance; }
 
+    public:
+        FOnWindowSizeUpdated OnWindowSizeUpdated{};
+        FOnViewportSizeUpdated OnViewportSizeUpdated{};
+
+        static constexpr uint16_t DEFAULT_WIDTH  = 1650;
+        static constexpr uint16_t DEFAULT_HEIGHT = 1080;
     private:
+        FWindowSpecification Specification{};
         std::string m_Title = "";
-        uint32_t m_Width = 0, m_Height = 0;
-        uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-        glm::vec2 m_Pos = { 0.0f, 0.0f };
-        glm::vec2 m_ViewportScalers = { 1.0f, 1.0f };
+
+	    bool bGlfwInitialized = false;
+        GLFWwindow* m_GlfwWindow = nullptr;
+
+        LVector2 Size{};
+        LVector2 ViewportSize{};
+
+        LVector2 m_Pos = { 0.0f, 0.0f };
+        LVector2 m_ViewportScalers = { 1.0f, 1.0f };
 
         std::string m_GlslVersion = "";
-        bool m_VSync;
+        bool m_VSync = false;
 
-        FWindowSpecification Specification;
-
-        struct WindowData
+        struct FWindowData
         {
-            std::string Title;
-            uint32_t Width, Height;
+            std::string Title{};
+            uint32_t Width = 0;
+            uint32_t Height = 0;
+
             FEventCallback EventCallback;
         };
-
-        WindowData m_Data{};
-
-        GLFWwindow* m_GlfwWindow = nullptr;
+        FWindowData Data{};
 
         TObjectPtr<LPipeline> m_Pipeline = nullptr;
         TObjectPtr<LSwapChain> m_SwapChain = nullptr;
         TObjectPtr<LRenderContext> RenderContext = nullptr;
 
-	    inline static bool bGlfwInitialized = false;
-
         inline static LWindow* Instance = nullptr;
 
         friend class LEditorLayer;
-
     private:
         LCLASS(LWindow);
     };

@@ -3,6 +3,8 @@
 #include "LkEngine/Core/Time.h"
 #include "LkEngine/Core/Globals.h"
 
+#include "LkEngine/Core/IO/File.h"
+
 
 namespace LkEngine {
 

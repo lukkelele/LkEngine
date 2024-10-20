@@ -188,7 +188,7 @@ namespace LkEngine {
 		}
 		out << YAML::Value << YAML::EndMap;
 
-		// Entities
+		/* Entities. */
 		out << YAML::Key << "Entities";
 		out << YAML::Value << YAML::BeginSeq;
 		{
@@ -200,7 +200,7 @@ namespace LkEngine {
 				sortedEntityMap[idComponentView.get<LIDComponent>(entity).ID] = entity;
 			}
 	
-			// Serialize sorted entities
+			// Serialize sorted entities.
 			for (const auto& [id, entity] : sortedEntityMap)
 			{
 				SerializeEntity(out, { entity, m_Scene->m_ActiveScene });
@@ -509,7 +509,6 @@ namespace LkEngine {
 		std::ifstream stream(filepath);
 		std::stringstream strStream;
 		strStream << stream.rdbuf();
-
 		try
 		{
 			DeserializeFromYAML(strStream.str());

@@ -4,39 +4,40 @@
 
 namespace LkEngine {
 
-	FileStreamWriter::FileStreamWriter(const std::filesystem::path& path)
-		: m_Path(path)
+	FileStreamWriter::FileStreamWriter(const std::filesystem::path& InPath)
+		: Path(InPath)
 	{
-		m_Stream = std::ofstream(path, std::ifstream::out | std::ifstream::binary);
+		Stream = std::ofstream(InPath, std::ifstream::out | std::ifstream::binary);
 	}
 
 	FileStreamWriter::~FileStreamWriter()
 	{
-		m_Stream.close();
+		Stream.close();
 	}
 
-	bool FileStreamWriter::WriteData(const char* data, size_t size)
+	bool FileStreamWriter::WriteData(const char* Data, const size_t Size)
 	{
-		m_Stream.write(data, size);
-		return true;
+		Stream.write(Data, Size);
+
+		//return true;
+		return Stream.good();
 	}
 
 
-
-	FileStreamReader::FileStreamReader(const std::filesystem::path& path)
-		: m_Path(path)
+	FileStreamReader::FileStreamReader(const std::filesystem::path& InPath)
+		: Path(InPath)
 	{
-		m_Stream = std::ifstream(path, std::ifstream::in | std::ifstream::binary);
+		Stream = std::ifstream(InPath, std::ifstream::in | std::ifstream::binary);
 	}
 
 	FileStreamReader::~FileStreamReader()
 	{
-		m_Stream.close();
+		Stream.close();
 	}
 
-	bool FileStreamReader::ReadData(char* destination, size_t size)
+	bool FileStreamReader::ReadData(char* Destination, const std::size_t Size)
 	{
-		m_Stream.read(destination, size);
+		Stream.read(Destination, Size);
 		return true;
 	}
 

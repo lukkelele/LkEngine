@@ -23,6 +23,11 @@ namespace LkEngine::Global {
 	/**
 	 * @brief Get the working directory.
 	 */
-	std::filesystem::path GetWorkingDirectory();
+	std::filesystem::path GetWorkingDir();
+
+	/**
+	 * @brief Get the binary executable directory.
+	 */
+	std::filesystem::path GetBinaryDir();
 
 }

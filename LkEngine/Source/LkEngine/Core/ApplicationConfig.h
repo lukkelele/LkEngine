@@ -23,6 +23,7 @@ namespace LkEngine {
         bool ImGuiEnabled = true;
 
         LString WorkingDirectory{};
+        std::filesystem::path ConfigurationFile = "LkEngine.config";
     };
 
 }

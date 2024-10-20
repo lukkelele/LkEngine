@@ -55,6 +55,8 @@ namespace LkEngine {
         void Run();
         void Shutdown();
 
+        bool ReadConfigurationFile();
+
         void OnEvent(LEvent& e);
 
         void RenderUI();
@@ -105,15 +107,15 @@ namespace LkEngine {
         FTimestep GetTimestep() const { return Timestep; } // REMOVE ME
         uint32_t GetCurrentFrameIndex() const { return m_CurrentFrameIndex; }
 
-        static LApplication* Get() { return m_Instance; }
+        static LApplication* Get() { return Instance; }
 
         FThreadData Test_ThreadData2{};
 
     private:
-        ApplicationSpecification Specification;
+        ApplicationSpecification Specification{};
 
         bool bRunning = false;
-        Timer m_Timer;
+        Timer Timer;
 
         FTimestep Timestep{};
         FTimestep LastTimestep{};
@@ -130,7 +132,7 @@ namespace LkEngine {
         uint32_t m_CurrentFrameIndex = 0;
 
         TUniquePtr<LEditorLayer> Editor;
-        TObjectPtr<LImGuiLayer> ImGuiLayer;
+        TObjectPtr<LImGuiLayer> UILayer;
 
         TUniquePtr<PhysicsSystem> m_PhysicsSystem;
 
@@ -138,10 +140,9 @@ namespace LkEngine {
 		std::queue<std::function<void()>> EventQueue;
 		std::vector<FEventCallback> EventCallbacks;
 
-        TObjectPtr<LProject> Project;
-        //TObjectPtr<LScene> Scene = nullptr;
+        TObjectPtr<LProject> Project{};
 
-        inline static LApplication* m_Instance = nullptr;
+        inline static LApplication* Instance = nullptr;
 
         LCLASS(LApplication);
     };

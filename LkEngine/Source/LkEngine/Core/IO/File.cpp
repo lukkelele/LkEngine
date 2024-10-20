@@ -4,68 +4,27 @@
 
 namespace LkEngine {
 
-    File::File(const std::string& filePath)
-        : m_Path(filePath)
-        , m_PathObject(filePath)
+    LFile::LFile(const std::string& InFilePath)
+        : Path(InFilePath)
     {
-        m_Name = m_PathObject.filename().string();
-    }
-
-    std::string File::GetParentPath() const
-    {
-        return m_PathObject.parent_path().string();
-    }
-
-    void File::PrintInformation() const
-    {
-        printf("Filename: %s    Path: %s\n", m_Name.c_str(), m_Path.c_str());
-    }
-
-    std::string File::ExtractFilename(const std::string& filePath)
-    {
-        size_t pos = filePath.find_last_of("/\\");
-        if (pos != std::string::npos)
+        if (Path.has_filename())
         {
-            return filePath.substr(pos + 1);
+            Name = Path.filename().string();
         }
-        return filePath;
     }
 
-    std::string File::ExtractFilenameWithoutExtension(const std::string& filename, const FileExtension& fileExtension)
+    int LFile::GetFilesInDirectory(std::string_view Directory, std::vector<LFile>& Files)
     {
-        if (HasFileExtension(filename) == false)
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& Entry : fs::directory_iterator(Directory))
         {
-            return filename;
-        }
-
-        return ExtractFilename(filename.substr(0, filename.size() - ((size_t)fileExtension + 1)));
-    }
-
-    File File::GetFile(const std::string& filepath)
-    {
-        bool filepathIsDirectory = std::filesystem::is_directory(filepath);
-        if (!filepathIsDirectory)
-        {
-            return File(filepath);
-        }
-
-        LK_CORE_ASSERT(false, "Couldnt get file in \"{}\"", filepath);
-    }
-
-    std::vector<File> File::GetFilesInDirectory(const std::string& directory)
-    {
-        std::vector<File> files;
-        for (const auto& fileEntry : std::filesystem::directory_iterator(directory))
-        {
-            if (fileEntry.exists() && !fileEntry.is_symlink() && !fileEntry.is_directory())
+            if (Entry.exists() && !Entry.is_symlink() && !Entry.is_directory())
             {
-                std::string filePath = fileEntry.path().parent_path().string();
-                std::string fileName = fileEntry.path().filename().string();
-                File file(filePath + "/" + fileName);
-                files.push_back(file);
+                Files.emplace_back(Entry.path().parent_path().string() + "/" + Entry.path().filename().string());
             }
         }
-        return files;
+
+        return Files.size();
     }
 
 

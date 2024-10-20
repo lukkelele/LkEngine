@@ -1,6 +1,8 @@
 #include "LKpch.h"
 #include "Application.h"
 
+#include "LkEngine/Core/ApplicationSerializer.h"
+
 
 namespace LkEngine {
 
@@ -10,47 +12,47 @@ namespace LkEngine {
         , MetadataRegistry(LMetadataRegistry::Get())
         , ThreadManager(LThreadManager::Instance())
     {
-        m_Instance = this;
+        Instance = this;
+        LCrashHandler::AttachInstance(this);
 
         Global::SetRuntimeArguments(Specification.Argc, Specification.Argv);
-
-        m_Timer.Reset();
-
-        LCrashHandler::AttachInstance(this);
 
         LK_CORE_TRACE_TAG("Application", "Creating window");
         Window = MakeUnique<LWindow>(InSpecification);
         MetadataRegistry.RegisterObject("Window", Window);
-        //ImGuiLayer = LImGuiLayer::Create();
+
+        /* Read configuration file. */
+        ReadConfigurationFile();
+
+        Timer.Reset();
     }
 
     LApplication::~LApplication()
     {
         if (bRunning)
         {
-            LK_CORE_WARN_TAG("Application", "Terminating application");
+            LK_CORE_INFO_TAG("Application", "Shutting down");
             Shutdown();
-        }
-        else
-        {
-            LK_CORE_WARN_TAG("Application", "Already invoked application shutdown");
         }
     }
 
     void LApplication::Initialize()
     {
-        Window->Init();
-		Window->SetEventCallback([this](LEvent& Event) { OnEvent(Event); });
+        Window->Initialize();
+		Window->SetEventCallback([this](LEvent& Event) 
+        { 
+            OnEvent(Event); 
+        });
 
-        Input::Init();
-
+        Input::Initialize();
+        
         /* Initialize the renderer. */
         Renderer = TObjectPtr<LRenderer>::Create();
         Renderer->Initialize();
 
-        ImGuiLayer = LImGuiLayer::Create();
-        ImGuiLayer->Initialize();
-        ImGuiLayer->SetDarkTheme();
+        UILayer = LImGuiLayer::Create();
+        UILayer->Initialize();
+        UILayer->SetDarkTheme();
 
         /* Create EditorLayer. */
         Editor = MakeUnique<LEditorLayer>();
@@ -67,7 +69,7 @@ namespace LkEngine {
 
 		while (!glfwWindowShouldClose(GlfwWindow))
 		{
-			Timestep = m_Timer.GetDeltaTime();
+			Timestep = Timer.GetDeltaTime();
 
             Input::Update();
             LRenderer::BeginFrame();
@@ -95,7 +97,7 @@ namespace LkEngine {
                     Application->RenderUI(); 
                 });
 
-				LRenderer::Submit([&]() { ImGuiLayer->EndFrame(); });
+				LRenderer::Submit([&]() { UILayer->EndFrame(); });
 			}
 
 			LRenderer::EndFrame();
@@ -117,12 +119,30 @@ namespace LkEngine {
     {
         if (bRunning)
         {
-			LK_CORE_WARN_TAG("Application", "Renderer->Shutdown()");
+            /* Serialize application configuration. */
+			std::filesystem::path ApplicationConfigFile = Global::GetWorkingDir();
+            ApplicationConfigFile += PathSeparator + std::string("LkEngine.config");
+			LApplicationSerializer Serializer(this);
+			Serializer.Serialize(ApplicationConfigFile);
+
 			Renderer->Shutdown();
 
 			LK_CORE_WARN_TAG("Application", "Window->Shutdown()");
 			Window->Shutdown();
+
+            bRunning = false;
         }
+    }
+
+    bool LApplication::ReadConfigurationFile()
+    {
+        std::filesystem::path ApplicationConfigFile = Global::GetWorkingDir();
+        ApplicationConfigFile += PathSeparator + std::string("LkEngine.config");
+
+        LApplicationSerializer Serializer(this);
+        Serializer.Deserialize(ApplicationConfigFile);
+
+        return true;
     }
 
     /* FIXME */
@@ -136,7 +156,7 @@ namespace LkEngine {
         /* Bind to default framebuffer before any UI rendering takes place. */
 		LFramebuffer::TargetSwapChain();
 
-        ImGuiLayer->BeginFrame();
+        UILayer->BeginFrame();
 
         for (TObjectPtr<LLayer>& Layer : LayerStack)
         {
