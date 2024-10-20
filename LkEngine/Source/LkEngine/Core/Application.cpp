@@ -120,10 +120,8 @@ namespace LkEngine {
         if (bRunning)
         {
             /* Serialize application configuration. */
-			std::filesystem::path ApplicationConfigFile = Global::GetWorkingDir();
-            ApplicationConfigFile += PathSeparator + std::string("LkEngine.config");
 			LApplicationSerializer Serializer(this);
-			Serializer.Serialize(ApplicationConfigFile);
+			Serializer.Serialize(Global::GetEngineConfig());
 
 			Renderer->Shutdown();
 
@@ -136,11 +134,8 @@ namespace LkEngine {
 
     bool LApplication::ReadConfigurationFile()
     {
-        std::filesystem::path ApplicationConfigFile = Global::GetWorkingDir();
-        ApplicationConfigFile += PathSeparator + std::string("LkEngine.config");
-
         LApplicationSerializer Serializer(this);
-        Serializer.Deserialize(ApplicationConfigFile);
+        Serializer.Deserialize(Global::GetEngineConfig());
 
         return true;
     }

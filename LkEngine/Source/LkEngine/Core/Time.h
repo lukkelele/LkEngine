@@ -21,14 +21,13 @@ namespace LkEngine::Time {
     FORCEINLINE static std::string CurrentTimestamp(std::string_view InFormat = "%Y-%m-%d-%H%M%S")
     {
         using namespace std::chrono;
-        //std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-        time_point<system_clock> now = system_clock::now();
-        std::time_t currentTime = system_clock::to_time_t(now);
+        time_point<system_clock> Now = system_clock::now();
+        std::time_t CurrentTime = system_clock::to_time_t(Now);
 
-        std::stringstream timestampStream;
-        timestampStream << std::put_time(std::localtime(&currentTime), InFormat.data());
+        std::stringstream StrStream;
+        StrStream << std::put_time(std::localtime(&CurrentTime), InFormat.data());
 
-        return timestampStream.str();
+        return StrStream.str();
     }
 
 }

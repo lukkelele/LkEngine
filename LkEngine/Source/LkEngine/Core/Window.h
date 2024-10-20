@@ -78,16 +78,26 @@ namespace LkEngine {
         FORCEINLINE std::string GetTitle() const { return m_Title; }
         FORCEINLINE std::string GetShaderVersion() const { return m_GlslVersion; }
         FORCEINLINE bool IsVSyncEnabled() const { return m_VSync; }
-        FORCEINLINE void SetDepthEnabled(bool enabled) { RenderContext->SetDepthEnabled(enabled); }
-        FORCEINLINE TObjectPtr<LRenderContext> GetRenderContext() { return RenderContext; }
 
-        FORCEINLINE void SetSize(const glm::vec2& InSize)
-        {
-            //if ((m_Width != InSize.x) || (m_Height != InSize.y))
-            if ((Size.X != InSize.x) || (Size.Y != InSize.y))
+        FORCEINLINE TObjectPtr<LRenderContext> GetRenderContext() 
+        { 
+            return RenderContext; 
+        }
+
+        FORCEINLINE void SetDepthEnabled(const bool InEnabled) 
+        { 
+            if (RenderContext)
             {
-                Size.X = static_cast<decltype(Size.X)>(InSize.x); // / m_ViewportScalers.x;
-                Size.Y = static_cast<decltype(Size.Y)>(InSize.y); // / m_ViewportScalers.y;
+                RenderContext->SetDepthEnabled(InEnabled); 
+            }
+        }
+
+        FORCEINLINE void SetSize(const LVector2& InSize)
+        {
+            if ((Size.X != InSize.X) || (Size.Y != InSize.X))
+            {
+                Size.X = static_cast<decltype(Size.X)>(InSize.X);
+                Size.Y = static_cast<decltype(Size.Y)>(InSize.Y);
                 LK_CORE_ERROR_TAG("Window", "Width={}  Height={}  Scalers={{{}, {}}}", 
                                   Size.X, Size.Y, m_ViewportScalers.X, m_ViewportScalers.Y);
 
@@ -95,21 +105,21 @@ namespace LkEngine {
             }
         }
 
-        FORCEINLINE void SetViewportWidth(const uint32_t NewWidth) 
+        FORCEINLINE void SetViewportWidth(const uint16_t NewWidth) 
         { 
             if (ViewportSize.X != NewWidth)
             {
                 ViewportSize.Y = NewWidth; 
+                OnViewportSizeUpdated.Broadcast(static_cast<uint16_t>(ViewportSize.X), static_cast<uint16_t>(ViewportSize.Y));
             }
         }
 
-        FORCEINLINE void SetViewportHeight(const uint32_t NewHeight) 
+        FORCEINLINE void SetViewportHeight(const uint16_t NewHeight) 
         { 
             if (ViewportSize.Y != NewHeight)
             {
                 ViewportSize.Y = static_cast<decltype(ViewportSize.Y)>(NewHeight); 
-
-                OnWindowSizeUpdated.Broadcast(ViewportSize.X, ViewportSize.Y);
+                OnViewportSizeUpdated.Broadcast(static_cast<uint16_t>(ViewportSize.X), static_cast<uint16_t>(ViewportSize.Y));
             }
         }
 
@@ -119,23 +129,21 @@ namespace LkEngine {
         TObjectPtr<LSwapChain> GetSwapChain();
         TObjectPtr<LRenderPass> GetRenderPass();
 
-		FORCEINLINE void SetWidth(const uint32_t NewWidth) 
+		FORCEINLINE void SetWidth(const uint16_t NewWidth) 
         { 
             if (Size.X != NewWidth)
             {
                 Size.X = static_cast<decltype(Size.X)>(NewWidth); 
-
-                OnWindowSizeUpdated.Broadcast(Size.X, Size.Y);
+                OnWindowSizeUpdated.Broadcast(static_cast<uint16_t>(Size.X), static_cast<uint16_t>(Size.Y));
             }
         }
 
-		FORCEINLINE void SetHeight(const uint32_t NewHeight) 
+		FORCEINLINE void SetHeight(const uint16_t NewHeight) 
         { 
             if (Size.Y != NewHeight)
             {
                 Size.Y = static_cast<decltype(Size.Y)>(NewHeight); 
-
-                OnWindowSizeUpdated.Broadcast(Size.X, Size.Y);
+                OnWindowSizeUpdated.Broadcast(static_cast<uint16_t>(Size.X), static_cast<uint16_t>(Size.Y));
             }
         }
 

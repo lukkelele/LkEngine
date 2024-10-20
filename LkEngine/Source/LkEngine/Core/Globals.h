@@ -30,4 +30,9 @@ namespace LkEngine::Global {
 	 */
 	std::filesystem::path GetBinaryDir();
 
+	/**
+	 * @brief Get the engine config.
+	 */
+	std::filesystem::path GetEngineConfig();
+
 }

@@ -8,19 +8,82 @@
 
 namespace LkEngine {
 
+	/* Assuming the log files are formatted with a timestamp. */
+	static bool CompareLogFiles(const std::filesystem::directory_entry& a, 
+								const std::filesystem::directory_entry& b)
+	{
+		return (a.path().filename().string() < b.path().filename().string());
+	}
+
+	static int CountLogFilesInDir(const std::filesystem::path& InDirectory)
+	{
+		namespace fs = std::filesystem;
+		int Files = 0;
+		if (fs::exists(InDirectory) && fs::is_directory(InDirectory))
+		{
+			for (const fs::directory_entry& Entry : fs::directory_iterator(InDirectory))
+			{
+				if (Entry.is_regular_file() && Entry.path().extension() == ".log")
+				{
+					Files++;
+				}
+			}
+		}
+
+		return Files;
+	}
+
+	static void CleanLogDirectory(const std::filesystem::path& InDirectory, const int MaxLogFiles)
+	{
+		namespace fs = std::filesystem;
+		std::vector<fs::directory_entry> LogFiles;
+		LogFiles.reserve(MaxLogFiles);
+
+		/* Check if the directory exists. */
+		if (fs::exists(InDirectory) && fs::is_directory(InDirectory))
+		{
+			for (const auto& Entry : fs::directory_iterator(InDirectory))
+			{
+				if (Entry.is_regular_file() && Entry.path().extension() == ".log")
+				{
+					LogFiles.push_back(Entry);
+				}
+			}
+		}
+
+		/* If we have more than MaxLogFiles, sort and remove the oldest. */
+		if (LogFiles.size() > MaxLogFiles)
+		{
+			/* Sort log files based on their names (timestamps in filenames). */
+			std::sort(LogFiles.begin(), LogFiles.end(), CompareLogFiles);
+
+			/* Remove the oldest files, keeping only the most recent ones. */
+			for (std::size_t Index = 0; Index < LogFiles.size() - MaxLogFiles; Index++)
+			{
+				const fs::directory_entry& LogFile = LogFiles[Index];
+				if (LogFile.path().extension() == ".log")
+				{
+					fs::remove(LogFile.path());
+					LK_CORE_TRACE_TAG("Log", "Deleted logfile: {}", LogFile.path().string());
+				}
+			}
+		}
+	}
+
 	LLog::LLog()
 	{
-		// TODO: Read configuration and application args.
+		// TODO: Read configuration and application args for setting log levels on initialization.
 		Initialize(
 			LString::Format("LkEditor-{}.log", Time::CurrentTimestamp()).CStr(),
 			"CORE", 
 			"CLIENT"
 		);
 
-		LogDirectory = std::filesystem::current_path();
-		LK_CORE_DEBUG("Default Log Directory: {}", LogDirectory.string());
+		namespace fs = std::filesystem;
+		LogDirectory = fs::path(LString::Format("{}/Logs", fs::current_path().string()).CStr());
+		LK_CORE_TRACE_TAG("Log", "Log Directory: {}", LogDirectory.string());
 
-		/* TODO: Only allow X amount of logfiles to exist. */
+		CleanLogDirectory(LogDirectory, 10);
 	}
 
 	LLog::~LLog()

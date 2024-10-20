@@ -12,6 +12,12 @@ namespace LkEngine {
 		LK_CORE_ERROR_TAG("GLFW", "GLFW Error ({0}): {1}", error, description);
 	}
 
+	static void GLFW_FramebufferSizeCallback(GLFWwindow* GLFWWindow, int Width, int Height)
+	{
+		/* Adjust the viewport when the framebuffer is resized. */
+		glViewport(0, 0, Width, Height);
+	}
+
 	LWindow::LWindow(const FWindowSpecification& WindowSpecification)
 		: Specification(WindowSpecification)
 		, m_Title(WindowSpecification.Title)
@@ -23,8 +29,8 @@ namespace LkEngine {
 
 		/* Window Data. */
 		Data.Title = m_Title;
-		Data.Width = Size.X;
-		Data.Height = Size.Y;
+		Data.Width = static_cast<decltype(Data.Width)>(Size.X);
+		Data.Height = static_cast<decltype(Data.Height)>(Size.Y);
 
 		LCLASS_REGISTER();
 
@@ -89,12 +95,10 @@ namespace LkEngine {
 		glfwSetInputMode(m_GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		glfwSetWindowSizeLimits(m_GlfwWindow, 420, 280, 2560, 1440);
 
-		// Callback functions.
 		glfwSetWindowSizeCallback(m_GlfwWindow, WindowResizeCallback);
 
 		glfwSetKeyCallback(m_GlfwWindow, [](GLFWwindow* Window, int key, int scancode, int Action, int mods)
 		{
-			//auto& data = *((FWindowData*)glfwGetWindowUserPointer(Window));
 			FWindowData& DataRef = *((FWindowData*)glfwGetWindowUserPointer(Window));
 
 			switch (Action)
@@ -125,7 +129,14 @@ namespace LkEngine {
 			}
 		});
 
-		// Character callback
+		/* Framebuffer resize callback. */
+		glfwSetFramebufferSizeCallback(m_GlfwWindow, [](GLFWwindow* GlfwWindow, int Width, int Height)
+		{
+			LK_CORE_DEBUG_TAG("GLFW", "Framebuffer Size Callback  ({}, {})", Width, Height);
+			glViewport(0, 0, Width, Height);
+		});
+
+		/* Character callback. */
 		glfwSetCharCallback(m_GlfwWindow, [](GLFWwindow* Window, uint32_t codepoint)
 		{
 			FWindowData& DataRef = *((FWindowData*)glfwGetWindowUserPointer(Window));
@@ -134,7 +145,7 @@ namespace LkEngine {
 			DataRef.EventCallback(Event);
 		});
 
-		// Mouse button callback
+		/* Mouse button callback. */
 #if 1
 		glfwSetMouseButtonCallback(m_GlfwWindow, [](GLFWwindow* GlfwWindow, int Button, int Action, int Modifiers)
 		{

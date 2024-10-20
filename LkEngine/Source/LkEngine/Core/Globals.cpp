@@ -8,6 +8,7 @@ namespace LkEngine::Global {
 
 	static std::filesystem::path WorkingDir{};
 	static std::filesystem::path BinaryDir{};
+	static std::filesystem::path EngineConfig{};
 
 	void SetRuntimeArguments(const int InArgc, char* InArgv[])
 	{
@@ -22,6 +23,8 @@ namespace LkEngine::Global {
 		}
 
 		WorkingDir = std::filesystem::current_path();
+		EngineConfig = WorkingDir;
+		EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
 
 		LK_CORE_TRACE("RuntimeArgs  Argc={} Argv=\"{}\" WorkingDir=\"{}\" BinaryDir=\"{}\"", 
 					  RuntimeArguments.Argc, *RuntimeArguments.Argv, 
@@ -42,6 +45,11 @@ namespace LkEngine::Global {
 	std::filesystem::path GetBinaryDir()
 	{
 		return BinaryDir;
+	}
+
+	std::filesystem::path GetEngineConfig()
+	{
+		return EngineConfig;
 	}
 
 }
