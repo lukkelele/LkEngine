@@ -34,7 +34,7 @@ namespace LkEngine {
     class Input
     {
     public:
-		static void Init();
+		static void Initialize();
 
 		static void Update();
 		static void SetScene(const TObjectPtr<LScene>& InScene); 

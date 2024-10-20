@@ -53,17 +53,17 @@ namespace LkEngine {
 		}
 
 		// Translate Mode
-		if (Keyboard::IsKeyPressed(Key::T))
+		if (LKeyboard::IsKeyPressed(Key::T))
 		{
 			LK_CORE_DEBUG_TAG("EditorCamera", "TRANSLATE MODE");
 		}
 		// Rotation Mode
-		if (Keyboard::IsKeyPressed(Key::R))
+		if (LKeyboard::IsKeyPressed(Key::R))
 		{
 			LK_CORE_DEBUG_TAG("EditorCamera", "ROTATION MODE");
 		}
 		// Scale Mode
-		if (Keyboard::IsKeyPressed(Key::S))
+		if (LKeyboard::IsKeyPressed(Key::S))
 		{
 			LK_CORE_DEBUG_TAG("EditorCamera", "SCALE MODE");
 		}
@@ -101,12 +101,12 @@ namespace LkEngine {
 				m_PositionDelta += DeltaTime * speed * m_RightDirection;
 			}
 
-			if (Keyboard::IsKeyPressed(Key::H))
+			if (LKeyboard::IsKeyPressed(Key::H))
 			{
 				m_ProjectionType = ProjectionType::Orthographic;
 				m_Position = { 2, 2, 0 };
 			}
-			if (Keyboard::IsKeyPressed(Key::P))
+			if (LKeyboard::IsKeyPressed(Key::P))
 			{
 				m_ProjectionType = ProjectionType::Perspective;
 				m_Position = { -330, -140, -910 };

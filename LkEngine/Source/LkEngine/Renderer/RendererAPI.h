@@ -151,6 +151,19 @@ namespace LkEngine {
 
 		static void SetAPI(ERendererAPI InRendererApiType);
 
+		FORCEINLINE static LString GetName()
+		{
+			switch (RendererAPI)
+			{
+				case ERendererAPI::OpenGL: return "OpenGL";
+				case ERendererAPI::Vulkan: return "Vulkan";
+				default: break; 
+			}
+
+			LK_CORE_ASSERT(false, "Invalid render API");
+			return {};
+		}
+
 	protected:
 		inline static ERendererAPI RendererAPI = ERendererAPI::OpenGL;
 

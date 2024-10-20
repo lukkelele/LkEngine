@@ -8,19 +8,23 @@
 
 namespace LkEngine {
 
-	static bool Initialized = false;
+	///
+	/// FIXME: UPDATE THIS ENTIRE IMPL
+	///
 
-	void Keyboard::Init()
+	static bool bInitialized = false;
+
+	void LKeyboard::Initialize()
 	{
-		if (Initialized)
+		if (bInitialized)
 		{
 			return;
 		}
 
-		Initialized = true;
+		bInitialized = true;
 	}
 
-	bool Keyboard::IsKeyPressed(const KeyCode key)
+	bool LKeyboard::IsKeyPressed(const KeyCode key)
 	{
 		GLFWwindow* GlfwWindow = LApplication::Get()->GetWindow().GetGlfwWindow();
 		const int KeyState = glfwGetKey(GlfwWindow, static_cast<int32_t>(key));

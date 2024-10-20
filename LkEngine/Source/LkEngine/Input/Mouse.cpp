@@ -11,16 +11,17 @@
 
 namespace LkEngine {
 
-	static bool Initialized = false;
+	static bool bInitialized = false;
 
-	void Mouse::Init()
+	void Mouse::Initialize()
 	{
-		if (Initialized)
+		if (bInitialized)
 		{
+			LK_ASSERT(false);
 			return;
 		}
 
-		Initialized = true;
+		bInitialized = true;
 	}
 
 	glm::vec2 Mouse::GetPos()

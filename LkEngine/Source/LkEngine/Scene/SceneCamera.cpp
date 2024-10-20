@@ -47,27 +47,27 @@ namespace LkEngine {
 		if (m_KeyboardEnabled)
 		{
 			// WASD
-			if (Keyboard::IsKeyPressed(Key::W))
+			if (LKeyboard::IsKeyPressed(Key::W))
 			{
 				m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
 			}
-			if (Keyboard::IsKeyPressed(Key::A))
+			if (LKeyboard::IsKeyPressed(Key::A))
 			{
 				m_Pos -= glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
 			}
-			if (Keyboard::IsKeyPressed(Key::S))
+			if (LKeyboard::IsKeyPressed(Key::S))
 			{
 				m_Pos -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
 			}
-			if (Keyboard::IsKeyPressed(Key::D))
+			if (LKeyboard::IsKeyPressed(Key::D))
 			{
 				m_Pos += glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
 			}
-			if (Keyboard::IsKeyPressed(Key::Q))
+			if (LKeyboard::IsKeyPressed(Key::Q))
 			{
 				//m_Zoom += 0.010f;
 			}
-			if (Keyboard::IsKeyPressed(Key::R))
+			if (LKeyboard::IsKeyPressed(Key::R))
 			{
 				//m_Zoom -= 0.010f;
 			}

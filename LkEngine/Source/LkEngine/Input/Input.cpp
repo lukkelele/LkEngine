@@ -11,10 +11,10 @@ namespace LkEngine {
 
     LApplication* Application = nullptr; /* REMOVE ME */
 
-	void Input::Init()
+	void Input::Initialize()
 	{
-        Keyboard::Init();
-        Mouse::Init();
+        LKeyboard::Initialize();
+        Mouse::Initialize();
 	}
 
 	void Input::SetScene(const TObjectPtr<LScene>& InScene)
@@ -37,7 +37,7 @@ namespace LkEngine {
 		LEditorLayer* Editor = LEditorLayer::Get();
 		if (Mouse::IsButtonPressed(EMouseButton::Button0) == false)
 		{
-			if (Keyboard::IsKeyPressed(Key::Escape))
+			if (LKeyboard::IsKeyPressed(Key::Escape))
 			{
 				LK_CORE_TRACE("De-selecting (clicked escape)");
 				if (Editor && Editor->IsEnabled())
@@ -85,7 +85,7 @@ namespace LkEngine {
 		{
 		}
 
-        if (Keyboard::IsKeyPressed(Key::Escape))
+        if (LKeyboard::IsKeyPressed(Key::Escape))
         {
 			LK_CORE_DEBUG("De-selecting (clicked escape)");
 			if (Editor && Editor->IsEnabled())

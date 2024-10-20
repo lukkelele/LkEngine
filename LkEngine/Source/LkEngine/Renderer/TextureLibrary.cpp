@@ -11,25 +11,20 @@ namespace LkEngine {
         ".bmp" 
     };
 
-    static FileExtension DetermineExtension(const std::filesystem::directory_entry& Entry)
+    static constexpr std::string_view ExtractFileNameWithoutExtension(std::string_view FilePath)
     {
-        if (!Entry.is_regular_file())
-        {
-            return FileExtension::Unknown;
-        }
+        /* Find the last path separator('/' or '\\') in the string. */
+		const std::size_t LastSlash = FilePath.find_last_of("/\\");
+		
+		/* Extract the filename(the part after the last separator). */
+		std::string_view FileName = (LastSlash == std::string_view::npos) ? FilePath : FilePath.substr(LastSlash + 1);
 
-        const std::string fileExtension = Entry.path().extension().string();
-        if (fileExtension == "png")
-        {
-            return FileExtension::PNG;
-        }
-        else if (fileExtension == "jpg")
-        {
-            return FileExtension::JPG;
-        }
+		/* Find the last dot(.) to remove the extension. */
+		const std::size_t LastDot = FileName.find_last_of('.');
 
-        return FileExtension::Unknown;
-    }
+		/* Return the substring without the extension. */
+		return (LastDot == std::string_view::npos) ? FileName : FileName.substr(0, LastDot);
+	}
 
     LTextureLibrary::LTextureLibrary()
     {
@@ -222,7 +217,7 @@ namespace LkEngine {
         for (auto Iter = m_Collection2D.begin(); Iter != m_Collection2D.end(); ++Iter)
         {
             auto& Texture = *Iter;
-            if (File::ExtractFilenameWithoutExtension(Texture.first, FileExtension::PNG) == TextureName)
+            if (ExtractFileNameWithoutExtension(Texture.first) == TextureName)
             {
                 return Texture.second;
             }
@@ -235,7 +230,7 @@ namespace LkEngine {
     {
         for (const TTexture2DPair& Entry : m_Collection2D)
         {
-            if (Entry.first == File::ExtractFilenameWithoutExtension(TextureSpecification.Name))
+            if (Entry.first == ExtractFileNameWithoutExtension(TextureSpecification.Name))
             {
                 if (((TextureSpecification.Width == Entry.second->GetWidth()) 
                     && (TextureSpecification.Height == Entry.second->GetHeight()))
@@ -283,25 +278,6 @@ namespace LkEngine {
     {
         std::vector<TTexture2DPair> textures;
         textures.push_back({ "white-texture", m_WhiteTexture });
-
-#if 0
-        for (const TTexture2DPair& Entry : m_Collection2D)
-        {
-            if ((Entry.second->GetName() == "black-texture")
-                || (Entry.second->GetName() == "white-texture"))
-            {
-                continue;
-            }
-
-            textures.push_back(Entry);
-        }
-
-			| std::views::filter([](const TTexture2DPair& Entry)
-			{
-				return (Entry.second->GetName() != "white-texture")
-					&& (Entry.second->GetName() != "black-texture");
-			}), 
-#endif
 
         auto RetrieveTexture = [&](const TTexture2DPair& Entry)
         {
@@ -354,19 +330,6 @@ namespace LkEngine {
     bool LTextureLibrary::HasTextureWithFilename(const std::string& FileName)
     {
         LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
-    #if 0 /// OLD IMPL
-        for (const TTexture2DPair& Entry : m_Collection2D)
-        {
-            const TObjectPtr<LTexture2D>& texture = Entry.second;
-            if (texture->GetPath().Filename() == Filename)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    #endif
-
         return std::ranges::any_of(m_Collection2D, [&](const TTexture2DPair& Entry)
 		{
 		    return (Entry.second->GetFilename() == FileName);
@@ -376,33 +339,6 @@ namespace LkEngine {
     TObjectPtr<LTexture> LTextureLibrary::TryToGetTextureWithFilename(const std::string& Filename)
     {
         LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
-
-#if OLD_IMPL
-        for (const TTexture2DPair& Entry : m_Collection2D)
-        {
-            if (TObjectPtr<LTexture2D> texture = Entry.second)
-            {
-				if (texture->GetFilename() == Filename)
-				{
-					return texture;
-				}
-            }
-        }
-
-        for (const std::pair<std::string, TTexture2DMap>& CurrentTexture2DMap : m_Collections2D)
-        {
-            for (const TTexture2DPair& Entry : CurrentTexture2DMap.second)
-            {
-                if (TObjectPtr<LTexture2D> texture = Entry.second)
-                {
-					if (texture->GetFilename() == Filename)
-					{
-						return texture;
-					}
-                }
-            }
-        }
-#endif
 
         /* Search in 2D collection to begin. */
 		if (auto Texture = std::ranges::find_if(m_Collection2D, [&](const TTexture2DPair& Entry)
@@ -420,19 +356,12 @@ namespace LkEngine {
             {
                 return (Entry.second && (Entry.second->GetFilename() == Filename));
             };
-    #if 0
-			if (auto Texture = std::ranges::find_if(CurrentTexture2DMap.second, [&](const TTexture2DPair& Entry)
-			{
-				return Entry.second && Entry.second->GetFilename() == Filename;
-			}); Texture != CurrentTexture2DMap.second.end())
-			{
-				return Texture->second; /* Return the found texture. */
-			}
-    #endif
+
 			if (auto Texture = std::ranges::find_if(CurrentTexture2DMap.second, CheckEntry); 
                 Texture != CurrentTexture2DMap.second.end())
 			{
-				return Texture->second; /* Return the found texture. */
+                /* Return the found texture. */
+				return (Texture->second);
 			}
 		}
 

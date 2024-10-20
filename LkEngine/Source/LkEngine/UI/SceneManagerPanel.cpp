@@ -41,13 +41,7 @@ namespace LkEngine {
 	void LSceneManagerPanel::Initialize()
 	{
 		LK_UI_TRACE_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
-		LK_UI_DEBUG_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
-		LK_UI_INFO_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
-		LK_UI_WARN_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
-		LK_UI_ERROR_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
-		LK_UI_FATAL_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
 		GOnSceneSetActive.Add(this, &LSceneManagerPanel::SetScene);
-		//SceneManagerPanel->SetScene(InScene);
 
 		m_ComponentCopyScene = LScene::CreateEmpty();
 		m_ComponentCopyEntity = m_ComponentCopyScene->CreateEntity();
@@ -289,16 +283,18 @@ namespace LkEngine {
 	{
 		auto [MousePosX, MousePosY] = ImGui::GetMousePos();
 
-		const auto& viewportBounds = primaryViewport ? LEditorLayer::Get()->m_ViewportBounds : LEditorLayer::Get()->m_SecondViewportBounds;
-		MousePosX -= viewportBounds[0].x;
-		MousePosY -= viewportBounds[0].y;
+		const auto& ViewportBounds = primaryViewport 
+			? LEditorLayer::Get()->ViewportBounds 
+			: LEditorLayer::Get()->SecondViewportBounds;
+		MousePosX -= ViewportBounds[0].X;
+		MousePosY -= ViewportBounds[0].Y;
 
-		const float viewportWidth = viewportBounds[1].x - viewportBounds[0].x;
-		const float viewportHeight = viewportBounds[1].y - viewportBounds[0].y;
+		const float ViewportWidth = ViewportBounds[1].X - ViewportBounds[0].X;
+		const float ViewportHeight = ViewportBounds[1].Y - ViewportBounds[0].Y;
 
 		return { 
-			(MousePosX / viewportWidth) * 2.0f - 1.0f, 
-			((MousePosY / viewportHeight) * 2.0f - 1.0f) * -1.0f 
+			(MousePosX / ViewportWidth) * 2.0f - 1.0f, 
+			((MousePosY / ViewportHeight) * 2.0f - 1.0f) * -1.0f 
 		};
 	}
 

@@ -11,10 +11,14 @@
 
 namespace LkEngine {
 
-	LOpenGLContext::LOpenGLContext(LWindow* InWindowRef)
+	LOpenGLContext::LOpenGLContext(LWindow* InWindow)
     {
-		m_Window = InWindowRef;
-		m_GlfwWindow = m_Window->GetGlfwWindow();
+		Window = InWindow;
+		m_GlfwWindow = Window->GetGlfwWindow();
+
+		/* Attach window delegates. */
+		LK_CORE_DEBUG_TAG("OpenGLContext", "Attaching to OnWindowSizeUpdated delegate");
+		Window->OnWindowSizeUpdated.Add(this, &LOpenGLContext::UpdateResolution);
 	}
 
     void LOpenGLContext::Destroy()
@@ -90,14 +94,15 @@ namespace LkEngine {
 		}
 	}
 
-	void LOpenGLContext::UpdateResolution(uint16_t width, uint16_t height)
+	void LOpenGLContext::UpdateResolution(const uint16_t Width, const uint16_t Height)
 	{
+		LK_CORE_DEBUG_TAG("OpenGLContext", "UpdateResolution -> ({}, {})", Width, Height);
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImVec2 pos = viewport->WorkPos;
-		glViewport(pos.x, pos.y, width, height);
+		const ImVec2 Pos = viewport->WorkPos;
+		glViewport(Pos.x, Pos.y, Width, Height);
 
-		auto& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(width, height);
+		ImGuiIO& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2(Width, Height);
 	}
 
 	void LOpenGLContext::SetDepthEnabled(const bool InEnabled)

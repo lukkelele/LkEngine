@@ -46,9 +46,9 @@ namespace LkEngine {
 			serializer->WriteRaw(Instance);
 		}
 
-		static void Deserialize(StreamReader* deserializer, BoneInfo& Instance)
+		static void Deserialize(StreamReader* Deserializer, BoneInfo& Instance)
 		{
-			deserializer->ReadRaw(Instance);
+			Deserializer->ReadRaw(Instance);
 		}
 	};
 
@@ -102,9 +102,9 @@ namespace LkEngine {
 			serializer->WriteRaw(Instance);
 		}
 
-		static void Deserialize(StreamReader* deserializer, BoneInfluence& Instance)
+		static void Deserialize(StreamReader* Deserializer, BoneInfluence& Instance)
 		{
-			deserializer->ReadRaw(Instance);
+			Deserializer->ReadRaw(Instance);
 		}
 	};
 
@@ -175,19 +175,19 @@ namespace LkEngine {
 			Serializer->WriteRaw(Instance.IsRigged);
 		}
 
-		static void Deserialize(StreamReader* deserializer, Submesh& Instance)
+		static void Deserialize(StreamReader* Deserializer, Submesh& Instance)
 		{
-			deserializer->ReadRaw(Instance.BaseVertex);
-			deserializer->ReadRaw(Instance.BaseIndex);
-			deserializer->ReadRaw(Instance.MaterialIndex);
-			deserializer->ReadRaw(Instance.IndexCount);
-			deserializer->ReadRaw(Instance.VertexCount);
-			deserializer->ReadRaw(Instance.Transform);
-			deserializer->ReadRaw(Instance.LocalTransform);
-			deserializer->ReadRaw(Instance.BoundingBox);
-			deserializer->ReadString(Instance.NodeName);
-			deserializer->ReadString(Instance.MeshName);
-			deserializer->ReadRaw(Instance.IsRigged);
+			Deserializer->ReadRaw(Instance.BaseVertex);
+			Deserializer->ReadRaw(Instance.BaseIndex);
+			Deserializer->ReadRaw(Instance.MaterialIndex);
+			Deserializer->ReadRaw(Instance.IndexCount);
+			Deserializer->ReadRaw(Instance.VertexCount);
+			Deserializer->ReadRaw(Instance.Transform);
+			Deserializer->ReadRaw(Instance.LocalTransform);
+			Deserializer->ReadRaw(Instance.BoundingBox);
+			Deserializer->ReadString(Instance.NodeName);
+			Deserializer->ReadString(Instance.MeshName);
+			Deserializer->ReadRaw(Instance.IsRigged);
 		}
 	};
 

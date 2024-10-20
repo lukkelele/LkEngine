@@ -7,10 +7,13 @@
 
 namespace LkEngine {
 
-	class Keyboard
+	///
+	/// FIXME: UPDATE THIS ENTIRE IMPL
+	///
+	class LKeyboard
 	{
 	public:
-		static void Init();
+		static void Initialize();
 
 		static bool IsKeyPressed(const KeyCode key);
 	};

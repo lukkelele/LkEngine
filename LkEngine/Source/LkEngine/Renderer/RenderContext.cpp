@@ -67,11 +67,6 @@ namespace LkEngine {
 	{
 		switch (LRendererAPI::Current())
 		{
-			case ERendererAPI::Vulkan: 
-			{
-				/* Empty for now. */
-				return;
-			}
 			case ERendererAPI::OpenGL:
 			{
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, MajorVersion); 
@@ -79,11 +74,17 @@ namespace LkEngine {
 				return;
 			}
 
+			case ERendererAPI::Vulkan: 
+			{
+				/* Empty for now. */
+				return;
+			}
 		}
 
 		LK_CORE_ASSERT(false, "SetVersion(MAJOR, MINOR) failed, neither Vulkan or OpenGL was detected");
 	}
 
+	/// PATCH OUT
 	void LRenderContext::HandleViewportEvents()
 	{
 		LWindow& WindowRef = LWindow::Get();

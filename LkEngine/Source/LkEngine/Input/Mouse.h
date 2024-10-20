@@ -8,10 +8,15 @@
 
 namespace LkEngine {
 
+	///
+	/// FIXME: UPDATE THIS IMPL
+	/// ALSO RENAME CLASS
+	///
+
 	class Mouse
 	{
 	public:
-		static void Init();
+		static void Initialize();
 
 		static glm::vec2 GetPos();
 		static LVector2 GetPosition();

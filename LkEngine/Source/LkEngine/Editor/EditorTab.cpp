@@ -64,14 +64,15 @@ namespace LkEngine {
             | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
         ImVec2 nodeWindowSize = ImVec2(Editor->EditorWindowSize.x * (1 - div), Editor->EditorWindowSize.y);
-		ImGui::SetNextWindowPos({ Editor->m_SecondViewportBounds[0].x, (Editor->GetMenuBarSize().y + Editor->GetTabBarSize().y)}, ImGuiCond_Always);
+
+		ImGui::SetNextWindowPos({ Editor->SecondViewportBounds[0].X, (Editor->GetMenuBarSize().y + Editor->GetTabBarSize().y) }, 
+                                ImGuiCond_Always);
 		ImGui::SetNextWindowSize(nodeWindowSize, ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(0, nodeWindowSize.y), ImGuiCond_Always);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        //UI::Begin(windowFlags);
-        NodeEditor->OnImGuiRender(nodeWindowSize);
-        //UI::End();
-
+        {
+            NodeEditor->OnImGuiRender(nodeWindowSize);
+        }
         ImGui::PopStyleVar(1);
 
 #if 0

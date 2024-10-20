@@ -163,7 +163,12 @@ namespace LkEngine{
 		const glm::vec4& GetColor() const { return Color; }
         float GetWidth() const { return Size.x; }
         float GetHeight() const { return Size.y; }
-		void SetSize(const glm::vec2& size) { Size = size; }
+
+		void SetSize(const glm::vec2& size) 
+		{ 
+			Size = size; 
+		}
+
 		void SetSize(float x, float y) { Size = { x, y }; }
 		void SetPassthrough(bool passthrough) { Passthrough = passthrough; }
 		bool IsPassthrough() const { return Passthrough; }

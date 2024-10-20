@@ -42,22 +42,26 @@ namespace LkEngine {
 		CurrentWindowType = EEditorWindowType::Viewport;
 
 		Window = &LApplication::Get()->GetWindow();
-		LK_CORE_ASSERT(Window != nullptr, "Window is nullptr");
+		LK_CORE_ASSERT(Window, "Window is nullptr");
 
-		m_ViewportBounds[0] = { 0, 0 };
-		m_ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
-		m_SecondViewportBounds[0] = { 0, 0 };
-		m_SecondViewportBounds[1] = { 0, 0 };
-		LeftSidebarSize.y = m_ViewportBounds[1].y;
-		RightSidebarSize.y = m_ViewportBounds[1].y;
+		/* Viewport bounds. */
+		ViewportBounds[0] = { 0, 0 };
+		//ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
+		ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
+
+		SecondViewportBounds[0] = { 0, 0 };
+		SecondViewportBounds[1] = { 0, 0 };
+
+		LeftSidebarSize.y = ViewportBounds[1].Y;
+		RightSidebarSize.y = ViewportBounds[1].Y;
 		LastBottomBarSize = Utils::ConvertToImVec2(BottomBarSize);
 
 		EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
-		EditorWindowSize.x = m_ViewportBounds[1].x - LeftSidebarSize.x - RightSidebarSize.x;
-		EditorWindowSize.y = m_ViewportBounds[1].y - BottomBarSize.y /* - topbar_height */;
+		EditorWindowSize.x = ViewportBounds[1].X - LeftSidebarSize.x - RightSidebarSize.x;
+		EditorWindowSize.y = ViewportBounds[1].Y - BottomBarSize.y /* - topbar_height */;
 
-		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
-		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
+		ViewportScalers.x = EditorWindowSize.x / ViewportBounds[1].X;
+		ViewportScalers.y = EditorWindowSize.y / ViewportBounds[1].Y;
 
 		/* Editor UI components. */
 		SceneManagerPanel = MakeShared<LSceneManagerPanel>();
@@ -68,6 +72,12 @@ namespace LkEngine {
 		auto EventCallback = [&Editor](LEvent& Event) { Editor.OnEvent(Event); };
 		LK_CORE_TRACE_TAG("Editor", "Setting event callback to OnEvent");
 		SetEventCallback(EventCallback);
+
+		Window->OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "Window size updated to ({}, {})", NewWidth, NewHeight);
+			SetUpdateWindowFlag(true);
+		});
 	}
 
 	void LEditorLayer::Initialize()
@@ -75,11 +85,15 @@ namespace LkEngine {
 		LObject::Initialize();
 		LK_ASSERT(bInit == false, "EditorLayer already initialized");
 
+		LK_CORE_DEBUG_TAG("Editor", "Initializing layer");
+	#if 0
 		Window->SetScalers(ViewportScalers.x, ViewportScalers.y);
 		Window->SetWidth(static_cast<uint32_t>(EditorWindowSize.x));
 		Window->SetHeight(static_cast<uint32_t>(EditorWindowSize.y));
+	#endif
 
-        // Viewport Framebuffer
+        /* Viewport Framebuffer. */
+		LK_CORE_TRACE_TAG("Editor", "Creating viewport framebuffer");
 		FFramebufferSpecification FramebufferSpec;
 		FramebufferSpec.Attachments = { 
 			EImageFormat::RGBA32F, 
@@ -138,7 +152,7 @@ namespace LkEngine {
 		{
 			Mouse::Pos = Mouse::GetRawPos();
 			Mouse::Pos.x -= LeftSidebarSize.x;
-			Mouse::Pos.y = m_ViewportBounds[1].y - BottomBarSize.y - Mouse::Pos.y;
+			Mouse::Pos.y = ViewportBounds[1].Y - BottomBarSize.y - Mouse::Pos.y;
 
 			Mouse::ScaledPos.x = (Mouse::Pos.x) / ViewportScalers.x;
 			Mouse::ScaledPos.y = (Mouse::Pos.y) / ViewportScalers.y;
@@ -171,8 +185,8 @@ namespace LkEngine {
 		io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
 
 		ImGuiViewportP* Viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
-		ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
-		ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
+		ViewportScalers.x = EditorWindowSize.x / ViewportBounds[1].X;
+		ViewportScalers.y = EditorWindowSize.y / ViewportBounds[1].Y;
 
 #if 0
 		if (m_Scene && SELECTION::SelectedEntity != SELECTION::NULL_ENTITY)
@@ -362,7 +376,7 @@ namespace LkEngine {
 			const ImVec2 windowPos = ImGui::GetWindowPos();
 			if (WindowSize.x != LastSidebarLeftSize.x || WindowSize.y != LastSidebarLeftSize.y)
 			{
-				bWindowsHaveChangedInSize = true;
+				//bWindowsHaveChangedInSize = true;
 			}
 
 			LastSidebarLeftPos = windowPos;
@@ -396,7 +410,7 @@ namespace LkEngine {
 			const ImVec2 WindowSize = ImGui::GetWindowSize();
 			if (WindowSize.x != RightSidebarSize.x || WindowSize.y != RightSidebarSize.y)
 			{
-				bWindowsHaveChangedInSize = true;
+				//bWindowsHaveChangedInSize = true;
 			}
 			LastSidebarRightPos = ImGui::GetWindowPos();
 			LastSidebarRightSize = WindowSize;
@@ -470,9 +484,9 @@ namespace LkEngine {
 		/* Render tabs. */
 		UI_TabManager();
 
-		// If the window sizes have been adjusted, set the bool member to false
-		// This must be run BEFORE the 'WindowsHaveChangedInSize' if-statement
-		if (ShouldUpdateWindowSizes == true)
+		// If the window sizes have been adjusted, set the member to false.
+		// This must be run BEFORE the 'bWindowsHaveChangedInSize'.
+		if (ShouldUpdateWindowSizes)
 		{
 			ShouldUpdateWindowSizes = false; 
 		}
@@ -633,10 +647,10 @@ namespace LkEngine {
         const glm::mat4& viewMatrix = EditorCamera->GetViewMatrix();
         const glm::mat4& projectionMatrix = EditorCamera->GetProjectionMatrix();
 
-		float pos_x = m_SecondViewportBounds[0].x;
-		float pos_y = m_SecondViewportBounds[0].y;
-		float width  = m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x;
-		float height = m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y;
+		float pos_x = SecondViewportBounds[0].X;
+		float pos_y = SecondViewportBounds[0].Y;
+		float width  = SecondViewportBounds[1].X - SecondViewportBounds[0].X;
+		float height = SecondViewportBounds[1].Y - SecondViewportBounds[0].Y;
 
 		auto window = ImGui::FindWindowByName(UI::VIEWPORT_TEXTURE);
 		ImGui::Begin(window->Name, nullptr, UI::CoreViewportFlags | ImGuiWindowFlags_NoScrollbar);
@@ -769,8 +783,8 @@ namespace LkEngine {
 	glm::vec2 LEditorLayer::GetEditorWindowSize() const
 	{
 		glm::vec2 size = { 
-			m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
-			m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y 
+			SecondViewportBounds[1].X - SecondViewportBounds[0].X, 
+			SecondViewportBounds[1].Y - SecondViewportBounds[0].Y 
 		};
 
 		return size;
@@ -1075,14 +1089,15 @@ namespace LkEngine {
 		UI::PopID();
 	}
 
-	void LEditorLayer::SetUpdateWindowFlag(bool flag) 
+	void LEditorLayer::SetUpdateWindowFlag(const bool flag) 
 	{ 
 		// Window width and height has been changed as this function has been called,
 		// therefore need to update the Viewport bounds
+
 		ShouldUpdateWindowSizes = flag; 
 
-		m_ViewportBounds[0] = { 0, 0 };
-		m_ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight()};
+		ViewportBounds[0] = { 0, 0 };
+		ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight()};
 	}
 
 	void LEditorLayer::UI_ShowViewportAndWindowDetails()
@@ -1090,19 +1105,23 @@ namespace LkEngine {
 		ImGui::BeginGroup();
 		{
 			ImGui::Text("Window Info");
-			ImGui::Text("Second Viewport Bounds[0]: (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y);
-			ImGui::Text("Second Viewport Bounds[1]: (%1.f, %1.f)", m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+			ImGui::Text("Second Viewport Bounds[0]: (%1.f, %1.f)", SecondViewportBounds[0].X, SecondViewportBounds[0].Y);
+			ImGui::Text("Second Viewport Bounds[1]: (%1.f, %1.f)", SecondViewportBounds[1].X, SecondViewportBounds[1].Y);
 			ImGui::Text("Second Viewport Size: (%1.f, %1.f)", 
-				m_SecondViewportBounds[1].x - m_SecondViewportBounds[0].x, 
-				m_SecondViewportBounds[1].y - m_SecondViewportBounds[0].y
+				SecondViewportBounds[1].X - SecondViewportBounds[0].X, 
+				SecondViewportBounds[1].Y - SecondViewportBounds[0].Y
 			);
 			ImGui::Text("Window Size: (%1.f, %1.f)", (float)Window->GetWidth(), (float)Window->GetHeight());
-			ImGui::Text("Viewport Window Size: (%1.f, %1.f)", m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+			ImGui::Text("Viewport Window Size: (%1.f, %1.f)", 
+						ViewportBounds[1].X - ViewportBounds[0].X, 
+						ViewportBounds[1].Y - ViewportBounds[0].Y);
+
 			ImGui::Text("EditorLayer Window Size: (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
 			ImGui::Text("Center Window (%1.f, %1.f)", EditorWindowSize.x, EditorWindowSize.y);
 			ImGui::SameLine(0, 20);
 			ImGui::Text("Scaled res (%.1f, %.1f)", EditorWindowSize.x / ViewportScalers.x, EditorWindowSize.y / ViewportScalers.y);
-			ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", m_SecondViewportBounds[0].x, m_SecondViewportBounds[0].y, m_SecondViewportBounds[1].x, m_SecondViewportBounds[1].y);
+			ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", SecondViewportBounds[0].X, SecondViewportBounds[0].Y, SecondViewportBounds[1].X, SecondViewportBounds[1].Y);
 
 			if (EditorCamera->m_IsActive)
 			{
@@ -1152,10 +1171,10 @@ namespace LkEngine {
 		EditorWindowSize.y = ViewportSize.y - (BottomBarSize.y + MenuBarSize.y);
 
 		// Top right point/bound
-		m_SecondViewportBounds[0] = { LeftSidebarSize.x, BottomBarSize.y };
-		m_SecondViewportBounds[1] = { 
-			(m_SecondViewportBounds[0].x + EditorWindowSize.x),
-			(m_SecondViewportBounds[0].y + EditorWindowSize.y)
+		SecondViewportBounds[0] = { LeftSidebarSize.x, BottomBarSize.y };
+		SecondViewportBounds[1] = { 
+			(SecondViewportBounds[0].X + EditorWindowSize.x),
+			(SecondViewportBounds[0].Y + EditorWindowSize.y)
 		};
 
 		// Check to see if any of the editor windows have changed in size and if they have
@@ -1182,12 +1201,12 @@ namespace LkEngine {
 			EditorWindowPos.y -= MenuBarSize.y;
 
 			// Update Viewport scalers as the resolution has been altered
-			ViewportScalers.x = EditorWindowSize.x / m_ViewportBounds[1].x;
-			ViewportScalers.y = EditorWindowSize.y / m_ViewportBounds[1].y;
+			ViewportScalers.x = EditorWindowSize.x / ViewportBounds[1].X;
+			ViewportScalers.y = EditorWindowSize.y / ViewportBounds[1].Y;
 
 			Window->SetScalers(ViewportScalers);
-			Window->SetWidth(EditorWindowSize.x);
-			Window->SetHeight(EditorWindowSize.y);
+			//Window->SetWidth(EditorWindowSize.x);
+			//Window->SetHeight(EditorWindowSize.y);
 
 			if (m_FillSidebarsVertically)
 			{
@@ -1321,7 +1340,7 @@ namespace LkEngine {
 								continue;
 							}
 
-							ImGui::SetNextWindowPos({ m_SecondViewportBounds[0].x, MenuBarSize.y + TabBarSize.y }, ImGuiCond_Always);
+							ImGui::SetNextWindowPos({ SecondViewportBounds[0].X, MenuBarSize.y + TabBarSize.y }, ImGuiCond_Always);
 							ImGui::SetNextWindowSize({ EditorWindowSize.x, EditorWindowSize.y }, ImGuiCond_Always);
 							ImGui::Begin("##TabWindow", NULL, 
 										 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar 

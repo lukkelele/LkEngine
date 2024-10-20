@@ -11,27 +11,35 @@ namespace LkEngine {
     class LOpenGLContext : public LRenderContext
     {
     public:
-        LOpenGLContext(LWindow* InWindowRef);
+        LOpenGLContext(LWindow* InWindow);
         ~LOpenGLContext() = default;
 
-        void Init(const ESourceBlendFunction& InSourceBlendFunction, 
-                  const EDestinationBlendFunction& InDestinationBlendFunction) override;
-        void Destroy() override;
+        virtual void Init(const ESourceBlendFunction& InSourceBlendFunction, 
+                          const EDestinationBlendFunction& InDestinationBlendFunction) override;
+        virtual void Destroy() override;
 
-        GLFWwindow* GetGlfwWindow() override { return m_GlfwWindow; }
+        FORCEINLINE virtual GLFWwindow* GetGlfwWindow() override 
+        { 
+            return m_GlfwWindow; 
+        }
 
-        void SetViewport(const glm::vec2& pos, const glm::vec2& size) override;
-        void UpdateResolution(uint16_t width, uint16_t height) override;
+        virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) override;
+        virtual void UpdateResolution(const uint16_t width, const uint16_t height) override;
 
-        void SetDepthEnabled(const bool InEnabled) override;
-        void SetDepthFunction(const EDepthFunction& depthFunc) override;
-        void SetBlendingEnabled(bool enabled) override;
-        void SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
-                              const EDestinationBlendFunction& InDestinationBlendFunction) override;
-        void SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction) override;
-        void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction) override;
+        virtual void SetDepthEnabled(const bool InEnabled) override;
+        virtual void SetDepthFunction(const EDepthFunction& depthFunc) override;
 
-        FORCEINLINE void SetName(std::string_view InName) override { m_Name = InName; }
+        virtual void SetBlendingEnabled(bool enabled) override;
+        virtual void SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
+                                      const EDestinationBlendFunction& InDestinationBlendFunction) override;
+        virtual void SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction) override;
+        virtual void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction) override;
+
+        FORCEINLINE virtual void SetName(std::string_view InName) override 
+        { 
+            m_Name = InName; 
+        }
+
         FORCEINLINE const std::string GetName() const { return m_Name; }
         
         virtual std::string GetCurrentSourceBlendFunctionName() const override;
@@ -53,7 +61,7 @@ namespace LkEngine {
 
         std::string m_Name;
 
-        LWindow* m_Window;
+        LWindow* Window;
         GLFWwindow* m_GlfwWindow;
 
         TObjectPtr<OpenGLSwapChain> m_SwapChain;

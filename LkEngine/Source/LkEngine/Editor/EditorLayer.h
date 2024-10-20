@@ -191,8 +191,9 @@ namespace LkEngine {
 
 		TObjectPtr<LScene> m_Scene = nullptr;
 		bool m_Enabled = true;
-		glm::vec2 m_ViewportBounds[2];
-		glm::vec2 m_SecondViewportBounds[2];
+
+		LVector2 ViewportBounds[2];
+		LVector2 SecondViewportBounds[2];
 
 		bool m_ShowMetricsTool = false;
 		bool m_ShowStackTool = false;

@@ -13,20 +13,18 @@ namespace LkEngine {
 
     class LWindow;
 
-    //class LRenderContext : public RefCounted
     class LRenderContext : public LObject
     {
     public:
         enum class EProfile 
         { 
-            Core = 0, 
-            Compability = 1 
+            Core, 
+            Compability,
         };
 
     public:
         virtual ~LRenderContext() = default;
 
-        //static Ref<RenderContext> Create(LWindow* WindowRef);
         static TObjectPtr<LRenderContext> Create(LWindow* InWindow);
 
         static void SetProfile(const EProfile& InProfile);
@@ -44,7 +42,7 @@ namespace LkEngine {
         virtual void SetSourceBlendFunction(const ESourceBlendFunction& InSourceFunc) = 0;
         virtual void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationFunc) = 0;
 
-        virtual void UpdateResolution(uint16_t width, uint16_t height) = 0;
+        virtual void UpdateResolution(const uint16_t Width, const uint16_t Height) = 0;
         virtual bool GetBlendingEnabled() const = 0;
 
         virtual void SetName(std::string_view name) = 0;

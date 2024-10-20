@@ -18,7 +18,6 @@ namespace LkEngine {
 
     class LWindow;
 
-    //class LImGuiLayer : public LObject, public LLayer
     class LImGuiLayer : public LLayer
     {
     public:
