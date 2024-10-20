@@ -29,8 +29,8 @@ namespace LkEngine {
 
 		template<typename R>
 		TVector2(const R InX, const R InY)
-			: X(InX)
-			, Y(InY)
+			: X(static_cast<T>(InX))
+			, Y(static_cast<T>(InY))
 		{
 			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
 		} 
