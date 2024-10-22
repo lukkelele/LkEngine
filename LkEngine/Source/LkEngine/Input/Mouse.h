@@ -1,9 +1,11 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "LkEngine/Core/Delegate/Delegate.h"
 
 #include "LkEngine/Input/MouseCodes.h"
 #include "LkEngine/Core/Math/Vector.h"
+
+#include <glm/glm.hpp>
 
 
 namespace LkEngine {
@@ -13,8 +15,12 @@ namespace LkEngine {
 	/// ALSO RENAME CLASS
 	///
 
-	class Mouse
+	class LMouse
 	{
+	public:
+		LK_DECLARE_MULTICAST_DELEGATE(FOnMouseButtonPressed, const FMouseButtonData&);
+		LK_DECLARE_MULTICAST_DELEGATE(FOnMouseButtonReleased, const FMouseButtonData&);
+		LK_DECLARE_MULTICAST_DELEGATE(FOnMouseScrolled, const EMouseScroll);
 	public:
 		static void Initialize();
 
@@ -25,7 +31,6 @@ namespace LkEngine {
 		static void Enable();
 		static void Disable();
 
-		//static bool IsButtonPressed(const EMouseButton Button);
 		static bool IsButtonPressed(const EMouseButton button);
 
 		static float GetMouseX();

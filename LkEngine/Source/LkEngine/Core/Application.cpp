@@ -44,20 +44,23 @@ namespace LkEngine {
             OnEvent(Event); 
         });
 
-        Input::Initialize();
+        LInput::Initialize();
         
         /* Initialize the renderer. */
         Renderer = TObjectPtr<LRenderer>::Create();
         Renderer->Initialize();
 
+        /* UI layer. */
         UILayer = LImGuiLayer::Create();
         UILayer->Initialize();
         UILayer->SetDarkTheme();
 
-        /* Create EditorLayer. */
+    #if LK_USE_EDITOR
+        /* Create and initialize EditorLayer. */
         Editor = MakeUnique<LEditorLayer>();
         Editor->Initialize();
         LayerStack.PushOverlay(Editor.get());
+    #endif
     }
 
     void LApplication::Run()
@@ -71,7 +74,7 @@ namespace LkEngine {
 		{
 			Timestep = Timer.GetDeltaTime();
 
-            Input::Update();
+            LInput::Update();
             LRenderer::BeginFrame();
 
             /** LkEditor */
@@ -190,8 +193,8 @@ namespace LkEngine {
 
 	void LApplication::ProcessEvents()
 	{
-		Input::TransitionPressedKeys();
-		Input::TransitionPressedButtons();
+		LInput::TransitionPressedKeys();
+		LInput::TransitionPressedButtons();
 
 		Window->ProcessEvents();
 

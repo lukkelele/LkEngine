@@ -1,8 +1,12 @@
 #pragma once
 
+/// TODO: Place in build configuration
 #ifndef GLM_ENABLE_EXPERIMENTAL
 #define GLM_ENABLE_EXPERIMENTAL
 #endif
+
+#include <random>
+#include <time.h>
 
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_common.hpp>
@@ -12,9 +16,6 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/norm.hpp>
-
-#include <random>
-#include <time.h>
 
 #include "LkEngine/Core/Core.h"
 

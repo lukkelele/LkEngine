@@ -7,6 +7,7 @@
 
 #include "LkEngine/Core/Math/Math.h"
 
+#include "LkEngine/Renderer/CameraBase.h"
 #include "LkEngine/Renderer/Material.h"
 
 #include "LkEngine/Physics2D/ContactListener2D.h"
@@ -176,14 +177,27 @@ namespace LkEngine{
 
 	struct LCameraComponent
 	{
-		enum class Type { None = -1, Perspective, Orthographic };
-		Type ProjectionType = Type::None;
+	#if 0
+		enum class Type 
+		{ 
+			None = -1, 
+			Perspective, 
+			Orthographic 
+		};
 
-		TObjectPtr<LSceneCamera> Camera;
-		bool Primary = false;
+		Type ProjectionType = Type::None;
+	#endif
+		TObjectPtr<LSceneCamera> Camera{};
+		ECameraProjection ProjectionType = ECameraProjection::None;
+
+		bool Primary = false; /// REMOVE, should be handled by the CameraManager
 
 		LCameraComponent() = default;
-		LCameraComponent(const LCameraComponent& Other) = default;
+		LCameraComponent(const LCameraComponent& Other)
+			: Camera(Other.Camera)
+			, ProjectionType(Other.ProjectionType)
+		{
+		}
 		
 		operator LSceneCamera& () { return *Camera; }
 		operator const LSceneCamera& () const { return *Camera; }

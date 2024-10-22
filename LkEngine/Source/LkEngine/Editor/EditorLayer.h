@@ -5,6 +5,9 @@
  *******************************************************************/
 #pragma once
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
+
 #include "LkEngine/Core/Thread.h"
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
@@ -29,26 +32,19 @@
 
 #include "LkEngine/ImGui/ImGuiLayer.h"
 
+#define LK_UI_ENABLE_LEFT_SIDEBAR_CONTENT 1
+
 
 namespace LkEngine {
 
 	class LScene;
 	class LSceneManagerPanel;
 
-	/** EEditorWindowType */
 	enum class EEditorWindowType
 	{
 		None = 0,
 		Viewport,  // EditorLayer Viewport, 'normal' mode
 		NodeEditorLayer,
-	};
-
-	/** EGizmoType */
-	enum class EGizmoType
-	{
-		Translate = 7 << 0,
-		Rotate    = 7 << 3,
-		Scale     = 7 << 6
 	};
 
 	class LEditorLayer : public LLayer
@@ -71,11 +67,6 @@ namespace LkEngine {
 		FORCEINLINE void SetEventCallback(const FEventCallback& Callback) 
 		{ 
 			m_EventCallback = Callback; 
-		}
-
-		void TestCallback(const LObject& Object)
-		{
-			LK_CORE_DEBUG_TAG("Editor", "TestCallback: {}, ReferenceCount={}", Object.GetName(), Object.GetReferenceCount());
 		}
 
 		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() 
@@ -121,7 +112,8 @@ namespace LkEngine {
 		void RenderViewport();                
 		void RenderViewport(TObjectPtr<LImage> Image); 
 
-        void DrawImGuizmo(LEntity Entity);
+        //void DrawObjectGizmo(const LEntity Entity);
+        void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);
 		void HandleExternalWindows();
 
 		void UI_MainMenuBar();
@@ -199,7 +191,7 @@ namespace LkEngine {
 		bool m_ShowStackTool = false;
 		bool m_ShowStyleEditorLayer = false;
 
-		EGizmoType m_GizmoType = EGizmoType::Translate;
+		EGizmo GizmoType = EGizmo::Translate;
 
         FEventCallback m_EventCallback; /// UPDATE ME
 

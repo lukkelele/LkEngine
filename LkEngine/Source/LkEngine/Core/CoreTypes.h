@@ -52,4 +52,17 @@ namespace LkEngine
 		Hexagon
 	};
 
+
+	template <typename To, typename From>
+	To* Cast(From* Source)
+	{
+		static_assert((sizeof(From) > 0) && (sizeof(To) > 0), "Incomplete types, cannot proceed with cast");
+		if (Source)
+		{
+			return (static_cast<To*>(Source));
+		}
+
+		return nullptr;
+	}
+
 }

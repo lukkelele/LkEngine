@@ -3,6 +3,8 @@
 
 #include "Application.h"
 
+#include "LkEngine/Renderer/Renderer.h"
+
 
 namespace LkEngine {
 
@@ -128,6 +130,13 @@ namespace LkEngine {
 			}
 			Out << YAML::Value << YAML::EndMap;
 
+			/* Renderer. */
+			Out << YAML::Key << "Renderer";
+			Out << YAML::Value << YAML::BeginMap;
+			{
+				Out << YAML::Key << "ClearColor" << YAML::Value << LRenderer::ClearColor;
+			}
+			Out << YAML::Value << YAML::EndMap;
 
 			Out << YAML::EndMap;
 		}
@@ -163,6 +172,18 @@ namespace LkEngine {
 
 			LK_CORE_DEBUG("WindowNode  Width={}  Height={}", Width, Height);
 			Window.SetSize({ Width, Height });
+		}
+
+		/* Renderer. */
+		if (YAML::Node RendererNode = Data["Renderer"])
+		{
+			glm::vec4 ClearColor = LRenderer::DEFAULT_CLEARCOLOR;
+			if (RendererNode["ClearColor"])
+			{
+				ClearColor = RendererNode["ClearColor"].as<glm::vec4>();
+			}
+			LRenderer::ClearColor = ClearColor;
+
 		}
 
 		return true;

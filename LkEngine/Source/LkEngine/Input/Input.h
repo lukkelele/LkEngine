@@ -5,6 +5,7 @@
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Input/Mouse.h"
+#include "LkEngine/Input/MouseCodes.h"
 #include "LkEngine/Input/Keycodes.h"
 
 #include "LkEngine/Core/Event/KeyEvent.h"
@@ -15,23 +16,7 @@ namespace LkEngine {
 
     class LScene;
 
-	using ButtonState = KeyState;
-
-	struct FKeyData
-	{
-		KeyCode Key{};
-		KeyState State = KeyState::None;
-		KeyState OldState = KeyState::None;
-	};
-
-	struct FButtonData
-	{
-		EMouseButton Button = EMouseButton::None;
-		KeyState State = KeyState::None;
-		KeyState OldState = KeyState::None;
-	};
-
-    class Input
+    class LInput
     {
     public:
 		static void Initialize();
@@ -39,20 +24,13 @@ namespace LkEngine {
 		static void Update();
 		static void SetScene(const TObjectPtr<LScene>& InScene); 
 
-		FORCEINLINE static float GetMouseX() 
-		{ 
-			return Mouse::GetMouseX(); 
-		}
+		FORCEINLINE static float GetMouseX() { return LMouse::GetMouseX(); }
+		FORCEINLINE static float GetMouseY() { return LMouse::GetMouseY(); }
 
-		FORCEINLINE static float GetMouseY() 
-		{ 
-			return Mouse::GetMouseY(); 
-		}
-
-		static bool IsKeyPressed(Key key);
-		static bool IsKeyHeld(Key key);
-		static bool IsKeyDown(Key key);
-		static bool IsKeyReleased(const KeyCode key);
+		static bool IsKeyPressed(EKey Key);
+		static bool IsKeyHeld(EKey Key);
+		static bool IsKeyDown(EKey Key);
+		static bool IsKeyReleased(const EKey Key);
 
 		static bool IsMouseButtonPressed(const EMouseButton Button);
 		static bool IsMouseButtonHeld(const EMouseButton Button);
@@ -65,11 +43,17 @@ namespace LkEngine {
 		static void SetCursorMode(ECursorMode mode);
 		static ECursorMode GetCursorMode();
 
-		static void UpdateKeyState(KeyCode key, KeyState NewState);
-		static void UpdateButtonState(const EMouseButton Button, KeyState NewState);
+		static FKeyData& UpdateKeyState(const EKey Key, EKeyState NewState);
+		static FMouseButtonData& UpdateButtonState(const EMouseButton Button, const EMouseButtonState NewState);
 
 		static void TransitionPressedKeys();
 		static void TransitionPressedButtons();
+
+		FORCEINLINE static FMouseButtonData& GetMouseData(const EMouseButton MouseButton)
+		{
+			LK_CORE_ASSERT(MouseDataMap.contains(MouseButton));
+			return (MouseDataMap.at(MouseButton));
+		}
 
 		FORCEINLINE static EMouseButton GetLastMouseButton() 
 		{ 
@@ -81,8 +65,8 @@ namespace LkEngine {
 
 		inline static EMouseButton LastMouseButton = EMouseButton::None;
 
-		inline static std::map<KeyCode, FKeyData> m_KeyData;
-		inline static std::map<EMouseButton, FButtonData> m_MouseData;
+		inline static std::map<EKey, FKeyData> KeyDataMap{};
+		inline static std::map<EMouseButton, FMouseButtonData> MouseDataMap{};
     };
 
 }

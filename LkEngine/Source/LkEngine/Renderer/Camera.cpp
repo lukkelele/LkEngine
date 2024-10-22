@@ -4,30 +4,18 @@
 
 namespace LkEngine {
 
-	LCamera::LCamera(const glm::mat4& projection)
-		: m_ProjectionMatrix(projection)
+	LCamera::LCamera(const glm::mat4& InProjection)
+		: m_ProjectionMatrix(InProjection)
 	{
 	}
 
-	LCamera::LCamera(const float degFov, 
-					 const float width, 
-					 const float height, 
-					 const float nearP, 
-					 const float farP)
-		: m_ProjectionMatrix(glm::perspectiveFov(glm::radians(degFov), width, height, farP, nearP))
+	LCamera::LCamera(const float InDegFov, 
+					 const float InWidth, 
+					 const float InHeight, 
+					 const float InNearP, 
+					 const float InFarP)
+		: m_ProjectionMatrix(glm::perspectiveFov(glm::radians(InDegFov), InWidth, InHeight, InFarP, InNearP))
 	{
 	}
-
-	std::string LCamera::GetTypeStr() const
-	{
-		switch (m_Type)
-		{
-			case Type::Scene:  return "Scene";
-			case Type::Editor: return "Editor";
-			case Type::None:   return "None";
-		}
-		return "NULL";
-	}
-
 
 }

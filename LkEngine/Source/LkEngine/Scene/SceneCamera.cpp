@@ -6,31 +6,16 @@
 
 namespace LkEngine {
 
-	void LSceneCamera::SetPerspective(float degVerticalFOV, float nearClip, float farClip)
-	{
-		m_ProjectionType = ProjectionType::Perspective;
-		m_DegPerspectiveFOV = degVerticalFOV;
-		m_PerspectiveNear = nearClip;
-		m_PerspectiveFar = farClip;
-	}
-
-	void LSceneCamera::SetOrthographic(float Width, float Height, float nearClip, float farClip)
-	{
-		m_ProjectionType = ProjectionType::Orthographic;
-		m_OrthographicNear = nearClip;
-		m_OrthographicFar = farClip;
-	}
-
 	void LSceneCamera::SetViewportSize(uint32_t Width, uint32_t Height)
 	{
 		UpdateView();
-		switch (m_ProjectionType)
+		switch (ProjectionType)
 		{
-			case ProjectionType::Perspective:
+			case ECameraProjection::Perspective:
 				SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), (float)Width, (float)Height, m_PerspectiveNear, m_PerspectiveFar);
 				break;
 
-			case ProjectionType::Orthographic:
+			case ECameraProjection::Orthographic:
 				SetOrthoProjectionMatrix(Width, Height, m_OrthographicNear, m_OrthographicFar);
 				break;
 		}
@@ -46,28 +31,29 @@ namespace LkEngine {
 	{
 		if (m_KeyboardEnabled)
 		{
-			// WASD
-			if (LKeyboard::IsKeyPressed(Key::W))
+			/* WASD */
+			if (LKeyboard::IsKeyPressed(EKey::W))
 			{
 				m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
 			}
-			if (LKeyboard::IsKeyPressed(Key::A))
+			if (LKeyboard::IsKeyPressed(EKey::A))
 			{
 				m_Pos -= glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
 			}
-			if (LKeyboard::IsKeyPressed(Key::S))
+			if (LKeyboard::IsKeyPressed(EKey::S))
 			{
 				m_Pos -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
 			}
-			if (LKeyboard::IsKeyPressed(Key::D))
+			if (LKeyboard::IsKeyPressed(EKey::D))
 			{
 				m_Pos += glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
 			}
-			if (LKeyboard::IsKeyPressed(Key::Q))
+
+			if (LKeyboard::IsKeyPressed(EKey::Q))
 			{
 				//m_Zoom += 0.010f;
 			}
-			if (LKeyboard::IsKeyPressed(Key::R))
+			if (LKeyboard::IsKeyPressed(EKey::R))
 			{
 				//m_Zoom -= 0.010f;
 			}
@@ -77,6 +63,7 @@ namespace LkEngine {
 		{
 		}
 
+		/// FIXME: Use delegate here
         LWindow& Window = LWindow::Get();
 		SetViewportSize(Window.GetViewportWidth(), Window.GetViewportHeight());
 	}

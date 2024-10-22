@@ -62,14 +62,14 @@
  * 
  *  Base classes that inherit from LObject are required to be declared as an LCLASS.
  *
+		virtual std::string GetStaticClass() const override { return #ClassName; } \
  *  Adds the static class type to the metadata registry and implements 
  *  abstract functions and other base functionality from LObject.
  */
 #define LCLASS(ClassName) \
 	public: \
 		using BaseClass = LObject; \
-		virtual std::string GetStaticClass() const override { return #ClassName; } \
-		static std::string StaticClass() { return #ClassName; } \
+		static std::string_view StaticClass() { return #ClassName; } \
 	private: \
 		void LK_META_CLASS_REGISTER_FUNC() \
 		{ \
@@ -115,7 +115,7 @@
 		const char* ClassName = typeid(this).name(); \
 		static bool LK_ObjectRegistration = [&]() \
 		{ \
-			LMetadataRegistry::Get().Register((*this).GetStaticClass(), this); \
+			LMetadataRegistry::Get().Register((*this).StaticClass(), this); \
 			return true; \
 		}(); \
 		assert(LK_ObjectRegistration && "LCLASS_REGISTER failed"); \

@@ -33,7 +33,8 @@ namespace LkEngine {
 
 			LEditorLayer::Get()->SetScene(TObjectPtr<LScene>(this));
 
-			Input::SetScene(TObjectPtr<LScene>(this)); // REMOVE ME
+			/// FIXME
+			LInput::SetScene(TObjectPtr<LScene>(this)); // REMOVE ME
 		}
 
 	#if LK_PHYSICS_ENABLED
@@ -60,7 +61,9 @@ namespace LkEngine {
 		{
 			m_IsActiveScene = true;
 			m_ActiveScene = this;
-			Input::SetScene(TObjectPtr<LScene>(this));
+
+			/// FIXME
+			LInput::SetScene(TObjectPtr<LScene>(this));
 		}
 		
 		if (bIsEditorScene)

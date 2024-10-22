@@ -40,11 +40,15 @@ namespace LkEngine {
         LCLASS(LImGuiLayer);
     };
 
-	enum class GizmoMode : unsigned int 
+
+	/** 
+     * EGizmo 
+     */
+	enum class EGizmo : int
 	{ 
-		Translate = (ImGuizmo::OPERATION::TRANSLATE),
-		Rotate    = (ImGuizmo::OPERATION::ROTATE),
-		Scale     = (ImGuizmo::OPERATION::SCALE)
+		Translate = static_cast<int>(ImGuizmo::OPERATION::TRANSLATE),
+		Rotate    = static_cast<int>(ImGuizmo::OPERATION::ROTATE),
+		Scale     = static_cast<int>(ImGuizmo::OPERATION::SCALE)
 	};
 
 }

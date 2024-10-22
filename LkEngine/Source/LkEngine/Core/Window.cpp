@@ -33,8 +33,10 @@ namespace LkEngine {
 		Data.Height = static_cast<decltype(Data.Height)>(Size.Y);
 
 		LCLASS_REGISTER();
-
-		LK_CORE_DEBUG_TAG("Window", "StaticClassName: \"{}\"", StaticClass());
+		LK_CORE_DEBUG_TAG("Window", "StaticClass: \"{}\"  IsA<LEntity>()={}  IsA<LObject>()={}", 
+						  StaticClass(), 
+						  IsA<LEntity>() ? "TRUE" : "FALSE",
+						  IsA<LObject>() ? "TRUE" : "FALSE");
 	}
 
 	LWindow::~LWindow()
@@ -68,9 +70,9 @@ namespace LkEngine {
 		Data.Width = Specification.Width;
 		Data.Height = Specification.Height;
 	
-		m_GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), static_cast<int>(Size.Y), m_Title.c_str(), nullptr, nullptr);
-		LK_CORE_ASSERT(m_GlfwWindow != nullptr);
-		glfwMakeContextCurrent(m_GlfwWindow);
+		GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), static_cast<int>(Size.Y), m_Title.c_str(), nullptr, nullptr);
+		LK_CORE_ASSERT(GlfwWindow != nullptr);
+		glfwMakeContextCurrent(GlfwWindow);
 
 		/* Create render context. */
 		RenderContext = LRenderContext::Create(this);
@@ -84,115 +86,125 @@ namespace LkEngine {
 		SetVSync(true);
 		LK_CORE_DEBUG_TAG("Graphics Context", "Name: {}", RenderContext->GetName());
 
-		glfwSetWindowUserPointer(m_GlfwWindow, &Data);
+		glfwSetWindowUserPointer(GlfwWindow, &Data);
 
-		/* Input, mouse and keyboard. */
+		/* Input, mouse and Keyboard. */
 		if (glfwRawMouseMotionSupported())
 		{
-			glfwSetInputMode(m_GlfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+			glfwSetInputMode(GlfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 		}
-		glfwSetInputMode(m_GlfwWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
-		glfwSetInputMode(m_GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		glfwSetWindowSizeLimits(m_GlfwWindow, 420, 280, 2560, 1440);
+		glfwSetInputMode(GlfwWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
+		glfwSetInputMode(GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		glfwSetWindowSizeLimits(GlfwWindow, 420, 280, 2560, 1440);
 
-		glfwSetWindowSizeCallback(m_GlfwWindow, WindowResizeCallback);
+		glfwSetWindowSizeCallback(GlfwWindow, WindowResizeCallback);
 
-		glfwSetKeyCallback(m_GlfwWindow, [](GLFWwindow* Window, int key, int scancode, int Action, int mods)
+		glfwSetKeyCallback(GlfwWindow, [](GLFWwindow* Window, int Key, int ScanCode, int Action, int Modifiers)
 		{
-			FWindowData& DataRef = *((FWindowData*)glfwGetWindowUserPointer(Window));
+			FWindowData& WindowDataRef = *((FWindowData*)glfwGetWindowUserPointer(Window));
 
 			switch (Action)
 			{
 				case GLFW_PRESS:
 				{
-					Input::UpdateKeyState((KeyCode)key, KeyState::Pressed);
-					KeyPressedEvent event((KeyCode)key, 0);
-					DataRef.EventCallback(event);
+					LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Pressed);
+			#if 0
+					KeyPressedEvent Event(static_cast<EKey>(Key), 0);
+					WindowDataRef.EventCallback(Event);
+					//WindowDataRef.OnWindowEvent.Broadcast(Event);
+			#endif
 					break;
 				}
 
 				case GLFW_RELEASE:
 				{
-					Input::UpdateKeyState((KeyCode)key, KeyState::Released);
-					KeyReleasedEvent event((KeyCode)key);
-					DataRef.EventCallback(event);
+			#if 0
+					LInput::UpdateKeyState((EKey)Key, EKeyState::Released);
+					KeyReleasedEvent Event((EKey)Key);
+					WindowDataRef.EventCallback(Event);
+			#endif
 					break;
 				}
 
 				case GLFW_REPEAT:
 				{
-					Input::UpdateKeyState((KeyCode)key, KeyState::Held);
-					KeyPressedEvent event((KeyCode)key, 1);
-					DataRef.EventCallback(event);
+					LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Held);
+					//KeyPressedEvent Event(static_cast<EKey>(Key), 1);
+					//WindowDataRef.EventCallback(Event);
+					//WindowDataRef.OnWindowEvent.Broadcast(Event);
+
 					break;
 				}
 			}
 		});
 
 		/* Framebuffer resize callback. */
-		glfwSetFramebufferSizeCallback(m_GlfwWindow, [](GLFWwindow* GlfwWindow, int Width, int Height)
+		glfwSetFramebufferSizeCallback(GlfwWindow, [](GLFWwindow* GlfwWindow, int Width, int Height)
 		{
 			LK_CORE_DEBUG_TAG("GLFW", "Framebuffer Size Callback  ({}, {})", Width, Height);
 			glViewport(0, 0, Width, Height);
 		});
 
-		/* Character callback. */
-		glfwSetCharCallback(m_GlfwWindow, [](GLFWwindow* Window, uint32_t codepoint)
+		/* Character input callback. */
+		glfwSetCharCallback(GlfwWindow, [](GLFWwindow* Window, uint32_t Codepoint)
 		{
-			FWindowData& DataRef = *((FWindowData*)glfwGetWindowUserPointer(Window));
+			FWindowData& WindowDataRef = *(static_cast<FWindowData*>(glfwGetWindowUserPointer(Window)));
 
-			KeyTypedEvent Event((KeyCode)codepoint);
-			DataRef.EventCallback(Event);
+			KeyTypedEvent Event(static_cast<EKey>(Codepoint));
+			WindowDataRef.EventCallback(Event);
 		});
 
-		/* Mouse button callback. */
-#if 1
-		glfwSetMouseButtonCallback(m_GlfwWindow, [](GLFWwindow* GlfwWindow, int Button, int Action, int Modifiers)
+		/* Mouse button callbacks. */
+		glfwSetMouseButtonCallback(GlfwWindow, [](GLFWwindow* GlfwWindow, int Button, int Action, int Modifiers)
 		{
-			FWindowData& DataRef = *((FWindowData*)glfwGetWindowUserPointer(GlfwWindow));
+			FWindowData& WindowDataRef = *static_cast<FWindowData*>(glfwGetWindowUserPointer(GlfwWindow));
 			switch (Action)
 			{
 				case GLFW_PRESS:
 				{
-					Input::UpdateButtonState(static_cast<EMouseButton>(Button), KeyState::Pressed);
-
 					double MousePosX, MousePosY;
 					glfwGetCursorPos(GlfwWindow, &MousePosX, &MousePosY);
-					LMouseButtonPressedEvent Event(static_cast<EMouseButton>(Button), 
-												   { MousePosX, MousePosY });
-					DataRef.EventCallback(Event);
+
+					const FMouseButtonData& ButtonData = LInput::UpdateButtonState(static_cast<EMouseButton>(Button), 
+																				   EMouseButtonState::Pressed);
+					WindowDataRef.OnMouseButtonPressed.Broadcast(ButtonData);
+
 					break;
 				}
 
 				case GLFW_RELEASE:
 				{
-					Input::UpdateButtonState(static_cast<EMouseButton>(Button), KeyState::Released);
-
 					double MousePosX, MousePosY;
 					glfwGetCursorPos(GlfwWindow, &MousePosX, &MousePosY);
-					LMouseButtonReleasedEvent Event(static_cast<EMouseButton>(Button), 
-												   { MousePosX, MousePosY });
-					DataRef.EventCallback(Event);
+
+					const FMouseButtonData& ButtonData = LInput::UpdateButtonState(static_cast<EMouseButton>(Button), 
+																				   EMouseButtonState::Pressed);
+					WindowDataRef.OnMouseButtonReleased.Broadcast(ButtonData);
+
 					break;
 				}
 			}
 		});
-#endif
 
 		/* Cursor position callback. */
-		glfwSetCursorPosCallback(m_GlfwWindow, [](GLFWwindow* Window, double x, double y)
+		glfwSetCursorPosCallback(GlfwWindow, [](GLFWwindow* Window, double x, double y)
 		{
-			FWindowData& data = *((FWindowData*)glfwGetWindowUserPointer(Window));
-			MouseMovedEvent event((float)x, (float)y);
-			data.EventCallback(event);
+			FWindowData& WindowDataRef = *(static_cast<FWindowData*>(glfwGetWindowUserPointer(Window)));
 		});
 
 		/* Mouse scroll callback. */
-		glfwSetScrollCallback(m_GlfwWindow, [](GLFWwindow* Window, double xOffset, double yOffset)
+		glfwSetScrollCallback(GlfwWindow, [](GLFWwindow* Window, double OffsetX, double OffsetY)
 		{
-			FWindowData& data = *((FWindowData*)glfwGetWindowUserPointer(Window));
-			MouseScrolledEvent event((float)xOffset, (float)yOffset);
-			data.EventCallback(event);
+			FWindowData& WindowData = *(static_cast<FWindowData*>(glfwGetWindowUserPointer(Window)));
+			if (OffsetY > 0)
+			{
+				WindowData.OnMouseScrolled.Broadcast(EMouseScroll::Up);
+			}
+			else if (OffsetY < 0)
+			{
+				WindowData.OnMouseScrolled.Broadcast(EMouseScroll::Down);
+			}
+
 		});
 
 		bGlfwInitialized = true;
@@ -200,7 +212,7 @@ namespace LkEngine {
 
 	void LWindow::SwapBuffers()
 	{
-		glfwSwapBuffers(m_GlfwWindow);
+		glfwSwapBuffers(GlfwWindow);
 		glfwPollEvents();
 	}
 	
@@ -212,12 +224,12 @@ namespace LkEngine {
 			RenderContext.Release();
 			RenderContext = nullptr;
 		}
-		if (m_GlfwWindow)
+		if (GlfwWindow)
 		{
-			glfwDestroyWindow(m_GlfwWindow);
+			glfwDestroyWindow(GlfwWindow);
 			glfwTerminate();
 
-			m_GlfwWindow = nullptr;
+			GlfwWindow = nullptr;
 		}
 	}
 	
@@ -264,7 +276,7 @@ namespace LkEngine {
 	#endif
 	}
 
-	void LWindow::MouseButtonCallback(GLFWwindow* Window, int button, int action, int mods)
+	void LWindow::MouseButtonCallback(GLFWwindow* Window, int button, int action, int Modifiers)
 	{
 	}
 
@@ -282,7 +294,7 @@ namespace LkEngine {
 	{
 		glfwPollEvents();
 
-		Input::Update();
+		LInput::Update();
 	}
 
 }

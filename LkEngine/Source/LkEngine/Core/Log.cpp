@@ -9,10 +9,10 @@
 namespace LkEngine {
 
 	/* Assuming the log files are formatted with a timestamp. */
-	static bool CompareLogFiles(const std::filesystem::directory_entry& a, 
-								const std::filesystem::directory_entry& b)
+	static bool CompareLogFiles(const std::filesystem::directory_entry& A, 
+								const std::filesystem::directory_entry& B)
 	{
-		return (a.path().filename().string() < b.path().filename().string());
+		return (A.path().filename().string() < B.path().filename().string());
 	}
 
 	static int CountLogFilesInDir(const std::filesystem::path& InDirectory)

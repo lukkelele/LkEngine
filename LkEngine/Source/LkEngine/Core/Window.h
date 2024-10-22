@@ -14,12 +14,14 @@
 #include "LkEngine/Renderer/SwapChain.h"
 #include "LkEngine/Renderer/RenderPass.h"
 
+#include "LkEngine/Input/Keyboard.h"
+#include "LkEngine/Input/Mouse.h"
+
 
 namespace LkEngine {
 
 	struct FWindowSpecification
 	{
-		//std::string Title = "LkEngine v2.0.1";
         /// @TODO: Get version
 		LString Title = "LkEngine v2.0.1";
 		uint32_t Width = 1600;
@@ -43,6 +45,26 @@ namespace LkEngine {
         }
 	};
 
+	/**
+	 * FWindowData
+     * 
+     *  Data container.
+	 */
+	struct FWindowData
+	{
+		std::string Title{};
+		uint32_t Width = 0;
+		uint32_t Height = 0;
+
+		FEventCallback EventCallback;
+
+        LKeyboard::FOnKeyPressed OnKeyPressed;
+
+		LMouse::FOnMouseButtonPressed OnMouseButtonPressed;
+		LMouse::FOnMouseButtonReleased OnMouseButtonReleased;
+		LMouse::FOnMouseScrolled OnMouseScrolled;
+	};
+
     /**
      * LWindow
      */
@@ -50,10 +72,8 @@ namespace LkEngine {
     {
 		LK_DECLARE_MULTICAST_DELEGATE(FOnWindowSizeUpdated, const uint16_t, const uint16_t);
 		LK_DECLARE_MULTICAST_DELEGATE(FOnWindowScalersUpdated, const float, const float);
-
 		LK_DECLARE_MULTICAST_DELEGATE(FOnViewportSizeUpdated, const uint16_t, const uint16_t);
 		LK_DECLARE_MULTICAST_DELEGATE(FOnViewportScalersUpdated, const float, const float);
-
     public:
         LWindow(const FWindowSpecification& WindowSpecification);
         ~LWindow();
@@ -64,7 +84,7 @@ namespace LkEngine {
         void ProcessEvents();
         void Shutdown();
 
-        FORCEINLINE GLFWwindow* GetGlfwWindow() const { return m_GlfwWindow; }
+        FORCEINLINE GLFWwindow* GetGlfwWindow() const { return GlfwWindow; }
 
         FORCEINLINE LVector2 GetSize() const { return Size; }
         FORCEINLINE uint32_t GetWidth() const { return Size.X; }
@@ -101,7 +121,7 @@ namespace LkEngine {
                 LK_CORE_ERROR_TAG("Window", "Width={}  Height={}  Scalers={{{}, {}}}", 
                                   Size.X, Size.Y, m_ViewportScalers.X, m_ViewportScalers.Y);
 
-                OnWindowSizeUpdated.Broadcast(Size.X, Size.Y);
+                OnWindowSizeUpdated.Broadcast(static_cast<uint16_t>(Size.X), static_cast<uint16_t>(Size.Y));
             }
         }
 
@@ -182,6 +202,9 @@ namespace LkEngine {
             Data.EventCallback = Callback;
         }
 
+        FORCEINLINE FWindowData& GetWindowData() { return Data; }
+        FORCEINLINE const FWindowData& GetWindowData() const { return Data; }
+
         static void WindowResizeCallback(GLFWwindow* window, int width, int height);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
@@ -198,7 +221,7 @@ namespace LkEngine {
         std::string m_Title = "";
 
 	    bool bGlfwInitialized = false;
-        GLFWwindow* m_GlfwWindow = nullptr;
+        GLFWwindow* GlfwWindow = nullptr;
 
         LVector2 Size{};
         LVector2 ViewportSize{};
@@ -209,14 +232,6 @@ namespace LkEngine {
         std::string m_GlslVersion = "";
         bool m_VSync = false;
 
-        struct FWindowData
-        {
-            std::string Title{};
-            uint32_t Width = 0;
-            uint32_t Height = 0;
-
-            FEventCallback EventCallback;
-        };
         FWindowData Data{};
 
         TObjectPtr<LPipeline> m_Pipeline = nullptr;

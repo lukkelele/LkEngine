@@ -20,7 +20,7 @@ namespace LkEngine {
     std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(LScene& scene)
     {
         std::vector<Raycast2DResult> results = {};
-        glm::vec2 MousePos = Mouse::GetScaledPos();
+        glm::vec2 MousePos = LMouse::GetScaledPos();
 
         // Exit early if no camera is attached to the scene
         auto* Editor = LEditorLayer::Get();
@@ -109,12 +109,16 @@ namespace LkEngine {
                 glm::vec2 SpritePoint_TopRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y + quadHeight * 0.50f };
             #endif
 
-                if (Mouse::IsButtonPressed(EMouseButton::Button0))
+                if (LMouse::IsButtonPressed(EMouseButton::Button0))
                 {
                     // Add camera position to adjust for camera placement in the world
-                    bool within_x_boundaries = (MousePos.x + camPos.x >= SpritePoint_BottomLeft.x) && (MousePos.x + camPos.x <= SpritePoint_TopRight.x);
-                    bool within_y_boundaries = (MousePos.y + camPos.y <= SpritePoint_TopLeft.y) && (MousePos.y + camPos.y >= SpritePoint_BottomRight.y);
-                    if (within_x_boundaries && within_y_boundaries)
+                    const bool bInBoundsX = (MousePos.x + camPos.x >= SpritePoint_BottomLeft.x) 
+                        && (MousePos.x + camPos.x <= SpritePoint_TopRight.x);
+
+                    const bool bInBoundsY = (MousePos.y + camPos.y <= SpritePoint_TopLeft.y) 
+                        && (MousePos.y + camPos.y >= SpritePoint_BottomRight.y);
+
+                    if (bInBoundsX && bInBoundsY)
                     {
                         float centerX = tc.Translation.x + quadWidth * 0.50f;
                         float centerY = tc.Translation.y + quadHeight * 0.50f;

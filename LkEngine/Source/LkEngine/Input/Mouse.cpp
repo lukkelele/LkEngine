@@ -11,10 +11,10 @@
 
 namespace LkEngine {
 
-	static bool bInitialized = false;
 
-	void Mouse::Initialize()
+	void LMouse::Initialize()
 	{
+		static bool bInitialized = false;
 		if (bInitialized)
 		{
 			LK_ASSERT(false);
@@ -24,7 +24,7 @@ namespace LkEngine {
 		bInitialized = true;
 	}
 
-	glm::vec2 Mouse::GetPos()
+	glm::vec2 LMouse::GetPos()
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(LWindow::Get().GetGlfwWindow(), &xpos, &ypos);
@@ -34,13 +34,13 @@ namespace LkEngine {
 		Pos.x = x;
 		Pos.y = y;
 
-		Mouse::CenterPos.x = (x / LWindow::Get().GetWidth()) * 2.0f - 1.0f;
-		Mouse::CenterPos.y = ((y / LWindow::Get().GetHeight()) * 2.0f - 1.0f) * -1.0f;
+		LMouse::CenterPos.x = (x / LWindow::Get().GetWidth()) * 2.0f - 1.0f;
+		LMouse::CenterPos.y = ((y / LWindow::Get().GetHeight()) * 2.0f - 1.0f) * -1.0f;
 
 		return Pos;
 	}
 
-	LVector2 Mouse::GetPosition()
+	LVector2 LMouse::GetPosition()
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(LWindow::Get().GetGlfwWindow(), &xpos, &ypos);
@@ -50,13 +50,13 @@ namespace LkEngine {
 		Pos.x = x;
 		Pos.y = y;
 
-		Mouse::CenterPos.x = (x / LWindow::Get().GetWidth()) * 2.0f - 1.0f;
-		Mouse::CenterPos.y = ((y / LWindow::Get().GetHeight()) * 2.0f - 1.0f) * -1.0f;
+		LMouse::CenterPos.x = (x / LWindow::Get().GetWidth()) * 2.0f - 1.0f;
+		LMouse::CenterPos.y = ((y / LWindow::Get().GetHeight()) * 2.0f - 1.0f) * -1.0f;
 
 		return { x, y };
 	}
 
-	glm::vec2 Mouse::GetRawPos()
+	glm::vec2 LMouse::GetRawPos()
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(LWindow::Get().GetGlfwWindow(), &xpos, &ypos);
@@ -64,24 +64,24 @@ namespace LkEngine {
 		return { static_cast<float>(xpos), static_cast<float>(ypos) };
 	}
 
-	void Mouse::SetScaledPos(float x, float y)
+	void LMouse::SetScaledPos(float x, float y)
 	{
 		ScaledPos = { x, y };
 	}
 
-	float Mouse::GetMouseX()
+	float LMouse::GetMouseX()
 	{
 		auto pos = GetPos();
 		return pos.x;
 	}
 
-	float Mouse::GetMouseY()
+	float LMouse::GetMouseY()
 	{
 		auto pos = GetPos();
 		return pos.y;
 	}
 
-	void Mouse::SetPos(float x, float y)
+	void LMouse::SetPos(float x, float y)
 	{
 		Pos.x = x;
 		Pos.y = y;
@@ -89,7 +89,7 @@ namespace LkEngine {
 
 	// The main cursor position is not updated here as the Editor actually adjusts the
 	// position when it is being run because of the editor docking windows
-	glm::vec2 Mouse::GetCenterPos() 
+	glm::vec2 LMouse::GetCenterPos() 
 	{ 
 		CenterPos.x = (Pos.x / LWindow::Get().GetWidth()) * 2.0f - 1.0f;
 		CenterPos.y = ((Pos.y / LWindow::Get().GetHeight()) * 2.0f - 1.0f) * 1.0f;
@@ -98,17 +98,17 @@ namespace LkEngine {
 		return CenterPos;
 	}
 
-	glm::vec2 Mouse::GetScaledPos()
+	glm::vec2 LMouse::GetScaledPos()
 	{
 		return ScaledPos;
 	}
 
-	glm::vec2 Mouse::GetScaledCenterPos()
+	glm::vec2 LMouse::GetScaledCenterPos()
 	{
 		return ScaledCenterPos;
 	}
 
-	bool Mouse::IsButtonPressed(const EMouseButton Button)
+	bool LMouse::IsButtonPressed(const EMouseButton Button)
 	{
 		const bool bImGuiEnabled = LApplication::Get()->GetSpecification().ImGuiEnabled;
 		if (bImGuiEnabled == false)
@@ -146,15 +146,15 @@ namespace LkEngine {
 		return bPressed;
 	}
 
-	void Mouse::Enable()
+	void LMouse::Enable()
 	{
-		Input::SetCursorMode(ECursorMode::Normal);
+		LInput::SetCursorMode(ECursorMode::Normal);
 		UI::SetInputEnabled(true);
 	}
 
-	void Mouse::Disable()
+	void LMouse::Disable()
 	{
-		Input::SetCursorMode(ECursorMode::Locked);
+		LInput::SetCursorMode(ECursorMode::Locked);
 		UI::SetInputEnabled(false);
 	}
 

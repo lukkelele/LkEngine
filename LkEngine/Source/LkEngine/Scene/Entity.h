@@ -27,12 +27,13 @@ namespace LkEngine {
 
 		void OnUpdate(float ts) {}
 
-		template<typename T, typename ...ARGS>
-		T& AddComponent(ARGS&&... args)
+		template<typename T, typename ...TArgs>
+		T& AddComponent(TArgs&&... Args)
 		{
-			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
-			m_Scene->OnComponentAdded<T>(*this, component);
-			return component;
+			T& Component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<TArgs>(Args)...);
+			m_Scene->OnComponentAdded<T>(*this, Component);
+
+			return Component;
 		}
 
 		template<typename... T>
@@ -95,17 +96,8 @@ namespace LkEngine {
 		FORCEINLINE const std::string& Name() { return GetComponent<LTagComponent>().Tag; }
 		FORCEINLINE LTagComponent& Tag() { return GetComponent<LTagComponent>(); }
 		FORCEINLINE LTransformComponent& Transform() { return GetComponent<LTransformComponent>(); }
-		//FORCEINLINE LSpriteComponent& Sprite() { return GetComponent<LSpriteComponent>(); }
-		//FORCEINLINE LCameraComponent& Camera() { return GetComponent<LCameraComponent>(); }
 
-		//FORCEINLINE LRigidBody2DComponent& RigidBody2D() { return GetComponent<LRigidBody2DComponent>(); }
-		//FORCEINLINE LBoxCollider2DComponent& BoxCollider2D() { return GetComponent<LBoxCollider2DComponent>(); }
-
-		/** 
-		 * GetMesh 
-		 * 
-		 *  Throws error if entity doesn't have a mesh component. 
-		 */
+		/** GetMesh, throws error if entity doesn't have the component.*/
 		FORCEINLINE LMeshComponent& GetMesh() 
 		{ 
 			return GetComponent<LMeshComponent>(); 
@@ -116,16 +108,25 @@ namespace LkEngine {
 		operator LTransformComponent&() { return GetComponent<LTransformComponent>(); }
 
 		operator bool () const;
-		bool operator==(const LEntity& Other) const { return m_EntityHandle == Other.m_EntityHandle && m_Scene == Other.m_Scene; }
+
+		bool operator==(const LEntity& Other) const 
+		{ 
+			return ((m_EntityHandle == Other.m_EntityHandle) && (m_Scene == Other.m_Scene)); 
+		}
+
 		bool operator!=(const LEntity& Other) const { return !(*this == Other); }
 
 		LEntity GetParent() const;
-		UUID GetUUID() { return GetComponent<LIDComponent>().ID; }
 
-		void SetParent(LEntity parent)
+		FORCEINLINE UUID GetUUID() const 
+		{ 
+			return GetComponent<LIDComponent>().ID; 
+		}
+
+		FORCEINLINE void SetParent(LEntity InParent)
 		{
 			LEntity CurrentParent = GetParent();
-			if (CurrentParent == parent)
+			if (CurrentParent == InParent)
 			{
 				return;
 			}
@@ -136,16 +137,17 @@ namespace LkEngine {
 				CurrentParent.RemoveChild(*this);
 			}
 
-			// Setting to null is okay
-			SetParentUUID(parent.GetUUID());
+			/* Setting to null is okay. */
+			SetParentUUID(InParent.GetUUID());
 
-			if (parent)
+			if (InParent)
 			{
-				auto& parentChildren = parent.GetChildren();
+				auto& Children = InParent.GetChildren();
 				const UUID uuid = GetUUID();
-				if (std::find(parentChildren.begin(), parentChildren.end(), uuid) == parentChildren.end())
+
+				if (std::find(Children.begin(), Children.end(), uuid) == Children.end())
 				{
-					parentChildren.emplace_back(GetUUID());
+					Children.emplace_back(GetUUID());
 				}
 			}
 		}
@@ -173,6 +175,7 @@ namespace LkEngine {
 		{
 			const UUID ChildID = Child.GetUUID();
 			std::vector<UUID>& Children = GetChildren();
+
 			/* FIXME: Use compressed if statement */
 			auto Iter = std::find(Children.begin(), Children.end(), ChildID);
 			if (Iter != Children.end())

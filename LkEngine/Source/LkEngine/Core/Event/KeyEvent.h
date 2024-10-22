@@ -10,47 +10,45 @@ namespace LkEngine {
 	class KeyEvent : public LEvent
 	{
 	protected:
-		KeyEvent(KeyCode keycode) 
-			: m_KeyCode(keycode) {}
-
+		KeyEvent(EKey InKey) : Key(Key) {}
 	public:
-		inline KeyCode GetKeyCode() const { return m_KeyCode; }
+		FORCEINLINE EKey GetKey() const { return Key; }
 
 		EEventType GetEventType() const { return EEventType::Key; }
 		const char* GetName() const override { return "Key"; }
 
 	protected:
-		KeyCode m_KeyCode;
+		EKey Key{};
 	};
 
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(KeyCode keycode, int repeatCount)
-			: KeyEvent(keycode)
-			, m_RepeatCount(repeatCount) {}
-
-		inline int GetRepeatCount() const { return m_RepeatCount; }
+		KeyPressedEvent(EKey InKey, const int InRepeatCount)
+			: KeyEvent(Key)
+			, RepeatCount(InRepeatCount) {}
 
 		const char* GetName() const override { return "KeyPressed"; }
 		EEventType GetEventType() const { return EEventType::KeyPressed; }
 
+		FORCEINLINE int GetRepeatCount() const { return RepeatCount; }
+
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyPressedEvent: " << (int)m_KeyCode << " (" << m_RepeatCount << " repeats)";
+			ss << "KeyPressedEvent: " << (int)Key << " (" << RepeatCount << " repeats)";
 			return ss.str();
 		}
 
 	private:
-		int m_RepeatCount;
+		int RepeatCount = 0;
 	};
 
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(KeyCode keycode)
-			: KeyEvent(keycode) {}
+		KeyReleasedEvent(EKey InKey)
+			: KeyEvent(Key) {}
 
 		const char* GetName() const override { return "KeyReleased"; }
 		EEventType GetEventType() const { return EEventType::KeyReleased; }
@@ -58,7 +56,7 @@ namespace LkEngine {
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyReleasedEvent: " << (int)m_KeyCode;
+			ss << "KeyReleasedEvent: " << (int)Key;
 			return ss.str();
 		}
 	};
@@ -66,8 +64,8 @@ namespace LkEngine {
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(KeyCode keycode)
-			: KeyEvent(keycode) {}
+		KeyTypedEvent(EKey InKey)
+			: KeyEvent(Key) {}
 
 		const char* GetName() const override { return "KeyTyped"; }
 		EEventType GetEventType() const { return EEventType::KeyTyped; }
@@ -75,7 +73,7 @@ namespace LkEngine {
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyTypedEvent: " << (int)m_KeyCode;
+			ss << "KeyTypedEvent: " << (int)Key;
 			return ss.str();
 		}
 	};

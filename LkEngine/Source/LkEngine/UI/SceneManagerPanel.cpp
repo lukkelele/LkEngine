@@ -422,20 +422,13 @@ namespace LkEngine {
 	void LSceneManagerPanel::UI_CameraSettings()
 	{
 		static ImVec2 ButtonSize = ImVec2(92, 50);
-		//UI::Begin("Editor Camera", ImGuiDockNodeFlags_DockSpace);
 		ImGui::BeginGroup();
 		{
-			if (ImGui::Button("2D Mode", ButtonSize))
+			if (ImGui::Button("Camera Mode", ButtonSize))
 			{
-				LK_CORE_DEBUG_TAG("SceneManagerPanel", "Button clicked -> 2D Mode");
-				LEditorCamera& EditorCamera = *m_Scene->GetEditorCamera();
-				EditorCamera.ApplyViewMode(LEditorCamera::ViewMode::Fake2D);
-				EditorCamera.SetPosition({ -10, 8, -10 });
 			}
-
 		}
 		ImGui::EndGroup();
-		//UI::End();
 	}
 
 }

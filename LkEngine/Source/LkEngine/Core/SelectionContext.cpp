@@ -4,7 +4,7 @@
 
 namespace LkEngine {
 
-	TObjectPtr<LObject> GSelectedEntity{};
+	TObjectPtr<LObject> GSelectedObject{};
 
 	LSelectionContext& LSelectionContext::Get()
 	{
@@ -15,8 +15,7 @@ namespace LkEngine {
 	LSelectionContext::LSelectionContext()
 	{
 		LCLASS_REGISTER();
-
-		LK_CORE_DEBUG_TAG("SelectionContext", "StaticClassName: \"{}\"", GetStaticClass());
+		LK_CORE_TRACE_TAG("SelectionContext", "StaticClassName: \"{}\"", StaticClass());
 	}
 
 }

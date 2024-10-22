@@ -30,16 +30,15 @@ namespace LkEngine {
 		/** Retreive the most recent deserialized scene. */
 		TObjectPtr<LScene> LoadScene();
 
-		void SerializeRuntime(FAssetHandle Scene);
-		bool DeserializeRuntime(FAssetHandle Scene);
+		void SerializeRuntime(const FAssetHandle InSceneHandle);
+		bool DeserializeRuntime(const FAssetHandle InSceneHandle);
 
 	private:
 		static void SerializeEntity(YAML::Emitter& out, LEntity Entity);
 		static void DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> Scene);
-		static void DeserializeEntities(YAML::Node& EntitiesNode, LScene* Scene);
 
 		static void SerializeEditorCamera(YAML::Emitter& out, LEditorCamera& editorCamera);
-		static void DeserializeEditorCamera(YAML::Node& editorCameraNode, LEditorCamera& Scene);
+		static void DeserializeEditorCamera(const YAML::Node& EditorCameraNode, LEditorCamera& Scene);
 
 	public:
 		inline static std::string_view FileFilter = "LkEngine Scene (*.lukkelele)\0*.lukkelele\0";

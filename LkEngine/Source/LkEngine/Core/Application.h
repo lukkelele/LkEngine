@@ -41,7 +41,7 @@
 
 #include "LkEngine/Physics/PhysicsSystem.h"
 
-#define LK_EDITOR_ONLY 1
+#define LK_USE_EDITOR 1
 
 namespace LkEngine {
 
@@ -126,7 +126,7 @@ namespace LkEngine {
         LThreadManager& ThreadManager;
 
         TUniquePtr<LWindow> Window;
-        TUniquePtr<Input> m_Input;
+        //TUniquePtr<LInput> m_Input;
 
         TObjectPtr<LRenderer> Renderer;
         uint32_t m_CurrentFrameIndex = 0;

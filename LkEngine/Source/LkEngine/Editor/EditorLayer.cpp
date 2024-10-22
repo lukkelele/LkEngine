@@ -13,6 +13,7 @@
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Event/SceneEvent.h"
+#include "LkEngine/Input/Mouse.h"
 
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/DockSpace.h"
@@ -86,11 +87,48 @@ namespace LkEngine {
 		LK_ASSERT(bInit == false, "EditorLayer already initialized");
 
 		LK_CORE_DEBUG_TAG("Editor", "Initializing layer");
-	#if 0
+	#if 0 /// DISABLED, NEEDS TO BE RE-EVALUATED
 		Window->SetScalers(ViewportScalers.x, ViewportScalers.y);
 		Window->SetWidth(static_cast<uint32_t>(EditorWindowSize.x));
 		Window->SetHeight(static_cast<uint32_t>(EditorWindowSize.y));
 	#endif
+		/* Attach to LWindow delegates. */
+		LK_CORE_ASSERT(Window, "Window reference is nullptr");
+		if (Window)
+		{
+			FWindowData& WindowData = Window->GetWindowData();
+			LK_CORE_DEBUG_TAG("Editor", "Attaching to window delegates");
+
+			/* Mouse button pressed. */
+			WindowData.OnMouseButtonPressed.Add([&](const FMouseButtonData& MouseButtonData)
+			{
+				LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed: {}", static_cast<int>(MouseButtonData.Button));
+			});
+
+			/* Mouse button released. */
+			WindowData.OnMouseButtonReleased.Add([&](const FMouseButtonData& MouseButtonData)
+			{
+				LK_CORE_DEBUG_TAG("Editor", "MouseButtonReleased: {}", static_cast<int>(MouseButtonData.Button));
+			});
+
+			/* Mouse scroll. */
+			WindowData.OnMouseScrolled.Add([&](const EMouseScroll MouseScroll)
+			{
+				LK_CORE_DEBUG_TAG("Editor", "Mouse Scroll: {}", Enum::ToString(MouseScroll));
+				if (EditorCamera)
+				{
+					if (MouseScroll == EMouseScroll::Up)
+					{
+						EditorCamera->MouseZoom(0.01f);
+					}
+					else if (MouseScroll == EMouseScroll::Down)
+					{
+						EditorCamera->MouseZoom(-0.01f);
+					}
+				}
+			});
+
+		}
 
         /* Viewport Framebuffer. */
 		LK_CORE_TRACE_TAG("Editor", "Creating viewport framebuffer");
@@ -107,7 +145,7 @@ namespace LkEngine {
         FramebufferSpec.Height = LWindow::Get().GetHeight();
 		m_ViewportFramebuffer = LFramebuffer::Create(FramebufferSpec);
 
-		// Camera system
+		/* Editor Camera. */
 		EditorCamera = TObjectPtr<LEditorCamera>::Create(60.0f,                /* FOV    */
 														 Window->GetWidth(),   /* Width  */
 														 Window->GetHeight(),  /* Height */
@@ -119,7 +157,7 @@ namespace LkEngine {
 		EditorCamera->m_Pitch = 0.0f;
 		EditorCamera->m_Yaw = glm::pi<float>();
 
-		// UI Panels
+		/* UI components. */
 		SceneManagerPanel->Initialize();
 		ContentBrowser->Initialize();
 		ComponentEditor->Initialize();
@@ -131,6 +169,7 @@ namespace LkEngine {
 
 		m_ViewportFramebuffer->Bind();
 
+		/* Bind delegate for GEditorOnSelectionChanged. */
 		auto OnSelectionChanged = [&](const LObject& Object)
 		{
 			LK_CORE_DEBUG_TAG("Editor", "OnSelectionChanged Callback: {}, ReferenceCount: {}", 
@@ -138,27 +177,23 @@ namespace LkEngine {
 		};
 		GEditorOnSelectionChanged.Add(OnSelectionChanged);
 
-		GEditorOnSelectionChanged.Add(this, &LEditorLayer::TestCallback);
-
-		LObject Test1;
-		GEditorOnSelectionChanged.Broadcast(Test1);
-
 		bInit = true;
 	}
 
 	void LEditorLayer::OnUpdate(const float DeltaTime)
 	{
-		// The window space is calculated from topleft corner, so remove Mouse::Pos.y to get the actual cursor placement
+		// The window space is calculated from topleft corner, so remove LMouse::Pos.y to get the actual cursor placement
 		{
-			Mouse::Pos = Mouse::GetRawPos();
-			Mouse::Pos.x -= LeftSidebarSize.x;
-			Mouse::Pos.y = ViewportBounds[1].Y - BottomBarSize.y - Mouse::Pos.y;
+			/// MOVE THIS
+			LMouse::Pos = LMouse::GetRawPos();
+			LMouse::Pos.x -= LeftSidebarSize.x;
+			LMouse::Pos.y = ViewportBounds[1].Y - BottomBarSize.y - LMouse::Pos.y;
 
-			Mouse::ScaledPos.x = (Mouse::Pos.x) / ViewportScalers.x;
-			Mouse::ScaledPos.y = (Mouse::Pos.y) / ViewportScalers.y;
+			LMouse::ScaledPos.x = (LMouse::Pos.x) / ViewportScalers.x;
+			LMouse::ScaledPos.y = (LMouse::Pos.y) / ViewportScalers.y;
 
-			Mouse::CenterPos.x = (Mouse::Pos.x / Window->GetWidth()) * 2.0f - 1.0f;
-			Mouse::CenterPos.y = ((Mouse::Pos.y / Window->GetHeight()) * 2.0f - 1.0f) * -1.0f;
+			LMouse::CenterPos.x = (LMouse::Pos.x / Window->GetWidth()) * 2.0f - 1.0f;
+			LMouse::CenterPos.y = ((LMouse::Pos.y / Window->GetHeight()) * 2.0f - 1.0f) * -1.0f;
 		}
 
 		if (EditorCamera)
@@ -208,11 +243,12 @@ namespace LkEngine {
 		CheckLeftSidebarSize();
 		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
 		{
-			static bool bBlendingEnabled = false;
+	#if LK_UI_ENABLE_LEFT_SIDEBAR_CONTENT
 
+			/* Blending */
+			static bool bBlendingEnabled = false;
 			TObjectPtr<LRenderContext> RenderContext = LWindow::Get().GetRenderContext();
 			bBlendingEnabled = RenderContext->GetBlendingEnabled();
-
 			if (ImGui::Checkbox("Depth Testing", &bBlendingEnabled))
 			{
 				Window->SetDepthEnabled(bBlendingEnabled);
@@ -221,9 +257,8 @@ namespace LkEngine {
 			SceneManagerPanel->UI_CameraSettings();
 
 			/* Retrieve the cached textures. */
-			const std::vector<TTexture2DPair>& textures2D = LAssetManager::GetTextures2D();
-
 		#if LK_UI_RENDER_GEOMETRIC_SHAPES_MENU
+			const std::vector<TTexture2DPair>& textures2D = LAssetManager::GetTextures2D();
 			if (CubeTexture)
 			{
 				std::string_view TextureName = CubeTexture->GetName();
@@ -257,17 +292,14 @@ namespace LkEngine {
 		#endif
 
 
-		#if LK_UI_USE_COLORS_MENU
-			//----------------------------------------------------
-			// Colors
-			//----------------------------------------------------
+			/* COLORS */
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			if (ImGui::TreeNode("Colors"))
 			{
 				UI_ClearColorModificationMenu();
-				ImGui::TreePop();
+
+				ImGui::TreePop(); /* Colors. */
 			}
-		#endif
 
 		#if LK_UI_USE_EDITORLAYER_CAMERA
 			//----------------------------------------------------
@@ -381,8 +413,9 @@ namespace LkEngine {
 
 			LastSidebarLeftPos = windowPos;
 			LastSidebarLeftSize = WindowSize;
+	#endif
 		}
-		ImGui::End();  
+		ImGui::End(); /* Left Sidebar. */
 
 
 		//---------------------------------------------------------
@@ -432,28 +465,23 @@ namespace LkEngine {
 		LSceneManagerPanel::DrawComponents(SelectionContext::SelectedEntity);
 	#endif
 
-		//---------------------------------------------------------
-		// Main Window
-		//---------------------------------------------------------
+		/* Main Window. */
 		UI::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 		UI::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		UI::Begin(UI_CORE_VIEWPORT, UI::CoreViewportFlags);
 		{
 			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.x, MenuBarSize.y), ImGuiCond_Always);
-			//ImGui::SetNextWindowSize(ImVec2(EditorWindowSize.x, EditorWindowSize.y), ImGuiCond_Always);
 			ImGui::SetNextWindowSize(ImVec2(EditorWindowSize.x, Viewport->Size.y - (BottomBarSize.y + MenuBarSize.y)), ImGuiCond_Always);
 			UI::Begin(UI::VIEWPORT_TEXTURE, UI::ViewportTextureFlags);
 			{
 				UI_ViewportTexture(); // Actual scene image
 
-			#if 0
-				if (SELECTION::SelectedEntity)
+				if (GSelectedObject)
 				{
-					DrawImGuizmo(SELECTION::SelectedEntity);
+					DrawObjectGizmo(GSelectedObject);
 				}
-			#endif
 
-				// Stats, FPS counter
+				/* Statistics, FPS counter... */
 				UI_WindowStatistics();
 			}
 			UI::End(); // UI::VIEWPORT_TEXTURE
@@ -637,55 +665,64 @@ namespace LkEngine {
 		}
 	}
 
-    void LEditorLayer::DrawImGuizmo(LEntity entity)
+	/// FIXME:
+	void LEditorLayer::DrawObjectGizmo(const TObjectPtr<LObject>& InObject)
     {
-		LK_CORE_ASSERT(entity.HasComponent<LTransformComponent>(), "Entity doesnt have a transform component");
-
-		LTransformComponent& tc = entity.Transform();
-        glm::mat4 transform_matrix = tc.GetTransform();
-        const glm::vec3& cameraPosition = EditorCamera->GetPosition();
-        const glm::mat4& viewMatrix = EditorCamera->GetViewMatrix();
-        const glm::mat4& projectionMatrix = EditorCamera->GetProjectionMatrix();
-
-		float pos_x = SecondViewportBounds[0].X;
-		float pos_y = SecondViewportBounds[0].Y;
-		float width  = SecondViewportBounds[1].X - SecondViewportBounds[0].X;
-		float height = SecondViewportBounds[1].Y - SecondViewportBounds[0].Y;
-
-		auto window = ImGui::FindWindowByName(UI::VIEWPORT_TEXTURE);
-		ImGui::Begin(window->Name, nullptr, UI::CoreViewportFlags | ImGuiWindowFlags_NoScrollbar);
+		if (InObject->IsA<LEntity>())
 		{
-			ImGuizmo::SetOrthographic(static_cast<int>(EditorCamera->GetProjectionType()));
-			ImGuizmo::SetDrawlist();
+			LEntity Entity = InObject->As<LEntity>();
+			//LEntity Entity = const_cast<TObjectPtr<LObject>&>(InObject)->As<LEntity>();
 
-			if (TabManager.GetTabCount() == 1)
-			{
-				ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
-			}
-			else
-			{
-				ImGuizmo::SetRect(pos_x, (pos_y - BottomBarSize.y + MenuBarSize.y + TabBarSize.y), EditorWindowSize.x, EditorWindowSize.y);
-			}
+			LTransformComponent& TransformComponent = Entity.Transform();
+			glm::mat4 TransformMatrix = TransformComponent.GetTransform();
+			const glm::vec3& CameraPos = EditorCamera->GetPosition();
+			const glm::mat4& ViewMatrix = EditorCamera->GetViewMatrix();
+			const glm::mat4& ProjectionMatrix = EditorCamera->GetProjectionMatrix();
 
-			ImGuizmo::Manipulate(
-				glm::value_ptr(viewMatrix),
-				glm::value_ptr(projectionMatrix),
-				(ImGuizmo::OPERATION)EditorCamera->GetGizmoMode(),
-			    ImGuizmo::LOCAL, 
-			    glm::value_ptr(transform_matrix)
-			);
+			const float PosX = SecondViewportBounds[0].X;
+			const float PosY = SecondViewportBounds[0].Y;
+			//const float Width  = SecondViewportBounds[1].X - SecondViewportBounds[0].X;
+			//const float Height = SecondViewportBounds[1].Y - SecondViewportBounds[0].Y;
 
-			if (ImGuizmo::IsUsing())
+			ImGuiWindow* Window = ImGui::FindWindowByName(UI::VIEWPORT_TEXTURE);
+			ImGui::Begin(Window->Name, nullptr, UI::CoreViewportFlags | ImGuiWindowFlags_NoScrollbar);
 			{
-			    glm::vec3 translation, scale;
-			    glm::quat rotation;
-			    Math::DecomposeTransform(transform_matrix, translation, rotation, scale);
-			    tc.Translation = translation;
-			    tc.Scale = scale;
-			    tc.SetRotation(rotation);
+				ImGuizmo::SetOrthographic(static_cast<int>(EditorCamera->GetProjectionType()));
+				ImGuizmo::SetDrawlist();
+
+				if (TabManager.GetTabCount() == 1)
+				{
+					ImGuizmo::SetRect(PosX, (PosY - BottomBarSize.y + MenuBarSize.y), 
+									  EditorWindowSize.x, EditorWindowSize.y);
+				}
+				else
+				{
+					ImGuizmo::SetRect(PosX, (PosY - BottomBarSize.y + MenuBarSize.y + TabBarSize.y), 
+									  EditorWindowSize.x, EditorWindowSize.y);
+				}
+
+				ImGuizmo::Manipulate(
+					glm::value_ptr(ViewMatrix),
+					glm::value_ptr(ProjectionMatrix),
+					static_cast<ImGuizmo::OPERATION>(EditorCamera->GetGizmoMode()),
+					ImGuizmo::LOCAL, 
+					glm::value_ptr(TransformMatrix)
+				);
+
+				if (ImGuizmo::IsUsing())
+				{
+					glm::vec3 Translation;
+					glm::vec3 Scale;
+					glm::quat Rotation;
+					Math::DecomposeTransform(TransformMatrix, Translation, Rotation, Scale);
+
+					TransformComponent.Translation = Translation;
+					TransformComponent.Scale = Scale;
+					TransformComponent.SetRotation(Rotation);
+				}
 			}
+			ImGui::End(); // Window->Name
 		}
-		ImGui::End();
     }
 
 	// TODO: Right alignment in the child window
@@ -714,7 +751,7 @@ namespace LkEngine {
 			const float FPS = 1000.0f / LApplication::Get()->GetTimestep();
 			ImGui::Text("FPS: %1.f", FPS);
 
-			if (EditorCamera->m_IsActive)
+			if (EditorCamera->bIsActive)
 			{
 				ImGui::Text("FOV: %1.f", EditorCamera->m_DegPerspectiveFOV);
 				const glm::vec3& camPos = EditorCamera->GetPosition();
@@ -728,7 +765,7 @@ namespace LkEngine {
 				ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", EditorCamera->GetFocalPoint().x, EditorCamera->GetFocalPoint().y, EditorCamera->GetFocalPoint().z);
 
 				// Mouse data.
-				ImGui::Text("Mouse Button: %s", Enum::ToString(Input::GetLastMouseButton()));
+				ImGui::Text("Mouse Button: %s", Enum::ToString(LInput::GetLastMouseButton()));
 			}
 		}
 		ImGui::EndChild();
@@ -1123,10 +1160,10 @@ namespace LkEngine {
 			ImGui::Text("Scaled res (%.1f, %.1f)", EditorWindowSize.x / ViewportScalers.x, EditorWindowSize.y / ViewportScalers.y);
 			ImGui::Text("Centered window pos (%1.f, %1.f) - (%1.f, %1.f)", SecondViewportBounds[0].X, SecondViewportBounds[0].Y, SecondViewportBounds[1].X, SecondViewportBounds[1].Y);
 
-			if (EditorCamera->m_IsActive)
+			if (EditorCamera->bIsActive)
 			{
-				glm::vec2 cameraPos = EditorCamera->GetPosition();
-				ImGui::Text("EditorCamera Position: (%.1f, %.1f)", cameraPos.x, cameraPos.y);
+				const glm::vec2 CameraPos = EditorCamera->GetPosition();
+				ImGui::Text("EditorCamera Position: (%.1f, %.1f)", CameraPos.x, CameraPos.y);
 			}
 
 		}
@@ -1138,10 +1175,10 @@ namespace LkEngine {
 		ImGui::BeginGroup();
 		{
 			ImGui::SeparatorText("Mouse Info");
-			ImGui::Text("Raw Pos (%1.f, %1.f)", Mouse::Pos.x, Mouse::Pos.y);
-			ImGui::Text("Scaled Pos (%.1f, %.1f)", Mouse::ScaledPos.x, Mouse::ScaledPos.y);
-			ImGui::Text("Center Normalized (%.2f, %.2f)", Mouse::CenterPos.x, Mouse::CenterPos.y);
-			ImGui::Text("Center Scaled (%.2f, %.2f)", (Mouse::CenterPos.x * EditorWindowSize.x * 0.50f) / ViewportScalers.x, Mouse::CenterPos.y * EditorWindowSize.y * 0.50f / ViewportScalers.y) ;
+			ImGui::Text("Raw Pos (%1.f, %1.f)", LMouse::Pos.x, LMouse::Pos.y);
+			ImGui::Text("Scaled Pos (%.1f, %.1f)", LMouse::ScaledPos.x, LMouse::ScaledPos.y);
+			ImGui::Text("Center Normalized (%.2f, %.2f)", LMouse::CenterPos.x, LMouse::CenterPos.y);
+			ImGui::Text("Center Scaled (%.2f, %.2f)", (LMouse::CenterPos.x * EditorWindowSize.x * 0.50f) / ViewportScalers.x, LMouse::CenterPos.y * EditorWindowSize.y * 0.50f / ViewportScalers.y) ;
 			ImGui::Text("Mouse Scalers (%.2f, %.2f)", ViewportScalers.x, ViewportScalers.y);
 			ImGui::Separator();
 			ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", LastSidebarRightSize.x, LastSidebarRightSize.y);

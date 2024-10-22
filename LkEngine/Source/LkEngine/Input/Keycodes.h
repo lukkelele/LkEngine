@@ -5,7 +5,7 @@
 
 namespace LkEngine {
 
-	typedef enum class KeyCode : uint16_t 
+	enum class EKey : uint16_t 
 	{
 		Space = 32,
 		Apostrophe = 39,
@@ -93,9 +93,9 @@ namespace LkEngine {
 		RightAlt = 346,
 		RightSuper = 347,
 		Menu = 348
-	} Key;
+	};
 
-	enum class KeyState
+	enum class EKeyState
 	{
 		None = -1,
 		Pressed,
@@ -106,14 +106,14 @@ namespace LkEngine {
 	/// @FIXME: Temporary until metadata is available.
 	namespace Enum
 	{
-		FORCEINLINE static constexpr const char* ToString(const KeyState State)
+		FORCEINLINE static constexpr const char* ToString(const EKeyState State)
 		{
 			switch (State)
 			{
-				case KeyState::None:      return "None";
-				case KeyState::Pressed:   return "Pressed";
-				case KeyState::Held:      return "Held";
-				case KeyState::Released:  return "Released";
+				case EKeyState::None:      return "None";
+				case EKeyState::Pressed:   return "Pressed";
+				case EKeyState::Held:      return "Held";
+				case EKeyState::Released:  return "Released";
 			}
 
 			assert(false);
