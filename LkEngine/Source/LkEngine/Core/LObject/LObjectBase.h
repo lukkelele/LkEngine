@@ -25,10 +25,10 @@ namespace LkEngine {
 	/**
 	 * LObjectFlag 
 	 * 
-	 *  Used for initialization stages and garbage collection.
+	 *  Used for object initialization, loading and garbage collection.
 	 */
 	using LObjectFlag = uint32_t;
-	namespace ObjectFlag
+	namespace EObjectFlag
 	{
 		enum Flag : LObjectFlag
 		{
@@ -41,7 +41,7 @@ namespace LkEngine {
 		};
 	}
 
-	// TODO: Implement this
+	/// TODO: Implement this
 	template<typename TObject>
 	concept HasCoreObjectFunctionality = requires(TObject Object)
 	{

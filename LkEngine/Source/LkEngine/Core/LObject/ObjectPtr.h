@@ -162,9 +162,21 @@ namespace LkEngine {
 		const T* Get() const { return static_cast<T*>(ObjectPtr); }
 
 		template<typename R>
-		TObjectPtr<R> As() const
+		FORCEINLINE TObjectPtr<R> As() const
 		{
 			return TObjectPtr<R>(*this);
+		}
+
+		/** Wrapper for LObject::IsA. */
+		template<typename T>
+		FORCEINLINE bool IsA() const
+		{
+			if (ObjectPtr)
+			{
+				return (ObjectPtr->IsA<T>());
+			}
+
+			return false;
 		}
 
 		void Reset(T* ObjectRef = nullptr)
