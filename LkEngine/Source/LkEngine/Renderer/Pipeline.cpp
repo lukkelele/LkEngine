@@ -10,13 +10,13 @@
 
 namespace LkEngine {
 
-	TObjectPtr<LPipeline> LPipeline::Create(const FPipelineSpecification& InPipelineSpecification)
+	TObjectPtr<LPipeline> LPipeline::Create(const FPipelineSpecification& InSpecification)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL:
 			{
-				return TObjectPtr<LOpenGLPipeline>::Create(InPipelineSpecification);
+				return TObjectPtr<LOpenGLPipeline>::Create(InSpecification);
 			}
 
 			case ERendererAPI::Vulkan:

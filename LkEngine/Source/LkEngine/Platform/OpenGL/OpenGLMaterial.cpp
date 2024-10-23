@@ -7,21 +7,19 @@
 namespace LkEngine {
 
     LOpenGLMaterial::LOpenGLMaterial(const TObjectPtr<LShader>& InShader, const std::string& InName)
-        : Shader(InShader.As<OpenGLShader>())
+        : Shader(InShader.As<LOpenGLShader>())
         , Name(InName)
     {
 		//LRenderer::RegisterShaderDependency(Shader, this);
-		//LRenderer::RegisterShaderDependency(Shader, (*this).As<LMaterial>());
 
         Texture = LRenderer::GetWhiteTexture();
     }
 
    	LOpenGLMaterial::LOpenGLMaterial(TObjectPtr<LMaterial> material, const std::string& InName)
-		: Shader(material->GetShader().As<OpenGLShader>())
+		: Shader(material->GetShader().As<LOpenGLShader>())
         , Name(InName)
 	{
 		//LRenderer::RegisterShaderDependency(Shader, this);
-		//LRenderer::RegisterShaderDependency(Shader, (*this).As<LMaterial>());
 
         if (InName.empty())
         {
@@ -37,9 +35,9 @@ namespace LkEngine {
             Texture = LRenderer::GetWhiteTexture();
         }
 
-		TObjectPtr<LOpenGLMaterial> glMaterial = material.As<LOpenGLMaterial>();
-		m_UniformStorageBuffer = FBuffer::Copy(glMaterial->m_UniformStorageBuffer.Data, 
-                                               glMaterial->m_UniformStorageBuffer.Size);
+		TObjectPtr<LOpenGLMaterial> OpenGLMaterial = material.As<LOpenGLMaterial>();
+		UniformStorageBuffer = FBuffer::Copy(OpenGLMaterial->UniformStorageBuffer.Data, 
+                                             OpenGLMaterial->UniformStorageBuffer.Size);
 
         LK_CORE_WARN_TAG("OpenGLMaterial", "Created new material based on another material called \"{}\"", material->GetName());
 	}

@@ -344,9 +344,9 @@ namespace LkEngine {
 		//RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *shader);
 	}
 
-	void LRenderer::RegisterShaderDependency(TObjectPtr<LShader> shader, TObjectPtr<LMaterial> material)
+	void LRenderer::RegisterShaderDependency(TObjectPtr<LShader> Shader, TObjectPtr<LMaterial> material)
 	{
-		s_ShaderDependencies[shader->GetHash()].Materials.push_back(material);
+		s_ShaderDependencies[Shader->GetHash()].Materials.push_back(material);
 	}
 
 	void LRenderer::LoadTextures()

@@ -61,13 +61,14 @@ namespace LkEngine {
 
     private:
 		std::string Name{};
-		TObjectPtr<OpenGLShader> Shader{};
+		MaterialSpecification Specification{};
+
+		//TObjectPtr<LOpenGLShader> Shader{};
+		TObjectPtr<LShader> Shader{};
 		TObjectPtr<LTexture2D> Texture{};
 
-		MaterialSpecification m_Properties{};
-
-		uint32_t m_MaterialFlags = 0;
-		FBuffer m_UniformStorageBuffer;
+		uint32_t MaterialFlags = 0;
+		FBuffer UniformStorageBuffer{};
     };
 
 

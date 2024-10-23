@@ -2,50 +2,139 @@
 
 #include "LkEngine/Renderer/Shader.h"
 
+#include "LkOpenGL.h"
+
 
 namespace LkEngine {
 
-    class OpenGLShader : public LShader
+    class LOpenGLShader : public LShader
     {
 	public:
-		OpenGLShader() = default;
-		OpenGLShader(const std::string& filepath);
-		OpenGLShader(const std::string& vertexPath, const std::string& fragmentPath);
-		~OpenGLShader() override;
+		LOpenGLShader(const std::filesystem::path& InFilePath);
+		LOpenGLShader(const FShaderProgramSource& ShaderProgramSource);
+		LOpenGLShader() = delete;
+		~LOpenGLShader();
 
-		virtual void Bind() const override;
-		virtual void Unbind() const override;
+		FORCEINLINE virtual void Bind() const override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+		}
 
-		/// FIXME: TEMPLATES
-		virtual void Set(const std::string& name, int value) override;
-		virtual void Set(const std::string& name, bool value) override;
-		virtual void Set(const std::string& name, float value) override;;
-		virtual void Set(const std::string& name, uint32_t value) override;
-		virtual void Set(const std::string& name, const glm::vec2& value) override;
-		virtual void Set(const std::string& name, const glm::vec3& value) override;
-		virtual void Set(const std::string& name, const glm::vec4& value) override; 
-		virtual void Set(const std::string& name, const glm::ivec2& value) override;
-		virtual void Set(const std::string& name, const glm::ivec3& value) override;
-		virtual void Set(const std::string& name, const glm::ivec4& value) override;
-		virtual void Set(const std::string& name, const glm::mat4& value) override;
+		FORCEINLINE virtual void Unbind() const override
+		{
+			LK_OpenGL(glUseProgram(0));
+		}
+
+		FORCEINLINE virtual RendererID GetRendererID() const override { return m_RendererID; }
+		FORCEINLINE virtual RendererID& GetRendererID() override { return m_RendererID; }
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const int Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), Value));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const bool Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), static_cast<int>(Value)));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const float Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform1f(GetUniformLocation(Uniform.data()), Value));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const uint32_t Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), Value));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec2& Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID)); 
+			LK_OpenGL(glUniform2f(GetUniformLocation(Uniform.data()), Value.x, Value.y));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec3& Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform3f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec4& Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform4f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec2& Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform2i(GetUniformLocation(Uniform.data()), Value.x, Value.y));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec3& Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform3i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec4& Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniform4i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
+		}
+
+		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::mat4& Value) override
+		{
+			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUniformMatrix4fv(GetUniformLocation(Uniform.data()), 1, GL_FALSE, &Value[0][0]));
+		}
 		
-		int GetUniformLocation(const std::string& name);
-
-		virtual RendererID GetRendererID() const override { return m_RendererID; }
-		virtual RendererID& GetRendererID() override { return m_RendererID; }
-
-		virtual unsigned int CompileShader(unsigned int type, const std::string& source) override;
-		virtual unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) override;
-
-		virtual size_t GetHash() override;
+		FORCEINLINE virtual std::size_t GetHash() override
+		{
+			return Hash::GenerateFNVHash(FilePath.string());
+		}
 
 	private:
-		RendererID m_RendererID;
-		std::unordered_map<std::string, int> m_UniformLocationCache;
+		/**
+		 * @brief Get location of a uniform.
+         * 
+		 * Do not use any string view types for the passed argument here.
+		 * Need to extend the string lifetime to be sure call to OpenGL doesn't fail.
+		 */
+		FORCEINLINE int GetUniformLocation(const std::string& Uniform)
+		{
+			if (UniformLocationCache.find(Uniform) != UniformLocationCache.end())
+			{
+				return UniformLocationCache[Uniform];
+			}
 
-		std::filesystem::path m_FilePath{};
+			int UniformLocation;
+			LK_OpenGL(UniformLocation = glGetUniformLocation(m_RendererID, Uniform.c_str()));
+			if (UniformLocation == -1)
+			{
+				LK_CORE_WARN_TAG("Shader", "Uniform \"{}\" is not in use", Uniform);
+			}
 
-		std::string m_VertexPath{};
-		std::string m_FragmentPath{};
+			/* TODO: Should caching be placed in 'else' statement here? */
+			UniformLocationCache[Uniform] = UniformLocation;
+
+			return UniformLocation;
+		}
+
+		virtual uint32_t CompileShader(const uint32_t InShaderType, const std::string& Source) override;
+		virtual uint32_t CreateShader(const FShaderProgramSource& ShaderProgramSource) override;
+
+	private:
+		RendererID m_RendererID = 0;
+
+		std::unordered_map<std::string, int> UniformLocationCache;
+		std::filesystem::path FilePath{};
+
+		LCLASS(LOpenGLShader);
     };
 }

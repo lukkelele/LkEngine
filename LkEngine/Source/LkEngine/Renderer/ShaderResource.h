@@ -7,17 +7,22 @@
 
 namespace LkEngine {
 
-	struct ShaderProgramSource
+	struct FShaderProgramSource
 	{
-		std::string VertexSource{};
-		std::string FragmentSource{};
+		std::string Vertex{};
+		std::string Fragment{};
+
+		bool IsValid() const
+		{
+			return ((Vertex.size() > 0) && (Fragment.size() > 0));
+		}
 	};
 
-	class ShaderResourceDeclaration
+	class LShaderResourceDeclaration
 	{
 	public:
-		ShaderResourceDeclaration() = default;
-		ShaderResourceDeclaration(const std::string& InName, 
+		LShaderResourceDeclaration() = default;
+		LShaderResourceDeclaration(const std::string& InName, 
 								  uint32_t InSet, 
 								  uint32_t InResourceRegister, 
 								  uint32_t InCount)
@@ -28,12 +33,12 @@ namespace LkEngine {
 		{
 		}
 
-		virtual const std::string& GetName() const { return Name; }
-		virtual uint32_t GetSet() const { return Set; }
-		virtual uint32_t GetRegister() const { return Register; }
-		virtual uint32_t GetCount() const { return Count; }
+		FORCEINLINE virtual const std::string& GetName() const { return Name; }
+		FORCEINLINE virtual uint32_t GetSet() const { return Set; }
+		FORCEINLINE virtual uint32_t GetRegister() const { return Register; }
+		FORCEINLINE virtual uint32_t GetCount() const { return Count; }
 
-		static void Serialize(StreamWriter* Serializer, const ShaderResourceDeclaration& Instance)
+		static void Serialize(StreamWriter* Serializer, const LShaderResourceDeclaration& Instance)
 		{
 			Serializer->WriteString(Instance.Name);
 			Serializer->WriteRaw(Instance.Set);
@@ -41,7 +46,7 @@ namespace LkEngine {
 			Serializer->WriteRaw(Instance.Count);
 		}
 
-		static void Deserialize(StreamReader* DeSerializer, ShaderResourceDeclaration& Instance)
+		static void Deserialize(StreamReader* DeSerializer, LShaderResourceDeclaration& Instance)
 		{
 			DeSerializer->ReadString(Instance.Name);
 			DeSerializer->ReadRaw(Instance.Set);
@@ -50,12 +55,11 @@ namespace LkEngine {
 		}
 
 	private:
-		std::string Name;
+		std::string Name{};
 		uint32_t Set = 0;
 		uint32_t Register = 0;
 		uint32_t Count = 0;
 	};
 
-	using ShaderResourceList = std::vector<ShaderResourceDeclaration*>;
-
+	using ShaderResourceList = std::vector<LShaderResourceDeclaration*>;
 }

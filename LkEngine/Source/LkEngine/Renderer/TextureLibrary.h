@@ -53,8 +53,6 @@ namespace LkEngine {
         static LTextureLibrary& Get();
 
     private:
-        //bool bInitialized = false;
-
         TObjectPtr<LTexture2D> m_WhiteTexture{};
         TObjectPtr<LTexture2D> m_BlackTexture{};
 
@@ -63,7 +61,7 @@ namespace LkEngine {
         std::unordered_map<std::string, TObjectPtr<LTexture2D>> m_Collection2D;
         std::unordered_map<std::string, TTexture2DMap> m_Collections2D;
 
-        //inline static TObjectPtr<LTextureLibrary> m_Instance = nullptr;
+        LCLASS(LTextureLibrary);
     };
 
 }

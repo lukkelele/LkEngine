@@ -46,6 +46,8 @@ namespace LkEngine {
 		std::string m_FilePath;
 
 		glm::vec4 m_TintColor = Color::RGBA::Transparent;
+
+		LCLASS(LOpenGLImage);
 	};
 
 	/********************************************************************************
@@ -95,6 +97,8 @@ namespace LkEngine {
 		std::filesystem::path m_FilePath{};
 
 		glm::vec4 m_TintColor = Color::RGBA::Transparent;
+
+		LCLASS(LOpenGLImage2D);
 	};
 
 	namespace GLUtils 

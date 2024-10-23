@@ -7,7 +7,7 @@
 
 namespace LkEngine {
 
-	class LShader; 
+	class LShader;
 
 	struct PipelineStatistics
 	{
@@ -33,7 +33,7 @@ namespace LkEngine {
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 
 		/** Factory function. */
-		static TObjectPtr<LPipeline> Create(const FPipelineSpecification& InPipelineSpecification);
+		static TObjectPtr<LPipeline> Create(const FPipelineSpecification& InSpecification);
 
 	private:
 		LCLASS(LPipeline)

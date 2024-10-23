@@ -1,13 +1,11 @@
 #include "LKpch.h"
 #include "Shader.h"
-//#include <glad/glad.h>
 
 #include "LkEngine/Serialization/FileStream.h"
 #include "LkEngine/Serialization/StreamReader.h"
 #include "LkEngine/Serialization/StreamWriter.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLShader.h"
-//#include "LkEngine/Platform/Vulkan/VulkanShader.h"
 
 
 #include "RendererAPI.h"
@@ -15,16 +13,16 @@
 
 namespace LkEngine {
 
-	TObjectPtr<LShader> LShader::Create(const std::string& InFilepath)
+	TObjectPtr<LShader> LShader::Create(const std::string& InFilePath)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL:
 			{
-				return TObjectPtr<OpenGLShader>::Create(InFilepath);
+				return TObjectPtr<LOpenGLShader>::Create(InFilePath);
 			}
 
-			case ERendererAPI::None: break;
+			case ERendererAPI::None:
 			default: break;
 		}
 
@@ -32,13 +30,13 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	TObjectPtr<LShader> LShader::Create(const std::string& vertexPath, const std::string& fragmentPath)
+	TObjectPtr<LShader> LShader::Create(const FShaderProgramSource& ShaderProgramSource)
 	{
 		switch (LRendererAPI::Current())
 		{
-			case ERendererAPI::OpenGL: return TObjectPtr<OpenGLShader>::Create(vertexPath, fragmentPath);
+			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLShader>::Create(ShaderProgramSource);
 
-			case ERendererAPI::None: break;
+			case ERendererAPI::None:
 			default: break;
 		}
 
@@ -46,107 +44,92 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	ShaderProgramSource LShader::ParseShader(const std::string& filepath)
+	bool LShader::ParseShader(FShaderProgramSource& ShaderProgramSource, const std::filesystem::path& InFilePath)
 	{
-		enum class ShaderType
-		{
-			NONE = -1,
-			VERTEX = 0,
-			FRAGMENT = 1
-		};
+		std::ifstream InputStream(InFilePath);
 
-		std::ifstream stream(filepath);
-		std::string line;
 		std::stringstream ss[2];
-		ShaderType type = ShaderType::NONE;
+		std::string Line;
 
-		while (getline(stream, line))
+		EShaderType ShaderType = EShaderType::None;
+		while (getline(InputStream, Line))
 		{
-	#ifdef LK_ENGINE_PRINT_SHADER
-			printf("%s\n", line.c_str());
-	#endif
-			if (line.find("#shader") != std::string::npos)
+		#ifdef LK_ENGINE_PRINT_SHADER
+			printf("%s\n", Line.c_str());
+		#endif
+			if (Line.find("#shader") != std::string::npos)
 			{
-				if (line.find("vertex") != std::string::npos)
+				if (Line.find("vertex") != std::string::npos)
 				{
-					type = ShaderType::VERTEX;
+					ShaderType = EShaderType::Vertex;
 				}
-				else if (line.find("fragment") != std::string::npos)
+				else if (Line.find("fragment") != std::string::npos)
 				{
-					type = ShaderType::FRAGMENT;
+					ShaderType = EShaderType::Fragment;
 				}
 			} 
 			else
-			{	// Use ShaderType to append lines appropriately 
-				if (type != ShaderType::NONE)
+			{	
+				if (ShaderType != EShaderType::None)
 				{
-					ss[(int)type] << line << '\n';
+					ss[static_cast<int>(ShaderType)] << Line << '\n';
 				}
 			}
 		}
 
-		std::string vertex_str = ss[0].str();
-		std::string frag_str = ss[1].str();
+		ShaderProgramSource.Vertex = ss[0].str();
+		ShaderProgramSource.Fragment = ss[1].str();
 
-		/* Check for errors */
-		if (vertex_str.empty())
-		{
-			LK_CORE_ERROR("Parsed vertex shader is empty!");
-		}
-		if (frag_str.empty())
-		{
-			LK_CORE_ERROR("Parsed fragment shader is empty!");
-		}
-
-		return { vertex_str, frag_str };
+		return ShaderProgramSource.IsValid();
 	}
 
-	ShaderProgramSource LShader::ParseShaders(const std::string& vertexPath, const std::string& fragmentPath)
+	bool LShader::ParseShaders(FShaderProgramSource& ShaderProgramSource, 
+							   const std::filesystem::path& InVertexPath, 
+							   const std::filesystem::path& InFragmentPath)
 	{
-		enum class ShaderType
+		if (!std::filesystem::exists(InVertexPath) || !std::filesystem::exists(InFragmentPath))
 		{
-			NONE = -1,
-			VERTEX = 0,
-			FRAGMENT = 1
-		};
+			LK_CORE_WARN_TAG("Shader", "Paths to vertex and/or fragment shader are invalid\n Vertex: {}\n Fragment: {}", 
+							 InVertexPath.string(), InFragmentPath.string());
+			return false;
+		}
 
-		std::ifstream streamVertex(vertexPath);
-		std::string line;
+		std::ifstream InputStreamVertex(InVertexPath);
+		std::string Line{};
+
 		std::stringstream ss[2];
-		ShaderType type = ShaderType::VERTEX;
 
-		while (getline(streamVertex, line))
+		/* Vertex Shader. */
+		EShaderType Type = EShaderType::Vertex;
+		while (getline(InputStreamVertex, Line))
 		{
-			ss[(int)type] << line << '\n';
+			ss[static_cast<int>(Type)] << Line << '\n';
 		}
 
-		std::ifstream streamFrag(fragmentPath);
-		type = ShaderType::FRAGMENT;
-		while (getline(streamFrag, line))
+		/* Fragment Shader. */
+		std::ifstream InputStreamFrag(InFragmentPath);
+		Type = EShaderType::Fragment;
+		while (getline(InputStreamFrag, Line))
 		{
-			ss[(int)type] << line << '\n';
+			ss[static_cast<int>(Type)] << Line << '\n';
 		}
 
-		std::string vertex_str = ss[0].str();
-		std::string frag_str = ss[1].str();
-		LK_CORE_ASSERT(vertex_str.empty(), "Parsed vertex shader is empty!");
-		LK_CORE_ASSERT(frag_str.empty(), "Parsed fragment shader is empty!");
+		ShaderProgramSource.Vertex = ss[0].str();
+		ShaderProgramSource.Fragment = ss[1].str();
 
-		return { vertex_str, frag_str };
+		return ShaderProgramSource.IsValid();
 	}
 
 
+	/***********************************************************************/
 
-	//============================================================================
-	// ShaderLibrary
-	//============================================================================
     void LShaderLibrary::Add(const TObjectPtr<LShader>& shader)
     {
     }
 
-    void LShaderLibrary::Load(std::string_view name, const std::string& path)
+    void LShaderLibrary::Load(std::string_view name, const std::string& InFilePath)
     {
-		Shaders[name] = LShader::Create(path);
+		Shaders[name] = LShader::Create(InFilePath);
     }
 
     TObjectPtr<LShader>& LShaderLibrary::Get(std::string_view ShaderName)

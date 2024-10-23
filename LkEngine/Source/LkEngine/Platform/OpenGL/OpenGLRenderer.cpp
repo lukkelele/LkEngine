@@ -287,7 +287,7 @@ namespace LkEngine {
 										uint32_t indexCount /* == 0*/)
 	{
 		TObjectPtr<LOpenGLPipeline> pipeline = _pipeline.As<LOpenGLPipeline>();
-		TObjectPtr<OpenGLShader> shader = pipeline->GetShader();
+		TObjectPtr<LOpenGLShader> shader = pipeline->GetShader();
 		TObjectPtr<OpenGLVertexBuffer> vertexBuffer = _vertexBuffer.As<OpenGLVertexBuffer>();
 
 	#if 0

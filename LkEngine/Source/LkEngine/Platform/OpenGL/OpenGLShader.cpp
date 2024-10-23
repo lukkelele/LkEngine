@@ -1,167 +1,90 @@
 #include "LKpch.h"
 #include "OpenGLShader.h"
 
-#include "LkOpenGL.h"
-
 
 namespace LkEngine {
 
-	OpenGLShader::OpenGLShader(const std::string& filepath)
+	LOpenGLShader::LOpenGLShader(const std::filesystem::path& InFilePath)
+		: FilePath(InFilePath)
 	{
-		m_FilePath = std::filesystem::path(filepath);   
-		ShaderProgramSource source = ParseShader(filepath);
-		m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
-	}
-
-	OpenGLShader::OpenGLShader(const std::string& vertexPath, const std::string& fragmentPath)
-	{
-		m_VertexPath = vertexPath;
-		m_FragmentPath = fragmentPath;
-		ShaderProgramSource source = ParseShaders(vertexPath, fragmentPath);
-		m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
-	}
-
-	OpenGLShader::~OpenGLShader()
-	{
-		LK_OpenGL(glDeleteProgram(m_RendererID));
-	}
-
-	void OpenGLShader::Bind() const
-	{
-		LK_OpenGL(glUseProgram(m_RendererID));
-	}
-
-	void OpenGLShader::Unbind() const
-	{
-		LK_OpenGL(glUseProgram(0));
-	}
-
-	void OpenGLShader::Set(const std::string& name, int value)
-	{
-		LK_OpenGL(glUseProgram(m_RendererID));
-		LK_OpenGL(glUniform1i(GetUniformLocation(name), value));
-	}
-
-	void OpenGLShader::Set(const std::string& name, bool value)
-	{
-		LK_OpenGL(glUseProgram(m_RendererID));
-		LK_OpenGL(glUniform1i(GetUniformLocation(name), (int)value));
-	}
-
-	void OpenGLShader::Set(const std::string& name, float value)
-	{
-		LK_OpenGL(glUseProgram(m_RendererID));
-		LK_OpenGL(glUniform1f(GetUniformLocation(name), value));
-	}
-
-	void OpenGLShader::Set(const std::string& name, uint32_t value)
-	{
-		LK_OpenGL(glUseProgram(m_RendererID));
-		LK_OpenGL(glUniform1i(GetUniformLocation(name), value));
-	}
-
-	void OpenGLShader::Set(const std::string& name, const glm::vec4& value)
-	{
-		LK_OpenGL(glUseProgram(m_RendererID));
-		LK_OpenGL(glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w));
-	}
-
-	void OpenGLShader::Set(const std::string& name, const glm::vec2& value)
-	{
-		LK_OpenGL(glUseProgram(m_RendererID));
-		LK_OpenGL(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0]));
-	}
-
-	void OpenGLShader::Set(const std::string& name, const glm::vec3& value)
-	{
-		glUseProgram(m_RendererID);
-		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0]);
-	}
-
-	void OpenGLShader::Set(const std::string& name, const glm::ivec2& value)
-	{
-		glUseProgram(m_RendererID);
-		glUniform2i(GetUniformLocation(name), value.x, value.y);
-	}
-
-	void OpenGLShader::Set(const std::string& name, const glm::ivec3& value)
-	{
-		glUseProgram(m_RendererID);
-		glUniform3i(GetUniformLocation(name), value.x, value.y, value.z);
-	}
-
-	void OpenGLShader::Set(const std::string& name, const glm::ivec4& value)
-	{
-		glUseProgram(m_RendererID);
-		glUniform4i(GetUniformLocation(name), value.x, value.y, value.z, value.w);
-	}
-
-	void OpenGLShader::Set(const std::string& name, const glm::mat4& value)
-	{
-		glUseProgram(m_RendererID);
-		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]);
-	}
-
-	int OpenGLShader::GetUniformLocation(const std::string& name)
-	{
-		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
-			return m_UniformLocationCache[name];
-
-		int location;
-		LK_OpenGL(location = glGetUniformLocation(m_RendererID, name.c_str()));
-		if (location == -1)
-			LK_CORE_WARN("[SHADER] Warning: uniform {0} isn't in use", name);
-
-		m_UniformLocationCache[name] = location;
-		//LK_CORE_DEBUG("{} in uniform cache --> m_UniformLocationCache[{}] == {}", name, name, location);
-		return location;
-	}
-
-
-	unsigned int OpenGLShader::CompileShader(unsigned int type, const std::string& source)
-	{
-		unsigned int id = glCreateShader(type);
-		const char* src = source.c_str();   // &source[0] 
-		glShaderSource(id, 1, &src, nullptr);
-		glCompileShader(id);
-
-		// Error handling
-		int result;
-		glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-		if (result == GL_FALSE)
+		FShaderProgramSource ShaderProgramSource;
+		if (ParseShader(ShaderProgramSource, InFilePath))
 		{
-			int length;
-			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-			char* message = (char*)_malloca(length * sizeof(char));
-			glGetShaderInfoLog(id, length, &length, message);
-			LK_CORE_FATAL_TAG("OpenGLShader", "Failed to compile {} shader at {}, \"{}\"", (type == GL_VERTEX_SHADER ? "vertex" : "fragment"), m_FilePath, message);
+			m_RendererID = CreateShader(ShaderProgramSource);
+		}
+		else
+		{
+			LK_CORE_ERROR_TAG("Shader", "Parse of shader file failed at \"{}\"", InFilePath.string());
+		}
+	}
 
-			glDeleteShader(id);
+	LOpenGLShader::LOpenGLShader(const FShaderProgramSource& ShaderProgramSource)
+	{
+		if (ShaderProgramSource.IsValid())
+		{
+			m_RendererID = CreateShader(ShaderProgramSource);
+		}
+	}
+
+	LOpenGLShader::~LOpenGLShader()
+	{
+		if (m_RendererID > 0)
+		{
+			LK_OpenGL(glDeleteProgram(m_RendererID));
+		}
+	}
+
+	uint32_t LOpenGLShader::CompileShader(const uint32_t ShaderType, const std::string& ShaderSource)
+	{
+		static_assert(sizeof(uint32_t) == sizeof(GLuint), "Type size mismatch");
+		uint32_t ShaderID;
+		LK_OpenGL(ShaderID = glCreateShader(ShaderType));
+
+		const char* Source = ShaderSource.c_str();
+		LK_OpenGL(glShaderSource(ShaderID, 1, &Source, nullptr)); /* TODO: Check if works with &ShaderSource.c_str() */
+		LK_OpenGL(glCompileShader(ShaderID));
+
+		/* Error handling. */
+		int Result;
+		LK_OpenGL(glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &Result));
+		if (Result == GL_FALSE)
+		{
+			int Length;
+			LK_OpenGL(glGetShaderiv(ShaderID, GL_INFO_LOG_LENGTH, &Length));
+
+			char* ErrorMessage = (char*)_malloca(Length * sizeof(char));
+			LK_OpenGL(glGetShaderInfoLog(ShaderID, Length, &Length, ErrorMessage));
+			LK_CORE_ERROR_TAG("OpenGLShader", "Failed to compile {} shader at {}, \"{}\"", 
+							  ((ShaderType == GL_VERTEX_SHADER) ? "vertex" : "fragment"), FilePath, ErrorMessage);
+			LK_OpenGL(glDeleteShader(ShaderID));
+
 			return 0;
 		}
 
-		return id;
+		return ShaderID;
 	}
 
-	unsigned int OpenGLShader::CreateShader(const std::string& vertexOpenGLShader, const std::string& fragmentOpenGLShader)
+	uint32_t LOpenGLShader::CreateShader(const FShaderProgramSource& ShaderProgramSource)
 	{
-		unsigned int program = glCreateProgram();
-		unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexOpenGLShader);
-		unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentOpenGLShader);
+		uint32_t ShaderProgram;
+		LK_OpenGL(ShaderProgram = glCreateProgram());
+
+		const uint32_t VertexShader = CompileShader(GL_VERTEX_SHADER, ShaderProgramSource.Vertex);
+		const uint32_t FragmentShader = CompileShader(GL_FRAGMENT_SHADER, ShaderProgramSource.Fragment);
 		
-		glAttachShader(program, vs);
-		glAttachShader(program, fs);
-		glLinkProgram(program);
-		glValidateProgram(program);
-		glDeleteShader(vs);
-		glDeleteShader(fs);
+		/* Attach shaders. */
+		LK_OpenGL(glAttachShader(ShaderProgram, VertexShader));
+		LK_OpenGL(glAttachShader(ShaderProgram, FragmentShader));
 
-		return program;
-	}
+		/* Link and validate. */
+		LK_OpenGL(glLinkProgram(ShaderProgram));
+		LK_OpenGL(glValidateProgram(ShaderProgram));
 
-	size_t OpenGLShader::GetHash()
-	{
-		return Hash::GenerateFNVHash(m_FilePath.string());
+		/* Delete shader resources after shader programs are created and validated. */
+		LK_OpenGL(glDeleteShader(VertexShader));
+		LK_OpenGL(glDeleteShader(FragmentShader));
+
+		return ShaderProgram;
 	}
 
 }

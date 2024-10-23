@@ -13,14 +13,20 @@
 
 namespace LkEngine {
 
+	enum class EShaderType
+	{
+		None = -1,
+		Vertex,
+		Fragment
+	};
+
 	class LShader : public LObject
 	{
 	public:
 		virtual ~LShader() = default;
 
 		static TObjectPtr<LShader> Create(const std::string& InFilepath); 
-		static TObjectPtr<LShader> Create(const std::string& InVertexPath, 
-										  const std::string& fragmentPath); 
+		static TObjectPtr<LShader> Create(const FShaderProgramSource& ShaderProgramSource);
 
 		virtual RendererID GetRendererID() const = 0;
 		virtual RendererID& GetRendererID() = 0;
@@ -28,42 +34,49 @@ namespace LkEngine {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void Set(const std::string& name, int value) = 0;
-		virtual void Set(const std::string& name, bool value) = 0;
-		virtual void Set(const std::string& name, float value) = 0;
-		virtual void Set(const std::string& name, uint32_t value) = 0;
-		virtual void Set(const std::string& name, const glm::vec2& value) = 0;
-		virtual void Set(const std::string& name, const glm::vec3& value) = 0;
-		virtual void Set(const std::string& name, const glm::vec4& value) = 0;
-		virtual void Set(const std::string& name, const glm::ivec2& value) = 0;
-		virtual void Set(const std::string& name, const glm::ivec3& value) = 0;
-		virtual void Set(const std::string& name, const glm::ivec4& value) = 0;
-		virtual void Set(const std::string& name, const glm::mat4& value) = 0;
+		virtual void Set(std::string_view Uniform, int Value) = 0;
+		virtual void Set(std::string_view Uniform, bool Value) = 0;
+		virtual void Set(std::string_view Uniform, float Value) = 0;
+		virtual void Set(std::string_view Uniform, uint32_t Value) = 0;
+		virtual void Set(std::string_view Uniform, const glm::vec2& Value) = 0;
+		virtual void Set(std::string_view Uniform, const glm::vec3& Value) = 0;
+		virtual void Set(std::string_view Uniform, const glm::vec4& Value) = 0;
+		virtual void Set(std::string_view Uniform, const glm::ivec2& Value) = 0;
+		virtual void Set(std::string_view Uniform, const glm::ivec3& Value) = 0;
+		virtual void Set(std::string_view Uniform, const glm::ivec4& Value) = 0;
+		virtual void Set(std::string_view Uniform, const glm::mat4& Value) = 0;
 
-		virtual unsigned int CompileShader(unsigned int type, const std::string& source) = 0;
-		virtual unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) = 0;
+		virtual uint32_t CompileShader(const uint32_t ShaderType, const std::string& Source) = 0;
+		virtual uint32_t CreateShader(const FShaderProgramSource& ShaderProgramSource) = 0;
 
-		ShaderProgramSource ParseShader(const std::string& filepath);
-		ShaderProgramSource ParseShaders(const std::string& vertexPath, const std::string& fragmentPath);
+		bool ParseShader(FShaderProgramSource& ShaderProgramSource, const std::filesystem::path& InFilePath);
+		bool ParseShaders(FShaderProgramSource& ShaderProgramSource, 
+						  const std::filesystem::path& InVertexPath, 
+						  const std::filesystem::path& InFragmentPath);
 
-		virtual size_t GetHash() = 0;
+		virtual std::size_t GetHash() = 0;
 
+		/* TODO: Use map instead. */
 		FORCEINLINE static const char* ConvertUniformType(const ETextureUniformType& Type)
 		{
 			switch (Type)
 			{
 				case ETextureUniformType::Diffuse:          return "u_Diffuse";
 				case ETextureUniformType::Specular:         return "u_Specular";
-				case ETextureUniformType::Normal:           return "u_Normal"; // FIXME: Rename to 'Ambient'?
+				case ETextureUniformType::Normal:           return "u_Normal"; // FIXME: ReUniform to 'Ambient'?
 				case ETextureUniformType::Height:           return "u_Height";
 				case ETextureUniformType::DiffuseRoughness: return "u_DiffuseRoughness";
 				case ETextureUniformType::Emissive:         return "u_Emissive";
 			}
 
 			LK_CORE_ASSERT(false, "Could not convert the TextureUniformType {}", static_cast<int>(Type));
+			return nullptr;
 		}
 
+	private:
+		LCLASS(LShader);
 	};
+
 
     /**
      * LShaderLibrary
@@ -82,7 +95,9 @@ namespace LkEngine {
 		void Load(std::string_view InName, const std::string& InFilepath);
 
     private:
-        inline static std::unordered_map<std::string_view, TObjectPtr<LShader>> Shaders;
+        std::unordered_map<std::string_view, TObjectPtr<LShader>> Shaders;
+
+		LCLASS(LShaderLibrary);
     };
 
 
