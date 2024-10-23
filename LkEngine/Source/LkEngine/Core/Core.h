@@ -32,18 +32,16 @@
 #include "LkEngine/Core/Timer.h"
 #include "LkEngine/Core/Memory/MemoryPtr.h"
 #include "LkEngine/Core/Memory/Buffer.h"
-#include "LkEngine/Core/Memory/Ref.h"
 #include "LkEngine/Core/Hash/UUID.h"
 
 
 namespace LkEngine
 {
-	/** ERendererAPI */
 	enum class ERendererAPI
 	{
 		None = 0,
-		OpenGL,
-		Vulkan
+		OpenGL,    /*      SUPPORTED        */
+		Vulkan     /*   NOT SUPPORTED YET   */
 	};
 }
 

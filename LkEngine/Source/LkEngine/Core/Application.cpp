@@ -10,12 +10,14 @@ namespace LkEngine {
         : Specification(InSpecification)
         , Log(LLog::Instance())
         , MetadataRegistry(LMetadataRegistry::Get())
+        , GarbageCollector(LGarbageCollector::Get())
         , ThreadManager(LThreadManager::Instance())
     {
         Instance = this;
-        LCrashHandler::AttachInstance(this);
+        LCrashHandler::AttachInstance(this);        
 
         Global::SetRuntimeArguments(Specification.Argc, Specification.Argv);
+        GarbageCollector.Initialize();
 
         LK_CORE_TRACE_TAG("Application", "Creating window");
         Window = MakeUnique<LWindow>(InSpecification);

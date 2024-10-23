@@ -40,9 +40,9 @@ namespace LkEngine {
         virtual void SubmitImage(const TObjectPtr<LImage> image) override;
         virtual void SubmitImage(const TObjectPtr<LImage2D> image) override;
 
-        void SubmitMesh(TObjectPtr<Mesh>& mesh, 
-                        TObjectPtr<LShader>& shader, 
-                        const glm::mat4& transform);
+        virtual void SubmitMesh(TObjectPtr<LMesh>& InMesh, 
+                                TObjectPtr<LShader>& InShader, 
+                                const glm::mat4& InTransform) override;
 
         virtual void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
                                      TObjectPtr<LRenderPass> renderPass, 

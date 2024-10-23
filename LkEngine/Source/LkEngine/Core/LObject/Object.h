@@ -5,6 +5,7 @@
  *******************************************************************/
 #pragma once
 
+#include <set>
 #include <typeindex>
 #include <typeinfo>
 #include <type_traits>
@@ -29,11 +30,13 @@ namespace LkEngine {
 	template<typename FunctionType>
 	class TFunction;
 
+	/**
+	 * LObject
+	 */
 	class LObject
 	{
 		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestructBegin, const FObjectHandle&);
 		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestructEnd, const FObjectHandle&);
-		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestroyed, const FObjectHandle&);
 		
 	public:
 		LObject();
@@ -59,6 +62,9 @@ namespace LkEngine {
 
 			return *this;
 		}
+
+		/** @brief Get the object handle. */
+		FORCEINLINE FObjectHandle GetHandle() const { return Handle; }
 
 		/**
 		 * @brief Initialize object.
@@ -108,9 +114,14 @@ namespace LkEngine {
 		}
 
 		/**
-		 * GetStaticClass, implemented by LCLASS macro.
+		 * @brief Static class. Implemented by LCLASS macro.
 		 */
 		FORCEINLINE static std::string StaticClass() { return "LObject"; }
+
+		/** 
+		 * @brief Name of class. Implemented by LCLASS macro.
+		 */
+		FORCEINLINE virtual std::string_view ClassName() const = 0;
 
 		/** 
 		 * @brief Get name of object. 
@@ -119,7 +130,6 @@ namespace LkEngine {
 
 		/**
 		 * @brief Check to see if object is selected.
-		 * Applies to editor and runtime game layer.
 		 */
 		bool IsSelected() const;
 
@@ -158,6 +168,11 @@ namespace LkEngine {
 			return (StaticClass() == T::StaticClass());
 		}
 
+		virtual bool IsAsset() const
+		{
+			return false;
+		}
+
 		/**
 		 * @brief Return current reference count from all smart pointers. 
 		 */
@@ -184,11 +199,8 @@ namespace LkEngine {
 		/* Runtime object name. */
 		std::string Name{};
 
-		// Delegate
-		FObjectDestructBegin OnDestructBegin;
-		FObjectDestructEnd OnDestructEnd;
-		FObjectDestroyed OnObjectDestroyed;
-		// ~Delegate
+		FObjectDestructBegin OnDestructBegin{};
+		FObjectDestructEnd OnDestructEnd{};
 
 		/** Reference count is managed by TObjectPtr. */
 		mutable std::atomic<uint32_t> ReferenceCount = 0;
@@ -238,5 +250,9 @@ namespace LkEngine {
 
 	template<typename TObject>
 	inline constexpr bool IsBaseOfObject = std::is_base_of<LObject, std::decay_t<TObject>>::value;
+
+	/// TODO: Move to garbage collector or some other registry structure.
+	LK_DECLARE_MULTICAST_DELEGATE(FOnObjectCreated, const LObject*);
+	extern FOnObjectCreated GOnObjectCreated;
 
 }

@@ -181,21 +181,21 @@ namespace LkEngine {
 		glDrawElements(m_Topology, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void OpenGLRenderer::SubmitMesh(TObjectPtr<Mesh>& mesh, 
-									TObjectPtr<LShader>& shader, 
-									const glm::mat4& transform)
+	void OpenGLRenderer::SubmitMesh(TObjectPtr<LMesh>& Mesh, TObjectPtr<LShader>& Shader, const glm::mat4& Transform)
 	{
-		LRenderer::Submit([&] 
+		//LRenderer::Submit([&] 
+		const uint8_t Topology = m_Topology;
+		LRenderer::Submit([&Mesh, &Shader, &Transform, Topology] 
 		{
-			MeshSource& source = *mesh->GetMeshSource();
-			LVertexBuffer& VertexBuffer = *source.GetVertexBuffer();
-			LIndexBuffer& ib = *VertexBuffer.GetIndexBuffer();
+			LMeshSource& MeshSource = *Mesh->GetMeshSource();
+			LVertexBuffer& VertexBuffer = *MeshSource.GetVertexBuffer();
+			LIndexBuffer& IndexBuffer = *VertexBuffer.GetIndexBuffer();
 
-			shader->Bind();
+			Shader->Bind();
 
 			VertexBuffer.Bind();
-			glDrawElements(m_Topology, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
-			//glDrawElements(GLUtils::PrimitiveTopologyToOpenGL(m_Topology), ib.GetCount(), GL_UNSIGNED_INT, ib.GetLocalData().Data);
+			LK_OpenGL(glDrawElements(Topology, IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr));
+			//LK_OpenGL(glDrawElements(m_Topology, IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr));
 		});
 	}
 

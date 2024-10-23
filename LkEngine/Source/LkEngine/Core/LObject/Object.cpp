@@ -1,10 +1,10 @@
 #include "LKpch.h"
 #include "Object.h"
 
-#include "LkEngine/Core/MetadataRegistry.h"
-
 
 namespace LkEngine {
+
+	FOnObjectCreated GOnObjectCreated{};
 
 	LObject::LObject()
 		: Handle(FObjectHandle())

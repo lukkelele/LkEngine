@@ -15,6 +15,7 @@
 #include "LkEngine/Core/Math/Math.h"
 #include "LkEngine/Core/ThreadManager.h"
 #include "LkEngine/Core/MetadataRegistry.h"
+#include "LkEngine/Core/Memory/GarbageCollector.h"
 
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
@@ -104,7 +105,7 @@ namespace LkEngine {
             return Specification; 
         }
 
-        FTimestep GetTimestep() const { return Timestep; } // REMOVE ME
+        FTimestep GetTimestep() const { return Timestep; } /// TODO: MOVE ELSEWHERE
         uint32_t GetCurrentFrameIndex() const { return m_CurrentFrameIndex; }
 
         static LApplication* Get() { return Instance; }
@@ -122,11 +123,11 @@ namespace LkEngine {
 
         LLog& Log;
         LMetadataRegistry& MetadataRegistry;
+        LGarbageCollector& GarbageCollector;
         LLayerStack LayerStack;
         LThreadManager& ThreadManager;
 
         TUniquePtr<LWindow> Window;
-        //TUniquePtr<LInput> m_Input;
 
         TObjectPtr<LRenderer> Renderer;
         uint32_t m_CurrentFrameIndex = 0;

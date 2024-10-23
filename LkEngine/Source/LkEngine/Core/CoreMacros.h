@@ -61,21 +61,21 @@
  * LCLASS
  * 
  *  Base classes that inherit from LObject are required to be declared as an LCLASS.
- *
-		virtual std::string GetStaticClass() const override { return #ClassName; } \
  *  Adds the static class type to the metadata registry and implements 
  *  abstract functions and other base functionality from LObject.
  */
-#define LCLASS(ClassName) \
+#define LCLASS(Class) \
 	public: \
 		using BaseClass = LObject; \
-		static std::string_view StaticClass() { return #ClassName; } \
+		using ThisClass = Class; \
+		static std::string_view StaticClass() { return #Class; } \
+		virtual std::string_view ClassName() const override { return StaticClass(); } \
 	private: \
 		void LK_META_CLASS_REGISTER_FUNC() \
 		{ \
-			if constexpr (!std::is_same_v<::LkEngine::LObject, ::LkEngine::ClassName>) \
+			if constexpr (!std::is_same_v<::LkEngine::LObject, ::LkEngine::Class>) \
 			{ \
-				LMetadataRegistry::Get().Register(#ClassName, this); \
+				LMetadataRegistry::Get().Register(#Class, this); \
 			} \
 		}
 
@@ -89,20 +89,11 @@
  */
 #define LASSET(ClassName) \
 	public: \
-		template<typename TAsset = ClassName> \
-		std::enable_if<!std::is_same_v<TAsset, LAsset>, EAssetType> \
-		FORCEINLINE GetAssetType() const { return GetStaticType(); } \
-		\
 		LCLASS(ClassName); \
-
-/*
-/// TO ADD
-    template <typename T>
-    static void EnsureBaseInheritance() 
-    {
-        static_assert(std::is_base_of<Base, T>::value, "T must inherit from Base");
-    }
-*/
+		virtual bool IsAsset() const override { return true; } \
+		template<typename AssetType = ClassName> \
+		std::enable_if<!std::is_same_v<AssetType, LAsset>, EAssetType> \
+		FORCEINLINE GetAssetType() const { return GetStaticType(); } \
 
 /**
  * Register class.
