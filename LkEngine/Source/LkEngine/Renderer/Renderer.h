@@ -57,7 +57,7 @@ namespace LkEngine {
 		static void SubmitImage(const TObjectPtr<LImage> image);
 		static void SubmitImage(const TObjectPtr<LImage2D> image);
 
-		static void SubmitMesh(TObjectPtr<Mesh>& mesh, 
+		static void SubmitMesh(TObjectPtr<LMesh>& mesh, 
 							   TObjectPtr<LShader>& shader, 
 							   const glm::mat4& transform);
 
@@ -107,7 +107,7 @@ namespace LkEngine {
 
 		static void SubmitIndexed(LVertexBuffer& vb, const uint32_t count);
 
-		static void DrawMesh(Ref<Mesh>& mesh, const TObjectPtr<LShader> shader);
+		static void DrawMesh(TObjectPtr<LMesh>& Mesh, const TObjectPtr<LShader> Shader);
 
 		static uint32_t GetCurrentFrameIndex();
 		static uint32_t RT_GetCurrentFrameIndex();

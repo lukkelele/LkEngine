@@ -64,6 +64,11 @@ namespace LkEngine {
 		ViewportScalers.x = EditorWindowSize.x / ViewportBounds[1].X;
 		ViewportScalers.y = EditorWindowSize.y / ViewportBounds[1].Y;
 
+		GOnObjectCreated.Add([&](const LObject* NewObject)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "New Object Created: {}, Name=\"{}\"", NewObject->StaticClass(), NewObject->GetName());
+		});
+
 		/* Editor UI components. */
 		SceneManagerPanel = MakeShared<LSceneManagerPanel>();
 		ContentBrowser = MakeUnique<LContentBrowser>();
@@ -1535,28 +1540,30 @@ namespace LkEngine {
 	LEntity LEditorLayer::CreateCube()
 	{
 		FAssetHandle CubeHandle = LAssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Cube.gltf");
-		TObjectPtr<Mesh> CubeMesh = LAssetManager::GetAsset<Mesh>(CubeHandle);
+		TObjectPtr<LMesh> CubeMesh = LAssetManager::GetAsset<LMesh>(CubeHandle);
 
 		LEntity NewCubeEntity = m_Scene->CreateEntity();
 
-		auto assetList = m_Scene->GetAssetList();
-		for (const FAssetHandle assetHandle : assetList)
+		/// TODO: Just use a search function instead of iterating through like this
+		std::unordered_set<FAssetHandle> AssetList = m_Scene->GetAssetList();
+		for (const FAssetHandle AssetHandle : AssetList)
 		{
-			TObjectPtr<Mesh> mesh = LAssetManager::GetAsset<Mesh>(assetHandle);
-			if (mesh == CubeMesh)
+			TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(AssetHandle);
+			if (Mesh == CubeMesh)
 			{
 				// The cube is in the scene
-				auto entities = m_Scene->GetEntities();
-				for (auto& entity : entities)
+				std::vector<LEntity> SceneEntities = m_Scene->GetEntities();
+				for (LEntity& Entity : SceneEntities)
 				{
-					if (entity.HasComponent<LMeshComponent>())
+					if (Entity.HasComponent<LMeshComponent>())
 					{
-						LMeshComponent& entityMC = entity.GetMesh();
-						if (entityMC.Mesh == assetHandle)
+						LMeshComponent& EntityMesh = Entity.GetMesh();
+						if (EntityMesh.Mesh == AssetHandle)
 						{
-							m_Scene->CopyComponentIfExists<LMeshComponent>(NewCubeEntity, m_Scene->m_Registry, entity);
-							m_Scene->CopyComponentIfExists<LTagComponent>(NewCubeEntity, m_Scene->m_Registry, entity);
-							LK_CORE_VERIFY(NewCubeEntity.HasComponent<LMeshComponent>() && NewCubeEntity.HasComponent<LTagComponent>());
+							m_Scene->CopyComponentIfExists<LMeshComponent>(NewCubeEntity, m_Scene->m_Registry, Entity);
+							m_Scene->CopyComponentIfExists<LTagComponent>(NewCubeEntity, m_Scene->m_Registry, Entity);
+							LK_CORE_VERIFY((NewCubeEntity.HasComponent<LMeshComponent>()) 
+										   && (NewCubeEntity.HasComponent<LTagComponent>()));
 						}
 					}
 				}

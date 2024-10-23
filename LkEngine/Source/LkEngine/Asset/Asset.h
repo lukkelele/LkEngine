@@ -44,26 +44,29 @@ namespace LkEngine {
 			return !(*this == Other);
 		}
 
-		FORCEINLINE bool IsFlagSet(EAssetFlag InFlag) const 
+		FORCEINLINE bool IsFlagSet(const EAssetFlag InFlag) const 
 		{ 
-			return (InFlag & Flags);
+			return (Flags & static_cast<uint16_t>(InFlag));
 		}
 
-		void SetFlag(AssetFlag::Type InFlag, bool InValue = true)
+		//void SetFlag(AssetFlag::Type InFlag, bool InValue = true)
+		FORCEINLINE void SetFlag(const EAssetFlag InFlag, bool InValue = true)
 		{
 			if (InValue)
 			{
-				Flags |= InFlag;
+				//Flags |= InFlag;
+				Flags |= static_cast<uint16_t>(InFlag);
 			}
 			else
 			{
-				Flags &= ~InFlag;
+				//Flags &= ~InFlag;
+				Flags &= ~(static_cast<uint16_t>(InFlag));
 			}
 		}
 
     public:
         FAssetHandle Handle = 0;
-		uint16_t Flags = (uint16_t)AssetFlag::None;
+		uint16_t Flags = static_cast<uint16_t>(EAssetFlag::None);
 
 	private:
 		LCLASS(LAsset)

@@ -12,8 +12,7 @@ namespace LkEngine {
     /// Too many virtual nested calls here.
     /// Performance SUCKS
 
-    //class Renderer2D : public RefCounted
-    class LRenderer2D : public RefCounted
+    class LRenderer2D
     {
     public:
         static void Init();
@@ -53,8 +52,8 @@ namespace LkEngine {
         /// FIXME: REMOVE
         FORCEINLINE void SetRenderer(IRenderer2DAPI* InRenderer) 
         { 
+            LK_CORE_ASSERT(false);
             LK_UNUSED(InRenderer);
-            //Renderer2D = InRenderer; 
         }
 
     protected:

@@ -255,7 +255,7 @@ namespace LkEngine {
 
 	void LSceneSerializer::DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> SceneRef)
 	{
-		LK_VERIFY(SceneRef && SceneRef.IsValid()):
+		LK_VERIFY(SceneRef && SceneRef->IsValid());
 		for (const YAML::Node& Entity : EntitiesNode)
 		{
 			uint64_t uuid = Entity["Entity"].as<uint64_t>();
@@ -351,7 +351,7 @@ namespace LkEngine {
 					: 1.0f;
 			}
 
-			Scene->SortEntities();
+			SceneRef->SortEntities();
 		}
 	}
 

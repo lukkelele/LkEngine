@@ -18,64 +18,70 @@ namespace LkEngine {
 		template<typename T>
 		TObjectPtr<T> ImportAsset(std::filesystem::path filepath);
 
-        TObjectPtr<LAsset> GetAsset(FAssetHandle asset);
+        TObjectPtr<LAsset> GetAsset(FAssetHandle Asset);
 
-		EAssetType GetAssetType(FAssetHandle assetHandle);
-        bool IsMemoryAsset(FAssetHandle handle) { return m_MemoryAssets.contains(handle); }
+		EAssetType GetAssetType(const FAssetHandle AssetHandle);
 
-		bool ReloadData(FAssetHandle assetHandle);
-		void AddMemoryOnlyAsset(TObjectPtr<LAsset> asset);
-		bool IsAssetHandleValid(FAssetHandle assetHandle);
+        FORCEINLINE bool IsMemoryAsset(const FAssetHandle AssetHandle) 
+		{ 
+			return m_MemoryAssets.contains(AssetHandle); 
+		}
 
-        const FAssetMetadata& GetMetadata(FAssetHandle handle);
-        const FAssetMetadata& GetMetadata(const TObjectPtr<LAsset>& asset);
-        const FAssetMetadata& GetMetadata(const std::filesystem::path& filepath);
-        FAssetMetadata& GetMetadataInternal(FAssetHandle handle);
+		bool ReloadData(const FAssetHandle AssetHandle);
+		void AddMemoryOnlyAsset(TObjectPtr<LAsset> Asset);
 
-        FAssetHandle GetAssetHandleFromFilePath(const std::filesystem::path& filepath);
-		EAssetType GetAssetTypeFromExtension(const std::string& extension);
-		EAssetType GetAssetTypeFromPath(const std::filesystem::path& path);
+		bool IsAssetHandleValid(const FAssetHandle AssetHandle);
 
-        std::filesystem::path GetRelativePath(const std::filesystem::path& filepath);
+        const FAssetMetadata& GetMetadata(FAssetHandle AssetHandle);
+        const FAssetMetadata& GetMetadata(const TObjectPtr<LAsset>& AssetRef);
+        const FAssetMetadata& GetMetadata(const std::filesystem::path& InFilePath);
+        FAssetMetadata& GetMetadataInternal(const FAssetHandle AssetHandle);
+
+        FAssetHandle GetAssetHandleFromFilePath(const std::filesystem::path& InFilePath);
+		EAssetType GetAssetTypeFromExtension(const std::string& Extension);
+		EAssetType GetAssetTypeFromPath(const std::filesystem::path& InFilePath);
+
+        std::filesystem::path GetRelativePath(const std::filesystem::path& InFilePath);
 		void WriteRegistryToFile();
 
 		template<typename T>
-		TObjectPtr<T> GetAsset(const std::string& filepath)
+		TObjectPtr<T> GetAsset(const std::string& InFilePath)
 		{
-			/* TODO: Static validity check for retrieved asset cast to T. */
-			TObjectPtr<LAsset> Asset = GetAsset(GetAssetHandleFromFilePath(filepath));
+			/* TODO: Static validity check for retrieved Asset cast to T. */
+			TObjectPtr<LAsset> Asset = GetAsset(GetAssetHandleFromFilePath(InFilePath));
+
 			return Asset.As<T>();
 		}
 
 		template<typename T, typename... TArgs>
-		TObjectPtr<T> CreateNewAsset(const std::string& filename, 
-									 const std::string& directoryPath, 
-									 TArgs&&... args)
+		TObjectPtr<T> CreateNewAsset(const std::string& FileName, 
+									 const std::string& DirectoryPath, 
+									 TArgs&&... Args)
 		{
-			static_assert(std::is_base_of_v<LAsset, T>, "CreateNewAsset only works for assets derived from LAsset");
+			static_assert(std::is_base_of_v<LAsset, T>, "CreateNewAsset only works for Assets derived from LAsset");
 
-			FAssetMetadata metadata;
-			metadata.Handle = FAssetHandle();
+			FAssetMetadata Metadata{};
+			Metadata.Handle = FAssetHandle();
 
-			if (directoryPath.empty() || directoryPath == ".")
+			if (DirectoryPath.empty() || DirectoryPath == ".")
 			{
-				metadata.FilePath = filename;
+				Metadata.FilePath = FileName;
 			}
 			else
 			{
-				metadata.FilePath = GetRelativePath(directoryPath + "/" + filename);
+				Metadata.FilePath = GetRelativePath(DirectoryPath + "/" + FileName);
 			}
 
-			metadata.IsDataLoaded = true;
-			metadata.Type = T::GetStaticType();
+			Metadata.IsDataLoaded = true;
+			Metadata.Type = T::GetStaticType();
 
-			AssetRegistry[metadata.Handle] = metadata;
+			AssetRegistry[Metadata.Handle] = Metadata;
 
-			TObjectPtr<T> asset = TObjectPtr<T>::Create(std::forward<TArgs>(args)...);
-			asset->Handle = metadata.Handle;
-			m_LoadedAssets[asset->Handle] = asset;
+			TObjectPtr<T> Asset = TObjectPtr<T>::Create(std::forward<TArgs>(Args)...);
+			Asset->Handle = Metadata.Handle;
+			m_LoadedAssets[Asset->Handle] = Asset;
 
-			return asset;
+			return Asset;
 		}
 
 		const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetLoadedAssets() 

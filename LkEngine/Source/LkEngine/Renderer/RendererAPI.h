@@ -81,8 +81,8 @@ namespace LkEngine {
 
         virtual void DrawIndexed(uint64_t IndexCount) = 0;
 
-		virtual void SubmitMesh(TObjectPtr<Mesh>& mesh, 
-								TObjectPtr<LShader>& shader, 
+		virtual void SubmitMesh(TObjectPtr<LMesh>& InMesh, 
+								TObjectPtr<LShader>& InShader, 
 								const glm::mat4& InTransform) = 0;
 
 		virtual void SubmitIndexed(unsigned int IndexCount) = 0;

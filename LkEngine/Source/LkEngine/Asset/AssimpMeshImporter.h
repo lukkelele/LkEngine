@@ -13,24 +13,23 @@
 
 namespace LkEngine {
 
-	/// FIXME
-	class AssimpMeshImporter
+	class LAssimpMeshImporter
 	{
 	public:
-		AssimpMeshImporter(const std::filesystem::path& path);
-		~AssimpMeshImporter() = default;
+		LAssimpMeshImporter(const std::filesystem::path& InFilePath);
+		~LAssimpMeshImporter() = default;
 
-		TObjectPtr<MeshSource> ImportToMeshSource();
-
-	private:
-		void TraverseNodes(TObjectPtr<MeshSource> meshSource, 
-						   void* assimpNode, 
-						   const uint32_t nodeIndex, 
-						   const glm::mat4& parentTransform = glm::mat4(1.0f), 
-						   const uint32_t level = 0);
+		TObjectPtr<LMeshSource> ImportToMeshSource();
 
 	private:
-		const std::filesystem::path m_Path;
+		void TraverseNodes(TObjectPtr<LMeshSource> InMeshSource, 
+						   void* AssimpNode, 
+						   const uint32_t InNodeIndex, 
+						   const glm::mat4& InParentTransform = glm::mat4(1.0f), 
+						   const uint32_t InLevel = 0);
+
+	private:
+		const std::filesystem::path FilePath;
 	};
 
 }

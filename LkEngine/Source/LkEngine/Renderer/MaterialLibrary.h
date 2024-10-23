@@ -10,7 +10,7 @@ namespace LkEngine {
 
     class LMaterialAsset;
 
-    class LMaterialLibrary : public LObject, public RefCounted
+    class LMaterialLibrary : public LObject
     {
     public:
         static LMaterialLibrary& Get();
@@ -30,6 +30,7 @@ namespace LkEngine {
             return m_LoadedMaterialAssets; 
         }
 
+        /// TODO
         /** Return the base (NULL) material. */
         TObjectPtr<LMaterial> GetBaseMaterial();
 

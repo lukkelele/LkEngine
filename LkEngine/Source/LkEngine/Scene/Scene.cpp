@@ -557,7 +557,7 @@ namespace LkEngine {
 		}
 	}
 
-	static void InsertMeshMaterials(TObjectPtr<MeshSource> meshSource, 
+	static void InsertMeshMaterials(TObjectPtr<LMeshSource> meshSource, 
 									std::unordered_set<FAssetHandle>& assetList)
 	{
 		// Mesh materials
@@ -617,13 +617,13 @@ namespace LkEngine {
 						assetList.insert(mc.Mesh);
 
 						/* MeshSource is required too. */
-						TObjectPtr<Mesh> mesh = LAssetManager::GetAsset<Mesh>(mc.Mesh);
+						TObjectPtr<LMesh> mesh = LAssetManager::GetAsset<LMesh>(mc.Mesh);
 						if (!mesh)
 						{
 							continue;
 						}
 
-						TObjectPtr<MeshSource> meshSource = mesh->GetMeshSource();
+						TObjectPtr<LMeshSource> meshSource = mesh->GetMeshSource();
 						if (meshSource && LAssetManager::IsAssetHandleValid(meshSource->Handle))
 						{
 							assetList.insert(meshSource->Handle);
@@ -672,7 +672,7 @@ namespace LkEngine {
 			}
 		}
 
-		// LStaticMeshComponent
+		/* LStaticMeshComponent. */
 		{
 			auto view = m_Registry.view<LStaticMeshComponent>();
 			for (auto entity : view)
@@ -682,7 +682,7 @@ namespace LkEngine {
 				{
 					if (LAssetManager::IsMemoryAsset(mc.StaticMesh))
 					{
-						//continue;
+						/* continue; */
 					}
 
 					if (LAssetManager::IsAssetHandleValid(mc.StaticMesh))
@@ -690,8 +690,8 @@ namespace LkEngine {
 						assetList.insert(mc.StaticMesh);
 
 						// MeshSource is required too
-						TObjectPtr<StaticMesh> mesh = LAssetManager::GetAsset<StaticMesh>(mc.StaticMesh);
-						TObjectPtr<MeshSource> meshSource = mesh->GetMeshSource();
+						TObjectPtr<LStaticMesh> mesh = LAssetManager::GetAsset<LStaticMesh>(mc.StaticMesh);
+						TObjectPtr<LMeshSource> meshSource = mesh->GetMeshSource();
 						if (meshSource && LAssetManager::IsAssetHandleValid(meshSource->Handle))
 						{
 							assetList.insert(meshSource->Handle);

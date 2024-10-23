@@ -82,27 +82,27 @@ namespace LkEngine {
 	}
 
 	template<typename T>
-	TObjectPtr<T> LRuntimeAssetManager::ImportAsset(std::filesystem::path AssetFilepath)
+	TObjectPtr<T> LRuntimeAssetManager::ImportAsset(const std::filesystem::path InFilePath)
 	{
-		LK_UNUSED(AssetFilepath);
+		LK_UNUSED(InFilePath);
 	}
 	
 	template<>
-    TObjectPtr<Mesh> LRuntimeAssetManager::ImportAsset<Mesh>(std::filesystem::path filepath)
+    TObjectPtr<LMesh> LRuntimeAssetManager::ImportAsset<LMesh>(const std::filesystem::path InFilePath)
     {
-        AssimpMeshImporter meshImporter = AssimpMeshImporter(filepath);
+        LAssimpMeshImporter MeshImporter = LAssimpMeshImporter(InFilePath);
 
-        TObjectPtr<MeshSource> source = meshImporter.ImportToMeshSource();
-		TObjectPtr<Mesh> mesh = TObjectPtr<Mesh>::Create(source);
+        TObjectPtr<LMeshSource> MeshSource = MeshImporter.ImportToMeshSource();
+		TObjectPtr<LMesh> Mesh = TObjectPtr<LMesh>::Create(MeshSource);
 
-		m_LoadedAssets[mesh->Handle] = mesh;
+		m_LoadedAssets[Mesh->Handle] = Mesh;
 		LK_CORE_TRACE_TAG("RuntimeAssetManager", "Loaded mesh with {} vertices, {} indices and a handle of '{}'", 
-						  source->GetVertices().size(), source->GetIndices().size(), mesh->Handle);
+						  MeshSource->GetVertices().size(), MeshSource->GetIndices().size(), Mesh->Handle);
 
-		return m_LoadedAssets[mesh->Handle];
+		return m_LoadedAssets[Mesh->Handle];
     }
 
-	TObjectPtr<LAsset> LRuntimeAssetManager::GetAsset(FAssetHandle AssetHandle)
+	TObjectPtr<LAsset> LRuntimeAssetManager::GetAsset(const FAssetHandle AssetHandle)
     {
 		if (IsMemoryAsset(AssetHandle))
 		{
@@ -154,9 +154,9 @@ namespace LkEngine {
 	    return NullMetadata; 
 	}
 
-    FAssetHandle LRuntimeAssetManager::GetAssetHandleFromFilePath(const std::filesystem::path& filepath)
+    FAssetHandle LRuntimeAssetManager::GetAssetHandleFromFilePath(const std::filesystem::path& FilePath)
 	{
-		return GetMetadata(filepath).Handle;
+		return GetMetadata(FilePath).Handle;
 	}
 
     const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const TObjectPtr<LAsset>& asset)
@@ -164,11 +164,11 @@ namespace LkEngine {
 		return GetMetadata(asset->Handle);
 	}
 
-	const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const std::filesystem::path& filepath)
+	const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const std::filesystem::path& FilePath)
 	{
 		LK_CORE_ASSERT(AssetRegistry.Count() > 0, "AssetRegistry is empty!");
 
-		const std::filesystem::path RelativePath = GetRelativePath(filepath);
+		const std::filesystem::path RelativePath = GetRelativePath(FilePath);
 		for (auto& [handle, metadata] : AssetRegistry)
 		{
 			if (metadata.FilePath == RelativePath)
@@ -180,10 +180,10 @@ namespace LkEngine {
 		return NullMetadata;
 	}
 
-	std::filesystem::path LRuntimeAssetManager::GetRelativePath(const std::filesystem::path& filepath)
+	std::filesystem::path LRuntimeAssetManager::GetRelativePath(const std::filesystem::path& FilePath)
 	{
 		/* Return rvalue so we trigger move semantics for performance. */
-		return filepath.lexically_normal();
+		return FilePath.lexically_normal();
 	}
 
 	void LRuntimeAssetManager::WriteRegistryToFile()
@@ -252,56 +252,57 @@ namespace LkEngine {
 		LMaterialLibrary& MaterialLibrary = LMaterialLibrary::Get();
 
 		LK_CORE_WARN_TAG("RuntimeAssetManager", "Loading primitive shapes for project {}", project->GetName());
-		// Cube
+		/* Cube. */
 		{
-			std::filesystem::path filepath("Assets/Meshes/Cube.gltf");
-			LEntity cubeEntity = LProject::Current()->GetScene()->CreateEntity("Cube");
-			TObjectPtr<Mesh> cube = ImportAsset<Mesh>(filepath.string());
-			LMeshComponent& MeshComponent = cubeEntity.AddComponent<LMeshComponent>(cube->Handle);
+			std::filesystem::path FilePath("Assets/Meshes/Cube.gltf");
+			LEntity CubeEntity = LProject::Current()->GetScene()->CreateEntity("Cube");
+			TObjectPtr<LMesh> Cube = ImportAsset<LMesh>(FilePath.string());
+			LMeshComponent& MeshComponent = CubeEntity.AddComponent<LMeshComponent>(Cube->Handle);
 
+
+			/* Assign the Cube with the 'BaseMaterial' */
 			LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
-			// Assign the cube with the 'BaseMaterial'
 			TObjectPtr<LMaterial> baseMaterial = MaterialLibrary.GetBaseMaterial();
             baseMaterial->SetTexture(TextureLibrary.GetTexture("wood-container_512x512"));
-			TObjectPtr<LMaterialAsset> baseMatAsset = TObjectPtr<LMaterialAsset>::Create(baseMaterial);
+			TObjectPtr<LMaterialAsset> BaseMaterialAsset = TObjectPtr<LMaterialAsset>::Create(baseMaterial);
 
-			cube->Materials->SetMaterial(0, baseMatAsset->Handle);
+			Cube->Materials->SetMaterial(0, BaseMaterialAsset->Handle);
 			LK_CORE_ASSERT(baseMaterial->GetTexture(""), "BaseMaterial texture is nullptr");
 
-			FAssetMetadata cubeMetadata;
-			cubeMetadata.Handle = cube->Handle;
-			cubeMetadata.Type = EAssetType::Mesh;
-			cubeMetadata.FilePath = filepath;
-			cubeMetadata.IsDataLoaded = true;
-			AssetRegistry[cube->Handle] = cubeMetadata;
+			FAssetMetadata CubeMetadata;
+			CubeMetadata.Handle = Cube->Handle;
+			CubeMetadata.Type = EAssetType::Mesh;
+			CubeMetadata.FilePath = FilePath;
+			CubeMetadata.IsDataLoaded = true;
+			AssetRegistry[Cube->Handle] = CubeMetadata;
 
 			FAssetMetadata baseMaterialFAssetMetadata;
-			baseMaterialFAssetMetadata.Handle = baseMatAsset->Handle;
+			baseMaterialFAssetMetadata.Handle = BaseMaterialAsset->Handle;
 			baseMaterialFAssetMetadata.Type = EAssetType::Material;
 			baseMaterialFAssetMetadata.IsDataLoaded = true;
-			AssetRegistry[baseMatAsset->Handle] = baseMaterialFAssetMetadata;
+			AssetRegistry[BaseMaterialAsset->Handle] = baseMaterialFAssetMetadata;
 
-			TObjectPtr<MeshSource> cubeSource = cube->GetMeshSource();
-			cubeSource->m_VertexBuffer->SetLayout({
+			TObjectPtr<LMeshSource> CubeSource = Cube->GetMeshSource();
+			CubeSource->m_VertexBuffer->SetLayout({
 			    { "a_Position",      ShaderDataType::Float3  },
 			    { "a_Normal",        ShaderDataType::Float3  },
 			    { "a_Binormal",      ShaderDataType::Float3  },
 			    { "a_Tangent",       ShaderDataType::Float3  },
 			    { "a_Texcoord",      ShaderDataType::Float2  },
 			});
-			cubeSource->m_VertexBuffer->SetIndexBuffer(cubeSource->m_IndexBuffer);
+			CubeSource->m_VertexBuffer->SetIndexBuffer(CubeSource->m_IndexBuffer);
 
-			m_MemoryAssets[cube->Handle] = cube;
-			m_MemoryAssets[baseMatAsset->Handle] = baseMatAsset;
+			m_MemoryAssets[Cube->Handle] = Cube;
+			m_MemoryAssets[BaseMaterialAsset->Handle] = BaseMaterialAsset;
 
-			// Test out the retrieval of the texture before continuing
+			/* Test out the retrieval of the texture before continuing. */
 			{
-				FAssetHandle cubeMaterialHandle = cube->GetMaterials()->GetMaterialHandle(0);
-				TObjectPtr<LMaterial> cubeMaterial = LAssetManager::GetAsset<LMaterialAsset>(cube->GetMaterials()->GetMaterialHandle(0))->GetMaterial();
-				LK_CORE_VERIFY(cubeMaterial, "Retrieved material for CUBE is nullptr!");
+				const FAssetHandle CubeMaterialHandle = Cube->GetMaterials()->GetMaterialHandle(0);
+				TObjectPtr<LMaterial> CubeMaterial = LAssetManager::GetAsset<LMaterialAsset>(CubeMaterialHandle)->GetMaterial();
+				LK_CORE_VERIFY(CubeMaterial, "Retrieved material for Cube is nullptr!");
 			}
 
-			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Cube created with handle {}", cube->Handle);
+			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Cube created with handle {}", Cube->Handle);
 		}
     }
 

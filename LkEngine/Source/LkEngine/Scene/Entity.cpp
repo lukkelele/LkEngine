@@ -5,30 +5,18 @@
 
 namespace LkEngine {
 
-#if 1
-	LEntity::LEntity(entt::entity InHandle, LScene* InScene)
-		: m_EntityHandle(InHandle)
-		, m_Scene(InScene)
-		//, m_Scene(TObjectPtr<LScene>(InScene))
-	{
-	}
-#endif
-
-#if 1
 	LEntity::LEntity(entt::entity InHandle, TObjectPtr<LScene> InScene)
 		: m_EntityHandle(InHandle)
 		, m_Scene(InScene)
 	{
 	}
-#endif
 
-#if 0
-	LEntity::LEntity(const entt::entity InHandle, const LScene* InScene)
+	/// REMOVE
+	LEntity::LEntity(entt::entity InHandle, LScene* InScene)
 		: m_EntityHandle(InHandle)
 		, m_Scene(InScene)
 	{
 	}
-#endif
 
 	LEntity LEntity::GetParent() const
 	{

@@ -11,7 +11,7 @@ namespace LkEngine {
 	 */
 	namespace AssetFlag
 	{
-		enum Type : uint16_t
+		enum class Type : uint16_t
 		{
 			None       = 0 << 0,
 			Missing    = 1 << 1,

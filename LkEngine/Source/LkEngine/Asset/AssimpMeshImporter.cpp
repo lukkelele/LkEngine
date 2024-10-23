@@ -16,34 +16,35 @@ namespace LkEngine {
 	#define LK_MESH_ERROR(...) LK_CORE_ERROR_TAG("Mesh", __VA_ARGS__)
 
 
-	static const uint32_t s_MeshImportFlags =
-		aiProcess_CalcTangentSpace |        // Create binormals/tangents just in case
-		aiProcess_Triangulate |             // Make sure we're triangles
-		aiProcess_SortByPType |             // Split meshes by primitive type
-		aiProcess_GenNormals |              // Make sure we have legit normals
-		aiProcess_GenUVCoords |             // Convert UVs if required 
+	static constexpr uint32_t MeshImportFlags =
+		aiProcess_CalcTangentSpace |        /* Create binormals/tangents just in case. */
+		aiProcess_Triangulate |             /* Make sure we're triangles. */
+		aiProcess_SortByPType |             /* Split meshes by primitive type. */
+		aiProcess_GenNormals |              /* Make sure we have legit normals. */
+		aiProcess_GenUVCoords |             /* Convert UVs if required. */
 	  //aiProcess_OptimizeGraph |
-	  //aiProcess_OptimizeMeshes |          // Batch draws where possible
+	  //aiProcess_OptimizeMeshes |          /* Batch draws where possible */
 	  //aiProcess_JoinIdenticalVertices |
-		aiProcess_LimitBoneWeights |        // If more than N (=4) bone weights, discard least influencing bones and renormalise sum to 1
-		aiProcess_ValidateDataStructure |   // Validation
-		aiProcess_GlobalScale;              // e.g. convert cm to m for fbx import (and other formats where cm is native)
+		aiProcess_LimitBoneWeights |        /* If more than N(= 4) bone weights, discard least influencing bones and re-normalise sum to 1. */
+		aiProcess_ValidateDataStructure |   /* Validation. */
+		aiProcess_GlobalScale;              /* E.g convert cm to m for FBX import and other formats where cm is native. */
 
 	namespace Utils 
 	{
-		static glm::mat4 Mat4FromAIMatrix4x4(const aiMatrix4x4& matrix)
+		static glm::mat4 Mat4FromAIMatrix4x4(const aiMatrix4x4& Matrix)
 		{
+			/* Assimp uses A, B, C, D for the rows and 1, 2, 3, 4 for columns. */
 			glm::mat4 result{};
-			//the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
-			result[0][0] = matrix.a1; result[1][0] = matrix.a2; result[2][0] = matrix.a3; result[3][0] = matrix.a4;
-			result[0][1] = matrix.b1; result[1][1] = matrix.b2; result[2][1] = matrix.b3; result[3][1] = matrix.b4;
-			result[0][2] = matrix.c1; result[1][2] = matrix.c2; result[2][2] = matrix.c3; result[3][2] = matrix.c4;
-			result[0][3] = matrix.d1; result[1][3] = matrix.d2; result[2][3] = matrix.d3; result[3][3] = matrix.d4;
+			result[0][0] = Matrix.a1; result[1][0] = Matrix.a2; result[2][0] = Matrix.a3; result[3][0] = Matrix.a4;
+			result[0][1] = Matrix.b1; result[1][1] = Matrix.b2; result[2][1] = Matrix.b3; result[3][1] = Matrix.b4;
+			result[0][2] = Matrix.c1; result[1][2] = Matrix.c2; result[2][2] = Matrix.c3; result[3][2] = Matrix.c4;
+			result[0][3] = Matrix.d1; result[1][3] = Matrix.d2; result[2][3] = Matrix.d3; result[3][3] = Matrix.d4;
+
 			return result;
 		}
 
-#if MESH_DEBUG_LOG
-		static void PrintNode(aiNode* node, size_t depth)
+#if LK_MESH_DEBUG_LOG
+		static void PrintNode(aiNode* node, std::size_t depth)
 		{
 			LK_MESH_LOG("{0:^{1}}{2} {{", "", depth * 3, node->mName.C_Str());
 			++depth;
@@ -52,7 +53,8 @@ namespace LkEngine {
 			glm::vec3 scale;
 			glm::mat4 transform = Mat4FromAIMatrix4x4(node->mTransformation);
 			Math::DecomposeTransform(transform, translation, rotationQuat, scale);
-			glm::vec3 rotation = glm::degrees(glm::eulerAngles(rotationQuat));
+
+			const glm::vec3 rotation = glm::degrees(glm::eulerAngles(rotationQuat));
 
 			LK_MESH_LOG("{0:^{1}}translation: ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", depth * 3, translation.x, translation.y, translation.z);
 			LK_MESH_LOG("{0:^{1}}rotation:    ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", depth * 3, rotation.x, rotation.y, rotation.z);
@@ -62,179 +64,219 @@ namespace LkEngine {
 				PrintNode(node->mChildren[i], depth);
 			}
 			--depth;
+
 			LK_MESH_LOG("{0:^{1}}}}", "", depth * 3);
 		}
 #endif
 
 	}
 
-	AssimpMeshImporter::AssimpMeshImporter(const std::filesystem::path& path)
-		: m_Path(path)
+	LAssimpMeshImporter::LAssimpMeshImporter(const std::filesystem::path& InFilePath)
+		: FilePath(InFilePath)
 	{
+		/* TODO: Initialize the asset logger here. */
 		//AssimpLogStream::Initialize();
 	}
 
-	TObjectPtr<MeshSource> AssimpMeshImporter::ImportToMeshSource()
+	TObjectPtr<LMeshSource> LAssimpMeshImporter::ImportToMeshSource()
 	{
-		TObjectPtr<MeshSource> meshSource = TObjectPtr<MeshSource>::Create();
+		LK_CORE_DEBUG_TAG("AssimpMeshImporter", "Loading mesh: {0}", FilePath.string());
+		TObjectPtr<LMeshSource> MeshSource = TObjectPtr<LMeshSource>::Create();
 
-		LK_CORE_INFO_TAG("Mesh", "Loading mesh: {0}", m_Path.string());
+		Assimp::Importer Importer;
+		Importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
 
-		Assimp::Importer importer;
-		importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
-
-		const aiScene* scene = importer.ReadFile(m_Path.string(), s_MeshImportFlags);
-		if (!scene /* || !scene->HasMeshes()*/)  // scene CAN contain no meshes (e.g. it could contain an armature, an animation, and no skin (mesh)))
+		/* An assimp scene can contain no meshes. Something like an armature, an animation and/or no skin. */
+		const aiScene* AssimpScene = Importer.ReadFile(FilePath.string(), MeshImportFlags);
+		if (!AssimpScene /* || !scene->HasMeshes()*/)
 		{
-			LK_CORE_ERROR_TAG("Mesh", "Failed to load mesh file: {0}", m_Path.string());
-			meshSource->SetFlag(AssetFlag::Invalid);
+			LK_CORE_ERROR_TAG("Mesh", "Failed to load mesh file: {0}", FilePath.string());
+			MeshSource->SetFlag(EAssetFlag::Invalid);
 			return nullptr;
 		}
 
-		// If no meshes in the scene, there's nothing more for us to do
-		if (scene->HasMeshes())
+		/* If no meshes in the scene, there's nothing more for us to do. */
+		if (AssimpScene->HasMeshes())
 		{
-			uint32_t vertexCount = 0;
-			uint32_t indexCount = 0;
+			uint32_t VertexCount = 0;
+			uint32_t IndexCount = 0;
 
-			meshSource->m_BoundingBox.Min = { FLT_MAX, FLT_MAX, FLT_MAX };
-			meshSource->m_BoundingBox.Max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+			MeshSource->m_BoundingBox.Min = { FLT_MAX, FLT_MAX, FLT_MAX };
+			MeshSource->m_BoundingBox.Max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
-			meshSource->m_Submeshes.reserve(scene->mNumMeshes);
-			for (unsigned m = 0; m < scene->mNumMeshes; m++)
+			MeshSource->m_Submeshes.reserve(AssimpScene->mNumMeshes);
+			for (unsigned m = 0; m < AssimpScene->mNumMeshes; m++)
 			{
-				aiMesh* mesh = scene->mMeshes[m];
+				aiMesh* Mesh = AssimpScene->mMeshes[m];
 
-				Submesh& submesh = meshSource->m_Submeshes.emplace_back();
-				submesh.BaseVertex = vertexCount;
-				submesh.BaseIndex = indexCount;
-				submesh.MaterialIndex = mesh->mMaterialIndex;
-				submesh.VertexCount = mesh->mNumVertices;
-				submesh.IndexCount = mesh->mNumFaces * 3;
-				submesh.MeshName = mesh->mName.C_Str();
+				LSubmesh& Submesh = MeshSource->m_Submeshes.emplace_back();
+				Submesh.BaseVertex = VertexCount;
+				Submesh.BaseIndex = IndexCount;
+				Submesh.MaterialIndex = Mesh->mMaterialIndex;
+				Submesh.VertexCount = Mesh->mNumVertices;
+				Submesh.IndexCount = Mesh->mNumFaces * 3;
+				Submesh.MeshName = Mesh->mName.C_Str();
 
-				vertexCount += mesh->mNumVertices;
-				indexCount += submesh.IndexCount;
+				VertexCount += Mesh->mNumVertices;
+				IndexCount += Submesh.IndexCount;
 
-				LK_CORE_ASSERT(mesh->HasPositions(), "Meshes require positions.");
-				LK_CORE_ASSERT(mesh->HasNormals(), "Meshes require normals");
-				// TODO: add check for UV coords?
+				LK_CORE_VERIFY(Mesh->HasPositions(), "Meshes require positions.");
+				LK_CORE_VERIFY(Mesh->HasNormals(), "Meshes require normals");
+				// TODO: Add check for UV coordinates?
 
-				// Vertices
-				auto& aabb = submesh.BoundingBox;
-				aabb.Min = { FLT_MAX, FLT_MAX, FLT_MAX };
-				aabb.Max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+				/* Vertices. */
+				FAABB& BoundingBox = Submesh.BoundingBox;
+				BoundingBox.Min = { FLT_MAX, FLT_MAX, FLT_MAX };
+				BoundingBox.Max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
-				for (size_t i = 0; i < mesh->mNumVertices; i++)
+				for (size_t i = 0; i < Mesh->mNumVertices; i++)
 				{
-					Vertex vertex{};
-					vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
-					vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
-					aabb.Min.x = glm::min(vertex.Position.x, aabb.Min.x);
-					aabb.Min.y = glm::min(vertex.Position.y, aabb.Min.y);
-					aabb.Min.z = glm::min(vertex.Position.z, aabb.Min.z);
-					aabb.Max.x = glm::max(vertex.Position.x, aabb.Max.x);
-					aabb.Max.y = glm::max(vertex.Position.y, aabb.Max.y);
-					aabb.Max.z = glm::max(vertex.Position.z, aabb.Max.z);
+					FVertex Vertex{};
+					Vertex.Position = { 
+						Mesh->mVertices[i].x, 
+						Mesh->mVertices[i].y, 
+						Mesh->mVertices[i].z 
+					};
 
-					if (mesh->HasTangentsAndBitangents())
+					Vertex.Normal = { 
+						Mesh->mNormals[i].x, 
+						Mesh->mNormals[i].y, 
+						Mesh->mNormals[i].z 
+					};
+
+					BoundingBox.Min.x = glm::min(Vertex.Position.x, BoundingBox.Min.x);
+					BoundingBox.Min.y = glm::min(Vertex.Position.y, BoundingBox.Min.y);
+					BoundingBox.Min.z = glm::min(Vertex.Position.z, BoundingBox.Min.z);
+					BoundingBox.Max.x = glm::max(Vertex.Position.x, BoundingBox.Max.x);
+					BoundingBox.Max.y = glm::max(Vertex.Position.y, BoundingBox.Max.y);
+					BoundingBox.Max.z = glm::max(Vertex.Position.z, BoundingBox.Max.z);
+
+					if (Mesh->HasTangentsAndBitangents())
 					{
-						vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
-						vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+						/* Tangent. */
+						Vertex.Tangent = { 
+							Mesh->mTangents[i].x, 
+							Mesh->mTangents[i].y, 
+							Mesh->mTangents[i].z 
+						};
+
+						/* Binormal. */
+						Vertex.Binormal = { 
+							Mesh->mBitangents[i].x, 
+							Mesh->mBitangents[i].y, 
+							Mesh->mBitangents[i].z 
+						};
 					}
 
-					if (mesh->HasTextureCoords(0))
+					if (Mesh->HasTextureCoords(0))
 					{
-						vertex.Texcoord = {  mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
-						//vertex.Texcoord = { 2 * mesh->mTextureCoords[0][i].x, 2 * mesh->mTextureCoords[0][i].y };
+						//Vertex.Texcoord = { 2 * Mesh->mTextureCoords[0][i].x, 2 * Mesh->mTextureCoords[0][i].y };
+						Vertex.Texcoord = { 
+							Mesh->mTextureCoords[0][i].x, 
+							Mesh->mTextureCoords[0][i].y 
+						};
 					}
 
-					//LK_CORE_INFO_TAG("AssimpMeshImporter", "MESH: Add vertex {}, pos=({}, {}, {})  uv=({}, {})", i, vertex.Position.x, vertex.Position.y, vertex.Position.y, vertex.Texcoord.x, vertex.Texcoord.y);
-					meshSource->m_Vertices.push_back(vertex);
+					MeshSource->m_Vertices.push_back(Vertex);
 				}
 
 				// Indices
-				for (size_t i = 0; i < mesh->mNumFaces; i++)
+				for (size_t i = 0; i < Mesh->mNumFaces; i++)
 				{
-					LK_CORE_ASSERT(mesh->mFaces[i].mNumIndices == 3, "Mesh must have 3 indices");
-					Index index = { mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] };
-					meshSource->m_Indices.push_back(index);
+					LK_CORE_ASSERT(Mesh->mFaces[i].mNumIndices == 3, "Mesh must have 3 indices");
+					FIndex Index = { 
+						Mesh->mFaces[i].mIndices[0], 
+						Mesh->mFaces[i].mIndices[1], 
+						Mesh->mFaces[i].mIndices[2] 
+					};
+					MeshSource->m_Indices.push_back(Index);
 
-					meshSource->m_TriangleCache[m].emplace_back(meshSource->m_Vertices[index.V1 + submesh.BaseVertex], meshSource->m_Vertices[index.V2 + submesh.BaseVertex], meshSource->m_Vertices[index.V3 + submesh.BaseVertex]);
+					/* TODO: Fix overflow warning. */
+					MeshSource->m_TriangleCache[m].emplace_back(
+						MeshSource->m_Vertices[Index.V1 + Submesh.BaseVertex], 
+						MeshSource->m_Vertices[Index.V2 + Submesh.BaseVertex], 
+						MeshSource->m_Vertices[Index.V3 + Submesh.BaseVertex]
+					);
 				}
 			}
 
-			MeshNode& rootNode = meshSource->m_Nodes.emplace_back();
-			TraverseNodes(meshSource, scene->mRootNode, 0);
+			FMeshNode& RootNode = MeshSource->m_Nodes.emplace_back();
+			TraverseNodes(MeshSource, AssimpScene->mRootNode, 0);
 
-			for (const Submesh& submesh : meshSource->m_Submeshes)
+			for (const LSubmesh& Submesh : MeshSource->m_Submeshes)
 			{
-				AABB transformedSubmeshAABB = submesh.BoundingBox;
-				glm::vec3 min = glm::vec3(submesh.Transform * glm::vec4(transformedSubmeshAABB.Min, 1.0f));
-				glm::vec3 max = glm::vec3(submesh.Transform * glm::vec4(transformedSubmeshAABB.Max, 1.0f));
+				const FAABB TransformedSubmeshAABB = Submesh.BoundingBox;
+				glm::vec3 min = glm::vec3(Submesh.Transform * glm::vec4(TransformedSubmeshAABB.Min, 1.0f));
+				glm::vec3 max = glm::vec3(Submesh.Transform * glm::vec4(TransformedSubmeshAABB.Max, 1.0f));
 
-				meshSource->m_BoundingBox.Min.x = glm::min(meshSource->m_BoundingBox.Min.x, min.x);
-				meshSource->m_BoundingBox.Min.y = glm::min(meshSource->m_BoundingBox.Min.y, min.y);
-				meshSource->m_BoundingBox.Min.z = glm::min(meshSource->m_BoundingBox.Min.z, min.z);
-				meshSource->m_BoundingBox.Max.x = glm::max(meshSource->m_BoundingBox.Max.x, max.x);
-				meshSource->m_BoundingBox.Max.y = glm::max(meshSource->m_BoundingBox.Max.y, max.y);
-				meshSource->m_BoundingBox.Max.z = glm::max(meshSource->m_BoundingBox.Max.z, max.z);
+				MeshSource->m_BoundingBox.Min.x = glm::min(MeshSource->m_BoundingBox.Min.x, min.x);
+				MeshSource->m_BoundingBox.Min.y = glm::min(MeshSource->m_BoundingBox.Min.y, min.y);
+				MeshSource->m_BoundingBox.Min.z = glm::min(MeshSource->m_BoundingBox.Min.z, min.z);
+				MeshSource->m_BoundingBox.Max.x = glm::max(MeshSource->m_BoundingBox.Max.x, max.x);
+				MeshSource->m_BoundingBox.Max.y = glm::max(MeshSource->m_BoundingBox.Max.y, max.y);
+				MeshSource->m_BoundingBox.Max.z = glm::max(MeshSource->m_BoundingBox.Max.z, max.z);
 			}
 		}
-		// No meshes
+		/* No meshes. */
 		else 
 		{
-			LK_CORE_WARN_TAG("AssimpMeshImporter", "No meshes detected!");
+			LK_CORE_WARN_TAG("AssimpMeshImporter", "No meshes found when trying to import");
 		}
 
-		if (meshSource->m_Vertices.size())
+		if (MeshSource->m_Vertices.size())
 		{
-			meshSource->m_VertexBuffer = LVertexBuffer::Create(meshSource->m_Vertices.data(), 
-															   static_cast<uint32_t>(meshSource->m_Vertices.size() * sizeof(Vertex)));
+			MeshSource->m_VertexBuffer = LVertexBuffer::Create(MeshSource->m_Vertices.data(), 
+															   static_cast<uint64_t>(MeshSource->m_Vertices.size() * sizeof(FVertex)));
 		}
 
-		if (meshSource->m_Indices.size())
+		if (MeshSource->m_Indices.size())
 		{
-			meshSource->m_IndexBuffer = LIndexBuffer::Create(meshSource->m_Indices.data(), 
-															 static_cast<uint32_t>(meshSource->m_Indices.size() * sizeof(Index)));
+			MeshSource->m_IndexBuffer = LIndexBuffer::Create(MeshSource->m_Indices.data(), 
+															 static_cast<uint64_t>(MeshSource->m_Indices.size() * sizeof(FIndex)));
 		}
 
-		return meshSource;
+		return MeshSource;
 	}
 
-	void AssimpMeshImporter::TraverseNodes(TObjectPtr<MeshSource> meshSource, 
-										   void* assimpNode, 
-										   uint32_t nodeIndex, 
-										   const glm::mat4& parentTransform, 
-										   const uint32_t level)
+	void LAssimpMeshImporter::TraverseNodes(TObjectPtr<LMeshSource> MeshSource, 
+										   void* InAssimpNode, 
+										   uint32_t NodeIndex, 
+										   const glm::mat4& ParentTransform, 
+										   const uint32_t Level)
 	{
-		aiNode* aNode = (aiNode*)assimpNode;
+		aiNode* AssimpNode = static_cast<aiNode*>(InAssimpNode);
 
-		MeshNode& node = meshSource->m_Nodes[nodeIndex];
-		node.Name = aNode->mName.C_Str();
-		node.LocalTransform = Utils::Mat4FromAIMatrix4x4(aNode->mTransformation);
+		FMeshNode& MeshNode = MeshSource->m_Nodes[NodeIndex];
+		MeshNode.Name = AssimpNode->mName.C_Str();
+		MeshNode.LocalTransform = Utils::Mat4FromAIMatrix4x4(AssimpNode->mTransformation);
 
-		glm::mat4 transform = parentTransform * node.LocalTransform;
-		for (uint32_t i = 0; i < aNode->mNumMeshes; i++)
+		const glm::mat4 Transform = ParentTransform * MeshNode.LocalTransform;
+		for (uint32_t i = 0; i < AssimpNode->mNumMeshes; i++)
 		{
-			uint32_t submeshIndex = aNode->mMeshes[i];
-			auto& submesh = meshSource->m_Submeshes[submeshIndex];
-			submesh.NodeName = aNode->mName.C_Str();
-			submesh.Transform = transform;
-			submesh.LocalTransform = node.LocalTransform;
+			const uint32_t SubmeshIndex = AssimpNode->mMeshes[i];
+			LSubmesh& Submesh = MeshSource->m_Submeshes[SubmeshIndex];
+			Submesh.NodeName = AssimpNode->mName.C_Str();
+			Submesh.Transform = Transform;
+			Submesh.LocalTransform = MeshNode.LocalTransform;
 
-			node.Submeshes.push_back(submeshIndex);
+			MeshNode.Submeshes.push_back(SubmeshIndex);
 		}
 
-		uint32_t parentNodeIndex = (uint32_t)meshSource->m_Nodes.size() - 1;
-		node.Children.resize(aNode->mNumChildren);
-		for (uint32_t i = 0; i < aNode->mNumChildren; i++)
+		uint32_t ParentNodeIndex = static_cast<uint32_t>(MeshSource->m_Nodes.size() - 1);
+
+		MeshNode.Children.resize(AssimpNode->mNumChildren);
+		for (uint32_t i = 0; i < AssimpNode->mNumChildren; i++)
 		{
-			MeshNode& child = meshSource->m_Nodes.emplace_back();
-			uint32_t childIndex = static_cast<uint32_t>(meshSource->m_Nodes.size()) - 1;
-			child.Parent = parentNodeIndex;
-			meshSource->m_Nodes[nodeIndex].Children[i] = childIndex;
-			TraverseNodes(meshSource, aNode->mChildren[i], childIndex, transform, level + 1);
+			FMeshNode& ChildMeshNode = MeshSource->m_Nodes.emplace_back();
+			const uint32_t ChildIndex = static_cast<uint32_t>(MeshSource->m_Nodes.size()) - 1;
+			ChildMeshNode.Parent = ParentNodeIndex;
+			MeshSource->m_Nodes[NodeIndex].Children[i] = ChildIndex;
+
+			TraverseNodes(MeshSource, 
+						  AssimpNode->mChildren[i], 
+						  ChildIndex, 
+						  Transform, 
+						  Level + 1);
 		}
 	}
 }

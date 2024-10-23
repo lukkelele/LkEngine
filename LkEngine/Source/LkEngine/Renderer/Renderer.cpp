@@ -151,11 +151,9 @@ namespace LkEngine {
 		return RendererData->m_ShaderLibrary;
 	}
 
-	void LRenderer::SubmitMesh(TObjectPtr<Mesh>& mesh, 
-							   TObjectPtr<LShader>& shader, 
-							   const glm::mat4& transform)
+	void LRenderer::SubmitMesh(TObjectPtr<LMesh>& Mesh, TObjectPtr<LShader>& Shader, const glm::mat4& Transform)
 	{
-		RendererAPI->SubmitMesh(mesh, shader, transform);
+		RendererAPI->SubmitMesh(Mesh, Shader, Transform);
 	}
 
 	void LRenderer::SubmitImage(const TObjectPtr<LImage> image)
@@ -315,6 +313,7 @@ namespace LkEngine {
 								   const uint32_t indexCount /*= 0*/)
 	{
 		//RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, shader, vertexBuffer, indexBuffer, transform, indexCount);
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
 	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
@@ -326,6 +325,7 @@ namespace LkEngine {
 								   const uint32_t IndexCount /*= 0*/)
 	{
 		//RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, material, vertexBuffer, indexBuffer, Transform, IndexCount);
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 	
 	TObjectPtr<LTexture2D> LRenderer::GetWhiteTexture()
@@ -339,9 +339,11 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	void LRenderer::DrawMesh(Ref<Mesh>& mesh, const TObjectPtr<LShader> shader)
+	void LRenderer::DrawMesh(TObjectPtr<LMesh>& Mesh, const TObjectPtr<LShader> Shader)
 	{
 		//RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *shader);
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
+		LK_UNUSED(Mesh && Shader);
 	}
 
 	void LRenderer::RegisterShaderDependency(TObjectPtr<LShader> Shader, TObjectPtr<LMaterial> material)
