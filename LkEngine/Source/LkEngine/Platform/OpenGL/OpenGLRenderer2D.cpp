@@ -53,6 +53,7 @@ namespace LkEngine {
 
         // Quad
         {
+            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Creating quad framebuffer");
             FFramebufferSpecification QuadFramebufferSpec{};
 		    QuadFramebufferSpec.Attachments = {
                 EImageFormat::RGBA32F, 
@@ -77,6 +78,7 @@ namespace LkEngine {
             QuadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
             QuadPipelineSpec.Shader = m_QuadShader;
 
+            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Creating quad pipeline");
             RenderPassSpecification QuadPassSpec;
             QuadPassSpec.DebugName = "Renderer2D-QuadPass";
             QuadPassSpec.Pipeline = LPipeline::Create(QuadPipelineSpec);
@@ -84,6 +86,7 @@ namespace LkEngine {
             m_QuadMaterial = LMaterial::Create(m_QuadShader, "QuadMaterial");
 
             // Use correct amount of texture array uniforms
+            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Creating quad renderpass");
             for (uint8_t ArrayIndex = 0; ArrayIndex < m_Specification.TextureArraysUsed; ArrayIndex++)
             {
                 OpenGLPipeline->BindTextureArray(ArrayIndex);
@@ -119,6 +122,7 @@ namespace LkEngine {
                 Offset += 4;
             }
 
+            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Creating quad indexbuffer");
             TObjectPtr<LIndexBuffer> quadIB = LIndexBuffer::Create(QuadIndices, m_MaxIndices);
             m_QuadVertexBuffer->SetIndexBuffer(quadIB);
             m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
@@ -128,6 +132,7 @@ namespace LkEngine {
 
         // Lines
         {
+            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "");
             m_LineVertexBuffer = LVertexBuffer::Create(m_MaxVertices * sizeof(LineVertex));
             VertexBufferLayout lineVertexBufLayout{ };
             m_LineVertexBuffer->SetLayout({

@@ -33,7 +33,7 @@ namespace LkEngine {
     class LRendererAPI : public LObject
     {
 	public:
-		virtual void Init() = 0;
+		virtual void Initialize() = 0;
 		virtual void Shutdown() = 0;
 
 		virtual void BeginFrame() = 0;
@@ -167,12 +167,13 @@ namespace LkEngine {
 	protected:
 		inline static ERendererAPI RendererAPI = ERendererAPI::OpenGL;
 
-		friend class LEditor;
 		friend class LRenderer;
+		friend class LEditor; /// REMOVE
 
 	private:
 		LCLASS(LRendererAPI);
     };
+
 
 	namespace Enum
 	{

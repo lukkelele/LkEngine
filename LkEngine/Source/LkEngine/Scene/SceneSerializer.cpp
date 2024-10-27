@@ -147,8 +147,8 @@ namespace LkEngine {
 	{
 		Out << YAML::BeginMap;
 		Out << YAML::Key << "Scene"       << YAML::Value << m_Scene->GetName();
-		Out << YAML::Key << "Active"      << YAML::Value << m_Scene->m_IsActiveScene;
-		Out << YAML::Key << "EditorScene" << YAML::Value << m_Scene->m_EditorScene;
+		Out << YAML::Key << "Active"      << YAML::Value << m_Scene->bIsActiveScene;
+		Out << YAML::Key << "EditorScene" << YAML::Value << m_Scene->bIsEditorScene;
 		Out << YAML::Key << "SceneHandle" << YAML::Value << static_cast<uint32_t>(m_Scene->m_SceneEntity);
 
 		LEditorLayer* Editor = LEditorLayer::Get();
@@ -201,6 +201,7 @@ namespace LkEngine {
 		Out << YAML::EndMap;
 	}
 
+	/// FIXME: Refactor
 	bool LSceneSerializer::DeserializeFromYAML(const std::string& YamlString)
 	{
 		YAML::Node data = YAML::Load(YamlString);
@@ -217,7 +218,8 @@ namespace LkEngine {
 		m_Scene->SetAsActive(bIsActiveScene);
 
 		const bool bIsEditorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
-		m_Scene->SetAsEditorScene(bIsEditorScene);
+		//m_Scene->SetAsEditorScene(bIsEditorScene);
+		m_Scene->bIsEditorScene = bIsEditorScene;
 		const uint32_t SceneEntityHandle = data["SceneHandle"].as<uint32_t>();
 
 		/* EditorCamera. */
@@ -228,20 +230,19 @@ namespace LkEngine {
 			DeserializeEditorCamera(EditorCameraNode, *EditorCamera);
 		}
 
-		// Entities
+		/* Scene entities. */
 		YAML::Node entities = data["Entities"];
 		if (entities)
 		{
 			DeserializeEntities(entities, m_Scene);
 		}
 
-
-		// Sort LIDComponent by by Entity handle (which is essentially the order in which they were created)
+		/* Sort LIDComponent by by Entity handle(which is essentially the order in which they were created). */
 		m_Scene->m_Registry.sort<LIDComponent>([this](const auto Lhs, const auto Rhs)
 		{
 			auto LhsEntity = m_Scene->m_EntityIDMap.find(Lhs.ID);
 			auto RhsEntity = m_Scene->m_EntityIDMap.find(Rhs.ID);
-			return static_cast<uint32_t>(LhsEntity->second) < static_cast<uint32_t>(RhsEntity->second);
+			return (static_cast<uint32_t>(LhsEntity->second) < static_cast<uint32_t>(RhsEntity->second));
 		});
 
 		return true;

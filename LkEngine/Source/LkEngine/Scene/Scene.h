@@ -3,7 +3,7 @@
 #include <unordered_set>
 
 #include "LkEngine/Core/Core.h"
-#include "LkEngine/Core/Timer.h"
+#include "LkEngine/Core/Time/Timer.h"
 #include "LkEngine/Core/String.h"
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
@@ -69,8 +69,16 @@ namespace LkEngine {
 
 		FORCEINLINE std::string GetName() const { return Name; }
 		void SetName(const std::string& InName) { Name = InName; }
-		void SetAsActive(bool active) { m_IsActiveScene = active; }
-		void SetAsEditorScene(bool bIsEditorScene) { m_EditorScene = bIsEditorScene; }
+
+		void SetAsActive(const bool Active) 
+		{ 
+			if (bIsActiveScene != Active)
+			{
+				bIsActiveScene = Active; 
+				/// TODO: Broadcast delegate here.
+			}
+		}
+
 		void Clear();
 
 		TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
@@ -151,7 +159,10 @@ namespace LkEngine {
 			return "";
 		}
 
-		static uint8_t GetSceneCount() { return m_SceneCounter; }
+		/**
+		 * @brief Get count of existing scenes.
+		 */
+		FORCEINLINE static uint8_t GetSceneCount() { return SceneCounter; }
 
 		static TObjectPtr<LScene> GetActiveScene() 
 		{ 
@@ -161,34 +172,33 @@ namespace LkEngine {
 		std::unordered_set<FAssetHandle> GetAssetList();
 
 	private:
-		//inline static LScene* m_ActiveScene = nullptr;
 		inline static TObjectPtr<LScene> m_ActiveScene = nullptr;
-
-		inline static uint8_t m_SceneCounter = 0;
+		inline static uint8_t SceneCounter = 0;
 	private:
 		std::string Name = "";
-		UUID m_SceneID = 0; // Replace with AssetHandle.
+
+		UUID m_SceneID = 0; /// TODO: Replace with AssetHandle.
 		FAssetHandle AssetHandle;
+
 		entt::entity m_SceneEntity;
 
-		bool m_Paused = false;
+		bool bPaused = false;
 		int m_Frames = 0;
 
 		EntityMap m_EntityIDMap;
 		entt::registry m_Registry{};
 
-		Timer m_Timer;
-		bool m_EditorScene = false; // Blank scene
-		bool m_IsActiveScene = false;
+		bool bIsActiveScene = false;
+		bool bIsEditorScene = false; /// REMOVE
 
 		uint16_t m_ViewportWidth = 0;
 		uint16_t m_ViewportHeight = 0;
 
 		TObjectPtr<LSceneCamera> m_Camera = nullptr;
-		TObjectPtr<LSceneCamera> m_Camera2D = nullptr;
+		TObjectPtr<LSceneCamera> m_Camera2D = nullptr; /// REMOVE
 		TObjectPtr<LEditorCamera> EditorCamera = nullptr;
 
-		TObjectPtr<LSceneRenderer> m_Renderer = nullptr;
+		TObjectPtr<LSceneRenderer> Renderer = nullptr;
 
 		friend class LEntity;
 		friend class LEditorLayer;

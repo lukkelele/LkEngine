@@ -79,7 +79,17 @@ namespace LkEngine {
 		RendererData->MaterialLibrary = TObjectPtr<LMaterialLibrary>::Create();
 
 		RendererAPI = LRendererAPI::Create();
-		RendererAPI->Init();
+		RendererAPI->Initialize();
+
+		const LClass* ClassInfo = RendererAPI->GetClass();
+		if (ClassInfo->CastTo<LWindow>(RendererAPI.Get()))
+		{
+			LK_CORE_FATAL_TAG("Renderer", "{}  Cast to LWindow SUCCESSFUL", ClassInfo->GetName());
+		}
+		else
+		{
+			LK_CORE_WARN_TAG("Renderer", "{}  Cast to LWindow failed", ClassInfo->GetName());
+		}
 	}
 
 	void LRenderer::Clear()

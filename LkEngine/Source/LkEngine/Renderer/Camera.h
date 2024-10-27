@@ -143,12 +143,16 @@ namespace LkEngine {
 			bDirty = true;
 		}
 
-		void SetOrthoProjectionMatrix(const float width, const float height, const float nearP, const float farP)
+		void SetOrthoProjectionMatrix(const float InWidth, 
+									  const float InHeight, 
+									  const float InNearP, 
+									  const float InFarP)
 		{
 			m_ProjectionMatrix = glm::ortho(
-				-(width  * 0.5f), (width  * 0.5f),
-				-(height * 0.5f), (height * 0.5f),
-				nearP, farP);
+				-(InWidth  * 0.5f), (InWidth  * 0.5f),
+				-(InHeight * 0.5f), (InHeight * 0.5f),
+				InNearP, InFarP);
+
 			bDirty = true;
 		}
 
@@ -177,6 +181,7 @@ namespace LkEngine {
 		ECameraProjection ProjectionType = ECameraProjection::Perspective;
 		ECameraType Type = ECameraType::None;
 
+		/** Flag to indicate that the camera is in need of thorough update. */
 		bool bDirty = false;
 
 		float m_DegPerspectiveFOV = 45.0f;

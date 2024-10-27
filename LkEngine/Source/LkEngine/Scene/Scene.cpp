@@ -16,8 +16,12 @@
 
 namespace LkEngine {
 
-	LScene::LScene(bool bIsEditorScene)
-		: m_EditorScene(bIsEditorScene)
+	///
+	/// FIXME: Unify constructors here
+	///
+
+	LScene::LScene(const bool IsEditorScene)
+		: bIsEditorScene(IsEditorScene)
 		, Name("")
 	{
 		m_SceneEntity = m_Registry.create();
@@ -38,17 +42,18 @@ namespace LkEngine {
 		}
 
 	#if LK_PHYSICS_ENABLED
-		// Initiate 2D physics
 		Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
 		box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
-		Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
+		Debugger::AttachDebugDrawer2D(&box2dWorld, 
+									  Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 	#endif
 
 		LK_CORE_DEBUG_TAG("Scene", "New scene created {}", Name);
+		SceneCounter++;
 	}
 
 	LScene::LScene(const LString& InName, bool bIsActiveScene, bool bIsEditorScene)
-		: m_EditorScene(bIsEditorScene)
+		: bIsEditorScene(bIsEditorScene)
 		, Name(InName)
 	{
 		m_SceneEntity = m_Registry.create();
@@ -59,7 +64,7 @@ namespace LkEngine {
 
 		if (bIsActiveScene)
 		{
-			m_IsActiveScene = true;
+			bIsActiveScene = true;
 			m_ActiveScene = this;
 
 			/// FIXME
@@ -80,6 +85,8 @@ namespace LkEngine {
 	#endif
 
 		LK_CORE_DEBUG_TAG("Scene", "New scene created {}", Name);
+
+		SceneCounter++;
 	}
 
 	LScene::~LScene()
@@ -216,10 +223,12 @@ namespace LkEngine {
 		});
 	}
 
-	void LScene::Pause(bool paused)
+	void LScene::Pause(const bool IsPaused)
 	{
-		m_Paused = paused;
-		//m_World->Pause(paused);
+		bPaused = IsPaused;
+	#if 0
+		m_World->Pause(IsPaused);
+	#endif
 	}
 
 	void LScene::SwitchCamera()
@@ -403,7 +412,7 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("Scene", "Starting to copy scene \"{}\"", Name);
 
 		target->Name = Name;
-		target->m_EditorScene = m_EditorScene;
+		target->bIsEditorScene = bIsEditorScene;
 
 		std::unordered_map<UUID, entt::entity> enttMap;
 		auto idComponents = m_Registry.view<LIDComponent>();

@@ -22,14 +22,14 @@ namespace LkEngine {
     class OpenGLRenderer : public LRendererAPI
     {
     public:
-        void Init();
-        void Shutdown();
+        virtual void Initialize() override;
+        virtual void Shutdown() override;
 
         virtual void BeginFrame() override;
         virtual void EndFrame() override;
         virtual void Clear() override;
 
-        virtual void DrawIndexed(uint64_t indexCount) override;
+        virtual void DrawIndexed(const uint64_t IndexCount) override;
 
         void Draw(LVertexBuffer& vb, const LShader& shader);
 

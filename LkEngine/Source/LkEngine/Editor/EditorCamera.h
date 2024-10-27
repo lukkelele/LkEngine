@@ -1,9 +1,10 @@
 #pragma once
 
 #include "LkEngine/Core/Core.h"
-#include "LkEngine/Core/Timestep.h"
+#include "LkEngine/Core/Time/Timer.h"
 
 #include "LkEngine/Renderer/Camera.h"
+#include "LkEngine/Core/Time/Timestep.h"
 
 #include "LkEngine/Input/Keyboard.h"
 #include "LkEngine/Input/Mouse.h"

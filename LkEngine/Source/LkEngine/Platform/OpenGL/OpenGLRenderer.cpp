@@ -12,11 +12,11 @@
 namespace LkEngine {
 
 	constexpr int MaxTexturesArrays = 10;
-    constexpr int MaxTexturesPerTextureArray = 32;
+	constexpr int MaxTexturesPerTextureArray = 32;
 
 	struct FRendererData
 	{
-        RendererCapabilities m_RendererCapabilities;
+		RendererCapabilities m_RendererCapabilities;
 
 		TObjectPtr<OpenGLTextureArray> TextureArrays[MaxTexturesArrays];
 	};
@@ -24,17 +24,17 @@ namespace LkEngine {
 	static FRendererData* RendererData = nullptr;
 	static int TextureArrayCount = 0;
 
-    void OpenGLRenderer::Init()
-    {
+	void OpenGLRenderer::Initialize()
+	{
 		RendererData = new FRendererData();
 
 		RenderContext = LWindow::Get().GetRenderContext().As<LOpenGLContext>();
 
 		// Texture Arrays
-		constexpr ETextureArrayDimension TextureArrayDimensions[] = { 
-			Dimension_512x512, 
-			Dimension_1024x1024, 
-			Dimension_2048x2048 
+		static constexpr ETextureArrayDimension TextureArrayDimensions[] = {
+			Dimension_512x512,
+			Dimension_1024x1024,
+			Dimension_2048x2048
 		};
 
 		FTextureArraySpecification TextureArraySpec;
@@ -48,31 +48,41 @@ namespace LkEngine {
 			LK_CORE_TRACE_TAG("OpenGLRenderer", "Created texture array {} called \"{}\"", i, TextureArraySpec.DebugName);
 		}
 
-        //auto Textures2D = LTextureLibrary::Get().GetTextures2D();
-        //const auto& Textures2D = LTextureLibrary::Get().GetTextures2D();
-        auto& Textures2D = LAssetManager::GetTextures2D();
-        for (int i = 0; i < Textures2D.size(); i++)
-        {
-			//const TObjectPtr<LOpenGLImage2D>& img = Textures2D.at(i).second->GetImage().As<LOpenGLImage2D>();
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding textures to TextureArray's");
+		const std::vector<TTexture2DPair>& Textures2D = LAssetManager::GetTextures2D();
+		for (int i = 0; i < Textures2D.size(); i++)
+		{
 			const TObjectPtr<LOpenGLImage2D> img = Textures2D.at(i).second->GetImage().As<LOpenGLImage2D>();
 			switch (img->GetWidth())
 			{
-				case 512:  
+				case 512:
 					GetTextureArray(0)->AddTextureToArray(Textures2D[i].second);
 					break;
 
-				case 1024: 
-					GetTextureArray(1)->AddTextureToArray(Textures2D[i].second); 
+				case 1024:
+					GetTextureArray(1)->AddTextureToArray(Textures2D[i].second);
 					break;
 
-				case 2048: 
-					GetTextureArray(2)->AddTextureToArray(Textures2D[i].second); 
+				case 2048:
+					GetTextureArray(2)->AddTextureToArray(Textures2D[i].second);
+					break;
+
+				default:
 					break;
 			}
-        }
+		}
+
+	#if 0 // DISABLED
+
+		/// REMOVE
+		for (int i = 0; i < TextureArrayCount; i++)
+		{
+			LK_CORE_WARN_TAG("OpenGLRenderer", "TextureArray {}  TypeID={}", i, RendererData->TextureArrays[i]->GetTypeID());
+		}
 
 		OpenGLRenderer2DSpecification renderer2DSpec;
 		renderer2DSpec.TextureArraysUsed = TextureArrayCount;
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Creating 2D Renderer with {} texture arrays used", TextureArrayCount);
 		Renderer2D = TObjectPtr<LOpenGLRenderer2D>::Create(renderer2DSpec);
 
 		/* Add texture array references to OpenGLRenderer2D as well. */
@@ -80,26 +90,28 @@ namespace LkEngine {
 		{
 			if (RendererData->TextureArrays[i])
 			{
+                LK_CORE_DEBUG_TAG("OpenGLRenderer", "TextureArray {}  TypeID={}", i, RendererData->TextureArrays[i]->GetTypeID());
 				Renderer2D->m_TextureArrays[i] = RendererData->TextureArrays[i];
 				BindTextureArray(i);
 			}
 		}
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Initializing 2D renderer");
 		Renderer2D->Init();
 
 		RenderContext->SetDepthEnabled(true);
 		/* Default to triangles */
 		SetPrimitiveTopology(ERenderTopology::Triangles);
 
-		// Render Passes
+		/* Create render passes. */
 		{
-			// Geometric
-			RenderPassSpecification renderPassSpec;
-			renderPassSpec.DebugName = "OpenGL_GeometricRenderPass";
-			m_GeometricPass = TObjectPtr<OpenGLRenderPass>::Create(renderPassSpec);
+			/* Geometric. */
+			RenderPassSpecification RenderPassSpec;
+			RenderPassSpec.DebugName = "RenderPass_Geometric";
+			m_GeometricPass = TObjectPtr<OpenGLRenderPass>::Create(RenderPassSpec);
 
-			// 2D
-			renderPassSpec.DebugName = "OpenGL_Renderer2DRenderPass";
-			m_RenderPass2D = TObjectPtr<OpenGLRenderPass>::Create(renderPassSpec);
+			/* 2D. */
+			RenderPassSpec.DebugName = "RenderPass_2D";
+			m_RenderPass2D = TObjectPtr<OpenGLRenderPass>::Create(RenderPassSpec);
 		}
 
 	#if 1
@@ -113,11 +125,17 @@ namespace LkEngine {
             FloorTexture_ = LoadTexture("Assets/Textures/metal.png");
         }
 	#endif
+
+	#endif
     }
 
     void OpenGLRenderer::Shutdown()
     {
-		m_GeometricPass->Terminate();
+		if (m_GeometricPass)
+		{
+			m_GeometricPass->Terminate();
+			m_GeometricPass.Release();
+		}
     }
 
     void OpenGLRenderer::BeginFrame()

@@ -66,7 +66,8 @@ namespace LkEngine {
 
 		GOnObjectCreated.Add([&](const LObject* NewObject)
 		{
-			LK_CORE_DEBUG_TAG("Editor", "New Object Created: {}, Name=\"{}\"", NewObject->StaticClass(), NewObject->GetName());
+			//LK_CORE_DEBUG_TAG("Editor", "New Object Created: {}, Name=\"{}\"", NewObject->StaticClassName(), NewObject->GetName());
+			LK_CORE_DEBUG_TAG("Editor", "New Object  ClassName=\"{}\"  Name=\"{}\"", NewObject->GetClass()->GetName(), NewObject->GetName());
 		});
 
 		/* Editor UI components. */
