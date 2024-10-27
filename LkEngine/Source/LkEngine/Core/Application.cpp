@@ -25,8 +25,6 @@ namespace LkEngine {
 
         /* Read configuration file. */
         ReadConfigurationFile();
-
-        Timer.Reset();
     }
 
     LApplication::~LApplication()
@@ -72,6 +70,7 @@ namespace LkEngine {
         LApplication* Application = this;
         GLFWwindow* GlfwWindow = Window->GetGlfwWindow();
 
+        Timer.Reset();
 		while (!glfwWindowShouldClose(GlfwWindow))
 		{
 			Timestep = Timer.GetDeltaTime();

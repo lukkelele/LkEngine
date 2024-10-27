@@ -3,11 +3,10 @@
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/String.h"
 
-/// FIXME: Cannot include LObject here.
-///        Need to forward declare better.
 
 namespace LkEngine {
 
+	/* TODO: Remove */
 	struct FClassMetadata
 	{
 		std::vector<std::string> Properties{};
@@ -48,22 +47,6 @@ namespace LkEngine {
 
 		template<typename T>
 		void RegisterObject(std::string_view ObjectVariableName, const T& ObjectToRegister);
-
-		void LogMetadata(std::string_view VariableName)
-		{
-			if (LiveCollection.find(VariableName.data()) != LiveCollection.end())
-			{
-				LK_CORE_INFO_TAG("MetadataRegistry", "Metadata for '{}'\n"
-								 " - Type:     {}\n"
-								 " - Created : {}\n",
-								 LiveCollection[VariableName.data()].first,
-								 std::ctime(&LiveCollection[VariableName.data()].second));
-			}
-			else
-			{
-				LK_CORE_WARN_TAG("MetadataRegistry", "No LiveCollection found for variable '{}'", VariableName);
-			}
-		}
 
 		FORCEINLINE int GetClassRegistrySize() const 
 		{ 

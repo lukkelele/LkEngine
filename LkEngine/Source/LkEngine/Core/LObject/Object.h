@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "LkEngine/Core/CoreMacros.h"
+#include "LkEngine/Core/LObject/LClass.h"
 #include "LkEngine/Core/LObject/LObjectBase.h"
 #include "LkEngine/Core/String.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
@@ -58,13 +59,20 @@ namespace LkEngine {
 				return *this;
 			}
 
+			Handle = Other.Handle;
+			bInitialized = Other.bInitialized;
 			Flags = Other.Flags;
+			Name = Other.Name;
+			ReferenceCount = Other.ReferenceCount.load();
 
 			return *this;
 		}
 
 		/** @brief Get the object handle. */
-		FORCEINLINE FObjectHandle GetHandle() const { return Handle; }
+		FORCEINLINE FObjectHandle GetHandle() const 
+		{ 
+			return Handle; 
+		}
 
 		/**
 		 * @brief Initialize object.
@@ -114,14 +122,28 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Static class. Implemented by LCLASS macro.
+		 * @brief Get static class.
 		 */
-		FORCEINLINE static std::string StaticClass() { return "LObject"; }
+		FORCEINLINE static const LClass* StaticClass() 
+		{ 
+			static const bool bClassRegistered = (LClass::Register<LObject>("LObject"), true);
+			return LClass::Get(LType<LObject>::ID());
+		}
+
+		/**
+		 * @brief Static class name, implemented by LCLASS macro.
+		 */
+		FORCEINLINE static std::string StaticClassName() { return "LObject"; }
 
 		/** 
-		 * @brief Name of class. Implemented by LCLASS macro.
+		 * @brief Return LClass object for this class.
 		 */
-		FORCEINLINE virtual std::string_view ClassName() const = 0;
+		virtual const LClass* GetClass() const = 0;
+
+		/** 
+		 * @brief Name of class, implemented by LCLASS macro.
+		 */
+		virtual std::string ClassName() const = 0;
 
 		/** 
 		 * @brief Get name of object. 
@@ -137,6 +159,15 @@ namespace LkEngine {
 		 * @brief Serialize object. 
 		 */
 		virtual LString Serialize() const { return ""; }
+
+		/**
+		 * @brief Mark object as garbage.
+		 */
+		FORCEINLINE void MarkAsGarbage()
+		{
+			//Flags |= static_cast<decltype(Flags)>(EObjectFlag::Garbage);
+			Flags |= EObjectFlag::Garbage;
+		}
 
 		/** 
 		 * @brief Cast object to type T. 
@@ -165,38 +196,52 @@ namespace LkEngine {
 		bool IsA() const
 		{
 			static_assert(sizeof(T) > 0, "IsA<T> failed, incomplete type");
+			//return (StaticClassName() == T::StaticClassName());
 			return (StaticClass() == T::StaticClass());
 		}
 
-		virtual bool IsAsset() const
-		{
-			return false;
-		}
+		/**
+		 * @brief Check if object is considered an asset.
+		 */
+		FORCEINLINE virtual bool IsAsset() const { return false; }
 
 		/**
 		 * @brief Return current reference count from all smart pointers. 
 		 */
-		FORCEINLINE uint32_t GetReferenceCount() const 
-		{ 
-			return ReferenceCount.load(); 
-		}
+		FORCEINLINE uint32_t GetReferenceCount() const { return ReferenceCount.load(); }
 
 	protected:
 		/**
-		 * @brief End stage of object destruction, called last on destruction.
+		 * @brief End stage of object destruction.
 		 */
 		virtual void FinalizeDestruction();
 
 	private:
-		FORCEINLINE void IncrementReferenceCount() const { ReferenceCount++; }
-		FORCEINLINE void DecrementReferenceCount() const { ReferenceCount--; }
+		/**
+		 * @brief Increment reference count.
+		 * Managed by TObjectPtr.
+		 */
+		FORCEINLINE void IncrementReferenceCount() const 
+		{ 
+			ReferenceCount++; 
+		}
+
+		/**
+		 * @brief Decrement reference count.
+		 * Managed by TObjectPtr.
+		 */
+		FORCEINLINE void DecrementReferenceCount() const 
+		{ 
+			ReferenceCount--; 
+		}
+
 	protected:
 		FObjectHandle Handle = 0;
 
 		bool bInitialized = false;
 		LObjectFlag Flags = EObjectFlag::None;
 
-		/* Runtime object name. */
+		/* Runtime name. */
 		std::string Name{};
 
 		FObjectDestructBegin OnDestructBegin{};

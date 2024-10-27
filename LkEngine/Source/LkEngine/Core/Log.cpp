@@ -1,20 +1,21 @@
 #include "LKpch.h"
 #include "LkEngine/Core/Log.h"
-#include "LkEngine/Core/Time.h"
-#include "LkEngine/Core/Globals.h"
 
+#include "LkEngine/Core/Time/Time.h"
+#include "LkEngine/Core/Globals.h"
 #include "LkEngine/Core/IO/File.h"
 
 
 namespace LkEngine {
 
-	/* Assuming the log files are formatted with a timestamp. */
+	/** Assuming the log files are formatted with a timestamp. */
 	static bool CompareLogFiles(const std::filesystem::directory_entry& A, 
 								const std::filesystem::directory_entry& B)
 	{
 		return (A.path().filename().string() < B.path().filename().string());
 	}
 
+	/** Get count of logfiles present in directory. */
 	static int CountLogFilesInDir(const std::filesystem::path& InDirectory)
 	{
 		namespace fs = std::filesystem;

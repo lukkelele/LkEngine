@@ -3,11 +3,11 @@
 #include "LkEngine/Core/Delegate/Delegate.h"
 
 
-/**
- * Delegate type trait helpers.
- */
-namespace LkEngine 
-{
+namespace LkEngine::Meta {
+
+	/**
+	 * @brief Helper for checking if a delegate is a multicast delegate.
+	 */
 	template <typename T>
 	struct IsMulticastDelegate : std::false_type {};
 
@@ -16,4 +16,5 @@ namespace LkEngine
 
 	template<typename T>
 	inline constexpr bool IsMulticastDelegate_v = IsMulticastDelegate<T>::value;
+
 }

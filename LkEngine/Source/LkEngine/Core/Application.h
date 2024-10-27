@@ -5,10 +5,10 @@
 
 #include "LkEngine/Core/ApplicationConfig.h"
 #include "LkEngine/Core/Window.h"
-#include "LkEngine/Core/Timer.h"
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/CrashHandler.h"
+#include "LkEngine/Core/Time/Timer.h"
 #include "LkEngine/Core/Event/KeyEvent.h"
 #include "LkEngine/Core/Event/MouseEvent.h"
 #include "LkEngine/Core/IO/File.h"
@@ -116,8 +116,8 @@ namespace LkEngine {
         ApplicationSpecification Specification{};
 
         bool bRunning = false;
-        Timer Timer;
 
+        LTimer Timer;
         FTimestep Timestep{};
         FTimestep LastTimestep{};
 

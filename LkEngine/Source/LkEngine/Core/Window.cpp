@@ -32,9 +32,8 @@ namespace LkEngine {
 		Data.Width = static_cast<decltype(Data.Width)>(Size.X);
 		Data.Height = static_cast<decltype(Data.Height)>(Size.Y);
 
-		LCLASS_REGISTER();
-		LK_CORE_DEBUG_TAG("Window", "StaticClass: \"{}\"  IsA<LEntity>()={}  IsA<LObject>()={}", 
-						  StaticClass(), 
+		LK_CORE_DEBUG_TAG("Window", "Class Name: \"{}\"  IsA<LEntity>()={}  IsA<LObject>()={}", 
+						  StaticClassName(), 
 						  IsA<LEntity>() ? "TRUE" : "FALSE",
 						  IsA<LObject>() ? "TRUE" : "FALSE");
 	}

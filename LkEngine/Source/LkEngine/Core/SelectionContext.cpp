@@ -14,8 +14,7 @@ namespace LkEngine {
 
 	LSelectionContext::LSelectionContext()
 	{
-		LCLASS_REGISTER();
-		LK_CORE_TRACE_TAG("SelectionContext", "StaticClassName: \"{}\"", StaticClass());
+		LK_CORE_TRACE_TAG("SelectionContext", "Class Name: \"{}\"", GetClass()->GetName());
 	}
 
 }

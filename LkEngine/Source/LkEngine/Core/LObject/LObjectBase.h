@@ -10,6 +10,8 @@
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/String.h"
 
+#include "Enum.h"
+
 
 namespace LkEngine {
 
@@ -28,6 +30,7 @@ namespace LkEngine {
 	 *  Used for object initialization, loading and garbage collection.
 	 */
 	using LObjectFlag = uint32_t;
+#if 1
 	namespace EObjectFlag
 	{
 		enum Flag : LObjectFlag
@@ -40,6 +43,22 @@ namespace LkEngine {
 			Garbage,               /* Object deemed garbage and should get deleted. */
 		};
 	}
+#else
+	enum class EObjectFlag : LObjectFlag
+	{
+		None = 0,              /* No flags. */
+		NeedInitialization,    /* Need to be initialized. */
+		NeedLoad,              /* Needs to get loaded to memory. */
+		BeginDestroy,          /* Begin object destruction. */
+		FinishDestroy,         /* Object destroyed. */
+		Garbage,               /* Object deemed garbage and should get deleted. */
+	};
+
+	/** Make enum class eligeble for bitwise operators as regular enum. */
+	LK_ENUM_CLASS_FLAGS(EObjectFlag)
+	LK_FRIEND_ENUM_CLASS_FLAGS(EObjectFlag)
+#endif
+
 
 	/// TODO: Implement this
 	template<typename TObject>

@@ -9,6 +9,9 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/LObject/Object.h"
 
+/** Log whenever a reference is added/removed. */
+#define LK_DEBUG_LOG_LIVE_REFERENCES 1
+
 
 namespace LkEngine {
 
@@ -23,9 +26,9 @@ namespace LkEngine {
 		inline static std::mutex LiveReferenceMutex;
 		inline static std::unordered_set<void*> LiveReferences{};
 
-		static void AddToLiveReferences(void* ObjectInstance);
-		static void RemoveFromLiveReferences(void* ObjectInstance);
-		static bool IsLive(void* ObjectInstance);
+		static void AddToLiveReferences(void* InObject);
+		static void RemoveFromLiveReferences(void* InObject);
+		static bool IsLive(void* InObject);
 	}
 
 	/**
@@ -188,10 +191,13 @@ namespace LkEngine {
 
 		void Release()
 		{
+			TObjectPtr_DecrementReferenceCount();
+		#if 0
 			if (ObjectPtr)
 			{
 				delete ObjectPtr;
 			}
+		#endif
 
 			ObjectPtr = nullptr;
 		}
@@ -202,7 +208,7 @@ namespace LkEngine {
 		bool IsEqual(const TObjectPtr<T>& Other) const 
 		{
 			/* Validity check so no dereferencing of nullptr happends. */
-			if (ObjectPtr == nullptr || Other.ObjectPtr == nullptr)
+			if ((ObjectPtr == nullptr) || (Other.ObjectPtr == nullptr))
 			{
 				return false;
 			}
@@ -230,6 +236,7 @@ namespace LkEngine {
 				{
 					TObjectPtr_Internal::RemoveFromLiveReferences((void*)ObjectPtr);
 
+					//ObjectPtr->MarkAsGarbage();
 					delete ObjectPtr;
 					ObjectPtr = nullptr;
 				}

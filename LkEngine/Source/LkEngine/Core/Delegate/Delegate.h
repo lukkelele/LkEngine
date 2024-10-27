@@ -9,6 +9,9 @@
  *  - LK_DECLARE_DELEGATE_RET
  *  - LK_DECLARE_EVENT
  *
+ *   TODO:
+ *    * Set static names for LMulticastDelegate on declaration.
+ *
  *******************************************************************/
 #pragma once
 
@@ -20,27 +23,27 @@ namespace LkEngine {
 
 	using namespace Meta;
 
-	static constexpr std::size_t BUFSIZE_DelegateName = 100;
+	static constexpr std::size_t BUFSIZE_DELEGATE_NAME = 100;
 
 	#define LK_DECLARE_DELEGATE(DelegateName, ...) \
-	using DelegateName = LDelegate<void, #DelegateName, __VA_ARGS__>
+		using DelegateName = LDelegate<#DelegateName, void __VA_OPT__(,__VA_ARGS__)>
 
 	#define LK_DECLARE_DELEGATE_RET(DelegateName, ReturnValue, ...) \
-	using DelegateName = LDelegate<ReturnValue, DelegateName, __VA_ARGS__>
+		using DelegateName = LDelegate<#DelegateName, ReturnValue __VA_OPT__(,__VA_ARGS__)>
 
 	#define LK_DECLARE_MULTICAST_DELEGATE(DelegateName, ...) \
-	using DelegateName = LMulticastDelegate<__VA_ARGS__>; \
-	using DelegateName ## _DelegateType = LMulticastDelegate<__VA_ARGS__>::TDelegate
+		using DelegateName = LMulticastDelegate<__VA_ARGS__>; \
+		using DelegateName ## _DelegateType = LMulticastDelegate<__VA_ARGS__>::TDelegate
 
 	#define LK_DECLARE_EVENT(EventName, TOwner, ...) \
-	class EventName : public LMulticastDelegate<__VA_ARGS__> \
-	{ \
-	private: \
-		friend class TOwner; \
-		using LMulticastDelegate::Broadcast; \
-		using LMulticastDelegate::RemoveAll; \
-		using LMulticastDelegate::Remove; \
-	};
+		class EventName : public LMulticastDelegate<__VA_ARGS__> \
+		{ \
+		private: \
+			friend class TOwner; \
+			using LMulticastDelegate::Broadcast; \
+			using LMulticastDelegate::RemoveAll; \
+			using LMulticastDelegate::Remove; \
+		};
 
 	namespace DelegateCore
 	{
@@ -139,12 +142,6 @@ namespace LkEngine {
 		virtual void Clone(void* Destination) override
 		{
 			new (Destination) LStaticDelegate(Function, Payload);
-		}
-
-		FORCEINLINE static std::string_view StaticClassName()
-		{
-			static constexpr char Buf[100] = "LStaticDelegate";
-			return Buf;
 		}
 
 	private:
@@ -613,6 +610,14 @@ namespace LkEngine {
 		{
 		}
 
+		/**
+		 * @brief Check if the delegate is bound.
+		 */
+		FORCEINLINE bool IsBound() const
+		{
+			return Allocator.HasAllocation();
+		}
+
 	protected:
 		LDelegateBase& operator=(const LDelegateBase& Other)
 		{
@@ -657,11 +662,6 @@ namespace LkEngine {
 			Release();
 		}
 
-		FORCEINLINE bool IsBound() const
-		{
-			return Allocator.HasAllocation();
-		}
-
 		FORCEINLINE bool IsBoundTo(void* InObject) const
 		{
 			if (!InObject || !Allocator.HasAllocation())
@@ -697,7 +697,7 @@ namespace LkEngine {
 	 *  Delegate implementation that supports multiple ways
 	 *  of binding functions.
 	 */
-	template<typename TReturnValue, TString DelegateName, typename... TArgs>
+	template<TString DelegateName, typename TReturnValue, typename... TArgs>
 	class LDelegate : public LDelegateBase
 	{
 	public:
@@ -721,7 +721,7 @@ namespace LkEngine {
 		 */
 		TReturnValue Execute(TArgs... Args) const
 		{
-			LK_CORE_ASSERT(Allocator.HasAllocation(), "Delegate \"{}\" is not bound", GetStaticName());
+			LK_CORE_ASSERT(Allocator.HasAllocation(), "Delegate \"{}\" is not bound", typeid(this).name());
 			return ((TDelegateInterface*)GetDelegate())->Execute(std::forward<TArgs>(Args)...);
 		}
 
@@ -737,7 +737,7 @@ namespace LkEngine {
 			{
 				return ((TDelegateInterface*)GetDelegate())->Execute(std::forward<TArgs>(Args)...);
 			}
-			LK_CORE_DEBUG_TAG("Delegate", "Failed to execute unbound delegate \"{}\"", GetStaticName());
+			LK_CORE_DEBUG_TAG("Delegate", "Failed to execute unbound delegate \"{}\"", typeid(*this).name());
 
 			return TReturnValue();
 		}
@@ -852,24 +852,25 @@ namespace LkEngine {
 		{
 			Release();
 			void* AllocPointer = Allocator.Allocate(sizeof(T));
+
 			new (AllocPointer) T(std::forward<TBindArgs>(Args)...);
 		}
 
 		FORCEINLINE static std::string_view GetStaticName() { return StaticName; }
 
 	private:
-		inline static constexpr TString StaticName = DelegateName;
-
 		/** Allow access to the Create<TFunction> functions. */
 		template<typename... TArgs>
 		friend class LMulticastDelegate;
+
+		inline static constexpr TString StaticName = DelegateName;
 	};
 
 
 	/**
 	 * LMulticastDelegate
 	 *
-	 *  Supports most available types of functions.
+	 *  Supports most function types.
 	 */
 	template<typename... TArgs>
 	class LMulticastDelegate : public LDelegateBase
@@ -882,19 +883,9 @@ namespace LkEngine {
 		using NonConstMemberFunction = typename Meta::MemberFunction<false, T, void, TArgs..., TArgs2...>::Type;
 
 	public:
-		using TDelegate = LDelegate<void, "TDelegate", TArgs...>;
+		using TDelegate = LDelegate<"MulticastComponent", void, TArgs...>;
 
-		constexpr LMulticastDelegate()
-			: Locks(0)
-		{
-			/* TODO: Need to fix the metadata assignment here. */
-			if constexpr (sizeof...(TArgs) == 1)
-			{
-				using FirstArgType = typename std::tuple_element_t<0, std::tuple<TArgs...>>;
-				TypeName = LkEngine::Meta::TypeName<FirstArgType>();
-			}
-		}
-
+		constexpr LMulticastDelegate() : Locks(0) {}
 		~LMulticastDelegate() noexcept = default;
 
 		LMulticastDelegate(const LMulticastDelegate& Other) = default;
@@ -993,7 +984,7 @@ namespace LkEngine {
 		 */
 		FORCEINLINE size_t GetSize() const { return Dispatchers.size(); }
 
-		FORCEINLINE std::string_view GetName() const { return TypeName; }
+		FORCEINLINE std::string_view GetName() const { return typeid(decltype(this)).name(); }
 
 		FORCEINLINE std::string ToString() const
 		{
@@ -1149,9 +1140,6 @@ namespace LkEngine {
 			}
 		}
 
-		/** Return the static delegate name. */
-		FORCEINLINE static std::string_view GetStaticName() { return StaticName; }
-
 	private:
 		FORCEINLINE void Lock()
 		{
@@ -1201,12 +1189,6 @@ namespace LkEngine {
 
 	private:
 		std::vector<FDelegateHandlerPair> Dispatchers{};
-		unsigned int Locks = 0;
-
-		/* FIXME: */
-		inline static constexpr const char* StaticName = "";
-
-		// TODO: Metadata impl.
-		std::string TypeName = "Unassigned";
+		uint32_t Locks = 0;
 	};
 }
