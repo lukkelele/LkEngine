@@ -69,3 +69,6 @@ Intermediate
 
 **/*.tlog
 
+# Ignore lkconf files as they should be generated locally and saved there.
+**/*.lkconf
+
