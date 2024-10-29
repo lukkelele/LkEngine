@@ -16,7 +16,7 @@
 #pragma once
 
 #include "LkEngine/Core/CoreMacros.h"
-#include "LkEngine/Core/TypeTrait.h"
+#include "LkEngine/Core/Template/TypeTrait.h"
 
 
 namespace LkEngine {
