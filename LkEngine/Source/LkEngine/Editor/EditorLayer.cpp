@@ -26,7 +26,8 @@
 
 namespace LkEngine {
 
-	static bool bInit = false;
+	/* Windows. */
+	static bool bWindow_LiveObjects = false;
 
 	static TObjectPtr<LTexture2D> FloorTexture;
 	static TObjectPtr<LTexture2D> CubeTexture;
@@ -37,6 +38,8 @@ namespace LkEngine {
 	    , m_Scene(nullptr)
 		, m_Enabled(true)
 	{
+		LCLASS_REGISTER();
+
 		Instance = this;
 
 		m_ShowStackTool = false;
@@ -67,7 +70,8 @@ namespace LkEngine {
 		GOnObjectCreated.Add([&](const LObject* NewObject)
 		{
 			//LK_CORE_DEBUG_TAG("Editor", "New Object Created: {}, Name=\"{}\"", NewObject->StaticClassName(), NewObject->GetName());
-			LK_CORE_DEBUG_TAG("Editor", "New Object  ClassName=\"{}\"  Name=\"{}\"", NewObject->GetClass()->GetName(), NewObject->GetName());
+			LK_CORE_DEBUG_TAG("Editor", "New Object  ClassName=\"{}\"  Name=\"{}\"", 
+				NewObject->GetClass()->GetName(), NewObject->ClassName());
 		});
 
 		/* Editor UI components. */
@@ -90,7 +94,6 @@ namespace LkEngine {
 	void LEditorLayer::Initialize()
 	{
 		LObject::Initialize();
-		LK_ASSERT(bInit == false, "EditorLayer already initialized");
 
 		LK_CORE_DEBUG_TAG("Editor", "Initializing layer");
 	#if 0 /// DISABLED, NEEDS TO BE RE-EVALUATED
@@ -179,11 +182,11 @@ namespace LkEngine {
 		auto OnSelectionChanged = [&](const LObject& Object)
 		{
 			LK_CORE_DEBUG_TAG("Editor", "OnSelectionChanged Callback: {}, ReferenceCount: {}", 
-							  Object.GetName(), Object.GetReferenceCount());
+							  Object.ClassName(), Object.GetReferenceCount());
 		};
 		GEditorOnSelectionChanged.Add(OnSelectionChanged);
 
-		bInit = true;
+		bInitialized = true;
 	}
 
 	void LEditorLayer::OnUpdate(const float DeltaTime)
@@ -398,9 +401,7 @@ namespace LkEngine {
 	#endif
 
 	#if LK_USE_CREATOR_MENU
-			//----------------------------------------------------
-			// Creator menu
-			//----------------------------------------------------
+			/* Creator Menu. */
 			ImGui::BeginGroup();
 			{
 				UI_CreateMenu();
@@ -496,9 +497,7 @@ namespace LkEngine {
 		UI::PopStyleVar(2);
 
 
-		//---------------------------------------------------------
-		// Bottom Bar
-		//---------------------------------------------------------
+		/* Bottom Bar. */
 		CheckBottomBarSize();
 		ImGui::Begin(UI_BOTTOM_BAR, nullptr, UI::SidebarFlags);
 		{
@@ -518,8 +517,10 @@ namespace LkEngine {
 		/* Render tabs. */
 		UI_TabManager();
 
-		// If the window sizes have been adjusted, set the member to false.
-		// This must be run BEFORE the 'bWindowsHaveChangedInSize'.
+		/* 
+		 * If the window sizes have been adjusted, set the member to false.
+		 * This must be run BEFORE the 'bWindowsHaveChangedInSize'.
+		 */
 		if (ShouldUpdateWindowSizes)
 		{
 			ShouldUpdateWindowSizes = false; 
@@ -528,7 +529,7 @@ namespace LkEngine {
 		glm::vec2 ViewportSize = { Viewport->WorkSize.x, Viewport->WorkSize.y };
 		UI_SyncEditorWindowSizes(ViewportSize);
 
-		// FIXME: What does this even do?...
+		/// FIXME: What does this even do?
 		// Take care of tabs here.
 		TabManager.End();
 
@@ -599,11 +600,161 @@ namespace LkEngine {
 			UI_ShowEditorWindowsDetails();
 			ImGui::End();
 		}
+
+		if (bWindow_LiveObjects)
+		{
+			ImGui::Begin("Object References", &bWindow_LiveObjects, ImGuiWindowFlags_NoDocking);
+			{
+				static std::size_t SelectedIndex = -1;
+				static std::size_t SelectedIndexPrev = -1;
+				static int MaxVisibleItems = 20;
+				static std::vector<bool> Selected(MaxVisibleItems);
+
+				/* Items to show, shows a scrollbar if greater. */
+
+				/* Show only static class object references. */
+				static bool bFilterByStaticClassObjects = true;
+
+				static std::vector<TObjectPtr<LObject>> LiveObjects;
+				const int LiveObjectCount = TObjectPtr_Internal::GetLiveObjects(LiveObjects, 
+																				bFilterByStaticClassObjects);
+				/* Resize if needed. */
+				if (Selected.size() < LiveObjects.size())
+				{
+					LK_CORE_INFO("Resizing selected vector");
+					Selected.resize(LiveObjects.size(), false);
+				}
+
+				/**
+				 * Clear selection if selecting indices too large.
+				 * Can happen if filtering is toggled whilst having an object
+				 * reference selected.
+				 */
+				if (SelectedIndex >= Selected.size()) 
+				{
+					SelectedIndex = -1;
+					SelectedIndexPrev = -1;
+				}
+
+				if (LiveObjects.size() < MaxVisibleItems)
+				{
+					MaxVisibleItems = static_cast<int>(LiveObjects.size());
+				}
+
+				const float ItemHeight = ImGui::GetTextLineHeightWithSpacing();
+				float ObjectsWindowHeight = MaxVisibleItems * ItemHeight;
+				if (SelectedIndex == -1)
+				{
+					float ObjectsWindowHeight = 0;
+				}
+
+				ImGui::Text("Total Live References: %d", LiveObjectCount);
+				ImGui::Checkbox("Filter by single class only", &bFilterByStaticClassObjects);
+
+				static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Borders 
+					| ImGuiTableFlags_RowBg 
+					| ImGuiTableFlags_ScrollY 
+					| ImGuiTableFlags_Sortable
+					| ImGuiTableFlags_SizingStretchProp;
+
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+				ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(2, 2));
+				if (ImGui::BeginTable("Live Objects", 2, TableFlags, ImVec2(0, ObjectsWindowHeight)))
+				{
+					ImGui::TableSetupColumn("Object Index", ImGuiTableColumnFlags_IndentDisable);
+					ImGui::TableSetupColumn("Class Name", ImGuiTableColumnFlags_IndentDisable);
+					ImGui::TableHeadersRow();
+
+					int Index = 0;
+					for (const TObjectPtr<LObject>& LiveObject : LiveObjects)
+					{
+						/* Display the object number. */
+						ImGui::TableNextColumn();
+						ImGui::Text("%d", (Index + 1));
+
+						/* Object classname. */
+						char Label[80];
+						sprintf_s(Label, LK_ARRAYSIZE(Label), "%s ##%lld", 
+								  LiveObject->GetClass()->GetName().c_str(), 
+								  reinterpret_cast<intptr_t>(LiveObject.Get()));
+						ImGui::TableNextColumn();
+						if (ImGui::Selectable(Label, Selected[Index], ImGuiSelectableFlags_SpanAllColumns))
+						{
+							/* Only allow one selection at a time. */
+							LK_CORE_WARN("Selected: {} ({})", LiveObject->ClassName(), Index);
+							std::fill(Selected.begin(), Selected.end(), false);
+							Selected[Index] = true;
+							SelectedIndex = Index;
+						}
+
+						Index++;
+					}
+
+					/* Deselect previously selected entry. */
+					if ((SelectedIndexPrev != SelectedIndex) && (SelectedIndexPrev != -1))
+					{
+						Selected[SelectedIndexPrev] = false;
+					}
+
+					SelectedIndexPrev = SelectedIndex;
+
+					ImGui::EndTable();
+				}
+				ImGui::PopStyleVar(2);
+
+				if ((SelectedIndex != -1) && (SelectedIndex < LiveObjects.size()))
+				{
+					/* 
+					 * TODO: Should use a weak pointer here so the viewing of an object
+					 *       does not extend its lifetime and thus prohibit its (potential) destruction.
+					 */
+					TObjectPtr<LObject> SelectedObject = LiveObjects.at(SelectedIndex);
+
+					/* Display information about selected object. */
+					ImGui::BeginChild("Object Information", ImVec2(0, 0), true, ImGuiWindowFlags_NoNavInputs);
+					{
+						static constexpr ImGuiTableFlags ObjectInfoTableFlags = ImGuiTableFlags_Borders
+							| ImGuiTableFlags_RowBg
+							| ImGuiTableFlags_SizingFixedFit;
+
+						const LClass* Class = SelectedObject->GetClass();
+						if (ImGui::BeginTable("##ObjectInfo", 2, ObjectInfoTableFlags, ImVec2(0, 0)))
+						{
+							/* Name. */
+							ImGui::TableNextColumn();
+							ImGui::Text("Name");
+							ImGui::TableNextColumn();
+							ImGui::Text("%s", Class->GetName().c_str());
+
+							/* Reference Count. */
+							ImGui::TableNextRow();
+							ImGui::TableNextColumn();
+							ImGui::Text("References");
+							ImGui::TableNextColumn();
+							ImGui::Text("%d", SelectedObject->GetReferenceCount());
+
+							/* Memory Address. */
+							ImGui::TableNextRow();
+							ImGui::TableNextColumn();
+							ImGui::Text("Address");
+							ImGui::TableNextColumn();
+							ImGui::Text("0x%p", reinterpret_cast<intptr_t>(SelectedObject.Get()));
+
+							ImGui::EndTable(); /* */
+						}
+					}
+					ImGui::EndChild();
+				}
+
+			}
+			ImGui::End();
+		}
 	}
 
-	void LEditorLayer::RegisterEvent(LEvent& e)
+	void LEditorLayer::RegisterEvent(LEvent& Event)
 	{
-		m_EventCallback(e);
+		/// FIXME
+		m_EventCallback(Event);
 	}
 
 	void LEditorLayer::OnEvent(LEvent& Event)
@@ -987,7 +1138,7 @@ namespace LkEngine {
 		// Can be clicked on to select diffent shapes instead of dropdown menu
 		ImGui::BeginGroup();
 		{
-			static const ImVec4 tintColor = ImVec4(1, 1, 0.90, 1);
+			static const ImVec4 tintColor = ImVec4(1, 1, 0.90f, 1);
 			static const ImVec4 bgColor = ImVec4(0, 0, 0, 0);
 			static const ImVec2 imageSize = ImVec2(60, 60);
 
@@ -1308,8 +1459,6 @@ namespace LkEngine {
 		m_Scene = InScene;
 
 		GOnSceneSetActive.Broadcast(m_Scene);
-		//SceneManagerPanel->SetScene(InScene);
-
 		if (InScene->EditorCamera)
 		{
 			InScene->EditorCamera->SetActive(true);
@@ -1428,21 +1577,18 @@ namespace LkEngine {
 
 			if (ImGui::BeginMenu("Project")) 
 			{ 
-				// Save project
+				/* Save project. */
 				if (ImGui::MenuItem("Save")) 
 				{ 
 					m_Project->Save();
 				}
-				// New project
+				/* New project. */
 				if (ImGui::MenuItem("New")) 
 				{ 
 					m_Project = TObjectPtr<LProject>::Create("Project1");
 				}
-				// Load existing project
+				/* Load existing project. */
 				if (ImGui::MenuItem("Load")) 
-				{ 
-				}
-				if (ImGui::MenuItem("Recent")) 
 				{ 
 				}
 
@@ -1465,7 +1611,17 @@ namespace LkEngine {
 					bShowEditorWindowSizesWindow = !bShowEditorWindowSizesWindow;
 				}
 
-				ImGui::EndMenu();
+				ImGui::EndMenu(); /* View. */
+			}
+
+			if (ImGui::BeginMenu("Debug"))
+			{
+				if (ImGui::MenuItem("Live Objects"))
+				{
+					bWindow_LiveObjects = true;
+				}
+
+				ImGui::EndMenu(); /* Debug. */
 			}
 
 			if (ImGui::BeginMenu("Scene"))
@@ -1475,10 +1631,12 @@ namespace LkEngine {
 				}
 				if (ImGui::MenuItem("Load"))
 				{
-					TObjectPtr<LScene> newScene = TObjectPtr<LScene>::Create();
-					LSceneSerializer SceneSerializer(newScene);
+					static constexpr bool IsEditorScene = true;
+					TObjectPtr<LScene> NewScene = TObjectPtr<LScene>::Create(IsEditorScene);
+					LSceneSerializer SceneSerializer(NewScene);
 					SceneSerializer.Deserialize("scene.lukkelele");
-					newScene->CopyTo(m_Scene);
+
+					NewScene->CopyTo(m_Scene);
 				}
 				if (ImGui::MenuItem("Save"))
 				{
@@ -1489,30 +1647,11 @@ namespace LkEngine {
 				ImGui::EndMenu();
 			}
 
-			// Horizontal space
+			/* Horizontal space. */
 			ImGui::Dummy(ImVec2(40, 0));
 			if (ImGui::BeginMenu(std::string("Project: " + m_Project->GetName()).c_str()))
 			{
 				ImGui::EndMenu(); /* Project + Name. */
-			}
-
-			if (ImGui::MenuItem("[Test] Throw Nullptr Exception"))
-			{
-				LK_CORE_WARN_TAG("Test", "Throwing nullptr exception to test LCrashHandler functionality");
-				int* NumberPointer = nullptr;
-				*NumberPointer = 60;
-			}
-
-			if (ImGui::MenuItem("[Test] Get count of Threads in ThreadPool"))
-			{
-				LK_CORE_WARN_TAG("ThreadManager", "Threads in ThreadPool: {}", LThreadManager::Instance().GetThreadPoolSize());
-			}
-
-			if (ImGui::MenuItem("[Test] Start Thread 1 (0)"))
-			{
-				constexpr int ThreadIndex = 0;
-				LK_CORE_WARN_TAG("ThreadManager", "Starting thread -> {}", ThreadIndex);
-				LThreadManager::Instance().StartThread(ThreadIndex);
 			}
 
 			if (ImGui::MenuItem("[Test] Submit Function to CommandQueue"))

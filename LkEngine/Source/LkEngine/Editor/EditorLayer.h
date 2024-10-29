@@ -112,7 +112,6 @@ namespace LkEngine {
 		void RenderViewport();                
 		void RenderViewport(TObjectPtr<LImage> Image); 
 
-        //void DrawObjectGizmo(const LEntity Entity);
         void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);
 		void HandleExternalWindows();
 
@@ -123,7 +122,6 @@ namespace LkEngine {
 		void UI_CreateMenu();
 		void UI_RenderSettingsWindow();
 
-		// Update potential changes in editor docking window sizes/positions.
 		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize);
 
 		void UI_ShowMouseDetails();
