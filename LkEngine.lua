@@ -52,14 +52,12 @@ project "LkEngine"
         "LK_PHYSICS_API_BOX2D",
 
         "GLFW_INCLUDE_NONE",
-        "_CRT_SECURE_NO_WARNINGS",
 		"YAML_CPP_STATIC_DEFINE",
         "IMGUI_DEFINE_MATH_OPERATORS",
         "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
 
         "LK_CHAR_UTF8",
         --"LK_CHAR_UNICODE",
-        --"LK_CHAR_ENCODING=LK_CHAR_UTF8",
     }
 
     files
@@ -141,11 +139,12 @@ project "LkEngine"
         {
             "{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
         }
-
-        -- Enable new standard-conforming preprocessor for MSVC.
+ 
 		buildoptions 
         { 
-            "/Zc:preprocessor" 
+            "/Zc:preprocessor",  -- Enable new standard-conforming preprocessor for MSVC.
+            "/wd4312",           -- Disable warning: C4312 (type conversion from greater size)
+            "/wd4244",           -- Disable warning: C4244 (conversion, possible loss of data)
         }
 
         linkoptions 

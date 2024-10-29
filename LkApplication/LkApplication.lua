@@ -40,9 +40,24 @@ project "LkApplication"
 	filter "system:windows"
 		systemversion "latest"
 
+		defines 
+        { 
+            "LK_PLATFORM_WINDOWS",
+            "_IMGUI_WIN32",
+            "_CRT_SECURE_NO_WARNINGS",
+            "_GLM_WIN32",
+		}
+
         postbuildcommands 
 		{
             "{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
+        }
+
+		buildoptions 
+        { 
+            "/Zc:preprocessor",  -- Enable new standard-conforming preprocessor for MSVC.
+            "/wd4312",           -- Disable warning: C4312 (type conversion from greater size)
+            "/wd4244",           -- Disable warning: C4244 (conversion, possible loss of data)
         }
 
 		linkoptions 
