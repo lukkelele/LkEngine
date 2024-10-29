@@ -173,7 +173,7 @@ namespace LkEngine {
 			}
 		}
 
-		static void ApplyTextureFilter(const RendererID& rendererID, const ETextureFilter TextureFilter, bool bGenerateMipmap = true)
+		static void ApplyTextureFilter(const LRendererID& rendererID, const ETextureFilter TextureFilter, bool bGenerateMipmap = true)
 		{
             switch (TextureFilter)
             {
@@ -232,7 +232,7 @@ namespace LkEngine {
             }
 		}
 
-		static void ApplyTextureWrap(const RendererID rendererID, const ETextureWrap TextureWrap)
+		static void ApplyTextureWrap(const LRendererID rendererID, const ETextureWrap TextureWrap)
 		{
 			switch (TextureWrap)
 			{
@@ -289,7 +289,7 @@ namespace LkEngine {
     extern unsigned int CubeVAO, CubeVBO;
     extern unsigned int PlaneVAO, PlaneVBO;
     extern unsigned int QuadVAO, QuadVBO;
-    extern RendererID SkyboxVAO;
+    extern LRendererID SkyboxVAO;
     extern unsigned int SkyboxVBO;
 
     extern TObjectPtr<LVertexBuffer> CubeVertexBuffer;
@@ -543,7 +543,7 @@ namespace LkEngine {
 		return textureID;
 	}  
 
-    static void GenerateSkybox(RendererID& skyboxVAO, RendererID& skyboxVBO)
+    static void GenerateSkybox(LRendererID& skyboxVAO, LRendererID& skyboxVBO)
     {
         glGenVertexArrays(1, &skyboxVAO);
         glGenBuffers(1, &skyboxVBO);
@@ -558,7 +558,7 @@ namespace LkEngine {
         SkyboxShader->Set("skybox", 0);
     }
 
-    static void RenderSkybox(RendererID& texture, const glm::mat4& view, const glm::mat4& projection)
+    static void RenderSkybox(LRendererID& texture, const glm::mat4& view, const glm::mat4& projection)
     {
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         SkyboxShader->Bind();

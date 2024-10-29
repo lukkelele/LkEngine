@@ -22,6 +22,8 @@ namespace LkEngine {
     class OpenGLRenderer : public LRendererAPI
     {
     public:
+        OpenGLRenderer();
+
         virtual void Initialize() override;
         virtual void Shutdown() override;
 

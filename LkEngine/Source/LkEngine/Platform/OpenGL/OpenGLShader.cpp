@@ -7,6 +7,8 @@ namespace LkEngine {
 	LOpenGLShader::LOpenGLShader(const std::filesystem::path& InFilePath)
 		: FilePath(InFilePath)
 	{
+		LCLASS_REGISTER();
+
 		FShaderProgramSource ShaderProgramSource;
 		if (ParseShader(ShaderProgramSource, InFilePath))
 		{
@@ -20,6 +22,8 @@ namespace LkEngine {
 
 	LOpenGLShader::LOpenGLShader(const FShaderProgramSource& ShaderProgramSource)
 	{
+		LCLASS_REGISTER();
+
 		if (ShaderProgramSource.IsValid())
 		{
 			m_RendererID = CreateShader(ShaderProgramSource);

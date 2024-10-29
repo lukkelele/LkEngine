@@ -1,12 +1,19 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Camera.h"
+#include "Camera.h"
 
 
 namespace LkEngine {
 
+	LCamera::LCamera()
+	{
+		LCLASS_REGISTER();
+	}
+
 	LCamera::LCamera(const glm::mat4& InProjection)
 		: m_ProjectionMatrix(InProjection)
 	{
+		LCLASS_REGISTER();
 	}
 
 	LCamera::LCamera(const float InDegFov, 
@@ -16,6 +23,7 @@ namespace LkEngine {
 					 const float InFarP)
 		: m_ProjectionMatrix(glm::perspectiveFov(glm::radians(InDegFov), InWidth, InHeight, InFarP, InNearP))
 	{
+		LCLASS_REGISTER();
 	}
 
 }

@@ -28,6 +28,8 @@ namespace LkEngine {
 
     LTextureLibrary::LTextureLibrary()
     {
+		LCLASS_REGISTER();
+
         m_Collection2D.clear();
 
         /* Create white texture. */

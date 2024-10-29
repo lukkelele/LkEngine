@@ -9,13 +9,6 @@
 #include "LkEngine/Input/Keyboard.h"
 #include "LkEngine/Input/Mouse.h"
 
-///
-/// TODO: Need to clean this
-///
-#if 0
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#endif
 
 namespace LkEngine {
 
@@ -44,7 +37,7 @@ namespace LkEngine {
 		LK_DECLARE_MULTICAST_DELEGATE(FCameraInputModified);
 
 	public:
-		LCamera() = default;
+		LCamera();
 		LCamera(const glm::mat4& projection);
 		LCamera(const float InDegFov, 
 				const float InWidth, 

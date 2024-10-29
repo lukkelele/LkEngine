@@ -15,6 +15,7 @@ namespace LkEngine {
 	public:
 		OpenGLTexture2D(const FTextureSpecification& InSpecification, FBuffer InBuffer);
 		OpenGLTexture2D(const FTextureSpecification& InSpecification); 
+		OpenGLTexture2D() = delete;
 		~OpenGLTexture2D();
 
 		virtual void SetData(void* InData, const uint32_t InSize) override;
@@ -54,12 +55,12 @@ namespace LkEngine {
 
 		virtual bool Loaded() const override { return m_Loaded; }
 
-		FORCEINLINE virtual RendererID GetRendererID() const override
+		FORCEINLINE virtual LRendererID GetRendererID() const override
 		{
 			return m_Image->GetRendererID();
 		}
 
-		FORCEINLINE virtual RendererID& GetRendererID() override
+		FORCEINLINE virtual LRendererID& GetRendererID() override
 		{
 			return m_Image->GetRendererID();
 		}
@@ -104,8 +105,9 @@ namespace LkEngine {
 	class OpenGLTextureCube : public LTextureCube
 	{
 	public:
-		OpenGLTextureCube(const FTextureSpecification& specification, 
-						  std::vector<std::filesystem::path> facePaths);
+		OpenGLTextureCube(const FTextureSpecification& InSpecification, 
+						  std::vector<std::filesystem::path> InFacePaths);
+		OpenGLTextureCube() = delete;
 		~OpenGLTextureCube();
 
 		virtual void Bind(uint32_t slot = 0) const override;
@@ -121,8 +123,8 @@ namespace LkEngine {
 		/// TODO: Needs implementation
 		virtual uint32_t GetMipLevelCount() const override { return 0; }
 
-		FORCEINLINE virtual RendererID GetRendererID() const override { return m_RendererID; }
-		FORCEINLINE virtual RendererID& GetRendererID() override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID GetRendererID() const override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID& GetRendererID() override { return m_RendererID; }
 
 		FORCEINLINE virtual std::string_view GetName() const override { return Specification.Name; }
 		FORCEINLINE virtual std::string_view GetFilename() const override { return FileName; }
@@ -136,7 +138,7 @@ namespace LkEngine {
 		}
 
 	private:
-		RendererID m_RendererID = 0;
+		LRendererID m_RendererID = 0;
 		FTextureSpecification Specification{};
 
 		FBuffer DataBuffer{};

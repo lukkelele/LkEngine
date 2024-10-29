@@ -29,7 +29,7 @@ namespace LkEngine {
                         const uint32_t blockIndex);
 
     private:
-        RendererID m_ID;
+        LRendererID m_ID;
 		uint64_t m_Size = 0;
 		std::string m_Name;
         uint8_t* m_LocalData = nullptr;

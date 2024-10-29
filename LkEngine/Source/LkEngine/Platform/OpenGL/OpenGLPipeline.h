@@ -30,16 +30,16 @@ namespace LkEngine {
 			return PipelineSpecification; 
 		}
 
-		void BindTextureArray(const RendererID& rendererID);
+		void BindTextureArray(const LRendererID& rendererID);
 
-		FORCEINLINE std::deque<RendererID> GetBoundTextureArrays() const 
+		FORCEINLINE std::deque<LRendererID> GetBoundTextureArrays() const 
 		{
 			return BoundTextureArrays; 
 		}
 
 	private:
 		FPipelineSpecification PipelineSpecification;
-		std::deque<RendererID> BoundTextureArrays{};
+		std::deque<LRendererID> BoundTextureArrays{};
     };
 
 }

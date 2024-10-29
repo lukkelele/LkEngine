@@ -9,6 +9,7 @@ namespace LkEngine {
     {
     public:
 		LOpenGLFramebuffer(const FFramebufferSpecification& InSpecification);
+		LOpenGLFramebuffer() = delete;
         ~LOpenGLFramebuffer();
         
 		virtual void Invalidate() override;
@@ -42,13 +43,13 @@ namespace LkEngine {
 		FORCEINLINE virtual uint32_t GetHeight() const override { return m_Height; }
 		FORCEINLINE virtual uint64_t GetSize() const override { return (m_Width * m_Height); }
 
-		FORCEINLINE virtual RendererID GetRendererID() const override { return m_RendererID; }
-		FORCEINLINE virtual RendererID& GetRendererID() override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID GetRendererID() const override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID& GetRendererID() override { return m_RendererID; }
 
 		static void TargetSwapChain();
 
 	private:
-		RendererID m_RendererID;
+		LRendererID m_RendererID;
 
 		uint64_t m_Width{};
 		uint64_t m_Height{};

@@ -15,6 +15,9 @@
 
 namespace LkEngine {
 
+	/**
+	 * EImageFormat
+	 */
 	enum class EImageFormat
 	{
 		None = 0,
@@ -44,10 +47,12 @@ namespace LkEngine {
 		DEPTH32F,
 		DEPTH24STENCIL8,
 
-		// Defaults
 		Depth = DEPTH24STENCIL8,
 	};
 
+	/**
+	 * EImageUsage
+	 */
 	enum class EImageUsage
 	{
 		None = 0,
@@ -56,6 +61,9 @@ namespace LkEngine {
 		Storage,
 	};
 
+	/**
+	 * ETextureWrap
+	 */
 	enum class ETextureWrap
 	{
 		None = 0,
@@ -191,8 +199,8 @@ namespace LkEngine {
 		virtual void Invalidate() = 0;
 		virtual void RT_Invalidate() = 0;
 
-		virtual RendererID& GetRendererID() = 0;
-		virtual RendererID GetRendererID() const = 0;
+		virtual LRendererID& GetRendererID() = 0;
+		virtual LRendererID GetRendererID() const = 0;
 
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;

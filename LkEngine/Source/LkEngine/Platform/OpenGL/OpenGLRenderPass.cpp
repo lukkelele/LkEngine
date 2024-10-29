@@ -7,25 +7,18 @@
 
 namespace LkEngine {
 
-	OpenGLRenderPass::OpenGLRenderPass(const RenderPassSpecification& specification)
-		: m_Specification(specification)
+	OpenGLRenderPass::OpenGLRenderPass(const RenderPassSpecification& InSpecification)
+		: m_Specification(InSpecification)
 	{
-		//LK_CORE_VERIFY(m_Specification.Pipeline != nullptr, "OpenGLRenderPass::m_Specification.Pipeline is nullptr!");
+		LCLASS_REGISTER();
 	}
-
-	OpenGLRenderPass::~OpenGLRenderPass()
-	{
-	}
-
 
 	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LImage> image)
 	{
-
 	}
 
 	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LTexture2D> texture)
 	{
-
 	}
 
 	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LUniformBuffer> uniformBuffer)

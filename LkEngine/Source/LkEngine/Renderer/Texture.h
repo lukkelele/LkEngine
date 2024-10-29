@@ -23,8 +23,8 @@ namespace LkEngine {
 
 		virtual ETextureType GetType() const = 0;
 
-		virtual RendererID GetRendererID() const = 0;
-		virtual RendererID& GetRendererID() = 0;
+		virtual LRendererID GetRendererID() const = 0;
+		virtual LRendererID& GetRendererID() = 0;
 
 		virtual const FTextureSpecification& GetSpecification() const = 0;
 

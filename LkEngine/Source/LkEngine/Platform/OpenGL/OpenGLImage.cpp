@@ -10,58 +10,48 @@ namespace LkEngine {
 		: Specification(InSpecification)
 		, m_ImageData(std::move(InBuffer))
     {
+		LCLASS_REGISTER();
+
 		if (m_ImageData.Data)
 		{
-		#if 0
-            const uint64_t ImageSize = Utils::GetMemorySize(Specification.Format, Specification.Width, Specification.Height);
-		#endif
+			LK_OpenGL(glGenTextures(1, &m_RendererID));
+			LK_OpenGL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
 
-			glGenTextures(1, &m_RendererID);
-			glBindTexture(GL_TEXTURE_2D, m_RendererID);
-
-			glTexImage2D(GL_TEXTURE_2D, 
-						 0, 
-						 GLUtils::OpenGLImageInternalFormat(Specification.Format), 
-						 Specification.Width, 
-						 Specification.Height, 
-						 0, 
-						 GLUtils::OpenGLImageFormat(Specification.Format), 
-						 GL_UNSIGNED_BYTE, 
-						 (const void*)m_ImageData.Data);
+			LK_OpenGL(
+				glTexImage2D(GL_TEXTURE_2D, 
+						     0, 
+						     GLUtils::OpenGLImageInternalFormat(Specification.Format), 
+						     Specification.Width, 
+						     Specification.Height, 
+						     0, 
+						     GLUtils::OpenGLImageFormat(Specification.Format), 
+						     GL_UNSIGNED_BYTE, 
+						     (const void*)m_ImageData.Data)
+			);
 
 			if (Specification.Mips > 1)
 			{
-				glGenerateTextureMipmap(m_RendererID);
+				LK_OpenGL(glGenerateTextureMipmap(m_RendererID));
 			}
 
 			GLUtils::ApplyTextureWrap(Specification.Wrap);
 			GLUtils::ApplyTextureFilter(Specification.Filter, Specification.Mips > 1);
 
-			glBindTexture(GL_TEXTURE_2D, 0);
+			LK_OpenGL(glBindTexture(GL_TEXTURE_2D, 0));
 		}
-	#if 0 /* FIXME: Remove */
-		else
-		{
-			// Data is null, try to load it from path
-			stbi_set_flip_vertically_on_load(1);
-			int width, height, channels;
-			void* data = stbi_load(Specification.Path.c_str(), &width, &height, &channels, 4);
-			m_ImageData = FBuffer(data, Utils::GetMemorySize(Specification.Format, width, height));
-
-			stbi_image_free(data);
-		}
-	#endif
     }
 
     LOpenGLImage::LOpenGLImage(const FImageSpecification& InSpecification, void* InData)
         : Specification(InSpecification)
 	{
+		LCLASS_REGISTER();
+
 		if (InData)
 		{
 			m_ImageData = FBuffer::Copy(InData, Specification.Size);
 
-			glGenTextures(1, &m_RendererID);
-			glBindTexture(GL_TEXTURE_2D, m_RendererID);
+			LK_OpenGL(glGenTextures(1, &m_RendererID));
+			LK_OpenGL(glBindTexture(GL_TEXTURE_2D, m_RendererID));
 
 			glTexImage2D(GL_TEXTURE_2D, 
 						 0, 
@@ -90,24 +80,6 @@ namespace LkEngine {
 			/* Clean up resources. */
 			stbi_image_free(InData);
 		}
-	#if 0 /* FIXME: Remove */
-		else
-		{
-			/* TODO: I don't really like this approach. Should prob just crash here. */
-			/* Data is null, try to load it from path. */
-
-			int width, height, channels;
-			stbi_set_flip_vertically_on_load(1);
-
-			void* LoadedImageData = stbi_load(Specification.Path.c_str(), &width, &height, &channels, 4);
-			m_ImageData = FBuffer(LoadedImageData, Utils::GetMemorySize(Specification.Format, width, height));
-
-			/* Clean up resources. */
-			stbi_image_free(LoadedImageData);
-
-			Invalidate();
-		}
-	#endif
     }
 
     LOpenGLImage::~LOpenGLImage()
@@ -115,14 +87,19 @@ namespace LkEngine {
 		//LK_OpenGL(glMakeTextureHandleNonResidentARB(m_HandleARB));
     }
 
-	void LOpenGLImage::SetData(const void* data)
+	void LOpenGLImage::SetData(const void* InData)
     {
-		m_ImageData.Release();
-		m_ImageData.Data = (void*)data;
+		if (InData)
+		{
+			m_ImageData.Release();
+			m_ImageData.Data = (void*)InData;
+		}
     }
 
-    void LOpenGLImage::Resize(uint32_t width, uint32_t height)
+    void LOpenGLImage::Resize(const uint32_t NewWidth, const uint32_t NewHeight)
     {
+		LK_UNUSED(NewWidth && NewHeight);
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
     }
 
     void LOpenGLImage::Invalidate()
@@ -186,6 +163,8 @@ namespace LkEngine {
 		: Specification(InSpecification)
 		, m_ImageData(std::move(InBuffer))
     {
+		LCLASS_REGISTER();
+
 		if (m_ImageData)
 		{
 			LK_OpenGL(glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID));
@@ -223,6 +202,8 @@ namespace LkEngine {
     LOpenGLImage2D::LOpenGLImage2D(const FImageSpecification& InSpecification, void* InData)
         : Specification(InSpecification)
 	{
+		LCLASS_REGISTER();
+
 		if (InData)
 		{
             const uint64_t ImageSize = ImageUtils::GetMemorySize(Specification.Format, Specification.Width, Specification.Height);
@@ -267,15 +248,19 @@ namespace LkEngine {
 		Release();
     }
 
-	void LOpenGLImage2D::SetData(const void* data)
+	void LOpenGLImage2D::SetData(const void* InData)
     {
-		m_ImageData.Release();
-		m_ImageData.Data = (void*)data;
+		if (InData)
+		{
+			m_ImageData.Release();
+			m_ImageData.Data = (void*)InData;
+		}
     }
 
-    void LOpenGLImage2D::Resize(uint32_t width, uint32_t height)
+    void LOpenGLImage2D::Resize(const uint32_t NewWidth, const uint32_t NewHeight)
     {
-		LK_CORE_DEBUG_TAG("LOpenGLImage", "Resize ({}, {})", width, height);
+		LK_CORE_DEBUG_TAG("LOpenGLImage", "Resize ({}, {})", NewWidth, NewHeight);
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
     }
 
     void LOpenGLImage2D::Invalidate()

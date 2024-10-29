@@ -87,10 +87,10 @@ namespace LkEngine {
         FORCEINLINE GLFWwindow* GetGlfwWindow() const { return GlfwWindow; }
 
         FORCEINLINE LVector2 GetSize() const { return Size; }
-        FORCEINLINE uint32_t GetWidth() const { return Size.X; }
-        FORCEINLINE uint32_t GetHeight() const { return Size.Y; }
-        FORCEINLINE uint32_t GetViewportWidth()  const { return ViewportSize.X; }
-        FORCEINLINE uint32_t GetViewportHeight() const { return ViewportSize.Y; }
+        FORCEINLINE uint16_t GetWidth() const { return Size.X; }
+        FORCEINLINE uint16_t GetHeight() const { return static_cast<uint16_t>(Size.Y); }
+        FORCEINLINE uint16_t GetViewportWidth()  const { return ViewportSize.X; }
+        FORCEINLINE uint16_t GetViewportHeight() const { return ViewportSize.Y; }
 
         FORCEINLINE LVector2 GetPos() const { return m_Pos; }
         FORCEINLINE LVector2 GetViewportSize() const { return ViewportSize; }
@@ -175,7 +175,7 @@ namespace LkEngine {
 		FORCEINLINE float GetScalerY() const { return m_ViewportScalers.Y; }
 		FORCEINLINE LVector2 GetScalers() const { return m_ViewportScalers; }
 
-		FORCEINLINE void SetScalerX(const const float InX)
+		FORCEINLINE void SetScalerX(const float InX)
 		{
 			m_ViewportScalers.X = InX;
 		}

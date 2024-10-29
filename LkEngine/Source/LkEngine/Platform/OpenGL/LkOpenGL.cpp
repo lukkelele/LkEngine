@@ -257,7 +257,7 @@ namespace LkEngine {
     unsigned int PlaneVAO, PlaneVBO;
     unsigned int QuadVAO, QuadVBO;
 
-	RendererID SkyboxVAO;
+	LRendererID SkyboxVAO;
 	unsigned int SkyboxVBO;
 
 	TObjectPtr<LVertexBuffer> CubeVertexBuffer{};

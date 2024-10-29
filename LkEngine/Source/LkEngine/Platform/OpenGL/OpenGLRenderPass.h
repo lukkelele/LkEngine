@@ -16,8 +16,9 @@ namespace LkEngine {
     class OpenGLRenderPass : public LRenderPass
     {
     public:
-		OpenGLRenderPass(const RenderPassSpecification& spec);
-		virtual ~OpenGLRenderPass();
+		OpenGLRenderPass(const RenderPassSpecification& InSpecification);
+		OpenGLRenderPass() = delete;
+		~OpenGLRenderPass() = default;
 
 		FORCEINLINE virtual RenderPassSpecification& GetSpecification() override 
 		{ 
@@ -46,10 +47,10 @@ namespace LkEngine {
 		virtual void Prepare() override;
 		virtual void Terminate() override;
 
-		bool IsInvalidated(uint32_t set, uint32_t binding) const;
+		bool IsInvalidated(uint32_t Set, uint32_t Binding) const;
 
     private:
-        RenderPassSpecification m_Specification;  
+		RenderPassSpecification m_Specification{};
 
 		LCLASS(OpenGLRenderPass)
     };

@@ -123,13 +123,20 @@ namespace LkEngine {
 
 	/***********************************************************************/
 
-    void LShaderLibrary::Add(const TObjectPtr<LShader>& shader)
+	LShaderLibrary::LShaderLibrary()
+	{
+		LCLASS_REGISTER();
+	}
+
+    void LShaderLibrary::Add(const TObjectPtr<LShader>& Shader)
     {
+		LK_UNUSED(Shader);
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
     }
 
-    void LShaderLibrary::Load(std::string_view name, const std::string& InFilePath)
+    void LShaderLibrary::Load(std::string_view Name, const std::string& InFilePath)
     {
-		Shaders[name] = LShader::Create(InFilePath);
+		Shaders[Name] = LShader::Create(InFilePath);
     }
 
     TObjectPtr<LShader>& LShaderLibrary::Get(std::string_view ShaderName)

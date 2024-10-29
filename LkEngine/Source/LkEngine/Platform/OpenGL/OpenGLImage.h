@@ -21,11 +21,11 @@ namespace LkEngine {
 		virtual void Invalidate() override;
 		virtual void RT_Invalidate() override;
 
-		virtual void Resize(uint32_t width, uint32_t height) override;
+		virtual void Resize(const uint32_t NewWidth, const uint32_t NewHeight) override;
 		virtual void SetData(const void* data) override;
 
-		virtual RendererID& GetRendererID() override { return m_RendererID; }
-		virtual RendererID GetRendererID() const override { return m_RendererID; }
+		virtual LRendererID& GetRendererID() override { return m_RendererID; }
+		virtual LRendererID GetRendererID() const override { return m_RendererID; }
 
 		virtual FBuffer GetBuffer() const override { return m_ImageData; }
 		virtual FBuffer& GetBuffer() override { return m_ImageData; }	
@@ -39,11 +39,11 @@ namespace LkEngine {
 		void AllocateMemory(uint64_t size) override;
 
 	private:
-		RendererID m_RendererID = 0;
+		LRendererID m_RendererID = 0;
 		FBuffer m_ImageData{};
 
-		FImageSpecification Specification;
-		std::string m_FilePath;
+		FImageSpecification Specification{};
+		std::string m_FilePath{};
 
 		glm::vec4 m_TintColor = Color::RGBA::Transparent;
 
@@ -72,8 +72,8 @@ namespace LkEngine {
 		virtual void Resize(const uint32_t NewWidth, const uint32_t NewHeight) override;
 		virtual void SetData(const void* InData) override;
 
-		virtual RendererID& GetRendererID() override { return m_RendererID; }
-		virtual RendererID GetRendererID() const override { return m_RendererID; }
+		virtual LRendererID& GetRendererID() override { return m_RendererID; }
+		virtual LRendererID GetRendererID() const override { return m_RendererID; }
 
 		virtual FBuffer GetBuffer() const override { return m_ImageData; }
 		virtual FBuffer& GetBuffer() override { return m_ImageData; }	
@@ -90,7 +90,7 @@ namespace LkEngine {
 		virtual void AllocateMemory(uint64_t size) override;
 
 	private:
-		RendererID m_RendererID = 0;
+		LRendererID m_RendererID = 0;
 		FImageSpecification Specification{};
 
 		FBuffer m_ImageData{};

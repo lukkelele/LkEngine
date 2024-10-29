@@ -33,10 +33,10 @@ namespace LkEngine {
 		virtual void Unbind() = 0;
 
 		virtual void AddTextureToArray(const TObjectPtr<LTexture> Texture) = 0;
-		virtual bool RemoveTextureFromArray(const RendererID TextureID) = 0;
+		virtual bool RemoveTextureFromArray(const LRendererID TextureID) = 0;
 
-		virtual const RendererID GetRendererID() const = 0;
-		virtual RendererID& GetRendererID() = 0;
+		virtual const LRendererID GetRendererID() const = 0;
+		virtual LRendererID& GetRendererID() = 0;
 
 		virtual int GetTextureSlot() const = 0;
 		virtual const ETextureArrayDimension& GetDimension() const = 0;
@@ -48,7 +48,7 @@ namespace LkEngine {
 		virtual void SetHeight(int height) = 0;
 
 		virtual bool HasTexture(const TObjectPtr<LTexture>& Texture) = 0;
-		virtual TObjectPtr<LTexture> GetTextureWithID(RendererID id) = 0;
+		virtual TObjectPtr<LTexture> GetTextureWithID(LRendererID id) = 0;
 		virtual int GetIndexOfTexture(const TObjectPtr<LTexture>& Texture) = 0;
 
 		static TObjectPtr<TextureArray> Create(const FTextureArraySpecification& Specification);

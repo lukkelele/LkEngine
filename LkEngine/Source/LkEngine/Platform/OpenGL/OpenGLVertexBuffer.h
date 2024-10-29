@@ -39,7 +39,7 @@ namespace LkEngine {
 			return m_BufferLayout; 
 		}
 
-		FORCEINLINE RendererID GetRendererID() const 
+		FORCEINLINE LRendererID GetRendererID() const 
 		{ 
 			return m_RendererID; 
 		}
@@ -51,7 +51,7 @@ namespace LkEngine {
 		void AddVertexBuffer(LVertexBuffer& VertexBuffer);
 
 	private:
-		RendererID m_RendererID = 0;
+		LRendererID m_RendererID = 0;
 		FBuffer m_LocalData{};
 		uint64_t m_Size = 0;
 		EVertexBufferUsage m_Usage = EVertexBufferUsage::None;
@@ -59,7 +59,7 @@ namespace LkEngine {
 		TObjectPtr<LIndexBuffer> m_IndexBuffer = nullptr;
 		VertexBufferLayout m_BufferLayout;
 
-		RendererID m_VertexArrayID = 0;
+		LRendererID m_VertexArrayID = 0;
 		unsigned int m_VertexBufferIndex = 0;
     };
 

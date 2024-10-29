@@ -9,6 +9,11 @@
 
 namespace LkEngine {
 
+    LMaterialLibrary::LMaterialLibrary()
+    {
+		LCLASS_REGISTER();
+    }
+
     LMaterialLibrary& LMaterialLibrary::Get()
     {
         static LMaterialLibrary MaterialLibrary;

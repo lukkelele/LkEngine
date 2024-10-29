@@ -18,6 +18,7 @@ namespace LkEngine {
 		glViewport(0, 0, Width, Height);
 	}
 
+
 	LWindow::LWindow(const FWindowSpecification& WindowSpecification)
 		: Specification(WindowSpecification)
 		, m_Title(WindowSpecification.Title)
@@ -25,6 +26,7 @@ namespace LkEngine {
 		, ViewportSize({ WindowSpecification.Width, WindowSpecification.Height })
 		, m_VSync(WindowSpecification.VSync)
 	{
+		LCLASS_REGISTER();
 		Instance = this;
 
 		/* Window Data. */

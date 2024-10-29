@@ -13,6 +13,8 @@ namespace LkEngine {
     class LMaterialLibrary : public LObject
     {
     public:
+        LMaterialLibrary();
+
         static LMaterialLibrary& Get();
 
         void Initialize();

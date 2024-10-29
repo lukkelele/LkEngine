@@ -7,6 +7,8 @@ namespace LkEngine {
 	OpenGLTextureArray::OpenGLTextureArray(const FTextureArraySpecification& InSpecification)
 		: Specification(InSpecification)
 	{
+		LCLASS_REGISTER();
+
 		auto [Width, Height] = GLUtils::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
 		m_Width = Width;
 		m_Height = Height;
@@ -64,7 +66,7 @@ namespace LkEngine {
 					                      0, 
 					                      0, 
 					                      0, 
-					                      Textures.size(), 
+					                      static_cast<int>(Textures.size()), 
 					                      m_Width, 
 					                      m_Height, 
 					                      1, 
@@ -83,7 +85,7 @@ namespace LkEngine {
 		}
 	}
 
-	bool OpenGLTextureArray::RemoveTextureFromArray(const RendererID TextureID)
+	bool OpenGLTextureArray::RemoveTextureFromArray(const LRendererID TextureID)
 	{
 		auto FindTextureInArray = [TextureID](const TObjectPtr<LTexture>& Texture) -> bool
 		{

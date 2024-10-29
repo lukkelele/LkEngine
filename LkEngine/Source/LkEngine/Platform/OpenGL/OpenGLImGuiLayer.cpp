@@ -8,6 +8,11 @@
 
 namespace LkEngine {
 
+    LOpenGLImGuiLayer::LOpenGLImGuiLayer()
+    {
+		LCLASS_REGISTER();
+    }
+
     void LOpenGLImGuiLayer::Initialize()
     {
         /// TODO: Get window config and apply settings from that.

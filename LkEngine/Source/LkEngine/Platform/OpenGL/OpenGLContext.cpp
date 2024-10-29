@@ -12,8 +12,10 @@
 namespace LkEngine {
 
 	LOpenGLContext::LOpenGLContext(LWindow* InWindow)
+		: Window(InWindow)
     {
-		Window = InWindow;
+		LCLASS_REGISTER();
+
 		m_GlfwWindow = Window->GetGlfwWindow();
 
 		/* Attach window delegates. */

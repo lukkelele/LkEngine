@@ -11,20 +11,21 @@ namespace LkEngine {
 	{
 	public:
 		OpenGLTextureArray(const FTextureArraySpecification& InSpecification);
+		OpenGLTextureArray() = delete;
 		~OpenGLTextureArray();
 
 		virtual void Bind() override;
 		virtual void Unbind() override;
 
 		virtual void AddTextureToArray(const TObjectPtr<LTexture> Texture) override;
-		virtual bool RemoveTextureFromArray(const RendererID TextureID) override;
+		virtual bool RemoveTextureFromArray(const LRendererID TextureID) override;
 
-		FORCEINLINE virtual const RendererID GetRendererID() const override 
+		FORCEINLINE virtual const LRendererID GetRendererID() const override 
 		{ 
 			return m_RendererID; 
 		}
 
-		FORCEINLINE virtual RendererID& GetRendererID() override 
+		FORCEINLINE virtual LRendererID& GetRendererID() override 
 		{ 
 			return m_RendererID; 
 		}
@@ -54,7 +55,7 @@ namespace LkEngine {
 			return (TextureIDSet.find(Texture->GetRendererID()) != TextureIDSet.end());
 		}
 
-		FORCEINLINE virtual TObjectPtr<LTexture> GetTextureWithID(RendererID TextureID) override
+		FORCEINLINE virtual TObjectPtr<LTexture> GetTextureWithID(LRendererID TextureID) override
 		{
 			if (auto Iter = IndexCache.find(TextureID); Iter != IndexCache.end())
 			{
@@ -81,15 +82,15 @@ namespace LkEngine {
 	public:
 		static constexpr int MaxTexturesPerArray = 32;
 	public:
-		RendererID m_RendererID = 0;
+		LRendererID m_RendererID = 0;
 		FTextureArraySpecification Specification{};
 
 		int m_Width = 0;
 		int m_Height = 0;
 
 		std::deque<TObjectPtr<LTexture>> Textures{};
-		std::unordered_map<RendererID, int> IndexCache{};
-		std::unordered_set<RendererID> TextureIDSet{};
+		std::unordered_map<LRendererID, int> IndexCache{};
+		std::unordered_set<LRendererID> TextureIDSet{};
 	};
 
 
@@ -129,7 +130,7 @@ namespace LkEngine {
 			return {};
 		}
 
-		static void GenerateTextureArrayImage(RendererID& ID, const FTextureArraySpecification& Specification)
+		static void GenerateTextureArrayImage(LRendererID& ID, const FTextureArraySpecification& Specification)
 		{
 			auto [Width, Height] = GLUtils::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
 			LK_OpenGL(glTextureStorage3D(ID, 

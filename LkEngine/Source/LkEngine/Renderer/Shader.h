@@ -13,6 +13,11 @@
 
 namespace LkEngine {
 
+	/**
+	 * @enum EShaderType
+	 *
+	 *  Type of shader, used on parsing of files during shader setup.
+	 */
 	enum class EShaderType
 	{
 		None = -1,
@@ -28,8 +33,8 @@ namespace LkEngine {
 		static TObjectPtr<LShader> Create(const std::string& InFilepath); 
 		static TObjectPtr<LShader> Create(const FShaderProgramSource& ShaderProgramSource);
 
-		virtual RendererID GetRendererID() const = 0;
-		virtual RendererID& GetRendererID() = 0;
+		virtual LRendererID GetRendererID() const = 0;
+		virtual LRendererID& GetRendererID() = 0;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
@@ -86,7 +91,7 @@ namespace LkEngine {
     class LShaderLibrary : public LObject
     {
     public:
-		LShaderLibrary() = default;
+		LShaderLibrary();
 		~LShaderLibrary() = default;
 
         TObjectPtr<LShader>& Get(std::string_view shaderName);

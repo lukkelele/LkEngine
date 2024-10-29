@@ -24,6 +24,12 @@ namespace LkEngine {
 	static FRendererData* RendererData = nullptr;
 	static int TextureArrayCount = 0;
 
+
+	OpenGLRenderer::OpenGLRenderer()
+	{
+		LCLASS_REGISTER();
+	}
+
 	void OpenGLRenderer::Initialize()
 	{
 		RendererData = new FRendererData();
@@ -336,7 +342,7 @@ namespace LkEngine {
 										uint32_t indexCount /* == 0*/)
 	{
 		TObjectPtr<LOpenGLPipeline> pipeline = InPipeline.As<LOpenGLPipeline>();
-		std::deque<RendererID> boundTextureArrays = pipeline->GetBoundTextureArrays();
+		std::deque<LRendererID> boundTextureArrays = pipeline->GetBoundTextureArrays();
 		TObjectPtr<LFramebuffer>& framebuffer = LRenderer::GetViewportFramebuffer();
 		LRenderer::Submit([&, pipeline, framebuffer, shader, 
 						  InVertexBuffer, transform, indexCount, boundTextureArrays]() mutable
@@ -345,7 +351,7 @@ namespace LkEngine {
 			shader->Bind();
 
 			int i = 1;
-			for (RendererID& textureArray : boundTextureArrays)
+			for (LRendererID& textureArray : boundTextureArrays)
 			{
 				shader->Set("u_TextureArray" + std::to_string(i++), textureArray);
 			}

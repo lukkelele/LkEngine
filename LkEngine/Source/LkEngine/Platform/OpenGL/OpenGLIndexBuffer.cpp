@@ -8,6 +8,8 @@ namespace LkEngine {
 		: m_Size(InSize)
 		, m_Count(InSize / sizeof(decltype(InSize)))
     {
+		LCLASS_REGISTER();
+
 		LK_OpenGL(glCreateBuffers(1, &m_RendererID));
 		LK_OpenGL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
 		LK_OpenGL(glNamedBufferData(m_RendererID, m_Size, nullptr, GL_DYNAMIC_DRAW));
@@ -18,6 +20,8 @@ namespace LkEngine {
 		: m_Size(InSize)
 		, m_Count(InSize / sizeof(decltype(InSize)))
 	{
+		LCLASS_REGISTER();
+
 		LK_OpenGL(glCreateBuffers(1, &m_RendererID));
 		LK_OpenGL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
 		LK_OpenGL(glNamedBufferData(m_RendererID, m_Size, nullptr, GL_DYNAMIC_DRAW));

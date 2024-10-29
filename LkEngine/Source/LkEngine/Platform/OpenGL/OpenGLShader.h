@@ -25,8 +25,8 @@ namespace LkEngine {
 			LK_OpenGL(glUseProgram(0));
 		}
 
-		FORCEINLINE virtual RendererID GetRendererID() const override { return m_RendererID; }
-		FORCEINLINE virtual RendererID& GetRendererID() override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID GetRendererID() const override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID& GetRendererID() override { return m_RendererID; }
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const int Value) override
 		{
@@ -130,7 +130,7 @@ namespace LkEngine {
 		virtual uint32_t CreateShader(const FShaderProgramSource& ShaderProgramSource) override;
 
 	private:
-		RendererID m_RendererID = 0;
+		LRendererID m_RendererID = 0;
 
 		std::unordered_map<std::string, int> UniformLocationCache;
 		std::filesystem::path FilePath{};

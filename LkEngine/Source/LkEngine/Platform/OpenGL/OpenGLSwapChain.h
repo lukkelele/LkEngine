@@ -11,27 +11,27 @@ namespace LkEngine {
 	{
 	public:
 		OpenGLSwapChain() = default;
-		OpenGLSwapChain(uint32_t* width, uint32_t* height, bool vsync);
+		OpenGLSwapChain(uint32_t* InWidth, uint32_t* InHeight, const bool InVSync);
 
-		void Init();
-		void InitSurface(GLFWwindow* windowHandle);
-		void Create(uint32_t* width, uint32_t* height, bool vsync);
-		void Destroy();
+		virtual void Initialize() override;
+		virtual void InitializeSurface(GLFWwindow* GlfwWindowHandle) override;
+		virtual void Destroy() override;
 
-		void OnResize(uint32_t width, uint32_t height);
+		virtual void OnResize(const uint32_t NewWidth, const uint32_t NewHeight) override;
 
-		void BeginFrame();
-		void Present();
+		virtual void BeginFrame() override;
+		virtual void Present() override;
 
-		uint32_t GetImageCount() const { return m_ImageCount; }
+		FORCEINLINE uint32_t GetImageCount() const { return m_ImageCount; }
+		FORCEINLINE virtual uint32_t GetWidth() const override { return m_Width; }
+		FORCEINLINE virtual uint32_t GetHeight() const override { return m_Height; }
+		FORCEINLINE virtual uint32_t GetCurrentBufferIndex() const override;
 
-		uint32_t GetWidth() const { return m_Width; }
-		uint32_t GetHeight() const { return m_Height; }
-
-		uint32_t GetCurrentBufferIndex() const;
+		void Create(uint32_t* InWidth, uint32_t* InHeight, const bool InVSync);
 
 	private:
-		uint32_t m_Width, m_Height;
+		uint32_t m_Width{};
+		uint32_t m_Height{};
 		uint32_t m_ImageCount = 0;
 
 		LCLASS(OpenGLSwapChain)

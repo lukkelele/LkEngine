@@ -112,10 +112,10 @@ namespace LkEngine {
 		virtual void Clear() = 0;
 		virtual int ReadPixel(const uint32_t AttachmentIndex, int PosX, int PosY) = 0;
 		virtual void ClearAttachment(const uint32_t AttachmentIndex, int value) = 0;
-		virtual RendererID GetColorAttachmentRendererID(const uint32_t Index = 0) const = 0;
+		virtual LRendererID GetColorAttachmentRendererID(const uint32_t Index = 0) const = 0;
 
-		virtual RendererID GetRendererID() const = 0;
-		virtual RendererID& GetRendererID() = 0;
+		virtual LRendererID GetRendererID() const = 0;
+		virtual LRendererID& GetRendererID() = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual uint64_t GetSize() const = 0;

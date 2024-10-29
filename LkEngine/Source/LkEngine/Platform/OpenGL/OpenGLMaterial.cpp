@@ -10,6 +10,7 @@ namespace LkEngine {
         : Shader(InShader.As<LOpenGLShader>())
         , Name(InName)
     {
+		LCLASS_REGISTER();
 		//LRenderer::RegisterShaderDependency(Shader, this);
 
         Texture = LRenderer::GetWhiteTexture();
@@ -19,6 +20,7 @@ namespace LkEngine {
 		: Shader(material->GetShader().As<LOpenGLShader>())
         , Name(InName)
 	{
+		LCLASS_REGISTER();
 		//LRenderer::RegisterShaderDependency(Shader, this);
 
         if (InName.empty())

@@ -8,7 +8,7 @@ namespace LkEngine {
     class LOpenGLImGuiLayer : public LImGuiLayer
     {
     public:
-        LOpenGLImGuiLayer() = default;
+        LOpenGLImGuiLayer();
         ~LOpenGLImGuiLayer() = default;
 
         virtual void Initialize() override;

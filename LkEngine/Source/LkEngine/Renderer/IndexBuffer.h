@@ -23,8 +23,8 @@ namespace LkEngine {
 		virtual uint32_t GetCount() const = 0;
 		virtual uint64_t GetSize() const = 0;
 
-		virtual RendererID GetRendererID() const = 0;
-		virtual RendererID& GetRendererID() = 0;
+		virtual LRendererID GetRendererID() const = 0;
+		virtual LRendererID& GetRendererID() = 0;
 
 		static TObjectPtr<LIndexBuffer> Create(const uint64_t InSize);
 		static TObjectPtr<LIndexBuffer> Create(void* Data, const uint64_t InSize = 0);

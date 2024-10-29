@@ -26,11 +26,11 @@ namespace LkEngine {
 
 		virtual void Bind() const override;
 
-		FORCEINLINE virtual RendererID GetRendererID() const override { return m_RendererID; }
-		FORCEINLINE virtual RendererID& GetRendererID() override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID GetRendererID() const override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID& GetRendererID() override { return m_RendererID; }
 
 	private:
-		RendererID m_RendererID = 0;
+		LRendererID m_RendererID = 0;
 		FBuffer m_LocalData;
 
 		uint32_t m_Size = 0;

@@ -44,6 +44,7 @@ namespace LkEngine {
 
 	LRenderer::LRenderer()
 	{
+		LCLASS_REGISTER(LRenderer);
 		s_Instance = this;
 	}
 
@@ -81,6 +82,11 @@ namespace LkEngine {
 		RendererAPI = LRendererAPI::Create();
 		RendererAPI->Initialize();
 
+		/// FIXME: NEED A WAY TO ENFORCE STATIC CLASS REGISTRATION
+		const LClass* Class = RendererAPI->GetClass();
+		LK_VERIFY(Class, "ClassRef is nullptr");
+		/// TODO: REMOVE ME
+#if 0
 		const LClass* ClassInfo = RendererAPI->GetClass();
 		if (ClassInfo->CastTo<LWindow>(RendererAPI.Get()))
 		{
@@ -90,6 +96,15 @@ namespace LkEngine {
 		{
 			LK_CORE_WARN_TAG("Renderer", "{}  Cast to LWindow failed", ClassInfo->GetName());
 		}
+		if (ClassInfo->CastTo<LRendererAPI>(RendererAPI.Get()))
+		{
+			LK_CORE_FATAL_TAG("Renderer", "{}  Cast to LObject SUCCESSFUL", ClassInfo->GetName());
+		}
+		else
+		{
+			LK_CORE_WARN_TAG("Renderer", "{}  Cast to LObject failed", ClassInfo->GetName());
+		}
+#endif
 	}
 
 	void LRenderer::Clear()
