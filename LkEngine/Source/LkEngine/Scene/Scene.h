@@ -36,8 +36,9 @@ namespace LkEngine {
 	class LScene : public LAsset
 	{
 	public:
-		LScene(const bool bIsEditorScene = true);
-		LScene(const LString& SceneName, bool bIsActiveScene = true, bool bIsEditorScene = false);
+		LScene(const bool bIsEditorScene);
+		LScene(const LString& SceneName, const bool bIsActiveScene = true, const bool bIsEditorScene = false);
+		LScene() = delete;
 		~LScene();
 
 		void OnRender(TObjectPtr<LSceneRenderer> InSceneRenderer, FTimestep Timestep);

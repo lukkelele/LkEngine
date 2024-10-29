@@ -20,10 +20,16 @@ namespace LkEngine {
 	LSceneSerializer::LSceneSerializer(LScene* Scene)
 		: m_Scene(Scene)
 	{
-		if (m_Scene == nullptr)
+		LCLASS_REGISTER();
+
+		if (!m_Scene)
 		{
-			/// Make shared pointer.
-			m_Scene = new LScene;
+		#if LK_USE_EDITOR
+			const bool IsEditorScene = true;
+		#else
+			const bool IsEditorScene = false;
+		#endif
+			m_Scene = new LScene(IsEditorScene);
 		}
 	}
 

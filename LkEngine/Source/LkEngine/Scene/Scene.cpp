@@ -24,6 +24,7 @@ namespace LkEngine {
 		: bIsEditorScene(IsEditorScene)
 		, Name("")
 	{
+		LCLASS_REGISTER();
 		m_SceneEntity = m_Registry.create();
 		m_Registry.emplace<LSceneComponent>(m_SceneEntity, m_SceneID);
 
@@ -56,6 +57,7 @@ namespace LkEngine {
 		: bIsEditorScene(bIsEditorScene)
 		, Name(InName)
 	{
+		LCLASS_REGISTER();
 		m_SceneEntity = m_Registry.create();
 		m_Registry.emplace<LSceneComponent>(m_SceneEntity, m_SceneID);
 
