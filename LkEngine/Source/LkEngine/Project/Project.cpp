@@ -19,7 +19,8 @@ namespace LkEngine {
 	LProject::LProject(std::string_view InProjectName)
 		: m_Name(InProjectName)
 	{
-		//RuntimeAssetManager = TObjectPtr<LRuntimeAssetManager>::Create();
+		LCLASS_REGISTER();
+
 		RuntimeAssetManager = TObjectPtr<LRuntimeAssetManager>::Create();
 	}
 
