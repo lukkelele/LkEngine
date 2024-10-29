@@ -12,7 +12,7 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/LObject/LClass.h"
-#include "LkEngine/Core/LObject/LObjectBase.h"
+#include "LkEngine/Core/LObject/ObjectBase.h"
 #include "LkEngine/Core/String.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
 
@@ -34,7 +34,7 @@ namespace LkEngine {
 	/**
 	 * LObject
 	 */
-	class LObject
+	class LObject : public LObjectBase
 	{
 		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestructBegin, const FObjectHandle&);
 		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestructEnd, const FObjectHandle&);
@@ -46,7 +46,6 @@ namespace LkEngine {
 			: Handle(Other.Handle)
 			, bInitialized(Other.bInitialized)
 			, Flags(Other.Flags)
-			, Name(Other.Name)
 		{
 		}
 
@@ -62,7 +61,6 @@ namespace LkEngine {
 			Handle = Other.Handle;
 			bInitialized = Other.bInitialized;
 			Flags = Other.Flags;
-			Name = Other.Name;
 			ReferenceCount = Other.ReferenceCount.load();
 
 			return *this;
@@ -122,33 +120,51 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Get static class.
+		 * @brief Get static class, is implemented for every LClass.
 		 */
 		FORCEINLINE static const LClass* StaticClass() 
 		{ 
-			static const bool bClassRegistered = (LClass::Register<LObject>("LObject"), true);
+			static bool bClassRegistered = false; 
+			if (!bClassRegistered)
+			{
+				LClass* ObjectClass = LClass::Register<LObject>("LObject");
+				bClassRegistered = true;
+			} 
+
 			return LClass::Get(LType<LObject>::ID());
 		}
 
 		/**
-		 * @brief Static class name, implemented by LCLASS macro.
+		 * @brief Get object class.
+		 * @note  Implemented by LCLASS macro.
+		 */
+		virtual const LClass* ClassRegistration() = 0;
+
+		/**
+		 * @brief Static class name.
+		 * @note  Implemented by LCLASS macro.
 		 */
 		FORCEINLINE static std::string StaticClassName() { return "LObject"; }
 
 		/** 
-		 * @brief Return LClass object for this class.
+		 * @brief Get the class for this object.
+		 *
+		 * No null-checks should be done inside this function since it is 
+		 * used to determine the class registration at places, i.e the return value 
+		 * is used to determine if the class is registered depending if nullptr or not.
+		 *
+		 * @note Implemented by LCLASS macro.
 		 */
-		virtual const LClass* GetClass() const = 0;
+		FORCEINLINE virtual const LClass* GetClass() const
+		{
+			return LObjectBase::GetClass();
+		}
 
 		/** 
-		 * @brief Name of class, implemented by LCLASS macro.
+		 * @brief Get name of class.
+		 * @note  Implemented by LCLASS macro.
 		 */
 		virtual std::string ClassName() const = 0;
-
-		/** 
-		 * @brief Get name of object. 
-		 */
-		FORCEINLINE std::string_view GetName() const { return Name; }
 
 		/**
 		 * @brief Check to see if object is selected.
@@ -165,7 +181,6 @@ namespace LkEngine {
 		 */
 		FORCEINLINE void MarkAsGarbage()
 		{
-			//Flags |= static_cast<decltype(Flags)>(EObjectFlag::Garbage);
 			Flags |= EObjectFlag::Garbage;
 		}
 
@@ -196,8 +211,7 @@ namespace LkEngine {
 		bool IsA() const
 		{
 			static_assert(sizeof(T) > 0, "IsA<T> failed, incomplete type");
-			//return (StaticClassName() == T::StaticClassName());
-			return (StaticClass() == T::StaticClass());
+			return (StaticClassName() == T::StaticClassName()); /// TODO: CHANGE THIS 
 		}
 
 		/**
@@ -206,7 +220,7 @@ namespace LkEngine {
 		FORCEINLINE virtual bool IsAsset() const { return false; }
 
 		/**
-		 * @brief Return current reference count from all smart pointers. 
+		 * @brief Return current reference count from all object pointers. 
 		 */
 		FORCEINLINE uint32_t GetReferenceCount() const { return ReferenceCount.load(); }
 
@@ -219,7 +233,7 @@ namespace LkEngine {
 	private:
 		/**
 		 * @brief Increment reference count.
-		 * Managed by TObjectPtr.
+		 * @note  Managed by TObjectPtr.
 		 */
 		FORCEINLINE void IncrementReferenceCount() const 
 		{ 
@@ -228,7 +242,7 @@ namespace LkEngine {
 
 		/**
 		 * @brief Decrement reference count.
-		 * Managed by TObjectPtr.
+		 * @note  Managed by TObjectPtr.
 		 */
 		FORCEINLINE void DecrementReferenceCount() const 
 		{ 
@@ -240,9 +254,6 @@ namespace LkEngine {
 
 		bool bInitialized = false;
 		LObjectFlag Flags = EObjectFlag::None;
-
-		/* Runtime name. */
-		std::string Name{};
 
 		FObjectDestructBegin OnDestructBegin{};
 		FObjectDestructEnd OnDestructEnd{};
@@ -300,4 +311,17 @@ namespace LkEngine {
 	LK_DECLARE_MULTICAST_DELEGATE(FOnObjectCreated, const LObject*);
 	extern FOnObjectCreated GOnObjectCreated;
 
+}
+
+/** Allow usage of LObject's in maps and sets. */
+namespace std 
+{
+    template<>
+    struct hash<LkEngine::LObject>
+    {
+        std::size_t operator()(const LkEngine::LObject& Object) const noexcept
+        {
+			return std::hash<uint64_t>()(Object.GetHandle());
+        }
+    };
 }

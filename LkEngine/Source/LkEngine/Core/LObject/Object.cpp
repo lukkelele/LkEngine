@@ -1,6 +1,8 @@
 #include "LKpch.h"
 #include "Object.h"
 
+#include "LkEngine/Core/Template/LkTemplate.h"
+
 
 namespace LkEngine {
 
@@ -8,7 +10,6 @@ namespace LkEngine {
 
 	LObject::LObject()
 		: Handle(FObjectHandle())
-		, Name("LObject")
 	{
 		Flags = EObjectFlag::NeedInitialization;
 	}

@@ -7,20 +7,20 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/CoreTypes.h"
-#include "LkEngine/Core/TypeTrait.h"
+#include "LkEngine/Core/Template/TypeTrait.h"
+#include "LkEngine/Core/Memory/MemoryPtr.h"
 #include "LkEngine/Core/LObject/Enum.h"
+#include "LkEngine/Core/LObject/ObjectBase.h"
 
 
 namespace LkEngine {
-	
-	class LObject;
 
 	class LClass
 	{
 		/**
 		 * @brief Cast function used to cast from LObject to derived type.
 		 */
-		using FObjectCastFunction = std::function<void*(LObject*)>;
+		using FObjectCastFunction = std::function<void*(LObjectBase*)>;
 
 	public:
 		explicit LClass(std::string_view InName, const std::type_index& InTypeID, FObjectCastFunction InCastFunction)
@@ -30,7 +30,7 @@ namespace LkEngine {
 		{
 		}
 
-		LClass() = delete;
+		LClass() = default;
 		virtual ~LClass() = default;
 
 		/**
@@ -50,39 +50,6 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Check if class is of a specific type.
-		 */
-		template<typename T>
-		bool IsA() const
-		{
-			static_assert(sizeof(T) > 0, "IsA failed, incomplete type T");
-			return (TypeID == std::type_index(typeid(T)));
-		}
-
-		/**
-		 * @brief Attempt to cast object to type T.
-		 */
-		template <typename T>
-		T* CastTo(void* InObject) const
-		{
-			static_assert(sizeof(T) > 0, "CastTo failed, incomplete type T");
-			return (IsA<T>() ? static_cast<T*>(CastFunction(static_cast<LObject*>(InObject))) : nullptr);
-		}
-
-		/**
-		 * @brief Register metadata for a LClass.
-		 */
-		template<typename T>
-		static void Register(std::string_view ClassName)
-		{
-			static_assert(sizeof(T) > 0, "Register failed, incomplete type T");
-			ClassMetadataMap[typeid(T)] = MakeUnique<LClass>(ClassName, typeid(T), [](LObject* ClassObject) -> void* 
-			{ 
-				return static_cast<T*>(ClassObject); 
-			});
-		}
-
-		/**
 		 * @brief Retrieve metadata for a LClass.
 		 */
 		static const LClass* Get(const std::type_index& ClassType)
@@ -92,13 +59,55 @@ namespace LkEngine {
 				return Iter->second.get();
 			}
 
-			LK_CORE_ASSERT(false, "LClass::Get failed, \"{}\" is not in class map", ClassType.name());
 			return nullptr;
 		}
-		
+
+		/**
+		 * @brief Register metadata for a LClass.
+		 */
+		template<typename T>
+		static LClass* Register(std::string_view ClassName)
+		{
+			static_assert(sizeof(T) > 0, "Register failed, incomplete type T");
+			if (ClassMetadataMap.contains(typeid(T)))
+			{
+				return ClassMetadataMap[typeid(T)].get();
+			}
+
+			ClassMetadataMap[typeid(T)] = MakeUnique<LClass>(ClassName, typeid(T), [](LObjectBase* ClassObject) -> void* 
+			{ 
+				return static_cast<T*>(ClassObject); 
+			});
+
+			LClass* Class = ClassMetadataMap[typeid(T)].get();
+			Class->bRegistered = true;
+
+			return Class;
+		}
+	
 		bool operator==(const LClass& Other) const
 		{
 			return (TypeID == Other.TypeID);
+		}
+
+		/**
+		 * @brief Check if class is registered in the static storage.
+		 */
+		FORCEINLINE bool IsRegistered() const 
+		{ 
+			return bRegistered; 
+		}
+
+		/**
+		 * @brief Check if class is child of another class.
+		 */
+		bool IsChildOf(const LClass* OtherClass) const;
+
+		template<typename T>
+		bool IsChildOf() const
+		{
+			static_assert(sizeof(T) > 0, "IsChildOf failed, incomplete type T");
+			return IsChildOf(T::StaticClass());
 		}
 
 	private:
@@ -106,7 +115,9 @@ namespace LkEngine {
 		std::type_index TypeID;
 		FObjectCastFunction CastFunction;
 
-		/** Storage for all class metadata. */
+		bool bRegistered = false;
+
+		/** Static storage for all LClasses. */
 		inline static std::unordered_map<std::type_index, TUniquePtr<LClass>> ClassMetadataMap{};
 	};
 
