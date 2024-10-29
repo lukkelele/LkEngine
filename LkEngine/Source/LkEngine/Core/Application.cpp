@@ -13,7 +13,9 @@ namespace LkEngine {
         , GarbageCollector(LGarbageCollector::Get())
         , ThreadManager(LThreadManager::Instance())
     {
+        LCLASS_REGISTER(LApplication);
         Instance = this;
+
         LCrashHandler::AttachInstance(this);        
 
         Global::SetRuntimeArguments(Specification.Argc, Specification.Argv);
@@ -21,7 +23,6 @@ namespace LkEngine {
 
         LK_CORE_TRACE_TAG("Application", "Creating window");
         Window = MakeUnique<LWindow>(InSpecification);
-        MetadataRegistry.RegisterObject("Window", Window);
 
         /* Read configuration file. */
         ReadConfigurationFile();
