@@ -17,8 +17,13 @@ namespace LkEngine {
 	void LGarbageCollector::Initialize()
 	{
 		GLiveObjectMap.clear();
-		GLiveObjectMap.insert({ LApplication::Get()->GetHandle(), TObjectPtr<LObject>(LApplication::Get()) });
-		LK_CORE_DEBUG_TAG("GarbageCollector", "Created new instance, added Application as first live object");
+
+		LK_CORE_DEBUG_TAG("GarbageCollector", "Adding Application as first tracked LObject");
+		GLiveObjectMap.insert(
+			{ LApplication::Get()->GetHandle(), TObjectPtr<LObject>(LApplication::Get()) }
+		);
+
+		LK_CORE_DEBUG_TAG("GarbageCollector", "Initializiation complete");
 	}
 
 }

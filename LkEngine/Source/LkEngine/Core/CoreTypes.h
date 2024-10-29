@@ -13,12 +13,10 @@
 
 namespace LkEngine 
 {
-	using Type_Nullptr = std::nullptr_t;
-
 	using byte = uint8_t;
 	using llong = long long;
 
-	using RendererID = uint32_t;
+	using LRendererID = uint32_t;
 
 	/* Path separator. */
 	template<typename TChar>
@@ -52,7 +50,9 @@ namespace LkEngine
 		Hexagon
 	};
 
-
+	/**
+	 * @brief
+	 */
 	template <typename To, typename From>
 	To* Cast(From* Source)
 	{

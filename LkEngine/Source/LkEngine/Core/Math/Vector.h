@@ -99,6 +99,12 @@ namespace LkEngine {
 			, Y(T())
 			, Z(T()) 
 		{
+			//static_assert(std::is_floating_point_v<T>, "LVector can only use floating types");
+			static_assert(std::disjunction_v<
+				std::is_same<T, int>, 
+				std::is_same<T, float>, 
+				std::is_same<T, double>
+			>, "TVector can only be instantiated with int, float or double.");
 		} 
 
 		TVector3(T InX, T InY, T InZ)

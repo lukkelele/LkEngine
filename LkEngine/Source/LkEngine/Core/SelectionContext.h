@@ -29,7 +29,6 @@ namespace LkEngine {
 
 		FORCEINLINE void SelectEntity(const LEntity InEntity)
 		{
-			LK_CORE_DEBUG("Selected {}", InEntity.GetName());
 			GSelectedObject = InEntity;
 			OnObjectSelectionChanged.Broadcast(InEntity);
 		}
