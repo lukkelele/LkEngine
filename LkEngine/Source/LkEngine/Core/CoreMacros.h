@@ -14,10 +14,6 @@
 #define LK_BIT_FIELD(x)         (1 << x)
 #define LK_STRINGIFY(x)         #x
 
-/* Disable warnings, push and pop. */
-#define LK_DISABLE_WARN_BEGIN     _Pragma("warning(push, 0)")
-#define LK_DISABLE_WARN_END       _Pragma("warning(pop)")
-
 /** Function Signature. */
 #ifdef __clang__
 #	define LK_FUNC_SIG __PRETTY_FUNCTION__
@@ -55,6 +51,34 @@
 #define LK_MARK_FUNC_NOT_IMPLEMENTED(...) \
 	LK_CORE_ASSERT(false, "[ Function not implemented ]\n{}" __VA_OPT__("\nDev note: {}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))
 
+#if defined(_MSC_VER)
+#	define LK_ASSUME(x)  __assume(x)
+#	define LK_STRUCT_OFFSET(InStruct, InMember)  offsetof(InStruct, InMember)
+#elif defined(__clang__)
+#	define LK_ASSUME(x)  __builtin_assume(x)
+#	define LK_STRUCT_OFFSET(InStruct, InMember)  __builtin_offsetof(InStruct, InMember)
+#else
+#	define LK_ASSUME(x)
+#	define LK_STRUCT_OFFSET(InStruct, InMember)
+#endif
+
+/* Branch prediction hints. */
+#ifndef LK_LIKELY
+#	if (defined(__clang__) || defined(__GNUC__)) && LK_PLATFORM_LINUX
+#		define LK_LIKELY(x)	 __builtin_expect(!!(x), 1)
+#	else
+#		define LK_LIKELY(x)  (!!(x))
+#	endif
+#endif
+
+#ifndef LK_UNLIKELY
+#	if (defined(__clang__) || defined(__GNUC__)) && LK_PLATFORM_LINUX
+#		define LK_UNLIKELY(x)  __builtin_expect(!!(x), 0)
+#	else
+#		define LK_UNLIKELY(x)  (!!(x))
+#	endif
+#endif
+
 namespace LkEngine {
 
 	enum class EClassFlag : uint32_t
@@ -76,9 +100,9 @@ namespace LkEngine {
 
 /**
  * LCLASS
- * 
+ *
  *  Base classes that inherit from LObject are required to be declared as an LCLASS.
- *  Adds the static class type to the metadata registry and implements 
+ *  Adds the static class type to the metadata registry and implements
  *  abstract functions and other base functionality from LObject.
  */
 #define LCLASS(Class) \
@@ -89,21 +113,25 @@ namespace LkEngine {
 		static std::string_view StaticClassName() { return #Class; } \
 		static const LClass* StaticClass() \
 		{ \
-			static const bool bClassRegistered = (LClass::Register<Class>(#Class), true); \
 			return LClass::Get(LType<Class>::ID()); \
 		} \
-		virtual const LClass* GetClass() const override \
+		virtual const LClass* ClassRegistration() override \
 		{ \
-			return Class::StaticClass(); \
+			LClass* ObjectClass = LClass::Register<Class>(#Class); \
+			return ObjectClass; \
 		} \
-	private: \
-		void LK_META_CLASS_REGISTER_FUNC() \
+
+
+/** 
+ * LCLASS_REGISTER
+ */
+#define LCLASS_REGISTER(...) \
+		LClass* ClassObject = const_cast<LClass*>(LClass::Get(typeid(this))); \
+		if (!ClassObject) \
 		{ \
-			if constexpr (!std::is_same_v<::LkEngine::LObject, ::LkEngine::Class>) \
-			{ \
-				LMetadataRegistry::Get().Register(#Class, this); \
-			} \
-		} 
+			ClassObject = const_cast<LClass*>(ClassRegistration()); \
+			LObjectBase::SetClass(const_cast<LClass*>(ClassObject)); \
+		} \
 
 
 /// FIXME: LASSET macro is not done/implemented yet.
