@@ -2,6 +2,10 @@
 
 #include <unordered_set>
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
+#include "LkEngine/Core/LObject/LClass.h"
+
 #include "Asset.h"
 #include "AssetRegistry.h"
 

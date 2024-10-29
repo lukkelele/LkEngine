@@ -28,6 +28,7 @@ namespace LkEngine {
 	LRuntimeAssetManager::LRuntimeAssetManager()
 		: TextureLibrary(LTextureLibrary::Get())
 	{
+		LCLASS_REGISTER();
 	}
 
 	void LRuntimeAssetManager::Initialize(const EInitFlag AssetInitialization)
