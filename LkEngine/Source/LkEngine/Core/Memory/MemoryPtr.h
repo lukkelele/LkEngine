@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 
-#include "LkEngine/Core/LObject/LObjectBase.h"
+#include "LkEngine/Core/LObject/ObjectBase.h"
 
 
 namespace LkEngine {
