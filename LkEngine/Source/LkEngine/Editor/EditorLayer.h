@@ -57,39 +57,29 @@ namespace LkEngine {
 
 		virtual void OnUpdate(const float DeltaTime) override;
 
-		void OnRender();
-		void OnImGuiRender();
-
-		virtual void OnEvent(LEvent& Event) override;
-		void RegisterEvent(LEvent& Event);
-
-		/* FIXME: Event category */
-		FORCEINLINE void SetEventCallback(const FEventCallback& Callback) 
-		{ 
-			m_EventCallback = Callback; 
-		}
+		virtual void OnRender() override;
+		virtual void OnRenderUI() override;
 
 		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() 
 		{ 
 			return EditorCamera; 
 		}
 
-		void SetScene(TObjectPtr<LScene> scene);
+		void SetScene(TObjectPtr<LScene> InScene);
 
 		FORCEINLINE TObjectPtr<LScene> GetCurrentScene() 
 		{ 
-			return m_Scene; 
-		}
-
-		const char* UI_GetSelectedEntityWindowName() 
-		{ 
-			return SelectedEntityWindow.c_str(); 
+			return Scene; 
 		}
 
 		void SetUpdateWindowFlag(bool flag);
 
 		FORCEINLINE bool IsEnabled() const { return m_Enabled; }
-		FORCEINLINE EEditorWindowType GetCurrentWindowType() const { return CurrentWindowType; }
+
+		FORCEINLINE EEditorWindowType GetCurrentWindowType() const 
+		{ 
+			return CurrentWindowType; 
+		}
 
 		/* FIXME: Update all of these, refactor away. */
 		glm::vec2 GetEditorWindowSize() const;
@@ -155,16 +145,15 @@ namespace LkEngine {
 		bool ShowRenderSettingsWindow = false;
 		bool m_FillSidebarsVertically = true; // Always fill out sidebars vertically
 
+		/// REMOVE
 		ImVec2 LastSidebarLeftPos = ImVec2(0, 0);
 		ImVec2 LastSidebarLeftSize = ImVec2(0, 0);
 		ImVec2 LastSidebarRightPos = ImVec2(0, 0);
 		ImVec2 LastSidebarRightSize = ImVec2(0, 0);
 		ImVec2 LastBottomBarPos = ImVec2(0, 0);
 		ImVec2 LastBottomBarSize = ImVec2(0, 0);
-
-		inline static std::string SelectedEntityWindow = UI_SIDEBAR_RIGHT;
-
 	private:
+		/// REMOVE
 		inline static glm::vec2 MenuBarSize = { 0.0f, 30.0f };
 		inline static glm::vec2 TabBarSize = { 0.0f, 34.0f };
 		inline static glm::vec2 BottomBarSize = { 0.0f, 240.0f };
@@ -179,7 +168,7 @@ namespace LkEngine {
 	private:
 		LEditorTabManager& TabManager;
 
-		TObjectPtr<LScene> m_Scene = nullptr;
+		TObjectPtr<LScene> Scene = nullptr;
 		bool m_Enabled = true;
 
 		LVector2 ViewportBounds[2];
@@ -198,7 +187,8 @@ namespace LkEngine {
 
 		TSharedPtr<LSceneManagerPanel> SceneManagerPanel;
 
-		TObjectPtr<LProject> m_Project;
+		/* Active object. */
+		TObjectPtr<LProject> m_Project{};
 
 		// Editor
 		TUniquePtr<LNodeEditor> NodeEditor;
@@ -209,10 +199,11 @@ namespace LkEngine {
 		LWindow* Window = nullptr;
 		EEditorWindowType CurrentWindowType = EEditorWindowType::None;
 
-		/// REWORK
+		/// REWORK ALL THESE FRIEND DECLARATIONS
 		friend class Physics2D; // For getting UI window size when raycasting
-		friend class NodeEditorTab;
-		friend class MaterialEditorTab;
+
+		friend class LNodeEditorTab;
+		friend class LMaterialEditorTab;
 		friend class LSceneManagerPanel; 
 		friend class LRenderer;
 		

@@ -15,40 +15,49 @@ namespace LkEngine {
         return EditorTabManager;
     }
 
-    void LEditorTabManager::Init(bool InSwitchToNewTabsOnCreation)
+    void LEditorTabManager::Init(const bool InSwitchToNewTabsOnCreation)
     {
         bSwitchToNewTabsOnCreation = InSwitchToNewTabsOnCreation;
     }
 
-    TSharedPtr<LTab> LEditorTabManager::NewTab(std::string TabName, const EditorTabType TabType, bool bSetAsActive)
+    void LEditorTabManager::Destroy()
     {
+    }
+
+    /// REFACTOR
+    TSharedPtr<LTab> LEditorTabManager::NewTab(std::string_view TabName, 
+                                               const ETabType TabType, 
+                                               const bool bSetAsActive)
+    {
+        LK_CORE_INFO_TAG("Editor", "New tab: {}", TabName);
         TSharedPtr<LTab> SearchedTab = GetTab(TabName);
+        /// REFACTOR: what the .... is going on here
         if (SearchedTab)
         {
-            unsigned int TabCopies = 1;
-            std::string originalTabName = TabName;
+            int TabCopies = 1;
+            std::string OriginalTabName = TabName.data();
 
             while (SearchedTab != nullptr)
             {
                 LK_CORE_DEBUG("Tab already exists, adding copy marker -> ({})", TabCopies);
-                TabName = originalTabName + "(" + std::to_string(TabCopies++) + ")";
+                TabName = OriginalTabName + "(" + std::to_string(TabCopies++) + ")";
                 SearchedTab = GetTab(TabName);
             }
         }
         
         /// FIXME
         TSharedPtr<LTab> Tab = nullptr;
-        if (TabType == EditorTabType::Viewport)
+        if (TabType == ETabType::Viewport)
         {
             Tab = MakeShared<ViewportTab>(TabName);
         }
-        else if (TabType == EditorTabType::NodeEditor)
+        else if (TabType == ETabType::NodeEditor)
         {
-            Tab = MakeShared<NodeEditorTab>(TabName);
+            Tab = MakeShared<LNodeEditorTab>(TabName);
         }
-        else if (TabType == EditorTabType::MaterialEditor)
+        else if (TabType == ETabType::MaterialEditor)
         {
-            Tab = MakeShared<MaterialEditorTab>(TabName);
+            Tab = MakeShared<LMaterialEditorTab>(TabName);
         }
 
         UUID TabIndex = UUID();

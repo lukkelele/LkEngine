@@ -20,14 +20,16 @@ namespace LkEngine {
 
         static void End();
 
-        static TSharedPtr<LTab> NewTab(std::string tabName, const EditorTabType tabType, bool setAsActive = false);
+        static TSharedPtr<LTab> NewTab(std::string_view TabName, 
+                                       const ETabType TabType, 
+                                       const bool SetAsActive = false);
 
         FORCEINLINE static void SetActiveTab(TSharedPtr<LTab> Tab)
         {
 			ActiveTab = Tab;
-			if (Tab && (Tab->GetTabType() == EditorTabType::NodeEditor))
+			if (Tab && (Tab->GetTabType() == ETabType::NodeEditor))
 			{
-				TSharedPtr<NodeEditorTab> NodeTab = std::static_pointer_cast<NodeEditorTab>(Tab);
+				TSharedPtr<LNodeEditorTab> NodeTab = std::static_pointer_cast<LNodeEditorTab>(Tab);
 				NodeTab->NodeEditor->ActivateContext();
 			}
         }
@@ -37,9 +39,9 @@ namespace LkEngine {
             if (TSharedPtr<LTab> Tab = GetTab(TabName))
             {
 				ActiveTab = Tab;
-				if (Tab && (Tab->GetTabType() == EditorTabType::NodeEditor))
+				if (Tab && (Tab->GetTabType() == ETabType::NodeEditor))
 				{
-					TSharedPtr<NodeEditorTab> NodeTab = std::static_pointer_cast<NodeEditorTab>(Tab);
+					TSharedPtr<LNodeEditorTab> NodeTab = std::static_pointer_cast<LNodeEditorTab>(Tab);
 					NodeTab->NodeEditor->ActivateContext();
 				}
             }
@@ -66,7 +68,7 @@ namespace LkEngine {
         }
 
         template<typename T>
-        FORCEINLINE static TSharedPtr<LTab> GetTab(T TArg)
+        FORCEINLINE static TSharedPtr<LTab> GetTab(T Arg)
         {
             static_assert(std::disjunction_v<
                             std::is_same<T, std::uint8_t>,
@@ -84,10 +86,10 @@ namespace LkEngine {
 
         static void PopTab();
 
-        FORCEINLINE static void CloseTab(TSharedPtr<LTab> tab)
+        FORCEINLINE static void CloseTab(TSharedPtr<LTab> Tab)
         {
-			tab->Closed = true;
-			TabsToClose.push_back(tab);
+			Tab->Closed = true;
+			TabsToClose.push_back(Tab);
         }
 
     private:

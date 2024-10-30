@@ -1,8 +1,6 @@
 #include "LKpch.h"
 #include "LkEngine/Editor/EditorLayer.h"
 
-#include "LkEngine/Debug/DebugLayer.h"
-
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
 
@@ -19,6 +17,7 @@
 #include "LkEngine/UI/DockSpace.h"
 #include "LkEngine/UI/Property.h"
 #include "LkEngine/UI/SceneManagerPanel.h"
+#include "LkEngine/UI/DebugPanel.h"
 
 #include "LkEngine/Platform/OpenGL/OpenGLRenderer.h"
 #include "EditorLayer.h"
@@ -26,20 +25,18 @@
 
 namespace LkEngine {
 
-	/* Windows. */
-	static bool bWindow_LiveObjects = false;
-
 	static TObjectPtr<LTexture2D> FloorTexture;
 	static TObjectPtr<LTexture2D> CubeTexture;
+
+	TObjectPtr<LDebugPanel> DebugPanel{};
 
 	LEditorLayer::LEditorLayer()
 		: LLayer("EditorLayer")
 		, TabManager(LEditorTabManager::Get())
-	    , m_Scene(nullptr)
+	    , Scene(nullptr)
 		, m_Enabled(true)
 	{
 		LCLASS_REGISTER();
-
 		Instance = this;
 
 		m_ShowStackTool = false;
@@ -50,7 +47,6 @@ namespace LkEngine {
 
 		/* Viewport bounds. */
 		ViewportBounds[0] = { 0, 0 };
-		//ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
 		ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
 
 		SecondViewportBounds[0] = { 0, 0 };
@@ -69,20 +65,19 @@ namespace LkEngine {
 
 		GOnObjectCreated.Add([&](const LObject* NewObject)
 		{
-			//LK_CORE_DEBUG_TAG("Editor", "New Object Created: {}, Name=\"{}\"", NewObject->StaticClassName(), NewObject->GetName());
 			LK_CORE_DEBUG_TAG("Editor", "New Object  ClassName=\"{}\"  Name=\"{}\"", 
 				NewObject->GetClass()->GetName(), NewObject->ClassName());
+		});
+
+		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
+		{
+			SetScene(NewActiveScene);
 		});
 
 		/* Editor UI components. */
 		SceneManagerPanel = MakeShared<LSceneManagerPanel>();
 		ContentBrowser = MakeUnique<LContentBrowser>();
 		ComponentEditor = MakeUnique<LComponentEditor>();
-
-		LEditorLayer& Editor = *this;
-		auto EventCallback = [&Editor](LEvent& Event) { Editor.OnEvent(Event); };
-		LK_CORE_TRACE_TAG("Editor", "Setting event callback to OnEvent");
-		SetEventCallback(EventCallback);
 
 		Window->OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
 		{
@@ -94,13 +89,8 @@ namespace LkEngine {
 	void LEditorLayer::Initialize()
 	{
 		LObject::Initialize();
+		LK_CORE_DEBUG_TAG("Editor", "Initializing");
 
-		LK_CORE_DEBUG_TAG("Editor", "Initializing layer");
-	#if 0 /// DISABLED, NEEDS TO BE RE-EVALUATED
-		Window->SetScalers(ViewportScalers.x, ViewportScalers.y);
-		Window->SetWidth(static_cast<uint32_t>(EditorWindowSize.x));
-		Window->SetHeight(static_cast<uint32_t>(EditorWindowSize.y));
-	#endif
 		/* Attach to LWindow delegates. */
 		LK_CORE_ASSERT(Window, "Window reference is nullptr");
 		if (Window)
@@ -171,6 +161,9 @@ namespace LkEngine {
 		ContentBrowser->Initialize();
 		ComponentEditor->Initialize();
 
+		LK_CORE_DEBUG_TAG("Editor", "Adding debugging panel");
+		DebugPanel = TObjectPtr<LDebugPanel>::Create();
+
 		// TODO: Parse config or cache to determine most recent project and go from there
 		// New project and/or setting the project to active triggers an event that 
 		// handles the redirection of input and physics 
@@ -193,7 +186,7 @@ namespace LkEngine {
 	{
 		// The window space is calculated from topleft corner, so remove LMouse::Pos.y to get the actual cursor placement
 		{
-			/// MOVE THIS
+			/// TODO: REFACTOR
 			LMouse::Pos = LMouse::GetRawPos();
 			LMouse::Pos.x -= LeftSidebarSize.x;
 			LMouse::Pos.y = ViewportBounds[1].Y - BottomBarSize.y - LMouse::Pos.y;
@@ -219,41 +212,36 @@ namespace LkEngine {
 		RenderViewport();
 	}
 
-	void LEditorLayer::OnImGuiRender()
+	void LEditorLayer::OnRenderUI()
 	{
 		LApplication* Application = LApplication::Get();
-		auto& window = Window;
-		auto& io = ImGui::GetIO();
-		auto& style = ImGui::GetStyle();
-		auto& colors = style.Colors;
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiStyle& Style = ImGui::GetStyle();
+		auto& Colors = Style.Colors;
 		io.ConfigWindowsResizeFromEdges = io.BackendFlags & ImGuiBackendFlags_HasMouseCursors;
 
 		ImGuiViewportP* Viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
 		ViewportScalers.x = EditorWindowSize.x / ViewportBounds[1].X;
 		ViewportScalers.y = EditorWindowSize.y / ViewportBounds[1].Y;
 
-#if 0
-		if (m_Scene && SELECTION::SelectedEntity != SELECTION::NULL_ENTITY)
-		{
-			SELECTION::SelectedEntity = m_Scene->TryGetEntityWithUUID(SELECTION::SelectedEntity.GetUUID());
-		}
-#endif
-
 		UI::BeginViewport(UI_CORE_VIEWPORT, Window, Viewport);
 		UI_HandleManualWindowResize();
 		UI::BeginDockSpace(LkEngine_DockSpace);
 
+		/* Main menu. */
 		UI_MainMenuBar();
 
-		/* Left Sidebar. */
-		const ImGuiID DockspaceID_LeftSidebar = ImGui::GetID("Dockspace_LeftSidebar");
+		/*-----------------------------------------------------------------------------
+			Sidebar1 
+							Initally to the left.
+		-----------------------------------------------------------------------------*/
+		static const ImGuiID DockspaceID_Sidebar1 = ImGui::GetID("Dockspace_LeftSidebar");
 		static bool ResetDockspace_LeftSidebar = true;
 
 		CheckLeftSidebarSize();
-		ImGui::Begin(UI_SIDEBAR_LEFT, nullptr, UI::SidebarFlags);
+		ImGui::Begin(UI::Sidebar1, nullptr, UI::SidebarFlags);
 		{
 	#if LK_UI_ENABLE_LEFT_SIDEBAR_CONTENT
-
 			/* Blending */
 			static bool bBlendingEnabled = false;
 			TObjectPtr<LRenderContext> RenderContext = LWindow::Get().GetRenderContext();
@@ -265,43 +253,7 @@ namespace LkEngine {
 
 			SceneManagerPanel->UI_CameraSettings();
 
-			/* Retrieve the cached textures. */
-		#if LK_UI_RENDER_GEOMETRIC_SHAPES_MENU
-			const std::vector<TTexture2DPair>& textures2D = LAssetManager::GetTextures2D();
-			if (CubeTexture)
-			{
-				std::string_view TextureName = CubeTexture->GetName();
-				if (ImGui::BeginCombo("Cubes", TextureName.data(), ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoPreview))
-				{
-					for (const std::pair<std::string, TObjectPtr<LTexture2D>>& TextureEntry : textures2D)
-					{
-						if (ImGui::Selectable(TextureEntry.first.c_str()))
-						{
-							CubeTexture = TextureEntry.second;
-						}
-					}
-
-					ImGui::EndCombo(); // Cubes
-				}
-
-				if (ImGui::BeginCombo("Floor", TextureName.data(), ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoPreview))
-				{
-					for (auto& tex : textures2D)
-					{
-						if (ImGui::Selectable(tex.first.c_str()))
-						{
-							//mc.SetTexture(tex.second);
-							PlaneTexture = tex.second;
-						}
-					}
-
-					ImGui::EndCombo(); // Floor
-				}
-			}
-		#endif
-
-
-			/* COLORS */
+			/* Color modification. */
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			if (ImGui::TreeNode("Colors"))
 			{
@@ -310,86 +262,36 @@ namespace LkEngine {
 				ImGui::TreePop(); /* Colors. */
 			}
 
-		#if LK_UI_USE_EDITORLAYER_CAMERA
-			//----------------------------------------------------
-			// EditorLayer Camera
-			//----------------------------------------------------
-			ImGui::Text("EditorLayer Cam Mode: %s", (EditorCamera->m_CameraMode == LEditorCamera::Mode::Arcball ? "Arcball" : "Flycam"));
-			static const char* cameraViewTypes[] = { "Perspective", "Orthographic" };
-			int selectedEditorCameraViewTypeIndex = (int)EditorCamera->GetProjectionType();
-			ImGui::Text("Selected View Type Index: %d", selectedEditorCameraViewTypeIndex);
-			// Get current camera view mode and set it to that if at init stage
-			if (ImGui::BeginCombo("EditorLayer Camera Type", cameraViewTypes[selectedEditorCameraViewTypeIndex]))
-			{
-				int CurrentIndex = 0;
-				for (const char*& viewType : cameraViewTypes)
-				{
-					const bool isSelected = selectedEditorCameraViewTypeIndex == CurrentIndex;
-					if (ImGui::Selectable(cameraViewTypes[CurrentIndex], isSelected, ImGuiSelectableFlags_SpanAvailWidth))
-					{
-						selectedEditorCameraViewTypeIndex = CurrentIndex;
-						if (viewType == "Perspective")
-						{
-							EditorCamera->SetProjectionType(LCamera::ProjectionType::Perspective);
-						}
-						else if (viewType == "Orthographic")
-						{
-							EditorCamera->SetProjectionType(LCamera::ProjectionType::Orthographic);
-						}
-					}
-					if (isSelected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-
-					CurrentIndex++;
-				}
-
-				ImGui::EndCombo();
-			}
+			/* Mode Selector. */
 			ImGui::BeginGroup();
 			{
-				UI::Property::PositionXYZ(EditorCamera->m_Position);
-				ImGui::SliderFloat("Pitch", &EditorCamera->m_Pitch, -12.0f, 12.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-				ImGui::SliderFloat("Yaw", &EditorCamera->m_Yaw, -12.0f, 12.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-			}
-			ImGui::EndGroup();
-		#endif
-
-			/* DISABLE FOR NOW */
-	#if LK_UI_USE_MODE_SELECTOR
-			//----------------------------------------------------
-			// Mode Selector
-			//----------------------------------------------------
-			ImGui::BeginGroup();
-			{
-				static ImVec2 modeButtonSize = { 50.0f, 50.0f };
-				static ImVec4 modeButtonBgColor = { 0, 0, 0, 0 };
-				static ImVec4 modeButtonTintColor = { 1, 1, 1, 1 };
+				static ImVec2 ModeButtonSize = { 50.0f, 50.0f };
+				static ImVec4 ModeButtonBgColor = { 0, 0, 0, 0 };
+				static ImVec4 ModeButtonTintColor = { 1, 1, 1, 1 };
 				constexpr const char* TextureName = "ale1024";
 				if (ImGui::ImageButton("##ModeButton-NormalMode", 
-					(void*)LTextureLibrary::GetTexture(TextureName)->GetRendererID(), 
-					modeButtonSize, 
+					(void*)LTextureLibrary::Get().GetTexture(TextureName)->GetRendererID(), 
+					ModeButtonSize, 
 					ImVec2(1, 1), 
 					ImVec2(0, 0), 
-					modeButtonBgColor, 
-					modeButtonTintColor))
+					ModeButtonBgColor, 
+					ModeButtonTintColor))
 				{
 					LK_CORE_DEBUG("Push tab");
 					//TabManager::NewTab(
 					TabManager.NewTab(
-						fmt::format("Node EditorLayer-{}", TabManager.GetTabCount()), 
-						EditorTabType::NodeEditor
+						LString::Format("Node EditorLayer-{}", TabManager.GetTabCount()).CStr(),
+						ETabType::NodeEditor
 					);
 				}
 				ImGui::SameLine();
 				if (ImGui::ImageButton("##ModeButton-NodeEditorLayer", 
-					(void*)LTextureLibrary::GetTexture(TextureName)->GetRendererID(), 
-					modeButtonSize, 
+					(void*)LTextureLibrary::Get().GetTexture(TextureName)->GetRendererID(), 
+					ModeButtonSize, 
 					ImVec2(1, 1), 
 					ImVec2(0, 0), 
-					modeButtonBgColor, 
-					modeButtonTintColor))
+					ModeButtonBgColor, 
+					ModeButtonTintColor))
 				{
 					if (TabManager.GetTabCount() > 1)
 					{
@@ -398,38 +300,30 @@ namespace LkEngine {
 				}
 			}
 			ImGui::EndGroup();
-	#endif
-
-	#if LK_USE_CREATOR_MENU
-			/* Creator Menu. */
-			ImGui::BeginGroup();
-			{
-				UI_CreateMenu();
-			}
-			ImGui::EndGroup();
-	#endif
 
 			SceneManagerPanel->OnRenderUI();
+			DebugPanel->OnRenderUI();
 
 			const ImVec2 WindowSize = ImGui::GetWindowSize();
-			const ImVec2 windowPos = ImGui::GetWindowPos();
-			if (WindowSize.x != LastSidebarLeftSize.x || WindowSize.y != LastSidebarLeftSize.y)
+			const ImVec2 WindowPos = ImGui::GetWindowPos();
+			if ((WindowSize.x != LastSidebarLeftSize.x)
+				|| (WindowSize.y != LastSidebarLeftSize.y))
 			{
 				//bWindowsHaveChangedInSize = true;
 			}
 
-			LastSidebarLeftPos = windowPos;
+			LastSidebarLeftPos = WindowPos;
 			LastSidebarLeftSize = WindowSize;
 	#endif
 		}
 		ImGui::End(); /* Left Sidebar. */
 
-
-		//---------------------------------------------------------
-		// Right Sidebar
-		//---------------------------------------------------------
+		/*-----------------------------------------------------------------------------
+			Sidebar2 
+							Initally to the right.
+		-----------------------------------------------------------------------------*/
 		CheckRightSidebarSize();
-		ImGui::Begin(UI_SIDEBAR_RIGHT, nullptr, UI::SidebarFlags);
+		ImGui::Begin(UI::Sidebar2, nullptr, UI::SidebarFlags);
 		{
 			ComponentEditor->OnRenderUI();
 
@@ -437,14 +331,14 @@ namespace LkEngine {
 			if (ImGui::TreeNode("Window Information"))
 			{
 				UI_ShowViewportAndWindowDetails();
-
-				ImGui::TreePop(); /* ~Window Information */
+				ImGui::TreePop(); /* Window Information */
 			}
 
 			/* Mouse Information. */
 			if (ImGui::TreeNode("Mouse Information"))
 			{
 				UI_ShowMouseDetails();
+				ImGui::TreePop(); /* Mouse Information */
 			}
 
 			const ImVec2 WindowSize = ImGui::GetWindowSize();
@@ -597,228 +491,10 @@ namespace LkEngine {
 		if (bShowEditorWindowSizesWindow)
 		{
 			ImGui::Begin("EditorLayer Window Sizes", &bShowEditorWindowSizesWindow);
-			UI_ShowEditorWindowsDetails();
-			ImGui::End();
-		}
-
-		if (bWindow_LiveObjects)
-		{
-			ImGui::Begin("Object References", &bWindow_LiveObjects, ImGuiWindowFlags_NoDocking);
 			{
-				static std::size_t SelectedIndex = -1;
-				static std::size_t SelectedIndexPrev = -1;
-				static int MaxVisibleItems = 20;
-				static std::vector<bool> Selected(MaxVisibleItems);
-
-				/* Items to show, shows a scrollbar if greater. */
-
-				/* Show only static class object references. */
-				static bool bFilterByStaticClassObjects = true;
-
-				static std::vector<TObjectPtr<LObject>> LiveObjects;
-				const int LiveObjectCount = TObjectPtr_Internal::GetLiveObjects(LiveObjects, 
-																				bFilterByStaticClassObjects);
-				/* Resize if needed. */
-				if (Selected.size() < LiveObjects.size())
-				{
-					LK_CORE_INFO("Resizing selected vector");
-					Selected.resize(LiveObjects.size(), false);
-				}
-
-				/**
-				 * Clear selection if selecting indices too large.
-				 * Can happen if filtering is toggled whilst having an object
-				 * reference selected.
-				 */
-				if (SelectedIndex >= Selected.size()) 
-				{
-					SelectedIndex = -1;
-					SelectedIndexPrev = -1;
-				}
-
-				if (LiveObjects.size() < MaxVisibleItems)
-				{
-					MaxVisibleItems = static_cast<int>(LiveObjects.size());
-				}
-
-				const float ItemHeight = ImGui::GetTextLineHeightWithSpacing();
-				float ObjectsWindowHeight = MaxVisibleItems * ItemHeight;
-				if (SelectedIndex == -1)
-				{
-					float ObjectsWindowHeight = 0;
-				}
-
-				ImGui::Text("Total Live References: %d", LiveObjectCount);
-				ImGui::Checkbox("Filter by single class only", &bFilterByStaticClassObjects);
-
-				static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Borders 
-					| ImGuiTableFlags_RowBg 
-					| ImGuiTableFlags_ScrollY 
-					| ImGuiTableFlags_Sortable
-					| ImGuiTableFlags_SizingStretchProp;
-
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-				ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(2, 2));
-				if (ImGui::BeginTable("Live Objects", 2, TableFlags, ImVec2(0, ObjectsWindowHeight)))
-				{
-					ImGui::TableSetupColumn("Object Index", ImGuiTableColumnFlags_IndentDisable);
-					ImGui::TableSetupColumn("Class Name", ImGuiTableColumnFlags_IndentDisable);
-					ImGui::TableHeadersRow();
-
-					int Index = 0;
-					for (const TObjectPtr<LObject>& LiveObject : LiveObjects)
-					{
-						/* Display the object number. */
-						ImGui::TableNextColumn();
-						ImGui::Text("%d", (Index + 1));
-
-						/* Object classname. */
-						char Label[80];
-						sprintf_s(Label, LK_ARRAYSIZE(Label), "%s ##%lld", 
-								  LiveObject->GetClass()->GetName().c_str(), 
-								  reinterpret_cast<intptr_t>(LiveObject.Get()));
-						ImGui::TableNextColumn();
-						if (ImGui::Selectable(Label, Selected[Index], ImGuiSelectableFlags_SpanAllColumns))
-						{
-							/* Only allow one selection at a time. */
-							LK_CORE_WARN("Selected: {} ({})", LiveObject->ClassName(), Index);
-							std::fill(Selected.begin(), Selected.end(), false);
-							Selected[Index] = true;
-							SelectedIndex = Index;
-						}
-
-						Index++;
-					}
-
-					/* Deselect previously selected entry. */
-					if ((SelectedIndexPrev != SelectedIndex) && (SelectedIndexPrev != -1))
-					{
-						Selected[SelectedIndexPrev] = false;
-					}
-
-					SelectedIndexPrev = SelectedIndex;
-
-					ImGui::EndTable();
-				}
-				ImGui::PopStyleVar(2);
-
-				if ((SelectedIndex != -1) && (SelectedIndex < LiveObjects.size()))
-				{
-					/* 
-					 * TODO: Should use a weak pointer here so the viewing of an object
-					 *       does not extend its lifetime and thus prohibit its (potential) destruction.
-					 */
-					TObjectPtr<LObject> SelectedObject = LiveObjects.at(SelectedIndex);
-
-					/* Display information about selected object. */
-					ImGui::BeginChild("Object Information", ImVec2(0, 0), true, ImGuiWindowFlags_NoNavInputs);
-					{
-						static constexpr ImGuiTableFlags ObjectInfoTableFlags = ImGuiTableFlags_Borders
-							| ImGuiTableFlags_RowBg
-							| ImGuiTableFlags_SizingFixedFit;
-
-						const LClass* Class = SelectedObject->GetClass();
-						if (ImGui::BeginTable("##ObjectInfo", 2, ObjectInfoTableFlags, ImVec2(0, 0)))
-						{
-							/* Name. */
-							ImGui::TableNextColumn();
-							ImGui::Text("Name");
-							ImGui::TableNextColumn();
-							ImGui::Text("%s", Class->GetName().c_str());
-
-							/* Reference Count. */
-							ImGui::TableNextRow();
-							ImGui::TableNextColumn();
-							ImGui::Text("References");
-							ImGui::TableNextColumn();
-							ImGui::Text("%d", SelectedObject->GetReferenceCount());
-
-							/* Memory Address. */
-							ImGui::TableNextRow();
-							ImGui::TableNextColumn();
-							ImGui::Text("Address");
-							ImGui::TableNextColumn();
-							ImGui::Text("0x%p", reinterpret_cast<intptr_t>(SelectedObject.Get()));
-
-							ImGui::EndTable(); /* */
-						}
-					}
-					ImGui::EndChild();
-				}
-
+				UI_ShowEditorWindowsDetails();
 			}
 			ImGui::End();
-		}
-	}
-
-	void LEditorLayer::RegisterEvent(LEvent& Event)
-	{
-		/// FIXME
-		m_EventCallback(Event);
-	}
-
-	void LEditorLayer::OnEvent(LEvent& Event)
-	{
-		switch (Event.GetEventType())
-		{
-			case EEventType::MouseButtonPressed:
-			{
-				LMouseButtonPressedEvent& MouseButtonPressedEvent = static_cast<LMouseButtonPressedEvent&>(Event);
-
-				if (TObjectPtr<LEditorCamera> EditorCamera = GetEditorCamera())
-				{
-					LWindow& Window = LWindow::Get();
-
-					const glm::vec2 ScreenCoordinates = MouseButtonPressedEvent.GetCoordinates();
-					//const float Depth = 0.50f;
-					const float Depth = GLUtils::SampleDepth(0, 0, Window.GetWidth(), Window.GetHeight());
-					const glm::vec4 Viewport = { 0, 0, LWindow::Get().GetWidth(), LWindow::Get().GetHeight() };
-					const glm::vec2 WorldCoordinates = Math::ConvertScreenToWorldCoordinates(ScreenCoordinates, 
-																							 Depth, 
-																							 EditorCamera->GetViewMatrix(), 
-																							 EditorCamera->GetProjectionMatrix(), 
-																							 Viewport);
-					LK_CORE_DEBUG_TAG("Editor", "{}  World Coordinates: ({}, {})", 
-									  MouseButtonPressedEvent.ToString(), WorldCoordinates.x, WorldCoordinates.y);
-				}
-
-				break;
-			}
-
-			case EEventType::MouseButtonReleased:
-			{
-				break;
-			}
-
-			case EEventType::MouseScrolled:
-			{
-				Event.Handled = EditorCamera->OnMouseScroll(static_cast<MouseScrolledEvent&>(Event));
-				break;
-			}
-
-			case EEventType::KeyPressed:
-			{
-				Event.Handled = EditorCamera->OnKeyPress(static_cast<KeyPressedEvent&>(Event));
-				break;
-			}
-
-			case EEventType::KeyReleased:
-			{
-				break;
-			}
-
-			case EEventType::SceneCreated:
-			{
-				LK_CORE_DEBUG_TAG("Editor", "Handling SceneCreated event");
-				SceneCreatedEvent& sceneEvent = static_cast<SceneCreatedEvent&>(Event);
-
-				TObjectPtr<LScene> newScene = sceneEvent.GetScene();
-				m_Scene = newScene;
-				SceneManagerPanel->SetScene(newScene);
-				newScene->EditorCamera->SetActive(true);
-
-				break;
-			}
 		}
 	}
 
@@ -956,11 +632,11 @@ namespace LkEngine {
 
         static ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick;
 
-		auto entities = m_Scene->m_Registry.view<LTransformComponent>();
+		auto entities = Scene->m_Registry.view<LTransformComponent>();
 		ImGui::Text("Entities in scene: %d", entities.size());
         for (const entt::entity& ent : entities)
         {
-            LEntity entity = { ent, m_Scene };
+            LEntity entity = { ent, Scene };
 
 			bool bIsSelected = false;
             std::string label = fmt::format("{}", entity.Name());
@@ -1287,7 +963,6 @@ namespace LkEngine {
 	{ 
 		// Window width and height has been changed as this function has been called,
 		// therefore need to update the Viewport bounds
-
 		ShouldUpdateWindowSizes = flag; 
 
 		ViewportBounds[0] = { 0, 0 };
@@ -1456,12 +1131,13 @@ namespace LkEngine {
 
 	void LEditorLayer::SetScene(TObjectPtr<LScene> InScene)
 	{
-		m_Scene = InScene;
-
-		GOnSceneSetActive.Broadcast(m_Scene);
-		if (InScene->EditorCamera)
+		LK_CORE_VERIFY(InScene, "Scene is nullptr");
+		if (InScene && InScene->bIsEditorScene)
 		{
-			InScene->EditorCamera->SetActive(true);
+			Scene = InScene;
+			Scene->EditorCamera = GetEditorCamera();
+			LK_VERIFY(Scene->EditorCamera);
+			Scene->EditorCamera->SetActive(true);
 		}
 	}
 
@@ -1477,7 +1153,6 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_TabManager()
 	{
-		//m_CurrentTabCount = TabManager::GetTabCount();
 		static int LastTabCount = 0;
 		const int CurrentTabCount = TabManager.GetTabCount();
 
@@ -1514,7 +1189,7 @@ namespace LkEngine {
 
 								if (ImGui::CloseButton(ImGui::GetID(UI::GenerateID()), pos))
 								{
-									if (Tab.GetTabType() != EditorTabType::Viewport)
+									if (Tab.GetTabType() != ETabType::Viewport)
 									{
 										TabManager.CloseTab(Entry.second);
 									}
@@ -1526,7 +1201,7 @@ namespace LkEngine {
 								TabManager.SetActiveTab(Entry.second);
 							}
 
-							if ((Tab.GetTabType() == EditorTabType::Viewport) || (Tab.Closed == true))
+							if ((Tab.GetTabType() == ETabType::Viewport) || (Tab.Closed == true))
 							{
 								ImGui::EndTabItem();
 								continue;
@@ -1618,7 +1293,8 @@ namespace LkEngine {
 			{
 				if (ImGui::MenuItem("Live Objects"))
 				{
-					bWindow_LiveObjects = true;
+					//bWindow_LiveObjects = true;
+					DebugPanel->bWindow_ObjectReferences = true;
 				}
 
 				ImGui::EndMenu(); /* Debug. */
@@ -1636,11 +1312,11 @@ namespace LkEngine {
 					LSceneSerializer SceneSerializer(NewScene);
 					SceneSerializer.Deserialize("scene.lukkelele");
 
-					NewScene->CopyTo(m_Scene);
+					NewScene->CopyTo(Scene);
 				}
 				if (ImGui::MenuItem("Save"))
 				{
-					LSceneSerializer Serializer(m_Scene);
+					LSceneSerializer Serializer(Scene);
 					Serializer.Serialize("scene.lukkelele");
 				}
 
@@ -1654,25 +1330,6 @@ namespace LkEngine {
 				ImGui::EndMenu(); /* Project + Name. */
 			}
 
-			if (ImGui::MenuItem("[Test] Submit Function to CommandQueue"))
-			{
-				constexpr int ThreadIndex = 0;
-				LK_CORE_WARN_TAG("ThreadManager", "Submitting function CommandQueue");
-
-				static uint16_t TestFunctionCounter = 0;
-				auto TestFunction = []()
-				{
-					LK_CORE_DEBUG_TAG("TestThread2_Function", "Im a lambda function, Functions submitted: {}", TestFunctionCounter++);
-					TThread::Sleep(1500ms);
-					LK_CORE_DEBUG_TAG("TestThread2_Function", "Sleep  (1)");
-					TThread::Sleep(1500ms);
-					LK_CORE_DEBUG_TAG("TestThread2_Function", "Sleep  (2)");
-					TThread::Sleep(1500ms);
-					LK_CORE_DEBUG_TAG("TestThread2_Function", "Sleep  (3)");
-				};
-				LThreadManager::Instance().SubmitFunctionToThread(LApplication::Get()->Test_ThreadData2, TestFunction);
-			}
-
 		}
 		ImGui::EndMainMenuBar();
 	}
@@ -1682,17 +1339,17 @@ namespace LkEngine {
 		FAssetHandle CubeHandle = LAssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Cube.gltf");
 		TObjectPtr<LMesh> CubeMesh = LAssetManager::GetAsset<LMesh>(CubeHandle);
 
-		LEntity NewCubeEntity = m_Scene->CreateEntity();
+		LEntity NewCubeEntity = Scene->CreateEntity();
 
 		/// TODO: Just use a search function instead of iterating through like this
-		std::unordered_set<FAssetHandle> AssetList = m_Scene->GetAssetList();
+		std::unordered_set<FAssetHandle> AssetList = Scene->GetAssetList();
 		for (const FAssetHandle AssetHandle : AssetList)
 		{
 			TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(AssetHandle);
 			if (Mesh == CubeMesh)
 			{
 				// The cube is in the scene
-				std::vector<LEntity> SceneEntities = m_Scene->GetEntities();
+				std::vector<LEntity> SceneEntities = Scene->GetEntities();
 				for (LEntity& Entity : SceneEntities)
 				{
 					if (Entity.HasComponent<LMeshComponent>())
@@ -1700,8 +1357,8 @@ namespace LkEngine {
 						LMeshComponent& EntityMesh = Entity.GetMesh();
 						if (EntityMesh.Mesh == AssetHandle)
 						{
-							m_Scene->CopyComponentIfExists<LMeshComponent>(NewCubeEntity, m_Scene->m_Registry, Entity);
-							m_Scene->CopyComponentIfExists<LTagComponent>(NewCubeEntity, m_Scene->m_Registry, Entity);
+							Scene->CopyComponentIfExists<LMeshComponent>(NewCubeEntity, Scene->m_Registry, Entity);
+							Scene->CopyComponentIfExists<LTagComponent>(NewCubeEntity, Scene->m_Registry, Entity);
 							LK_CORE_VERIFY((NewCubeEntity.HasComponent<LMeshComponent>()) 
 										   && (NewCubeEntity.HasComponent<LTagComponent>()));
 						}

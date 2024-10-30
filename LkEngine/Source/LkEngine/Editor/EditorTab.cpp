@@ -8,53 +8,47 @@
 
 namespace LkEngine {
 
-    NodeEditorTab::NodeEditorTab(std::string_view InName) 
+    LNodeEditorTab::LNodeEditorTab(std::string_view InName) 
     {
         Name = InName;
-        Type = EditorTabType::NodeEditor;
+        Type = ETabType::NodeEditor;
 
         NodeEditor = TObjectPtr<LNodeEditor>::Create(InName);
     }
 
-    NodeEditorTab::~NodeEditorTab()
+    LNodeEditorTab::~LNodeEditorTab()
     {
        NodeEditor->Destroy();
     }
 
-    void NodeEditorTab::OnRender() 
-    {
-    }
-
-    void NodeEditorTab::OnImGuiRender()
+    void LNodeEditorTab::OnImGuiRender()
     {
         NodeEditor->OnImGuiRender();
     }
 
 
 
-    //-----------------------------------------------------------
-    // MaterialEditorTab
-    //-----------------------------------------------------------
-    MaterialEditorTab::MaterialEditorTab(std::string_view InName) 
+    LMaterialEditorTab::LMaterialEditorTab(std::string_view InName) 
     {
         Name = InName;
-        Type = EditorTabType::MaterialEditor;
+        Type = ETabType::MaterialEditor;
 
         NodeEditor = TObjectPtr<LNodeEditor>::Create(InName);
     }
 
-    MaterialEditorTab::~MaterialEditorTab()
+    LMaterialEditorTab::~LMaterialEditorTab()
     {
         NodeEditor->Destroy();
     }
 
-    void MaterialEditorTab::OnRender()
+    void LMaterialEditorTab::OnRender()
     {
     }
 
-    // TODO: Need to add a check for size changes if I want to be able to allow resizing without creating issues when pos is set
-    //       Basically just replicate what's done in Editor, but I have no energy to do that now lol
-    void MaterialEditorTab::OnImGuiRender()
+    // TODO: Need to add a check for size changes if I want to be able 
+    // to allow resizing without creating issues when pos is set
+    // Basically just replicate what's done in Editor, but I have no energy to do that now lol
+    void LMaterialEditorTab::OnImGuiRender()
     {
         LEditorLayer* Editor = LEditorLayer::Get();
         static float div = 0.30f;
@@ -65,8 +59,10 @@ namespace LkEngine {
 
         ImVec2 nodeWindowSize = ImVec2(Editor->EditorWindowSize.x * (1 - div), Editor->EditorWindowSize.y);
 
-		ImGui::SetNextWindowPos({ Editor->SecondViewportBounds[0].X, (Editor->GetMenuBarSize().y + Editor->GetTabBarSize().y) }, 
-                                ImGuiCond_Always);
+		ImGui::SetNextWindowPos(
+            { Editor->SecondViewportBounds[0].X, (Editor->GetMenuBarSize().y + Editor->GetTabBarSize().y) }, 
+            ImGuiCond_Always
+        );
 		ImGui::SetNextWindowSize(nodeWindowSize, ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2(0, nodeWindowSize.y), ImGuiCond_Always);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));

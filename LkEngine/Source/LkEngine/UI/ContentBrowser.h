@@ -13,7 +13,7 @@ namespace LkEngine {
 	class LContentBrowser : public IPanel
 	{
 	public:
-		LContentBrowser() = default;
+		LContentBrowser();
 		~LContentBrowser() = default;
 
 		virtual void Initialize() override;
@@ -24,6 +24,9 @@ namespace LkEngine {
 	public:
 		inline static TObjectPtr<LTexture> FileIconTexture;
 		inline static TObjectPtr<LTexture> FolderIconTexture;
+
+	private:
+		LCLASS(LContentBrowser);
 	};
 
 }

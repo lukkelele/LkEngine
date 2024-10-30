@@ -19,14 +19,18 @@ namespace LkEngine {
         Mode_Move,
         Mode_Swap
     };
-    static int mode = 0;
+    static int Mode = 0;
 
-    static const char* names[9] =
+    static const char* TestNames[9] =
     {
-        "Bobby", "Beatrice", "Betty",
-        "Brianna", "Barry", "Bernard",
-        "Bibi", "Blaine", "Bryn"
+        "Bobby", "Beatrice", "Betty", "Brianna", 
+        "Barry", "Bernard", "Bibi", "Blaine", "Bryn"
     };
+
+    LContentBrowser::LContentBrowser()
+    {
+        LCLASS_REGISTER();
+    }
 
     void LContentBrowser::Initialize()
     {

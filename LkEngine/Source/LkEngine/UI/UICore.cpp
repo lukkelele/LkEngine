@@ -48,7 +48,6 @@ namespace LkEngine::UI {
     static int UIContextID = 0;
     static char IDBuffer[16] = "##";
     static char LabelIDBuffer[1024];
-    const char* SelectedEntityWindow = UI_SIDEBAR_RIGHT;
 
     static int PushedStyleVars = 0;
     static int PushedStyleColors = 0;
@@ -65,9 +64,9 @@ namespace LkEngine::UI {
         Counter = 0;
     }
 
-    void PushID(const char* id)
+    void PushID(const char* ID)
     {
-        ImGui::PushID(id);
+        ImGui::PushID(ID);
     }
 
     void PopID()
@@ -76,7 +75,7 @@ namespace LkEngine::UI {
         UIContextID--;
     }
 
-    void PopID(const char* id)
+    void PopID(const char* ID)
     {
         ImGui::PopID();
     }
@@ -99,11 +98,11 @@ namespace LkEngine::UI {
         return (io.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0;
     }
 
-    void SetInputEnabled(bool enabled)
+    void SetInputEnabled(const bool Enabled)
     {
         ImGuiIO& io = ImGui::GetIO();
 
-        if (enabled)
+        if (Enabled)
         {
             io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
             io.ConfigFlags &= ~ImGuiConfigFlags_NavNoCaptureKeyboard;
@@ -115,47 +114,47 @@ namespace LkEngine::UI {
         }
     }
 
-    void Separator(ImVec2 size, ImVec4 color)
+    void Separator(const ImVec2 Size, const ImVec4 Color)
     {
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, color);
-        ImGui::BeginChild("sep", size);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, Color);
+        ImGui::BeginChild("sep", Size);
         ImGui::EndChild();
         ImGui::PopStyleColor();
     }
 
-    bool IsWindowFocused(const char* windowName, const bool checkRootWindow)
+    bool IsWindowFocused(const char* WindowName, const bool CheckRootWindow)
     {
-        ImGuiWindow* currentNavWindow = GImGui->NavWindow;
+        ImGuiWindow* CurrentNavWindow = GImGui->NavWindow;
 
-        if (checkRootWindow)
+        if (CheckRootWindow)
         {
             // Get the actual nav window (not e.g a table)
-            ImGuiWindow* lastWindow = NULL;
-            while (lastWindow != currentNavWindow)
+            ImGuiWindow* LastWindow = NULL;
+            while (LastWindow != CurrentNavWindow)
             {
-                lastWindow = currentNavWindow;
-                currentNavWindow = currentNavWindow->RootWindow;
+                LastWindow = CurrentNavWindow;
+                CurrentNavWindow = CurrentNavWindow->RootWindow;
             }
         }
 
-        return (currentNavWindow == ImGui::FindWindowByName(windowName));
+        return (CurrentNavWindow == ImGui::FindWindowByName(WindowName));
     }
 
-    void Begin(std::string windowTitle, ImGuiWindowFlags windowFlags, bool* open)
+    void Begin(std::string WindowTitle, ImGuiWindowFlags WindowFlags, bool* Open)
     {
-        Begin(windowTitle.c_str(), windowFlags, open);
+        Begin(WindowTitle.c_str(), WindowFlags, Open);
     }
 
-    void Begin(const char* windowTitle, ImGuiWindowFlags windowFlags, bool* open)
-    {
-        UI::PushID();
-        ImGui::Begin(windowTitle, open, windowFlags);
-    }
-
-    void Begin(ImGuiWindowFlags windowFlags, bool* open)
+    void Begin(const char* WindowTitle, ImGuiWindowFlags WindowFlags, bool* Open)
     {
         UI::PushID();
-        ImGui::Begin(UI::GenerateID(), open, windowFlags);
+        ImGui::Begin(WindowTitle, Open, WindowFlags);
+    }
+
+    void Begin(ImGuiWindowFlags WindowFlags, bool* Open)
+    {
+        UI::PushID();
+        ImGui::Begin(UI::GenerateID(), Open, WindowFlags);
     }
 
     void End()
@@ -176,15 +175,14 @@ namespace LkEngine::UI {
         UI::PopID(UI_CORE_VIEWPORT);
     }
 
-    const char* GetSelectedEntityWindowName()
+    /// TODO: Refactor
+    void BeginSubwindow(const char* WindowName, ImGuiWindowFlags WindowFlags)
     {
-        return SelectedEntityWindow;
-    }
-
-    void BeginSubwindow(const char* windowName, ImGuiWindowFlags windowFlags)
-    {
-        PushID(std::string("##" + std::string(windowName)).c_str());
-        ImGui::Begin(SelectedEntityWindow, NULL, (windowFlags | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse));
+        LK_MARK_FUNC_NOT_IMPLEMENTED("Needs refactoring");
+    #if 0
+        PushID(std::string("##" + std::string(WindowName)).c_str());
+        ImGui::Begin(SelectedEntityWindow, NULL, (WindowFlags | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse));
+    #endif
     }
 
     void EndSubwindow()
@@ -193,9 +191,9 @@ namespace LkEngine::UI {
         PopID();
     }
 
-    void BeginDockSpace(const char* dockspaceID)
+    void BeginDockSpace(const char* DockspaceID)
     {
-		ImGuiStyle& style = ImGui::GetStyle();
+		ImGuiStyle& Style = ImGui::GetStyle();
 
 		if (UI::DockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
 		{
@@ -203,10 +201,10 @@ namespace LkEngine::UI {
 			UI::HostWindowFlags |= ImGuiWindowFlags_NoBackground;
 		}
 
-		float minWinSizeX = style.WindowMinSize.x;
-		style.WindowMinSize.x = 370.0f;
+		float MinWinSizeX = Style.WindowMinSize.x;
+		Style.WindowMinSize.x = 370.0f;
 		ImGui::DockSpace(ImGui::GetID(LkEngine_DockSpace), ImVec2(0, 0), UI::DockspaceFlags);
-		style.WindowMinSize.x = minWinSizeX;
+		Style.WindowMinSize.x = MinWinSizeX;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -215,11 +213,11 @@ namespace LkEngine::UI {
 		ImGui::PopStyleVar(1);
     }
 
-    void BeginViewport(const char* viewportID, LWindow* WindowRef, ImGuiViewport* viewport)
+    void BeginViewport(const char* ViewportID, LWindow* WindowRef, ImGuiViewport* Viewport)
     {
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::SetNextWindowPos(Viewport->Pos);
+		ImGui::SetNextWindowSize(Viewport->Size);
+		ImGui::SetNextWindowViewport(Viewport->ID);
 
 		GLFWwindow* GlfwWindow= WindowRef->GetGlfwWindow();
 		const bool bIsMaximized = (bool)glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED);
@@ -232,41 +230,41 @@ namespace LkEngine::UI {
 		ImGui::PopStyleVar(2);
     }
 
-    void PushStyleVar(ImGuiStyleVar styleVar, const ImVec2& var)
+    void PushStyleVar(const ImGuiStyleVar StyleVar, const ImVec2& Var)
     {
-        ImGui::PushStyleVar(styleVar, var);
+        ImGui::PushStyleVar(StyleVar, Var);
         PushedStyleVars++;
     }
 
-    void PushStyleVar(ImGuiStyleVar styleVar, const glm::vec2& var)
+    void PushStyleVar(const ImGuiStyleVar StyleVar, const glm::vec2& Var)
     {
-        ImGui::PushStyleVar(styleVar, ImVec2(var.x, var.y));
+        ImGui::PushStyleVar(StyleVar, ImVec2(Var.x, Var.y));
         PushedStyleVars++;
     }
 
-    void PopStyleVar(uint8_t poppedStyleVars)
+    void PopStyleVar(const uint8_t VarsToPop)
     {
-        ImGui::PopStyleVar(poppedStyleVars);
-        PushedStyleVars = PushedStyleVars - poppedStyleVars;
+        ImGui::PopStyleVar(VarsToPop);
+        PushedStyleVars = PushedStyleVars - VarsToPop;
         LK_CORE_VERIFY(PushedStyleVars >= 0, "UI StyleVar Push/Pop stack invalid!");
     }
 
-    void PushStyleColor(ImGuiCol colorVar, const ImVec4& color)
+    void PushStyleColor(const ImGuiCol ColorVar, const ImVec4& Color)
     {
-        ImGui::PushStyleColor(colorVar, color);
+        ImGui::PushStyleColor(ColorVar, Color);
         PushedStyleColors++;
     }
 
-    void PushStyleColor(ImGuiCol colorVar, const glm::vec4& color)
+    void PushStyleColor(const ImGuiCol ColorVar, const glm::vec4& Color)
     {
-        ImGui::PushStyleColor(colorVar, ImVec4(color.r, color.g, color.b, color.a));
+        ImGui::PushStyleColor(ColorVar, ImVec4(Color.r, Color.g, Color.b, Color.a));
         PushedStyleColors++;
     }
 
-    void PopStyleColor(uint8_t pop)
+    void PopStyleColor(const uint8_t VarsToPop)
     {
-        ImGui::PopStyleColor(pop);
-        PushedStyleColors = PushedStyleColors - pop;
+        ImGui::PopStyleColor(VarsToPop);
+        PushedStyleColors = PushedStyleColors - VarsToPop;
         LK_CORE_VERIFY(PushedStyleColors >= 0, "UI Color Push/Pop stack invalid!");
     }
 

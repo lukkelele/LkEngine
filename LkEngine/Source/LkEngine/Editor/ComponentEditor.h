@@ -11,7 +11,7 @@ namespace LkEngine {
     class LComponentEditor : public IPanel
     {
     public:
-        LComponentEditor() = default;
+        LComponentEditor();
         ~LComponentEditor() = default;
 
         virtual void Initialize() override;
@@ -25,7 +25,7 @@ namespace LkEngine {
         void RenderTextureEditor(const TObjectPtr<LTexture2D>& Texture);
 
     private:
-        friend class LEditorLayer; /// REMOVE ME
+        LCLASS(LComponentEditor);
     };
 
 }

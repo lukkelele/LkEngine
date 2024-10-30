@@ -14,33 +14,31 @@
 
 namespace LkEngine {
 
+	/// REFACTOR
 	/* Log helper function. */
-	static void DumpAttachedComponents(LEntity entity)
+	static void DumpAttachedComponents(LEntity Entity)
 	{
-		if (entity.HasComponent<LIDComponent>() && (static_cast<uint32_t>(entity.GetUUID()) != 0))
+		if (Entity.HasComponent<LIDComponent>() 
+			&& (static_cast<uint32_t>(Entity.GetUUID()) != 0))
 		{
-			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LIDComponent: {}", entity.HasComponent<LIDComponent>());
-			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LTagComponent: {}", entity.HasComponent<LTagComponent>());
+			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LIDComponent: {}", Entity.HasComponent<LIDComponent>());
+			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LTagComponent: {}", Entity.HasComponent<LTagComponent>());
 		}
-		if (entity.HasComponent<LTransformComponent>())
+		if (Entity.HasComponent<LTransformComponent>())
 		{
-			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LTransformComponent: {}", entity.GetComponent<LTransformComponent>().ToString());
+			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LTransformComponent: {}", 
+							  Entity.GetComponent<LTransformComponent>().ToString());
 		}
 	}
 
-	LSceneManagerPanel::LSceneManagerPanel()
-		: m_Scene(nullptr)
-	{
-	}
-
-	LSceneManagerPanel::LSceneManagerPanel(const TObjectPtr<LScene>& InScene)
+	LSceneManagerPanel::LSceneManagerPanel(TObjectPtr<LScene> InScene)
 		: m_Scene(InScene)
 	{
+		LCLASS_REGISTER();
 	}
 
 	void LSceneManagerPanel::Initialize()
 	{
-		LK_UI_TRACE_TAG("SceneManagerPanel", "Binding to delegate 'GOnSetSceneActive'");
 		GOnSceneSetActive.Add(this, &LSceneManagerPanel::SetScene);
 
 		m_ComponentCopyScene = LScene::CreateEmpty();
@@ -59,10 +57,10 @@ namespace LkEngine {
 		{
 			ImGui::SeparatorText(fmt::format("Current Scene - {}", m_Scene->Name).c_str());
 			ImGui::Text("Entities: %d", m_Scene->m_Registry.size());
-			m_Scene->m_Registry.each([&](auto entityID)
+			m_Scene->m_Registry.each([&](auto EntityID)
 			{
-				LEntity entity{ entityID, m_Scene.Get() };
-				DrawEntityNode(entity);
+				LEntity Entity { EntityID, m_Scene.Get() };
+				DrawEntityNode(Entity);
 			});
 
 			/// TODO: Make it so the input interface is used here instead of raw ImGui calls.
@@ -74,17 +72,16 @@ namespace LkEngine {
 
 		if (ImGui::BeginDragDropTargetCustom(WindowContent, ImGui::GetCurrentWindow()->ID))
 		{
-			const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_ENTITY_NODE", ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
-
-			if (payload)
+			const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload("SCENE_ENTITY_NODE", ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
+			if (Payload)
 			{
-				size_t count = payload->DataSize / sizeof(UUID);
+				const size_t Count = (Payload->DataSize / sizeof(UUID));
 
-				for (size_t i = 0; i < count; i++)
+				for (size_t i = 0; i < Count; i++)
 				{
-					UUID entityID = *(((UUID*)payload->Data) + i);
-					LEntity entity = m_Scene->GetEntityWithUUID(entityID);
-					m_Scene->UnparentEntity(entity);
+					const UUID EntityID = *((static_cast<UUID*>(Payload->Data)) + i);
+					LEntity Entity = m_Scene->GetEntityWithUUID(EntityID);
+					m_Scene->UnparentEntity(Entity);
 				}
 			}
 
@@ -92,52 +89,61 @@ namespace LkEngine {
 		}
 	}
 
-	template<typename T, typename UIFunction>
-	void LSceneManagerPanel::DrawComponent(const std::string& name, LEntity entity, UIFunction uiFunction)
+	template<typename T, typename TUIFunction>
+	void LSceneManagerPanel::DrawComponent(const std::string& ComponentName, LEntity Entity, TUIFunction UIFunction)
 	{
-		static const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen 
+		static const ImGuiTreeNodeFlags TreeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen 
 			| ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth
 			| ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 
-		if (!entity.HasComponent<T>())
+		if (!Entity.HasComponent<T>())
+		{
 			return;
+		}
 
-		auto& component = entity.GetComponent<T>();
-		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+		auto& Component = Entity.GetComponent<T>();
+		const ImVec2 ContentRegionAvailable = ImGui::GetContentRegionAvail();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-		ImGui::Separator();
-		bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-		ImGui::PopStyleVar();
-		ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+		float LineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
-		if (ImGui::Button("+", ImVec2(lineHeight, lineHeight)))
+		ImGui::Separator();
+		bool bOpen = ImGui::TreeNodeEx(
+			(void*)typeid(T).hash_code(), 
+			TreeNodeFlags, 
+			ComponentName.c_str()
+		);
+		ImGui::PopStyleVar();
+
+		ImGui::SameLine(ContentRegionAvailable.x - LineHeight * 0.5f);
+		if (ImGui::Button("+", ImVec2(LineHeight, LineHeight)))
 		{
 			ImGui::OpenPopup("ComponentSettings");
 		}
 
-		bool removeComponent = false;
+		bool bRemoveComponent = false;
 		if (ImGui::BeginPopup("ComponentSettings"))
 		{
 			// FIXME: Crashes right now, need to set on_destruct callbacks
-			if (ImGui::MenuItem("Remove component"))
-				removeComponent = true;
+			if (ImGui::MenuItem("Remove Component"))
+			{
+				bRemoveComponent = true;
+			}
 			ImGui::EndPopup();
 		}
 
-		if (open)
+		if (bOpen)
 		{
-			uiFunction(component);
+			UIFunction(Component);
 			ImGui::TreePop();
 		}
 
-		if (removeComponent)
+		if (bRemoveComponent)
 		{
-			// Check if component can be removed
-			auto& component = entity.GetComponent<T>();
-			LK_CORE_DEBUG("Removing component from {}", entity.Name());
-			entity.RemoveComponent<T>();
+			/* Check if Component can be removed. */
+			auto& Component = Entity.GetComponent<T>();
+			LK_CORE_DEBUG("Removing Component from {}", Entity.Name());
+			Entity.RemoveComponent<T>();
 		}
 	}
 
@@ -156,18 +162,18 @@ namespace LkEngine {
 #endif
 	}
 
-	void LSceneManagerPanel::DrawComponents(LEntity entity)
+	void LSceneManagerPanel::DrawComponents(LEntity Entity)
 	{
-		if (!entity)
+		if (!Entity)
 		{
 			return;
 		}
-		LK_CORE_VERIFY(entity.m_Scene, "Entity doesn't have a scene assigned");
+		LK_CORE_VERIFY(Entity.m_Scene, "Entity doesn't have a scene assigned");
 
 		UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
-		if (entity.HasComponent<LTagComponent>())
+		if (Entity.HasComponent<LTagComponent>())
 		{
-			auto& tag = entity.GetComponent<LTagComponent>().Tag;
+			auto& tag = Entity.GetComponent<LTagComponent>().Tag;
 
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
@@ -192,7 +198,7 @@ namespace LkEngine {
 		//---------------------------------------------------------------------------
 		// Transform Component
 		//---------------------------------------------------------------------------
-		DrawComponent<LTransformComponent>("Transform", entity, [&entity](auto& transform)
+		DrawComponent<LTransformComponent>("Transform", Entity, [&Entity](auto& transform)
 		{
 			ImGui::Text("Position");
 			UI::Property::PositionXYZ(transform.Translation, 2.0);
@@ -211,7 +217,7 @@ namespace LkEngine {
 		//---------------------------------------------------------------------------
 		// Sprite Component
 		//---------------------------------------------------------------------------
-		DrawComponent<LSpriteComponent>("Sprite", entity, [&entity](auto& sprite)
+		DrawComponent<LSpriteComponent>("Sprite", Entity, [&Entity](auto& sprite)
 		{
 			ImGui::Text("Sprite Component");
 			ImGui::Text("Size");
@@ -225,7 +231,7 @@ namespace LkEngine {
 		//---------------------------------------------------------------------------
 		// Material Component
 		//---------------------------------------------------------------------------
-		DrawComponent<MaterialComponent>("Material", entity, [&entity](auto& mc)
+		DrawComponent<MaterialComponent>("Material", Entity, [&Entity](auto& mc)
 		{
 			auto texture = mc.GetTexture();
 			if (!texture)
@@ -303,7 +309,7 @@ namespace LkEngine {
 #if 0 
 		static float pos_step_size = 5.0f;
         const LScene& Scene = *LScene::GetActiveScene();
-        //Entity entity = scene.GetEntityWithUUID(SelectedEntityID);
+        //Entity Entity = scene.GetEntityWithUUID(SelectedEntityID);
 		if (!SelectionContext::SelectedEntity)
 		{
 			return;
@@ -350,48 +356,48 @@ namespace LkEngine {
 
     }
 
-	void LSceneManagerPanel::DrawEntityNode(LEntity entity)
+	void LSceneManagerPanel::DrawEntityNode(LEntity Entity)
 	{
-		if (!entity || !entity.HasComponent<LIDComponent>() || !entity.HasComponent<LTagComponent>())
+		if (!Entity || !Entity.HasComponent<LIDComponent>() || !Entity.HasComponent<LTagComponent>())
 		{
-			DumpAttachedComponents(entity);
+			DumpAttachedComponents(Entity);
 			return;
 		}
 
-		const std::string& Tag = entity.GetComponent<LTagComponent>().Tag;
-		std::string tagWithEntityHandle = fmt::format("{}  ({})", Tag, entity.m_EntityHandle);
+		const std::string& Tag = Entity.GetComponent<LTagComponent>().Tag;
+		std::string tagWithEntityHandle = fmt::format("{}  ({})", Tag, Entity.m_EntityHandle);
 
-		//bool bEntitySelected = SELECTION::SelectedEntity && (SELECTION::SelectedEntity.GetUUID() == entity.GetUUID());
+		//bool bEntitySelected = SELECTION::SelectedEntity && (SELECTION::SelectedEntity.GetUUID() == Entity.GetUUID());
 		const bool bEntitySelected = false;
 		ImGuiTreeNodeFlags flags = (bEntitySelected ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		//bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tagWithEntityHandle.c_str());
+		//bool bOpened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, flags, tag.c_str());
+		bool bOpened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, flags, tagWithEntityHandle.c_str());
 
 		if (ImGui::IsItemClicked())
 		{
-			//SELECTION::SelectedEntity = entity;
-			//LK_CORE_DEBUG("Selecting entity {} ({})", entity.Name(), entity.GetUUID());
+			//SELECTION::SelectedEntity = Entity;
+			//LK_CORE_DEBUG("Selecting Entity {} ({})", Entity.Name(), Entity.GetUUID());
 		}
 
-		bool entityDeleted = false;
-		bool entityReset = false;
+		bool EntityDeleted = false;
+		bool EntityReset = false;
 
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Delete object"))
 			{
-				entityDeleted= true;
+				EntityDeleted= true;
 			}
 			else if (ImGui::MenuItem("Reset object"))
 			{
-				entityReset = true;
+				EntityReset = true;
 			}
 
 			ImGui::EndPopup();
 		}
 
-		if (opened)
+		if (bOpened)
 		{
 			ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 			const bool bOpened = ImGui::TreeNodeEx((void*)9817239, Flags, Tag.c_str());
@@ -402,11 +408,11 @@ namespace LkEngine {
 			ImGui::TreePop();
 		}
 
-		if (entityDeleted)
+		if (EntityDeleted)
 		{
-			m_Scene->DestroyEntity(entity);
+			m_Scene->DestroyEntity(Entity);
 #if 0 
-			if (SELECTION::SelectedEntity.GetUUID() == entity.GetUUID())
+			if (SELECTION::SelectedEntity.GetUUID() == Entity.GetUUID())
 			{
 				SELECTION::SelectedEntity = {};
 			}

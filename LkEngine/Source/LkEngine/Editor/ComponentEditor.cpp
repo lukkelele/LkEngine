@@ -12,37 +12,50 @@
 
 namespace LkEngine {
 
+    LComponentEditor::LComponentEditor()
+    {
+        LCLASS_REGISTER();
+    }
+
     void LComponentEditor::Initialize()
     {
+        LObject::Initialize();
         // TODO
     }
 
     void LComponentEditor::OnRenderUI()
     {
+        static std::unordered_map<std::string, TObjectPtr<LMaterial>> MaterialMap{};
+
         static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;
         if (ImGui::TreeNodeEx("Materials", treeNodeFlags))
         {
-            static std::string selected_material = "";
+            static std::string SelectedMaterial = "";
 
-            auto& Materials = LMaterialLibrary::Get().GetMaterials();
-            for (std::pair<std::string, TObjectPtr<LMaterial>> MaterialEntry : Materials)
+            //auto& Materials = LMaterialLibrary::Get().GetMaterials();
+            const int RetrievedMaterials = LMaterialLibrary::Get().GetMaterials(MaterialMap);
+            for (std::pair<std::string, TObjectPtr<LMaterial>> MaterialEntry : MaterialMap)
             {
                 const std::string& MaterialName = MaterialEntry.first;
-			    const bool bIsSelected = (MaterialName == selected_material);
+			    const bool bIsSelected = (MaterialName == SelectedMaterial);
 
-                if (ImGui::Selectable(MaterialName.c_str(), bIsSelected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAllColumns))
+                if (ImGui::Selectable(MaterialName.c_str(), bIsSelected, 
+                        ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAllColumns))
                 {
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                     {
-                        selected_material = MaterialName;
-                        // Create new edit tab for the material
+                        SelectedMaterial = MaterialName;
+
+                        /* Create new edit tab for the material. */
                         TSharedPtr<LTab> NewTab = LEditorTabManager::NewTab(
-                            fmt::format("Edit - {}", MaterialName.c_str()), 
-                            EditorTabType::MaterialEditor
+                            LString::Format("Edit->{}", MaterialName).CStr(),
+                            ETabType::MaterialEditor
                         );
 
-                        MaterialEditorTab& MaterialEditorTabRef = static_cast<MaterialEditorTab&>(*NewTab.get());
-                        MaterialEditorTabRef.MaterialRef = MaterialEntry.second;
+                        if (TSharedPtr<LMaterialEditorTab> MaterialEditorTabRef = std::static_pointer_cast<LMaterialEditorTab>(NewTab))
+                        {
+                            MaterialEditorTabRef->MaterialRef = MaterialEntry.second;
+                        }
                     }
                 }
 

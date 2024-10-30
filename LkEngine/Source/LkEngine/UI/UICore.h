@@ -18,84 +18,98 @@ namespace LkEngine
     static constexpr const char* LkEngine_DockSpace = "##LkEngine-DockSpace";
     
 	/// UPDATE/REFACTOR
-    static constexpr const char* UI_CORE_VIEWPORT = "##lkengine-core-viewport";
+    static constexpr const char* UI_CORE_VIEWPORT = "##lkengine-core-Viewport";
     static constexpr const char* UI_RENDER_WINDOW = "##lkengine-render-window";
     static constexpr const char* UI_TOP_BAR = "##lkengine-top-bar";
     static constexpr const char* UI_BOTTOM_BAR = "##lkengine-lower-bar";
-    static constexpr const char* UI_SIDEBAR_LEFT = "##lkengine-sidebar-left";
-    static constexpr const char* UI_SIDEBAR_RIGHT = "##lkengine-sidebar-right";
     static constexpr const char* UI_SELECTED_ENTITY_INFO = "##lkengine-selected-entity-info";
 }
 
 namespace LkEngine::UI {
 
+    static constexpr const char* Sidebar1 = "##LkEngine-SIDEBAR-1";
+    static constexpr const char* Sidebar2 = "##LkEngine-SIDEBAR-2";
+
     const char* GenerateID();
     void PushID();
-    void PushID(const char* id);
+    void PushID(const char* ID);
     void PopID();
-    void PopID(const char* id);
-    void Separator(ImVec2 size, ImVec4 color);
+    void PopID(const char* ID);
+    void Separator(ImVec2 Size, ImVec4 Color);
     bool IsInputEnabled();
     bool IsMouseEnabled();
     bool IsKeyboardEnabled();
-    void SetInputEnabled(bool enabled);
+    void SetInputEnabled(bool Enabled);
 
-    void Begin(std::string windowTitle, ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None, bool* open = nullptr);
-    void Begin(const char* windowTitle, ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None, bool* open = nullptr);
-    void Begin(ImGuiWindowFlags windowFlags, bool* open = nullptr);
+    void Begin(std::string WindowTitle, 
+               const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None, 
+               bool* Open = nullptr);
+
+    void Begin(const char* WindowTitle, 
+               const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None, 
+               bool* Open = nullptr);
+
+    void Begin(ImGuiWindowFlags WindowFlags, 
+               bool* Open = nullptr);
+
     void End();
 
-    // Core Viewport, aka main screen/window
+    /* Core Viewport, also known as Main Window */
     void BeginCoreViewport();
     void EndCoreViewport();
 
-    // Insert UI widgets inside already existing windows on the screen.
-    // Is determined by SelectedEntityWindow
-    void BeginSubwindow(const char* windowName, ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None);
+    /// REFACTOR
+    /**
+     * Insert UI widgets inside already existing windows on the screen.
+     * Is determined by SelectedEntityWindow
+     */
+    void BeginSubwindow(const char* WindowName, 
+                        const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None);
     void EndSubwindow();
-    bool IsWindowFocused(const char* windowName, const bool checkRootWindow);
-    const char* GetSelectedEntityWindowName();
+    bool IsWindowFocused(const char* WindowName, 
+                         const bool CheckRootWindow);
+    //const char* GetSelectedEntityWindowName();
 
-    void BeginDockSpace(const char* dockspaceID);
-    void BeginViewport(const char* viewportID, LWindow* WindowRef, ImGuiViewport* viewport);
+    void BeginDockSpace(const char* DockspaceID);
+    void BeginViewport(const char* ViewportID, LWindow* WindowRef, ImGuiViewport* Viewport);
 
-    // 
+    /// FIXME
     void Image(const TObjectPtr<LTexture2D>& texture, 
-               const ImVec2& size, 
-               const ImVec2& uv0 = ImVec2(0, 0), 
-               const ImVec2& uv1 = ImVec2(1, 1), 
-               const ImVec4& tint_col = ImVec4(1, 1, 1, 1), 
-               const ImVec4& border_col = ImVec4(0, 0, 0, 0));
+               const ImVec2& Size, 
+               const ImVec2& UV0 = ImVec2(0, 0), 
+               const ImVec2& UV1 = ImVec2(1, 1), 
+               const ImVec4& TintColor = ImVec4(1, 1, 1, 1), 
+               const ImVec4& BorderColor = ImVec4(0, 0, 0, 0));
 
-    void Image(const TObjectPtr<LTexture2D>& image, 
-               const glm::vec2& size, 
-               const glm::vec2& uv0 = glm::vec2(0, 0), 
-               const glm::vec2& uv1 = glm::vec2(1, 1), 
-               const glm::vec4& tint_col = glm::vec4(1, 1, 1, 1), 
-               const glm::vec4& border_col = glm::vec4(0, 0, 0, 0));
+    void Image(const TObjectPtr<LTexture2D>& Image, 
+               const glm::vec2& Size, 
+               const glm::vec2& UV0 = glm::vec2(0, 0), 
+               const glm::vec2& UV1 = glm::vec2(1, 1), 
+               const glm::vec4& TintColor = glm::vec4(1, 1, 1, 1), 
+               const glm::vec4& BorderColor = glm::vec4(0, 0, 0, 0));
 
-    void Image(const TObjectPtr<LImage2D>& image, 
-               const ImVec2& size, 
-               const ImVec2& uv0 = ImVec2(0, 0), 
-               const ImVec2& uv1 = ImVec2(1, 1), 
-               const ImVec4& tint_col = ImVec4(1, 1, 1, 1), 
-               const ImVec4& border_col = ImVec4(0, 0, 0, 0));
+    void Image(const TObjectPtr<LImage2D>& Image, 
+               const ImVec2& Size, 
+               const ImVec2& UV0 = ImVec2(0, 0), 
+               const ImVec2& UV1 = ImVec2(1, 1), 
+               const ImVec4& TintColor = ImVec4(1, 1, 1, 1), 
+               const ImVec4& BorderColor = ImVec4(0, 0, 0, 0));
 
-    void Image(const TObjectPtr<LImage2D>& image, 
-               const glm::vec2& size, 
-               const glm::vec2& uv0 = glm::vec2(0, 0), 
-               const glm::vec2& uv1 = glm::vec2(1, 1), 
-               const glm::vec4& tint_col = glm::vec4(1, 1, 1, 1), 
-               const glm::vec4& border_col = glm::vec4(0, 0, 0, 0));
+    void Image(const TObjectPtr<LImage2D>& Image, 
+               const glm::vec2& Size, 
+               const glm::vec2& UV0 = glm::vec2(0, 0), 
+               const glm::vec2& UV1 = glm::vec2(1, 1), 
+               const glm::vec4& TintColor = glm::vec4(1, 1, 1, 1), 
+               const glm::vec4& BorderColor = glm::vec4(0, 0, 0, 0));
     // ~
 
-    void PushStyleVar(ImGuiStyleVar styleVar, const ImVec2& var);
-    void PushStyleVar(ImGuiStyleVar styleVar, const glm::vec2& var);
-    void PopStyleVar(uint8_t popVars = 1);
+    void PushStyleVar(const ImGuiStyleVar StyleVar, const ImVec2& Var);
+    void PushStyleVar(const ImGuiStyleVar StyleVar, const glm::vec2& Var);
+    void PopStyleVar(uint8_t VarsToPop = 1);
 
-    void PushStyleColor(ImGuiCol colorVar, const ImVec4& color);
-    void PushStyleColor(ImGuiCol colorVar, const glm::vec4& color);
-    void PopStyleColor(uint8_t popVars = 1);
+    void PushStyleColor(const ImGuiCol ColorVar, const ImVec4& Color);
+    void PushStyleColor(const ImGuiCol ColorVar, const glm::vec4& Color);
+    void PopStyleColor(const uint8_t VarsToPop = 1);
     void PopStyleStack(); // Pop entire stack 
    
     /* Flags. */
@@ -107,7 +121,7 @@ namespace LkEngine::UI {
     extern ImGuiWindowFlags TabBarFlags;
     extern ImGuiWindowFlags ViewportTextureFlags;
     extern ImGuiDockNodeFlags DockspaceFlags; 
-    extern const char* SelectedEntityWindow;
+    //extern const char* SelectedEntityWindow; /// FIXME
 
     constexpr const char* VIEWPORT_TEXTURE = "LkEngine-ViewportTexture";
 

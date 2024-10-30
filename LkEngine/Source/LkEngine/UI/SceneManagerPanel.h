@@ -11,8 +11,8 @@ namespace LkEngine {
 	class LSceneManagerPanel : public IPanel
 	{
 	public:
-		LSceneManagerPanel();
-		LSceneManagerPanel(const TObjectPtr<LScene>& InScene);
+		LSceneManagerPanel(TObjectPtr<LScene> InScene = nullptr);
+		//LSceneManagerPanel() = delete;
 		~LSceneManagerPanel() = default;
 
 		virtual void Initialize() override;
@@ -26,10 +26,8 @@ namespace LkEngine {
 		/**
 		 * DrawComponent
 		 */
-		template<typename T, typename UIFunction>
-		static void DrawComponent(const std::string& name, 
-								  LEntity entity, 
-								  UIFunction uiFunction);
+		template<typename T, typename TUIFunction>
+		static void DrawComponent(const std::string& ComponentName, LEntity Entity, TUIFunction UIFunction);
 
 		template<typename T>
 		void DisplayAddComponentEntry(const std::string& InComponentEntryName);
@@ -47,6 +45,8 @@ namespace LkEngine {
 
 		/// FIXME: REWORK THIS
 		LEntity m_ComponentCopyEntity;
+
+		LCLASS(LSceneManagerPanel);
 	};
 
 }
