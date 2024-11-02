@@ -16,12 +16,8 @@ from Tools.Logger import Logger
 ScriptLogger = Logger("LkEngine")
 
 scripts_dir = os.path.join(f"{tools_dir}")
-glfw_script = "LkEngine_Build_Glfw.py"
-glad_script = "LkEngine_Build_Glad.py"
-#glfw_script = os.path.join(scripts_dir, "LkEngine_Build_Glfw.py") 
-#glad_script = os.path.join(scripts_dir, "LkEngine_Build_Glad.py") 
-#glfw_script = f"{tools_dir}/LkEngine_Build_Glfw.py"
-#glad_script = f"{tools_dir}/LkEngine_Build_Glad.py"
+glfw_script = "Build_Glfw.py"
+glad_script = "Build_Glad.py"
 
 def run_script(script_name):
     """Run a script and capture its output."""
@@ -47,7 +43,8 @@ def main():
     ScriptLogger.info("Installing: Glad")
     run_script(glad_script)
 
-    ScriptLogger.info("Engine setup complete")
+    ScriptLogger.success("Engine setup complete!")
+    print()
 
 if __name__ == "__main__":
     main()
