@@ -1,8 +1,8 @@
---|===========================================================
---| LkEngine 
+--|------------------------------------------------------------
+--| LkEngine
 --|
 --| Dependencies
---|===========================================================
+--|------------------------------------------------------------
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
@@ -39,7 +39,7 @@ Dependencies = {
 	},
 
 	Spdlog = {
-		IncludeDir = "%{wks.location}/External/spdlog/",
+		IncludeDir = "%{wks.location}/External/spdlog/include",
 	},
 
 	StbImage = {
@@ -59,8 +59,8 @@ Dependencies = {
 	},
 
 	YamlCPP = {
-        	IncludeDir = "%{wks.location}/External/yaml-cpp/include",
-        	LibDir = "%{wks.location}/External/yaml-cpp/lib",
+		IncludeDir = "%{wks.location}/External/yaml-cpp/include",
+		LibDir = "%{wks.location}/External/yaml-cpp/lib",
 	},
 	
 	Glm = {
@@ -83,6 +83,11 @@ Dependencies = {
 
 	Entt = {
         	IncludeDir = "%{wks.location}/External/entt/include" 
+	},
+
+	Tracy = {
+		LibName = "Tracy",
+		IncludeDir = "%{wks.location}/External/tracy/public",
 	}
 
 }
