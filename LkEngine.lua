@@ -2,7 +2,7 @@ workspace "LkEngine"
     architecture "x86_64"
     startproject "LkApplication"
 
-    configurations { "Debug", "Release", "Dist" }
+    configurations { "Debug", "Debug-AddressSanitize", "Release", "Dist" }
 
     flags { "MultiProcessorCompile" }
 
@@ -45,19 +45,27 @@ project "LkEngine"
     pchheader "LKpch.h"
     pchsource "LkEngine/Source/LKpch.cpp"
 
+	--solution_items { ".editorconfig" }
+
     defines 
     {
         "LK_RENDERER_API_OPENGL",
-        "LK_PHYSICS_API_BULLET3",
-        "LK_PHYSICS_API_BOX2D",
+        "LK_CHAR_UTF8",
+        --"LK_CHAR_UNICODE",
 
+        "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
+		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
+		"SPDLOG_USE_STD_FORMAT",
         "GLFW_INCLUDE_NONE",
 		"YAML_CPP_STATIC_DEFINE",
         "IMGUI_DEFINE_MATH_OPERATORS",
-        "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
+		"NOMINMAX",
+		"TRACY_ENABLE",
+		"TRACY_ON_DEMAND",
+		"TRACY_CALLSTACK=10",
 
-        "LK_CHAR_UTF8",
-        --"LK_CHAR_UNICODE",
+        "LK_PHYSICS_API_BULLET3",
+        "LK_PHYSICS_API_BOX2D",
     }
 
     files
@@ -69,8 +77,10 @@ project "LkEngine"
         "%{wks.location}/LkEngine/Source/**.cpp",
         "%{wks.location}/LkEngine/Source/**.tpp",
 
-        "%{ExternalDirectory}/stb_image/**.h",
-        "%{ExternalDirectory}/stb_image/**.cpp",
+		"%{ExternalDirectory}/stb_image/**.h",
+		"%{ExternalDirectory}/stb_image/**.cpp",
+
+        "%{ExternalDirectory}/spdlog/include/spdlog/spdlog.h",
    	}
 
     libdirs 
@@ -85,6 +95,7 @@ project "LkEngine"
         "%{wks.location}/LkEngine/Source/LkEngine",
 
         "%{ExternalDirectory}",
+        "%{ExternalDirectory}/spdlog/include",
 
         "%{Dependencies.Glfw.IncludeDir}",
         "%{Dependencies.Glad.IncludeDir}",
@@ -98,6 +109,7 @@ project "LkEngine"
         "%{Dependencies.Spdlog.IncludeDir}",
         "%{Dependencies.Box2D.IncludeDir}",
         "%{Dependencies.YamlCPP.IncludeDir}",
+        "%{Dependencies.Tracy.IncludeDir}",
     }
 
     links 
@@ -116,14 +128,10 @@ project "LkEngine"
 		defines 
         { 
             "LK_PLATFORM_WINDOWS",
-            "_IMGUI_WIN32",
             "_CRT_SECURE_NO_WARNINGS",
             "_GLM_WIN32",
+            "_IMGUI_WIN32",
 		}
-
-        includedirs 
-        { 
-        }
 
         libdirs 
         { 
@@ -142,9 +150,11 @@ project "LkEngine"
  
 		buildoptions 
         { 
-            "/Zc:preprocessor",  -- Enable new standard-conforming preprocessor for MSVC.
-            "/wd4312",           -- Disable warning: C4312 (type conversion from greater size)
-            "/wd4244",           -- Disable warning: C4244 (conversion, possible loss of data)
+            "/Zc:preprocessor",    -- Enable new standard-conforming preprocessor for MSVC.
+            "/Zc:__cplusplus",
+            "/EHsc",               -- Only allow exceptions at throw statements or in a function.
+            "/wd4312",             -- Disable warning: C4312 (type conversion from greater size)
+            "/wd4244",             -- Disable warning: C4244 (conversion, possible loss of data)
         }
 
         linkoptions 
@@ -152,6 +162,9 @@ project "LkEngine"
             "/IGNORE:4006", -- Ignore 'already defined' warning for object files.
         }
 
+	filter { "system:windows", "configurations:Debug-AddressSanitize" }	
+		sanitize { "Address" }
+		flags { "NoRuntimeChecks", "NoIncrementalLink" }
 
 	filter "configurations:Debug"
 		defines "LK_DEBUG"
@@ -160,11 +173,11 @@ project "LkEngine"
 
 	filter "configurations:Release"
 		defines "LK_RELEASE"
-		runtime "Release"
 		optimize "On"
+		symbols "Default"
 
 	filter "configurations:Dist"
 		defines "LK_DIST"
 		runtime "Release"
-		optimize "On"
+		optimize "Full"
 

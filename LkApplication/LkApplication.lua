@@ -9,10 +9,24 @@ project "LkApplication"
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
+	defines 
+	{
+		"_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
+		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
+		"SPDLOG_USE_STD_FORMAT",
+        "GLFW_INCLUDE_NONE",
+		"YAML_CPP_STATIC_DEFINE",
+        "IMGUI_DEFINE_MATH_OPERATORS",
+		"NOMINMAX",
+		"TRACY_ENABLE",
+		"TRACY_ON_DEMAND",
+		"TRACY_CALLSTACK=10",
+	}
+
 	files 
 	{
-		"Source/**.h",
-		"Source/**.cpp",
+		"%{prj.location}/Source/**.h",
+		"%{prj.location}/Source/**.cpp",
 	}
 
 	includedirs 
@@ -20,7 +34,8 @@ project "LkApplication"
 		"%{wks.location}/LkEngine",
 		"%{wks.location}/LkEngine/Source",
 
-		--"%{ExternalDirectory}",
+		"%{ExternalDirectory}",
+
         "%{Dependencies.Glfw.IncludeDir}",
         "%{Dependencies.Glad.IncludeDir}",
         "%{Dependencies.StbImage.IncludeDir}",
@@ -33,6 +48,7 @@ project "LkApplication"
         "%{Dependencies.Box2D.IncludeDir}",
         "%{Dependencies.YamlCPP.IncludeDir}",
         "%{Dependencies.Assimp.IncludeDir}",
+        "%{Dependencies.Tracy.IncludeDir}",
 	}
 
 	links { "LkEngine" }
@@ -43,9 +59,9 @@ project "LkApplication"
 		defines 
         { 
             "LK_PLATFORM_WINDOWS",
-            "_IMGUI_WIN32",
             "_CRT_SECURE_NO_WARNINGS",
             "_GLM_WIN32",
+            "_IMGUI_WIN32",
 		}
 
         postbuildcommands 
@@ -55,9 +71,11 @@ project "LkApplication"
 
 		buildoptions 
         { 
-            "/Zc:preprocessor",  -- Enable new standard-conforming preprocessor for MSVC.
-            "/wd4312",           -- Disable warning: C4312 (type conversion from greater size)
-            "/wd4244",           -- Disable warning: C4244 (conversion, possible loss of data)
+            "/Zc:preprocessor",    -- Enable new standard-conforming preprocessor for MSVC.
+            "/Zc:__cplusplus",
+            "/EHsc",               -- Only allow exceptions at throw statements or in a function.
+            "/wd4312",             -- Disable warning: C4312 (type conversion from greater size)
+            "/wd4244",             -- Disable warning: C4244 (conversion, possible loss of data)
         }
 
 		linkoptions 
