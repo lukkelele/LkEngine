@@ -81,6 +81,7 @@ project "LkApplication"
 		linkoptions 
         { 
             "/IGNORE:4006", -- Ignore 'already defined' warning for object files.
+			"/NODEFAULTLIB:MSVCRT",
         }
 
 

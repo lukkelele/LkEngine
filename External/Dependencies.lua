@@ -22,7 +22,13 @@ Dependencies = {
 
 	Glfw = {
         IncludeDir = "%{wks.location}/External/glfw/include",
-		LibDir = "%{wks.location}/External/glfw/lib",
+		LibDir = "%{wks.location}/External/Libraries",
+		Windows = { 
+			LibName = "glfw3.lib", 
+		},
+		Linux = { 
+			LibName = "glfw3.so", 
+		},
 	},
 
 	ImGui = {
@@ -91,15 +97,6 @@ Dependencies = {
 	}
 
 }
-
-
---include "External/glfw/glfw-premake5.lua"
---include "External/glad/glad-premake5.lua"
---include "External/imgui/imgui-premake5.lua"
---include "External/ImGuizmo/ImGuizmo-premake5.lua"
---include "External/imgui-node-editor/imgui-node-editor-premake5.lua"
---include "External/box2d/box2d-premake5.lua"
---include "External/yaml-cpp/yaml-cpp-premake5.lua"
 
 include "External/glfw-premake5.lua"
 include "External/glad-premake5.lua"
