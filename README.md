@@ -1,7 +1,7 @@
 # LkEngine :shaved_ice: 
 > Game Engine written in C++20<br>
 >
-> New version of my first engine **LukkelEngine** ([repo](https://github.com/lukkelele/LukkelEngine/tree/main)).<br>
+> Upgraded version of my first engine **LukkelEngine** ([repo](https://github.com/lukkelele/LukkelEngine/tree/main)).<br>
 ---
 
 ## Content
@@ -16,61 +16,99 @@
 
 ---
 
-## About 
+# Project Information
 
-LkEngine is a game engine written in C\++20 and modern OpenGL. <br>
-I began LkEngine as a project to learn more about C++ and graphics programming in general.<br>
-There was an earlier version called **LukkelEngine** but after putting the project
-on pause for about 8-9 months, I decided I wanted to start over and thus **LkEngine** was born.<br>
+LkEngine is a game engine written in C\++20. <br>
+There was an earlier version called **LukkelEngine** that I scrapped and began anew.<br>
+The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast whilst doing it.<br>
+I have lots of ideas that I want to see if they could work and this project has been a very good environment for me to try stuff out.
 <br>
-With that said, my goals for the project are the following:
-1. To learn 
-2. Have fun
+There is no roadmap, I just do things as they pop up in my head.<br>
+<br>
+My goal is to have a robust application that is _easy_ to extend and add features on.<br>
+A rich core API that is good for performance and easy to use and grasp.<br>
+That includes:
+- Static reflection.
+- Development tools _(e.g for debugging and profiling)_.
+- Serialization, configurability and persistance.
+- Dynamic configurability without rebuilding _(e.g changing log levels, enabling profiling)_.
+- Crash handling.
 
+<br>
+
+This is somewhat of a playground for me. I will not (always) conform to standard practices as otherwise is a good rule to follow for a _real_ project.
+Custom data structures will be used as a way for me to learn to first and foremost understand **_how they work_** and also **_why_** one should avoid doing so in the real world.
+Implementing your own data structures is a great way to learn move semantics and copying semantics, and also see the potential pitfalls in both.
 
 ## Setup and Installation
-**TODO**
 
-### Dependencies
-- glfw3
-- Vulkan
-- OpenGL4
-- spdlog
-- ImGui
-- ImGuizmo
-- Assimp
-- yaml-cpp
+### Building the project 
+There are scripts available in `Tools/` to help with setting up the project.
 
-## Implemented features
-<!---------------------- Checklist --------------------------->
+1. Clone the repo and download all submodules.<br>
+    ```shell
+	git clone --recursive https://github.com/lukkelele/LkEngine.git
+	```
+2. Run the python script **_Setup.py_**.<br>
+	```shell
+	python Setup.py
+    ```
+3. Build the project by running **_Build.py_**.<br>
+    ```shell
+	python Build.py --build=[debug|release]
+	```
+    There are several build flags available:
+	- --build
+4. Run LkEngine. (FIXME: This will change)<br>
+    ```shell
+	python Run-LkEngine.py
+	```
 
-:white_check_mark: Window callbacks (resize, minimize) <br>
-:white_check_mark: Event system  <br>
-:white_check_mark: Camera system (in progress)<br>
-:white_check_mark: Sprite rendering<br>
-:white_check_mark: ECS (Entity Component System) (in progress) <br>
-:white_check_mark: Render submission system<br>
-:white_check_mark: 2D Physics and Raycasting <br>
-:white_check_mark: Asset manager (in progress) <br>
-:white_check_mark: Mesh loading (in progress) <br>
-:white_check_mark: Serialization (in progress) <br>
+### Dependencies (TODO: Add reference links to the repo for every dependency)
+- **glfw3**
+- **glad**
+- **spdlog**
+- **ImGui**
+- **ImGuizmo**
+- **imgui-node-editor**
+- **yaml-cpp**
+- **glm**
+- **entt**
+- **Tracy**
+- **assimp**
+- **box2D**
+- **python3** *(for project setup)*
 
-... and more to come
-## TODO
+## Features
+
+### Available
+TODO
+
+### In Progress
+:black_square_button: Camera System<br>
+:black_square_button: Profiling and Instrumentation<br>
+:black_square_button: Serialization<br>
+:black_square_button: Physics and Raycasting<br>
+:black_square_button: Asset Manager<br>
+:black_square_button: Renderer Submission System<br>
+
+## Todo
 :black_square_button: Runtime application (instead of just sandbox)<br>
-:black_square_button: Profiling<br>
-:black_square_button: Vulkan renderer <br>
+:black_square_button: Vulkan Renderer <br>
 :black_square_button: Renderer debugging tools (e.g drawing lines in world space) <br>
 :black_square_button: 3D Physics and Raycasting <br>
 
 <!------------------------------------------------------------>
 
+<br>
+<br>
+<br>
 
 ---
 
-# Development
+# Development ( MOVE TO SEPARATE FILE )
 
-## LkEngine Development
+## Progression
 
 ### February 15, 2024
 Last couple of weeks has mostly been work on assets and asset loading. <br>
