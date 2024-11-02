@@ -16,3 +16,6 @@
 [submodule "External/glfw"]
 	path = External/glfw
 	url = git@github.com:glfw/glfw.git
+[submodule "External/glad"]
+	path = External/glad
+	url = git@github.com:Dav1dde/glad.git
