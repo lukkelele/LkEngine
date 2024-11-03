@@ -3,7 +3,7 @@
 	url = git@github.com:jbeder/yaml-cpp.git
 [submodule "External/imgui-node-editor"]
 	path = External/imgui-node-editor
-	url = https://github.com/thedmd/imgui-node-editor
+	url = git@github.com:thedmd/imgui-node-editor.git
 [submodule "External/yaml-cpp"]
 	path = External/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
@@ -19,3 +19,15 @@
 [submodule "External/glad"]
 	path = External/glad
 	url = git@github.com:Dav1dde/glad.git
+[submodule "External/imgui"]
+	path = External/imgui
+	url = git@github.com:ocornut/imgui.git
+[submodule "External/ImGuizmo"]
+	path = External/ImGuizmo
+	url = git@github.com:CedricGuillemet/ImGuizmo.git
+[submodule "External/box2d"]
+	path = External/box2d
+	url = git@github.com:erincatto/box2d.git
+[submodule "External/ImFileDialog"]
+	path = External/ImFileDialog
+	url = https://github.com/lukkelele/ImFileDialog.git

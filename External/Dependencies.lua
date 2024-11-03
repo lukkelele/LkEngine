@@ -40,8 +40,9 @@ Dependencies = {
 	},
 
 	Box2D = {
-		LibName = "box2d",
 		IncludeDir = "%{wks.location}/External/box2d/include",
+		LibName = "box2dd",
+		LibDir = "%{wks.location}/External/box2d/build/src/%{cfg.buildcfg}",
 	},
 
 	Spdlog = {
@@ -58,6 +59,10 @@ Dependencies = {
 
 	ImGuiNodeEditor = {
 		IncludeDir = "%{wks.location}/External/imgui-node-editor",
+	},
+
+	ImFileDialog = {
+		IncludeDir = "%{wks.location}/External/ImFileDialog",
 	},
 
 	VulkanMemoryAllocator = {
@@ -103,6 +108,7 @@ include "External/glad-premake5.lua"
 include "External/imgui-premake5.lua"
 include "External/ImGuizmo-premake5.lua"
 include "External/imgui-node-editor-premake5.lua"
+include "External/ImFileDialog-premake5.lua"
 include "External/yaml-cpp-premake5.lua"
 include "External/box2d-premake5.lua"
 

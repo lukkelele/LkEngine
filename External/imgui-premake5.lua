@@ -31,20 +31,23 @@ project "ImGui"
         "%{prj.location}/imgui_tables.h",
         "%{prj.location}/imgui_tables.cpp",
 
-		"%{prj.location}/imgui_impl_glfw.cpp",
-		"%{prj.location}/imgui_impl_glfw.h",
-		"%{prj.location}/imgui_impl_opengl3.cpp",
-		"%{prj.location}/imgui_impl_opengl3.h",
+		"%{prj.location}/backends/imgui_impl_glfw.cpp",
+		"%{prj.location}/backends/imgui_impl_glfw.h",
+		"%{prj.location}/backends/imgui_impl_opengl3.cpp",
+		"%{prj.location}/backends/imgui_impl_opengl3.h",
 
-		"%{prj.location}/ImFileDialog.h",
-		"%{prj.location}/ImFileDialog.cpp",
+        --"%{ExternalDirectory}/ImFileDialog/ImFileDialog.h",
+        --"%{ExternalDirectory}/ImFileDialog/ImFileDialog.cpp",
 	}
 
     includedirs
     {
+        "%{prj.location}",
+        "%{prj.location}/backends",
         "%{ExternalDirectory}/GLFW/include",
         "%{ExternalDirectory}/glad/include",
         "%{ExternalDirectory}/stb_image",
+        "%{Dependencies.ImGuizmo.IncludeDir}",
     }
 
 	filter "system:windows"

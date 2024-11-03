@@ -21,6 +21,11 @@ project "box2d"
 		"%{prj.location}/src"
 	}
 
+	postbuildcommands 
+	{
+		"{COPYFILE} %{Dependencies.Box2D.LibDir}/%{Dependencies.Box2D.LibName}.lib %{cfg.targetdir}/%{prj.name}.lib"
+	}
+
 	filter "system:windows"
 		systemversion "latest"
 
