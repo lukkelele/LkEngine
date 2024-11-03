@@ -3,6 +3,9 @@
 >
 > Upgraded version of my first engine **LukkelEngine** ([repo](https://github.com/lukkelele/LukkelEngine/tree/main)).<br>
 ---
+## Platform Support
+### :white_check_mark: Windows<br>
+### :black_square_button: Linux (in the future)<br>
 
 ## Content
 1. [About](#about)
@@ -34,37 +37,49 @@ That includes:
 - Dynamic configurability without rebuilding _(e.g changing log levels, enabling profiling)_.
 - Crash handling.
 
-<br>
-
 This is somewhat of a playground for me. I will not (always) conform to standard practices as otherwise is a good rule to follow for a _real_ project.
 Custom data structures will be used as a way for me to learn to first and foremost understand **_how they work_** and also **_why_** one should avoid doing so in the real world.
 Implementing your own data structures is a great way to learn move semantics and copying semantics, and also see the potential pitfalls in both.
 
 ## Setup and Installation
+For development I've been using Visual Studio.<br>
+Other IDE's should in theory be able to run the project but I cannot make any promises.
 
-### Building the project 
-There are scripts available in `Tools/` to help with setting up the project.
+### Windows
+Make sure the following are installed:
+
+| Package | Link                          |
+|----------------|--------------------------------------------|
+| CMake | [Download](https://cmake.org/download/) |
+| C/C++ Compiler | [Download](https://visualstudio.microsoft.com/vs/features/cplusplus/) |
+| Make | [Download](https://gnuwin32.sourceforge.net/packages/make.htm) |
+| Python3 | [Download](https://www.python.org/downloads/windows/) |
+
+Most dependencies are sorted by scripts available in `Tools/` that help setting up the engine.
+
 
 1. Clone the repo and download all submodules.<br>
     ```shell
 	git clone --recursive https://github.com/lukkelele/LkEngine.git
 	```
-2. Run the python script **_Setup.py_**.<br>
+2. Enter the **Tools** directory.<br>
+3. Run the setup script **LkEngine-Setup.bat**.<br>
+   It is also possible to run the script directly in a shell which yields the same result, as the bat script just runs **LkEngine-Setup.py**.
 	```shell
-	python Setup.py
+	python LkEngine-Setup.py
     ```
-3. Build the project by running **_Build.py_**.<br>
-    ```shell
-	python Build.py --build=[debug|release]
-	```
-    There are several build flags available:
-	- --build
-4. Run LkEngine. (FIXME: This will change)<br>
-    ```shell
-	python Run-LkEngine.py
-	```
+4. The setup script will ask to install **Premake5** if not present, answer **(y)** on the prompt to continue.
+5. All dependencies are then handled by the script. The built static libraries are moved to their desired spot inside the _'External'_ directory. 
+6. Done!
 
-### Dependencies (TODO: Add reference links to the repo for every dependency)
+### Linux 
+:warning: **Linux is not supported as of yet.** :warning:
+
+## Dependencies (TODO: Add reference links to the repo for every dependency)
+- **CMake**
+- **make**
+- **python3**
+### Engine Dependencies
 - **glfw3**
 - **glad**
 - **spdlog**
@@ -77,7 +92,6 @@ There are scripts available in `Tools/` to help with setting up the project.
 - **Tracy**
 - **assimp**
 - **box2D**
-- **python3** *(for project setup)*
 
 ## Features
 

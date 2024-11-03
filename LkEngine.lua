@@ -5,7 +5,7 @@ workspace "LkEngine"
     configurations 
     { 
         "Debug", 
-        "Debug-AddressSanitize", 
+        --"Debug-AddressSanitize", 
         "Release", 
         "Dist" 
     }
@@ -127,6 +127,7 @@ project "LkEngine"
         "yaml-cpp",
         "glad", 
         "opengl32",
+        --"Assimp",
     }
 
 	filter "system:windows"
@@ -140,17 +141,24 @@ project "LkEngine"
 
         libdirs 
         { 
+            "%{ExternalDirectory}/Libraries",
             "%{Dependencies.Assimp.Windows.LibDir}",
         }
 
         links 
         {
-            "%{Dependencies.Assimp.Windows.LibName}",
+            -- TODO: Debug/Release selection of the copied lib. Place the postbuild command in platform filter.
+            "%{Dependencies.Assimp.Windows.DebugLibName}",
+            --"%{Dependencies.Assimp.Windows.DebugLibName}",
+            --"%{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.DebugLibName}.lib"
         }
 
         postbuildcommands 
         {
-            "{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
+            -- TODO: Debug/Release selection of the copied lib. Place the postbuild command in platform filter.
+            --"{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
+            --"{COPYFILE} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.DebugLibName}.dll %{cfg.targetdir}"
+            --"{COPYFILE} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.DebugLibName}.lib %{cfg.targetdir}"
         }
  
 		buildoptions 
@@ -167,22 +175,25 @@ project "LkEngine"
             "/IGNORE:4006", -- Ignore 'already defined' warning for object files.
         }
 
-	filter { "system:windows", "configurations:Debug-AddressSanitize" }	
-		sanitize { "Address" }
-		flags { "NoRuntimeChecks", "NoIncrementalLink" }
+	--filter { "system:windows", "configurations:Debug-AddressSanitize" }	
+	--	runtime "Debug"
+	--	sanitize { "Address" }
+	--	flags { "NoRuntimeChecks", "NoIncrementalLink" }
+	--	defines "LK_DEBUG"
 
 	filter "configurations:Debug"
-		defines "LK_DEBUG"
 		runtime "Debug"
 		symbols "On"
+		defines "LK_DEBUG"
 
 	filter "configurations:Release"
-		defines "LK_RELEASE"
+        runtime "Release"
 		optimize "On"
 		symbols "Default"
+		defines "LK_RELEASE"
 
 	filter "configurations:Dist"
-		defines "LK_DIST"
 		runtime "Release"
 		optimize "Full"
+		defines "LK_DIST"
 

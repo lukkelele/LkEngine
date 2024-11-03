@@ -48,8 +48,8 @@
 **/glfw/examples
 **/glfw/tests
 
-**/bin
-**/*bin-int*
+**/External/bin
+**/External/*bin-int*
 **/out
 **/External/**/build*
 **/External/*build*

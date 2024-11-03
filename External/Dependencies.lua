@@ -81,9 +81,11 @@ Dependencies = {
 	Assimp = {
         IncludeDir = "%{wks.location}/External/assimp/include",
 		Windows = { 
-			LibName = "assimp-vc143-mt", 
+			--LibName = "assimp-vc143-mt", 
+			LibName = "assimp-vc143-mtd",  -- FIXME
 			DebugLibName = "assimp-vc143-mtd", 
-			LibDir = "%{wks.location}/External/assimp/bin/windows/%{cfg.buildcfg}/" 
+			--LibDir = "%{wks.location}/External/assimp/bin/windows/%{cfg.buildcfg}/" 
+			LibDir = "%{wks.location}/External/Libraries" 
 		},
 		Linux = { 
 			LibName = "assimp", 
@@ -111,6 +113,7 @@ include "External/imgui-node-editor-premake5.lua"
 include "External/ImFileDialog-premake5.lua"
 include "External/yaml-cpp-premake5.lua"
 include "External/box2d-premake5.lua"
+--include "External/assimp-premake5.lua"
 
 include "LkApplication/LkApplication.lua"
 
