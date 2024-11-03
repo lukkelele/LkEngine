@@ -51,8 +51,8 @@
 **/bin
 **/*bin-int*
 **/out
-**/build*
-**/*build*
+**/External/**/build*
+**/External/*build*
 **/*.vcxproj*
 External/**/*.vcx*
 
