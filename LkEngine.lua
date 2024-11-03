@@ -2,7 +2,13 @@ workspace "LkEngine"
     architecture "x86_64"
     startproject "LkApplication"
 
-    configurations { "Debug", "Debug-AddressSanitize", "Release", "Dist" }
+    configurations 
+    { 
+        "Debug", 
+        "Debug-AddressSanitize", 
+        "Release", 
+        "Dist" 
+    }
 
     flags { "MultiProcessorCompile" }
 
@@ -45,8 +51,6 @@ project "LkEngine"
     pchheader "LKpch.h"
     pchsource "LkEngine/Source/LKpch.cpp"
 
-	--solution_items { ".editorconfig" }
-
     defines 
     {
         "LK_RENDERER_API_OPENGL",
@@ -87,6 +91,7 @@ project "LkEngine"
     {
         "%{Dependencies.Glfw.LibDir}",
         "%{Dependencies.YamlCPP.LibDir}",
+        "%{Dependencies.Box2D.LibDir}",
     }
 
     includedirs 
