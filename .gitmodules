@@ -31,3 +31,6 @@
 [submodule "External/ImFileDialog"]
 	path = External/ImFileDialog
 	url = https://github.com/lukkelele/ImFileDialog.git
+[submodule "External/assimp"]
+	path = External/assimp
+	url = git@github.com:assimp/assimp.git
