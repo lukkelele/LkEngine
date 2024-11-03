@@ -24,12 +24,6 @@
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/ContentBrowser.h"
 
-#include "LkEngine/Project/Project.h"
-
-#include "EditorTabManager.h"
-#include "ComponentEditor.h"
-#include "NodeEditor/NodeEditor.h"
-
 #include "LkEngine/ImGui/ImGuiLayer.h"
 
 #define LK_UI_ENABLE_LEFT_SIDEBAR_CONTENT 1
@@ -37,8 +31,12 @@
 
 namespace LkEngine {
 
+	class LComponentEditor;
+	class LEditorTabManager;
+	class LNodeEditor;
 	class LScene;
 	class LSceneManagerPanel;
+	class LProject;
 
 	enum class EEditorWindowType
 	{
@@ -126,7 +124,7 @@ namespace LkEngine {
 		void CheckRightSidebarSize();
 		void CheckBottomBarSize();
 
-		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return m_ViewportFramebuffer; }
+		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return ViewportFramebuffer; }
 
 		LEntity CreateCube();
 
@@ -182,7 +180,7 @@ namespace LkEngine {
 
         FEventCallback m_EventCallback; /// UPDATE ME
 
-		TObjectPtr<LFramebuffer> m_ViewportFramebuffer;
+		TObjectPtr<LFramebuffer> ViewportFramebuffer;
 		TObjectPtr<LEditorCamera> EditorCamera;
 
 		TSharedPtr<LSceneManagerPanel> SceneManagerPanel;

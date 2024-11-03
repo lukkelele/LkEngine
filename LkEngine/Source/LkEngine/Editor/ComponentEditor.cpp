@@ -2,6 +2,9 @@
 #include "ComponentEditor.h"
 
 #include "EditorLayer.h"
+#include "LkEngine/Editor/EditorTab.h"
+#include "LkEngine/Editor/EditorTabManager.h"
+#include "LkEngine/Editor/NodeEditor/NodeEditor.h"
 
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Renderer/MaterialLibrary.h"
@@ -48,7 +51,7 @@ namespace LkEngine {
 
                         /* Create new edit tab for the material. */
                         TSharedPtr<LTab> NewTab = LEditorTabManager::NewTab(
-                            LString::Format("Edit->{}", MaterialName).CStr(),
+                            LK_FORMAT_STRING("Edit->{}", MaterialName).c_str(),
                             ETabType::MaterialEditor
                         );
 

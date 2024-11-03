@@ -988,10 +988,10 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const
 		{
-			return fmt::format("\n[Multicast Delegate]\n"
-							   " - Name:    {}\n"
-							   " - RawName: {}\n", 
-							   TypeName, typeid(*this).raw_name());
+			return LK_FORMAT_STRING("\n[Multicast Delegate]\n" 
+									" - Name:    {}\n"
+									" - RawName: {}\n", 
+									TypeName, typeid(*this).raw_name());
 		}
 
 		/***************************************************

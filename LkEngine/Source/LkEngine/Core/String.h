@@ -230,7 +230,10 @@ namespace LkEngine {
         template<typename ...TArgs>
         static LString Format(const LString& String, TArgs&&... Args)
         {
-            return fmt::format(String.m_Data, std::forward<TArgs>(Args)...);
+            LK_CORE_ASSERT(false, "Disabled");
+            /* Disabled for now. */
+            //return fmt::format(String.m_Data, std::forward<TArgs>(Args)...);
+            return "";
         }
 
     private:

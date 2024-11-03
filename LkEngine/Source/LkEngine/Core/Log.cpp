@@ -75,13 +75,13 @@ namespace LkEngine {
 	{
 		// TODO: Read configuration and application args for setting log levels on initialization.
 		Initialize(
-			LString::Format("LkEditor-{}.log", Time::CurrentTimestamp()).CStr(),
+			LK_FORMAT_STRING("LkEditor-{}.log", Time::CurrentTimestamp()).c_str(),
 			"CORE", 
 			"CLIENT"
 		);
 
 		namespace fs = std::filesystem;
-		LogDirectory = fs::path(LString::Format("{}/Logs", fs::current_path().string()).CStr());
+		LogDirectory = fs::path(LK_FORMAT_STRING("{}/Logs", fs::current_path().string()).c_str());
 		LK_CORE_TRACE_TAG("Log", "Log Directory: {}", LogDirectory.string());
 
 		CleanLogDirectory(LogDirectory, 10);
@@ -113,14 +113,6 @@ namespace LkEngine {
 		static constexpr const char* UISinkPattern     = "%^[%H:%M:%S] [%n] %v%$";
 		/* Logfile sink. */
 		static constexpr const char* FileSinkPattern   = "[%H:%M:%S] [%l] [%n] %v";
-
-		/* Set log level names to UPPERCASE. */
-		spdlog::level::level_string_views[spdlog::level::trace]    = "TRACE";
-		spdlog::level::level_string_views[spdlog::level::debug]    = "DEBUG";
-		spdlog::level::level_string_views[spdlog::level::info]     = "INFO";
-		spdlog::level::level_string_views[spdlog::level::warn]     = "WARN";
-		spdlog::level::level_string_views[spdlog::level::err]      = "ERROR";
-		spdlog::level::level_string_views[spdlog::level::critical] = "FATAL";
 
 		/* Create the color and file sink. */
 		std::vector<spdlog::sink_ptr> LogSinks;
@@ -160,7 +152,6 @@ namespace LkEngine {
 			std::string Color_Emerald = "\033[38;5;34m"; /* Bright Green. */
 
 			/* Colors. */
-			//UIColorSink->set_color(spdlog::level::trace, Color_Emerald.c_str());
 			UIColorSink->set_color(spdlog::level::trace, (FOREGROUND_BLUE | FOREGROUND_RED));
 			UIColorSink->set_color(spdlog::level::debug, (FOREGROUND_GREEN | FOREGROUND_BLUE));
 			UIColorSink->set_color(spdlog::level::info,  (FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED));
@@ -178,9 +169,19 @@ namespace LkEngine {
 		{
 			ELogLevel LogLevel = ELogLevel::Info;
 
+			std::shared_ptr<ColorSinkType> AssetColorSink = std::make_shared<ColorSinkType>();
+			AssetColorSink->set_pattern(UISinkPattern);
+
+			std::vector<spdlog::sink_ptr> UILogSinks { AssetColorSink, LogSinks[1] };
+
+			/* Colors. */
+			AssetColorSink->set_color(spdlog::level::trace, (FOREGROUND_BLUE | FOREGROUND_RED));
+			AssetColorSink->set_color(spdlog::level::debug, (FOREGROUND_GREEN | FOREGROUND_BLUE));
+			AssetColorSink->set_color(spdlog::level::info,  (FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED));
+
 			AssetLogger = std::make_shared<spdlog::logger>("ASSET", LogSinks.begin(), LogSinks.end());
-			AssetLogger ->set_level(spdlog::level::debug);
-			AssetLogger ->flush_on(spdlog::level::debug);
+			AssetLogger->set_level(ToSpdlogLevel(LogLevel));
+			AssetLogger->flush_on(ToSpdlogLevel(LogLevel));
 			spdlog::register_logger(AssetLogger);
 
 			EnabledTags[AssetLogger->name()] = LogLevel;

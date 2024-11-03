@@ -2,6 +2,7 @@
 
 #include "LkEngine/Debug/Debugger2D.h"
 
+#if 0 /// FIXME: DISABLED FOR NOW
 #include <box2d/b2_draw.h>
 
 
@@ -37,3 +38,5 @@ namespace LkEngine {
     }
 
 }
+
+#endif

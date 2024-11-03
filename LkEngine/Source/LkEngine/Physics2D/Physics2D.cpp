@@ -7,64 +7,64 @@
 #include "LkEngine/Scene/Entity.h"
 
 #include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Editor/EditorTabManager.h"
 
 
 namespace LkEngine {
 
-    std::vector<Raycast2DResult> Physics2D::Raycast(LScene& scene, const glm::vec2& point0, const glm::vec2& point1)
+    std::vector<Raycast2DResult> Physics2D::Raycast(LScene& SpriteComponentene, const glm::vec2& point0, const glm::vec2& point1)
     {
         std::vector<Raycast2DResult> results = {};
         return results;
     }
 
-    std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(LScene& scene)
+    std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(LScene& SpriteComponentene)
     {
         std::vector<Raycast2DResult> results = {};
         glm::vec2 MousePos = LMouse::GetScaledPos();
 
-        // Exit early if no camera is attached to the scene
-        auto* Editor = LEditorLayer::Get();
+        // Exit early if no Cameraera is attached to the SpriteComponentene
+        LEditorLayer* Editor = LEditorLayer::Get();
         if (Editor && Editor->IsEnabled())
         {
-            //auto EditorCamera = Editor->GetEditorCamera();
         }
         else
         {
-            if (scene.GetMainCamera() == nullptr)
+            if (SpriteComponentene.GetMainCamera() == nullptr)
             {
-                LK_CORE_WARN_TAG("Raycast", "Scene {} has no camera attached to it!", scene.GetName());
+                LK_CORE_INFO_TAG("Raycast2D", "Scene {} has no camera attached to it", SpriteComponentene.GetName());
                 return results;
             }
         }
 
-        std::vector<LEntity> SceneEntities = scene.GetEntities();
+        std::vector<LEntity> SceneEntities = SpriteComponentene.GetEntities();
         for (LEntity& Entity : SceneEntities)
         {
             if (Entity.HasComponent<LTransformComponent>() && Entity.HasComponent<LSpriteComponent>())
             {
-                LTransformComponent& tc = Entity.Transform();
-                LSpriteComponent& sc = Entity.GetComponent<LSpriteComponent>();
-                if (tc.IsStatic() || sc.IsPassthrough())
+                LTransformComponent& TransformComponent = Entity.Transform();
+                LSpriteComponent& SpriteComponent = Entity.GetComponent<LSpriteComponent>();
+                if (TransformComponent.IsStatic() || SpriteComponent.IsPassthrough())
                 {
                     continue;
                 }
 
-                auto cam = Editor->GetEditorCamera();
-                glm::vec2 camPos = cam->GetPosition();
+                TObjectPtr<LEditorCamera> Camera = Editor->GetEditorCamera();
+                glm::vec2 CameraPos = Camera->GetPosition();
 
-                float quadWidth = tc.Scale.x * sc.Size.x;
-                float quadHeight = tc.Scale.y * sc.Size.y;
-                glm::vec2 QuadPos = { tc.Translation.x, tc.Translation.y };
+                float QuadWidth = TransformComponent.Scale.x * SpriteComponent.Size.x;
+                float QuadHeight = TransformComponent.Scale.y * SpriteComponent.Size.y;
+                glm::vec2 QuadPos = { TransformComponent.Translation.x, TransformComponent.Translation.y };
+
+                /* FIXME: Rewrite all of this awful code. */
 
                 // The position is placed in between the upper two points.
 
-                // Place the origin in the middle of the screen.
+                // Place the origin in the middle of the SpriteComponentreen.
                 // This is done by adding half of the window width and height.
-
-                LEditorLayer* Editor = LEditorLayer::Get();
                 if (Editor && Editor->IsEnabled())
                 {
-                    // Center the quad
+                    // Center the Quad
                     QuadPos.x += Editor->EditorWindowSize.x * 0.50f + Editor->GetLeftSidebarSize().x;
                     // Only add the tabbar size if there are any tabs 
                     if (LEditorTabManager::GetTabCount() == 0)
@@ -87,10 +87,10 @@ namespace LkEngine {
                 }
 
 
-                float angleRad = glm::radians(tc.GetRotation2D());
-                glm::mat2 rotMat = {
-                    glm::cos(angleRad), -glm::sin(angleRad),
-                    glm::sin(angleRad), glm::cos(angleRad)
+                const float AngleRad = glm::radians(TransformComponent.GetRotation2D());
+                glm::mat2 RotationMatrix = {
+                    glm::cos(AngleRad), -glm::sin(AngleRad),
+                    glm::sin(AngleRad), glm::cos(AngleRad)
                 };
 
                 // >> Sprite Points
@@ -98,30 +98,30 @@ namespace LkEngine {
                 // Bottom left: Move half size to right, down entire sprite height
                 // Top left: Move half size to left, stay at y
                 // Top right: Move half size to right, stay at y
-                glm::vec2 SpritePoint_BottomLeft = { QuadPos.x - quadWidth * 0.50f, QuadPos.y - quadHeight };
-                glm::vec2 SpritePoint_BottomRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y - quadHeight };
-                glm::vec2 SpritePoint_TopLeft = { QuadPos.x - quadWidth * 0.50f, QuadPos.y };
-                glm::vec2 SpritePoint_TopRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y };
+                glm::vec2 SpritePoint_BottomLeft = { QuadPos.x - QuadWidth * 0.50f, QuadPos.y - QuadHeight };
+                glm::vec2 SpritePoint_BottomRight = { QuadPos.x + QuadWidth * 0.50f, QuadPos.y - QuadHeight };
+                glm::vec2 SpritePoint_TopLeft = { QuadPos.x - QuadWidth * 0.50f, QuadPos.y };
+                glm::vec2 SpritePoint_TopRight = { QuadPos.x + QuadWidth * 0.50f, QuadPos.y };
             #if 0
-                glm::vec2 SpritePoint_BottomLeft = { QuadPos.x - quadWidth * 0.50f, QuadPos.y - quadHeight * 0.50f };
-                glm::vec2 SpritePoint_BottomRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y - quadHeight * 0.50f };
-                glm::vec2 SpritePoint_TopLeft = { QuadPos.x - quadWidth * 0.50f, QuadPos.y + quadHeight * 0.50f };
-                glm::vec2 SpritePoint_TopRight = { QuadPos.x + quadWidth * 0.50f, QuadPos.y + quadHeight * 0.50f };
+                glm::vec2 SpritePoint_BottomLeft = { QuadPos.x - QuadWidth * 0.50f, QuadPos.y - QuadHeight * 0.50f };
+                glm::vec2 SpritePoint_BottomRight = { QuadPos.x + QuadWidth * 0.50f, QuadPos.y - QuadHeight * 0.50f };
+                glm::vec2 SpritePoint_TopLeft = { QuadPos.x - QuadWidth * 0.50f, QuadPos.y + QuadHeight * 0.50f };
+                glm::vec2 SpritePoint_TopRight = { QuadPos.x + QuadWidth * 0.50f, QuadPos.y + QuadHeight * 0.50f };
             #endif
 
                 if (LMouse::IsButtonPressed(EMouseButton::Button0))
                 {
-                    // Add camera position to adjust for camera placement in the world
-                    const bool bInBoundsX = (MousePos.x + camPos.x >= SpritePoint_BottomLeft.x) 
-                        && (MousePos.x + camPos.x <= SpritePoint_TopRight.x);
+                    // Add Cameraera position to adjust for Cameraera placement in the world
+                    const bool bInBoundsX = (MousePos.x + CameraPos.x >= SpritePoint_BottomLeft.x) 
+                        && (MousePos.x + CameraPos.x <= SpritePoint_TopRight.x);
 
-                    const bool bInBoundsY = (MousePos.y + camPos.y <= SpritePoint_TopLeft.y) 
-                        && (MousePos.y + camPos.y >= SpritePoint_BottomRight.y);
+                    const bool bInBoundsY = (MousePos.y + CameraPos.y <= SpritePoint_TopLeft.y) 
+                        && (MousePos.y + CameraPos.y >= SpritePoint_BottomRight.y);
 
                     if (bInBoundsX && bInBoundsY)
                     {
-                        float centerX = tc.Translation.x + quadWidth * 0.50f;
-                        float centerY = tc.Translation.y + quadHeight * 0.50f;
+                        float centerX = TransformComponent.Translation.x + QuadWidth * 0.50f;
+                        float centerY = TransformComponent.Translation.y + QuadHeight * 0.50f;
                         LK_CORE_WARN("Hit: {} -> ({}, {})", Entity.Name().c_str(), MousePos.x, MousePos.y);
 
                         float x = centerX - MousePos.x;

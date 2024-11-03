@@ -54,7 +54,7 @@ namespace LkEngine {
 			for (int Index = 0; Index < Extensions; Index++)
 			{
 				const GLubyte* Extension = glGetStringi(GL_EXTENSIONS, Index);
-				LK_CORE_DEBUG_TAG("OpenGL Extension", "{}", Extension);
+				LK_CORE_DEBUG_TAG("OpenGL Extension", "{}", std::string(reinterpret_cast<const char*>(Extension)));
 			}
 		}
 

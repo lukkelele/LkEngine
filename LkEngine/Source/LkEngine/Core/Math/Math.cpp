@@ -84,9 +84,9 @@ namespace LkEngine::Math {
 }
 
 namespace LkEngine::Utils {
-
+	
+	#if 0 /// DISABLED
 	glm::vec2 ConvertToGlm(const b2Vec2& vec2) { return glm::vec2(vec2.x, vec2.y); }
-
 	glm::vec3 ConvertToGlm(const b2Vec3& vec3) 
 	{ 
 		return glm::vec3(vec3.x, vec3.y, vec3.z); 
@@ -97,5 +97,6 @@ namespace LkEngine::Utils {
 
 	ImVec2 ConvertToImVec2(const glm::vec2& vec2) { return ImVec2(vec2.x, vec2.y); }
 	ImVec4 ConvertToImVec4(const glm::vec4& vec4) { return ImVec4(vec4.x, vec4.y, vec4.z, vec4.w); }
+	#endif
 
 }

@@ -4,6 +4,7 @@
 
 namespace LkEngine::UI {
 
+	/// FIXME: NEEDS SOME LOVE
     bool UpdateWindowManualResize(ImGuiWindow* window, ImVec2& newSize, ImVec2& newPosition)
 	{
 		auto CalcWindowSizeAfterConstraint = [](ImGuiWindow* window, const ImVec2& size_desired)
@@ -33,14 +34,17 @@ namespace LkEngine::UI {
 			// Minimum size
 			if (!(window->Flags & (ImGuiWindowFlags_ChildWindow | ImGuiWindowFlags_AlwaysAutoResize)))
 			{
+			#if 0
 				ImGuiWindow* window_for_height = (window->DockNodeAsHost && window->DockNodeAsHost->VisibleWindow) ? window->DockNodeAsHost->VisibleWindow : window;
 				const float decoration_up_height = window_for_height->TitleBarHeight() + window_for_height->MenuBarHeight();
 				new_size = ImMax(new_size, g.Style.WindowMinSize);
 				new_size.y = ImMax(new_size.y, decoration_up_height + ImMax(0.0f, g.Style.WindowRounding - 1.0f)); // Reduce artifacts with very small windows
+			#endif
 			}
 			return new_size;
 		};
 
+		#if 0
 		auto CalcWindowAutoFitSize = [CalcWindowSizeAfterConstraint](ImGuiWindow* window, const ImVec2& size_contents)
 		{
 			ImGuiContext& g = *GImGui;
@@ -303,6 +307,9 @@ namespace LkEngine::UI {
 		//window->Size = window->SizeFull;
 		return changed;
 
-    }
+		#endif
+
+		return false;
+	}
 
 }

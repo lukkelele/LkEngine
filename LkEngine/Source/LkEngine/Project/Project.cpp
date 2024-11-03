@@ -24,27 +24,33 @@ namespace LkEngine {
 		RuntimeAssetManager = TObjectPtr<LRuntimeAssetManager>::Create();
 	}
 
-	void LProject::SetActive(TObjectPtr<LProject> project)
+	void LProject::SetActive(TObjectPtr<LProject> InProject)
 	{
-		LK_CORE_VERIFY(project, "Project is nullptr");
+		LK_CORE_VERIFY(InProject, "Project is nullptr");
 
-		/* The currently active project is not the same as the passed project argument. */
-		if (ActiveProject != project)
+		/* The currently active Project is not the same as the passed Project argument. */
+		if (ActiveProject != InProject)
 		{
+			/* Release resources. */
+			RuntimeAssetManager->BeginDestroy();
+
+			RuntimeAssetManager.Release();
 			RuntimeAssetManager = nullptr;
 		}
 
-		ActiveProject = project;
+		ActiveProject = InProject;
 		if (ActiveProject)
 		{
-			if (project->RuntimeAssetManager)
+			if (InProject->RuntimeAssetManager)
 			{
-				LK_CORE_TRACE_TAG("Project", "RuntimeAssetManager was already initialized for project {}", project->GetName());
-				RuntimeAssetManager = project->RuntimeAssetManager;
+				LK_CORE_TRACE_TAG("Project", "RuntimeAssetManager already initialized for Project {}", 
+								  ActiveProject->GetName());
+				RuntimeAssetManager = ActiveProject->RuntimeAssetManager;
 			}
 			else
 			{
-				LK_CORE_WARN_TAG("Project", "RuntimeAssetManager was NOT initialized for project {}, initializing...", project->GetName());
+				LK_CORE_WARN_TAG("Project", "RuntimeAssetManager was NOT initialized for Project {}", 
+								 ActiveProject->GetName());
 				RuntimeAssetManager = TObjectPtr<LRuntimeAssetManager>::Create();
 				RuntimeAssetManager->Initialize(EInitFlag::NoInit);
 			}
@@ -52,11 +58,11 @@ namespace LkEngine {
 
 	}
 
-	// Save project data, aka serialize to disk
 	bool LProject::Save()
 	{
-		LK_CORE_INFO_TAG("Project", "Saving project {}", m_Name);
-		//SceneSerializer sceneSerializer(Data.TargetScene);
+		LK_CORE_INFO_TAG("Project", "Saving Project: \"{}\"", m_Name);
+		/* Serialize to disk. */
+		//LSceneSerializer SceneSerializer(Data.TargetScene);
 
 		return true;
 	}
@@ -66,97 +72,89 @@ namespace LkEngine {
 		return 0;
 	}
 
-	TObjectPtr<LProject> LProject::CreateEmptyProject(std::string_view projectName, bool bSetAsActive)
+	TObjectPtr<LProject> LProject::CreateEmptyProject(std::string_view ProjectName, bool bSetAsActive)
 	{
-		LK_CORE_DEBUG_TAG("Project", "Creating empty project \"{}\", setting as active: {}", 
-						  projectName, bSetAsActive);
-		TObjectPtr<LProject> project = TObjectPtr<LProject>::Create(std::string(projectName));
-		project->Scene = TObjectPtr<LScene>::Create("StarterScene", true, true);
+		LK_CORE_DEBUG_TAG("Project", "Creating empty Project \"{}\", active: {}", ProjectName, bSetAsActive);
+		TObjectPtr<LProject> Project = TObjectPtr<LProject>::Create(std::string(ProjectName));
+		Project->Scene = TObjectPtr<LScene>::Create("StarterScene", true, true);
 
 		if (LEditorLayer* Editor = LEditorLayer::Get(); Editor && Editor->IsEnabled())
 		{
-			// REMOVE
-			SceneCreatedEvent Event(project->Scene);
-			Editor->RegisterEvent(Event);
+			GOnSceneSetActive.Broadcast(Project->Scene);
 		}
 
 		if (bSetAsActive)
 		{
-			LProject::SetActive(project);
-			ActiveProject = project;
+			LProject::SetActive(Project);
+			ActiveProject = Project;
 		}
 
-		return project;
+		return Project;
 	}
 
 	// TODO
-	TObjectPtr<LProject> LProject::CreateDefaultProject(std::string_view projectName, const bool bSetAsActive)
+	TObjectPtr<LProject> LProject::CreateDefaultProject(std::string_view ProjectName, const bool bSetAsActive)
 	{
-		TObjectPtr<LProject> project = TObjectPtr<LProject>::Create("UntitledProject");
+		TObjectPtr<LProject> Project = TObjectPtr<LProject>::Create("UntitledProject");
 
 #if true 
 		LK_CORE_DEBUG_TAG("Project", "Creating platform entity");
-		LEntity BasePlatform = project->Scene->CreateEntity("Platform");
-		LSpriteComponent& sc = BasePlatform.AddComponent<LSpriteComponent>();
+		LEntity BasePlatform = Project->Scene->CreateEntity("Platform");
+		LSpriteComponent& SpriteComponent = BasePlatform.AddComponent<LSpriteComponent>();
 
-		//auto& mc = basePlatform.AddComponent<MaterialComponent>();
 		LCameraComponent& CameraComponent = BasePlatform.AddComponent<LCameraComponent>();
 		LK_CORE_DEBUG_TAG("Project", "Created transform, sprite, material and camera components for platform entity");
 
-		sc.SetSize(20, 20);
-		sc.Color = Color::RGBA::Green;
-		// Rotate platform
+		SpriteComponent.SetSize(20, 20);
+		SpriteComponent.Color = Color::RGBA::Green;
 
-		// Center origin
-		auto& tc = BasePlatform.Transform();
-		tc.Translation.x = sc.Size.x * 0.50f;
-		tc.Translation.y = sc.Size.y * 0.50f;
+		/* Center origin. */
+		LTransformComponent& TransformComponent = BasePlatform.Transform();
+		TransformComponent.Translation.x = SpriteComponent.Size.x * 0.50f;
+		TransformComponent.Translation.y = SpriteComponent.Size.y * 0.50f;
 
-		//LK_CORE_DEBUG_TAG("Project", "Setting texture2D");
-		//mc.SetTexture(TextureLibrary::Get()->GetTexture2D("atte_square"));
-
-		LK_CORE_DEBUG_TAG("Project", "Creating scene camera and setting it to perspective");
 		CameraComponent.Camera = TObjectPtr<LSceneCamera>::Create();
 		CameraComponent.Camera->SetPerspective(60.0f, 0.10f, 5000.0f);
 
 		if (bSetAsActive)
 		{
-			ActiveProject = project;
+			ActiveProject = Project;
 		}
 
-		return project;
+		return Project;
 	}
 
 	// TODO
 	TObjectPtr<LProject> LProject::CreateDebugProject(const bool bSetAsActive)
 	{
+		LK_MARK_FUNC_NOT_IMPLEMENTED("Not ready");
 #if 0
-		TObjectPtr<LProject> project = TObjectPtr<LProject>::Create("UntitledProject");
+		TObjectPtr<LProject> Project = TObjectPtr<LProject>::Create("UntitledProject");
 
 		LK_CORE_DEBUG_TAG("Project", "Creating base entity");
-		LEntity atteEntity = project->Scene->CreateEntity("Atte");
-		LSpriteComponent& sc = atteEntity.AddComponent<LSpriteComponent>();
+		LEntity atteEntity = Project->Scene->CreateEntity("Atte");
+		LSpriteComponent& SpriteComponent = atteEntity.AddComponent<LSpriteComponent>();
 		LCameraComponent& CameraComponent = atteEntity.AddComponent<LCameraComponent>();
 		LK_CORE_DEBUG_TAG("Project", "Created transform, sprite, material and camera components for base entity");
 
-		sc.SetSize(10, 10);
-		sc.Color = Color::RGBA::Green;
+		SpriteComponent.SetSize(10, 10);
+		SpriteComponent.Color = Color::RGBA::Green;
 
-		// Center origin
-		auto& tc = atteEntity.Transform();
-		tc.Translation.x = sc.Size.x * 0.50f;
-		tc.Translation.y = sc.Size.y * 0.50f;
+		/* Center origin. */
+		LTransformComponent& TransformComponent = atteEntity.Transform();
+		TransformComponent.Translation.x = SpriteComponent.Size.x * 0.50f;
+		TransformComponent.Translation.y = SpriteComponent.Size.y * 0.50f;
 
-		LK_CORE_DEBUG_TAG("Project", "Creating scene camera and setting it to perspective");
+		LK_CORE_DEBUG_TAG("Project", "Creating SpriteComponentene camera and setting it to perspective");
 		CameraComponent.Camera = TObjectPtr<LSceneCamera>::Create();
 		CameraComponent.Camera->SetPerspective(60.0f, 0.10f, 5000.0f);
 
 		if (bSetAsActive)
 		{
-			ActiveProject = project;
+			ActiveProject = Project;
 		}
 
-		return project;
+		return Project;
 #endif
 		return nullptr;
 

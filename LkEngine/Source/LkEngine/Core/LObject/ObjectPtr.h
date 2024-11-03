@@ -10,7 +10,7 @@
 #include "LkEngine/Core/LObject/Object.h"
 
 /** Log whenever a reference is added/removed. */
-#define LK_DEBUG_LOG_LIVE_REFERENCES 1
+#define LK_DEBUG_LOG_LIVE_REFERENCES 0
 
 
 namespace LkEngine {

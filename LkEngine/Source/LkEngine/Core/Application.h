@@ -108,9 +108,12 @@ namespace LkEngine {
         FTimestep GetTimestep() const { return Timestep; } /// TODO: MOVE ELSEWHERE
         uint32_t GetCurrentFrameIndex() const { return m_CurrentFrameIndex; }
 
-        static LApplication* Get() { return Instance; }
+        FORCEINLINE LPerformanceProfiler* GetPerformanceProfiler()
+        {
+            return PerformanceProfiler;
+        }
 
-        FThreadData Test_ThreadData2{};
+        static LApplication* Get() { return Instance; }
 
     private:
         ApplicationSpecification Specification{};
@@ -142,6 +145,9 @@ namespace LkEngine {
 		std::vector<FEventCallback> EventCallbacks;
 
         TObjectPtr<LProject> Project{};
+
+        LPerformanceProfiler* PerformanceProfiler{};
+        std::unordered_map<const char*, LPerformanceProfiler::FFrameData> ProfilerPreviousFrameData;
 
         inline static LApplication* Instance = nullptr;
 

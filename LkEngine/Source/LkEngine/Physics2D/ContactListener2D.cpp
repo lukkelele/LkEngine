@@ -8,6 +8,7 @@
 
 namespace LkEngine {
 
+    #if 0 /// FIXME
     ContactListener2D::ContactListener2D()
     {
     }
@@ -77,4 +78,5 @@ namespace LkEngine {
         }
     }
 
+    #endif
 }

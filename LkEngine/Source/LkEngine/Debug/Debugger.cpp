@@ -40,6 +40,7 @@ namespace LkEngine {
 
     void Debugger::AttachDebugDrawer2D(void* world2D, int drawFlags)
     {
+    #if 0 /// DISABLED FOR NOW
         if (Debugger2D::GetCurrentAPI() == Physics2D::API::Box2D)
         {
         }
@@ -67,6 +68,7 @@ namespace LkEngine {
 		drawDebugger->SetFlags(b2Draw::e_shapeBit);
 
 		LK_CORE_DEBUG("Added debug drawer for Box2D");
+    #endif
     }
 
 

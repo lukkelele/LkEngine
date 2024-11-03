@@ -62,6 +62,8 @@ namespace LkEngine {
         Editor->Initialize();
         LayerStack.PushOverlay(Editor.get());
     #endif
+
+        PerformanceProfiler = new LPerformanceProfiler();
     }
 
     void LApplication::Run()
@@ -160,7 +162,7 @@ namespace LkEngine {
 
         for (TObjectPtr<LLayer>& Layer : LayerStack)
         {
-            Layer->OnImGuiRender();
+            Layer->OnRenderUI();
         }
     }
 
@@ -200,7 +202,7 @@ namespace LkEngine {
 
 		Window->ProcessEvents();
 
-		std::scoped_lock<std::mutex> lock(EventQueueMutex);
+		std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
 		while (EventQueue.size() > 0)
 		{
             /* Invoke event from the queue and remove it after. */

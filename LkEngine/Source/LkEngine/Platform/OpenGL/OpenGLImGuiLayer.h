@@ -18,6 +18,7 @@ namespace LkEngine {
          * @brief TODO
          */
         virtual void OnUpdate(const float DeltaTime) {}
+        virtual void OnRenderUI() override {};
 
         virtual void OnAttach() override {}
         virtual void OnDetach() override {}

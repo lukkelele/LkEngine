@@ -47,6 +47,14 @@
 	#define LK_ITOA(c, buf, size, p)  void() // FIXME
 #endif
 
+/* Log formatter. */
+#ifdef SPDLOG_USE_STD_FORMAT
+#	define LK_FMT_LIB  std
+#else
+#	define LK_FMT_LIB  spdlog::fmt_lib
+#endif
+#define LK_FORMAT_STRING(...)  LK_FMT_LIB::format(__VA_ARGS__)
+
 /* Mark a function 'Not implemented'. */
 #define LK_MARK_FUNC_NOT_IMPLEMENTED(...) \
 	LK_CORE_ASSERT(false, "[ Function not implemented ]\n{}" __VA_OPT__("\nDev note: {}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))

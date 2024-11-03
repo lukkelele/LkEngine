@@ -20,6 +20,9 @@ namespace LkEngine {
 	/// FIXME: Unify constructors here
 	///
 
+	FOnSceneSetActive GOnSceneSetActive{};
+	FOnSceneCreated   GOnSceneCreated{};
+
 	LScene::LScene(const bool IsEditorScene)
 		: bIsEditorScene(IsEditorScene)
 		, Name("")
@@ -69,8 +72,9 @@ namespace LkEngine {
 			bIsActiveScene = true;
 			m_ActiveScene = this;
 
+			GOnSceneSetActive.Broadcast(this);
 			/// FIXME
-			LInput::SetScene(TObjectPtr<LScene>(this));
+			//LInput::SetScene(TObjectPtr<LScene>(this));
 		}
 		
 		if (bIsEditorScene)
@@ -278,6 +282,7 @@ namespace LkEngine {
 	template<>
 	void LScene::OnComponentAdded<LRigidBody2DComponent>(LEntity Entity, LRigidBody2DComponent& rigidBody2DComponent)
 	{
+		#if 0 /// DISABLED
 		auto sceneView = m_Registry.view<Box2DWorldComponent>();
 		auto& world = m_Registry.get<Box2DWorldComponent>(sceneView.front()).World;
 
@@ -329,6 +334,7 @@ namespace LkEngine {
 		body->SetBullet(rigidBody2D.IsBullet);
 		body->GetUserData().pointer = (uintptr_t)entityID;
 		rigidBody2D.RuntimeBody = body;
+		#endif
 		//LK_CORE_DEBUG("OnComponentAdded<LRigidBody2DComponent>  {}", entity.Name());
 	}
 
@@ -338,6 +344,7 @@ namespace LkEngine {
 		LEntity Entity = { InEntity, this };
 		auto& transform = Entity.Transform();
 
+		#if 0 /// DISABLED
 		if (Entity.HasComponent<LRigidBody2DComponent>())
 		{
 			auto& rigidBody2D = Entity.GetComponent<LRigidBody2DComponent>();
@@ -358,6 +365,8 @@ namespace LkEngine {
 			fixtureDef.restitution = 0.30f;
 			body->CreateFixture(&fixtureDef);
 		}
+
+		#endif
 	}
 
 	void LScene::ParentEntity(LEntity Entity, LEntity Parent)
@@ -508,7 +517,9 @@ namespace LkEngine {
 
 	void LScene::EndScene()
 	{
+		#if 0 /// DISABLED
 		GetBox2DWorld().World->DebugDraw();
+		#endif
 	}
 
 	void LScene::SetCamera(TObjectPtr<LSceneCamera> cam)
@@ -526,10 +537,13 @@ namespace LkEngine {
 		EditorCamera = InEditorCamera;
 	}
 
+	#if 0 /// DISABLED
 	Box2DWorldComponent& LScene::GetBox2DWorld()
 	{
+		/// FIXME
 		return m_Registry.get<Box2DWorldComponent>(m_SceneEntity);
 	}
+	#endif
 
 	void LScene::SetActiveScene(TObjectPtr<LScene> InScene)
 	{
@@ -542,20 +556,24 @@ namespace LkEngine {
 		m_Registry.clear<AllComponents>();
 	}
 
+	#if 0 /// DISABLED
 	void LScene::Initiate2DPhysics(const Physics2DSpecification& specification)
 	{
 		// Check to see if there already exists a 2D world for the scene and exit function if it does
 		if (m_Registry.has<Box2DWorldComponent>(m_SceneEntity) == true)
 		{
+		#if 0 /// DISABLED
 			LK_CORE_DEBUG_TAG("Scene", "2D physics already initialized for the scene \"{}\"", Name);
 			auto& box2dWorld = m_Registry.get<Box2DWorldComponent>(m_SceneEntity);
 			if (!box2dWorld.HasDebugDrawerAttached() && specification.DebugDrawer)
 			{
 				//Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 			}
+		#endif
 		}
 		else
 		{
+		#if 0 /// DISABLED
 			b2Vec2 gravity = Utils::ConvertToB2(specification.Gravity);
 			Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(gravity));
 			box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
@@ -565,8 +583,10 @@ namespace LkEngine {
 			{
 				//Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
 			}
+		#endif
 		}
 	}
+	#endif
 
 	static void InsertMeshMaterials(TObjectPtr<LMeshSource> meshSource, 
 									std::unordered_set<FAssetHandle>& assetList)

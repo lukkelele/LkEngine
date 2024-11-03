@@ -1,8 +1,14 @@
 #include "LKpch.h"
 #include "LkEngine/Editor/EditorLayer.h"
 
+#include "EditorTabManager.h"
+#include "ComponentEditor.h"
+#include "NodeEditor/NodeEditor.h"
+
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
+
+#include "LkEngine/Project/Project.h"
 
 #include "LkEngine/Renderer/Renderer2D.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
@@ -54,7 +60,10 @@ namespace LkEngine {
 
 		LeftSidebarSize.y = ViewportBounds[1].Y;
 		RightSidebarSize.y = ViewportBounds[1].Y;
+
+		#if 0 /// DISABLED
 		LastBottomBarSize = Utils::ConvertToImVec2(BottomBarSize);
+		#endif
 
 		EditorWindowPos = { LeftSidebarSize.x, BottomBarSize.y };
 		EditorWindowSize.x = ViewportBounds[1].X - LeftSidebarSize.x - RightSidebarSize.x;
@@ -93,41 +102,37 @@ namespace LkEngine {
 
 		/* Attach to LWindow delegates. */
 		LK_CORE_ASSERT(Window, "Window reference is nullptr");
-		if (Window)
+		FWindowData& WindowData = Window->GetWindowData();
+		LK_CORE_DEBUG_TAG("Editor", "Attaching to window delegates");
+
+		/* Mouse button pressed. */
+		WindowData.OnMouseButtonPressed.Add([&](const FMouseButtonData& MouseButtonData)
 		{
-			FWindowData& WindowData = Window->GetWindowData();
-			LK_CORE_DEBUG_TAG("Editor", "Attaching to window delegates");
+			LK_CORE_TRACE_TAG("Editor", "MouseButtonPressed: {}", static_cast<int>(MouseButtonData.Button));
+		});
 
-			/* Mouse button pressed. */
-			WindowData.OnMouseButtonPressed.Add([&](const FMouseButtonData& MouseButtonData)
-			{
-				LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed: {}", static_cast<int>(MouseButtonData.Button));
-			});
+		/* Mouse button released. */
+		WindowData.OnMouseButtonReleased.Add([&](const FMouseButtonData& MouseButtonData)
+		{
+			LK_CORE_TRACE_TAG("Editor", "MouseButtonReleased: {}", static_cast<int>(MouseButtonData.Button));
+		});
 
-			/* Mouse button released. */
-			WindowData.OnMouseButtonReleased.Add([&](const FMouseButtonData& MouseButtonData)
+		/* Mouse scroll. */
+		WindowData.OnMouseScrolled.Add([&](const EMouseScroll MouseScroll)
+		{
+			LK_CORE_TRACE_TAG("Editor", "Mouse Scroll: {}", Enum::ToString(MouseScroll));
+			if (EditorCamera)
 			{
-				LK_CORE_DEBUG_TAG("Editor", "MouseButtonReleased: {}", static_cast<int>(MouseButtonData.Button));
-			});
-
-			/* Mouse scroll. */
-			WindowData.OnMouseScrolled.Add([&](const EMouseScroll MouseScroll)
-			{
-				LK_CORE_DEBUG_TAG("Editor", "Mouse Scroll: {}", Enum::ToString(MouseScroll));
-				if (EditorCamera)
+				if (MouseScroll == EMouseScroll::Up)
 				{
-					if (MouseScroll == EMouseScroll::Up)
-					{
-						EditorCamera->MouseZoom(0.01f);
-					}
-					else if (MouseScroll == EMouseScroll::Down)
-					{
-						EditorCamera->MouseZoom(-0.01f);
-					}
+					EditorCamera->MouseZoom(0.01f);
 				}
-			});
-
-		}
+				else if (MouseScroll == EMouseScroll::Down)
+				{
+					EditorCamera->MouseZoom(-0.01f);
+				}
+			}
+		});
 
         /* Viewport Framebuffer. */
 		LK_CORE_TRACE_TAG("Editor", "Creating viewport framebuffer");
@@ -140,9 +145,9 @@ namespace LkEngine {
 		FramebufferSpec.ClearColorOnLoad = false;
 		FramebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
 		FramebufferSpec.DebugName = "EditorLayer-Framebuffer";
-        FramebufferSpec.Width = LWindow::Get().GetWidth();
-        FramebufferSpec.Height = LWindow::Get().GetHeight();
-		m_ViewportFramebuffer = LFramebuffer::Create(FramebufferSpec);
+        FramebufferSpec.Width = Window->GetWidth();
+        FramebufferSpec.Height = Window->GetHeight();
+		ViewportFramebuffer = LFramebuffer::Create(FramebufferSpec);
 
 		/* Editor Camera. */
 		EditorCamera = TObjectPtr<LEditorCamera>::Create(60.0f,                /* FOV    */
@@ -169,7 +174,7 @@ namespace LkEngine {
 		// handles the redirection of input and physics 
 		m_Project = LProject::CreateEmptyProject("Editor", true);
 
-		m_ViewportFramebuffer->Bind();
+		ViewportFramebuffer->Bind();
 
 		/* Bind delegate for GEditorOnSelectionChanged. */
 		auto OnSelectionChanged = [&](const LObject& Object)
@@ -262,6 +267,7 @@ namespace LkEngine {
 				ImGui::TreePop(); /* Colors. */
 			}
 
+		#if 0 /// DISABLED
 			/* Mode Selector. */
 			ImGui::BeginGroup();
 			{
@@ -278,9 +284,8 @@ namespace LkEngine {
 					ModeButtonTintColor))
 				{
 					LK_CORE_DEBUG("Push tab");
-					//TabManager::NewTab(
 					TabManager.NewTab(
-						LString::Format("Node EditorLayer-{}", TabManager.GetTabCount()).CStr(),
+						LK_FORMAT_STRING("Node EditorLayer-{}", TabManager.GetTabCount()).c_str(),
 						ETabType::NodeEditor
 					);
 				}
@@ -300,6 +305,7 @@ namespace LkEngine {
 				}
 			}
 			ImGui::EndGroup();
+		#endif
 
 			SceneManagerPanel->OnRenderUI();
 			DebugPanel->OnRenderUI();
@@ -309,7 +315,7 @@ namespace LkEngine {
 			if ((WindowSize.x != LastSidebarLeftSize.x)
 				|| (WindowSize.y != LastSidebarLeftSize.y))
 			{
-				//bWindowsHaveChangedInSize = true;
+				bWindowsHaveChangedInSize = true;
 			}
 
 			LastSidebarLeftPos = WindowPos;
@@ -344,7 +350,7 @@ namespace LkEngine {
 			const ImVec2 WindowSize = ImGui::GetWindowSize();
 			if (WindowSize.x != RightSidebarSize.x || WindowSize.y != RightSidebarSize.y)
 			{
-				//bWindowsHaveChangedInSize = true;
+				bWindowsHaveChangedInSize = true;
 			}
 			LastSidebarRightPos = ImGui::GetWindowPos();
 			LastSidebarRightSize = WindowSize;
@@ -451,7 +457,7 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_ViewportTexture()
 	{
-		TObjectPtr<LImage2D> ViewportImage = m_ViewportFramebuffer->GetImage(0);
+		TObjectPtr<LImage2D> ViewportImage = ViewportFramebuffer->GetImage(0);
 
 		UI::Image(ViewportImage, ImVec2(EditorWindowSize.x - 2, EditorWindowSize.y + MenuBarSize.y), ImVec2(0, 1), ImVec2(1, 0));
 
@@ -592,7 +598,8 @@ namespace LkEngine {
 				ImGui::Text("Pos (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
 				ImGui::Text("Camera Zoom: %.3f", EditorCamera->ZoomSpeed());
 				ImGui::Text("Speed: %.3f", EditorCamera->GetCameraSpeed());
-				ImGui::Text("Forward Direction: %s", EditorCamera->GetForwardDirection<LVector>().ToString().CStr());
+				/// DISABLED UNTIL LString IS WORKING AGAIN
+				//ImGui::Text("Forward Direction: %s", EditorCamera->GetForwardDirection<LVector>().ToString().CStr());
 
 				ImGui::Text("Distance: %.2f", EditorCamera->GetDistance());
 				ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", EditorCamera->GetFocalPoint().x, EditorCamera->GetFocalPoint().y, EditorCamera->GetFocalPoint().z);
@@ -639,7 +646,8 @@ namespace LkEngine {
             LEntity entity = { ent, Scene };
 
 			bool bIsSelected = false;
-            std::string label = fmt::format("{}", entity.Name());
+            //std::string label = fmt::format("{}", entity.Name());
+            std::string label = LK_FORMAT_STRING("{}", entity.Name());
             if (ImGui::Selectable(label.c_str(), &bIsSelected, selectable_flags))
             {
 				//SELECTION::SelectedEntityID = entity.GetComponent<IDComponent>().ID;
@@ -697,7 +705,7 @@ namespace LkEngine {
 			}
 
 			ImGui::SeparatorText("Blend Function");
-			if (ImGui::BeginCombo(fmt::format("Source: {}", RenderContext->GetCurrentSourceBlendFunctionName()).c_str(), 
+			if (ImGui::BeginCombo(LK_FORMAT_STRING("Source: {}", RenderContext->GetCurrentSourceBlendFunctionName()).c_str(), 
 				                  nullptr, ImGuiComboFlags_NoPreview))
 			{
 				if (ImGui::MenuItem("Zero"))
@@ -725,7 +733,7 @@ namespace LkEngine {
 
 			/* Destination Blend. */
 			if (ImGui::BeginCombo(
-					fmt::format("Destination: {}", RenderContext->GetCurrentDestinationBlendFunctionName()).c_str(), 
+					LK_FORMAT_STRING("Destination: {}", RenderContext->GetCurrentDestinationBlendFunctionName()).c_str(), 
 					nullptr, ImGuiComboFlags_NoPreview)
 				)
 			{
@@ -810,6 +818,7 @@ namespace LkEngine {
 			ImGui::EndCombo(); /* CreateMenu */
 		}
 
+	#if 0 /// DISABLED
 		// Selectable geometric shapes
 		// Can be clicked on to select diffent shapes instead of dropdown menu
 		ImGui::BeginGroup();
@@ -902,6 +911,7 @@ namespace LkEngine {
 
 		}
 		ImGui::EndGroup();
+		#endif
 
 		static constexpr uint32_t shapeSizeColumnSize = 50;
 		if (geometricShapes[geometricShapeCurrentIndex] == "Rectangle")

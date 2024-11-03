@@ -54,7 +54,7 @@ namespace LkEngine {
 			auto& tag = Entity.GetComponent<LTagComponent>().Tag;
 			Out << YAML::Key << "Tag" << YAML::Value << tag;
 
-			Out << YAML::EndMap; // LTagComponent
+			Out << YAML::EndMap; // TagComponent
 		}
 
 		if (Entity.HasComponent<LTransformComponent>())
@@ -165,6 +165,7 @@ namespace LkEngine {
 			SerializeEditorCamera(Out, *Editor->GetEditorCamera());
 		}
 
+		#if 0 /// DISABLED
 		// 2D Physics
 		Out << YAML::Key << "Physics2D";
 		Out << YAML::Value << YAML::BeginMap;
@@ -183,6 +184,7 @@ namespace LkEngine {
 			}
 		}
 		Out << YAML::Value << YAML::EndMap;
+		#endif
 
 		/* Entities. */
 		Out << YAML::Key << "Entities";

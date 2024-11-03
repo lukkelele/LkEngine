@@ -7,9 +7,9 @@
 
 namespace LkEngine {
 
-	static void GLFWErrorCallback(int error, const char* description)
+	static void GLFWErrorCallback(int Error, const char* Description)
 	{
-		LK_CORE_ERROR_TAG("GLFW", "GLFW Error ({0}): {1}", error, description);
+		LK_CORE_ERROR_TAG("GLFW", "Error ({0}): {1}", Error, Description);
 	}
 
 	static void GLFW_FramebufferSizeCallback(GLFWwindow* GLFWWindow, int Width, int Height)
@@ -82,7 +82,7 @@ namespace LkEngine {
 			EDestinationBlendFunction::One_Minus_SourceAlpha
 		);
 
-		RenderContext->SetName(LString::Format("{}-Context", LRendererAPI::GetName().CStr()).CStr());
+		RenderContext->SetName(LK_FORMAT_STRING("{}-Context", LRendererAPI::GetName().CStr()).c_str());
 
 		SetVSync(true);
 		LK_CORE_DEBUG_TAG("Graphics Context", "Name: {}", RenderContext->GetName());
@@ -130,9 +130,11 @@ namespace LkEngine {
 				case GLFW_REPEAT:
 				{
 					LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Held);
-					//KeyPressedEvent Event(static_cast<EKey>(Key), 1);
-					//WindowDataRef.EventCallback(Event);
-					//WindowDataRef.OnWindowEvent.Broadcast(Event);
+				#if 0
+					KeyPressedEvent Event(static_cast<EKey>(Key), 1);
+					WindowDataRef.EventCallback(Event);
+					WindowDataRef.OnWindowEvent.Broadcast(Event);
+				#endif
 
 					break;
 				}
@@ -143,6 +145,7 @@ namespace LkEngine {
 		glfwSetFramebufferSizeCallback(GlfwWindow, [](GLFWwindow* GlfwWindow, int Width, int Height)
 		{
 			LK_CORE_DEBUG_TAG("GLFW", "Framebuffer Size Callback  ({}, {})", Width, Height);
+			/* FIXME: Should be no raw OpenGL calls. */
 			glViewport(0, 0, Width, Height);
 		});
 

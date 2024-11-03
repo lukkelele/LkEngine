@@ -55,7 +55,8 @@ namespace LkEngine {
 
 		if (m_Scene)
 		{
-			ImGui::SeparatorText(fmt::format("Current Scene - {}", m_Scene->Name).c_str());
+			//ImGui::SeparatorText(fmt::format("Current Scene - {}", m_Scene->Name).c_str());
+			ImGui::SeparatorText(LK_FORMAT_STRING("Current Scene - {}", m_Scene->Name).c_str());
 			ImGui::Text("Entities: %d", m_Scene->m_Registry.size());
 			m_Scene->m_Registry.each([&](auto EntityID)
 			{
@@ -365,19 +366,16 @@ namespace LkEngine {
 		}
 
 		const std::string& Tag = Entity.GetComponent<LTagComponent>().Tag;
-		std::string tagWithEntityHandle = fmt::format("{}  ({})", Tag, Entity.m_EntityHandle);
+		std::string tagWithEntityHandle = LK_FORMAT_STRING("{}  ({})", Tag, Entity.m_EntityHandle);
 
 		//bool bEntitySelected = SELECTION::SelectedEntity && (SELECTION::SelectedEntity.GetUUID() == Entity.GetUUID());
 		const bool bEntitySelected = false;
 		ImGuiTreeNodeFlags flags = (bEntitySelected ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		//bool bOpened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, flags, tag.c_str());
 		bool bOpened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, flags, tagWithEntityHandle.c_str());
 
 		if (ImGui::IsItemClicked())
 		{
-			//SELECTION::SelectedEntity = Entity;
-			//LK_CORE_DEBUG("Selecting Entity {} ({})", Entity.Name(), Entity.GetUUID());
 		}
 
 		bool EntityDeleted = false;

@@ -58,13 +58,13 @@ namespace LkEngine {
 
 	LWindowsCrashHandler::~LWindowsCrashHandler()
 	{
-        // Unbind exception filter.
-        // The crashdump should already have been generated at this point.
         SetUnhandledExceptionFilter(nullptr);
 	}
 
     LString LWindowsCrashHandler::GenerateApplicationCrashDump()
     {
+        /* Disabled for now. */
+#if 0
         LString DumpInfo = "APPLICATION_CRASH";
         if (!WindowsExceptionStringBuffer.empty())
         {
@@ -78,6 +78,8 @@ namespace LkEngine {
         //LK_CORE_DEBUG_TAG("WindowsCrashHandler", "Generated application crashdump, returning:\n\"\"\"\n{}\n\"\"\"", *DumpInfo);
 
         return DumpInfo;
+#endif
+        return "";
     }
 
     void LWindowsCrashHandler::LogCrashInformation(LStringView CrashInformation)
@@ -89,7 +91,9 @@ namespace LkEngine {
     {
 		std::ostringstream oss;
 
-		// Capture stack trace.
+        /* Disabled for now. */
+    #if 0
+		/* Capture stack trace. */
 		const int MaxFrames = 128;
 		void* Callstack[MaxFrames];
 		USHORT frames = CaptureStackBackTrace(0, MaxFrames, Callstack, nullptr);
@@ -105,6 +109,7 @@ namespace LkEngine {
 			    oss << *LString::Format(" {}. ", i) << Callstack[i] << "\n";
             }
 		}
+    #endif
 
         return oss.str();
     }

@@ -8,6 +8,8 @@
 
 namespace LkEngine {
 
+    /// FIXME: DISABLED / REMOVE LATER ON
+    #if 0
     Box2DContactListener::Box2DContactListener()
     {
     }
@@ -47,5 +49,6 @@ namespace LkEngine {
 			LK_CORE_DEBUG_TAG("Box2DContactListener", "EndContact --> ({}   and   {})", a.Name(), b.Name());
         }
     }
+    #endif
 
 }

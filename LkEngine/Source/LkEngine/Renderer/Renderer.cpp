@@ -157,11 +157,10 @@ namespace LkEngine {
 
 	TObjectPtr<LFramebuffer>& LRenderer::GetViewportFramebuffer()
 	{
-		/// FIXME
-		// Editor is enabled, thus the render target is a texture that the Editor is responsible for
+		/* TODO: Should not do it like this for the editor, skip the LRenderer here entirely... */
 		if (LEditorLayer* Editor = LEditorLayer::Get(); Editor && Editor->IsEnabled())
 		{
-			return Editor->m_ViewportFramebuffer;
+			return Editor->ViewportFramebuffer;
 		}
 		else
 		{

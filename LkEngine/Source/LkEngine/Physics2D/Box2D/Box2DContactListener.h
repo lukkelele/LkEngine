@@ -10,6 +10,8 @@
 
 namespace LkEngine {
 
+    /// FIXME: DISABLED / REMOVE LATER ON
+    #if 0
     class Box2DContactListener : public b2ContactListener
     {
     public:
@@ -32,5 +34,6 @@ namespace LkEngine {
         }
 
     };
+    #endif
 
 }

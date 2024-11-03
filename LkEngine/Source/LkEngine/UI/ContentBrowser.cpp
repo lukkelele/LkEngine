@@ -57,13 +57,10 @@ namespace LkEngine {
 
 	void LContentBrowser::OnRenderUI()
 	{
-		if (ImGui::ImageButton(
-				reinterpret_cast<ImTextureID>(LContentBrowser::FileIconTexture->GetRendererID()), 
-				ImVec2(48, 48), 
-				ImVec2(0, 0))
-            )
+        /// FIXME
+		if (ImGui::ImageButton("FILE_ICON", (ImTextureID)(LContentBrowser::FileIconTexture->GetRendererID()), ImVec2(48, 48), ImVec2(0, 0)))
 		{
-		    LK_CORE_DEBUG_TAG("ContentBrowser", "Clicked FileIcon!");
+		    LK_CORE_DEBUG_TAG("ContentBrowser", "Clicked FileIcon");
 		}
 
         // File Icon
@@ -90,9 +87,10 @@ namespace LkEngine {
 
         ImGui::SameLine();
 
+        /// FIXME
         // Folder Icon
         static std::string folder_data = "FOLDER";
-		if (ImGui::ImageButton((void*)FolderIconTexture->GetRendererID(), ImVec2(48, 48), ImVec2(0, 0)))
+		if (ImGui::ImageButton("FOLDER_ICON", (ImTextureID)FolderIconTexture->GetRendererID(), ImVec2(48, 48), ImVec2(0, 0)))
 		{
 		    LK_CORE_DEBUG_TAG("ContentBrowser", "Clicked FolderIcon!");
 		}

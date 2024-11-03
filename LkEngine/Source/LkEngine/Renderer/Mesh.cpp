@@ -55,7 +55,7 @@ namespace LkEngine {
 	{
 		LK_CORE_TRACE("------------------------------------------------------");
 		LK_CORE_TRACE("Vertex Buffer Dump");
-		LK_CORE_TRACE("Mesh: {0}", m_FilePath);
+		LK_CORE_TRACE("Mesh: {0}", m_FilePath.string());
 		for (size_t i = 0; i < m_Vertices.size(); i++)
 		{
 			const FVertex& Vertex = m_Vertices[i];
@@ -81,7 +81,8 @@ namespace LkEngine {
 		const std::vector<TObjectPtr<LMaterial>>& MeshMaterials = m_MeshSource->GetMaterials();
 		Materials = TObjectPtr<LMaterialTable>::Create(static_cast<uint32_t>(MeshMaterials.size()));
 
-		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials!", Handle, static_cast<uint32_t>(MeshMaterials.size()));
+		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials!", 
+						  Handle, static_cast<uint32_t>(MeshMaterials.size()));
 		for (uint32_t i = 0; i < static_cast<decltype(i)>(MeshMaterials.size()); i++)
 		{
 			TObjectPtr<LMaterialAsset> MaterialAsset = TObjectPtr<LMaterialAsset>::Create(MeshMaterials[i]);
@@ -99,7 +100,8 @@ namespace LkEngine {
 		const std::vector<TObjectPtr<LMaterial>>& MeshMaterials = meshSource->GetMaterials();
 		Materials = TObjectPtr<LMaterialTable>::Create(static_cast<uint32_t>(MeshMaterials.size()));
 
-		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials", Handle, static_cast<uint32_t>(MeshMaterials.size()));
+		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials", 
+						  Handle, static_cast<uint32_t>(MeshMaterials.size()));
 		for (uint32_t i = 0; i < static_cast<decltype(i)>(MeshMaterials.size()); i++)
 		{
 			TObjectPtr<LMaterialAsset> MaterialAsset = TObjectPtr<LMaterialAsset>::Create(MeshMaterials[i]);

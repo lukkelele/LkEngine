@@ -292,6 +292,7 @@ namespace LkEngine::Math {
 
 namespace LkEngine::Utils {
 
+	#if 0 /// DISABLED
     glm::vec2 ConvertToGlm(const b2Vec2& vec2);
     glm::vec3 ConvertToGlm(const b2Vec3& vec3);
 
@@ -300,5 +301,6 @@ namespace LkEngine::Utils {
 
     ImVec2 ConvertToImVec2(const glm::vec2& vec2);
     ImVec4 ConvertToImVec4(const glm::vec4& vec4);
+	#endif
 
 }

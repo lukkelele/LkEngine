@@ -27,6 +27,14 @@ namespace LkEngine {
             return m_Collection; 
         }
 
+        FORCEINLINE int GetMaterials(std::unordered_map<std::string, TObjectPtr<LMaterial>>& InMaterialMap) const
+        { 
+            InMaterialMap.clear();
+            InMaterialMap = m_Collection;
+
+            return InMaterialMap.size(); 
+        }
+
         FORCEINLINE std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>>& GetLoadedMaterialAssets() 
         { 
             return m_LoadedMaterialAssets; 

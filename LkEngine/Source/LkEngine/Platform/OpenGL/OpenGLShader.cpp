@@ -59,7 +59,7 @@ namespace LkEngine {
 			char* ErrorMessage = (char*)_malloca(Length * sizeof(char));
 			LK_OpenGL(glGetShaderInfoLog(ShaderID, Length, &Length, ErrorMessage));
 			LK_CORE_ERROR_TAG("OpenGLShader", "Failed to compile {} shader at {}, \"{}\"", 
-							  ((ShaderType == GL_VERTEX_SHADER) ? "vertex" : "fragment"), FilePath, ErrorMessage);
+							  ((ShaderType == GL_VERTEX_SHADER) ? "vertex" : "fragment"), FilePath.string(), ErrorMessage);
 			LK_OpenGL(glDeleteShader(ShaderID));
 
 			return 0;

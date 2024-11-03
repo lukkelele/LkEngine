@@ -291,6 +291,7 @@ namespace LkEngine{
 
 	struct Box2DWorldComponent 
 	{
+	#if 0 /// FIXME: DISABLED FOR NOW
 		std::unique_ptr<b2World> World;
 		ContactListener2D ContactListener;
 		bool DebugDrawerAttached = false;
@@ -322,6 +323,7 @@ namespace LkEngine{
 		{ 
 			return DebugDrawerAttached; 
 		}
+	#endif
 	};
 
 	struct LSceneComponent

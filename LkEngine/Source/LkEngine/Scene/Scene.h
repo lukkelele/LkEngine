@@ -29,9 +29,12 @@ namespace LkEngine {
 	using EntityMap = std::unordered_map<UUID, LEntity>;
 
 	LK_DECLARE_MULTICAST_DELEGATE(FOnSceneSetActive, const TObjectPtr<LScene>&);
+	LK_DECLARE_MULTICAST_DELEGATE(FOnSceneCreated,   const TObjectPtr<LScene>&);
 
 	/** OnSceneSetActive. */
-	static FOnSceneSetActive GOnSceneSetActive;
+	//static FOnSceneSetActive GOnSceneSetActive;
+	extern FOnSceneSetActive GOnSceneSetActive;
+	extern FOnSceneCreated   GOnSceneCreated;
 
 	class LScene : public LAsset
 	{
@@ -97,8 +100,10 @@ namespace LkEngine {
 			return m_SceneID; 
 		}
 
+		#if 0 /// DISABLED
 		Box2DWorldComponent& GetBox2DWorld();
 		void Initiate2DPhysics(const Physics2DSpecification& PhysicsSpecification);
+		#endif
 
 		void CopyTo(TObjectPtr<LScene>& TargetScene);
 

@@ -5,7 +5,6 @@
  *******************************************************************/
 #pragma once
 
-#include <memory>
 #include <initializer_list>
 #include <stdexcept>
 #include <utility>
@@ -304,6 +303,7 @@ namespace LkEngine {
 		/** Internal utility functions. */
 		FORCEINLINE void EnsureCapacity(const SizeType RequiredCapacity)
 		{
+			LK_MARK_FUNC_NOT_IMPLEMENTED();
 			if (RequiredCapacity > m_Capacity)
 			{
 				Reallocate(std::max(m_Capacity * 2, RequiredCapacity));
@@ -312,11 +312,14 @@ namespace LkEngine {
 
 		FORCEINLINE void Reallocate(const SizeType NewCapacity)
 		{
+			LK_MARK_FUNC_NOT_IMPLEMENTED();
+		#if 0
 			TUniquePtr<ElementType[]> NewData = std::make_unique<ElementType[]>(NewCapacity);
 			std::move(m_Data.get(), m_Data.get() + m_Size, NewData.get());
 
 			m_Data = std::move(NewData);
 			m_Capacity = NewCapacity;
+		#endif
 		}
 
 	protected:

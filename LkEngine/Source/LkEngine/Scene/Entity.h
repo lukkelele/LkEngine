@@ -203,3 +203,27 @@ namespace LkEngine {
 	};
 
 }
+
+/* TODO: Move to separate header. */
+/* Logging formatters. */
+template<>
+struct std::formatter<LkEngine::LEntity> : std::formatter<std::string>
+{
+    template <typename FormatContext>
+    auto format(const LkEngine::LEntity& Entity, FormatContext& Context) const
+    {
+		return LK_FMT_LIB::format_to(Context.out(), "{}", static_cast<entt::id_type>(Entity));
+    }
+};
+
+template<>
+struct std::formatter<entt::entity> : std::formatter<std::string>
+{
+    //auto format(const entt::entity& Entity, FormatContext& Context) -> decltype(Context.out())
+    template <typename FormatContext>
+    auto format(const entt::entity& Entity, FormatContext& Context) const
+    {
+		return LK_FMT_LIB::format_to(Context.out(), "{}", static_cast<entt::id_type>(Entity));
+    }
+};
+

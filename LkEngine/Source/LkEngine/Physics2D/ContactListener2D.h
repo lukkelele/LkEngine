@@ -1,12 +1,12 @@
 #pragma once
 
 #include <box2d/box2d.h>
-
-#define LK_CAST_TO_b2Body(_RUNTIME_BODY) static_cast<b2Body*>(_RUNTIME_BODY)
+#include <box2d/collision.h>
 
 
 namespace LkEngine {
 
+    #if 0 /// FIXME
     class ContactListener2D : public b2ContactListener
     {
     public:
@@ -29,6 +29,6 @@ namespace LkEngine {
         }
 
     };
-
+    #endif
 
 }

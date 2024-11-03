@@ -3,7 +3,7 @@
 
 #include "LkEngine/Core/Application.h"
 
-#include <imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
 
 
 namespace LkEngine {
@@ -81,8 +81,7 @@ namespace LkEngine {
                    const glm::vec4& tint_col, 
                    const glm::vec4& BorderColumn)
     {
-        //ImGui::Image((ImTextureID)texture->GetRendererID(), 
-        ImGui::Image(reinterpret_cast<ImTextureID>(texture->GetRendererID()),
+        ImGui::Image((ImTextureID)(texture->GetRendererID()),
                      ImVec2(size.x, size.y), 
                      ImVec2(uv0.x, uv0.y), 
                      ImVec2(uv1.x, uv1.y), 
@@ -97,8 +96,7 @@ namespace LkEngine {
                    const ImVec4& tint_col, 
                    const ImVec4& BorderColumn)
     {
-        //ImGui::Image((ImTextureID)image->GetRendererID(), 
-        ImGui::Image(reinterpret_cast<ImTextureID>(image->GetRendererID()),
+        ImGui::Image((ImTextureID)(image->GetRendererID()),
                      size, 
                      uv0, 
                      uv1, 

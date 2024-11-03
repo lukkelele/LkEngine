@@ -4,54 +4,46 @@
 
 namespace LkEngine {
     
-	static std::mutex s_AssetRegistryMutex;
+	static std::mutex AssetRegistryMutex;
 
 	FAssetMetadata& LAssetRegistry::operator[](const FAssetHandle AssetHandle)
 	{
-		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
-
-		LOG_ASSET("Retrieving AssetHandle {}", AssetHandle);
+		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
+		LK_ASSET_TRACE_TAG("AssetRegistry", "Retrieving asset handle: {}", AssetHandle);
 		return m_AssetRegistry[AssetHandle];
 	}
 
 	const FAssetMetadata& LAssetRegistry::Get(const FAssetHandle AssetHandle) const
 	{
-		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
+		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
 		LK_ASSERT(m_AssetRegistry.find(AssetHandle) != m_AssetRegistry.end());
-
 		return m_AssetRegistry.at(AssetHandle);
 	}
 
 	FAssetMetadata& LAssetRegistry::Get(const FAssetHandle AssetHandle)
 	{
-		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
-
+		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
 		return m_AssetRegistry[AssetHandle];
 	}
 
 	bool LAssetRegistry::Contains(const FAssetHandle AssetHandle) const
 	{
-		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
-
+		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
 		return m_AssetRegistry.find(AssetHandle) != m_AssetRegistry.end();
 	}
 
 	size_t LAssetRegistry::Remove(const FAssetHandle AssetHandle)
 	{
-		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
-
-		LOG_ASSET("Removing AssetHandle", AssetHandle);
+		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
+		LK_ASSET_TRACE_TAG("AssetRegistry", "Removing AssetHandle", AssetHandle);
 		return m_AssetRegistry.erase(AssetHandle);
 	}
 
 	void LAssetRegistry::Clear()
 	{
-		std::scoped_lock<std::mutex> lock(s_AssetRegistryMutex);
-
-		LOG_ASSET("Clearing registry");
+		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
+		LK_ASSET_DEBUG_TAG("AssetRegistry", "Clearing registry");
 		m_AssetRegistry.clear();
 	}
-
-
 
 }
