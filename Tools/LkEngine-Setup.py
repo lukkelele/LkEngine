@@ -10,26 +10,58 @@ import sys
 import os
 import subprocess
 import platform
+from pathlib import Path
 
-import ScriptUtils as Utils
+def IsPythonPackageInstalled(PackageName):
+    """Check if a Package is installed using pip."""
+    try:
+        subprocess.check_call(['python', '-m', 'pip', 'show', PackageName], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+RequiredPythonDependencies = [
+    "setuptools",
+    "requests",
+    "fake-useragent",
+    "colorama",
+]
+# Install Python dependencies.
+for RequiredPythonPackage in RequiredPythonDependencies:
+    if not IsPythonPackageInstalled(RequiredPythonPackage):
+        subprocess.check_call(['python', '-m', 'pip', 'install', RequiredPythonPackage])
 
 import colorama
 from colorama import Fore, Back, Style
 colorama.init()
 
-from ScriptUtils import ScriptLogger
+# Add 'Tools/Module' to path.
+sys.path.append(os.path.join(os.path.dirname(__file__), "Module"))
+
+import Module.ScriptUtils as Utils
+from Module.ScriptUtils import ScriptLogger
 Logger = ScriptLogger("LkEngine")
 
-from PythonClass import PythonConfiguration
-from PremakeClass import PremakeConfiguration
+from Module.PythonClass import PythonConfiguration
+from Module.PremakeClass import PremakeConfiguration
 
-tools_dir = "Tools"
-scripts_dir = os.path.join(f"{tools_dir}")
-glfw_script = "Build-Glfw.py"
-glad_script = "Build-Glad.py"
-box2d_script = "Build-Box2D.py"
+ToolsDir = "Tools"
+ModuleDir = os.path.join(f"{ToolsDir}", "Module")
+BuildScript_Glfw = "Build-Glfw.py"
+BuildScript_Glad = "Build-Glad.py"
+BuildScript_Box2D = "Build-Box2D.py"
+BuildScript_Assimp = "Build-Assimp.py"
 
-Utils.PrintBanner("LkEngine Setup", 60, Fore.CYAN, '=')
+Packages = [
+    { "name": "Glfw",   "script":  BuildScript_Glfw,   "color":  Fore.WHITE },
+    { "name": "Glad",   "script":  BuildScript_Glad,   "color":  Fore.WHITE },
+    { "name": "Box2D",  "script":  BuildScript_Box2D,  "color":  Fore.WHITE },
+    { "name": "Assimp", "script":  BuildScript_Assimp, "color":  Fore.WHITE },
+]
+PackageBannerSize = 38
+PackageBannerChar = '='
+
+Utils.PrintBanner("LkEngine Setup", 60, Fore.WHITE, '=')
 
 # Validate Python installation.
 PythonConfiguration.IsInstalled()
@@ -37,49 +69,36 @@ PythonConfiguration.IsInstalled()
 Logger.info("Updating git submodules")
 subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
 
-# TODO: Check current dir before invoking this
-# Change to LkEngine root directory.
 # Validate Premake installation.
-Utils.ChangeDirectory("./..")
-PremakeInstalled = PremakeConfiguration.Validate()
+# Change to LkEngine root directory if not already there.
+CurrentPath = Path.cwd()
+ParentPath = CurrentPath.parents[0]
+if ParentPath.name == "LkEngine":
+    #Utils.ChangeDirectory("./..")
+    os.chdir("./..")
 
-if (PremakeInstalled):
-    # Build GLFW.
-    print()
-    Utils.PrintBanner("Building: Glfw", 40, Fore.WHITE, '-')
-    SetupResult_Glfw = Utils.RunScript(glfw_script, script_dir=tools_dir)
-    if SetupResult_Glfw != 0:
-        Logger.error("Failed to build Glfw")
-        sys.exit(1)
-    Logger.success("Build complete: Glfw")
+IsPremakeInstalled = PremakeConfiguration.Validate()
+if (IsPremakeInstalled):
+    # Install packages. 
+    for Package in Packages: 
+        print() 
+        Utils.PrintBanner(f"Building: {Package['name']}", PackageBannerSize, Package["color"], PackageBannerChar) 
+        BuildResult = Utils.RunScript(Package["script"], script_dir=ModuleDir) 
 
-	# Build Glad.
-    print()
-    Utils.PrintBanner("Building: Glad", 40, Fore.WHITE, '-')
-    SetupResult_Glad = Utils.RunScript(glad_script, script_dir=tools_dir)
-    if SetupResult_Glad != 0:
-        Logger.error("Failed to build Glad")
-        sys.exit(1)
-    Logger.success("Build complete: Glad")
+        if BuildResult != 0: 
+            Utils.PrintBanner(f"Failed to build: {Package['name']}", PackageBannerSize, Fore.RED, PackageBannerChar) 
+            sys.exit(1) 
 
-	# Build Box2D.
-    print()
-    Utils.PrintBanner("Building: Box2D", 40, Fore.WHITE, '-')
-    SetupResult_Box2D = Utils.RunScript(box2d_script, script_dir=tools_dir)
-    if SetupResult_Box2D != 0:
-        Logger.error("Failed to build Box2D")
-        sys.exit(1)
-    Logger.success("Build complete: Box2D")
+        Utils.PrintBanner(f"Build Complete: {Package['name']}", PackageBannerSize, Fore.GREEN, PackageBannerChar)
 
     # Engine modules built, continue on with generating project files.
-    Logger.info("All engine modules has been built")
+    Logger.info("Built all engine modules")
 
-    Logger.info("Continuing with project generation")
     if platform.system() == "Windows": 
         print()
-        Utils.RunScript("GenerateProjects-Windows.py", tools_dir)
+        Utils.RunScript("GenerateProjects-Windows.py", ToolsDir)
 
-    print()
+    print("\n")
     Utils.PrintBanner("LkEngine Setup Complete", 60, Fore.GREEN, '=')
 else:
     print()

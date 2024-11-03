@@ -20,13 +20,13 @@ generator = "c"
 api = "gl=4.6"
 
 # Paths to Glad, build and output directories.
-glad_dir = os.path.join("..", "External", "glad")
-build_dir = os.path.join(glad_dir, "build")
-output_dir = os.path.join("..", "External", "glad")
-output_path = os.path.join(glad_dir, "output")
+GladDir = os.path.join("..", "..", "External", "glad")
+BuildDir = os.path.join(GladDir, "build")
+OutputDir = os.path.join("..", "..", "External", "glad")
+OutputPath = os.path.join(GladDir, "output")
 
 # Ensure output directory exists.
-os.makedirs(output_dir, exist_ok=True)
+os.makedirs(OutputDir, exist_ok=True)
 
 # Platform-specific options.
 PlatformWindows = platform.system() == "Windows"
@@ -43,7 +43,7 @@ def _InstallGladModule():
     """Install the Glad module."""
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "glad"])
-        Logger.success("Glad module installed successfully.")
+        Logger.success("Glad module installed successfully")
     except subprocess.CalledProcessError as e:
         Logger.error(f"Failed to install GLAD module, error: {e}")
         sys.exit(1)
@@ -56,56 +56,52 @@ def _GenerateGladLoader():
             f"--profile={profile}",
             f"--api={api}",
             f"--generator={generator}",
-            f"--out-path={output_path}"
+            f"--out-path={OutputPath}"
         ]
         subprocess.check_call(command)
-        #Logger.info(f"GLAD generated successfully in '{output_path}' directory.")
     except subprocess.CalledProcessError as e:
-        Logger.error(f"[GLAD] Generation of files failed: {e}")
+        Logger.error(f"[GLAD] Generation of files failed, error: {e}")
         sys.exit(1)
 
 def _MoveGeneratedFiles():
     """Moves generated files from output directory to the Glad directory."""
-    src_include = os.path.join(output_path, "include")
-    src_src = os.path.join(output_path, "src")
+    IncludeDir = os.path.join(OutputPath, "include")
+    SourceDir = os.path.join(OutputPath, "src")
 
-    dest_include = os.path.join(glad_dir, "include")
-    dest_src = os.path.join(glad_dir, "src")
+    DestInclude = os.path.join(GladDir, "include")
+    DestSource = os.path.join(GladDir, "src")
 
     # Ensure destination directories exist and move files if it does.
-    #Logger.info("Moving the generated Glad files out from build directory")
-    if os.path.exists(src_include):
-        if os.path.exists(dest_include):
-            # Remove old include directory if it exists.
-            shutil.rmtree(dest_include)
-        shutil.move(src_include, glad_dir)
-        #Logger.info(f"Moved 'include' to '{glad_dir}'")
+    if os.path.exists(IncludeDir):
+        # Remove old include directory if it exists.
+        if os.path.exists(DestInclude):
+            shutil.rmtree(DestInclude)
+        shutil.move(IncludeDir, GladDir)
 
-    if os.path.exists(src_src):
-        if os.path.exists(dest_src):
-            # Remove old src directory if it exists.
-            shutil.rmtree(dest_src)
-        shutil.move(src_src, glad_dir)
-        #Logger.info(f"Moved 'src' to '{glad_dir}'")
+    if os.path.exists(SourceDir):
+        # Remove old src directory if it exists.
+        if os.path.exists(DestSource):
+            shutil.rmtree(DestSource)
+        shutil.move(SourceDir, GladDir)
 
-    # Cleanup: Remove the output directory if it’s empty.
-    if os.path.exists(output_path):
-        shutil.rmtree(output_path)
-        #Logger.info(f"Cleaned up '{output_path}' directory")
+    # Clean the output directory.
+    if os.path.exists(OutputPath):
+        shutil.rmtree(OutputPath)
     
 
 def BuildGlad():
-    os.makedirs(build_dir, exist_ok=True)
+    """Generate glad loader files."""
+    os.makedirs(BuildDir, exist_ok=True)
     try:
         if not _IsGladModuleInstalled():
             Logger.warning("Glad module not found, installing it")
             _InstallGladModule()
-        _GenerateGladLoader()
+        BuildResult = _GenerateGladLoader()
         _MoveGeneratedFiles()
-        return True
+        return BuildResult
     except subprocess.CalledProcessError as e:
         Logger.error(f"[GLAD] Error occurred during the build process: {e}")
-        return False
+        return 1 # Return non-zero to indicate error.
 
 if __name__ == "__main__":
     BuildGlad()

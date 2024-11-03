@@ -1,12 +1,11 @@
 #--------------------------------------------------------------------------
 # [LkEngine] ScriptUtils.py
 #
-#
 #--------------------------------------------------------------------------
 import sys
 import subprocess
 import os
-import winreg
+import winreg # TODO: Patch out
 
 import requests
 import time
@@ -48,6 +47,7 @@ class ScriptLogger:
     def error(self, message):
         print(self._format_message("ERROR", message, Colors.FAIL))
 
+
 def GetSystemEnvironmentVariable(EnvName):
     Key = winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE, r"System\CurrentControlSet\Control\Session Manager\Environment")
     try:
@@ -55,12 +55,14 @@ def GetSystemEnvironmentVariable(EnvName):
     except:
         return None
 
+
 def GetUserEnvironmentVariable(EnvName):
     Key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Environment")
     try:
         return winreg.QueryValueEx(Key, EnvName)[0]
     except:
         return None
+
 
 def ChangeDirectory(directory_path):
     """Validate and change to the specified directory if valid."""
@@ -70,6 +72,7 @@ def ChangeDirectory(directory_path):
     else:
         return False 
 
+
 def RunScript(script_name, script_dir="./"):
     """Run a script and capture its output."""
     try:
@@ -77,6 +80,7 @@ def RunScript(script_name, script_dir="./"):
         return result.returncode 
     except subprocess.CalledProcessError as e:
         return 1
+
 
 def DownloadFile(url, filepath):
     path = filepath
@@ -139,6 +143,7 @@ def DownloadFile(url, filepath):
                 sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * done, '.' * (50-done), percentage, avgSpeedString))
                 sys.stdout.flush()
     sys.stdout.write('\n')
+
 
 def UnzipFile(filepath, DeleteZipFile=True):
     ZipFilePath = os.path.abspath(filepath) # get full path of files

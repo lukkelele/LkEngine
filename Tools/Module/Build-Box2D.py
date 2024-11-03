@@ -14,9 +14,9 @@ import shutil
 from ScriptUtils import ScriptLogger
 Logger = ScriptLogger("LkEngine")
 
-# Paths to box2d, build and output directories.
-box2d_dir = os.path.join("..", "External", "box2d")
-build_dir = os.path.join(box2d_dir, "build")
+# Directory paths.
+Box2DDir = os.path.join("..", "..", "External", "box2d")
+BuildDir = os.path.join(Box2DDir, "build")
 
 CMakeFlags = [
 	"-DBOX2D_UNIT_TESTS=OFF"
@@ -26,21 +26,20 @@ CMakeFlags = [
 PlatformWindows = platform.system() == "Windows"
 
 def BuildBox2D():
-    """
-    Build box2d library.
-    """
-    original_dir = os.getcwd()
+    """Build box2d library."""
+    OriginalDir = os.getcwd()
     SetupResult = 1
 
+    # TODO: Add way to clean build dir entirely without exceptions (from _deps).
+
     # Create the build directory.
-    os.makedirs(build_dir, exist_ok=True) 
+    os.makedirs(BuildDir, exist_ok=True) 
 
     try:
         # Navigate to the box2d build directory.
-        os.chdir(build_dir)
+        os.chdir(BuildDir)
 
         # Run CMake configuration.
-        Logger.info("Running CMake configuration...")
         subprocess.check_call(["cmake", ".."] + CMakeFlags)
 
         # Build the project.
@@ -51,7 +50,7 @@ def BuildBox2D():
 
     finally:
         # Change back to the original directory before exiting.
-        os.chdir(original_dir)
+        os.chdir(OriginalDir)
         return SetupResult
 
 if __name__ == "__main__":
