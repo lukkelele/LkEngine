@@ -11,6 +11,7 @@ import os
 import platform
 import subprocess
 import shutil
+from sys import exit
 
 import ScriptUtils as Utils
 
@@ -26,7 +27,18 @@ OutputDir = os.path.join("..", "..", "External", "Libraries")
 os.makedirs(OutputDir, exist_ok=True)
 
 IsPlatformWindows = platform.system() == "Windows"
+if not IsPlatformWindows:
+    print(f"[Build-Assimp] Platform is not Windows, undefined behaviour can be expected")
+
 Architecture = "x64" # TODO: Automatic assignment
+try:
+    Architecture = "x64" if platform.architecture()[0] == "64bit" else "x86"
+except Exception as e:
+    print(f"[Build-Assimp] Error occured when trying to determine system architecture, error: {e}")
+    exit(1)
+
+if Architecture != "x64":
+    print(f"[Build-Assimp] Warning: System architecture is not 64-bit")
 
 LibraryExtension = ".lib" if IsPlatformWindows else ".a"
 LibraryFileRelease = "assimp-vc143-mt" + LibraryExtension
@@ -73,7 +85,6 @@ def _CopyGeneratedFiles():
     shutil.copy2(ConfigHeader, os.path.join(AssimpDir, "include", "assimp", "config.h"))
     shutil.copy2(RevisionHeader, os.path.join(AssimpDir, "include", "assimp", "revision.h"))
 
-    print("Copying ZLib")
     # Copy generated ZLib library.
     ZLibFileName = "zlibstaticd" if BuildAsDebug else "zlibstatic"
     ZLibFile = os.path.join(BuildDir, "contrib", "zlib", "Debug" if BuildAsDebug else "Release", ZLibFileName + LibraryExtension)
