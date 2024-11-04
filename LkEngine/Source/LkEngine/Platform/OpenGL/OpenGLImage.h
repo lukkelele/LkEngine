@@ -1,3 +1,7 @@
+/******************************************************************
+ * LOpenGLImage
+ *
+ *******************************************************************/
 #pragma once
 
 #include "LkEngine/Renderer/Image.h"
@@ -56,7 +60,7 @@ namespace LkEngine {
 	/**
 	 * LOpenGLImage
 	 *
-	 *  Image implementation for Open GL.
+	 *  2D Image implementation for OpenGL.
 	 */
 	class LOpenGLImage2D : public LImage2D
 	{
@@ -72,15 +76,15 @@ namespace LkEngine {
 		virtual void Resize(const uint32_t NewWidth, const uint32_t NewHeight) override;
 		virtual void SetData(const void* InData) override;
 
-		virtual LRendererID& GetRendererID() override { return m_RendererID; }
-		virtual LRendererID GetRendererID() const override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID& GetRendererID() override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID GetRendererID() const override { return m_RendererID; }
 
-		virtual FBuffer GetBuffer() const override { return m_ImageData; }
-		virtual FBuffer& GetBuffer() override { return m_ImageData; }	
-		virtual uint32_t GetWidth() const override { return Specification.Width; }
-		virtual uint32_t GetHeight() const override { return Specification.Height; }
+		FORCEINLINE virtual FBuffer GetBuffer() const override { return m_ImageData; }
+		FORCEINLINE virtual FBuffer& GetBuffer() override { return m_ImageData; }	
+		FORCEINLINE virtual uint32_t GetWidth() const override { return Specification.Width; }
+		FORCEINLINE virtual uint32_t GetHeight() const override { return Specification.Height; }
 
-		virtual const FImageSpecification& GetSpecification() const override 
+		FORCEINLINE virtual const FImageSpecification& GetSpecification() const override 
 		{ 
 			return Specification; 
 		}
@@ -101,7 +105,7 @@ namespace LkEngine {
 		LCLASS(LOpenGLImage2D);
 	};
 
-	namespace GLUtils 
+	namespace LOpenGL 
 	{
 		void ApplyTextureFilter(ETextureFilter TextureFilter, bool bUseMipmap = true);
 		void ApplyTextureWrap(ETextureWrap TextureWrap);

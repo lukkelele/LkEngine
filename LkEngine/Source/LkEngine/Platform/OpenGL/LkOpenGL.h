@@ -15,7 +15,6 @@
 #include "LkEngine/Renderer/VertexBuffer.h"
 
 
-
 namespace LkEngine {
 
     class TextureArray;
@@ -26,53 +25,124 @@ namespace LkEngine {
      *  Macro for invoking OpenGL functions.
      *  Handles potential errors and logs them before issuing a crash.
      */
-    #define LK_OpenGL(_OPENGL_FUNCTION) \
-        OpenGL_ClearError(); \
-        _OPENGL_FUNCTION; \
-        LK_ASSERT(OpenGL_LogCall(#_OPENGL_FUNCTION, __FILE__, __LINE__))
+    #define LK_OpenGL(OpenGLFunction) \
+        LOpenGL_Internal::ClearPendingErrors(); \
+        OpenGLFunction; \
+        LK_ASSERT(LOpenGL_Internal::SafeFunctionInvoke(#OpenGLFunction, __FILE__, __LINE__))
 
 
-	FORCEINLINE static void OpenGL_ClearError() 
-	{ 
-		while (glGetError() != GL_NO_ERROR); 
-	}
-
-    FORCEINLINE static bool OpenGL_LogCall(const char* InFunction, const char* InFile, int InLine)
-    {
-        while (GLenum Error = glGetError())
-        {
-            LK_CORE_ERROR_TAG("OpenGL", "Error: {}   Function: {}   File: {}   Line: {}", Error, InFunction, InFile, InLine);
-            return false;
-        }
-
-        return true;
-    }
-
-	FORCEINLINE static const char* OpenGL_GetVersion()
+    /**
+     * LOpenGL_Internal
+	 * 
+	 *  Internal LOpenGL namespace, do not use.
+     */
+    namespace LOpenGL_Internal
 	{
-		char buf[140];
-		//sprintf(buf, "%s", glGetString(GL_VERSION));
-		sprintf_s(buf, ARRAYSIZE(buf), "%s", glGetString(GL_VERSION));
+		FORCEINLINE static void ClearPendingErrors() 
+		{ 
+			while (glGetError() != GL_NO_ERROR) {}
+		}
 
-		return buf;
+		FORCEINLINE static bool SafeFunctionInvoke(const char* InFunction, const char* InFile, int InLine)
+		{
+			while (GLenum Error = glGetError())
+			{
+				LK_CORE_ERROR_TAG("OpenGL", "Error: {}\n Function: {}\n File: {}\n Line: {}", 
+								  Error, InFunction, InFile, InLine);
+				return false;
+			}
+
+			return true;
+		}
 	}
 
+	// REMOVE
     constexpr int OpenGL_Major_Version = 4;
     constexpr int OpenGL_Minor_Version = 5;
     constexpr const char* OpenGL_GLSL_33 = "#version 330";
     constexpr const char* OpenGL_GLSL_45 = "#version 450";
 
-    namespace GLUtils {
+    namespace LOpenGL 
+    {
+		/* Forward declarations. */
+		FORCEINLINE static GLenum TextureTarget(const bool IsMultisampled);
 
-        int GetOpenGLSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction);
-        int GetOpenGLDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction);
+		FORCEINLINE static std::string GetVersion()
+		{
+			char CharBuf[140];
+			std::sprintf(CharBuf, "%s", glGetString(GL_VERSION));
 
-        const GLubyte* GetExtensions();
-        void PrintOpenGLExtensions();
+			return std::string(CharBuf);
+		}
 
-        GLenum OpenGLFormatDataType(EImageFormat Format);
+		/**
+		 * @brief Convert ESourceBlendFunction to OpenGL source blend function.
+		 */
+		FORCEINLINE static int GetSourceBlendFunction(const ESourceBlendFunction& InBlendFunction)
+		{
+			switch (InBlendFunction)
+			{
+				case ESourceBlendFunction::Zero:  return GL_ZERO;
+				case ESourceBlendFunction::One:   return GL_ONE;
+				case ESourceBlendFunction::Alpha: return GL_SRC_ALPHA;
+				case ESourceBlendFunction::Color: return GL_SRC_COLOR;
+				case ESourceBlendFunction::One_Minus_DestinationAlpha: return GL_ONE_MINUS_DST_ALPHA;
+			}
 
-        FORCEINLINE static GLenum OpenGLImageFormat(const EImageFormat ImageFormat)
+			LK_CORE_ASSERT(false, "Invalid source blend function");
+			return -1;
+		}
+	
+		/**
+		 * @brief Convert EDestinationBlendFunction to OpenGL destination blend function.
+		 */
+		FORCEINLINE static int GetDestinationBlendFunction(const EDestinationBlendFunction& InBlendFunction)
+		{
+			switch (InBlendFunction)
+			{
+				case EDestinationBlendFunction::Zero:  return GL_ZERO;
+				case EDestinationBlendFunction::One:   return GL_ONE;
+				case EDestinationBlendFunction::Alpha: return GL_DST_ALPHA;
+				case EDestinationBlendFunction::Color: return GL_DST_COLOR;
+				case EDestinationBlendFunction::One_Minus_SourceAlpha: return GL_ONE_MINUS_SRC_ALPHA;
+			}
+
+			LK_CORE_ASSERT(false, "Invalid destination blend function");
+			return -1;
+		}
+
+		FORCEINLINE static const GLubyte* GetExtensions() 
+        { 
+            return glGetString(GL_EXTENSIONS); 
+        }
+
+		FORCEINLINE static void PrintOpenGLExtensions()
+		{
+			int Extensions{};
+			LK_OpenGL(glGetIntegerv(GL_NUM_EXTENSIONS, &Extensions));
+			for (int Index = 0; Index < Extensions; Index++)
+			{
+				const GLubyte* Extension = glGetStringi(GL_EXTENSIONS, Index);
+				LK_CORE_INFO("OpenGL Extension: {}", std::string(reinterpret_cast<const char*>(Extension)));
+			}
+		}
+
+		FORCEINLINE static GLenum GetFormatDataType(EImageFormat ImageFormat)
+		{
+			switch (ImageFormat)
+			{
+				case EImageFormat::RGB:
+				case EImageFormat::RGBA:    
+				case EImageFormat::RGBA8:   return GL_UNSIGNED_BYTE;
+				case EImageFormat::RGBA16F:
+				case EImageFormat::RGBA32F: return GL_FLOAT;
+			}
+
+			LK_CORE_ASSERT(false, "Unknown OpenGLFormatDataType: {}", static_cast<int>(ImageFormat));
+			return GL_INVALID_VALUE;
+		}
+
+        FORCEINLINE static GLenum GetImageFormat(const EImageFormat ImageFormat)
         {
             switch (ImageFormat)
             {
@@ -93,36 +163,198 @@ namespace LkEngine {
             return GL_INVALID_ENUM;
         }
 
-        GLenum OpenGLImageInternalFormat(const EImageFormat Format);
-        GLenum OpenGLSamplerWrap(const ETextureWrap TextureWrap);
-        GLenum OpenGLSamplerFilter(const ETextureFilter TextureFilter, const bool bEnableMipMap);
-        GLenum ImageFormatToGLDataFormat(const EImageFormat Format);
-        GLenum ImageFormatToGLInternalFormat(const EImageFormat Format);
+		FORCEINLINE static GLenum GetImageInternalFormat(const EImageFormat Format)
+		{
+			switch (Format)
+			{
+				case EImageFormat::RGB:             return GL_RGB8;
+				case EImageFormat::RGBA:            return GL_RGBA8;
+				case EImageFormat::RGBA8:           return GL_RGBA8;
+				case EImageFormat::RGBA16F:         return GL_RGBA16F;
+				case EImageFormat::RGBA32F:         return GL_RGBA32F;
+				case EImageFormat::DEPTH24STENCIL8: return GL_DEPTH24_STENCIL8;
+				case EImageFormat::DEPTH32F:        return GL_DEPTH_COMPONENT32F;
+			}
 
-        void BindTexture(const bool bMultisampled, const uint32_t TextureID);
-        void CreateTextures(const bool bMultisampled, uint32_t* OutTextureID, uint32_t Count);
-        GLenum TextureTarget(const bool bMultisampled);
+			LK_CORE_ASSERT(false, "Invalid image format");
+			return GL_INVALID_ENUM;
+		}
 
-        void AttachColorTexture(const uint32_t id, 
-                                const int Samples, 
-                                const GLenum InternalFormat, 
-                                const GLenum Format, 
-                                const uint32_t Width, 
-                                const uint32_t Height, 
-                                const int Index);
+		FORCEINLINE static GLenum GetSamplerWrap(const ETextureWrap TextureWrap)
+		{
+			switch (TextureWrap)
+			{
+				case ETextureWrap::Clamp:   return GL_CLAMP_TO_EDGE;
+				case ETextureWrap::Repeat:  return GL_REPEAT;
+			}
 
-        void AttachDepthTexture(const uint32_t id, 
-                                const int Samples, 
-                                const GLenum Format, 
-                                const GLenum AttachmentType, 
-                                const uint32_t Width, 
-                                const uint32_t Height);
+			LK_CORE_ASSERT(false, "Unknown OpenGLSamplerWrap: {}", static_cast<int>(TextureWrap));
+			return GL_INVALID_VALUE;
+		}
 
-        bool IsDepthFormat(const EImageFormat Format);
-        GLenum FramebufferTextureFormatToGL(const EImageFormat Format);
+		FORCEINLINE static GLenum GetSamplerFilter(const ETextureFilter TextureFilter, const bool bUseMipmap)
+		{
+			switch (TextureFilter)
+			{
+				case ETextureFilter::Linear:  return bUseMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
+				case ETextureFilter::Nearest: return bUseMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST;
+			}
+
+			LK_CORE_ASSERT(false, "Unknown OpenGLSamplerFilter: {}, mipmap: {}", static_cast<int>(TextureFilter), bUseMipmap);
+			return GL_INVALID_VALUE;
+		}
+
+
+		FORCEINLINE static GLenum ImageFormatToGLDataFormat(EImageFormat ImageFormat)
+		{
+			switch (ImageFormat)
+			{
+				case EImageFormat::RGBA:   
+				case EImageFormat::RGBA8:   
+				case EImageFormat::RGBA16F:   
+				case EImageFormat::RGBA32F:  return GL_RGBA;
+
+				case EImageFormat::RG8:     
+				case EImageFormat::RG16F:     
+				case EImageFormat::RG32F:    return GL_RG;
+
+				case EImageFormat::RGB:  
+				case EImageFormat::RGB8:     return GL_RGB;
+
+				case EImageFormat::RED8UI:
+				case EImageFormat::RED16UI:
+				case EImageFormat::RED32UI:  return GL_RED_INTEGER;
+				case EImageFormat::RED32F:   return GL_RED_INTEGER;
+
+			}
+
+			LK_CORE_ASSERT(false, "Invalid ImageFormat: {}", static_cast<int>(ImageFormat));
+			return GL_INVALID_VALUE;
+		}
+
+		FORCEINLINE static GLenum ImageFormatToGLInternalFormat(EImageFormat ImageFormat)
+		{
+			switch (ImageFormat)
+			{
+				case EImageFormat::RGB:      return GL_RGB32F;
+				case EImageFormat::RGB8:     return GL_RGB8;
+
+				case EImageFormat::RGBA:     return GL_RGBA32F;
+				case EImageFormat::RGBA8:    return GL_RGBA8;
+				case EImageFormat::RGBA16F:  return GL_RGBA16F;
+				case EImageFormat::RGBA32F:  return GL_RGBA32F;
+
+				case EImageFormat::RG16F:    return GL_RG16F;
+				case EImageFormat::RG32F:    return GL_RG32F;
+
+				case EImageFormat::RED8UI:   return GL_R8UI;
+				case EImageFormat::RED16UI:  return GL_R16UI;
+				case EImageFormat::RED32UI:  return GL_R32UI;
+				case EImageFormat::RED32F:   return GL_R32F;
+			}
+
+			LK_CORE_ASSERT(false, "Invalid internal ImageFormat: {}", static_cast<int>(ImageFormat));
+			return GL_INVALID_VALUE;
+		}
+
+		FORCEINLINE static void CreateTextures(const bool bMultisampled, uint32_t* OutTextureID, const uint32_t Count)
+		{
+			LK_OpenGL(glCreateTextures(TextureTarget(bMultisampled), Count, OutTextureID));
+		}
+
+		FORCEINLINE static void BindTexture(const bool bMultisampled, const uint32_t ID)
+		{
+			LK_OpenGL(glBindTexture(TextureTarget(bMultisampled), ID));
+		}
+
+		FORCEINLINE static GLenum TextureTarget(const bool IsMultisampled)
+		{
+			return (IsMultisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D);
+		}
+
+		FORCEINLINE static void AttachColorTexture(const uint32_t ID, const int Samples, 
+                                                   const GLenum InternalFormat, const GLenum Format, 
+                                                   const uint32_t Width, const uint32_t Height, const int Index)
+		{
+			const bool bMultisampled = (Samples > 1);
+			if (bMultisampled)
+			{
+				LK_OpenGL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, InternalFormat, Width, Height, GL_FALSE));
+			}
+			else
+			{
+				LK_OpenGL(glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, Width, Height, 0, Format, GL_UNSIGNED_BYTE, nullptr));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+			}
+
+			LK_OpenGL(glFramebufferTexture2D(
+                GL_FRAMEBUFFER, 
+                GL_COLOR_ATTACHMENT0 + Index, 
+                TextureTarget(bMultisampled), 
+                ID, 
+                0)
+            );
+		}
+
+		FORCEINLINE static void AttachDepthTexture(const uint32_t ID, const int Samples, 
+                                                   const GLenum Format, const GLenum AttachmentType, 
+                                                   const uint32_t Width, const uint32_t Height)
+		{
+			const bool bMultisampled = (Samples > 1);
+			if (bMultisampled)
+			{
+				LK_OpenGL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, Format, Width, Height, GL_FALSE));
+			}
+			else
+			{
+				LK_OpenGL(glTexStorage2D(GL_TEXTURE_2D, 1, Format, Width, Height));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+			}
+
+			LK_OpenGL(glFramebufferTexture2D(GL_FRAMEBUFFER, AttachmentType, TextureTarget(bMultisampled), ID, 0));
+		}
 
         std::string FramebufferTextureFormatToString(const EFramebufferTextureFormat Format);
-        std::string ImageFormatToString(const EImageFormat ImageFormat);
+
+		FORCEINLINE static GLenum FramebufferTextureFormatToGL(const EImageFormat ImageFormat)
+		{
+			switch (ImageFormat)
+			{
+				case EImageFormat::RGBA8:            return GL_RGBA8;
+				case EImageFormat::RGBA16F:          return GL_RGBA16F;
+				case EImageFormat::RGBA32F:          return GL_RGBA32F;
+				case EImageFormat::RED8UI:      
+				case EImageFormat::RED8UN:      
+				case EImageFormat::RED16UI:       
+				case EImageFormat::RED32UI:          return GL_RED_INTEGER;
+				case EImageFormat::DEPTH24STENCIL8:  return GL_DEPTH24_STENCIL8;
+			}
+
+			LK_CORE_ASSERT(false, "Invalid ImageFormat");
+			return GL_INVALID_VALUE;
+		}
+
+        FORCEINLINE static std::string FramebufferTextureFormatToString(const EFramebufferTextureFormat Format)
+		{
+			switch (Format)
+			{
+				case EFramebufferTextureFormat::RGBA8:           return "RGBA8";
+				case EFramebufferTextureFormat::RED_INTEGER:     return "RED_INTEGER";
+				case EFramebufferTextureFormat::DEPTH24STENCIL8: return "DEPTH24STENCIL8";
+				case EFramebufferTextureFormat::None:            return "None";
+			}
+
+			LK_CORE_ASSERT(false, "Invalid FramebufferTextureFormat");
+			return "";
+		};
 
 		FORCEINLINE static void ApplyTextureFilter(ETextureFilter TextureFilter, bool bGenerateMipmap)
 		{
@@ -130,11 +362,11 @@ namespace LkEngine {
 			{
                 if (bGenerateMipmap)
                 {
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+					LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
                 }
                 else
                 {
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
                 }
 
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -173,115 +405,111 @@ namespace LkEngine {
 			}
 		}
 
-		static void ApplyTextureFilter(const LRendererID& rendererID, const ETextureFilter TextureFilter, bool bGenerateMipmap = true)
+		static void ApplyTextureFilter(const LRendererID& RendererID, const ETextureFilter TextureFilter, bool bGenerateMipmap = true)
 		{
             switch (TextureFilter)
             {
                 case ETextureFilter::Linear:
 			    {
-                    if (bGenerateMipmap)
-                    {
-			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-                    }
-                    else
-                    {
-			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                    }
+					/* Min Filter. */
+					LK_OpenGL(
+						glTextureParameteri(RendererID, 
+											GL_TEXTURE_MIN_FILTER, 
+											(bGenerateMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR))
+					);
 
-			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					/* Mag Filter. */
+					LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR) );
 
                     break;
 			    }
 
                 case ETextureFilter::Nearest:
 			    {
-            #if 0
-                    if (bGenerateMipmap)
-                    {
-			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-                    }
-                    else
-                    {
-			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                    }
-            #endif
-			    	LK_OpenGL(glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, (bGenerateMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST)));
+					/* Min Filter. */
+			    	LK_OpenGL(
+						glTextureParameteri(
+							RendererID, 
+							GL_TEXTURE_MIN_FILTER, 
+							(bGenerateMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST)
+						)
+					);
 
-			    	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			    	LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 
                     break;
 			    }
 
                 case ETextureFilter::None:
 			    {
-            #if 0
-                    if (bGenerateMipmap)
-                    {
-			    		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-                    }
-                    else
-                    {
-			    	    glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                    }
-            #endif
-			    	LK_OpenGL(glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, (bGenerateMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST)));
-			    	LK_OpenGL(glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+					/* Min Filter. */
+			    	LK_OpenGL(
+						glTextureParameteri(
+								RendererID, 
+								GL_TEXTURE_MIN_FILTER, 
+								(bGenerateMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST)
+						)
+					);
+
+					/* Mag Filter. */
+			    	LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 
                     return;
 			    }
             }
 		}
 
-		static void ApplyTextureWrap(const LRendererID rendererID, const ETextureWrap TextureWrap)
+		FORCEINLINE static void ApplyTextureWrap(const LRendererID RendererID, const ETextureWrap TextureWrap)
 		{
 			switch (TextureWrap)
 			{
 				case ETextureWrap::None:
 				{
-					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+					LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT)); 
+					LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT)); 
                     break;
 				}
 
 				case ETextureWrap::Clamp:
 				{
-					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+					LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT)); 
+					LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT)); 
                     break;
 				}
 
 				case ETextureWrap::Repeat:
 				{
-					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-					glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+					LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT));
+					LK_OpenGL(glTextureParameteri(RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT)); 
                     break;
 				}
 
                 default: 
-                    LK_CORE_ASSERT(false, "Unknown TextureWrap {}", static_cast<int>(TextureWrap));
-                    return;
+                    LK_CORE_ASSERT(false, "Unknown texture wrap: {}", static_cast<int>(TextureWrap));
 			}
 		}
 
         /**
 		 * Depth is returned normalized i.e in range { 0.0, 1.0 }
          */
-		FORCEINLINE static float SampleDepth(int x, int y, int WindowWidth, int WindowHeight) 
+		FORCEINLINE static float SampleDepth(int x, int y, 
+											 int WindowWidth, int WindowHeight) 
 		{
 			GLint Viewport[4];
-			glGetIntegerv(GL_VIEWPORT, Viewport);
+			LK_OpenGL(glGetIntegerv(GL_VIEWPORT, Viewport));
 
 			/* Convert screen coordinates to OpenGL viewport coordinates. */
 			y = WindowHeight - y;
 
 			float Depth = 0.0f;
-			glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &Depth);
+			LK_OpenGL(glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &Depth));
 
 			return Depth;
 		}
 
     }
 
+	// TODO: REMOVE!!!!!!!!!
     //=====================================================================
     // Debugging
     extern unsigned int CubeTexture_, FloorTexture_;
@@ -354,6 +582,7 @@ namespace LkEngine {
         -0.5f,  0.5f,  0.5f,    0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,    0.0f, 1.0f
     };
+
     static float Cube_TextureCoords[] = {
         0.0f, 0.0f,
         1.0f, 0.0f,
@@ -464,29 +693,40 @@ namespace LkEngine {
 
     static unsigned int LoadTexture(const char* path)
     {
-        unsigned int textureID;
-        glGenTextures(1, &textureID);
+        unsigned int TextureID;
+        LK_OpenGL(glGenTextures(1, &TextureID));
 
         int Width, Height, channels;
         unsigned char* data = stbi_load(path, &Width, &Height, &channels, 0);
         if (data)
         {
             GLenum Format;
-            if (channels == 1)
+			if (channels == 1)
+			{
                 Format = GL_RED;
-            else if (channels == 3)
+			}
+			else if (channels == 3)
+			{
                 Format = GL_RGB;
-            else if (channels == 4)
+			}
+			else if (channels == 4)
+			{
                 Format = GL_RGBA;
+			}
+			else
+			{
+				LK_CORE_ASSERT(false, "Invalid GLFormat");
+				Format = GL_INVALID_ENUM;
+			}
 
-            glBindTexture(GL_TEXTURE_2D, textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
+            LK_OpenGL(glBindTexture(GL_TEXTURE_2D, TextureID));
+            LK_OpenGL(glTexImage2D(GL_TEXTURE_2D, 0, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, data));
+            LK_OpenGL(glGenerateMipmap(GL_TEXTURE_2D));
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+            LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+            LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+            LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
             stbi_image_free(data);
         }
@@ -495,7 +735,8 @@ namespace LkEngine {
             LK_CORE_ERROR_TAG("OpenGLRenderer2D", "Texture failed to load at path {}", path);
             stbi_image_free(data);
         }
-        return textureID;
+
+        return TextureID;
     }
 
     void GenerateCubeVaoAndVbo(unsigned int& vao, unsigned int& vbo);
@@ -513,9 +754,9 @@ namespace LkEngine {
 
 	static unsigned int LoadCubemap(std::vector<std::string> faces)
 	{
-		unsigned int textureID;
-		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+		unsigned int TextureID;
+		glGenTextures(1, &TextureID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, TextureID);
 
 		int Width, Height, nrChannels;
 		for (unsigned int i = 0; i < faces.size(); i++)
@@ -523,8 +764,9 @@ namespace LkEngine {
 		    unsigned char* data = stbi_load(faces[i].c_str(), &Width, &Height, &nrChannels, 0);
 		    if (data)
 		    {
-		        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
-		                     0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+		        glTexImage2D(
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+		            0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
 		        );
 		        stbi_image_free(data);
 		    }
@@ -534,13 +776,14 @@ namespace LkEngine {
 		        stbi_image_free(data);
 		    }
 		}
+
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-		return textureID;
+		return TextureID;
 	}  
 
     static void GenerateSkybox(LRendererID& skyboxVAO, LRendererID& skyboxVBO)

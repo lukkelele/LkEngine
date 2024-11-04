@@ -29,9 +29,10 @@ namespace LkEngine {
         virtual void SetDepthEnabled(const bool InEnabled) override;
         virtual void SetDepthFunction(const EDepthFunction& depthFunc) override;
 
-        virtual void SetBlendingEnabled(bool enabled) override;
+        virtual void SetBlendingEnabled(const bool InEnabled) override;
         virtual void SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
                                       const EDestinationBlendFunction& InDestinationBlendFunction) override;
+
         virtual void SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction) override;
         virtual void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction) override;
 
@@ -42,8 +43,15 @@ namespace LkEngine {
 
         FORCEINLINE const std::string GetName() const { return m_Name; }
         
-        virtual std::string GetCurrentSourceBlendFunctionName() const override;
-        virtual std::string GetCurrentDestinationBlendFunctionName() const override;
+		FORCEINLINE virtual std::string GetCurrentSourceBlendFunctionName() const override
+		{
+			return Enum::ToString(BlendFunction.Source);
+		}
+
+		FORCEINLINE virtual std::string GetCurrentDestinationBlendFunctionName() const override
+		{
+			return Enum::ToString(BlendFunction.Destination);
+		}
 
         FORCEINLINE virtual bool GetBlendingEnabled() const override 
         { 

@@ -82,7 +82,7 @@ namespace LkEngine {
 
 	void OpenGLTexture2D::SetData(void* InData, const uint32_t InSize)
 	{
-		const GLenum DataFormat = GLUtils::ImageFormatToGLDataFormat(Specification.Format);
+		const GLenum DataFormat = LOpenGL::ImageFormatToGLDataFormat(Specification.Format);
 		//const uint32_t BPP = (DataFormat == GL_RGBA ? 4 : 3);
 
 		glTextureSubImage2D(m_Image->GetRendererID(), 

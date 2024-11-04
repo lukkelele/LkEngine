@@ -94,7 +94,7 @@ namespace LkEngine {
 	};
 
 
-	namespace GLUtils {
+	namespace LOpenGL {
 
 		static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const ETextureArrayDimension& TextureArrayDimension)
 		{
@@ -132,7 +132,7 @@ namespace LkEngine {
 
 		static void GenerateTextureArrayImage(LRendererID& ID, const FTextureArraySpecification& Specification)
 		{
-			auto [Width, Height] = GLUtils::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
+			auto [Width, Height] = LOpenGL::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
 			LK_OpenGL(glTextureStorage3D(ID, 
 					                     Specification.Layers, 
 							             ImageFormatToGLDataFormat(Specification.ImageFormat), 

@@ -92,34 +92,6 @@ namespace LkEngine {
 		int ViewportHeight;
 
 		glfwGetWindowSize(WindowRef.GetGlfwWindow(), &ViewportWidth, &ViewportHeight);
-	}
-
-	std::string LRenderContext::GetSourceBlendFunctionName(const ESourceBlendFunction& InSourceFunction)
-	{
-		switch (InSourceFunction)
-		{
-			case ESourceBlendFunction::Zero:  return "Zero";
-			case ESourceBlendFunction::One:   return "One";
-			case ESourceBlendFunction::Alpha: return "Alpha";
-			case ESourceBlendFunction::Color: return "Color";
-			case ESourceBlendFunction::One_Minus_DestinationAlpha: return "One_Minus_DestinationAlpha";
-			default: throw std::runtime_error("Source blend function name could not be retrieved correctly");
-		}
-	}
-
-	std::string LRenderContext::GetDestinationBlendFunctionName(const EDestinationBlendFunction& InDestinationFunction)
-	{
-		switch (InDestinationFunction)
-		{
-			case EDestinationBlendFunction::Zero:  return "Zero";
-			case EDestinationBlendFunction::One:   return "One";
-			case EDestinationBlendFunction::Alpha: return "Alpha";
-			case EDestinationBlendFunction::Color: return "Color";
-			case EDestinationBlendFunction::One_Minus_SourceAlpha: return "One_Minus_SourceAlpha";
-			default: throw std::runtime_error("Destination blend function name could not be retrieved correctly");
-		}
-	}
-
-	
+	}	
 
 }

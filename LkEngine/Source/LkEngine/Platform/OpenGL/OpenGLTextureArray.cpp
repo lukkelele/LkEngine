@@ -9,7 +9,7 @@ namespace LkEngine {
 	{
 		LCLASS_REGISTER();
 
-		auto [Width, Height] = GLUtils::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
+		auto [Width, Height] = LOpenGL::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
 		m_Width = Width;
 		m_Height = Height;
 

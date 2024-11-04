@@ -216,9 +216,9 @@ namespace LkEngine {
 	};
 
 
-	//-------------------------------------------------------------------------------
-	// Image2D
-	//-------------------------------------------------------------------------------
+	/**
+	 * LImage2D
+	 */
 	class LImage2D : public LImage
 	{
 	public:
@@ -234,7 +234,7 @@ namespace LkEngine {
 
 	namespace ImageUtils 
 	{
-		FORCEINLINE static int64_t GetImageFormat(EImageFormat ImageFormat)
+		FORCEINLINE static int64_t GetImageFormat(const EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{
@@ -246,7 +246,7 @@ namespace LkEngine {
 			return 0;
 		}
 
-		FORCEINLINE static uint32_t GetFormatBPP(EImageFormat ImageFormat)
+		FORCEINLINE static uint32_t GetFormatBPP(const EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{
@@ -257,16 +257,47 @@ namespace LkEngine {
 				case EImageFormat::RGBA32F:   return 4 * 4;
 			}
 
-			LK_CORE_ASSERT(false, "GetFormatBPP failed, format not recognized!");
+			LK_CORE_ASSERT(false, "GetFormatBPP failed, format not recognized");
 			return 0;
 		}
 
-		FORCEINLINE static uint32_t GetMemorySize(EImageFormat ImageFormat, const uint32_t Width, const uint32_t Height)
+		FORCEINLINE static uint32_t GetMemorySize(const EImageFormat ImageFormat, const uint32_t Width, const uint32_t Height)
 		{
 			return (Width * Height * GetFormatBPP(ImageFormat));
 		}
 
-		FORCEINLINE static std::string ImageFormatToString(const EImageFormat ImageFormat)
+		static uint32_t BytesPerPixel(const EImageFormat ImageFormat)
+		{
+			switch (ImageFormat)
+			{
+				case EImageFormat::RGBA:    return 4;
+				case EImageFormat::RGBA32F: return 16;
+				case EImageFormat::None:	return 0;
+			}
+
+			return 0;
+		}
+
+		FORCEINLINE static uint32_t CalculateMipCount(const uint32_t Width, const uint32_t Height)
+		{
+			return static_cast<uint32_t>(std::floor(std::log2(glm::min(Width, Height))) + 1);
+		}
+
+		FORCEINLINE static bool IsDepthFormat(const EImageFormat ImageFormat)
+		{
+			switch (ImageFormat)
+			{
+				case EImageFormat::DEPTH24STENCIL8: return true;
+			}
+
+			return false;
+		}
+
+	}
+
+	namespace Enum
+	{
+		FORCEINLINE static constexpr const char* ToString(const EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{
@@ -288,36 +319,9 @@ namespace LkEngine {
 				case EImageFormat::DEPTH24STENCIL8:   return "DEPTH24STENCIL8";
 			}
 
-			LK_CORE_ASSERT(false, "Invalid enum value of ImageFormat: {}", static_cast<int>(ImageFormat));
+			LK_CORE_ASSERT(false, "Invalid image format");
+			return "";
 		}
-
-		static uint32_t BytesPerPixel(EImageFormat format)
-		{
-			switch (format)
-			{
-				case EImageFormat::RGBA:    return 4;
-				case EImageFormat::RGBA32F: return 16;
-				case EImageFormat::None:	return 0;
-			}
-
-			return 0;
-		}
-
-		FORCEINLINE static uint32_t CalculateMipCount(const uint32_t Width, const uint32_t Height)
-		{
-			return static_cast<uint32_t>(std::floor(std::log2(glm::min(Width, Height))) + 1);
-		}
-
-		FORCEINLINE static bool IsDepthFormat(EImageFormat ImageFormat)
-		{
-			switch (ImageFormat)
-			{
-				case EImageFormat::DEPTH24STENCIL8: return true;
-			}
-
-			return false;
-		}
-
 	}
 
 }

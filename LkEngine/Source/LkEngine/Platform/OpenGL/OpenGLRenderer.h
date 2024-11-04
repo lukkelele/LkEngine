@@ -140,7 +140,7 @@ namespace LkEngine {
         LCLASS(OpenGLRenderer)
     };
 
-    namespace GLUtils {
+    namespace LOpenGL {
 
         inline static int PrimitiveTopologyToOpenGL(const PrimitiveTopology& topology)
         {

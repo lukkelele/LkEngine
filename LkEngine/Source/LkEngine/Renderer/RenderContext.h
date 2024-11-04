@@ -8,7 +8,6 @@
 
 struct GLFWwindow;
 
-
 namespace LkEngine {
 
     class LWindow;
@@ -48,20 +47,52 @@ namespace LkEngine {
         virtual void SetName(std::string_view name) = 0;
         virtual const std::string GetName() const = 0;
 
+        /* FIXME: REMOVE */
         virtual std::string GetCurrentSourceBlendFunctionName() const = 0;
         virtual std::string GetCurrentDestinationBlendFunctionName() const = 0;
-
-        static std::string GetSourceBlendFunctionName(const ESourceBlendFunction& SourceBlendFunc);
-        static std::string GetDestinationBlendFunctionName(const EDestinationBlendFunction& DestinationFunction);
 
     protected:
         static void HandleViewportEvents();
 
     protected:
-        friend class LEditor;
+        friend class LEditor; /* FIXME: REMOVE */
 
     private:
         LCLASS(LRenderContext);
     };
+
+
+    namespace Enum
+    {
+		FORCEINLINE static constexpr const char* ToString(const ESourceBlendFunction InSourceFunction)
+		{
+			switch (InSourceFunction)
+			{
+				case ESourceBlendFunction::Zero:  return "Zero";
+				case ESourceBlendFunction::One:   return "One";
+				case ESourceBlendFunction::Alpha: return "Alpha";
+				case ESourceBlendFunction::Color: return "Color";
+				case ESourceBlendFunction::One_Minus_DestinationAlpha: return "One_Minus_DestinationAlpha";
+			}
+
+            LK_CORE_ASSERT(false, "Invalid source blendfunction name");
+			return "";
+		}
+
+		FORCEINLINE static constexpr const char* ToString(const EDestinationBlendFunction InDestinationFunction)
+		{
+			switch (InDestinationFunction)
+			{
+				case EDestinationBlendFunction::Zero:  return "Zero";
+				case EDestinationBlendFunction::One:   return "One";
+				case EDestinationBlendFunction::Alpha: return "Alpha";
+				case EDestinationBlendFunction::Color: return "Color";
+				case EDestinationBlendFunction::One_Minus_SourceAlpha: return "One_Minus_SourceAlpha";
+			}
+
+            LK_CORE_ASSERT(false, "Invalid destination blendfunction name");
+			return "";
+		}
+    }
 
 }
