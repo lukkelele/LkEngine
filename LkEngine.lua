@@ -5,7 +5,7 @@ workspace "LkEngine"
     configurations 
     { 
         "Debug", 
-        --"Debug-AddressSanitize", 
+        "Debug-AddressSanitize", 
         "Release", 
         "Dist" 
     }
@@ -33,11 +33,15 @@ TargetDirectory = "%{wks.location}/Binaries/" .. BuildOutputDirectory .. "/%{prj
 IntermediateDirectory = "%{wks.location}/Intermediate/" .. BuildOutputDirectory .. "/%{prj.name}"
 
 ExternalDirectory = "%{wks.location}/External"
+LibrariesDirectory = "%{ExternalDirectory}/Libraries"
 AssetsDirectory = "%{wks.location}/Assets"
 
 include "External/Dependencies.lua"
 
-
+--|===========================================
+--| LkEngine
+--|
+--|===========================================
 project "LkEngine"
     location "LkEngine"
     kind "StaticLib"
@@ -89,6 +93,7 @@ project "LkEngine"
 
     libdirs 
     {
+        "%{ExternalDirectory}/Libraries",
         "%{Dependencies.Glfw.LibDir}",
         "%{Dependencies.YamlCPP.LibDir}",
         "%{Dependencies.Box2D.LibDir}",
@@ -127,7 +132,6 @@ project "LkEngine"
         "yaml-cpp",
         "glad", 
         "opengl32",
-        --"Assimp",
     }
 
 	filter "system:windows"
@@ -141,24 +145,11 @@ project "LkEngine"
 
         libdirs 
         { 
-            "%{ExternalDirectory}/Libraries",
             "%{Dependencies.Assimp.Windows.LibDir}",
-        }
-
-        links 
-        {
-            -- TODO: Debug/Release selection of the copied lib. Place the postbuild command in platform filter.
-            "%{Dependencies.Assimp.Windows.DebugLibName}",
-            --"%{Dependencies.Assimp.Windows.DebugLibName}",
-            --"%{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.DebugLibName}.lib"
         }
 
         postbuildcommands 
         {
-            -- TODO: Debug/Release selection of the copied lib. Place the postbuild command in platform filter.
-            --"{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.dll %{cfg.targetdir}"
-            --"{COPYFILE} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.DebugLibName}.dll %{cfg.targetdir}"
-            --"{COPYFILE} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.DebugLibName}.lib %{cfg.targetdir}"
         }
  
 		buildoptions 
@@ -172,14 +163,29 @@ project "LkEngine"
 
         linkoptions 
         { 
-            "/IGNORE:4006", -- Ignore 'already defined' warning for object files.
+            "/IGNORE:4006", -- Ignore warning 'already defined' for object files.
+            "/IGNORE:4099", -- Ignore warning 'PDB not found, linking as if no debug info'.
         }
 
-	--filter { "system:windows", "configurations:Debug-AddressSanitize" }	
-	--	runtime "Debug"
-	--	sanitize { "Address" }
-	--	flags { "NoRuntimeChecks", "NoIncrementalLink" }
-	--	defines "LK_DEBUG"
+	filter { "system:windows", "configurations:Debug" }	
+        links 
+        {
+            "%{Dependencies.Assimp.Windows.DebugLibName}.lib",
+            "zlibstaticd", -- Built by Assimp.
+        }
+
+	filter { "system:windows", "configurations:Release or configurations:Dist" }	
+        links 
+        {
+            "%{Dependencies.Assimp.Windows.LibName}.lib",
+            "zlibstatic", -- Built by Assimp.
+        }
+        
+	filter { "system:windows", "configurations:Debug-AddressSanitize" }	
+		runtime "Debug"
+		sanitize { "Address" }
+		flags { "NoRuntimeChecks", "NoIncrementalLink" }
+		defines "LK_DEBUG"
 
 	filter "configurations:Debug"
 		runtime "Debug"

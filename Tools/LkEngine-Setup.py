@@ -74,11 +74,13 @@ subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
 CurrentPath = Path.cwd()
 ParentPath = CurrentPath.parents[0]
 if ParentPath.name == "LkEngine":
-    #Utils.ChangeDirectory("./..")
     os.chdir("./..")
 
 IsPremakeInstalled = PremakeConfiguration.Validate()
 if (IsPremakeInstalled):
+    # Create 'Libraries' directory, is the location for all generated libraries.
+    os.makedirs("External/Libraries", exist_ok=True)
+
     # Install packages. 
     for Package in Packages: 
         print() 

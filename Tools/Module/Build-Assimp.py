@@ -26,6 +26,8 @@ OutputDir = os.path.join("..", "..", "External", "Libraries")
 os.makedirs(OutputDir, exist_ok=True)
 
 IsPlatformWindows = platform.system() == "Windows"
+Architecture = "x64" # TODO: Automatic assignment
+
 LibraryExtension = ".lib" if IsPlatformWindows else ".a"
 LibraryFileRelease = "assimp-vc143-mt" + LibraryExtension
 LibraryFileDebug = "assimp-vc143-mtd" + LibraryExtension
@@ -36,9 +38,12 @@ BuildConfig = "debug" if BuildAsDebug else "release"
 LibraryFile = LibraryFileDebug if BuildAsDebug else LibraryFileRelease
 
 # CMake flags.
-cmake_flags = [
+CMakeFlags = [
     "-DBUILD_SHARED_LIBS=OFF",
     "-DASSIMP_BUILD_TESTS=OFF",
+	"-DASSIMP_INSTALL=OFF",
+    "-DUSE_STATIC_CRT=ON",
+	"-DASSIMP_BUILD_ZLIB=ON"
 ]
 
 # Platform-specific options.
@@ -46,7 +51,8 @@ IsPlatformWindows = platform.system() == "Windows"
 
 def _RunCMakeConfiguration():
     """Run CMake configure command."""
-    result = subprocess.check_call(["cmake", ".."] + cmake_flags, cwd=BuildDir)
+    # TODO: Automatic assignment of architecture.
+    result = subprocess.check_call(["cmake", "..", f"-A {Architecture}"] + CMakeFlags, cwd=BuildDir)
     return result
 
 def _BuildAssimp():
@@ -58,19 +64,25 @@ def _BuildAssimp():
 def _CopyGeneratedFiles():
     """Copy the generated files to the desired locations."""
     SourceFile = os.path.join(BuildDir, "lib", BuildConfig, LibraryFile)
+    DestinationFile = os.path.join(OutputDir, LibraryFile)
+    shutil.copy2(SourceFile, DestinationFile)
+
+    # Copy config.h and revision.h headers to Assimp's include directory.
     ConfigHeader = os.path.join(BuildDir, "include", "assimp", "config.h")
     RevisionHeader = os.path.join(BuildDir, "include", "assimp", "revision.h")
-    DestinationFile = os.path.join(OutputDir, LibraryFile)
-
-    shutil.copy2(SourceFile, DestinationFile)
     shutil.copy2(ConfigHeader, os.path.join(AssimpDir, "include", "assimp", "config.h"))
     shutil.copy2(RevisionHeader, os.path.join(AssimpDir, "include", "assimp", "revision.h"))
+
+    print("Copying ZLib")
+    # Copy generated ZLib library.
+    ZLibFileName = "zlibstaticd" if BuildAsDebug else "zlibstatic"
+    ZLibFile = os.path.join(BuildDir, "contrib", "zlib", "Debug" if BuildAsDebug else "Release", ZLibFileName + LibraryExtension)
+    shutil.copy2(ZLibFile, os.path.join(OutputDir, ZLibFileName + LibraryExtension))
 
 def _CleanUpAfterBuild():
     """Clean up build files."""
     if os.path.exists(BuildDir):
         shutil.rmtree(BuildDir)
-        #print("CLEAN UP - REMOVE ME")
 
 def BuildAssimp():
     os.makedirs(BuildDir, exist_ok=True)

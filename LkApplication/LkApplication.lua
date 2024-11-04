@@ -3,7 +3,13 @@ project "LkApplication"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "On"
-	configurations { "Debug", "Release", "Dist" }
+
+	configurations 
+	{ 
+		"Debug", 
+		"Release", 
+		"Dist" 
+	}
 
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
@@ -64,10 +70,7 @@ project "LkApplication"
 		}
 
         postbuildcommands 
-	{
-            -- TODO: Debug/Release selection of the copied lib. Place the postbuild command in platform filter.
-            "{COPY} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.LibName}.lib %{cfg.targetdir}"
-            -- "{COPYFILE} %{Dependencies.Assimp.Windows.LibDir}/%{Dependencies.Assimp.Windows.DebugLibName}.lib %{cfg.targetdir}/"
+		{
         }
 
 		buildoptions 
@@ -82,9 +85,9 @@ project "LkApplication"
 		linkoptions 
         { 
             "/IGNORE:4006", -- Ignore 'already defined' warning for object files.
+            "/IGNORE:4099", -- Ignore warning 'PDB not found, linking as if no debug info'.
 			"/NODEFAULTLIB:MSVCRT",
         }
-
 
 	filter "configurations:Debug"
 		runtime "Debug"
