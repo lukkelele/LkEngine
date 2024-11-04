@@ -187,7 +187,7 @@ namespace LkEngine {
         bInitialized = true;
     }
 
-    /// FIXME: 
+    /// FIXME: Do not iterate like this. So inefficent
     TObjectPtr<LTexture2D> LTextureLibrary::GetTexture(const int textureID)
     {
         LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
@@ -205,6 +205,8 @@ namespace LkEngine {
                 return texture.second;
             }
         }
+
+        return nullptr;
     } 
 
     TObjectPtr<LTexture2D> LTextureLibrary::GetTexture(std::string_view TextureName)

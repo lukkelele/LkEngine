@@ -343,7 +343,7 @@ namespace LkEngine {
 	{
 		TObjectPtr<LOpenGLPipeline> pipeline = InPipeline.As<LOpenGLPipeline>();
 		std::deque<LRendererID> boundTextureArrays = pipeline->GetBoundTextureArrays();
-		TObjectPtr<LFramebuffer>& framebuffer = LRenderer::GetViewportFramebuffer();
+		TObjectPtr<LFramebuffer> framebuffer = LRenderer::GetViewportFramebuffer();
 		LRenderer::Submit([&, pipeline, framebuffer, shader, 
 						  InVertexBuffer, transform, indexCount, boundTextureArrays]() mutable
 		{

@@ -23,6 +23,7 @@ namespace LkEngine {
         }
 
         LK_CORE_ASSERT(false, "No Render API detected");
+		return nullptr;
     }
 
 }

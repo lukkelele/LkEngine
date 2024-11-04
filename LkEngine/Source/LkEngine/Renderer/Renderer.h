@@ -112,7 +112,7 @@ namespace LkEngine {
 		static uint32_t GetCurrentFrameIndex();
 		static uint32_t RT_GetCurrentFrameIndex();
 
-		static TObjectPtr<LFramebuffer>& GetViewportFramebuffer();
+		static TObjectPtr<LFramebuffer> GetViewportFramebuffer();
 		static RendererCapabilities& GetCapabilities();
 
 		static void BeginScene(const LSceneCamera& camera);

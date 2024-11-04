@@ -32,7 +32,7 @@ namespace LkEngine {
             InMaterialMap.clear();
             InMaterialMap = m_Collection;
 
-            return InMaterialMap.size(); 
+            return static_cast<int>(InMaterialMap.size());
         }
 
         FORCEINLINE std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>>& GetLoadedMaterialAssets() 

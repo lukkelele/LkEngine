@@ -155,18 +155,16 @@ namespace LkEngine {
 		return RenderCommandQueueSubmissionIndex;
 	}
 
-	TObjectPtr<LFramebuffer>& LRenderer::GetViewportFramebuffer()
+	TObjectPtr<LFramebuffer> LRenderer::GetViewportFramebuffer()
 	{
 		/* TODO: Should not do it like this for the editor, skip the LRenderer here entirely... */
 		if (LEditorLayer* Editor = LEditorLayer::Get(); Editor && Editor->IsEnabled())
 		{
 			return Editor->ViewportFramebuffer;
 		}
-		else
-		{
-			// TODO:
-			LK_CORE_ASSERT(false, "Not implemented yet!");
-		}
+
+		LK_CORE_ASSERT(false, "Not implemented yet!");
+		return nullptr;
 	}
 
 	TObjectPtr<LShaderLibrary> LRenderer::GetShaderLibrary()

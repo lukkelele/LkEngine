@@ -12,7 +12,7 @@
 
 namespace LkEngine {
 
-	constexpr unsigned int MaxTexturesPerArray = 32;
+	static constexpr unsigned int MaxTexturesPerArray = 32;
 
 	namespace GLUtils {
 
@@ -25,8 +25,10 @@ namespace LkEngine {
 				case ESourceBlendFunction::Alpha: return GL_ALPHA;
 				case ESourceBlendFunction::Color: return GL_COLOR;
 				case ESourceBlendFunction::One_Minus_DestinationAlpha: return GL_ONE_MINUS_DST_ALPHA;
-				default: throw std::runtime_error("Source blend function could not be retrieved correctly");
 			}
+
+			LK_CORE_ASSERT(false);
+			return -1;
 		}
 	
 		int GetOpenGLDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction)
@@ -42,10 +44,7 @@ namespace LkEngine {
 			}
 		}
 
-		const GLubyte* GetExtensions()
-		{
-			return glGetString(GL_EXTENSIONS);
-		}
+		const GLubyte* GetExtensions() { return glGetString(GL_EXTENSIONS); }
 
 		void PrintOpenGLExtensions()
 		{
@@ -69,10 +68,10 @@ namespace LkEngine {
 				case EImageFormat::RGBA32F:         return GL_RGBA32F;
 				case EImageFormat::DEPTH24STENCIL8: return GL_DEPTH24_STENCIL8;
 				case EImageFormat::DEPTH32F:        return GL_DEPTH_COMPONENT32F;
-
-				default:
-					LK_CORE_ASSERT(false, "Invalid OpenGLImageFormat {}", static_cast<int>(Format));
 			}
+
+			LK_CORE_ASSERT(false);
+			return GL_INVALID_ENUM;
 		}
 
 		GLenum OpenGLFormatDataType(EImageFormat ImageFormat)
@@ -84,10 +83,10 @@ namespace LkEngine {
 				case EImageFormat::RGBA8:   return GL_UNSIGNED_BYTE;
 				case EImageFormat::RGBA16F:
 				case EImageFormat::RGBA32F: return GL_FLOAT;
-
-				default:
-					LK_CORE_ASSERT(false, "Unknown OpenGLFormatDataType {}", static_cast<int>(ImageFormat));
 			}
+
+			LK_CORE_ASSERT(false, "Unknown OpenGLFormatDataType: {}", static_cast<int>(ImageFormat));
+			return GL_INVALID_VALUE;
 		}
 
 		GLenum OpenGLSamplerWrap(ETextureWrap TextureWrap)
@@ -97,7 +96,9 @@ namespace LkEngine {
 				case ETextureWrap::Clamp:   return GL_CLAMP_TO_EDGE;
 				case ETextureWrap::Repeat:  return GL_REPEAT;
 			}
+
 			LK_CORE_ASSERT(false, "Unknown OpenGLSamplerWrap: {}", static_cast<int>(TextureWrap));
+			return GL_INVALID_VALUE;
 		}
 
 		GLenum OpenGLSamplerFilter(const ETextureFilter TextureFilter, const bool bUseMipmap)
@@ -107,7 +108,9 @@ namespace LkEngine {
 				case ETextureFilter::Linear:  return bUseMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
 				case ETextureFilter::Nearest: return bUseMipmap ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST;
 			}
+
 			LK_CORE_ASSERT(false, "Unknown OpenGLSamplerFilter: {}, mipmap: {}", static_cast<int>(TextureFilter), bUseMipmap);
+			return GL_INVALID_VALUE;
 		}
 
 		GLenum ImageFormatToGLDataFormat(EImageFormat ImageFormat)
@@ -134,6 +137,7 @@ namespace LkEngine {
 			}
 
 			LK_CORE_ASSERT(false, "Invalid ImageFormat: {}", static_cast<int>(ImageFormat));
+			return GL_INVALID_VALUE;
 		}
 
 		GLenum ImageFormatToGLInternalFormat(EImageFormat ImageFormat)
@@ -158,6 +162,7 @@ namespace LkEngine {
 			}
 
 			LK_CORE_ASSERT(false, "Invalid internal ImageFormat: {}", static_cast<int>(ImageFormat));
+			return GL_INVALID_VALUE;
 		}
 
 		GLenum TextureTarget(const bool bMultisampled)
@@ -216,6 +221,7 @@ namespace LkEngine {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			}
+
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, TextureTarget(bMultisampled), id, 0);
 		}
 
@@ -234,6 +240,7 @@ namespace LkEngine {
 			}
 
 			LK_CORE_ASSERT(false, "FramebufferTextureFormatToGL  ImageFormat not recognized");
+			return GL_INVALID_VALUE;
 		}
 
         std::string FramebufferTextureFormatToString(EFramebufferTextureFormat FramebufferTextureFormat)
@@ -247,6 +254,7 @@ namespace LkEngine {
 			}
 
 			LK_CORE_ASSERT(false, "Invalid FramebufferTextureFormat");
+			return "";
 		};
 	}
 
