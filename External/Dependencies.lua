@@ -1,6 +1,6 @@
 --|------------------------------------------------------------
---| LkEngine
---|
+--| [LkEngine] 
+--| 
 --| Dependencies
 --|------------------------------------------------------------
 
@@ -81,14 +81,13 @@ Dependencies = {
 	Assimp = {
         IncludeDir = "%{wks.location}/External/assimp/include",
 		Windows = { 
-			--LibName = "assimp-vc143-mt", 
-			LibName = "assimp-vc143-mtd",  -- FIXME
+			LibName = "assimp-vc143-mt",
 			DebugLibName = "assimp-vc143-mtd", 
-			--LibDir = "%{wks.location}/External/assimp/bin/windows/%{cfg.buildcfg}/" 
 			LibDir = "%{wks.location}/External/Libraries" 
 		},
 		Linux = { 
-			LibName = "assimp", 
+			LibName = "assimp-vc143-mt",
+			DebugLibName = "assimp-vc143-mtd", 
 			LibDir = "%{wks.location}/External/assimp/bin/linux/" 
 		},
 		Configurations = "Debug,Release"
@@ -101,10 +100,12 @@ Dependencies = {
 	Tracy = {
 		LibName = "Tracy",
 		IncludeDir = "%{wks.location}/External/tracy/public",
+		LibDir = "%{wks.location}/External/Libraries" 
 	}
 
 }
 
+-- Libraries
 include "External/glfw-premake5.lua"
 include "External/glad-premake5.lua"
 include "External/imgui-premake5.lua"
@@ -113,7 +114,8 @@ include "External/imgui-node-editor-premake5.lua"
 include "External/ImFileDialog-premake5.lua"
 include "External/yaml-cpp-premake5.lua"
 include "External/box2d-premake5.lua"
---include "External/assimp-premake5.lua"
+include "External/tracy-premake5.lua"
+-- ~Libraries
 
 include "LkApplication/LkApplication.lua"
 

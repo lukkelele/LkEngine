@@ -32,6 +32,11 @@ project "ImGuizmo"
 		"imgui" 
 	}
 
+	buildoptions	
+	{
+        "/IGNORE:C4005", -- Ignore warning 'macro redefinition'.
+	}
+
 	filter "system:windows"
 		systemversion "latest"
 		staticruntime "On"
