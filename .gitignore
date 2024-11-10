@@ -55,6 +55,8 @@
 **/External/*build*
 **/*.vcxproj*
 External/**/*.vcx*
+External/**/*.vcxproj
+
 
 **/*.sln
 **/*.ini
