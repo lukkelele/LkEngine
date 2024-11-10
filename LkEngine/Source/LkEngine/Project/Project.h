@@ -8,8 +8,6 @@
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Scene/Scene.h"
-#include "LkEngine/ImGui/ImGuiLayer.h"
-
 #include "LkEngine/Serialization/FileStream.h"
 
 #include "LkEngine/Asset/RuntimeAssetManager.h"

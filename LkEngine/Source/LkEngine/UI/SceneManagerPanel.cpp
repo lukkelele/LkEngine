@@ -9,7 +9,7 @@
 
 #include "LkEngine/Editor/EditorLayer.h"
 
-#include "LkEngine/ImGui/ImGuiLayer.h"
+#include "LkEngine/UI/UILayer.h"
 
 
 namespace LkEngine {
@@ -286,13 +286,16 @@ namespace LkEngine {
 		UI::EndSubwindow();
 	}
 
-	std::pair<float, float> LSceneManagerPanel::GetMouseViewportSpace(bool primaryViewport)
+	std::pair<float, float> LSceneManagerPanel::GetMouseViewportSpace(const bool primaryViewport)
 	{
+		LK_MARK_FUNC_NOT_IMPLEMENTED("FIXME");
+	#if 0
 		auto [MousePosX, MousePosY] = ImGui::GetMousePos();
 
 		const auto& ViewportBounds = primaryViewport 
 			? LEditorLayer::Get()->ViewportBounds 
 			: LEditorLayer::Get()->SecondViewportBounds;
+
 		MousePosX -= ViewportBounds[0].X;
 		MousePosY -= ViewportBounds[0].Y;
 
@@ -303,6 +306,8 @@ namespace LkEngine {
 			(MousePosX / ViewportWidth) * 2.0f - 1.0f, 
 			((MousePosY / ViewportHeight) * 2.0f - 1.0f) * -1.0f 
 		};
+	#endif
+		return {};
 	}
 
     void LSceneManagerPanel::UI_SelectedEntityProperties()

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RendererAPI.h"
-#include "Renderer2DAPI.h"
+//#include "Renderer2DAPI.h"
 
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
@@ -115,7 +115,7 @@ namespace LkEngine {
 		static TObjectPtr<LFramebuffer> GetViewportFramebuffer();
 		static RendererCapabilities& GetCapabilities();
 
-		static void BeginScene(const LSceneCamera& camera);
+		static void BeginScene(const LSceneCamera& SceneCamera);
 		static void BeginScene(const glm::mat4& ViewProjection);
 		static void EndScene();
 
@@ -151,14 +151,18 @@ namespace LkEngine {
 			});
 		}
 
-		static uint32_t GetSamplersCount() { return m_SamplerCount; }
-		static void IncrementSamplerCount() { m_SamplerCount++; }
-		static void DecreaseSamplerCount() { m_SamplerCount--; }
+		FORCEINLINE static uint32_t GetSamplersCount() { return SamplerCount; }
+		FORCEINLINE static void IncrementSamplerCount() { SamplerCount++; }
+		FORCEINLINE static void DecreaseSamplerCount() { SamplerCount--; }
 
-		static uint32_t GetFramesInFlight() { return m_FramesInFlight; }
+		FORCEINLINE static uint32_t GetFramesInFlight() { return FramesInFlight; }
 
 		static void SetPrimitiveTopology(const ERenderTopology& InRenderTopology);
-		FORCEINLINE static ERenderTopology GetPrimitiveTopology() { return PrimitiveTopology; }
+
+		FORCEINLINE static ERenderTopology GetPrimitiveTopology() 
+		{ 
+			return PrimitiveTopology; 
+		}
 
 		static RenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
@@ -166,10 +170,13 @@ namespace LkEngine {
 
 		static TObjectPtr<LShaderLibrary> GetShaderLibrary();
 
-		static LRenderer* Get() { return s_Instance; }
+		FORCEINLINE static LRenderer* Get() { return Instance; }
 
 		/// @FIXME: remove all these Getters
-		static TObjectPtr<LRendererAPI> GetRendererAPI() { return RendererAPI; }
+		FORCEINLINE static TObjectPtr<LRendererAPI> GetRendererAPI() 
+		{ 
+			return RendererAPI; 
+		}
 
 		static TObjectPtr<LTexture2D> GetWhiteTexture();
 		static TObjectPtr<LTextureCube> GetWhiteTextureCube();
@@ -183,17 +190,17 @@ namespace LkEngine {
 
 	public:
 		inline static ERenderTopology PrimitiveTopology;
-		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.250f, 1.0f };
 
+		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.250f, 1.0f };
 		inline static glm::vec4 DEFAULT_CLEARCOLOR = { 0.200f, 0.200f, 0.250f, 1.0f };
 	private:
-		inline static uint32_t m_SamplerCount = 0; // Samplers
-		inline static uint32_t m_FramesInFlight = 2;
+		inline static uint32_t SamplerCount = 0;
+		inline static uint32_t FramesInFlight = 2;
 
 		/* Render API */
 		inline static TObjectPtr<LRendererAPI> RendererAPI = nullptr;
 
-		inline static LRenderer* s_Instance = nullptr;
+		inline static LRenderer* Instance = nullptr;
 
 		friend class LEditorLayer;
 

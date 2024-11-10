@@ -62,6 +62,7 @@ namespace LkEngine {
 
                 // Place the origin in the middle of the SpriteComponentreen.
                 // This is done by adding half of the window width and height.
+            #if 0
                 if (Editor && Editor->IsEnabled())
                 {
                     // Center the Quad
@@ -85,6 +86,7 @@ namespace LkEngine {
                     QuadPos.x += LWindow::Get().GetWidth() * 0.50f;
                     QuadPos.y += LWindow::Get().GetHeight() * 0.50f;
                 }
+            #endif
 
 
                 const float AngleRad = glm::radians(TransformComponent.GetRotation2D());

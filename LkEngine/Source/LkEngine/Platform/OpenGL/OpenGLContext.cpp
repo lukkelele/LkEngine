@@ -6,7 +6,8 @@
 #include "OpenGLSwapChain.h"
 #include "LkOpenGL.h"
 
-#include "LkEngine/ImGui/ImGuiLayer.h"
+#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Platform/OpenGL/OpenGLImGuiLayer.h"
 
 
 namespace LkEngine {
@@ -27,8 +28,8 @@ namespace LkEngine {
     {
     }
 
-    void LOpenGLContext::Init(const ESourceBlendFunction& InSourceBlendFunction, 
-		                      const EDestinationBlendFunction& InDestinationBlendFunction)
+    void LOpenGLContext::Initialize(const ESourceBlendFunction InSourceBlendFunction, 
+									const EDestinationBlendFunction InDestinationBlendFunction)
     {
 		const GLenum GladInitResult = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (GladInitResult == 0)
@@ -64,7 +65,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LOpenGLContext::SetDepthFunction(const EDepthFunction& InDepthFunction)
+	void LOpenGLContext::SetDepthFunction(const EDepthFunction InDepthFunction)
 	{
 		DepthFunction = InDepthFunction;
 		switch (DepthFunction)
@@ -127,8 +128,8 @@ namespace LkEngine {
 		LK_OpenGL(glDisable(GL_DEPTH_TEST));
 	}
 
-	void LOpenGLContext::SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
-		                                  const EDestinationBlendFunction& InDestinationBlendFunction)
+	void LOpenGLContext::SetBlendFunction(const ESourceBlendFunction InSourceBlendFunction, 
+		                                  const EDestinationBlendFunction InDestinationBlendFunction)
 	{
 		LK_CORE_DEBUG_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InSourceBlendFunction));
 		LK_CORE_DEBUG_TAG("OpenGLContext", "Setting destination blend function: {}", Enum::ToString(InDestinationBlendFunction));
@@ -140,7 +141,7 @@ namespace LkEngine {
 		BlendFunction.Destination = InDestinationBlendFunction;
 	}
 
-	void LOpenGLContext::SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction)
+	void LOpenGLContext::SetSourceBlendFunction(const ESourceBlendFunction InSourceBlendFunction)
 	{
 		BlendFunction.Source = InSourceBlendFunction;
 		LK_CORE_TRACE_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InSourceBlendFunction));
@@ -150,11 +151,11 @@ namespace LkEngine {
 		));
 	}
 
-    void LOpenGLContext::SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction)
+    void LOpenGLContext::SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationBlendFunction)
 	{
 		BlendFunction.Destination = InDestinationBlendFunction;
 		LK_CORE_TRACE_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InDestinationBlendFunction));
-		LK_OpenGL(glBlendFunc(
+		LK_OpenGL(glBlendFunc( 
 			LOpenGL::GetSourceBlendFunction(BlendFunction.Source), 
 			LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination)
 		));

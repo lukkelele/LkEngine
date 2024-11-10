@@ -1,5 +1,6 @@
 #pragma once
 
+#include "LkEngine/Renderer/RendererCore.h"
 #include "LkEngine/Renderer/Renderer2DAPI.h"
 
 #include "OpenGLFramebuffer.h"
@@ -7,21 +8,38 @@
 #include "OpenGLTextureArray.h"
 
 
+
 namespace LkEngine {
 
     class LEntity;
 
-    struct OpenGLRenderer2DSpecification : public Renderer2DSpecification
+    struct FOpenGLRenderer2DSpecification : public FRenderer2DSpecification
     {
         uint8_t TextureArraysUsed = 1;
     };
 
-	class LOpenGLRenderer2D : public IRenderer2DAPI, public LObject
+	/* TODO: Wait until IRenderer2D is available.*/
+	//class LOpenGLRenderer2D : public IRenderer2DAPI, public LObject
+	class LOpenGLRenderer2D : public LRenderer2DAPI
 	{
     public:
-        LOpenGLRenderer2D(const OpenGLRenderer2DSpecification& InSpecification = OpenGLRenderer2DSpecification());
+        LOpenGLRenderer2D(const FOpenGLRenderer2DSpecification& InSpecification = FOpenGLRenderer2DSpecification());
         ~LOpenGLRenderer2D() = default;
 
+        virtual void Initialize() override;
+        virtual void Destroy() override;
+
+        FORCEINLINE virtual TObjectPtr<LShader> GetQuadShader() override
+        { 
+            return m_QuadShader; 
+        }
+
+        FORCEINLINE virtual TObjectPtr<LShader> GetLineShader() override 
+        { 
+            return m_LineShader; 
+        }
+
+    #if 0
         virtual void Init() override;
         virtual void Shutdown() override;
 
@@ -33,67 +51,8 @@ namespace LkEngine {
 
         virtual void DrawImage(const TObjectPtr<LImage>& Image) override;
 
-        // DrawQuad
-        virtual void DrawQuad(const glm::mat4& transform, 
-                              const glm::vec4& color, 
-                              const uint64_t entityID = 0) override;
 
-        virtual void DrawQuad(const glm::vec2& pos,
-                              const glm::vec2& size, 
-                              const glm::vec4& color, 
-                              const uint64_t entityID = 0) override;
 
-        virtual void DrawQuad(const glm::vec3& pos, 
-                              const glm::vec2& size, 
-                              const glm::vec4& color, 
-                              const uint64_t entityID = 0) override;
-
-        virtual void DrawQuad(const glm::vec2& pos, 
-                              const glm::vec2& size, 
-                              const glm::vec4& color, 
-                              const float rotation, 
-                              uint64_t entityID = 0) override;
-
-        virtual void DrawQuad(const glm::vec3& pos, 
-                              const glm::vec2& size, 
-                              const glm::vec4& color, 
-                              const float rotation, 
-                              const uint64_t entityID = 0) override; 
-
-        virtual void DrawQuad(const glm::vec2& pos, 
-                              const glm::vec2& size, 
-                              TObjectPtr<LTexture2D> texture2D, 
-                              const float rotation, 
-                              const uint64_t entityID = 0) override; 
-
-        virtual void DrawQuad(const glm::vec3& pos, 
-                              const glm::vec2& size, 
-                              TObjectPtr<LTexture2D> texture, 
-                              const float rotation, 
-                              const uint64_t entityID = 0) override; 
-
-        virtual void DrawQuad(const glm::vec3& pos, 
-                              const glm::vec2& size, 
-                              TObjectPtr<LTexture2D> texture, 
-                              const glm::vec4& tintColor, 
-                              float rotation, 
-                              uint64_t entityID = 0) override; 
-        // ~DrawQuad
-
-        /// FIXME
-        // DrawRotatedQuad
-        virtual void DrawRotatedQuad(const glm::vec2& pos, 
-                                     const glm::vec2& size, 
-                                     const glm::vec4& color, 
-                                     const float rotation, 
-                                     uint64_t entityID = 0) override;
-
-        virtual void DrawRotatedQuad(const glm::vec3& pos, 
-                                     const glm::vec2& size, 
-                                     const glm::vec4& color, 
-                                     const float rotation, 
-                                     uint64_t entityID = 0) override;
-        // ~DrawRotatedQuad
 
         // DrawLine
         virtual void DrawLine(const glm::vec2& p0, 
@@ -107,15 +66,6 @@ namespace LkEngine {
                               uint64_t entityID = 0) override;
         // ~DrawLine
 
-        TObjectPtr<LShader> GetQuadShader() override
-        { 
-            return m_QuadShader; 
-        }
-
-        TObjectPtr<LShader> GetLineShader() override 
-        { 
-            return m_LineShader; 
-        }
 
         const Renderer2DSpecification& GetSpecification() const override { return m_Specification; }
 
@@ -136,8 +86,8 @@ namespace LkEngine {
         virtual void AddQuadBuffer() override;
         virtual void AddLineBuffer() override;
 
-        virtual QuadVertex*& GetWriteableQuadBuffer() override;
-        virtual LineVertex*& GetWriteableLineBuffer() override;
+        virtual FQuadVertex*& GetWriteableQuadBuffer() override;
+        virtual FLineVertex*& GetWriteableLineBuffer() override;
 
         void AddTextureArray(const TObjectPtr<OpenGLTextureArray>& textureArray);
 
@@ -147,7 +97,6 @@ namespace LkEngine {
     private:
         int m_Topology;
 
-        OpenGLRenderer2DSpecification m_Specification;
         RenderCommandQueue m_RenderQueue;
 
         const uint32_t m_MaxVertices = 0;
@@ -157,12 +106,21 @@ namespace LkEngine {
 
 		TObjectPtr<LRenderCommandBuffer> m_RenderCommandBuffer;
 
+
+        /* Texture Slots. */
+        std::array<TObjectPtr<LTexture2D>, MaxTextureSlots> m_TextureSlots;
+
+        /* Texture Arrays. */
+        std::array<TObjectPtr<OpenGLTextureArray>, MaxTextureArrays> m_TextureArrays;
+    #endif
+        FOpenGLRenderer2DSpecification m_Specification;
+
         /* Quad. */
         uint32_t m_QuadIndexCount = 0;
 		TObjectPtr<LRenderPass> m_QuadPass;
 		TObjectPtr<LMaterial> m_QuadMaterial;
-        QuadVertex* m_QuadVertexBufferBase = nullptr;
-        QuadVertex* m_QuadVertexBufferPtr = nullptr;
+        FQuadVertex* m_QuadVertexBufferBase = nullptr;
+        FQuadVertex* m_QuadVertexBufferPtr = nullptr;
         TObjectPtr<LShader> m_QuadShader;
 		TObjectPtr<LIndexBuffer> m_QuadIndexBuffer;
         TObjectPtr<LVertexBuffer> m_QuadVertexBuffer;
@@ -171,32 +129,24 @@ namespace LkEngine {
         /* Line.*/
         float m_LineWidth = 3.0f;
         uint32_t m_LineIndexCount = 0;
-        TObjectPtr<LVertexBuffer> m_LineVertexBuffer;
-
-        LineVertex* m_LineVertexBufferBase = nullptr;
-        LineVertex* m_LineVertexBufferPtr = nullptr;
-        TObjectPtr<LIndexBuffer> m_LineIndexBuffer = nullptr;
-        TObjectPtr<LShader> m_LineShader = nullptr;
-		TObjectPtr<LMaterial> m_LineMaterial;
+		TObjectPtr<LVertexBuffer> m_LineVertexBuffer{};
+		TObjectPtr<LShader> m_LineShader{};
+		FLineVertex* m_LineVertexBufferBase{};
+		FLineVertex* m_LineVertexBufferPtr{};
+		TObjectPtr<LIndexBuffer> m_LineIndexBuffer{};
+		TObjectPtr<LMaterial> m_LineMaterial{};
 
         TObjectPtr<LShader> m_TextureShader = nullptr;
         TObjectPtr<LTexture2D> m_WhiteTexture = nullptr;
 
-        /* Texture Slots. */
-        std::array<TObjectPtr<LTexture2D>, MaxTextureSlots> m_TextureSlots;
-
-        /* Texture Arrays. */
-        std::array<TObjectPtr<OpenGLTextureArray>, MaxTextureArrays> m_TextureArrays;
-
-        struct CameraData
+        struct FCameraData
         {
             glm::mat4 ViewProjection{};
         };
-        CameraData m_CameraBuffer{};
+        FCameraData CameraBuffer{};
+        TObjectPtr<LOpenGLUniformBuffer> CameraUniformBuffer;
 
-        TObjectPtr<LOpenGLUniformBuffer> m_CameraUniformBuffer;
-
-        Statistics m_Stats;
+        //FRenderer2DStatistics Statistics;
 
         friend class LEditorLayer;
         friend class LOpenGLRenderer;

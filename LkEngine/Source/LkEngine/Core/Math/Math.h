@@ -1,10 +1,5 @@
 #pragma once
 
-/// TODO: Place in build configuration
-#ifndef GLM_ENABLE_EXPERIMENTAL
-#define GLM_ENABLE_EXPERIMENTAL
-#endif
-
 #include <random>
 #include <time.h>
 
@@ -287,20 +282,5 @@ namespace LkEngine::Math {
 					  "TVector must valid vector type");
 		return TVector(glm::normalize(InVector));
 	}
-
-}
-
-namespace LkEngine::Utils {
-
-	#if 0 /// DISABLED
-    glm::vec2 ConvertToGlm(const b2Vec2& vec2);
-    glm::vec3 ConvertToGlm(const b2Vec3& vec3);
-
-    b2Vec2 ConvertToB2(const glm::vec2& vec2);
-    b2Vec3 ConvertToB2(const glm::vec3& vec3);
-
-    ImVec2 ConvertToImVec2(const glm::vec2& vec2);
-    ImVec4 ConvertToImVec4(const glm::vec4& vec4);
-	#endif
 
 }

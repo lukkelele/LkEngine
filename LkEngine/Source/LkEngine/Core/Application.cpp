@@ -52,7 +52,7 @@ namespace LkEngine {
         Renderer->Initialize();
 
         /* UI layer. */
-        UILayer = LImGuiLayer::Create();
+        UILayer = LUILayer::Create();
         UILayer->Initialize();
         UILayer->SetDarkTheme();
 
@@ -104,7 +104,10 @@ namespace LkEngine {
                     Application->RenderUI(); 
                 });
 
-				LRenderer::Submit([&]() { UILayer->EndFrame(); });
+				LRenderer::Submit([&]() 
+                { 
+                    UILayer->EndFrame(); 
+                });
 			}
 
 			LRenderer::EndFrame();

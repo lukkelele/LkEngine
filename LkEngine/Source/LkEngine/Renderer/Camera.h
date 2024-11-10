@@ -132,6 +132,7 @@ namespace LkEngine {
 											const float InNearP, 
 											const float InFarP)
 		{
+			LK_VERIFY((InWidth > 0) && (InHeight > 0), "Cannot set projection matrix with invalid arguments");
 			m_ProjectionMatrix = glm::perspectiveFov(InRadFov, InWidth, InHeight, InNearP, InFarP);
 			bDirty = true;
 		}
@@ -141,9 +142,10 @@ namespace LkEngine {
 									  const float InNearP, 
 									  const float InFarP)
 		{
+			LK_VERIFY((InWidth > 0) && (InHeight > 0));
 			m_ProjectionMatrix = glm::ortho(
-				-(InWidth  * 0.5f), (InWidth  * 0.5f),
-				-(InHeight * 0.5f), (InHeight * 0.5f),
+				-(InWidth  * 0.50f), (InWidth  * 0.50f),
+				-(InHeight * 0.50f), (InHeight * 0.50f),
 				InNearP, InFarP);
 
 			bDirty = true;

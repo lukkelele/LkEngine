@@ -12,7 +12,7 @@
 #include "LkEngine/Core/Event/KeyEvent.h"
 #include "LkEngine/Core/Event/MouseEvent.h"
 
-#include "LkEngine/ImGui/ImGuiLayer.h"
+#include "LkEngine/Editor/EditorCore.h"
 
 
 namespace LkEngine {
@@ -213,7 +213,7 @@ namespace LkEngine {
 		float m_Distance = 0.0f;
 		float m_NormalSpeed = 0.0020f;
 
-		EGizmo GizmoMode = EGizmo::Translate;
+		EGizmo GizmoMode = EGizmo::Translate; /* FIXME */
 
 		float m_Pitch = 0.0f;
 		float m_PitchDelta{};

@@ -14,8 +14,8 @@ namespace LkEngine {
         LOpenGLContext(LWindow* InWindow);
         ~LOpenGLContext() = default;
 
-        virtual void Init(const ESourceBlendFunction& InSourceBlendFunction, 
-                          const EDestinationBlendFunction& InDestinationBlendFunction) override;
+        virtual void Initialize(const ESourceBlendFunction InSourceBlendFunction, 
+                                const EDestinationBlendFunction InDestinationBlendFunction) override;
         virtual void Destroy() override;
 
         FORCEINLINE virtual GLFWwindow* GetGlfwWindow() override 
@@ -27,30 +27,23 @@ namespace LkEngine {
         virtual void UpdateResolution(const uint16_t width, const uint16_t height) override;
 
         virtual void SetDepthEnabled(const bool InEnabled) override;
-        virtual void SetDepthFunction(const EDepthFunction& depthFunc) override;
+        virtual void SetDepthFunction(const EDepthFunction depthFunc) override;
 
         virtual void SetBlendingEnabled(const bool InEnabled) override;
-        virtual void SetBlendFunction(const ESourceBlendFunction& InSourceBlendFunction, 
-                                      const EDestinationBlendFunction& InDestinationBlendFunction) override;
+        virtual void SetBlendFunction(const ESourceBlendFunction InSourceBlendFunction, 
+                                      const EDestinationBlendFunction InDestinationBlendFunction) override;
 
-        virtual void SetSourceBlendFunction(const ESourceBlendFunction& InSourceBlendFunction) override;
-        virtual void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationBlendFunction) override;
+        virtual void SetSourceBlendFunction(const ESourceBlendFunction InSourceBlendFunction) override;
+        virtual void SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationBlendFunction) override;
 
-        FORCEINLINE virtual void SetName(std::string_view InName) override 
-        { 
-            m_Name = InName; 
-        }
-
-        FORCEINLINE const std::string GetName() const { return m_Name; }
-        
-		FORCEINLINE virtual std::string GetCurrentSourceBlendFunctionName() const override
+		FORCEINLINE virtual ESourceBlendFunction GetSourceBlendFunction() const override
 		{
-			return Enum::ToString(BlendFunction.Source);
+			return BlendFunction.Source;
 		}
 
-		FORCEINLINE virtual std::string GetCurrentDestinationBlendFunctionName() const override
+		FORCEINLINE virtual EDestinationBlendFunction GetDestinationBlendFunction() const override
 		{
-			return Enum::ToString(BlendFunction.Destination);
+			return BlendFunction.Destination;
 		}
 
         FORCEINLINE virtual bool GetBlendingEnabled() const override 
@@ -59,20 +52,18 @@ namespace LkEngine {
         } 
 
     private:
-        std::string m_GlslVersion = "";
+		std::string m_GlslVersion{};
 
         bool bDepthEnabled = true;
         bool bBlendingEnabled = true;
 
         FBlendFunction BlendFunction{};
-        EDepthFunction DepthFunction;
+		EDepthFunction DepthFunction{};
 
-        std::string m_Name;
+        LWindow* Window{};
+		GLFWwindow* m_GlfwWindow{};
 
-        LWindow* Window;
-        GLFWwindow* m_GlfwWindow;
-
-        TObjectPtr<OpenGLSwapChain> m_SwapChain;
+        TObjectPtr<OpenGLSwapChain> SwapChain;
 
         friend class Editor;
 

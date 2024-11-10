@@ -459,13 +459,13 @@ namespace LkEngine {
 		target->m_ViewportHeight = m_ViewportHeight;
 	}
 
-	void LScene::OnRender(TObjectPtr<LSceneRenderer> renderer, FTimestep Timestep)
+	void LScene::OnRender(TObjectPtr<LSceneRenderer> SceneRenderer, FTimestep Timestep)
 	{
-		SceneRendererCamera sceneCamera;
-		sceneCamera.Camera = m_Camera;
-		sceneCamera.ViewMatrix = m_Camera->GetViewMatrix();
+		FSceneRendererCamera SceneCamera;
+		SceneCamera.Camera = Camera;
+		SceneCamera.ViewMatrix = Camera->GetViewMatrix();
 
-		renderer->BeginScene(sceneCamera);
+		SceneRenderer->BeginScene(SceneCamera);
 	}
 
 	void LScene::OnRenderEditor(LEditorCamera& EditorCamera, FTimestep Timestep)
@@ -485,14 +485,17 @@ namespace LkEngine {
 
 	LEntity LScene::GetMainCameraEntity()
 	{
-		auto view = m_Registry.view<LCameraComponent>();
-		for (auto Entity : view)
+		auto EntityView = m_Registry.view<LCameraComponent>();
+		for (auto Entity : EntityView)
 		{
-			auto& LCameraComponentRef = view.get<LCameraComponent>(Entity);
-			if (LCameraComponentRef.Primary)
+			LCameraComponent& CameraComponent = EntityView.get<LCameraComponent>(Entity);
+			if (CameraComponent.Primary)
 			{
-				LK_CORE_ASSERT(LCameraComponentRef.Camera->GetOrthographicSize() 
-					|| LCameraComponentRef.Camera->GetDegPerspectiveVerticalFOV(), "Camera is not fully initialized");
+				LK_VERIFY(
+					CameraComponent.Camera->GetOrthographicSize() || CameraComponent.Camera->GetDegPerspectiveVerticalFOV(), 
+					"Camera is not fully initialized"
+				);
+
 				return { Entity, this };
 			}
 		}
@@ -503,9 +506,9 @@ namespace LkEngine {
 #if 0
 	void LScene::BeginScene(Timestep ts)
 	{
-		if (m_Camera == nullptr)
+		if (Camera == nullptr)
 			return;
-		BeginScene(*m_Camera, ts);
+		BeginScene(*Camera, ts);
 	}
 
 	void LScene::BeginScene(SceneCamera& cam, Timestep ts)
@@ -524,12 +527,12 @@ namespace LkEngine {
 
 	void LScene::SetCamera(TObjectPtr<LSceneCamera> cam)
 	{ 
-		m_Camera = cam;
+		Camera = cam;
 	}
 
 	void LScene::SetCamera(LSceneCamera* cam)
 	{ 
-		m_Camera = TObjectPtr<LSceneCamera>(cam);
+		Camera = TObjectPtr<LSceneCamera>(cam);
 	}
 
 	void LScene::SetEditorCamera(const TObjectPtr<LEditorCamera> InEditorCamera)

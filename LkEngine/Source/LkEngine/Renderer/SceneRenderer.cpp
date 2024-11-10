@@ -1,15 +1,15 @@
 #include "LKpch.h"
-#include "LkEngine/Renderer/SceneRenderer.h"
+#include "SceneRenderer.h"
 
 #include "LkEngine/Renderer/Renderer.h"
+#include "LkEngine/Renderer/Renderer2D.h"
 
 
 namespace LkEngine {
 
-	LSceneRenderer::LSceneRenderer(TObjectPtr<LScene> InScene, 
-								   const SceneRendererSpecification& InSpecification)
-		: m_Scene(InScene)
-		, m_Specification(InSpecification)
+	LSceneRenderer::LSceneRenderer(const FSceneRendererSpecification& InSpecification)
+		: Scene(InSpecification.StartScene)
+		, Specification(InSpecification)
 	{
 	}
 
@@ -21,31 +21,29 @@ namespace LkEngine {
 	{
 	}
 
-	void LSceneRenderer::BeginScene(const SceneRendererCamera& camera)
+	void LSceneRenderer::BeginScene(const FSceneRendererCamera& Camera)
 	{
-		SceneData.SceneCamera = camera;
+		LK_PROFILE_FUNC();
+		SceneData.SceneCamera = Camera;
+		UBCamera& CameraData = CameraDataUB;
 
-		UBCamera& cameraData = CameraDataUB;
+		auto& SceneCamera = SceneData.SceneCamera;
+		const auto ViewProjection = SceneCamera.Camera->GetProjectionMatrix() * SceneCamera.ViewMatrix;
+		const glm::mat4 ViewInverse = glm::inverse(SceneCamera.ViewMatrix);
+		const glm::mat4 ProjectionInverse = glm::inverse(SceneCamera.Camera->GetProjectionMatrix());
+		const glm::vec3 CameraPosition = ViewInverse[3];
 
-		auto& sceneCamera = SceneData.SceneCamera;
-		//const auto viewProjection = sceneCamera.Camera->GetProjectionMatrix() * sceneCamera.ViewMatrix;
-		const auto viewProjection = sceneCamera.Camera->GetProjectionMatrix() * sceneCamera.ViewMatrix;
-		const glm::mat4 viewInverse = glm::inverse(sceneCamera.ViewMatrix);
-		const glm::mat4 projectionInverse = glm::inverse(sceneCamera.Camera->GetProjectionMatrix());
-		const glm::vec3 cameraPosition = viewInverse[3];
-
-		cameraData.ViewProjection = viewProjection;
-		cameraData.Projection = sceneCamera.Camera->GetProjectionMatrix();
-		//cameraData.Projection = sceneCamera.Camera->GetProjectionMatrix();
-		cameraData.InverseProjection = projectionInverse;
-		cameraData.View = sceneCamera.ViewMatrix;
-		cameraData.InverseView = viewInverse;
-		cameraData.InverseViewProjection = viewInverse * cameraData.InverseProjection;
+		CameraData.ViewProjection = ViewProjection;
+		CameraData.Projection = SceneCamera.Camera->GetProjectionMatrix();
+		CameraData.InverseProjection = ProjectionInverse;
+		CameraData.View = SceneCamera.ViewMatrix;
+		CameraData.InverseView = ViewInverse;
+		CameraData.InverseViewProjection = ViewInverse * CameraData.InverseProjection;
 
 		TObjectPtr<LSceneRenderer> SceneRendererInstance = this;
-		LRenderer::Submit([&SceneRendererInstance, cameraData]() mutable
+		LRenderer::Submit([&SceneRendererInstance, CameraData]() mutable
 		{
-			SceneRendererInstance->m_UBSCamera->Get()->SetData(&cameraData, sizeof(cameraData));
+			SceneRendererInstance->UBSCamera->Get()->SetData(&CameraData, sizeof(CameraData));
 		});
 	}
 
@@ -53,10 +51,14 @@ namespace LkEngine {
 	{
 	}
 
+	void LSceneRenderer::PreRender()
+	{
+	}
+
 #if 0
-	Ref<Renderer2DAPI> LSceneRenderer::GetRenderer2D()
+	TObjectPtr<LRenderer2D> LSceneRenderer::GetRenderer2D()
 	{ 
-		return m_Renderer2D; 
+		return Renderer2D; 
 	}
 #endif
 

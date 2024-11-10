@@ -13,12 +13,6 @@ namespace LkEngine {
 
     static TObjectPtr<LImage> FileIconImage{};
 
-    enum Mode
-    {
-        Mode_Copy,
-        Mode_Move,
-        Mode_Swap
-    };
     static int Mode = 0;
 
     static const char* TestNames[9] =

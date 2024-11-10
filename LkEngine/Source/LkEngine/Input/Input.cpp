@@ -61,6 +61,23 @@ namespace LkEngine {
 		}
 
 	#if 0
+		/// @NOTE: This was moved here from the editor layer.
+		// The window space is calculated from topleft corner, 
+		// so remove LMouse::Pos.y to get the actual cursor placement
+		{
+			LMouse::Pos = LMouse::GetRawPos();
+			LMouse::Pos.x -= LeftSidebarSize.x;
+			LMouse::Pos.y = ViewportBounds[1].Y - BottomBarSize.y - LMouse::Pos.y;
+
+			LMouse::ScaledPos.x = (LMouse::Pos.x) / ViewportScalers.x;
+			LMouse::ScaledPos.y = (LMouse::Pos.y) / ViewportScalers.y;
+
+			LMouse::CenterPos.x = (LMouse::Pos.x / Window->GetWidth()) * 2.0f - 1.0f;
+			LMouse::CenterPos.y = ((LMouse::Pos.y / Window->GetHeight()) * 2.0f - 1.0f) * -1.0f;
+		}
+	#endif
+
+	#if 0
         const glm::vec2 mousePos = Mouse::GetPos();
         std::vector<Raycast2DResult> raycastResults = Physics2D::RaycastFromScreen(*Scene);
 		for (const Raycast2DResult& RaycastResult : raycastResults)

@@ -27,13 +27,13 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	void LRenderContext::SetProfile(const EProfile& InProfile)
+	void LRenderContext::SetProfile(const ERenderProfile InProfile)
 	{
 		ERendererAPI RenderAPI = LRendererAPI::Current();
 
 		switch (InProfile)
 		{
-			case EProfile::Core:
+			case ERenderProfile::Core:
 			{
 				if (RenderAPI == ERendererAPI::Vulkan)
 				{
@@ -47,7 +47,8 @@ namespace LkEngine {
 
 				break;
 			}
-			case EProfile::Compability:
+
+			case ERenderProfile::Compability:
 			{
 				if (RenderAPI == ERendererAPI::Vulkan)
 				{
@@ -83,15 +84,5 @@ namespace LkEngine {
 
 		LK_CORE_ASSERT(false, "SetVersion(MAJOR, MINOR) failed, neither Vulkan or OpenGL was detected");
 	}
-
-	/// PATCH OUT
-	void LRenderContext::HandleViewportEvents()
-	{
-		LWindow& WindowRef = LWindow::Get();
-		int ViewportWidth;
-		int ViewportHeight;
-
-		glfwGetWindowSize(WindowRef.GetGlfwWindow(), &ViewportWidth, &ViewportHeight);
-	}	
 
 }

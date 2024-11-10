@@ -12,52 +12,52 @@ namespace LkEngine {
 
     class LWindow;
 
+	/**
+	 * @enum ERenderProfile
+	 */
+	enum class ERenderProfile 
+	{ 
+		Core, 
+		Compability,
+	};
+
+    /**
+     * LRenderContext
+     */
     class LRenderContext : public LObject
     {
     public:
-        enum class EProfile 
-        { 
-            Core, 
-            Compability,
-        };
-
-    public:
         virtual ~LRenderContext() = default;
 
-        static TObjectPtr<LRenderContext> Create(LWindow* InWindow);
-
-        static void SetProfile(const EProfile& InProfile);
-        static void SetVersion(const int MajorVersion, const int MinorVersion);
-
-        virtual void Init(const ESourceBlendFunction& InSourceFunc, const EDestinationBlendFunction& InDestinatonFunc) = 0;
+        virtual void Initialize(const ESourceBlendFunction InSourceFunc, 
+                                const EDestinationBlendFunction InDestinatonFunc) = 0;
         virtual void Destroy() = 0;
+
         virtual GLFWwindow* GetGlfwWindow() = 0;
         virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) = 0;
 
         virtual void SetDepthEnabled(const bool InEnabled) = 0;
-        virtual void SetDepthFunction(const EDepthFunction& InDepthFunc) = 0;
+        virtual void SetDepthFunction(const EDepthFunction InDepthFunc) = 0;
         virtual void SetBlendingEnabled(const bool InEnabled) = 0;
-        virtual void SetBlendFunction(const ESourceBlendFunction& InSourceFunc, const EDestinationBlendFunction& InDestinationFunc) = 0;
-        virtual void SetSourceBlendFunction(const ESourceBlendFunction& InSourceFunc) = 0;
-        virtual void SetDestinationBlendFunction(const EDestinationBlendFunction& InDestinationFunc) = 0;
+        virtual void SetBlendFunction(const ESourceBlendFunction InSourceFunc, const EDestinationBlendFunction InDestinationFunc) = 0;
+        virtual void SetSourceBlendFunction(const ESourceBlendFunction InSourceFunc) = 0;
+        virtual void SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationFunc) = 0;
 
         virtual void UpdateResolution(const uint16_t Width, const uint16_t Height) = 0;
         virtual bool GetBlendingEnabled() const = 0;
 
-        virtual void SetName(std::string_view name) = 0;
-        virtual const std::string GetName() const = 0;
+        virtual ESourceBlendFunction GetSourceBlendFunction() const = 0;
+        virtual EDestinationBlendFunction GetDestinationBlendFunction() const = 0;
 
-        /* FIXME: REMOVE */
-        virtual std::string GetCurrentSourceBlendFunctionName() const = 0;
-        virtual std::string GetCurrentDestinationBlendFunctionName() const = 0;
+        static void SetProfile(const ERenderProfile InProfile);
+        static void SetVersion(const int MajorVersion, const int MinorVersion);
 
-    protected:
-        static void HandleViewportEvents();
+        /**
+         * @brief Factory function for creating a LRenderContext.
+         */
+        static TObjectPtr<LRenderContext> Create(LWindow* InWindow);
 
-    protected:
-        friend class LEditor; /* FIXME: REMOVE */
-
-    private:
+	private:
         LCLASS(LRenderContext);
     };
 

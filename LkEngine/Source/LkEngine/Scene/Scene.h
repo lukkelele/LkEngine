@@ -93,7 +93,8 @@ namespace LkEngine {
 		void SetCamera(TObjectPtr<LSceneCamera> InSceneCamera);
 		void SetCamera(LSceneCamera* InSceneCamera);
 		void SetEditorCamera(const TObjectPtr<LEditorCamera> EditorCamera);
-		TObjectPtr<LSceneCamera> GetMainCamera() { return m_Camera; }
+
+		FORCEINLINE TObjectPtr<LSceneCamera> GetMainCamera() { return Camera; } 
 
 		FORCEINLINE UUID GetUUID() const 
 		{ 
@@ -147,7 +148,7 @@ namespace LkEngine {
 														   (entt::entity)Source);
 		}
 
-		template<typename... Components>
+		template<typename ...Components>
 		auto GetAllEntitiesWith()
 		{
 			return m_Registry.view<Components...>();
@@ -200,8 +201,7 @@ namespace LkEngine {
 		uint16_t m_ViewportWidth = 0;
 		uint16_t m_ViewportHeight = 0;
 
-		TObjectPtr<LSceneCamera> m_Camera = nullptr;
-		TObjectPtr<LSceneCamera> m_Camera2D = nullptr; /// REMOVE
+		TObjectPtr<LSceneCamera> Camera = nullptr;
 		TObjectPtr<LEditorCamera> EditorCamera = nullptr;
 
 		TObjectPtr<LSceneRenderer> Renderer = nullptr;

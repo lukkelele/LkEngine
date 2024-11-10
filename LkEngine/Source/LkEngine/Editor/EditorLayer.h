@@ -22,9 +22,8 @@
 #include "LkEngine/Renderer/Framebuffer.h"
 
 #include "LkEngine/UI/UICore.h"
+#include "LkEngine/UI/UILayer.h"
 #include "LkEngine/UI/ContentBrowser.h"
-
-#include "LkEngine/ImGui/ImGuiLayer.h"
 
 #define LK_UI_ENABLE_LEFT_SIDEBAR_CONTENT 1
 
@@ -37,11 +36,13 @@ namespace LkEngine {
 	class LScene;
 	class LSceneManagerPanel;
 	class LProject;
+	class LViewport;
 
+	/* FIXME: */
 	enum class EEditorWindowType
 	{
 		None = 0,
-		Viewport,  // EditorLayer Viewport, 'normal' mode
+		Viewport,
 		NodeEditorLayer,
 	};
 
@@ -132,13 +133,16 @@ namespace LkEngine {
 		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window // FIXME: REMOVE
 		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 }; // TODO: REMOVE/UPDATE
 
-		glm::vec2 EditorViewportBounds[2] = { { 0.0f, 0.0f }, { 0.0f, 0.0f} };
+		glm::vec2 EditorViewportBounds[2] = { 
+			{ 0.0f, 0.0f }, 
+			{ 0.0f, 0.0f } 
+		};
 		glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
-		glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
-		glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
+		//glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
+		//glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 
-		bool ShouldUpdateWindowSizes = true;
+		bool bShouldUpdateWindowSizes = true;
 
 		bool ShowRenderSettingsWindow = false;
 		bool m_FillSidebarsVertically = true; // Always fill out sidebars vertically
@@ -170,7 +174,9 @@ namespace LkEngine {
 		bool m_Enabled = true;
 
 		LVector2 ViewportBounds[2];
-		LVector2 SecondViewportBounds[2];
+
+		/* Editor Window Bounds. */
+		//LVector2 SecondViewportBounds[2];
 
 		bool m_ShowMetricsTool = false;
 		bool m_ShowStackTool = false;
@@ -183,6 +189,9 @@ namespace LkEngine {
 		TObjectPtr<LFramebuffer> ViewportFramebuffer;
 		TObjectPtr<LEditorCamera> EditorCamera;
 
+		/** @brief The editor viewport.  */
+		TObjectPtr<LViewport> EditorViewport;
+
 		TSharedPtr<LSceneManagerPanel> SceneManagerPanel;
 
 		/* Active object. */
@@ -194,7 +203,8 @@ namespace LkEngine {
 		TUniquePtr<LContentBrowser> ContentBrowser;
 		// ~Editor
 
-		LWindow* Window = nullptr;
+		TObjectPtr<LWindow> Window{};
+
 		EEditorWindowType CurrentWindowType = EEditorWindowType::None;
 
 		/// REWORK ALL THESE FRIEND DECLARATIONS

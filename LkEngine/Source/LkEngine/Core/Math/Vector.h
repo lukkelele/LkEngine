@@ -27,18 +27,34 @@ namespace LkEngine {
 		{
 		} 
 
-		template<typename R>
+		template<typename R, typename = std::enable_if_t<std::is_convertible_v<R, T>>>
 		TVector2(const R InX, const R InY)
 			: X(static_cast<T>(InX))
 			, Y(static_cast<T>(InY))
 		{
-			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
 		} 
+
+		template<typename R, typename = std::enable_if_t<std::is_convertible_v<R, T>>>
+		TVector2(const TVector2<R>& Other)
+			: X(static_cast<T>(Other.X))
+			, Y(static_cast<T>(Other.Y))
+		{
+		}
 
 		TVector2(const glm::vec2& InVec)
 			: X(InVec.x)
 			, Y(InVec.y)
 		{
+		} 
+
+		TVector2& operator=(const TVector2& Other)
+		{
+			if (this != &Other)
+			{
+				X = Other.X;
+				Y = Other.Y;
+			}
+			return *this;
 		} 
 
 		TVector2& operator+=(const TVector2& Other)
@@ -60,14 +76,79 @@ namespace LkEngine {
 			return TVector2((X - Other.X), (Y - Other.Y));
 		}
 
+		template<typename R>
+		TVector2 operator-(const TVector2<R>& Other) const 
+		{
+			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
+			return TVector2((X - static_cast<T>(Other.X)), (Y - static_cast<T>(Other.Y)));
+		}
+
 		TVector2 operator+(const TVector2& Other) const 
 		{
 			return TVector2((X + Other.X), (Y + Other.Y));
 		}
 
+		template<typename R>
+		TVector2 operator+(const TVector2<R>& Other) const 
+		{
+			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
+			return TVector2((X + static_cast<T>(Other.X)), (Y + static_cast<T>(Other.Y)));
+		}
+
+		template<typename R>
+		TVector2& operator=(const TVector2<R> Other)
+		{
+			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
+			X = static_cast<T>(Other.X);
+			Y = static_cast<T>(Other.Y);
+			return *this;
+		} 
+
+		bool operator==(const TVector2& Other) const 
+		{
+			return ((X == Other.X) && (Y == Other.Y));
+		}
+
+		bool operator!=(const TVector2& Other) const 
+		{
+			return !(*this == Other);
+		}
+
+		template<typename R>
+		bool operator==(const TVector2<R>& Other) const 
+		{
+			return ((X == static_cast<T>(Other.X))
+					&& (Y == static_cast<T>(Other.Y)));
+		}
+
+		/** Implicit conversion to glm::vec2. */
+		operator glm::vec2()
+		{
+			return glm::vec2(X, Y);
+		}
+
 		static float Distance(const TVector2& A, const TVector2& B)
 		{
 			return 0.0f;
+		}
+
+		FORCEINLINE std::string ToString() const
+		{
+			if constexpr (std::is_floating_point_v<T>)
+			{
+				return LK_FORMAT_STRING("({:.2f}, {:.2f})", X, Y);
+			}
+			else
+			{
+				return LK_FORMAT_STRING("({}, {})", X, Y);
+			}
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const TVector2& Vector) 
+		{
+			//os << *Vector.ToString(); /* LString     */
+			os << Vector.ToString();    /* std::string */
+			return os;
 		}
 
 	public:
@@ -99,7 +180,6 @@ namespace LkEngine {
 			, Y(T())
 			, Z(T()) 
 		{
-			//static_assert(std::is_floating_point_v<T>, "LVector can only use floating types");
 			static_assert(std::disjunction_v<
 				std::is_same<T, int>, 
 				std::is_same<T, float>, 
@@ -158,6 +238,16 @@ namespace LkEngine {
 			return TVector3((X + Other.X), (Y + Other.Y), (Z + Other.Z));
 		}
 
+		bool operator==(const TVector3& Other) const 
+		{
+			return ((X == Other.X) && (Y == Other.Y) && (Z == Other.Z));
+		}
+
+		bool operator!=(const TVector3& Other) const 
+		{
+			return !(*this == Other);
+		}
+
 		static float Distance(const TVector3& A, const TVector3& B)
 		{
 			return 0.0f;
@@ -187,7 +277,9 @@ namespace LkEngine {
 		>, "TVector can only be instantiated with int, float or double.");
 
 	public:
-		T X, Y, Z;
+		T X;
+		T Y;
+		T Z;
 	};
 
 	using LVector = TVector3<float>;

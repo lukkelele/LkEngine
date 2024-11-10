@@ -1,11 +1,17 @@
 #pragma once
 
-#include "LkEngine/ImGui/ImGuiLayer.h"
+#include "LkEngine/UI/UILayer.h"
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <ImFileDialog/ImFileDialog.h>
 
 
 namespace LkEngine {
 
-    class LOpenGLImGuiLayer : public LImGuiLayer
+    class LOpenGLImGuiLayer : public LUILayer
     {
     public:
         LOpenGLImGuiLayer();
@@ -25,6 +31,8 @@ namespace LkEngine {
 
         virtual void BeginFrame() override;
         virtual void EndFrame() override;
+        
+        virtual void SetDarkTheme() override;
 
     private:
         bool bInitialized = false;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "RendererCore.h"
 #include "Framebuffer.h"
 #include "UniformBuffer.h"
 #include "VertexBuffer.h"
@@ -22,101 +23,47 @@ namespace LkEngine {
 
     class LSceneCamera;
 
-    struct QuadVertex
-    {
-        glm::vec3 Position;
-        glm::vec4 Color;
-        glm::vec2 Texcoord;
-        float TexIndex;
-        float TexArray;
-        float TilingFactor;
-    };
-
-    struct LineVertex
-    {
-        glm::vec3 Position{};
-        glm::vec4 Color{};
-    };
-
-	class IRenderer2DAPI
+	/**
+	 * LRenderer2D
+     * 
+     *  Base implementation for the 2D renderer.
+	 */
+	class LRenderer2DAPI : public LObject
 	{
 	public:
-        virtual ~IRenderer2DAPI() = default;
+        LRenderer2DAPI();
+        virtual ~LRenderer2DAPI() = default;
 
-        virtual void Init() = 0;
-        virtual void Shutdown() = 0;
+        virtual void Initialize() = 0;
+        virtual void Destroy() = 0;
 
-        virtual void BeginScene(const LSceneCamera& camera) = 0;
-        virtual void BeginScene(const LSceneCamera& camera, const glm::mat4& transform) = 0;
-        virtual void BeginScene(const glm::mat4& transform) = 0;
+        // Scene
+        virtual void BeginScene(const LSceneCamera& Camera) = 0;
+        virtual void BeginScene(const LSceneCamera& Camera, const glm::mat4& Transform) = 0;
+        virtual void BeginScene(const glm::mat4& Transform) = 0;
         virtual void Flush() = 0;
         virtual void EndScene() = 0;
+        // ~Scene
 
         virtual void DrawImage(const TObjectPtr<LImage>& Image) = 0;
-
-        virtual void DrawQuad(const glm::mat4& transform, const glm::vec4& color, uint64_t entityID = 0) = 0;
-        virtual void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
-        virtual void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) = 0;
-        virtual void DrawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;
-        virtual void DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) = 0;
-
-        virtual void DrawQuad(const glm::vec2& pos, 
-                              const glm::vec2& size, 
-                              TObjectPtr<LTexture2D> texture2D, 
-                              const float rotation, 
-                              uint64_t entityID = 0) = 0;
-
-        virtual void DrawQuad(const glm::vec3& pos, 
-                              const glm::vec2& size, 
-                              TObjectPtr<LTexture2D> texture, 
-                              const float rotation, 
-                              uint64_t entityID = 0) = 0;
-
-        virtual void DrawQuad(const glm::vec3& pos, 
-                              const glm::vec2& size, 
-                              TObjectPtr<LTexture2D> texture, 
-                              const glm::vec4& tintColor, 
-                              const float rotation, 
-                              uint64_t entityID = 0) = 0;
-
-        virtual void DrawRotatedQuad(const glm::vec2& pos, 
-                                     const glm::vec2& size, 
-                                     const glm::vec4& color, 
-                                     const float rotation, 
-                                     uint64_t entityID = 0) = 0;
-
-        virtual void DrawRotatedQuad(const glm::vec3& pos, 
-                                     const glm::vec2& size, 
-                                     const glm::vec4& color, 
-                                     const float rotation, 
-                                     uint64_t entityID = 0) = 0;
-
-        
-        // DrawLine
-        virtual void DrawLine(const glm::vec2& p0, 
-                              const glm::vec2& p1, 
-                              const glm::vec4& color, 
-                              uint64_t entityID = 0) = 0;
-
-        virtual void DrawLine(const glm::vec3& p0, 
-                              const glm::vec3& p1, 
-                              const glm::vec4& color, 
-                              uint64_t entityID = 0) = 0;
-        // ~DrawLine
+        virtual void DrawQuad(const glm::mat4& Transform, const glm::vec4& Color) = 0;
+        virtual void DrawQuad(const glm::vec2& Position, const glm::vec2& Size, const glm::vec4& Color) = 0;
+        virtual void DrawLine(const glm::vec2& P0, const glm::vec2& P1, const glm::vec4& Color) = 0;
 
         virtual float GetLineWidth() = 0;
-        virtual void SetLineWidth(float width) = 0;
+        virtual void SetLineWidth(const float NewLineWidth) = 0;
 
-        virtual void AddTextureToSlot(TObjectPtr<LTexture2D> texture) = 0;
-        virtual void AddTextureToSlot(TObjectPtr<LTexture2D> texture, int slot) = 0;
+        virtual void AddTextureToSlot(TObjectPtr<LTexture2D> Texture) = 0;
+        virtual void AddTextureToSlot(TObjectPtr<LTexture2D> Texture, const int Slot) = 0;
 
-        virtual const Renderer2DSpecification& GetSpecification() const = 0;
-
-        //FORCEINLINE static IRenderer2DAPI* Get() { return Renderer2DAPI; }
-        FORCEINLINE static IRenderer2DAPI& Get() { return *Renderer2DAPI; }
+        virtual const FRenderer2DSpecification& GetSpecification() const = 0;
 
         virtual TObjectPtr<LShader> GetQuadShader() = 0;
         virtual TObjectPtr<LShader> GetLineShader() = 0;
+
+        #if 0
+        virtual FRenderer2DStatistics GetStatistics() = 0;
+        virtual void ResetStatistics() = 0;
 
         struct Statistics
         {
@@ -130,15 +77,13 @@ namespace LkEngine {
             uint32_t GetTotalIndexCount() const { return QuadCount * 6; }
         };
 
-        virtual Statistics GetStats() = 0;
-        virtual void ResetStats() = 0;
-
         inline static constexpr glm::vec2 TextureCoords[] = { 
             { 0.0f, 0.0f }, // Bottom Left 
             { 0.0f, 1.0f }, // Top Left
             { 1.0f, 1.0f }, // Top Right
             { 1.0f, 0.0f }  // Bottom Right
         };
+        #endif
         
     protected:
         virtual void StartBatch() = 0;
@@ -146,17 +91,11 @@ namespace LkEngine {
 
         virtual void AddQuadBuffer() = 0;
         virtual void AddLineBuffer() = 0;
-        virtual QuadVertex*& GetWriteableQuadBuffer() = 0;
-        virtual LineVertex*& GetWriteableLineBuffer() = 0;
-
-    protected:
-        //inline static Ref<IRenderer2DAPI> Renderer2DAPI = nullptr;
-        inline static IRenderer2DAPI* Renderer2DAPI = nullptr;
+        virtual FQuadVertex*& GetWriteableQuadBuffer() = 0;
+        virtual FLineVertex*& GetWriteableLineBuffer() = 0;
 
     private:
-        friend class Renderer2D; /// REMOVE
-        friend class LRenderer2D;
-        friend class LEditorLayer;
+		LCLASS(LRenderer2DAPI);
 	};
 
 }

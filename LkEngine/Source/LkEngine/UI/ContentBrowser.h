@@ -2,10 +2,20 @@
 
 #include "Panel.h"
 
-#include "LkEngine/ImGui/ImGuiLayer.h"
+#include "LkEngine/UI/UILayer.h"
 
 
 namespace LkEngine {
+
+	namespace UI
+	{
+		enum EDragAndDropMode
+		{
+			Copy,
+			Move,
+			Swap
+		};
+	}
 
 	/**
 	 * LContentBrowser

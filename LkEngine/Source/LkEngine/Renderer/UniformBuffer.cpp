@@ -4,16 +4,18 @@
 #include "LkEngine/Renderer/RendererAPI.h"
 #include "LkEngine/Platform/OpenGL/OpenGLUniformBuffer.h"
 
+#include "LkEngine/Renderer/Shader.h"
+
 
 namespace LkEngine {
 
-	TObjectPtr<LUniformBuffer> LUniformBuffer::Create(uint64_t size)
+	TObjectPtr<LUniformBuffer> LUniformBuffer::Create(const uint64_t Size)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				return TObjectPtr<LOpenGLUniformBuffer>::Create(size);
+				return TObjectPtr<LOpenGLUniformBuffer>::Create(Size);
 			}
 
 			case ERendererAPI::None: break;

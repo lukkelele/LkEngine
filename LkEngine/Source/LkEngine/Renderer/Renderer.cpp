@@ -11,13 +11,13 @@
 
 namespace LkEngine {
 
-	struct ShaderDependencies
+	struct FShaderDependencies
 	{
 		std::vector<TObjectPtr<LPipeline>> Pipelines{};
 		std::vector<TObjectPtr<LMaterial>> Materials{};
 	};
 
-	static std::unordered_map<size_t, ShaderDependencies> s_ShaderDependencies;
+	static std::unordered_map<std::size_t, FShaderDependencies> ShaderDependencies;
 
 	void LRendererAPI::SetAPI(ERendererAPI InRendererAPI)
 	{
@@ -45,7 +45,7 @@ namespace LkEngine {
 	LRenderer::LRenderer()
 	{
 		LCLASS_REGISTER(LRenderer);
-		s_Instance = this;
+		Instance = this;
 	}
 
 	void LRenderer::Initialize()
@@ -71,7 +71,7 @@ namespace LkEngine {
 			ShaderLibrary->Load("Renderer_Model",     "Assets/Shaders/OpenGL/Renderer_Model.shader");
 		}
 
-		LK_CORE_DEBUG_TAG("Renderer", "Creating texture library");
+		LK_CORE_DEBUG_TAG("Renderer", "Creating Texture library");
 		RendererData->TextureLibrary = TObjectPtr<LTextureLibrary>(&LTextureLibrary::Get());
 		RendererData->TextureLibrary->Initialize();
 		RendererData->WhiteTexture = RendererData->TextureLibrary->GetWhiteTexture();
@@ -81,30 +81,6 @@ namespace LkEngine {
 
 		RendererAPI = LRendererAPI::Create();
 		RendererAPI->Initialize();
-
-		/// FIXME: NEED A WAY TO ENFORCE STATIC CLASS REGISTRATION
-		const LClass* Class = RendererAPI->GetClass();
-		LK_VERIFY(Class, "ClassRef is nullptr");
-		/// TODO: REMOVE ME
-#if 0
-		const LClass* ClassInfo = RendererAPI->GetClass();
-		if (ClassInfo->CastTo<LWindow>(RendererAPI.Get()))
-		{
-			LK_CORE_FATAL_TAG("Renderer", "{}  Cast to LWindow SUCCESSFUL", ClassInfo->GetName());
-		}
-		else
-		{
-			LK_CORE_WARN_TAG("Renderer", "{}  Cast to LWindow failed", ClassInfo->GetName());
-		}
-		if (ClassInfo->CastTo<LRendererAPI>(RendererAPI.Get()))
-		{
-			LK_CORE_FATAL_TAG("Renderer", "{}  Cast to LObject SUCCESSFUL", ClassInfo->GetName());
-		}
-		else
-		{
-			LK_CORE_WARN_TAG("Renderer", "{}  Cast to LObject failed", ClassInfo->GetName());
-		}
-#endif
 	}
 
 	void LRenderer::Clear()
@@ -169,7 +145,7 @@ namespace LkEngine {
 
 	TObjectPtr<LShaderLibrary> LRenderer::GetShaderLibrary()
 	{
-		LK_CORE_ASSERT(RendererData->m_ShaderLibrary, "ShaderLibrary is nullptr!");
+		LK_CORE_ASSERT(RendererData->m_ShaderLibrary, "ShaderLibrary is nullptr");
 		return RendererData->m_ShaderLibrary;
 	}
 
@@ -188,20 +164,20 @@ namespace LkEngine {
 		RendererAPI->SubmitImage(image);
 	}
 
-	void LRenderer::SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, uint32_t entityID)
+	void LRenderer::SubmitLine(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& Color, uint32_t EntityID)
 	{
-		RendererAPI->SubmitLine(p0, p1, color, entityID);
+		RendererAPI->SubmitLine(p0, p1, Color, EntityID);
 	}
 
-	void LRenderer::SubmitLines(const LVertexBuffer& vb, const LIndexBuffer& ib, const LShader& shader) 
+	void LRenderer::SubmitLines(const LVertexBuffer& VertexBuffer, const LIndexBuffer& ib, const LShader& shader) 
 	{
 		shader.Bind();
-		vb.Bind();
+		VertexBuffer.Bind();
 		ib.Bind();
 
 		ERenderTopology InitialTopology = GetPrimitiveTopology();
 		SetPrimitiveTopology(ERenderTopology::Lines);
-		RendererAPI->Draw(vb, ib, shader);
+		RendererAPI->Draw(VertexBuffer, ib, shader);
 
 		/* Reset initial topology */
 		SetPrimitiveTopology(InitialTopology);
@@ -213,81 +189,69 @@ namespace LkEngine {
 		RendererAPI->SubmitIndexed(Count);
 	}
 
-	void LRenderer::SubmitQuad(const glm::vec2& pos, 
-							   const glm::vec2& size, 
-							   const glm::vec4& color, 
-							   const uint64_t entityID)
+	void LRenderer::SubmitQuad(const glm::vec2& Position, const glm::vec2& Size, 
+							   const glm::vec4& Color, const uint64_t EntityID)
 	{
-		RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);
+		RendererAPI->SubmitQuad({ Position.x, Position.y, 0.0f }, Size, Color, EntityID);
 	}
 
-	void LRenderer::SubmitQuad(const glm::vec3& pos, 
-							   const glm::vec2& size, 
-							   const glm::vec4& color, 
-							   uint64_t entityID)
+	void LRenderer::SubmitQuad(const glm::vec3& Position, const glm::vec2& Size, 
+							   const glm::vec4& Color, uint64_t EntityID)
 	{
-		RendererAPI->SubmitQuad(pos, size, color, entityID);
+		RendererAPI->SubmitQuad(Position, Size, Color, EntityID);
 	}
 
-	void LRenderer::SubmitQuad(const glm::vec2& pos, 
-							   const glm::vec2& size, 
-							   TObjectPtr<LTexture> texture, 
-							   uint64_t entityID)
+	void LRenderer::SubmitQuad(const glm::vec2& Position, const glm::vec2& Size, 
+							   TObjectPtr<LTexture> Texture, uint64_t EntityID)
 	{
-		RendererAPI->SubmitQuad({ pos.x, pos.y, 0.0f }, size, texture, entityID);
+		RendererAPI->SubmitQuad({ Position.x, Position.y, 0.0f }, Size, Texture, EntityID);
 	}
 
-	void LRenderer::SubmitQuad(const glm::vec3& pos, 
-							   const glm::vec2& size, 
-							   TObjectPtr<LTexture> texture, 
-							   uint64_t entityID)
+	void LRenderer::SubmitQuad(const glm::vec3& Position, const glm::vec2& Size, 
+							   TObjectPtr<LTexture> Texture, uint64_t EntityID)
 	{
-		RendererAPI->SubmitQuad(pos, size, texture, 0.0f, entityID);
+		RendererAPI->SubmitQuad(Position, Size, Texture, 0.0f, EntityID);
 	}
 
-	void LRenderer::SubmitSprite(LTransformComponent& tc, 
-								 const glm::vec2& size, 
-								 const glm::vec4 color, 
-								 uint64_t entityID)
+	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, 
+								 const glm::vec4 Color, uint64_t EntityID)
     {
-        RendererAPI->SubmitQuad({ tc.Translation.x, tc.Translation.y }, 
-								size, 
-								color, 
-								tc.Rotation2D, 
-								entityID);
+        RendererAPI->SubmitQuad(
+			{ TransformComponent.Translation.x, TransformComponent.Translation.y }, 
+			Size, 
+			Color, 
+			TransformComponent.Rotation2D, 
+			EntityID
+		);
     }
 
-	void LRenderer::SubmitSprite(LTransformComponent& tc, 
-								 const glm::vec2& size, 
-								 TObjectPtr<LTexture> texture, 
-								 uint64_t entityID)
+	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent, 
+								 const glm::vec2& Size, 
+								 TObjectPtr<LTexture> Texture, 
+								 uint64_t EntityID)
     {
-        RendererAPI->SubmitQuad(tc.Translation, size, texture, tc.Rotation2D, entityID);
+        RendererAPI->SubmitQuad(TransformComponent.Translation, Size, Texture, TransformComponent.Rotation2D, EntityID);
     }
 
-	void LRenderer::SubmitSprite(LTransformComponent& tc, 
-								 const glm::vec2& size, 
-								 TObjectPtr<LTexture> texture, 
-								 const glm::vec4& color, 
-								 uint64_t entityID)
+	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, 
+								 TObjectPtr<LTexture> Texture, const glm::vec4& Color, uint64_t EntityID)
     {
-        RendererAPI->SubmitQuad(tc.Translation, size, texture, color, tc.Rotation2D, entityID);
+        RendererAPI->SubmitQuad(TransformComponent.Translation, Size, Texture, Color, TransformComponent.Rotation2D, EntityID);
     }
 
-	// REMOVE
 	void LRenderer::BeginScene(const LSceneCamera& InSceneCamera)
 	{
-		//Renderer2DAPI->BeginScene(InSceneCamera);
+		//LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
-	// REMOVE
 	void LRenderer::BeginScene(const glm::mat4& viewProjectionMatrix)
 	{
-		//Renderer2DAPI->BeginScene(viewProjectionMatrix);
+		//LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
 	void LRenderer::EndScene()
 	{
+		//LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
 	RendererCapabilities& LRenderer::GetCapabilities()
@@ -302,7 +266,7 @@ namespace LkEngine {
 
 	uint32_t LRenderer::RT_GetCurrentFrameIndex()
 	{
-		// Swapchain owns the RenderThread frame index
+		/* FIXME: Swapchain owns the RenderThread frame index. */
 		return LApplication::Get()->GetWindow().GetSwapChain()->GetCurrentBufferIndex();
 	}
 
@@ -352,12 +316,13 @@ namespace LkEngine {
 	
 	TObjectPtr<LTexture2D> LRenderer::GetWhiteTexture()
 	{
+		LK_VERIFY(RendererData->WhiteTexture, "White texture is nullptr");
 		return RendererData->WhiteTexture;
 	}
 
 	TObjectPtr<LTextureCube> LRenderer::GetWhiteTextureCube()
 	{
-		LK_CORE_ASSERT(false, "Not implemented!");
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
 		return nullptr;
 	}
 
@@ -370,9 +335,10 @@ namespace LkEngine {
 
 	void LRenderer::RegisterShaderDependency(TObjectPtr<LShader> Shader, TObjectPtr<LMaterial> material)
 	{
-		s_ShaderDependencies[Shader->GetHash()].Materials.push_back(material);
+		ShaderDependencies[Shader->GetHash()].Materials.push_back(material);
 	}
 
+	/* TODO: Make this dynamic instead of using hardcoded entries. */
 	void LRenderer::LoadTextures()
 	{
 		LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
@@ -442,20 +408,20 @@ namespace LkEngine {
 			TextureLibrary.AddTexture(Specification);
 
 			/* Bricks. */
-			Specification.Path = "Assets/Textures/bricks_orange.jpg";
+			Specification.Path = "Assets/Textures/brickorange.jpg";
 			Specification.Name = "bricks";
 			Specification.DebugName = "bricks";
 			TextureLibrary.AddTexture(Specification);
 
-			/* Åle texture. */
+			/* Åle Texture. */
 			Specification.Path = "Assets/Textures/Misc/ale_1024x1024.png";
 			Specification.Name = "ale1024";
 			Specification.DebugName = "ale1024";
 			TextureLibrary.AddTexture(Specification);
 
 			/* Lukas Texture. */
-			Specification.Path = "Assets/Textures/Misc/lukas_1024.jpg";
-			Specification.Name = "lukas_1024";
+			Specification.Path = "Assets/Textures/Misc/luka1024.jpg";
+			Specification.Name = "luka1024";
 			Specification.DebugName = "lukas-1024x1024";
 			Specification.SamplerWrap = ETextureWrap::Repeat;
 			TextureLibrary.AddTexture(Specification);

@@ -2,6 +2,7 @@
 #include "Window.h"
 
 #include "LkEngine/Core/Application.h"
+#include "LkEngine/Core/Viewport.h"
 #include "LkEngine/Renderer/Renderer.h"
 
 
@@ -56,7 +57,7 @@ namespace LkEngine {
 		}
 
 		/* Set context profile and the version to use for the Renderer API. */
-		LRenderContext::SetProfile(LRenderContext::EProfile::Core);
+		LRenderContext::SetProfile(ERenderProfile::Core);
 
 		switch (LRendererAPI::Current())
 		{
@@ -77,15 +78,12 @@ namespace LkEngine {
 
 		/* Create render context. */
 		RenderContext = LRenderContext::Create(this);
-		RenderContext->Init(
+		RenderContext->Initialize(
 			ESourceBlendFunction::Alpha, 
 			EDestinationBlendFunction::One_Minus_SourceAlpha
 		);
 
-		RenderContext->SetName(LK_FORMAT_STRING("{}-Context", LRendererAPI::GetName().CStr()).c_str());
-
 		SetVSync(true);
-		LK_CORE_DEBUG_TAG("Graphics Context", "Name: {}", RenderContext->GetName());
 
 		glfwSetWindowUserPointer(GlfwWindow, &Data);
 

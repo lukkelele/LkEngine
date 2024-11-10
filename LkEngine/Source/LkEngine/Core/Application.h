@@ -22,7 +22,7 @@
 
 #include "LkEngine/Input/Input.h"
 
-#include "LkEngine/ImGui/ImGuiLayer.h"
+#include "LkEngine/UI/UILayer.h"
 
 #include "LkEngine/Asset/AssetManager.h"
 
@@ -135,8 +135,8 @@ namespace LkEngine {
         TObjectPtr<LRenderer> Renderer;
         uint32_t m_CurrentFrameIndex = 0;
 
+        TObjectPtr<LUILayer> UILayer;
         TUniquePtr<LEditorLayer> Editor;
-        TObjectPtr<LImGuiLayer> UILayer;
 
         TUniquePtr<PhysicsSystem> m_PhysicsSystem;
 

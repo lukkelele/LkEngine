@@ -10,7 +10,7 @@
 #include "LkEngine/Renderer/MaterialLibrary.h"
 #include "LkEngine/Renderer/Renderer.h"
 
-#include "LkEngine/ImGui/ImGuiUtilities.h"
+#include "LkEngine/UI/ImGui/ImGuiUtilities.h"
 
 
 namespace LkEngine {
@@ -35,11 +35,10 @@ namespace LkEngine {
         {
             static std::string SelectedMaterial = "";
 
-            //auto& Materials = LMaterialLibrary::Get().GetMaterials();
             const int RetrievedMaterials = LMaterialLibrary::Get().GetMaterials(MaterialMap);
-            for (std::pair<std::string, TObjectPtr<LMaterial>> MaterialEntry : MaterialMap)
+            for (auto& [ MaterialName, Material ] : MaterialMap)
             {
-                const std::string& MaterialName = MaterialEntry.first;
+                //const std::string& MaterialName = MaterialEntry.first;
 			    const bool bIsSelected = (MaterialName == SelectedMaterial);
 
                 if (ImGui::Selectable(MaterialName.c_str(), bIsSelected, 
@@ -57,7 +56,7 @@ namespace LkEngine {
 
                         if (TSharedPtr<LMaterialEditorTab> MaterialEditorTabRef = std::static_pointer_cast<LMaterialEditorTab>(NewTab))
                         {
-                            MaterialEditorTabRef->MaterialRef = MaterialEntry.second;
+							MaterialEditorTabRef->MaterialRef = Material;
                         }
                     }
                 }
@@ -72,6 +71,7 @@ namespace LkEngine {
         }
         if (ImGui::TreeNodeEx("Textures", treeNodeFlags))
         {
+        #if 0
             for (auto& Texture2DEntry : LTextureLibrary::Get().GetTextures2D())
             {
                 auto& Texture2D = Texture2DEntry.second;
@@ -81,7 +81,8 @@ namespace LkEngine {
                     ImGui::TreePop();
                 }
             }
-            ImGui::TreePop();
+        #endif
+			ImGui::TreePop(); /* Textures. */
         }
 
         ImGui::Separator();

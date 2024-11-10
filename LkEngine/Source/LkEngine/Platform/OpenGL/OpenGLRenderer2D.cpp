@@ -22,24 +22,29 @@
 
 namespace LkEngine {
 
-    static bool Initialized = false;
-
-    LOpenGLRenderer2D::LOpenGLRenderer2D(const OpenGLRenderer2DSpecification& InSpecification) 
+    LOpenGLRenderer2D::LOpenGLRenderer2D(const FOpenGLRenderer2DSpecification& InSpecification) 
         : m_Specification(InSpecification)
-        , m_MaxVertices(InSpecification.MaxQuads * 4)
-        , m_MaxIndices(InSpecification.MaxQuads * 6)
-        , m_MaxLineVertices(InSpecification.MaxLines * 2)
-        , m_MaxLineIndices(InSpecification.MaxLines * 6)
+        //, m_MaxVertices(InSpecification.MaxQuads * 4)
+        //, m_MaxIndices(InSpecification.MaxQuads * 6)
+        //, m_MaxLineVertices(InSpecification.MaxLines * 2)
+        //, m_MaxLineIndices(InSpecification.MaxLines * 6)
     {
 		LCLASS_REGISTER();
-        Renderer2DAPI = this;
+        //Renderer2DAPI = this;
 
-        m_CameraBuffer = {};
-        m_CameraUniformBuffer = {};
+        CameraBuffer = {};
+        CameraUniformBuffer = {};
+	}
 
-        m_QuadIndexCount = 0;
-        m_LineIndexCount = 0;
-    }
+	void LOpenGLRenderer2D::Initialize()
+	{
+	}
+
+	void LOpenGLRenderer2D::Destroy()
+	{
+	}
+
+#if 0 /* DISBLED */
 
     void LOpenGLRenderer2D::Init()
     {
@@ -473,4 +478,5 @@ namespace LkEngine {
         }
     }
 
+#endif
 }

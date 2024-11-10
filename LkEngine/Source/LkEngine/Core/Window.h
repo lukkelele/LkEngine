@@ -20,6 +20,8 @@
 
 namespace LkEngine {
 
+    class LViewport;
+
 	struct FWindowSpecification
 	{
         /// @TODO: Get version

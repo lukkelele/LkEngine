@@ -30,11 +30,10 @@ namespace LkEngine {
         OpenGLFunction; \
         LK_ASSERT(LOpenGL_Internal::SafeFunctionInvoke(#OpenGLFunction, __FILE__, __LINE__))
 
-
     /**
      * LOpenGL_Internal
 	 * 
-	 *  Internal LOpenGL namespace, do not use.
+	 *  Internal OpenGL namespace, do not use directly.
      */
     namespace LOpenGL_Internal
 	{
@@ -56,14 +55,14 @@ namespace LkEngine {
 		}
 	}
 
-	// REMOVE
-    constexpr int OpenGL_Major_Version = 4;
-    constexpr int OpenGL_Minor_Version = 5;
-    constexpr const char* OpenGL_GLSL_33 = "#version 330";
-    constexpr const char* OpenGL_GLSL_45 = "#version 450";
-
     namespace LOpenGL 
     {
+		// REMOVE
+		static constexpr int Major_Version = 4;
+		static constexpr int Minor_Version = 5;
+		static constexpr const char* GLSL_33 = "#version 330";
+		static constexpr const char* GLSL_45 = "#version 450";
+
 		/* Forward declarations. */
 		FORCEINLINE static GLenum TextureTarget(const bool IsMultisampled);
 
@@ -148,13 +147,13 @@ namespace LkEngine {
             {
                 case EImageFormat::RGB:     return GL_RGB;
 
-                /* RGBA */
+                /* RGBA. */
                 case EImageFormat::RGBA:
                 case EImageFormat::RGBA8:
                 case EImageFormat::RGBA16F:
                 case EImageFormat::RGBA32F: return GL_RGBA;
 
-                /* SRGB */
+                /* SRGB. */
                 case EImageFormat::SRGB:    return GL_SRGB;
                 case EImageFormat::SRGBA:   return GL_SRGB_ALPHA;
             }
@@ -512,314 +511,323 @@ namespace LkEngine {
 	// TODO: REMOVE!!!!!!!!!
     //=====================================================================
     // Debugging
-    extern unsigned int CubeTexture_, FloorTexture_;
 
-    extern unsigned int CubeVAO, CubeVBO;
-    extern unsigned int PlaneVAO, PlaneVBO;
-    extern unsigned int QuadVAO, QuadVBO;
-    extern LRendererID SkyboxVAO;
-    extern unsigned int SkyboxVBO;
+	namespace LOpenGL::Debug
+	{
+		extern uint32_t CubeTexture_;
+		extern uint32_t FloorTexture_;
 
-    extern TObjectPtr<LVertexBuffer> CubeVertexBuffer;
-    extern TObjectPtr<LVertexBuffer> PlaneVertexBuffer;
-    extern TObjectPtr<LTexture2D> CubeTexture;
-    extern TObjectPtr<LTexture2D> PlaneTexture;
+		extern uint32_t CubeVAO;
+		extern uint32_t CubeVBO;
+		extern uint32_t PlaneVAO;
+		extern uint32_t PlaneVBO;
+		extern uint32_t QuadVAO;
+		extern uint32_t QuadVBO;
+		extern LRendererID SkyboxVAO;
+		extern uint32_t SkyboxVBO;
 
-    inline static TObjectPtr<LShader> ScreenShader = nullptr;
-    inline static TObjectPtr<LShader> DebugShader = nullptr;
+		extern TObjectPtr<LVertexBuffer> CubeVertexBuffer;
+		extern TObjectPtr<LVertexBuffer> PlaneVertexBuffer;
+		extern TObjectPtr<LTexture2D> CubeTexture;
+		extern TObjectPtr<LTexture2D> PlaneTexture;
 
-    // Skybox
-    inline static TObjectPtr<LVertexBuffer> SkyboxVertexBuffer;
-    inline static TObjectPtr<LTextureCube> SkyboxTexture;
-    inline static TObjectPtr<LShader> SkyboxShader;
-    inline static unsigned int CubemapTexture;
+		inline static TObjectPtr<LShader> ScreenShader = nullptr;
+		inline static TObjectPtr<LShader> DebugShader = nullptr;
 
-    inline static glm::mat4 ModelMVP = glm::mat4(1.0f);
-    inline static glm::mat4 View = glm::mat4(1.0f);
-    inline static glm::mat4 Projection = glm::mat4(1.0f);
+		/* Skybox. */
+		inline static TObjectPtr<LVertexBuffer> SkyboxVertexBuffer;
+		inline static TObjectPtr<LTextureCube> SkyboxTexture;
+		inline static TObjectPtr<LShader> SkyboxShader;
+		inline static uint32_t CubemapTexture;
 
-    static float Cube_Vertices[] = {
-        // Positions         // Texture Coords
-        -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,    1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,
+		inline static glm::mat4 ModelMVP = glm::mat4(1.0f);
+		inline static glm::mat4 View = glm::mat4(1.0f);
+		inline static glm::mat4 Projection = glm::mat4(1.0f);
 
-        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,    1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
+		static float Cube_Vertices[] = {
+			// Positions         // Texture Coords
+			-0.5f, -0.5f, -0.5f,    0.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f,    1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f,    0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,    0.0f, 0.0f,
 
-        -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,    1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,    1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,    1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f,    0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
 
-         0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
 
-        -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,    1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,    1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,    1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
 
-        -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,    0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,    0.0f, 1.0f
-    };
+			-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,    1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,    1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,    1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,    0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f,    0.0f, 1.0f,
 
-    static float Cube_TextureCoords[] = {
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-    
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-    
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-    
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-    
-        0.0f, 1.0f,
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-    
-        0.0f, 1.0f,
-        1.0f, 1.0f,
-        1.0f, 0.0f,
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f
-    };
+			-0.5f,  0.5f, -0.5f,    0.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,    1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,    1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,    0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,    0.0f, 1.0f
+		};
 
-    static float Plane_Vertices[] = {
-        // Positions          // Texture Coords 
-         5.0f, -0.5f,  5.0f,     2.0f, 0.0f,
-        -5.0f, -0.5f,  5.0f,     0.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,     0.0f, 2.0f,
-    
-         5.0f, -0.5f,  5.0f,     2.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,     0.0f, 2.0f,
-         5.0f, -0.5f, -5.0f,     2.0f, 2.0f
-    };
-    static float Quad_Vertices[] = { 
-        // positions   // texCoords
-        -0.3f,  1.0f,  0.0f, 1.0f,
-        -0.3f,  0.7f,  0.0f, 0.0f,
-         0.3f,  0.7f,  1.0f, 0.0f,
-    
-        -0.3f,  1.0f,  0.0f, 1.0f,
-         0.3f,  0.7f,  1.0f, 0.0f,
-         0.3f,  1.0f,  1.0f, 1.0f
-    };
-    static float Skybox_Vertices[] = {
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
+		static float Cube_TextureCoords[] = {
+			0.0f, 0.0f,
+			1.0f, 0.0f,
+			1.0f, 1.0f,
+			1.0f, 1.0f,
+			0.0f, 1.0f,
+			0.0f, 0.0f,
+		
+			0.0f, 0.0f,
+			1.0f, 0.0f,
+			1.0f, 1.0f,
+			1.0f, 1.0f,
+			0.0f, 1.0f,
+			0.0f, 0.0f,
+		
+			1.0f, 0.0f,
+			1.0f, 1.0f,
+			0.0f, 1.0f,
+			0.0f, 1.0f,
+			0.0f, 0.0f,
+			1.0f, 0.0f,
+		
+			1.0f, 0.0f,
+			1.0f, 1.0f,
+			0.0f, 1.0f,
+			0.0f, 1.0f,
+			0.0f, 0.0f,
+			1.0f, 0.0f,
+		
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,
+			1.0f, 0.0f,
+			0.0f, 0.0f,
+			0.0f, 1.0f,
+		
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,
+			1.0f, 0.0f,
+			0.0f, 0.0f,
+			0.0f, 1.0f
+		};
 
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+		static float Plane_Vertices[] = {
+			// Positions          // Texture Coords 
+			 5.0f, -0.5f,  5.0f,     2.0f, 0.0f,
+			-5.0f, -0.5f,  5.0f,     0.0f, 0.0f,
+			-5.0f, -0.5f, -5.0f,     0.0f, 2.0f,
+		
+			 5.0f, -0.5f,  5.0f,     2.0f, 0.0f,
+			-5.0f, -0.5f, -5.0f,     0.0f, 2.0f,
+			 5.0f, -0.5f, -5.0f,     2.0f, 2.0f
+		};
 
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
+		static float Quad_Vertices[] = { 
+		/* Positions */    /* Texture Coordinates */
+			-0.3f,  1.0f,        0.0f, 1.0f,
+			-0.3f,  0.7f,        0.0f, 0.0f,
+			 0.3f,  0.7f,        1.0f, 0.0f,
+		
+			-0.3f,  1.0f,        0.0f, 1.0f,
+			 0.3f,  0.7f,        1.0f, 0.0f,
+			 0.3f,  1.0f,        1.0f, 1.0f
+		};
 
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+		static float Skybox_Vertices[] = {
+			-1.0f,  1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
 
-        -1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
 
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f
-    };
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
 
-    static unsigned int LoadTexture(const char* path)
-    {
-        unsigned int TextureID;
-        LK_OpenGL(glGenTextures(1, &TextureID));
+			-1.0f, -1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
 
-        int Width, Height, channels;
-        unsigned char* data = stbi_load(path, &Width, &Height, &channels, 0);
-        if (data)
-        {
-            GLenum Format;
-			if (channels == 1)
+			-1.0f,  1.0f, -1.0f,
+			 1.0f,  1.0f, -1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			 1.0f, -1.0f,  1.0f
+		};
+
+		FORCEINLINE static uint32_t LoadTexture(const char* path)
+		{
+			uint32_t TextureID;
+			LK_OpenGL(glGenTextures(1, &TextureID));
+
+			int Width;
+			int Height;
+			int Channels;
+			unsigned char* data = stbi_load(path, &Width, &Height, &Channels, 0);
+			if (data)
 			{
-                Format = GL_RED;
-			}
-			else if (channels == 3)
-			{
-                Format = GL_RGB;
-			}
-			else if (channels == 4)
-			{
-                Format = GL_RGBA;
+				GLenum Format;
+				if (Channels == 1)
+				{
+					Format = GL_RED;
+				}
+				else if (Channels == 3)
+				{
+					Format = GL_RGB;
+				}
+				else if (Channels == 4)
+				{
+					Format = GL_RGBA;
+				}
+				else
+				{
+					LK_CORE_ASSERT(false, "Invalid GLFormat");
+					Format = GL_INVALID_ENUM;
+				}
+
+				LK_OpenGL(glBindTexture(GL_TEXTURE_2D, TextureID));
+				LK_OpenGL(glTexImage2D(GL_TEXTURE_2D, 0, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, data));
+				LK_OpenGL(glGenerateMipmap(GL_TEXTURE_2D));
+
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+				LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+				stbi_image_free(data);
 			}
 			else
 			{
-				LK_CORE_ASSERT(false, "Invalid GLFormat");
-				Format = GL_INVALID_ENUM;
+				LK_CORE_ERROR_TAG("OpenGLRenderer2D", "Texture failed to load at path {}", path);
+				stbi_image_free(data);
 			}
 
-            LK_OpenGL(glBindTexture(GL_TEXTURE_2D, TextureID));
-            LK_OpenGL(glTexImage2D(GL_TEXTURE_2D, 0, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, data));
-            LK_OpenGL(glGenerateMipmap(GL_TEXTURE_2D));
-
-            LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-            LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-            LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-            LK_OpenGL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-
-            stbi_image_free(data);
-        }
-        else
-        {
-            LK_CORE_ERROR_TAG("OpenGLRenderer2D", "Texture failed to load at path {}", path);
-            stbi_image_free(data);
-        }
-
-        return TextureID;
-    }
-
-    void GenerateCubeVaoAndVbo(unsigned int& vao, unsigned int& vbo);
-    void GeneratePlaneVaoAndVbo(unsigned int& vao, unsigned int& vbo);
-    void GenerateScreenQuadVaoAndVbo(unsigned int& vao, unsigned int& vbo);
-    void SetupTexturesAndShaders();
-
-    void RenderMirrorTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
-    void RenderScreenTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
-    void RenderCubes(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
-    void RenderFloor(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
-    
-    TObjectPtr<LShader> GetDebugShader();
-    TObjectPtr<LShader> GetScreenShader();
-
-	static unsigned int LoadCubemap(std::vector<std::string> faces)
-	{
-		unsigned int TextureID;
-		glGenTextures(1, &TextureID);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, TextureID);
-
-		int Width, Height, nrChannels;
-		for (unsigned int i = 0; i < faces.size(); i++)
-		{
-		    unsigned char* data = stbi_load(faces[i].c_str(), &Width, &Height, &nrChannels, 0);
-		    if (data)
-		    {
-		        glTexImage2D(
-					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
-		            0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-		        );
-		        stbi_image_free(data);
-		    }
-		    else
-		    {
-                LK_CORE_ASSERT(false, "Failed to load texture {}", faces[i]);
-		        stbi_image_free(data);
-		    }
+			return TextureID;
 		}
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		void GenerateCubeVaoAndVbo(uint32_t& vao, uint32_t& vbo);
+		void GeneratePlaneVaoAndVbo(uint32_t& vao, uint32_t& vbo);
+		void GenerateScreenQuadVaoAndVbo(uint32_t& vao, uint32_t& vbo);
+		void SetupTexturesAndShaders();
 
-		return TextureID;
-	}  
+		void RenderMirrorTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
+		void RenderScreenTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
+		void RenderCubes(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
+		void RenderFloor(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
+    
+		TObjectPtr<LShader> GetDebugShader();
+		TObjectPtr<LShader> GetScreenShader();
 
-    static void GenerateSkybox(LRendererID& skyboxVAO, LRendererID& skyboxVBO)
-    {
-        glGenVertexArrays(1, &skyboxVAO);
-        glGenBuffers(1, &skyboxVBO);
-        glBindVertexArray(skyboxVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Skybox_Vertices), &Skybox_Vertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		static uint32_t LoadCubemap(std::vector<std::string> faces)
+		{
+			uint32_t TextureID;
+			glGenTextures(1, &TextureID);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, TextureID);
 
-        SkyboxShader = LShader::Create("Assets/Shaders/OpenGL/Skybox.shader");
-        SkyboxShader->Bind();
-        SkyboxShader->Set("skybox", 0);
-    }
+			int Width, Height, nrChannels;
+			for (uint32_t i = 0; i < faces.size(); i++)
+			{
+				unsigned char* data = stbi_load(faces[i].c_str(), &Width, &Height, &nrChannels, 0);
+				if (data)
+				{
+					glTexImage2D(
+						GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+						0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+					);
+					stbi_image_free(data);
+				}
+				else
+				{
+					LK_CORE_ASSERT(false, "Failed to load texture {}", faces[i]);
+					stbi_image_free(data);
+				}
+			}
 
-    static void RenderSkybox(LRendererID& texture, const glm::mat4& view, const glm::mat4& projection)
-    {
-        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-        SkyboxShader->Bind();
-        SkyboxShader->Set("view", view);
-        SkyboxShader->Set("projection", projection);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-        // Skybox Cube
-        glBindVertexArray(SkyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        glDepthFunc(GL_LESS); // set depth function back to default
-    }
+			return TextureID;
+		}  
+
+		static void GenerateSkybox(LRendererID& skyboxVAO, LRendererID& skyboxVBO)
+		{
+			glGenVertexArrays(1, &skyboxVAO);
+			glGenBuffers(1, &skyboxVBO);
+			glBindVertexArray(skyboxVAO);
+			glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(Skybox_Vertices), &Skybox_Vertices, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+			SkyboxShader = LShader::Create("Assets/Shaders/OpenGL/Skybox.shader");
+			SkyboxShader->Bind();
+			SkyboxShader->Set("skybox", 0);
+		}
+
+		static void RenderSkybox(LRendererID& texture, const glm::mat4& view, const glm::mat4& projection)
+		{
+			glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+			SkyboxShader->Bind();
+			SkyboxShader->Set("view", view);
+			SkyboxShader->Set("projection", projection);
+
+			// Skybox Cube
+			glBindVertexArray(SkyboxVAO);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
+			glDepthFunc(GL_LESS); // set depth function back to default
+		}
+
+	}
 
 }
-
-constexpr int LK_RENDERER_API_OPENGL_MAJOR_VERSION = LkEngine::OpenGL_Major_Version;
-constexpr int LK_RENDERER_API_OPENGL_VERSION = LkEngine::OpenGL_Minor_Version;
-constexpr const char* LK_RENDERER_API_OPENGL_SHADER_VERSION = LkEngine::OpenGL_GLSL_45;
 
