@@ -41,6 +41,7 @@ include "External/Dependencies.lua"
 --|===========================================
 --| LkEngine
 --|
+--| Engine Project.
 --|===========================================
 project "LkEngine"
     location "LkEngine"
@@ -66,6 +67,7 @@ project "LkEngine"
 		"SPDLOG_USE_STD_FORMAT",
         "GLFW_INCLUDE_NONE",
 		"YAML_CPP_STATIC_DEFINE",
+        "GLM_ENABLE_EXPERIMENTAL",
         "IMGUI_DEFINE_MATH_OPERATORS",
 		"NOMINMAX",
 		"TRACY_ENABLE",
@@ -172,6 +174,7 @@ project "LkEngine"
         {
             "%{Dependencies.Assimp.Windows.DebugLibName}.lib",
             "zlibstaticd", -- Built by Assimp.
+            "DbgHelp"
         }
 
 	filter { "system:windows", "configurations:Release or configurations:Dist" }	
@@ -190,7 +193,16 @@ project "LkEngine"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "On"
-		defines "LK_DEBUG"
+
+		defines 
+        {
+            "LK_DEBUG",
+        }
+
+        links
+        {
+            "Tracy",
+        }
 
 	filter "configurations:Release"
         runtime "Release"
