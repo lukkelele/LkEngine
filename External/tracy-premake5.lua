@@ -3,7 +3,7 @@ project "Tracy"
 	language "C++"
     location "tracy"
 	cppdialect "C++17"
-	staticruntime "Off"
+	staticruntime "On"
 
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
@@ -35,6 +35,16 @@ project "Tracy"
 	filter "system:windows"
 		systemversion "latest"
 
+		defines 
+		{
+			"_CRT_SECURE_NO_WARNINGS",
+		}
+
+		buildoptions	
+		{
+			"/IGNORE:C4996", -- Ignore warning 'The POSIX name for this item is deprecated'.
+		}
+
 	filter "system:linux"
 		files 
 		{
@@ -50,6 +60,12 @@ project "Tracy"
 		runtime "Debug"
 		symbols "On"
 		conformancemode "On"
+
+		defines 
+		{
+			"TRACY_ENABLE",
+			"TRACY_ON_DEMAND"
+		}
 
 	filter "configurations:Release"
 		runtime "Release"
