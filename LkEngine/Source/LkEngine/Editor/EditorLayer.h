@@ -11,6 +11,7 @@
 #include "LkEngine/Core/Thread.h"
 #include "LkEngine/Core/Layer.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
+#include "LkEngine/Core/Viewport.h"
 #include "LkEngine/Core/SelectionContext.h"
 #include "LkEngine/Core/Math/Math.h"
 
@@ -81,21 +82,19 @@ namespace LkEngine {
 		}
 
 		/* FIXME: Update all of these, refactor away. */
-		glm::vec2 GetEditorWindowSize() const;
-		float GetEditorWindowWidth() const;
-		float GetEditorWindowHeight() const;
+		FORCEINLINE LVector2 GetEditorWindowSize() const { return EditorViewport->GetSize(); }
 
 		FORCEINLINE glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
 		FORCEINLINE glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
 		FORCEINLINE glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
-
-		FORCEINLINE float GetViewportScalerX() const { return ViewportScalers.x; }
-		FORCEINLINE float GetViewportScalerY() const { return ViewportScalers.y; }
-
 		FORCEINLINE glm::vec2 GetMenuBarSize() const { return MenuBarSize; }
 		FORCEINLINE glm::vec2 GetTabBarSize() const { return TabBarSize; }
 
-		FORCEINLINE static LEditorLayer* Get() { return Instance; }
+		FORCEINLINE static LEditorLayer* Get() 
+		{ 
+			LK_VERIFY(Instance, "Invalid editor instance");
+			return Instance; 
+		}
 
 	private:
 		void RenderViewport();                
@@ -111,7 +110,7 @@ namespace LkEngine {
 		void UI_CreateMenu();
 		void UI_RenderSettingsWindow();
 
-		void UI_SyncEditorWindowSizes(const glm::vec2& viewportSize);
+		void UI_SyncEditorWindowSizes(const LVector2& InViewportSize);
 
 		void UI_ShowMouseDetails();
 		void UI_ShowViewportAndWindowDetails();
@@ -121,49 +120,30 @@ namespace LkEngine {
 		void UI_WindowStatistics();
 		void UI_TabManager();
 
-		void CheckLeftSidebarSize();
-		void CheckRightSidebarSize();
-		void CheckBottomBarSize();
+		void PrepareForLeftSidebar() const;
+		void PrepareForRightSidebar() const;
+		void PrepareForBottomBar() const;
 
 		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return ViewportFramebuffer; }
 
 		LEntity CreateCube();
 
 	public:
-		inline static bool InCreateItemProcess = false; // if true, the potentially created item is shown in the editor window // FIXME: REMOVE
-		inline static ImVec2 SelectedEntityMenuSize = { 0, 440 }; // TODO: REMOVE/UPDATE
-
-		glm::vec2 EditorViewportBounds[2] = { 
-			{ 0.0f, 0.0f }, 
-			{ 0.0f, 0.0f } 
-		};
-		glm::vec2 EditorViewportPos = { 0.0f, 0.0f };
-		//glm::vec2 EditorWindowPos = { 0.0f, 0.0f };
-		//glm::vec2 EditorWindowSize = { 0.0f, 0.0f };
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 
 		bool bShouldUpdateWindowSizes = true;
-
 		bool ShowRenderSettingsWindow = false;
-		bool m_FillSidebarsVertically = true; // Always fill out sidebars vertically
-
-		/// REMOVE
-		ImVec2 LastSidebarLeftPos = ImVec2(0, 0);
-		ImVec2 LastSidebarLeftSize = ImVec2(0, 0);
-		ImVec2 LastSidebarRightPos = ImVec2(0, 0);
-		ImVec2 LastSidebarRightSize = ImVec2(0, 0);
-		ImVec2 LastBottomBarPos = ImVec2(0, 0);
-		ImVec2 LastBottomBarSize = ImVec2(0, 0);
+		bool bFillSidebarsVertically = true; // Always fill out sidebars vertically
 	private:
 		/// REMOVE
-		inline static glm::vec2 MenuBarSize = { 0.0f, 30.0f };
-		inline static glm::vec2 TabBarSize = { 0.0f, 34.0f };
-		inline static glm::vec2 BottomBarSize = { 0.0f, 240.0f };
-		inline static glm::vec2 LeftSidebarSize = { 340.0f, 0.0f };
-		inline static glm::vec2 RightSidebarSize = { 340.0f, 0.0f };
-		inline static glm::vec2 BottomBarPos = { 0.0f, 0.0f };
-		inline static glm::vec2 LeftSidebarPos = { 0.0f, 0.0f };
-		inline static glm::vec2 RightSidebarPos = { 0.0f, 0.0f };
+		inline static LVector2 MenuBarSize = { 0.0f, 30.0f };
+		inline static LVector2 TabBarSize = { 0.0f, 34.0f };
+		inline static LVector2 BottomBarSize = { 0.0f, 240.0f };
+		inline static LVector2 LeftSidebarSize = { 340.0f, 0.0f };
+		inline static LVector2 RightSidebarSize = { 340.0f, 0.0f };
+		inline static LVector2 BottomBarPos = { 0.0f, 0.0f };
+		inline static LVector2 LeftSidebarPos = { 0.0f, 0.0f };
+		inline static LVector2 RightSidebarPos = { 0.0f, 0.0f };
 
 		inline static bool bWindowsHaveChangedInSize = true;
 		inline static bool bShowEditorWindowSizesWindow = false;
@@ -174,9 +154,6 @@ namespace LkEngine {
 		bool m_Enabled = true;
 
 		LVector2 ViewportBounds[2];
-
-		/* Editor Window Bounds. */
-		//LVector2 SecondViewportBounds[2];
 
 		bool m_ShowMetricsTool = false;
 		bool m_ShowStackTool = false;

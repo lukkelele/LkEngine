@@ -121,6 +121,11 @@ namespace LkEngine {
 					&& (Y == static_cast<T>(Other.Y)));
 		}
 
+		FORCEINLINE bool IsNull() const
+		{
+			return ((X == 0) && (Y == 0));
+		}
+
 		/** Implicit conversion to glm::vec2. */
 		operator glm::vec2()
 		{

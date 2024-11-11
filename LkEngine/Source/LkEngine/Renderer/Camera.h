@@ -39,11 +39,8 @@ namespace LkEngine {
 	public:
 		LCamera();
 		LCamera(const glm::mat4& projection);
-		LCamera(const float InDegFov, 
-				const float InWidth, 
-				const float InHeight, 
-				const float InNearP, 
-				const float InFarP);
+		LCamera(const float InDegFov, const float InWidth, const float InHeight, 
+				const float InNearP, const float InFarP);
 		virtual ~LCamera() = default;
 
 		/**

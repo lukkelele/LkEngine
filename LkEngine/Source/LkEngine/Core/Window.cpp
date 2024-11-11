@@ -72,7 +72,12 @@ namespace LkEngine {
 		Data.Width = Specification.Width;
 		Data.Height = Specification.Height;
 	
-		GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), static_cast<int>(Size.Y), m_Title.c_str(), nullptr, nullptr);
+		/* Create GLFW window. */
+		GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), 
+									  static_cast<int>(Size.Y), 
+									  m_Title.c_str(), 
+									  nullptr, 
+									  nullptr);
 		LK_CORE_ASSERT(GlfwWindow != nullptr);
 		glfwMakeContextCurrent(GlfwWindow);
 
@@ -96,7 +101,25 @@ namespace LkEngine {
 		glfwSetInputMode(GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		glfwSetWindowSizeLimits(GlfwWindow, 420, 280, 2560, 1440);
 
-		glfwSetWindowSizeCallback(GlfwWindow, WindowResizeCallback);
+		//glfwSetWindowSizeCallback(GlfwWindow, WindowResizeCallback);
+		glfwSetWindowSizeCallback(GlfwWindow, [](GLFWwindow* InGlfwWindow, int NewWidth, int NewHeight) 
+		{
+			int SizeX, SizeY;
+			glfwGetWindowSize(InGlfwWindow, &SizeX, &SizeY);
+
+			LWindow& Window = LWindow::Get();
+			Window.SetViewportWidth(NewWidth);
+			Window.SetViewportHeight(NewHeight);
+			Window.OnViewportSizeUpdated.Broadcast(NewWidth, NewHeight);
+			//Window.SetViewportWidth(SizeX);
+			//Window.SetViewportHeight(SizeY);
+			//Window.OnViewportSizeUpdated.Broadcast(SizeX, SizeY);
+
+			Window.SetSize({ NewWidth, NewHeight });
+			LK_CORE_DEBUG_TAG("Window", "Resize: ({}, {})   Viewport ({}, {})", 
+							  Window.GetWidth(), Window.GetHeight(), 
+							  Window.GetViewportWidth(), Window.GetViewportHeight());
+		});
 
 		glfwSetKeyCallback(GlfwWindow, [](GLFWwindow* Window, int Key, int ScanCode, int Action, int Modifiers)
 		{
@@ -206,7 +229,6 @@ namespace LkEngine {
 			{
 				WindowData.OnMouseScrolled.Broadcast(EMouseScroll::Down);
 			}
-
 		});
 
 		bGlfwInitialized = true;
@@ -226,6 +248,7 @@ namespace LkEngine {
 			RenderContext.Release();
 			RenderContext = nullptr;
 		}
+
 		if (GlfwWindow)
 		{
 			glfwDestroyWindow(GlfwWindow);
@@ -248,6 +271,7 @@ namespace LkEngine {
 		}
 	}
 
+	#if 0
 	void LWindow::WindowResizeCallback(GLFWwindow* glfwWindow, int Width, int Height)
 	{
 		int SizeX, SizeY;
@@ -277,10 +301,7 @@ namespace LkEngine {
 		}
 	#endif
 	}
-
-	void LWindow::MouseButtonCallback(GLFWwindow* Window, int button, int action, int Modifiers)
-	{
-	}
+	#endif
 
 	TObjectPtr<LSwapChain> LWindow::GetSwapChain()
 	{

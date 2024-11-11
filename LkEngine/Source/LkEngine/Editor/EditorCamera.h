@@ -30,15 +30,15 @@ namespace LkEngine {
 	class LEditorCamera : public LCamera
 	{
 	public:
-		LEditorCamera(const float DegFov,
-					  const float Width,
-					  const float Height,
-					  const float NearP,
-					  const float FarP);
+		LEditorCamera(const float DegFov, const float Width, const float Height,
+					  const float NearP, const float FarP); 
 
-		void Init();
+		void Initialize();
+
 		void OnUpdate(const FTimestep DeltaTime);
 		void UpdateCameraView();
+
+		/// @TODO: Patch out
 		void OnEvent(LEvent& e);
 
 		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, 

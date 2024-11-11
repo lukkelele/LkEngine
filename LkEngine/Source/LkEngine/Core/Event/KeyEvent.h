@@ -10,7 +10,7 @@ namespace LkEngine {
 	class KeyEvent : public LEvent
 	{
 	protected:
-		KeyEvent(EKey InKey) : Key(Key) {}
+		KeyEvent(EKey InKey) : Key(InKey) {}
 	public:
 		FORCEINLINE EKey GetKey() const { return Key; }
 
@@ -25,7 +25,7 @@ namespace LkEngine {
 	{
 	public:
 		KeyPressedEvent(EKey InKey, const int InRepeatCount)
-			: KeyEvent(Key)
+			: KeyEvent(InKey)
 			, RepeatCount(InRepeatCount) {}
 
 		const char* GetName() const override { return "KeyPressed"; }
@@ -47,8 +47,7 @@ namespace LkEngine {
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(EKey InKey)
-			: KeyEvent(Key) {}
+		KeyReleasedEvent(EKey InKey) : KeyEvent(InKey) {}
 
 		const char* GetName() const override { return "KeyReleased"; }
 		EEventType GetEventType() const { return EEventType::KeyReleased; }
@@ -64,8 +63,7 @@ namespace LkEngine {
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(EKey InKey)
-			: KeyEvent(Key) {}
+		KeyTypedEvent(EKey InKey) : KeyEvent(InKey) {}
 
 		const char* GetName() const override { return "KeyTyped"; }
 		EEventType GetEventType() const { return EEventType::KeyTyped; }

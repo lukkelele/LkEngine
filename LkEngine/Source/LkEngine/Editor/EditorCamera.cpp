@@ -10,21 +10,21 @@
 
 namespace LkEngine {
 
-	LEditorCamera::LEditorCamera(const float degFov, 
-								 const float width, 
-								 const float height, 
-								 const float nearP, 
-								 const float farP)
-		: LCamera(glm::perspectiveFov(glm::radians(degFov), width, height, farP, nearP))
+	LEditorCamera::LEditorCamera(const float InFovDeg, const float InWidth, const float InHeight, 
+								 const float InNearP, const float InFarP)
+		: LCamera(glm::perspectiveFov(glm::radians(InFovDeg), InWidth, InHeight, InFarP, InNearP))
 	{
-		m_PerspectiveNear = nearP;
-		m_PerspectiveFar = farP;
-		constexpr glm::vec3 position = { -5, 5, 5 }; 
-		m_Position = position;
-		Init();
+		m_PerspectiveNear = InNearP;
+		m_PerspectiveFar = InFarP;
+
+		static constexpr glm::vec3 BasePosition = { -5, 5, 5 }; 
+		m_Position = BasePosition;
+
+		m_Pitch = 0.0f;
+		m_Yaw = glm::pi<float>();
 	}
 
-	void LEditorCamera::Init()
+	void LEditorCamera::Initialize()
 	{
 		m_Distance = glm::distance(m_Position, m_FocalPoint);
 
@@ -32,9 +32,10 @@ namespace LkEngine {
 		m_Pitch = glm::pi<float>() / 4.0f;
 
 		m_Position = CalculatePosition();
-		const glm::quat orientation = GetOrientation();
-		m_Direction = glm::eulerAngles(orientation) * (180.0f / glm::pi<float>());
-		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
+
+		const glm::quat Orientation = GetOrientation();
+		m_Direction = glm::eulerAngles(Orientation) * (180.0f / glm::pi<float>());
+		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(Orientation);
 		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 
 		LK_CORE_TRACE_TAG("EditorCamera", "m_Position = ({}, {}, {})", m_Position.x, m_Position.y, m_Position.z);

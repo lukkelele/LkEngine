@@ -34,19 +34,16 @@ namespace LkEngine {
 		 */
 		FORCEINLINE LVector2 GetScalers() const { return Scalers; }
 
-		/// @Marked: Makes no sense to use this on a member variable really.
-		/// Should modify the viewport bounds array instead.
 		FORCEINLINE void SetSize(const LVector2& NewSize) 
 		{ 
 			if (Size != NewSize)
 			{
 				Size = NewSize;
+				//LK_CORE_DEBUG_TAG("Viewport", "Set Size: {}", Size.ToString());
 				bDirty = true;
 			}
 		}
 
-		/// @Marked: Makes no sense to use this on a member variable really.
-		/// Should modify the viewport bounds array instead.
 		template<typename T>
 		FORCEINLINE void SetSizeX(const T InX)
 		{
@@ -54,12 +51,11 @@ namespace LkEngine {
 			if (Size.X != InX)
 			{
 				Size.X = InX;
+				//LK_CORE_DEBUG_TAG("Viewport", "Set SizeX: {}", Size.X);
 				bDirty = true;
 			}
 		}
 
-		/// @Marked: Makes no sense to use this on a member variable really.
-		/// Should modify the viewport bounds array instead.
 		template<typename T>
 		FORCEINLINE void SetSizeY(const T InY)
 		{
@@ -67,11 +63,11 @@ namespace LkEngine {
 			if (Size.Y != InY)
 			{
 				Size.Y = InY;
+				//LK_CORE_DEBUG_TAG("Viewport", "Set SizeY: {}", Size.Y);
 				bDirty = true;
 			}
 		}
 
-		/// @TODO: This should modify the viewport bounds (indexed 0), or?
 		/**
 		 * @brief Set viewport position.
 		 */
@@ -80,7 +76,6 @@ namespace LkEngine {
 			if (Position != NewPosition)
 			{
 				Position = NewPosition;
-				bDirty = true;
 			}
 		}
 
@@ -94,19 +89,6 @@ namespace LkEngine {
 			{
 				ViewportBounds[Index] = Bounds;
 				LK_CORE_DEBUG_TAG("Viewport", "Set viewport bounds {} to {}", Index, Bounds.ToString());
-
-				Size.X = (ViewportBounds[1].X - ViewportBounds[0].X); 
-				Size.Y = (ViewportBounds[1].Y - ViewportBounds[0].Y);
-				LK_CORE_DEBUG_TAG("Viewport", "Size: {}", Size.ToString());
-
-				/// Do not calculate scalers here.
-			#if 0
-				Scalers.X = (Size.X / ViewportBounds[1].X);
-				Scalers.Y = (Size.Y / ViewportBounds[1].Y);
-			#endif
-
-				/* Always require full when viewport bounds are modified. */
-				bDirty = true;
 			}
 		}
 
@@ -132,11 +114,16 @@ namespace LkEngine {
 
 		FORCEINLINE void SetScalers(const LVector2& NewScalers) 
 		{ 
-			if (Scalers != NewScalers)
+			if (!NewScalers.IsNull() && (Scalers != NewScalers))
 			{
+				//LK_CORE_DEBUG_TAG("Viewport", "SetScalers: {}", NewScalers.ToString());
 				Scalers = NewScalers;
-				bDirty = true;
 			}
+		}
+
+		FORCEINLINE void SetDirty(const bool Dirty)
+		{
+			bDirty = Dirty;
 		}
 
 	public:
@@ -144,7 +131,7 @@ namespace LkEngine {
 	private:
 		TVector2<uint16_t> Size = { 0.0f, 0.0f };
 		TVector2<uint16_t> Position = { 0.0f, 0.0f };
-		TVector2<uint16_t> Scalers = { 1.0f, 1.0f };
+		TVector2<float> Scalers = { 1.0f, 1.0f };
 
 		LVector2 ViewportBounds[2] = { 
 			{ 0.0f, 0.0f }, 

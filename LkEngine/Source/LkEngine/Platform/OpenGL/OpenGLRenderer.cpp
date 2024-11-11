@@ -397,6 +397,7 @@ namespace LkEngine {
 		}
 
 		LK_CORE_ASSERT(false, "Couldn't find TextureArray with dimension {}...", static_cast<int>(TextureArrayDimension));
+		return nullptr;
 	}
 
 }

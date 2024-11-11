@@ -16,14 +16,12 @@ namespace LkEngine {
 		LCLASS_REGISTER();
 	}
 
-	LCamera::LCamera(const float InDegFov, 
-					 const float InWidth, 
-					 const float InHeight, 
-					 const float InNearP, 
-					 const float InFarP)
-		: m_ProjectionMatrix(glm::perspectiveFov(glm::radians(InDegFov), InWidth, InHeight, InFarP, InNearP))
+	LCamera::LCamera(const float InDegFov, const float InWidth, const float InHeight, 
+					 const float InNearP, const float InFarP)
+		: LCamera(glm::perspectiveFov(glm::radians(InDegFov), InWidth, InHeight, InFarP, InNearP))
 	{
-		LCLASS_REGISTER();
+		//: m_ProjectionMatrix(glm::perspectiveFov(glm::radians(InDegFov), InWidth, InHeight, InFarP, InNearP))
+		//LCLASS_REGISTER();
 	}
 
 }

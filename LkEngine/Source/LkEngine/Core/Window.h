@@ -94,7 +94,7 @@ namespace LkEngine {
         FORCEINLINE uint16_t GetViewportWidth()  const { return ViewportSize.X; }
         FORCEINLINE uint16_t GetViewportHeight() const { return ViewportSize.Y; }
 
-        FORCEINLINE LVector2 GetPos() const { return m_Pos; }
+        FORCEINLINE LVector2 GetPosition() const { return m_Pos; }
         FORCEINLINE LVector2 GetViewportSize() const { return ViewportSize; }
 
         FORCEINLINE std::string GetTitle() const { return m_Title; }
@@ -120,8 +120,7 @@ namespace LkEngine {
             {
                 Size.X = static_cast<decltype(Size.X)>(InSize.X);
                 Size.Y = static_cast<decltype(Size.Y)>(InSize.Y);
-                LK_CORE_ERROR_TAG("Window", "Width={}  Height={}  Scalers={{{}, {}}}", 
-                                  Size.X, Size.Y, m_ViewportScalers.X, m_ViewportScalers.Y);
+				LK_CORE_ERROR_TAG("Window", "Width={}  Height={}", Size.X, Size.Y);
 
                 OnWindowSizeUpdated.Broadcast(static_cast<uint16_t>(Size.X), static_cast<uint16_t>(Size.Y));
             }
@@ -193,11 +192,6 @@ namespace LkEngine {
 			m_ViewportScalers.Y = InY;
 		}
 
-		FORCEINLINE void SetScalers(const glm::vec2& InScalers)
-		{
-			m_ViewportScalers = InScalers;
-		}
-
         /* TODO : Event category. */
         FORCEINLINE void SetEventCallback(const FEventCallback& Callback)
         {
@@ -206,9 +200,6 @@ namespace LkEngine {
 
         FORCEINLINE FWindowData& GetWindowData() { return Data; }
         FORCEINLINE const FWindowData& GetWindowData() const { return Data; }
-
-        static void WindowResizeCallback(GLFWwindow* window, int width, int height);
-        static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
         FORCEINLINE static LWindow& Get() { return *Instance; }
 
