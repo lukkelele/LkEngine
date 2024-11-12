@@ -5,7 +5,10 @@
 
 namespace LkEngine {
 
-	enum class ShaderDataType
+	/**
+	 * EShaderDataType
+	 */
+	enum class EShaderDataType
 	{
 		Null = 0,
 		Float, Float2, Float3, Float4,
@@ -14,45 +17,48 @@ namespace LkEngine {
 		Bool,
 	};
 
-	enum class ShaderDataMember
+	/**
+	 * EShaderDataMember
+	 */
+	enum class EShaderDataMember
 	{
 		Null = 0,
 		Position,
 		Color
 	};
 
-	static unsigned int ShaderDataTypeSize(ShaderDataType dataType)
+	inline static constexpr uint32_t ShaderDataTypeSize(EShaderDataType DataType)
 	{
-		switch (dataType)
+		switch (DataType)
 		{
-			case ShaderDataType::Bool:     return 1;
-			case ShaderDataType::Int:      return 4;
-			case ShaderDataType::Int2:     return 4 * 2;
-			case ShaderDataType::Int3:     return 4 * 3;
-			case ShaderDataType::Int4:     return 4 * 4;
-			case ShaderDataType::Float:    return 4;
-			case ShaderDataType::Float2:   return 4 * 2;
-			case ShaderDataType::Float3:   return 4 * 3;
-			case ShaderDataType::Float4:   return 4 * 4;
-			case ShaderDataType::Mat3:     return 4 * 3 * 3;
-			case ShaderDataType::Mat4:     return 4 * 4 * 4;
+			case EShaderDataType::Bool:     return 1;
+			case EShaderDataType::Int:      return 4;
+			case EShaderDataType::Int2:     return 4 * 2;
+			case EShaderDataType::Int3:     return 4 * 3;
+			case EShaderDataType::Int4:     return 4 * 4;
+			case EShaderDataType::Float:    return 4;
+			case EShaderDataType::Float2:   return 4 * 2;
+			case EShaderDataType::Float3:   return 4 * 3;
+			case EShaderDataType::Float4:   return 4 * 4;
+			case EShaderDataType::Mat3:     return 4 * 3 * 3;
+			case EShaderDataType::Mat4:     return 4 * 4 * 4;
 		}
-		LK_CORE_ASSERT(false, "Could not get shader data type size for ShaderDataType: {}", (int)dataType);
+
+		LK_CORE_ASSERT(false, "Invalid EShaderDataType value: {}", (int)DataType);
 		return 0;
 	}
 
-	struct VertexBufferElement
+	struct FVertexBufferElement
 	{
-		std::string Name;
-		ShaderDataType Type;
-		uint32_t Size;
-		size_t Offset;
-		unsigned char Normalized;
-		unsigned int Count;
+		std::string Name{};
+		EShaderDataType Type;
+		uint32_t Size = 0;
+		size_t Offset = 0;
+		unsigned char Normalized{};
+		unsigned int Count = 0;
 
-		VertexBufferElement() = default;
-
-		VertexBufferElement(const std::string& name, ShaderDataType type, bool normalized = false)
+		FVertexBufferElement() = default;
+		FVertexBufferElement(const std::string& name, EShaderDataType type, bool normalized = false)
 			: Type(type)
 			, Name(name)
 			, Size(ShaderDataTypeSize(type))
@@ -62,23 +68,23 @@ namespace LkEngine {
 		{
 		}
 
-		std::string_view GetName() { return Name; }
+		FORCEINLINE std::string_view GetName() const { return Name; }
 
 		uint32_t GetComponentCount() const
 		{
 			switch (Type)
 			{
-				case ShaderDataType::Float:   return 1;
-				case ShaderDataType::Float2:  return 2;
-				case ShaderDataType::Float3:  return 3;
-				case ShaderDataType::Float4:  return 4;
-				case ShaderDataType::Mat3:    return 3 * 3;
-				case ShaderDataType::Mat4:    return 4 * 4;
-				case ShaderDataType::Int:     return 1;
-				case ShaderDataType::Int2:    return 2;
-				case ShaderDataType::Int3:    return 3;
-				case ShaderDataType::Int4:    return 4;
-				case ShaderDataType::Bool:    return 1;
+				case EShaderDataType::Float:   return 1;
+				case EShaderDataType::Float2:  return 2;
+				case EShaderDataType::Float3:  return 3;
+				case EShaderDataType::Float4:  return 4;
+				case EShaderDataType::Mat3:    return 3 * 3;
+				case EShaderDataType::Mat4:    return 4 * 4;
+				case EShaderDataType::Int:     return 1;
+				case EShaderDataType::Int2:    return 2;
+				case EShaderDataType::Int3:    return 3;
+				case EShaderDataType::Int4:    return 4;
+				case EShaderDataType::Bool:    return 1;
 			}
 			LK_CORE_ASSERT(false, "GetComponentCount failed");
 			return 0;
@@ -90,20 +96,32 @@ namespace LkEngine {
 	public:
 		VertexBufferLayout() {}
 
-		VertexBufferLayout(const std::initializer_list<VertexBufferElement>& elements)
-			: m_Elements(elements)
+		VertexBufferLayout(const std::initializer_list<FVertexBufferElement>& InElements)
+			: m_Elements(InElements)
 		{
 			CalculateOffsetsAndStride();
 		}
 
-		uint32_t GetStride() const { return m_Stride; }
-		const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }
-		uint32_t GetElementCount() const { return (uint32_t)m_Elements.size(); }
+		FORCEINLINE uint32_t GetStride() const 
+		{ 
+			return m_Stride; 
+		}
 
-		[[nodiscard]] std::vector<VertexBufferElement>::iterator begin() { return m_Elements.begin(); }
-		[[nodiscard]] std::vector<VertexBufferElement>::iterator end() { return m_Elements.end(); }
-		[[nodiscard]] std::vector<VertexBufferElement>::const_iterator begin() const { return m_Elements.begin(); }
-		[[nodiscard]] std::vector<VertexBufferElement>::const_iterator end() const { return m_Elements.end(); }
+		FORCEINLINE const std::vector<FVertexBufferElement>& GetElements() const 
+		{ 
+			return m_Elements; 
+		}
+
+		FORCEINLINE uint32_t GetElementCount() const 
+		{ 
+			return (uint32_t)m_Elements.size(); 
+		}
+
+		[[nodiscard]] std::vector<FVertexBufferElement>::iterator begin() { return m_Elements.begin(); }
+		[[nodiscard]] std::vector<FVertexBufferElement>::iterator end() { return m_Elements.end(); }
+		[[nodiscard]] std::vector<FVertexBufferElement>::const_iterator begin() const { return m_Elements.begin(); }
+		[[nodiscard]] std::vector<FVertexBufferElement>::const_iterator end() const { return m_Elements.end(); }
+
 	private:
 		void CalculateOffsetsAndStride()
 		{
@@ -116,8 +134,9 @@ namespace LkEngine {
 				m_Stride += element.Size;
 			}
 		}
+
 	private:
-		std::vector<VertexBufferElement> m_Elements;
+		std::vector<FVertexBufferElement> m_Elements{};
 		uint32_t m_Stride = 0;
 	};
 

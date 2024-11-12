@@ -36,6 +36,7 @@ namespace LkEngine {
 	class LNodeEditor;
 	class LScene;
 	class LSceneManagerPanel;
+	class LRenderer2D;
 	class LProject;
 	class LViewport;
 
@@ -84,22 +85,17 @@ namespace LkEngine {
 		/* FIXME: Update all of these, refactor away. */
 		FORCEINLINE LVector2 GetEditorWindowSize() const { return EditorViewport->GetSize(); }
 
-		FORCEINLINE glm::vec2 GetLeftSidebarSize() const { return LeftSidebarSize; }
-		FORCEINLINE glm::vec2 GetRightSidebarSize() const { return RightSidebarSize; }
-		FORCEINLINE glm::vec2 GetBottomBarSize() const { return BottomBarSize; }
-		FORCEINLINE glm::vec2 GetMenuBarSize() const { return MenuBarSize; }
-		FORCEINLINE glm::vec2 GetTabBarSize() const { return TabBarSize; }
-
 		FORCEINLINE static LEditorLayer* Get() 
 		{ 
 			LK_VERIFY(Instance, "Invalid editor instance");
 			return Instance; 
 		}
 
-	private:
 		void RenderViewport();                
 		void RenderViewport(TObjectPtr<LImage> Image); 
+		void Render2D();
 
+	private:
         void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);
 		void HandleExternalWindows();
 
@@ -135,16 +131,6 @@ namespace LkEngine {
 		bool ShowRenderSettingsWindow = false;
 		bool bFillSidebarsVertically = true; // Always fill out sidebars vertically
 	private:
-		/// REMOVE
-		inline static LVector2 MenuBarSize = { 0.0f, 30.0f };
-		inline static LVector2 TabBarSize = { 0.0f, 34.0f };
-		inline static LVector2 BottomBarSize = { 0.0f, 240.0f };
-		inline static LVector2 LeftSidebarSize = { 340.0f, 0.0f };
-		inline static LVector2 RightSidebarSize = { 340.0f, 0.0f };
-		inline static LVector2 BottomBarPos = { 0.0f, 0.0f };
-		inline static LVector2 LeftSidebarPos = { 0.0f, 0.0f };
-		inline static LVector2 RightSidebarPos = { 0.0f, 0.0f };
-
 		inline static bool bWindowsHaveChangedInSize = true;
 		inline static bool bShowEditorWindowSizesWindow = false;
 	private:
@@ -154,6 +140,9 @@ namespace LkEngine {
 		bool m_Enabled = true;
 
 		LVector2 ViewportBounds[2];
+		TObjectPtr<LFramebuffer> ViewportFramebuffer;
+		TObjectPtr<LSceneRenderer> ViewportRenderer{};
+		TObjectPtr<LEditorCamera> EditorCamera;
 
 		bool m_ShowMetricsTool = false;
 		bool m_ShowStackTool = false;
@@ -163,24 +152,20 @@ namespace LkEngine {
 
         FEventCallback m_EventCallback; /// UPDATE ME
 
-		TObjectPtr<LFramebuffer> ViewportFramebuffer;
-		TObjectPtr<LEditorCamera> EditorCamera;
-
-		/** @brief The editor viewport.  */
-		TObjectPtr<LViewport> EditorViewport;
-
 		TSharedPtr<LSceneManagerPanel> SceneManagerPanel;
 
 		/* Active object. */
 		TObjectPtr<LProject> m_Project{};
 
 		// Editor
+		TObjectPtr<LViewport> EditorViewport;
 		TUniquePtr<LNodeEditor> NodeEditor;
 		TUniquePtr<LComponentEditor> ComponentEditor{};
 		TUniquePtr<LContentBrowser> ContentBrowser;
 		// ~Editor
 
 		TObjectPtr<LWindow> Window{};
+		TObjectPtr<LRenderer2D> Renderer2D{};
 
 		EEditorWindowType CurrentWindowType = EEditorWindowType::None;
 

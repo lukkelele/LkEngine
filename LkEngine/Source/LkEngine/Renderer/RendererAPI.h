@@ -75,8 +75,11 @@ namespace LkEngine {
 		// ~RenderGeometry
 
 		// Draw
-		virtual void Draw(const LVertexBuffer& vb, const LIndexBuffer& ib, const LShader& shader) = 0;
-		virtual void Draw(LVertexBuffer& vb, const LShader& shader) = 0;
+		virtual void Draw(const LVertexBuffer& VertexBuffer, 
+						  const LIndexBuffer& IndexBuffer, 
+						  const LShader& Shader) = 0;
+
+		virtual void Draw(LVertexBuffer& VertexBuffer, const LShader& Shader) = 0;
 		// ~Draw
 
         virtual void DrawIndexed(uint64_t IndexCount) = 0;
@@ -139,8 +142,11 @@ namespace LkEngine {
 
 		virtual void SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, uint64_t entityID = 0) = 0;
 
-		virtual void SetPrimitiveTopology(const ERenderTopology& InRenderTopology) = 0;
-		virtual void SetDepthFunction(const EDepthFunction& InDepthFunction) = 0;
+		virtual void SetPrimitiveTopology(const ERenderTopology InRenderTopology) = 0;
+		virtual void SetDepthFunction(const EDepthFunction InDepthFunction) = 0;
+
+		virtual void BindTextureArray(const uint8_t Index) = 0;
+		virtual void BindTextureArray(const ETextureArrayDimension& TextureArrayDim) = 0;
 
 		virtual RendererCapabilities& GetCapabilities() = 0;
 

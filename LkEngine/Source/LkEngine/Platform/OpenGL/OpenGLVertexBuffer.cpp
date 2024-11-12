@@ -8,45 +8,22 @@
 
 namespace LkEngine {
 
-	/// MOVE
-	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
-	{
-		switch (type)
-		{
-			case ShaderDataType::Float:    return GL_FLOAT;
-			case ShaderDataType::Float2:   return GL_FLOAT;
-			case ShaderDataType::Float3:   return GL_FLOAT;
-			case ShaderDataType::Float4:   return GL_FLOAT;
-			case ShaderDataType::Mat3:     return GL_FLOAT;
-			case ShaderDataType::Mat4:     return GL_FLOAT;
-			case ShaderDataType::Int:      return GL_INT;
-			case ShaderDataType::Int2:     return GL_INT;
-			case ShaderDataType::Int3:     return GL_INT;
-			case ShaderDataType::Int4:     return GL_INT;
-			case ShaderDataType::Bool:     return GL_BOOL;
-		}
-		return 0;
-	}
-
-
-	OpenGLVertexBuffer::OpenGLVertexBuffer(void* InBuffer, 
-										   const uint64_t InSize, 
+	OpenGLVertexBuffer::OpenGLVertexBuffer(void* InBuffer, const uint64_t InSize, 
 										   const EVertexBufferUsage InBufferUsage)
 		: m_Size(InSize)
 		, m_Usage(InBufferUsage)
 	{
 		m_LocalData = FBuffer(InBuffer, InSize);
 
-		glGenVertexArrays(1, &m_VertexArrayID);
-		glBindVertexArray(m_VertexArrayID);
+		LK_OpenGL(glGenVertexArrays(1, &m_VertexArrayID));
+		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
 
-		glGenBuffers(1, &m_RendererID);
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		glBufferData(GL_ARRAY_BUFFER, InSize, InBuffer, GL_DYNAMIC_DRAW);
+		LK_OpenGL(glGenBuffers(1, &m_RendererID));
+		LK_OpenGL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+		LK_OpenGL(glBufferData(GL_ARRAY_BUFFER, InSize, InBuffer, GL_DYNAMIC_DRAW));
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(const uint64_t InSize, 
-										   const EVertexBufferUsage InBufferUsage)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const uint64_t InSize, const EVertexBufferUsage InBufferUsage)
 		: m_Size(InSize)
 		, m_Usage(InBufferUsage)
 	{
@@ -68,7 +45,7 @@ namespace LkEngine {
 
 	void OpenGLVertexBuffer::Bind() const
 	{
-		glBindVertexArray(m_VertexArrayID);
+		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
 	}
 
 	void OpenGLVertexBuffer::SetData(void* InData, uint64_t InSize, uint64_t InOffset)
@@ -85,69 +62,69 @@ namespace LkEngine {
 		LK_OpenGL(glBufferSubData(GL_ARRAY_BUFFER, offset, InSize, InData));
 	}
 
-	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout)
+	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& Layout)
 	{
-		m_BufferLayout = layout;
+		m_BufferLayout = Layout;
 		AddVertexBufferToVertexArray();
 	}
 
 	void OpenGLVertexBuffer::AddVertexBufferToVertexArray()
 	{
 		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
-		VertexBufferLayout& layout = GetLayout();
 
-		for (const auto& element : layout)
+		for (const FVertexBufferElement& Element : m_BufferLayout)
 		{
-			switch (element.Type)
+			switch (Element.Type)
 			{
-				case ShaderDataType::Float:
-				case ShaderDataType::Float2:
-				case ShaderDataType::Float3:
-				case ShaderDataType::Float4:
+				case EShaderDataType::Float:
+				case EShaderDataType::Float2:
+				case EShaderDataType::Float3:
+				case EShaderDataType::Float4:
 				{
-					glEnableVertexAttribArray(m_VertexBufferIndex);
-					glVertexAttribPointer(m_VertexBufferIndex,
-										  element.GetComponentCount(),
-										  ShaderDataTypeToOpenGLBaseType(element.Type),
-										  element.Normalized ? GL_TRUE : GL_FALSE,
-										  layout.GetStride(),
-										  (const void*)element.Offset);
+					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+					LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
+													Element.GetComponentCount(),
+													LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+													(Element.Normalized ? GL_TRUE : GL_FALSE),
+													m_BufferLayout.GetStride(),
+													(const void*)Element.Offset));
 					m_VertexBufferIndex++;
 					break;
 				}
-				case ShaderDataType::Int:
-				case ShaderDataType::Int2:
-				case ShaderDataType::Int3:
-				case ShaderDataType::Int4:
-				case ShaderDataType::Bool:
+				case EShaderDataType::Int:
+				case EShaderDataType::Int2:
+				case EShaderDataType::Int3:
+				case EShaderDataType::Int4:
+				case EShaderDataType::Bool:
 				{
-					glEnableVertexAttribArray(m_VertexBufferIndex);
-					glVertexAttribIPointer(m_VertexBufferIndex,
-										   element.GetComponentCount(),
-										   ShaderDataTypeToOpenGLBaseType(element.Type),
-										   layout.GetStride(),
-										   (const void*)element.Offset);
+					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+					LK_OpenGL(glVertexAttribIPointer(m_VertexBufferIndex,
+													 Element.GetComponentCount(),
+													 LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+													 m_BufferLayout.GetStride(),
+													 (const void*)Element.Offset));
 					m_VertexBufferIndex++;
 					break;
 				}
-				case ShaderDataType::Mat3:
-				case ShaderDataType::Mat4:
+				case EShaderDataType::Mat3:
+				case EShaderDataType::Mat4:
 				{
-					uint8_t count = element.GetComponentCount();
+					uint8_t count = Element.GetComponentCount();
 					for (uint8_t i = 0; i < count; i++)
 					{
-						glEnableVertexAttribArray(m_VertexBufferIndex);
-						glVertexAttribPointer(m_VertexBufferIndex,
-											  count,
-											  ShaderDataTypeToOpenGLBaseType(element.Type),
-											  element.Normalized ? GL_TRUE : GL_FALSE,
-											  layout.GetStride(),
-											  (const void*)(element.Offset + sizeof(float) * count * i));
-						glVertexAttribDivisor(m_VertexBufferIndex, 1);
+						LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+						LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
+														count,
+														LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+														(Element.Normalized ? GL_TRUE : GL_FALSE),
+														m_BufferLayout.GetStride(),
+														(const void*)(Element.Offset + sizeof(float) * count * i)));
+						LK_OpenGL(glVertexAttribDivisor(m_VertexBufferIndex, 1));
 						m_VertexBufferIndex++;
 					}
 					break;
 				}
+
 				default: LK_ASSERT(false);
 			}
 		}
@@ -158,60 +135,61 @@ namespace LkEngine {
 	{
 		glBindVertexArray(m_VertexArrayID);
 		VertexBuffer.Bind();
-		VertexBufferLayout& layout = VertexBuffer.GetLayout();
+		VertexBufferLayout& Layout = VertexBuffer.GetLayout();
 
-		for (const VertexBufferElement& element : layout)
+		for (const FVertexBufferElement& Element : Layout)
 		{
-			switch (element.Type)
+			switch (Element.Type)
 			{
-				case ShaderDataType::Float:
-				case ShaderDataType::Float2:
-				case ShaderDataType::Float3:
-				case ShaderDataType::Float4:
+				case EShaderDataType::Float:
+				case EShaderDataType::Float2:
+				case EShaderDataType::Float3:
+				case EShaderDataType::Float4:
 				{
-					glEnableVertexAttribArray(m_VertexBufferIndex);
-					glVertexAttribPointer(m_VertexBufferIndex,
-										  element.GetComponentCount(),
-										  ShaderDataTypeToOpenGLBaseType(element.Type),
-										  element.Normalized ? GL_TRUE : GL_FALSE,
-										  layout.GetStride(),
-										  (const void*)element.Offset);
+					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+					LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
+													Element.GetComponentCount(),
+													LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+													Element.Normalized ? GL_TRUE : GL_FALSE,
+													Layout.GetStride(),
+													(const void*)Element.Offset));
 					m_VertexBufferIndex++;
 					break;
 				}
-				case ShaderDataType::Int:
-				case ShaderDataType::Int2:
-				case ShaderDataType::Int3:
-				case ShaderDataType::Int4:
-				case ShaderDataType::Bool:
+				case EShaderDataType::Int:
+				case EShaderDataType::Int2:
+				case EShaderDataType::Int3:
+				case EShaderDataType::Int4:
+				case EShaderDataType::Bool:
 				{
-					glEnableVertexAttribArray(m_VertexBufferIndex);
-					glVertexAttribIPointer(m_VertexBufferIndex,
-										   element.GetComponentCount(),
-										   ShaderDataTypeToOpenGLBaseType(element.Type),
-										   layout.GetStride(),
-										   (const void*)element.Offset);
+					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+					LK_OpenGL(glVertexAttribIPointer(m_VertexBufferIndex, 
+													 Element.GetComponentCount(),
+													 LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+													 Layout.GetStride(),
+													 (const void*)Element.Offset));
 					m_VertexBufferIndex++;
 					break;
 				}
-				case ShaderDataType::Mat3:
-				case ShaderDataType::Mat4:
+				case EShaderDataType::Mat3:
+				case EShaderDataType::Mat4:
 				{
-					uint8_t count = element.GetComponentCount();
+					uint8_t count = Element.GetComponentCount();
 					for (uint8_t i = 0; i < count; i++)
 					{
-						glEnableVertexAttribArray(m_VertexBufferIndex);
-						glVertexAttribPointer(m_VertexBufferIndex,
-											  count,
-											  ShaderDataTypeToOpenGLBaseType(element.Type),
-											  element.Normalized ? GL_TRUE : GL_FALSE,
-											  layout.GetStride(),
-											  (const void*)(element.Offset + sizeof(float) * count * i));
-						glVertexAttribDivisor(m_VertexBufferIndex, 1);
+						LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+						LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
+														count,
+														LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+														Element.Normalized ? GL_TRUE : GL_FALSE,
+														Layout.GetStride(),
+														(const void*)(Element.Offset + sizeof(float) * count * i)));
+						LK_OpenGL(glVertexAttribDivisor(m_VertexBufferIndex, 1));
 						m_VertexBufferIndex++;
 					}
 					break;
 				}
+
 				default: LK_ASSERT(false);
 			}
 		}

@@ -231,7 +231,7 @@ namespace LkEngine {
 			return GL_INVALID_VALUE;
 		}
 
-		FORCEINLINE static GLenum ImageFormatToGLInternalFormat(EImageFormat ImageFormat)
+		FORCEINLINE static constexpr GLenum ImageFormatToGLInternalFormat(EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{
@@ -254,6 +254,26 @@ namespace LkEngine {
 
 			LK_CORE_ASSERT(false, "Invalid internal ImageFormat: {}", static_cast<int>(ImageFormat));
 			return GL_INVALID_VALUE;
+		}
+
+		FORCEINLINE static constexpr GLenum ShaderDataTypeToOpenGLBaseType(EShaderDataType type)
+		{
+			switch (type)
+			{
+				case EShaderDataType::Float:    return GL_FLOAT;
+				case EShaderDataType::Float2:   return GL_FLOAT;
+				case EShaderDataType::Float3:   return GL_FLOAT;
+				case EShaderDataType::Float4:   return GL_FLOAT;
+				case EShaderDataType::Mat3:     return GL_FLOAT;
+				case EShaderDataType::Mat4:     return GL_FLOAT;
+				case EShaderDataType::Int:      return GL_INT;
+				case EShaderDataType::Int2:     return GL_INT;
+				case EShaderDataType::Int3:     return GL_INT;
+				case EShaderDataType::Int4:     return GL_INT;
+				case EShaderDataType::Bool:     return GL_BOOL;
+			}
+
+			return GL_INVALID_ENUM;
 		}
 
 		FORCEINLINE static void CreateTextures(const bool bMultisampled, uint32_t* OutTextureID, const uint32_t Count)
@@ -508,8 +528,8 @@ namespace LkEngine {
 
     }
 
-	// TODO: REMOVE!!!!!!!!!
-    //=====================================================================
+	//
+    //-----------------------------------------------------------
     // Debugging
 
 	namespace LOpenGL::Debug

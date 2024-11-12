@@ -5,12 +5,12 @@
 
 namespace LkEngine {
 
-	class OpenGLRenderCommandBuffer : public LRenderCommandBuffer
+	class LOpenGLRenderCommandBuffer : public LRenderCommandBuffer
 	{
 	public:
-		OpenGLRenderCommandBuffer(uint32_t Count = 0, std::string_view InDebugName = "");
-		OpenGLRenderCommandBuffer(std::string_view InDebugName, bool bSwapchain);
-		~OpenGLRenderCommandBuffer() override;
+		LOpenGLRenderCommandBuffer(uint32_t Count = 0, std::string_view InDebugName = "");
+		LOpenGLRenderCommandBuffer(std::string_view InDebugName, bool bSwapchain);
+		~LOpenGLRenderCommandBuffer() override;
 
 		virtual void Begin() override;
 		virtual void End() override;
@@ -18,10 +18,12 @@ namespace LkEngine {
 
 		virtual float GetExecutionGPUTime(uint32_t frameIndex, uint32_t queryIndex = 0) const override
 		{
-			if (queryIndex == UINT32_MAX || queryIndex / 2 >= m_TimestampNextAvailableQuery / 2)
+			if ((queryIndex == UINT32_MAX) || ((queryIndex / 2) >= m_TimestampNextAvailableQuery / 2))
+			{
 				return 0.0f;
+			}
 
-			return m_ExecutionGPUTimes[frameIndex][queryIndex / 2];
+			return m_ExecutionGPUTimes[frameIndex][(queryIndex / 2)];
 		}
 
 		virtual const PipelineStatistics& GetPipelineStatistics(const uint32_t frameIndex) const override;
@@ -38,10 +40,12 @@ namespace LkEngine {
 		uint32_t m_TimestampQueryCount = 0;
 		uint32_t m_TimestampNextAvailableQuery = 2;
 
-		std::vector<std::vector<uint64_t>> m_TimestampQueryResults;
-		std::vector<std::vector<float>> m_ExecutionGPUTimes;
+		std::vector<std::vector<uint64_t>> m_TimestampQueryResults{};
+		std::vector<std::vector<float>> m_ExecutionGPUTimes{};
 
 		uint32_t m_PipelineQueryCount = 0;
+
+		LCLASS(LOpenGLRenderCommandBuffer);
 	};
 
 }

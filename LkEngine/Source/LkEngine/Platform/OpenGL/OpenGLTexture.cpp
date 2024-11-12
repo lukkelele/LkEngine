@@ -72,28 +72,29 @@ namespace LkEngine {
 
 	void OpenGLTexture2D::Bind(uint32_t Slot) const
 	{
-		glBindTextureUnit(Slot, m_Image->GetRendererID());
+		LK_OpenGL(glBindTextureUnit(Slot, m_Image->GetRendererID()));
 	}
 
 	void OpenGLTexture2D::Unbind(uint32_t Slot) const
 	{
-		glBindTextureUnit(Slot, 0);
+		LK_OpenGL(glBindTextureUnit(Slot, 0));
 	}
 
 	void OpenGLTexture2D::SetData(void* InData, const uint32_t InSize)
 	{
 		const GLenum DataFormat = LOpenGL::ImageFormatToGLDataFormat(Specification.Format);
 		//const uint32_t BPP = (DataFormat == GL_RGBA ? 4 : 3);
-
-		glTextureSubImage2D(m_Image->GetRendererID(), 
-							0, 
-							0, 
-							0, 
-							Specification.Width, 
-							Specification.Height, 
-							DataFormat, 
-							GL_UNSIGNED_BYTE, 
-							InData);
+		LK_OpenGL(
+			glTextureSubImage2D(m_Image->GetRendererID(), 
+								0, 
+								0, 
+								0, 
+								Specification.Width, 
+								Specification.Height, 
+								DataFormat, 
+								GL_UNSIGNED_BYTE, 
+								InData)
+		);
 	}
 
 	void OpenGLTexture2D::Lock()
@@ -175,11 +176,11 @@ namespace LkEngine {
 
 		stbi_set_flip_vertically_on_load(true);
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		LK_OpenGL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		LK_OpenGL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		LK_OpenGL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		LK_OpenGL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		LK_OpenGL(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 	}
 
 	OpenGLTextureCube::~OpenGLTextureCube()
@@ -188,9 +189,9 @@ namespace LkEngine {
 
 	void OpenGLTextureCube::Bind(const uint32_t Slot) const
 	{
-		glActiveTexture(GL_TEXTURE0 + Slot);
+		LK_OpenGL(glActiveTexture(GL_TEXTURE0 + Slot));
+		LK_OpenGL(glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID));
 		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
 	}
 
 }

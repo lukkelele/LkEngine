@@ -146,8 +146,11 @@ namespace LkEngine {
 
         void SetVSync(const bool InEnabled);
 
-        /// REMOVE
-        TObjectPtr<LSwapChain> GetSwapChain();
+		FORCEINLINE LSwapChain& GetSwapChain() 
+        { 
+            return *m_SwapChain; 
+        }
+
         TObjectPtr<LRenderPass> GetRenderPass();
 
 		FORCEINLINE void SetWidth(const uint16_t NewWidth) 

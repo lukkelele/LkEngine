@@ -11,9 +11,9 @@ namespace LkEngine {
 	class LSceneCamera : public LCamera
 	{
 	public:
-		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, 
-										const float InNearClip = 0.1f, 
-										const float InFarClip = 1000.0f)
+		//LSceneCamera(const glm::mat4& projection);
+
+		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
 				|| (m_DegPerspectiveFOV != InVerticalFovDeg)
@@ -137,7 +137,7 @@ namespace LkEngine {
 		FORCEINLINE const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		FORCEINLINE const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
 
-	private:
+	protected:
 		glm::vec3 m_Pos = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_PosDelta = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Origin = { 0.0f, 0.0f, 0.0f };

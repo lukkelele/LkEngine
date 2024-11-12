@@ -7,12 +7,12 @@
 
 namespace LkEngine {
 
-	class OpenGLTextureArray : public TextureArray
+	class LOpenGLTextureArray : public LTextureArray
 	{
 	public:
-		OpenGLTextureArray(const FTextureArraySpecification& InSpecification);
-		OpenGLTextureArray() = delete;
-		~OpenGLTextureArray();
+		LOpenGLTextureArray(const FTextureArraySpecification& InSpecification);
+		LOpenGLTextureArray() = delete;
+		~LOpenGLTextureArray();
 
 		virtual void Bind() override;
 		virtual void Unbind() override;
@@ -91,11 +91,15 @@ namespace LkEngine {
 		std::deque<TObjectPtr<LTexture>> Textures{};
 		std::unordered_map<LRendererID, int> IndexCache{};
 		std::unordered_set<LRendererID> TextureIDSet{};
+
+	private:
+		LCLASS(LOpenGLTextureArray);
 	};
 
 
 	namespace LOpenGL {
 
+		/* TODO: MOVE ELSEWHERE. */
 		static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const ETextureArrayDimension& TextureArrayDimension)
 		{
 			switch (TextureArrayDimension)
@@ -110,14 +114,9 @@ namespace LkEngine {
 			return {};
 		}
 
-		static ETextureArrayDimension DetermineDimension(int width, int height)
+		static ETextureArrayDimension DetermineDimension(const int InWidth, const int InHeight)
 		{
-			if (width != height)
-			{
-				height = width;
-			}
-
-			switch (width)
+			switch (InWidth)
 			{
 				case 200:  return ETextureArrayDimension::Dimension_200x200;
 				case 512:  return ETextureArrayDimension::Dimension_512x512;
@@ -126,7 +125,7 @@ namespace LkEngine {
 				case 4096: return ETextureArrayDimension::Dimension_4096x4096;
 			}
 
-			LK_CORE_ASSERT(false, "Invalid dimension arguments,  width={}  height={}", width, height);
+			LK_CORE_ASSERT(false, "Failed to determine dimension");
 			return {};
 		}
 

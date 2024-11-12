@@ -21,9 +21,9 @@ namespace LkEngine {
 		PipelineSpecification.Layout = layout;
 	}
 
-	void LOpenGLPipeline::BindTextureArray(const LRendererID& rendererID)
+	void LOpenGLPipeline::BindTextureArray(const LRendererID TextureArrayID)
 	{
-		BoundTextureArrays.push_back(rendererID);
+		BoundTextureArrays.push_back(TextureArrayID);
 	}
 
 }

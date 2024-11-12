@@ -79,15 +79,31 @@ namespace LkEngine {
 			Timestep = Timer.GetDeltaTime();
 
             LInput::Update();
+        #if 0
+			LRenderer::Submit([&]() { Window->GetSwapChain().BeginFrame(); });
+        #endif
+
             LRenderer::BeginFrame();
 
+        #if 0
+			/* Update all layers. */
+			// LK_SCOPE_PERF("Application  Updating Layers");
+			for (TObjectPtr<LLayer>& Layer : LayerStack)
+			{
+				Layer->OnUpdate(Timestep);
+			}
+        #endif
+
+        #if 1
             /** LkEditor */
             if (Editor->IsEnabled())
             {
                 TObjectPtr<LEditorCamera> EditorCamera = Editor->GetEditorCamera();
                 LRenderer::BeginScene(EditorCamera->GetViewProjectionMatrix());
 
-                /* Update all layers. */
+                Editor->RenderViewport();
+
+		        /* Update all layers. */
 				for (TObjectPtr<LLayer>& Layer : LayerStack)
 				{
 					Layer->OnUpdate(Timestep);
@@ -95,6 +111,7 @@ namespace LkEngine {
 
                 LRenderer::EndScene();
             }
+        #endif
             
             /* UI */
 			if (Specification.ImGuiEnabled)
@@ -112,7 +129,7 @@ namespace LkEngine {
 
 			LRenderer::EndFrame();
 
-			/* Submit the buffer swap. */
+			/* Swap buffers. */
 			LRenderer::Submit([&]()
 			{
 				Window->SwapBuffers();

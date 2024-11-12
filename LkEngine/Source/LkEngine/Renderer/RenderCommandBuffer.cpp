@@ -14,7 +14,7 @@ namespace LkEngine {
 		{
 			case ERendererAPI::OpenGL:  
 			{
-				return TObjectPtr<OpenGLRenderCommandBuffer>::Create(count, debugName);
+				return TObjectPtr<LOpenGLRenderCommandBuffer>::Create(count, debugName);
 			}
 
 			case ERendererAPI::None: break;
@@ -31,7 +31,7 @@ namespace LkEngine {
 		{
 			case ERendererAPI::OpenGL:  
 			{
-				return TObjectPtr<OpenGLRenderCommandBuffer>::Create(debugName, true);
+				return TObjectPtr<LOpenGLRenderCommandBuffer>::Create(debugName, true);
 			}
 
 			case ERendererAPI::None: break;

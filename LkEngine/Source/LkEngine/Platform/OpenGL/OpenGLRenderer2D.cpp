@@ -103,7 +103,7 @@ namespace LkEngine {
             m_QuadVertexBuffer->SetLayout({
                 { "a_Position",       ShaderDataType::Float3  },
                 { "a_Color",          ShaderDataType::Float4  },
-                { "a_Texcoord",       ShaderDataType::Float2  },
+                { "a_TexCoord",       ShaderDataType::Float2  },
                 { "a_TexIndex",       ShaderDataType::Float,  },
                 { "a_TexArray",       ShaderDataType::Float,  },
                 { "a_TilingFactor",   ShaderDataType::Float,  },

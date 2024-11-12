@@ -8,8 +8,7 @@ namespace LkEngine {
     class OpenGLVertexBuffer : public LVertexBuffer
     {
 	public:
-		OpenGLVertexBuffer(void* data, 
-						   const uint64_t InSize, 
+		OpenGLVertexBuffer(void* data, const uint64_t InSize, 
 						   const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
 		OpenGLVertexBuffer(const uint64_t InSize, 
 						   const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);

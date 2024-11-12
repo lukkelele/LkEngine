@@ -24,16 +24,16 @@ namespace LkEngine {
 		std::string DebugName{};
 	};
 
-	class TextureArray : public LObject
+	class LTextureArray : public LObject
 	{
 	public:
-		virtual ~TextureArray() = default;
+		virtual ~LTextureArray() = default;
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
-		virtual void AddTextureToArray(const TObjectPtr<LTexture> Texture) = 0;
-		virtual bool RemoveTextureFromArray(const LRendererID TextureID) = 0;
+		virtual void AddTextureToArray(const TObjectPtr<LTexture> InTexture) = 0;
+		virtual bool RemoveTextureFromArray(const LRendererID InTextureID) = 0;
 
 		virtual const LRendererID GetRendererID() const = 0;
 		virtual LRendererID& GetRendererID() = 0;
@@ -44,17 +44,17 @@ namespace LkEngine {
 
 		virtual int GetWidth() const = 0;
 		virtual int GetHeight() const = 0;
-		virtual void SetWidth(int width) = 0;
-		virtual void SetHeight(int height) = 0;
+		virtual void SetWidth(const int InWidth) = 0;
+		virtual void SetHeight(const int InHeight) = 0;
 
 		virtual bool HasTexture(const TObjectPtr<LTexture>& Texture) = 0;
 		virtual TObjectPtr<LTexture> GetTextureWithID(LRendererID id) = 0;
 		virtual int GetIndexOfTexture(const TObjectPtr<LTexture>& Texture) = 0;
 
-		static TObjectPtr<TextureArray> Create(const FTextureArraySpecification& Specification);
+		static TObjectPtr<LTextureArray> Create(const FTextureArraySpecification& Specification);
 
 	private:
-		LCLASS(TextureArray)
+		LCLASS(LTextureArray)
 	};
 
 	namespace Utils {

@@ -12,7 +12,7 @@ namespace LkEngine::UI {
     ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_None
         | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
         | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
-        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus 
+        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollWithMouse
         | ImGuiWindowFlags_NoInputs;
         //| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar;
 
@@ -41,7 +41,7 @@ namespace LkEngine::UI {
         | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
     ImGuiWindowFlags ViewportTextureFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
-        | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar 
+        | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
         | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize;
 
     static uint32_t Counter = 0;

@@ -4,15 +4,21 @@
 #include "LkEngine/Core/Application.h" /// REMOVE
 
 
-namespace LkEngine {
-
+namespace LkEngine
+{
 	void LSceneCamera::SetViewportSize(uint32_t Width, uint32_t Height)
 	{
 		UpdateView();
 		switch (ProjectionType)
 		{
 			case ECameraProjection::Perspective:
-				SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), (float)Width, (float)Height, m_PerspectiveNear, m_PerspectiveFar);
+				SetPerspectiveProjectionMatrix(glm::radians(
+					m_DegPerspectiveFOV), 
+					(float)Width, 
+					(float)Height, 
+					m_PerspectiveNear, 
+					m_PerspectiveFar
+				);
 				break;
 
 			case ECameraProjection::Orthographic:

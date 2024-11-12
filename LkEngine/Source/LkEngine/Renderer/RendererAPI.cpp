@@ -12,7 +12,7 @@ namespace LkEngine {
         {
             case ERendererAPI::OpenGL: 
             {
-                return TObjectPtr<OpenGLRenderer>::Create();
+                return TObjectPtr<LOpenGLRenderer>::Create();
             }
 
             case ERendererAPI::Vulkan: 

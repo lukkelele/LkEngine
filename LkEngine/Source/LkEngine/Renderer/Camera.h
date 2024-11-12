@@ -123,21 +123,16 @@ namespace LkEngine {
 			}
 		}
 
-		void SetPerspectiveProjectionMatrix(const float InRadFov, 
-											const float InWidth, 
-											const float InHeight, 
-											const float InNearP, 
-											const float InFarP)
+		void SetPerspectiveProjectionMatrix(const float InRadFov, const float InWidth, const float InHeight, 
+											const float InNearP, const float InFarP)
 		{
 			LK_VERIFY((InWidth > 0) && (InHeight > 0), "Cannot set projection matrix with invalid arguments");
 			m_ProjectionMatrix = glm::perspectiveFov(InRadFov, InWidth, InHeight, InNearP, InFarP);
 			bDirty = true;
 		}
 
-		void SetOrthoProjectionMatrix(const float InWidth, 
-									  const float InHeight, 
-									  const float InNearP, 
-									  const float InFarP)
+		void SetOrthoProjectionMatrix(const float InWidth, const float InHeight, 
+									  const float InNearP, const float InFarP)
 		{
 			LK_VERIFY((InWidth > 0) && (InHeight > 0));
 			m_ProjectionMatrix = glm::ortho(

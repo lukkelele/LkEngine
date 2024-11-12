@@ -12,6 +12,7 @@ namespace LkEngine {
     class LImage;
     class LSceneCamera;
     class LTexture;
+	class LTextureArray;
 
 	class LRenderer2D : public LObject
     {
@@ -25,24 +26,32 @@ namespace LkEngine {
         void BeginScene(const LSceneCamera& Camera);
         void BeginScene(const LSceneCamera& Camera, const glm::mat4& Transform);
         void EndScene();
+
+	private:
+		void StartBatch();
+		void NextBatch();
         void Flush();
 
+    public:
         void DrawImage(const TObjectPtr<LImage> Image);
+
+        void DrawLine(const glm::vec2& P0, const glm::vec2& P1, const glm::vec4& Color);
 
 		void DrawQuad(const glm::mat4& Transform, const glm::vec4& Color);
         void DrawQuad(const glm::vec2& Position, const glm::vec2& Size, const glm::vec4& Color);
 		void DrawQuad(const glm::vec3& Position, const glm::vec2& Size, const glm::vec4& Color);
 		void DrawQuad(const glm::vec2& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture);
+
 		void DrawQuad(const glm::vec2& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture, const glm::vec4& TintColor);
+		void DrawQuad(const glm::vec3& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture, const glm::vec4& TintColor);
         
         void DrawRotatedQuad(const glm::vec2& Position, const glm::vec2& Size, const glm::vec4& Color, const float Rotation);
-        void DrawLine(const glm::vec2& P0, const glm::vec2& P1, const glm::vec4& Color);
 
         float GetLineWidth();
         void SetLineWidth(const float NewLineWidth);
 
-        FQuadVertex*& GetWriteableQuadBuffer();
-        FLineVertex*& GetWriteableLineBuffer();
+        FORCEINLINE FQuadVertex*& GetWriteableQuadBuffer() { return QuadVertexBufferPtr; }
+		FORCEINLINE FLineVertex*& GetWriteableLineBuffer() { return LineVertexBufferPtr; }
 
 		struct FRendererStatistics
 		{
@@ -55,24 +64,32 @@ namespace LkEngine {
 			uint32_t GetTotalVertexCount() const { return QuadCount * 4; }
 			uint32_t GetTotalIndexCount() const { return QuadCount * 6; }
 		};
+
+        /* TODO: Change type to LVector2. */
+        inline static constexpr glm::vec2 TextureCoords[] = { 
+            { 0.0f, 0.0f },     /*  Bottom Left.  */
+            { 0.0f, 1.0f },     /*  Top Left.     */
+            { 1.0f, 1.0f },     /*  Top Right.    */
+            { 1.0f, 0.0f }      /*  Bottom Right. */
+        };
         
 	public:
         static constexpr int MaxTextureSlots = 32;
         static constexpr int MaxTextureArrays = 10;
 	private:
 		FRenderer2DSpecification Specification{};
-		FRendererStatistics DrawStatistics{};
+		FRendererStatistics Statistics{};
 
         const uint32_t MaxVertices = 0;
         const uint32_t MaxIndices = 0;
         const uint32_t MaxLineVertices = 0;
         const uint32_t MaxLineIndices = 0;
 
-        /* FIXME: Disabled for now. */
         /* Texture Slots. */
-        //std::array<TObjectPtr<LTexture2D>, MaxTextureSlots> TextureSlots;
+        std::array<TObjectPtr<LTexture2D>, MaxTextureSlots> TextureSlots;
+
         /* Texture Arrays. */
-        //std::array<TObjectPtr<OpenGLTextureArray>, MaxTextureArrays> TextureArrays;
+        std::array<TObjectPtr<LTextureArray>, MaxTextureArrays> TextureArrays;
 
         /* Quad. */
         uint32_t QuadIndexCount = 0;
@@ -106,6 +123,9 @@ namespace LkEngine {
         };
         FCameraData CameraBuffer{};
         TObjectPtr<LUniformBuffer> CameraUniformBuffer;
+
+    private:
+		LCLASS(LRenderer2D);
     };
 
 }

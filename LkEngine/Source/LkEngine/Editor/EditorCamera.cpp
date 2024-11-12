@@ -12,7 +12,6 @@ namespace LkEngine {
 
 	LEditorCamera::LEditorCamera(const float InFovDeg, const float InWidth, const float InHeight, 
 								 const float InNearP, const float InFarP)
-		: LCamera(glm::perspectiveFov(glm::radians(InFovDeg), InWidth, InHeight, InFarP, InNearP))
 	{
 		m_PerspectiveNear = InNearP;
 		m_PerspectiveFar = InFarP;
@@ -22,6 +21,9 @@ namespace LkEngine {
 
 		m_Pitch = 0.0f;
 		m_Yaw = glm::pi<float>();
+
+		/* Calculate projection matrix. */
+		m_ProjectionMatrix = glm::perspectiveFov(glm::radians(InFovDeg), InWidth, InHeight, InNearP, InFarP);
 	}
 
 	void LEditorCamera::Initialize()
@@ -261,6 +263,7 @@ namespace LkEngine {
 			m_FocalPoint += ForwardDir * m_Distance;
 			m_Distance = 1.0f;
 		}
+
 		m_PositionDelta += Delta * ZoomSpeed() * ForwardDir;
 	}
 

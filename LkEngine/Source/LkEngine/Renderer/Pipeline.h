@@ -32,6 +32,8 @@ namespace LkEngine {
 		virtual TObjectPtr<LShader> GetShader() const = 0;
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 
+		virtual void BindTextureArray(const LRendererID InRendererID) = 0;
+
 		/** Factory function. */
 		static TObjectPtr<LPipeline> Create(const FPipelineSpecification& InSpecification);
 

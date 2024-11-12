@@ -90,14 +90,18 @@ namespace LkEngine::LOpenGL {
 			}
 
 			LFramebuffer::TargetSwapChain();
-			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			//glClearColor(0.1f, 0.2f, 0.1f, 1.0f);
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		#if 0
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClearColor(0.1f, 0.2f, 0.1f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		#endif
 
 			ModelMVP = glm::mat4(1.0f);
 			DebugShader->Bind();
-			DebugShader->Set("View", view);
-			DebugShader->Set("Projection", proj);
+			//DebugShader->Set("View", view);
+			//DebugShader->Set("Projection", proj);
+			DebugShader->Set("u_ViewMatrix", view);
+			DebugShader->Set("u_ProjectionMatrix", proj);
 
 			// Cubes
 			{
@@ -117,7 +121,7 @@ namespace LkEngine::LOpenGL {
 
 			/* Floor. */
 			{
-				glBindVertexArray(PlaneVAO);
+				LK_OpenGL(glBindVertexArray(PlaneVAO));
 				PlaneTexture->Bind();
 				DebugShader->Set("u_Model", glm::mat4(1.0f));
 				LK_OpenGL(glDrawArrays(GL_TRIANGLES, 0, 6));
@@ -128,10 +132,10 @@ namespace LkEngine::LOpenGL {
 			// Disable depth test so screen-space quad isn't discarded due to depth test.
 			LK_OpenGL(glDisable(GL_DEPTH_TEST)); 
 			ScreenShader->Bind();
-			TObjectPtr<LImage2D> colorAttachment0 = LRenderer::GetViewportFramebuffer()->GetImage(0);
+			TObjectPtr<LImage2D> ColorAttachment0 = LRenderer::GetViewportFramebuffer()->GetImage(0);
 
 			/* Use the color attachment texture as the texture of the quad plane. */
-			LK_OpenGL(glBindTexture(GL_TEXTURE_2D, colorAttachment0->GetRendererID()));
+			LK_OpenGL(glBindTexture(GL_TEXTURE_2D, ColorAttachment0->GetRendererID()));
 			LK_OpenGL(glDrawArrays(GL_TRIANGLES, 0, 6));
 
 			DebugShader->Unbind();
@@ -146,31 +150,34 @@ namespace LkEngine::LOpenGL {
 				return;
 			}
 
-			glEnable(GL_DEPTH_TEST);
-
 			LRenderer::GetViewportFramebuffer()->Bind();
+			LK_OpenGL(glEnable(GL_DEPTH_TEST));
+			//LK_OpenGL(glDepthFunc(GL_LESS));
 
 			DebugShader->Bind();
 			DebugShader->Set("u_ViewMatrix", view);
 			DebugShader->Set("u_ProjectionMatrix", projection);
 			//DebugShader->Set("u_ViewProjectionMatrix", viewProjection);
+			/* EXPERIMENTAL. */
+			DebugShader->Set("Texture1", 0);
 
 			ModelMVP = glm::mat4(1.0f);
 
 			CubeVertexBuffer->Bind();
 			CubeTexture->Bind(0);
 
-			// Cube 1
+			/* Cube 1. */
 			ModelMVP = glm::translate(ModelMVP, glm::vec3(-1.0f, 0.0f, -1.0f));
 			DebugShader->Set("u_Model", ModelMVP);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			LK_OpenGL(glDrawArrays(GL_TRIANGLES, 0, 36));
 
-			// Cube 2
+			/* Cube 2. */
 			ModelMVP = glm::mat4(1.0f);
 			ModelMVP = glm::translate(ModelMVP, glm::vec3(2.0f, 0.0f, 0.0f));
 			DebugShader->Set("u_Model", ModelMVP);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			LK_OpenGL(glDrawArrays(GL_TRIANGLES, 0, 36));
 
+			/* Clean up before exit. */
 			DebugShader->Unbind();
 
 			LFramebuffer::TargetSwapChain();
@@ -179,7 +186,6 @@ namespace LkEngine::LOpenGL {
 		void RenderFloor(const glm::mat4& view, const glm::mat4& projection)
 		{
 			glEnable(GL_DEPTH_TEST);
-			//Renderer2DAPI::Get().As<OpenGLRenderer2D>()->GetFramebuffer()->Bind();
 			LRenderer::GetViewportFramebuffer()->Bind();
 
 			ModelMVP = glm::mat4(1.0f);
@@ -200,12 +206,12 @@ namespace LkEngine::LOpenGL {
 		{
 			CubeVertexBuffer = LVertexBuffer::Create(Cube_Vertices, sizeof(Cube_Vertices));
 			CubeVertexBuffer->SetLayout({
-				{ "a_Position",      ShaderDataType::Float3  },
-				{ "a_Color",         ShaderDataType::Float4  },
-				{ "a_Texcoord",      ShaderDataType::Float2  },
-				{ "a_TexIndex",      ShaderDataType::Float,  },
-				{ "a_TexArray",      ShaderDataType::Float,  },
-				{ "a_TilingFactor",  ShaderDataType::Float,  },
+				{ "a_Position",      EShaderDataType::Float3 },
+				{ "a_Color",         EShaderDataType::Float4 },
+				{ "a_TexCoord",      EShaderDataType::Float2 },
+				{ "a_TexIndex",      EShaderDataType::Float  },
+				{ "a_TexArray",      EShaderDataType::Float  },
+				{ "a_TilingFactor",  EShaderDataType::Float  },
 			});
 
 			if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
@@ -217,6 +223,12 @@ namespace LkEngine::LOpenGL {
 
 		void SetupTexturesAndShaders()
 		{
+			if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
+			{
+				LK_CORE_INFO_TAG("OpenGL", "Setting up textures and shaders");
+			}
+
+			/* Shaders. */
 			if (!DebugShader)
 			{
 				DebugShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Debug");
@@ -227,6 +239,7 @@ namespace LkEngine::LOpenGL {
 				ScreenShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			}
 
+			/* Textures. */
 			if (!CubeTexture)
 			{
 				CubeTexture = LTextureLibrary::Get().GetTexture("wood-container");
@@ -234,7 +247,8 @@ namespace LkEngine::LOpenGL {
 
 			if (!PlaneTexture)
 			{
-				//PlaneTexture = LTextureLibrary::Get()->GetTexture("metal");
+				PlaneTexture = LTextureLibrary::Get().GetTexture("MetalGround");
+				LK_CORE_ASSERT(PlaneTexture, "Plane Texture failed to setup");
 			}
 		}
 
@@ -252,28 +266,28 @@ namespace LkEngine::LOpenGL {
 
 			PlaneVertexBuffer = LVertexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices));
 			PlaneVertexBuffer->SetLayout({
-				{ "a_Pos",          ShaderDataType::Float3  },
-				{ "a_Texcoord",     ShaderDataType::Float2  },
+				{ "a_Pos",       EShaderDataType::Float3 },
+				{ "a_TexCoord",  EShaderDataType::Float2 },
 			});
 			LK_CORE_TRACE_TAG("LkOpenGL", "Generated CubeVertexBuffer!");
 		}
 
-		void GenerateScreenQuadVaoAndVbo(uint32_t& vao, uint32_t& vbo)
+		void GenerateScreenQuadVaoAndVbo(uint32_t& VaoRef, uint32_t& VboRef)
 		{
-			glGenVertexArrays(1, &vao);
-			glGenBuffers(1, &vbo);
+			LK_OpenGL(glGenVertexArrays(1, &VaoRef));
+			LK_OpenGL(glGenBuffers(1, &VboRef));
 
-			glBindVertexArray(vao);
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(Quad_Vertices), &Quad_Vertices, GL_STATIC_DRAW);
+			LK_OpenGL(glBindVertexArray(VaoRef));
+			LK_OpenGL(glBindBuffer(GL_ARRAY_BUFFER, VboRef));
+			LK_OpenGL(glBufferData(GL_ARRAY_BUFFER, sizeof(Quad_Vertices), &Quad_Vertices, GL_STATIC_DRAW));
 
-			// Vertex Indexing
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+			/* Vertex Indexing. */
+			LK_OpenGL(glEnableVertexAttribArray(0));
+			LK_OpenGL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0));
 
-			// Texture Indexing
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+			/* Texture Indexing. */
+			LK_OpenGL(glEnableVertexAttribArray(1));
+			LK_OpenGL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float))));
 		}
 
 		TObjectPtr<LShader> GetDebugShader() 

@@ -19,10 +19,11 @@
 
 namespace LkEngine {
 
-    class OpenGLRenderer : public LRendererAPI
+    class LOpenGLRenderer : public LRendererAPI
     {
     public:
-        OpenGLRenderer();
+        LOpenGLRenderer();
+		~LOpenGLRenderer() = default;
 
         virtual void Initialize() override;
         virtual void Shutdown() override;
@@ -33,11 +34,9 @@ namespace LkEngine {
 
         virtual void DrawIndexed(const uint64_t IndexCount) override;
 
-        void Draw(LVertexBuffer& vb, const LShader& shader);
+        void Draw(LVertexBuffer& VertexBuffer, const LShader& Shader);
 
-        virtual void Draw(const LVertexBuffer& vb,
-                          const LIndexBuffer& ib,
-                          const LShader& shader); // override;
+        virtual void Draw(const LVertexBuffer& VertexBuffer, const LIndexBuffer& IndexBuffer, const LShader& Shader); // override;
 
         virtual void SubmitImage(const TObjectPtr<LImage> image) override;
         virtual void SubmitImage(const TObjectPtr<LImage2D> image) override;
@@ -62,7 +61,7 @@ namespace LkEngine {
 
         virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
                                     TObjectPtr<LPipeline> pipeline, 
-                                    TObjectPtr<LShader>& shader, 
+                                    TObjectPtr<LShader>& Shader, 
                                     TObjectPtr<LVertexBuffer>& vertexBuffer, 
                                     TObjectPtr<LIndexBuffer>& indexBuffer, 
                                     const glm::mat4& transform, 
@@ -79,54 +78,38 @@ namespace LkEngine {
 
 		void SubmitIndexed(unsigned int count) override;
 
-        void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) override;
-        void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID = 0) override;
-        void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) override;
-        void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID = 0) override;
+        void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& color, uint64_t EntityID = 0) override;
+        void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& color, uint64_t EntityID = 0) override;
+        void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& color, float Rotation, uint64_t EntityID = 0) override;
+        void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& color, float Rotation, uint64_t EntityID = 0) override;
 
-        void SubmitQuad(const glm::vec2& pos, 
-                        const glm::vec2& size, 
-                        TObjectPtr<LTexture> texture, 
-                        const float rotation, 
-                        uint64_t entityID = 0) override;
+        void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
+                        const float Rotation, uint64_t EntityID = 0) override;
 
-        void SubmitQuad(const glm::vec3& pos, 
-                        const glm::vec2& size, 
-                        TObjectPtr<LTexture> texture, 
-                        const float rotation, 
-                        uint64_t entityID = 0) override;
+        void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
+                        const float Rotation, uint64_t EntityID = 0) override;
 
-        void SubmitQuad(const glm::vec2& pos, 
-                        const glm::vec2& size, 
-                        TObjectPtr<LTexture> texture, 
-                        const glm::vec4& tintColor, 
-                        const float rotation, 
-                        uint64_t entityID) override;
+        void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
+                        const glm::vec4& TintColor, const float Rotation, uint64_t EntityID) override;
 
-        void SubmitQuad(const glm::vec3& pos, 
-                        const glm::vec2& size, 
-                        TObjectPtr<LTexture> texture, 
-                        const glm::vec4& tintColor, 
-                        const float rotation, 
-                        uint64_t entityID) override;
+        void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
+                        const glm::vec4& TintColor, const float Rotation, uint64_t EntityID) override;
 
-        void SubmitLine(const glm::vec2& pos, 
-                        const glm::vec2& size, 
-                        const glm::vec4& color, 
-                        uint64_t entityID = 0) override;
+        void SubmitLine(const glm::vec2& Pos, const glm::vec2& Size, 
+                        const glm::vec4& color, uint64_t EntityID = 0) override;
 
-        void SetPrimitiveTopology(const ERenderTopology& InRenderTopology) override;
-        void SetDepthFunction(const EDepthFunction& InDepthFunction) override;
+        virtual void SetPrimitiveTopology(const ERenderTopology InRenderTopology) override;
+        virtual void SetDepthFunction(const EDepthFunction InDepthFunction) override;
 
         RendererCapabilities& GetCapabilities() override;
 
-        void BindTextureArray(int idx);
-        void BindTextureArray(const ETextureArrayDimension& InTextureArrayDimension);
+        virtual void BindTextureArray(const uint8_t Index) override;
+        virtual void BindTextureArray(const ETextureArrayDimension& InTextureArrayDim) override;
 
-        TObjectPtr<OpenGLTextureArray> GetTextureArray(const int Index);
+        TObjectPtr<LOpenGLTextureArray> GetTextureArray(const int Index);
 
     private:
-        TObjectPtr<OpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension);
+        TObjectPtr<LOpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension);
 
     private:
         uint8_t m_Topology = GL_TRIANGLES;
@@ -137,8 +120,9 @@ namespace LkEngine {
         TObjectPtr<OpenGLRenderPass> m_GeometricPass{};
 		TObjectPtr<OpenGLRenderPass> m_RenderPass2D{};
 
-        LCLASS(OpenGLRenderer)
+        LCLASS(LOpenGLRenderer)
     };
+
 
     namespace LOpenGL {
 

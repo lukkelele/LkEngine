@@ -30,7 +30,13 @@ namespace LkEngine
 
         /* Quads. */
         {
-            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "Creating quad framebuffer");
+            QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
+            QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
+            QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
+            QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
+
+			/* Create the quad framebuffer. */
+            LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad framebuffer");
             FFramebufferSpecification QuadFramebufferSpec{};
 		    QuadFramebufferSpec.Attachments = {
                 EImageFormat::RGBA32F, 
@@ -39,17 +45,12 @@ namespace LkEngine
 		    QuadFramebufferSpec.Samples = 1;
 		    QuadFramebufferSpec.ClearColorOnLoad = false;
 		    QuadFramebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
-		    QuadFramebufferSpec.DebugName = "OpenGLRenderer2D_Framebuffer";
+		    QuadFramebufferSpec.DebugName = "Renderer2D_Framebuffer";
             QuadFramebufferSpec.Width = LWindow::Get().GetWidth();
             QuadFramebufferSpec.Height = LWindow::Get().GetHeight();
 		    TObjectPtr<LFramebuffer> QuadFramebuffer = LFramebuffer::Create(QuadFramebufferSpec);
 
-            QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f }; 
-            QuadVertexPositions[1] = { -0.5f,  0.5f, 0.0f, 1.0f };
-            QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
-            QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
-
-            // Quad Pipeline
+			/* Create the quad pipeline. */
             FPipelineSpecification QuadPipelineSpec{};
             QuadPipelineSpec.TargetFramebuffer = nullptr;
             QuadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
@@ -62,24 +63,25 @@ namespace LkEngine
             //QuadMaterial = LMaterial::Create(QuadShader, "QuadMaterial");
 
         /* TODO: Need some way to invoke this for OpenGL in abstract way. */
-        #if 0
+        #if 1
+            
             // Use correct amount of texture array uniforms
             LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad renderpass");
-            for (uint8_t ArrayIndex = 0; ArrayIndex < Specification.TextureArraysUsed; ArrayIndex++)
+            for (uint8_t ArrayIndex = 0; ArrayIndex < Specification.TextureArraysCount; ArrayIndex++)
             {
-                //OpenGLPipeline->BindTextureArray(ArrayIndex);
+                QuadPassSpec.Pipeline->BindTextureArray(ArrayIndex);
             }
         #endif
             QuadPass = LRenderPass::Create(QuadPassSpec);
             
             QuadVertexBuffer = LVertexBuffer::Create(MaxVertices * sizeof(FQuadVertex));
             QuadVertexBuffer->SetLayout({
-                { "a_Position",       ShaderDataType::Float3  },
-                { "a_Color",          ShaderDataType::Float4  },
-                { "a_Texcoord",       ShaderDataType::Float2  },
-                { "a_TexIndex",       ShaderDataType::Float,  },
-                { "a_TexArray",       ShaderDataType::Float,  },
-                { "a_TilingFactor",   ShaderDataType::Float,  },
+                { "a_Position",     EShaderDataType::Float3 },
+                { "a_Color",        EShaderDataType::Float4 },
+                { "a_TexCoord",     EShaderDataType::Float2 },
+                { "a_TexIndex",     EShaderDataType::Float, },
+                { "a_TexArray",     EShaderDataType::Float, },
+                { "a_TilingFactor", EShaderDataType::Float, },
             });
 
             QuadVertexBufferBase = new FQuadVertex[MaxVertices];
@@ -111,13 +113,13 @@ namespace LkEngine
 
         /* Lines. */
         {
-            LK_CORE_DEBUG_TAG("OpenGLRenderer2D", "");
+            LK_CORE_DEBUG_TAG("Renderer2D", "");
             LineVertexBuffer = LVertexBuffer::Create(MaxVertices * sizeof(FLineVertex));
             VertexBufferLayout lineVertexBufLayout{ };
             LineVertexBuffer->SetLayout({
-                { "a_Pos",       ShaderDataType::Float3, },
-                { "a_Color",     ShaderDataType::Float4, },
-                { "a_EntityID",  ShaderDataType::Int,  }
+                { "a_Pos",       EShaderDataType::Float3, },
+                { "a_Color",     EShaderDataType::Float4, },
+                { "a_EntityID",  EShaderDataType::Int,    }  /// TODO: FIX THIS
             });
             LineVertexBufferBase = new FLineVertex[MaxVertices];
 
@@ -126,6 +128,7 @@ namespace LkEngine
             {
 		        LineIndices[i] = i;
             }
+
 		    delete[] LineIndices;
         }
 
@@ -137,8 +140,6 @@ namespace LkEngine
 
         RenderCommandBuffer = LRenderCommandBuffer::Create(0, "Renderer2D_RenderCommandBuffer");
 
-        /* TODO: Need some way to invoke this for OpenGL in abstract way. */
-        #if 0
         for (uint32_t i = 0; i < TextureArrays.size(); i++)
         {
             if (TextureArrays[i])
@@ -146,7 +147,6 @@ namespace LkEngine
                 TextureArrays[i]->Bind();
             }
         }
-        #endif
 
         bInitialized = true;
     }
@@ -157,38 +157,73 @@ namespace LkEngine
 
     void LRenderer2D::BeginScene(const LSceneCamera& Camera) 
     {
-		LK_UNUSED(Camera);
-        //Renderer2D->BeginScene(Camera);
+        CameraBuffer.ViewProjection = Camera.GetViewProjectionMatrix();
+        CameraUniformBuffer->SetData(&CameraBuffer, sizeof(FCameraData));
+
+        StartBatch();
     }
 
     void LRenderer2D::BeginScene(const LSceneCamera& Camera, const glm::mat4& Transform) 
     {
-		LK_UNUSED(Camera);
-		LK_UNUSED(Transform);
-        //Renderer2D->BeginScene(Camera, Transform);
+        CameraBuffer.ViewProjection = Camera.GetProjectionMatrix() * glm::inverse(Transform);
+        CameraUniformBuffer->SetData(&CameraBuffer, sizeof(FCameraData));
+
+        StartBatch();
     }
 
     void LRenderer2D::EndScene() 
     {
-        //Renderer2D->EndScene();
+		Flush();
     }
+
+	void LRenderer2D::StartBatch()
+	{
+        QuadIndexCount = 0;
+        QuadVertexBufferPtr = QuadVertexBufferBase;
+
+        LineIndexCount = 0;
+        LineVertexBufferPtr = LineVertexBufferBase;
+	}
+
+	void LRenderer2D::NextBatch()
+	{
+		Flush();
+		StartBatch();
+	}
 
     void LRenderer2D::Flush() 
     {
-        //Renderer2D->Flush();
+		LK_PROFILE_FUNC();
+        const uint32_t FrameIndex = LRenderer::GetCurrentFrameIndex();
+        uint32_t DataSize = 0;
+
+        /* Quads. */
+        if (QuadIndexCount)
+        {
+            DataSize = static_cast<uint32_t>((uint8_t*)QuadVertexBufferPtr - (uint8_t*)QuadVertexBufferBase);
+            QuadVertexBuffer->SetData(QuadVertexBufferBase, DataSize);
+
+			LRenderer::RenderGeometry(RenderCommandBuffer, 
+                                      QuadPass->GetPipeline(), 
+                                      QuadShader, 
+                                      QuadVertexBuffer, 
+                                      QuadIndexBuffer, 
+                                      CameraBuffer.ViewProjection, 
+                                      QuadIndexCount);
+
+            Statistics.DrawCalls++;
+        }
 	}
+
 
 	void LRenderer2D::DrawImage(const TObjectPtr<LImage> Image)
 	{
 		LK_UNUSED(Image);
-		LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
 	void LRenderer2D::DrawQuad(const glm::mat4& Transform, const glm::vec4& Color)
 	{
-		LK_UNUSED(Transform);
-		LK_UNUSED(Color);
-		LK_MARK_FUNC_NOT_IMPLEMENTED();
+		LK_UNUSED(Transform); LK_UNUSED(Color);
 	}
 
 	void LRenderer2D::DrawQuad(const glm::vec2& Position, const glm::vec2& Size, const glm::vec4& Color)
@@ -198,7 +233,9 @@ namespace LkEngine
 
 	void LRenderer2D::DrawQuad(const glm::vec3& Position, const glm::vec2& Size, const glm::vec4& Color)
 	{
-		const float TextureIndex = 0.0f; // White Texture
+		LK_PROFILE_FUNC();
+
+		const float TextureIndex = 0.0f; /* White Texture. */
 		const float TilingFactor = 1.0f;
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), Position) 
@@ -235,7 +272,7 @@ namespace LkEngine
 
 		QuadIndexCount += 6;
 
-		DrawStatistics.QuadCount++;
+		Statistics.QuadCount++;
 	}
 
 	void LRenderer2D::DrawQuad(const glm::vec2& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture)
@@ -244,30 +281,87 @@ namespace LkEngine
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
-	void LRenderer2D::DrawQuad(const glm::vec2& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture, const glm::vec4& TintColor)
+	void LRenderer2D::DrawQuad(const glm::vec2& Position, const glm::vec2& Size, 
+                               TObjectPtr<LTexture> Texture, const glm::vec4& TintColor)
 	{
+    #if 0
 		LK_UNUSED(Position); LK_UNUSED(Size); LK_UNUSED(Texture); LK_UNUSED(TintColor);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
+
+        const float TextureIndex = 0; 
+        const float TilingFactor = 1.0f;
+        constexpr size_t QuadVertexCount = 4;
+
+        for (size_t i = 0; i < QuadVertexCount; i++)
+        {
+            QuadVertexBufferPtr->Position = Transform * QuadVertexPositions[i];
+            QuadVertexBufferPtr->TexCoord = TextureCoords[i];
+            QuadVertexBufferPtr->Color = Color;
+            QuadVertexBufferPtr->TexIndex = TextureIndex; // White texture
+            QuadVertexBufferPtr->TexArray = 0;            // White texture
+            QuadVertexBufferPtr->TilingFactor = TilingFactor;
+            QuadVertexBufferPtr++;
+        }
+
+        m_QuadIndexCount += 6;
+        m_Stats.QuadCount++;
+    #endif
+
+        DrawQuad({ Position.x, Position.y, 0.0f }, Size, Texture, TintColor);
+    }
+
+	void LRenderer2D::DrawQuad(const glm::vec3& Position, const glm::vec2& Size, 
+                               TObjectPtr<LTexture> Texture, const glm::vec4& TintColor)
+	{
+		LK_PROFILE_FUNC();
+
+        if (QuadIndexCount >= MaxIndices)
+        {
+            NextBatch();
+        }
+
+        static constexpr std::size_t QuadVertexCount = 4;
+        static constexpr float TilingFactor = 1.0f;
+
+        float TextureIndex = 0;
+        float TextureArrayIndex = 0;
+
+        for (uint32_t i = 0; i < TextureArrays.size(); i++)
+        {
+            if (TextureArrays[i] && TextureArrays[i]->HasTexture(Texture))
+            {
+                TextureIndex = TextureArrays[i]->GetIndexOfTexture(Texture);
+                TextureArrayIndex = static_cast<uint32_t>(i);
+                break;
+            }
+        }
+
+        const glm::mat4 Transform = glm::translate(glm::mat4(1.0f), { Position.x, Position.y, Position.z})
+            * glm::scale(glm::mat4(1.0f), { Size.x, Size.y, 1.0f });
+
+        for (std::size_t i = 0; i < QuadVertexCount; i++)
+        {
+            QuadVertexBufferPtr->Position = Transform * QuadVertexPositions[i];
+            QuadVertexBufferPtr->Color = TintColor;
+            QuadVertexBufferPtr->TexCoord = TextureCoords[i];
+            QuadVertexBufferPtr->TexIndex = TextureIndex;
+            QuadVertexBufferPtr->TexArray = TextureArrayIndex;
+            QuadVertexBufferPtr->TilingFactor = TilingFactor;
+            QuadVertexBufferPtr++;
+        }
+
+        QuadIndexCount += 6;
+        Statistics.QuadCount++;
 	}
 
     float LRenderer2D::GetLineWidth() 
     {
-        return 0.0f;
+        return 2.0f;
     }
 
     void LRenderer2D::SetLineWidth(const float InWidth) 
     {
 		LK_MARK_FUNC_NOT_IMPLEMENTED("SetLineWidth failed, function not implemented, width: {}", InWidth);
-	}
-
-	FQuadVertex*& LRenderer2D::GetWriteableQuadBuffer()
-	{
-		return QuadVertexBufferPtr;
-	}
-
-	FLineVertex*& LRenderer2D::GetWriteableLineBuffer()
-	{
-		return LineVertexBufferPtr;
 	}
 
 }

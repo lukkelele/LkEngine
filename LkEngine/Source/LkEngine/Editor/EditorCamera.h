@@ -1,7 +1,11 @@
 #pragma once
 
-#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/Core.h" /* PATCH OUT */
 #include "LkEngine/Core/Time/Timer.h"
+#include "LkEngine/Core/Event/KeyEvent.h"
+#include "LkEngine/Core/Event/MouseEvent.h"
+
+#include "LkEngine/Editor/EditorCore.h"
 
 #include "LkEngine/Renderer/Camera.h"
 #include "LkEngine/Core/Time/Timestep.h"
@@ -9,10 +13,7 @@
 #include "LkEngine/Input/Keyboard.h"
 #include "LkEngine/Input/Mouse.h"
 
-#include "LkEngine/Core/Event/KeyEvent.h"
-#include "LkEngine/Core/Event/MouseEvent.h"
-
-#include "LkEngine/Editor/EditorCore.h"
+#include "LkEngine/Scene/SceneCamera.h"
 
 
 namespace LkEngine {
@@ -27,7 +28,7 @@ namespace LkEngine {
 	/**
 	 * LEditorCamera
 	 */
-	class LEditorCamera : public LCamera
+	class LEditorCamera : public LSceneCamera
 	{
 	public:
 		LEditorCamera(const float DegFov, const float Width, const float Height,

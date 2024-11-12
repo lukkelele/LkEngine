@@ -13,6 +13,7 @@ namespace LkEngine {
 
     class LEntity;
 
+    /// REMOVE THIS ENTIRE CLASSSSSSSSSSSSSSS
     struct FOpenGLRenderer2DSpecification : public FRenderer2DSpecification
     {
         uint8_t TextureArraysUsed = 1;

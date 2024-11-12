@@ -20,8 +20,6 @@ namespace LkEngine {
 					 const float InNearP, const float InFarP)
 		: LCamera(glm::perspectiveFov(glm::radians(InDegFov), InWidth, InHeight, InFarP, InNearP))
 	{
-		//: m_ProjectionMatrix(glm::perspectiveFov(glm::radians(InDegFov), InWidth, InHeight, InFarP, InNearP))
-		//LCLASS_REGISTER();
 	}
 
 }

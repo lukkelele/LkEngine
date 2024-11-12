@@ -16,7 +16,7 @@ namespace LkEngine {
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<OpenGLVertexBuffer>::Create(InBuffer, InSize, InBufferUsage);
 
-			case ERendererAPI::None: break;
+			case ERendererAPI::None:
 			default: break;
 		}
 
@@ -30,7 +30,7 @@ namespace LkEngine {
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<OpenGLVertexBuffer>::Create(InSize, InBufferUsage);
 
-			case ERendererAPI::None: break;
+			case ERendererAPI::None:
 			default: break;
 		}
 

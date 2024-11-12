@@ -56,12 +56,12 @@ namespace LkEngine {
 		CommandQueue[0] = new RenderCommandQueue();
 		CommandQueue[1] = new RenderCommandQueue();
 
-		LK_CORE_DEBUG_TAG("Renderer", "Creating shader library");
+		LK_CORE_DEBUG_TAG("Renderer", "Creating Shader library");
 		RendererData->m_ShaderLibrary = TObjectPtr<LShaderLibrary>::Create();
 
 		if (TObjectPtr<LShaderLibrary> ShaderLibrary = GetShaderLibrary())
 		{
-			LK_CORE_DEBUG_TAG("Renderer", "Loading shaders");
+			LK_CORE_DEBUG_TAG("Renderer", "Loading Shaders");
 			ShaderLibrary->Load("Renderer2D_Quad",    "Assets/Shaders/OpenGL/Renderer2D_Quad.shader");
 			ShaderLibrary->Load("Renderer2D_Line",    "Assets/Shaders/OpenGL/Renderer2D_Line.shader");
 			ShaderLibrary->Load("Renderer2D_Debug",   "Assets/Shaders/OpenGL/Renderer2D_Debug.shader");
@@ -71,12 +71,12 @@ namespace LkEngine {
 			ShaderLibrary->Load("Renderer_Model",     "Assets/Shaders/OpenGL/Renderer_Model.shader");
 		}
 
-		LK_CORE_DEBUG_TAG("Renderer", "Creating Texture library");
+		LK_CORE_DEBUG_TAG("Renderer", "Creating texture library");
 		RendererData->TextureLibrary = TObjectPtr<LTextureLibrary>(&LTextureLibrary::Get());
 		RendererData->TextureLibrary->Initialize();
 		RendererData->WhiteTexture = RendererData->TextureLibrary->GetWhiteTexture();
 
-		LK_CORE_DEBUG_TAG("Renderer", "Creating material library");
+		LK_CORE_DEBUG_TAG("Renderer", "Creating Material library");
 		RendererData->MaterialLibrary = TObjectPtr<LMaterialLibrary>::Create();
 
 		RendererAPI = LRendererAPI::Create();
@@ -96,6 +96,7 @@ namespace LkEngine {
 
 	void LRenderer::EndFrame()
 	{
+		/// TODO: Use SwapQueues here instead of in BeginFrame
 		CommandQueue[GetRenderQueueIndex()]->Execute();
 		RendererAPI->EndFrame();
 	}
@@ -169,15 +170,15 @@ namespace LkEngine {
 		RendererAPI->SubmitLine(p0, p1, Color, EntityID);
 	}
 
-	void LRenderer::SubmitLines(const LVertexBuffer& VertexBuffer, const LIndexBuffer& ib, const LShader& shader) 
+	void LRenderer::SubmitLines(const LVertexBuffer& VertexBuffer, const LIndexBuffer& ib, const LShader& Shader) 
 	{
-		shader.Bind();
+		Shader.Bind();
 		VertexBuffer.Bind();
 		ib.Bind();
 
 		ERenderTopology InitialTopology = GetPrimitiveTopology();
 		SetPrimitiveTopology(ERenderTopology::Lines);
-		RendererAPI->Draw(VertexBuffer, ib, shader);
+		RendererAPI->Draw(VertexBuffer, ib, Shader);
 
 		/* Reset initial topology */
 		SetPrimitiveTopology(InitialTopology);
@@ -241,17 +242,14 @@ namespace LkEngine {
 
 	void LRenderer::BeginScene(const LSceneCamera& InSceneCamera)
 	{
-		//LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
-	void LRenderer::BeginScene(const glm::mat4& viewProjectionMatrix)
+	void LRenderer::BeginScene(const glm::mat4& ViewProjectionMatrix)
 	{
-		//LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
 	void LRenderer::EndScene()
 	{
-		//LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
 	RendererCapabilities& LRenderer::GetCapabilities()
@@ -267,51 +265,53 @@ namespace LkEngine {
 	uint32_t LRenderer::RT_GetCurrentFrameIndex()
 	{
 		/* FIXME: Swapchain owns the RenderThread frame index. */
-		return LApplication::Get()->GetWindow().GetSwapChain()->GetCurrentBufferIndex();
+		/// FIX THIS !!!!!!!!! OMG !!!
+		return LApplication::Get()->GetWindow().GetSwapChain().GetCurrentBufferIndex();
 	}
 
-	void LRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, TObjectPtr<LRenderPass> renderPass)
+	void LRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, TObjectPtr<LRenderPass> renderPass)
 	{
-		RendererAPI->BeginRenderPass(renderCommandBuffer, renderPass, false);
+		RendererAPI->BeginRenderPass(RenderCommandBuffer, renderPass, false);
 	}
 
-	void LRenderer::EndRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer)
+	void LRenderer::EndRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer)
 	{
-		RendererAPI->EndRenderPass(renderCommandBuffer);
+		RendererAPI->EndRenderPass(RenderCommandBuffer);
 	}
 
-	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
-								   TObjectPtr<LPipeline> pipeline, 
-								   TObjectPtr<LVertexBuffer> vertexBuffer, 
-								   TObjectPtr<LIndexBuffer> indexBuffer, 
-								   const glm::mat4& transform, 
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+								   TObjectPtr<LPipeline> Pipeline, 
+								   TObjectPtr<LVertexBuffer> VertexBuffer, 
+								   TObjectPtr<LIndexBuffer> IndexBuffer, 
+								   const glm::mat4& Transform, 
 								   uint32_t IndexCount /*= 0*/)
 	{
-		//RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, vertexBuffer, indexBuffer, transform, IndexCount);
-	}
-
-	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
-								   TObjectPtr<LPipeline> pipeline, 
-								   TObjectPtr<LShader> shader, 
-								   TObjectPtr<LVertexBuffer> vertexBuffer, 
-								   TObjectPtr<LIndexBuffer> indexBuffer, 
-								   const glm::mat4& transform, 
-								   const uint32_t indexCount /*= 0*/)
-	{
-		//RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, shader, vertexBuffer, indexBuffer, transform, indexCount);
+		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, VertexBuffer, IndexBuffer, Transform, IndexCount);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
-	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
-								   TObjectPtr<LPipeline> pipeline, 
-								   TObjectPtr<LMaterial> material, 
-								   TObjectPtr<LVertexBuffer> vertexBuffer, 
-								   TObjectPtr<LIndexBuffer> indexBuffer, 
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+								   TObjectPtr<LPipeline> Pipeline, 
+								   TObjectPtr<LShader> Shader, 
+								   TObjectPtr<LVertexBuffer> VertexBuffer, 
+								   TObjectPtr<LIndexBuffer> IndexBuffer, 
 								   const glm::mat4& Transform, 
 								   const uint32_t IndexCount /*= 0*/)
 	{
-		//RendererAPI->RenderGeometry(renderCommandBuffer, pipeline, material, vertexBuffer, indexBuffer, Transform, IndexCount);
-		LK_MARK_FUNC_NOT_IMPLEMENTED();
+		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, Shader, VertexBuffer, IndexBuffer, Transform, IndexCount);
+		//LK_MARK_FUNC_NOT_IMPLEMENTED();
+	}
+
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+								   TObjectPtr<LPipeline> Pipeline, 
+								   TObjectPtr<LMaterial> Material, 
+								   TObjectPtr<LVertexBuffer> VertexBuffer, 
+								   TObjectPtr<LIndexBuffer> IndexBuffer, 
+								   const glm::mat4& Transform, 
+								   const uint32_t IndexCount /*= 0*/)
+	{
+		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, Material, VertexBuffer, IndexBuffer, Transform, IndexCount);
+		//LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 	
 	TObjectPtr<LTexture2D> LRenderer::GetWhiteTexture()
@@ -328,14 +328,14 @@ namespace LkEngine {
 
 	void LRenderer::DrawMesh(TObjectPtr<LMesh>& Mesh, const TObjectPtr<LShader> Shader)
 	{
-		//RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *shader);
+		//RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *Shader);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 		LK_UNUSED(Mesh && Shader);
 	}
 
-	void LRenderer::RegisterShaderDependency(TObjectPtr<LShader> Shader, TObjectPtr<LMaterial> material)
+	void LRenderer::RegisterShaderDependency(TObjectPtr<LShader> Shader, TObjectPtr<LMaterial> Material)
 	{
-		ShaderDependencies[Shader->GetHash()].Materials.push_back(material);
+		ShaderDependencies[Shader->GetHash()].Materials.push_back(Material);
 	}
 
 	/* TODO: Make this dynamic instead of using hardcoded entries. */

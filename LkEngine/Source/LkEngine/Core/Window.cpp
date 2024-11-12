@@ -271,43 +271,6 @@ namespace LkEngine {
 		}
 	}
 
-	#if 0
-	void LWindow::WindowResizeCallback(GLFWwindow* glfwWindow, int Width, int Height)
-	{
-		int SizeX, SizeY;
-		glfwGetWindowSize(glfwWindow, &SizeX, &SizeY);
-
-		LWindow& Window = LWindow::Get();
-		Window.SetViewportWidth(SizeX);
-		Window.SetViewportHeight(SizeY);
-
-		Window.SetSize({ Width, Height });
-		LK_CORE_DEBUG_TAG("Window", "Resize: ({}, {})   Viewport ({}, {})", 
-						  Window.GetWidth(), Window.GetHeight(), 
-						  Window.GetViewportWidth(), Window.GetViewportHeight());
-
-	#if 0
-		if (LEditorLayer* Editor = LEditorLayer::Get(); Editor && Editor->IsEnabled())
-		{
-			float EditorWindowWidth = Editor->GetEditorWindowSize().x;
-			float EditorWindowHeight = Editor->GetEditorWindowSize().y;
-
-			/* Scale the resolution for the Editor main window. */
-			EditorWindowWidth /= Window.GetScalerX();
-			EditorWindowHeight /= Window.GetScalerY();
-			
-			Window.SetWidth(static_cast<uint32_t>(EditorWindowWidth));
-			Window.SetHeight(EditorWindowHeight);
-		}
-	#endif
-	}
-	#endif
-
-	TObjectPtr<LSwapChain> LWindow::GetSwapChain()
-	{
-		return m_SwapChain;
-	}
-
 	TObjectPtr<LRenderPass> LWindow::GetRenderPass()
 	{
 		return nullptr;

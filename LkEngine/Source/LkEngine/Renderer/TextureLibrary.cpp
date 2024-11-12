@@ -157,8 +157,8 @@ namespace LkEngine {
 
 			// Metal
             TextureSpecification.Path = "Assets/Textures/metal.png";
-            TextureSpecification.Name = "metal-ground";
-            TextureSpecification.DebugName = "metal-ground";
+            TextureSpecification.Name = "MetalGround";
+            TextureSpecification.DebugName = "MetalGround";
             TextureSpecification.GenerateMips = true;
             TextureSpecification.SamplerWrap = ETextureWrap::Repeat;
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
@@ -227,6 +227,7 @@ namespace LkEngine {
             }
         }
 
+        LK_VERIFY(false, "Was not able to find texture '{}'", TextureName);
         return nullptr;
     }
 

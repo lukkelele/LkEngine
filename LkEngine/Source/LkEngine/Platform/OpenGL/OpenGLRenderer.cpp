@@ -18,20 +18,21 @@ namespace LkEngine {
 	{
 		RendererCapabilities m_RendererCapabilities;
 
-		TObjectPtr<OpenGLTextureArray> TextureArrays[MaxTexturesArrays];
+		TObjectPtr<LOpenGLTextureArray> TextureArrays[MaxTexturesArrays];
 	};
 
 	static FRendererData* RendererData = nullptr;
 	static int TextureArrayCount = 0;
 
 
-	OpenGLRenderer::OpenGLRenderer()
+	LOpenGLRenderer::LOpenGLRenderer()
 	{
 		LCLASS_REGISTER();
 	}
 
-	void OpenGLRenderer::Initialize()
+	void LOpenGLRenderer::Initialize()
 	{
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Initializing");
 		RendererData = new FRendererData();
 
 		RenderContext = LWindow::Get().GetRenderContext().As<LOpenGLContext>();
@@ -50,12 +51,12 @@ namespace LkEngine {
 			TextureArraySpec.TextureSlot = TextureArrayCount;
 			TextureArraySpec.TextureArrayDimension = TextureArrayDimensions[i];
 			TextureArraySpec.DebugName = "TextureArray-" + Utils::TextureArrayDimensionToString(TextureArrayDimensions[i]);
-			RendererData->TextureArrays[TextureArrayCount++] = TObjectPtr<OpenGLTextureArray>::Create(TextureArraySpec);
-			LK_CORE_TRACE_TAG("OpenGLRenderer", "Created texture array {} called \"{}\"", i, TextureArraySpec.DebugName);
+			RendererData->TextureArrays[TextureArrayCount++] = TObjectPtr<LOpenGLTextureArray>::Create(TextureArraySpec);
+			LK_CORE_TRACE_TAG("OpenGLRenderer", "Added array Texture {} with name \"{}\"", i, TextureArraySpec.DebugName);
 		}
 
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding textures to TextureArray's");
-		const std::vector<TTexture2DPair>& Textures2D = LAssetManager::GetTextures2D();
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding Textures to Array Textures");
+		const auto& Textures2D = LAssetManager::GetTextures2D();
 		for (int i = 0; i < Textures2D.size(); i++)
 		{
 			const TObjectPtr<LOpenGLImage2D> img = Textures2D.at(i).second->GetImage().As<LOpenGLImage2D>();
@@ -78,30 +79,33 @@ namespace LkEngine {
 			}
 		}
 
-	#if 0 // DISABLED
+	#if 1
 		/// REMOVE
 		for (int i = 0; i < TextureArrayCount; i++)
 		{
-			LK_CORE_WARN_TAG("OpenGLRenderer", "TextureArray {}  TypeID={}", i, RendererData->TextureArrays[i]->GetTypeID());
+			//LK_CORE_WARN_TAG("OpenGLRenderer", "TextureArray {}  TypeID={}", i, RendererData->TextureArrays[i]->GetTypeID());
 		}
 
+	#if 0
 		OpenGLRenderer2DSpecification renderer2DSpec;
 		renderer2DSpec.TextureArraysUsed = TextureArrayCount;
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Creating 2D Renderer with {} texture arrays used", TextureArrayCount);
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Creating 2D Renderer with {} Texture arrays used", TextureArrayCount);
 		Renderer2D = TObjectPtr<LOpenGLRenderer2D>::Create(renderer2DSpec);
+	#endif
 
-		/* Add texture array references to OpenGLRenderer2D as well. */
-		for (int i = 0; i < LOpenGLRenderer2D::MaxTextureArrays; i++)
+		/* Add Texture array references to OpenGLRenderer2D as well. */
+		//for (int i = 0; i < LOpenGLRenderer2D::MaxTextureArrays; i++)
+		for (int i = 0; i < LRenderer2D::MaxTextureArrays; i++)
 		{
 			if (RendererData->TextureArrays[i])
 			{
-                LK_CORE_DEBUG_TAG("OpenGLRenderer", "TextureArray {}  TypeID={}", i, RendererData->TextureArrays[i]->GetTypeID());
-				Renderer2D->m_TextureArrays[i] = RendererData->TextureArrays[i];
+                LK_CORE_DEBUG_TAG("OpenGLRenderer", "TextureArray {}  RendererID={}", i, RendererData->TextureArrays[i]->GetRendererID());
+				//Renderer2D->TextureArrays[i] = RendererData->TextureArrays[i];
 				BindTextureArray(i);
 			}
 		}
 		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Initializing 2D renderer");
-		Renderer2D->Init();
+		//Renderer2D->Initialize();
 
 		RenderContext->SetDepthEnabled(true);
 		/* Default to triangles */
@@ -121,11 +125,12 @@ namespace LkEngine {
 
 	#if 1
 		/* Setup debugging stuff. */
-		SetupTexturesAndShaders();
+		LOpenGL::Debug::SetupTexturesAndShaders();
         {
-            GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
-            GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
-            GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
+			using namespace LOpenGL::Debug;
+            LOpenGL::Debug::GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
+            LOpenGL::Debug::GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
+            LOpenGL::Debug::GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
             CubeTexture_ = LoadTexture("Assets/Textures/container.jpg");
             FloorTexture_ = LoadTexture("Assets/Textures/metal.png");
         }
@@ -134,7 +139,7 @@ namespace LkEngine {
 	#endif
     }
 
-    void OpenGLRenderer::Shutdown()
+    void LOpenGLRenderer::Shutdown()
     {
 		if (m_GeometricPass)
 		{
@@ -143,16 +148,16 @@ namespace LkEngine {
 		}
     }
 
-    void OpenGLRenderer::BeginFrame()
+    void LOpenGLRenderer::BeginFrame()
     {
 		Clear();
     }
 
-    void OpenGLRenderer::EndFrame()
+    void LOpenGLRenderer::EndFrame()
     {
     }
 
-	void OpenGLRenderer::Clear()
+	void LOpenGLRenderer::Clear()
 	{
 		LFramebuffer::TargetSwapChain();
 		glClearColor(LRenderer::ClearColor.r, 
@@ -167,7 +172,7 @@ namespace LkEngine {
 		ViewportFramebuffer.Unbind();
 	}
 
-	void OpenGLRenderer::SetPrimitiveTopology(const ERenderTopology& InRenderTopology)
+	void LOpenGLRenderer::SetPrimitiveTopology(const ERenderTopology InRenderTopology)
 	{
 		/* No need to call RenderContext here as the topology is used for draw calls. */
 		switch (InRenderTopology)
@@ -188,23 +193,23 @@ namespace LkEngine {
 		}
 	}
 
-	void OpenGLRenderer::SetDepthFunction(const EDepthFunction& InDepthFunction)
+	void LOpenGLRenderer::SetDepthFunction(const EDepthFunction InDepthFunction)
 	{
 		RenderContext->SetDepthFunction(InDepthFunction);
 	}
 
-	void OpenGLRenderer::Draw(LVertexBuffer& vb, const LShader& shader)
+	void LOpenGLRenderer::Draw(LVertexBuffer& VertexBuffer, const LShader& Shader)
 	{
-		shader.Bind();
-		LK_OpenGL(glDrawElements(m_Topology, vb.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
+		Shader.Bind();
+		LK_OpenGL(glDrawElements(m_Topology, VertexBuffer.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
 	}
 
-	void OpenGLRenderer::Draw(const LVertexBuffer& vb, const LIndexBuffer& ib, const LShader& shader) 
+	void LOpenGLRenderer::Draw(const LVertexBuffer& VertexBuffer, const LIndexBuffer& IndexBuffer, const LShader& Shader) 
 	{
-		LK_OpenGL(glDrawElements(m_Topology, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+		LK_OpenGL(glDrawElements(m_Topology, IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr));
 	}
 
-	void OpenGLRenderer::SubmitMesh(TObjectPtr<LMesh>& Mesh, TObjectPtr<LShader>& Shader, const glm::mat4& Transform)
+	void LOpenGLRenderer::SubmitMesh(TObjectPtr<LMesh>& Mesh, TObjectPtr<LShader>& Shader, const glm::mat4& Transform)
 	{
 		//LRenderer::Submit([&] 
 		const uint8_t Topology = m_Topology;
@@ -222,82 +227,85 @@ namespace LkEngine {
 		});
 	}
 
-	void OpenGLRenderer::SubmitImage(const TObjectPtr<LImage> image)
+	void LOpenGLRenderer::SubmitImage(const TObjectPtr<LImage> image)
 	{
 		//Renderer2D->DrawImage(image);
 	}
 
-	void OpenGLRenderer::SubmitImage(const TObjectPtr<LImage2D> image)
+	void LOpenGLRenderer::SubmitImage(const TObjectPtr<LImage2D> image)
 	{
 		//Renderer2D->DrawImage(image);
 	}
 
-	void OpenGLRenderer::SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, uint64_t entityID)
+	void LOpenGLRenderer::SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, uint64_t entityID)
 	{
 		//Renderer2D->DrawLine(p1, p2, color, entityID);
 	}
 
-	void OpenGLRenderer::SubmitIndexed(const uint32_t IndexCount)
+	void LOpenGLRenderer::SubmitIndexed(const uint32_t IndexCount)
 	{
 		LK_OpenGL(glDrawElements(m_Topology, IndexCount, GL_UNSIGNED_INT, nullptr));
 	}
 
-	void OpenGLRenderer::DrawIndexed(const uint64_t IndexCount)
+	void LOpenGLRenderer::DrawIndexed(const uint64_t IndexCount)
 	{
 		LK_OpenGL(glDrawElements(m_Topology, static_cast<GLsizei>(IndexCount), GL_UNSIGNED_INT, nullptr));
 	}
 
-	void OpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+	void LOpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& Size, const glm::vec4& color, uint64_t entityID)
 	{
-		//Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, size, color, entityID);
+		//Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, Size, color, entityID);
 	}
 
-	void OpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color, uint64_t entityID)
+	void LOpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& Size, const glm::vec4& color, uint64_t entityID)
 	{
-		//Renderer2D->DrawQuad(pos, size, color, entityID);
+		//Renderer2D->DrawQuad(pos, Size, color, entityID);
 	}
 
-	void OpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, float rotation, uint64_t entityID)
+	void LOpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& Size, const glm::vec4& color, float rotation, uint64_t entityID)
 	{
-		//Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, size, color, rotation, entityID);
+		//Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, Size, color, rotation, entityID);
 	}
 
-	void OpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, 
+	void LOpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& Size, 
 									const glm::vec4& color, float rotation, uint64_t entityID)
 	{
-		//Renderer2D->DrawQuad(pos, size, color, rotation, entityID);
+		//Renderer2D->DrawQuad(pos, Size, color, rotation, entityID);
 	}
 
-	void OpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, TObjectPtr<LTexture> texture, 
+	void LOpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
 									const float rotation, uint64_t entityID)
 	{
-		//Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, size, texture, rotation, entityID);
+		//Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, Size, Texture, rotation, entityID);
 	}
 
-	void OpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, TObjectPtr<LTexture> texture, 
+	void LOpenGLRenderer::SubmitQuad(const glm::vec2& pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
 									const glm::vec4& tintColor, const float rotation, uint64_t entityID)
 	{
-		//Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, size, texture, tintColor, rotation, entityID);
+		//Renderer2D->DrawQuad({ pos.x, pos.y, 0.0f }, Size, Texture, tintColor, rotation, entityID);
 	}
 
-	void OpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, TObjectPtr<LTexture> texture, 
+	void LOpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
 									const glm::vec4& tintColor, float rotation, uint64_t entityID)
 	{
-		//Renderer2D->DrawQuad(pos, size, texture, tintColor, rotation, entityID);
+		//Renderer2D->DrawQuad(pos, Size, Texture, tintColor, rotation, entityID);
 	}
 
-	void OpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, TObjectPtr<LTexture> texture, float rotation, uint64_t entityID)
+	void LOpenGLRenderer::SubmitQuad(const glm::vec3& pos, const glm::vec2& Size, 
+									TObjectPtr<LTexture> Texture, float rotation, uint64_t entityID)
 	{
-		//Renderer2D->DrawQuad(pos, size, texture, rotation, entityID);
+		//Renderer2D->DrawQuad(pos, Size, Texture, rotation, entityID);
 	}
 
-	RendererCapabilities& OpenGLRenderer::GetCapabilities()
+	RendererCapabilities& LOpenGLRenderer::GetCapabilities()
 	{
 		return RendererData->m_RendererCapabilities;
 	}
 
-	void OpenGLRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer, TObjectPtr<LPipeline> InPipeline, 
-										TObjectPtr<LVertexBuffer> InVertexBuffer, TObjectPtr<LIndexBuffer> InIndexBuffer, 
+	void LOpenGLRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer, 
+										TObjectPtr<LPipeline> InPipeline, 
+										TObjectPtr<LVertexBuffer> InVertexBuffer, 
+										TObjectPtr<LIndexBuffer> InIndexBuffer, 
 										const glm::mat4& InTransform, const uint32_t IndexCount)
 	{
 		TObjectPtr<LOpenGLPipeline> Pipeline = InPipeline.As<LOpenGLPipeline>();
@@ -310,7 +318,7 @@ namespace LkEngine {
 	#endif
 	}
 
-	void OpenGLRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+	void LOpenGLRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
 										TObjectPtr<LPipeline> InPipeline, 
 										TObjectPtr<LMaterial> InMaterial, 
 										TObjectPtr<LVertexBuffer> VertexBuffer, 
@@ -322,73 +330,68 @@ namespace LkEngine {
 		LK_CORE_ASSERT(false, "Not implemented");
 	}
 
-	void OpenGLRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+	void LOpenGLRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
 										TObjectPtr<LPipeline> InPipeline, 
-										TObjectPtr<LShader>& shader, 
-										TObjectPtr<LVertexBuffer>& InVertexBuffer, 
-										TObjectPtr<LIndexBuffer>& _indexBuffer, 
-										const glm::mat4& transform, 
+										TObjectPtr<LShader>& Shader, 
+										TObjectPtr<LVertexBuffer>& VertexBuffer, 
+										TObjectPtr<LIndexBuffer>& IndexBuffer, 
+										const glm::mat4& Transform, 
 										uint32_t IndexCount /* == 0*/)
 	{
-		TObjectPtr<LOpenGLPipeline> pipeline = InPipeline.As<LOpenGLPipeline>();
-		std::deque<LRendererID> boundTextureArrays = pipeline->GetBoundTextureArrays();
-		TObjectPtr<LFramebuffer> framebuffer = LRenderer::GetViewportFramebuffer();
-		LRenderer::Submit([&, pipeline, framebuffer, shader, 
-						  InVertexBuffer, transform, IndexCount, boundTextureArrays]() mutable
+		LK_CORE_ASSERT(false, "RENDER GEOMETRY DISABLED :)");
+		std::deque<LRendererID> BoundTextureArrays = InPipeline.As<LOpenGLPipeline>()->GetBoundTextureArrays();
+		TObjectPtr<LFramebuffer> Framebuffer = LRenderer::GetViewportFramebuffer();
+		
+		LRenderer::Submit([&, Framebuffer, Shader, VertexBuffer, 
+						  Transform, IndexCount, BoundTextureArrays]() mutable
 		{
-			framebuffer->Bind();
-			shader->Bind();
+			Framebuffer->Bind();
+			Shader->Bind();
 
-			int i = 1;
-			for (LRendererID& textureArray : boundTextureArrays)
+			int ArrIndex = 1;
+			for (const LRendererID TextureArray : BoundTextureArrays)
 			{
-				shader->Set("u_TextureArray" + std::to_string(i++), textureArray);
+				Shader->Set("u_TextureArray" + std::to_string(ArrIndex++), TextureArray);
 			}
 			
-			InVertexBuffer->Bind();
+			VertexBuffer->Bind();
 			DrawIndexed(IndexCount);
 
-			framebuffer->Unbind();
+			Framebuffer->Unbind();
 		});
 	}
 
-	void OpenGLRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
-										 TObjectPtr<LRenderPass> renderPass, 
-										 const bool ExplicitClear)
+	void LOpenGLRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+										  TObjectPtr<LRenderPass> InRenderPass, 
+										  const bool ExplicitClear)
 	{
-#if 0
-		auto commandBuffer = renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
-		auto pass = renderPass.As<OpenGLRenderPass>();
-		auto pipeline = pass->GetPipeline().As<LOpenGLPipeline>();
-		auto shader = pipeline->GetShader().As<OpenGLShader>();
-#endif
 	}
 
-	void OpenGLRenderer::EndRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer)
+	void LOpenGLRenderer::EndRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer)
 	{
-		auto commandBuffer = renderCommandBuffer.As<OpenGLRenderCommandBuffer>();
+		LK_UNUSED(RenderCommandBuffer);
 	}
 
-	TObjectPtr<OpenGLTextureArray> OpenGLRenderer::GetTextureArray(int idx)
+	TObjectPtr<LOpenGLTextureArray> LOpenGLRenderer::GetTextureArray(int idx)
 	{
 		return RendererData->TextureArrays[idx];
 	}
 
-	void OpenGLRenderer::BindTextureArray(int idx)
+	void LOpenGLRenderer::BindTextureArray(const uint8_t Index)
 	{
-		TextureArray& textureArray = *RendererData->TextureArrays[idx];
-		textureArray.Bind();
+		LTextureArray& TextureArray = *RendererData->TextureArrays[Index];
+		TextureArray.Bind();
 	}
 
-	void OpenGLRenderer::BindTextureArray(const ETextureArrayDimension& TextureArrayDimension)
+	void LOpenGLRenderer::BindTextureArray(const ETextureArrayDimension& TextureArrayDimension)
 	{
-		OpenGLTextureArray& textureArray = *GetTextureArrayWithDimension(TextureArrayDimension);
-		textureArray.Bind();
+		LOpenGLTextureArray& TextureArray = *GetTextureArrayWithDimension(TextureArrayDimension);
+		TextureArray.Bind();
 	}
 
-	TObjectPtr<OpenGLTextureArray> OpenGLRenderer::GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension)
+	TObjectPtr<LOpenGLTextureArray> LOpenGLRenderer::GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension)
 	{
-		for (TObjectPtr<OpenGLTextureArray>& TextureArray : RendererData->TextureArrays)
+		for (TObjectPtr<LOpenGLTextureArray>& TextureArray : RendererData->TextureArrays)
 		{
 			if (TextureArray->Specification.TextureArrayDimension == TextureArrayDimension)
 			{

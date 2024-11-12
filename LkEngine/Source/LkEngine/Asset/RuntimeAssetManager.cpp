@@ -260,7 +260,6 @@ namespace LkEngine {
 			TObjectPtr<LMesh> Cube = ImportAsset<LMesh>(FilePath.string());
 			LMeshComponent& MeshComponent = CubeEntity.AddComponent<LMeshComponent>(Cube->Handle);
 
-
 			/* Assign the Cube with the 'BaseMaterial' */
 			LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
 			TObjectPtr<LMaterial> baseMaterial = MaterialLibrary.GetBaseMaterial();
@@ -285,11 +284,11 @@ namespace LkEngine {
 
 			TObjectPtr<LMeshSource> CubeSource = Cube->GetMeshSource();
 			CubeSource->m_VertexBuffer->SetLayout({
-			    { "a_Position",      ShaderDataType::Float3  },
-			    { "a_Normal",        ShaderDataType::Float3  },
-			    { "a_Binormal",      ShaderDataType::Float3  },
-			    { "a_Tangent",       ShaderDataType::Float3  },
-			    { "a_Texcoord",      ShaderDataType::Float2  },
+			    { "a_Position",   EShaderDataType::Float3 },
+			    { "a_Normal",     EShaderDataType::Float3 },
+			    { "a_Binormal",   EShaderDataType::Float3 },
+			    { "a_Tangent",    EShaderDataType::Float3 },
+			    { "a_TexCoord",   EShaderDataType::Float2 },
 			});
 			CubeSource->m_VertexBuffer->SetIndexBuffer(CubeSource->m_IndexBuffer);
 
