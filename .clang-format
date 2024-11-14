@@ -47,10 +47,17 @@ Cpp11BracedListStyle: false
 EmptyLineBeforeAccessModifier: Never 
 IndentCaseBlocks: false
 IndentCaseLabels: true
-IndentPPDirectives: AfterHash 
+AllowShortCaseLabelsOnASingleLine: true
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+  AlignCaseColons: false
 IndentWidth: 4
 IndentExternBlock: AfterExternBlock
 NamespaceIndentation: All
+IndentPPDirectives: AfterHash 
+PPIndentWidth: 2
 PointerAlignment: Left
 SortIncludes: false
 SpaceBeforeCaseColon: false
@@ -59,5 +66,9 @@ SpaceBeforeInheritanceColon: true
 SpaceBeforeJsonColon: false
 SpacesInAngles: Never
 SpacesBeforeTrailingComments: 1
+SpaceAfterCStyleCast: false
 TabWidth: 4
 UseTab: Always
+InsertNewlineAtEOF: true
+PackConstructorInitializers: Never
+LambdaBodyIndentation: OuterScope
