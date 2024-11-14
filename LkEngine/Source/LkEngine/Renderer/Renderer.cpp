@@ -78,6 +78,7 @@ namespace LkEngine {
 
 		LK_CORE_DEBUG_TAG("Renderer", "Creating Material library");
 		RendererData->MaterialLibrary = TObjectPtr<LMaterialLibrary>::Create();
+		RendererData->MaterialLibrary->Initialize();
 
 		RendererAPI = LRendererAPI::Create();
 		RendererAPI->Initialize();

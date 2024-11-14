@@ -31,19 +31,21 @@ namespace LkEngine {
 		LCLASS_REGISTER();
 	}
 
-	void LRuntimeAssetManager::Initialize(const EInitFlag AssetInitialization)
+	void LRuntimeAssetManager::Initialize(const EInitFlag InitFlag)
 	{
 		LObject::Initialize();
-		if (AssetInitialization == EInitFlag::NoInit)
+		if (InitFlag == EInitFlag::NoInit)
 		{
 			/* Do nothing. */
 			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Skipping initialization of LMaterialLibrary");
 		}
-		else if (AssetInitialization == EInitFlag::True)
+		else if (InitFlag == EInitFlag::True)
 		{
+			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Loading materials");
 			LoadMaterials();
 
 			/* Load all primitive shapes. */
+			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Loading primitive shapes");
 			LoadPrimitiveShapes();
 
 			/* Load textures into cache. */
@@ -91,14 +93,15 @@ namespace LkEngine {
 	template<>
     TObjectPtr<LMesh> LRuntimeAssetManager::ImportAsset<LMesh>(const std::filesystem::path InFilePath)
     {
+		LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Importing asset from: {}", InFilePath.string());
         LAssimpMeshImporter MeshImporter = LAssimpMeshImporter(InFilePath);
 
         TObjectPtr<LMeshSource> MeshSource = MeshImporter.ImportToMeshSource();
 		TObjectPtr<LMesh> Mesh = TObjectPtr<LMesh>::Create(MeshSource);
 
 		m_LoadedAssets[Mesh->Handle] = Mesh;
-		LK_CORE_TRACE_TAG("RuntimeAssetManager", "Loaded mesh with {} vertices, {} indices and a handle of '{}'", 
-						  MeshSource->GetVertices().size(), MeshSource->GetIndices().size(), Mesh->Handle);
+		LK_CORE_TRACE_TAG("RuntimeAssetManager", "Loaded mesh {} with {} vertices and {}", 
+						  Mesh->Handle, MeshSource->GetVertices().size(), MeshSource->GetIndices().size());
 
 		return m_LoadedAssets[Mesh->Handle];
     }
@@ -110,17 +113,17 @@ namespace LkEngine {
 			return m_MemoryAssets[AssetHandle];
 		}
 
-		FAssetMetadata& metadata = GetMetadataInternal(AssetHandle);
-		if (!metadata.IsValid())
+		FAssetMetadata& Metadata = GetMetadataInternal(AssetHandle);
+		if (!Metadata.IsValid())
 		{
 			LK_CORE_WARN_TAG("RuntimeAssetManager", "Metadata is invalid for {}", AssetHandle);
 			return nullptr;
 		}
 
 		TObjectPtr<LAsset> Asset = nullptr;
-		if (!metadata.IsDataLoaded)
+		if (!Metadata.IsDataLoaded)
 		{
-			if (!metadata.IsDataLoaded)
+			if (!Metadata.IsDataLoaded)
 			{
 				return nullptr;
 			}
@@ -135,21 +138,21 @@ namespace LkEngine {
 		return Asset;
     }
 
-    const FAssetMetadata& LRuntimeAssetManager::GetMetadata(FAssetHandle handle)
+    const FAssetMetadata& LRuntimeAssetManager::GetMetadata(FAssetHandle Handle)
 	{
-		if (AssetRegistry.Contains(handle))
+		if (AssetRegistry.Contains(Handle))
 		{
-			return AssetRegistry[handle];
+			return AssetRegistry[Handle];
 		}
 
 		return NullMetadata;
 	}
 
-    FAssetMetadata& LRuntimeAssetManager::GetMetadataInternal(FAssetHandle handle)
+    FAssetMetadata& LRuntimeAssetManager::GetMetadataInternal(FAssetHandle Handle)
 	{
-		if (AssetRegistry.Contains(handle))
+		if (AssetRegistry.Contains(Handle))
 		{
-	    	return AssetRegistry[handle];
+	    	return AssetRegistry[Handle];
 		}
 
 	    return NullMetadata; 
@@ -160,21 +163,21 @@ namespace LkEngine {
 		return GetMetadata(FilePath).Handle;
 	}
 
-    const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const TObjectPtr<LAsset>& asset)
+    const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const TObjectPtr<LAsset>& Asset)
 	{
-		return GetMetadata(asset->Handle);
+		return GetMetadata(Asset->Handle);
 	}
 
 	const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const std::filesystem::path& FilePath)
 	{
-		LK_CORE_ASSERT(AssetRegistry.Count() > 0, "AssetRegistry is empty!");
+		LK_CORE_ASSERT(AssetRegistry.Count() > 0, "AssetRegistry is empty");
 
 		const std::filesystem::path RelativePath = GetRelativePath(FilePath);
-		for (auto& [handle, metadata] : AssetRegistry)
+		for (auto& [Handle, Metadata] : AssetRegistry)
 		{
-			if (metadata.FilePath == RelativePath)
+			if (Metadata.FilePath == RelativePath)
 			{
-				return metadata;
+				return Metadata;
 			}
 		}
 
@@ -219,29 +222,33 @@ namespace LkEngine {
 
 		// Asphalt
 		{
+		#if 0 
 			TObjectPtr<LMaterial> AsphaltMaterial = MaterialLibrary.GetMaterial("Basic_Asphalt");
 			AsphaltMaterial->SetTexture(TextureLibrary.GetWhiteTexture());
 			TObjectPtr<LMaterialAsset> AsphaltMaterialAsset = TObjectPtr<LMaterialAsset>::Create(AsphaltMaterial);
 			m_MemoryAssets[AsphaltMaterialAsset->Handle] = AsphaltMaterialAsset;
 
-			FAssetMetadata metadata;
-			metadata.Handle = AsphaltMaterialAsset->Handle;
-			metadata.Type = EAssetType::Material;
-			AssetRegistry[AsphaltMaterialAsset->Handle] = metadata;
+			FAssetMetadata Metadata;
+			Metadata.Handle = AsphaltMaterialAsset->Handle;
+			Metadata.Type = EAssetType::Material;
+			AssetRegistry[AsphaltMaterialAsset->Handle] = Metadata;
+		#endif
 		}
 
 		// Rubber
 		{
+		#if 0 
 			TObjectPtr<LMaterial> RubberMaterial = MaterialLibrary.GetMaterial("Basic_Rubber");
 			RubberMaterial->SetTexture(TextureLibrary.GetWhiteTexture());
 
 			TObjectPtr<LMaterialAsset> RubberMaterialAsset = TObjectPtr<LMaterialAsset>::Create(RubberMaterial);
 			m_MemoryAssets[RubberMaterialAsset->Handle] = RubberMaterialAsset;
 
-			FAssetMetadata metadata;
-			metadata.Handle = RubberMaterialAsset->Handle;
-			metadata.Type = EAssetType::Material;
-			AssetRegistry[RubberMaterialAsset->Handle] = metadata;
+			FAssetMetadata Metadata;
+			Metadata.Handle = RubberMaterialAsset->Handle;
+			Metadata.Type = EAssetType::Material;
+			AssetRegistry[RubberMaterialAsset->Handle] = Metadata;
+		#endif
 		}
 	}
 
@@ -262,12 +269,12 @@ namespace LkEngine {
 
 			/* Assign the Cube with the 'BaseMaterial' */
 			LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
-			TObjectPtr<LMaterial> baseMaterial = MaterialLibrary.GetBaseMaterial();
-            baseMaterial->SetTexture(TextureLibrary.GetTexture("wood-container_512x512"));
-			TObjectPtr<LMaterialAsset> BaseMaterialAsset = TObjectPtr<LMaterialAsset>::Create(baseMaterial);
+			TObjectPtr<LMaterial> BaseMaterial = MaterialLibrary.GetBaseMaterial();
+            BaseMaterial->SetTexture(TextureLibrary.GetTexture("wood-container_512x512"));
+			TObjectPtr<LMaterialAsset> BaseMaterialAsset = TObjectPtr<LMaterialAsset>::Create(BaseMaterial);
 
 			Cube->Materials->SetMaterial(0, BaseMaterialAsset->Handle);
-			LK_CORE_ASSERT(baseMaterial->GetTexture(""), "BaseMaterial texture is nullptr");
+			LK_CORE_ASSERT(BaseMaterial->GetTexture(""), "BaseMaterial texture is nullptr");
 
 			FAssetMetadata CubeMetadata;
 			CubeMetadata.Handle = Cube->Handle;
@@ -276,11 +283,11 @@ namespace LkEngine {
 			CubeMetadata.IsDataLoaded = true;
 			AssetRegistry[Cube->Handle] = CubeMetadata;
 
-			FAssetMetadata baseMaterialFAssetMetadata;
-			baseMaterialFAssetMetadata.Handle = BaseMaterialAsset->Handle;
-			baseMaterialFAssetMetadata.Type = EAssetType::Material;
-			baseMaterialFAssetMetadata.IsDataLoaded = true;
-			AssetRegistry[BaseMaterialAsset->Handle] = baseMaterialFAssetMetadata;
+			FAssetMetadata BaseMaterialAssetMetadata;
+			BaseMaterialAssetMetadata.Handle = BaseMaterialAsset->Handle;
+			BaseMaterialAssetMetadata.Type = EAssetType::Material;
+			BaseMaterialAssetMetadata.IsDataLoaded = true;
+			AssetRegistry[BaseMaterialAsset->Handle] = BaseMaterialAssetMetadata;
 
 			TObjectPtr<LMeshSource> CubeSource = Cube->GetMeshSource();
 			CubeSource->m_VertexBuffer->SetLayout({
@@ -301,6 +308,8 @@ namespace LkEngine {
 				TObjectPtr<LMaterial> CubeMaterial = LAssetManager::GetAsset<LMaterialAsset>(CubeMaterialHandle)->GetMaterial();
 				LK_CORE_VERIFY(CubeMaterial, "Retrieved material for Cube is nullptr!");
 			}
+
+			DebugCube = Cube;
 
 			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Cube created with handle {}", Cube->Handle);
 		}

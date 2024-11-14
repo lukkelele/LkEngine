@@ -17,7 +17,7 @@ namespace LkEngine {
 
 		FORCEINLINE virtual void Bind() const override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 		}
 
 		FORCEINLINE virtual void Unbind() const override
@@ -25,72 +25,72 @@ namespace LkEngine {
 			LK_OpenGL(glUseProgram(0));
 		}
 
-		FORCEINLINE virtual LRendererID GetRendererID() const override { return m_RendererID; }
-		FORCEINLINE virtual LRendererID& GetRendererID() override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID GetRendererID() const override { return RendererID; }
+		FORCEINLINE virtual LRendererID& GetRendererID() override { return RendererID; }
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const int Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), Value));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const bool Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), static_cast<int>(Value)));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const float Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform1f(GetUniformLocation(Uniform.data()), Value));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const uint32_t Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), Value));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec2& Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID)); 
+			LK_OpenGL(glUseProgram(RendererID)); 
 			LK_OpenGL(glUniform2f(GetUniformLocation(Uniform.data()), Value.x, Value.y));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec3& Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform3f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec4& Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform4f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec2& Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform2i(GetUniformLocation(Uniform.data()), Value.x, Value.y));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec3& Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform3i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec4& Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniform4i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::mat4& Value) override
 		{
-			LK_OpenGL(glUseProgram(m_RendererID));
+			LK_OpenGL(glUseProgram(RendererID));
 			LK_OpenGL(glUniformMatrix4fv(GetUniformLocation(Uniform.data()), 1, GL_FALSE, &Value[0][0]));
 		}
 		
@@ -99,12 +99,17 @@ namespace LkEngine {
 			return Hash::GenerateFNVHash(FilePath.string());
 		}
 
+		FORCEINLINE virtual const FShaderProgramSource& GetSource() const override 
+		{ 
+			return Source; 
+		}
+
 	private:
 		/**
 		 * @brief Get location of a uniform.
          * 
 		 * Do not use any string view types for the passed argument here.
-		 * Need to extend the string lifetime to be sure call to OpenGL doesn't fail.
+		 * Need to extend the lifetime of the string to be sure call to OpenGL doesn't fail.
 		 */
 		FORCEINLINE int GetUniformLocation(const std::string& Uniform)
 		{
@@ -114,10 +119,10 @@ namespace LkEngine {
 			}
 
 			int UniformLocation;
-			LK_OpenGL(UniformLocation = glGetUniformLocation(m_RendererID, Uniform.c_str()));
+			LK_OpenGL(UniformLocation = glGetUniformLocation(RendererID, Uniform.c_str()));
 			if (UniformLocation == -1)
 			{
-				LK_CORE_WARN_TAG("Shader", "Uniform \"{}\" is not in use", Uniform);
+				LK_CORE_WARN_TAG("Shader", "Uniform \"{}\" is not in use ({})", Uniform, FilePath.filename().string());
 			}
 
 			/* TODO: Should caching be placed in 'else' statement here? */
@@ -130,10 +135,12 @@ namespace LkEngine {
 		virtual uint32_t CreateShader(const FShaderProgramSource& ShaderProgramSource) override;
 
 	private:
-		LRendererID m_RendererID = 0;
+		LRendererID RendererID = 0;
 
 		std::unordered_map<std::string, int> UniformLocationCache;
 		std::filesystem::path FilePath{};
+
+		FShaderProgramSource Source{};
 
 		LCLASS(LOpenGLShader);
     };

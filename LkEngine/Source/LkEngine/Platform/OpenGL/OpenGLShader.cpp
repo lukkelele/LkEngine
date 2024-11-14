@@ -12,7 +12,8 @@ namespace LkEngine {
 		FShaderProgramSource ShaderProgramSource;
 		if (ParseShader(ShaderProgramSource, InFilePath))
 		{
-			m_RendererID = CreateShader(ShaderProgramSource);
+			RendererID = CreateShader(ShaderProgramSource);
+			Source = ShaderProgramSource;
 		}
 		else
 		{
@@ -26,15 +27,15 @@ namespace LkEngine {
 
 		if (ShaderProgramSource.IsValid())
 		{
-			m_RendererID = CreateShader(ShaderProgramSource);
+			RendererID = CreateShader(ShaderProgramSource);
 		}
 	}
 
 	LOpenGLShader::~LOpenGLShader()
 	{
-		if (m_RendererID > 0)
+		if (RendererID > 0)
 		{
-			LK_OpenGL(glDeleteProgram(m_RendererID));
+			LK_OpenGL(glDeleteProgram(RendererID));
 		}
 	}
 

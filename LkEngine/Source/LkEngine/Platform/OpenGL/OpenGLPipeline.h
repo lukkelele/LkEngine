@@ -13,7 +13,7 @@ namespace LkEngine {
 
 		virtual void Invalidate() override;
 
-		virtual void SetLayout(const VertexBufferLayout& layout) override;
+		virtual void SetLayout(const FVertexBufferLayout& InLayout) override;
 
 		FORCEINLINE virtual TObjectPtr<LShader> GetShader() const override 
 		{ 

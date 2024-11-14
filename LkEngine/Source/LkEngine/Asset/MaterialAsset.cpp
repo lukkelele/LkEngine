@@ -16,12 +16,12 @@ namespace LkEngine {
 	static const std::string s_MetalnessMapUniform = "u_MetalnessTexture";
 	static const std::string s_RoughnessMapUniform = "u_RoughnessTexture";
 
-	LMaterialAsset::LMaterialAsset(const TObjectPtr<LMaterial>& material)
+	LMaterialAsset::LMaterialAsset(const TObjectPtr<LMaterial>& InMaterial)
 	{
 		Handle = {};
-		m_Material = LMaterial::Copy(material);
+		m_Material = LMaterial::Copy(InMaterial);
 		LK_CORE_INFO_TAG("MaterialAsset", "Created material asset ({}) with material {}", 
-						 Handle, material->GetName());
+						 Handle, InMaterial->GetName());
 
 		LK_CORE_ASSERT(m_Material->GetTexture(""), "Material ({}) texture is nullptr!", m_Material->GetName());
 	}

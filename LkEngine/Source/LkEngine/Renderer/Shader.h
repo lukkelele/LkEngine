@@ -61,8 +61,10 @@ namespace LkEngine {
 
 		virtual std::size_t GetHash() = 0;
 
+		virtual const FShaderProgramSource& GetSource() const = 0;
+
 		/* TODO: Use map instead. */
-		FORCEINLINE static const char* ConvertUniformType(const ETextureUniformType& Type)
+		FORCEINLINE static const char* ConvertUniformType(const ETextureUniformType Type)
 		{
 			switch (Type)
 			{

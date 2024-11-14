@@ -115,22 +115,15 @@ namespace LkEngine {
 	#endif
 
 		template<typename... TArgs>
-		static void PrintMessageWithTag(const ELoggerType LoggerType, 
-										const ELogLevel Level, 
-										std::string_view Tag, 
-										std::format_string<TArgs...> Format, 
-										TArgs&&... Args);
+		static void PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag, 
+										std::format_string<TArgs...> Format, TArgs&&... Args);
 
-		static void PrintMessageWithTag(const ELoggerType LoggerType, 
-										const ELogLevel Level, 
-										std::string_view 
-										Tag, std::string_view Message);
+		static void PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, 
+										std::string_view Tag, std::string_view Message);
 
 		template<typename... TArgs>
-		static void PrintAssertMessage(const ELoggerType LoggerType, 
-									   std::string_view Prefix, 
-									   std::format_string<TArgs...> Message, 
-									   TArgs&&... Args);
+		static void PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix, 
+									   std::format_string<TArgs...> Message, TArgs&&... Args);
 		static void PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix);
 
 		FORCEINLINE static const char* LevelToString(const ELogLevel Level)
@@ -315,11 +308,8 @@ namespace LkEngine {
 	}
 
 	template<typename... TArgs>
-	void LLog::PrintMessageWithTag(const ELoggerType LoggerType, 
-								   const ELogLevel Level, 
-								   std::string_view Tag, 
-								   std::format_string<TArgs...> Format, 
-								   TArgs&&... Args)
+	void LLog::PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag, 
+								   std::format_string<TArgs...> Format, TArgs&&... Args)
 	{
 		const FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];
 		if (TagDetails.Enabled && (TagDetails.Filter <= Level))
@@ -355,10 +345,8 @@ namespace LkEngine {
 		}
 	}
 
-	FORCEINLINE void LLog::PrintMessageWithTag(const ELoggerType LoggerType, 
-											   const ELogLevel Level, 
-											   std::string_view Tag, 
-											   std::string_view Message)
+	FORCEINLINE void LLog::PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, 
+											   std::string_view Tag, std::string_view Message)
 	{
 		FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];
 		if (TagDetails.Enabled && TagDetails.Filter <= Level)
@@ -395,10 +383,8 @@ namespace LkEngine {
 	}
 
 	template<typename ...TArgs>
-	void LLog::PrintAssertMessage(const ELoggerType LoggerType, 
-								  std::string_view Prefix, 
-								  std::format_string<TArgs...> Message, 
-								  TArgs&&... Args)
+	void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix, 
+								  std::format_string<TArgs...> Message, TArgs&&... Args)
 	{
 		const std::string FormattedString = std::format(Message, std::forward<TArgs>(Args)...);
 		GetLogger(LoggerType)->error("{0}: {1}", Prefix, FormattedString);

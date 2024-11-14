@@ -15,8 +15,8 @@ namespace LkEngine {
 
 		void Initialize(const EInitFlag AssetInitialization = EInitFlag::True);
 
-		template<typename T>
-		TObjectPtr<T> ImportAsset(std::filesystem::path filepath);
+		template<typename AssetType>
+		TObjectPtr<AssetType> ImportAsset(std::filesystem::path filepath);
 
         TObjectPtr<LAsset> GetAsset(FAssetHandle Asset);
 
@@ -54,9 +54,7 @@ namespace LkEngine {
 		}
 
 		template<typename T, typename... TArgs>
-		TObjectPtr<T> CreateNewAsset(const std::string& FileName, 
-									 const std::string& DirectoryPath, 
-									 TArgs&&... Args)
+		TObjectPtr<T> CreateNewAsset(const std::string& FileName, const std::string& DirectoryPath, TArgs&&... Args)
 		{
 			static_assert(std::is_base_of_v<LAsset, T>, "CreateNewAsset only works for Assets derived from LAsset");
 
@@ -99,6 +97,12 @@ namespace LkEngine {
 		 */
 		const std::vector<TTexture2DPair>& GetTextures2D() const;
 		int GetTextures2D(std::vector<TTexture2DPair>& TextureContainer);
+
+	public:
+		/**
+		 * @brief Base cube.
+		 */
+		TObjectPtr<LMesh> DebugCube{};
 
 	private:
 		void LoadMaterials();

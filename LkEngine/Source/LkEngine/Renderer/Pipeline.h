@@ -30,7 +30,7 @@ namespace LkEngine {
 		virtual void Invalidate() = 0;
 
 		virtual TObjectPtr<LShader> GetShader() const = 0;
-		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
+		virtual void SetLayout(const FVertexBufferLayout& InLayout) = 0;
 
 		virtual void BindTextureArray(const LRendererID InRendererID) = 0;
 

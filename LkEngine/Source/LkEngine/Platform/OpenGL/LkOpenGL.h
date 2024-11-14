@@ -553,12 +553,17 @@ namespace LkEngine {
 
 		inline static TObjectPtr<LShader> ScreenShader = nullptr;
 		inline static TObjectPtr<LShader> DebugShader = nullptr;
+		inline static TObjectPtr<LShader> CubeDebugShader = nullptr;
 
 		/* Skybox. */
-		inline static TObjectPtr<LVertexBuffer> SkyboxVertexBuffer;
-		inline static TObjectPtr<LTextureCube> SkyboxTexture;
-		inline static TObjectPtr<LShader> SkyboxShader;
-		inline static uint32_t CubemapTexture;
+		//inline static TObjectPtr<LVertexBuffer> SkyboxVertexBuffer;
+		//inline static TObjectPtr<LTextureCube> SkyboxTexture;
+		//inline static TObjectPtr<LShader> SkyboxShader;
+		//inline static uint32_t CubemapTexture;
+		extern TObjectPtr<LVertexBuffer> SkyboxVertexBuffer;
+		extern TObjectPtr<LTextureCube> SkyboxTexture;
+		extern TObjectPtr<LShader> SkyboxShader;
+		extern uint32_t CubemapTexture;
 
 		inline static glm::mat4 ModelMVP = glm::mat4(1.0f);
 		inline static glm::mat4 View = glm::mat4(1.0f);
@@ -719,6 +724,51 @@ namespace LkEngine {
 			 1.0f, -1.0f,  1.0f
 		};
 
+		static float Cube_Vertices_NT[] = {
+		/*    Positions               Normals		  Texture Coords   */
+		-0.5f, -0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,	0.0f,  0.0f, 1.0f,		0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,	0.0f,  0.0f, 1.0f,		1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,	0.0f,  0.0f, 1.0f,		1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,	0.0f,  0.0f, 1.0f,		1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,	0.0f,  0.0f, 1.0f,		0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f,  0.0f, 1.0f,		0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,		1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,		1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,		0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,		0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,		0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,		1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,	1.0f,  0.0f,  0.0f,		1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,	1.0f,  0.0f,  0.0f,		1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,	1.0f,  0.0f,  0.0f,		0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,	1.0f,  0.0f,  0.0f,		0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,	1.0f,  0.0f,  0.0f,		0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,	1.0f,  0.0f,  0.0f,		1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,	0.0f, -1.0f,  0.0f,		0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,	0.0f, -1.0f,  0.0f,		1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,	0.0f, -1.0f,  0.0f,		1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,	0.0f, -1.0f,  0.0f,		1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f, -1.0f,  0.0f,		0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, -1.0f,  0.0f,		0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,	0.0f,  1.0f,  0.0f,		0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,	0.0f,  1.0f,  0.0f,		1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,	0.0f,  1.0f,  0.0f,		1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,	0.0f,  1.0f,  0.0f,		1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,	0.0f,  1.0f,  0.0f,		0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,	0.0f,  1.0f,  0.0f,		0.0f, 1.0f
+	};
+
 		FORCEINLINE static uint32_t LoadTexture(const char* path)
 		{
 			uint32_t TextureID;
@@ -773,6 +823,7 @@ namespace LkEngine {
 		void GeneratePlaneVaoAndVbo(uint32_t& vao, uint32_t& vbo);
 		void GenerateScreenQuadVaoAndVbo(uint32_t& vao, uint32_t& vbo);
 		void SetupTexturesAndShaders();
+		void SetupSkybox();
 
 		void RenderMirrorTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
 		void RenderScreenTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));

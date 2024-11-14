@@ -9,21 +9,23 @@ namespace LkEngine {
 	LOpenGLPipeline::LOpenGLPipeline(const FPipelineSpecification& InPipelineSpecification)
 		: PipelineSpecification(InPipelineSpecification)
 	{
+		/* FIXME: What? Why is this done here ... */
 		PipelineSpecification.RenderAPI = ERendererAPI::OpenGL;
 	}
 
 	void LOpenGLPipeline::Invalidate()
 	{
+		/* TODO: */
 	}
 
-	void LOpenGLPipeline::SetLayout(const VertexBufferLayout& layout)
+	void LOpenGLPipeline::SetLayout(const FVertexBufferLayout& InLayout)
 	{
-		PipelineSpecification.Layout = layout;
+		PipelineSpecification.Layout = InLayout;
 	}
 
 	void LOpenGLPipeline::BindTextureArray(const LRendererID TextureArrayID)
 	{
-		BoundTextureArrays.push_back(TextureArrayID);
+		BoundTextureArrays.emplace_back(TextureArrayID);
 	}
 
 }

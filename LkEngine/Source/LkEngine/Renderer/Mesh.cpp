@@ -19,11 +19,12 @@ namespace LkEngine {
 		Submesh.BaseIndex = 0;
 		Submesh.IndexCount = static_cast<uint32_t>(InIndices.size() * 3u);
 		Submesh.Transform = InTransform;
-		m_Submeshes.push_back(Submesh);
+		Submeshes.push_back(Submesh);
 
 		/* Create Vertex and index buffers. */
 		m_VertexBuffer = LVertexBuffer::Create(m_Vertices.data(), static_cast<uint64_t>(m_Vertices.size() * sizeof(FVertex)));
 		m_IndexBuffer = LIndexBuffer::Create(m_Indices.data(), static_cast<uint64_t>(m_Indices.size() * sizeof(FIndex)));
+		LK_CORE_ASSERT(Submesh.IndexCount == m_IndexBuffer->GetCount(), "IndexBuffer count mismatch");
 	}
 
 	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices, 
@@ -31,7 +32,7 @@ namespace LkEngine {
 							 const std::vector<LSubmesh>& InSubmeshes)
 		: m_Vertices(InVertices)
 		, m_Indices(InIndices)
-		, m_Submeshes(InSubmeshes)
+		, Submeshes(InSubmeshes)
 	{
 		Handle = {};
 
@@ -72,18 +73,17 @@ namespace LkEngine {
 
 
 	LMesh::LMesh(TObjectPtr<LMeshSource> InMeshSource)
-		: m_MeshSource(InMeshSource)
+		: MeshSource(InMeshSource)
 	{
 		Handle = {};
 
 		SetSubmeshes({});
 
-		const std::vector<TObjectPtr<LMaterial>>& MeshMaterials = m_MeshSource->GetMaterials();
+		const std::vector<TObjectPtr<LMaterial>>& MeshMaterials = MeshSource->GetMaterials();
 		Materials = TObjectPtr<LMaterialTable>::Create(static_cast<uint32_t>(MeshMaterials.size()));
 
-		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials!", 
-						  Handle, static_cast<uint32_t>(MeshMaterials.size()));
-		for (uint32_t i = 0; i < static_cast<decltype(i)>(MeshMaterials.size()); i++)
+		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials", Handle, MeshMaterials.size());
+		for (uint32_t i = 0; i < static_cast<uint32_t>(MeshMaterials.size()); i++)
 		{
 			TObjectPtr<LMaterialAsset> MaterialAsset = TObjectPtr<LMaterialAsset>::Create(MeshMaterials[i]);
 			Materials->SetMaterial(i, MaterialAsset->Handle);
@@ -91,18 +91,17 @@ namespace LkEngine {
 		}
 	}
 
-	LMesh::LMesh(TObjectPtr<LMeshSource> meshSource, const std::vector<uint32_t>& submeshes)
-		: m_MeshSource(meshSource)
+	LMesh::LMesh(TObjectPtr<LMeshSource> InMeshSource, const std::vector<uint32_t>& InSubmeshes)
+		: MeshSource(InMeshSource)
 	{
 		Handle = {};
-		SetSubmeshes(submeshes);
+		SetSubmeshes(InSubmeshes);
 
-		const std::vector<TObjectPtr<LMaterial>>& MeshMaterials = meshSource->GetMaterials();
+		const std::vector<TObjectPtr<LMaterial>>& MeshMaterials = InMeshSource->GetMaterials();
 		Materials = TObjectPtr<LMaterialTable>::Create(static_cast<uint32_t>(MeshMaterials.size()));
 
-		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials", 
-						  Handle, static_cast<uint32_t>(MeshMaterials.size()));
-		for (uint32_t i = 0; i < static_cast<decltype(i)>(MeshMaterials.size()); i++)
+		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials", Handle, MeshMaterials.size());
+		for (uint32_t i = 0; i < static_cast<uint32_t>(MeshMaterials.size()); i++)
 		{
 			TObjectPtr<LMaterialAsset> MaterialAsset = TObjectPtr<LMaterialAsset>::Create(MeshMaterials[i]);
 			Materials->SetMaterial(i, MaterialAsset->Handle);
@@ -111,10 +110,10 @@ namespace LkEngine {
 	}
 
 	LMesh::LMesh(const TObjectPtr<LMesh>& Other)
-		: m_MeshSource(Other->m_MeshSource)
+		: MeshSource(Other->MeshSource)
 		, Materials(Other->Materials)
 	{
-		SetSubmeshes(Other->m_Submeshes);
+		SetSubmeshes(Other->Submeshes);
 	}
 
 	void LMesh::SetSubmeshes(const std::vector<uint32_t>& InSubmeshes)
@@ -122,16 +121,16 @@ namespace LkEngine {
 		if (!InSubmeshes.empty())
 		{
 			/// TODO: Set dirty
-			m_Submeshes = InSubmeshes;
+			Submeshes = InSubmeshes;
 		}
 		else
 		{
 			/// TODO: Set dirty
-			const std::vector<LSubmesh>& Submeshes = m_MeshSource->GetSubmeshes();
-			m_Submeshes.resize(Submeshes.size());
-			for (uint32_t Index = 0; Index < static_cast<decltype(Index)>(Submeshes.size()); Index++)
+			const std::vector<LSubmesh>& SourceSubmeshes = MeshSource->GetSubmeshes();
+			Submeshes.resize(SourceSubmeshes.size());
+			for (uint32_t Index = 0; Index < static_cast<uint32_t>(Submeshes.size()); Index++)
 			{
-				m_Submeshes[Index] = Index;
+				Submeshes[Index] = Index;
 			}
 		}
 	}
@@ -146,7 +145,7 @@ namespace LkEngine {
 
 
 	LStaticMesh::LStaticMesh(TObjectPtr<LMeshSource> InMeshSource)
-		: m_MeshSource(InMeshSource)
+		: MeshSource(InMeshSource)
 	{
 		Handle = {};
 
@@ -162,7 +161,7 @@ namespace LkEngine {
 	}
 
 	LStaticMesh::LStaticMesh(TObjectPtr<LMeshSource> meshSource, const std::vector<uint32_t>& submeshes)
-		: m_MeshSource(meshSource)
+		: MeshSource(meshSource)
 	{
 		Handle = {};
 
@@ -178,10 +177,10 @@ namespace LkEngine {
 	}
 
 	LStaticMesh::LStaticMesh(const TObjectPtr<LStaticMesh>& Other)
-		: m_MeshSource(Other->m_MeshSource)
+		: MeshSource(Other->MeshSource)
 		, Materials(Other->Materials)
 	{
-		SetSubmeshes(Other->m_Submeshes);
+		SetSubmeshes(Other->Submeshes);
 	}
 
 	void LStaticMesh::SetSubmeshes(const std::vector<uint32_t>& InSubmeshes)
@@ -189,16 +188,16 @@ namespace LkEngine {
 		if (!InSubmeshes.empty())
 		{
 			/// TODO: Set dirty
-			m_Submeshes = InSubmeshes;
+			Submeshes = InSubmeshes;
 		}
 		else
 		{
 			/// TODO: Set dirty
-			const std::vector<LSubmesh>& Submeshes = m_MeshSource->GetSubmeshes();
-			m_Submeshes.resize(Submeshes.size());
-			for (uint32_t Index = 0; Index < static_cast<decltype(Index)>(Submeshes.size()); Index++)
+			const std::vector<LSubmesh>& SourceSubmeshes = MeshSource->GetSubmeshes();
+			Submeshes.resize(SourceSubmeshes.size());
+			for (uint32_t Index = 0; Index < static_cast<uint32_t>(Submeshes.size()); Index++)
 			{
-				m_Submeshes[Index] = Index;
+				Submeshes[Index] = Index;
 			}
 		}
 	}

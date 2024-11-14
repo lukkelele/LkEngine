@@ -8,7 +8,7 @@ layout(location = 3) in float  a_TexIndex;
 layout(location = 4) in float  a_TexArray;
 layout(location = 5) in float  a_TilingFactor;
 
-out vec2 v_Texcoord;
+out vec2 v_TexCoord;
 out float v_TexIndex;
 out float v_TexArray;
 
@@ -21,7 +21,7 @@ void main()
 {
     gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_Model * vec4(a_Position, 1.0);
 
-    v_Texcoord = a_TexCoord;    
+    v_TexCoord = a_TexCoord;    
     v_TexIndex = a_TexIndex;
     v_TexArray = a_TexArray;
 }
@@ -31,12 +31,12 @@ void main()
 #version 450 core
 out vec4 FragColor;
 
-in vec2 v_Texcoord;
+in vec2 v_TexCoord;
 
 uniform sampler2D Texture1;
 
 void main()
 {    
-    FragColor = texture(Texture1, v_Texcoord);
-    //FragColor = vec4(v_Texcoord.x, v_Texcoord.y, 1.0, 1.0);
+    FragColor = texture(Texture1, v_TexCoord);
+    //FragColor = vec4(v_TexCoord.x, v_TexCoord.y, 1.0, 1.0);
 }

@@ -35,6 +35,11 @@ namespace LkEngine {
 			return LProject::GetRuntimeAssetManager()->GetTextures2D();
 		}
 
+		FORCEINLINE static TObjectPtr<LMesh> GetDebugCube()
+		{
+			return LProject::GetRuntimeAssetManager()->DebugCube;
+		}
+
 		template<typename T>
 		static TObjectPtr<T> GetAsset(FAssetHandle AssetHandle)
 		{

@@ -5,14 +5,13 @@
 
 namespace LkEngine {
 
-    class OpenGLVertexBuffer : public LVertexBuffer
+    class LOpenGLVertexBuffer : public LVertexBuffer
     {
 	public:
-		OpenGLVertexBuffer(void* data, const uint64_t InSize, 
-						   const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
-		OpenGLVertexBuffer(const uint64_t InSize, 
-						   const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
-		~OpenGLVertexBuffer();
+		LOpenGLVertexBuffer(void* data, const uint64_t InSize, 
+							const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
+		LOpenGLVertexBuffer(const uint64_t InSize, const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
+		~LOpenGLVertexBuffer();
 
 		virtual void SetData(void* data, uint64_t InSize, uint64_t offset = 0) override;
 		virtual void RT_SetData(void* buffer, uint64_t InSize, uint64_t offset = 0) override;
@@ -21,21 +20,21 @@ namespace LkEngine {
 		virtual uint64_t GetSize() const override { return m_Size; }
 
 		virtual void SetIndexBuffer(const TObjectPtr<LIndexBuffer> ib) override;
-		virtual void SetLayout(const VertexBufferLayout& layout) override; 
+		virtual void SetLayout(const FVertexBufferLayout& layout) override; 
 
 		virtual TObjectPtr<LIndexBuffer> GetIndexBuffer() override 
 		{ 
 			return m_IndexBuffer; 
 		}
 
-		FORCEINLINE virtual VertexBufferLayout GetLayout() const override 
+		FORCEINLINE virtual FVertexBufferLayout GetLayout() const override 
 		{ 
-			return m_BufferLayout; 
+			return Layout; 
 		}
 
-		FORCEINLINE virtual VertexBufferLayout& GetLayout() override 
+		FORCEINLINE virtual FVertexBufferLayout& GetLayout() override 
 		{ 
-			return m_BufferLayout; 
+			return Layout; 
 		}
 
 		FORCEINLINE LRendererID GetRendererID() const 
@@ -56,7 +55,7 @@ namespace LkEngine {
 		EVertexBufferUsage m_Usage = EVertexBufferUsage::None;
 
 		TObjectPtr<LIndexBuffer> m_IndexBuffer = nullptr;
-		VertexBufferLayout m_BufferLayout;
+		FVertexBufferLayout Layout{};
 
 		LRendererID m_VertexArrayID = 0;
 		unsigned int m_VertexBufferIndex = 0;

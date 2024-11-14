@@ -26,8 +26,8 @@ namespace LkEngine {
 		virtual LRendererID GetRendererID() const = 0;
 		virtual LRendererID& GetRendererID() = 0;
 
-		static TObjectPtr<LIndexBuffer> Create(const uint64_t InSize);
-		static TObjectPtr<LIndexBuffer> Create(void* Data, const uint64_t InSize = 0);
+		static TObjectPtr<LIndexBuffer> Create(const uint32_t InSize);
+		static TObjectPtr<LIndexBuffer> Create(void* Data, const uint32_t InSize = 0);
 
 	private:
 		LCLASS(LIndexBuffer)

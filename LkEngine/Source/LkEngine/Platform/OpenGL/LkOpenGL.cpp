@@ -24,9 +24,12 @@ namespace LkEngine::LOpenGL {
 		uint32_t CubeTexture_;
 		uint32_t FloorTexture_;
 
-		uint32_t CubeVAO, CubeVBO;
-		uint32_t PlaneVAO, PlaneVBO;
-		uint32_t QuadVAO, QuadVBO;
+		uint32_t CubeVAO;
+		uint32_t CubeVBO;
+		uint32_t PlaneVAO;
+		uint32_t PlaneVBO;
+		uint32_t QuadVAO;
+		uint32_t QuadVBO;
 
 		LRendererID SkyboxVAO;
 		uint32_t SkyboxVBO;
@@ -35,6 +38,11 @@ namespace LkEngine::LOpenGL {
 		TObjectPtr<LVertexBuffer> PlaneVertexBuffer{};
 		TObjectPtr<LTexture2D> CubeTexture{};
 		TObjectPtr<LTexture2D> PlaneTexture{};
+
+		TObjectPtr<LVertexBuffer> SkyboxVertexBuffer{};
+		TObjectPtr<LTextureCube> SkyboxTexture{};
+		TObjectPtr<LShader> SkyboxShader{};
+		uint32_t CubemapTexture{};
 
 		void RenderMirrorTexture(const glm::mat4& view, const glm::mat4& proj)
 		{
@@ -160,11 +168,10 @@ namespace LkEngine::LOpenGL {
 			//DebugShader->Set("u_ViewProjectionMatrix", viewProjection);
 			/* EXPERIMENTAL. */
 			DebugShader->Set("Texture1", 0);
+			CubeTexture->Bind(0);
 
 			ModelMVP = glm::mat4(1.0f);
-
 			CubeVertexBuffer->Bind();
-			CubeTexture->Bind(0);
 
 			/* Cube 1. */
 			ModelMVP = glm::translate(ModelMVP, glm::vec3(-1.0f, 0.0f, -1.0f));
@@ -202,22 +209,28 @@ namespace LkEngine::LOpenGL {
 			LFramebuffer::TargetSwapChain();
 		}
 
+		//void GenerateCubeVaoAndVbo(uint32_t& vao, uint32_t& vbo)
+		/* TODO: Remove passed arguments. */
 		void GenerateCubeVaoAndVbo(uint32_t& vao, uint32_t& vbo)
 		{
-			CubeVertexBuffer = LVertexBuffer::Create(Cube_Vertices, sizeof(Cube_Vertices));
-			CubeVertexBuffer->SetLayout({
-				{ "a_Position",      EShaderDataType::Float3 },
-				{ "a_Color",         EShaderDataType::Float4 },
-				{ "a_TexCoord",      EShaderDataType::Float2 },
-				{ "a_TexIndex",      EShaderDataType::Float  },
-				{ "a_TexArray",      EShaderDataType::Float  },
-				{ "a_TilingFactor",  EShaderDataType::Float  },
-			});
-
-			if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
+			LK_CORE_WARN_TAG("LOpenGL", "Generating cube VAO and VBO");
+			if (!CubeVertexBuffer)
 			{
-				SetupTexturesAndShaders();
-				return;
+				CubeVertexBuffer = LVertexBuffer::Create(Cube_Vertices, sizeof(Cube_Vertices));
+				CubeVertexBuffer->SetLayout({
+					{ "a_Position",      EShaderDataType::Float3 },
+					{ "a_Color",         EShaderDataType::Float4 },
+					{ "a_TexCoord",      EShaderDataType::Float2 },
+					{ "a_TexIndex",      EShaderDataType::Float  },
+					{ "a_TexArray",      EShaderDataType::Float  },
+					{ "a_TilingFactor",  EShaderDataType::Float  },
+				});
+
+				if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
+				{
+					SetupTexturesAndShaders();
+					return;
+				}
 			}
 		}
 
@@ -229,9 +242,19 @@ namespace LkEngine::LOpenGL {
 			}
 
 			/* Shaders. */
+			if (!CubeDebugShader)
+			{
+				CubeDebugShader = LRenderer::GetShaderLibrary()->Get("Renderer_Debug");
+				const FShaderProgramSource& ShaderSource = CubeDebugShader->GetSource();
+				//LK_CORE_WARN_TAG("LOpenGL", "DebugCubeShader:\n{}\n{}", ShaderSource.Vertex, ShaderSource.Fragment);
+				CubeDebugShader->Set("u_Texture0", 0);
+			}
+
 			if (!DebugShader)
 			{
 				DebugShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Debug");
+				const FShaderProgramSource& ShaderSource = DebugShader->GetSource();
+				//LK_CORE_WARN_TAG("LOpenGL", "DebugShader:\n{}\n{}", ShaderSource.Vertex, ShaderSource.Fragment);
 			}
 
 			if (!ScreenShader)
@@ -250,6 +273,33 @@ namespace LkEngine::LOpenGL {
 				PlaneTexture = LTextureLibrary::Get().GetTexture("MetalGround");
 				LK_CORE_ASSERT(PlaneTexture, "Plane Texture failed to setup");
 			}
+		}
+
+		void SetupSkybox()
+		{
+			LK_CORE_FATAL("Setting up skybox");
+			LK_CORE_ASSERT(SkyboxVertexBuffer == nullptr, "Skybox already exists");
+
+			SkyboxVertexBuffer = LVertexBuffer::Create(Skybox_Vertices, sizeof(Skybox_Vertices));
+			SkyboxVertexBuffer->SetLayout({
+				{ "a_Position", EShaderDataType::Float3 },
+			});
+			SkyboxShader = LRenderer::GetShaderLibrary()->Get("Renderer_Skybox");
+			LK_CORE_ASSERT(SkyboxShader, "Skybox shader is nullptr");
+
+			FTextureSpecification SkyboxSpec;
+			std::vector<std::filesystem::path> SkyboxFacePaths = {
+				"Assets/Textures/Skybox/right.jpg",
+				"Assets/Textures/Skybox/left.jpg",
+				"Assets/Textures/Skybox/top.jpg",
+				"Assets/Textures/Skybox/bottom.jpg",
+				"Assets/Textures/Skybox/front.jpg",
+				"Assets/Textures/Skybox/back.jpg",
+			};
+			SkyboxTexture = LTextureCube::Create(SkyboxSpec, SkyboxFacePaths);
+			SkyboxTexture->Bind(0);
+			SkyboxShader->Bind();
+			SkyboxShader->Set("u_Skybox", 0);
 		}
 
 		void GeneratePlaneVaoAndVbo(uint32_t& vao, uint32_t& vbo)

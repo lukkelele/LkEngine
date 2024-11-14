@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "LClass.h"
+#include "Class.h"
 
 
 namespace LkEngine {

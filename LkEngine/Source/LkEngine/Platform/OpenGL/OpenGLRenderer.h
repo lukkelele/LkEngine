@@ -126,16 +126,17 @@ namespace LkEngine {
 
     namespace LOpenGL {
 
-        inline static int PrimitiveTopologyToOpenGL(const PrimitiveTopology& topology)
+        inline static int PrimitiveTopologyToOpenGL(const EPrimitiveTopology Topology)
         {
-            switch (topology)
+            switch (Topology)
             {
-                case PrimitiveTopology::Triangles:  return GL_TRIANGLES;
-                case PrimitiveTopology::Lines:      return GL_LINES;
-                case PrimitiveTopology::Points:     return GL_POINTS;
+                case EPrimitiveTopology::Points:     return GL_POINTS;
+                case EPrimitiveTopology::Lines:      return GL_LINES;
+                case EPrimitiveTopology::Triangles:  return GL_TRIANGLES;
             }
-            LK_CORE_ASSERT(false, "Unknown topology");
-            return -1;
+
+            LK_CORE_ASSERT(false, "Unknown topology, cannot convert to OpenGL format");
+            return GL_INVALID_ENUM;
         }
 
     }

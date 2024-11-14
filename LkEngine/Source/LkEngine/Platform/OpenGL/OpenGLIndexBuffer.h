@@ -10,8 +10,8 @@ namespace LkEngine {
     class OpenGLIndexBuffer : public LIndexBuffer
     {
 	public:
-		OpenGLIndexBuffer(const uint64_t InSize);
-		OpenGLIndexBuffer(void* InData, const uint64_t InSize);
+		OpenGLIndexBuffer(const uint32_t InSize);
+		OpenGLIndexBuffer(void* InData, const uint32_t InSize);
         ~OpenGLIndexBuffer();
 
 		void SetData(void* InData, const uint64_t InSize, const uint64_t InOffset = 0) override;
@@ -34,7 +34,7 @@ namespace LkEngine {
 		FBuffer m_LocalData;
 
 		uint32_t m_Size = 0;
-		unsigned int m_Count = 0;
+		uint32_t m_Count = 0;
 
 		LCLASS(OpenGLIndexBuffer)
     };

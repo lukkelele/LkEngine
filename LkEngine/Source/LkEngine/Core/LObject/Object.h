@@ -11,7 +11,7 @@
 #include <type_traits>
 
 #include "LkEngine/Core/CoreMacros.h"
-#include "LkEngine/Core/LObject/LClass.h"
+#include "LkEngine/Core/LObject/Class.h"
 #include "LkEngine/Core/LObject/ObjectBase.h"
 #include "LkEngine/Core/String.h"
 #include "LkEngine/Core/Delegate/Delegate.h"

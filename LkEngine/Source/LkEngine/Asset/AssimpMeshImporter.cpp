@@ -104,12 +104,12 @@ namespace LkEngine {
 			MeshSource->m_BoundingBox.Min = { FLT_MAX, FLT_MAX, FLT_MAX };
 			MeshSource->m_BoundingBox.Max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
-			MeshSource->m_Submeshes.reserve(AssimpScene->mNumMeshes);
+			MeshSource->Submeshes.reserve(AssimpScene->mNumMeshes);
 			for (unsigned m = 0; m < AssimpScene->mNumMeshes; m++)
 			{
 				aiMesh* Mesh = AssimpScene->mMeshes[m];
 
-				LSubmesh& Submesh = MeshSource->m_Submeshes.emplace_back();
+				LSubmesh& Submesh = MeshSource->Submeshes.emplace_back();
 				Submesh.BaseVertex = VertexCount;
 				Submesh.BaseIndex = IndexCount;
 				Submesh.MaterialIndex = Mesh->mMaterialIndex;
@@ -203,7 +203,7 @@ namespace LkEngine {
 			FMeshNode& RootNode = MeshSource->m_Nodes.emplace_back();
 			TraverseNodes(MeshSource, AssimpScene->mRootNode, 0);
 
-			for (const LSubmesh& Submesh : MeshSource->m_Submeshes)
+			for (const LSubmesh& Submesh : MeshSource->Submeshes)
 			{
 				const FAABB TransformedSubmeshAABB = Submesh.BoundingBox;
 				glm::vec3 min = glm::vec3(Submesh.Transform * glm::vec4(TransformedSubmeshAABB.Min, 1.0f));
@@ -254,7 +254,7 @@ namespace LkEngine {
 		for (uint32_t i = 0; i < AssimpNode->mNumMeshes; i++)
 		{
 			const uint32_t SubmeshIndex = AssimpNode->mMeshes[i];
-			LSubmesh& Submesh = MeshSource->m_Submeshes[SubmeshIndex];
+			LSubmesh& Submesh = MeshSource->Submeshes[SubmeshIndex];
 			Submesh.NodeName = AssimpNode->mName.C_Str();
 			Submesh.Transform = Transform;
 			Submesh.LocalTransform = MeshNode.LocalTransform;

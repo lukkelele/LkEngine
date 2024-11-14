@@ -11,10 +11,9 @@ namespace LkEngine {
 
 	class LFramebuffer;
 	class LShader;
-	class VertexBufferLayout;
+	struct FVertexBufferLayout;
 
-	/// @TODO: Prefix E for enumeration
-	enum class PrimitiveTopology
+	enum class EPrimitiveTopology
 	{
 		None = 0,
 		Points,
@@ -25,8 +24,7 @@ namespace LkEngine {
 		TriangleFan
 	};
 
-	/// @TODO: Prefix E for enumeration
-	enum class DepthCompareOperator
+	enum class EDepthCompareOperator
 	{
 	    None = 0,
 		Never,
@@ -39,17 +37,60 @@ namespace LkEngine {
 	    Always,
 	};
 
+	namespace Enum
+	{
+		inline static constexpr const char* ToString(const EDepthCompareOperator CompareOperator)
+		{
+			switch (CompareOperator)
+			{
+				case EDepthCompareOperator::None:			return "None";
+				case EDepthCompareOperator::Never:			return "Never";
+				case EDepthCompareOperator::NotEqual:		return "NotEqual";
+				case EDepthCompareOperator::Less:			return "Less";
+				case EDepthCompareOperator::LessOrEqual:	return "LessOrEqual";
+				case EDepthCompareOperator::Greater:		return "Greater";
+				case EDepthCompareOperator::GreaterOrEqual:	return "GreaterOrEqual";
+				case EDepthCompareOperator::Equal:			return "Equal";
+				case EDepthCompareOperator::Always:			return "Always";
+			}
+
+			LK_CORE_ASSERT(false, "Invalid EDepthCompareOperator value");
+			return nullptr;
+		}
+
+		inline static constexpr const char* ToString(const EPrimitiveTopology Topology)
+		{
+			switch (Topology)
+			{
+				case EPrimitiveTopology::None:			return "None";
+				case EPrimitiveTopology::Points:		return "Points";
+				case EPrimitiveTopology::Lines:			return "Lines";
+				case EPrimitiveTopology::Triangles:		return "Triangles";
+				case EPrimitiveTopology::LineStrip:		return "LineStrip";
+				case EPrimitiveTopology::TriangleStrip:	return "TriangleStrip";
+				case EPrimitiveTopology::TriangleFan:	return "TriangleFan";
+			}
+
+			LK_CORE_ASSERT(false, "Invalid EPrimitiveTopology value");
+			return nullptr;
+		}
+	}
+
+	/**
+	 * FPipelineSpecification
+	 */
 	struct FPipelineSpecification
 	{
 		TObjectPtr<LShader> Shader = nullptr;
 		TObjectPtr<LFramebuffer> TargetFramebuffer = nullptr;
 
-		VertexBufferLayout Layout;
-		VertexBufferLayout InstanceLayout;
-		VertexBufferLayout BoneInfluenceLayout;
+		/* TODO: Investigate the forward declaration of FVertexBufferLayout here. */
+		FVertexBufferLayout Layout;
+		FVertexBufferLayout InstanceLayout;
+		FVertexBufferLayout BoneInfluenceLayout;
 
-		PrimitiveTopology Topology = PrimitiveTopology::Triangles;
-		DepthCompareOperator DepthOperator = DepthCompareOperator::GreaterOrEqual;
+		EPrimitiveTopology Topology = EPrimitiveTopology::Triangles;
+		EDepthCompareOperator DepthOperator = EDepthCompareOperator::GreaterOrEqual;
 
 		bool BackfaceCulling = true;
 		bool DepthTest = true;
@@ -61,11 +102,10 @@ namespace LkEngine {
 
 		ERendererAPI RenderAPI = ERendererAPI::None;
 
-		FORCEINLINE void SetLayout(const VertexBufferLayout& layout) 
+		FORCEINLINE void SetLayout(const FVertexBufferLayout& InLayout) 
 		{ 
-			Layout = layout; 
+			Layout = InLayout; 
 		}
 	};
-
 
 }

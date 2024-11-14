@@ -62,16 +62,12 @@ namespace LkEngine
             QuadPassSpec.Pipeline = LPipeline::Create(QuadPipelineSpec);
             //QuadMaterial = LMaterial::Create(QuadShader, "QuadMaterial");
 
-        /* TODO: Need some way to invoke this for OpenGL in abstract way. */
-        #if 1
-            
-            // Use correct amount of texture array uniforms
+            /* Use correct amount of texture array uniforms. */
             LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad renderpass");
             for (uint8_t ArrayIndex = 0; ArrayIndex < Specification.TextureArraysCount; ArrayIndex++)
             {
                 QuadPassSpec.Pipeline->BindTextureArray(ArrayIndex);
             }
-        #endif
             QuadPass = LRenderPass::Create(QuadPassSpec);
             
             QuadVertexBuffer = LVertexBuffer::Create(MaxVertices * sizeof(FQuadVertex));
@@ -115,7 +111,7 @@ namespace LkEngine
         {
             LK_CORE_DEBUG_TAG("Renderer2D", "");
             LineVertexBuffer = LVertexBuffer::Create(MaxVertices * sizeof(FLineVertex));
-            VertexBufferLayout lineVertexBufLayout{ };
+            FVertexBufferLayout LineVertexBufferLayout{ };
             LineVertexBuffer->SetLayout({
                 { "a_Pos",       EShaderDataType::Float3, },
                 { "a_Color",     EShaderDataType::Float4, },

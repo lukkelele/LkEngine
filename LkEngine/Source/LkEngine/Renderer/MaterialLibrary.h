@@ -8,6 +8,8 @@
 
 namespace LkEngine {
 
+    static constexpr const char* BASE_MATERIAL = "BaseMaterial";
+
     class LMaterialAsset;
 
     class LMaterialLibrary : public LObject
@@ -49,6 +51,7 @@ namespace LkEngine {
         void CreateBasicMaterials();
 
     private:
+        /// @TODO: Why on earth is the key a string? FIX !!!
         inline static std::unordered_map<std::string, TObjectPtr<LMaterial>> m_Collection;
 		inline static std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>> m_LoadedMaterialAssets;
 

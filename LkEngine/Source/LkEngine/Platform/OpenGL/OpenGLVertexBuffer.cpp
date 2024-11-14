@@ -8,8 +8,8 @@
 
 namespace LkEngine {
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(void* InBuffer, const uint64_t InSize, 
-										   const EVertexBufferUsage InBufferUsage)
+	LOpenGLVertexBuffer::LOpenGLVertexBuffer(void* InBuffer, const uint64_t InSize, 
+											 const EVertexBufferUsage InBufferUsage)
 		: m_Size(InSize)
 		, m_Usage(InBufferUsage)
 	{
@@ -23,7 +23,7 @@ namespace LkEngine {
 		LK_OpenGL(glBufferData(GL_ARRAY_BUFFER, InSize, InBuffer, GL_DYNAMIC_DRAW));
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(const uint64_t InSize, const EVertexBufferUsage InBufferUsage)
+	LOpenGLVertexBuffer::LOpenGLVertexBuffer(const uint64_t InSize, const EVertexBufferUsage InBufferUsage)
 		: m_Size(InSize)
 		, m_Usage(InBufferUsage)
 	{
@@ -37,106 +37,40 @@ namespace LkEngine {
 		LK_OpenGL(glBufferData(GL_ARRAY_BUFFER, InSize, nullptr, GL_DYNAMIC_DRAW));
 	}
  
-	OpenGLVertexBuffer::~OpenGLVertexBuffer() 
+	LOpenGLVertexBuffer::~LOpenGLVertexBuffer() 
 	{
 		LK_OpenGL(glDeleteVertexArrays(1, &m_VertexArrayID));
 		LK_OpenGL(glDeleteBuffers(1, &m_RendererID));
 	}
 
-	void OpenGLVertexBuffer::Bind() const
+	void LOpenGLVertexBuffer::Bind() const
 	{
 		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
 	}
 
-	void OpenGLVertexBuffer::SetData(void* InData, uint64_t InSize, uint64_t InOffset)
+	void LOpenGLVertexBuffer::SetData(void* InData, uint64_t InSize, uint64_t InOffset)
 	{
 		m_LocalData.Data = InData;
 		LK_OpenGL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 		LK_OpenGL(glBufferSubData(GL_ARRAY_BUFFER, InOffset, InSize, InData));
 	}
 
-	void OpenGLVertexBuffer::RT_SetData(void* InData, uint64_t InSize, uint64_t offset)
+	void LOpenGLVertexBuffer::RT_SetData(void* InData, uint64_t InSize, uint64_t offset)
 	{
 		m_LocalData.Data = InData;
 		LK_OpenGL(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 		LK_OpenGL(glBufferSubData(GL_ARRAY_BUFFER, offset, InSize, InData));
 	}
 
-	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& Layout)
+	void LOpenGLVertexBuffer::SetLayout(const FVertexBufferLayout& InLayout)
 	{
-		m_BufferLayout = Layout;
+		Layout = InLayout;
 		AddVertexBufferToVertexArray();
 	}
 
-	void OpenGLVertexBuffer::AddVertexBufferToVertexArray()
+	void LOpenGLVertexBuffer::AddVertexBufferToVertexArray()
 	{
 		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
-
-		for (const FVertexBufferElement& Element : m_BufferLayout)
-		{
-			switch (Element.Type)
-			{
-				case EShaderDataType::Float:
-				case EShaderDataType::Float2:
-				case EShaderDataType::Float3:
-				case EShaderDataType::Float4:
-				{
-					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
-					LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
-													Element.GetComponentCount(),
-													LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
-													(Element.Normalized ? GL_TRUE : GL_FALSE),
-													m_BufferLayout.GetStride(),
-													(const void*)Element.Offset));
-					m_VertexBufferIndex++;
-					break;
-				}
-				case EShaderDataType::Int:
-				case EShaderDataType::Int2:
-				case EShaderDataType::Int3:
-				case EShaderDataType::Int4:
-				case EShaderDataType::Bool:
-				{
-					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
-					LK_OpenGL(glVertexAttribIPointer(m_VertexBufferIndex,
-													 Element.GetComponentCount(),
-													 LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
-													 m_BufferLayout.GetStride(),
-													 (const void*)Element.Offset));
-					m_VertexBufferIndex++;
-					break;
-				}
-				case EShaderDataType::Mat3:
-				case EShaderDataType::Mat4:
-				{
-					uint8_t count = Element.GetComponentCount();
-					for (uint8_t i = 0; i < count; i++)
-					{
-						LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
-						LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
-														count,
-														LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
-														(Element.Normalized ? GL_TRUE : GL_FALSE),
-														m_BufferLayout.GetStride(),
-														(const void*)(Element.Offset + sizeof(float) * count * i)));
-						LK_OpenGL(glVertexAttribDivisor(m_VertexBufferIndex, 1));
-						m_VertexBufferIndex++;
-					}
-					break;
-				}
-
-				default: LK_ASSERT(false);
-			}
-		}
-
-	}
-
-	void OpenGLVertexBuffer::AddVertexBuffer(LVertexBuffer& VertexBuffer)
-	{
-		glBindVertexArray(m_VertexArrayID);
-		VertexBuffer.Bind();
-		VertexBufferLayout& Layout = VertexBuffer.GetLayout();
-
 		for (const FVertexBufferElement& Element : Layout)
 		{
 			switch (Element.Type)
@@ -150,7 +84,7 @@ namespace LkEngine {
 					LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
 													Element.GetComponentCount(),
 													LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
-													Element.Normalized ? GL_TRUE : GL_FALSE,
+													(Element.Normalized ? GL_TRUE : GL_FALSE),
 													Layout.GetStride(),
 													(const void*)Element.Offset));
 					m_VertexBufferIndex++;
@@ -163,7 +97,7 @@ namespace LkEngine {
 				case EShaderDataType::Bool:
 				{
 					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
-					LK_OpenGL(glVertexAttribIPointer(m_VertexBufferIndex, 
+					LK_OpenGL(glVertexAttribIPointer(m_VertexBufferIndex,
 													 Element.GetComponentCount(),
 													 LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
 													 Layout.GetStride(),
@@ -181,8 +115,73 @@ namespace LkEngine {
 						LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
 														count,
 														LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
-														Element.Normalized ? GL_TRUE : GL_FALSE,
+														(Element.Normalized ? GL_TRUE : GL_FALSE),
 														Layout.GetStride(),
+														(const void*)(Element.Offset + sizeof(float) * count * i)));
+						LK_OpenGL(glVertexAttribDivisor(m_VertexBufferIndex, 1));
+						m_VertexBufferIndex++;
+					}
+					break;
+				}
+
+				default: LK_ASSERT(false);
+			}
+		}
+
+	}
+
+	void LOpenGLVertexBuffer::AddVertexBuffer(LVertexBuffer& VertexBuffer)
+	{
+		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
+		VertexBuffer.Bind();
+		FVertexBufferLayout& VertexBufferLayout = VertexBuffer.GetLayout();
+
+		for (const FVertexBufferElement& Element : VertexBufferLayout)
+		{
+			switch (Element.Type)
+			{
+				case EShaderDataType::Float:
+				case EShaderDataType::Float2:
+				case EShaderDataType::Float3:
+				case EShaderDataType::Float4:
+				{
+					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+					LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
+													Element.GetComponentCount(),
+													LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+													Element.Normalized ? GL_TRUE : GL_FALSE,
+													VertexBufferLayout.GetStride(),
+													(const void*)Element.Offset));
+					m_VertexBufferIndex++;
+					break;
+				}
+				case EShaderDataType::Int:
+				case EShaderDataType::Int2:
+				case EShaderDataType::Int3:
+				case EShaderDataType::Int4:
+				case EShaderDataType::Bool:
+				{
+					LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+					LK_OpenGL(glVertexAttribIPointer(m_VertexBufferIndex, 
+													 Element.GetComponentCount(),
+													 LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+													 VertexBufferLayout.GetStride(),
+													 (const void*)Element.Offset));
+					m_VertexBufferIndex++;
+					break;
+				}
+				case EShaderDataType::Mat3:
+				case EShaderDataType::Mat4:
+				{
+					uint8_t count = Element.GetComponentCount();
+					for (uint8_t i = 0; i < count; i++)
+					{
+						LK_OpenGL(glEnableVertexAttribArray(m_VertexBufferIndex));
+						LK_OpenGL(glVertexAttribPointer(m_VertexBufferIndex,
+														count,
+														LOpenGL::ShaderDataTypeToOpenGLBaseType(Element.Type),
+														Element.Normalized ? GL_TRUE : GL_FALSE,
+														VertexBufferLayout.GetStride(),
 														(const void*)(Element.Offset + sizeof(float) * count * i)));
 						LK_OpenGL(glVertexAttribDivisor(m_VertexBufferIndex, 1));
 						m_VertexBufferIndex++;
@@ -196,22 +195,22 @@ namespace LkEngine {
 	}
 
 #if 0
-	void OpenGLVertexBuffer::BindVertexArray()
+	void LOpenGLVertexBuffer::BindVertexArray()
 	{
 		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
 	}
 
-	void OpenGLVertexBuffer::UnbindVertexArray()
+	void LOpenGLVertexBuffer::UnbindVertexArray()
 	{
 		LK_OpenGL(glBindVertexArray(0));
 	}
 #endif
 
-	void OpenGLVertexBuffer::SetIndexBuffer(const TObjectPtr<LIndexBuffer> indexBuffer)
+	void LOpenGLVertexBuffer::SetIndexBuffer(const TObjectPtr<LIndexBuffer> InIndexBuffer)
 	{
 		glBindVertexArray(m_VertexArrayID);
-		indexBuffer->Bind();
-		m_IndexBuffer = indexBuffer;
+		InIndexBuffer->Bind();
+		m_IndexBuffer = InIndexBuffer;
 	}
 
 }

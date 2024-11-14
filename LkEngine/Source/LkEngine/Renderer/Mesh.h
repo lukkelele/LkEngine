@@ -283,13 +283,13 @@ namespace LkEngine {
 					const std::vector<LSubmesh>& InSubmeshes);
 		virtual ~LMeshSource() = default;
 
-		std::vector<LSubmesh>& GetSubmeshes() { return m_Submeshes; }
-		const std::vector<LSubmesh>& GetSubmeshes() const { return m_Submeshes; }
+		std::vector<LSubmesh>& GetSubmeshes() { return Submeshes; }
+		const std::vector<LSubmesh>& GetSubmeshes() const { return Submeshes; }
 
 		const std::vector<FVertex>& GetVertices() const { return m_Vertices; }
 		const std::vector<FIndex>& GetIndices() const { return m_Indices; }
 
-		bool IsSubmeshRigged(uint32_t submeshIndex) const { return m_Submeshes[submeshIndex].bIsRigged; }
+		bool IsSubmeshRigged(uint32_t submeshIndex) const { return Submeshes[submeshIndex].bIsRigged; }
 		const std::vector<FBoneInfluence>& GetBoneInfluences() const { return m_BoneInfluences; }
 
 		FORCEINLINE std::vector<TObjectPtr<LMaterial>>& GetMaterials() 
@@ -313,9 +313,20 @@ namespace LkEngine {
 			return m_TriangleCache.at(Index); 
 		}
 
-		TObjectPtr<LVertexBuffer> GetVertexBuffer() { return m_VertexBuffer; }
-		TObjectPtr<LVertexBuffer> GetBoneInfluenceBuffer() { return m_BoneInfluenceBuffer; }
-		TObjectPtr<LIndexBuffer> GetIndexBuffer() { return m_IndexBuffer; }
+		FORCEINLINE TObjectPtr<LVertexBuffer> GetVertexBuffer() 
+		{ 
+			return m_VertexBuffer; 
+		}
+
+		FORCEINLINE TObjectPtr<LVertexBuffer> GetBoneInfluenceBuffer() 
+		{ 
+			return m_BoneInfluenceBuffer; 
+		}
+
+		FORCEINLINE TObjectPtr<LIndexBuffer> GetIndexBuffer() 
+		{ 
+			return m_IndexBuffer; 
+		}
 
 		static EAssetType GetStaticType() { return EAssetType::MeshSource; }
 
@@ -362,7 +373,7 @@ namespace LkEngine {
 	#endif
 
 	private:
-		std::vector<LSubmesh> m_Submeshes{};
+		std::vector<LSubmesh> Submeshes{};
 
 		TObjectPtr<LVertexBuffer> m_VertexBuffer{};
 		TObjectPtr<LVertexBuffer> m_BoneInfluenceBuffer{};
@@ -416,24 +427,24 @@ namespace LkEngine {
 		LMesh(const TObjectPtr<LMesh>& Other);
 		virtual ~LMesh() = default;
 
-		std::vector<uint32_t>& GetSubmeshes() { return m_Submeshes; }
-		const std::vector<uint32_t>& GetSubmeshes() const { return m_Submeshes; }
+		std::vector<uint32_t>& GetSubmeshes() { return Submeshes; }
+		const std::vector<uint32_t>& GetSubmeshes() const { return Submeshes; }
 
 		void SetSubmeshes(const std::vector<uint32_t>& submeshes);
 
 		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() 
 		{ 
-			return m_MeshSource; 
+			return MeshSource; 
 		}
 
 		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const 
 		{ 
-			return m_MeshSource; 
+			return MeshSource; 
 		}
 
 		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> meshSource) 
 		{ 
-			m_MeshSource = meshSource; 
+			MeshSource = meshSource; 
 		}
 
 		FORCEINLINE TObjectPtr<LMaterialTable> GetMaterials() const 
@@ -458,8 +469,8 @@ namespace LkEngine {
 		TObjectPtr<LIndexBuffer> GetIndexBuffer() { return GetMeshSource()->GetIndexBuffer(); }
 
 	private:
-		TObjectPtr<LMeshSource> m_MeshSource;
-		std::vector<uint32_t> m_Submeshes; 
+		TObjectPtr<LMeshSource> MeshSource;
+		std::vector<uint32_t> Submeshes; 
 
 		TObjectPtr<LMaterialTable> Materials;
 
@@ -486,30 +497,30 @@ namespace LkEngine {
 
 		FORCEINLINE std::vector<uint32_t>& GetSubmeshes() 
 		{ 
-			return m_Submeshes; 
+			return Submeshes; 
 		}
 
 		FORCEINLINE const std::vector<uint32_t>& GetSubmeshes() const 
 		{ 
-			return m_Submeshes; 
+			return Submeshes; 
 		}
 
 		void SetSubmeshes(const std::vector<uint32_t>& InSubmeshes);
 
 		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() 
 		{ 
-			return m_MeshSource; 
+			return MeshSource; 
 		}
 
 		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const 
 		{ 
-			return m_MeshSource;
+			return MeshSource;
 		}
 
 		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> InMeshAsset) 
 		{ 
 			/// TODO: Mark dirty
-			m_MeshSource = InMeshAsset; 
+			MeshSource = InMeshAsset; 
 		}
 
 		TObjectPtr<LMaterialTable> GetMaterials() const 
@@ -520,8 +531,8 @@ namespace LkEngine {
 		static EAssetType GetStaticType() { return EAssetType::StaticMesh; }
 
 	private:
-		TObjectPtr<LMeshSource> m_MeshSource{};
-		std::vector<uint32_t> m_Submeshes{};
+		TObjectPtr<LMeshSource> MeshSource{};
+		std::vector<uint32_t> Submeshes{};
 
 		// Materials
 		TObjectPtr<LMaterialTable> Materials{};

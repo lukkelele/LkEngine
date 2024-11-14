@@ -16,7 +16,9 @@ namespace LkEngine {
 		LRenderer();
 		~LRenderer() = default;
 
-		/** Initialize the renderer by creating the pipeline components. */
+		/** 
+		 * @brief Create pipeline components. 
+		 */
 		static void Initialize();
 		static void Shutdown();
 

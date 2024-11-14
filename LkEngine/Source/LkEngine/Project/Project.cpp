@@ -43,16 +43,14 @@ namespace LkEngine {
 		{
 			if (InProject->RuntimeAssetManager)
 			{
-				LK_CORE_TRACE_TAG("Project", "RuntimeAssetManager already initialized for Project {}", 
-								  ActiveProject->GetName());
+				LK_CORE_TRACE_TAG("Project", "AssetManager already initialized for project '{}'", ActiveProject->GetName());
 				RuntimeAssetManager = ActiveProject->RuntimeAssetManager;
 			}
 			else
 			{
-				LK_CORE_WARN_TAG("Project", "RuntimeAssetManager was NOT initialized for Project {}", 
-								 ActiveProject->GetName());
+				LK_CORE_INFO_TAG("Project", "Initializing asset manager for '{}'", ActiveProject->GetName());
 				RuntimeAssetManager = TObjectPtr<LRuntimeAssetManager>::Create();
-				RuntimeAssetManager->Initialize(EInitFlag::NoInit);
+				RuntimeAssetManager->Initialize(EInitFlag::True);
 			}
 		}
 

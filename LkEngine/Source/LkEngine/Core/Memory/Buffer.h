@@ -95,20 +95,21 @@ namespace LkEngine {
 		{
 			FBuffer Buffer;
 			Buffer.Allocate(Other.Size);
-			memcpy(Buffer.Data, Other.Data, Other.Size);
+			std::memcpy(Buffer.Data, Other.Data, Other.Size);
 
 			return Buffer;
 		}
 
-		FORCEINLINE static FBuffer Copy(const void* data, uint64_t size)
+		FORCEINLINE static FBuffer Copy(const void* Data, const uint64_t Size)
 		{
-			FBuffer buffer;
-			buffer.Allocate(size);
-			memcpy(buffer.Data, data, size);
-			return buffer;
+			FBuffer Buffer;
+			Buffer.Allocate(Size);
+			std::memcpy(Buffer.Data, Data, Size);
+
+			return Buffer;
 		}
 
-		void Allocate(const uint64_t InSize)
+		FORCEINLINE void Allocate(const uint64_t InSize)
 		{
 			LK_CORE_ASSERT(InSize > 0, "Allocate failed, invalid size: {}", InSize);
 
@@ -119,7 +120,7 @@ namespace LkEngine {
 			Size = InSize;
 		}
 
-		void Release()
+		FORCEINLINE void Release()
 		{
 			if (Data)
 			{
@@ -129,38 +130,39 @@ namespace LkEngine {
 			}
 		}
 
-		void ZeroInitialize()
+		FORCEINLINE void ZeroInitialize()
 		{
 			if (Size > 0)
 			{
-				memset(Data, 0, Size);
+				std::memset(Data, 0, Size);
 			}
 		}
 
 		template<typename T>
-		T& Read(uint64_t offset = 0)
+		FORCEINLINE T& Read(const uint64_t Offset = 0)
 		{
-			return *(T*)((byte*)Data + offset);
+			return *(T*)(static_cast<byte*>(Data) + Offset);
 		}
 
 		template<typename T>
-		const T& Read(uint64_t offset = 0) const
+		FORCEINLINE const T& Read(uint64_t Offset = 0) const
 		{
-			return *(T*)((byte*)Data + offset);
+			return *(T*)(static_cast<byte*>(Data) + Offset);
 		}
 
-		byte* ReadBytes(uint64_t size, uint64_t offset) const
+		FORCEINLINE byte* ReadBytes(const uint64_t ReadSize, const uint64_t Offset) const
 		{
-			LK_CORE_ASSERT(offset + size <= Size, "FBuffer overflow!");
-			byte* buffer = new byte[size];
-			memcpy(buffer, (byte*)Data + offset, size);
-			return buffer;
+			LK_CORE_ASSERT(Offset + ReadSize <= ReadSize, "Buffer overflow");
+			byte* Buffer = new byte[ReadSize];
+			std::memcpy(Buffer, (byte*)Data + Offset, ReadSize);
+
+			return Buffer;
 		}
 
-		void Write(const void* data, uint64_t size, uint64_t offset = 0)
+		FORCEINLINE void Write(const void* InData, const uint64_t WriteSize, uint64_t Offset = 0)
 		{
-			LK_CORE_ASSERT(offset + size <= Size, "FBuffer overflow!");
-			memcpy((byte*)Data + offset, data, size);
+			LK_CORE_ASSERT(Offset + WriteSize <= Size, "FBuffer overflow");
+			std::memcpy((byte*)Data + Offset, InData, WriteSize);
 		}
 
 		operator bool() { return (Data && (Size > 0)); }
@@ -182,7 +184,7 @@ namespace LkEngine {
 			return (T*)Data;
 		}
 
-		inline uint64_t GetSize() const { return Size; }
+		FORCEINLINE uint64_t GetSize() const { return Size; }
 
 	public:
 		void* Data = nullptr;
@@ -196,12 +198,13 @@ namespace LkEngine {
 			Release();
 		}
 
-		static FBufferSafe Copy(const void* data, uint64_t size)
+		static FBufferSafe Copy(const void* Data, const uint64_t Size)
 		{
-			FBufferSafe buffer;
-			buffer.Allocate(size);
-			memcpy(buffer.Data, data, size);
-			return buffer;
+			FBufferSafe Buffer;
+			Buffer.Allocate(Size);
+			std::memcpy(Buffer.Data, Data, Size);
+
+			return Buffer;
 		}
 	};
 }

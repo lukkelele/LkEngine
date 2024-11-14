@@ -4,7 +4,7 @@
 
 namespace LkEngine {
 
-    OpenGLIndexBuffer::OpenGLIndexBuffer(const uint64_t InSize)
+    OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t InSize)
 		: m_Size(InSize)
 		, m_Count(InSize / sizeof(decltype(InSize)))
     {
@@ -16,7 +16,7 @@ namespace LkEngine {
 		//LK_OpenGL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)); // UNBIND
     }
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(void* InData, const uint64_t InSize)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(void* InData, const uint32_t InSize)
 		: m_Size(InSize)
 		, m_Count(InSize / sizeof(decltype(InSize)))
 	{

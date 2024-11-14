@@ -8,7 +8,7 @@
 
 namespace LkEngine {
 
-	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(void* InBuffer, const uint64_t InSize)
+	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(void* InBuffer, const uint32_t InSize)
 	{ 
 		switch (LRendererAPI::Current())
 		{
@@ -25,7 +25,7 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(const uint64_t InSize)
+	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(const uint32_t InSize)
 	{ 
 		switch (LRendererAPI::Current())
 		{
