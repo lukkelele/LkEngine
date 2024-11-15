@@ -7,7 +7,6 @@
 #include "LkEngine/Renderer/RendererAPI.h"
 
 #include "LkEngine/Scene/SceneCamera.h"
-#include "LkEngine/Platform/OpenGL/OpenGLRenderer2D.h" // @todo: REMOVE
 
 
 namespace LkEngine
@@ -20,6 +19,7 @@ namespace LkEngine
         , MaxLineIndices(InSpecification.MaxLines * 6)
 	{
 		LCLASS_REGISTER();
+		LK_CORE_ASSERT((MaxVertices > 0) && (MaxIndices > 0) && (MaxLineVertices > 0) && (MaxLineIndices > 0));
 	}
 
 	void LRenderer2D::Initialize()

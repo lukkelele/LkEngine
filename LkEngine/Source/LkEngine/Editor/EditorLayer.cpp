@@ -26,8 +26,8 @@
 #include "LkEngine/UI/ContentBrowser.h"
 #include "LkEngine/UI/DebugPanel.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLRenderer.h"
-#include "LkEngine/Platform/OpenGL/OpenGLImGuiLayer.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLImGuiLayer.h"
 
 
 namespace LkEngine {

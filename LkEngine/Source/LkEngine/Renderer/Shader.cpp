@@ -5,7 +5,7 @@
 #include "LkEngine/Serialization/StreamReader.h"
 #include "LkEngine/Serialization/StreamWriter.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLShader.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLShader.h"
 
 
 #include "RendererAPI.h"

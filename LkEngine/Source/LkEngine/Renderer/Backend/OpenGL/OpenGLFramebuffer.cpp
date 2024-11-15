@@ -1,7 +1,7 @@
 #include "LKpch.h"
 #include "OpenGLFramebuffer.h"
 
-#include "LkEngine/Platform/OpenGL/LkOpenGL.h"
+#include "LkEngine/Renderer/Backend/OpenGL/LkOpenGL.h"
 
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/Texture.h"

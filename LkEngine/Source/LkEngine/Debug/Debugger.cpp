@@ -5,7 +5,7 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Input/Mouse.h"
 
-#include "LkEngine/Platform/OpenGL/LkOpenGL.h"
+#include "LkEngine/Renderer/Backend/OpenGL/LkOpenGL.h"
 
 
 namespace LkEngine {

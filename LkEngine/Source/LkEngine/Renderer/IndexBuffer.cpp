@@ -3,7 +3,7 @@
 
 #include "RendererAPI.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLIndexBuffer.h"
+#include "Backend/OpenGL/OpenGLIndexBuffer.h"
 
 
 namespace LkEngine {

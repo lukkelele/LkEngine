@@ -1,7 +1,7 @@
 #include "LKpch.h"
 #include "RenderPass.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLRenderPass.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderPass.h"
 
 #include "RendererAPI.h"
 

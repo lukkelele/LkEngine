@@ -10,13 +10,12 @@
 
 /* Windows Platform */
 #if defined(LK_PLATFORM_WINDOWS)
-	#include "LkEngine/Platform/Windows/WindowsThread.h"
+#	include "LkEngine/Platform/Windows/WindowsThread.h"
 	namespace LkEngine 
 	{
 		using TThread = LThread<LWindowsThread>;
 	}
 #endif
-
 
 namespace LkEngine {
 

@@ -1,7 +1,7 @@
 #include "LKpch.h"
 #include "VertexBuffer.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLVertexBuffer.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLVertexBuffer.h"
 
 #include "RendererAPI.h"
 

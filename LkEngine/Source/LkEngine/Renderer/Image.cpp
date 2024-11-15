@@ -1,7 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Image.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLImage.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLImage.h"
 
 #include "LkEngine/Renderer/RendererAPI.h"
 

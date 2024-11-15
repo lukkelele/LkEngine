@@ -7,7 +7,7 @@
 
 #include "LkEngine/Renderer/Renderer.h"
 
-#include "LkEngine/Platform/OpenGL/LkOpenGL.h"
+#include "LkEngine/Renderer/Backend/OpenGL/LkOpenGL.h"
 
 
 namespace LkEngine {
@@ -35,39 +35,55 @@ namespace LkEngine {
 		{
 			/* Assimp uses A, B, C, D for the rows and 1, 2, 3, 4 for columns. */
 			glm::mat4 result{};
-			result[0][0] = Matrix.a1; result[1][0] = Matrix.a2; result[2][0] = Matrix.a3; result[3][0] = Matrix.a4;
-			result[0][1] = Matrix.b1; result[1][1] = Matrix.b2; result[2][1] = Matrix.b3; result[3][1] = Matrix.b4;
-			result[0][2] = Matrix.c1; result[1][2] = Matrix.c2; result[2][2] = Matrix.c3; result[3][2] = Matrix.c4;
-			result[0][3] = Matrix.d1; result[1][3] = Matrix.d2; result[2][3] = Matrix.d3; result[3][3] = Matrix.d4;
+			result[0][0] = Matrix.a1; 
+			result[1][0] = Matrix.a2; 
+			result[2][0] = Matrix.a3; 
+			result[3][0] = Matrix.a4;
+
+			result[0][1] = Matrix.b1; 
+			result[1][1] = Matrix.b2; 
+			result[2][1] = Matrix.b3; 
+			result[3][1] = Matrix.b4;
+
+			result[0][2] = Matrix.c1; 
+			result[1][2] = Matrix.c2; 
+			result[2][2] = Matrix.c3; 
+			result[3][2] = Matrix.c4;
+
+			result[0][3] = Matrix.d1; 
+			result[1][3] = Matrix.d2; 
+			result[2][3] = Matrix.d3; 
+			result[3][3] = Matrix.d4;
 
 			return result;
 		}
 
-#if LK_MESH_DEBUG_LOG
-		static void PrintNode(aiNode* node, std::size_t depth)
+		[[maybe_unused]] static void PrintNode(aiNode* node, std::size_t depth)
 		{
 			LK_MESH_LOG("{0:^{1}}{2} {{", "", depth * 3, node->mName.C_Str());
-			++depth;
-			glm::vec3 translation;
-			glm::quat rotationQuat;
-			glm::vec3 scale;
-			glm::mat4 transform = Mat4FromAIMatrix4x4(node->mTransformation);
-			Math::DecomposeTransform(transform, translation, rotationQuat, scale);
+			depth++;
+			glm::vec3 Translation;
+			glm::quat RotationQuat;
+			glm::vec3 Scale;
+			glm::mat4 Transform = Mat4FromAIMatrix4x4(node->mTransformation);
+			Math::DecomposeTransform(Transform, Translation, RotationQuat, Scale);
 
-			const glm::vec3 rotation = glm::degrees(glm::eulerAngles(rotationQuat));
+			const glm::vec3 Rotation = glm::degrees(glm::eulerAngles(RotationQuat));
 
-			LK_MESH_LOG("{0:^{1}}translation: ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", depth * 3, translation.x, translation.y, translation.z);
-			LK_MESH_LOG("{0:^{1}}rotation:    ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", depth * 3, rotation.x, rotation.y, rotation.z);
-			LK_MESH_LOG("{0:^{1}}scale:       ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", depth * 3, scale.x, scale.y, scale.z);
+			LK_MESH_LOG("{0:^{1}} Translation: ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", 
+						depth * 3, Translation.x, Translation.y, Translation.z);
+			LK_MESH_LOG("{0:^{1}} Rotation:    ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", 
+						depth * 3, Rotation.x, Rotation.y, Rotation.z);
+			LK_MESH_LOG("{0:^{1}} Scale:       ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", 
+						depth * 3, Scale.x, Scale.y, Scale.z);
 			for (uint32_t i = 0; i < node->mNumChildren; ++i)
 			{
 				PrintNode(node->mChildren[i], depth);
 			}
-			--depth;
+			depth--;
 
 			LK_MESH_LOG("{0:^{1}}}}", "", depth * 3);
 		}
-#endif
 
 	}
 

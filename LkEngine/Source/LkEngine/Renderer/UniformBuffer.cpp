@@ -2,7 +2,7 @@
 #include "LkEngine/Renderer/UniformBuffer.h"
 
 #include "LkEngine/Renderer/RendererAPI.h"
-#include "LkEngine/Platform/OpenGL/OpenGLUniformBuffer.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLUniformBuffer.h"
 
 #include "LkEngine/Renderer/Shader.h"
 

@@ -26,25 +26,34 @@
 #endif
 
 /// @TODO: Do Platform implementations in separate headers for Windows/Linux
-/** Windows Platform */
-#if defined(LK_PLATFORM_WINDOWS)
-#	define STDCALL  __stdcall
-#	define VARARGS  __cdecl
-#	ifdef FORCEINLINE
-#		undef FORCEINLINE
-#		define FORCEINLINE  __forceinline
-#	endif
-
-#	define FORCEINLINE  __forceinline
-#	define LK_ITOA(c, buf, size, p)  _itoa_s(c, buf, size, p)
+#ifdef FORCEINLINE
+#undef FORCEINLINE
 #endif
 
-/** Linux Platform */
-#if defined(LK_PLATFORM_LINUX)
-	#define STDCALL  __stdcall
-	#define VARARGS  __cdecl
-	#define FORCEINLINE __forceinline
-	#define LK_ITOA(c, buf, size, p)  void() // FIXME
+/** 
+ * Platform: Windows
+ */
+#if defined(LK_PLATFORM_WINDOWS)
+#	define STDCALL					__stdcall
+#	define VARARGS					__cdecl
+#	define FORCEINLINE				__forceinline
+#	define WARNINGS_DISABLE()		__pragma(warning(push, 0))
+#	define WARNINGS_ENABLE()		__pragma(warning(pop))
+#	define LK_ITOA(c, buf, size, p)	_itoa_s(c, buf, size, p)
+/** 
+ * Platform: Linux
+ */
+#elif defined(LK_PLATFORM_LINUX)
+#	define STDCALL		__stdcall
+#	define VARARGS		__cdecl
+#	define FORCEINLINE	__forceinline
+#	define LK_ITOA(c, buf, size, p)  void() // FIXME
+#	define WARNINGS_DISABLE() \
+        _Pragma("GCC diagnostic push") \
+        _Pragma("GCC diagnostic ignored \"-Wall\"") \
+        _Pragma("GCC diagnostic ignored \"-Wextra\"") \
+        _Pragma("GCC diagnostic ignored \"-Wpedantic\"")
+#	define WARNINGS_ENABLE() _Pragma("GCC diagnostic pop")
 #endif
 
 /* Log formatter. */

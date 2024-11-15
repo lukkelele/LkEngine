@@ -2,7 +2,7 @@
 
 #include "RendererAPI.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLPipeline.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLPipeline.h"
 
 #include "Shader.h"
 #include "VertexBuffer.h"

@@ -2,7 +2,7 @@
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/Renderer.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLTexture.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLTexture.h"
 
 
 namespace LkEngine {

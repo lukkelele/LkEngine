@@ -1,7 +1,7 @@
 #include "LKpch.h"
 #include "LkEngine/Renderer/Material.h"
 
-#include "LkEngine/Platform/OpenGL/OpenGLMaterial.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLMaterial.h"
 
 #include "RendererAPI.h"
 
