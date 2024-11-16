@@ -38,11 +38,11 @@ AssetsDirectory = "%{wks.location}/Assets"
 
 include "External/Dependencies.lua"
 
---|===========================================
+--|---------------------------------------------
 --| LkEngine
 --|
 --| Engine Project.
---|===========================================
+--|---------------------------------------------
 project "LkEngine"
     location "LkEngine"
     kind "StaticLib"
@@ -59,6 +59,7 @@ project "LkEngine"
     defines 
     {
         "LK_RENDERER_API_OPENGL",
+        "LK_OPENGL4", -- OpenGL 4
         "LK_CHAR_UTF8",
         --"LK_CHAR_UNICODE",
 

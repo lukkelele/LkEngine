@@ -6,9 +6,7 @@ AccessModifierOffset: -4
 IndentAccessModifiers: false
 AlignAfterOpenBracket: Align
 AlignConsecutiveDeclarations: false
-AlignConsecutiveMacros: 
-  Enabled: true
-  AcrossComments: true
+AlignConsecutiveMacros: true
 AlignEscapedNewlines: Left
 AlignOperands: DontAlign
 AlignTrailingComments: true
@@ -17,13 +15,14 @@ AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortLoopsOnASingleLine: false
 AllowShortLambdasOnASingleLine: None
+BreakBeforeBraces: Custom
 BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true
   AfterControlStatement: true
   AfterEnum: true
   AfterFunction: true
-  AfterNamespace: true
+  AfterNamespace: false
   AfterObjCDeclaration: true
   AfterStruct: true
   AfterUnion: true
@@ -35,7 +34,6 @@ BraceWrapping:
   IndentBraces: false
   SplitEmptyRecord: true
 BreakBeforeBinaryOperators: NonAssignment
-BreakBeforeBraces: Allman
 BreakInheritanceList: AfterColon
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
@@ -44,20 +42,21 @@ BitFieldColonSpacing: Both
 ColumnLimit: 0
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 Cpp11BracedListStyle: false
-EmptyLineBeforeAccessModifier: Never 
+EmptyLineBeforeAccessModifier: LogicalBlock
 IndentCaseBlocks: false
 IndentCaseLabels: true
 AllowShortCaseLabelsOnASingleLine: true
 AlignConsecutiveShortCaseStatements:
   Enabled: true
-  AcrossEmptyLines: false
+  AcrossEmptyLines: true
   AcrossComments: false
   AlignCaseColons: false
 IndentWidth: 4
 IndentExternBlock: AfterExternBlock
 NamespaceIndentation: All
+AlignArrayOfStructures: Right
 IndentPPDirectives: AfterHash 
-PPIndentWidth: 2
+PPIndentWidth: 4
 PointerAlignment: Left
 SortIncludes: false
 SpaceBeforeCaseColon: false
@@ -72,3 +71,26 @@ UseTab: Always
 InsertNewlineAtEOF: true
 PackConstructorInitializers: Never
 LambdaBodyIndentation: OuterScope
+FixNamespaceComments: false
+CompactNamespaces: false
+MaxEmptyLinesToKeep: 2
+
+# Not yet supported in Visual Studio
+#KeepEmptyLines:
+#  AtEndOfFile: true
+#  AtStartOfBlock: true
+#  AtStartOfFile: true
+
+KeepEmptyLinesAtTheStartOfBlocks: true
+KeepEmptyLinesAtEOF: true
+SeparateDefinitionBlocks: Leave
+SpaceAfterTemplateKeyword: false
+ExperimentalAutoDetectBinPacking: false
+BinPackArguments: true 
+BinPackParameters: true 
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: true
+PenaltyBreakAssignment: 100
+PenaltyBreakBeforeFirstCallParameter: 200
+PenaltyBreakOpenParenthesis: 180
+PenaltyBreakTemplateDeclaration: 100
