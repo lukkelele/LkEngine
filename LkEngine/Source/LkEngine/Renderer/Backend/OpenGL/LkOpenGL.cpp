@@ -227,6 +227,8 @@ namespace LkEngine {
 
 			CubeTexture_ = LoadTexture("Assets/Textures/container.jpg");
 			FloorTexture_ = LoadTexture("Assets/Textures/metal.png");
+
+			SetupSkybox();
 		}
 
 		// void GenerateCubeVaoAndVbo(uint32_t& vao, uint32_t& vbo)

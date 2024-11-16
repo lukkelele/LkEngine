@@ -43,20 +43,18 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glBindBuffer(GL_UNIFORM_BUFFER, 0));
 	}
 
-	void LOpenGLUniformBuffer::SetBinding(const TObjectPtr<LShader> Shader, std::string_view ubName, const uint32_t BlockIndex)
+	void LOpenGLUniformBuffer::SetBinding(const TObjectPtr<LShader> Shader, std::string_view UBName, const uint32_t BlockIndex)
 	{
-		//uint32_t UBIndex = glGetUniformBlockIndex(Shader->GetRendererID(), std::string(ubName).c_str());
 		uint32_t UBIndex;
-		LK_OpenGL_Verify(UBIndex = glGetUniformBlockIndex(Shader->GetRendererID(), std::string(ubName).c_str()));
+		LK_OpenGL_Verify(UBIndex = glGetUniformBlockIndex(Shader->GetRendererID(), std::string(UBName).c_str()));
 		if (UBIndex == BlockIndex)
 		{
-			LK_CORE_DEBUG("Uniformbuffer is already bound to {} for block \"{}\"", BlockIndex, ubName);
+			LK_CORE_DEBUG("Uniformbuffer is already bound to {} for block \"{}\"", BlockIndex, UBName);
 			return;
 		}
 
 		LK_OpenGL_Verify(glUniformBlockBinding(Shader->GetRendererID(), UBIndex, BlockIndex));
-		LK_CORE_DEBUG_TAG("OpenGLUniformBuffer", "Updated buffer binding, block index is now set to {} for block {}", BlockIndex, ubName);
-		//glUniformBlockBinding(Shader->GetRendererID(), m_ID, BlockIndex);
+		LK_CORE_DEBUG_TAG("OpenGLUniformBuffer", "Updated buffer binding, block index is now set to {} for block {}", BlockIndex, UBName);
 	}
 
 

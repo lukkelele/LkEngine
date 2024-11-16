@@ -35,7 +35,7 @@ namespace LkEngine
 
 	void LSceneCamera::Update(float ts)
 	{
-		if (m_KeyboardEnabled)
+		if (bKeyboardEnabled)
 		{
 			/* WASD */
 			if (LKeyboard::IsKeyPressed(EKey::W))
@@ -65,7 +65,7 @@ namespace LkEngine
 			}
 		}
 
-		if (m_MouseEnabled)
+		if (bMouseEnabled)
 		{
 		}
 

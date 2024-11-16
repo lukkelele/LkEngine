@@ -26,7 +26,7 @@ namespace LkEngine {
 
 	/**
 	 * LCamera
-	 * 
+	 *
 	 *  Base camera class.
 	 */
 	class LCamera : public LObject
@@ -38,8 +38,8 @@ namespace LkEngine {
 
 	public:
 		LCamera();
-		LCamera(const glm::mat4& projection);
-		LCamera(const float InDegFov, const float InWidth, const float InHeight, 
+		LCamera(const glm::mat4& InProjection);
+		LCamera(const float InDegFov, const float InWidth, const float InHeight,
 				const float InNearP, const float InFarP);
 		virtual ~LCamera() = default;
 
@@ -51,21 +51,23 @@ namespace LkEngine {
 		FORCEINLINE ECameraType GetType() const { return Type; }
 		FORCEINLINE ECameraProjection GetProjectionType() const { return ProjectionType; }
 
-		virtual void SetProjection(const glm::mat4& InProjection) 
-		{ 
+		virtual void SetProjection(const glm::mat4& InProjection)
+		{
 			if (m_ProjectionMatrix != InProjection)
 			{
 				m_ProjectionMatrix = InProjection;
+
 				bDirty = true;
 			}
 		}
-		FORCEINLINE void SetProjectionType(ECameraProjection InProjection) 
-		{ 
+		FORCEINLINE void SetProjectionType(ECameraProjection InProjection)
+		{
 			if (ProjectionType != InProjection)
 			{
-				ProjectionType = InProjection; 
-				bDirty = true;
+				ProjectionType = InProjection;
 				OnCameraProjectionChanged.Broadcast(ProjectionType);
+
+				bDirty = true;
 			}
 		}
 
@@ -74,17 +76,17 @@ namespace LkEngine {
 		FORCEINLINE float GetPerspectiveNearClip() const { return m_PerspectiveNear; }
 		FORCEINLINE float GetPerspectiveFarClip() const { return m_PerspectiveFar; }
 
-		FORCEINLINE void SetPerspectiveNearClip(const float InNearClip) 
-		{ 
+		FORCEINLINE void SetPerspectiveNearClip(const float InNearClip)
+		{
 			if (m_PerspectiveNear != InNearClip)
 			{
-				m_PerspectiveNear = InNearClip; 
+				m_PerspectiveNear = InNearClip;
 				bDirty = true;
 			}
 		}
 
-		FORCEINLINE void SetPerspectiveFarClip(const float InFarClip) 
-		{ 
+		FORCEINLINE void SetPerspectiveFarClip(const float InFarClip)
+		{
 			if (m_PerspectiveFar != InFarClip)
 			{
 				m_PerspectiveFar = InFarClip;
@@ -96,20 +98,20 @@ namespace LkEngine {
 		FORCEINLINE float GetOrthographicNearClip() const { return m_OrthographicNear; }
 		FORCEINLINE float GetOrthographicFarClip() const { return m_OrthographicFar; }
 
-		FORCEINLINE void SetOrthographicNearClip(const float InNearClip) 
-		{ 
+		FORCEINLINE void SetOrthographicNearClip(const float InNearClip)
+		{
 			if (m_OrthographicNear != InNearClip)
 			{
-				m_OrthographicNear = InNearClip; 
+				m_OrthographicNear = InNearClip;
 				bDirty = true;
 			}
 		}
 
-		FORCEINLINE void SetOrthographicFarClip(const float InFarClip) 
-		{ 
+		FORCEINLINE void SetOrthographicFarClip(const float InFarClip)
+		{
 			if (m_OrthographicFar != InFarClip)
 			{
-				m_OrthographicFar = InFarClip; 
+				m_OrthographicFar = InFarClip;
 				bDirty = true;
 			}
 		}
@@ -123,7 +125,7 @@ namespace LkEngine {
 			}
 		}
 
-		void SetPerspectiveProjectionMatrix(const float InRadFov, const float InWidth, const float InHeight, 
+		void SetPerspectiveProjectionMatrix(const float InRadFov, const float InWidth, const float InHeight,
 											const float InNearP, const float InFarP)
 		{
 			LK_VERIFY((InWidth > 0) && (InHeight > 0), "Cannot set projection matrix with invalid arguments");
@@ -131,32 +133,32 @@ namespace LkEngine {
 			bDirty = true;
 		}
 
-		void SetOrthoProjectionMatrix(const float InWidth, const float InHeight, 
+		void SetOrthoProjectionMatrix(const float InWidth, const float InHeight,
 									  const float InNearP, const float InFarP)
 		{
 			LK_VERIFY((InWidth > 0) && (InHeight > 0));
 			m_ProjectionMatrix = glm::ortho(
-				-(InWidth  * 0.50f), (InWidth  * 0.50f),
+				-(InWidth * 0.50f), (InWidth * 0.50f),
 				-(InHeight * 0.50f), (InHeight * 0.50f),
 				InNearP, InFarP);
 
 			bDirty = true;
 		}
 
-		virtual void SetMouseEnabled(const bool InEnabled) 
-		{ 
-			if (m_MouseEnabled != InEnabled)
+		virtual void SetMouseEnabled(const bool InEnabled)
+		{
+			if (bMouseEnabled != InEnabled)
 			{
-				m_MouseEnabled = InEnabled; 
+				bMouseEnabled = InEnabled;
 				OnCameraInputModified.Broadcast();
 			}
 		}
 
-		virtual void SetKeyboardEnabled(const bool InEnabled) 
-		{ 
-			if (m_KeyboardEnabled != InEnabled)
+		virtual void SetKeyboardEnabled(const bool InEnabled)
+		{
+			if (bKeyboardEnabled != InEnabled)
 			{
-				m_KeyboardEnabled = InEnabled;
+				bKeyboardEnabled = InEnabled;
 				OnCameraInputModified.Broadcast();
 			}
 		}
@@ -164,6 +166,7 @@ namespace LkEngine {
 	public:
 		FCameraProjectionChanged OnCameraProjectionChanged;
 		FCameraInputModified OnCameraInputModified;
+
 	protected:
 		ECameraProjection ProjectionType = ECameraProjection::Perspective;
 		ECameraType Type = ECameraType::None;
@@ -182,8 +185,8 @@ namespace LkEngine {
 		float m_RotationSpeed = 0.0002f;
 		float m_TravelSpeed = 1.0f;
 		float m_MouseSpeed = 1.0f;
-		bool m_MouseEnabled = true;
-		bool m_KeyboardEnabled = true;
+		bool bMouseEnabled = true;
+		bool bKeyboardEnabled = true;
 
 		glm::mat4 m_ViewMatrix = glm::mat4(1.0f);
 		glm::mat4 m_ProjectionMatrix = glm::mat4(1.0f);

@@ -8,7 +8,7 @@
 
 namespace LkEngine {
 
-	OpenGLTexture2D::OpenGLTexture2D(const FTextureSpecification& InSpecification, FBuffer InBuffer)
+	LOpenGLTexture2D::LOpenGLTexture2D(const FTextureSpecification& InSpecification, FBuffer InBuffer)
 		: Specification(InSpecification)
 		, m_Width(InSpecification.Width)
 		, m_Height(InSpecification.Height)
@@ -23,7 +23,7 @@ namespace LkEngine {
 		m_Image = LImage2D::Create(ImageSpec, InBuffer);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const FTextureSpecification& InSpecification)
+	LOpenGLTexture2D::LOpenGLTexture2D(const FTextureSpecification& InSpecification)
 		: Specification(InSpecification)
 		, m_Width(InSpecification.Width)
 		, m_Height(InSpecification.Height)
@@ -41,7 +41,7 @@ namespace LkEngine {
 			stbi_set_flip_vertically_on_load(1);
 
 			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Loading image from path \"{}\"", m_FilePath.string());
-			stbi_uc* data = stbi_load(Specification.Path.c_str(), &Width, &Height, &Channels, 4);
+			stbi_uc* LoadedData = stbi_load(Specification.Path.c_str(), &Width, &Height, &Channels, 4);
 
 			const uint32_t DataSize = ImageUtils::GetMemorySize(Specification.Format,
 																Specification.Width,
@@ -50,10 +50,16 @@ namespace LkEngine {
 			ImageSpec.Size = (uint64_t)Width * (uint64_t)Height * (uint64_t)Channels;
 			if (ImageSpec.Size != DataSize)
 			{
-				data = MemoryUtils::ResizeImageData(data, DataSize, Width, Height, InSpecification.Width, InSpecification.Height, STBIR_RGBA);
+				LoadedData = MemoryUtils::ResizeImageData(LoadedData, 
+														  DataSize, 
+														  Width, 
+														  Height, 
+														  InSpecification.Width, 
+														  InSpecification.Height, 
+														  STBIR_RGBA);
 			}
 
-			m_Image = LImage2D::Create(ImageSpec, data);
+			m_Image = LImage2D::Create(ImageSpec, LoadedData);
 		}
 		else
 		{
@@ -62,22 +68,26 @@ namespace LkEngine {
 		}
 	}
 
-	OpenGLTexture2D::~OpenGLTexture2D()
+	LOpenGLTexture2D::~LOpenGLTexture2D()
 	{
-		m_Image->Release();
+		if (m_Image)
+		{
+			m_Image->Release();
+		}
 	}
 
-	void OpenGLTexture2D::Bind(uint32_t Slot) const
+	void LOpenGLTexture2D::Bind(uint32_t Slot) const
 	{
+		LK_CORE_ASSERT(m_Image, "Invalid image reference, cannot bind slot {}", Slot);
 		LK_OpenGL_Verify(glBindTextureUnit(Slot, m_Image->GetRendererID()));
 	}
 
-	void OpenGLTexture2D::Unbind(uint32_t Slot) const
+	void LOpenGLTexture2D::Unbind(uint32_t Slot) const
 	{
 		LK_OpenGL_Verify(glBindTextureUnit(Slot, 0));
 	}
 
-	void OpenGLTexture2D::SetData(void* InData, const uint32_t InSize)
+	void LOpenGLTexture2D::SetData(void* InData, const uint32_t InSize)
 	{
 		LK_OpenGL_Verify(glTextureSubImage2D(m_Image->GetRendererID(),
 											 0,
@@ -90,48 +100,48 @@ namespace LkEngine {
 											 InData));
 	}
 
-	void OpenGLTexture2D::Lock()
+	void LOpenGLTexture2D::Lock()
 	{
 		m_Locked = true;
 	}
 
-	void OpenGLTexture2D::Unlock()
+	void LOpenGLTexture2D::Unlock()
 	{
 		m_Locked = false;
 	}
 
-	void OpenGLTexture2D::Load()
+	void LOpenGLTexture2D::Load()
 	{
 		m_Loaded = true;
 	}
 
-	void OpenGLTexture2D::Unload()
+	void LOpenGLTexture2D::Unload()
 	{
 		m_Loaded = false;
 	}
 
-	uint32_t OpenGLTexture2D::GetMipLevelCount() const
+	uint32_t LOpenGLTexture2D::GetMipLevelCount() const
 	{
 		return m_Image->GetSpecification().Mips;
 	}
 
-	void OpenGLTexture2D::Resize(const uint32_t NewWidth, const uint32_t NewHeight)
+	void LOpenGLTexture2D::Resize(const uint32_t NewWidth, const uint32_t NewHeight)
 	{
 		m_Image->Resize(NewWidth, NewHeight);
 	}
 
-	void OpenGLTexture2D::Invalidate()
+	void LOpenGLTexture2D::Invalidate()
 	{
 		m_Image->Invalidate();
 	}
 
-	uint64_t OpenGLTexture2D::GetARBHandle() const
+	uint64_t LOpenGLTexture2D::GetARBHandle() const
 	{
 		return glGetTextureHandleARB(m_Image->GetRendererID());
 	}
 
 
-	OpenGLTextureCube::OpenGLTextureCube(const FTextureSpecification& InSpecification, 
+	LOpenGLTextureCube::LOpenGLTextureCube(const FTextureSpecification& InSpecification, 
 										 std::vector<std::filesystem::path> InFacePaths)
 		: Specification(InSpecification)
 		, m_Width(InSpecification.Width)
@@ -173,12 +183,12 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 	}
 
-	OpenGLTextureCube::~OpenGLTextureCube()
+	LOpenGLTextureCube::~LOpenGLTextureCube()
 	{
 		/* TODO: Release resources. */
 	}
 
-	void OpenGLTextureCube::Bind(const uint32_t Slot) const
+	void LOpenGLTextureCube::Bind(const uint32_t Slot) const
 	{
 		LK_OpenGL_Verify(glActiveTexture(GL_TEXTURE0 + Slot));
 		LK_OpenGL_Verify(glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID));

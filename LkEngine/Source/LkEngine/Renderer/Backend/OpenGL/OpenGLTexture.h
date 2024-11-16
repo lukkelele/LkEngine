@@ -10,13 +10,13 @@
 
 namespace LkEngine {
 
-	class OpenGLTexture2D : public LTexture2D
+	class LOpenGLTexture2D : public LTexture2D
 	{
 	public:
-		OpenGLTexture2D(const FTextureSpecification& InSpecification, FBuffer InBuffer);
-		OpenGLTexture2D(const FTextureSpecification& InSpecification); 
-		OpenGLTexture2D() = delete;
-		~OpenGLTexture2D();
+		LOpenGLTexture2D(const FTextureSpecification& InSpecification, FBuffer InBuffer);
+		LOpenGLTexture2D(const FTextureSpecification& InSpecification); 
+		LOpenGLTexture2D() = delete;
+		~LOpenGLTexture2D();
 
 		virtual void SetData(void* InData, const uint32_t InSize) override;
 		virtual void Invalidate() override;
@@ -84,6 +84,7 @@ namespace LkEngine {
 			m_TextureArrayIndex = ArrayIndex; 
 		}
 
+		/* TODO: Remove */
 		uint64_t GetARBHandle() const;
 
 	private:
@@ -102,13 +103,12 @@ namespace LkEngine {
 	};
 
 
-	class OpenGLTextureCube : public LTextureCube
+	class LOpenGLTextureCube : public LTextureCube
 	{
 	public:
-		OpenGLTextureCube(const FTextureSpecification& InSpecification, 
-						  std::vector<std::filesystem::path> InFacePaths);
-		OpenGLTextureCube() = delete;
-		~OpenGLTextureCube();
+		LOpenGLTextureCube(const FTextureSpecification& InSpecification, std::vector<std::filesystem::path> InFacePaths);
+		LOpenGLTextureCube() = delete;
+		~LOpenGLTextureCube();
 
 		virtual void Bind(uint32_t slot = 0) const override;
 

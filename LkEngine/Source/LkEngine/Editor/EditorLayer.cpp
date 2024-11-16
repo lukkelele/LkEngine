@@ -250,7 +250,6 @@ namespace LkEngine {
 
 		/* FIXME: Temporary debugging. */
 		LOpenGL_Debug::InitializeEnvironment();
-		LOpenGL_Debug::SetupSkybox();
 	}
 
 	void LEditorLayer::OnUpdate(const float DeltaTime)

@@ -16,7 +16,8 @@
  * Set loglevel names to UPPERCASE.
  * Must be defined BEFORE including spdlog.
  */
-#define SPDLOG_LEVEL_NAMES { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF" }
+#define SPDLOG_LEVEL_NAMES \
+	{ "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF" }
 
 /* Ignore warnings raised inside external headers. */
 #pragma warning(push, 0)
