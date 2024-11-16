@@ -33,12 +33,12 @@ namespace LkEngine {
 
 	void LOpenGLRenderer::Initialize()
 	{
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Initializing");
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Initializing renderer");
 		RendererData = new FRendererData();
 
 		RenderContext = LWindow::Get().GetRenderContext().As<LOpenGLContext>();
 
-		// Texture Arrays
+		/* Array texture dimensions. */
 		static constexpr ETextureArrayDimension TextureArrayDimensions[] = {
 			ETextureArrayDimension::Dim_512x512,
 			ETextureArrayDimension::Dim_1024x1024,
@@ -56,23 +56,22 @@ namespace LkEngine {
 			LK_CORE_TRACE_TAG("OpenGLRenderer", "Added array texture {} with name \"{}\"", i, TextureArraySpec.DebugName);
 		}
 
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Adding Textures to Array Textures");
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Binding array textures");
 		const auto& Textures2D = LAssetManager::GetTextures2D();
-		for (std::size_t i = 0; i < Textures2D.size(); i++)
+		for (const auto& [TextureName, Texture] : Textures2D)
 		{
-			const TObjectPtr<LOpenGLImage2D> img = Textures2D.at(i).second->GetImage().As<LOpenGLImage2D>();
-			switch (img->GetWidth())
+			switch (Texture->GetWidth())
 			{
 				case 512:
-					GetTextureArray(0)->AddTextureToArray(Textures2D[i].second);
+					GetTextureArray(0)->AddTextureToArray(Texture);
 					break;
 
 				case 1024:
-					GetTextureArray(1)->AddTextureToArray(Textures2D[i].second);
+					GetTextureArray(1)->AddTextureToArray(Texture);
 					break;
 
 				case 2048:
-					GetTextureArray(2)->AddTextureToArray(Textures2D[i].second);
+					GetTextureArray(2)->AddTextureToArray(Texture);
 					break;
 
 				default:
@@ -80,44 +79,38 @@ namespace LkEngine {
 			}
 		}
 
-#if 1
-		/* Add Texture array references to OpenGLRenderer2D as well. */
-		// for (int i = 0; i < LOpenGLRenderer2D::MaxTextureArrays; i++)
+		/* Bind the array textures. */
 		for (int i = 0; i < LRenderer2D::MaxTextureArrays; i++)
 		{
 			if (RendererData->TextureArrays[i])
 			{
-				LK_CORE_DEBUG_TAG("OpenGLRenderer", "TextureArray {}  RendererID={}", i, RendererData->TextureArrays[i]->GetRendererID());
-				// Renderer2D->TextureArrays[i] = RendererData->TextureArrays[i];
+				LK_CORE_TRACE_TAG("OpenGLRenderer", "TextureArray {}  RendererID={}", i, RendererData->TextureArrays[i]->GetRendererID());
 				BindTextureArray(i);
 			}
 		}
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Initializing 2D renderer");
+
+		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Creating render passes");
+		/* Create render passes. */
+		/* Render Pass: Geometric */
+		FRenderPassSpecification RP_Geometric;
+		RP_Geometric.DebugName = "RenderPass_Geometric";
+		GeometricPass = TObjectPtr<LOpenGLRenderPass>::Create(RP_Geometric);
+
+		/* Render Pass: 2D */
+		FRenderPassSpecification RP_2D;
+		RP_2D.DebugName = "RenderPass_2D";
+		RenderPass2D = TObjectPtr<LOpenGLRenderPass>::Create(RP_2D);
 
 		RenderContext->SetDepthEnabled(true);
-		/* Default to triangles */
 		SetPrimitiveTopology(ERenderTopology::Triangles);
-
-		/* Create render passes. */
-		{
-			/* Geometric. */
-			RenderPassSpecification RenderPassSpec;
-			RenderPassSpec.DebugName = "RenderPass_Geometric";
-			m_GeometricPass = TObjectPtr<OpenGLRenderPass>::Create(RenderPassSpec);
-
-			/* 2D. */
-			RenderPassSpec.DebugName = "RenderPass_2D";
-			m_RenderPass2D = TObjectPtr<OpenGLRenderPass>::Create(RenderPassSpec);
-		}
-#endif
 	}
 
 	void LOpenGLRenderer::Shutdown()
 	{
-		if (m_GeometricPass)
+		if (GeometricPass)
 		{
-			m_GeometricPass->Terminate();
-			m_GeometricPass.Release();
+			GeometricPass->Terminate();
+			GeometricPass.Release();
 		}
 	}
 
@@ -331,14 +324,15 @@ namespace LkEngine {
 		LK_UNUSED(RenderCommandBuffer);
 	}
 
-	TObjectPtr<LOpenGLTextureArray> LOpenGLRenderer::GetTextureArray(int idx)
+	TObjectPtr<LOpenGLTextureArray> LOpenGLRenderer::GetTextureArray(const int Index)
 	{
-		return RendererData->TextureArrays[idx];
+		LK_CORE_ASSERT(RendererData && RendererData->TextureArrays[Index]);
+		return RendererData->TextureArrays[Index];
 	}
 
 	void LOpenGLRenderer::BindTextureArray(const uint8_t Index)
 	{
-		LK_VERIFY(RendererData);
+		LK_CORE_ASSERT(RendererData && RendererData->TextureArrays[Index]);
 		LTextureArray& TextureArray = *RendererData->TextureArrays[Index];
 		TextureArray.Bind();
 	}
@@ -351,7 +345,7 @@ namespace LkEngine {
 
 	TObjectPtr<LOpenGLTextureArray> LOpenGLRenderer::GetTextureArrayWithDimension(const ETextureArrayDimension TextureArrayDimension)
 	{
-		for (TObjectPtr<LOpenGLTextureArray>& TextureArray : RendererData->TextureArrays)
+		for (const TObjectPtr<LOpenGLTextureArray>& TextureArray : RendererData->TextureArrays)
 		{
 			if (TextureArray->Specification.TextureArrayDimension == TextureArrayDimension)
 			{

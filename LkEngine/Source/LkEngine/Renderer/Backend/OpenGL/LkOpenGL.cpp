@@ -200,7 +200,7 @@ namespace LkEngine {
 
 		void RenderFloor(const glm::mat4& view, const glm::mat4& projection)
 		{
-			glEnable(GL_DEPTH_TEST);
+			LK_OpenGL_Verify(glEnable(GL_DEPTH_TEST));
 			LRenderer::GetViewportFramebuffer()->Bind();
 
 			ModelMVP = glm::mat4(1.0f);
@@ -212,7 +212,7 @@ namespace LkEngine {
 			PlaneTexture->Bind();
 
 			DebugShader->Set("u_Model", glm::mat4(1.0f));
-			glDrawArrays(GL_TRIANGLES, 0, 6);
+			LK_OpenGL_Verify(glDrawArrays(GL_TRIANGLES, 0, 6));
 
 			LFramebuffer::TargetSwapChain();
 		}

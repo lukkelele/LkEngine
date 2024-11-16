@@ -8,8 +8,7 @@
 
 namespace LkEngine {
 
-	/// @FIXME: Add E prefix
-	enum class RenderPassResourceType : uint16_t
+	enum class ERenderPassResourceType : uint16_t
 	{
 		None = 0,
 		UniformBuffer,
@@ -21,8 +20,7 @@ namespace LkEngine {
 		Image2D
 	};
 
-	/// @FIXME: Add E prefix
-	enum class RenderPassInputType : uint16_t
+	enum class ERenderPassInputType : uint16_t
 	{
 		None = 0,
 		UniformBuffer,
@@ -35,27 +33,27 @@ namespace LkEngine {
 		StorageImage3D
 	};
 
-	struct RenderPassInput
+	struct FRenderPassInput
 	{
-		RenderPassResourceType Type = RenderPassResourceType::None;
+		ERenderPassResourceType Type = ERenderPassResourceType::None;
 	};
 
-	struct RenderPassInputDeclaration
+	struct FRenderPassInputDeclaration
 	{
-		RenderPassInputType Type = RenderPassInputType::None;
+		ERenderPassInputType Type = ERenderPassInputType::None;
 		uint32_t Set = 0;
 		uint32_t Binding = 0;
 		uint32_t Count = 0;
-		std::string Name;
+		std::string Name{};
 	};
 
-	struct RenderPassSpecification
+	struct FRenderPassSpecification
 	{
 		TObjectPtr<LPipeline> Pipeline{};
 
 		glm::vec4 MarkerColor;
 
-		std::string DebugName;
+		std::string DebugName{};
 	};
 
 	class LRenderPass : public LObject
@@ -63,32 +61,33 @@ namespace LkEngine {
 	public:
 		virtual ~LRenderPass() = default;
 
-		virtual RenderPassSpecification& GetSpecification() = 0;
-		virtual const RenderPassSpecification& GetSpecification() const = 0;
+		virtual FRenderPassSpecification& GetSpecification() = 0;
+		virtual const FRenderPassSpecification& GetSpecification() const = 0;
 
 		virtual TObjectPtr<LPipeline> GetPipeline() const = 0;
 		virtual TObjectPtr<LFramebuffer> GetTargetFramebuffer() const = 0;
 
-		virtual void SetInput(std::string_view name, TObjectPtr<LImage> image) = 0;
-		virtual void SetInput(std::string_view name, TObjectPtr<LTexture2D> texture) = 0;
-		virtual void SetInput(std::string_view name, TObjectPtr<LUniformBuffer> uniformBuffer) = 0;
+		virtual void SetInput(std::string_view Name, TObjectPtr<LImage> Image) = 0;
+		virtual void SetInput(std::string_view Name, TObjectPtr<LTexture2D> Texture) = 0;
+		virtual void SetInput(std::string_view Name, TObjectPtr<LUniformBuffer> UniformBuffer) = 0;
 
-		virtual TObjectPtr<LImage> GetOutput(uint32_t index) = 0;
+		virtual TObjectPtr<LImage> GetOutput(const uint32_t Index) = 0;
 		virtual TObjectPtr<LImage> GetDepthOutput() = 0;
 		virtual uint32_t GetFirstSetIndex() const =0;
 
 		virtual bool Validate() = 0;
+		virtual bool IsInvalidated(const uint32_t Set, const uint32_t Binding) const = 0;
+
 		virtual void Bake() = 0;
 		virtual bool Baked() const = 0;
 		virtual void Prepare() = 0;
 
 		virtual void Terminate() = 0;
 
-		static TObjectPtr<LRenderPass> Create(const RenderPassSpecification& spec);
+		static TObjectPtr<LRenderPass> Create(const FRenderPassSpecification& Specification);
 
 	private:
 		LCLASS(LRenderPass)
 	};
-
 
 }

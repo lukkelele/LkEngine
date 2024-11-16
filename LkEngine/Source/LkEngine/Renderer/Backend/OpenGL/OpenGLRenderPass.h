@@ -6,40 +6,38 @@
 
 namespace LkEngine {
 
-	///------------------------------------------------
-	/// @FIXME: Not implemented.
-	///------------------------------------------------
-
     /**
      * LOpenGLRenderPass
+	 * 
+	 * @note: This is not implemented yet.
      */
-    class OpenGLRenderPass : public LRenderPass
+    class LOpenGLRenderPass : public LRenderPass
     {
     public:
-		OpenGLRenderPass(const RenderPassSpecification& InSpecification);
-		OpenGLRenderPass() = delete;
-		~OpenGLRenderPass() = default;
+		LOpenGLRenderPass(const FRenderPassSpecification& InSpecification);
+		LOpenGLRenderPass() = delete;
+		~LOpenGLRenderPass() = default;
 
-		FORCEINLINE virtual RenderPassSpecification& GetSpecification() override 
+		FORCEINLINE virtual FRenderPassSpecification& GetSpecification() override 
 		{ 
-			return m_Specification; 
+			return Specification; 
 		}
 
-		FORCEINLINE virtual const RenderPassSpecification& GetSpecification() const override 
+		FORCEINLINE virtual const FRenderPassSpecification& GetSpecification() const override 
 		{ 
-			return m_Specification; 
+			return Specification; 
 		}
 
-		TObjectPtr<LFramebuffer> GetTargetFramebuffer() const;
-		TObjectPtr<LPipeline> GetPipeline() const;
+		virtual TObjectPtr<LFramebuffer> GetTargetFramebuffer() const override;
+		virtual TObjectPtr<LPipeline> GetPipeline() const override;
 
-		void SetInput(std::string_view name, TObjectPtr<LImage> image);
-		void SetInput(std::string_view name, TObjectPtr<LTexture2D> texture);
-		void SetInput(std::string_view name, TObjectPtr<LUniformBuffer> uniformBuffer);
+		virtual void SetInput(std::string_view Name, TObjectPtr<LImage> Image) override;
+		virtual void SetInput(std::string_view Name, TObjectPtr<LTexture2D> Texture) override;
+		virtual void SetInput(std::string_view Name, TObjectPtr<LUniformBuffer> UniformBuffer) override;
 
-		TObjectPtr<LImage> GetOutput(uint32_t index);
-		TObjectPtr<LImage> GetDepthOutput();
-		uint32_t GetFirstSetIndex() const;
+		virtual TObjectPtr<LImage> GetOutput(const uint32_t Index) override;
+		virtual TObjectPtr<LImage> GetDepthOutput() override;
+		virtual uint32_t GetFirstSetIndex() const override;
 
 		virtual bool Validate() override;
 		virtual void Bake() override;
@@ -47,12 +45,12 @@ namespace LkEngine {
 		virtual void Prepare() override;
 		virtual void Terminate() override;
 
-		bool IsInvalidated(uint32_t Set, uint32_t Binding) const;
+		virtual bool IsInvalidated(const uint32_t Set, const uint32_t Binding) const override;
 
     private:
-		RenderPassSpecification m_Specification{};
+		FRenderPassSpecification Specification{};
 
-		LCLASS(OpenGLRenderPass)
+		LCLASS(LOpenGLRenderPass)
     };
 
 }

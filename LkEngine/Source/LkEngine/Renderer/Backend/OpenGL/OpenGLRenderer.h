@@ -112,13 +112,14 @@ namespace LkEngine {
         TObjectPtr<LOpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension TextureArrayDimension);
 
     private:
-        uint8_t m_Topology = GL_TRIANGLES;
+		static_assert(GL_TRIANGLES == sizeof(uint32_t));
+        uint32_t m_Topology = GL_TRIANGLES;
 
         TObjectPtr<LOpenGLRenderer2D> Renderer2D{};
 		TObjectPtr<LOpenGLContext> RenderContext{};
 
-        TObjectPtr<OpenGLRenderPass> m_GeometricPass{};
-		TObjectPtr<OpenGLRenderPass> m_RenderPass2D{};
+        TObjectPtr<LOpenGLRenderPass> GeometricPass{};
+		TObjectPtr<LOpenGLRenderPass> RenderPass2D{};
 
         LCLASS(LOpenGLRenderer)
     };

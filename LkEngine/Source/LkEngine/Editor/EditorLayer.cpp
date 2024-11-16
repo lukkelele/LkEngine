@@ -48,6 +48,8 @@ namespace LkEngine {
 		LVector2 LastSidebarRightSize{};
 		LVector2 LastBottomBarPos{};
 		LVector2 LastBottomBarSize{};
+
+		bool bRenderSkybox = true;
 	}
 
 	static TObjectPtr<LTexture2D> FloorTexture;
@@ -83,9 +85,7 @@ namespace LkEngine {
 		EditorViewport = TObjectPtr<LViewport>::Create();
 		EditorViewport->SetViewportBounds(0, { 0.0f, 0.0f });
 		EditorViewport->SetViewportBounds(1, { Window->GetWidth(), Window->GetHeight() });
-
 		EditorViewport->SetPosition({ LeftSidebarSize.X, BottomBarSize.Y });
-
 		EditorViewport->SetSize({ (Window->GetWidth() - LeftSidebarSize.X, RightSidebarSize.X),
 								  (Window->GetHeight() - BottomBarSize.Y) });
 
@@ -98,8 +98,7 @@ namespace LkEngine {
 
 		GOnObjectCreated.Add([&](const LObject* NewObject)
 		{
-			LK_CORE_DEBUG_TAG("Editor", "Object  ClassName=\"{}\"  Name=\"{}\"", NewObject->GetClass()->GetName(),
-							  NewObject->ClassName());
+			LK_CORE_DEBUG_TAG("Editor", "Object Class=\"{}\"  Name=\"{}\"", NewObject->GetClass()->GetName(), NewObject->ClassName());
 		});
 
 		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
@@ -114,9 +113,6 @@ namespace LkEngine {
 
 		Window->OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
 		{
-#if 0
-			LK_CORE_DEBUG_TAG("Editor", "Window size updated to ({}, {})", NewWidth, NewHeight);
-#endif
 			SetUpdateWindowFlag(true);
 		});
 
@@ -128,9 +124,6 @@ namespace LkEngine {
 			WindowScalers.X = EditorWindowSize.X / NewWidth;
 			WindowScalers.Y = EditorWindowSize.Y / NewHeight;
 			EditorViewport->SetScalers(WindowScalers);
-#if 0
-			LK_CORE_TRACE_TAG("Editor", "Viewport size updated to ({}, {})  Editor={}", NewWidth, NewHeight, EditorWindowSize.ToString());
-#endif
 
 			SetUpdateWindowFlag(true);
 		});
@@ -205,10 +198,6 @@ namespace LkEngine {
 			LVector2 EditorWindowScalers;
 			EditorWindowScalers.X = static_cast<float>(NewWidth) / Window->GetWidth();
 			EditorWindowScalers.Y = static_cast<float>(NewHeight) / Window->GetHeight();
-#if 0
-			LK_CORE_DEBUG_TAG("Editor", "Setting scalers on EditorViewport: {}   NewWidth={}  NewHeight={}", 
-							  EditorWindowScalers.ToString(), NewWidth, NewHeight);
-#endif
 			EditorViewport->SetScalers(EditorWindowScalers);
 		});
 
@@ -225,31 +214,29 @@ namespace LkEngine {
 		// handles the redirection of input and physics
 		m_Project = LProject::CreateEmptyProject("Editor", true);
 
-		ViewportFramebuffer->Bind();
-
 		/* Bind delegate for GEditorOnSelectionChanged. */
 		auto OnSelectionChanged = [&](const LObject& Object)
 		{
-			LK_CORE_DEBUG_TAG("Editor", "OnSelectionChanged Callback: {}, ReferenceCount: {}", Object.ClassName(),
-							  Object.GetReferenceCount());
+			LK_CORE_DEBUG_TAG("Editor", "OnSelectionChanged: '{}', references: {}", 
+							  Object.ClassName(), Object.GetReferenceCount());
 		};
 		GEditorOnSelectionChanged.Add(OnSelectionChanged);
 
 		/* Force editor viewport to sync data. */
 		EditorViewport->SetDirty(true);
 
-		/* Setup the 2D renderer. */
+		/* Create the 2D renderer. */
 		FRenderer2DSpecification Renderer2DSpec;
 		Renderer2D = TObjectPtr<LRenderer2D>::Create(Renderer2DSpec);
 		Renderer2D->Initialize();
-
-		bInitialized = true;
 
 		DebugCube = LAssetManager::GetDebugCube();
 		LK_VERIFY(DebugCube, "Debug cube not setup correctly");
 
 		/* FIXME: Temporary debugging. */
 		LOpenGL_Debug::InitializeEnvironment();
+
+		bInitialized = true;
 	}
 
 	void LEditorLayer::OnUpdate(const float DeltaTime)
@@ -362,6 +349,12 @@ namespace LkEngine {
 				UI_ShowMouseDetails();
 				ImGui::TreePop(); /* Mouse Information */
 			}
+
+			if (ImGui::Checkbox("Render Skybox", &bRenderSkybox))
+			{
+			}
+
+			/* Poll window information to detect changes window position and size. */
 
 			const ImVec2 WindowSize = ImGui::GetWindowSize();
 			if ((WindowSize.x != RightSidebarSize.X) || (WindowSize.x != RightSidebarSize.Y))
@@ -484,55 +477,61 @@ namespace LkEngine {
 			Shader->Bind();
 
 			glm::mat4 ModelPosition = glm::translate(glm::mat4(1.0f), glm::vec3(5, 0, 5));
-			// Shader->Set("u_CameraPos", EditorCamera->GetViewMatrix());
 			Shader->Set("u_Model", ModelPosition);
 			Shader->Set("u_ViewProjectionMatrix", GetEditorCamera()->GetViewProjectionMatrix());
-			// Shader->Set("u_ViewProjectionMatrix", ProjectionMatrix * ViewMatrix);
 			Shader->Set("u_Texture0", 0);
 			Texture->Bind(0);
 			LK_CORE_ASSERT(DebugCube->GetIndexBuffer()->GetCount() > 0, "IndexBuffer count not valid");
 
 			DebugCube->GetVertexBuffer()->Bind();
-			LK_OpenGL_Verify(glDrawElements(GL_TRIANGLES, DebugCube->GetIndexBuffer()->GetCount(),
-									 // DebugCube->GetIndexBuffer()->GetCount() * 2,
-									 GL_UNSIGNED_INT, nullptr));
+			LK_OpenGL_Verify(
+				glDrawElements(GL_TRIANGLES, DebugCube->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr)
+			);
 
 			LFramebuffer::TargetSwapChain();
 		});
 
 		/**
-		 * TODO: Move elsewhere.
+		 * Render the debug skybox.
+		 * TODO: Move away from here.
 		 */
-		LRenderer::Submit([&]()
+
+		if (bRenderSkybox)
 		{
-			LRenderer::GetViewportFramebuffer()->Bind();
+			LRenderer::Submit([&]()
+			{
+				LRenderer::GetViewportFramebuffer()->Bind();
 
-			LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
-			static constexpr unsigned int SkyboxModelSize = 100;
+				LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
+				static constexpr unsigned int SkyboxModelSize = 100;
 
-			LK_CORE_ASSERT(LOpenGL_Debug::SkyboxShader);
-			LOpenGL_Debug::SkyboxShader->Bind();
+				LK_CORE_ASSERT(LOpenGL_Debug::SkyboxShader);
+				LOpenGL_Debug::SkyboxShader->Bind();
 
-			/* Make the TextureCube follow us. */
-			const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
-			const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
-			LOpenGL_Debug::SkyboxShader->Set("u_ViewProjectionMatrix", ProjectionMatrix * ViewMatrix);
+				/* Make the TextureCube follow us. */
+				const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
+				const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
+				LOpenGL_Debug::SkyboxShader->Set("u_ViewProjectionMatrix", ProjectionMatrix * ViewMatrix);
 
-			LOpenGL_Debug::SkyboxShader->Set("u_CameraPos", EditorCamera->GetViewMatrix());
-			LOpenGL_Debug::SkyboxShader->Set("u_Model", glm::mat4(SkyboxModelSize));
-			LOpenGL_Debug::SkyboxVertexBuffer->Bind();
-			LOpenGL_Debug::SkyboxTexture->Bind(0);
-			LK_OpenGL_Verify(glDrawArrays(GL_TRIANGLES, 0, 36));
+				LOpenGL_Debug::SkyboxShader->Set("u_CameraPos", EditorCamera->GetViewMatrix());
+				LOpenGL_Debug::SkyboxShader->Set("u_Model", glm::mat4(SkyboxModelSize));
+				LOpenGL_Debug::SkyboxVertexBuffer->Bind();
+				LOpenGL_Debug::SkyboxTexture->Bind(0);
+				LK_OpenGL_Verify(glDrawArrays(GL_TRIANGLES, 0, 36));
 
-			LRenderer::SetDepthFunction(EDepthFunction::Less);
+				LRenderer::SetDepthFunction(EDepthFunction::Less);
 
-			LFramebuffer::TargetSwapChain();
-		});
+				LFramebuffer::TargetSwapChain();
+			});
+		}
 
 		Render2D();
 	}
 
-	void LEditorLayer::RenderViewport(TObjectPtr<LImage> image) {}
+	void LEditorLayer::RenderViewport(TObjectPtr<LImage> Image) 
+	{
+		LK_UNUSED(Image);
+	}
 
 	void LEditorLayer::Render2D()
 	{

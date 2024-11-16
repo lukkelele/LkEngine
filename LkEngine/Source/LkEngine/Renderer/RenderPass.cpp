@@ -8,13 +8,13 @@
 
 namespace LkEngine {
 
-	TObjectPtr<LRenderPass> LRenderPass::Create(const RenderPassSpecification& Specification)
+	TObjectPtr<LRenderPass> LRenderPass::Create(const FRenderPassSpecification& Specification)
 	{
 		switch (LRendererAPI::Current())
 		{
 			case ERendererAPI::OpenGL: 
 			{
-				return TObjectPtr<OpenGLRenderPass>::Create(Specification);
+				return TObjectPtr<LOpenGLRenderPass>::Create(Specification);
 			}
 
 			case ERendererAPI::None: break;

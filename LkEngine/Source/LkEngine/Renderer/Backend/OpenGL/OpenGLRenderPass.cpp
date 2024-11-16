@@ -7,76 +7,74 @@
 
 namespace LkEngine {
 
-	OpenGLRenderPass::OpenGLRenderPass(const RenderPassSpecification& InSpecification)
-		: m_Specification(InSpecification)
+	LOpenGLRenderPass::LOpenGLRenderPass(const FRenderPassSpecification& InSpecification)
+		: Specification(InSpecification)
 	{
 		LCLASS_REGISTER();
 	}
 
-	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LImage> image)
+	void LOpenGLRenderPass::SetInput(std::string_view Name, TObjectPtr<LImage> Image)
 	{
 	}
 
-	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LTexture2D> texture)
+	void LOpenGLRenderPass::SetInput(std::string_view Name, TObjectPtr<LTexture2D> Texture)
 	{
 	}
 
-	void OpenGLRenderPass::SetInput(std::string_view name, TObjectPtr<LUniformBuffer> uniformBuffer)
+	void LOpenGLRenderPass::SetInput(std::string_view Name, TObjectPtr<LUniformBuffer> UniformBuffer)
 	{
 	}
 
-	TObjectPtr<LImage> OpenGLRenderPass::GetOutput(uint32_t index)
-	{
-		return nullptr;
-	}
-
-	TObjectPtr<LImage> OpenGLRenderPass::GetDepthOutput()
+	TObjectPtr<LImage> LOpenGLRenderPass::GetOutput(const uint32_t Index)
 	{
 		return nullptr;
 	}
 
-	uint32_t OpenGLRenderPass::GetFirstSetIndex() const
+	TObjectPtr<LImage> LOpenGLRenderPass::GetDepthOutput()
+	{
+		return nullptr;
+	}
+
+	uint32_t LOpenGLRenderPass::GetFirstSetIndex() const
 	{
 		return 1;
 	}
 	
-	bool OpenGLRenderPass::Validate() 
+	bool LOpenGLRenderPass::Validate() 
 	{
 		return true;
 	}
 
-	void OpenGLRenderPass::Bake() 
+	void LOpenGLRenderPass::Bake() 
 	{
 	}
 
-	bool OpenGLRenderPass::Baked() const 
+	bool LOpenGLRenderPass::Baked() const 
 	{
 		return true;
 	}
 
-	void OpenGLRenderPass::Prepare() 
+	void LOpenGLRenderPass::Prepare() 
 	{
 	}
 
-	bool OpenGLRenderPass::IsInvalidated(uint32_t set, uint32_t binding) const
+	bool LOpenGLRenderPass::IsInvalidated(const uint32_t Set, const uint32_t Binding) const
 	{
 		return false;
 	}
 
-	TObjectPtr<LPipeline> OpenGLRenderPass::GetPipeline() const
+	TObjectPtr<LPipeline> LOpenGLRenderPass::GetPipeline() const
 	{
-		return m_Specification.Pipeline;
+		return Specification.Pipeline;
 	}
 
-	TObjectPtr<LFramebuffer> OpenGLRenderPass::GetTargetFramebuffer() const
+	TObjectPtr<LFramebuffer> LOpenGLRenderPass::GetTargetFramebuffer() const
 	{
 		return nullptr;
 	}
 
-	void OpenGLRenderPass::Terminate()
+	void LOpenGLRenderPass::Terminate()
 	{
 	}
-
-
 
 }

@@ -57,8 +57,8 @@ namespace LkEngine
             QuadPipelineSpec.Shader = QuadShader;
 
             LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad pipeline");
-            RenderPassSpecification QuadPassSpec;
-            QuadPassSpec.DebugName = "Renderer2D-QuadPass";
+            FRenderPassSpecification QuadPassSpec;
+            QuadPassSpec.DebugName = "Renderer2D-RenderPass-Quad";
             QuadPassSpec.Pipeline = LPipeline::Create(QuadPipelineSpec);
             //QuadMaterial = LMaterial::Create(QuadShader, "QuadMaterial");
 
