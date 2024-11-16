@@ -138,7 +138,7 @@ namespace LkEngine {
 		return Asset;
     }
 
-    const FAssetMetadata& LRuntimeAssetManager::GetMetadata(FAssetHandle Handle)
+    const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const FAssetHandle Handle)
 	{
 		if (AssetRegistry.Contains(Handle))
 		{
@@ -148,7 +148,7 @@ namespace LkEngine {
 		return NullMetadata;
 	}
 
-    FAssetMetadata& LRuntimeAssetManager::GetMetadataInternal(FAssetHandle Handle)
+    FAssetMetadata& LRuntimeAssetManager::GetMetadataInternal(const FAssetHandle Handle)
 	{
 		if (AssetRegistry.Contains(Handle))
 		{

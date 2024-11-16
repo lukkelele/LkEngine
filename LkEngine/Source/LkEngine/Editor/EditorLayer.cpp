@@ -58,7 +58,7 @@ namespace LkEngine {
 	TObjectPtr<LDebugPanel> DebugPanel{};
 
 	/* --- REMOVE ME --- */
-	static TObjectPtr<LMesh> DebugCube{};
+	static FAssetHandle CubeAssetHandle;
 	/* ----------------- */
 
 	LEditorLayer::LEditorLayer()
@@ -230,8 +230,7 @@ namespace LkEngine {
 		Renderer2D = TObjectPtr<LRenderer2D>::Create(Renderer2DSpec);
 		Renderer2D->Initialize();
 
-		DebugCube = LAssetManager::GetDebugCube();
-		LK_VERIFY(DebugCube, "Debug cube not setup correctly");
+		CubeAssetHandle = LAssetManager::GetDebugCubeHandle();
 
 		/* FIXME: Temporary debugging. */
 		LOpenGL_Debug::InitializeEnvironment();
@@ -257,8 +256,8 @@ namespace LkEngine {
 		{
 			LRenderer::GetViewportFramebuffer()->Bind();
 
-			// LOpenGL_Debug::RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
-			LOpenGL_Debug::RenderCubes(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+			//LOpenGL_Debug::RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+			//LOpenGL_Debug::RenderCubes(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
 			LOpenGL_Debug::RenderFloor(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
 
 			LFramebuffer::TargetSwapChain();
@@ -274,27 +273,34 @@ namespace LkEngine {
 			const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
 			const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
 
-			TObjectPtr<LMaterialTable> MeshMaterials = DebugCube->GetMaterials();
+			TObjectPtr<LMesh> Cube = LAssetManager::GetAsset<LMesh>(CubeAssetHandle);
+			TObjectPtr<LMaterialTable> MeshMaterials = Cube->GetMaterials();
 			if (MeshMaterials->HasMaterial(0))
 			{
 				const FAssetHandle MaterialHandle = MeshMaterials->GetMaterialHandle(0);
-				TObjectPtr<LMaterial> Material = LAssetManager::GetAsset<LMaterialAsset>(MaterialHandle)->GetMaterial();
+				TObjectPtr<LMaterial> Material = Cube->GetMaterial(0);
 
 				TObjectPtr<LTexture2D> Texture = Material->GetTexture();
 				TObjectPtr<LShader> Shader = Material->GetShader();
 				Shader->Bind();
 
-				glm::mat4 ModelPosition = glm::translate(glm::mat4(1.0f), glm::vec3(5, 0, 5));
+				glm::mat4 ModelPosition = glm::translate(glm::mat4(1.0f), glm::vec3(4, 0.50, 1));
 				Shader->Set("u_Model", ModelPosition);
 				Shader->Set("u_ViewProjectionMatrix", GetEditorCamera()->GetViewProjectionMatrix());
 				Shader->Set("u_Texture0", 0);
 				Texture->Bind(0);
-				LK_CORE_ASSERT(DebugCube->GetIndexBuffer()->GetCount() > 0, "IndexBuffer count not valid");
+				LK_CORE_ASSERT(Cube->GetIndexBuffer()->GetCount() > 0, "IndexBuffer count not valid");
 
-				DebugCube->GetVertexBuffer()->Bind();
-				LK_OpenGL_Verify(
-					glDrawElements(GL_TRIANGLES, DebugCube->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr)
-				);
+				Cube->GetVertexBuffer()->Bind();
+				LK_OpenGL_Verify(glDrawElements(GL_TRIANGLES, Cube->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
+
+				ModelPosition = glm::translate(ModelPosition, glm::vec3(-5, 0, -4));
+				Shader->Set("u_Model", glm::scale(ModelPosition, glm::vec3(0.80f, 1.00f, 0.80f)));
+				LK_OpenGL_Verify(glDrawElements(GL_TRIANGLES, Cube->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
+
+				ModelPosition = glm::translate(ModelPosition, glm::vec3(1, 0, 5));
+				Shader->Set("u_Model", glm::scale(ModelPosition, glm::vec3(0.95f, 1.00f, 0.90f)));
+				LK_OpenGL_Verify(glDrawElements(GL_TRIANGLES, Cube->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
 
 				LFramebuffer::TargetSwapChain();
 			}
