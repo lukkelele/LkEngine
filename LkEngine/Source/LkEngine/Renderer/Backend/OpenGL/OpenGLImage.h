@@ -105,11 +105,12 @@ namespace LkEngine {
 		LCLASS(LOpenGLImage2D);
 	};
 
+	#if 0
 	namespace LOpenGL 
 	{
 		void ApplyTextureFilter(ETextureFilter TextureFilter, bool bUseMipmap = true);
 		void ApplyTextureWrap(ETextureWrap TextureWrap);
 	}
-
+	#endif
 
 }

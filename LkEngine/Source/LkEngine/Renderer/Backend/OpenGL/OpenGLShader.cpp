@@ -35,7 +35,7 @@ namespace LkEngine {
 	{
 		if (RendererID > 0)
 		{
-			LK_OpenGL(glDeleteProgram(RendererID));
+			LK_OpenGL_Verify(glDeleteProgram(RendererID));
 		}
 	}
 
@@ -43,25 +43,25 @@ namespace LkEngine {
 	{
 		static_assert(sizeof(uint32_t) == sizeof(GLuint), "Type size mismatch");
 		uint32_t ShaderID;
-		LK_OpenGL(ShaderID = glCreateShader(ShaderType));
+		LK_OpenGL_Verify(ShaderID = glCreateShader(ShaderType));
 
 		const char* Source = ShaderSource.c_str();
-		LK_OpenGL(glShaderSource(ShaderID, 1, &Source, nullptr)); /* TODO: Check if works with &ShaderSource.c_str() */
-		LK_OpenGL(glCompileShader(ShaderID));
+		LK_OpenGL_Verify(glShaderSource(ShaderID, 1, &Source, nullptr)); /* TODO: Check if works with &ShaderSource.c_str() */
+		LK_OpenGL_Verify(glCompileShader(ShaderID));
 
 		/* Error handling. */
 		int Result;
-		LK_OpenGL(glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &Result));
+		LK_OpenGL_Verify(glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &Result));
 		if (Result == GL_FALSE)
 		{
 			int Length;
-			LK_OpenGL(glGetShaderiv(ShaderID, GL_INFO_LOG_LENGTH, &Length));
+			LK_OpenGL_Verify(glGetShaderiv(ShaderID, GL_INFO_LOG_LENGTH, &Length));
 
 			char* ErrorMessage = (char*)_malloca(Length * sizeof(char));
-			LK_OpenGL(glGetShaderInfoLog(ShaderID, Length, &Length, ErrorMessage));
+			LK_OpenGL_Verify(glGetShaderInfoLog(ShaderID, Length, &Length, ErrorMessage));
 			LK_CORE_ERROR_TAG("OpenGLShader", "Failed to compile {} shader at {}, \"{}\"", 
 							  ((ShaderType == GL_VERTEX_SHADER) ? "vertex" : "fragment"), FilePath.string(), ErrorMessage);
-			LK_OpenGL(glDeleteShader(ShaderID));
+			LK_OpenGL_Verify(glDeleteShader(ShaderID));
 
 			return 0;
 		}
@@ -72,22 +72,22 @@ namespace LkEngine {
 	uint32_t LOpenGLShader::CreateShader(const FShaderProgramSource& ShaderProgramSource)
 	{
 		uint32_t ShaderProgram;
-		LK_OpenGL(ShaderProgram = glCreateProgram());
+		LK_OpenGL_Verify(ShaderProgram = glCreateProgram());
 
 		const uint32_t VertexShader = CompileShader(GL_VERTEX_SHADER, ShaderProgramSource.Vertex);
 		const uint32_t FragmentShader = CompileShader(GL_FRAGMENT_SHADER, ShaderProgramSource.Fragment);
 		
 		/* Attach shaders. */
-		LK_OpenGL(glAttachShader(ShaderProgram, VertexShader));
-		LK_OpenGL(glAttachShader(ShaderProgram, FragmentShader));
+		LK_OpenGL_Verify(glAttachShader(ShaderProgram, VertexShader));
+		LK_OpenGL_Verify(glAttachShader(ShaderProgram, FragmentShader));
 
 		/* Link and validate. */
-		LK_OpenGL(glLinkProgram(ShaderProgram));
-		LK_OpenGL(glValidateProgram(ShaderProgram));
+		LK_OpenGL_Verify(glLinkProgram(ShaderProgram));
+		LK_OpenGL_Verify(glValidateProgram(ShaderProgram));
 
 		/* Delete shader resources after shader programs are created and validated. */
-		LK_OpenGL(glDeleteShader(VertexShader));
-		LK_OpenGL(glDeleteShader(FragmentShader));
+		LK_OpenGL_Verify(glDeleteShader(VertexShader));
+		LK_OpenGL_Verify(glDeleteShader(FragmentShader));
 
 		return ShaderProgram;
 	}

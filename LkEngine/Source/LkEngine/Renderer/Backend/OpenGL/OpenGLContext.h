@@ -5,36 +5,37 @@
 
 namespace LkEngine {
 
-    class LWindow;
-    class OpenGLSwapChain;
+	class LWindow;
+	class OpenGLSwapChain;
 
-    class LOpenGLContext : public LRenderContext
-    {
-    public:
-        LOpenGLContext(LWindow* InWindow);
-        ~LOpenGLContext() = default;
+	class LOpenGLContext : public LRenderContext
+	{
+	public:
+		LOpenGLContext(LWindow* InWindow);
+		~LOpenGLContext() = default;
 
-        virtual void Initialize(const ESourceBlendFunction InSourceBlendFunction, 
-                                const EDestinationBlendFunction InDestinationBlendFunction) override;
-        virtual void Destroy() override;
+		virtual void Initialize(const ESourceBlendFunction InSourceBlendFunction,
+								const EDestinationBlendFunction InDestinationBlendFunction) override;
+		virtual void Destroy() override;
 
-        FORCEINLINE virtual GLFWwindow* GetGlfwWindow() override 
-        { 
-            return m_GlfwWindow; 
-        }
+		FORCEINLINE virtual GLFWwindow* GetGlfwWindow() override
+		{
+			LK_VERIFY(m_GlfwWindow);
+			return m_GlfwWindow;
+		}
 
-        virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) override;
-        virtual void UpdateResolution(const uint16_t width, const uint16_t height) override;
+		virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) override;
+		virtual void UpdateResolution(const uint16_t width, const uint16_t height) override;
 
-        virtual void SetDepthEnabled(const bool InEnabled) override;
-        virtual void SetDepthFunction(const EDepthFunction depthFunc) override;
+		virtual void SetDepthEnabled(const bool InEnabled) override;
+		virtual void SetDepthFunction(const EDepthFunction depthFunc) override;
 
-        virtual void SetBlendingEnabled(const bool InEnabled) override;
-        virtual void SetBlendFunction(const ESourceBlendFunction InSourceBlendFunction, 
-                                      const EDestinationBlendFunction InDestinationBlendFunction) override;
+		virtual void SetBlendingEnabled(const bool InEnabled) override;
+		virtual void SetBlendFunction(const ESourceBlendFunction InSourceBlendFunction,
+									  const EDestinationBlendFunction InDestinationBlendFunction) override;
 
-        virtual void SetSourceBlendFunction(const ESourceBlendFunction InSourceBlendFunction) override;
-        virtual void SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationBlendFunction) override;
+		virtual void SetSourceBlendFunction(const ESourceBlendFunction InSourceBlendFunction) override;
+		virtual void SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationBlendFunction) override;
 
 		FORCEINLINE virtual ESourceBlendFunction GetSourceBlendFunction() const override
 		{
@@ -46,28 +47,25 @@ namespace LkEngine {
 			return BlendFunction.Destination;
 		}
 
-        FORCEINLINE virtual bool GetBlendingEnabled() const override 
-        { 
-            return bBlendingEnabled; 
-        } 
+		FORCEINLINE virtual bool GetBlendingEnabled() const override { return bBlendingEnabled; }
 
-    private:
+	private:
 		std::string m_GlslVersion{};
 
-        bool bDepthEnabled = true;
-        bool bBlendingEnabled = true;
+		bool bDepthEnabled = true;
+		bool bBlendingEnabled = true;
 
-        FBlendFunction BlendFunction{};
+		FBlendFunction BlendFunction{};
 		EDepthFunction DepthFunction{};
 
-        LWindow* Window{};
+		LWindow* Window{};
 		GLFWwindow* m_GlfwWindow{};
 
-        TObjectPtr<OpenGLSwapChain> SwapChain;
+		TObjectPtr<OpenGLSwapChain> SwapChain;
 
-        friend class Editor;
+		friend class Editor;
 
-        LCLASS(LOpenGLContext);
-    };
+		LCLASS(LOpenGLContext);
+	};
 
 }

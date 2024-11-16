@@ -9,6 +9,9 @@
 
 namespace LkEngine {
 
+	/**
+	 * LTexture
+	 */
 	class LTexture : public LAsset
 	{
 	public:
@@ -39,7 +42,9 @@ namespace LkEngine {
 		LCLASS(LTexture)
 	};
 
-
+	/**
+	 * LTexture2D
+	 */
 	class LTexture2D : public LTexture
 	{
 	public:
@@ -69,14 +74,16 @@ namespace LkEngine {
 
 		FORCEINLINE static EAssetType GetStaticType() { return EAssetType::Texture; }
 
-		static TObjectPtr<LTexture2D> Create(const FTextureSpecification& specification);
-		static TObjectPtr<LTexture2D> Create(const FTextureSpecification& specification, FBuffer imageData);
+		static TObjectPtr<LTexture2D> Create(const FTextureSpecification& Specification);
+		static TObjectPtr<LTexture2D> Create(const FTextureSpecification& Specification, FBuffer ImageData);
 
 	private:
 		LASSET(LTexture2D)
 	};
 
-
+	/**
+	 * LTextureCube
+	 */
 	class LTextureCube : public LTexture
 	{
 	public:

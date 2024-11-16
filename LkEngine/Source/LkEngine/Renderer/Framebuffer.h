@@ -130,4 +130,22 @@ namespace LkEngine {
 	};
 
 
+	namespace Enum {
+
+		FORCEINLINE static constexpr const char* ToString(const EFramebufferTextureFormat Format)
+		{
+			switch (Format)
+			{
+				case EFramebufferTextureFormat::RGBA8:			 return "RGBA8";
+				case EFramebufferTextureFormat::RED_INTEGER:	 return "RED_INTEGER";
+				case EFramebufferTextureFormat::DEPTH24STENCIL8: return "DEPTH24STENCIL8";
+				case EFramebufferTextureFormat::None:			 return "None";
+			}
+
+			LK_CORE_ASSERT(false, "Invalid FramebufferTextureFormat");
+			return "";
+		}
+
+	}
+
 }

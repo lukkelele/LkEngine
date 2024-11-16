@@ -9,98 +9,12 @@
 
 #include "BlendingSpecification.h"
 #include "Color.h"
+#include "TextureEnum.h"
 
 #include "LkEngine/Core/Event/AssetEvent.h"
 
 
 namespace LkEngine {
-
-	/**
-	 * EImageFormat
-	 */
-	enum class EImageFormat
-	{
-		None = 0,
-		RED8UN,
-		RED8UI,
-		RED16UI,
-		RED32UI,
-		RED32F,
-		RG8,
-		RG16F,
-		RG32F,
-		RGB,
-		RGBA,
-
-		RGB8,
-		RGBA8,
-
-		RGBA16F,
-		RGBA32F,
-
-		B10R11G11UF,
-
-		SRGB,
-		SRGBA,
-
-		DEPTH32FSTENCIL8UINT,
-		DEPTH32F,
-		DEPTH24STENCIL8,
-
-		Depth = DEPTH24STENCIL8,
-	};
-
-	/**
-	 * EImageUsage
-	 */
-	enum class EImageUsage
-	{
-		None = 0,
-		Texture,
-		Attachment,
-		Storage,
-	};
-
-	/**
-	 * ETextureWrap
-	 */
-	enum class ETextureWrap
-	{
-		None = 0,
-		Clamp,
-		Repeat
-	};
-
-	enum class ETextureFilter
-	{
-		None = 0,
-		Linear,
-		Nearest
-	};
-
-	enum class ETextureType
-	{
-		None = 0,
-		Texture2D,
-		TextureCube
-	};
-
-	enum class ETextureAnistropicFiltering
-	{
-		None = 0,
-		Bilnear,
-		Trilnear
-	};
-
-	enum class ETextureUniformType : uint8_t
-	{
-		Diffuse = 0,
-		Specular,
-		Normal,
-		Height,
-		Emissive,
-		DiffuseRoughness,
-	};
 
 	struct FTextureSpecification
 	{

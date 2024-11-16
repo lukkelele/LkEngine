@@ -25,7 +25,7 @@ namespace LkEngine {
 	struct FWindowSpecification
 	{
         /// @TODO: Get version
-		LString Title = "LkEngine v2.0.1";
+		LString Title = "LkEngine";
 		uint32_t Width = 1600;
 		uint32_t Height = 1080;
 		bool Decorated = true;
@@ -97,12 +97,13 @@ namespace LkEngine {
         FORCEINLINE LVector2 GetPosition() const { return m_Pos; }
         FORCEINLINE LVector2 GetViewportSize() const { return ViewportSize; }
 
-        FORCEINLINE std::string GetTitle() const { return m_Title; }
+        FORCEINLINE std::string GetTitle() const { return Title; }
         FORCEINLINE std::string GetShaderVersion() const { return m_GlslVersion; }
-        FORCEINLINE bool IsVSyncEnabled() const { return m_VSync; }
+        FORCEINLINE bool IsVSyncEnabled() const { return bVSync; }
 
         FORCEINLINE TObjectPtr<LRenderContext> GetRenderContext() 
         { 
+            LK_CORE_ASSERT(RenderContext);
             return RenderContext; 
         }
 
@@ -118,11 +119,11 @@ namespace LkEngine {
         {
             if ((Size.X != InSize.X) || (Size.Y != InSize.X))
             {
-                Size.X = static_cast<decltype(Size.X)>(InSize.X);
-                Size.Y = static_cast<decltype(Size.Y)>(InSize.Y);
-				LK_CORE_ERROR_TAG("Window", "Width={}  Height={}", Size.X, Size.Y);
+                Size.X = static_cast<uint16_t>(InSize.X);
+                Size.Y = static_cast<uint16_t>(InSize.Y);
 
-                OnWindowSizeUpdated.Broadcast(static_cast<uint16_t>(Size.X), static_cast<uint16_t>(Size.Y));
+                //OnWindowSizeUpdated.Broadcast(static_cast<uint16_t>(Size.X), static_cast<uint16_t>(Size.Y));
+                OnWindowSizeUpdated.Broadcast((uint16_t)Size.X, (uint16_t)Size.Y);
             }
         }
 
@@ -148,6 +149,7 @@ namespace LkEngine {
 
 		FORCEINLINE LSwapChain& GetSwapChain() 
         { 
+            LK_CORE_ASSERT(m_SwapChain);
             return *m_SwapChain; 
         }
 
@@ -210,11 +212,11 @@ namespace LkEngine {
         FOnWindowSizeUpdated OnWindowSizeUpdated{};
         FOnViewportSizeUpdated OnViewportSizeUpdated{};
 
-        static constexpr uint16_t DEFAULT_WIDTH  = 1650;
+        static constexpr uint16_t DEFAULT_WIDTH  = 1600;
         static constexpr uint16_t DEFAULT_HEIGHT = 1080;
     private:
         FWindowSpecification Specification{};
-        std::string m_Title = "";
+        std::string Title = "";
 
 	    bool bGlfwInitialized = false;
         GLFWwindow* GlfwWindow = nullptr;
@@ -226,7 +228,7 @@ namespace LkEngine {
         LVector2 m_ViewportScalers = { 1.0f, 1.0f };
 
         std::string m_GlslVersion = "";
-        bool m_VSync = false;
+        bool bVSync = false;
 
         FWindowData Data{};
 

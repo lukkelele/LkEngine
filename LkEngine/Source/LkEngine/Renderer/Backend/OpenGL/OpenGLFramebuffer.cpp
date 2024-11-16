@@ -39,19 +39,19 @@ namespace LkEngine {
 
 	LOpenGLFramebuffer::~LOpenGLFramebuffer()
 	{
-		LK_OpenGL(glDeleteFramebuffers(1, &m_RendererID));
+		LK_OpenGL_Verify(glDeleteFramebuffers(1, &m_RendererID));
 		m_ColorAttachments.clear();
 
-		LK_OpenGL(glDeleteTextures(1, &m_DepthAttachment));
+		LK_OpenGL_Verify(glDeleteTextures(1, &m_DepthAttachment));
 	}
 
 	void LOpenGLFramebuffer::Invalidate()
 	{
 		if (m_RendererID)
 		{
-			LK_OpenGL(glDeleteFramebuffers(1, &m_RendererID));
+			LK_OpenGL_Verify(glDeleteFramebuffers(1, &m_RendererID));
 			m_ColorAttachments.clear();
-			LK_OpenGL(glDeleteTextures(1, &m_DepthAttachment));
+			LK_OpenGL_Verify(glDeleteTextures(1, &m_DepthAttachment));
 			
 			m_ColorAttachments.clear();
 			m_DepthAttachment = 0;
@@ -59,8 +59,8 @@ namespace LkEngine {
 
 		const bool bMultisample = m_Specification.Samples > 1;
 
-		LK_OpenGL(glCreateFramebuffers(1, &m_RendererID));
-		LK_OpenGL(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+		LK_OpenGL_Verify(glCreateFramebuffers(1, &m_RendererID));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
 
 		/* Color Attachments. */
 		if (m_ColorAttachmentSpecifications.size())
@@ -89,7 +89,7 @@ namespace LkEngine {
 				TObjectPtr<LImage2D> Image = LImage2D::Create(ImageSpec, ImageData);
 				m_ColorAttachments.push_back(Image);
 
-				LK_OpenGL(glFramebufferTexture2D(GL_FRAMEBUFFER, 
+				LK_OpenGL_Verify(glFramebufferTexture2D(GL_FRAMEBUFFER, 
 					                             (GL_COLOR_ATTACHMENT0 + i), 
 					                             GL_TEXTURE_2D, 
 					                             m_ColorAttachments[0]->GetRendererID(), 0));
@@ -120,25 +120,25 @@ namespace LkEngine {
 		LK_CORE_VERIFY(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
 		LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Created framebuffer with {} color attachments", m_ColorAttachments.size());
 
-		LK_OpenGL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 	void LOpenGLFramebuffer::Clear()
 	{
-		LK_OpenGL(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
 
 		const glm::vec4& c = LRenderer::ClearColor;
-        LK_OpenGL(glClearColor(c.r, c.g, c.b, c.a));
-        LK_OpenGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        LK_OpenGL_Verify(glClearColor(c.r, c.g, c.b, c.a));
+        LK_OpenGL_Verify(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-		LK_OpenGL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 	int LOpenGLFramebuffer::ReadPixel(uint32_t AttachmentIndex, int x, int y)
 	{
-		LK_OpenGL(glReadBuffer(GL_COLOR_ATTACHMENT0 + AttachmentIndex));
+		LK_OpenGL_Verify(glReadBuffer(GL_COLOR_ATTACHMENT0 + AttachmentIndex));
 		int PixelData;
-		LK_OpenGL(glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &PixelData));
+		LK_OpenGL_Verify(glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &PixelData));
 
 		return PixelData;
 	}
@@ -147,11 +147,11 @@ namespace LkEngine {
 	{
 		LK_CORE_ASSERT(AttachmentIndex < m_ColorAttachments.size(), "Attachment Index < m_ColorAttachments.size()");
 		FFramebufferTextureSpecification& FramebufferTextureSpec = m_ColorAttachmentSpecifications[AttachmentIndex];
-		LK_OpenGL(
+		LK_OpenGL_Verify(
 			glClearTexImage(
 				m_ColorAttachments[AttachmentIndex], 
 				0, 
-				LOpenGL::FramebufferTextureFormatToGL(FramebufferTextureSpec.ImageFormat), 
+				LOpenGL::GetFramebufferTextureFormat(FramebufferTextureSpec.ImageFormat), 
 				GL_INT, 
 				&Value)
 		);
@@ -167,14 +167,14 @@ namespace LkEngine {
 	void LOpenGLFramebuffer::Bind() const
 	{
 		LK_CORE_VERIFY(m_Specification.Width > 0 && m_Specification.Height > 0);
-		LK_OpenGL(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
 
-		LK_OpenGL(glViewport(0, 0, m_Specification.Width, m_Specification.Height));
+		LK_OpenGL_Verify(glViewport(0, 0, m_Specification.Width, m_Specification.Height));
 	}
 
 	void LOpenGLFramebuffer::Unbind() const
 	{
-		LK_OpenGL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 	void LOpenGLFramebuffer::Resize(uint32_t width, uint32_t height, bool forceRecreate)
@@ -187,7 +187,7 @@ namespace LkEngine {
 
 	void LOpenGLFramebuffer::BindTexture(uint32_t AttachmentIndex, uint32_t slot) const
 	{
-		LK_OpenGL(glBindTextureUnit(slot, m_ColorAttachments[AttachmentIndex]->GetRendererID()));
+		LK_OpenGL_Verify(glBindTextureUnit(slot, m_ColorAttachments[AttachmentIndex]->GetRendererID()));
 	}
 
 	TObjectPtr<LImage> LOpenGLFramebuffer::GetImage(uint32_t AttachmentIndex) const
@@ -215,7 +215,7 @@ namespace LkEngine {
 
 	void LOpenGLFramebuffer::TargetSwapChain()
 	{
-		LK_OpenGL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
 }

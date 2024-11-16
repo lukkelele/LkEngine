@@ -45,7 +45,6 @@ namespace LkEngine {
 	LRenderer::LRenderer()
 	{
 		LCLASS_REGISTER(LRenderer);
-		Instance = this;
 	}
 
 	void LRenderer::Initialize()
@@ -61,6 +60,7 @@ namespace LkEngine {
 
 		if (TObjectPtr<LShaderLibrary> ShaderLibrary = GetShaderLibrary())
 		{
+			/* clang-format off */
 			LK_CORE_DEBUG_TAG("Renderer", "Loading Shaders");
 			ShaderLibrary->Load("Renderer2D_Quad",    "Assets/Shaders/OpenGL/Renderer2D_Quad.shader");
 			ShaderLibrary->Load("Renderer2D_Line",    "Assets/Shaders/OpenGL/Renderer2D_Line.shader");
@@ -69,6 +69,7 @@ namespace LkEngine {
 			ShaderLibrary->Load("Renderer_Debug",     "Assets/Shaders/OpenGL/Renderer_Debug.shader");
 			ShaderLibrary->Load("Renderer_Skybox",    "Assets/Shaders/OpenGL/Renderer_Skybox.shader");
 			ShaderLibrary->Load("Renderer_Model",     "Assets/Shaders/OpenGL/Renderer_Model.shader");
+			/* clang-format on */
 		}
 
 		LK_CORE_DEBUG_TAG("Renderer", "Creating texture library");
@@ -84,6 +85,12 @@ namespace LkEngine {
 		RendererAPI->Initialize();
 	}
 
+	void LRenderer::Shutdown()
+	{
+		LK_VERIFY(RendererAPI, "Renderer API reference invalid");
+		RendererAPI->Shutdown();
+	}
+
 	void LRenderer::Clear()
 	{
 		RendererAPI->Clear();
@@ -91,31 +98,33 @@ namespace LkEngine {
 
 	void LRenderer::BeginFrame()
 	{
-        LRenderer::SwapQueues();
-		RendererAPI->BeginFrame();
+		LRenderer::SwapQueues();
+
+		LFramebuffer::TargetSwapChain();
+		RendererAPI->Clear();
+
+		if (TObjectPtr<LFramebuffer> ViewportFramebuffer = GetViewportFramebuffer())
+		{
+			ViewportFramebuffer->Bind();
+			ViewportFramebuffer->Clear();
+			ViewportFramebuffer->Unbind();
+		}
 	}
 
 	void LRenderer::EndFrame()
 	{
-		/// TODO: Use SwapQueues here instead of in BeginFrame
 		CommandQueue[GetRenderQueueIndex()]->Execute();
-		RendererAPI->EndFrame();
 	}
 
-	void LRenderer::Shutdown()
+	void LRenderer::SwapQueues()
 	{
-		RendererAPI->Shutdown();
+		RenderCommandQueueSubmissionIndex = (RenderCommandQueueSubmissionIndex + 1) % RenderCommandQueueCount;
 	}
 
 	void LRenderer::SetPrimitiveTopology(const ERenderTopology& InRenderTopology)
 	{
 		PrimitiveTopology = InRenderTopology;
 		RendererAPI->SetPrimitiveTopology(InRenderTopology);
-	}
-
-	void LRenderer::SwapQueues()
-	{
-		RenderCommandQueueSubmissionIndex = (RenderCommandQueueSubmissionIndex + 1) % RenderCommandQueueCount;
 	}
 
 	RenderCommandQueue& LRenderer::GetRenderCommandQueue()
@@ -151,6 +160,12 @@ namespace LkEngine {
 		return RendererData->m_ShaderLibrary;
 	}
 
+	LRenderer* LRenderer::Get()
+	{
+		static LRenderer Renderer;
+		return &Renderer;
+	}
+
 	void LRenderer::SubmitMesh(TObjectPtr<LMesh>& Mesh, TObjectPtr<LShader>& Shader, const glm::mat4& Transform)
 	{
 		RendererAPI->SubmitMesh(Mesh, Shader, Transform);
@@ -171,7 +186,7 @@ namespace LkEngine {
 		RendererAPI->SubmitLine(p0, p1, Color, EntityID);
 	}
 
-	void LRenderer::SubmitLines(const LVertexBuffer& VertexBuffer, const LIndexBuffer& ib, const LShader& Shader) 
+	void LRenderer::SubmitLines(const LVertexBuffer& VertexBuffer, const LIndexBuffer& ib, const LShader& Shader)
 	{
 		Shader.Bind();
 		VertexBuffer.Bind();
@@ -187,71 +202,67 @@ namespace LkEngine {
 
 	void LRenderer::SubmitIndexed(LVertexBuffer& VertexBuffer, const uint32_t Count)
 	{
-        VertexBuffer.Bind();
+		VertexBuffer.Bind();
 		RendererAPI->SubmitIndexed(Count);
 	}
 
-	void LRenderer::SubmitQuad(const glm::vec2& Position, const glm::vec2& Size, 
-							   const glm::vec4& Color, const uint64_t EntityID)
+	void
+	LRenderer::SubmitQuad(const glm::vec2& Position, const glm::vec2& Size, const glm::vec4& Color, const uint64_t EntityID)
 	{
 		RendererAPI->SubmitQuad({ Position.x, Position.y, 0.0f }, Size, Color, EntityID);
 	}
 
-	void LRenderer::SubmitQuad(const glm::vec3& Position, const glm::vec2& Size, 
-							   const glm::vec4& Color, uint64_t EntityID)
+	void LRenderer::SubmitQuad(const glm::vec3& Position, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID)
 	{
 		RendererAPI->SubmitQuad(Position, Size, Color, EntityID);
 	}
 
-	void LRenderer::SubmitQuad(const glm::vec2& Position, const glm::vec2& Size, 
-							   TObjectPtr<LTexture> Texture, uint64_t EntityID)
+	void
+	LRenderer::SubmitQuad(const glm::vec2& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID)
 	{
 		RendererAPI->SubmitQuad({ Position.x, Position.y, 0.0f }, Size, Texture, EntityID);
 	}
 
-	void LRenderer::SubmitQuad(const glm::vec3& Position, const glm::vec2& Size, 
-							   TObjectPtr<LTexture> Texture, uint64_t EntityID)
+	void
+	LRenderer::SubmitQuad(const glm::vec3& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID)
 	{
 		RendererAPI->SubmitQuad(Position, Size, Texture, 0.0f, EntityID);
 	}
 
-	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, 
-								 const glm::vec4 Color, uint64_t EntityID)
-    {
-        RendererAPI->SubmitQuad(
-			{ TransformComponent.Translation.x, TransformComponent.Translation.y }, 
-			Size, 
-			Color, 
-			TransformComponent.Rotation2D, 
-			EntityID
-		);
-    }
-
-	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent, 
-								 const glm::vec2& Size, 
-								 TObjectPtr<LTexture> Texture, 
+	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent,
+								 const glm::vec2& Size,
+								 const glm::vec4 Color,
 								 uint64_t EntityID)
-    {
-        RendererAPI->SubmitQuad(TransformComponent.Translation, Size, Texture, TransformComponent.Rotation2D, EntityID);
-    }
-
-	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, 
-								 TObjectPtr<LTexture> Texture, const glm::vec4& Color, uint64_t EntityID)
-    {
-        RendererAPI->SubmitQuad(TransformComponent.Translation, Size, Texture, Color, TransformComponent.Rotation2D, EntityID);
-    }
-
-	void LRenderer::BeginScene(const LSceneCamera& InSceneCamera)
 	{
+		RendererAPI->SubmitQuad({ TransformComponent.Translation.x, TransformComponent.Translation.y },
+								Size,
+								Color,
+								TransformComponent.Rotation2D,
+								EntityID);
 	}
 
-	void LRenderer::BeginScene(const glm::mat4& ViewProjectionMatrix)
+	void LRenderer::SubmitSprite(
+		LTransformComponent& TransformComponent, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID)
 	{
+		RendererAPI->SubmitQuad(TransformComponent.Translation, Size, Texture, TransformComponent.Rotation2D, EntityID);
 	}
 
-	void LRenderer::EndScene()
+	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent,
+								 const glm::vec2& Size,
+								 TObjectPtr<LTexture>
+									 Texture,
+								 const glm::vec4& Color,
+								 uint64_t EntityID)
 	{
+		RendererAPI
+			->SubmitQuad(TransformComponent.Translation, Size, Texture, Color, TransformComponent.Rotation2D, EntityID);
 	}
+
+	void LRenderer::BeginScene(const LSceneCamera& InSceneCamera) {}
+
+	void LRenderer::BeginScene(const glm::mat4& ViewProjectionMatrix) {}
+
+	void LRenderer::EndScene() {}
 
 	RendererCapabilities& LRenderer::GetCapabilities()
 	{
@@ -270,7 +281,8 @@ namespace LkEngine {
 		return LApplication::Get()->GetWindow().GetSwapChain().GetCurrentBufferIndex();
 	}
 
-	void LRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, TObjectPtr<LRenderPass> renderPass)
+	void
+	LRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, TObjectPtr<LRenderPass> renderPass)
 	{
 		RendererAPI->BeginRenderPass(RenderCommandBuffer, renderPass, false);
 	}
@@ -280,41 +292,54 @@ namespace LkEngine {
 		RendererAPI->EndRenderPass(RenderCommandBuffer);
 	}
 
-	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
-								   TObjectPtr<LPipeline> Pipeline, 
-								   TObjectPtr<LVertexBuffer> VertexBuffer, 
-								   TObjectPtr<LIndexBuffer> IndexBuffer, 
-								   const glm::mat4& Transform, 
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
+								   TObjectPtr<LPipeline>
+									   Pipeline,
+								   TObjectPtr<LVertexBuffer>
+									   VertexBuffer,
+								   TObjectPtr<LIndexBuffer>
+									   IndexBuffer,
+								   const glm::mat4& Transform,
 								   uint32_t IndexCount /*= 0*/)
 	{
 		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, VertexBuffer, IndexBuffer, Transform, IndexCount);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
-	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
-								   TObjectPtr<LPipeline> Pipeline, 
-								   TObjectPtr<LShader> Shader, 
-								   TObjectPtr<LVertexBuffer> VertexBuffer, 
-								   TObjectPtr<LIndexBuffer> IndexBuffer, 
-								   const glm::mat4& Transform, 
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
+								   TObjectPtr<LPipeline>
+									   Pipeline,
+								   TObjectPtr<LShader>
+									   Shader,
+								   TObjectPtr<LVertexBuffer>
+									   VertexBuffer,
+								   TObjectPtr<LIndexBuffer>
+									   IndexBuffer,
+								   const glm::mat4& Transform,
 								   const uint32_t IndexCount /*= 0*/)
 	{
-		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, Shader, VertexBuffer, IndexBuffer, Transform, IndexCount);
-		//LK_MARK_FUNC_NOT_IMPLEMENTED();
+		RendererAPI
+			->RenderGeometry(RenderCommandBuffer, Pipeline, Shader, VertexBuffer, IndexBuffer, Transform, IndexCount);
+		// LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
-	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
-								   TObjectPtr<LPipeline> Pipeline, 
-								   TObjectPtr<LMaterial> Material, 
-								   TObjectPtr<LVertexBuffer> VertexBuffer, 
-								   TObjectPtr<LIndexBuffer> IndexBuffer, 
-								   const glm::mat4& Transform, 
+	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
+								   TObjectPtr<LPipeline>
+									   Pipeline,
+								   TObjectPtr<LMaterial>
+									   Material,
+								   TObjectPtr<LVertexBuffer>
+									   VertexBuffer,
+								   TObjectPtr<LIndexBuffer>
+									   IndexBuffer,
+								   const glm::mat4& Transform,
 								   const uint32_t IndexCount /*= 0*/)
 	{
-		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, Material, VertexBuffer, IndexBuffer, Transform, IndexCount);
-		//LK_MARK_FUNC_NOT_IMPLEMENTED();
+		RendererAPI
+			->RenderGeometry(RenderCommandBuffer, Pipeline, Material, VertexBuffer, IndexBuffer, Transform, IndexCount);
+		// LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
-	
+
 	TObjectPtr<LTexture2D> LRenderer::GetWhiteTexture()
 	{
 		LK_VERIFY(RendererData->WhiteTexture, "White texture is nullptr");
@@ -329,7 +354,7 @@ namespace LkEngine {
 
 	void LRenderer::DrawMesh(TObjectPtr<LMesh>& Mesh, const TObjectPtr<LShader> Shader)
 	{
-		//RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *Shader);
+		// RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *Shader);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 		LK_UNUSED(Mesh && Shader);
 	}
@@ -350,24 +375,24 @@ namespace LkEngine {
 
 			/* Grass. */
 			Specification.Width = 512;
-		    Specification.Height = 512;
-            Specification.Path = "Assets/Textures/grass.png";
-            Specification.Name = "grass-512x512";
-            Specification.DebugName = "grass-512x512";
-            Specification.GenerateMips = true;
+			Specification.Height = 512;
+			Specification.Path = "Assets/Textures/grass.png";
+			Specification.Name = "grass-512x512";
+			Specification.DebugName = "grass-512x512";
+			Specification.GenerateMips = true;
 			Specification.Format = EImageFormat::RGBA32F;
-            Specification.SamplerWrap = ETextureWrap::Repeat;
-            Specification.SamplerFilter = ETextureFilter::Linear;
+			Specification.SamplerWrap = ETextureWrap::Repeat;
+			Specification.SamplerFilter = ETextureFilter::Linear;
 			TextureLibrary.AddTexture(Specification);
 
 			/* Ice Skybox. */
-            Specification.Path = "Assets/Textures/Skybox/back.jpg";
-            Specification.Name = "skybox-ice-back-512x512";
-            Specification.DebugName = "skybox-ice-back-512x512";
-            Specification.GenerateMips = false;
+			Specification.Path = "Assets/Textures/Skybox/back.jpg";
+			Specification.Name = "skybox-ice-back-512x512";
+			Specification.DebugName = "skybox-ice-back-512x512";
+			Specification.GenerateMips = false;
 			Specification.Format = EImageFormat::RGBA32F;
-            Specification.SamplerWrap = ETextureWrap::Clamp;
-            Specification.SamplerFilter = ETextureFilter::Nearest;
+			Specification.SamplerWrap = ETextureWrap::Clamp;
+			Specification.SamplerFilter = ETextureFilter::Nearest;
 			TextureLibrary.AddTexture(Specification);
 		}
 
@@ -377,13 +402,13 @@ namespace LkEngine {
 
 			/* Brickwall. */
 			Specification.Width = 1024;
-		    Specification.Height = 1024;
-            Specification.Path = "Assets/Textures/brickwall.jpg";
-            Specification.Name = "brickwall";
-            Specification.DebugName = "brickwall";
-            Specification.GenerateMips = true;
-            Specification.SamplerWrap = ETextureWrap::Repeat;
-            Specification.SamplerFilter = ETextureFilter::Linear;
+			Specification.Height = 1024;
+			Specification.Path = "Assets/Textures/brickwall.jpg";
+			Specification.Name = "brickwall";
+			Specification.DebugName = "brickwall";
+			Specification.GenerateMips = true;
+			Specification.SamplerWrap = ETextureWrap::Repeat;
+			Specification.SamplerFilter = ETextureFilter::Linear;
 			TextureLibrary.AddTexture(Specification);
 		}
 
@@ -428,36 +453,36 @@ namespace LkEngine {
 			TextureLibrary.AddTexture(Specification);
 
 			/* Metal. */
-            Specification.Path = "Assets/Textures/metal.png";
-            Specification.Name = "metal-ground";
-            Specification.DebugName = "metal-ground";
-            Specification.GenerateMips = true;
-            Specification.SamplerWrap = ETextureWrap::Repeat;
-            Specification.SamplerFilter = ETextureFilter::Nearest;
+			Specification.Path = "Assets/Textures/metal.png";
+			Specification.Name = "metal-ground";
+			Specification.DebugName = "metal-ground";
+			Specification.GenerateMips = true;
+			Specification.SamplerWrap = ETextureWrap::Repeat;
+			Specification.SamplerFilter = ETextureFilter::Nearest;
 			TextureLibrary.AddTexture(Specification);
 
 			/* Wood. */
-            Specification.Name = "wood";
-            Specification.DebugName = "wood";
-            Specification.Path = "Assets/Textures/wood.png";
-            Specification.GenerateMips = true;
-            Specification.SamplerWrap = ETextureWrap::Repeat;
-            Specification.SamplerFilter = ETextureFilter::Linear;
+			Specification.Name = "wood";
+			Specification.DebugName = "wood";
+			Specification.Path = "Assets/Textures/wood.png";
+			Specification.GenerateMips = true;
+			Specification.SamplerWrap = ETextureWrap::Repeat;
+			Specification.SamplerFilter = ETextureFilter::Linear;
 			TextureLibrary.AddTexture(Specification);
 
 			/* Ice Skybox. */
-            Specification.Name = "skybox-ice-back";
-            Specification.DebugName = "skybox-ice-back";
-            Specification.Path = "Assets/Textures/Skybox/back.jpg";
-            Specification.GenerateMips = false;
-            Specification.Format = EImageFormat::RGBA32F;
-            Specification.SamplerFilter = ETextureFilter::Nearest;
-            Specification.SamplerWrap = ETextureWrap::Clamp;
+			Specification.Name = "skybox-ice-back";
+			Specification.DebugName = "skybox-ice-back";
+			Specification.Path = "Assets/Textures/Skybox/back.jpg";
+			Specification.GenerateMips = false;
+			Specification.Format = EImageFormat::RGBA32F;
+			Specification.SamplerFilter = ETextureFilter::Nearest;
+			Specification.SamplerWrap = ETextureWrap::Clamp;
 			TextureLibrary.AddTexture(Specification);
-        }
+		}
 	}
 
-	void LRenderer::SetDepthFunction(const EDepthFunction& InDepthFunction)
+	void LRenderer::SetDepthFunction(const EDepthFunction InDepthFunction)
 	{
 		RendererAPI->SetDepthFunction(InDepthFunction);
 	}

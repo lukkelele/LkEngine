@@ -8,37 +8,27 @@
 
 namespace LkEngine {
 
-	static void GLFWErrorCallback(int Error, const char* Description)
+	#if 0
+	static void GlfwErrorCallback(int Error, const char* Description)
 	{
 		LK_CORE_ERROR_TAG("GLFW", "Error ({0}): {1}", Error, Description);
 	}
-
-	static void GLFW_FramebufferSizeCallback(GLFWwindow* GLFWWindow, int Width, int Height)
-	{
-		/* Adjust the viewport when the framebuffer is resized. */
-		glViewport(0, 0, Width, Height);
-	}
-
+	#endif
 
 	LWindow::LWindow(const FWindowSpecification& WindowSpecification)
 		: Specification(WindowSpecification)
-		, m_Title(WindowSpecification.Title)
+		, Title(WindowSpecification.Title)
 		, Size({ WindowSpecification.Width, WindowSpecification.Height })
 		, ViewportSize({ WindowSpecification.Width, WindowSpecification.Height })
-		, m_VSync(WindowSpecification.VSync)
+		, bVSync(WindowSpecification.VSync)
 	{
 		LCLASS_REGISTER();
 		Instance = this;
 
 		/* Window Data. */
-		Data.Title = m_Title;
-		Data.Width = static_cast<decltype(Data.Width)>(Size.X);
-		Data.Height = static_cast<decltype(Data.Height)>(Size.Y);
-
-		LK_CORE_DEBUG_TAG("Window", "Class Name: \"{}\"  IsA<LEntity>()={}  IsA<LObject>()={}", 
-						  StaticClassName(), 
-						  IsA<LEntity>() ? "TRUE" : "FALSE",
-						  IsA<LObject>() ? "TRUE" : "FALSE");
+		Data.Title = Title;
+		Data.Width = static_cast<uint32_t>(Size.X);
+		Data.Height = static_cast<uint32_t>(Size.Y);
 	}
 
 	LWindow::~LWindow()
@@ -53,7 +43,11 @@ namespace LkEngine {
 		if (!bGlfwInitialized)
 		{
 			LK_ASSERT(glfwInit() == GLFW_TRUE, "GLFW failed to initialize, glfwInit() != GLFW_TRUE");
-			glfwSetErrorCallback(GLFWErrorCallback);
+			//glfwSetErrorCallback(GlfwErrorCallback);
+			glfwSetErrorCallback([](const int Error, const char* Description)
+			{
+				LK_CORE_ERROR_TAG("GLFW", "Error ({0}): {1}", Error, Description);
+			});
 		}
 
 		/* Set context profile and the version to use for the Renderer API. */
@@ -75,7 +69,7 @@ namespace LkEngine {
 		/* Create GLFW window. */
 		GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), 
 									  static_cast<int>(Size.Y), 
-									  m_Title.c_str(), 
+									  Title.c_str(), 
 									  nullptr, 
 									  nullptr);
 		LK_CORE_ASSERT(GlfwWindow != nullptr);
@@ -101,7 +95,6 @@ namespace LkEngine {
 		glfwSetInputMode(GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		glfwSetWindowSizeLimits(GlfwWindow, 420, 280, 2560, 1440);
 
-		//glfwSetWindowSizeCallback(GlfwWindow, WindowResizeCallback);
 		glfwSetWindowSizeCallback(GlfwWindow, [](GLFWwindow* InGlfwWindow, int NewWidth, int NewHeight) 
 		{
 			int SizeX, SizeY;
@@ -111,9 +104,6 @@ namespace LkEngine {
 			Window.SetViewportWidth(NewWidth);
 			Window.SetViewportHeight(NewHeight);
 			Window.OnViewportSizeUpdated.Broadcast(NewWidth, NewHeight);
-			//Window.SetViewportWidth(SizeX);
-			//Window.SetViewportHeight(SizeY);
-			//Window.OnViewportSizeUpdated.Broadcast(SizeX, SizeY);
 
 			Window.SetSize({ NewWidth, NewHeight });
 			LK_CORE_DEBUG_TAG("Window", "Resize: ({}, {})   Viewport ({}, {})", 
@@ -260,8 +250,8 @@ namespace LkEngine {
 	
 	void LWindow::SetVSync(bool InEnabled)
 	{
-		m_VSync = InEnabled;
-		if (m_VSync)
+		bVSync = InEnabled;
+		if (bVSync)
 		{
 			glfwSwapInterval(1);
 		}

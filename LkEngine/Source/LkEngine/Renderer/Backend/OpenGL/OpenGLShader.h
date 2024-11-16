@@ -17,12 +17,12 @@ namespace LkEngine {
 
 		FORCEINLINE virtual void Bind() const override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
 		}
 
 		FORCEINLINE virtual void Unbind() const override
 		{
-			LK_OpenGL(glUseProgram(0));
+			LK_OpenGL_Verify(glUseProgram(0));
 		}
 
 		FORCEINLINE virtual LRendererID GetRendererID() const override { return RendererID; }
@@ -30,68 +30,68 @@ namespace LkEngine {
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const int Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), Value));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform1i(GetUniformLocation(Uniform.data()), Value));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const bool Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), static_cast<int>(Value)));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform1i(GetUniformLocation(Uniform.data()), static_cast<int>(Value)));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const float Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform1f(GetUniformLocation(Uniform.data()), Value));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform1f(GetUniformLocation(Uniform.data()), Value));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const uint32_t Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform1i(GetUniformLocation(Uniform.data()), Value));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform1i(GetUniformLocation(Uniform.data()), Value));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec2& Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID)); 
-			LK_OpenGL(glUniform2f(GetUniformLocation(Uniform.data()), Value.x, Value.y));
+			LK_OpenGL_Verify(glUseProgram(RendererID)); 
+			LK_OpenGL_Verify(glUniform2f(GetUniformLocation(Uniform.data()), Value.x, Value.y));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec3& Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform3f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform3f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::vec4& Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform4f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform4f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec2& Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform2i(GetUniformLocation(Uniform.data()), Value.x, Value.y));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform2i(GetUniformLocation(Uniform.data()), Value.x, Value.y));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec3& Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform3i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform3i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::ivec4& Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniform4i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniform4i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
 		}
 
 		FORCEINLINE virtual void Set(std::string_view Uniform, const glm::mat4& Value) override
 		{
-			LK_OpenGL(glUseProgram(RendererID));
-			LK_OpenGL(glUniformMatrix4fv(GetUniformLocation(Uniform.data()), 1, GL_FALSE, &Value[0][0]));
+			LK_OpenGL_Verify(glUseProgram(RendererID));
+			LK_OpenGL_Verify(glUniformMatrix4fv(GetUniformLocation(Uniform.data()), 1, GL_FALSE, &Value[0][0]));
 		}
 		
 		FORCEINLINE virtual std::size_t GetHash() override
@@ -119,7 +119,7 @@ namespace LkEngine {
 			}
 
 			int UniformLocation;
-			LK_OpenGL(UniformLocation = glGetUniformLocation(RendererID, Uniform.c_str()));
+			LK_OpenGL_Verify(UniformLocation = glGetUniformLocation(RendererID, Uniform.c_str()));
 			if (UniformLocation == -1)
 			{
 				LK_CORE_WARN_TAG("Shader", "Uniform \"{}\" is not in use ({})", Uniform, FilePath.filename().string());

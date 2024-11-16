@@ -6,8 +6,8 @@
 
 namespace LkEngine {
 
-    LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices, 
-							 const std::vector<FIndex>& InIndices, 
+	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices,
+							 const std::vector<FIndex>& InIndices,
 							 const glm::mat4& InTransform)
 		: m_Vertices(InVertices)
 		, m_Indices(InIndices)
@@ -27,8 +27,8 @@ namespace LkEngine {
 		LK_CORE_ASSERT(Submesh.IndexCount == m_IndexBuffer->GetCount(), "IndexBuffer count mismatch");
 	}
 
-	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices, 
-							 const std::vector<FIndex>& InIndices, 
+	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices,
+							 const std::vector<FIndex>& InIndices,
 							 const std::vector<LSubmesh>& InSubmeshes)
 		: m_Vertices(InVertices)
 		, m_Indices(InIndices)

@@ -22,10 +22,10 @@ namespace LkEngine {
 		TObjectPtr<LMeshSource> ImportToMeshSource();
 
 	private:
-		void TraverseNodes(TObjectPtr<LMeshSource> InMeshSource, 
-						   void* AssimpNode, 
-						   const uint32_t InNodeIndex, 
-						   const glm::mat4& InParentTransform = glm::mat4(1.0f), 
+		void TraverseNodes(TObjectPtr<LMeshSource> InMeshSource,
+						   void* AssimpNode,
+						   const uint32_t InNodeIndex,
+						   const glm::mat4& InParentTransform = glm::mat4(1.0f),
 						   const uint32_t InLevel = 0);
 
 	private:

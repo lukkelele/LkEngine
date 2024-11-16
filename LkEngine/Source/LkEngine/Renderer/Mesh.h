@@ -21,10 +21,10 @@
 
 namespace LkEngine {
 
-    /**
-     * FVertex
-     */
-    struct FVertex
+	/**
+	 * FVertex
+	 */
+	struct FVertex
 	{
 		glm::vec3 Position{};
 		glm::vec3 Normal{};
@@ -44,14 +44,14 @@ namespace LkEngine {
 		uint32_t BoneIndex;
 
 		FBoneInfo() = default;
-		FBoneInfo(const glm::mat4& InSubMeshInverseTransform, 
-				  const glm::mat4& InInverseBindPose, 
-				  const uint32_t InSubMeshIndex, 
+		FBoneInfo(const glm::mat4& InSubMeshInverseTransform,
+				  const glm::mat4& InInverseBindPose,
+				  const uint32_t InSubMeshIndex,
 				  const uint32_t InBoneIndex)
 			: SubMeshInverseTransform(InSubMeshInverseTransform)
 			, InverseBindPose(InInverseBindPose)
 			, SubMeshIndex(InSubMeshIndex)
-			, BoneIndex(InBoneIndex) 
+			, BoneIndex(InBoneIndex)
 		{
 		}
 
@@ -78,7 +78,7 @@ namespace LkEngine {
 		{
 			if ((Weight < 0.0f) || (Weight > 1.0f))
 			{
-				LK_CORE_WARN_TAG("BoneInfluence", "Vertex bone weight is out of range, clamping it to [0, 1] (BoneID={}, Weight={})", 
+				LK_CORE_WARN_TAG("BoneInfluence", "Vertex bone weight is out of range, clamping it to [0, 1] (BoneID={}, Weight={})",
 								 BoneInfoIndex, Weight);
 				Weight = std::clamp(Weight, 0.0f, 1.0f);
 			}
@@ -96,8 +96,8 @@ namespace LkEngine {
 					}
 				}
 
-				LK_CORE_WARN_TAG("BoneInfluence", "Vertex has more than four bones affecting it, " 
-								 "extra bone influences will be discarded (BoneID={}, Weight={})", 
+				LK_CORE_WARN_TAG("BoneInfluence", "Vertex has more than four bones affecting it, "
+												  "extra bone influences will be discarded (BoneID={}, Weight={})",
 								 BoneInfoIndex, Weight);
 			}
 		}
@@ -150,15 +150,17 @@ namespace LkEngine {
 	struct FTriangle
 	{
 		FVertex V0;
-		FVertex V1; 
+		FVertex V1;
 		FVertex V2;
 
-		explicit FTriangle(const FVertex& InV0, 
-						   const FVertex& InV1, 
+		explicit FTriangle(const FVertex& InV0,
+						   const FVertex& InV1,
 						   const FVertex& InV2)
 			: V0(InV0)
 			, V1(InV1)
-			, V2(InV2) {}
+			, V2(InV2)
+		{
+		}
 		FTriangle() = delete;
 	};
 
@@ -167,14 +169,14 @@ namespace LkEngine {
 		glm::vec3 Min;
 		glm::vec3 Max;
 
-		FAABB() 
+		FAABB()
 			: Min(0.0f)
 			, Max(0.0f)
 		{
 		}
 
-		FAABB(const glm::vec3& InMin, 
-			 const glm::vec3& InMax) 
+		FAABB(const glm::vec3& InMin,
+			  const glm::vec3& InMax)
 			: Min(InMin)
 			, Max(InMax)
 		{
@@ -275,11 +277,11 @@ namespace LkEngine {
 	{
 	public:
 		LMeshSource() = default;
-		LMeshSource(const std::vector<FVertex>& InVertices, 
-					const std::vector<FIndex>& InIndices, 
+		LMeshSource(const std::vector<FVertex>& InVertices,
+					const std::vector<FIndex>& InIndices,
 					const glm::mat4& InTransform);
-		LMeshSource(const std::vector<FVertex>& InVertices, 
-					const std::vector<FIndex>& InIndices, 
+		LMeshSource(const std::vector<FVertex>& InVertices,
+					const std::vector<FIndex>& InIndices,
 					const std::vector<LSubmesh>& InSubmeshes);
 		virtual ~LMeshSource() = default;
 
@@ -292,55 +294,55 @@ namespace LkEngine {
 		bool IsSubmeshRigged(uint32_t submeshIndex) const { return Submeshes[submeshIndex].bIsRigged; }
 		const std::vector<FBoneInfluence>& GetBoneInfluences() const { return m_BoneInfluences; }
 
-		FORCEINLINE std::vector<TObjectPtr<LMaterial>>& GetMaterials() 
-		{ 
-			return m_Materials; 
+		FORCEINLINE std::vector<TObjectPtr<LMaterial>>& GetMaterials()
+		{
+			return m_Materials;
 		}
 
-		FORCEINLINE const std::vector<TObjectPtr<LMaterial>>& GetMaterials() const 
-		{ 
-			return m_Materials; 
+		FORCEINLINE const std::vector<TObjectPtr<LMaterial>>& GetMaterials() const
+		{
+			return m_Materials;
 		}
 
-		FORCEINLINE const std::filesystem::path& GetFilePath() const 
-		{ 
+		FORCEINLINE const std::filesystem::path& GetFilePath() const
+		{
 			return m_FilePath;
 		}
 
-		FORCEINLINE const std::vector<FTriangle> GetTriangleCache(const uint32_t Index) const 
-		{ 
+		FORCEINLINE const std::vector<FTriangle> GetTriangleCache(const uint32_t Index) const
+		{
 			LK_VERIFY(m_TriangleCache.contains(Index));
-			return m_TriangleCache.at(Index); 
+			return m_TriangleCache.at(Index);
 		}
 
-		FORCEINLINE TObjectPtr<LVertexBuffer> GetVertexBuffer() 
-		{ 
-			return m_VertexBuffer; 
+		FORCEINLINE TObjectPtr<LVertexBuffer> GetVertexBuffer()
+		{
+			return m_VertexBuffer;
 		}
 
-		FORCEINLINE TObjectPtr<LVertexBuffer> GetBoneInfluenceBuffer() 
-		{ 
-			return m_BoneInfluenceBuffer; 
+		FORCEINLINE TObjectPtr<LVertexBuffer> GetBoneInfluenceBuffer()
+		{
+			return m_BoneInfluenceBuffer;
 		}
 
-		FORCEINLINE TObjectPtr<LIndexBuffer> GetIndexBuffer() 
-		{ 
-			return m_IndexBuffer; 
+		FORCEINLINE TObjectPtr<LIndexBuffer> GetIndexBuffer()
+		{
+			return m_IndexBuffer;
 		}
 
 		static EAssetType GetStaticType() { return EAssetType::MeshSource; }
 
-		//const AABB& GetBoundingBox() const { return m_BoundingBox; }
+		// const AABB& GetBoundingBox() const { return m_BoundingBox; }
 
-		FORCEINLINE const FMeshNode& GetRootNode() const 
-		{ 
+		FORCEINLINE const FMeshNode& GetRootNode() const
+		{
 			LK_CORE_ASSERT(m_Nodes.size() > 0, "No root node exists");
-			return m_Nodes[0]; 
+			return m_Nodes[0];
 		}
 
-		const std::vector<FMeshNode>& GetNodes() const 
-		{ 
-			return m_Nodes; 
+		const std::vector<FMeshNode>& GetNodes() const
+		{
+			return m_Nodes;
 		}
 
 		/**
@@ -349,7 +351,7 @@ namespace LkEngine {
 		void DumpVertexBuffer();
 
 		/* Not implemented yet. */
-	#if 0
+#if 0
 		FORCEINLINE bool HasSkeleton() const 
 		{ 
 			return static_cast<bool>(m_Skeleton); 
@@ -370,7 +372,7 @@ namespace LkEngine {
 									   const bool IsMaskedRootMotion, 
 									   const glm::vec3& RootTranslationMask, 
 									   const float RootRotationMask) const;
-	#endif
+#endif
 
 	private:
 		std::vector<LSubmesh> Submeshes{};
@@ -386,14 +388,14 @@ namespace LkEngine {
 		std::vector<FBoneInfo> m_BoneInfo{};
 
 		/* Not implemented yet. */
-	#if 0
+#if 0
 		/* Skeleton. */
 		mutable TObjectPtr<LSkeleton> m_Skeleton;
 
 		/* Animations. */
 		mutable std::vector<TObjectPtr<LAnimation>> Animations;
 		std::vector<std::string> m_AnimationNames;
-	#endif
+#endif
 
 		std::vector<TObjectPtr<LMaterial>> m_Materials{};
 		std::unordered_map<uint32_t, std::vector<FTriangle>> m_TriangleCache;
@@ -432,28 +434,28 @@ namespace LkEngine {
 
 		void SetSubmeshes(const std::vector<uint32_t>& submeshes);
 
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() 
-		{ 
-			return MeshSource; 
+		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource()
+		{
+			return MeshSource;
 		}
 
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const 
-		{ 
-			return MeshSource; 
+		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const
+		{
+			return MeshSource;
 		}
 
-		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> meshSource) 
-		{ 
-			MeshSource = meshSource; 
+		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> meshSource)
+		{
+			MeshSource = meshSource;
 		}
 
-		FORCEINLINE TObjectPtr<LMaterialTable> GetMaterials() const 
-		{ 
-			return Materials; 
+		FORCEINLINE TObjectPtr<LMaterialTable> GetMaterials() const
+		{
+			return Materials;
 		}
 
-		FORCEINLINE FAssetHandle GetMaterialHandle(const int Index) 
-		{ 
+		FORCEINLINE FAssetHandle GetMaterialHandle(const int Index)
+		{
 			return Materials->GetMaterialHandle(Index);
 		}
 
@@ -461,16 +463,16 @@ namespace LkEngine {
 
 		static EAssetType GetStaticType() { return EAssetType::Mesh; }
 
-		TObjectPtr<LVertexBuffer> GetVertexBuffer() 
-		{ 
-			return GetMeshSource()->GetVertexBuffer(); 
+		TObjectPtr<LVertexBuffer> GetVertexBuffer()
+		{
+			return GetMeshSource()->GetVertexBuffer();
 		}
 
 		TObjectPtr<LIndexBuffer> GetIndexBuffer() { return GetMeshSource()->GetIndexBuffer(); }
 
 	private:
 		TObjectPtr<LMeshSource> MeshSource;
-		std::vector<uint32_t> Submeshes; 
+		std::vector<uint32_t> Submeshes;
 
 		TObjectPtr<LMaterialTable> Materials;
 
@@ -495,37 +497,37 @@ namespace LkEngine {
 		LStaticMesh(const TObjectPtr<LStaticMesh>& Other);
 		virtual ~LStaticMesh() = default;
 
-		FORCEINLINE std::vector<uint32_t>& GetSubmeshes() 
-		{ 
-			return Submeshes; 
+		FORCEINLINE std::vector<uint32_t>& GetSubmeshes()
+		{
+			return Submeshes;
 		}
 
-		FORCEINLINE const std::vector<uint32_t>& GetSubmeshes() const 
-		{ 
-			return Submeshes; 
+		FORCEINLINE const std::vector<uint32_t>& GetSubmeshes() const
+		{
+			return Submeshes;
 		}
 
 		void SetSubmeshes(const std::vector<uint32_t>& InSubmeshes);
 
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() 
-		{ 
-			return MeshSource; 
-		}
-
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const 
-		{ 
+		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource()
+		{
 			return MeshSource;
 		}
 
-		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> InMeshAsset) 
-		{ 
-			/// TODO: Mark dirty
-			MeshSource = InMeshAsset; 
+		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const
+		{
+			return MeshSource;
 		}
 
-		TObjectPtr<LMaterialTable> GetMaterials() const 
-		{ 
-			return Materials; 
+		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> InMeshAsset)
+		{
+			/// TODO: Mark dirty
+			MeshSource = InMeshAsset;
+		}
+
+		TObjectPtr<LMaterialTable> GetMaterials() const
+		{
+			return Materials;
 		}
 
 		static EAssetType GetStaticType() { return EAssetType::StaticMesh; }

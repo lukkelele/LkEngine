@@ -1,7 +1,7 @@
 /******************************************************************
  * EditorLayer
  *
- * Main editor. 
+ * Main editor.
  *******************************************************************/
 #pragma once
 
@@ -61,42 +61,33 @@ namespace LkEngine {
 		virtual void OnRender() override;
 		virtual void OnRenderUI() override;
 
-		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() 
-		{ 
-			return EditorCamera; 
-		}
+		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
 
 		void SetScene(TObjectPtr<LScene> InScene);
 
-		FORCEINLINE TObjectPtr<LScene> GetCurrentScene() 
-		{ 
-			return Scene; 
-		}
+		FORCEINLINE TObjectPtr<LScene> GetCurrentScene() { return Scene; }
 
 		void SetUpdateWindowFlag(bool flag);
 
 		FORCEINLINE bool IsEnabled() const { return m_Enabled; }
 
-		FORCEINLINE EEditorWindowType GetCurrentWindowType() const 
-		{ 
-			return CurrentWindowType; 
-		}
+		FORCEINLINE EEditorWindowType GetCurrentWindowType() const { return CurrentWindowType; }
 
 		/* FIXME: Update all of these, refactor away. */
 		FORCEINLINE LVector2 GetEditorWindowSize() const { return EditorViewport->GetSize(); }
 
-		FORCEINLINE static LEditorLayer* Get() 
-		{ 
+		FORCEINLINE static LEditorLayer* Get()
+		{
 			LK_VERIFY(Instance, "Invalid editor instance");
-			return Instance; 
+			return Instance;
 		}
 
-		void RenderViewport();                
-		void RenderViewport(TObjectPtr<LImage> Image); 
+		void RenderViewport();
+		void RenderViewport(TObjectPtr<LImage> Image);
 		void Render2D();
 
 	private:
-        void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);
+		void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);
 		void HandleExternalWindows();
 
 		void UI_MainMenuBar();
@@ -133,6 +124,7 @@ namespace LkEngine {
 	private:
 		inline static bool bWindowsHaveChangedInSize = true;
 		inline static bool bShowEditorWindowSizesWindow = false;
+
 	private:
 		LEditorTabManager& TabManager;
 
@@ -150,7 +142,7 @@ namespace LkEngine {
 
 		EGizmo GizmoType = EGizmo::Translate;
 
-        FEventCallback m_EventCallback; /// UPDATE ME
+		FEventCallback m_EventCallback; /// UPDATE ME
 
 		TSharedPtr<LSceneManagerPanel> SceneManagerPanel;
 
@@ -174,9 +166,9 @@ namespace LkEngine {
 
 		friend class LNodeEditorTab;
 		friend class LMaterialEditorTab;
-		friend class LSceneManagerPanel; 
+		friend class LSceneManagerPanel;
 		friend class LRenderer;
-		
+
 		inline static LEditorLayer* Instance = nullptr;
 	};
 

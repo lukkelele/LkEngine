@@ -13,21 +13,21 @@ namespace LkEngine {
 		m_Width = Width;
 		m_Height = Height;
 
-		LK_OpenGL(glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &m_RendererID));
-		LK_OpenGL(glTextureStorage3D(m_RendererID, 1, GL_RGBA32F, m_Width, m_Height, Specification.Layers));
+		LK_OpenGL_Verify(glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &m_RendererID));
+		LK_OpenGL_Verify(glTextureStorage3D(m_RendererID, 1, GL_RGBA32F, m_Width, m_Height, Specification.Layers));
 
 		// Since we're using immutable storage, mipmap generation should be reconsidered.
 		// If mipmaps are needed, you must specify the correct number of levels in glTextureStorage3D and generate them after filling the Texture.
 		if (Specification.Mipmaps > 1)
 		{
-			LK_OpenGL(glGenerateTextureMipmap(m_RendererID));
-			LK_OpenGL(glTextureParameteri(m_RendererID, GL_TEXTURE_MAX_LEVEL, 10)); 
+			LK_OpenGL_Verify(glGenerateTextureMipmap(m_RendererID));
+			LK_OpenGL_Verify(glTextureParameteri(m_RendererID, GL_TEXTURE_MAX_LEVEL, 10)); 
 		}
 		
-		LK_OpenGL(glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST)); 
-		LK_OpenGL(glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-		LK_OpenGL(glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT));
-		LK_OpenGL(glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT));
+		LK_OpenGL_Verify(glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST)); 
+		LK_OpenGL_Verify(glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		LK_OpenGL_Verify(glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT));
+		LK_OpenGL_Verify(glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT));
 	}
 
 	LOpenGLTextureArray::~LOpenGLTextureArray()
@@ -35,20 +35,20 @@ namespace LkEngine {
 		/* The TextureArray should not explicitly delete textures as 
 		 * they belong to the TextureLibrary. */
 		LK_CORE_DEBUG_TAG("OpenGLTextureArray", "Deleting TextureArrayTexture bound to {}", m_RendererID);
-		LK_OpenGL(glDeleteTextures(1, &m_RendererID));
+		LK_OpenGL_Verify(glDeleteTextures(1, &m_RendererID));
 	}
 
 	void LOpenGLTextureArray::Bind()
 	{
 		if (m_RendererID > 0)
 		{
-			LK_OpenGL(glBindTextureUnit(Specification.TextureSlot, m_RendererID));
+			LK_OpenGL_Verify(glBindTextureUnit(Specification.TextureSlot, m_RendererID));
 		}
 	}
 
 	void LOpenGLTextureArray::Unbind()
 	{
-		LK_OpenGL(glBindTextureUnit(Specification.TextureSlot, 0));
+		LK_OpenGL_Verify(glBindTextureUnit(Specification.TextureSlot, 0));
 		if (m_RendererID > 0)
 		{
 			//LK_OpenGL(glBindTextureUnit(Specification.TextureSlot, 0));
@@ -63,7 +63,7 @@ namespace LkEngine {
 			FBuffer ImageBuffer = Texture2D->GetImageBuffer();
 			LK_CORE_ASSERT(ImageBuffer.Data, "Texture data from \"{}\" is NULL", Texture2D->GetName());
 
-			LK_OpenGL(glTextureSubImage3D(m_RendererID, 
+			LK_OpenGL_Verify(glTextureSubImage3D(m_RendererID, 
 					                      0, 
 					                      0, 
 					                      0, 

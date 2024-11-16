@@ -14,7 +14,7 @@ namespace LkEngine {
 
 	LOpenGLContext::LOpenGLContext(LWindow* InWindow)
 		: Window(InWindow)
-    {
+	{
 		LCLASS_REGISTER();
 
 		m_GlfwWindow = Window->GetGlfwWindow();
@@ -24,13 +24,11 @@ namespace LkEngine {
 		Window->OnWindowSizeUpdated.Add(this, &LOpenGLContext::UpdateResolution);
 	}
 
-    void LOpenGLContext::Destroy()
-    {
-    }
+	void LOpenGLContext::Destroy() {}
 
-    void LOpenGLContext::Initialize(const ESourceBlendFunction InSourceBlendFunction, 
+	void LOpenGLContext::Initialize(const ESourceBlendFunction InSourceBlendFunction,
 									const EDestinationBlendFunction InDestinationBlendFunction)
-    {
+	{
 		const GLenum GladInitResult = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (GladInitResult == 0)
 		{
@@ -38,18 +36,18 @@ namespace LkEngine {
 			LK_CORE_ASSERT(false);
 		}
 
-		LK_OpenGL(glEnable(GL_LINE_SMOOTH));
-		LK_OpenGL(glEnable(GL_BLEND));
+		LK_OpenGL_Verify(glEnable(GL_LINE_SMOOTH));
+		LK_OpenGL_Verify(glEnable(GL_BLEND));
 
 		SetBlendingEnabled(true);
 		SetDepthEnabled(false);
 
 		SetBlendFunction(InSourceBlendFunction, InDestinationBlendFunction);
-    }
+	}
 
 	void LOpenGLContext::SetViewport(const glm::vec2& ViewportPos, const glm::vec2& ViewportSize)
 	{
-		LK_OpenGL(glViewport(ViewportPos.x, ViewportPos.y, ViewportSize.x, ViewportSize.y));
+		LK_OpenGL_Verify(glViewport(ViewportPos.x, ViewportPos.y, ViewportSize.x, ViewportSize.y));
 	}
 
 	void LOpenGLContext::SetBlendingEnabled(const bool InEnabled)
@@ -57,11 +55,11 @@ namespace LkEngine {
 		bBlendingEnabled = InEnabled;
 		if (bBlendingEnabled)
 		{
-			LK_OpenGL(glEnable(GL_BLEND));
+			LK_OpenGL_Verify(glEnable(GL_BLEND));
 		}
 		else
 		{
-			LK_OpenGL(glDisable(GL_BLEND));
+			LK_OpenGL_Verify(glDisable(GL_BLEND));
 		}
 	}
 
@@ -71,35 +69,35 @@ namespace LkEngine {
 		switch (DepthFunction)
 		{
 			case EDepthFunction::Never:
-				LK_OpenGL(glDepthFunc(GL_NEVER));
+				LK_OpenGL_Verify(glDepthFunc(GL_NEVER));
 				break;
 
 			case EDepthFunction::Less:
-				LK_OpenGL(glDepthFunc(GL_LESS));
+				LK_OpenGL_Verify(glDepthFunc(GL_LESS));
 				break;
 
 			case EDepthFunction::Equal:
-				LK_OpenGL(glDepthFunc(GL_EQUAL));
+				LK_OpenGL_Verify(glDepthFunc(GL_EQUAL));
 				break;
 
 			case EDepthFunction::LessOrEqual:
-				LK_OpenGL(glDepthFunc(GL_LEQUAL));
+				LK_OpenGL_Verify(glDepthFunc(GL_LEQUAL));
 				break;
 
 			case EDepthFunction::Greater:
-				LK_OpenGL(glDepthFunc(GL_GREATER));
+				LK_OpenGL_Verify(glDepthFunc(GL_GREATER));
 				break;
 
 			case EDepthFunction::NotEqual:
-				LK_OpenGL(glDepthFunc(GL_NOTEQUAL));
+				LK_OpenGL_Verify(glDepthFunc(GL_NOTEQUAL));
 				break;
 
 			case EDepthFunction::GreaterOrEqual:
-				LK_OpenGL(glDepthFunc(GL_GEQUAL));
+				LK_OpenGL_Verify(glDepthFunc(GL_GEQUAL));
 				break;
 
 			case EDepthFunction::Always:
-				LK_OpenGL(glDepthFunc(GL_ALWAYS));
+				LK_OpenGL_Verify(glDepthFunc(GL_ALWAYS));
 				break;
 		}
 	}
@@ -110,7 +108,7 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("OpenGLContext", "Update resolution to ({}, {})", Width, Height);
 		ImGuiViewport* Viewport = ImGui::GetMainViewport();
 		const ImVec2 Pos = Viewport->WorkPos;
-		LK_OpenGL(glViewport(Pos.x, Pos.y, Width, Height));
+		LK_OpenGL_Verify(glViewport(Pos.x, Pos.y, Width, Height));
 
 		ImGuiIO& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2(Width, Height);
@@ -121,22 +119,22 @@ namespace LkEngine {
 		bDepthEnabled = InEnabled;
 		if (bDepthEnabled)
 		{
-			LK_OpenGL(glEnable(GL_DEPTH_TEST));
+			LK_OpenGL_Verify(glEnable(GL_DEPTH_TEST));
 			return;
 		}
 
-		LK_OpenGL(glDisable(GL_DEPTH_TEST));
+		LK_OpenGL_Verify(glDisable(GL_DEPTH_TEST));
 	}
 
-	void LOpenGLContext::SetBlendFunction(const ESourceBlendFunction InSourceBlendFunction, 
-		                                  const EDestinationBlendFunction InDestinationBlendFunction)
+	void LOpenGLContext::SetBlendFunction(const ESourceBlendFunction InSourceBlendFunction,
+										  const EDestinationBlendFunction InDestinationBlendFunction)
 	{
 		LK_CORE_DEBUG_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InSourceBlendFunction));
-		LK_CORE_DEBUG_TAG("OpenGLContext", "Setting destination blend function: {}", Enum::ToString(InDestinationBlendFunction));
-		LK_OpenGL(glBlendFunc(
-			LOpenGL::GetSourceBlendFunction(InSourceBlendFunction), 
-			LOpenGL::GetDestinationBlendFunction(InDestinationBlendFunction))
-		);
+		LK_CORE_DEBUG_TAG("OpenGLContext",
+						  "Setting destination blend function: {}",
+						  Enum::ToString(InDestinationBlendFunction));
+		LK_OpenGL_Verify(glBlendFunc(LOpenGL::GetSourceBlendFunction(InSourceBlendFunction),
+							  LOpenGL::GetDestinationBlendFunction(InDestinationBlendFunction)));
 		BlendFunction.Source = InSourceBlendFunction;
 		BlendFunction.Destination = InDestinationBlendFunction;
 	}
@@ -145,20 +143,16 @@ namespace LkEngine {
 	{
 		BlendFunction.Source = InSourceBlendFunction;
 		LK_CORE_TRACE_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InSourceBlendFunction));
-		LK_OpenGL(glBlendFunc(
-			LOpenGL::GetSourceBlendFunction(BlendFunction.Source), 
-			LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination)
-		));
+		LK_OpenGL_Verify(glBlendFunc(LOpenGL::GetSourceBlendFunction(BlendFunction.Source),
+							  LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination)));
 	}
 
-    void LOpenGLContext::SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationBlendFunction)
+	void LOpenGLContext::SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationBlendFunction)
 	{
 		BlendFunction.Destination = InDestinationBlendFunction;
 		LK_CORE_TRACE_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InDestinationBlendFunction));
-		LK_OpenGL(glBlendFunc( 
-			LOpenGL::GetSourceBlendFunction(BlendFunction.Source), 
-			LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination)
-		));
+		LK_OpenGL_Verify(glBlendFunc(LOpenGL::GetSourceBlendFunction(BlendFunction.Source),
+							  LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination)));
 	}
 
 }

@@ -1,28 +1,10 @@
 #pragma once
 
-#include "Texture.h"
+#include "LkEngine/Renderer/Texture.h"
+#include "LkEngine/Renderer/TextureArraySpecification.h"
 
 
 namespace LkEngine {
-
-	enum ETextureArrayDimension : uint8_t
-	{
-		Dimension_200x200 = 0,
-		Dimension_512x512,
-		Dimension_1024x1024,
-		Dimension_2048x2048,
-		Dimension_4096x4096,
-	};
-
-	struct FTextureArraySpecification
-	{
-		ETextureArrayDimension TextureArrayDimension = ETextureArrayDimension::Dimension_1024x1024;
-		EImageFormat ImageFormat = EImageFormat::RGBA;
-		int TextureSlot = 0;
-		int Layers = 10;
-		int Mipmaps = 5;
-		std::string DebugName{};
-	};
 
 	class LTextureArray : public LObject
 	{
@@ -56,23 +38,5 @@ namespace LkEngine {
 	private:
 		LCLASS(LTextureArray)
 	};
-
-	namespace Utils {
-
-		static std::string TextureArrayDimensionToString(ETextureArrayDimension TextureArrayDimension)
-		{
-			switch (TextureArrayDimension)
-			{
-				case ETextureArrayDimension::Dimension_512x512:   return "512x512";
-				case ETextureArrayDimension::Dimension_1024x1024: return "1024x1024";
-				case ETextureArrayDimension::Dimension_2048x2048: return "2048x2048";
-				case ETextureArrayDimension::Dimension_4096x4096: return "4096x4096";
-			}
-
-			LK_CORE_ASSERT(false, "Unknown enum value of ETextureArrayDimension: {}", static_cast<int>(TextureArrayDimension));
-			return {};
-		}
-
-	}
 
 }

@@ -9,50 +9,47 @@
 
 #include "LkEngine/Renderer/Backend/OpenGL/LkOpenGL.h"
 
-
 namespace LkEngine {
 
-	#define LK_MESH_LOG(...)   LK_CORE_TRACE_TAG("Mesh", __VA_ARGS__)
-	#define LK_MESH_ERROR(...) LK_CORE_ERROR_TAG("Mesh", __VA_ARGS__)
-
+#define LK_MESH_LOG(...)   LK_CORE_TRACE_TAG("Mesh", __VA_ARGS__)
+#define LK_MESH_ERROR(...) LK_CORE_ERROR_TAG("Mesh", __VA_ARGS__)
 
 	static constexpr uint32_t MeshImportFlags =
-		aiProcess_CalcTangentSpace |        /* Create binormals/tangents just in case. */
-		aiProcess_Triangulate |             /* Make sure we're triangles. */
-		aiProcess_SortByPType |             /* Split meshes by primitive type. */
-		aiProcess_GenNormals |              /* Make sure we have legit normals. */
-		aiProcess_GenUVCoords |             /* Convert UVs if required. */
-	  //aiProcess_OptimizeGraph |
-	  //aiProcess_OptimizeMeshes |          /* Batch draws where possible */
-	  //aiProcess_JoinIdenticalVertices |
-		aiProcess_LimitBoneWeights |        /* If more than N(= 4) bone weights, discard least influencing bones and re-normalise sum to 1. */
-		aiProcess_ValidateDataStructure |   /* Validation. */
-		aiProcess_GlobalScale;              /* E.g convert cm to m for FBX import and other formats where cm is native. */
+		aiProcess_CalcTangentSpace | /* Create binormals/tangents just in case. */
+		aiProcess_Triangulate |		 /* Make sure we're triangles. */
+		aiProcess_SortByPType |		 /* Split meshes by primitive type. */
+		aiProcess_GenNormals |		 /* Make sure we have legit normals. */
+		aiProcess_GenUVCoords |		 /* Convert UVs if required. */
+									 // aiProcess_OptimizeGraph |
+		// aiProcess_OptimizeMeshes |          /* Batch draws where possible */
+		// aiProcess_JoinIdenticalVertices |
+		aiProcess_LimitBoneWeights |	  /* If more than N(= 4) bone weights, discard least influencing bones and re-normalise sum to 1. */
+		aiProcess_ValidateDataStructure | /* Validation. */
+		aiProcess_GlobalScale;			  /* E.g convert cm to m for FBX import and other formats where cm is native. */
 
-	namespace Utils 
-	{
+	namespace Utils {
 		static glm::mat4 Mat4FromAIMatrix4x4(const aiMatrix4x4& Matrix)
 		{
 			/* Assimp uses A, B, C, D for the rows and 1, 2, 3, 4 for columns. */
 			glm::mat4 result{};
-			result[0][0] = Matrix.a1; 
-			result[1][0] = Matrix.a2; 
-			result[2][0] = Matrix.a3; 
+			result[0][0] = Matrix.a1;
+			result[1][0] = Matrix.a2;
+			result[2][0] = Matrix.a3;
 			result[3][0] = Matrix.a4;
 
-			result[0][1] = Matrix.b1; 
-			result[1][1] = Matrix.b2; 
-			result[2][1] = Matrix.b3; 
+			result[0][1] = Matrix.b1;
+			result[1][1] = Matrix.b2;
+			result[2][1] = Matrix.b3;
 			result[3][1] = Matrix.b4;
 
-			result[0][2] = Matrix.c1; 
-			result[1][2] = Matrix.c2; 
-			result[2][2] = Matrix.c3; 
+			result[0][2] = Matrix.c1;
+			result[1][2] = Matrix.c2;
+			result[2][2] = Matrix.c3;
 			result[3][2] = Matrix.c4;
 
-			result[0][3] = Matrix.d1; 
-			result[1][3] = Matrix.d2; 
-			result[2][3] = Matrix.d3; 
+			result[0][3] = Matrix.d1;
+			result[1][3] = Matrix.d2;
+			result[2][3] = Matrix.d3;
 			result[3][3] = Matrix.d4;
 
 			return result;
@@ -70,12 +67,9 @@ namespace LkEngine {
 
 			const glm::vec3 Rotation = glm::degrees(glm::eulerAngles(RotationQuat));
 
-			LK_MESH_LOG("{0:^{1}} Translation: ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", 
-						depth * 3, Translation.x, Translation.y, Translation.z);
-			LK_MESH_LOG("{0:^{1}} Rotation:    ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", 
-						depth * 3, Rotation.x, Rotation.y, Rotation.z);
-			LK_MESH_LOG("{0:^{1}} Scale:       ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", 
-						depth * 3, Scale.x, Scale.y, Scale.z);
+			LK_MESH_LOG("{0:^{1}} Translation: ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", depth * 3, Translation.x, Translation.y, Translation.z);
+			LK_MESH_LOG("{0:^{1}} Rotation:    ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", depth * 3, Rotation.x, Rotation.y, Rotation.z);
+			LK_MESH_LOG("{0:^{1}} Scale:       ({2:6.2f}, {3:6.2f}, {4:6.2f})", "", depth * 3, Scale.x, Scale.y, Scale.z);
 			for (uint32_t i = 0; i < node->mNumChildren; ++i)
 			{
 				PrintNode(node->mChildren[i], depth);
@@ -85,13 +79,13 @@ namespace LkEngine {
 			LK_MESH_LOG("{0:^{1}}}}", "", depth * 3);
 		}
 
-	}
+	} // namespace Utils
 
 	LAssimpMeshImporter::LAssimpMeshImporter(const std::filesystem::path& InFilePath)
 		: FilePath(InFilePath)
 	{
 		/* TODO: Initialize the asset logger here. */
-		//AssimpLogStream::Initialize();
+		// AssimpLogStream::Initialize();
 	}
 
 	TObjectPtr<LMeshSource> LAssimpMeshImporter::ImportToMeshSource()
@@ -148,16 +142,16 @@ namespace LkEngine {
 				for (size_t i = 0; i < Mesh->mNumVertices; i++)
 				{
 					FVertex Vertex{};
-					Vertex.Position = { 
-						Mesh->mVertices[i].x, 
-						Mesh->mVertices[i].y, 
-						Mesh->mVertices[i].z 
+					Vertex.Position = {
+						Mesh->mVertices[i].x,
+						Mesh->mVertices[i].y,
+						Mesh->mVertices[i].z
 					};
 
-					Vertex.Normal = { 
-						Mesh->mNormals[i].x, 
-						Mesh->mNormals[i].y, 
-						Mesh->mNormals[i].z 
+					Vertex.Normal = {
+						Mesh->mNormals[i].x,
+						Mesh->mNormals[i].y,
+						Mesh->mNormals[i].z
 					};
 
 					BoundingBox.Min.x = glm::min(Vertex.Position.x, BoundingBox.Min.x);
@@ -170,26 +164,26 @@ namespace LkEngine {
 					if (Mesh->HasTangentsAndBitangents())
 					{
 						/* Tangent. */
-						Vertex.Tangent = { 
-							Mesh->mTangents[i].x, 
-							Mesh->mTangents[i].y, 
-							Mesh->mTangents[i].z 
+						Vertex.Tangent = {
+							Mesh->mTangents[i].x,
+							Mesh->mTangents[i].y,
+							Mesh->mTangents[i].z
 						};
 
 						/* Binormal. */
-						Vertex.Binormal = { 
-							Mesh->mBitangents[i].x, 
-							Mesh->mBitangents[i].y, 
-							Mesh->mBitangents[i].z 
+						Vertex.Binormal = {
+							Mesh->mBitangents[i].x,
+							Mesh->mBitangents[i].y,
+							Mesh->mBitangents[i].z
 						};
 					}
 
 					if (Mesh->HasTextureCoords(0))
 					{
-						//Vertex.Texcoord = { 2 * Mesh->mTextureCoords[0][i].x, 2 * Mesh->mTextureCoords[0][i].y };
-						Vertex.Texcoord = { 
-							Mesh->mTextureCoords[0][i].x, 
-							Mesh->mTextureCoords[0][i].y 
+						// Vertex.Texcoord = { 2 * Mesh->mTextureCoords[0][i].x, 2 * Mesh->mTextureCoords[0][i].y };
+						Vertex.Texcoord = {
+							Mesh->mTextureCoords[0][i].x,
+							Mesh->mTextureCoords[0][i].y
 						};
 					}
 
@@ -200,19 +194,18 @@ namespace LkEngine {
 				for (size_t i = 0; i < Mesh->mNumFaces; i++)
 				{
 					LK_CORE_ASSERT(Mesh->mFaces[i].mNumIndices == 3, "Mesh must have 3 indices");
-					FIndex Index = { 
-						Mesh->mFaces[i].mIndices[0], 
-						Mesh->mFaces[i].mIndices[1], 
-						Mesh->mFaces[i].mIndices[2] 
+					FIndex Index = {
+						Mesh->mFaces[i].mIndices[0],
+						Mesh->mFaces[i].mIndices[1],
+						Mesh->mFaces[i].mIndices[2]
 					};
 					MeshSource->m_Indices.push_back(Index);
 
 					/* TODO: Fix overflow warning. */
 					MeshSource->m_TriangleCache[m].emplace_back(
-						MeshSource->m_Vertices[Index.V1 + Submesh.BaseVertex], 
-						MeshSource->m_Vertices[Index.V2 + Submesh.BaseVertex], 
-						MeshSource->m_Vertices[Index.V3 + Submesh.BaseVertex]
-					);
+						MeshSource->m_Vertices[Index.V1 + Submesh.BaseVertex],
+						MeshSource->m_Vertices[Index.V2 + Submesh.BaseVertex],
+						MeshSource->m_Vertices[Index.V3 + Submesh.BaseVertex]);
 				}
 			}
 
@@ -234,31 +227,31 @@ namespace LkEngine {
 			}
 		}
 		/* No meshes. */
-		else 
+		else
 		{
 			LK_CORE_WARN_TAG("AssimpMeshImporter", "No meshes found when trying to import");
 		}
 
 		if (MeshSource->m_Vertices.size())
 		{
-			MeshSource->m_VertexBuffer = LVertexBuffer::Create(MeshSource->m_Vertices.data(), 
+			MeshSource->m_VertexBuffer = LVertexBuffer::Create(MeshSource->m_Vertices.data(),
 															   static_cast<uint64_t>(MeshSource->m_Vertices.size() * sizeof(FVertex)));
 		}
 
 		if (MeshSource->m_Indices.size())
 		{
-			MeshSource->m_IndexBuffer = LIndexBuffer::Create(MeshSource->m_Indices.data(), 
+			MeshSource->m_IndexBuffer = LIndexBuffer::Create(MeshSource->m_Indices.data(),
 															 static_cast<uint64_t>(MeshSource->m_Indices.size() * sizeof(FIndex)));
 		}
 
 		return MeshSource;
 	}
 
-	void LAssimpMeshImporter::TraverseNodes(TObjectPtr<LMeshSource> MeshSource, 
-										   void* InAssimpNode, 
-										   uint32_t NodeIndex, 
-										   const glm::mat4& ParentTransform, 
-										   const uint32_t Level)
+	void LAssimpMeshImporter::TraverseNodes(TObjectPtr<LMeshSource> MeshSource,
+											void* InAssimpNode,
+											uint32_t NodeIndex,
+											const glm::mat4& ParentTransform,
+											const uint32_t Level)
 	{
 		aiNode* AssimpNode = static_cast<aiNode*>(InAssimpNode);
 
@@ -288,11 +281,12 @@ namespace LkEngine {
 			ChildMeshNode.Parent = ParentNodeIndex;
 			MeshSource->m_Nodes[NodeIndex].Children[i] = ChildIndex;
 
-			TraverseNodes(MeshSource, 
-						  AssimpNode->mChildren[i], 
-						  ChildIndex, 
-						  Transform, 
+			TraverseNodes(MeshSource,
+						  AssimpNode->mChildren[i],
+						  ChildIndex,
+						  Transform,
 						  Level + 1);
 		}
 	}
+
 }

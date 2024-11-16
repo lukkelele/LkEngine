@@ -109,7 +109,7 @@ namespace LkEngine {
         TObjectPtr<LOpenGLTextureArray> GetTextureArray(const int Index);
 
     private:
-        TObjectPtr<LOpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension& TextureArrayDimension);
+        TObjectPtr<LOpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension TextureArrayDimension);
 
     private:
         uint8_t m_Topology = GL_TRIANGLES;
@@ -122,23 +122,5 @@ namespace LkEngine {
 
         LCLASS(LOpenGLRenderer)
     };
-
-
-    namespace LOpenGL {
-
-        inline static int PrimitiveTopologyToOpenGL(const EPrimitiveTopology Topology)
-        {
-            switch (Topology)
-            {
-                case EPrimitiveTopology::Points:     return GL_POINTS;
-                case EPrimitiveTopology::Lines:      return GL_LINES;
-                case EPrimitiveTopology::Triangles:  return GL_TRIANGLES;
-            }
-
-            LK_CORE_ASSERT(false, "Unknown topology, cannot convert to OpenGL format");
-            return GL_INVALID_ENUM;
-        }
-
-    }
 
 }
