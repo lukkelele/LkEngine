@@ -78,30 +78,29 @@ namespace LkEngine {
 
 		void SubmitIndexed(unsigned int count) override;
 
-        void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& color, uint64_t EntityID = 0) override;
-        void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& color, uint64_t EntityID = 0) override;
-        void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& color, float Rotation, uint64_t EntityID = 0) override;
-        void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& color, float Rotation, uint64_t EntityID = 0) override;
+        virtual void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0) override;
+        virtual void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0) override;
+        virtual void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& Color, const float Rotation, uint64_t EntityID = 0) override;
+        virtual void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& Color, const float Rotation, uint64_t EntityID = 0) override;
 
-        void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
-                        const float Rotation, uint64_t EntityID = 0) override;
+        virtual void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
+								const float Rotation, uint64_t EntityID = 0) override;
 
-        void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
-                        const float Rotation, uint64_t EntityID = 0) override;
+        virtual void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
+								const float Rotation, uint64_t EntityID = 0) override;
 
-        void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
-                        const glm::vec4& TintColor, const float Rotation, uint64_t EntityID) override;
+        virtual void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
+								const glm::vec4& TintColor, const float Rotation, uint64_t EntityID) override;
 
-        void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
-                        const glm::vec4& TintColor, const float Rotation, uint64_t EntityID) override;
+        virtual void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, 
+								const glm::vec4& TintColor, const float Rotation, uint64_t EntityID) override;
 
-        void SubmitLine(const glm::vec2& Pos, const glm::vec2& Size, 
-                        const glm::vec4& color, uint64_t EntityID = 0) override;
+        virtual void SubmitLine(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0) override;
 
         virtual void SetPrimitiveTopology(const ERenderTopology InRenderTopology) override;
         virtual void SetDepthFunction(const EDepthFunction InDepthFunction) override;
 
-        RendererCapabilities& GetCapabilities() override;
+        virtual RendererCapabilities& GetCapabilities() override;
 
         virtual void BindTextureArray(const uint8_t Index) override;
         virtual void BindTextureArray(const ETextureArrayDimension& InTextureArrayDim) override;

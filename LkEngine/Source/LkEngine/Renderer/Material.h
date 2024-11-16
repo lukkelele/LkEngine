@@ -21,6 +21,11 @@ namespace LkEngine {
 		}
     };
 
+	/**
+	 * @brief Index of fallback texture incase all other fails.
+	 */
+	static constexpr int MATERIAL_FALLBACK_TEXTURE = -1;
+
 	/// UPDATE THIS
 	/// * Make the const string ref's into string_view
     class LMaterial : public LObject

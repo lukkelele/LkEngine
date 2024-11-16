@@ -6,6 +6,18 @@
 
 namespace LkEngine {
 
+	static std::string LevelToSpaces(uint32_t level)
+	{
+		std::string result = "";
+		for (uint32_t i = 0; i < level; i++)
+		{
+			result += "--";
+		}
+
+		return result;
+	}
+
+
 	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices,
 							 const std::vector<FIndex>& InIndices,
 							 const glm::mat4& InTransform)
@@ -22,8 +34,8 @@ namespace LkEngine {
 		Submeshes.push_back(Submesh);
 
 		/* Create Vertex and index buffers. */
-		m_VertexBuffer = LVertexBuffer::Create(m_Vertices.data(), static_cast<uint64_t>(m_Vertices.size() * sizeof(FVertex)));
-		m_IndexBuffer = LIndexBuffer::Create(m_Indices.data(), static_cast<uint64_t>(m_Indices.size() * sizeof(FIndex)));
+		m_VertexBuffer = LVertexBuffer::Create(m_Vertices.data(), static_cast<uint32_t>(m_Vertices.size() * sizeof(FVertex)));
+		m_IndexBuffer = LIndexBuffer::Create(m_Indices.data(), static_cast<uint32_t>(m_Indices.size() * sizeof(FIndex)));
 		LK_CORE_ASSERT(Submesh.IndexCount == m_IndexBuffer->GetCount(), "IndexBuffer count mismatch");
 	}
 
@@ -39,17 +51,6 @@ namespace LkEngine {
 		/* Create Vertex and index buffers. */
 		m_VertexBuffer = LVertexBuffer::Create(m_Vertices.data(), static_cast<uint64_t>(m_Vertices.size() * sizeof(FVertex)));
 		m_IndexBuffer = LIndexBuffer::Create(m_Indices.data(), static_cast<uint64_t>(m_Indices.size() * sizeof(FIndex)));
-	}
-
-	static std::string LevelToSpaces(uint32_t level)
-	{
-		std::string result = "";
-		for (uint32_t i = 0; i < level; i++)
-		{
-			result += "--";
-		}
-
-		return result;
 	}
 
 	void LMeshSource::DumpVertexBuffer()
@@ -139,7 +140,6 @@ namespace LkEngine {
 	{
 		/* TODO: Validate index */
 		const FAssetHandle AssetHandle = Materials->GetMaterialHandle(Index);
-
 		return LAssetManager::GetAsset<LMaterialAsset>(AssetHandle)->GetMaterial();
 	}
 

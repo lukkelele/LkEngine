@@ -61,7 +61,7 @@ namespace LkEngine {
 
     TObjectPtr<LTexture2D> LOpenGLMaterial::GetTexture(const std::string& Name)
     {
-        //LK_CORE_ASSERT(Texture, "LOpenGLMaterial::m_Texture ({}) is nullptr!", Name);
+        //LK_CORE_ASSERT(Texture, "Texture ({}) is nullptr!", Name);
         return Texture;
     }
 

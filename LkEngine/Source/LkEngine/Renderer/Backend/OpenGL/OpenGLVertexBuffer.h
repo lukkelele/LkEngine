@@ -8,16 +8,16 @@ namespace LkEngine {
     class LOpenGLVertexBuffer : public LVertexBuffer
     {
 	public:
-		LOpenGLVertexBuffer(void* data, const uint64_t InSize, 
+		LOpenGLVertexBuffer(void* InData, const uint32_t InSize, 
 							const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
-		LOpenGLVertexBuffer(const uint64_t InSize, const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
+		LOpenGLVertexBuffer(const uint32_t InSize, const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
 		~LOpenGLVertexBuffer();
 
-		virtual void SetData(void* data, uint64_t InSize, uint64_t offset = 0) override;
-		virtual void RT_SetData(void* buffer, uint64_t InSize, uint64_t offset = 0) override;
+		virtual void SetData(void* data, uint32_t InSize, uint32_t offset = 0) override;
+		virtual void RT_SetData(void* buffer, uint32_t InSize, uint32_t offset = 0) override;
 
 		virtual FBuffer GetLocalData() override { return m_LocalData; }
-		virtual uint64_t GetSize() const override { return m_Size; }
+		virtual uint32_t GetSize() const override { return m_Size; }
 
 		virtual void SetIndexBuffer(const TObjectPtr<LIndexBuffer> ib) override;
 		virtual void SetLayout(const FVertexBufferLayout& layout) override; 

@@ -24,7 +24,7 @@ namespace LkEngine {
 
         FORCEINLINE bool IsMemoryAsset(const FAssetHandle AssetHandle) 
 		{ 
-			return m_MemoryAssets.contains(AssetHandle); 
+			return MemoryAssets.contains(AssetHandle); 
 		}
 
 		bool ReloadData(const FAssetHandle AssetHandle);
@@ -89,7 +89,7 @@ namespace LkEngine {
 
 		const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetMemoryOnlyAssets() 
 		{ 
-			return m_MemoryAssets;
+			return MemoryAssets;
 		}
 
 		/**
@@ -110,7 +110,7 @@ namespace LkEngine {
 
     private:
         std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> m_LoadedAssets;
-		std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> m_MemoryAssets;
+		std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> MemoryAssets;
 
         LAssetRegistry AssetRegistry;
 

@@ -26,29 +26,30 @@ namespace LkEngine {
 		/**
 		 * @brief Set data in buffer.
 		 */
-		virtual void SetData(void* Buffer, const uint64_t Size, const uint64_t Offset = 0) = 0;
+		virtual void SetData(void* Buffer, const uint32_t Size, const uint32_t Offset = 0) = 0;
 
 		/**
 		 * @brief Set data in buffer on the render thread.
 		 */
-		virtual void RT_SetData(void* Buffer, const uint64_t Size, const uint64_t Offset = 0) = 0;
+		virtual void RT_SetData(void* Buffer, const uint32_t Size, const uint32_t Offset = 0) = 0;
 
 		virtual FBuffer GetLocalData() = 0;
 		virtual void SetLayout(const FVertexBufferLayout& layout) = 0;
 		virtual void SetIndexBuffer(const TObjectPtr<LIndexBuffer> indexBuffer) = 0;
 
 		virtual void Bind() const = 0;
-		virtual uint64_t GetSize() const = 0;
+		virtual uint32_t GetSize() const = 0;
 
 		virtual TObjectPtr<LIndexBuffer> GetIndexBuffer() = 0;
 
 		virtual FVertexBufferLayout GetLayout() const = 0;
 		virtual FVertexBufferLayout& GetLayout() = 0;
 
-		static TObjectPtr<LVertexBuffer> Create(void* InBuffer, const uint64_t Size, 
-												const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
+		static TObjectPtr<LVertexBuffer> Create(void* InBuffer, 
+												const uint32_t Size, 
+												const EVertexBufferUsage BufferUsage = EVertexBufferUsage::Dynamic);
 
-		static TObjectPtr<LVertexBuffer> Create(const uint64_t Size, const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
+		static TObjectPtr<LVertexBuffer> Create(const uint32_t Size, const EVertexBufferUsage BufferUsage = EVertexBufferUsage::Dynamic);
 
 	private:
 		LCLASS(LVertexBuffer)

@@ -67,7 +67,7 @@ namespace LkEngine {
 		}
 
 		/** @brief Get the object handle. */
-		FORCEINLINE FObjectHandle GetHandle() const
+		FORCEINLINE FObjectHandle GetObjectHandle() const
 		{
 			return Handle;
 		}
@@ -321,7 +321,7 @@ namespace std {
 	{
 		std::size_t operator()(const LkEngine::LObject& Object) const noexcept
 		{
-			return std::hash<uint64_t>()(Object.GetHandle());
+			return std::hash<uint64_t>()(Object.GetObjectHandle());
 		}
 	};
 

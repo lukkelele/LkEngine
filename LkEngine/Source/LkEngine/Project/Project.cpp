@@ -17,7 +17,7 @@
 namespace LkEngine {
 
 	LProject::LProject(std::string_view InProjectName)
-		: m_Name(InProjectName)
+		: Name(InProjectName)
 	{
 		LCLASS_REGISTER();
 
@@ -58,7 +58,7 @@ namespace LkEngine {
 
 	bool LProject::Save()
 	{
-		LK_CORE_INFO_TAG("Project", "Saving Project: \"{}\"", m_Name);
+		LK_CORE_INFO_TAG("Project", "Saving Project: \"{}\"", Name);
 		/* Serialize to disk. */
 		//LSceneSerializer SceneSerializer(Data.TargetScene);
 

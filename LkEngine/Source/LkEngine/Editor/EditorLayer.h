@@ -58,6 +58,10 @@ namespace LkEngine {
 
 		virtual void OnUpdate(const float DeltaTime) override;
 
+		void RenderViewport();
+		void RenderViewport(TObjectPtr<LImage> Image);
+		void Render2D();
+
 		virtual void OnRender() override;
 		virtual void OnRenderUI() override;
 
@@ -81,10 +85,6 @@ namespace LkEngine {
 			LK_VERIFY(Instance, "Invalid editor instance");
 			return Instance;
 		}
-
-		void RenderViewport();
-		void RenderViewport(TObjectPtr<LImage> Image);
-		void Render2D();
 
 	private:
 		void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);

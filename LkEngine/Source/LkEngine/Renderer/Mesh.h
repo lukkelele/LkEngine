@@ -291,8 +291,15 @@ namespace LkEngine {
 		const std::vector<FVertex>& GetVertices() const { return m_Vertices; }
 		const std::vector<FIndex>& GetIndices() const { return m_Indices; }
 
-		bool IsSubmeshRigged(uint32_t submeshIndex) const { return Submeshes[submeshIndex].bIsRigged; }
-		const std::vector<FBoneInfluence>& GetBoneInfluences() const { return m_BoneInfluences; }
+		FORCEINLINE bool IsSubmeshRigged(const uint32_t SubmeshIndex) const 
+		{ 
+			return Submeshes[SubmeshIndex].bIsRigged; 
+		}
+
+		FORCEINLINE const std::vector<FBoneInfluence>& GetBoneInfluences() const 
+		{ 
+			return m_BoneInfluences; 
+		}
 
 		FORCEINLINE std::vector<TObjectPtr<LMaterial>>& GetMaterials()
 		{
@@ -367,11 +374,8 @@ namespace LkEngine {
 
 		std::vector<std::string> GetAnimationNames() const;
 
-		const LAnimation* GetAnimation(const uint32_t AnimationIndex, 
-									   const LSkeleton& Skeleton, 
-									   const bool IsMaskedRootMotion, 
-									   const glm::vec3& RootTranslationMask, 
-									   const float RootRotationMask) const;
+		const LAnimation* GetAnimation(const uint32_t AnimationIndex, const LSkeleton& Skeleton, const bool IsMaskedRootMotion, 
+									   const glm::vec3& RootTranslationMask, const float RootRotationMask) const;
 #endif
 
 	private:
@@ -390,11 +394,11 @@ namespace LkEngine {
 		/* Not implemented yet. */
 #if 0
 		/* Skeleton. */
-		mutable TObjectPtr<LSkeleton> m_Skeleton;
+		mutable TObjectPtr<LSkeleton> Skeleton;
 
 		/* Animations. */
 		mutable std::vector<TObjectPtr<LAnimation>> Animations;
-		std::vector<std::string> m_AnimationNames;
+		std::vector<std::string> AnimationNames;
 #endif
 
 		std::vector<TObjectPtr<LMaterial>> m_Materials{};
@@ -429,24 +433,17 @@ namespace LkEngine {
 		LMesh(const TObjectPtr<LMesh>& Other);
 		virtual ~LMesh() = default;
 
-		std::vector<uint32_t>& GetSubmeshes() { return Submeshes; }
-		const std::vector<uint32_t>& GetSubmeshes() const { return Submeshes; }
+		FORCEINLINE std::vector<uint32_t>& GetSubmeshes() { return Submeshes; }
+		FORCEINLINE const std::vector<uint32_t>& GetSubmeshes() const { return Submeshes; }
 
 		void SetSubmeshes(const std::vector<uint32_t>& submeshes);
 
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource()
-		{
-			return MeshSource;
-		}
+		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() { return MeshSource; }
+		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const { return MeshSource; }
 
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const
+		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> InMeshSource)
 		{
-			return MeshSource;
-		}
-
-		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> meshSource)
-		{
-			MeshSource = meshSource;
+			MeshSource = InMeshSource;
 		}
 
 		FORCEINLINE TObjectPtr<LMaterialTable> GetMaterials() const

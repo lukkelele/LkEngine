@@ -221,7 +221,7 @@ namespace LkEngine {
 		{
 			SetupTexturesAndShaders();
 
-			GenerateCubeVaoAndVbo(CubeVAO, CubeVBO);
+			SetupDebugCube();
 			GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
 			GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
 
@@ -233,7 +233,7 @@ namespace LkEngine {
 
 		// void GenerateCubeVaoAndVbo(uint32_t& vao, uint32_t& vbo)
 		/* TODO: Remove passed arguments. */
-		void GenerateCubeVaoAndVbo(uint32_t& vao, uint32_t& vbo)
+		void SetupDebugCube()
 		{
 			LK_CORE_WARN_TAG("LOpenGL", "Generating cube VAO and VBO");
 			if (!CubeVertexBuffer)
@@ -248,6 +248,7 @@ namespace LkEngine {
 					{ "a_TilingFactor",  EShaderDataType::Float  },
 				});
 
+				/* REMOVE */
 				if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 				{
 					SetupTexturesAndShaders();
@@ -258,6 +259,7 @@ namespace LkEngine {
 
 		void SetupTexturesAndShaders()
 		{
+			/* REMOVE */
 			if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 			{
 				LK_CORE_INFO_TAG("OpenGL", "Setting up textures and shaders");
@@ -276,7 +278,8 @@ namespace LkEngine {
 			{
 				DebugShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Debug");
 				const FShaderProgramSource& ShaderSource = DebugShader->GetSource();
-				//LK_CORE_WARN_TAG("LOpenGL", "DebugShader:\n{}\n{}", ShaderSource.Vertex, ShaderSource.Fragment);
+				LK_CORE_WARN_TAG("LOpenGL", "DebugShader -> {}:\n{}\n{}", 
+								 DebugShader->GetName(), ShaderSource.Vertex, ShaderSource.Fragment);
 			}
 
 			if (!ScreenShader)

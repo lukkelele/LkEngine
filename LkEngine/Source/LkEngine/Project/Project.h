@@ -27,18 +27,18 @@ namespace LkEngine {
 		bool Save();
 		uint64_t GetSize() const;
 
-		std::filesystem::path GetFilepath() const { return m_Filepath; }
-		const std::string& GetName() const { return m_Name; }
+		FORCEINLINE const std::string& GetName() const { return Name; }
+		FORCEINLINE std::filesystem::path GetFilepath() const { return Filepath; }
 
 		FORCEINLINE TObjectPtr<LScene> GetScene() 
 		{ 
 			return Scene; 
 		}
 
-		static void SetActive(TObjectPtr<LProject> project);
+		static void SetActive(TObjectPtr<LProject> Project);
 
-		static TObjectPtr<LProject> CreateEmptyProject(std::string_view projectName, const bool bSetAsActive = true);
-		static TObjectPtr<LProject> CreateDefaultProject(std::string_view projectName, const bool bSetAsActive = true);
+		static TObjectPtr<LProject> CreateEmptyProject(std::string_view ProjectName, const bool bSetAsActive = true);
+		static TObjectPtr<LProject> CreateDefaultProject(std::string_view ProjectName, const bool bSetAsActive = true);
 		static TObjectPtr<LProject> CreateDebugProject(const bool bSetAsActive = true);
 
 		static TObjectPtr<LRuntimeAssetManager> GetRuntimeAssetManager() 
@@ -46,9 +46,9 @@ namespace LkEngine {
 			return RuntimeAssetManager; 
 		}
 
-		static bool IsActiveProject(const TObjectPtr<LProject>& project) 
+		static bool IsActiveProject(const TObjectPtr<LProject>& Project) 
 		{ 
-			return (ActiveProject == project);
+			return (ActiveProject == Project);
 		}
 
 		struct FProjectData
@@ -56,11 +56,11 @@ namespace LkEngine {
 		};
 
 	public:
-		FProjectData ProjectData;
+		FProjectData ProjectData{};
 		inline static std::string_view DefaultExtension = ".lkproj";
 	private:
-		std::string m_Name;
-		std::filesystem::path m_Filepath;
+		std::string Name{};
+		std::filesystem::path Filepath{};
 
 		TObjectPtr<LScene> Scene{};
 

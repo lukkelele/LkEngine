@@ -55,7 +55,7 @@ namespace LkEngine {
 
 	void LRuntimeAssetManager::AddMemoryOnlyAsset(TObjectPtr<LAsset> asset)
 	{
-		m_MemoryAssets[asset->Handle] = asset;
+		MemoryAssets[asset->Handle] = asset;
 	}
 
 	bool LRuntimeAssetManager::ReloadData(FAssetHandle AssetHandle)
@@ -110,7 +110,7 @@ namespace LkEngine {
     {
 		if (IsMemoryAsset(AssetHandle))
 		{
-			return m_MemoryAssets[AssetHandle];
+			return MemoryAssets[AssetHandle];
 		}
 
 		FAssetMetadata& Metadata = GetMetadataInternal(AssetHandle);
@@ -226,7 +226,7 @@ namespace LkEngine {
 			TObjectPtr<LMaterial> AsphaltMaterial = MaterialLibrary.GetMaterial("Basic_Asphalt");
 			AsphaltMaterial->SetTexture(TextureLibrary.GetWhiteTexture());
 			TObjectPtr<LMaterialAsset> AsphaltMaterialAsset = TObjectPtr<LMaterialAsset>::Create(AsphaltMaterial);
-			m_MemoryAssets[AsphaltMaterialAsset->Handle] = AsphaltMaterialAsset;
+			MemoryAssets[AsphaltMaterialAsset->Handle] = AsphaltMaterialAsset;
 
 			FAssetMetadata Metadata;
 			Metadata.Handle = AsphaltMaterialAsset->Handle;
@@ -242,7 +242,7 @@ namespace LkEngine {
 			RubberMaterial->SetTexture(TextureLibrary.GetWhiteTexture());
 
 			TObjectPtr<LMaterialAsset> RubberMaterialAsset = TObjectPtr<LMaterialAsset>::Create(RubberMaterial);
-			m_MemoryAssets[RubberMaterialAsset->Handle] = RubberMaterialAsset;
+			MemoryAssets[RubberMaterialAsset->Handle] = RubberMaterialAsset;
 
 			FAssetMetadata Metadata;
 			Metadata.Handle = RubberMaterialAsset->Handle;
@@ -257,38 +257,21 @@ namespace LkEngine {
 		LK_CORE_INFO_TAG("RuntimeAssetManager", "Creating primitive shapes");
 
 		TObjectPtr<LProject> project = LProject::Current();
-		LMaterialLibrary& MaterialLibrary = LMaterialLibrary::Get();
+		//LMaterialLibrary& MaterialLibrary = LMaterialLibrary::Get();
+
+		TObjectPtr<LScene> CurrentScene = LProject::Current()->GetScene();
 
 		LK_CORE_WARN_TAG("RuntimeAssetManager", "Loading primitive shapes for project {}", project->GetName());
-		/* Cube. */
+		if (CurrentScene)
 		{
+			/* Create cube. */
 			std::filesystem::path FilePath("Assets/Meshes/Cube.gltf");
+			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Importing cube from: '{}'", FilePath.string());
 			LEntity CubeEntity = LProject::Current()->GetScene()->CreateEntity("Cube");
 			TObjectPtr<LMesh> Cube = ImportAsset<LMesh>(FilePath.string());
 			LMeshComponent& MeshComponent = CubeEntity.AddComponent<LMeshComponent>(Cube->Handle);
 
-			/* Assign the Cube with the 'BaseMaterial' */
-			LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
-			TObjectPtr<LMaterial> BaseMaterial = MaterialLibrary.GetBaseMaterial();
-            BaseMaterial->SetTexture(TextureLibrary.GetTexture("wood-container_512x512"));
-			TObjectPtr<LMaterialAsset> BaseMaterialAsset = TObjectPtr<LMaterialAsset>::Create(BaseMaterial);
-
-			Cube->Materials->SetMaterial(0, BaseMaterialAsset->Handle);
-			LK_CORE_ASSERT(BaseMaterial->GetTexture(""), "BaseMaterial texture is nullptr");
-
-			FAssetMetadata CubeMetadata;
-			CubeMetadata.Handle = Cube->Handle;
-			CubeMetadata.Type = EAssetType::Mesh;
-			CubeMetadata.FilePath = FilePath;
-			CubeMetadata.IsDataLoaded = true;
-			AssetRegistry[Cube->Handle] = CubeMetadata;
-
-			FAssetMetadata BaseMaterialAssetMetadata;
-			BaseMaterialAssetMetadata.Handle = BaseMaterialAsset->Handle;
-			BaseMaterialAssetMetadata.Type = EAssetType::Material;
-			BaseMaterialAssetMetadata.IsDataLoaded = true;
-			AssetRegistry[BaseMaterialAsset->Handle] = BaseMaterialAssetMetadata;
-
+			/* Setup the vertexbuffer layout. */
 			TObjectPtr<LMeshSource> CubeSource = Cube->GetMeshSource();
 			CubeSource->m_VertexBuffer->SetLayout({
 			    { "a_Position",   EShaderDataType::Float3 },
@@ -299,15 +282,34 @@ namespace LkEngine {
 			});
 			CubeSource->m_VertexBuffer->SetIndexBuffer(CubeSource->m_IndexBuffer);
 
-			m_MemoryAssets[Cube->Handle] = Cube;
-			m_MemoryAssets[BaseMaterialAsset->Handle] = BaseMaterialAsset;
+			/* Cube metadata in the asset registry. */
+			FAssetMetadata CubeMetadata;
+			CubeMetadata.Handle = Cube->Handle;
+			CubeMetadata.Type = EAssetType::Mesh;
+			CubeMetadata.FilePath = FilePath;
+			CubeMetadata.IsDataLoaded = true;
+			AssetRegistry[Cube->Handle] = CubeMetadata;
 
-			/* Test out the retrieval of the texture before continuing. */
-			{
-				const FAssetHandle CubeMaterialHandle = Cube->GetMaterials()->GetMaterialHandle(0);
-				TObjectPtr<LMaterial> CubeMaterial = LAssetManager::GetAsset<LMaterialAsset>(CubeMaterialHandle)->GetMaterial();
-				LK_CORE_VERIFY(CubeMaterial, "Retrieved material for Cube is nullptr!");
-			}
+			/* Assign the Cube with the 'BaseMaterial' */
+			LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
+			TObjectPtr<LMaterial> BaseMaterial = LMaterialLibrary::Get().GetBaseMaterial();
+			/* TODO: Fix the retrieval of the texture here, should not be a raw string. */
+            BaseMaterial->SetTexture(TextureLibrary.GetTexture("wood-container_512x512"));
+			TObjectPtr<LMaterialAsset> BaseMaterialAsset = TObjectPtr<LMaterialAsset>::Create(BaseMaterial);
+
+			//Cube->Materials->SetMaterial(0, BaseMaterialAsset->Handle);
+			Cube->Materials->SetMaterial(0, BaseMaterialAsset->Handle);
+			LK_CORE_ASSERT(BaseMaterial->GetTexture(""), "BaseMaterial texture is nullptr");
+
+			/* Base material metadata in the asset registry. */
+			FAssetMetadata BaseMaterialAssetMetadata;
+			BaseMaterialAssetMetadata.Handle = BaseMaterialAsset->Handle;
+			BaseMaterialAssetMetadata.Type = EAssetType::Material;
+			BaseMaterialAssetMetadata.IsDataLoaded = true;
+			AssetRegistry[BaseMaterialAsset->Handle] = BaseMaterialAssetMetadata;
+
+			MemoryAssets[Cube->Handle] = Cube;
+			MemoryAssets[BaseMaterialAsset->Handle] = BaseMaterialAsset;
 
 			DebugCube = Cube;
 

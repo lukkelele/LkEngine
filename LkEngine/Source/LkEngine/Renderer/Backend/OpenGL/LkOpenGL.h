@@ -888,7 +888,7 @@ namespace LkEngine {
 		 */
 		void InitializeEnvironment();
 
-		void GenerateCubeVaoAndVbo(uint32_t& vao, uint32_t& vbo);
+		void SetupDebugCube();
 		void GeneratePlaneVaoAndVbo(uint32_t& vao, uint32_t& vbo);
 		void GenerateScreenQuadVaoAndVbo(uint32_t& vao, uint32_t& vbo);
 		void SetupTexturesAndShaders();

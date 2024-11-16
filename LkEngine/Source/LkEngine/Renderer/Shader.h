@@ -59,7 +59,8 @@ namespace LkEngine {
 						  const std::filesystem::path& InVertexPath, 
 						  const std::filesystem::path& InFragmentPath);
 
-		virtual std::size_t GetHash() = 0;
+		virtual std::size_t GetHash() const = 0;
+		virtual std::string GetName() const = 0;
 
 		virtual const FShaderProgramSource& GetSource() const = 0;
 

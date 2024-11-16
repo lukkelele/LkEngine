@@ -11,12 +11,11 @@ namespace LkEngine {
     class LMaterialAsset : public LAsset
     {
     public:
-		LMaterialAsset(const TObjectPtr<LMaterial>& material);
+		LMaterialAsset(const TObjectPtr<LMaterial>& Material);
         LMaterialAsset(const bool bIsTransparent = false);
         ~LMaterialAsset() = default;
 
 		static EAssetType GetStaticType() { return EAssetType::Material; }
-		//virtual EAssetType GetAssetType() const override { return GetStaticType(); }
 
 		glm::vec3& GetAlbedoColor();
 		void SetAlbedoColor(const glm::vec3& color);
@@ -30,8 +29,8 @@ namespace LkEngine {
 		float& GetEmission();
 		void SetEmission(float value);
 
-		TObjectPtr<LMaterial> GetMaterial() const { return m_Material; }
-		void SetMaterial(TObjectPtr<LMaterial> material) { m_Material = material; }
+		TObjectPtr<LMaterial> GetMaterial() const { return Material; }
+		void SetMaterial(TObjectPtr<LMaterial> Material) { Material = Material; }
 
         void SetTransparency(float transparency);
         float& GetTransparency();
@@ -56,7 +55,7 @@ namespace LkEngine {
 		void SetDefaults();
 
 	private:
-		TObjectPtr<LMaterial> m_Material = nullptr;
+		TObjectPtr<LMaterial> Material = nullptr;
 		bool m_Transparent = false;
 
 		friend class MaterialEditor;
@@ -68,44 +67,53 @@ namespace LkEngine {
     class LMaterialTable : public LObject
     {
     public:
-        LMaterialTable(uint32_t materialCount = 1);
+        LMaterialTable(const uint32_t MaterialCount = 1);
         LMaterialTable(TObjectPtr<LMaterialTable> Other);
         ~LMaterialTable() = default;
 
-        void SetMaterial(uint32_t index, FAssetHandle material);
-        void ClearMaterial(uint32_t index);
+        void SetMaterial(const uint32_t Index, const FAssetHandle AssetHandle);
+        void ClearMaterial(const uint32_t Index);
+        void InsertLast(const FAssetHandle Material);
 
-        void InsertLast(FAssetHandle material);
-
-        bool HasMaterial(uint32_t materialIndex) const 
+        FORCEINLINE bool HasMaterial(const uint32_t Index) const 
         { 
-            return m_Materials.find(materialIndex) != m_Materials.end(); 
+            return (Materials.find(Index) != Materials.end());
         }
 
-        FAssetHandle GetMaterialHandle(uint32_t materialIndex) const
+        FORCEINLINE FAssetHandle GetMaterialHandle(const uint32_t Index) const
         {
-            LK_CORE_ASSERT(HasMaterial(materialIndex));
-            return m_Materials.at(materialIndex);
+            LK_CORE_ASSERT(HasMaterial(Index));
+            return Materials.at(Index);
         }
-
-        std::map<uint32_t, FAssetHandle>& GetMaterials() { return m_Materials; }
-        const std::map<uint32_t, FAssetHandle>& GetMaterials() const { return m_Materials; }
 
         FORCEINLINE uint32_t GetMaterialCount() const 
         { 
-            return m_MaterialCount; 
+            return MaterialCount; 
         }
 
-        FORCEINLINE void SetMaterialCount(uint32_t materialCount) 
+        FORCEINLINE void SetMaterialCount(const uint32_t InMaterialCount) 
         { 
-            m_MaterialCount = materialCount;
+            MaterialCount = InMaterialCount;
         }
 
+        /**
+         * @brief
+         */
         void Clear();
 
+        std::map<uint32_t, FAssetHandle>& GetMaterials() 
+		{ 
+			return Materials; 
+		}
+
+        const std::map<uint32_t, FAssetHandle>& GetMaterials() const 
+		{ 
+			return Materials; 
+		}
+
     private:
-        std::map<uint32_t, FAssetHandle> m_Materials;
-        uint32_t m_MaterialCount;
+		std::map<uint32_t, FAssetHandle> Materials{};
+        uint32_t MaterialCount = 0;
 
         LCLASS(LMaterialTable)
     };

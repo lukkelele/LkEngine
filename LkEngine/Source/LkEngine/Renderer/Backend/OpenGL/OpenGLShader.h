@@ -94,9 +94,18 @@ namespace LkEngine {
 			LK_OpenGL_Verify(glUniformMatrix4fv(GetUniformLocation(Uniform.data()), 1, GL_FALSE, &Value[0][0]));
 		}
 		
-		FORCEINLINE virtual std::size_t GetHash() override
+		FORCEINLINE virtual std::size_t GetHash() const override
 		{
 			return Hash::GenerateFNVHash(FilePath.string());
+		}
+
+		FORCEINLINE virtual std::string GetName() const override
+		{
+			if (FilePath.has_filename())
+			{
+				return FilePath.filename().string();
+			}
+			return "UNKNOWN";
 		}
 
 		FORCEINLINE virtual const FShaderProgramSource& GetSource() const override 

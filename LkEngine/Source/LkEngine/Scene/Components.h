@@ -15,11 +15,11 @@
 #include "SceneCamera.h"
 
 
-namespace LkEngine{
+namespace LkEngine {
 
-	/** 
+	/**
 	 * IComponent
-	 * 
+	 *
 	 *  Component interface.
 	 */
 	struct IComponent
@@ -29,7 +29,7 @@ namespace LkEngine{
 		virtual std::string ToString() const = 0;
 	};
 
-	struct LIDComponent 
+	struct LIDComponent
 	{
 		UUID ID;
 
@@ -41,12 +41,14 @@ namespace LkEngine{
 		std::string Tag;
 
 		LTagComponent() = default;
-		LTagComponent(const LTagComponent& other) = default;
+		LTagComponent(const LTagComponent& Other) = default;
 		LTagComponent(const std::string& tag)
-			: Tag(tag) {}
+			: Tag(tag)
+		{
+		}
 
-		operator std::string& () { return Tag; }
-		operator const std::string& () const { return Tag; }
+		operator std::string&() { return Tag; }
+		operator const std::string&() const { return Tag; }
 	};
 
 	struct LRelationshipComponent
@@ -55,16 +57,20 @@ namespace LkEngine{
 		std::vector<UUID> Children;
 
 		LRelationshipComponent() = default;
-		LRelationshipComponent(const UUID InParentHandle) : ParentHandle(InParentHandle) {}
+		LRelationshipComponent(const UUID InParentHandle)
+			: ParentHandle(InParentHandle)
+		{
+		}
 		LRelationshipComponent(const LRelationshipComponent& Other) = default;
 	};
 
 	// TODO: Patch out the use of Rotation2D and just use the Rotation quaternion
-    struct LTransformComponent : public IComponent
-    {
+	struct LTransformComponent : public IComponent
+	{
 	public:
 		glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+
 	private:
 		glm::vec3 RotationEuler = { 0.0f, 0.0f, 0.0f };
 		glm::quat Rotation = { 1.0f, 0.0f, 0.0f, 0.0f };
@@ -74,8 +80,11 @@ namespace LkEngine{
 		bool bIsStatic = false;
 
 		LTransformComponent() = default;
-		LTransformComponent(const LTransformComponent& other) = default;
-		LTransformComponent(const glm::vec3& Translation) : Translation(Translation) {}
+		LTransformComponent(const LTransformComponent& Other) = default;
+		LTransformComponent(const glm::vec3& Translation)
+			: Translation(Translation)
+		{
+		}
 
 		glm::vec3 GetTranslation() const { return Translation; }
 		glm::vec3 GetScale() const { return Scale; }
@@ -119,7 +128,7 @@ namespace LkEngine{
 			RotationEuler = glm::eulerAngles(Rotation);
 
 			/* Attempt to avoid 180deg flips in the Euler angles when using SetRotation(quat). */
-			if ((fabs(RotationEuler.x - originalEuler.x) == glm::pi<float>()) 
+			if ((fabs(RotationEuler.x - originalEuler.x) == glm::pi<float>())
 				&& (fabs(RotationEuler.z - originalEuler.z) == glm::pi<float>()))
 			{
 				RotationEuler.x = originalEuler.x;
@@ -134,50 +143,51 @@ namespace LkEngine{
 		{
 			return std::string("LTransformComponent::ToString() | TODO");
 		}
-
 	};
 
 
-    struct LSpriteComponent 
-    {
-        std::string FilePath;
-        glm::vec2 Size;
-        glm::vec4 Color; 
+	struct LSpriteComponent
+	{
+		std::string FilePath;
+		glm::vec2 Size;
+		glm::vec4 Color;
 		bool Passthrough = false;
 
-        LSpriteComponent(const std::string& filepath, 
-                        const glm::vec2& size = { 100.0f, 100.0f }, 
-                        const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
-            : FilePath(filepath)
-            , Size(size)
-            , Color(color) 
-		{}
+		LSpriteComponent(const std::string& filepath,
+						 const glm::vec2& size = { 100.0f, 100.0f },
+						 const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
+			: FilePath(filepath)
+			, Size(size)
+			, Color(color)
+		{
+		}
 
-        LSpriteComponent(const glm::vec2& size = { 0.0f, 0.0f },
-                        const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
-            : FilePath("")
-            , Size(size)
-            , Color(color) 
-        {}
+		LSpriteComponent(const glm::vec2& size = { 0.0f, 0.0f },
+						 const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f })
+			: FilePath("")
+			, Size(size)
+			, Color(color)
+		{
+		}
 
-        const glm::vec2& GetSize() const { return Size; }
+		const glm::vec2& GetSize() const { return Size; }
 		const glm::vec4& GetColor() const { return Color; }
-        float GetWidth() const { return Size.x; }
-        float GetHeight() const { return Size.y; }
+		float GetWidth() const { return Size.x; }
+		float GetHeight() const { return Size.y; }
 
-		void SetSize(const glm::vec2& size) 
-		{ 
-			Size = size; 
+		void SetSize(const glm::vec2& size)
+		{
+			Size = size;
 		}
 
 		void SetSize(float x, float y) { Size = { x, y }; }
 		void SetPassthrough(bool passthrough) { Passthrough = passthrough; }
 		bool IsPassthrough() const { return Passthrough; }
-    };
+	};
 
 	struct LCameraComponent
 	{
-	#if 0
+#if 0
 		enum class Type 
 		{ 
 			None = -1, 
@@ -186,7 +196,7 @@ namespace LkEngine{
 		};
 
 		Type ProjectionType = Type::None;
-	#endif
+#endif
 		TObjectPtr<LSceneCamera> Camera{};
 		ECameraProjection ProjectionType = ECameraProjection::None;
 
@@ -198,26 +208,26 @@ namespace LkEngine{
 			, ProjectionType(Other.ProjectionType)
 		{
 		}
-		
-		operator LSceneCamera& () { return *Camera; }
-		operator const LSceneCamera& () const { return *Camera; }
+
+		operator LSceneCamera&() { return *Camera; }
+		operator const LSceneCamera&() const { return *Camera; }
 	};
 
 	/** ERigidBodyType */
-	enum class ERigidBodyType 
-	{ 
-		None = -1, 
-		Static,   // 0
+	enum class ERigidBodyType
+	{
+		None = -1,
+		Static,	  // 0
 		Dynamic,  // 1
 		Kinematic // 2
 	};
 
-	struct LRigidBody2DComponent 
+	struct LRigidBody2DComponent
 	{
-		enum class Type 
-		{ 
-			None = -1, 
-			Static,   // 0
+		enum class Type
+		{
+			None = -1,
+			Static,	  // 0
 			Dynamic,  // 1
 			Kinematic // 2
 		};
@@ -231,9 +241,15 @@ namespace LkEngine{
 		bool IsBullet = false;
 		void* RuntimeBody = nullptr; // Assigned at component creation
 
-		LRigidBody2DComponent() : BodyType(Type::Dynamic) {}
-		LRigidBody2DComponent(Type type) : BodyType(type) {}
-		LRigidBody2DComponent(const LRigidBody2DComponent& other) = default;
+		LRigidBody2DComponent()
+			: BodyType(Type::Dynamic)
+		{
+		}
+		LRigidBody2DComponent(Type type)
+			: BodyType(type)
+		{
+		}
+		LRigidBody2DComponent(const LRigidBody2DComponent& Other) = default;
 	};
 
 
@@ -248,7 +264,7 @@ namespace LkEngine{
 		void* RuntimeBody = nullptr; // Assigned at component creation
 
 		LBoxCollider2DComponent() = default;
-		LBoxCollider2DComponent(const LBoxCollider2DComponent& other) = default;
+		LBoxCollider2DComponent(const LBoxCollider2DComponent& Other) = default;
 	};
 
 	struct LMeshComponent
@@ -256,16 +272,27 @@ namespace LkEngine{
 		FAssetHandle Mesh;
 		uint32_t SubmeshIndex = 0;
 		TObjectPtr<LMaterialTable> MaterialTable = TObjectPtr<LMaterialTable>::Create();
-		std::vector<UUID> BoneEntityIds; // If mesh is rigged, these are the entities whose transforms will used to "skin" the rig
+
+		/**
+		 * @brief The entities whose transforms will used to "skin" the rig if mesh is rigged.
+		 */
+		std::vector<UUID> BoneEntityIDs{};
+
 		bool Visible = true;
 
 		LMeshComponent() = default;
-		LMeshComponent(const LMeshComponent& other)
-			: Mesh(other.Mesh), SubmeshIndex(other.SubmeshIndex)
-			, MaterialTable(TObjectPtr<LkEngine::LMaterialTable>::Create(other.MaterialTable))
-			, BoneEntityIds(other.BoneEntityIds) {}
-		LMeshComponent(FAssetHandle InMesh, uint32_t submeshIndex = 0)
-			: Mesh(InMesh), SubmeshIndex(submeshIndex) {}
+		LMeshComponent(const LMeshComponent& Other)
+			: Mesh(Other.Mesh)
+			, SubmeshIndex(Other.SubmeshIndex)
+			, MaterialTable(TObjectPtr<LkEngine::LMaterialTable>::Create(Other.MaterialTable))
+			, BoneEntityIDs(Other.BoneEntityIDs)
+		{
+		}
+		LMeshComponent(const FAssetHandle InMesh, const uint32_t InSubmeshIndex = 0)
+			: Mesh(InMesh)
+			, SubmeshIndex(InSubmeshIndex)
+		{
+		}
 	};
 
 	struct LStaticMeshComponent
@@ -276,22 +303,22 @@ namespace LkEngine{
 
 		LStaticMeshComponent() = default;
 
-		LStaticMeshComponent(const LStaticMeshComponent& other)
-			: StaticMesh(other.StaticMesh)
-			, MaterialTable(TObjectPtr<LMaterialTable>::Create(other.MaterialTable))
-			, Visible(other.Visible) 
+		LStaticMeshComponent(const LStaticMeshComponent& Other)
+			: StaticMesh(Other.StaticMesh)
+			, MaterialTable(TObjectPtr<LMaterialTable>::Create(Other.MaterialTable))
+			, Visible(Other.Visible)
 		{
 		}
 
-		LStaticMeshComponent(FAssetHandle staticMesh)
-			: StaticMesh(staticMesh) 
+		LStaticMeshComponent(const FAssetHandle InStaticMesh)
+			: StaticMesh(InStaticMesh)
 		{
 		}
 	};
 
-	struct Box2DWorldComponent 
+	struct Box2DWorldComponent
 	{
-	#if 0 /// FIXME: DISABLED FOR NOW
+#if 0 /// FIXME: DISABLED FOR NOW
 		std::unique_ptr<b2World> World;
 		ContactListener2D ContactListener;
 		bool DebugDrawerAttached = false;
@@ -323,7 +350,7 @@ namespace LkEngine{
 		{ 
 			return DebugDrawerAttached; 
 		}
-	#endif
+#endif
 	};
 
 	struct LSceneComponent
@@ -337,8 +364,8 @@ namespace LkEngine{
 	};
 
 	using AllComponents = ComponentGroup<
-		LIDComponent, 
-		LTagComponent, 
+		LIDComponent,
+		LTagComponent,
 		LTransformComponent,
 		LSpriteComponent,
 		LCameraComponent,
@@ -346,8 +373,7 @@ namespace LkEngine{
 		LBoxCollider2DComponent,
 		LMeshComponent,
 		LStaticMeshComponent,
-		LSceneComponent	
-	>;
+		LSceneComponent>;
 
 }
 

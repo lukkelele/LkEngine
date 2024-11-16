@@ -251,6 +251,110 @@ namespace LkEngine {
 		}
 	}
 
+	void LEditorLayer::RenderViewport()
+	{
+		LRenderer::Submit([&]()
+		{
+			LRenderer::GetViewportFramebuffer()->Bind();
+
+			// LOpenGL_Debug::RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+			LOpenGL_Debug::RenderCubes(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+			LOpenGL_Debug::RenderFloor(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+
+			LFramebuffer::TargetSwapChain();
+		});
+
+		LRenderer::Submit([&]()
+		{
+			LRenderer::GetViewportFramebuffer()->Bind();
+			LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
+
+			using namespace LOpenGL_Debug;
+
+			const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
+			const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
+
+			TObjectPtr<LMaterialTable> MeshMaterials = DebugCube->GetMaterials();
+			if (MeshMaterials->HasMaterial(0))
+			{
+				const FAssetHandle MaterialHandle = MeshMaterials->GetMaterialHandle(0);
+				TObjectPtr<LMaterial> Material = LAssetManager::GetAsset<LMaterialAsset>(MaterialHandle)->GetMaterial();
+
+				TObjectPtr<LTexture2D> Texture = Material->GetTexture();
+				TObjectPtr<LShader> Shader = Material->GetShader();
+				Shader->Bind();
+
+				glm::mat4 ModelPosition = glm::translate(glm::mat4(1.0f), glm::vec3(5, 0, 5));
+				Shader->Set("u_Model", ModelPosition);
+				Shader->Set("u_ViewProjectionMatrix", GetEditorCamera()->GetViewProjectionMatrix());
+				Shader->Set("u_Texture0", 0);
+				Texture->Bind(0);
+				LK_CORE_ASSERT(DebugCube->GetIndexBuffer()->GetCount() > 0, "IndexBuffer count not valid");
+
+				DebugCube->GetVertexBuffer()->Bind();
+				LK_OpenGL_Verify(
+					glDrawElements(GL_TRIANGLES, DebugCube->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr)
+				);
+
+				LFramebuffer::TargetSwapChain();
+			}
+		});
+
+		/**
+		 * Render the debug skybox.
+		 * TODO: Move away from here.
+		 */
+
+		if (bRenderSkybox)
+		{
+			LRenderer::Submit([&]()
+			{
+				LRenderer::GetViewportFramebuffer()->Bind();
+
+				LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
+				static constexpr unsigned int SkyboxModelSize = 100;
+
+				LK_CORE_ASSERT(LOpenGL_Debug::SkyboxShader);
+				LOpenGL_Debug::SkyboxShader->Bind();
+
+				/* Make the TextureCube follow us. */
+				const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
+				const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
+				LOpenGL_Debug::SkyboxShader->Set("u_ViewProjectionMatrix", ProjectionMatrix * ViewMatrix);
+
+				LOpenGL_Debug::SkyboxShader->Set("u_CameraPos", EditorCamera->GetViewMatrix());
+				LOpenGL_Debug::SkyboxShader->Set("u_Model", glm::mat4(SkyboxModelSize));
+				LOpenGL_Debug::SkyboxVertexBuffer->Bind();
+				LOpenGL_Debug::SkyboxTexture->Bind(0);
+				LK_OpenGL_Verify(glDrawArrays(GL_TRIANGLES, 0, 36));
+
+				LRenderer::SetDepthFunction(EDepthFunction::Less);
+
+				LFramebuffer::TargetSwapChain();
+			});
+		}
+
+		Render2D();
+	}
+
+	void LEditorLayer::RenderViewport(TObjectPtr<LImage> Image) 
+	{
+		LK_UNUSED(Image);
+	}
+
+	void LEditorLayer::Render2D()
+	{
+		Renderer2D->BeginScene(*EditorCamera);
+		{
+			/**
+			 * TODO:
+			 *   - Draw bounding boxes.
+			 *   - Draw/Mark selected entities.
+			 */
+		}
+		Renderer2D->EndScene();
+	}
+
 	void LEditorLayer::OnRender()
 	{
 		LRenderer::Submit([&]()
@@ -446,104 +550,6 @@ namespace LkEngine {
 		HandleExternalWindows();
 
 		ImGui::End(); // Core Viewport
-	}
-
-	void LEditorLayer::RenderViewport()
-	{
-		LRenderer::Submit([&]()
-		{
-			LRenderer::GetViewportFramebuffer()->Bind();
-
-			// LOpenGL_Debug::RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
-			LOpenGL_Debug::RenderCubes(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
-			LOpenGL_Debug::RenderFloor(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
-
-			LFramebuffer::TargetSwapChain();
-		});
-
-		LRenderer::Submit([&]()
-		{
-			LRenderer::GetViewportFramebuffer()->Bind();
-			LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
-
-			using namespace LOpenGL_Debug;
-
-			const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
-			const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
-
-			TObjectPtr<LMaterial> Material = DebugCube->GetMaterial(0);
-			TObjectPtr<LTexture2D> Texture = Material->GetTexture();
-			TObjectPtr<LShader> Shader = Material->GetShader();
-			Shader->Bind();
-
-			glm::mat4 ModelPosition = glm::translate(glm::mat4(1.0f), glm::vec3(5, 0, 5));
-			Shader->Set("u_Model", ModelPosition);
-			Shader->Set("u_ViewProjectionMatrix", GetEditorCamera()->GetViewProjectionMatrix());
-			Shader->Set("u_Texture0", 0);
-			Texture->Bind(0);
-			LK_CORE_ASSERT(DebugCube->GetIndexBuffer()->GetCount() > 0, "IndexBuffer count not valid");
-
-			DebugCube->GetVertexBuffer()->Bind();
-			LK_OpenGL_Verify(
-				glDrawElements(GL_TRIANGLES, DebugCube->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr)
-			);
-
-			LFramebuffer::TargetSwapChain();
-		});
-
-		/**
-		 * Render the debug skybox.
-		 * TODO: Move away from here.
-		 */
-
-		if (bRenderSkybox)
-		{
-			LRenderer::Submit([&]()
-			{
-				LRenderer::GetViewportFramebuffer()->Bind();
-
-				LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
-				static constexpr unsigned int SkyboxModelSize = 100;
-
-				LK_CORE_ASSERT(LOpenGL_Debug::SkyboxShader);
-				LOpenGL_Debug::SkyboxShader->Bind();
-
-				/* Make the TextureCube follow us. */
-				const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
-				const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
-				LOpenGL_Debug::SkyboxShader->Set("u_ViewProjectionMatrix", ProjectionMatrix * ViewMatrix);
-
-				LOpenGL_Debug::SkyboxShader->Set("u_CameraPos", EditorCamera->GetViewMatrix());
-				LOpenGL_Debug::SkyboxShader->Set("u_Model", glm::mat4(SkyboxModelSize));
-				LOpenGL_Debug::SkyboxVertexBuffer->Bind();
-				LOpenGL_Debug::SkyboxTexture->Bind(0);
-				LK_OpenGL_Verify(glDrawArrays(GL_TRIANGLES, 0, 36));
-
-				LRenderer::SetDepthFunction(EDepthFunction::Less);
-
-				LFramebuffer::TargetSwapChain();
-			});
-		}
-
-		Render2D();
-	}
-
-	void LEditorLayer::RenderViewport(TObjectPtr<LImage> Image) 
-	{
-		LK_UNUSED(Image);
-	}
-
-	void LEditorLayer::Render2D()
-	{
-		Renderer2D->BeginScene(*EditorCamera);
-		{
-			/**
-			 * TODO:
-			 *   - Draw bounding boxes.
-			 *   - Draw/Mark selected entities.
-			 */
-		}
-		Renderer2D->EndScene();
 	}
 
 	void LEditorLayer::UI_ViewportTexture()

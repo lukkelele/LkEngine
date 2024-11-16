@@ -20,7 +20,7 @@ namespace LkEngine {
 
 		LK_CORE_DEBUG_TAG("GarbageCollector", "Adding Application as first tracked LObject");
 		GLiveObjectMap.insert(
-			{ LApplication::Get()->GetHandle(), TObjectPtr<LObject>(LApplication::Get()) }
+			{ LApplication::Get()->GetObjectHandle(), TObjectPtr<LObject>(LApplication::Get()) }
 		);
 
 		LK_CORE_DEBUG_TAG("GarbageCollector", "Initializiation complete");

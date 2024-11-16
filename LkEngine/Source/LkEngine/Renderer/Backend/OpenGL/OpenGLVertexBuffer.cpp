@@ -8,11 +8,12 @@
 
 namespace LkEngine {
 
-	LOpenGLVertexBuffer::LOpenGLVertexBuffer(void* InBuffer, const uint64_t InSize, 
+	LOpenGLVertexBuffer::LOpenGLVertexBuffer(void* InBuffer, const uint32_t InSize, 
 											 const EVertexBufferUsage InBufferUsage)
 		: m_Size(InSize)
 		, m_Usage(InBufferUsage)
 	{
+		static_assert(sizeof(InSize) == sizeof(GLuint));
 		m_LocalData = FBuffer(InBuffer, InSize);
 
 		LK_OpenGL_Verify(glGenVertexArrays(1, &m_VertexArrayID));
@@ -23,10 +24,11 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glBufferData(GL_ARRAY_BUFFER, InSize, InBuffer, GL_DYNAMIC_DRAW));
 	}
 
-	LOpenGLVertexBuffer::LOpenGLVertexBuffer(const uint64_t InSize, const EVertexBufferUsage InBufferUsage)
+	LOpenGLVertexBuffer::LOpenGLVertexBuffer(const uint32_t InSize, const EVertexBufferUsage InBufferUsage)
 		: m_Size(InSize)
 		, m_Usage(InBufferUsage)
 	{
+		static_assert(sizeof(InSize) == sizeof(GLuint));
 		m_LocalData.Allocate(InSize);
 
 		LK_OpenGL_Verify(glGenVertexArrays(1, &m_VertexArrayID));
@@ -48,15 +50,17 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glBindVertexArray(m_VertexArrayID));
 	}
 
-	void LOpenGLVertexBuffer::SetData(void* InData, uint64_t InSize, uint64_t InOffset)
+	void LOpenGLVertexBuffer::SetData(void* InData, uint32_t InSize, uint32_t InOffset)
 	{
+		static_assert(sizeof(InSize) == sizeof(GLuint));
 		m_LocalData.Data = InData;
 		LK_OpenGL_Verify(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 		LK_OpenGL_Verify(glBufferSubData(GL_ARRAY_BUFFER, InOffset, InSize, InData));
 	}
 
-	void LOpenGLVertexBuffer::RT_SetData(void* InData, uint64_t InSize, uint64_t offset)
+	void LOpenGLVertexBuffer::RT_SetData(void* InData, uint32_t InSize, uint32_t offset)
 	{
+		static_assert(sizeof(InSize) == sizeof(GLuint));
 		m_LocalData.Data = InData;
 		LK_OpenGL_Verify(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 		LK_OpenGL_Verify(glBufferSubData(GL_ARRAY_BUFFER, offset, InSize, InData));
