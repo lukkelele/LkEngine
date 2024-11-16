@@ -66,9 +66,9 @@ namespace LkEngine {
 		/**
 		 * @brief Get the count of layers.
 		 */
-		FORCEINLINE int Count() const 
-		{ 
-			return static_cast<int>(Layers.size()); 
+		FORCEINLINE int Count() const
+		{
+			return static_cast<int>(Layers.size());
 		}
 
 		// Iterator

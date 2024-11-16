@@ -6,125 +6,125 @@
 
 namespace LkEngine {
 
-    LApplication::LApplication(const ApplicationSpecification& InSpecification)
-        : Specification(InSpecification)
-        , Log(LLog::Instance())
-        , MetadataRegistry(LMetadataRegistry::Get())
-        , GarbageCollector(LGarbageCollector::Get())
-        , ThreadManager(LThreadManager::Instance())
-    {
-        LCLASS_REGISTER(LApplication);
-        Instance = this;
+	LApplication::LApplication(const ApplicationSpecification& InSpecification)
+		: Specification(InSpecification)
+		, Log(LLog::Instance())
+		, MetadataRegistry(LMetadataRegistry::Get())
+		, GarbageCollector(LGarbageCollector::Get())
+		, ThreadManager(LThreadManager::Instance())
+	{
+		LCLASS_REGISTER(LApplication);
+		Instance = this;
 
-        LCrashHandler::AttachInstance(this);        
+		LCrashHandler::AttachInstance(this);
 
-        Global::SetRuntimeArguments(Specification.Argc, Specification.Argv);
-        GarbageCollector.Initialize();
+		Global::SetRuntimeArguments(Specification.Argc, Specification.Argv);
+		GarbageCollector.Initialize();
 
-        LK_CORE_TRACE_TAG("Application", "Creating window");
-        Window = MakeUnique<LWindow>(InSpecification);
+		LK_CORE_TRACE_TAG("Application", "Creating window");
+		Window = MakeUnique<LWindow>(InSpecification);
 
-        /* Read configuration file. */
-        ReadConfigurationFile();
-    }
+		/* Read configuration file. */
+		ReadConfigurationFile();
+	}
 
-    LApplication::~LApplication()
-    {
-        if (bRunning)
-        {
-            LK_CORE_INFO_TAG("Application", "Shutting down");
-            Shutdown();
-        }
-    }
+	LApplication::~LApplication()
+	{
+		if (bRunning)
+		{
+			LK_CORE_INFO_TAG("Application", "Shutting down");
+			Shutdown();
+		}
+	}
 
-    void LApplication::Initialize()
-    {
-        Window->Initialize();
-		Window->SetEventCallback([this](LEvent& Event) 
-        { 
-            OnEvent(Event); 
-        });
+	void LApplication::Initialize()
+	{
+		Window->Initialize();
+		Window->SetEventCallback([this](LEvent& Event)
+		{
+			OnEvent(Event);
+		});
 
-        LInput::Initialize();
-        
-        /* Initialize the renderer. */
-        Renderer = TObjectPtr<LRenderer>::Create();
-        Renderer->Initialize();
+		LInput::Initialize();
 
-        /* UI layer. */
-        UILayer = LUILayer::Create();
-        UILayer->Initialize();
-        UILayer->SetDarkTheme();
+		/* Initialize the renderer. */
+		Renderer = TObjectPtr<LRenderer>::Create();
+		Renderer->Initialize();
 
-    #if LK_USE_EDITOR
-        /* Create and initialize EditorLayer. */
-        Editor = MakeUnique<LEditorLayer>();
-        Editor->Initialize();
-        LayerStack.PushOverlay(Editor.get());
-    #endif
+		/* UI layer. */
+		UILayer = LUILayer::Create();
+		UILayer->Initialize();
+		UILayer->SetDarkTheme();
 
-        PerformanceProfiler = new LPerformanceProfiler();
-    }
+#if LK_USE_EDITOR
+		/* Create and initialize EditorLayer. */
+		Editor = MakeUnique<LEditorLayer>();
+		Editor->Initialize();
+		LayerStack.PushOverlay(Editor.get());
+#endif
 
-    void LApplication::Run()
-    {
-        bRunning = true;
+		PerformanceProfiler = new LPerformanceProfiler();
+	}
 
-        LApplication* Application = this;
-        GLFWwindow* GlfwWindow = Window->GetGlfwWindow();
+	void LApplication::Run()
+	{
+		bRunning = true;
 
-        Timer.Reset();
+		LApplication* Application = this;
+		GLFWwindow* GlfwWindow = Window->GetGlfwWindow();
+
+		Timer.Reset();
 		while (!glfwWindowShouldClose(GlfwWindow))
 		{
 			Timestep = Timer.GetDeltaTime();
 
-            LInput::Update();
-        #if 0
+			LInput::Update();
+#if 0
 			LRenderer::Submit([&]() { Window->GetSwapChain().BeginFrame(); });
-        #endif
+#endif
 
-            LRenderer::BeginFrame();
+			LRenderer::BeginFrame();
 
-        #if 0
+#if 0
 			/* Update all layers. */
 			// LK_SCOPE_PERF("Application  Updating Layers");
 			for (TObjectPtr<LLayer>& Layer : LayerStack)
 			{
 				Layer->OnUpdate(Timestep);
 			}
-        #endif
+#endif
 
-        #if 1
-            /** LkEditor */
-            if (Editor->IsEnabled())
-            {
-                TObjectPtr<LEditorCamera> EditorCamera = Editor->GetEditorCamera();
-                LRenderer::BeginScene(EditorCamera->GetViewProjectionMatrix());
+#if 1
+			/** LkEditor */
+			if (Editor->IsEnabled())
+			{
+				TObjectPtr<LEditorCamera> EditorCamera = Editor->GetEditorCamera();
+				LRenderer::BeginScene(EditorCamera->GetViewProjectionMatrix());
 
-                Editor->RenderViewport();
+				Editor->RenderViewport();
 
-		        /* Update all layers. */
+				/* Update all layers. */
 				for (TObjectPtr<LLayer>& Layer : LayerStack)
 				{
 					Layer->OnUpdate(Timestep);
 				}
 
-                LRenderer::EndScene();
-            }
-        #endif
-            
-            /* UI */
+				LRenderer::EndScene();
+			}
+#endif
+
+			/* UI */
 			if (Specification.ImGuiEnabled)
 			{
-				LRenderer::Submit([Application]() 
-                { 
-                    Application->RenderUI(); 
-                });
+				LRenderer::Submit([Application]()
+				{
+					Application->RenderUI();
+				});
 
-				LRenderer::Submit([&]() 
-                { 
-                    UILayer->EndFrame(); 
-                });
+				LRenderer::Submit([&]()
+				{
+					UILayer->EndFrame();
+				});
 			}
 
 			LRenderer::EndFrame();
@@ -135,18 +135,18 @@ namespace LkEngine {
 				Window->SwapBuffers();
 			});
 
-		    m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % LRenderer::GetFramesInFlight();
-            LastTimestep = Timestep;
+			m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % LRenderer::GetFramesInFlight();
+			LastTimestep = Timestep;
 
-            ProcessEvents();
+			ProcessEvents();
 		}
-    }
+	}
 
-    void LApplication::Shutdown()
-    {
-        if (bRunning)
-        {
-            /* Serialize application configuration. */
+	void LApplication::Shutdown()
+	{
+		if (bRunning)
+		{
+			/* Serialize application configuration. */
 			LApplicationSerializer Serializer(this);
 			Serializer.Serialize(Global::GetEngineConfig());
 
@@ -155,38 +155,38 @@ namespace LkEngine {
 			LK_CORE_WARN_TAG("Application", "Window->Shutdown()");
 			Window->Shutdown();
 
-            bRunning = false;
-        }
-    }
+			bRunning = false;
+		}
+	}
 
-    bool LApplication::ReadConfigurationFile()
-    {
-        LApplicationSerializer Serializer(this);
-        Serializer.Deserialize(Global::GetEngineConfig());
+	bool LApplication::ReadConfigurationFile()
+	{
+		LApplicationSerializer Serializer(this);
+		Serializer.Deserialize(Global::GetEngineConfig());
 
-        return true;
-    }
+		return true;
+	}
 
-    /* FIXME */
-    LString LApplication::GenerateCrashDump()
-    {
-        return "[TODO] CRASHDUMP";
-    }
+	/* FIXME */
+	LString LApplication::GenerateCrashDump()
+	{
+		return "[TODO] CRASHDUMP";
+	}
 
-    void LApplication::RenderUI()
-    {
-        /* Bind to default framebuffer before any UI rendering takes place. */
+	void LApplication::RenderUI()
+	{
+		/* Bind to default framebuffer before any UI rendering takes place. */
 		LFramebuffer::TargetSwapChain();
 
-        UILayer->BeginFrame();
+		UILayer->BeginFrame();
 
-        for (TObjectPtr<LLayer>& Layer : LayerStack)
-        {
-            Layer->OnRenderUI();
-        }
-    }
+		for (TObjectPtr<LLayer>& Layer : LayerStack)
+		{
+			Layer->OnRenderUI();
+		}
+	}
 
-    /// FIXME: 
+	/// FIXME:
 	void LApplication::OnEvent(LEvent& Event)
 	{
 		EventDispatcher Dispatcher(Event);
@@ -194,24 +194,24 @@ namespace LkEngine {
 		for (TObjectPtr<LLayer>& Layer : LayerStack)
 		{
 			Layer->OnEvent(Event);
-            if (Event.Handled)
-            {
+			if (Event.Handled)
+			{
 				break;
-            }
+			}
 		}
 
-        if (Event.Handled)
-        {
+		if (Event.Handled)
+		{
 			return;
-        }
+		}
 
 		for (FEventCallback& Callback : EventCallbacks)
 		{
 			Callback(Event);
-            if (Event.Handled)
-            {
+			if (Event.Handled)
+			{
 				break;
-            }
+			}
 		}
 	}
 
@@ -225,8 +225,8 @@ namespace LkEngine {
 		std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
 		while (EventQueue.size() > 0)
 		{
-            /* Invoke event from the queue and remove it after. */
-            EventQueue.front()();
+			/* Invoke event from the queue and remove it after. */
+			EventQueue.front()();
 			EventQueue.pop();
 		}
 	}

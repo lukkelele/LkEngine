@@ -35,13 +35,13 @@
 #include "LkEngine/Core/Hash/UUID.h"
 
 
-namespace LkEngine
-{
+namespace LkEngine {
+
 	enum class ERendererAPI
 	{
 		None = 0,
-		OpenGL,    /*      SUPPORTED        */
-		Vulkan     /*   NOT SUPPORTED YET   */
+		OpenGL, /*      SUPPORTED        */
+		Vulkan	/*   NOT SUPPORTED YET   */
 	};
 }
 

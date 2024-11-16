@@ -46,112 +46,112 @@
 
 namespace LkEngine {
 
-    class LApplication : public LObject
-    {
-    public:
-        LApplication(const ApplicationSpecification& InSpecification = ApplicationSpecification());
-        ~LApplication();
+	class LApplication : public LObject
+	{
+	public:
+		LApplication(const ApplicationSpecification& InSpecification = ApplicationSpecification());
+		~LApplication();
 
-        void Initialize();
-        void Run();
-        void Shutdown();
+		void Initialize();
+		void Run();
+		void Shutdown();
 
-        bool ReadConfigurationFile();
+		bool ReadConfigurationFile();
 
-        void OnEvent(LEvent& e);
+		void OnEvent(LEvent& e);
 
-        void RenderUI();
-        void ProcessEvents();
+		void RenderUI();
+		void ProcessEvents();
 
-        /// TODO: Add event category to bundle the callback with.
-        FORCEINLINE void AddEventCallback(const FEventCallback& EventCallback) 
-        { 
-            EventCallbacks.push_back(EventCallback); 
-        }
+		/// TODO: Add event category to bundle the callback with.
+		FORCEINLINE void AddEventCallback(const FEventCallback& EventCallback)
+		{
+			EventCallbacks.push_back(EventCallback);
+		}
 
-        template<typename EventFunction>
-        void QueueEvent(EventFunction&& Event)
-        {
-            EventQueue.push(Event);
-        }
+		template<typename EventFunction>
+		void QueueEvent(EventFunction&& Event)
+		{
+			EventQueue.push(Event);
+		}
 
-        template<typename TEvent, bool bDispatchImmediately = false, typename... TEventArgs>
-        void DispatchEvent(TEventArgs&&... Args)
-        {
-            std::shared_ptr<TEvent> Event = MakeShared<TEvent>(std::forward<TEventArgs>(Args)...);
-            if constexpr (bDispatchImmediately)
-            {
-                OnEvent(*Event);
-            }
-            else
-            {
-                std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
-                EventQueue.push([Event]() 
-                { 
-                    LApplication::Get()->OnEvent(*Event); 
-                });
-            }
-        }
+		template<typename TEvent, bool bDispatchImmediately = false, typename... TEventArgs>
+		void DispatchEvent(TEventArgs&&... Args)
+		{
+			std::shared_ptr<TEvent> Event = MakeShared<TEvent>(std::forward<TEventArgs>(Args)...);
+			if constexpr (bDispatchImmediately)
+			{
+				OnEvent(*Event);
+			}
+			else
+			{
+				std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
+				EventQueue.push([Event]()
+				{
+					LApplication::Get()->OnEvent(*Event);
+				});
+			}
+		}
 
-        LString GenerateCrashDump();
+		LString GenerateCrashDump();
 
-        FORCEINLINE LWindow& GetWindow() { return *Window; }
-        FORCEINLINE GLFWwindow* GetGlfwWindow() { return Window->GetGlfwWindow(); }
+		FORCEINLINE LWindow& GetWindow() { return *Window; }
+		FORCEINLINE GLFWwindow* GetGlfwWindow() { return Window->GetGlfwWindow(); }
 
-        FORCEINLINE TObjectPtr<LProject> GetProject() { return Project; }
+		FORCEINLINE TObjectPtr<LProject> GetProject() { return Project; }
 
-        const ApplicationSpecification& GetSpecification() const 
-        { 
-            return Specification; 
-        }
+		const ApplicationSpecification& GetSpecification() const
+		{
+			return Specification;
+		}
 
-        FTimestep GetTimestep() const { return Timestep; } /// TODO: MOVE ELSEWHERE
-        uint32_t GetCurrentFrameIndex() const { return m_CurrentFrameIndex; }
+		FTimestep GetTimestep() const { return Timestep; } /// TODO: MOVE ELSEWHERE
+		uint32_t GetCurrentFrameIndex() const { return m_CurrentFrameIndex; }
 
-        FORCEINLINE LPerformanceProfiler* GetPerformanceProfiler()
-        {
-            return PerformanceProfiler;
-        }
+		FORCEINLINE LPerformanceProfiler* GetPerformanceProfiler()
+		{
+			return PerformanceProfiler;
+		}
 
-        static LApplication* Get() { return Instance; }
+		static LApplication* Get() { return Instance; }
 
-    private:
-        ApplicationSpecification Specification{};
+	private:
+		ApplicationSpecification Specification{};
 
-        bool bRunning = false;
+		bool bRunning = false;
 
-        LTimer Timer;
-        FTimestep Timestep{};
-        FTimestep LastTimestep{};
+		LTimer Timer;
+		FTimestep Timestep{};
+		FTimestep LastTimestep{};
 
-        LLog& Log;
-        LMetadataRegistry& MetadataRegistry;
-        LGarbageCollector& GarbageCollector;
-        LLayerStack LayerStack;
-        LThreadManager& ThreadManager;
+		LLog& Log;
+		LMetadataRegistry& MetadataRegistry;
+		LGarbageCollector& GarbageCollector;
+		LLayerStack LayerStack;
+		LThreadManager& ThreadManager;
 
-        TUniquePtr<LWindow> Window;
+		TUniquePtr<LWindow> Window;
 
-        TObjectPtr<LRenderer> Renderer;
-        uint32_t m_CurrentFrameIndex = 0;
+		TObjectPtr<LRenderer> Renderer;
+		uint32_t m_CurrentFrameIndex = 0;
 
-        TObjectPtr<LUILayer> UILayer;
-        TUniquePtr<LEditorLayer> Editor;
+		TObjectPtr<LUILayer> UILayer;
+		TUniquePtr<LEditorLayer> Editor;
 
-        TUniquePtr<PhysicsSystem> m_PhysicsSystem;
+		TUniquePtr<PhysicsSystem> m_PhysicsSystem;
 
 		std::mutex EventQueueMutex;
 		std::queue<std::function<void()>> EventQueue;
 		std::vector<FEventCallback> EventCallbacks;
 
-        TObjectPtr<LProject> Project{};
+		TObjectPtr<LProject> Project{};
 
-        LPerformanceProfiler* PerformanceProfiler{};
-        std::unordered_map<const char*, LPerformanceProfiler::FFrameData> ProfilerPreviousFrameData;
+		LPerformanceProfiler* PerformanceProfiler{};
+		std::unordered_map<const char*, LPerformanceProfiler::FFrameData> ProfilerPreviousFrameData;
 
-        inline static LApplication* Instance = nullptr;
+		inline static LApplication* Instance = nullptr;
 
-        LCLASS(LApplication);
-    };
+		LCLASS(LApplication);
+	};
 
 }

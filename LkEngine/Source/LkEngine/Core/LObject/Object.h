@@ -38,7 +38,7 @@ namespace LkEngine {
 	{
 		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestructBegin, const FObjectHandle&);
 		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestructEnd, const FObjectHandle&);
-		
+
 	public:
 		LObject();
 
@@ -67,9 +67,9 @@ namespace LkEngine {
 		}
 
 		/** @brief Get the object handle. */
-		FORCEINLINE FObjectHandle GetHandle() const 
-		{ 
-			return Handle; 
+		FORCEINLINE FObjectHandle GetHandle() const
+		{
+			return Handle;
 		}
 
 		/**
@@ -85,9 +85,9 @@ namespace LkEngine {
 		/**
 		 * @brief Check if object is initialized.
 		 */
-		FORCEINLINE virtual bool IsInitialized() const 
-		{ 
-			return bInitialized; 
+		FORCEINLINE virtual bool IsInitialized() const
+		{
+			return bInitialized;
 		}
 
 		/**
@@ -122,14 +122,14 @@ namespace LkEngine {
 		/**
 		 * @brief Get static class, is implemented for every LClass.
 		 */
-		FORCEINLINE static const LClass* StaticClass() 
-		{ 
-			static bool bClassRegistered = false; 
+		FORCEINLINE static const LClass* StaticClass()
+		{
+			static bool bClassRegistered = false;
 			if (!bClassRegistered)
 			{
 				LClass* ObjectClass = LClass::Register<LObject>("LObject");
 				bClassRegistered = true;
-			} 
+			}
 
 			return LClass::Get(LType<LObject>::ID());
 		}
@@ -146,11 +146,11 @@ namespace LkEngine {
 		 */
 		FORCEINLINE static std::string StaticClassName() { return "LObject"; }
 
-		/** 
+		/**
 		 * @brief Get the class for this object.
 		 *
-		 * No null-checks should be done inside this function since it is 
-		 * used to determine the class registration at places, i.e the return value 
+		 * No null-checks should be done inside this function since it is
+		 * used to determine the class registration at places, i.e the return value
 		 * is used to determine if the class is registered depending if nullptr or not.
 		 *
 		 * @note Implemented by LCLASS macro.
@@ -160,7 +160,7 @@ namespace LkEngine {
 			return LObjectBase::GetClass();
 		}
 
-		/** 
+		/**
 		 * @brief Get name of class.
 		 * @note  Implemented by LCLASS macro.
 		 */
@@ -172,7 +172,7 @@ namespace LkEngine {
 		bool IsSelected() const;
 
 		/**
-		 * @brief Serialize object. 
+		 * @brief Serialize object.
 		 */
 		virtual LString Serialize() const { return ""; }
 
@@ -184,8 +184,8 @@ namespace LkEngine {
 			Flags |= EObjectFlag::Garbage;
 		}
 
-		/** 
-		 * @brief Cast object to type T. 
+		/**
+		 * @brief Cast object to type T.
 		 */
 		template<typename T>
 		T& As()
@@ -194,8 +194,8 @@ namespace LkEngine {
 			return static_cast<T&>(*this);
 		}
 
-		/** 
-		 * @brief Cast object to type T. 
+		/**
+		 * @brief Cast object to type T.
 		 */
 		template<typename T>
 		const T& As() const
@@ -204,14 +204,14 @@ namespace LkEngine {
 			return static_cast<const T&>(*this);
 		}
 
-		/** 
+		/**
 		 * @brief Check if object is or is a derivation of T.
 		 */
 		template<typename T>
 		bool IsA() const
 		{
 			static_assert(sizeof(T) > 0, "IsA<T> failed, incomplete type");
-			return (StaticClassName() == T::StaticClassName()); /// TODO: CHANGE THIS 
+			return (StaticClassName() == T::StaticClassName()); /// TODO: CHANGE THIS
 		}
 
 		/**
@@ -220,7 +220,7 @@ namespace LkEngine {
 		FORCEINLINE virtual bool IsAsset() const { return false; }
 
 		/**
-		 * @brief Return current reference count from all object pointers. 
+		 * @brief Return current reference count from all object pointers.
 		 */
 		FORCEINLINE uint32_t GetReferenceCount() const { return ReferenceCount.load(); }
 
@@ -235,18 +235,18 @@ namespace LkEngine {
 		 * @brief Increment reference count.
 		 * @note  Managed by TObjectPtr.
 		 */
-		FORCEINLINE void IncrementReferenceCount() const 
-		{ 
-			ReferenceCount++; 
+		FORCEINLINE void IncrementReferenceCount() const
+		{
+			ReferenceCount++;
 		}
 
 		/**
 		 * @brief Decrement reference count.
 		 * @note  Managed by TObjectPtr.
 		 */
-		FORCEINLINE void DecrementReferenceCount() const 
-		{ 
-			ReferenceCount--; 
+		FORCEINLINE void DecrementReferenceCount() const
+		{
+			ReferenceCount--;
 		}
 
 	protected:
@@ -290,14 +290,14 @@ namespace LkEngine {
 		return IsValid(&Object);
 	}
 
-	template <typename TObject>
+	template<typename TObject>
 	TObject* GetValid(TObject* Object)
 	{
 		static_assert(std::is_base_of<LObject, Object>::value, "GetValid only works with LObject-derived classes");
-		return (IsValid(Object) ? Object: nullptr);
+		return (IsValid(Object) ? Object : nullptr);
 	}
 
-	template <typename TObject>
+	template<typename TObject>
 	const TObject* GetValid(const TObject* Object)
 	{
 		static_assert(std::is_base_of<LObject, Object>::value, "GetValid only works with LObject-derived classes");
@@ -314,14 +314,15 @@ namespace LkEngine {
 }
 
 /** Allow usage of LObject's in maps and sets. */
-namespace std 
-{
-    template<>
-    struct hash<LkEngine::LObject>
-    {
-        std::size_t operator()(const LkEngine::LObject& Object) const noexcept
-        {
+namespace std {
+
+	template<>
+	struct hash<LkEngine::LObject>
+	{
+		std::size_t operator()(const LkEngine::LObject& Object) const noexcept
+		{
 			return std::hash<uint64_t>()(Object.GetHandle());
-        }
-    };
+		}
+	};
+
 }

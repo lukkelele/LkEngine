@@ -1,6 +1,6 @@
 /******************************************************************
  * LObjectPtr
- * 
+ *
  *******************************************************************/
 #pragma once
 
@@ -12,7 +12,6 @@
 /** Log whenever a reference is added/removed. */
 #define LK_DEBUG_LOG_LIVE_REFERENCES 0
 
-
 namespace LkEngine {
 
 	template<typename T>
@@ -23,12 +22,11 @@ namespace LkEngine {
 	-----------------------------------------------------------------------------*/
 	/**
 	 * TObjectPtr_Internal
-	 * 
+	 *
 	 *  Management of live references.
 	 *  For internal use by TObjectPtr.
 	 */
-	namespace TObjectPtr_Internal
-	{
+	namespace TObjectPtr_Internal {
 		extern std::unordered_set<void*> LiveReferences;
 		extern std::mutex LiveReferenceMutex;
 
@@ -42,7 +40,7 @@ namespace LkEngine {
 		 * @brief Populare a vector with live objects.
 		 * @return The count of objects returned.
 		 */
-		int GetLiveObjects(std::vector<TObjectPtr<LObject>>& ObjectArray, 
+		int GetLiveObjects(std::vector<TObjectPtr<LObject>>& ObjectArray,
 						   const bool FilterByStaticClass = true);
 	}
 
@@ -53,10 +51,10 @@ namespace LkEngine {
 	 *
 	 * `TObjectPtr` is a templated smart pointer class that provides automatic reference counting,
 	 * basic type safety, and the ability to track live object references for memory management.
-	 * It supports initialization from raw pointers, other `TObjectPtr` instances and conversion 
+	 * It supports initialization from raw pointers, other `TObjectPtr` instances and conversion
 	 * between compatible types.
 	 *
-	 * @note TObjectPtr uses reference counting for lifetime management. 
+	 * @note TObjectPtr uses reference counting for lifetime management.
 	 *       When the reference count reaches zero, the object is deleted and its resources released.
 	 */
 	template<typename T>
@@ -72,7 +70,7 @@ namespace LkEngine {
 			}
 		}
 
-		TObjectPtr(T& Object) 
+		TObjectPtr(T& Object)
 			: ObjectPtr(&Object)
 		{
 			if (ObjectPtr)
@@ -194,6 +192,7 @@ namespace LkEngine {
 		}
 
 		operator bool() { return ObjectPtr != nullptr; }
+
 		operator bool() const { return ObjectPtr != nullptr; }
 
 		/** Check against nullptr. */
@@ -203,22 +202,22 @@ namespace LkEngine {
 		}
 
 		/** Equality comparison. */
-		template<
-			typename U, 
-			typename Base = std::common_type_t<T*, U*>
-		>
+		template<typename U, typename Base = std::common_type_t<T*, U*>>
 		FORCEINLINE bool operator==(const TObjectPtr<U>& Other) const
 		{
 			return (ObjectPtr == nullptr ? !Other : ObjectPtr == Other.ObjectPtr);
 		}
 
 		T* operator->() { return ObjectPtr; }
+
 		const T* operator->() const { return ObjectPtr; }
 
 		T& operator*() { return *ObjectPtr; }
+
 		const T& operator*() const { return *ObjectPtr; }
 
 		T* Get() { return static_cast<T*>(ObjectPtr); }
+
 		const T* Get() const { return static_cast<T*>(ObjectPtr); }
 
 		template<typename R>
@@ -239,16 +238,16 @@ namespace LkEngine {
 			ObjectPtr = nullptr;
 		}
 
-		template<typename ...TArgs>
+		template<typename... TArgs>
 		static TObjectPtr<T> Create(TArgs&&... Args);
 
-		bool IsEqual(const TObjectPtr<T>& Other) const 
+		bool IsEqual(const TObjectPtr<T>& Other) const
 		{
 			if ((ObjectPtr == nullptr) || (Other.ObjectPtr == nullptr))
 			{
 				return false;
 			}
-			
+
 			return *ObjectPtr == *Other.ObjectPtr;
 		}
 
@@ -264,7 +263,7 @@ namespace LkEngine {
 			if (ObjectPtr)
 			{
 				ObjectPtr->DecrementReferenceCount();
-				
+
 				if (ObjectPtr->GetReferenceCount() == 0)
 				{
 					TObjectPtr_Internal::RemoveFromLiveReferences((void*)ObjectPtr);
