@@ -209,10 +209,11 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("Editor", "Adding debugging panel");
 		DebugPanel = TObjectPtr<LDebugPanel>::Create();
 
-		// TODO: Parse config or cache to determine most recent project and go from there
-		// New project and/or setting the project to active triggers an event that
-		// handles the redirection of input and physics
-		m_Project = LProject::CreateEmptyProject("Editor", true);
+		/* TODO: Load last open project, else load an empty 'default' project. */
+		if (!LProject::Current())
+		{
+			EmptyProject();
+		}
 
 		/* Bind delegate for GEditorOnSelectionChanged. */
 		auto OnSelectionChanged = [&](const LObject& Object)
@@ -742,11 +743,11 @@ namespace LkEngine {
 		static ImGuiSelectableFlags SelectableFlags = ImGuiSelectableFlags_SpanAllColumns
 			| ImGuiSelectableFlags_AllowDoubleClick;
 
-		auto EntitiesView = Scene->m_Registry.view<LTransformComponent>();
+		auto EntitiesView = EditorScene->m_Registry.view<LTransformComponent>();
 		ImGui::Text("Entities in scene: %d", EntitiesView.size());
 		for (const entt::entity& EntityRef : EntitiesView)
 		{
-			LEntity Entity = { EntityRef, Scene };
+			LEntity Entity = { EntityRef, EditorScene };
 
 			bool bIsSelected = false;
 			std::string label = LK_FORMAT_STRING("{}", Entity.Name());
@@ -1062,6 +1063,28 @@ namespace LkEngine {
 		ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
 	}
 
+	void LEditorLayer::NewScene(const std::string& SceneName)
+	{
+		EditorScene = TObjectPtr<LScene>::Create(SceneName, true);
+		EditorScene->SetActive(true);
+		//LScene::SetActiveScene(EditorScene);
+	}
+
+	void LEditorLayer::EmptyProject()
+	{
+		if (LProject::Current())
+		{
+			/* TODO: Close current project. */
+		}
+
+		NewScene();
+
+		LK_CORE_INFO_TAG("Editor", "Creating empty project");
+		Project = TObjectPtr<LProject>::Create();
+		Project->SetName("EmptyProject");
+		LProject::SetActive(Project);
+	}
+
 	void LEditorLayer::UI_ShowViewportAndWindowDetails()
 	{
 		const LVector2 WindowSize = EditorViewport->GetSize();
@@ -1215,13 +1238,11 @@ namespace LkEngine {
 
 	void LEditorLayer::SetScene(TObjectPtr<LScene> InScene)
 	{
+		LK_CORE_ASSERT(false, "Remove this function...");
 		LK_CORE_VERIFY(InScene, "Scene is nullptr");
 		if (InScene && InScene->bIsEditorScene)
 		{
-			Scene = InScene;
-			Scene->EditorCamera = GetEditorCamera();
-			LK_VERIFY(Scene->EditorCamera);
-			Scene->EditorCamera->SetActive(true);
+			EditorScene = InScene;
 		}
 	}
 
@@ -1334,13 +1355,15 @@ namespace LkEngine {
 				/* Save project. */
 				if (ImGui::MenuItem("Save"))
 				{
-					m_Project->Save();
+					LK_CORE_VERIFY(Project);
+					Project->Save();
 				}
+
 				/* New project. */
 				if (ImGui::MenuItem("New"))
 				{
-					m_Project = TObjectPtr<LProject>::Create("Project1");
 				}
+
 				/* Load existing project. */
 				if (ImGui::MenuItem("Load"))
 				{
@@ -1387,15 +1410,16 @@ namespace LkEngine {
 				if (ImGui::MenuItem("Load"))
 				{
 					static constexpr bool IsEditorScene = true;
-					TObjectPtr<LScene> NewScene = TObjectPtr<LScene>::Create(IsEditorScene);
+					LK_CORE_ASSERT(false, "FIX LOADING OF SCENE");
+					TObjectPtr<LScene> NewScene = TObjectPtr<LScene>::Create("", IsEditorScene);
 					LSceneSerializer SceneSerializer(NewScene);
 					SceneSerializer.Deserialize("scene.lukkelele");
 
-					NewScene->CopyTo(Scene);
+					NewScene->CopyTo(EditorScene);
 				}
 				if (ImGui::MenuItem("Save"))
 				{
-					LSceneSerializer Serializer(Scene);
+					LSceneSerializer Serializer(EditorScene);
 					Serializer.Serialize("scene.lukkelele");
 				}
 
@@ -1404,7 +1428,7 @@ namespace LkEngine {
 
 			/* Horizontal space. */
 			ImGui::Dummy(ImVec2(40, 0));
-			if (ImGui::BeginMenu(std::string("Project: " + m_Project->GetName()).c_str()))
+			if (ImGui::BeginMenu(std::string("Project: " + Project->GetName()).c_str()))
 			{
 				ImGui::EndMenu(); /* Project + Name. */
 			}
@@ -1417,17 +1441,17 @@ namespace LkEngine {
 		FAssetHandle CubeHandle = LAssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Cube.gltf");
 		TObjectPtr<LMesh> CubeMesh = LAssetManager::GetAsset<LMesh>(CubeHandle);
 
-		LEntity NewCubeEntity = Scene->CreateEntity();
+		LEntity NewCubeEntity = EditorScene->CreateEntity();
 
 		/// TODO: Just use a search function instead of iterating through like this
-		std::unordered_set<FAssetHandle> AssetList = Scene->GetAssetList();
+		std::unordered_set<FAssetHandle> AssetList = EditorScene->GetAssetList();
 		for (const FAssetHandle AssetHandle : AssetList)
 		{
 			TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(AssetHandle);
 			if (Mesh == CubeMesh)
 			{
 				// The cube is in the scene
-				std::vector<LEntity> SceneEntities = Scene->GetEntities();
+				std::vector<LEntity> SceneEntities = EditorScene->GetEntities();
 				for (LEntity& Entity : SceneEntities)
 				{
 					if (Entity.HasComponent<LMeshComponent>())
@@ -1435,10 +1459,9 @@ namespace LkEngine {
 						LMeshComponent& EntityMesh = Entity.GetMesh();
 						if (EntityMesh.Mesh == AssetHandle)
 						{
-							Scene->CopyComponentIfExists<LMeshComponent>(NewCubeEntity, Scene->m_Registry, Entity);
-							Scene->CopyComponentIfExists<LTagComponent>(NewCubeEntity, Scene->m_Registry, Entity);
-							LK_CORE_VERIFY((NewCubeEntity.HasComponent<LMeshComponent>())
-										   && (NewCubeEntity.HasComponent<LTagComponent>()));
+							EditorScene->CopyComponentIfExists<LMeshComponent>(NewCubeEntity, EditorScene->m_Registry, Entity);
+							EditorScene->CopyComponentIfExists<LTagComponent>(NewCubeEntity, EditorScene->m_Registry, Entity);
+							LK_CORE_VERIFY((NewCubeEntity.HasComponent<LMeshComponent>()) && (NewCubeEntity.HasComponent<LTagComponent>()));
 						}
 					}
 				}

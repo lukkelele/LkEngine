@@ -13,7 +13,7 @@ namespace LkEngine {
 		LRuntimeAssetManager();
 		~LRuntimeAssetManager() = default;
 
-		void Initialize(const EInitFlag AssetInitialization = EInitFlag::True);
+		void Initialize();
 
 		template<typename AssetType>
 		TObjectPtr<AssetType> ImportAsset(std::filesystem::path filepath);

@@ -1,3 +1,8 @@
+/******************************************************************
+ * LApplication
+ *
+ *
+ *******************************************************************/
 #pragma once
 
 #include "LkEngine/Core/Core.h"
@@ -52,9 +57,9 @@ namespace LkEngine {
 		LApplication(const ApplicationSpecification& InSpecification = ApplicationSpecification());
 		~LApplication();
 
-		void Initialize();
-		void Run();
-		void Shutdown();
+		virtual void Initialize();
+		virtual void Run();
+		virtual void Shutdown();
 
 		bool ReadConfigurationFile();
 
@@ -62,6 +67,18 @@ namespace LkEngine {
 
 		void RenderUI();
 		void ProcessEvents();
+
+		void PushLayer(TObjectPtr<LLayer> InLayer)
+		{
+			LayerStack.PushLayer(InLayer);
+		}
+
+		#if 0
+		void PushLayer(LLayer* InLayer)
+		{
+			LayerStack.PushLayer(InLayer);
+		}
+		#endif
 
 		/// TODO: Add event category to bundle the callback with.
 		FORCEINLINE void AddEventCallback(const FEventCallback& EventCallback)
@@ -97,8 +114,6 @@ namespace LkEngine {
 
 		FORCEINLINE LWindow& GetWindow() { return *Window; }
 		FORCEINLINE GLFWwindow* GetGlfwWindow() { return Window->GetGlfwWindow(); }
-
-		FORCEINLINE TObjectPtr<LProject> GetProject() { return Project; }
 
 		const ApplicationSpecification& GetSpecification() const
 		{
@@ -143,8 +158,7 @@ namespace LkEngine {
 		std::mutex EventQueueMutex;
 		std::queue<std::function<void()>> EventQueue;
 		std::vector<FEventCallback> EventCallbacks;
-
-		TObjectPtr<LProject> Project{};
+		//TObjectPtr<LProject> Project{};
 
 		LPerformanceProfiler* PerformanceProfiler{};
 		std::unordered_map<const char*, LPerformanceProfiler::FFrameData> ProfilerPreviousFrameData;

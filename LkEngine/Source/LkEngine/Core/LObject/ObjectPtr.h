@@ -127,8 +127,38 @@ namespace LkEngine {
 
 		TObjectPtr& operator=(std::nullptr_t)
 		{
-			TObjectPtr_DecrementReferenceCount();
+			if (ObjectPtr)
+			{
+				TObjectPtr_DecrementReferenceCount();
+			}
 			ObjectPtr = nullptr;
+
+			return *this;
+		}
+
+		TObjectPtr& operator=(TObjectPtr<T>&& Other) noexcept
+		{
+			if (ObjectPtr != Other.ObjectPtr)
+			{
+				TObjectPtr_DecrementReferenceCount();
+
+				ObjectPtr = Other.ObjectPtr;
+				Other.ObjectPtr = nullptr;
+			}
+
+			return *this;
+		}
+
+		template<typename R>
+		TObjectPtr& operator=(TObjectPtr<R>&& Other)
+		{
+			if (ObjectPtr != Other.ObjectPtr)
+			{
+				TObjectPtr_DecrementReferenceCount();
+
+				ObjectPtr = (T*)Other.ObjectPtr;
+				Other.ObjectPtr = nullptr;
+			}
 
 			return *this;
 		}
@@ -149,43 +179,18 @@ namespace LkEngine {
 			return *this;
 		}
 
-		TObjectPtr& operator=(TObjectPtr<T>&& Other) noexcept
-		{
-			if (this != &Other)
-			{
-				TObjectPtr_DecrementReferenceCount();
-
-				ObjectPtr = Other.ObjectPtr;
-				Other.ObjectPtr = nullptr;
-			}
-
-			return *this;
-		}
-
 		template<typename R>
 		TObjectPtr& operator=(const TObjectPtr<R>& Other)
 		{
 			if (ObjectPtr != Other.ObjectPtr)
 			{
 				TObjectPtr_DecrementReferenceCount();
+
 				ObjectPtr = (T*)Other.ObjectPtr;
 				if (ObjectPtr)
 				{
 					TObjectPtr_IncrementReferenceCount();
 				}
-			}
-
-			return *this;
-		}
-
-		template<typename R>
-		TObjectPtr& operator=(TObjectPtr<R>&& Other)
-		{
-			if (ObjectPtr != Other.ObjectPtr)
-			{
-				TObjectPtr_DecrementReferenceCount();
-				ObjectPtr = (T*)Other.ObjectPtr;
-				Other.ObjectPtr = nullptr;
 			}
 
 			return *this;

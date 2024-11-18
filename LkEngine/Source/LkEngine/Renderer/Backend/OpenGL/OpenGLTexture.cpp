@@ -171,7 +171,7 @@ namespace LkEngine {
 										  Data));
 
 			stbi_image_free(Data);
-			LK_CORE_DEBUG_TAG("OpenGLTextureCube", "Created face {} with texture image: {}", i, FacePath.string());
+			LK_CORE_DEBUG_TAG("OpenGLTextureCube", "Created face {} with: '{}'", i, FacePath.string());
 		}
 
 		stbi_set_flip_vertically_on_load(true);

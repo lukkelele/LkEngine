@@ -269,7 +269,7 @@ namespace LkEngine {
 			if (!CubeDebugShader)
 			{
 				CubeDebugShader = LRenderer::GetShaderLibrary()->Get("Renderer_Debug");
-				const FShaderProgramSource& ShaderSource = CubeDebugShader->GetSource();
+				//const FShaderProgramSource& ShaderSource = CubeDebugShader->GetSource();
 				//LK_CORE_WARN_TAG("LOpenGL", "DebugCubeShader:\n{}\n{}", ShaderSource.Vertex, ShaderSource.Fragment);
 				CubeDebugShader->Set("u_Texture0", 0);
 			}
@@ -277,9 +277,8 @@ namespace LkEngine {
 			if (!DebugShader)
 			{
 				DebugShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-				const FShaderProgramSource& ShaderSource = DebugShader->GetSource();
-				LK_CORE_WARN_TAG("LOpenGL", "DebugShader -> {}:\n{}\n{}", 
-								 DebugShader->GetName(), ShaderSource.Vertex, ShaderSource.Fragment);
+				//const FShaderProgramSource& ShaderSource = DebugShader->GetSource();
+				//LK_CORE_WARN_TAG("LOpenGL", "DebugShader -> {}:\n{}\n{}", DebugShader->GetName(), ShaderSource.Vertex, ShaderSource.Fragment);
 			}
 
 			if (!ScreenShader)
@@ -302,7 +301,7 @@ namespace LkEngine {
 
 		void SetupSkybox()
 		{
-			LK_CORE_FATAL("Setting up skybox");
+			LK_CORE_TRACE("Setting up skybox");
 			LK_CORE_ASSERT(SkyboxVertexBuffer == nullptr, "Skybox already exists");
 
 			SkyboxVertexBuffer = LVertexBuffer::Create(Skybox_Vertices, sizeof(Skybox_Vertices));
@@ -313,13 +312,13 @@ namespace LkEngine {
 			LK_CORE_ASSERT(SkyboxShader, "Skybox shader is nullptr");
 
 			FTextureSpecification SkyboxSpec;
-			std::vector<std::filesystem::path> SkyboxFacePaths = {
-				"Assets/Textures/Skybox/right.jpg",
-				"Assets/Textures/Skybox/left.jpg",
-				"Assets/Textures/Skybox/top.jpg",
-				"Assets/Textures/Skybox/bottom.jpg",
-				"Assets/Textures/Skybox/front.jpg",
-				"Assets/Textures/Skybox/back.jpg",
+			static std::vector<std::filesystem::path> SkyboxFacePaths = {
+				"Assets/Textures/Debug/Skybox-WaterIsland/Right.jpg",
+				"Assets/Textures/Debug/Skybox-WaterIsland/Left.jpg",
+				"Assets/Textures/Debug/Skybox-WaterIsland/Top.jpg",
+				"Assets/Textures/Debug/Skybox-WaterIsland/Bottom.jpg",
+				"Assets/Textures/Debug/Skybox-WaterIsland/Front.jpg",
+				"Assets/Textures/Debug/Skybox-WaterIsland/Back.jpg",
 			};
 			SkyboxTexture = LTextureCube::Create(SkyboxSpec, SkyboxFacePaths);
 			SkyboxTexture->Bind(0);

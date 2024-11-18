@@ -78,9 +78,9 @@ namespace LkEngine {
 			AddTexture(TextureSpecification);
 
 			// Ice Skybox 
-            TextureSpecification.Path = "Assets/Textures/Skybox/back.jpg";
-            TextureSpecification.Name = "skybox-ice-back-512x512";
-            TextureSpecification.DebugName = "skybox-ice-back-512x512";
+            TextureSpecification.Path = "Assets/Textures/Debug/Skybox-WaterIsland/Back.jpg";
+            TextureSpecification.Name = "Skybox-WaterIsland-Back-512x512";
+            TextureSpecification.DebugName = "Skybox-WaterIsland-Back-512x512";
             TextureSpecification.GenerateMips = false;
 			TextureSpecification.Format = EImageFormat::RGBA32F;
             TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
@@ -174,9 +174,9 @@ namespace LkEngine {
 			AddTexture(TextureSpecification);
 
 			// Skybox
-            TextureSpecification.Name = "skybox-ice-back";
-            TextureSpecification.DebugName = "skybox-ice-back";
-            TextureSpecification.Path = "Assets/Textures/Skybox/back.jpg";
+            TextureSpecification.Name = "Skybox-WaterIsland-Back";
+            TextureSpecification.DebugName = "Skybox-WaterIsland-Back";
+            TextureSpecification.Path = "Assets/Textures/Debug/Skybox-WaterIsland/Back.jpg";
             TextureSpecification.GenerateMips = false;
             TextureSpecification.Format = EImageFormat::RGBA32F;
             TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
@@ -237,8 +237,8 @@ namespace LkEngine {
         {
             if (Entry.first == ExtractFileNameWithoutExtension(TextureSpecification.Name))
             {
-                if (((TextureSpecification.Width == Entry.second->GetWidth()) 
-                    && (TextureSpecification.Height == Entry.second->GetHeight()))
+                if ((TextureSpecification.Width == Entry.second->GetWidth()) 
+					&& (TextureSpecification.Height == Entry.second->GetHeight())
                     || (Entry.first == TextureSpecification.Name))
                 {
                     LK_CORE_WARN_TAG("TextureLibrary", "Texture {} already exists and has same dimensions "

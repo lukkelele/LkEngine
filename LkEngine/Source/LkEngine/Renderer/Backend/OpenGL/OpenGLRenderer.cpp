@@ -57,7 +57,7 @@ namespace LkEngine {
 		}
 
 		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Binding array textures");
-		const auto& Textures2D = LAssetManager::GetTextures2D();
+		const auto& Textures2D = LTextureLibrary::Get().GetTextures2D();
 		for (const auto& [TextureName, Texture] : Textures2D)
 		{
 			switch (Texture->GetWidth())

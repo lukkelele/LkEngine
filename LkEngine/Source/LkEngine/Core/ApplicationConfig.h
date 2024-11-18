@@ -24,6 +24,7 @@ namespace LkEngine {
 
         LString WorkingDirectory{};
         std::filesystem::path ConfigurationFile = "LkEngine.config";
+		std::filesystem::path StartProject{};
     };
 
 }

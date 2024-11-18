@@ -15,54 +15,70 @@
 
 namespace LkEngine {
 
+	struct FProjectConfiguration
+	{
+		std::string Name{};
+
+		std::string AssetDirectory{};
+		std::string AssetRegistryPath{};
+		std::string MeshPath{};
+
+		std::string StartScene{};
+
+		bool bAutoSave = true;
+		std::chrono::seconds AutoSaveInterval = 150s;
+
+		/* Not serialized. */
+		std::string ProjectFileName{};
+		std::string ProjectDirectory{};
+	};
+
 	class LProject : public LObject
 	{
 	public:
-		LProject() = default;
-		LProject(std::string_view InProjectName);
+		LProject();
 		~LProject() = default;
 
-		static TObjectPtr<LProject> Current() { return ActiveProject; }
+		/**
+		 * @brief Load a project.
+		 */
+		void Load(const std::string& ProjectPath);
+
+		/**
+		 * @brief Get currently active project.
+		 */
+		FORCEINLINE static TObjectPtr<LProject> Current() { return ActiveProject; }
 
 		bool Save();
 		uint64_t GetSize() const;
 
-		FORCEINLINE const std::string& GetName() const { return Name; }
-		FORCEINLINE std::filesystem::path GetFilepath() const { return Filepath; }
+		FORCEINLINE const std::string& GetName() const { return Configuration.Name; }
 
-		FORCEINLINE TObjectPtr<LScene> GetScene() 
+		FORCEINLINE void SetName(const std::string& InName)
 		{ 
-			return Scene; 
+			Configuration.Name = InName;
+		}
+
+		FORCEINLINE FProjectConfiguration& GetConfiguration() { return Configuration; }
+		FORCEINLINE const FProjectConfiguration& GetConfiguration() const { return Configuration; }
+
+		FORCEINLINE static TObjectPtr<LRuntimeAssetManager> GetRuntimeAssetManager() 
+		{ 
+			LK_CORE_VERIFY(RuntimeAssetManager, "Invalid RuntimeAssetManager reference");
+			return RuntimeAssetManager; 
 		}
 
 		static void SetActive(TObjectPtr<LProject> Project);
 
-		static TObjectPtr<LProject> CreateEmptyProject(std::string_view ProjectName, const bool bSetAsActive = true);
-		static TObjectPtr<LProject> CreateDefaultProject(std::string_view ProjectName, const bool bSetAsActive = true);
-		static TObjectPtr<LProject> CreateDebugProject(const bool bSetAsActive = true);
-
-		static TObjectPtr<LRuntimeAssetManager> GetRuntimeAssetManager() 
-		{ 
-			return RuntimeAssetManager; 
-		}
-
-		static bool IsActiveProject(const TObjectPtr<LProject>& Project) 
+		FORCEINLINE static bool IsActiveProject(const TObjectPtr<LProject>& Project) 
 		{ 
 			return (ActiveProject == Project);
 		}
 
-		struct FProjectData
-		{
-		};
-
 	public:
-		FProjectData ProjectData{};
-		inline static std::string_view DefaultExtension = ".lkproj";
+		inline static constexpr const char* FILE_EXTENSION = "lkproject";
 	private:
-		std::string Name{};
-		std::filesystem::path Filepath{};
-
-		TObjectPtr<LScene> Scene{};
+		FProjectConfiguration Configuration{};
 
 		inline static TObjectPtr<LProject> ActiveProject{};
 		inline static TObjectPtr<LRuntimeAssetManager> RuntimeAssetManager{};

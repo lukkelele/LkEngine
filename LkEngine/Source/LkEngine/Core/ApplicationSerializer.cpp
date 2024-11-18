@@ -14,8 +14,7 @@ namespace LkEngine {
 		LK_CORE_ASSERT(InApplication, "Application instance is nullptr");
 	}
 
-	LApplicationSerializer::LApplicationSerializer(LApplication* InApplication,
-												   const std::filesystem::path& InConfigFile)
+	LApplicationSerializer::LApplicationSerializer(LApplication* InApplication, const std::filesystem::path& InConfigFile)
 		: Application(InApplication)
 		, ConfigFile(InConfigFile)
 	{
@@ -23,30 +22,14 @@ namespace LkEngine {
 		LK_CORE_ASSERT(!InConfigFile.empty() && InConfigFile.has_filename(), "Invalid filepath: {}", InConfigFile.string());
 	}
 
-	void LApplicationSerializer::Serialize()
+	void LApplicationSerializer::Serialize(const std::filesystem::path& InConfigFile)
 	{
-		LK_CORE_ASSERT(!ConfigFile.empty(), "Invoked Serialize with no config");
+		LK_CORE_ASSERT(!InConfigFile.empty(), "Invoked Serialize with no config");
+		ConfigFile = InConfigFile;
+
 		LK_CORE_DEBUG_TAG("ApplicationSerializer", "Serializing: \"{}\"", ConfigFile.string());
 		YAML::Emitter Out;
 		SerializeTo<ESerializeFormat::Yaml>(Out);
-
-		std::ofstream FileOut(ConfigFile);
-		if (FileOut.good() && FileOut.is_open())
-		{
-			LK_CORE_DEBUG_TAG("ApplicationSerializer", "Saving to file: {}", ConfigFile.string());
-			FileOut << Out.c_str();
-		}
-	}
-
-	void LApplicationSerializer::Serialize(const std::filesystem::path& InConfigFile)
-	{
-		LK_CORE_ASSERT(!InConfigFile.empty(), "Invalid filepath: {}", InConfigFile.string());
-		ConfigFile = InConfigFile;
-
-		LK_CORE_TRACE_TAG("ApplicationSerializer", "Serializing: \"{}\"", ConfigFile.string());
-		YAML::Emitter Out;
-		SerializeTo<ESerializeFormat::Yaml>(Out);
-		LK_CORE_DEBUG("Serialized:\n{}", Out.c_str());
 
 		std::ofstream FileOut(ConfigFile);
 		if (FileOut.is_open() && FileOut.good())
@@ -60,16 +43,8 @@ namespace LkEngine {
 		}
 	}
 
-	bool LApplicationSerializer::Deserialize()
-	{
-		LK_CORE_ASSERT(!ConfigFile.empty(), "Invoked Deserialize on empty filepath");
-
-		return false;
-	}
-
 	bool LApplicationSerializer::Deserialize(const std::filesystem::path& InConfigFile)
 	{
-		LK_CORE_ASSERT(!InConfigFile.empty(), "Passed config filepath is empty");
 		ConfigFile = InConfigFile;
 		if (!std::filesystem::exists(ConfigFile))
 		{
@@ -77,16 +52,17 @@ namespace LkEngine {
 			return false;
 		}
 
-		std::ifstream InputStream(InConfigFile);
+		std::ifstream InputStream(ConfigFile);
 		std::stringstream StrStream;
 		StrStream << InputStream.rdbuf();
 		try
 		{
 			DeserializeFromYaml(StrStream.str());
 		}
-		catch (const YAML::Exception& e)
+		catch (const YAML::Exception& Exception)
 		{
-			LK_CORE_ASSERT(false, "Failed to deserialize \"{}\", error: \"{}\"", ConfigFile.string(), e.what());
+			/* TODO: Remove assert here and just report error. */
+			LK_CORE_ASSERT(false, "Failed to deserialize '{}', error: '{}'", ConfigFile.string(), Exception.what());
 			return false;
 		}
 

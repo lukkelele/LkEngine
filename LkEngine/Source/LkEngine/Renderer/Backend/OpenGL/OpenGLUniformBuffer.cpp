@@ -49,7 +49,7 @@ namespace LkEngine {
 		LK_OpenGL_Verify(UBIndex = glGetUniformBlockIndex(Shader->GetRendererID(), std::string(UBName).c_str()));
 		if (UBIndex == BlockIndex)
 		{
-			LK_CORE_DEBUG("Uniformbuffer is already bound to {} for block \"{}\"", BlockIndex, UBName);
+			LK_CORE_WARN_TAG("OpenGLUniformBuffer", "Already bound to {} for block \"{}\"", BlockIndex, UBName);
 			return;
 		}
 

@@ -41,6 +41,8 @@ namespace LkEngine {
 
 	private:
 		TObjectPtr<LScene> m_Scene{};
+
+		/* TODO: Figure out a replacement for this approach. */
 		TObjectPtr<LScene> m_ComponentCopyScene{};
 
 		/// FIXME: REWORK THIS

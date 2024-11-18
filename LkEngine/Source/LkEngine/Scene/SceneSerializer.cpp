@@ -29,7 +29,8 @@ namespace LkEngine {
 		#else
 			const bool IsEditorScene = false;
 		#endif
-			m_Scene = new LScene(IsEditorScene);
+			/* FIXME */
+			m_Scene = new LScene("", IsEditorScene);
 		}
 	}
 
@@ -201,7 +202,7 @@ namespace LkEngine {
 			/* Serialize sorted entities. */
 			for (const auto& [id, Entity] : SortedEntityMap)
 			{
-				SerializeEntity(Out, { Entity, m_Scene->m_ActiveScene });
+				SerializeEntity(Out, { Entity, m_Scene->ActiveScene });
 			}
 		}
 		Out << YAML::EndSeq;
@@ -223,7 +224,7 @@ namespace LkEngine {
 		m_Scene->SetName(SceneName);
 
 		const bool bIsActiveScene = data["Active"].as<std::string>() == "true" ? true : false;
-		m_Scene->SetAsActive(bIsActiveScene);
+		m_Scene->SetActive(bIsActiveScene);
 
 		const bool bIsEditorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
 		//m_Scene->SetAsEditorScene(bIsEditorScene);

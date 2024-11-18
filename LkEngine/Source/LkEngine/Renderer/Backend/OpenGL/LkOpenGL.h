@@ -786,6 +786,9 @@ namespace LkEngine {
 			 1.0f, -1.0f,  1.0f
 		};
 
+		/**
+		 * Cube vertices with normals and texture coordinates.
+		 */
 		static float Cube_Vertices_NT[] = {
 			/*    Positions               Normals		  Texture Coords   */
 			-0.5f, -0.5f, -0.5f,	0.0f,  0.0f, -1.0f,		0.0f, 0.0f,

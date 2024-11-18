@@ -31,26 +31,18 @@ namespace LkEngine {
 		LCLASS_REGISTER();
 	}
 
-	void LRuntimeAssetManager::Initialize(const EInitFlag InitFlag)
+	void LRuntimeAssetManager::Initialize()
 	{
 		LObject::Initialize();
-		if (InitFlag == EInitFlag::NoInit)
-		{
-			/* Do nothing. */
-			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Skipping initialization of LMaterialLibrary");
-		}
-		else if (InitFlag == EInitFlag::True)
-		{
-			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Loading materials");
-			LoadMaterials();
+		LK_CORE_TRACE_TAG("RuntimeAssetManager", "Loading materials");
+		LoadMaterials();
 
-			/* Load all primitive shapes. */
-			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Loading primitive shapes");
-			LoadPrimitiveShapes();
+		/* Load all primitive shapes. */
+		LK_CORE_TRACE_TAG("RuntimeAssetManager", "Loading primitive shapes");
+		LoadPrimitiveShapes();
 
-			/* Load textures into cache. */
-			TextureLibrary.GetTextures2D(RuntimeCache.Textures2D);
-		}
+		/* Load textures into cache. */
+		TextureLibrary.GetTextures2D(RuntimeCache.Textures2D);
 	}
 
 	void LRuntimeAssetManager::AddMemoryOnlyAsset(TObjectPtr<LAsset> asset)
@@ -257,17 +249,14 @@ namespace LkEngine {
 		LK_CORE_INFO_TAG("RuntimeAssetManager", "Creating primitive shapes");
 
 		TObjectPtr<LProject> project = LProject::Current();
-		//LMaterialLibrary& MaterialLibrary = LMaterialLibrary::Get();
 
-		TObjectPtr<LScene> CurrentScene = LProject::Current()->GetScene();
-
-		LK_CORE_WARN_TAG("RuntimeAssetManager", "Loading primitive shapes for project {}", project->GetName());
-		if (CurrentScene)
+		if (TObjectPtr<LScene> CurrentScene = LScene::GetActiveScene())
 		{
+			LK_CORE_WARN_TAG("RuntimeAssetManager", "Loading primitive shapes for project {}", project->GetName());
 			/* Create cube. */
 			std::filesystem::path FilePath("Assets/Meshes/Cube.gltf");
 			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Importing cube from: '{}'", FilePath.string());
-			LEntity CubeEntity = LProject::Current()->GetScene()->CreateEntity("Cube");
+			LEntity CubeEntity = CurrentScene->CreateEntity("Cube");
 			TObjectPtr<LMesh> Cube = ImportAsset<LMesh>(FilePath.string());
 			LMeshComponent& MeshComponent = CubeEntity.AddComponent<LMeshComponent>(Cube->Handle);
 
@@ -315,6 +304,12 @@ namespace LkEngine {
 
 			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Cube created with handle {}", Cube->Handle);
 		}
+		else
+		{
+			LK_CORE_WARN_TAG("RuntimeAssetManager", "No active scene");
+			LK_CORE_ASSERT(false);
+		}
+			
     }
 
 

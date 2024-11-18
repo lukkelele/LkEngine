@@ -41,7 +41,8 @@ namespace LkEngine {
 	{
 		GOnSceneSetActive.Add(this, &LSceneManagerPanel::SetScene);
 
-		m_ComponentCopyScene = LScene::CreateEmpty();
+		/* TODO: Figure out a replacement for this approach. */
+		m_ComponentCopyScene = TObjectPtr<LScene>::Create("CopyScene", false);
 		m_ComponentCopyEntity = m_ComponentCopyScene->CreateEntity();
 	}
 

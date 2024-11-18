@@ -24,7 +24,6 @@ namespace LkEngine {
 		LK_CORE_TRACE_TAG("Application", "Creating window");
 		Window = MakeUnique<LWindow>(InSpecification);
 
-		/* Read configuration file. */
 		ReadConfigurationFile();
 	}
 
@@ -56,12 +55,12 @@ namespace LkEngine {
 		UILayer->Initialize();
 		UILayer->SetDarkTheme();
 
-#if LK_USE_EDITOR
+	#if LK_USE_EDITOR
 		/* Create and initialize EditorLayer. */
 		Editor = MakeUnique<LEditorLayer>();
 		Editor->Initialize();
 		LayerStack.PushOverlay(Editor.get());
-#endif
+	#endif
 
 		PerformanceProfiler = new LPerformanceProfiler();
 	}
@@ -79,22 +78,13 @@ namespace LkEngine {
 			Timestep = Timer.GetDeltaTime();
 
 			LInput::Update();
-#if 0
+	#if 0
 			LRenderer::Submit([&]() { Window->GetSwapChain().BeginFrame(); });
-#endif
+	#endif
 
 			LRenderer::BeginFrame();
 
-#if 0
-			/* Update all layers. */
-			// LK_SCOPE_PERF("Application  Updating Layers");
-			for (TObjectPtr<LLayer>& Layer : LayerStack)
-			{
-				Layer->OnUpdate(Timestep);
-			}
-#endif
-
-#if 1
+	#if LK_USE_EDITOR
 			/** LkEditor */
 			if (Editor->IsEnabled())
 			{
@@ -111,7 +101,7 @@ namespace LkEngine {
 
 				LRenderer::EndScene();
 			}
-#endif
+	#endif
 
 			/* UI */
 			if (Specification.ImGuiEnabled)
@@ -150,9 +140,19 @@ namespace LkEngine {
 			LApplicationSerializer Serializer(this);
 			Serializer.Serialize(Global::GetEngineConfig());
 
+			if (TObjectPtr<LProject> Project = LProject::Current())
+			{
+				TObjectPtr<LScene> ActiveScene = LScene::GetActiveScene();
+				if (ActiveScene)
+				{
+				}
+
+				Project->Save();
+			}
+
 			Renderer->Shutdown();
 
-			LK_CORE_WARN_TAG("Application", "Window->Shutdown()");
+			LK_CORE_TRACE_TAG("Application", "Window->Shutdown()");
 			Window->Shutdown();
 
 			bRunning = false;
@@ -186,7 +186,8 @@ namespace LkEngine {
 		}
 	}
 
-	/// FIXME:
+	/* FIXME: The event system needs to be re-evaluated to efficiently
+	 *        ripple events down to existing layers and overlays. */
 	void LApplication::OnEvent(LEvent& Event)
 	{
 		EventDispatcher Dispatcher(Event);

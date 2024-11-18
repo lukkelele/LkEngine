@@ -69,11 +69,14 @@ namespace LkEngine {
 
 		void SetScene(TObjectPtr<LScene> InScene);
 
-		FORCEINLINE TObjectPtr<LScene> GetCurrentScene() { return Scene; }
+		FORCEINLINE TObjectPtr<LScene> GetEditorScene() 
+		{ 
+			return EditorScene; 
+		}
 
 		void SetUpdateWindowFlag(bool flag);
 
-		FORCEINLINE bool IsEnabled() const { return m_Enabled; }
+		FORCEINLINE bool IsEnabled() const { return bEnabled; }
 
 		FORCEINLINE EEditorWindowType GetCurrentWindowType() const { return CurrentWindowType; }
 
@@ -85,6 +88,9 @@ namespace LkEngine {
 			LK_VERIFY(Instance, "Invalid editor instance");
 			return Instance;
 		}
+
+		void NewScene(const std::string& SceneName = "Untitled");
+		void EmptyProject();
 
 	private:
 		void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);
@@ -113,7 +119,7 @@ namespace LkEngine {
 
 		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return ViewportFramebuffer; }
 
-		LEntity CreateCube();
+		LEntity CreateCube(); /* TODO: REMOVE */
 
 	public:
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
@@ -128,13 +134,14 @@ namespace LkEngine {
 	private:
 		LEditorTabManager& TabManager;
 
-		TObjectPtr<LScene> Scene = nullptr;
-		bool m_Enabled = true;
+		TObjectPtr<LScene> EditorScene = nullptr;
+		bool bEnabled = true;
 
 		LVector2 ViewportBounds[2];
 		TObjectPtr<LFramebuffer> ViewportFramebuffer;
 		TObjectPtr<LSceneRenderer> ViewportRenderer{};
-		TObjectPtr<LEditorCamera> EditorCamera;
+
+		TObjectPtr<LEditorCamera> EditorCamera; /* TODO: Remove pointer, just make raw member. */
 
 		bool m_ShowMetricsTool = false;
 		bool m_ShowStackTool = false;
@@ -144,10 +151,9 @@ namespace LkEngine {
 
 		FEventCallback m_EventCallback; /// UPDATE ME
 
-		TSharedPtr<LSceneManagerPanel> SceneManagerPanel;
+		TSharedPtr<LSceneManagerPanel> SceneManagerPanel{};
 
-		/* Active object. */
-		TObjectPtr<LProject> m_Project{};
+		TObjectPtr<LProject> Project{};
 
 		// Editor
 		TObjectPtr<LViewport> EditorViewport;
@@ -162,6 +168,7 @@ namespace LkEngine {
 		EEditorWindowType CurrentWindowType = EEditorWindowType::None;
 
 		/// REWORK ALL THESE FRIEND DECLARATIONS
+		/// -> ESPECIALLY THIS TO Physics2D !!!!!!!
 		friend class Physics2D; // For getting UI window size when raycasting
 
 		friend class LNodeEditorTab;

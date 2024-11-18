@@ -3,8 +3,8 @@
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
-#include "LkEngine/Serialization/Serializer.h"
 #include "LkEngine/Serialization/FileStream.h"
+#include "LkEngine/Serialization/Serializer.h"
 
 
 namespace LkEngine {
@@ -19,10 +19,7 @@ namespace LkEngine {
         LApplicationSerializer() = delete;
         ~LApplicationSerializer() = default;
 
-        virtual void Serialize() override;
         virtual void Serialize(const std::filesystem::path& InConfigFile);
-
-        virtual bool Deserialize() override;
         virtual bool Deserialize(const std::filesystem::path& InConfigFile) override;
 
     private:

@@ -23,9 +23,9 @@ namespace LkEngine {
 	FOnSceneSetActive GOnSceneSetActive{};
 	FOnSceneCreated   GOnSceneCreated{};
 
-	LScene::LScene(const bool IsEditorScene)
+	LScene::LScene(std::string_view SceneName, const bool IsEditorScene)
 		: bIsEditorScene(IsEditorScene)
-		, Name("")
+		, Name(SceneName)
 	{
 		LCLASS_REGISTER();
 		m_SceneEntity = m_Registry.create();
@@ -36,13 +36,7 @@ namespace LkEngine {
 
 		if (bIsEditorScene)
 		{
-			EditorCamera = LEditorLayer::Get()->GetEditorCamera();
-			LK_CORE_ASSERT(EditorCamera, "EditorCamera is nullptr");
-
-			LEditorLayer::Get()->SetScene(TObjectPtr<LScene>(this));
-
-			/// FIXME
-			LInput::SetScene(TObjectPtr<LScene>(this)); // REMOVE ME
+			///GOnSceneSetActive.Broadcast(this);
 		}
 
 	#if LK_PHYSICS_ENABLED
@@ -53,10 +47,11 @@ namespace LkEngine {
 	#endif
 
 		LK_CORE_DEBUG_TAG("Scene", "New scene created {}", Name);
-		SceneCounter++;
+		//SceneCounter++;
 	}
 
-	LScene::LScene(const LString& InName, bool bIsActiveScene, bool bIsEditorScene)
+#if 0
+	LScene::LScene(const LString& InName, bool bIsEditorScene)
 		: bIsEditorScene(bIsEditorScene)
 		, Name(InName)
 	{
@@ -83,17 +78,11 @@ namespace LkEngine {
 			LEditorLayer::Get()->SetScene(TObjectPtr<LScene>(this));
 		}
 
-	#if LK_PHYSICS_ENABLED
-		/* Initialize 2D physics. */
-		Box2DWorldComponent& box2dWorld = m_Registry.emplace<Box2DWorldComponent>(m_SceneEntity, std::make_unique<b2World>(b2Vec2{ 0.0f, -9.8f }));
-		box2dWorld.World->SetContactListener(&box2dWorld.ContactListener);
-		Debugger::AttachDebugDrawer2D(&box2dWorld, Debugger2D::DrawMode2D::Shape | Debugger2D::DrawMode2D::Joints);
-	#endif
-
 		LK_CORE_DEBUG_TAG("Scene", "New scene created {}", Name);
 
 		SceneCounter++;
 	}
+#endif
 
 	LScene::~LScene()
 	{
@@ -212,11 +201,6 @@ namespace LkEngine {
 		return (m_Registry.has<LIDComponent>(entity) 
 			&& (entity.m_Scene != nullptr) 
 			&& (entity.m_EntityHandle != entt::null));
-	}
-
-	TObjectPtr<LScene> LScene::CreateEmpty()
-	{
-		return TObjectPtr<LScene>::Create("Empty", false, false);
 	}
 
 	void LScene::SortEntities()
@@ -535,23 +519,10 @@ namespace LkEngine {
 		Camera = TObjectPtr<LSceneCamera>(cam);
 	}
 
-	void LScene::SetEditorCamera(const TObjectPtr<LEditorCamera> InEditorCamera)
-	{ 
-		EditorCamera = InEditorCamera;
-	}
-
-	#if 0 /// DISABLED
-	Box2DWorldComponent& LScene::GetBox2DWorld()
-	{
-		/// FIXME
-		return m_Registry.get<Box2DWorldComponent>(m_SceneEntity);
-	}
-	#endif
-
 	void LScene::SetActiveScene(TObjectPtr<LScene> InScene)
 	{
-		// TODO: Verify scene validity
-		m_ActiveScene = InScene;
+		LK_CORE_FATAL_TAG("Scene", "Set active scene to: '{}'", InScene->GetName());
+		ActiveScene = InScene;
 	}
 
 	void LScene::Clear()

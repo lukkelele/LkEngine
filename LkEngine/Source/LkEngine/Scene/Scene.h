@@ -32,23 +32,19 @@ namespace LkEngine {
 	LK_DECLARE_MULTICAST_DELEGATE(FOnSceneCreated,   const TObjectPtr<LScene>&);
 
 	/** OnSceneSetActive. */
-	//static FOnSceneSetActive GOnSceneSetActive;
 	extern FOnSceneSetActive GOnSceneSetActive;
 	extern FOnSceneCreated   GOnSceneCreated;
 
 	class LScene : public LAsset
 	{
 	public:
-		LScene(const bool bIsEditorScene);
-		LScene(const LString& SceneName, const bool bIsActiveScene = true, const bool bIsEditorScene = false);
+		LScene(std::string_view SceneName, const bool IsEditorScene = false);
 		LScene() = delete;
 		~LScene();
 
 		void OnRender(TObjectPtr<LSceneRenderer> InSceneRenderer, FTimestep Timestep);
 		void OnRenderEditor(LEditorCamera& InEditorCamera, FTimestep Timestep);
 		void EndScene();
-
-		static TObjectPtr<LScene> CreateEmpty();
 
 		LEntity GetMainCameraEntity();
 		std::vector<LEntity> GetEntities();
@@ -74,37 +70,31 @@ namespace LkEngine {
 		FORCEINLINE std::string GetName() const { return Name; }
 		void SetName(const std::string& InName) { Name = InName; }
 
-		void SetAsActive(const bool Active) 
+		FORCEINLINE void SetActive(const bool Active) 
 		{ 
 			if (bIsActiveScene != Active)
 			{
 				bIsActiveScene = Active; 
-				/// TODO: Broadcast delegate here.
+			}
+
+			if (Active)
+			{
+				// TODO: Broadcast delegate here.
+				ActiveScene = this;
+				LK_CORE_WARN_TAG("Scene", "Setting active scene");
 			}
 		}
 
 		void Clear();
-
-		TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
-
-		void Pause(bool paused);
+		void Pause(const bool IsPaused);
 
 		void SwitchCamera();
 		void SetCamera(TObjectPtr<LSceneCamera> InSceneCamera);
 		void SetCamera(LSceneCamera* InSceneCamera);
-		void SetEditorCamera(const TObjectPtr<LEditorCamera> EditorCamera);
 
 		FORCEINLINE TObjectPtr<LSceneCamera> GetMainCamera() { return Camera; } 
 
-		FORCEINLINE UUID GetUUID() const 
-		{ 
-			return m_SceneID; 
-		}
-
-		#if 0 /// DISABLED
-		Box2DWorldComponent& GetBox2DWorld();
-		void Initiate2DPhysics(const Physics2DSpecification& PhysicsSpecification);
-		#endif
+		FORCEINLINE UUID GetUUID() const { return m_SceneID; }
 
 		void CopyTo(TObjectPtr<LScene>& TargetScene);
 
@@ -158,9 +148,9 @@ namespace LkEngine {
 
 		FORCEINLINE static std::string GetActiveSceneName()
 		{
-			if (m_ActiveScene)
+			if (ActiveScene)
 			{
-				return m_ActiveScene->GetName();
+				return ActiveScene->GetName();
 			}
 
 			return "";
@@ -173,13 +163,13 @@ namespace LkEngine {
 
 		static TObjectPtr<LScene> GetActiveScene() 
 		{ 
-			return m_ActiveScene; 
+			return ActiveScene; 
 		}
 
 		std::unordered_set<FAssetHandle> GetAssetList();
 
 	private:
-		inline static TObjectPtr<LScene> m_ActiveScene = nullptr;
+		inline static TObjectPtr<LScene> ActiveScene = nullptr;
 		inline static uint8_t SceneCounter = 0;
 	private:
 		std::string Name = "";
@@ -202,7 +192,7 @@ namespace LkEngine {
 		uint16_t m_ViewportHeight = 0;
 
 		TObjectPtr<LSceneCamera> Camera = nullptr;
-		TObjectPtr<LEditorCamera> EditorCamera = nullptr;
+		//TObjectPtr<LEditorCamera> EditorCamera = nullptr;
 
 		TObjectPtr<LSceneRenderer> Renderer = nullptr;
 

@@ -33,6 +33,7 @@ namespace LkEngine {
 
 		if (LiveReferences.find(InObject) != LiveReferences.end())
 		{
+			//LK_CORE_INFO("Removing {} from live references", static_cast<LObject*>(InObject)->ClassName());
 			LiveReferences.erase(InObject);
 		}
 		else

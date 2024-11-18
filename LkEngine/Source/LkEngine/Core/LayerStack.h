@@ -20,6 +20,15 @@ namespace LkEngine {
 			}
 		}
 
+		FORCEINLINE void PushLayer(TObjectPtr<LLayer> Layer)
+		{
+			if (auto Iter = Layers.emplace((Layers.begin() + InsertIndex), Layer); Iter != Layers.end())
+			{
+				InsertIndex++;
+				(*Iter)->OnAttach();
+			}
+		}
+
 		FORCEINLINE void PushOverlay(TObjectPtr<LLayer> Overlay)
 		{
 			if (Layers.emplace_back(Overlay))
