@@ -117,5 +117,5 @@ include "External/box2d-premake5.lua"
 include "External/tracy-premake5.lua"
 -- ~Libraries
 
-include "LkApplication/LkApplication.lua"
+include "LkRuntime/LkRuntime.lua"
 

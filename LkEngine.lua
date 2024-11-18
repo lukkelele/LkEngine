@@ -1,6 +1,6 @@
 workspace "LkEngine"
     architecture "x86_64"
-    startproject "LkApplication"
+    startproject "LkRuntime"
 
     configurations 
     { 
@@ -34,7 +34,7 @@ IntermediateDirectory = "%{wks.location}/Intermediate/" .. BuildOutputDirectory 
 
 ExternalDirectory = "%{wks.location}/External"
 LibrariesDirectory = "%{ExternalDirectory}/Libraries"
-AssetsDirectory = "%{wks.location}/Assets"
+AssetsDirectory = "%{wks.location}/LkRuntime/Assets"
 
 include "External/Dependencies.lua"
 
