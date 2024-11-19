@@ -54,28 +54,17 @@ namespace LkEngine {
 		/* Serialize to disk. */
 		FProjectSerializer Serializer(this);
 
-		const fs::path ProjectPath = LK_FORMAT_STRING("Projects/{}", Configuration.Name);
+		const fs::path ProjectPath = LK_FORMAT_STRING("Projects/{}/{}", Configuration.Name, Configuration.Name);
 		if (ProjectPath.empty())
 		{
 			LK_CORE_ERROR_TAG("Project", "Could not save project: '{}'", ProjectPath.string());
 			return false;
 		}
 
-		/* Make sure directory exists. */
-		if (ProjectPath.has_parent_path())
-		{
-			//const fs::path ParentPath = ProjectPath.parent_path();
-		}
-		else
-		{
-			fs::create_directories("Projects");
-		}
-
 		Serializer.Serialize(ProjectPath);
 
 		return true;
 	}
-
 
 	void LProject::SetActive(TObjectPtr<LProject> InProject)
 	{

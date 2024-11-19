@@ -227,7 +227,6 @@ namespace LkEngine {
 		m_Scene->SetActive(bIsActiveScene);
 
 		const bool bIsEditorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
-		//m_Scene->SetAsEditorScene(bIsEditorScene);
 		m_Scene->bIsEditorScene = bIsEditorScene;
 		const uint32_t SceneEntityHandle = data["SceneHandle"].as<uint32_t>();
 

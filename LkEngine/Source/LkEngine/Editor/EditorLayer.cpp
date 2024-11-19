@@ -1067,7 +1067,6 @@ namespace LkEngine {
 	{
 		EditorScene = TObjectPtr<LScene>::Create(SceneName, true);
 		EditorScene->SetActive(true);
-		//LScene::SetActiveScene(EditorScene);
 	}
 
 	void LEditorLayer::EmptyProject()

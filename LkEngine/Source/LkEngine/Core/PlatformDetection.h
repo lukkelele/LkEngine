@@ -38,7 +38,7 @@
 #endif
 
 
-#if defined(LK_DEBUG)
+#if defined(LK_ENGINE_DEBUG)
 #	define LK_ENABLE_ASSERTS 1
 #else
 #	define LK_ENABLE_ASSERTS 0

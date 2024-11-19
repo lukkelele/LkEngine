@@ -18,11 +18,10 @@ namespace LkEngine {
 		LK_CORE_ASSERT(!OutFile.empty(), "Cannot serialize an empty file");
 		LK_CORE_TRACE_TAG("ProjectSerializer", "Serializing: \"{}\"", OutFile.string());
 
-		/* Create 'Projects' directory if it does not exist for some odd reason. */
-		if (!fs::exists("Projects"))
+		/* Create the project directory if it does not exist. */
+		if (OutFile.has_parent_path() && !fs::exists(OutFile.parent_path()))
 		{
-			LK_CORE_INFO("Creating 'Projects' directory");
-			fs::create_directories("Projects");
+			fs::create_directories(OutFile.parent_path());
 		}
 
 		YAML::Emitter Out;
@@ -47,8 +46,7 @@ namespace LkEngine {
 	bool FProjectSerializer::Deserialize(const std::filesystem::path& InFile)
 	{
 		LK_CORE_VERIFY(Project, "Invalid project reference");
-
-		if (!InFile.has_parent_path())
+		if (!fs::exists(InFile))
 		{
 			LK_CORE_ERROR_TAG("ProjectSerializer", "Invalid filepath: {}", InFile.string());
 			return false;

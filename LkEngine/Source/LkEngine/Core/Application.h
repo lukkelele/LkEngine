@@ -62,6 +62,7 @@ namespace LkEngine {
 		virtual void Shutdown();
 
 		bool ReadConfigurationFile();
+		void SetupDirectories();
 
 		void OnEvent(LEvent& e);
 
@@ -72,13 +73,6 @@ namespace LkEngine {
 		{
 			LayerStack.PushLayer(InLayer);
 		}
-
-		#if 0
-		void PushLayer(LLayer* InLayer)
-		{
-			LayerStack.PushLayer(InLayer);
-		}
-		#endif
 
 		/// TODO: Add event category to bundle the callback with.
 		FORCEINLINE void AddEventCallback(const FEventCallback& EventCallback)

@@ -25,6 +25,7 @@ namespace LkEngine {
 		Window = MakeUnique<LWindow>(InSpecification);
 
 		ReadConfigurationFile();
+		SetupDirectories();
 	}
 
 	LApplication::~LApplication()
@@ -167,6 +168,16 @@ namespace LkEngine {
 		return true;
 	}
 
+	void LApplication::SetupDirectories()
+	{
+		/* Create 'Scenes' directory if it does not exist. */
+		if (!std::filesystem::exists("Scenes"))
+		{
+			LK_INFO("Creating 'Scenes' directory");
+			std::filesystem::create_directories("Scenes");
+		}
+	}
+
 	/* FIXME */
 	LString LApplication::GenerateCrashDump()
 	{
@@ -175,7 +186,9 @@ namespace LkEngine {
 
 	void LApplication::RenderUI()
 	{
-		/* Bind to default framebuffer before any UI rendering takes place. */
+		/* Bind to default framebuffer before any UI rendering takes place. 
+		 * TODO: This should not be done here but rather as an initial render submission.
+		 */
 		LFramebuffer::TargetSwapChain();
 
 		UILayer->BeginFrame();
@@ -184,6 +197,8 @@ namespace LkEngine {
 		{
 			Layer->OnRenderUI();
 		}
+
+		UILayer->EndFrame();
 	}
 
 	/* FIXME: The event system needs to be re-evaluated to efficiently
