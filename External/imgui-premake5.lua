@@ -35,9 +35,6 @@ project "ImGui"
 		"%{prj.location}/backends/imgui_impl_glfw.h",
 		"%{prj.location}/backends/imgui_impl_opengl3.cpp",
 		"%{prj.location}/backends/imgui_impl_opengl3.h",
-
-        --"%{ExternalDirectory}/ImFileDialog/ImFileDialog.h",
-        --"%{ExternalDirectory}/ImFileDialog/ImFileDialog.cpp",
 	}
 
     includedirs

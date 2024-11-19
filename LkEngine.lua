@@ -13,17 +13,17 @@ workspace "LkEngine"
     flags { "MultiProcessorCompile" }
 
     filter "configurations:Debug"
-        defines { "LK_DEBUG" }
+        defines { "LK_ENGINE_DEBUG" }
         runtime "Debug"
         symbols "On"
 
     filter "configurations:Release"
-        defines { "LK_RELEASE" }
+        defines { "LK_ENGINE_RELEASE" }
         runtime "Release"
         optimize "On"
 
     filter "configurations:Dist"
-        defines { "LK_DIST" }
+        defines { "LK_ENGINE_DIST" }
         runtime "Release"
         optimize "On"
 
@@ -189,7 +189,7 @@ project "LkEngine"
 		runtime "Debug"
 		sanitize { "Address" }
 		flags { "NoRuntimeChecks", "NoIncrementalLink" }
-		defines "LK_DEBUG"
+		defines "LK_ENGINE_DEBUG"
 
 	filter "configurations:Debug"
 		runtime "Debug"
@@ -197,7 +197,7 @@ project "LkEngine"
 
 		defines 
         {
-            "LK_DEBUG",
+            "LK_ENGINE_DEBUG",
         }
 
         links
@@ -209,10 +209,10 @@ project "LkEngine"
         runtime "Release"
 		optimize "On"
 		symbols "Default"
-		defines "LK_RELEASE"
+		defines "LK_ENGINE_RELEASE"
 
 	filter "configurations:Dist"
 		runtime "Release"
 		optimize "Full"
-		defines "LK_DIST"
+		defines "LK_ENGINE_DIST"
 
