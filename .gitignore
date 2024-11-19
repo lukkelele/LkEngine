@@ -57,7 +57,6 @@
 External/**/*.vcx*
 External/**/*.vcxproj
 
-
 **/*.sln
 **/*.ini
 
@@ -76,3 +75,5 @@ Intermediate
 **/*.lkconf
 **/*/*pycache*
 
+# Runtime directories.
+LkRuntime/Projects
