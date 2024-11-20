@@ -29,16 +29,13 @@ project "ImFileDialog"
 		pic "On"
 
 	filter "configurations:Debug"
-		defines "LK_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "LK_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "LK_DIST"
 		runtime "Release"
 		optimize "on"
