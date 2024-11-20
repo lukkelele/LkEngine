@@ -15,4 +15,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#if defined(LK_PLATFORM_WINDOWS)
+#	include <Windows.h>
+#endif
+
 #include "LkEngine/Core/Core.h"
