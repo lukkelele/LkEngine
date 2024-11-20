@@ -1,0 +1,29 @@
+Scene: Starter-2024
+Active: true
+EditorScene: true
+SceneHandle: 0
+EditorCamera:
+  Position: [-7.34844255, 10.3922691, -7.3484416]
+  Origin: [0, 0, 0]
+  Distance: 14.696887
+  FocalPoint: [0, 0, 0]
+  Perspective:
+    DegPerspectiveFOV: 45
+    PerspectiveNear: 0.100000001
+    PerspectiveFar: 2400
+  Orthographic:
+    OrthographicSize: 10
+    OrthographicNear: -1
+    OrthographicFar: 1
+  Pitch: 0.785398185
+  Yaw: 2.3561945
+  ProjectionType: 1
+  CameraMode: 2
+Entities:
+  - Entity: 1628195445538968962
+    LTagComponent:
+      Tag: Cube
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
