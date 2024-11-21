@@ -8,7 +8,7 @@ namespace LkEngine {
     class LOpenGLUniformBuffer : public LUniformBuffer
     {
     public:
-        LOpenGLUniformBuffer(const uint64_t size);
+        LOpenGLUniformBuffer(const uint64_t InSize);
 		LOpenGLUniformBuffer() = delete;
         ~LOpenGLUniformBuffer();
 

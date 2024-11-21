@@ -19,7 +19,6 @@ namespace LkEngine {
 	{
 	public:
 		LEntity() = default;
-		LEntity(entt::entity InHandle, LScene* InScene);
 		LEntity(entt::entity InHandle, TObjectPtr<LScene> InScene);
 		~LEntity() = default;
 
@@ -30,8 +29,8 @@ namespace LkEngine {
 		template<typename T, typename ...TArgs>
 		T& AddComponent(TArgs&&... Args)
 		{
-			T& Component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<TArgs>(Args)...);
-			m_Scene->OnComponentAdded<T>(*this, Component);
+			T& Component = Scene->Registry.emplace<T>(Handle, std::forward<TArgs>(Args)...);
+			Scene->OnComponentAdded<T>(*this, Component);
 
 			return Component;
 		}
@@ -39,58 +38,58 @@ namespace LkEngine {
 		template<typename... T>
 		bool HasComponent()
 		{
-			return m_Scene->m_Registry.has<T...>(m_EntityHandle);
+			return Scene->Registry.has<T...>(Handle);
 		}
 
 		template<typename... T>
 		bool HasComponent() const
 		{
-			return m_Scene->m_Registry.has<T...>(m_EntityHandle);
+			return Scene->Registry.has<T...>(Handle);
 		}
 
 		template<typename... T>
 		bool HasAny()
 		{
-			return m_Scene->m_Registry.any<T...>(m_EntityHandle);
+			return Scene->Registry.any<T...>(Handle);
 		}
 
 		template<typename... T>
 		bool HasAny() const
 		{
-			return m_Scene->m_Registry.any<T...>(m_EntityHandle);
+			return Scene->Registry.any<T...>(Handle);
 		}
 
 		template<typename T>
 		T& GetComponent()
 		{
 			LK_CORE_ASSERT(HasComponent<T>(), "Entity does not have that component");
-			return m_Scene->m_Registry.get<T>(m_EntityHandle);
+			return Scene->Registry.get<T>(Handle);
 		}
 
 		template<typename T>
 		const T& GetComponent() const
 		{
 			LK_CORE_ASSERT(HasComponent<T>(), "Entity does not have that component");
-			return m_Scene->m_Registry.get<T>(m_EntityHandle);
+			return Scene->Registry.get<T>(Handle);
 		}
 
 		template<typename T>
 		void RemoveComponent()
 		{
 			LK_CORE_ASSERT(HasComponent<T>(), "Entity does not have that component");
-			m_Scene->m_Registry.remove<T>(m_EntityHandle);
+			Scene->Registry.remove<T>(Handle);
 		}
 
 		template<typename T>
 		void RemoveComponentIfExists()
 		{
-			m_Scene->m_Registry.remove_if_exists<T>(m_EntityHandle);
+			Scene->Registry.remove_if_exists<T>(Handle);
 		}
 
 		template<typename T, typename... ARGS>
 		void AddExistingComponent(T, ARGS&&... args) 
 		{
-			m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<ARGS>(args)...);
+			Scene->Registry.emplace<T>(Handle, std::forward<ARGS>(args)...);
 		}
 
 		FORCEINLINE const std::string& Name() { return GetComponent<LTagComponent>().Tag; }
@@ -103,15 +102,14 @@ namespace LkEngine {
 			return GetComponent<LMeshComponent>(); 
 		}
 
-		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
-		operator entt::entity() const { return m_EntityHandle; }
+		operator uint32_t() const { return static_cast<uint32_t>(Handle); }
+		operator entt::entity() const { return Handle; }
 		operator LTransformComponent&() { return GetComponent<LTransformComponent>(); }
-
-		operator bool () const;
+		operator bool() const;
 
 		bool operator==(const LEntity& Other) const 
 		{ 
-			return ((m_EntityHandle == Other.m_EntityHandle) && (m_Scene == Other.m_Scene)); 
+			return ((Handle == Other.Handle) && (Scene == Other.Scene)); 
 		}
 
 		bool operator!=(const LEntity& Other) const { return !(*this == Other); }
@@ -131,7 +129,7 @@ namespace LkEngine {
 				return;
 			}
 
-			// If changing parent, remove child from existing parent
+			/* If changing parent, remove child from existing attached parent. */
 			if (CurrentParent)
 			{
 				CurrentParent.RemoveChild(*this);
@@ -142,7 +140,7 @@ namespace LkEngine {
 
 			if (InParent)
 			{
-				auto& Children = InParent.GetChildren();
+				std::vector<UUID>& Children = InParent.GetChildren();
 				const UUID uuid = GetUUID();
 
 				if (std::find(Children.begin(), Children.end(), uuid) == Children.end())
@@ -188,12 +186,16 @@ namespace LkEngine {
 		}
 
 		bool IsAncestorOf(LEntity entity) const;
-		bool IsDescendantOf(LEntity entity) const { return entity.IsAncestorOf(*this); }
+
+		FORCEINLINE bool IsDescendantOf(LEntity Entity) const 
+		{ 
+			return Entity.IsAncestorOf(*this); 
+		}
 
 	private:
-		entt::entity m_EntityHandle{ entt::null };
+		entt::entity Handle{ entt::null };
 
-		TObjectPtr<LScene> m_Scene{};
+		TObjectPtr<LScene> Scene{};
 
 		friend class LEditorLayer;
 		friend class LScene;
@@ -204,7 +206,6 @@ namespace LkEngine {
 
 }
 
-/* TODO: Move to separate header. */
 /* Logging formatters. */
 template<>
 struct std::formatter<LkEngine::LEntity> : std::formatter<std::string>
@@ -219,7 +220,6 @@ struct std::formatter<LkEngine::LEntity> : std::formatter<std::string>
 template<>
 struct std::formatter<entt::entity> : std::formatter<std::string>
 {
-    //auto format(const entt::entity& Entity, FormatContext& Context) -> decltype(Context.out())
     template <typename FormatContext>
     auto format(const entt::entity& Entity, FormatContext& Context) const
     {

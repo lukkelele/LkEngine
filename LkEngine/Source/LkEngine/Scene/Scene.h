@@ -54,10 +54,10 @@ namespace LkEngine {
 		LEntity FindEntity(std::string_view name);
 		LEntity GetEntityWithUUID(UUID uuid) const;
 
-		entt::registry& GetRegistry() { return m_Registry; }
-		void DestroyEntity(LEntity Entity);
-		bool HasEntity(LEntity Entity) const;
-		bool IsEntityInRegistry(LEntity Entity) const;
+		FORCEINLINE entt::registry& GetRegistry() { return Registry; }
+		void DestroyEntity(const LEntity Entity);
+		bool HasEntity(const LEntity Entity) const;
+		bool IsEntityInRegistry(const LEntity Entity) const;
 
 		LEntity CreateEntity(const std::string& InName = "");
 		LEntity CreateEntityWithID(UUID uuid, const std::string& InName = "");
@@ -68,33 +68,19 @@ namespace LkEngine {
 		void UnparentEntity(LEntity Entity, bool bConvertToWorldSpace = true);
 
 		FORCEINLINE std::string GetName() const { return Name; }
-		void SetName(const std::string& InName) { Name = InName; }
+		FORCEINLINE void SetName(const std::string& InName) { Name = InName; }
 
-		FORCEINLINE void SetActive(const bool Active) 
-		{ 
-			if (bIsActiveScene != Active)
-			{
-				bIsActiveScene = Active; 
-			}
-
-			if (Active)
-			{
-				// TODO: Broadcast delegate here.
-				ActiveScene = this;
-				LK_CORE_WARN_TAG("Scene", "Setting active scene");
-			}
-		}
+		void SetActive(const bool Active);
 
 		void Clear();
 		void Pause(const bool IsPaused);
 
-		void SwitchCamera();
 		void SetCamera(TObjectPtr<LSceneCamera> InSceneCamera);
-		void SetCamera(LSceneCamera* InSceneCamera);
+		void SwitchCamera();
 
 		FORCEINLINE TObjectPtr<LSceneCamera> GetMainCamera() { return Camera; } 
 
-		FORCEINLINE UUID GetUUID() const { return m_SceneID; }
+		FORCEINLINE UUID GetUUID() const { return SceneID; }
 
 		void CopyTo(TObjectPtr<LScene>& TargetScene);
 
@@ -120,9 +106,9 @@ namespace LkEngine {
 								   entt::registry& DestinationRegistry, 
 								   entt::entity Source)
 		{
-			if (m_Registry.has<TComponent>(Source))
+			if (Registry.has<TComponent>(Source))
 			{
-				auto& SourceComponent = m_Registry.get<TComponent>(Source);
+				auto& SourceComponent = Registry.get<TComponent>(Source);
 				DestinationRegistry.emplace_or_replace<TComponent>(Destination, SourceComponent);
 			}
 		}
@@ -134,14 +120,14 @@ namespace LkEngine {
 										   TObjectPtr<LScene> SourceScene)
 		{
 			SourceScene->CopyComponentIfExists<TComponent>((entt::entity)Destination, 
-														   DestinationScene->m_Registry, 
+														   DestinationScene->Registry, 
 														   (entt::entity)Source);
 		}
 
 		template<typename ...Components>
 		auto GetAllEntitiesWith()
 		{
-			return m_Registry.view<Components...>();
+			return Registry.view<Components...>();
 		}
 
 		static void SetActiveScene(TObjectPtr<LScene> InScene);
@@ -168,22 +154,24 @@ namespace LkEngine {
 
 		std::unordered_set<FAssetHandle> GetAssetList();
 
+	public:
+		static constexpr const char* FILE_EXTENSION = "lkscene";
 	private:
 		inline static TObjectPtr<LScene> ActiveScene = nullptr;
 		inline static uint8_t SceneCounter = 0;
 	private:
 		std::string Name = "";
 
-		UUID m_SceneID = 0; /// TODO: Replace with AssetHandle.
+		UUID SceneID = 0; /// TODO: Replace with AssetHandle.
 		FAssetHandle AssetHandle;
 
-		entt::entity m_SceneEntity;
+		entt::entity SceneEntity;
 
 		bool bPaused = false;
 		int m_Frames = 0;
 
 		EntityMap m_EntityIDMap;
-		entt::registry m_Registry{};
+		entt::registry Registry{};
 
 		bool bIsActiveScene = false;
 		bool bIsEditorScene = false; /// REMOVE

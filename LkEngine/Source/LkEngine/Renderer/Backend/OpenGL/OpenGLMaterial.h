@@ -80,6 +80,8 @@ namespace LkEngine {
 
 		uint32_t MaterialFlags = 0;
 		FBuffer UniformStorageBuffer{};
+
+		LCLASS(LOpenGLMaterial);
     };
 
 

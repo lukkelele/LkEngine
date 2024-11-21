@@ -9,7 +9,8 @@ namespace LkEngine {
 	LOpenGLPipeline::LOpenGLPipeline(const FPipelineSpecification& InPipelineSpecification)
 		: PipelineSpecification(InPipelineSpecification)
 	{
-		/* FIXME: What? Why is this done here ... */
+		LCLASS_REGISTER();
+
 		PipelineSpecification.RenderAPI = ERendererAPI::OpenGL;
 	}
 

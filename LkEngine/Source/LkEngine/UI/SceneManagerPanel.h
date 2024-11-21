@@ -12,7 +12,7 @@ namespace LkEngine {
 	{
 	public:
 		LSceneManagerPanel(TObjectPtr<LScene> InScene = nullptr);
-		//LSceneManagerPanel() = delete;
+		//LSceneManagerPanel() = delete; /* FIXME: EVALUATE */
 		~LSceneManagerPanel() = default;
 
 		virtual void Initialize() override;
@@ -40,13 +40,13 @@ namespace LkEngine {
 		void UI_CameraSettings();
 
 	private:
-		TObjectPtr<LScene> m_Scene{};
+		TObjectPtr<LScene> Scene{};
 
 		/* TODO: Figure out a replacement for this approach. */
-		TObjectPtr<LScene> m_ComponentCopyScene{};
+		TObjectPtr<LScene> ComponentCopyScene{};
 
 		/// FIXME: REWORK THIS
-		LEntity m_ComponentCopyEntity;
+		LEntity ComponentCopyEntity;
 
 		LCLASS(LSceneManagerPanel);
 	};

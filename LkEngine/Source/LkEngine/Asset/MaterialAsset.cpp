@@ -22,10 +22,11 @@ namespace LkEngine {
 
 	LMaterialAsset::LMaterialAsset(const TObjectPtr<LMaterial>& InMaterial)
 	{
+		LASSET_REGISTER();
+
 		Handle = {};
 		Material = LMaterial::Copy(InMaterial);
-		LK_CORE_INFO_TAG("MaterialAsset", "Created material asset ({}) with material {}", 
-						 Handle, InMaterial->GetName());
+		LK_CORE_INFO_TAG("MaterialAsset", "Created material asset ({}) with material {}", Handle, InMaterial->GetName());
 
 		LK_CORE_ASSERT(Material->GetTexture(""), "Material ({}) texture is nullptr!", Material->GetName());
 	}
@@ -33,6 +34,8 @@ namespace LkEngine {
 	LMaterialAsset::LMaterialAsset(const bool IsTransparent)
 		: m_Transparent(IsTransparent)
 	{
+		LASSET_REGISTER();
+
 		Handle = {};
 		SetDefaults();
 		LK_CORE_INFO_TAG("MaterialAsset", "Created material asset with default settings");
@@ -151,37 +154,42 @@ namespace LkEngine {
 	{
 		if (m_Transparent)
 		{
-			// Set defaults
+			/* Set defaults. */
 			SetAlbedoColor(glm::vec3(0.8f));
 
-			// Maps
+			/* Maps. */
 			//SetAlbedoMap(Renderer::GetWhiteTexture());
 		}
 		else
 		{
-			// Set defaults
+			/* Set defaults. */
 			SetAlbedoColor(glm::vec3(0.8f));
 			SetEmission(0.0f);
 			//SetUseNormalMap(false);
 			SetMetalness(0.0f);
 			SetRoughness(0.4f);
 
-			// Maps
-			//SetAlbedoMap(Renderer::GetWhiteTexture());
-			//SetNormalMap(Renderer::GetWhiteTexture());
-			//SetMetalnessMap(Renderer::GetWhiteTexture());
-			//SetRoughnessMap(Renderer::GetWhiteTexture());
+			/* Maps. */
+		#if 0
+			SetAlbedoMap(Renderer::GetWhiteTexture());
+			SetNormalMap(Renderer::GetWhiteTexture());
+			SetMetalnessMap(Renderer::GetWhiteTexture());
+			SetRoughnessMap(Renderer::GetWhiteTexture());
+		#endif
 		}
 	}
 
     LMaterialTable::LMaterialTable(const uint32_t InMaterialCount)
 		: MaterialCount(InMaterialCount)
 	{
+		LASSET_REGISTER();
 	}
 
 	LMaterialTable::LMaterialTable(TObjectPtr<LMaterialTable> Other)
 		: MaterialCount(Other->MaterialCount)
 	{
+		LASSET_REGISTER();
+
 		const auto& MeshMaterials = Other->GetMaterials();
 		for (auto& [Index, Handle] : MeshMaterials)
 		{

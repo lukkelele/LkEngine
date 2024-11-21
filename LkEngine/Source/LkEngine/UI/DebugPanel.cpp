@@ -92,14 +92,16 @@ namespace LkEngine {
 				int Index = 0;
 				for (const TObjectPtr<LObject>& LiveObject : LiveObjects)
 				{
+					LK_CORE_VERIFY(LiveObject->GetClass(), "{} object has invalid LClass reference", LiveObject->ClassName());
+
 					/* Display the object number. */
 					ImGui::TableNextColumn();
 					ImGui::Text("%d", (Index + 1));
 
 					/* Object classname. */
-					char Label[80];
-					sprintf_s(Label, LK_ARRAYSIZE(Label), "%s ##%lld", 
-							  LiveObject->GetClass()->GetName().c_str(), reinterpret_cast<intptr_t>(LiveObject.Get()));
+					char Label[200];
+					//sprintf_s(Label, LK_ARRAYSIZE(Label), "%s ##%lld", LiveObject->GetClass()->GetName().c_str(), reinterpret_cast<intptr_t>(LiveObject.Get()));
+					std::sprintf(Label, "%s ##%lld", LiveObject->GetClass()->GetName().c_str(), reinterpret_cast<uintptr_t>(LiveObject.Get()));
 
 					const bool bIsCurrentlySelected = Selected[Index];
 					bool bSelected = false;

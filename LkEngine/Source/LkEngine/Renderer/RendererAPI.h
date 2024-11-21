@@ -13,7 +13,7 @@
 #include "TextureLibrary.h"
 #include "MaterialLibrary.h"
 #include "UniformBufferSet.h"
-#include "TextureArray.h"
+#include "ArrayTexture.h"
 #include "Mesh.h"
 
 #include "RendererCapabilities.h"
@@ -75,18 +75,13 @@ namespace LkEngine {
 		// ~RenderGeometry
 
 		// Draw
-		virtual void Draw(const LVertexBuffer& VertexBuffer, 
-						  const LIndexBuffer& IndexBuffer, 
-						  const LShader& Shader) = 0;
-
+		virtual void Draw(const LVertexBuffer& VertexBuffer, const LIndexBuffer& IndexBuffer, const LShader& Shader) = 0;
 		virtual void Draw(LVertexBuffer& VertexBuffer, const LShader& Shader) = 0;
 		// ~Draw
 
         virtual void DrawIndexed(uint64_t IndexCount) = 0;
 
-		virtual void SubmitMesh(TObjectPtr<LMesh>& InMesh, 
-								TObjectPtr<LShader>& InShader, 
-								const glm::mat4& InTransform) = 0;
+		virtual void SubmitMesh(TObjectPtr<LMesh>& InMesh, TObjectPtr<LShader>& InShader, const glm::mat4& InTransform) = 0;
 
 		virtual void SubmitIndexed(unsigned int IndexCount) = 0;
 
@@ -146,7 +141,7 @@ namespace LkEngine {
 		virtual void SetDepthFunction(const EDepthFunction InDepthFunction) = 0;
 
 		virtual void BindTextureArray(const uint8_t Index) = 0;
-		virtual void BindTextureArray(const ETextureArrayDimension& TextureArrayDim) = 0;
+		virtual void BindTextureArray(const EArrayTextureDimension& TextureArrayDim) = 0;
 
 		virtual RendererCapabilities& GetCapabilities() = 0;
 

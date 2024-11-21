@@ -20,7 +20,7 @@ namespace LkEngine {
 	{
 		RendererCapabilities m_RendererCapabilities;
 
-		TObjectPtr<LOpenGLTextureArray> TextureArrays[MaxTexturesArrays];
+		TObjectPtr<LOpenGLArrayTexture> TextureArrays[MaxTexturesArrays];
 	};
 
 	static FRendererData* RendererData = nullptr;
@@ -39,20 +39,20 @@ namespace LkEngine {
 		RenderContext = LWindow::Get().GetRenderContext().As<LOpenGLContext>();
 
 		/* Array texture dimensions. */
-		static constexpr ETextureArrayDimension TextureArrayDimensions[] = {
-			ETextureArrayDimension::Dim_512x512,
-			ETextureArrayDimension::Dim_1024x1024,
-			ETextureArrayDimension::Dim_2048x2048
+		static constexpr EArrayTextureDimension TextureArrayDimensions[] = {
+			EArrayTextureDimension::Dim_512x512,
+			EArrayTextureDimension::Dim_1024x1024,
+			EArrayTextureDimension::Dim_2048x2048
 		};
 
-		FTextureArraySpecification TextureArraySpec;
+		FArrayTextureSpecification TextureArraySpec;
 		for (int i = 0; i < LK_ARRAYSIZE(TextureArrayDimensions); i++)
 		{
 			TextureArraySpec.ImageFormat = EImageFormat::RGBA;
 			TextureArraySpec.TextureSlot = TextureArrayCount;
 			TextureArraySpec.TextureArrayDimension = TextureArrayDimensions[i];
 			TextureArraySpec.DebugName = LK_FORMAT_STRING("GLArrayTexture-{}", Enum::ToString(TextureArrayDimensions[i]));
-			RendererData->TextureArrays[TextureArrayCount++] = TObjectPtr<LOpenGLTextureArray>::Create(TextureArraySpec);
+			RendererData->TextureArrays[TextureArrayCount++] = TObjectPtr<LOpenGLArrayTexture>::Create(TextureArraySpec);
 			LK_CORE_TRACE_TAG("OpenGLRenderer", "Added array texture {} with name \"{}\"", i, TextureArraySpec.DebugName);
 		}
 
@@ -324,7 +324,7 @@ namespace LkEngine {
 		LK_UNUSED(RenderCommandBuffer);
 	}
 
-	TObjectPtr<LOpenGLTextureArray> LOpenGLRenderer::GetTextureArray(const int Index)
+	TObjectPtr<LOpenGLArrayTexture> LOpenGLRenderer::GetTextureArray(const int Index)
 	{
 		LK_CORE_ASSERT(RendererData && RendererData->TextureArrays[Index]);
 		return RendererData->TextureArrays[Index];
@@ -333,19 +333,19 @@ namespace LkEngine {
 	void LOpenGLRenderer::BindTextureArray(const uint8_t Index)
 	{
 		LK_CORE_ASSERT(RendererData && RendererData->TextureArrays[Index]);
-		LTextureArray& TextureArray = *RendererData->TextureArrays[Index];
+		LArrayTexture& TextureArray = *RendererData->TextureArrays[Index];
 		TextureArray.Bind();
 	}
 
-	void LOpenGLRenderer::BindTextureArray(const ETextureArrayDimension& TextureArrayDimension)
+	void LOpenGLRenderer::BindTextureArray(const EArrayTextureDimension& TextureArrayDimension)
 	{
-		LOpenGLTextureArray& TextureArray = *GetTextureArrayWithDimension(TextureArrayDimension);
+		LOpenGLArrayTexture& TextureArray = *GetTextureArrayWithDimension(TextureArrayDimension);
 		TextureArray.Bind();
 	}
 
-	TObjectPtr<LOpenGLTextureArray> LOpenGLRenderer::GetTextureArrayWithDimension(const ETextureArrayDimension TextureArrayDimension)
+	TObjectPtr<LOpenGLArrayTexture> LOpenGLRenderer::GetTextureArrayWithDimension(const EArrayTextureDimension TextureArrayDimension)
 	{
-		for (const TObjectPtr<LOpenGLTextureArray>& TextureArray : RendererData->TextureArrays)
+		for (const TObjectPtr<LOpenGLArrayTexture>& TextureArray : RendererData->TextureArrays)
 		{
 			if (TextureArray->Specification.TextureArrayDimension == TextureArrayDimension)
 			{

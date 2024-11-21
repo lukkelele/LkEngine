@@ -20,6 +20,9 @@ namespace LkEngine {
 		uint64_t ComputeShaderInvocations = 0;
 	};
 
+	/**
+	 * LPipeline
+	 */
 	class LPipeline : public LObject
 	{
 	public:

@@ -6,31 +6,31 @@
 
 namespace LkEngine {
 
-	LOpenGLUniformBufferSet::LOpenGLUniformBufferSet(const uint32_t size, 
-													 const uint32_t framesInFlight)
-		: m_FramesInFlight(framesInFlight)
+	LOpenGLUniformBufferSet::LOpenGLUniformBufferSet(const uint32_t InSize, const uint32_t InFramesInFlight)
+		: m_FramesInFlight(InFramesInFlight)
 	{
-		if (framesInFlight == 0)
+		LCLASS_REGISTER();
+		if (InFramesInFlight == 0)
 		{
 			m_FramesInFlight = LRenderer::GetFramesInFlight();
 		}
 
-		for (uint32_t frame = 0; frame < m_FramesInFlight; frame++)
+		for (uint32_t Frame = 0; Frame < m_FramesInFlight; Frame++)
 		{
-			m_UniformBuffers[frame] = LUniformBuffer::Create(size);
+			m_UniformBuffers[Frame] = LUniformBuffer::Create(InSize);
 		}
 	}
 
 	TObjectPtr<LUniformBuffer> LOpenGLUniformBufferSet::Get()
 	{
-		uint32_t frame = LRenderer::GetCurrentFrameIndex();
-		return Get(frame);
+		const uint32_t Frame = LRenderer::GetCurrentFrameIndex();
+		return Get(Frame);
 	}
 
 	TObjectPtr<LUniformBuffer> LOpenGLUniformBufferSet::RT_Get()
 	{
-		uint32_t frame = LRenderer::RT_GetCurrentFrameIndex();
-		return Get(frame);
+		const uint32_t Frame = LRenderer::RT_GetCurrentFrameIndex();
+		return Get(Frame);
 	}
 
 	TObjectPtr<LUniformBuffer> LOpenGLUniformBufferSet::Get(uint32_t frame) 

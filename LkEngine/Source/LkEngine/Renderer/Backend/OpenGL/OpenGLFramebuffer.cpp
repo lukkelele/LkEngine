@@ -22,8 +22,7 @@ namespace LkEngine {
 
 		for (FFramebufferTextureSpecification& FramebufferTextureSpec : m_Specification.Attachments.Attachments)
 		{
-			LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Iterating framebuffer texture FramebufferTextureSpecification: {}", 
-							  Enum::ToString(FramebufferTextureSpec.ImageFormat));
+			LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Iterating framebuffer texture: {}", Enum::ToString(FramebufferTextureSpec.ImageFormat));
 			if (!ImageUtils::IsDepthFormat(FramebufferTextureSpec.ImageFormat))
 			{
 				m_ColorAttachmentSpecifications.emplace_back(FramebufferTextureSpec);
@@ -39,7 +38,7 @@ namespace LkEngine {
 
 	LOpenGLFramebuffer::~LOpenGLFramebuffer()
 	{
-		LK_OpenGL_Verify(glDeleteFramebuffers(1, &m_RendererID));
+		LK_OpenGL_Verify(glDeleteFramebuffers(1, &RendererID));
 		m_ColorAttachments.clear();
 
 		LK_OpenGL_Verify(glDeleteTextures(1, &m_DepthAttachment));
@@ -47,9 +46,9 @@ namespace LkEngine {
 
 	void LOpenGLFramebuffer::Invalidate()
 	{
-		if (m_RendererID)
+		if (RendererID)
 		{
-			LK_OpenGL_Verify(glDeleteFramebuffers(1, &m_RendererID));
+			LK_OpenGL_Verify(glDeleteFramebuffers(1, &RendererID));
 			m_ColorAttachments.clear();
 			LK_OpenGL_Verify(glDeleteTextures(1, &m_DepthAttachment));
 			
@@ -59,8 +58,8 @@ namespace LkEngine {
 
 		const bool bMultisample = m_Specification.Samples > 1;
 
-		LK_OpenGL_Verify(glCreateFramebuffers(1, &m_RendererID));
-		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+		LK_OpenGL_Verify(glCreateFramebuffers(1, &RendererID));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, RendererID));
 
 		/* Color Attachments. */
 		if (m_ColorAttachmentSpecifications.size())
@@ -125,7 +124,7 @@ namespace LkEngine {
 
 	void LOpenGLFramebuffer::Clear()
 	{
-		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, RendererID));
 
 		const glm::vec4& c = LRenderer::ClearColor;
         LK_OpenGL_Verify(glClearColor(c.r, c.g, c.b, c.a));
@@ -167,7 +166,7 @@ namespace LkEngine {
 	void LOpenGLFramebuffer::Bind() const
 	{
 		LK_CORE_VERIFY(m_Specification.Width > 0 && m_Specification.Height > 0);
-		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID));
+		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, RendererID));
 
 		LK_OpenGL_Verify(glViewport(0, 0, m_Specification.Width, m_Specification.Height));
 	}

@@ -8,6 +8,7 @@ namespace LkEngine {
 
 	LOpenGLUniformBuffer::LOpenGLUniformBuffer(const uint64_t size)
 	{
+		LCLASS_REGISTER();
 		LK_OpenGL_Verify(glCreateBuffers(1, &m_ID));
 
 		LK_OpenGL_Verify(glNamedBufferData(m_ID, size, nullptr, GL_DYNAMIC_DRAW)); 

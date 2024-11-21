@@ -15,11 +15,11 @@ namespace LkEngine {
 
 	void FProjectSerializer::Serialize(const std::filesystem::path& OutFile)
 	{
-		LK_CORE_ASSERT(!OutFile.empty(), "Cannot serialize an empty file");
+		LK_CORE_VERIFY(!OutFile.empty(), "Cannot serialize an empty file");
 		LK_CORE_TRACE_TAG("ProjectSerializer", "Serializing: \"{}\"", OutFile.string());
 
 		/* Create the project directory if it does not exist. */
-		if (OutFile.has_parent_path() && !fs::exists(OutFile.parent_path()))
+		if (!fs::exists(OutFile.parent_path()))
 		{
 			fs::create_directories(OutFile.parent_path());
 		}

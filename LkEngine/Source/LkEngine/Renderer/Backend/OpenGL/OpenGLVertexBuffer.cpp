@@ -8,11 +8,11 @@
 
 namespace LkEngine {
 
-	LOpenGLVertexBuffer::LOpenGLVertexBuffer(void* InBuffer, const uint32_t InSize, 
-											 const EVertexBufferUsage InBufferUsage)
+	LOpenGLVertexBuffer::LOpenGLVertexBuffer(void* InBuffer, const uint32_t InSize, const EVertexBufferUsage InBufferUsage)
 		: m_Size(InSize)
 		, m_Usage(InBufferUsage)
 	{
+		LCLASS_REGISTER();
 		static_assert(sizeof(InSize) == sizeof(GLuint));
 		m_LocalData = FBuffer(InBuffer, InSize);
 
@@ -28,6 +28,7 @@ namespace LkEngine {
 		: m_Size(InSize)
 		, m_Usage(InBufferUsage)
 	{
+		LCLASS_REGISTER();
 		static_assert(sizeof(InSize) == sizeof(GLuint));
 		m_LocalData.Allocate(InSize);
 

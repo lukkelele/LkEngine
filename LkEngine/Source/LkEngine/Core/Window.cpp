@@ -106,9 +106,9 @@ namespace LkEngine {
 			Window.OnViewportSizeUpdated.Broadcast(NewWidth, NewHeight);
 
 			Window.SetSize({ NewWidth, NewHeight });
-			LK_CORE_DEBUG_TAG("Window", "Resize: ({}, {})   Viewport ({}, {})", 
-							  Window.GetWidth(), Window.GetHeight(), 
-							  Window.GetViewportWidth(), Window.GetViewportHeight());
+			//LK_CORE_DEBUG_TAG("Window", "Resize: ({}, {})   Viewport ({}, {})", 
+			//				  Window.GetWidth(), Window.GetHeight(), 
+			//				  Window.GetViewportWidth(), Window.GetViewportHeight());
 		});
 
 		glfwSetKeyCallback(GlfwWindow, [](GLFWwindow* Window, int Key, int ScanCode, int Action, int Modifiers)
@@ -155,7 +155,7 @@ namespace LkEngine {
 		/* Framebuffer resize callback. */
 		glfwSetFramebufferSizeCallback(GlfwWindow, [](GLFWwindow* GlfwWindow, int Width, int Height)
 		{
-			LK_CORE_DEBUG_TAG("GLFW", "Framebuffer Size Callback  ({}, {})", Width, Height);
+			//LK_CORE_TRACE_TAG("GLFW", "Framebuffer Size Callback  ({}, {})", Width, Height);
 			/* FIXME: Should be no raw OpenGL calls. */
 			glViewport(0, 0, Width, Height);
 		});

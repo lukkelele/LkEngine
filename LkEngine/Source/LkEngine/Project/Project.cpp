@@ -5,7 +5,7 @@
 #include "LkEngine/Scene/SceneSerializer.h"
 
 #include "LkEngine/Core/Window.h"
-#include "LkEngine/Core/Event/SceneEvent.h"
+#include "LkEngine/Core/IO/FileSystem.h"
 
 #include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Editor/EditorLayer.h"
@@ -22,13 +22,13 @@ namespace LkEngine {
 
 	LProject::LProject()
 	{
-		/* Load default empty project. */
 		LCLASS_REGISTER();
 	}
 
 	void LProject::Load(const std::string& ProjectPath)
 	{
-		if (ProjectPath.empty() || !fs::exists(ProjectPath))
+		//if (ProjectPath.empty() || !fs::exists(ProjectPath))
+		if (ProjectPath.empty() || !LFileSystem::Exists(ProjectPath))
 		{
 			LK_CORE_ERROR_TAG("Project", "Could not load project: '{}'", ProjectPath);
 			return;
@@ -62,6 +62,20 @@ namespace LkEngine {
 		}
 
 		Serializer.Serialize(ProjectPath);
+
+		if (!LFileSystem::Exists("Scenes"))
+		{
+			LK_INFO("Creating 'Scenes' directory");
+			LFileSystem::CreateDirectory("Scenes");
+		}
+
+		/* Save the scene. */
+		if (TObjectPtr<LScene> Scene = LScene::GetActiveScene())
+		{
+			LSceneSerializer SceneSerializer(Scene);
+			const std::string SceneFilepath = LK_FORMAT_STRING("Scenes/{}.{}", Scene->GetName(), LScene::FILE_EXTENSION);
+			SceneSerializer.Serialize(SceneFilepath);
+		}
 
 		return true;
 	}

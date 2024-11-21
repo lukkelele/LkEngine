@@ -105,7 +105,7 @@ namespace LkEngine {
 	/* TODO: Fix the use of ImGui here. Should not be like that. */
 	void LOpenGLContext::UpdateResolution(const uint16_t Width, const uint16_t Height)
 	{
-		LK_CORE_DEBUG_TAG("OpenGLContext", "Update resolution to ({}, {})", Width, Height);
+		//LK_CORE_TRACE_TAG("OpenGLContext", "Update resolution to ({}, {})", Width, Height);
 		ImGuiViewport* Viewport = ImGui::GetMainViewport();
 		const ImVec2 Pos = Viewport->WorkPos;
 		LK_OpenGL_Verify(glViewport(Pos.x, Pos.y, Width, Height));

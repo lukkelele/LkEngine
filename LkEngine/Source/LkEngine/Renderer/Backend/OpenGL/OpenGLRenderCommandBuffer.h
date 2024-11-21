@@ -8,9 +8,9 @@ namespace LkEngine {
 	class LOpenGLRenderCommandBuffer : public LRenderCommandBuffer
 	{
 	public:
-		LOpenGLRenderCommandBuffer(uint32_t Count = 0, std::string_view InDebugName = "");
-		LOpenGLRenderCommandBuffer(std::string_view InDebugName, bool bSwapchain);
-		~LOpenGLRenderCommandBuffer() override;
+		LOpenGLRenderCommandBuffer(uint32_t Count = 0, std::string_view InName = "");
+		LOpenGLRenderCommandBuffer(std::string_view InName, bool InSwapchain);
+		~LOpenGLRenderCommandBuffer();
 
 		virtual void Begin() override;
 		virtual void End() override;

@@ -224,6 +224,12 @@ namespace LkEngine {
 		 */
 		FORCEINLINE uint32_t GetReferenceCount() const { return ReferenceCount.load(); }
 
+		template <typename T>
+		static void ValidateLObjectImplementation()
+		{
+			static_assert(HasLClassMacro<T>, "Class must include the LCLASS macro.");
+		}
+
 	protected:
 		/**
 		 * @brief End stage of object destruction.

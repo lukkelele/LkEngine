@@ -217,6 +217,32 @@ namespace LkEngine {
 			LFramebuffer::TargetSwapChain();
 		}
 
+		void RenderSkybox(const TObjectPtr<LSceneCamera> Camera)
+		{
+			LRenderer::GetViewportFramebuffer()->Bind();
+
+			LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
+			static constexpr unsigned int SkyboxModelSize = 100;
+
+			LK_CORE_ASSERT(LOpenGL_Debug::SkyboxShader);
+			LOpenGL_Debug::SkyboxShader->Bind();
+
+			/* Make the TextureCube follow us. */
+			const glm::mat4 ProjectionMatrix = Camera->GetProjectionMatrix();
+			const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(Camera->GetViewMatrix()));
+			LOpenGL_Debug::SkyboxShader->Set("u_ViewProjectionMatrix", ProjectionMatrix * ViewMatrix);
+
+			LOpenGL_Debug::SkyboxShader->Set("u_CameraPos", Camera->GetViewMatrix());
+			LOpenGL_Debug::SkyboxShader->Set("u_Model", glm::mat4(SkyboxModelSize));
+			LOpenGL_Debug::SkyboxVertexBuffer->Bind();
+			LOpenGL_Debug::SkyboxTexture->Bind(0);
+			LK_OpenGL_Verify(glDrawArrays(GL_TRIANGLES, 0, 36));
+
+			LRenderer::SetDepthFunction(EDepthFunction::Less);
+
+			LFramebuffer::TargetSwapChain();
+		}
+
 		void InitializeEnvironment()
 		{
 			SetupTexturesAndShaders();

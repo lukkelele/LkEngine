@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "TextureArray.h"
+#include "ArrayTexture.h"
 
 #include "RendererAPI.h"
 
@@ -8,13 +8,13 @@
 
 namespace LkEngine {
 
-    TObjectPtr<LTextureArray> LTextureArray::Create(const FTextureArraySpecification& Specification)
+    TObjectPtr<LArrayTexture> LArrayTexture::Create(const FArrayTextureSpecification& Specification)
     {
         switch (LRendererAPI::Current())
         {
             case ERendererAPI::OpenGL: 
             {
-                return TObjectPtr<LOpenGLTextureArray>::Create(Specification);
+                return TObjectPtr<LOpenGLArrayTexture>::Create(Specification);
             }
 
             case ERendererAPI::Vulkan:
@@ -24,4 +24,5 @@ namespace LkEngine {
         LK_CORE_ASSERT(false, "Invalid Render API");
         return nullptr;
     }
+
 }

@@ -1,18 +1,18 @@
 #pragma once
 
-#include "LkEngine/Renderer/TextureArray.h"
+#include "LkEngine/Renderer/ArrayTexture.h"
 
 #include "OpenGLTexture.h"
 
 
 namespace LkEngine {
 
-	class LOpenGLTextureArray : public LTextureArray
+	class LOpenGLArrayTexture : public LArrayTexture
 	{
 	public:
-		LOpenGLTextureArray(const FTextureArraySpecification& InSpecification);
-		LOpenGLTextureArray() = delete;
-		~LOpenGLTextureArray();
+		LOpenGLArrayTexture(const FArrayTextureSpecification& InSpecification);
+		LOpenGLArrayTexture() = delete;
+		~LOpenGLArrayTexture();
 
 		virtual void Bind() override;
 		virtual void Unbind() override;
@@ -35,12 +35,12 @@ namespace LkEngine {
 			return Specification.TextureSlot; 
 		}
 
-		FORCEINLINE virtual const FTextureArraySpecification& GetSpecification() const override 
+		FORCEINLINE virtual const FArrayTextureSpecification& GetSpecification() const override 
 		{ 
 			return Specification; 
 		}
 
-		FORCEINLINE virtual const ETextureArrayDimension& GetDimension() const override 
+		FORCEINLINE virtual const EArrayTextureDimension& GetDimension() const override 
 		{ 
 			return Specification.TextureArrayDimension; 
 		}
@@ -83,7 +83,7 @@ namespace LkEngine {
 		static constexpr int MaxTexturesPerArray = 32;
 	public:
 		LRendererID m_RendererID = 0;
-		FTextureArraySpecification Specification{};
+		FArrayTextureSpecification Specification{};
 
 		int m_Width = 0;
 		int m_Height = 0;
@@ -93,7 +93,7 @@ namespace LkEngine {
 		std::unordered_set<LRendererID> TextureIDSet{};
 
 	private:
-		LCLASS(LOpenGLTextureArray);
+		LCLASS(LOpenGLArrayTexture);
 	};
 
 }

@@ -5,6 +5,7 @@
 
 namespace LkEngine {
 
+	/** @TODO: Needs fixing */
     class LOpenGLPipeline : public LPipeline
     {
     public:
@@ -45,6 +46,8 @@ namespace LkEngine {
 	private:
 		FPipelineSpecification PipelineSpecification;
 		std::deque<LRendererID> BoundTextureArrays{};
+
+		LCLASS(LOpenGLPipeline);
     };
 
 }

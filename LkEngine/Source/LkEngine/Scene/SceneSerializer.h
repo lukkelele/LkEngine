@@ -41,12 +41,10 @@ namespace LkEngine {
 		static void DeserializeEditorCamera(const YAML::Node& EditorCameraNode, LEditorCamera& Scene);
 
 	public:
-		inline static std::string_view FileFilter = "LkEngine Scene (*.lukkelele)\0*.lukkelele\0";
-		inline static std::string_view DefaultExtension = ".lukkelele";
-
+		static std::string_view FILE_FILTER;
 	private:
 		bool m_IsLoaded = false;
-		LScene* m_Scene = nullptr;
+		LScene* Scene = nullptr;
 
 		LCLASS(LSceneSerializer);
     };

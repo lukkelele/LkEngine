@@ -91,6 +91,7 @@ namespace LkEngine {
 
 		void NewScene(const std::string& SceneName = "Untitled");
 		void EmptyProject();
+		void StarterProject();
 
 	private:
 		void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);

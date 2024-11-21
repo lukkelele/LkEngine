@@ -17,13 +17,16 @@ namespace LkEngine {
 		return result;
 	}
 
+	LMeshSource::LMeshSource()
+	{
+		LASSET_REGISTER();
+	}
 
-	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices,
-							 const std::vector<FIndex>& InIndices,
-							 const glm::mat4& InTransform)
+	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices, const std::vector<FIndex>& InIndices, const glm::mat4& InTransform)
 		: m_Vertices(InVertices)
 		, m_Indices(InIndices)
 	{
+		LASSET_REGISTER();
 		Handle = {};
 
 		LSubmesh Submesh{};
@@ -39,13 +42,12 @@ namespace LkEngine {
 		LK_CORE_ASSERT(Submesh.IndexCount == m_IndexBuffer->GetCount(), "IndexBuffer count mismatch");
 	}
 
-	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices,
-							 const std::vector<FIndex>& InIndices,
-							 const std::vector<LSubmesh>& InSubmeshes)
+	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices, const std::vector<FIndex>& InIndices, const std::vector<LSubmesh>& InSubmeshes)
 		: m_Vertices(InVertices)
 		, m_Indices(InIndices)
 		, Submeshes(InSubmeshes)
 	{
+		LASSET_REGISTER();
 		Handle = {};
 
 		/* Create Vertex and index buffers. */
@@ -76,6 +78,7 @@ namespace LkEngine {
 	LMesh::LMesh(TObjectPtr<LMeshSource> InMeshSource)
 		: MeshSource(InMeshSource)
 	{
+		LASSET_REGISTER();
 		Handle = {};
 
 		SetSubmeshes({});
@@ -95,6 +98,7 @@ namespace LkEngine {
 	LMesh::LMesh(TObjectPtr<LMeshSource> InMeshSource, const std::vector<uint32_t>& InSubmeshes)
 		: MeshSource(InMeshSource)
 	{
+		LASSET_REGISTER();
 		Handle = {};
 		SetSubmeshes(InSubmeshes);
 
@@ -114,6 +118,7 @@ namespace LkEngine {
 		: MeshSource(Other->MeshSource)
 		, Materials(Other->Materials)
 	{
+		LASSET_REGISTER();
 		SetSubmeshes(Other->Submeshes);
 	}
 
@@ -147,6 +152,7 @@ namespace LkEngine {
 	LStaticMesh::LStaticMesh(TObjectPtr<LMeshSource> InMeshSource)
 		: MeshSource(InMeshSource)
 	{
+		LASSET_REGISTER();
 		Handle = {};
 
 		SetSubmeshes({});
@@ -163,6 +169,7 @@ namespace LkEngine {
 	LStaticMesh::LStaticMesh(TObjectPtr<LMeshSource> meshSource, const std::vector<uint32_t>& submeshes)
 		: MeshSource(meshSource)
 	{
+		LASSET_REGISTER();
 		Handle = {};
 
 		SetSubmeshes(submeshes);
@@ -180,6 +187,7 @@ namespace LkEngine {
 		: MeshSource(Other->MeshSource)
 		, Materials(Other->Materials)
 	{
+		LASSET_REGISTER();
 		SetSubmeshes(Other->Submeshes);
 	}
 

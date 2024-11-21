@@ -12,7 +12,7 @@ namespace LkEngine {
     class LImage;
     class LSceneCamera;
     class LTexture;
-	class LTextureArray;
+	class LArrayTexture;
 
 	class LRenderer2D : public LObject
     {
@@ -89,7 +89,7 @@ namespace LkEngine {
         std::array<TObjectPtr<LTexture2D>, MaxTextureSlots> TextureSlots;
 
         /* Texture Arrays. */
-        std::array<TObjectPtr<LTextureArray>, MaxTextureArrays> TextureArrays;
+        std::array<TObjectPtr<LArrayTexture>, MaxTextureArrays> TextureArrays;
 
         /* Quad. */
         uint32_t QuadIndexCount = 0;

@@ -109,7 +109,7 @@ namespace LkEngine {
 	/**
 	 * @enum ETextureArrayDimension
 	 */
-	enum class ETextureArrayDimension
+	enum class EArrayTextureDimension
 	{
 		Dim_200x200,
 		Dim_512x512,

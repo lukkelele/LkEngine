@@ -69,7 +69,7 @@ namespace LkEngine {
 		void RenderUI();
 		void ProcessEvents();
 
-		void PushLayer(TObjectPtr<LLayer> InLayer)
+		FORCEINLINE void PushLayer(TObjectPtr<LLayer> InLayer)
 		{
 			LayerStack.PushLayer(InLayer);
 		}

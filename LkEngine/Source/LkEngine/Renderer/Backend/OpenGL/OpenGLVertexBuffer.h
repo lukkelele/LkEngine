@@ -59,6 +59,8 @@ namespace LkEngine {
 
 		LRendererID m_VertexArrayID = 0;
 		unsigned int m_VertexBufferIndex = 0;
+
+		LCLASS(LOpenGLVertexBuffer);
     };
 
 }

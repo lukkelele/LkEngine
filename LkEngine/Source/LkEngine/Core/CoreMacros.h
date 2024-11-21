@@ -13,6 +13,7 @@
 #define LK_ARRAYSIZE(_ARR)      (static_cast<int>((sizeof(_ARR) / sizeof(*(_ARR))))) 
 #define LK_BIT_FIELD(x)         (1 << x)
 #define LK_STRINGIFY(x)         #x
+#define LK_TEXT(_TEXT)			L##_TEXT /* Wide string literal. */
 
 /** Function Signature. */
 #ifdef __clang__
@@ -115,6 +116,11 @@ namespace LkEngine {
 
 }
 
+/* TODO: Should do a required/static_assert on the LClass registration to make sure 
+ *       a class that inherits LObject in fact do implement the LCLASS macro.
+ *       Otherwise there is risk of undefined behaviour because the LClass registration
+ *       won't take place.
+ */
 /**
  * LCLASS
  *
@@ -165,5 +171,16 @@ namespace LkEngine {
 		template<typename AssetType = Class> \
 		std::enable_if<!std::is_same_v<AssetType, LAsset>, EAssetType> \
 		FORCEINLINE GetAssetType() const { return GetStaticType(); } \
+
+/** 
+ * LASSET_REGISTER
+ */
+#define LASSET_REGISTER(...) \
+		LClass* ClassObject = const_cast<LClass*>(LClass::Get(typeid(this))); \
+		if (!ClassObject) \
+		{ \
+			ClassObject = const_cast<LClass*>(ClassRegistration()); \
+			LObjectBase::SetClass(const_cast<LClass*>(ClassObject)); \
+		} \
 
 

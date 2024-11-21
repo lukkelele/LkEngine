@@ -16,7 +16,8 @@
 
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
-#include "LkEngine/Core/Event/SceneEvent.h"
+#include "LkEngine/Core/IO/FileSystem.h"
+#include "LkEngine/Core/Event/SceneEvent.h" /* REMOVE */
 #include "LkEngine/Input/Mouse.h"
 
 #include "LkEngine/UI/UICore.h"
@@ -212,7 +213,8 @@ namespace LkEngine {
 		/* TODO: Load last open project, else load an empty 'default' project. */
 		if (!LProject::Current())
 		{
-			EmptyProject();
+			//EmptyProject();
+			StarterProject();
 		}
 
 		/* Bind delegate for GEditorOnSelectionChanged. */
@@ -257,8 +259,6 @@ namespace LkEngine {
 		{
 			LRenderer::GetViewportFramebuffer()->Bind();
 
-			//LOpenGL_Debug::RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
-			//LOpenGL_Debug::RenderCubes(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
 			LOpenGL_Debug::RenderFloor(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
 
 			LFramebuffer::TargetSwapChain();
@@ -290,7 +290,7 @@ namespace LkEngine {
 				Shader->Set("u_ViewProjectionMatrix", GetEditorCamera()->GetViewProjectionMatrix());
 				Shader->Set("u_Texture0", 0);
 				Texture->Bind(0);
-				LK_CORE_ASSERT(Cube->GetIndexBuffer()->GetCount() > 0, "IndexBuffer count not valid");
+				LK_CORE_ASSERT((Cube->GetIndexBuffer()->GetCount() > 0), "IndexBuffer count not valid");
 
 				Cube->GetVertexBuffer()->Bind();
 				LK_OpenGL_Verify(glDrawElements(GL_TRIANGLES, Cube->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
@@ -316,28 +316,7 @@ namespace LkEngine {
 		{
 			LRenderer::Submit([&]()
 			{
-				LRenderer::GetViewportFramebuffer()->Bind();
-
-				LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
-				static constexpr unsigned int SkyboxModelSize = 100;
-
-				LK_CORE_ASSERT(LOpenGL_Debug::SkyboxShader);
-				LOpenGL_Debug::SkyboxShader->Bind();
-
-				/* Make the TextureCube follow us. */
-				const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
-				const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
-				LOpenGL_Debug::SkyboxShader->Set("u_ViewProjectionMatrix", ProjectionMatrix * ViewMatrix);
-
-				LOpenGL_Debug::SkyboxShader->Set("u_CameraPos", EditorCamera->GetViewMatrix());
-				LOpenGL_Debug::SkyboxShader->Set("u_Model", glm::mat4(SkyboxModelSize));
-				LOpenGL_Debug::SkyboxVertexBuffer->Bind();
-				LOpenGL_Debug::SkyboxTexture->Bind(0);
-				LK_OpenGL_Verify(glDrawArrays(GL_TRIANGLES, 0, 36));
-
-				LRenderer::SetDepthFunction(EDepthFunction::Less);
-
-				LFramebuffer::TargetSwapChain();
+				LOpenGL_Debug::RenderSkybox(EditorCamera);
 			});
 		}
 
@@ -364,6 +343,7 @@ namespace LkEngine {
 
 	void LEditorLayer::OnRender()
 	{
+		LK_MARK_FUNC_NOT_IMPLEMENTED("IS USED");
 		LRenderer::Submit([&]()
 		{
 			LOpenGL_Debug::RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
@@ -743,7 +723,7 @@ namespace LkEngine {
 		static ImGuiSelectableFlags SelectableFlags = ImGuiSelectableFlags_SpanAllColumns
 			| ImGuiSelectableFlags_AllowDoubleClick;
 
-		auto EntitiesView = EditorScene->m_Registry.view<LTransformComponent>();
+		auto EntitiesView = EditorScene->Registry.view<LTransformComponent>();
 		ImGui::Text("Entities in scene: %d", EntitiesView.size());
 		for (const entt::entity& EntityRef : EntitiesView)
 		{
@@ -1076,11 +1056,27 @@ namespace LkEngine {
 			/* TODO: Close current project. */
 		}
 
-		NewScene();
+		NewScene("Untitled");
 
 		LK_CORE_INFO_TAG("Editor", "Creating empty project");
 		Project = TObjectPtr<LProject>::Create();
 		Project->SetName("EmptyProject");
+		LProject::SetActive(Project);
+	}
+
+	void LEditorLayer::StarterProject()
+	{
+		if (LProject::Current())
+		{
+			/* TODO: Close current project. */
+		}
+
+		static std::string StarterProjectName = "Starter-2024";
+		NewScene(StarterProjectName);
+
+		LK_CORE_INFO_TAG("Editor", "Creating empty project");
+		Project = TObjectPtr<LProject>::Create();
+		Project->SetName(StarterProjectName);
 		LProject::SetActive(Project);
 	}
 
@@ -1237,14 +1233,12 @@ namespace LkEngine {
 
 	void LEditorLayer::SetScene(TObjectPtr<LScene> InScene)
 	{
-		LK_CORE_ASSERT(false, "Remove this function...");
-		LK_CORE_VERIFY(InScene, "Scene is nullptr");
+		LK_CORE_VERIFY(InScene, "Invalid scene reference");
 		if (InScene && InScene->bIsEditorScene)
 		{
 			EditorScene = InScene;
 		}
 	}
-
 
 	void LEditorLayer::UI_TabManager()
 	{
@@ -1338,7 +1332,7 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_MainMenuBar()
 	{
-		ImGui::BeginMainMenuBar();
+		if (ImGui::BeginMainMenuBar())
 		{
 			MenuBarSize.X = ImGui::GetCurrentWindow()->Size.x;
 			MenuBarSize.Y = ImGui::GetFrameHeight();
@@ -1361,6 +1355,7 @@ namespace LkEngine {
 				/* New project. */
 				if (ImGui::MenuItem("New"))
 				{
+					LK_INFO("Creating new project");
 				}
 
 				/* Load existing project. */
@@ -1458,8 +1453,8 @@ namespace LkEngine {
 						LMeshComponent& EntityMesh = Entity.GetMesh();
 						if (EntityMesh.Mesh == AssetHandle)
 						{
-							EditorScene->CopyComponentIfExists<LMeshComponent>(NewCubeEntity, EditorScene->m_Registry, Entity);
-							EditorScene->CopyComponentIfExists<LTagComponent>(NewCubeEntity, EditorScene->m_Registry, Entity);
+							EditorScene->CopyComponentIfExists<LMeshComponent>(NewCubeEntity, EditorScene->Registry, Entity);
+							EditorScene->CopyComponentIfExists<LTagComponent>(NewCubeEntity, EditorScene->Registry, Entity);
 							LK_CORE_VERIFY((NewCubeEntity.HasComponent<LMeshComponent>()) && (NewCubeEntity.HasComponent<LTagComponent>()));
 						}
 					}

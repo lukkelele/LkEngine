@@ -276,20 +276,15 @@ namespace LkEngine {
 	class LMeshSource : public LAsset
 	{
 	public:
-		LMeshSource() = default;
-		LMeshSource(const std::vector<FVertex>& InVertices,
-					const std::vector<FIndex>& InIndices,
-					const glm::mat4& InTransform);
-		LMeshSource(const std::vector<FVertex>& InVertices,
-					const std::vector<FIndex>& InIndices,
-					const std::vector<LSubmesh>& InSubmeshes);
+		LMeshSource();
+		LMeshSource(const std::vector<FVertex>& InVertices, const std::vector<FIndex>& InIndices, const glm::mat4& InTransform);
+		LMeshSource(const std::vector<FVertex>& InVertices, const std::vector<FIndex>& InIndices, const std::vector<LSubmesh>& InSubmeshes);
 		virtual ~LMeshSource() = default;
 
-		std::vector<LSubmesh>& GetSubmeshes() { return Submeshes; }
-		const std::vector<LSubmesh>& GetSubmeshes() const { return Submeshes; }
-
-		const std::vector<FVertex>& GetVertices() const { return m_Vertices; }
-		const std::vector<FIndex>& GetIndices() const { return m_Indices; }
+		FORCEINLINE std::vector<LSubmesh>& GetSubmeshes() { return Submeshes; }
+		FORCEINLINE const std::vector<LSubmesh>& GetSubmeshes() const { return Submeshes; }
+		FORCEINLINE const std::vector<FVertex>& GetVertices() const { return m_Vertices; }
+		FORCEINLINE const std::vector<FIndex>& GetIndices() const { return m_Indices; }
 
 		FORCEINLINE bool IsSubmeshRigged(const uint32_t SubmeshIndex) const 
 		{ 

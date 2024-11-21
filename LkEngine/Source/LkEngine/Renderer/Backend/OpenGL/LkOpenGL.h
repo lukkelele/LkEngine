@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 #include "LkEngine/Core/Memory/MemoryUtils.h"
 
 #include "LkEngine/Renderer/TextureEnum.h"
@@ -10,7 +12,7 @@
 #include "LkEngine/Renderer/Shader.h"
 #include "LkEngine/Renderer/VertexBuffer.h"
 #include "LkEngine/Renderer/BlendingSpecification.h"
-#include "LkEngine/Renderer/TextureArraySpecification.h"
+#include "LkEngine/Renderer/ArrayTextureSpecification.h"
 
 #include "LkEngine/Utility/StringUtils.h"
 
@@ -31,7 +33,6 @@
  * 
  *  Internal component for the GL function verification process.
  */
-//#define LK_OpenGL_Verify_Func(Func, ...) { LK_CORE_WARN("LK_OpenGL_VerifyFunc called"); LK_OpenGL_Verify(Func(__VA_ARGS__)); }
 #define LK_OpenGL_Verify_Func(Func, ...) { LK_OpenGL_Verify(Func(__VA_ARGS__)); }
 
 /**
@@ -45,7 +46,8 @@
 
 namespace LkEngine {
 
-	class TextureArray;
+	class LSceneCamera;
+	class LArrayTexture;
 
 	/**
 	 * LOpenGL_Internal
@@ -529,38 +531,38 @@ namespace LkEngine {
 			return Depth;
 		}
 
-		FORCEINLINE static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const ETextureArrayDimension TexDim)
+		FORCEINLINE static std::pair<int, int> ConvertDimensionsToWidthAndHeight(const EArrayTextureDimension TexDim)
 		{
 			switch (TexDim)
 			{
-				case ETextureArrayDimension::Dim_200x200:   return { 200, 200 };
-				case ETextureArrayDimension::Dim_512x512:   return { 512, 512 };
-				case ETextureArrayDimension::Dim_1024x1024: return { 1024, 1024 };
-				case ETextureArrayDimension::Dim_2048x2048: return { 2048, 2048 };
-				case ETextureArrayDimension::Dim_4096x4096: return { 4096, 4096 };
+				case EArrayTextureDimension::Dim_200x200:   return { 200, 200 };
+				case EArrayTextureDimension::Dim_512x512:   return { 512, 512 };
+				case EArrayTextureDimension::Dim_1024x1024: return { 1024, 1024 };
+				case EArrayTextureDimension::Dim_2048x2048: return { 2048, 2048 };
+				case EArrayTextureDimension::Dim_4096x4096: return { 4096, 4096 };
 			}
 
 			LK_CORE_ASSERT(false, "Unknown OpenGLTextureArrayDimension");
 			return {};
 		}
 
-		FORCEINLINE static ETextureArrayDimension DetermineDimension(const int InWidth, const int InHeight)
+		FORCEINLINE static EArrayTextureDimension DetermineDimension(const int InWidth, const int InHeight)
 		{
 			LK_VERIFY(InWidth == InHeight, "Passed dimension size is not equal");
 			switch (InWidth)
 			{
-				case 200:  return ETextureArrayDimension::Dim_200x200;
-				case 512:  return ETextureArrayDimension::Dim_512x512;
-				case 1024: return ETextureArrayDimension::Dim_1024x1024;
-				case 2048: return ETextureArrayDimension::Dim_2048x2048;
-				case 4096: return ETextureArrayDimension::Dim_4096x4096;
+				case 200:  return EArrayTextureDimension::Dim_200x200;
+				case 512:  return EArrayTextureDimension::Dim_512x512;
+				case 1024: return EArrayTextureDimension::Dim_1024x1024;
+				case 2048: return EArrayTextureDimension::Dim_2048x2048;
+				case 4096: return EArrayTextureDimension::Dim_4096x4096;
 			}
 
 			LK_CORE_ASSERT(false, "Failed to determine dimension");
 			return {};
 		}
 
-		FORCEINLINE static void GenerateTextureArrayImage(const LRendererID ID, const FTextureArraySpecification& Specification)
+		FORCEINLINE static void GenerateTextureArrayImage(const LRendererID ID, const FArrayTextureSpecification& Specification)
 		{
 			auto [Width, Height] = ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
 			LK_OpenGL_Verify(glTextureStorage3D(ID, 
@@ -901,6 +903,7 @@ namespace LkEngine {
 		void RenderScreenTexture(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
 		void RenderCubes(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
 		void RenderFloor(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
+		void RenderSkybox(const TObjectPtr<LSceneCamera> Camera);
 
 		TObjectPtr<LShader> GetDebugShader();
 		TObjectPtr<LShader> GetScreenShader();
@@ -976,14 +979,14 @@ namespace LkEngine {
 
 	namespace Enum {
 
-		FORCEINLINE static constexpr const char* ToString(const ETextureArrayDimension TextureArrayDimension)
+		FORCEINLINE static constexpr const char* ToString(const EArrayTextureDimension TextureArrayDimension)
 		{
 			switch (TextureArrayDimension)
 			{
-				case ETextureArrayDimension::Dim_512x512:   return "512x512";
-				case ETextureArrayDimension::Dim_1024x1024: return "1024x1024";
-				case ETextureArrayDimension::Dim_2048x2048: return "2048x2048";
-				case ETextureArrayDimension::Dim_4096x4096: return "4096x4096";
+				case EArrayTextureDimension::Dim_512x512:   return "512x512";
+				case EArrayTextureDimension::Dim_1024x1024: return "1024x1024";
+				case EArrayTextureDimension::Dim_2048x2048: return "2048x2048";
+				case EArrayTextureDimension::Dim_4096x4096: return "4096x4096";
 			}
 
 			LK_CORE_ASSERT(false, "Unknown ETextureArrayDimension value: {}", static_cast<int>(TextureArrayDimension));

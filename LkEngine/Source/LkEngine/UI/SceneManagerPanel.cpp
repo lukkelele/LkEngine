@@ -32,7 +32,7 @@ namespace LkEngine {
 	}
 
 	LSceneManagerPanel::LSceneManagerPanel(TObjectPtr<LScene> InScene)
-		: m_Scene(InScene)
+		: Scene(InScene)
 	{
 		LCLASS_REGISTER();
 	}
@@ -42,8 +42,8 @@ namespace LkEngine {
 		GOnSceneSetActive.Add(this, &LSceneManagerPanel::SetScene);
 
 		/* TODO: Figure out a replacement for this approach. */
-		m_ComponentCopyScene = TObjectPtr<LScene>::Create("CopyScene", false);
-		m_ComponentCopyEntity = m_ComponentCopyScene->CreateEntity();
+		ComponentCopyScene = TObjectPtr<LScene>::Create("CopyScene", false);
+		ComponentCopyEntity = ComponentCopyScene->CreateEntity();
 	}
 
 	void LSceneManagerPanel::OnRender()
@@ -54,14 +54,14 @@ namespace LkEngine {
 	{
 		const ImRect WindowContent = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
 
-		if (m_Scene)
+		if (Scene)
 		{
-			//ImGui::SeparatorText(fmt::format("Current Scene - {}", m_Scene->Name).c_str());
-			ImGui::SeparatorText(LK_FORMAT_STRING("Current Scene - {}", m_Scene->Name).c_str());
-			ImGui::Text("Entities: %d", m_Scene->m_Registry.size());
-			m_Scene->m_Registry.each([&](auto EntityID)
+			//ImGui::SeparatorText(fmt::format("Current Scene - {}", Scene->Name).c_str());
+			ImGui::SeparatorText(LK_FORMAT_STRING("Scene - {}", Scene->Name).c_str());
+			ImGui::Text("Entities: %d", Scene->Registry.size());
+			Scene->Registry.each([&](auto EntityID)
 			{
-				LEntity Entity { EntityID, m_Scene.Get() };
+				LEntity Entity { EntityID, Scene.Get() };
 				DrawEntityNode(Entity);
 			});
 
@@ -82,8 +82,8 @@ namespace LkEngine {
 				for (size_t i = 0; i < Count; i++)
 				{
 					const UUID EntityID = *((static_cast<UUID*>(Payload->Data)) + i);
-					LEntity Entity = m_Scene->GetEntityWithUUID(EntityID);
-					m_Scene->UnparentEntity(Entity);
+					LEntity Entity = Scene->GetEntityWithUUID(EntityID);
+					Scene->UnparentEntity(Entity);
 				}
 			}
 
@@ -170,7 +170,7 @@ namespace LkEngine {
 		{
 			return;
 		}
-		LK_CORE_VERIFY(Entity.m_Scene, "Entity doesn't have a scene assigned");
+		LK_CORE_VERIFY(Entity.Scene, "Entity doesn't have a scene assigned");
 
 		UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
 		if (Entity.HasComponent<LTagComponent>())
@@ -372,13 +372,13 @@ namespace LkEngine {
 		}
 
 		const std::string& Tag = Entity.GetComponent<LTagComponent>().Tag;
-		std::string tagWithEntityHandle = LK_FORMAT_STRING("{}  ({})", Tag, Entity.m_EntityHandle);
+		const std::string TagWithEntityHandle = LK_FORMAT_STRING("{}  ({})", Tag, Entity.Handle);
 
-		//bool bEntitySelected = SELECTION::SelectedEntity && (SELECTION::SelectedEntity.GetUUID() == Entity.GetUUID());
 		const bool bEntitySelected = false;
 		ImGuiTreeNodeFlags flags = (bEntitySelected ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool bOpened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, flags, tagWithEntityHandle.c_str());
+
+		bool bOpened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, flags, TagWithEntityHandle.c_str());
 
 		if (ImGui::IsItemClicked())
 		{
@@ -414,19 +414,14 @@ namespace LkEngine {
 
 		if (EntityDeleted)
 		{
-			m_Scene->DestroyEntity(Entity);
-#if 0 
-			if (SELECTION::SelectedEntity.GetUUID() == Entity.GetUUID())
-			{
-				SELECTION::SelectedEntity = {};
-			}
-#endif
+			Scene->DestroyEntity(Entity);
 		}
 	}
 
-	void LSceneManagerPanel::SetScene(const TObjectPtr<LScene>& Scene)
+	void LSceneManagerPanel::SetScene(const TObjectPtr<LScene>& InScene)
 	{
-		m_Scene = Scene;
+		LK_CORE_VERIFY(InScene, "Invalid scene reference");
+		Scene = InScene;
 	}
 
 	void LSceneManagerPanel::UI_CameraSettings()

@@ -43,9 +43,20 @@ namespace LkEngine {
 		};
 	}
 
+	/* clang-format off */
+	/// TODO: Implement this
+	template<typename TObject>
+	concept LObjectCore = requires(TObject Object)
+	{
+		{ Object.GetName() } -> std::same_as<std::string>;
+	};
+	/* clang-format on */
+
 	/**
 	 * LObjectBase
 	 */
+	//template<LObjectCore ObjectCore>
+	//class LObjectBase
 	class LObjectBase
 	{
 	public:
@@ -79,8 +90,8 @@ namespace LkEngine {
 		 */
 		FORCEINLINE void SetClass(LClass* InClass)
 		{
-			LK_CORE_ASSERT(InClass, "Class object is nullptr");
-			LK_VERIFY(ClassPrivate == nullptr, "SetClass called multiple times");
+			LK_CORE_VERIFY(InClass, "Class object is nullptr");
+			LK_CORE_VERIFY(ClassPrivate == nullptr, "SetClass called multiple times");
 			ClassPrivate = InClass;
 		}
 
@@ -105,12 +116,22 @@ namespace LkEngine {
 		LClass* ClassPrivate = nullptr;
 	};
 
+	/** Helper to detect a member function. */
+	template <typename, typename = void>
+	struct HasGetClass : std::false_type {};
 
-	/// TODO: Implement this
-	template<typename TObject>
-	concept HasCoreObjectFunctionality = requires(TObject Object)
+	template <typename T>
+	struct HasGetClass<T, std::void_t<decltype(std::declval<T>().GetClass())>> : std::true_type {};
+
+	template <typename T>
+	concept HasLClassMacro = requires 
 	{
-		Object.GetName();
+		{ T::StaticClassName() } -> std::convertible_to<std::string_view>;
+		{ T::StaticClass() } -> std::same_as<const LClass*>;
+		{ std::declval<T>().ClassName() } -> std::convertible_to<std::string>;
+		{ std::declval<T>().ClassRegistration() } -> std::same_as<const LClass*>;
+		typename T::BaseClass;
+		typename T::ThisClass;
 	};
 
 }

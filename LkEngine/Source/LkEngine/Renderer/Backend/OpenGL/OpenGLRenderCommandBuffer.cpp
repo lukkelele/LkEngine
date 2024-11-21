@@ -6,12 +6,20 @@
 
 namespace LkEngine {
 
-	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(uint32_t Count, std::string_view InDebugName) 
+	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(uint32_t Count, std::string_view InName) 
 	{
+		LCLASS_REGISTER();
+
+		LK_UNUSED(Count);
+		LK_UNUSED(InName);
 	}
 
-	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(std::string_view InDebugName, bool bSwapchain)
+	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(std::string_view InName, bool InSwapchain)
 	{
+		LCLASS_REGISTER();
+
+		LK_UNUSED(InName);
+		LK_UNUSED(InSwapchain);
 	}
 
 	LOpenGLRenderCommandBuffer::~LOpenGLRenderCommandBuffer()

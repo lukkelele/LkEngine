@@ -17,12 +17,16 @@
 
 namespace LkEngine {
 
+	//std::string_view LSceneSerializer::FILE_FILTER = "LkEngine Scene (*.lkscene)\0*.lkscene\0";
+	std::string_view LSceneSerializer::FILE_FILTER = LK_FORMAT_STRING("LkEngine Scene (*.{})\0*.{}\0", 
+																	  LScene::FILE_EXTENSION, LScene::FILE_EXTENSION);
+
 	LSceneSerializer::LSceneSerializer(LScene* Scene)
-		: m_Scene(Scene)
+		: Scene(Scene)
 	{
 		LCLASS_REGISTER();
 
-		if (!m_Scene)
+		if (!Scene)
 		{
 		#if LK_USE_EDITOR
 			const bool IsEditorScene = true;
@@ -30,13 +34,13 @@ namespace LkEngine {
 			const bool IsEditorScene = false;
 		#endif
 			/* FIXME */
-			m_Scene = new LScene("", IsEditorScene);
+			Scene = new LScene("", IsEditorScene);
 		}
 	}
 
 	/// FIXME
 	LSceneSerializer::LSceneSerializer(const TObjectPtr<LScene>& Scene)
-		: m_Scene((LScene*)Scene.Get())
+		: Scene((LScene*)Scene.Get())
 	{
 	}
 
@@ -153,10 +157,10 @@ namespace LkEngine {
 	void LSceneSerializer::SerializeToYAML(YAML::Emitter& Out)
 	{
 		Out << YAML::BeginMap;
-		Out << YAML::Key << "Scene"       << YAML::Value << m_Scene->GetName();
-		Out << YAML::Key << "Active"      << YAML::Value << m_Scene->bIsActiveScene;
-		Out << YAML::Key << "EditorScene" << YAML::Value << m_Scene->bIsEditorScene;
-		Out << YAML::Key << "SceneHandle" << YAML::Value << static_cast<uint32_t>(m_Scene->m_SceneEntity);
+		Out << YAML::Key << "Scene"       << YAML::Value << Scene->GetName();
+		Out << YAML::Key << "Active"      << YAML::Value << Scene->bIsActiveScene;
+		Out << YAML::Key << "EditorScene" << YAML::Value << Scene->bIsEditorScene;
+		Out << YAML::Key << "SceneHandle" << YAML::Value << static_cast<uint32_t>(Scene->SceneEntity);
 
 		LEditorLayer* Editor = LEditorLayer::Get();
 
@@ -171,7 +175,7 @@ namespace LkEngine {
 		Out << YAML::Key << "Physics2D";
 		Out << YAML::Value << YAML::BeginMap;
 		{
-			Box2DWorldComponent& World2DComponent = m_Scene->GetBox2DWorld();
+			Box2DWorldComponent& World2DComponent = Scene->GetBox2DWorld();
 			if (&World2DComponent != nullptr)
 			{
 				Out << YAML::Key << "Paused" << YAML::Value << World2DComponent.IsPaused();
@@ -193,16 +197,16 @@ namespace LkEngine {
 		{
 			/* Sort entities by UUID. */
 			std::map<UUID, entt::entity> SortedEntityMap;
-			auto idComponentView = m_Scene->m_Registry.view<LIDComponent>();
-			for (const entt::entity Entity : idComponentView)
+			auto IDComponentView = Scene->Registry.view<LIDComponent>();
+			for (const entt::entity Entity : IDComponentView)
 			{
-				SortedEntityMap[idComponentView.get<LIDComponent>(Entity).ID] = Entity;
+				SortedEntityMap[IDComponentView.get<LIDComponent>(Entity).ID] = Entity;
 			}
 	
 			/* Serialize sorted entities. */
-			for (const auto& [id, Entity] : SortedEntityMap)
+			for (const auto& [ID, Entity] : SortedEntityMap)
 			{
-				SerializeEntity(Out, { Entity, m_Scene->ActiveScene });
+				SerializeEntity(Out, { Entity, Scene->ActiveScene });
 			}
 		}
 		Out << YAML::EndSeq;
@@ -221,13 +225,13 @@ namespace LkEngine {
 
 		/* Scene. */
 		std::string SceneName = data["Scene"].as<std::string>(); 
-		m_Scene->SetName(SceneName);
+		Scene->SetName(SceneName);
 
 		const bool bIsActiveScene = data["Active"].as<std::string>() == "true" ? true : false;
-		m_Scene->SetActive(bIsActiveScene);
+		Scene->SetActive(bIsActiveScene);
 
 		const bool bIsEditorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
-		m_Scene->bIsEditorScene = bIsEditorScene;
+		Scene->bIsEditorScene = bIsEditorScene;
 		const uint32_t SceneEntityHandle = data["SceneHandle"].as<uint32_t>();
 
 		/* EditorCamera. */
@@ -239,17 +243,17 @@ namespace LkEngine {
 		}
 
 		/* Scene entities. */
-		YAML::Node entities = data["Entities"];
-		if (entities)
+		YAML::Node EntitiesNode = data["Entities"];
+		if (EntitiesNode)
 		{
-			DeserializeEntities(entities, m_Scene);
+			DeserializeEntities(EntitiesNode, Scene);
 		}
 
 		/* Sort LIDComponent by by Entity handle(which is essentially the order in which they were created). */
-		m_Scene->m_Registry.sort<LIDComponent>([this](const auto Lhs, const auto Rhs)
+		Scene->Registry.sort<LIDComponent>([this](const auto Lhs, const auto Rhs)
 		{
-			auto LhsEntity = m_Scene->m_EntityIDMap.find(Lhs.ID);
-			auto RhsEntity = m_Scene->m_EntityIDMap.find(Rhs.ID);
+			auto LhsEntity = Scene->m_EntityIDMap.find(Lhs.ID);
+			auto RhsEntity = Scene->m_EntityIDMap.find(Rhs.ID);
 			return (static_cast<uint32_t>(LhsEntity->second) < static_cast<uint32_t>(RhsEntity->second));
 		});
 
@@ -482,23 +486,27 @@ namespace LkEngine {
 		}
 	}
 
-	bool LSceneSerializer::Deserialize(const std::filesystem::path& filepath)
+	bool LSceneSerializer::Deserialize(const std::filesystem::path& Filepath)
 	{
-		m_Scene->Clear();
+		LK_CORE_VERIFY(Scene, "Invalid scene reference");
+		Scene->Clear();
 
-		std::ifstream stream(filepath);
-		std::stringstream strStream;
-		strStream << stream.rdbuf();
+		bool bOperationSuccess = false;
+
+		std::ifstream InputStream(Filepath);
+		std::stringstream StringStream;
+		StringStream << InputStream.rdbuf();
 		try
 		{
-			DeserializeFromYAML(strStream.str());
+			bOperationSuccess = DeserializeFromYAML(StringStream.str());
 		}
-		catch (const YAML::Exception& e)
+		catch (const YAML::Exception& Exception)
 		{
-			LK_CORE_ASSERT(false, "Failed to deserialize scene '{0}': {1}", filepath.string(), e.what());
+			LK_ASSERT(false, "Failed to deserialize scene '{}': {}", Filepath.string(), Exception.what());
+			bOperationSuccess = false;
 		}
 
-		return true;
+		return bOperationSuccess;
 	}
 
 	bool LSceneSerializer::DeserializeRuntime(const FAssetHandle InSceneHandle)
@@ -509,17 +517,17 @@ namespace LkEngine {
 
 	TObjectPtr<LScene> LSceneSerializer::LoadScene()
 	{
-		if (m_Scene)
+		if (Scene)
 		{
-			m_Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
-			m_Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
+			Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
+			Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
 		}
 		else
 		{
 			LK_CORE_WARN_TAG("SceneSerializer", "LoadScene failed, member is nullptr");
 		}
 
-		return m_Scene;
+		return Scene;
 	}
 
 }

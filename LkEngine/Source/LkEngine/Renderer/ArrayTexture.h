@@ -1,15 +1,15 @@
 #pragma once
 
 #include "LkEngine/Renderer/Texture.h"
-#include "LkEngine/Renderer/TextureArraySpecification.h"
+#include "LkEngine/Renderer/ArrayTextureSpecification.h"
 
 
 namespace LkEngine {
 
-	class LTextureArray : public LObject
+	class LArrayTexture : public LObject
 	{
 	public:
-		virtual ~LTextureArray() = default;
+		virtual ~LArrayTexture() = default;
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
@@ -21,8 +21,8 @@ namespace LkEngine {
 		virtual LRendererID& GetRendererID() = 0;
 
 		virtual int GetTextureSlot() const = 0;
-		virtual const ETextureArrayDimension& GetDimension() const = 0;
-		virtual const FTextureArraySpecification& GetSpecification() const = 0;
+		virtual const EArrayTextureDimension& GetDimension() const = 0;
+		virtual const FArrayTextureSpecification& GetSpecification() const = 0;
 
 		virtual int GetWidth() const = 0;
 		virtual int GetHeight() const = 0;
@@ -33,10 +33,10 @@ namespace LkEngine {
 		virtual TObjectPtr<LTexture> GetTextureWithID(LRendererID id) = 0;
 		virtual int GetIndexOfTexture(const TObjectPtr<LTexture>& Texture) = 0;
 
-		static TObjectPtr<LTextureArray> Create(const FTextureArraySpecification& Specification);
+		static TObjectPtr<LArrayTexture> Create(const FArrayTextureSpecification& Specification);
 
 	private:
-		LCLASS(LTextureArray)
+		LCLASS(LArrayTexture)
 	};
 
 }

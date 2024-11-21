@@ -4,7 +4,7 @@
 
 namespace LkEngine {
 
-	LOpenGLTextureArray::LOpenGLTextureArray(const FTextureArraySpecification& InSpecification)
+	LOpenGLArrayTexture::LOpenGLArrayTexture(const FArrayTextureSpecification& InSpecification)
 		: Specification(InSpecification)
 	{
 		LCLASS_REGISTER();
@@ -30,7 +30,7 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT));
 	}
 
-	LOpenGLTextureArray::~LOpenGLTextureArray()
+	LOpenGLArrayTexture::~LOpenGLArrayTexture()
 	{
 		/* The TextureArray should not explicitly delete textures as 
 		 * they belong to the TextureLibrary. */
@@ -38,7 +38,7 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glDeleteTextures(1, &m_RendererID));
 	}
 
-	void LOpenGLTextureArray::Bind()
+	void LOpenGLArrayTexture::Bind()
 	{
 		if (m_RendererID > 0)
 		{
@@ -46,7 +46,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LOpenGLTextureArray::Unbind()
+	void LOpenGLArrayTexture::Unbind()
 	{
 		LK_OpenGL_Verify(glBindTextureUnit(Specification.TextureSlot, 0));
 		if (m_RendererID > 0)
@@ -55,7 +55,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LOpenGLTextureArray::AddTextureToArray(const TObjectPtr<LTexture> Texture)
+	void LOpenGLArrayTexture::AddTextureToArray(const TObjectPtr<LTexture> Texture)
 	{
 		if (Texture->GetType() == ETextureType::Texture2D)
 		{
@@ -86,7 +86,7 @@ namespace LkEngine {
 		}
 	}
 
-	bool LOpenGLTextureArray::RemoveTextureFromArray(const LRendererID TextureID)
+	bool LOpenGLArrayTexture::RemoveTextureFromArray(const LRendererID TextureID)
 	{
 		auto FindTextureInArray = [TextureID](const TObjectPtr<LTexture>& Texture) -> bool
 		{

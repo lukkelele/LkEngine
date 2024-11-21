@@ -103,12 +103,12 @@ namespace LkEngine {
         virtual RendererCapabilities& GetCapabilities() override;
 
         virtual void BindTextureArray(const uint8_t Index) override;
-        virtual void BindTextureArray(const ETextureArrayDimension& InTextureArrayDim) override;
+        virtual void BindTextureArray(const EArrayTextureDimension& InTextureArrayDim) override;
 
-        TObjectPtr<LOpenGLTextureArray> GetTextureArray(const int Index);
+        TObjectPtr<LOpenGLArrayTexture> GetTextureArray(const int Index);
 
     private:
-        TObjectPtr<LOpenGLTextureArray> GetTextureArrayWithDimension(const ETextureArrayDimension TextureArrayDimension);
+        TObjectPtr<LOpenGLArrayTexture> GetTextureArrayWithDimension(const EArrayTextureDimension TextureArrayDimension);
 
     private:
 		static_assert(GL_TRIANGLES == sizeof(uint32_t));

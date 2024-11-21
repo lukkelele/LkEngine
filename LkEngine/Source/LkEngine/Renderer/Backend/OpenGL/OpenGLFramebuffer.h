@@ -43,13 +43,13 @@ namespace LkEngine {
 		FORCEINLINE virtual uint32_t GetHeight() const override { return m_Height; }
 		FORCEINLINE virtual uint64_t GetSize() const override { return (m_Width * m_Height); }
 
-		FORCEINLINE virtual LRendererID GetRendererID() const override { return m_RendererID; }
-		FORCEINLINE virtual LRendererID& GetRendererID() override { return m_RendererID; }
+		FORCEINLINE virtual LRendererID GetRendererID() const override { return RendererID; }
+		FORCEINLINE virtual LRendererID& GetRendererID() override { return RendererID; }
 
 		static void TargetSwapChain();
 
 	private:
-		LRendererID m_RendererID;
+		LRendererID RendererID;
 
 		uint64_t m_Width{};
 		uint64_t m_Height{};
@@ -66,6 +66,8 @@ namespace LkEngine {
 		FFramebufferSpecification m_Specification{};
 		FFramebufferTextureSpecification m_DepthAttachmentSpecification{};
 		std::vector<FFramebufferTextureSpecification> m_ColorAttachmentSpecifications{};
+
+		LCLASS(LOpenGLFramebuffer);
     };
 
 
