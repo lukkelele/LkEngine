@@ -40,9 +40,9 @@ namespace LkEngine {
 			return Specification; 
 		}
 
-		FORCEINLINE virtual const EArrayTextureDimension& GetDimension() const override 
+		FORCEINLINE virtual const EArrayTextureDimension GetDimension() const override 
 		{ 
-			return Specification.TextureArrayDimension; 
+			return Specification.Dimension; 
 		}
 
 		FORCEINLINE virtual int GetWidth() const override { return m_Width; }

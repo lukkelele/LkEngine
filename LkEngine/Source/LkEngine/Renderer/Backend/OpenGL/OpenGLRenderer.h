@@ -13,7 +13,7 @@
 #include "OpenGLRenderCommandBuffer.h"
 #include "OpenGLShader.h"
 #include "OpenGLTexture.h"
-#include "OpenGLTextureArray.h"
+#include "OpenGLArrayTexture.h"
 #include "OpenGLImGuiLayer.h"
 
 
@@ -34,46 +34,44 @@ namespace LkEngine {
 
         virtual void DrawIndexed(const uint64_t IndexCount) override;
 
-        void Draw(LVertexBuffer& VertexBuffer, const LShader& Shader);
+        void Draw(LVertexBuffer& InVertexBuffer, const LShader& InShader);
 
-        virtual void Draw(const LVertexBuffer& VertexBuffer, const LIndexBuffer& IndexBuffer, const LShader& Shader); // override;
+        virtual void Draw(const LVertexBuffer& VertexBuffer, const LIndexBuffer& IndexBuffer, const LShader& Shader);
 
-        virtual void SubmitImage(const TObjectPtr<LImage> image) override;
-        virtual void SubmitImage(const TObjectPtr<LImage2D> image) override;
+        virtual void SubmitImage(const TObjectPtr<LImage> Image) override;
+        virtual void SubmitImage(const TObjectPtr<LImage2D> Image) override;
 
-        virtual void SubmitMesh(TObjectPtr<LMesh>& InMesh, 
-                                TObjectPtr<LShader>& InShader, 
-                                const glm::mat4& InTransform) override;
+        virtual void SubmitMesh(TObjectPtr<LMesh>& InMesh, TObjectPtr<LShader>& InShader, const glm::mat4& InTransform) override;
 
-        virtual void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
+        virtual void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
                                      TObjectPtr<LRenderPass> renderPass, 
                                      bool bExplicitClear = false) override;
 
-        virtual void EndRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer) override;
+        virtual void EndRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer) override;
 
         // RenderGeometry
-        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
-                                    TObjectPtr<LPipeline> pipeline, 
-                                    TObjectPtr<LVertexBuffer> vertexBuffer, 
-                                    TObjectPtr<LIndexBuffer> indexBuffer, 
-                                    const glm::mat4& transform, 
-                                    uint32_t indexCount) override;
+        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+                                    TObjectPtr<LPipeline> Pipeline, 
+                                    TObjectPtr<LVertexBuffer> InVertexBuffer, 
+                                    TObjectPtr<LIndexBuffer> InIndexBuffer, 
+                                    const glm::mat4& Transform, 
+                                    uint32_t IndexCount) override;
 
-        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
-                                    TObjectPtr<LPipeline> pipeline, 
+        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+                                    TObjectPtr<LPipeline> Pipeline, 
                                     TObjectPtr<LShader>& Shader, 
-                                    TObjectPtr<LVertexBuffer>& vertexBuffer, 
-                                    TObjectPtr<LIndexBuffer>& indexBuffer, 
-                                    const glm::mat4& transform, 
-                                    const uint32_t indexCount) override;
+                                    TObjectPtr<LVertexBuffer>& InVertexBuffer, 
+                                    TObjectPtr<LIndexBuffer>& InIndexBuffer, 
+                                    const glm::mat4& Transform, 
+                                    const uint32_t IndexCount) override;
 
-        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, 
-                                    TObjectPtr<LPipeline> pipeline, 
-                                    TObjectPtr<LMaterial> material, 
-                                    TObjectPtr<LVertexBuffer> vertexBuffer, 
-                                    TObjectPtr<LIndexBuffer> indexBuffer, 
-                                    const glm::mat4& transform, 
-                                    const uint32_t indexCount) override;
+        virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+                                    TObjectPtr<LPipeline> Pipeline, 
+                                    TObjectPtr<LMaterial> Material, 
+                                    TObjectPtr<LVertexBuffer> InVertexBuffer, 
+                                    TObjectPtr<LIndexBuffer> InIndexBuffer, 
+                                    const glm::mat4& Transform, 
+                                    const uint32_t IndexCount) override;
         // ~RenderGeometry
 
 		void SubmitIndexed(unsigned int count) override;
@@ -102,13 +100,13 @@ namespace LkEngine {
 
         virtual RendererCapabilities& GetCapabilities() override;
 
-        virtual void BindTextureArray(const uint8_t Index) override;
-        virtual void BindTextureArray(const EArrayTextureDimension& InTextureArrayDim) override;
+        virtual void BindArrayTexture(const uint8_t Index) override;
+        virtual void BindArrayTexture(const EArrayTextureDimension Dimension) override;
 
-        TObjectPtr<LOpenGLArrayTexture> GetTextureArray(const int Index);
+        TObjectPtr<LOpenGLArrayTexture> GetArrayTexture(const int Index);
 
     private:
-        TObjectPtr<LOpenGLArrayTexture> GetTextureArrayWithDimension(const EArrayTextureDimension TextureArrayDimension);
+        TObjectPtr<LOpenGLArrayTexture> GetArrayTextureWithDimension(const EArrayTextureDimension Dimension);
 
     private:
 		static_assert(GL_TRIANGLES == sizeof(uint32_t));

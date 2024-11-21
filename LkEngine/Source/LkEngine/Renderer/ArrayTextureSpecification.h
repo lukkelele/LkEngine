@@ -13,11 +13,12 @@ namespace LkEngine {
 	 */
 	struct FArrayTextureSpecification
 	{
-		EArrayTextureDimension TextureArrayDimension = EArrayTextureDimension::Dim_1024x1024;
+		EArrayTextureDimension Dimension = EArrayTextureDimension::Dim_1024x1024;
 		EImageFormat ImageFormat = EImageFormat::RGBA;
 		int TextureSlot = 0;
 		int Layers = 10;
 		int Mipmaps = 5;
+
 		std::string DebugName{};
 	};
 

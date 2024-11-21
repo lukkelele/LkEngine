@@ -13,18 +13,18 @@ namespace LkEngine {
 
 	namespace {
 		constexpr int MaxTexturesArrays = 10;
-		constexpr int MaxTexturesPerTextureArray = 32;
+		constexpr int MaxTexturesPerArrayTexture = 32;
 	}
 
 	struct FRendererData
 	{
 		RendererCapabilities m_RendererCapabilities;
 
-		TObjectPtr<LOpenGLArrayTexture> TextureArrays[MaxTexturesArrays];
+		TObjectPtr<LOpenGLArrayTexture> ArrayTextures[MaxTexturesArrays];
 	};
 
 	static FRendererData* RendererData = nullptr;
-	static int TextureArrayCount = 0;
+	static int ArrayTextureCount = 0;
 
 	LOpenGLRenderer::LOpenGLRenderer()
 	{
@@ -39,21 +39,21 @@ namespace LkEngine {
 		RenderContext = LWindow::Get().GetRenderContext().As<LOpenGLContext>();
 
 		/* Array texture dimensions. */
-		static constexpr EArrayTextureDimension TextureArrayDimensions[] = {
+		static constexpr EArrayTextureDimension ArrayTextureDimensions[] = {
 			EArrayTextureDimension::Dim_512x512,
 			EArrayTextureDimension::Dim_1024x1024,
 			EArrayTextureDimension::Dim_2048x2048
 		};
 
-		FArrayTextureSpecification TextureArraySpec;
-		for (int i = 0; i < LK_ARRAYSIZE(TextureArrayDimensions); i++)
+		FArrayTextureSpecification ArrayTextureSpec;
+		for (int i = 0; i < LK_ARRAYSIZE(ArrayTextureDimensions); i++)
 		{
-			TextureArraySpec.ImageFormat = EImageFormat::RGBA;
-			TextureArraySpec.TextureSlot = TextureArrayCount;
-			TextureArraySpec.TextureArrayDimension = TextureArrayDimensions[i];
-			TextureArraySpec.DebugName = LK_FORMAT_STRING("GLArrayTexture-{}", Enum::ToString(TextureArrayDimensions[i]));
-			RendererData->TextureArrays[TextureArrayCount++] = TObjectPtr<LOpenGLArrayTexture>::Create(TextureArraySpec);
-			LK_CORE_TRACE_TAG("OpenGLRenderer", "Added array texture {} with name \"{}\"", i, TextureArraySpec.DebugName);
+			ArrayTextureSpec.ImageFormat = EImageFormat::RGBA;
+			ArrayTextureSpec.TextureSlot = ArrayTextureCount;
+			ArrayTextureSpec.Dimension = ArrayTextureDimensions[i];
+			ArrayTextureSpec.DebugName = LK_FORMAT_STRING("GLArrayTexture-{}", Enum::ToString(ArrayTextureDimensions[i]));
+			RendererData->ArrayTextures[ArrayTextureCount++] = TObjectPtr<LOpenGLArrayTexture>::Create(ArrayTextureSpec);
+			LK_CORE_TRACE_TAG("OpenGLRenderer", "Added array texture {} with name \"{}\"", i, ArrayTextureSpec.DebugName);
 		}
 
 		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Binding array textures");
@@ -63,15 +63,15 @@ namespace LkEngine {
 			switch (Texture->GetWidth())
 			{
 				case 512:
-					GetTextureArray(0)->AddTextureToArray(Texture);
+					GetArrayTexture(0)->AddTextureToArray(Texture);
 					break;
 
 				case 1024:
-					GetTextureArray(1)->AddTextureToArray(Texture);
+					GetArrayTexture(1)->AddTextureToArray(Texture);
 					break;
 
 				case 2048:
-					GetTextureArray(2)->AddTextureToArray(Texture);
+					GetArrayTexture(2)->AddTextureToArray(Texture);
 					break;
 
 				default:
@@ -80,12 +80,12 @@ namespace LkEngine {
 		}
 
 		/* Bind the array textures. */
-		for (int i = 0; i < LRenderer2D::MaxTextureArrays; i++)
+		for (int i = 0; i < LRenderer2D::MaxArrayTextures; i++)
 		{
-			if (RendererData->TextureArrays[i])
+			if (RendererData->ArrayTextures[i])
 			{
-				LK_CORE_TRACE_TAG("OpenGLRenderer", "TextureArray {}  RendererID={}", i, RendererData->TextureArrays[i]->GetRendererID());
-				BindTextureArray(i);
+				LK_CORE_TRACE_TAG("OpenGLRenderer", "ArrayTexture {}  RendererID={}", i, RendererData->ArrayTextures[i]->GetRendererID());
+				BindArrayTexture(i);
 			}
 		}
 
@@ -290,20 +290,20 @@ namespace LkEngine {
 										 const uint32_t IndexCount /* == 0*/)
 	{
 		LK_CORE_ASSERT(false, "RENDER GEOMETRY DISABLED :)");
-		std::deque<LRendererID> BoundTextureArrays = InPipeline.As<LOpenGLPipeline>()->GetBoundTextureArrays();
+		std::deque<LRendererID> BoundArrayTextures = InPipeline.As<LOpenGLPipeline>()->GetBoundArrayTextures();
 		TObjectPtr<LFramebuffer> Framebuffer = LRenderer::GetViewportFramebuffer();
 
 		/* TODO: Dont submit by & here. */
 		LRenderer::Submit([&, Framebuffer, Shader, VertexBuffer,
-						   Transform, IndexCount, BoundTextureArrays]() mutable
+						   Transform, IndexCount, BoundArrayTextures]() mutable
 		{
 			Framebuffer->Bind();
 			Shader->Bind();
 
 			int ArrIndex = 1;
-			for (const LRendererID TextureArray : BoundTextureArrays)
+			for (const LRendererID ArrayTexture : BoundArrayTextures)
 			{
-				Shader->Set("u_TextureArray" + std::to_string(ArrIndex++), TextureArray);
+				Shader->Set("u_ArrayTexture" + std::to_string(ArrIndex++), ArrayTexture);
 			}
 
 			VertexBuffer->Bind();
@@ -324,36 +324,36 @@ namespace LkEngine {
 		LK_UNUSED(RenderCommandBuffer);
 	}
 
-	TObjectPtr<LOpenGLArrayTexture> LOpenGLRenderer::GetTextureArray(const int Index)
+	TObjectPtr<LOpenGLArrayTexture> LOpenGLRenderer::GetArrayTexture(const int Index)
 	{
-		LK_CORE_ASSERT(RendererData && RendererData->TextureArrays[Index]);
-		return RendererData->TextureArrays[Index];
+		LK_CORE_ASSERT(RendererData && RendererData->ArrayTextures[Index]);
+		return RendererData->ArrayTextures[Index];
 	}
 
-	void LOpenGLRenderer::BindTextureArray(const uint8_t Index)
+	void LOpenGLRenderer::BindArrayTexture(const uint8_t Index)
 	{
-		LK_CORE_ASSERT(RendererData && RendererData->TextureArrays[Index]);
-		LArrayTexture& TextureArray = *RendererData->TextureArrays[Index];
-		TextureArray.Bind();
+		LK_CORE_ASSERT(RendererData && RendererData->ArrayTextures[Index]);
+		LArrayTexture& ArrayTexture = *RendererData->ArrayTextures[Index];
+		ArrayTexture.Bind();
 	}
 
-	void LOpenGLRenderer::BindTextureArray(const EArrayTextureDimension& TextureArrayDimension)
+	void LOpenGLRenderer::BindArrayTexture(const EArrayTextureDimension Dimension)
 	{
-		LOpenGLArrayTexture& TextureArray = *GetTextureArrayWithDimension(TextureArrayDimension);
-		TextureArray.Bind();
+		LOpenGLArrayTexture& ArrayTexture = *GetArrayTextureWithDimension(Dimension);
+		ArrayTexture.Bind();
 	}
 
-	TObjectPtr<LOpenGLArrayTexture> LOpenGLRenderer::GetTextureArrayWithDimension(const EArrayTextureDimension TextureArrayDimension)
+	TObjectPtr<LOpenGLArrayTexture> LOpenGLRenderer::GetArrayTextureWithDimension(const EArrayTextureDimension ArrayTextureDimension)
 	{
-		for (const TObjectPtr<LOpenGLArrayTexture>& TextureArray : RendererData->TextureArrays)
+		for (const TObjectPtr<LOpenGLArrayTexture>& ArrayTexture : RendererData->ArrayTextures)
 		{
-			if (TextureArray->Specification.TextureArrayDimension == TextureArrayDimension)
+			if (ArrayTexture->Specification.Dimension == ArrayTextureDimension)
 			{
-				return TextureArray;
+				return ArrayTexture;
 			}
 		}
 
-		LK_CORE_ASSERT(false, "Couldn't find TextureArray with dimension {}...", static_cast<int>(TextureArrayDimension));
+		LK_CORE_ASSERT(false, "Couldn't find ArrayTexture with dimension {}...", static_cast<int>(ArrayTextureDimension));
 		return nullptr;
 	}
 

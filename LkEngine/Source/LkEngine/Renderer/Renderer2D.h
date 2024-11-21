@@ -75,7 +75,7 @@ namespace LkEngine {
         
 	public:
         static constexpr int MaxTextureSlots = 32;
-        static constexpr int MaxTextureArrays = 10;
+        static constexpr int MaxArrayTextures = 10;
 	private:
 		FRenderer2DSpecification Specification{};
 		FRendererStatistics Statistics{};
@@ -89,7 +89,7 @@ namespace LkEngine {
         std::array<TObjectPtr<LTexture2D>, MaxTextureSlots> TextureSlots;
 
         /* Texture Arrays. */
-        std::array<TObjectPtr<LArrayTexture>, MaxTextureArrays> TextureArrays;
+        std::array<TObjectPtr<LArrayTexture>, MaxArrayTextures> ArrayTextures;
 
         /* Quad. */
         uint32_t QuadIndexCount = 0;

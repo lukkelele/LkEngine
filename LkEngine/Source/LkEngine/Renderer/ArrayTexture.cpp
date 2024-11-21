@@ -3,7 +3,7 @@
 
 #include "RendererAPI.h"
 
-#include "LkEngine/Renderer/Backend/OpenGL/OpenGLTextureArray.h"
+#include "LkEngine/Renderer/Backend/OpenGL/OpenGLArrayTexture.h"
 
 
 namespace LkEngine {

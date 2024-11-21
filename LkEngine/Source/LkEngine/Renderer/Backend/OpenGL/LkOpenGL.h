@@ -564,7 +564,7 @@ namespace LkEngine {
 
 		FORCEINLINE static void GenerateTextureArrayImage(const LRendererID ID, const FArrayTextureSpecification& Specification)
 		{
-			auto [Width, Height] = ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
+			auto [Width, Height] = ConvertDimensionsToWidthAndHeight(Specification.Dimension);
 			LK_OpenGL_Verify(glTextureStorage3D(ID, 
 					                     Specification.Layers, 
 							             ImageFormatToDataFormat(Specification.ImageFormat), 

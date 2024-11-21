@@ -21,7 +21,7 @@ namespace LkEngine {
 		virtual LRendererID& GetRendererID() = 0;
 
 		virtual int GetTextureSlot() const = 0;
-		virtual const EArrayTextureDimension& GetDimension() const = 0;
+		virtual const EArrayTextureDimension GetDimension() const = 0;
 		virtual const FArrayTextureSpecification& GetSpecification() const = 0;
 
 		virtual int GetWidth() const = 0;

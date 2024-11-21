@@ -33,12 +33,12 @@ namespace LkEngine {
 
 		virtual void BindTextureArray(const LRendererID TextureArrayID) override;
 
-		FORCEINLINE std::deque<LRendererID>& GetBoundTextureArrays()
+		FORCEINLINE std::deque<LRendererID>& GetBoundArrayTextures()
 		{
 			return BoundTextureArrays; 
 		}
 
-		FORCEINLINE const std::deque<LRendererID>& GetBoundTextureArrays() const 
+		FORCEINLINE const std::deque<LRendererID>& GetBoundArrayTextures() const 
 		{
 			return BoundTextureArrays; 
 		}

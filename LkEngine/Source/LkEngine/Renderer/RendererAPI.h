@@ -140,8 +140,8 @@ namespace LkEngine {
 		virtual void SetPrimitiveTopology(const ERenderTopology InRenderTopology) = 0;
 		virtual void SetDepthFunction(const EDepthFunction InDepthFunction) = 0;
 
-		virtual void BindTextureArray(const uint8_t Index) = 0;
-		virtual void BindTextureArray(const EArrayTextureDimension& TextureArrayDim) = 0;
+		virtual void BindArrayTexture(const uint8_t Index) = 0;
+		virtual void BindArrayTexture(const EArrayTextureDimension ArrayTextureDim) = 0;
 
 		virtual RendererCapabilities& GetCapabilities() = 0;
 

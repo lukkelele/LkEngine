@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "OpenGLTextureArray.h"
+#include "OpenGLArrayTexture.h"
 
 
 namespace LkEngine {
@@ -9,7 +9,7 @@ namespace LkEngine {
 	{
 		LCLASS_REGISTER();
 
-		auto [Width, Height] = LOpenGL::ConvertDimensionsToWidthAndHeight(Specification.TextureArrayDimension);
+		auto [Width, Height] = LOpenGL::ConvertDimensionsToWidthAndHeight(Specification.Dimension);
 		m_Width = Width;
 		m_Height = Height;
 

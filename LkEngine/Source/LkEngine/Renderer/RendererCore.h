@@ -34,7 +34,7 @@ namespace LkEngine {
         uint32_t MaxLines = 1000;
         bool bSwapChainTarget = false;
 
-        uint8_t TextureArraysCount = 1;
+        uint8_t ArrayTexturesCount = 1;
     };
 
 }

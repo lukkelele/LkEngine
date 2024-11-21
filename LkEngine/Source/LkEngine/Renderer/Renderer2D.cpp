@@ -64,7 +64,7 @@ namespace LkEngine
 
             /* Use correct amount of texture array uniforms. */
             LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad renderpass");
-            for (uint8_t ArrayIndex = 0; ArrayIndex < Specification.TextureArraysCount; ArrayIndex++)
+            for (uint8_t ArrayIndex = 0; ArrayIndex < Specification.ArrayTexturesCount; ArrayIndex++)
             {
                 QuadPassSpec.Pipeline->BindTextureArray(ArrayIndex);
             }
@@ -136,11 +136,11 @@ namespace LkEngine
 
         RenderCommandBuffer = LRenderCommandBuffer::Create(0, "Renderer2D_RenderCommandBuffer");
 
-        for (uint32_t i = 0; i < TextureArrays.size(); i++)
+        for (uint32_t i = 0; i < ArrayTextures.size(); i++)
         {
-            if (TextureArrays[i])
+            if (ArrayTextures[i])
             {
-                TextureArrays[i]->Bind();
+                ArrayTextures[i]->Bind();
             }
         }
 
@@ -322,11 +322,11 @@ namespace LkEngine
         float TextureIndex = 0;
         float TextureArrayIndex = 0;
 
-        for (uint32_t i = 0; i < TextureArrays.size(); i++)
+        for (uint32_t i = 0; i < ArrayTextures.size(); i++)
         {
-            if (TextureArrays[i] && TextureArrays[i]->HasTexture(Texture))
+            if (ArrayTextures[i] && ArrayTextures[i]->HasTexture(Texture))
             {
-                TextureIndex = TextureArrays[i]->GetIndexOfTexture(Texture);
+                TextureIndex = ArrayTextures[i]->GetIndexOfTexture(Texture);
                 TextureArrayIndex = static_cast<uint32_t>(i);
                 break;
             }
