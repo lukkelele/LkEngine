@@ -26,7 +26,7 @@
 
 **LkEngine** (pronounced *_Lukkel-Engine_*) is a game engine written in C\++20. <br>
 An earlier version existed called **LukkelEngine** that I scrapped and began anew.<br>
-The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast whilst doing it.<br>
+The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast while doing it.<br>
 I have lots of ideas that I want to see if they could work and this project has been a very good environment for me to try stuff out.
 <br>
 <br>
