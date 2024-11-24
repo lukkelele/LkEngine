@@ -41,7 +41,6 @@ include "External/Dependencies.lua"
 --|---------------------------------------------
 --| LkEngine
 --|
---| Engine Project.
 --|---------------------------------------------
 project "LkEngine"
     location "LkEngine"
@@ -123,6 +122,7 @@ project "LkEngine"
         "%{Dependencies.Box2D.IncludeDir}",
         "%{Dependencies.YamlCPP.IncludeDir}",
         "%{Dependencies.Tracy.IncludeDir}",
+        "%{Dependencies.NfdExtended.IncludeDir}",
     }
 
     links 
@@ -135,6 +135,7 @@ project "LkEngine"
         "yaml-cpp",
         "glad", 
         "opengl32",
+        "%{Dependencies.NfdExtended.LibName}",
     }
 
 	filter "system:windows"

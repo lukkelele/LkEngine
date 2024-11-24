@@ -28,9 +28,9 @@
 [submodule "External/box2d"]
 	path = External/box2d
 	url = git@github.com:erincatto/box2d.git
-[submodule "External/ImFileDialog"]
-	path = External/ImFileDialog
-	url = https://github.com/lukkelele/ImFileDialog.git
 [submodule "External/assimp"]
 	path = External/assimp
 	url = git@github.com:assimp/assimp.git
+[submodule "External/NFD-Extended"]
+	path = External/NFD-Extended
+	url = https://github.com/btzy/nativefiledialog-extended

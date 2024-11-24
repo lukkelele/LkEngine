@@ -61,10 +61,6 @@ Dependencies = {
 		IncludeDir = "%{wks.location}/External/imgui-node-editor",
 	},
 
-	ImFileDialog = {
-		IncludeDir = "%{wks.location}/External/ImFileDialog",
-	},
-
 	VulkanMemoryAllocator = {
 		IncludeDir = "%{wks.location}/External/VulkanMemoryAllocator",
 	},
@@ -101,21 +97,26 @@ Dependencies = {
 		LibName = "Tracy",
 		IncludeDir = "%{wks.location}/External/tracy/public",
 		LibDir = "%{wks.location}/External/Libraries" 
+	},
+
+	NfdExtended = {
+		LibName = "NFD-Extended",
+		IncludeDir = "%{wks.location}/External/NFD-Extended/src/include"
 	}
 
 }
 
--- Libraries
+-- Dependency configurations
 include "External/glfw-premake5.lua"
 include "External/glad-premake5.lua"
 include "External/imgui-premake5.lua"
 include "External/ImGuizmo-premake5.lua"
 include "External/imgui-node-editor-premake5.lua"
-include "External/ImFileDialog-premake5.lua"
 include "External/yaml-cpp-premake5.lua"
 include "External/box2d-premake5.lua"
 include "External/tracy-premake5.lua"
--- ~Libraries
+include "External/NFD-Extended-premake5.lua"
+-- ~Dependency configurations
 
 include "LkRuntime/LkRuntime.lua"
 
