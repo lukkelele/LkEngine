@@ -28,7 +28,7 @@ Dependencies = {
 	},
 
 	StbImage = {
-		IncludeDir = "%{wks.location}/External/stb_image",
+		IncludeDir = "%{wks.location}/External/StbImage",
 	},
 
 	ImGui = {

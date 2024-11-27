@@ -1,36 +1,33 @@
-[submodule "lib/yaml-cpp"]
-	path = lib/yaml-cpp
-	url = git@github.com:jbeder/yaml-cpp.git
-[submodule "External/imgui-node-editor"]
-	path = External/imgui-node-editor
-	url = git@github.com:thedmd/imgui-node-editor.git
-[submodule "External/yaml-cpp"]
-	path = External/yaml-cpp
-	url = https://github.com/jbeder/yaml-cpp.git
-[submodule "External/tracy"]
-	path = External/tracy
-	url = git@github.com:wolfpld/tracy.git
-[submodule "External/spdlog"]
-	path = External/spdlog
-	url = git@github.com:gabime/spdlog.git
-[submodule "External/glfw"]
-	path = External/glfw
+[submodule "Glfw"]
+	path = External/Glfw/glfw
 	url = git@github.com:glfw/glfw.git
-[submodule "External/glad"]
-	path = External/glad
+[submodule "Glad"]
+	path = External/Glad/glad
 	url = git@github.com:Dav1dde/glad.git
-[submodule "External/imgui"]
-	path = External/imgui
+[submodule "Spdlog"]
+	path = External/Spdlog/spdlog
+	url = git@github.com:gabime/spdlog.git
+[submodule "ImGui"]
+	path = External/ImGui/imgui
 	url = git@github.com:ocornut/imgui.git
-[submodule "External/ImGuizmo"]
-	path = External/ImGuizmo
+[submodule "ImGuiNodeEditor"]
+	path = External/ImGuiNodeEditor/imgui-node-editor
+	url = git@github.com:thedmd/imgui-node-editor.git
+[submodule "ImGuizmo"]
+	path = External/ImGuizmo/ImGuizmo
 	url = git@github.com:CedricGuillemet/ImGuizmo.git
-[submodule "External/box2d"]
-	path = External/box2d
+[submodule "Box2D"]
+	path = External/Box2D/box2d
 	url = git@github.com:erincatto/box2d.git
-[submodule "External/assimp"]
-	path = External/assimp
+[submodule "Assimp"]
+	path = External/Assimp/assimp
 	url = git@github.com:assimp/assimp.git
-[submodule "External/NFD-Extended"]
-	path = External/NFD-Extended
+[submodule "NfdExtended"]
+	path = External/NfdExtended/NFD-Extended
 	url = https://github.com/btzy/nativefiledialog-extended
+[submodule "YamlCpp"]
+	path = External/YamlCpp/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "Tracy"]
+	path = External/Tracy/tracy
+	url = git@github.com:wolfpld/tracy.git
