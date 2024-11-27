@@ -96,9 +96,9 @@ project "LkEngine"
         "%{wks.location}/LkEngine/Source/**.cpp",
         "%{wks.location}/LkEngine/Source/**.tpp",
 
-        "%{Dependencies.StbImage.IncludeDir}/*.h",
-        "%{Dependencies.StbImage.IncludeDir}/*.cpp",
-        "%{Dependencies.Spdlog.IncludeDir}/spdlog/spdlog.h",
+        "%{Dependency.StbImage.IncludeDir}/**.h",
+        "%{Dependency.StbImage.IncludeDir}/**.cpp",
+        "%{Dependency.Spdlog.IncludeDir}/spdlog/spdlog.h",
    	}
 
     defines {
@@ -121,21 +121,21 @@ project "LkEngine"
         "%{wks.location}/LkEngine/Source",
         "%{wks.location}/LkEngine/Source/LkEngine",
 
-        "%{ExternalDirectory}",
-        "%{Dependencies.Glfw.IncludeDir}",
-        "%{Dependencies.Glad.IncludeDir}",
-        "%{Dependencies.StbImage.IncludeDir}",
-        "%{Dependencies.ImGui.IncludeDir}",
-        "%{Dependencies.ImGuizmo.IncludeDir}",
-        "%{Dependencies.ImGuiNodeEditor.IncludeDir}",
-        "%{Dependencies.Assimp.IncludeDir}",
-        "%{Dependencies.Entt.IncludeDir}",
-        "%{Dependencies.Glm.IncludeDir}",
-        "%{Dependencies.Spdlog.IncludeDir}",
-        "%{Dependencies.Box2D.IncludeDir}",
-        "%{Dependencies.YamlCpp.IncludeDir}",
-        "%{Dependencies.Tracy.IncludeDir}",
-        "%{Dependencies.NfdExtended.IncludeDir}",
+        "%{Dependency.Glfw.IncludeDir}",
+        "%{Dependency.Glad.IncludeDir}",
+        "%{Dependency.StbImage.IncludeDir}",
+        "%{Dependency.ImGui.IncludeDir}",
+		"%{Dependency.ImGui.IncludeDir}/imgui", -- To allow include 'imgui.h' as well as 'imgui/imgui.h'.
+        "%{Dependency.ImGuizmo.IncludeDir}",
+        "%{Dependency.ImGuiNodeEditor.IncludeDir}",
+        "%{Dependency.Assimp.IncludeDir}",
+        "%{Dependency.Entt.IncludeDir}",
+        "%{Dependency.Glm.IncludeDir}",
+        "%{Dependency.Spdlog.IncludeDir}",
+        "%{Dependency.Box2D.IncludeDir}",
+        "%{Dependency.YamlCpp.IncludeDir}",
+        "%{Dependency.Tracy.IncludeDir}",
+        "%{Dependency.NfdExtended.IncludeDir}",
     }
 
     links {
@@ -167,14 +167,14 @@ project "LkEngine"
 			}
 
 			links {
-				"%{Dependencies.Assimp.Windows.DebugLibName}",
+				"%{Dependency.Assimp.Windows.DebugLibName}",
 				"zlibstaticd", -- Built by Assimp.
 				"DbgHelp"
 			}
 
 		filter "configurations:Release or configurations:Dist"
 			links {
-				"%{Dependencies.Assimp.Windows.LibName}",
+				"%{Dependency.Assimp.Windows.LibName}",
 				"zlibstatic", -- Built by Assimp.
 			}
         

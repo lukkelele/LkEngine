@@ -8,8 +8,7 @@ project "NfdExtended"
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
-    files 
-    { 
+    files { 
         "%{prj.location}/src/include/nfd.h", 
         "%{prj.location}/src/include/nfd.hpp" 
     }
@@ -19,15 +18,13 @@ project "NfdExtended"
     filter "system:windows"
 		systemversion "latest"
 
-        files 
-        { 
+        files { 
             "%{prj.location}/src/nfd_win.cpp" 
         }
 
 		filter "configurations:Debug-AdressSanitize"
 			sanitize { "Address" }
-			flags 
-			{ 
+			flags { 
 				"NoRuntimeChecks", 
 				"NoIncrementalLink" 
 			}
@@ -46,8 +43,7 @@ project "NfdExtended"
 
 		filter "configurations:Debug-AdressSanitize"
 			sanitize { "Address" }
-			flags 
-			{ 
+			flags { 
 				"NoRuntimeChecks", 
 				"NoIncrementalLink" 
 			}

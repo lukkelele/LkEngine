@@ -8,8 +8,7 @@ project "ImGuiNodeEditor"
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
-    defines 
-	{ 
+    defines { 
 		"IMGUI_DEFINE_MATH_OPERATORS" 
 	}
 
@@ -28,10 +27,9 @@ project "ImGuiNodeEditor"
 		"%{prj.location}/crude_json.cpp",
 	}
 
-    includedirs
-    {
-		"%{Dependencies.ImGui.IncludeDir}"
-		--"imgui"
+    includedirs {
+		"%{Dependency.ImGui.IncludeDir}",
+		"%{Dependency.ImGui.IncludeDir}/imgui", -- To allow include 'imgui.h' as well as 'imgui/imgui.h'.
     }
 
 	filter "system:windows"
