@@ -2,18 +2,16 @@ project "ImGuizmo"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
-	location "%{prj.name}"
+	location "ImGuizmo"
 
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory) 
 
-	defines 
-	{ 
+	defines { 
 		"IMGUI_DEFINE_MATH_OPERATORS" 
 	}
 	
-	files 
-	{
+	files {
 		"%{prj.location}/ImGuizmo.h", 
 		"%{prj.location}/ImGuizmo.cpp",
 		"%{prj.location}/ImGradient.h",
@@ -27,14 +25,12 @@ project "ImGuizmo"
 		"%{prj.location}/GraphEditor.cpp", 
 	} 
 
-	includedirs 
-	{ 
+	includedirs { 
 		"imgui" 
 	}
 
-	buildoptions	
-	{
-        "/IGNORE:C4005", -- Ignore warning 'macro redefinition'.
+	buildoptions {
+        "/wd4005", -- Disable: 'Macro redefinition'.
 	}
 
 	filter "system:windows"
@@ -46,7 +42,7 @@ project "ImGuizmo"
 		systemversion "latest"
 		staticruntime "On"
 
-	filter "configurations:Debug"
+    filter "configurations:Debug or configurations:Debug-AddressSanitize or configurations:AutomationTest"
 		staticruntime "On"
 		runtime "Debug"
 		symbols "On"

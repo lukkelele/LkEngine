@@ -1,4 +1,4 @@
-project "glad"
+project "Glad"
     kind "StaticLib"
     language "C"
     location "glad"
@@ -23,9 +23,13 @@ project "glad"
     filter "system:windows"
         systemversion "latest"
 
-    filter "configurations:Debug"
-        runtime "Debug"
-        symbols "On"
+    filter "configurations:Debug or configurations:AutomationTest"
+		runtime "Debug"
+		symbols "On"
+
+    filter "configurations:Debug-AddressSanitize"
+		runtime "Debug"
+		symbols "On"
 
     filter "configurations:Release"
         runtime "Release"

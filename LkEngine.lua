@@ -2,30 +2,67 @@ workspace "LkEngine"
     architecture "x86_64"
     startproject "LkRuntime"
 
-    configurations 
-    { 
+    configurations { 
         "Debug", 
         "Debug-AddressSanitize", 
         "Release", 
-        "Dist" 
+        "Dist",
+        "AutomationTest",
     }
 
-    flags { "MultiProcessorCompile" }
+    flags { 
+        "MultiProcessorCompile" 
+    }
+
+    defines {
+        "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
+		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
+		"SPDLOG_USE_STD_FORMAT",
+		"YAML_CPP_STATIC_DEFINE",
+		"YAMLCPP_USE_STATIC_LIBS",
+		"NOMINMAX",
+		"TRACY_ENABLE",
+		"TRACY_ON_DEMAND",
+		"TRACY_CALLSTACK=10",
+    }
+
+    filter "action:vs*"
+		linkoptions { 
+            "/ignore:4006", -- Ignore: 'Already defined' warning for object files.
+            "/ignore:4099", -- Ignore: 'PDB not found, linking as if no debug info'.
+			"/NODEFAULTLIB:MSVCRT",
+        }
+
+        disablewarnings { 
+            "4068" -- Disable: 'Unknown #pragma mark'
+        } 
+
+    filter "system:windows"
+        defines {
+            "_CRT_SECURE_NO_WARNINGS",
+        }
+
+		buildoptions { 
+            "/Zc:preprocessor",    -- Enable new standard-conforming preprocessor for MSVC.
+            "/Zc:__cplusplus",
+            "/EHsc",               -- Explictly only allow exceptions at throw statements or in a function.
+        }
 
     filter "configurations:Debug"
         defines { "LK_ENGINE_DEBUG" }
         runtime "Debug"
         symbols "On"
 
-    filter "configurations:Release"
-        defines { "LK_ENGINE_RELEASE" }
+	filter "configurations:Release"
         runtime "Release"
-        optimize "On"
+		optimize "On"
+		symbols "Default"
+		defines { "LK_ENGINE_RELEASE" }
 
-    filter "configurations:Dist"
-        defines { "LK_ENGINE_DIST" }
-        runtime "Release"
-        optimize "On"
+	filter "configurations:Dist"
+		runtime "Release"
+		optimize "Full"
+		defines { "LK_ENGINE_DIST" }
 
 
 BuildOutputDirectory = "%{cfg.buildcfg}-%{cfg.system}"
@@ -40,7 +77,6 @@ include "External/Dependencies.lua"
 
 --|---------------------------------------------
 --| LkEngine
---|
 --|---------------------------------------------
 project "LkEngine"
     location "LkEngine"
@@ -55,165 +91,100 @@ project "LkEngine"
     pchheader "LKpch.h"
     pchsource "LkEngine/Source/LKpch.cpp"
 
-    defines 
-    {
-        "LK_RENDERER_API_OPENGL",
-        "LK_OPENGL4", -- OpenGL 4
-        "LK_CHAR_UTF8",
-        --"LK_CHAR_UNICODE",
-
-        "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
-		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
-		"SPDLOG_USE_STD_FORMAT",
-        "GLFW_INCLUDE_NONE",
-		"YAML_CPP_STATIC_DEFINE",
-        "GLM_ENABLE_EXPERIMENTAL",
-        "IMGUI_DEFINE_MATH_OPERATORS",
-		"NOMINMAX",
-		"TRACY_ENABLE",
-		"TRACY_ON_DEMAND",
-		"TRACY_CALLSTACK=10",
-
-        "LK_PHYSICS_API_BULLET3",
-        "LK_PHYSICS_API_BOX2D",
-    }
-
-    files
-    { 
-        "%{wks.location}/LkEngine/**.h",
-        "%{wks.location}/LkEngine/**.cpp",
-
+    files { 
         "%{wks.location}/LkEngine/Source/**.h",
         "%{wks.location}/LkEngine/Source/**.cpp",
         "%{wks.location}/LkEngine/Source/**.tpp",
 
-		"%{ExternalDirectory}/stb_image/**.h",
-		"%{ExternalDirectory}/stb_image/**.cpp",
-
-        "%{ExternalDirectory}/spdlog/include/spdlog/spdlog.h",
+        "%{Dependencies.StbImage.IncludeDir}/*.h",
+        "%{Dependencies.StbImage.IncludeDir}/*.cpp",
+        "%{Dependencies.Spdlog.IncludeDir}/spdlog/spdlog.h",
    	}
 
-    libdirs 
-    {
-        "%{ExternalDirectory}/Libraries",
-        "%{Dependencies.Glfw.LibDir}",
-        "%{Dependencies.YamlCPP.LibDir}",
-        "%{Dependencies.Box2D.LibDir}",
+    defines {
+        "LK_CHAR_UTF8", --"LK_CHAR_UNICODE",
+        "LK_ENGINE_OPENGL",
+        "LK_OPENGL4",   -- OpenGL 4
+        "LK_PHYSICS_API_BULLET3",
+        "LK_PHYSICS_API_BOX2D",
+
+        "GLFW_INCLUDE_NONE",
+        "GLM_ENABLE_EXPERIMENTAL",
+        "IMGUI_DEFINE_MATH_OPERATORS",
     }
 
-    includedirs 
-    {
+    libdirs {
+        "%{ExternalDirectory}/Libraries",
+    }
+
+    includedirs {
         "%{wks.location}/LkEngine/Source",
         "%{wks.location}/LkEngine/Source/LkEngine",
 
         "%{ExternalDirectory}",
-        "%{ExternalDirectory}/spdlog/include",
-
         "%{Dependencies.Glfw.IncludeDir}",
         "%{Dependencies.Glad.IncludeDir}",
+        "%{Dependencies.StbImage.IncludeDir}",
         "%{Dependencies.ImGui.IncludeDir}",
         "%{Dependencies.ImGuizmo.IncludeDir}",
         "%{Dependencies.ImGuiNodeEditor.IncludeDir}",
         "%{Dependencies.Assimp.IncludeDir}",
         "%{Dependencies.Entt.IncludeDir}",
-        "%{Dependencies.StbImage.IncludeDir}",
         "%{Dependencies.Glm.IncludeDir}",
         "%{Dependencies.Spdlog.IncludeDir}",
         "%{Dependencies.Box2D.IncludeDir}",
-        "%{Dependencies.YamlCPP.IncludeDir}",
+        "%{Dependencies.YamlCpp.IncludeDir}",
         "%{Dependencies.Tracy.IncludeDir}",
         "%{Dependencies.NfdExtended.IncludeDir}",
     }
 
-    links 
-    {
-        "GLFW",
+    links {
+        "Glfw", 
+        "Glad", 
         "ImGui",
         "ImGuizmo",
-        "box2d",
-        "imgui-node-editor",
-        "yaml-cpp",
-        "glad", 
-        "opengl32",
-        "%{Dependencies.NfdExtended.LibName}",
+        "ImGuiNodeEditor",
+        "NfdExtended",
+        "YamlCpp",
+        "Box2D",
     }
 
 	filter "system:windows"
-		defines 
-        { 
+		defines { 
             "LK_PLATFORM_WINDOWS",
-            "_CRT_SECURE_NO_WARNINGS",
             "_GLM_WIN32",
             "_IMGUI_WIN32",
 		}
 
-        libdirs 
-        { 
-            "%{Dependencies.Assimp.Windows.LibDir}",
+        links {
+            "opengl32",
         }
 
-        postbuildcommands 
-        {
-        }
- 
-		buildoptions 
-        { 
-            "/Zc:preprocessor",    -- Enable new standard-conforming preprocessor for MSVC.
-            "/Zc:__cplusplus",
-            "/EHsc",               -- Only allow exceptions at throw statements or in a function.
-            "/wd4312",             -- Disable warning: C4312 (type conversion from greater size)
-            "/wd4244",             -- Disable warning: C4244 (conversion, possible loss of data)
-        }
+        filter "configurations:Debug or configurations:AutomationTest"
+			buildoptions {
+				"/wd4312", -- Disable: C4312 (type conversion from greater size)
+				"/wd4244", -- Disable: C4244 (conversion, possible loss of data)
+			}
 
-        linkoptions 
-        { 
-            "/IGNORE:4006", -- Ignore warning 'already defined' for object files.
-            "/IGNORE:4099", -- Ignore warning 'PDB not found, linking as if no debug info'.
-        }
+			links {
+				"%{Dependencies.Assimp.Windows.DebugLibName}",
+				"zlibstaticd", -- Built by Assimp.
+				"DbgHelp"
+			}
 
-	filter { "system:windows", "configurations:Debug" }	
-        links 
-        {
-            "%{Dependencies.Assimp.Windows.DebugLibName}.lib",
-            "zlibstaticd", -- Built by Assimp.
-            "DbgHelp"
-        }
-
-	filter { "system:windows", "configurations:Release or configurations:Dist" }	
-        links 
-        {
-            "%{Dependencies.Assimp.Windows.LibName}.lib",
-            "zlibstatic", -- Built by Assimp.
-        }
+		filter "configurations:Release or configurations:Dist"
+			links {
+				"%{Dependencies.Assimp.Windows.LibName}",
+				"zlibstatic", -- Built by Assimp.
+			}
         
-	filter { "system:windows", "configurations:Debug-AddressSanitize" }	
-		runtime "Debug"
-		sanitize { "Address" }
-		flags { "NoRuntimeChecks", "NoIncrementalLink" }
-		defines "LK_ENGINE_DEBUG"
-
-	filter "configurations:Debug"
+	filter "configurations:Debug or configurations:Debug-AddressSanitize or configurations:AutomationTest"
 		runtime "Debug"
 		symbols "On"
+        links { "Tracy" }
 
-		defines 
-        {
-            "LK_ENGINE_DEBUG",
-        }
+    filter "kind:StaticLib"
+        defines { "LK_ENGINE_STATIC_LIB" }
 
-        links
-        {
-            "Tracy",
-        }
-
-	filter "configurations:Release"
-        runtime "Release"
-		optimize "On"
-		symbols "Default"
-		defines "LK_ENGINE_RELEASE"
-
-	filter "configurations:Dist"
-		runtime "Release"
-		optimize "Full"
-		defines "LK_ENGINE_DIST"
-
+    filter "kind:SharedLib"
+        defines { "LK_ENGINE_CORE" }

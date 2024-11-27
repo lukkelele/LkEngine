@@ -1,9 +1,8 @@
-project "imgui-node-editor"
+project "ImGuiNodeEditor"
 	kind "StaticLib"
 	language "C++"
     cppdialect "C++17"
-	location "%{prj.name}"
-
+	location "imgui-node-editor"
 	staticruntime "On"
 
 	targetdir (TargetDirectory)
@@ -31,7 +30,8 @@ project "imgui-node-editor"
 
     includedirs
     {
-		"imgui"
+		"%{Dependencies.ImGui.IncludeDir}"
+		--"imgui"
     }
 
 	filter "system:windows"
@@ -41,7 +41,11 @@ project "imgui-node-editor"
 		systemversion "latest"
 		pic "On"
 
-	filter "configurations:Debug"
+    filter "configurations:Debug or configurations:AutomationTest"
+		runtime "Debug"
+		symbols "On"
+
+    filter "configurations:Debug-AddressSanitize"
 		runtime "Debug"
 		symbols "On"
 
