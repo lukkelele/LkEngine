@@ -22,3 +22,6 @@
 [submodule "External/Box2D/box2d"]
 	path = External/Box2D/box2d
 	url = https://github.com/erincatto/box2d
+[submodule "External/Tracy/tracy"]
+	path = External/Tracy/tracy
+	url = https://github.com/wolfpld/tracy
