@@ -1,33 +1,33 @@
-[submodule "Glfw"]
+[submodule "External/Glfw"]
 	path = External/Glfw/glfw
 	url = git@github.com:glfw/glfw.git
-[submodule "Glad"]
+[submodule "External/Glad"]
 	path = External/Glad/glad
 	url = git@github.com:Dav1dde/glad.git
-[submodule "Spdlog"]
+[submodule "External/Spdlog"]
 	path = External/Spdlog/spdlog
 	url = git@github.com:gabime/spdlog.git
-[submodule "ImGui"]
+[submodule "External/ImGui"]
 	path = External/ImGui/imgui
 	url = git@github.com:ocornut/imgui.git
-[submodule "ImGuiNodeEditor"]
+[submodule "External/ImGuiNodeEditor"]
 	path = External/ImGuiNodeEditor/imgui-node-editor
 	url = git@github.com:thedmd/imgui-node-editor.git
-[submodule "ImGuizmo"]
+[submodule "External/ImGuizmo"]
 	path = External/ImGuizmo/ImGuizmo
 	url = git@github.com:CedricGuillemet/ImGuizmo.git
-[submodule "Box2D"]
+[submodule "External/Box2D"]
 	path = External/Box2D/box2d
 	url = git@github.com:erincatto/box2d.git
-[submodule "Assimp"]
+[submodule "External/Assimp"]
 	path = External/Assimp/assimp
 	url = git@github.com:assimp/assimp.git
-[submodule "NfdExtended"]
+[submodule "External/NfdExtended"]
 	path = External/NfdExtended/NFD-Extended
 	url = https://github.com/btzy/nativefiledialog-extended
-[submodule "YamlCpp"]
+[submodule "External/YamlCpp"]
 	path = External/YamlCpp/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
-[submodule "Tracy"]
+[submodule "External/Tracy"]
 	path = External/Tracy/tracy
 	url = git@github.com:wolfpld/tracy.git
