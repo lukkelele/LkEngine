@@ -11,24 +11,16 @@ project "ImGuiNodeEditor"
 		"IMGUI_DEFINE_MATH_OPERATORS" 
 	}
 
-	files
-	{
-		"imgui-node-editor/imgui_node_editor.h",
-		"imgui-node-editor/imgui_node_editor.cpp",
-		"imgui-node-editor/imgui_canvas.h",
-		"imgui-node-editor/imgui_canvas.cpp",
-		"imgui-node-editor/imgui_extra_math.h",
-		"imgui-node-editor/imgui_node_editor_internal.h",
-		"imgui-node-editor/imgui_node_editor_api.cpp",
-		"imgui-node-editor/imgui_bezier_math.h",
-
-		"imgui-node-editor/crude_json.h",
-		"imgui-node-editor/crude_json.cpp",
+	files {
+		"imgui-node-editor/*.h",
+		"imgui-node-editor/*.cpp",
 	}
 
     includedirs {
-		"%{Dependency.ImGui.IncludeDir}",
-		"%{Dependency.ImGui.IncludeDir}/imgui", -- To allow include 'imgui.h' as well as 'imgui/imgui.h'.
+		"imgui-node-editor",
+
+        "%{Dependency.ImGui.IncludeDir}",
+		"%{Dependency.ImGui.IncludeDir}/imgui", -- Allow 'imgui.h' as well as 'imgui/imgui.h' as an include.
     }
 
 	filter "system:windows"
