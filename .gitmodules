@@ -1,3 +1,18 @@
 [submodule "External/Glfw/glfw"]
 	path = External/Glfw/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "External/Glad/glad"]
+	path = External/Glad/glad
+	url = https://github.com/Dav1dde/glad
+[submodule "External/ImGui/imgui"]
+	path = External/ImGui/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "External/ImGuizmo/ImGuizmo"]
+	path = External/ImGuizmo/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo
+[submodule "External/ImGuiNodeEditor/imgui-node-editor"]
+	path = External/ImGuiNodeEditor/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor
+[submodule "External/YamlCpp/yaml-cpp"]
+	path = External/YamlCpp/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
