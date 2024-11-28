@@ -15,6 +15,9 @@ workspace "LkEngine"
     }
 
     defines {
+        "LK_ENGINE_VERSION_MAJOR=0",
+        "LK_ENGINE_VERSION_MINOR=2",
+        "LK_ENGINE_VERSION_PATCH=1",
         "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
 		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
 		"SPDLOG_USE_STD_FORMAT",
@@ -24,6 +27,7 @@ workspace "LkEngine"
 		"TRACY_ENABLE",
 		"TRACY_ON_DEMAND",
 		"TRACY_CALLSTACK=10",
+        "GLM_ENABLE_EXPERIMENTAL",
     }
 
     filter "action:vs*"
@@ -63,6 +67,11 @@ workspace "LkEngine"
 		runtime "Release"
 		optimize "Full"
 		defines { "LK_ENGINE_DIST" }
+
+    filter "configurations:AutomationTest"
+        defines { "LK_ENGINE_DEBUG", "LK_ENGINE_AUTOMATION_TEST" }
+        runtime "Debug"
+        symbols "On"
 
 
 BuildOutputDirectory = "%{cfg.buildcfg}-%{cfg.system}"
@@ -109,7 +118,6 @@ project "LkEngine"
         "LK_PHYSICS_API_BOX2D",
 
         "GLFW_INCLUDE_NONE",
-        "GLM_ENABLE_EXPERIMENTAL",
         "IMGUI_DEFINE_MATH_OPERATORS",
     }
 
@@ -125,7 +133,7 @@ project "LkEngine"
         "%{Dependency.Glad.IncludeDir}",
         "%{Dependency.StbImage.IncludeDir}",
         "%{Dependency.ImGui.IncludeDir}",
-		"%{Dependency.ImGui.IncludeDir}/imgui", -- To allow include 'imgui.h' as well as 'imgui/imgui.h'.
+		"%{Dependency.ImGui.IncludeDir}/imgui", -- Allow 'imgui.h' as well as 'imgui/imgui.h' as an include.
         "%{Dependency.ImGuizmo.IncludeDir}",
         "%{Dependency.ImGuiNodeEditor.IncludeDir}",
         "%{Dependency.Assimp.IncludeDir}",

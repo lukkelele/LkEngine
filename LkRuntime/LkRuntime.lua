@@ -21,9 +21,9 @@ project "LkRuntime"
         "%{Dependency.StbImage.IncludeDir}",
         "%{Dependency.Spdlog.IncludeDir}",
         "%{Dependency.ImGui.IncludeDir}",
-		"%{Dependency.ImGui.IncludeDir}/imgui", -- To allow include 'imgui.h' as well as 'imgui/imgui.h'.
-        "%{Dependency.ImGuiNodeEditor.IncludeDir}",
+		"%{Dependency.ImGui.IncludeDir}/imgui", -- Allow 'imgui.h' as well as 'imgui/imgui.h' as an include.
         "%{Dependency.ImGuizmo.IncludeDir}",
+        "%{Dependency.ImGuiNodeEditor.IncludeDir}",
         "%{Dependency.Assimp.IncludeDir}",
         "%{Dependency.Entt.IncludeDir}",
         "%{Dependency.Glm.IncludeDir}",
