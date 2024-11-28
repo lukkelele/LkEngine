@@ -39,11 +39,19 @@ def BuildBox2D():
         # Navigate to the box2d build directory.
         os.chdir(BuildDir)
 
+        # Create 'lib' directory.
+        os.makedirs("lib", exist_ok=True) 
+
         # Run CMake configuration.
         subprocess.check_call(["cmake", ".."] + CMakeFlags)
 
         # Build the project.
         SetupResult = subprocess.check_call(["cmake", "--build", "."])
+
+        # Move the built library to the 'lib' directory.
+        # TODO: Need to check the built library name, depending on debug/release build.
+        shutil.copy2("src/Debug/box2dd.lib", "lib/")
+        shutil.copy2("src/Debug/box2dd.pdb", "lib/")
 
     except Exception as e:
         Logger.error(f"[BOX2D] Error occurred: {e}")

@@ -33,7 +33,7 @@ for RequiredPythonPackage in RequiredPythonDependencies:
 
 import colorama
 from colorama import Fore, Back, Style
-colorama.init()
+colorama.init(strip=os.environ.get("CI") == "true")
 
 # Add 'Tools/Module' to path.
 sys.path.append(os.path.join(os.path.dirname(__file__), "Module"))
@@ -47,15 +47,11 @@ from Module.PremakeClass import PremakeConfiguration
 
 ToolsDir = "Tools"
 ModuleDir = os.path.join(f"{ToolsDir}", "Module")
-BuildScript_Glfw = "Build-Glfw.py"
 BuildScript_Glad = "Build-Glad.py"
-BuildScript_Box2D = "Build-Box2D.py"
 BuildScript_Assimp = "Build-Assimp.py"
 
 Packages = [
-    { "name": "Glfw",   "script":  BuildScript_Glfw,   "color":  Fore.WHITE },
     { "name": "Glad",   "script":  BuildScript_Glad,   "color":  Fore.WHITE },
-    { "name": "Box2D",  "script":  BuildScript_Box2D,  "color":  Fore.WHITE },
     { "name": "Assimp", "script":  BuildScript_Assimp, "color":  Fore.WHITE },
 ]
 PackageBannerSize = 38
@@ -78,7 +74,7 @@ if ParentPath.name == "LkEngine":
 
 IsPremakeInstalled = PremakeConfiguration.Validate()
 if (IsPremakeInstalled):
-    # Create 'Libraries' directory, is the location for all generated libraries.
+    # Create 'Libraries' directory which is the folder for all built static libraries.
     os.makedirs("External/Libraries", exist_ok=True)
 
     # Install packages. 
