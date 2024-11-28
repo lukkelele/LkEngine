@@ -19,7 +19,7 @@ from ScriptUtils import ScriptLogger
 Logger = ScriptLogger("LkEngine")
 
 # Paths to Assimp, build and output directories.
-AssimpDir = os.path.join("..", "..", "External", "assimp")
+AssimpDir = os.path.join("..", "..", "External", "Assimp", "assimp")
 BuildDir = os.path.join(AssimpDir, "build")
 OutputDir = os.path.join("..", "..", "External", "Libraries")
 
