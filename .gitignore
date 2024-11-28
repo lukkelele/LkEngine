@@ -57,6 +57,7 @@
 External/**/*.vcx*
 External/**/*.vcxproj
 External/glm/**/test
+External/Glad/glad/include
 
 **/*.sln
 **/*.ini
