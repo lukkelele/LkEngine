@@ -16,3 +16,9 @@
 [submodule "External/YamlCpp/yaml-cpp"]
 	path = External/YamlCpp/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "External/Assimp/assimp"]
+	path = External/Assimp/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "External/Box2D/box2d"]
+	path = External/Box2D/box2d
+	url = https://github.com/erincatto/box2d
