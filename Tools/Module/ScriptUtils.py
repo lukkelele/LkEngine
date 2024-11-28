@@ -15,6 +15,8 @@ from zipfile import ZipFile
 
 from colorama import Fore, Back, Style
 
+IsActionRunner = (os.environ.get("CI") == "true")
+
 class Colors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -140,9 +142,13 @@ def DownloadFile(url, filepath):
                 if (avgKBPerSecond > 1024):
                     avgMBPerSecond = avgKBPerSecond / 1024
                     avgSpeedString = '{:.2f} MB/s'.format(avgMBPerSecond)
-                sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * done, '.' * (50-done), percentage, avgSpeedString))
-                sys.stdout.flush()
-    sys.stdout.write('\n')
+
+                if not IsActionRunner:
+                    sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * done, '.' * (50-done), percentage, avgSpeedString))
+                    sys.stdout.flush()
+
+    if not IsActionRunner:
+        sys.stdout.write('\n')
 
 
 def UnzipFile(filepath, DeleteZipFile=True):
@@ -186,13 +192,16 @@ def UnzipFile(filepath, DeleteZipFile=True):
                 avgMBPerSecond = avgKBPerSecond / 1024
                 avgSpeedString = '{:.2f} MB/s'.format(avgMBPerSecond)
 
-            sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * done, '.' * (50-done), percentage, avgSpeedString))
-            sys.stdout.flush()
+            if not IsActionRunner:
+                sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * done, '.' * (50-done), percentage, avgSpeedString))
+                sys.stdout.flush()
 
-    sys.stdout.write('\n')
+    if not IsActionRunner:
+        sys.stdout.write('\n')
 
     if DeleteZipFile:
-        os.remove(ZipFilePath) # delete zip file
+        os.remove(ZipFilePath)
+
 
 def PrintHeader(length, color, style=Style.BRIGHT):
     print(f"{style}{color}{'=' * length}{Style.RESET_ALL}")
