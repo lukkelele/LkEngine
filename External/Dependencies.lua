@@ -91,7 +91,7 @@ Dependency = {
 	},
 
 	NfdExtended = {
-		IncludeDir = "%{wks.location}/External/NfdExtended/NFD-Extended/src/include"
+		IncludeDir = "%{wks.location}/External/NfdExtended/nativefiledialog-extended/src/include"
 	},
 
 	Vulkan = {

@@ -25,3 +25,9 @@
 [submodule "External/Tracy/tracy"]
 	path = External/Tracy/tracy
 	url = https://github.com/wolfpld/tracy
+[submodule "External/NfdExtended/nativefiledialog-extended"]
+	path = External/NfdExtended/nativefiledialog-extended
+	url = https://github.com/btzy/nativefiledialog-extended.git
+[submodule "External/Entt/entt"]
+	path = External/Entt/entt
+	url = https://github.com/skypjack/entt.git
