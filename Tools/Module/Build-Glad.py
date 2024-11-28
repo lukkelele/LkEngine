@@ -20,9 +20,9 @@ generator = "c"
 api = "gl=4.6"
 
 # Paths to Glad, build and output directories.
-GladDir = os.path.join("..", "..", "External", "glad")
+GladDir = os.path.join("..", "..", "External", "Glad", "glad")
 BuildDir = os.path.join(GladDir, "build")
-OutputDir = os.path.join("..", "..", "External", "glad")
+OutputDir = os.path.join("..", "..", "External", "Glad", "glad")
 OutputPath = os.path.join(GladDir, "output")
 
 # Ensure output directory exists.
