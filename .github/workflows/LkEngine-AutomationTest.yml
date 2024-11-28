@@ -9,25 +9,27 @@ on:
       - main
 
 jobs:
-  test:
+  WorkflowTest:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout code
+    - name: Code Checkout 
       uses: actions/checkout@v3
 
-    - name: Set up dependencies
-      run: |
-        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' --yes
-        choco install ninja --yes
+    - name: Python Setup
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
 
-    - name: Configure CMake
+    - name: Install Dependencies
       run: |
-        mkdir build
-        cd build
-        cmake -G "Visual Studio 17 2022" ..
+        python -m pip install --upgrade pip
+        python Tools/LkEngine-Setup.py
 
     - name: Build
       run: |
-        cd build
-        cmake --build . --config Debug
+        mkdir Build
+
+    - name: Run Test 
+      run: |
+        cd Build
