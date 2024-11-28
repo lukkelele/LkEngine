@@ -1,7 +1,6 @@
 project "Tracy"
 	kind "StaticLib"
 	language "C++"
-    location "tracy"
 	cppdialect "C++17"
 	staticruntime "On"
 
@@ -10,26 +9,26 @@ project "Tracy"
 
 	files
 	{
-		"%{prj.location}/public/client/**.h",
-		"%{prj.location}/public/client/**.hpp",
-		"%{prj.location}/public/client/**.cpp",
+		"tracy/public/client/**.h",
+		"tracy/public/client/**.hpp",
+		"tracy/public/client/**.cpp",
 
-		"%{prj.location}/public/common/**.h",
-		"%{prj.location}/public/common/**.hpp",
-		"%{prj.location}/public/common/**.cpp",
+		"tracy/public/common/**.h",
+		"tracy/public/common/**.hpp",
+		"tracy/public/common/**.cpp",
 
-		"%{prj.location}/public/tracy/**.h",
-		"%{prj.location}/public/tracy/**.hpp",
-		"%{prj.location}/public/tracy/**.cpp",
+		"tracy/public/tracy/**.h",
+		"tracy/public/tracy/**.hpp",
+		"tracy/public/tracy/**.cpp",
 
-		"%{prj.location}/public/libbacktrace/alloc.cpp",
-		"%{prj.location}/public/libbacktrace/sort.cpp",
-		"%{prj.location}/public/libbacktrace/state.cpp",
+		"tracy/public/libbacktrace/alloc.cpp",
+		"tracy/public/libbacktrace/sort.cpp",
+		"tracy/public/libbacktrace/state.cpp",
 	}
 
 	includedirs 
 	{ 
-		"%{prj.location}/public/" 
+		"tracy/public/" 
 	}
 
 	filter "system:windows"
@@ -46,12 +45,12 @@ project "Tracy"
 	filter "system:linux"
 		files 
 		{
-			"%{prj.location}/public/libbacktrace/posix.cpp",
-			"%{prj.location}/public/libbacktrace/mmapio.cpp",
-			"%{prj.location}/public/libbacktrace/macho.cpp",
-			"%{prj.location}/public/libbacktrace/fileline.cpp",
-			"%{prj.location}/public/libbacktrace/elf.cpp",
-			"%{prj.location}/public/libbacktrace/dwarf.cpp",
+			"tracy/public/libbacktrace/posix.cpp",
+			"tracy/public/libbacktrace/mmapio.cpp",
+			"tracy/public/libbacktrace/macho.cpp",
+			"tracy/public/libbacktrace/fileline.cpp",
+			"tracy/public/libbacktrace/elf.cpp",
+			"tracy/public/libbacktrace/dwarf.cpp",
 		}
 
     filter "configurations:Debug or configurations:Debug-AddressSanitize or configurations:AutomationTest"

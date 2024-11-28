@@ -2,7 +2,6 @@ project "ImGuizmo"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
-	location "ImGuizmo"
 	staticruntime "On"
 
 	targetdir (TargetDirectory)
@@ -13,17 +12,17 @@ project "ImGuizmo"
 	}
 	
 	files {
-		"%{prj.location}/ImGuizmo.h", 
-		"%{prj.location}/ImGuizmo.cpp",
-		"%{prj.location}/ImGradient.h",
-		"%{prj.location}/ImGradient.cpp",
-		"%{prj.location}/ImCurveEdit.h",
-		"%{prj.location}/ImCurveEdit.cpp",
-		"%{prj.location}/ImSequencer.h",
-		"%{prj.location}/ImSequencer.cpp",
-		"%{prj.location}/ImZoomSlider.cp",
-		"%{prj.location}/GraphEditor.h",
-		"%{prj.location}/GraphEditor.cpp", 
+		"ImGuizmo/ImGuizmo.h", 
+		"ImGuizmo/ImGuizmo.cpp",
+		"ImGuizmo/ImGradient.h",
+		"ImGuizmo/ImGradient.cpp",
+		"ImGuizmo/ImCurveEdit.h",
+		"ImGuizmo/ImCurveEdit.cpp",
+		"ImGuizmo/ImSequencer.h",
+		"ImGuizmo/ImSequencer.cpp",
+		"ImGuizmo/ImZoomSlider.cp",
+		"ImGuizmo/GraphEditor.h",
+		"ImGuizmo/GraphEditor.cpp", 
 	} 
 
 	includedirs { 

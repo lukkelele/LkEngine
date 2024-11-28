@@ -31,3 +31,6 @@
 [submodule "External/Entt/entt"]
 	path = External/Entt/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "External/Spdlog/spdlog"]
+	path = External/Spdlog/spdlog
+	url = https://github.com/gabime/spdlog.git

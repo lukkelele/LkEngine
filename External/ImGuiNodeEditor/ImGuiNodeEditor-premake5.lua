@@ -2,7 +2,6 @@ project "ImGuiNodeEditor"
 	kind "StaticLib"
 	language "C++"
     cppdialect "C++17"
-	location "imgui-node-editor"
 	staticruntime "On"
 
 	targetdir (TargetDirectory)
@@ -14,17 +13,17 @@ project "ImGuiNodeEditor"
 
 	files
 	{
-		"%{prj.location}/imgui_node_editor.h",
-		"%{prj.location}/imgui_node_editor.cpp",
-		"%{prj.location}/imgui_canvas.h",
-		"%{prj.location}/imgui_canvas.cpp",
-		"%{prj.location}/imgui_extra_math.h",
-		"%{prj.location}/imgui_node_editor_internal.h",
-		"%{prj.location}/imgui_node_editor_api.cpp",
-		"%{prj.location}/imgui_bezier_math.h",
+		"imgui-node-editor/imgui_node_editor.h",
+		"imgui-node-editor/imgui_node_editor.cpp",
+		"imgui-node-editor/imgui_canvas.h",
+		"imgui-node-editor/imgui_canvas.cpp",
+		"imgui-node-editor/imgui_extra_math.h",
+		"imgui-node-editor/imgui_node_editor_internal.h",
+		"imgui-node-editor/imgui_node_editor_api.cpp",
+		"imgui-node-editor/imgui_bezier_math.h",
 
-		"%{prj.location}/crude_json.h",
-		"%{prj.location}/crude_json.cpp",
+		"imgui-node-editor/crude_json.h",
+		"imgui-node-editor/crude_json.cpp",
 	}
 
     includedirs {

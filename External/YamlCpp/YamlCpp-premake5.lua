@@ -2,20 +2,19 @@ project "YamlCpp"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
-	location "yaml-cpp"
 
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
 	files { 
-        "%{prj.location}/src/**.h", 
-        "%{prj.location}/src/**.cpp", 
-		"%{prj.location}/include/**.h"
+        "yaml-cpp/src/**.h", 
+        "yaml-cpp/src/**.cpp", 
+		"yaml-cpp/include/**.h"
 	}
 
 	includedirs { 
-		"%{prj.location}/include",
-		"%{prj.location}/include/yaml-cpp"
+		"yaml-cpp/include",
+		"yaml-cpp/include/yaml-cpp"
 	}
 
 	defines {

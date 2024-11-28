@@ -1,21 +1,20 @@
 project "Glad"
     kind "StaticLib"
     language "C"
-    location "glad"
     staticruntime "On"
     
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
     files {
-        "%{prj.location}/include/glad/glad.h",
-        "%{prj.location}/src/glad.c",
+        "glad/include/glad/glad.h",
+        "glad/src/glad.c",
 
-        "%{prj.location}/include/KHR/khrplatform.h",
+        "glad/include/KHR/khrplatform.h",
     }
 
     includedirs { 
-        "%{prj.location}/include" 
+        "glad/include" 
     }
     
     filter "system:windows"

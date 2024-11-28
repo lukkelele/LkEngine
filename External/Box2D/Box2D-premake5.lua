@@ -3,7 +3,6 @@ project "Box2D"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "On"
-	location "box2d"
 
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
@@ -14,15 +13,15 @@ project "Box2D"
 	}
 
 	files {
-		"%{prj.location}/include/box2d/**.h",
-		"%{prj.location}/src/**.c",
-		"%{prj.location}/src/**.h",
+		"box2d/include/box2d/**.h",
+		"box2d/src/**.c",
+		"box2d/src/**.h",
 	}
 
 	includedirs {
-		"%{prj.location}/include",
-		"%{prj.location}/include/box2d",
-		"%{prj.location}/src",
+		"box2d/include",
+		"box2d/include/box2d",
+		"box2d/src",
 	}
 
 	filter "system:windows"
@@ -35,7 +34,7 @@ project "Box2D"
         warnings "Extra"
 
 		files {
-			"%{prj.location}/src/box2d.natvis",
+			"box2d/src/box2d.natvis",
 		}
 
 		filter "configurations:Debug or configurations:Debug-AddressSanitize or configurations:AutomationTest"

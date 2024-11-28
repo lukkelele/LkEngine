@@ -3,23 +3,22 @@ project "NfdExtended"
     language "C++"
     cppdialect "C++17"
     staticruntime "On"
-    location "NFD-Extended"
 
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
     files { 
-        "%{prj.location}/src/include/nfd.h", 
-        "%{prj.location}/src/include/nfd.hpp" 
+        "nativefiledialog-extended/src/include/nfd.h", 
+        "nativefiledialog-extended/src/include/nfd.hpp" 
     }
 
-    includedirs { "%{prj.location}/src/include/" }
+    includedirs { "nativefiledialog-extended/src/include/" }
 
     filter "system:windows"
 		systemversion "latest"
 
         files { 
-            "%{prj.location}/src/nfd_win.cpp" 
+            "nativefiledialog-extended/src/nfd_win.cpp" 
         }
 
 		filter "configurations:Debug-AdressSanitize"
@@ -35,7 +34,7 @@ project "NfdExtended"
 
         files 
         { 
-            "%{prj.location}/src/nfd_gtk.cpp" 
+            "nativefiledialog-extended/src/nfd_gtk.cpp" 
         }
 
         result, err = os.outputof("pkg-config --cflags gtk+-3.0")

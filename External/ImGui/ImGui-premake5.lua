@@ -2,7 +2,6 @@ project "ImGui"
 	kind "StaticLib"
 	language "C++"
     cppdialect "C++17" 
-	location "imgui"
 
     staticruntime "On"
     configurations { "Debug", "Release", "Dist" }
@@ -16,28 +15,28 @@ project "ImGui"
     }
 
 	files {
-        "%{prj.location}/imconfig.h",
-		"%{prj.location}/imgui.h",
-		"%{prj.location}/imgui.cpp",
-		"%{prj.location}/imgui_draw.cpp",
-		"%{prj.location}/imgui_internal.h",
-		"%{prj.location}/imgui_widgets.cpp",
-		"%{prj.location}/imstb_rectpack.h",
-		"%{prj.location}/imstb_textedit.h",
-		"%{prj.location}/imstb_truetype.h",
-		"%{prj.location}/imgui_demo.cpp",
-        "%{prj.location}/imgui_tables.h",
-        "%{prj.location}/imgui_tables.cpp",
+        "imgui/imconfig.h",
+		"imgui/imgui.h",
+		"imgui/imgui.cpp",
+		"imgui/imgui_draw.cpp",
+		"imgui/imgui_internal.h",
+		"imgui/imgui_widgets.cpp",
+		"imgui/imstb_rectpack.h",
+		"imgui/imstb_textedit.h",
+		"imgui/imstb_truetype.h",
+		"imgui/imgui_demo.cpp",
+        "imgui/imgui_tables.h",
+        "imgui/imgui_tables.cpp",
 
-		"%{prj.location}/backends/imgui_impl_glfw.cpp",
-		"%{prj.location}/backends/imgui_impl_glfw.h",
-		"%{prj.location}/backends/imgui_impl_opengl3.cpp",
-		"%{prj.location}/backends/imgui_impl_opengl3.h",
+		"imgui/backends/imgui_impl_glfw.cpp",
+		"imgui/backends/imgui_impl_glfw.h",
+		"imgui/backends/imgui_impl_opengl3.cpp",
+		"imgui/backends/imgui_impl_opengl3.h",
 	}
 
     includedirs {
-        "%{prj.location}",
-        "%{prj.location}/backends",
+        "imgui",
+        "imgui/backends",
         "%{Dependency.Glfw.IncludeDir}",
         "%{Dependency.Glad.IncludeDir}",
         "%{Dependency.StbImage.IncludeDir}",

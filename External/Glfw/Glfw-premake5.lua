@@ -1,51 +1,50 @@
 project "Glfw"
 	kind "StaticLib"
 	language "C"
-	location "glfw"
 	staticruntime "On"
 
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
 	files {
-		"%{prj.location}/include/GLFW/glfw3.h",
-		"%{prj.location}/include/GLFW/glfw3native.h",
-		"%{prj.location}/src/internal.h",
-		"%{prj.location}/src/platform.h",
-		"%{prj.location}/src/mappings.h",
-		"%{prj.location}/src/context.c",
-		"%{prj.location}/src/init.c",
-		"%{prj.location}/src/input.c",
-		"%{prj.location}/src/monitor.c",
-		"%{prj.location}/src/platform.c",
-		"%{prj.location}/src/vulkan.c",
-		"%{prj.location}/src/window.c",
-		"%{prj.location}/src/egl_context.c",
-		"%{prj.location}/src/osmesa_context.c",
-		"%{prj.location}/src/null_platform.h",
-		"%{prj.location}/src/null_joystick.h",
-		"%{prj.location}/src/null_init.c",
-		"%{prj.location}/src/null_monitor.c",
-		"%{prj.location}/src/null_window.c",
-		"%{prj.location}/src/null_joystick.c",
+		"glfw/include/GLFW/glfw3.h",
+		"glfw/include/GLFW/glfw3native.h",
+		"glfw/src/internal.h",
+		"glfw/src/platform.h",
+		"glfw/src/mappings.h",
+		"glfw/src/context.c",
+		"glfw/src/init.c",
+		"glfw/src/input.c",
+		"glfw/src/monitor.c",
+		"glfw/src/platform.c",
+		"glfw/src/vulkan.c",
+		"glfw/src/window.c",
+		"glfw/src/egl_context.c",
+		"glfw/src/osmesa_context.c",
+		"glfw/src/null_platform.h",
+		"glfw/src/null_joystick.h",
+		"glfw/src/null_init.c",
+		"glfw/src/null_monitor.c",
+		"glfw/src/null_window.c",
+		"glfw/src/null_joystick.c",
 	}
 
 	filter "system:windows"
 		systemversion "latest"
 
 		files {
-			"%{prj.location}/src/win32_init.c",
-			"%{prj.location}/src/win32_module.c",
-			"%{prj.location}/src/win32_joystick.c",
-			"%{prj.location}/src/win32_monitor.c",
-			"%{prj.location}/src/win32_time.h",
-			"%{prj.location}/src/win32_time.c",
-			"%{prj.location}/src/win32_thread.h",
-			"%{prj.location}/src/win32_thread.c",
-			"%{prj.location}/src/win32_window.c",
-			"%{prj.location}/src/wgl_context.c",
-			"%{prj.location}/src/egl_context.c",
-			"%{prj.location}/src/osmesa_context.c"
+			"glfw/src/win32_init.c",
+			"glfw/src/win32_module.c",
+			"glfw/src/win32_joystick.c",
+			"glfw/src/win32_monitor.c",
+			"glfw/src/win32_time.h",
+			"glfw/src/win32_time.c",
+			"glfw/src/win32_thread.h",
+			"glfw/src/win32_thread.c",
+			"glfw/src/win32_window.c",
+			"glfw/src/wgl_context.c",
+			"glfw/src/egl_context.c",
+			"glfw/src/osmesa_context.c"
 		}
 
 		defines { 
@@ -59,16 +58,16 @@ project "Glfw"
 
 		files 
 		{
-			"%{prj.location}/src/x11_init.c",
-			"%{prj.location}/src/x11_monitor.c",
-			"%{prj.location}/src/x11_window.c",
-			"%{prj.location}/src/xkb_unicode.c",
-			"%{prj.location}/src/posix_time.c",
-			"%{prj.location}/src/posix_thread.c",
-			"%{prj.location}/src/glx_context.c",
-			"%{prj.location}/src/egl_context.c",
-			"%{prj.location}/src/osmesa_context.c",
-			"%{prj.location}/src/linux_joystick.c"
+			"glfw/src/x11_init.c",
+			"glfw/src/x11_monitor.c",
+			"glfw/src/x11_window.c",
+			"glfw/src/xkb_unicode.c",
+			"glfw/src/posix_time.c",
+			"glfw/src/posix_thread.c",
+			"glfw/src/glx_context.c",
+			"glfw/src/egl_context.c",
+			"glfw/src/osmesa_context.c",
+			"glfw/src/linux_joystick.c"
 		}
 
 		defines {
