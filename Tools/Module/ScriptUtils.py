@@ -192,10 +192,6 @@ def UnzipFile(filepath, DeleteZipFile=True):
                 AverageMBPerSecond = AverageKBPerSec / 1024
                 AverageSpeedString = "{:.2f} MB/s".format(AverageMBPerSecond)
 
-            #if not bPlatformActionRunner:
-            #    print("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString), end="", flush=True)
-            #else:
-            #    print("\r[{}{}] {:.2f}% ({})     ".format('#' * Done, '.' * (50-Done), Percentage, AverageSpeedString), end="", flush=True)
             if not bPlatformActionRunner:
                 sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
             else:

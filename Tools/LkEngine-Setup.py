@@ -70,10 +70,11 @@ subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
 # Validate Premake installation, change to LkEngine root directory if not already there.
 # Check so platform is not a Github action runner before attempting to re-adjust current path.
 # The action runner pathing is a bit different, with two 'LkEngine' after each other (i.e 'LkEngine/LkEngine').
-CurrentPath = Path.cwd()
-ParentPath = CurrentPath.parents[0]
-if ParentPath.name == "LkEngine" and not bPlatformActionRunner:
-    os.chdir("./..")
+bInProjectRoot = (Path.is_dir(Path("LkEngine/Source")) and Path.is_dir(Path("External")))
+if not bInProjectRoot:
+	os.chdir("..")
+	if not Path.is_dir(Path("LkEngine/Source")):
+		raise Exception(f"Failed to find LkEngine project root directory")
 
 IsPremakeInstalled = PremakeConfiguration.Validate()
 if (IsPremakeInstalled):
