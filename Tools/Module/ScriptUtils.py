@@ -29,7 +29,7 @@ class Colors:
 
 class ScriptLogger:
     def __init__(self, name="Logger"):
-        self.name = name
+        self.name = name.strip()
 
     def _format_message(self, level, message, color):
         return f"{color}[{self.name}] [{level}] {message}{Colors.ENDC}"
