@@ -112,47 +112,53 @@ def DownloadFile(url, filepath):
         raise TypeError("Argument 'url' must be of type list or string")
 
     with open(filepath, 'wb') as f:
-        headers = {'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
+        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"}
         response = requests.get(url, headers=headers, stream=True)
-        total = response.headers.get('content-length')
+        Total = response.headers.get("content-length")
 
-        if total is None:
+        if Total is None:
             f.write(response.content)
         else:
-            downloaded = 0
-            total = int(total)
-            startTime = time.time()
-            for data in response.iter_content(chunk_size=max(int(total/1000), 1024*1024)):
-                downloaded += len(data)
+            Downloaded = 0
+            Total = int(Total)
+            StartTime = time.time()
+            for data in response.iter_content(chunk_size=max(int(Total/1000), 1024*1024)):
+                Downloaded += len(data)
                 f.write(data)
                 
                 try:
-                    done = int(50*downloaded/total) if downloaded < total else 50
-                    percentage = (downloaded / total) * 100 if downloaded < total else 100
+                    Done = int(50 * Downloaded / Total) if Downloaded < Total else 50
+                    Percentage = (Downloaded / Total) * 100 if Downloaded < Total else 100
                 except ZeroDivisionError:
-                    done = 50
-                    percentage = 100
-                elapsedTime = time.time() - startTime
+                    Done = 50
+                    Percentage = 100
+                ElapsedTime = time.time() - StartTime
                 try:
-                    avgKBPerSecond = (downloaded / 1024) / elapsedTime
+                    AverageKBPerSec = (Downloaded / 1024) / ElapsedTime
                 except ZeroDivisionError:
-                    avgKBPerSecond = 0.0
+                    AverageKBPerSec = 0.0
 
-                avgSpeedString = '{:.2f} KB/s'.format(avgKBPerSecond)
-                if (avgKBPerSecond > 1024):
-                    avgMBPerSecond = avgKBPerSecond / 1024
-                    avgSpeedString = '{:.2f} MB/s'.format(avgMBPerSecond)
+                AverageSpeedString = '{:.2f} KB/s'.format(AverageKBPerSec)
+                if (AverageKBPerSec > 1024):
+                    AverageMBPerSecond = AverageKBPerSec / 1024
+                    AverageSpeedString = '{:.2f} MB/s'.format(AverageMBPerSecond)
 
-                if not IsActionRunner:
-                    sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * done, '.' * (50-done), percentage, avgSpeedString))
-                    sys.stdout.flush()
+                print("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString), end="", flush=True)
+                #if not IsActionRunner:
+                #    sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
+                #    sys.stdout.flush()
+                #else:
+                #    print("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
 
-    if not IsActionRunner:
-        sys.stdout.write('\n')
+    print()
+    #if not IsActionRunner:
+    #    sys.stdout.write('\n')
+    #else:
+    #    print()
 
 
 def UnzipFile(filepath, DeleteZipFile=True):
-    ZipFilePath = os.path.abspath(filepath) # get full path of files
+    ZipFilePath = os.path.abspath(filepath)
     ZipFileLocation = os.path.dirname(ZipFilePath)
 
     ZipFileContent = dict()
@@ -163,41 +169,45 @@ def UnzipFile(filepath, DeleteZipFile=True):
 
         ZipFileContentSize = sum(ZipFileContent.values())
         ExtractedContentSize = 0
-        startTime = time.time()
-        for zippedFileName, zippedFileSize in ZipFileContent.items():
-            UnzippedFilePath = os.path.abspath(f"{ZipFileLocation}/{zippedFileName}")
-            os.makedirs(os.path.dirname(UnzippedFilePath), exist_ok=True)
+        StartTime = time.time()
+        for ZippedFileName, ZippedFileSize in ZipFileContent.items():
+            UnZippedFilePath = os.path.abspath(f"{ZipFileLocation}/{ZippedFileName}")
+            os.makedirs(os.path.dirname(UnZippedFilePath), exist_ok=True)
 
-            if os.path.isfile(UnzippedFilePath):
-                ZipFileContentSize -= zippedFileSize
+            if os.path.isfile(UnZippedFilePath):
+                ZipFileContentSize -= ZippedFileSize
             else:
-                ZipFileFolder.extract(zippedFileName, path=ZipFileLocation, pwd=None)
-                ExtractedContentSize += zippedFileSize
+                ZipFileFolder.extract(ZippedFileName, path=ZipFileLocation, pwd=None)
+                ExtractedContentSize += ZippedFileSize
             try:
-                done = int(50*ExtractedContentSize/ZipFileContentSize)
-                percentage = (ExtractedContentSize / ZipFileContentSize) * 100
+                Done = int(50*ExtractedContentSize/ZipFileContentSize)
+                Percentage = (ExtractedContentSize / ZipFileContentSize) * 100
             except ZeroDivisionError:
-                done = 50
-                percentage = 100
-            elapsedTime = time.time() - startTime
+                Done = 50
+                Percentage = 100
+            ElapsedTime = time.time() - StartTime
 
             try:
-                avgKBPerSecond = (ExtractedContentSize / 1024) / elapsedTime
+                AverageKBPerSec = (ExtractedContentSize / 1024) / ElapsedTime
             except ZeroDivisionError:
-                avgKBPerSecond = 0.0
+                AverageKBPerSec = 0.0
 
-            avgSpeedString = '{:.2f} KB/s'.format(avgKBPerSecond)
+            AverageSpeedString = "{:.2f} KB/s".format(AverageKBPerSec)
 
-            if (avgKBPerSecond > 1024):
-                avgMBPerSecond = avgKBPerSecond / 1024
-                avgSpeedString = '{:.2f} MB/s'.format(avgMBPerSecond)
+            if (AverageKBPerSec > 1024):
+                AverageMBPerSecond = AverageKBPerSec / 1024
+                AverageSpeedString = "{:.2f} MB/s".format(AverageMBPerSecond)
 
-            if not IsActionRunner:
-                sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * done, '.' * (50-done), percentage, avgSpeedString))
-                sys.stdout.flush()
+            print("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString), end="", flush=True)
+            #if not IsActionRunner:
+            #    sys.stdout.write("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
+            #    sys.stdout.flush()
+            #else
+            #    printf("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
 
-    if not IsActionRunner:
-        sys.stdout.write('\n')
+    print()
+    #if not IsActionRunner:
+    #    sys.stdout.write('\n')
 
     if DeleteZipFile:
         os.remove(ZipFilePath)

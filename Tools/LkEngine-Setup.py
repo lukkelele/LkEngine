@@ -67,17 +67,13 @@ PythonConfiguration.IsInstalled()
 Logger.info("Updating git submodules")
 subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
 
-# Validate Premake installation.
-# Change to LkEngine root directory if not already there.
+# Validate Premake installation, change to LkEngine root directory if not already there.
+# Check so platform is not a Github action runner before attempting to re-adjust current path.
+# The action runner pathing is a bit different, with two 'LkEngine' after each other (i.e 'LkEngine/LkEngine').
 CurrentPath = Path.cwd()
-print(f"CurrentPath: {CurrentPath}")
 ParentPath = CurrentPath.parents[0]
-print(f"Directory Entries: {list(Path.cwd().iterdir())}")
-print(f"Parent Paths: {list(CurrentPath.parents)}")
 if ParentPath.name == "LkEngine" and not bPlatformActionRunner:
     os.chdir("./..")
-print(f"\nCurrentPath (2): {CurrentPath}")
-print(f"\nDirectory Entries (2): {list(Path.cwd().iterdir())}")
 
 IsPremakeInstalled = PremakeConfiguration.Validate()
 if (IsPremakeInstalled):
