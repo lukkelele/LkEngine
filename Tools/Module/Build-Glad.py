@@ -29,7 +29,7 @@ OutputDir = os.path.abspath(os.path.join("..", "..", "External", "Glad", "glad")
 os.makedirs(OutputDir, exist_ok=True)
 
 # Platform-specific options.
-PlatformWindows = platform.system() == "Windows"
+PlatformWindows = (platform.system() == "Windows")
 
 def _IsGladModuleInstalled():
     """Checks if the Glad module is installed."""
@@ -102,6 +102,7 @@ def BuildGlad():
     except subprocess.CalledProcessError as e:
         Logger.error(f"[GLAD] Error occurred during the build process: {e}")
         return 1 # Return non-zero to indicate error.
+
 
 if __name__ == "__main__":
     BuildGlad()

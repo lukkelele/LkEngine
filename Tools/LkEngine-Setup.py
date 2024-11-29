@@ -12,6 +12,8 @@ import subprocess
 import platform
 from pathlib import Path
 
+bPlatformActionRunner = (os.environ.get("CI") == "true")
+
 def IsPythonPackageInstalled(PackageName):
     """Check if a Package is installed using pip."""
     try:
@@ -33,7 +35,7 @@ for RequiredPythonPackage in RequiredPythonDependencies:
 
 import colorama
 from colorama import Fore, Back, Style
-colorama.init(strip=os.environ.get("CI") == "true")
+colorama.init(strip="true" if bPlatformActionRunner else "false")
 
 # Add 'Tools/Module' to path.
 sys.path.append(os.path.join(os.path.dirname(__file__), "Module"))
@@ -68,9 +70,14 @@ subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
 # Validate Premake installation.
 # Change to LkEngine root directory if not already there.
 CurrentPath = Path.cwd()
+print(f"CurrentPath: {CurrentPath}")
 ParentPath = CurrentPath.parents[0]
-if ParentPath.name == "LkEngine":
+print(f"Directory Entries: {list(Path.cwd().iterdir())}")
+print(f"Parent Paths: {list(CurrentPath.parents)}")
+if ParentPath.name == "LkEngine" and not bPlatformActionRunner:
     os.chdir("./..")
+print(f"\nCurrentPath (2): {CurrentPath}")
+print(f"\nDirectory Entries (2): {list(Path.cwd().iterdir())}")
 
 IsPremakeInstalled = PremakeConfiguration.Validate()
 if (IsPremakeInstalled):
