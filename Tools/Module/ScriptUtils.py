@@ -15,7 +15,7 @@ from zipfile import ZipFile
 
 from colorama import Fore, Back, Style
 
-IsActionRunner = (os.environ.get("CI") == "true")
+bPlatformActionRunner = (os.environ.get("CI") == "true")
 
 class Colors:
     HEADER = '\033[95m'
@@ -143,18 +143,12 @@ def DownloadFile(url, filepath):
                     AverageMBPerSecond = AverageKBPerSec / 1024
                     AverageSpeedString = '{:.2f} MB/s'.format(AverageMBPerSecond)
 
-                print("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString), end="", flush=True)
-                #if not IsActionRunner:
-                #    sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
-                #    sys.stdout.flush()
-                #else:
-                #    print("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
+                if not bPlatformActionRunner:
+                    sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
+                else:
+                    sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('#' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
 
-    print()
-    #if not IsActionRunner:
-    #    sys.stdout.write('\n')
-    #else:
-    #    print()
+    sys.stdout.write('\n')
 
 
 def UnzipFile(filepath, DeleteZipFile=True):
@@ -198,16 +192,16 @@ def UnzipFile(filepath, DeleteZipFile=True):
                 AverageMBPerSecond = AverageKBPerSec / 1024
                 AverageSpeedString = "{:.2f} MB/s".format(AverageMBPerSecond)
 
-            print("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString), end="", flush=True)
-            #if not IsActionRunner:
-            #    sys.stdout.write("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
-            #    sys.stdout.flush()
-            #else
-            #    printf("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
+            #if not bPlatformActionRunner:
+            #    print("\r[{}{}] {:.2f}% ({})     ".format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString), end="", flush=True)
+            #else:
+            #    print("\r[{}{}] {:.2f}% ({})     ".format('#' * Done, '.' * (50-Done), Percentage, AverageSpeedString), end="", flush=True)
+            if not bPlatformActionRunner:
+                sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
+            else:
+                sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('#' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
 
-    print()
-    #if not IsActionRunner:
-    #    sys.stdout.write('\n')
+    sys.stdout.write('\n')
 
     if DeleteZipFile:
         os.remove(ZipFilePath)
