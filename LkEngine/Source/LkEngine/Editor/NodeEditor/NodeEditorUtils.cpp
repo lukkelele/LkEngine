@@ -2,7 +2,7 @@
 #include "NodeEditorUtils.h"
 
 #include <imgui_internal.h>
-#include <imgui_node_editor_internal.h>
+#include <imgui-node-editor/imgui_node_editor_internal.h>
 
 
 namespace LkEngine::UI::Nodes {
@@ -21,9 +21,9 @@ namespace LkEngine::UI::Nodes {
 
     void DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& b, IconType type, bool filled, ImU32 color, ImU32 innerColor)
     {
-        auto rect = ImRect(a, b);
-        auto rect_x = rect.Min.x;
-        auto rect_y = rect.Min.y;
+        ImRect rect = ImRect(a, b);
+        float rect_x = rect.Min.x;
+        float rect_y = rect.Min.y;
         auto rect_w = rect.Max.x - rect.Min.x;
         auto rect_h = rect.Max.y - rect.Min.y;
         auto rect_center_x = (rect.Min.x + rect.Max.x) * 0.5f;

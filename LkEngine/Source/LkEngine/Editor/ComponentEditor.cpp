@@ -28,7 +28,8 @@ namespace LkEngine {
 
     void LComponentEditor::OnRenderUI()
     {
-        static std::unordered_map<std::string, TObjectPtr<LMaterial>> MaterialMap{};
+        //static std::unordered_map<std::string, TObjectPtr<LMaterial>> MaterialMap{};
+        static std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>> MaterialMap{};
 
         static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;
         if (ImGui::TreeNodeEx("Materials", treeNodeFlags))
@@ -36,8 +37,12 @@ namespace LkEngine {
             static std::string SelectedMaterial = "";
 
             const int RetrievedMaterials = LMaterialLibrary::Get().GetMaterials(MaterialMap);
-            for (auto& [ MaterialName, Material ] : MaterialMap)
+            for (auto& [ MatAssetHandle, MaterialAsset ] : MaterialMap)
             {
+				//const std::string MaterialName = MaterialAsset->GetMaterial()->GetName();
+				const TObjectPtr<LMaterial>& Material = MaterialAsset->GetMaterial();
+				const std::string MaterialName = Material->GetName();
+
                 //const std::string& MaterialName = MaterialEntry.first;
 			    const bool bIsSelected = (MaterialName == SelectedMaterial);
 

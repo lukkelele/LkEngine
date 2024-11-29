@@ -370,9 +370,8 @@ namespace LkEngine {
 		/* Main menu. */
 		UI_MainMenuBar();
 
-		/*-----------------------------------------------------------------------------
+		/*----------------------------------------------------------------------------
 			Sidebar1
-							Default to the left.
 		-----------------------------------------------------------------------------*/
 		static const ImGuiID DockspaceID_Sidebar1 = ImGui::GetID("Dockspace_LeftSidebar");
 		static bool ResetDockspace_LeftSidebar = true;
@@ -418,9 +417,8 @@ namespace LkEngine {
 		}
 		ImGui::End(); /* Left Sidebar. */
 
-		/*-----------------------------------------------------------------------------
+		/*----------------------------------------------------------------------------
 			Sidebar2
-							Default to the right.
 		-----------------------------------------------------------------------------*/
 		PrepareForRightSidebar();
 		ImGui::Begin(UI::Sidebar2, nullptr, UI::SidebarFlags);
@@ -465,9 +463,9 @@ namespace LkEngine {
 		LSceneManagerPanel::DrawComponents(SelectionContext::SelectedEntity);
 #endif
 
-		/*-----------------------------------------------------------------------------
+		/*----------------------------------------------------------------------------
 			Main Window
-									Editor Viewport
+									 Editor Viewport
 		-----------------------------------------------------------------------------*/
 		UI::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 		UI::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -532,6 +530,8 @@ namespace LkEngine {
 		/// FIXME: What does this even do?
 		// Take care of tabs here.
 		TabManager.End();
+
+		UI::RenderMessageBoxes();
 
 		ImGui::End(); // Viewport
 		HandleExternalWindows();
@@ -1033,11 +1033,11 @@ namespace LkEngine {
 		UI::PopID();
 	}
 
-	void LEditorLayer::SetUpdateWindowFlag(const bool flag)
+	void LEditorLayer::SetUpdateWindowFlag(const bool Flag)
 	{
-		// Window width and height has been changed as this function has been called,
-		// therefore need to update the Viewport bounds
-		bShouldUpdateWindowSizes = flag;
+		/* Window width and height has been changed as this function has been called,
+		 * therefore need to update the Viewport bounds. */
+		bShouldUpdateWindowSizes = Flag;
 
 		ViewportBounds[0] = { 0, 0 };
 		ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
@@ -1076,8 +1076,39 @@ namespace LkEngine {
 
 		LK_CORE_INFO_TAG("Editor", "Creating empty project");
 		Project = TObjectPtr<LProject>::Create();
-		Project->SetName(StarterProjectName);
+		//Project->SetName(StarterProjectName);
+		Project->Load(LK_FORMAT_STRING("Projects/{}", StarterProjectName));
 		LProject::SetActive(Project);
+	}
+
+	void LEditorLayer::SaveProjectAs()
+	{
+	}
+
+	void LEditorLayer::SaveSceneAs()
+	{
+		namespace fs = std::filesystem;
+		LK_INFO("Saving current scene");
+		fs::path Filepath = LFileSystem::SaveFileDialog({ { "LkEngine Scene", "lkscene" } });
+		if (Filepath.empty())
+		{
+			return;
+		}
+
+		if (!Filepath.has_extension())
+		{
+			Filepath += LScene::FILE_EXTENSION;
+		}
+
+		LK_CORE_DEBUG("Scene filepath: {}", Filepath.string());
+		LSceneSerializer Serializer(EditorScene);
+
+	#if 0
+		fs::path path = Filepath;
+		UpdateWindowTitle(path.filename().string());
+		m_SceneFilePath = filepath.string();
+		std::replace(m_SceneFilePath.begin(), m_SceneFilePath.end(), '\\', '/');
+	#endif
 	}
 
 	void LEditorLayer::UI_ShowViewportAndWindowDetails()
@@ -1125,6 +1156,51 @@ namespace LkEngine {
 			ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", LastSidebarRightSize.X, LastSidebarRightSize.Y);
 		}
 		ImGui::EndGroup();
+	}
+
+	void LEditorLayer::UI_AboutPopup()
+	{
+		#define LK_ENGINE_VERSION "0.1.2" /* @FIXME: PLACE IN PROJECT CONFIG */
+		UI::ShowMessageBox("About", []()
+		{
+			/* Section: Title. */
+			UI::Font::Push("Large");
+			ImGui::Text("LkEngine %s", LK_ENGINE_VERSION);
+			UI::Font::Pop();
+
+			/* Section: About description. */
+			ImGui::Separator();
+			ImGui::TextWrapped("Game and rendering engine written in C++20.");
+			ImGui::Separator();
+
+			/* Section: Written By. */
+			UI::Font::Push("Bold");
+			ImGui::Text("Developed by");
+			UI::Font::Pop();
+			ImGui::BulletText("Lukas Gunnarsson (Lukkelele)");
+			ImGui::Separator();
+
+			/* Section: Software Info. */
+			if (ImGui::CollapsingHeader("Software Information", nullptr))
+			{
+				ImGui::TextColored(ImVec4(0.70f, 0.70f, 0.70f, 1.0f), "Contains source code provided by");
+				//ImGui::Text("ImGui: %s (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+				ImGui::BulletText("ImGui: %s (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+
+				/* TODO: Place dependencies here. */
+				UI::Font::Push("Italic");
+				ImGui::Text("... list dependencies here");
+				UI::Font::Pop();
+
+				//ImGui::Separator();
+			}
+
+			/* Section: OK Button. */
+			if (ImGui::Button("OK"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+		});
 	}
 
 	void LEditorLayer::UI_ShowEditorWindowsDetails()
@@ -1332,6 +1408,7 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_MainMenuBar()
 	{
+		namespace fs = std::filesystem;
 		if (ImGui::BeginMainMenuBar())
 		{
 			MenuBarSize.X = ImGui::GetCurrentWindow()->Size.x;
@@ -1361,6 +1438,7 @@ namespace LkEngine {
 				/* Load existing project. */
 				if (ImGui::MenuItem("Load"))
 				{
+					const fs::path Filepath = LFileSystem::OpenFileDialog({ { "LkEngine Project", "lkproj" } });
 				}
 
 				ImGui::EndMenu(); /* Project. */
@@ -1400,10 +1478,29 @@ namespace LkEngine {
 			{
 				if (ImGui::MenuItem("New"))
 				{
+					LK_CORE_DEBUG("Creating new scene");
+					fs::path Filepath = LFileSystem::SaveFileDialog({ { "LkEngine Scene", "lkscene" } });
+					if (Filepath.empty())
+					{
+						return;
+					}
+
+					if (!Filepath.has_extension())
+					{
+						Filepath += LScene::FILE_EXTENSION;
+					}
+
+					LK_CORE_DEBUG("New scene location: {}", Filepath.string());
+
 				}
 				if (ImGui::MenuItem("Load"))
 				{
 					static constexpr bool IsEditorScene = true;
+
+					LK_CORE_DEBUG_TAG("Editor", "Loading scene");
+					const fs::path Filepath = LFileSystem::OpenFileDialog({ { "LkEngine Scene", "lkscene" } });
+
+					/* Prompt file dialog. */
 					LK_CORE_ASSERT(false, "FIX LOADING OF SCENE");
 					TObjectPtr<LScene> NewScene = TObjectPtr<LScene>::Create("", IsEditorScene);
 					LSceneSerializer SceneSerializer(NewScene);
@@ -1420,8 +1517,15 @@ namespace LkEngine {
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::MenuItem("About"))
+			{
+				LK_CORE_DEBUG("Opening 'About' popup");
+				UI_AboutPopup();
+			}
+
 			/* Horizontal space. */
 			ImGui::Dummy(ImVec2(40, 0));
+
 			if (ImGui::BeginMenu(std::string("Project: " + Project->GetName()).c_str()))
 			{
 				ImGui::EndMenu(); /* Project + Name. */

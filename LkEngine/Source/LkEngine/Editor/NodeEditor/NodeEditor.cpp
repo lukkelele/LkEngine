@@ -4,6 +4,8 @@
 
 #include <imgui/imgui_internal.h>
 
+#include <imgui-node-editor/imgui_node_editor_internal.h>
+
 
 namespace LkEngine {
     

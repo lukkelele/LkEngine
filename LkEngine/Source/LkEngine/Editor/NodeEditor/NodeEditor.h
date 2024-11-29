@@ -3,9 +3,6 @@
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
-#include <imgui-node-editor/imgui_node_editor.h>
-#include <imgui-node-editor/imgui_node_editor_internal.h>
-
 #include "NodeEditorContext.h"
 #include "Nodes.h"
 

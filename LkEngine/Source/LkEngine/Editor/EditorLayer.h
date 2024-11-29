@@ -65,33 +65,29 @@ namespace LkEngine {
 		virtual void OnRender() override;
 		virtual void OnRenderUI() override;
 
+		FORCEINLINE TObjectPtr<LScene> GetEditorScene() { return EditorScene; }
 		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
-
-		void SetScene(TObjectPtr<LScene> InScene);
-
-		FORCEINLINE TObjectPtr<LScene> GetEditorScene() 
-		{ 
-			return EditorScene; 
-		}
 
 		void SetUpdateWindowFlag(bool flag);
 
 		FORCEINLINE bool IsEnabled() const { return bEnabled; }
 
-		FORCEINLINE EEditorWindowType GetCurrentWindowType() const { return CurrentWindowType; }
-
 		/* FIXME: Update all of these, refactor away. */
+		FORCEINLINE EEditorWindowType GetCurrentWindowType() const { return CurrentWindowType; }
 		FORCEINLINE LVector2 GetEditorWindowSize() const { return EditorViewport->GetSize(); }
 
 		FORCEINLINE static LEditorLayer* Get()
 		{
-			LK_VERIFY(Instance, "Invalid editor instance");
+			LK_CORE_ASSERT(Instance, "Editor not valid");
 			return Instance;
 		}
 
+		void SetScene(TObjectPtr<LScene> InScene);
 		void NewScene(const std::string& SceneName = "Untitled");
 		void EmptyProject();
 		void StarterProject();
+		void SaveProjectAs();
+		void SaveSceneAs();
 
 	private:
 		void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);
@@ -99,6 +95,7 @@ namespace LkEngine {
 
 		void UI_MainMenuBar();
 		void UI_HandleManualWindowResize();
+		void UI_AboutPopup();
 
 		void UI_SceneContent();
 		void UI_CreateMenu();
