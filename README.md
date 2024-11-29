@@ -14,21 +14,22 @@
 
 ## Content
 1. [Project](#project)
-2. [Setup and Installation](#setup-and-installation)
-    - [Prerequisites](#prerequisites)
-	- [Building LkEngine](#building-lkengine)
-3. [Todo](#todo)
+2. [Setup and Installation](#Setup-and-Installation)
+    - [Windows](#Platform-Windows)
+	- [Linux](#Platform-Linux)
+	- [Dependencies](#Engine-Dependencies)
+3. [Engine Features](#Engine-Features)
 4. [Development](#development)
     - [LkEngine](#lkengine-development)
     - [LukkelEngine (old)](#lukkelengine-old)
 
 ---
 
-# Project 
+# Project <a id="Project"></a>
 
 **LkEngine** (pronounced *_Lukkel-Engine_*) is a game engine written in C\++20. <br>
 An earlier version existed called **LukkelEngine** that I scrapped and began anew.<br>
-The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast while doing it.<br>
+The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast doing it.<br>
 I have lots of ideas that I want to see if they could work and this project has been a very good environment for me to try stuff out.
 <br>
 <br>
@@ -42,15 +43,13 @@ With features such as:
 - Crash and error handling.
 - Multiple platform support.
 
-This is somewhat of a playground for me. I will not (always) conform to standard practices as otherwise is a good rule to follow for a _real_ project.
-Custom data structures are used as a way for me to learn but also to understand **_how they work_**.
-Implementing your own data structures is a great way to learn move and copy semantics and to see potential pitfalls in both.
+This is somewhat of a playground for me. I will not always conform to standard practices as otherwise is a good rule to follow for a _real_ project.
 
-## Setup and Installation
+## Setup and Installation <a id="Setup-and-Installation"></a>
 For development I've been using Visual Studio Community 22 (64-bit).<br>
 Other IDE's should in theory be able to build and run the engine but I cannot make any promises.
 
-### Windows
+### Windows <a id="Platform-Windows"></a>
 Make sure the following are installed:
 
 | Package | Link                          |
@@ -69,18 +68,17 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 	```
 2. Enter the **Tools** directory.<br>
 3. Run the setup script **LkEngine-Setup.bat**.<br>
-   It is also possible to run the script directly in a shell which yields the same result, as the bat script runs **LkEngine-Setup.py**.
+   It is also possible to run the script directly in a shell which yields the same result as the bat script runs **LkEngine-Setup.py**.
 	```shell
 	python LkEngine-Setup.py
     ```
-4. The setup script will ask to install **Premake5** if not present, answer **(y)** on the prompt to continue.
-5. All dependencies are then handled by the script. The built static libraries are moved to their desired spot inside the _'External'_ directory. 
-6. Done!
+4. All dependencies are then handled by the script. The built static libraries are moved to their desired spot inside the _'External'_ directory. 
+5. Done! :white_check_mark:
 
-### Linux 
-:warning: TODO
+### Linux <a id="Platform-Linux"></a>
+:warning: **TODO**
 
-## Dependencies
+### Dependencies <a id="Engine-Dependencies"></a>
 - [glfw3](https://github.com/glfw/glfw)
 - [glad](https://github.com/Dav1dde/glad)
 - [spdlog](https://github.com/gabime/spdlog)
@@ -96,7 +94,9 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 - [box2d](https://github.com/erincatto/box2d)
 - [python3](https://www.python.org/downloads/)
 
-## Features
+---
+
+## Engine Features
 
 ### Available
 :white_check_mark:
