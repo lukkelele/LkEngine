@@ -92,6 +92,7 @@ if (IsPremakeInstalled):
             sys.exit(1) 
 
         Utils.PrintBanner(f"Build Complete: {Package['name']}", PackageBannerSize, Fore.GREEN, PackageBannerChar)
+        print()
 
     # Engine modules built, continue on with generating project files.
     Logger.info("Built all engine modules")
