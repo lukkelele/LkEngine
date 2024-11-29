@@ -1,9 +1,11 @@
 # LkEngine :shaved_ice: 
 > Game Engine written in C++20<br>
->
 > Upgraded version of my first engine **LukkelEngine** ([repo](https://github.com/lukkelele/LukkelEngine/tree/main)).<br>
 
 ---
+
+![LkEngine-AutomationTest](https://github.com/lukkelele/LkEngine/actions/workflows/LkEngine-AutomationTest.yml/badge.svg)
+
 
 ## Platform Support
 #### :white_check_mark: Windows<br>
@@ -84,14 +86,14 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 - [spdlog](https://github.com/gabime/spdlog)
 - [ImGui](https://github.com/ocornut/imgui)
 - [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
-- [ImFileDialog](https://github.com/lukkelele/ImFileDialog)
 - [imgui-node-editor](https://github.com/thedmd/imgui-node-editor)
+- [nativefiledialog-extended](https://github.com/btzy/nativefiledialog-extended)
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp)
 - [glm](https://github.com/g-truc/glm)
 - [entt](https://github.com/skypjack/entt)
 - [Tracy](https://github.com/wolfpld/tracy)
 - [assimp](https://github.com/assimp/assimp)
-- [box2D](https://github.com/erincatto/box2d)
+- [box2d](https://github.com/erincatto/box2d)
 - [python3](https://www.python.org/downloads/)
 
 ## Features
@@ -118,7 +120,6 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 <!------------------------------------------------------------>
 
 ---
-
 
 ## Misc
 
