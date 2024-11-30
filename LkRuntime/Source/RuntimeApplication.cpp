@@ -11,7 +11,7 @@
 class LRuntimeApplication : public LkEngine::LApplication
 {
 public:
-    LRuntimeApplication(LkEngine::ApplicationSpecification Specification)
+    LRuntimeApplication(LkEngine::FApplicationSpecification Specification)
         : LkEngine::LApplication(Specification) 
 		, ProjectPath(Specification.StartProject)
     {
@@ -33,7 +33,7 @@ private:
 
 int main(int Argc, char* Argv[])
 {
-    LkEngine::ApplicationSpecification ApplicationSpec = {
+    LkEngine::FApplicationSpecification ApplicationSpec = {
         .Title = "LkEditor",
         .Width = 1920,
         .Height = 1080,
