@@ -1,4 +1,4 @@
-name: LkEngine-AutomationTest
+name: AutomationTest
 
 on:
   push:
