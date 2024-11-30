@@ -4,8 +4,8 @@
 
 ---
 
-![LkEngine-AutomationTest](https://github.com/lukkelele/LkEngine/actions/workflows/LkEngine-AutomationTest.yml/badge.svg)
-![LkEngine-AutomationTest](https://github.com/lukkelele/LkEngine/actions/workflows/LkEngine-CoreTests.yml/badge.svg)
+![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
+![CoreTests](https://github.com/lukkelele/LkEngine/actions/workflows/CoreTests.yml/badge.svg)
 
 
 ## Platform Support

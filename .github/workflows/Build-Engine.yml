@@ -1,4 +1,4 @@
-name: Engine Build
+name: Build-Engine
 
 on:
   push:
