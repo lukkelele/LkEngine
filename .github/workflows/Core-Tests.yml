@@ -25,6 +25,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
 
+    - name: Locate MSBuild
+      id: msbuild-locate
+      run: |
+        echo "Locating MSBuild..."
+        $msbuild = &"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+        echo "MSBuild Path: $msbuild"
+        echo "::set-output name=msbuild::$msbuild"
+      shell: powershell
+
     - name: Build Engine 
       run: |
         python Tools/LkEngine-Setup.py
