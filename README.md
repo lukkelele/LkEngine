@@ -5,6 +5,7 @@
 ---
 
 ![LkEngine-AutomationTest](https://github.com/lukkelele/LkEngine/actions/workflows/LkEngine-AutomationTest.yml/badge.svg)
+![LkEngine-AutomationTest](https://github.com/lukkelele/LkEngine/actions/workflows/LkEngine-CoreTests.yml/badge.svg)
 
 
 ## Platform Support
@@ -43,7 +44,7 @@ With features such as:
 - Crash and error handling.
 - Multiple platform support.
 
-This is somewhat of a playground for me. I will not always conform to standard practices as otherwise is a good rule to follow for a _real_ project.
+This is somewhat of a playground for me. I will not always conform to standard practices as otherwise is a good rule to follow for a "_real_" project.
 
 ## Setup and Installation <a id="Setup-and-Installation"></a>
 For development I've been using Visual Studio Community 22 (64-bit).<br>
