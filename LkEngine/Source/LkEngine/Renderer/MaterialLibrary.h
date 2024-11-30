@@ -22,17 +22,13 @@ namespace LkEngine {
         void Initialize();
         void Add(const TObjectPtr<LMaterial> InMaterial);
 
-        TObjectPtr<LMaterial> GetMaterial(std::string_view InMaterialName);
+        TObjectPtr<LMaterialAsset> GetMaterial(const FAssetHandle Handle);
+        TObjectPtr<LMaterialAsset> GetMaterial(std::string_view InMaterialName);
 
-        FORCEINLINE std::unordered_map<std::string, TObjectPtr<LMaterial>>& GetMaterials() 
-        { 
-            return m_Collection; 
-        }
-
-        FORCEINLINE int GetMaterials(std::unordered_map<std::string, TObjectPtr<LMaterial>>& InMaterialMap) const
+        FORCEINLINE int GetMaterials(std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>>& InMaterialMap) const
         { 
             InMaterialMap.clear();
-            InMaterialMap = m_Collection;
+            InMaterialMap = m_LoadedMaterialAssets;
 
             return static_cast<int>(InMaterialMap.size());
         }
@@ -42,18 +38,15 @@ namespace LkEngine {
             return m_LoadedMaterialAssets; 
         }
 
-        /// TODO
-        /** Return the base (NULL) material. */
-        TObjectPtr<LMaterial> GetBaseMaterial();
+		std::string DumpLoadedAssets();
 
     private:
         /** Initialization for basic materials. */
         void CreateBasicMaterials();
 
     private:
-        /// @TODO: Why on earth is the key a string? FIX !!!
-        inline static std::unordered_map<std::string, TObjectPtr<LMaterial>> m_Collection;
 		inline static std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>> m_LoadedMaterialAssets;
+        inline static std::unordered_map<std::string, FAssetHandle> m_Collection;
 
         LCLASS(LMaterialLibrary)
     };

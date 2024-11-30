@@ -152,7 +152,7 @@ namespace LkEngine {
 
 		static void SetAPI(ERendererAPI InRendererApiType);
 
-		FORCEINLINE static LString GetName()
+		FORCEINLINE static std::string GetName()
 		{
 			switch (RendererAPI)
 			{

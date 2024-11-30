@@ -54,14 +54,14 @@ namespace LkEngine {
 	class LApplication : public LObject
 	{
 	public:
-		LApplication(const ApplicationSpecification& InSpecification = ApplicationSpecification());
+		LApplication(const FApplicationSpecification& InSpecification = FApplicationSpecification());
 		~LApplication();
 
 		virtual void Initialize();
 		virtual void Run();
 		virtual void Shutdown();
 
-		bool ReadConfigurationFile();
+		bool ReadConfigurationFile(FApplicationSpecification& InSpecification);
 		void SetupDirectories();
 
 		void OnEvent(LEvent& e);
@@ -104,15 +104,12 @@ namespace LkEngine {
 			}
 		}
 
-		LString GenerateCrashDump();
+		std::string GenerateCrashDump();
 
 		FORCEINLINE LWindow& GetWindow() { return *Window; }
 		FORCEINLINE GLFWwindow* GetGlfwWindow() { return Window->GetGlfwWindow(); }
 
-		const ApplicationSpecification& GetSpecification() const
-		{
-			return Specification;
-		}
+		FORCEINLINE const FApplicationSpecification& GetSpecification() const { return Specification; }
 
 		FTimestep GetTimestep() const { return Timestep; } /// TODO: MOVE ELSEWHERE
 		uint32_t GetCurrentFrameIndex() const { return m_CurrentFrameIndex; }
@@ -125,7 +122,7 @@ namespace LkEngine {
 		static LApplication* Get() { return Instance; }
 
 	private:
-		ApplicationSpecification Specification{};
+		FApplicationSpecification Specification{};
 
 		bool bRunning = false;
 

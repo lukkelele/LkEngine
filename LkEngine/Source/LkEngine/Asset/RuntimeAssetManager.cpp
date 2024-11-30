@@ -248,11 +248,8 @@ namespace LkEngine {
     {
 		LK_CORE_INFO_TAG("RuntimeAssetManager", "Creating primitive shapes");
 
-		TObjectPtr<LProject> project = LProject::Current();
-
 		if (TObjectPtr<LScene> CurrentScene = LScene::GetActiveScene())
 		{
-			LK_CORE_WARN_TAG("RuntimeAssetManager", "Loading primitive shapes for project {}", project->GetName());
 			/* Create cube. */
 			std::filesystem::path FilePath("Assets/Meshes/Cube.gltf");
 			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Importing cube from: '{}'", FilePath.string());
@@ -281,14 +278,26 @@ namespace LkEngine {
 
 			/* Assign the Cube with the 'BaseMaterial' */
 			LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
-			TObjectPtr<LMaterial> BaseMaterial = LMaterialLibrary::Get().GetBaseMaterial();
-			/* TODO: Fix the retrieval of the texture here, should not be a raw string. */
-            BaseMaterial->SetTexture(TextureLibrary.GetTexture("wood-container_512x512"));
-			TObjectPtr<LMaterialAsset> BaseMaterialAsset = TObjectPtr<LMaterialAsset>::Create(BaseMaterial);
 
-			//Cube->Materials->SetMaterial(0, BaseMaterialAsset->Handle);
+		#if 0
+			TObjectPtr<LMaterialAsset> BaseMaterialAsset = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL);
+			TObjectPtr<LMaterial> BaseMaterial = BaseMaterialAsset->As<LMaterial>();
+		#else
+			TObjectPtr<LMaterialAsset> BaseMaterialAsset = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL);
+			TObjectPtr<LMaterial> BaseMaterial = BaseMaterialAsset->GetMaterial();
+		#endif
+			//TObjectPtr<LMaterial> BasMatRef = BaseMaterial;
+			LK_CORE_VERIFY(BaseMaterial, "BaseMaterial is not valid");
+
+			/* TODO: Fix the retrieval of the texture here, should not be a raw string. */
+            TObjectPtr<LTexture2D> WoodTexture = TextureLibrary.GetTexture("wood-container_512x512");
+			LK_CORE_VERIFY(WoodTexture);
+			BaseMaterial->SetTexture(WoodTexture.As<LTexture>());
+
+			//TObjectPtr<LMaterialAsset> BaseMaterialAsset = TObjectPtr<LMaterialAsset>::Create(BaseMaterial);
+
 			Cube->Materials->SetMaterial(0, BaseMaterialAsset->Handle);
-			LK_CORE_ASSERT(BaseMaterial->GetTexture(""), "BaseMaterial texture is nullptr");
+			LK_CORE_VERIFY(BaseMaterial->GetTexture(""), "BaseMaterial texture is not valid");
 
 			/* Base material metadata in the asset registry. */
 			FAssetMetadata BaseMaterialAssetMetadata;

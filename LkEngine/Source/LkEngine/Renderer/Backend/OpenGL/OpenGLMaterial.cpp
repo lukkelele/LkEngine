@@ -54,9 +54,16 @@ namespace LkEngine {
 
     void LOpenGLMaterial::SetTexture(TObjectPtr<LTexture> InTexture)
     {
-        LK_CORE_ASSERT(InTexture, "Passed texture is nullptr");
+        LK_VERIFY(InTexture, "Passed texture is nullptr");
         Texture = InTexture.As<LTexture2D>();
-        LK_CORE_WARN_TAG("OpenGLMaterial", "Set texture {} to material \"{}\"", Texture->GetName(), Name);
+        LK_CORE_TRACE_TAG("OpenGLMaterial", "Set texture {} to material \"{}\"", Texture->GetName(), Name);
+    }
+
+    void LOpenGLMaterial::SetTexture(TObjectPtr<LTexture2D> InTexture)
+    {
+        LK_VERIFY(InTexture, "Invalid texture reference");
+        Texture = InTexture;
+        LK_CORE_TRACE_TAG("OpenGLMaterial", "Set texture {} to material \"{}\"", Texture->GetName(), Name);
     }
 
     TObjectPtr<LTexture2D> LOpenGLMaterial::GetTexture(const std::string& Name)

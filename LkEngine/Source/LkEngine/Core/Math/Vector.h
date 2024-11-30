@@ -151,8 +151,7 @@ namespace LkEngine {
 
 		friend std::ostream& operator<<(std::ostream& os, const TVector2& Vector) 
 		{
-			//os << *Vector.ToString(); /* LString     */
-			os << Vector.ToString();    /* std::string */
+			os << Vector.ToString();
 			return os;
 		}
 
@@ -264,9 +263,9 @@ namespace LkEngine {
 			return { };
 		}
 
-		LString ToString() const
+		std::string ToString() const
 		{
-			return LString::Format("({:.2f}, {:.2f}, {:.2f})", X, Y, Z);
+			return LK_FORMAT_STRING("({:.2f}, {:.2f}, {:.2f})", X, Y, Z);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const TVector3& Vector) 

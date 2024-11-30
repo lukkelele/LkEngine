@@ -4,7 +4,6 @@
 
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/Time/Timer.h"
-#include "LkEngine/Core/String.h"
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
@@ -35,12 +34,18 @@ namespace LkEngine {
 	extern FOnSceneSetActive GOnSceneSetActive;
 	extern FOnSceneCreated   GOnSceneCreated;
 
+	enum class ESceneType
+	{
+		Normal = 0,
+		Editor,
+	};
+
 	class LScene : public LAsset
 	{
 	public:
-		LScene(std::string_view SceneName, const bool IsEditorScene = false);
+		LScene(const std::string& SceneName, const bool IsEditorScene = false);
 		LScene() = delete;
-		~LScene();
+		~LScene() = default;
 
 		void OnRender(TObjectPtr<LSceneRenderer> InSceneRenderer, FTimestep Timestep);
 		void OnRenderEditor(LEditorCamera& InEditorCamera, FTimestep Timestep);
@@ -69,6 +74,7 @@ namespace LkEngine {
 
 		FORCEINLINE std::string GetName() const { return Name; }
 		FORCEINLINE void SetName(const std::string& InName) { Name = InName; }
+		FORCEINLINE bool IsActiveScene() const { return this == ActiveScene.Get(); }
 
 		void SetActive(const bool Active);
 
@@ -147,10 +153,7 @@ namespace LkEngine {
 		 */
 		FORCEINLINE static uint8_t GetSceneCount() { return SceneCounter; }
 
-		static TObjectPtr<LScene> GetActiveScene() 
-		{ 
-			return ActiveScene; 
-		}
+		static TObjectPtr<LScene> GetActiveScene() { return ActiveScene; }
 
 		std::unordered_set<FAssetHandle> GetAssetList();
 
@@ -162,9 +165,7 @@ namespace LkEngine {
 	private:
 		std::string Name = "";
 
-		UUID SceneID = 0; /// TODO: Replace with AssetHandle.
-		FAssetHandle AssetHandle;
-
+		FAssetHandle SceneID = 0;
 		entt::entity SceneEntity;
 
 		bool bPaused = false;
@@ -173,7 +174,6 @@ namespace LkEngine {
 		EntityMap m_EntityIDMap;
 		entt::registry Registry{};
 
-		bool bIsActiveScene = false;
 		bool bIsEditorScene = false; /// REMOVE
 
 		uint16_t m_ViewportWidth = 0;

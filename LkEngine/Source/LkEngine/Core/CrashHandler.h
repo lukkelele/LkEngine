@@ -5,7 +5,6 @@
 #pragma once
 
 #include "LkEngine/Core/Core.h"
-#include "LkEngine/Core/String.h"
 
 
 namespace LkEngine {
@@ -19,9 +18,9 @@ namespace LkEngine {
 		virtual ~ICrashHandler() = default;
 
 	protected:
-		virtual LString GenerateApplicationCrashDump() = 0;
-		virtual void LogCrashInformation(LStringView CrashInformation) = 0;
-		virtual LString CaptureBackTraceOnStack() = 0;
+		virtual std::string GenerateApplicationCrashDump() = 0;
+		virtual void LogCrashInformation(std::string_view CrashInformation) = 0;
+		virtual std::string CaptureBackTraceOnStack() = 0;
 
 		friend class LCrashHandler;
 	};

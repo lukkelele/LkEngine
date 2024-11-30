@@ -42,7 +42,7 @@ static constexpr auto ToStringIfNeeded(T Value)
 		{                                                                      \
 			try                                                                \
 			{                                                                  \
-				Destination = FoundNode.as<decltype(ToStringIfNeeded(DefaultValue))>(ToStringIfNeeded(DefaultValue)); \
+				Destination = FoundNode.as<decltype(ToStringIfNeeded(DefaultValue))>(); \
 			}                                                                  \
 			catch (const std::exception& Exception)                            \
 			{                                                                  \
@@ -67,18 +67,6 @@ namespace LkEngine {
 	{
 		None = 0,
 		Yaml,
-	};
-
-	/**
-	 * ISerializer
-	 *
-	 *  Interface for serializers.
-	 */
-	class ISerializer
-	{
-	public:
-		virtual void Serialize(const std::filesystem::path& InFile) = 0;
-		virtual bool Deserialize(const std::filesystem::path& OutFile) = 0;
 	};
 
 	namespace Enum {

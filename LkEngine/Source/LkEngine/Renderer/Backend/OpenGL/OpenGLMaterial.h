@@ -13,6 +13,7 @@ namespace LkEngine {
     public:
     	LOpenGLMaterial(const TObjectPtr<LShader>& Shader, const std::string& Name);
 		LOpenGLMaterial(TObjectPtr<LMaterial> Material, const std::string& Name);
+		LOpenGLMaterial() = delete;
 		~LOpenGLMaterial() = default;
 
 		virtual void Invalidate() override;
@@ -53,6 +54,8 @@ namespace LkEngine {
 
 		/// @TODO: Allow for multiple textures per material.
 		virtual void SetTexture(TObjectPtr<LTexture> Texture) override;
+		virtual void SetTexture(TObjectPtr<LTexture2D> Texture) override;
+
 		virtual TObjectPtr<LTexture2D> GetTexture(const std::string& Name = "") override;
 		virtual const TObjectPtr<LTexture2D>& GetTexture(const std::string& Name) const override;
 

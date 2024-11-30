@@ -13,22 +13,21 @@ namespace LkEngine::Global {
 	void SetRuntimeArguments(const int InArgc, char* InArgv[])
 	{
 		static bool bArgumentsSet = false;
-		LK_VERIFY(bArgumentsSet == false, "SetRuntimeArguments incorrectly called more than once");
+		assert(bArgumentsSet == false && "SetRuntimeArguments incorrectly called more than once");
 
 		RuntimeArguments.Argc = InArgc;
 		RuntimeArguments.Argv = InArgv;
 		if (RuntimeArguments.Argc >= 1)
 		{
-			BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]);
+			BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]).parent_path().string() + PathSeparator;
 		}
 
+	#if defined(LK_ENGINE_CORE)
 		WorkingDir = std::filesystem::current_path();
 		EngineConfig = WorkingDir;
 		EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
+	#endif
 
-		LK_CORE_TRACE("RuntimeArgs  Argc={} Argv=\"{}\" WorkingDir=\"{}\" BinaryDir=\"{}\"", 
-					  RuntimeArguments.Argc, *RuntimeArguments.Argv, 
-					  WorkingDir.string(), BinaryDir.string());
 		bArgumentsSet = true;
 	}
 

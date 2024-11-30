@@ -15,9 +15,9 @@ namespace LkEngine {
 		LWindowsCrashHandler() = delete;
 		~LWindowsCrashHandler();
 
-		virtual LString GenerateApplicationCrashDump() override;
-		virtual void LogCrashInformation(LStringView CrashInformation) override;
-		virtual LString CaptureBackTraceOnStack() override;
+		virtual std::string GenerateApplicationCrashDump() override;
+		virtual void LogCrashInformation(std::string_view CrashInformation) override;
+		virtual std::string CaptureBackTraceOnStack() override;
 
 	private:
 		/* Reference to application instance. */

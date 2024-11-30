@@ -3,10 +3,12 @@
 
 #include "LkEngine/Core/ApplicationSerializer.h"
 
+#include <nfd.hpp>
+
 
 namespace LkEngine {
 
-	LApplication::LApplication(const ApplicationSpecification& InSpecification)
+	LApplication::LApplication(const FApplicationSpecification& InSpecification)
 		: Specification(InSpecification)
 		, Log(LLog::Instance())
 		, MetadataRegistry(LMetadataRegistry::Get())
@@ -20,25 +22,26 @@ namespace LkEngine {
 
 		Global::SetRuntimeArguments(Specification.Argc, Specification.Argv);
 		GarbageCollector.Initialize();
-
-		LK_CORE_TRACE_TAG("Application", "Creating window");
-		Window = MakeUnique<LWindow>(InSpecification);
-
-		ReadConfigurationFile();
-		SetupDirectories();
 	}
 
 	LApplication::~LApplication()
 	{
 		if (bRunning)
 		{
-			LK_CORE_INFO_TAG("Application", "Shutting down");
+			LK_CORE_INFO("Shutting down application");
 			Shutdown();
 		}
 	}
 
 	void LApplication::Initialize()
 	{
+		Window = MakeUnique<LWindow>(Specification);
+
+		ReadConfigurationFile(Specification);
+		SetupDirectories();
+
+		LK_VERIFY(NFD::Init());
+
 		Window->Initialize();
 		Window->SetEventCallback([this](LEvent& Event)
 		{
@@ -160,12 +163,10 @@ namespace LkEngine {
 		}
 	}
 
-	bool LApplication::ReadConfigurationFile()
+	bool LApplication::ReadConfigurationFile(FApplicationSpecification& InSpecification)
 	{
 		LApplicationSerializer Serializer(this);
-		Serializer.Deserialize(Global::GetEngineConfig());
-
-		return true;
+		return Serializer.Deserialize(Global::GetEngineConfig(), InSpecification);
 	}
 
 	void LApplication::SetupDirectories()
@@ -178,10 +179,9 @@ namespace LkEngine {
 		}
 	}
 
-	/* FIXME */
-	LString LApplication::GenerateCrashDump()
+	std::string LApplication::GenerateCrashDump()
 	{
-		return "[TODO] CRASHDUMP";
+		return "NULL";
 	}
 
 	void LApplication::RenderUI()

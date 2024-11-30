@@ -18,8 +18,9 @@ namespace LkEngine {
     class LSceneSerializer : public LObject
     {
     public:
-		LSceneSerializer(LScene* Scene = nullptr); /// @FIXME
-		LSceneSerializer(const TObjectPtr<LScene>& Scene);
+		LSceneSerializer(LScene* InScene);
+		LSceneSerializer(const TObjectPtr<LScene>& InScene);
+		LSceneSerializer() = delete;
 
 		void Serialize(const std::filesystem::path& Filepath);
 		bool Deserialize(const std::filesystem::path& Filepath);
@@ -27,24 +28,24 @@ namespace LkEngine {
 		void SerializeToYAML(YAML::Emitter& out);
 		bool DeserializeFromYAML(const std::string& YamlString);
 
-		/** Retreive the most recent deserialized scene. */
+		/** FIXME: Move this to LProject, should not exist in here. */
 		TObjectPtr<LScene> LoadScene();
 
 		void SerializeRuntime(const FAssetHandle InSceneHandle);
 		bool DeserializeRuntime(const FAssetHandle InSceneHandle);
 
 	private:
-		static void SerializeEntity(YAML::Emitter& out, LEntity Entity);
-		static void DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> Scene);
+		static void SerializeEntity(YAML::Emitter& Out, LEntity Entity);
+		static void DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> SceneRef);
 
-		static void SerializeEditorCamera(YAML::Emitter& out, LEditorCamera& editorCamera);
-		static void DeserializeEditorCamera(const YAML::Node& EditorCameraNode, LEditorCamera& Scene);
+		static void SerializeEditorCamera(YAML::Emitter& Out, LEditorCamera& EditorCamera);
+		static void DeserializeEditorCamera(const YAML::Node& EditorCameraNode, LEditorCamera& EditorCamera);
 
 	public:
-		static std::string_view FILE_FILTER;
+		static std::string FILE_FILTER;
 	private:
-		bool m_IsLoaded = false;
 		LScene* Scene = nullptr;
+		bool bIsLoaded = false;
 
 		LCLASS(LSceneSerializer);
     };

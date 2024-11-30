@@ -2,6 +2,7 @@
 
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
+#include "LkEngine/Core/ApplicationConfig.h"
 
 #include "LkEngine/Serialization/FileStream.h"
 #include "LkEngine/Serialization/Serializer.h"
@@ -11,7 +12,7 @@ namespace LkEngine {
 
     class LApplication;
 
-    class LApplicationSerializer : public ISerializer
+    class LApplicationSerializer
     {
     public:
         LApplicationSerializer(LApplication* InApplication);
@@ -19,26 +20,12 @@ namespace LkEngine {
         LApplicationSerializer() = delete;
         ~LApplicationSerializer() = default;
 
-        virtual void Serialize(const std::filesystem::path& InConfigFile);
-        virtual bool Deserialize(const std::filesystem::path& InConfigFile) override;
+        void Serialize(const std::filesystem::path& InConfigFile);
+        bool Deserialize(const std::filesystem::path& InConfigFile, FApplicationSpecification& Spec);
 
     private:
-        template<ESerializeFormat Format, typename TStream>
-        void SerializeTo(TStream& Stream)
-        {
-            static_assert(!std::is_same_v<TStream, ESerializeFormat::None>, "Serializer format is not valid");
-        }
-
-        template<>
-        void SerializeTo<ESerializeFormat::Yaml>(YAML::Emitter& Out)
-        {
-            SerializeToYaml(Out);
-        }
-
-        // Yaml
-        void SerializeToYaml(YAML::Emitter& Out);
-        bool DeserializeFromYaml(const std::string& YamlString);
-        // ~Yaml
+		void SerializeToYaml(YAML::Emitter& Out);
+        bool DeserializeFromYaml(const std::string& YamlString, FApplicationSpecification& Spec);
 
     private:
         std::filesystem::path ConfigFile{};

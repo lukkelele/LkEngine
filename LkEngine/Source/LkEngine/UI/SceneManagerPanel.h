@@ -42,11 +42,10 @@ namespace LkEngine {
 	private:
 		TObjectPtr<LScene> Scene{};
 
-		/* TODO: Figure out a replacement for this approach. */
-		TObjectPtr<LScene> ComponentCopyScene{};
-
 		/// FIXME: REWORK THIS
-		LEntity ComponentCopyEntity;
+		/* TODO: Figure out a replacement for this approach. */
+		//TObjectPtr<LScene> ComponentCopyScene{};
+		//LEntity ComponentCopyEntity;
 
 		LCLASS(LSceneManagerPanel);
 	};

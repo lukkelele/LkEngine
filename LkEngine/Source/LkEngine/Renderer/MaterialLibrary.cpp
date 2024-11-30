@@ -22,12 +22,16 @@ namespace LkEngine {
 
     void LMaterialLibrary::Initialize()
     {
-		LK_CORE_DEBUG_TAG("MaterialLibrary", "Creating base material");
+		LK_CORE_INFO_TAG("MaterialLibrary", "Creating base material");
         TObjectPtr<LMaterial> BaseMaterial = LMaterial::Create(
 			LRenderer::GetShaderLibrary()->Get("Renderer_Model"), /*  Shader.         */
             BASE_MATERIAL                                         /*  Material Name.  */
         );
-        m_Collection.emplace(BaseMaterial->GetName(), BaseMaterial);
+        //m_Collection.emplace(BaseMaterial->GetName(), BaseMaterial);
+
+		Add(BaseMaterial);
+		//LMaterialAsset BaseMatAsset(BaseMaterial);
+		//m_LoadedMaterialAssets.emplace(BaseMatAsset.Handle, BaseMatAsset);
 
         LK_CORE_DEBUG_TAG("MaterialLibrary", "Creating basic materials");
         CreateBasicMaterials();
@@ -35,57 +39,78 @@ namespace LkEngine {
 
     void LMaterialLibrary::Add(const TObjectPtr<LMaterial> Material)
     {
-        /* Material does not exist in the collection. */
-        //if (!m_Collection.contains(Material->GetHandle()))
-        if (!m_Collection.contains(Material->GetName()))
-        {
-            m_Collection.emplace(Material->GetName(), Material);
-        }
+		LK_VERIFY(Material);
+	#if 0
+		LMaterialAsset MatAsset(Material);
+		m_LoadedMaterialAssets.emplace(MatAsset.Handle, MatAsset);
+		m_Collection.emplace(Material->GetName(), MatAsset.Handle);
+	#endif
+
+		LK_CORE_INFO("Adding {} to material library", Material->GetName());
+		TObjectPtr<LMaterialAsset> MatAsset = TObjectPtr<LMaterialAsset>::Create(Material);
+		//m_LoadedMaterialAssets.insert({ MatAsset->Handle, MatAsset });
+		m_LoadedMaterialAssets.emplace(MatAsset->Handle, MatAsset);
+		m_Collection.emplace(Material->GetName(), MatAsset->Handle);
     }
 
-    TObjectPtr<LMaterial> LMaterialLibrary::GetMaterial(std::string_view InMaterialName)
-    {
-        if (auto Iter = m_Collection.find(std::string(InMaterialName)); Iter != m_Collection.end())
+    TObjectPtr<LMaterialAsset> LMaterialLibrary::GetMaterial(const FAssetHandle Handle)
+	{
+        if (auto Iter = m_LoadedMaterialAssets.find(Handle); Iter != m_LoadedMaterialAssets.end())
         {
             return Iter->second;
         }
 
-        LK_CORE_WARN_TAG("MaterialLibrary", "Failed to get material \"{}\"", InMaterialName.data());
+        LK_CORE_ERROR_TAG("MaterialLibrary", "Failed to get material with handle \"{}\"", Handle);
+        return nullptr;
+	}
+
+	TObjectPtr<LMaterialAsset> LMaterialLibrary::GetMaterial(std::string_view InMaterialName)
+    {
+        if (auto Iter = m_Collection.find(std::string(InMaterialName)); Iter != m_Collection.end())
+        {
+			return m_LoadedMaterialAssets.at(Iter->second);
+        }
+
         return nullptr;
     }
 
-    void LMaterialLibrary::CreateBasicMaterials()
+    std::string LMaterialLibrary::DumpLoadedAssets()
+	{
+		std::string String;
+		for (const auto& [MatAssetHandle, MatAsset] : m_LoadedMaterialAssets)
+		{
+			String += LK_FORMAT_STRING("Material Asset {}: {}\n", MatAssetHandle, MatAsset->GetMaterial()->GetName());
+		}
+
+		return String;
+	}
+
+	void LMaterialLibrary::CreateBasicMaterials()
     {
         // Asphalt
         {
-            TObjectPtr<LMaterial> asphalt = LMaterial::Create(
+            TObjectPtr<LMaterial> Asphalt = LMaterial::Create(
                 LRenderer::GetShaderLibrary()->Get("Renderer_Model"), 
                 "Basic_Asphalt"
             );
-            TObjectPtr<LMaterialAsset> materialAsset(asphalt);
-            m_Collection.emplace(asphalt->GetName(), asphalt);
-            m_LoadedMaterialAssets.emplace(materialAsset->Handle, materialAsset);
+            TObjectPtr<LMaterialAsset> MaterialAsset(Asphalt);
+            m_Collection.emplace(Asphalt->GetName(), Asphalt);
+            m_LoadedMaterialAssets.emplace(MaterialAsset->Handle, MaterialAsset);
 
             LK_CORE_INFO_TAG("MaterialLibrary", "Created material 'Basic_Asphalt'");
         }
 
         // Rubber
         {
-            TObjectPtr<LMaterial> rubber = LMaterial::Create(
+            TObjectPtr<LMaterial> Rubber = LMaterial::Create(
                 LRenderer::GetShaderLibrary()->Get("Renderer_Model"), 
                 "Basic_Rubber"
             );
-            TObjectPtr<LMaterialAsset> materialAsset(rubber);
-            m_Collection.emplace(rubber->GetName(), rubber);
-            m_LoadedMaterialAssets.emplace(materialAsset->Handle, materialAsset);
+            TObjectPtr<LMaterialAsset> MaterialAsset(Rubber);
+            m_Collection.emplace(Rubber->GetName(), Rubber);
+            m_LoadedMaterialAssets.emplace(MaterialAsset->Handle, MaterialAsset);
             LK_CORE_INFO_TAG("MaterialLibrary", "Created material 'Basic_Rubber'");
         }
-    }
-
-    TObjectPtr<LMaterial> LMaterialLibrary::GetBaseMaterial()
-    {
-		LK_CORE_ASSERT(m_Collection.contains(BASE_MATERIAL));
-        return m_Collection.find(BASE_MATERIAL)->second;
     }
 
 }

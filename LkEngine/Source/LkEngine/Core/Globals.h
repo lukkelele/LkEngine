@@ -9,7 +9,7 @@
 #include "LkEngine/Core/CoreMacros.h"
 
 
-namespace LkEngine::Global {
+namespace LkEngine {
 
 	struct FRuntimeArguments
 	{
@@ -17,22 +17,26 @@ namespace LkEngine::Global {
 		char** Argv{};
 	};
 
-	void SetRuntimeArguments(const int InArgc, char* InArgv[]);
-	const FRuntimeArguments& GetRuntimeArguments();
+	namespace Global {
 
-	/**
-	 * @brief Get the working directory.
-	 */
-	std::filesystem::path GetWorkingDir();
+		void SetRuntimeArguments(const int InArgc, char* InArgv[]);
+		const FRuntimeArguments& GetRuntimeArguments();
 
-	/**
-	 * @brief Get the binary executable directory.
-	 */
-	std::filesystem::path GetBinaryDir();
+		/**
+		 * @brief Get the working directory.
+		 */
+		std::filesystem::path GetWorkingDir();
 
-	/**
-	 * @brief Get the engine config.
-	 */
-	std::filesystem::path GetEngineConfig();
+		/**
+		 * @brief Get the binary executable directory.
+		 */
+		std::filesystem::path GetBinaryDir();
+
+		/**
+		 * @brief Get the engine config.
+		 */
+		std::filesystem::path GetEngineConfig();
+
+	}
 
 }

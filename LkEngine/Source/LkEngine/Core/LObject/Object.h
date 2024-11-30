@@ -13,7 +13,6 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/LObject/Class.h"
 #include "LkEngine/Core/LObject/ObjectBase.h"
-#include "LkEngine/Core/String.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
 
 #include "LkEngine/Core/MetadataRegistry.h"
@@ -174,7 +173,7 @@ namespace LkEngine {
 		/**
 		 * @brief Serialize object.
 		 */
-		virtual LString Serialize() const { return ""; }
+		virtual std::string Serialize() const { return ""; }
 
 		/**
 		 * @brief Mark object as garbage.

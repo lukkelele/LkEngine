@@ -42,9 +42,9 @@ namespace LkEngine {
             LK_CORE_DEBUG_TAG("WindowsCrashHandler", "{}", oss.str());
             //oss << *LApplication::Get()->GenerateCrashDump();
 
-            LString CrashInfo = oss.str();
+            std::string CrashInfo = oss.str();
             std::string base64CrashInfo = LEncoder::Encode<EncodingFormat::Base64>(
-                reinterpret_cast<const unsigned char*>(CrashInfo.CStr()), CrashInfo.Length()
+                reinterpret_cast<const unsigned char*>(CrashInfo.c_str()), CrashInfo.length()
             );
 
             WindowsExceptionStringBuffer += base64CrashInfo;
@@ -53,7 +53,6 @@ namespace LkEngine {
         };
 
         WindowsCrashFunctionPtr = &WindowsCrashFunc;
-        //SetUnhandledExceptionFilter(WindowsCrashFunc);
 	}
 
 	LWindowsCrashHandler::~LWindowsCrashHandler()
@@ -61,19 +60,19 @@ namespace LkEngine {
         SetUnhandledExceptionFilter(nullptr);
 	}
 
-    LString LWindowsCrashHandler::GenerateApplicationCrashDump()
+    std::string LWindowsCrashHandler::GenerateApplicationCrashDump()
     {
         /* Disabled for now. */
 #if 0
-        LString DumpInfo = "APPLICATION_CRASH";
+        std::string DumpInfo = "APPLICATION_CRASH";
         if (!WindowsExceptionStringBuffer.empty())
         {
-            DumpInfo += LString::Format("\n{}", WindowsExceptionStringBuffer);
+            DumpInfo += std::string::Format("\n{}", WindowsExceptionStringBuffer);
         }
         // Include stack backtrace.
         else
         {
-            DumpInfo += LString::Format("\n{}", *CaptureBackTraceOnStack());
+            DumpInfo += std::string::Format("\n{}", *CaptureBackTraceOnStack());
         }
         //LK_CORE_DEBUG_TAG("WindowsCrashHandler", "Generated application crashdump, returning:\n\"\"\"\n{}\n\"\"\"", *DumpInfo);
 
@@ -82,12 +81,12 @@ namespace LkEngine {
         return "";
     }
 
-    void LWindowsCrashHandler::LogCrashInformation(LStringView CrashInformation)
+    void LWindowsCrashHandler::LogCrashInformation(std::string_view CrashInformation)
     {
         LK_CORE_WARN("\n\n ***** Crash Information *****\n    {}\n *****************************\n\n", CrashInformation);
     }
 
-    LString LWindowsCrashHandler::CaptureBackTraceOnStack()
+    std::string LWindowsCrashHandler::CaptureBackTraceOnStack()
     {
 		std::ostringstream oss;
 
@@ -102,11 +101,11 @@ namespace LkEngine {
 		{
             if (i < 10)
             {
-			    oss << *LString::Format(" {}.  ", i) << Callstack[i] << "\n";
+			    oss << *std::string::Format(" {}.  ", i) << Callstack[i] << "\n";
             }
             else if (i >= 10)
             {
-			    oss << *LString::Format(" {}. ", i) << Callstack[i] << "\n";
+			    oss << *std::string::Format(" {}. ", i) << Callstack[i] << "\n";
             }
 		}
     #endif

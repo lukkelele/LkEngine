@@ -15,7 +15,6 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
-#include <ImFileDialog/ImFileDialog.h>
 
 
 namespace LkEngine {
@@ -42,6 +41,9 @@ namespace LkEngine {
         virtual void EndFrame() override;
         
         virtual void SetDarkTheme() override;
+
+	private:
+		virtual void InitializeFonts() override;
 
     private:
         bool bInitialized = false;

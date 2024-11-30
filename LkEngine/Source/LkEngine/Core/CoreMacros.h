@@ -8,22 +8,32 @@
 #include <typeinfo>
 #include <regex>
 
+/* FIXME */
+#ifdef LK_ENGINE_STATIC_LIB
+#	define CORE_API
+#else
+#	ifdef LK_ENGINE_CORE
+#		define CORE_API __declspec(dllexport)
+#	else
+#		define CORE_API __declspec(dllimport)
+#	endif
+#endif
 
 #define LK_UNUSED(_VAR)         ((void)(_VAR))
 #define LK_ARRAYSIZE(_ARR)      (static_cast<int>((sizeof(_ARR) / sizeof(*(_ARR))))) 
-#define LK_BIT_FIELD(x)         (1 << x)
+#define LK_BIT(x)				(1 << x)
 #define LK_STRINGIFY(x)         #x
-#define LK_TEXT(_TEXT)			L##_TEXT /* Wide string literal. */
+#define LK_TEXT(_TEXT)			L##_TEXT /* Wide string. */
 
 /** Function Signature. */
-#ifdef __clang__
-#	define LK_FUNC_SIG __PRETTY_FUNCTION__
+#if defined(_MSC_VER)
+#	define LK_FUNCSIG	__FUNCSIG__
+#elif defined(__clang__)
+#	define LK_FUNC_SIG	__PRETTY_FUNCTION__
 #elif defined(__GNUC__)
-#	define LK_FUNC_SIG __PRETTY_FUNCTION__
-#elif defined(_MSC_VER)
-#	define LK_FUNCSIG __FUNCSIG__
+#	define LK_FUNC_SIG	__PRETTY_FUNCTION__
 #else
-#	error "Unsupported compiler"
+#	error "Unsupported compiler, LkEngine supports MSVC, Clang and GCC"
 #endif
 
 /// @TODO: Do Platform implementations in separate headers for Windows/Linux
@@ -101,17 +111,17 @@ namespace LkEngine {
 
 	enum class EClassFlag : uint32_t
 	{
-		None       = LK_BIT_FIELD(0),
-		Abstract   = LK_BIT_FIELD(1),
+		None       = LK_BIT(0),
+		Abstract   = LK_BIT(1),
 	};
 
 	enum class EClassCastFlag : uint64_t
 	{
-		LField    = LK_BIT_FIELD(0),
-		LEnum     = LK_BIT_FIELD(1),
-		LStruct   = LK_BIT_FIELD(2),
-		LClass    = LK_BIT_FIELD(3),
-		LObject   = LK_BIT_FIELD(4),
+		LField    = LK_BIT(0),
+		LEnum     = LK_BIT(1),
+		LStruct   = LK_BIT(2),
+		LClass    = LK_BIT(3),
+		LObject   = LK_BIT(4),
 	};
 
 }

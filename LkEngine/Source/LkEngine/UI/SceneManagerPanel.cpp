@@ -42,8 +42,8 @@ namespace LkEngine {
 		GOnSceneSetActive.Add(this, &LSceneManagerPanel::SetScene);
 
 		/* TODO: Figure out a replacement for this approach. */
-		ComponentCopyScene = TObjectPtr<LScene>::Create("CopyScene", false);
-		ComponentCopyEntity = ComponentCopyScene->CreateEntity();
+		//ComponentCopyScene = TObjectPtr<LScene>::Create("CopyScene", false);
+		//ComponentCopyEntity = ComponentCopyScene->CreateEntity();
 	}
 
 	void LSceneManagerPanel::OnRender()
@@ -142,7 +142,7 @@ namespace LkEngine {
 
 		if (bRemoveComponent)
 		{
-			/* Check if Component can be removed. */
+			/* Check if the component can be removed. */
 			auto& Component = Entity.GetComponent<T>();
 			LK_CORE_DEBUG("Removing Component from {}", Entity.Name());
 			Entity.RemoveComponent<T>();
@@ -170,121 +170,130 @@ namespace LkEngine {
 		{
 			return;
 		}
+
 		LK_CORE_VERIFY(Entity.Scene, "Entity doesn't have a scene assigned");
 
-		UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
-		if (Entity.HasComponent<LTagComponent>())
-		{
-			auto& tag = Entity.GetComponent<LTagComponent>().Tag;
+		/* FIXME: Fix the UI_SELECTED_ENTITY_INFO identifier. */
 
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
-			std::strncpy(buffer, tag.c_str(), sizeof(buffer));
-			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+		//UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
+		ImGui::PushID(UI_SELECTED_ENTITY_INFO);
+		if (ImGui::Begin("SceneManagerPanel-FIXME", nullptr))
+		{
+			if (Entity.HasComponent<LTagComponent>())
 			{
-				tag = std::string(buffer);
+				auto& tag = Entity.GetComponent<LTagComponent>().Tag;
+
+				char buffer[256];
+				memset(buffer, 0, sizeof(buffer));
+				std::strncpy(buffer, tag.c_str(), sizeof(buffer));
+				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+				{
+					tag = std::string(buffer);
+				}
 			}
-		}
-		ImGui::SameLine();
-		ImGui::PushItemWidth(-1);
 
-		if (ImGui::Button("Add Component"))
-			ImGui::OpenPopup("AddComponent");
-
-		if (ImGui::BeginPopup("AddComponent"))
-		{
-			ImGui::EndPopup();
-		}
-		ImGui::PopItemWidth();
-
-		//---------------------------------------------------------------------------
-		// Transform Component
-		//---------------------------------------------------------------------------
-		DrawComponent<LTransformComponent>("Transform", Entity, [&Entity](auto& transform)
-		{
-			ImGui::Text("Position");
-			UI::Property::PositionXYZ(transform.Translation, 2.0);
-
-			ImGui::Text("Scale");
-			ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
-
-			ImGui::Text("Rotation");
-			ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
-			auto rot = transform.GetRotation();
-			//transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
-			transform.SetRotation(glm::angleAxis(rot.x, glm::vec3(0.0f, 0.0f, 1.0f)));
-			//transform.SetRotation(rot);
-		});
-
-		//---------------------------------------------------------------------------
-		// Sprite Component
-		//---------------------------------------------------------------------------
-		DrawComponent<LSpriteComponent>("Sprite", Entity, [&Entity](auto& sprite)
-		{
-			ImGui::Text("Sprite Component");
-			ImGui::Text("Size");
 			ImGui::SameLine();
-			ImGui::SliderFloat2("##Size", &sprite.Size.x, 0.0f, 800.0f, "%1.f");
-			UI::Property::RGBAColor(sprite.Color);
-			
-		});
+			ImGui::PushItemWidth(-1);
 
-#if 0
-		//---------------------------------------------------------------------------
-		// Material Component
-		//---------------------------------------------------------------------------
-		DrawComponent<MaterialComponent>("Material", Entity, [&Entity](auto& mc)
-		{
-			auto texture = mc.GetTexture();
-			if (!texture)
-				return;
+			if (ImGui::Button("Add Component"))
+				ImGui::OpenPopup("AddComponent");
 
-			auto textures2D = TextureLibrary::Get()->GetTextures2D();
-			std::string textureName = texture->GetName();
-
-			// Selectable texture
-			if (ImGui::BeginTable("##MaterialTableProperties", 2, ImGuiTableFlags_SizingStretchProp))
+			if (ImGui::BeginPopup("AddComponent"))
 			{
-				ImGui::TableSetupColumn("##1", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_IndentDisable);
-				ImGui::TableSetupColumn("##2", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_IndentDisable);
-
-				// Texture
-				ImGui::TableNextRow(ImGuiTableFlags_SizingStretchProp | ImGuiTableColumnFlags_IndentDisable);
-				{
-					ImGui::TableSetColumnIndex(0);
-					ImGui::Text("Texture");
-
-					ImGui::TableSetColumnIndex(1);
-					if (ImGui::BeginCombo("##DrawMaterialComponent", textureName.c_str(), ImGuiComboFlags_HeightLargest))
-					{
-						for (auto& tex : textures2D)
-						{
-							if (ImGui::Selectable(tex.first.c_str()))
-								mc.SetTexture(tex.second);
-						}
-						ImGui::EndCombo();
-					}
-				}
-
-				// Roughness
-				ImGui::TableNextRow(ImGuiTableFlags_SizingStretchProp | ImGuiTableColumnFlags_IndentDisable);
-				{
-					ImGui::TableSetColumnIndex(0);
-					ImGui::Text("Roughness");
-
-					ImGui::TableSetColumnIndex(1);
-					auto material = mc.GetMaterial();
-					float roughness = material->GetRoughness();
-					ImGui::SliderFloat("##Roughness", &roughness, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-					material->SetRoughness(roughness);
-
-				}
-				ImGui::EndTable();
+				ImGui::EndPopup();
 			}
-		});
-#endif
+			ImGui::PopItemWidth();
 
-		UI::EndSubwindow();
+			//---------------------------------------------------------------------------
+			// Transform Component
+			//---------------------------------------------------------------------------
+			DrawComponent<LTransformComponent>("Transform", Entity, [&Entity](auto& transform)
+			{
+				ImGui::Text("Position");
+				UI::Property::PositionXYZ(transform.Translation, 2.0);
+
+				ImGui::Text("Scale");
+				ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
+
+				ImGui::Text("Rotation");
+				ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
+				auto rot = transform.GetRotation();
+				//transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
+				transform.SetRotation(glm::angleAxis(rot.x, glm::vec3(0.0f, 0.0f, 1.0f)));
+				//transform.SetRotation(rot);
+			});
+
+			//---------------------------------------------------------------------------
+			// Sprite Component
+			//---------------------------------------------------------------------------
+			DrawComponent<LSpriteComponent>("Sprite", Entity, [&Entity](auto& sprite)
+			{
+				ImGui::Text("Sprite Component");
+				ImGui::Text("Size");
+				ImGui::SameLine();
+				ImGui::SliderFloat2("##Size", &sprite.Size.x, 0.0f, 800.0f, "%1.f");
+				UI::Property::RGBAColor(sprite.Color);
+				
+			});
+
+	#if 0
+			//---------------------------------------------------------------------------
+			// Material Component
+			//---------------------------------------------------------------------------
+			DrawComponent<MaterialComponent>("Material", Entity, [&Entity](auto& mc)
+			{
+				auto texture = mc.GetTexture();
+				if (!texture)
+					return;
+
+				auto textures2D = TextureLibrary::Get()->GetTextures2D();
+				std::string textureName = texture->GetName();
+
+				// Selectable texture
+				if (ImGui::BeginTable("##MaterialTableProperties", 2, ImGuiTableFlags_SizingStretchProp))
+				{
+					ImGui::TableSetupColumn("##1", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_IndentDisable);
+					ImGui::TableSetupColumn("##2", ImGuiTableColumnFlags_NoHeaderLabel | ImGuiTableColumnFlags_IndentDisable);
+
+					// Texture
+					ImGui::TableNextRow(ImGuiTableFlags_SizingStretchProp | ImGuiTableColumnFlags_IndentDisable);
+					{
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("Texture");
+
+						ImGui::TableSetColumnIndex(1);
+						if (ImGui::BeginCombo("##DrawMaterialComponent", textureName.c_str(), ImGuiComboFlags_HeightLargest))
+						{
+							for (auto& tex : textures2D)
+							{
+								if (ImGui::Selectable(tex.first.c_str()))
+									mc.SetTexture(tex.second);
+							}
+							ImGui::EndCombo();
+						}
+					}
+
+					// Roughness
+					ImGui::TableNextRow(ImGuiTableFlags_SizingStretchProp | ImGuiTableColumnFlags_IndentDisable);
+					{
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("Roughness");
+
+						ImGui::TableSetColumnIndex(1);
+						auto material = mc.GetMaterial();
+						float roughness = material->GetRoughness();
+						ImGui::SliderFloat("##Roughness", &roughness, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+						material->SetRoughness(roughness);
+
+					}
+					ImGui::EndTable();
+				}
+			});
+	#endif
+
+		}
+
+		ImGui::End();
 	}
 
 	std::pair<float, float> LSceneManagerPanel::GetMouseViewportSpace(const bool primaryViewport)

@@ -72,6 +72,7 @@ namespace LkEngine {
 		virtual glm::mat4& GetMatrix4(const std::string& Name) = 0;
 
 		virtual void SetTexture(TObjectPtr<LTexture> Texture) = 0;
+		virtual void SetTexture(TObjectPtr<LTexture2D> Texture) = 0;
 
 		virtual TObjectPtr<LTexture2D> GetTexture(const std::string& Name = "") = 0;
 		virtual const TObjectPtr<LTexture2D>& GetTexture(const std::string& Name = "") const = 0;

@@ -49,8 +49,12 @@ namespace LkEngine {
 		{
 			/* TODO: Static validity check for retrieved Asset cast to T. */
 			TObjectPtr<LAsset> Asset = GetAsset(GetAssetHandleFromFilePath(InFilePath));
+			if (Asset)
+			{
+				return Asset->As<T>();
+			}
 
-			return Asset.As<T>();
+			return nullptr;
 		}
 
 		template<typename T, typename... TArgs>

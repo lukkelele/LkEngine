@@ -1,7 +1,6 @@
 #pragma once
 
 #include "LkEngine/Core/Core.h"
-#include "LkEngine/Core/String.h"
 
 
 namespace LkEngine {

@@ -23,10 +23,11 @@ namespace LkEngine {
 	LMaterialAsset::LMaterialAsset(const TObjectPtr<LMaterial>& InMaterial)
 	{
 		LASSET_REGISTER();
+		LK_CORE_VERIFY(InMaterial, "Material reference is not valid");
 
 		Handle = {};
 		Material = LMaterial::Copy(InMaterial);
-		LK_CORE_INFO_TAG("MaterialAsset", "Created material asset ({}) with material {}", Handle, InMaterial->GetName());
+		LK_CORE_DEBUG_TAG("MaterialAsset", "Created material asset ({}) with material {}", Handle, InMaterial->GetName());
 
 		LK_CORE_ASSERT(Material->GetTexture(""), "Material ({}) texture is nullptr!", Material->GetName());
 	}
@@ -43,115 +44,133 @@ namespace LkEngine {
 
 	glm::vec3& LMaterialAsset::GetAlbedoColor()
 	{
+		LK_CORE_VERIFY(Material);
 		return Material->GetVector3(s_AlbedoColorUniform);
 	}
 
 	void LMaterialAsset::SetAlbedoColor(const glm::vec3& color)
 	{
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_AlbedoColorUniform, color);
 	}
 
 	float& LMaterialAsset::GetMetalness()
 	{
+		LK_CORE_VERIFY(Material);
 		return Material->GetFloat(s_MetalnessUniform);
 	}
 
 	void LMaterialAsset::SetMetalness(float value)
 	{
-		LK_CORE_VERIFY(Material, "Material is nullptr!");
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_MetalnessUniform, value);
 	}
 
 	float& LMaterialAsset::GetRoughness()
 	{
-		LK_CORE_VERIFY(Material, "Material is nullptr!");
+		LK_CORE_VERIFY(Material);
 		return Material->GetFloat(s_RoughnessUniform);
 	}
 
 	void LMaterialAsset::SetRoughness(float value)
 	{
-		LK_CORE_VERIFY(Material, "Material is nullptr!");
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_RoughnessUniform, value);
 	}
 
 	float& LMaterialAsset::GetEmission()
 	{
-		LK_CORE_VERIFY(Material, "Material is nullptr!");
+		LK_CORE_VERIFY(Material);
 		return Material->GetFloat(s_EmissionUniform);
 	}
 
 	void LMaterialAsset::SetEmission(float value)
 	{
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_EmissionUniform, value);
 	}
 
 	float& LMaterialAsset::GetTransparency()
 	{
+		LK_CORE_VERIFY(Material);
 		return Material->GetFloat(s_TransparencyUniform);
 	}
 
 	void LMaterialAsset::SetTransparency(float transparency)
 	{
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_TransparencyUniform, transparency);
 	}
 
 	TObjectPtr<LTexture2D> LMaterialAsset::GetAlbedoMap()
 	{
+		LK_CORE_VERIFY(Material);
 		return Material->TryGetTexture(s_AlbedoMapUniform);
 	}
 
 	void LMaterialAsset::SetAlbedoMap(TObjectPtr<LTexture2D> texture)
 	{
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_AlbedoMapUniform, texture);
 	}
 
 	void LMaterialAsset::ClearAlbedoMap()
 	{
+		LK_CORE_VERIFY(Material);
 		//Material->Set(s_AlbedoMapUniform, Renderer::GetWhiteTexture());
 	}
 
 	TObjectPtr<LTexture2D> LMaterialAsset::GetNormalMap()
 	{
+		LK_CORE_VERIFY(Material);
 		return Material->TryGetTexture(s_NormalMapUniform);
 	}
 
 	void LMaterialAsset::SetNormalMap(TObjectPtr<LTexture2D> texture)
 	{
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_NormalMapUniform, texture);
 	}
 
 	TObjectPtr<LTexture2D> LMaterialAsset::GetMetalnessMap()
 	{
+		LK_CORE_VERIFY(Material);
 		return Material->TryGetTexture(s_MetalnessMapUniform);
 	}
 
 	void LMaterialAsset::SetMetalnessMap(TObjectPtr<LTexture2D> texture)
 	{
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_MetalnessMapUniform, texture);
 	}
 
 	void LMaterialAsset::ClearMetalnessMap()
 	{
+		LK_CORE_VERIFY(Material);
 		//Material->Set(s_MetalnessMapUniform, Renderer::GetWhiteTexture());
 	}
 
 	TObjectPtr<LTexture2D> LMaterialAsset::GetRoughnessMap()
 	{
+		LK_CORE_VERIFY(Material);
 		return Material->TryGetTexture(s_RoughnessMapUniform);
 	}
 
 	void LMaterialAsset::SetRoughnessMap(TObjectPtr<LTexture2D> texture)
 	{
+		LK_CORE_VERIFY(Material);
 		Material->Set(s_RoughnessMapUniform, texture);
 	}
 
 	void LMaterialAsset::ClearRoughnessMap()
 	{
+		LK_CORE_VERIFY(Material);
 		//Material->Set(s_RoughnessMapUniform, Renderer::GetWhiteTexture());
 	}
 
 	void LMaterialAsset::SetDefaults()
 	{
+		LK_CORE_VERIFY(Material);
 		if (m_Transparent)
 		{
 			/* Set defaults. */
@@ -178,6 +197,8 @@ namespace LkEngine {
 		#endif
 		}
 	}
+
+
 
     LMaterialTable::LMaterialTable(const uint32_t InMaterialCount)
 		: MaterialCount(InMaterialCount)

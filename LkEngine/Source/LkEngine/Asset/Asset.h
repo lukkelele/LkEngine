@@ -90,7 +90,7 @@ namespace LkEngine {
 	struct FAssetMetadata
 	{
 		FAssetHandle Handle = 0;
-		EAssetType Type;
+		EAssetType Type = EAssetType::None;
 		std::filesystem::path FilePath;
 		bool IsDataLoaded = false;
 		bool IsMemoryAsset = false;

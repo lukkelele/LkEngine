@@ -109,7 +109,7 @@ namespace LkEngine
 
         /* Lines. */
         {
-            LK_CORE_DEBUG_TAG("Renderer2D", "");
+            LK_CORE_DEBUG_TAG("Renderer2D", "Creating line vertexbuffer");
             LineVertexBuffer = LVertexBuffer::Create(MaxVertices * sizeof(FLineVertex));
             FVertexBufferLayout LineVertexBufferLayout{ };
             LineVertexBuffer->SetLayout({

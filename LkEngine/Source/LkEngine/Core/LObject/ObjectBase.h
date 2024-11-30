@@ -2,13 +2,13 @@
  * LObjectBase
  * 
  *
- *******************************************************************/
+ *****************************************************************/
 #pragma once
 
 #include <concepts>
 
 #include "LkEngine/Core/CoreTypes.h"
-#include "LkEngine/Core/String.h"
+#include "LkEngine/Core/Log.h"
 
 #include "Enum.h"
 

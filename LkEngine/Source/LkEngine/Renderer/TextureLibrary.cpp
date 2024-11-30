@@ -211,12 +211,9 @@ namespace LkEngine {
 
     TObjectPtr<LTexture2D> LTextureLibrary::GetTexture(std::string_view TextureName)
     {
-        LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
-        if (m_Collection2D.empty())
-        {
-            LK_CORE_ASSERT(false, "2D Texture Library is empty");
-            return nullptr;
-        }
+        LK_CORE_VERIFY(bInitialized, "TextureLibrary is not initialized");
+		LK_CORE_VERIFY(!m_Collection2D.empty(), "Texture 2D library is empty");
+		LK_VERIFY(!TextureName.empty());
 
         for (auto Iter = m_Collection2D.begin(); Iter != m_Collection2D.end(); ++Iter)
         {
@@ -231,14 +228,14 @@ namespace LkEngine {
         return nullptr;
     }
 
+	/* FIXME: Fix this awful code. So many copies. */
     TObjectPtr<LTexture2D> LTextureLibrary::AddTexture(const FTextureSpecification& TextureSpecification)
     {
         for (const TTexture2DPair& Entry : m_Collection2D)
         {
             if (Entry.first == ExtractFileNameWithoutExtension(TextureSpecification.Name))
             {
-                if ((TextureSpecification.Width == Entry.second->GetWidth()) 
-					&& (TextureSpecification.Height == Entry.second->GetHeight())
+                if (((TextureSpecification.Width == Entry.second->GetWidth()) && (TextureSpecification.Height == Entry.second->GetHeight()))
                     || (Entry.first == TextureSpecification.Name))
                 {
                     LK_CORE_WARN_TAG("TextureLibrary", "Texture {} already exists and has same dimensions "

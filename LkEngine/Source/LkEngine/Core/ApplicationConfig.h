@@ -7,13 +7,12 @@
 
 namespace LkEngine {
 
-    /// @FIXME: DONT SET VERSION HERE
-    struct ApplicationSpecification
+    struct FApplicationSpecification
     {
         int Argc = 0;
         char** Argv{};
 
-		LString Title = "LkEngine v0.2";
+		std::string Title = "LkEngine";
         uint16_t Width = 1650;
         uint16_t Height = 1080;
         bool Fullscreen = false;
@@ -22,7 +21,7 @@ namespace LkEngine {
         bool StartMaximized = false;
         bool ImGuiEnabled = true;
 
-        LString WorkingDirectory{};
+        std::string WorkingDirectory{};
         std::filesystem::path ConfigurationFile = "LkEngine.config";
 		std::filesystem::path StartProject{};
     };

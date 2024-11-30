@@ -22,13 +22,14 @@ namespace LkEngine {
 	FOnSceneSetActive GOnSceneSetActive{};
 	FOnSceneCreated   GOnSceneCreated{};
 
-	LScene::LScene(std::string_view SceneName, const bool IsEditorScene)
-		: bIsEditorScene(IsEditorScene)
-		, Name(SceneName)
+	LScene::LScene(const std::string& SceneName, const bool IsEditorScene)
+		: Name(SceneName)
+		, bIsEditorScene(IsEditorScene)
 	{
 		LCLASS_REGISTER();
 
 		SceneEntity = Registry.create();
+		LK_CORE_DEBUG_TAG("Scene", "Scene created '{}' with handle '{}'", Name, SceneEntity);
 
 		/* The file extension is handled by LSceneSerializer. */
 		const std::filesystem::path SceneFile = LK_FORMAT_STRING("Scenes/{}", Name);
@@ -37,21 +38,20 @@ namespace LkEngine {
 		LSceneSerializer Serializer(this);
 		if (Serializer.Deserialize(SceneFile))
 		{
+			LK_CORE_DEBUG("Scene serialization OK for '{}'", Name);
 		}
 		else
 		{
+			LK_CORE_WARN("Scene serialization failed, loading default values for '{}'", Name);
+
 			Registry.emplace<LSceneComponent>(SceneEntity, SceneID);
 
 			m_ViewportWidth = LWindow::Get().GetViewportWidth();
 			m_ViewportHeight = LWindow::Get().GetViewportHeight();
+			LK_CORE_DEBUG_TAG("Scene", "Viewport ({}, {})", m_ViewportWidth, m_ViewportHeight);
 		}
 
-		LK_INFO("New scene created '{}'", Name);
-	}
-
-	LScene::~LScene()
-	{
-		/* TODO: */
+		LK_INFO("Created scene called '{}'", Name);
 	}
 
 	LEntity LScene::CreateEntity(const std::string& name)
@@ -458,15 +458,11 @@ namespace LkEngine {
 
 	void LScene::SetActive(const bool Active)
 	{
-		if (bIsActiveScene != Active)
+		if (Active && (ActiveScene.Get() != this))
 		{
-			bIsActiveScene = Active;
-		}
-
-		if (Active)
-		{
+			LK_CORE_DEBUG("Setting active scene: {}", GetName());
 			ActiveScene = this;
-			LK_CORE_DEBUG("Setting active scene: {}", ActiveScene->GetName());
+			LK_CORE_VERIFY(ActiveScene, "Active scene reference is not valid");
 
 			GOnSceneSetActive.Broadcast(this);
 		}

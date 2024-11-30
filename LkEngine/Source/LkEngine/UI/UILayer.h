@@ -41,6 +41,9 @@ namespace LkEngine {
 
         static TObjectPtr<LUILayer> Create();
 
+	protected:
+		virtual void InitializeFonts() = 0;
+
     private:
         LCLASS(LUILayer);
     };

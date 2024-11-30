@@ -11,8 +11,9 @@ namespace LkEngine {
     class LMaterialAsset : public LAsset
     {
     public:
-		LMaterialAsset(const TObjectPtr<LMaterial>& Material);
+		explicit LMaterialAsset(const TObjectPtr<LMaterial>& Material);
         LMaterialAsset(const bool bIsTransparent = false);
+		LMaterialAsset() = delete;
         ~LMaterialAsset() = default;
 
 		static EAssetType GetStaticType() { return EAssetType::Material; }
@@ -30,7 +31,12 @@ namespace LkEngine {
 		void SetEmission(float value);
 
 		TObjectPtr<LMaterial> GetMaterial() const { return Material; }
-		void SetMaterial(TObjectPtr<LMaterial> Material) { Material = Material; }
+
+		void SetMaterial(TObjectPtr<LMaterial> Material) 
+		{ 
+			LK_CORE_VERIFY(Material);
+			Material = Material; 
+		}
 
         void SetTransparency(float transparency);
         float& GetTransparency();

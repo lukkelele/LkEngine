@@ -97,12 +97,6 @@ namespace LkEngine {
 			}
 		}
 
-		TObjectPtr(TObjectPtr<T>&& Other) noexcept
-			: ObjectPtr(Other.ObjectPtr)
-		{
-			Other.ObjectPtr = nullptr;
-		}
-
 		template<typename R>
 		TObjectPtr(const TObjectPtr<R>& Other)
 			: ObjectPtr((T*)Other.ObjectPtr)
@@ -111,6 +105,12 @@ namespace LkEngine {
 			{
 				TObjectPtr_IncrementReferenceCount();
 			}
+		}
+
+		TObjectPtr(TObjectPtr<T>&& Other) noexcept
+			: ObjectPtr(Other.ObjectPtr)
+		{
+			Other.ObjectPtr = nullptr;
 		}
 
 		template<typename R>
@@ -197,7 +197,6 @@ namespace LkEngine {
 		}
 
 		operator bool() { return ObjectPtr != nullptr; }
-
 		operator bool() const { return ObjectPtr != nullptr; }
 
 		/** Check against nullptr. */
@@ -206,25 +205,29 @@ namespace LkEngine {
 			return (ObjectPtr == nullptr);
 		}
 
-		/** Equality comparison. */
+		FORCEINLINE bool operator==(const T* Other) const
+		{
+			return (Get() == Other);
+		}
+
 		template<typename U, typename Base = std::common_type_t<T*, U*>>
 		FORCEINLINE bool operator==(const TObjectPtr<U>& Other) const
 		{
 			return (ObjectPtr == nullptr ? !Other : ObjectPtr == Other.ObjectPtr);
 		}
 
-		T* operator->() { return ObjectPtr; }
+		FORCEINLINE T* operator->() { return ObjectPtr; }
+		FORCEINLINE const T* operator->() const { return ObjectPtr; }
 
-		const T* operator->() const { return ObjectPtr; }
+		FORCEINLINE T& operator*() { return *ObjectPtr; }
+		FORCEINLINE const T& operator*() const { return *ObjectPtr; }
 
-		T& operator*() { return *ObjectPtr; }
+		FORCEINLINE T* Get() { return static_cast<T*>(ObjectPtr); }
+		FORCEINLINE const T* Get() const { return static_cast<T*>(ObjectPtr); }
 
-		const T& operator*() const { return *ObjectPtr; }
 
-		T* Get() { return static_cast<T*>(ObjectPtr); }
-
-		const T* Get() const { return static_cast<T*>(ObjectPtr); }
-
+		/* TODO: This cast function needs to be checked out a bit. I'm not entirely sure this 
+		 *       is behaving as it should. */
 		template<typename R>
 		FORCEINLINE TObjectPtr<R> As() const
 		{

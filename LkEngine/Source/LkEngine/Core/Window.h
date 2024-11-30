@@ -5,7 +5,6 @@
 
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/String.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
 
 #include "LkEngine/Core/ApplicationConfig.h"
@@ -22,10 +21,11 @@ namespace LkEngine {
 
     class LViewport;
 
+    /* @TODO: Don't use the application config here. */
 	struct FWindowSpecification
 	{
         /// @TODO: Get version
-		LString Title = "LkEngine";
+		std::string Title = "LkEngine";
 		uint32_t Width = 1600;
 		uint32_t Height = 1080;
 		bool Decorated = true;
@@ -35,7 +35,7 @@ namespace LkEngine {
         std::filesystem::path IconPath{};
 
         FWindowSpecification() = default;
-        FWindowSpecification(const ApplicationSpecification& ApplicationSpec)
+        FWindowSpecification(const FApplicationSpecification& ApplicationSpec)
             : Title(ApplicationSpec.Title)
             , Width(ApplicationSpec.Width)
             , Height(ApplicationSpec.Height)

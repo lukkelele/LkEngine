@@ -29,7 +29,7 @@ namespace LkEngine {
 
 		LK_CORE_DEBUG_TAG("ApplicationSerializer", "Serializing: \"{}\"", ConfigFile.string());
 		YAML::Emitter Out;
-		SerializeTo<ESerializeFormat::Yaml>(Out);
+		SerializeToYaml(Out);
 
 		std::ofstream FileOut(ConfigFile);
 		if (FileOut.is_open() && FileOut.good())
@@ -43,7 +43,7 @@ namespace LkEngine {
 		}
 	}
 
-	bool LApplicationSerializer::Deserialize(const std::filesystem::path& InConfigFile)
+	bool LApplicationSerializer::Deserialize(const std::filesystem::path& InConfigFile, FApplicationSpecification& Spec)
 	{
 		ConfigFile = InConfigFile;
 		if (!std::filesystem::exists(ConfigFile))
@@ -57,7 +57,7 @@ namespace LkEngine {
 		StrStream << InputStream.rdbuf();
 		try
 		{
-			DeserializeFromYaml(StrStream.str());
+			DeserializeFromYaml(StrStream.str(), Spec);
 		}
 		catch (const YAML::Exception& Exception)
 		{
@@ -118,7 +118,7 @@ namespace LkEngine {
 		}
 	}
 
-	bool LApplicationSerializer::DeserializeFromYaml(const std::string& YamlString)
+	bool LApplicationSerializer::DeserializeFromYaml(const std::string& YamlString, FApplicationSpecification& Spec)
 	{
 		LK_CORE_ASSERT(!YamlString.empty(), "Deserialization failed, yaml string is empty");
 		YAML::Node Data = YAML::Load(YamlString);
@@ -146,7 +146,6 @@ namespace LkEngine {
 				Height = WindowNode["Height"].as<int>();
 			}
 
-			LK_CORE_DEBUG("WindowNode  Width={}  Height={}", Width, Height);
 			Window.SetSize({ Width, Height });
 		}
 

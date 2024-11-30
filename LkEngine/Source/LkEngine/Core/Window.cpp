@@ -43,7 +43,6 @@ namespace LkEngine {
 		if (!bGlfwInitialized)
 		{
 			LK_ASSERT(glfwInit() == GLFW_TRUE, "GLFW failed to initialize, glfwInit() != GLFW_TRUE");
-			//glfwSetErrorCallback(GlfwErrorCallback);
 			glfwSetErrorCallback([](const int Error, const char* Description)
 			{
 				LK_CORE_ERROR_TAG("GLFW", "Error ({0}): {1}", Error, Description);
@@ -67,11 +66,7 @@ namespace LkEngine {
 		Data.Height = Specification.Height;
 	
 		/* Create GLFW window. */
-		GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), 
-									  static_cast<int>(Size.Y), 
-									  Title.c_str(), 
-									  nullptr, 
-									  nullptr);
+		GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), static_cast<int>(Size.Y), Title.c_str(), nullptr, nullptr);
 		LK_CORE_ASSERT(GlfwWindow != nullptr);
 		glfwMakeContextCurrent(GlfwWindow);
 

@@ -27,23 +27,31 @@ namespace LkEngine {
 
 	void LProject::Load(const std::string& ProjectPath)
 	{
-		//if (ProjectPath.empty() || !fs::exists(ProjectPath))
 		if (ProjectPath.empty() || !LFileSystem::Exists(ProjectPath))
 		{
 			LK_CORE_ERROR_TAG("Project", "Could not load project: '{}'", ProjectPath);
 			return;
 		}
 
-		FProjectSerializer Serializer(this);
+		std::filesystem::path Filepath = ProjectPath;
 
 		/**
-		 * Load serialized data into the project. 
-		 * The data is read into FProjectConfiguration.
+		 * Add the name of the project directory with the project suffix to get
+		 * the project name. 
 		 */
-		LK_CORE_WARN("Deserializing project");
-		if (!Serializer.Deserialize(ProjectPath))
+		if (LFileSystem::IsDirectory(Filepath))
 		{
-			LK_CORE_ERROR_TAG("Project", "Deserialization of project '{}' failed", ProjectPath);
+			Filepath = (Filepath / fs::path(Filepath.filename().string() + "." + LProject::FILE_EXTENSION));
+			LK_CORE_FATAL("Filesystem Directory: {}", Filepath.string());
+		}
+
+		FProjectSerializer ProjectSerializer(this);
+
+		/** Load serialized data into the project instance. */
+		LK_CORE_WARN("Deserializing project");
+		if (!ProjectSerializer.Deserialize(Filepath))
+		{
+			LK_CORE_ERROR_TAG("Project", "Deserialization of project '{}' failed", Filepath.string());
 		}
 	}
 
@@ -52,7 +60,7 @@ namespace LkEngine {
 		LK_CORE_INFO_TAG("Project", "Saving: \"{}\"", Configuration.Name);
 
 		/* Serialize to disk. */
-		FProjectSerializer Serializer(this);
+		FProjectSerializer ProjectSerializer(this);
 
 		const fs::path ProjectPath = LK_FORMAT_STRING("Projects/{}/{}", Configuration.Name, Configuration.Name);
 		if (ProjectPath.empty())
@@ -61,8 +69,9 @@ namespace LkEngine {
 			return false;
 		}
 
-		Serializer.Serialize(ProjectPath);
+		ProjectSerializer.Serialize(ProjectPath);
 
+		/* Serialize the active scene. */
 		if (!LFileSystem::Exists("Scenes"))
 		{
 			LK_INFO("Creating 'Scenes' directory");

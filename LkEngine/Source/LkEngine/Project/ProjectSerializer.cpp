@@ -1,6 +1,8 @@
 #include "LKpch.h"
 #include "ProjectSerializer.h"
 
+#include "LkEngine/Core/IO/FileSystem.h"
+
 #include "LkEngine/Scene/Scene.h"
 
 
@@ -16,7 +18,7 @@ namespace LkEngine {
 	void FProjectSerializer::Serialize(const std::filesystem::path& OutFile)
 	{
 		LK_CORE_VERIFY(!OutFile.empty(), "Cannot serialize an empty file");
-		LK_CORE_TRACE_TAG("ProjectSerializer", "Serializing: \"{}\"", OutFile.string());
+		LK_CORE_DEBUG_TAG("ProjectSerializer", "Serializing: \"{}\"", OutFile.string());
 
 		/* Create the project directory if it does not exist. */
 		if (!fs::exists(OutFile.parent_path()))
@@ -40,7 +42,6 @@ namespace LkEngine {
 		{
 			LK_CORE_ERROR_TAG("ProjectSerializer", "Failed to serialize: '{}'", OutFile.string());
 		}
-
 	}
 
 	bool FProjectSerializer::Deserialize(const std::filesystem::path& InFile)
@@ -84,6 +85,8 @@ namespace LkEngine {
 	{
 		LK_CORE_VERIFY(Project);
 
+		/* TODO: Add Scene name here. */
+
 		Out << YAML::BeginMap;
 		Out << YAML::Key << "Project" << YAML::Value;
 		{
@@ -98,8 +101,8 @@ namespace LkEngine {
 
 	bool FProjectSerializer::DeserializeFromYaml(const std::string& YamlString, FProjectConfiguration& ProjectConfig)
 	{
-		YAML::Node RootNode = YAML::Load(YamlString);
-		if (!RootNode["Project"])
+		YAML::Node RootNode = YAML::Load(YamlString)["Project"];
+		if (!RootNode.IsDefined())
 		{
 			LK_CORE_DEBUG_TAG("ProjectSerializer", "Yaml node is missing 'Project' node");
 			return false;
@@ -107,7 +110,6 @@ namespace LkEngine {
 
 		LK_CORE_DEBUG_TAG("ProjectSerializer", "Deserializing project data");
 
-		//LK_DESERIALIZE_PROPERTY(Name, ProjectConfig.Name, RootNode, std::string("Unknown"));
 		LK_DESERIALIZE_PROPERTY(Name, ProjectConfig.Name, RootNode, "Unknown");
 		LK_DESERIALIZE_PROPERTY(AutoSave, ProjectConfig.bAutoSave, RootNode, true);
 
