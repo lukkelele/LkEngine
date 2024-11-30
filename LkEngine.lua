@@ -15,9 +15,7 @@ workspace "LkEngine"
     }
 
     defines {
-        "LK_ENGINE_VERSION_MAJOR=0",
-        "LK_ENGINE_VERSION_MINOR=2",
-        "LK_ENGINE_VERSION_PATCH=1",
+        "LK_ENGINE_STATIC_LIB",
         "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
 		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
 		"SPDLOG_USE_STD_FORMAT",
@@ -69,9 +67,13 @@ workspace "LkEngine"
 		defines { "LK_ENGINE_DIST" }
 
     filter "configurations:AutomationTest"
-        defines { "LK_ENGINE_DEBUG", "LK_ENGINE_AUTOMATION_TEST" }
         runtime "Debug"
         symbols "On"
+        defines { 
+            "LK_ENGINE_DEBUG", 
+            "LK_ENGINE_AUTOMATION_TEST",
+        }
+        undefines { "LK_EDITOR" }
 
 
 BuildOutputDirectory = "%{cfg.buildcfg}-%{cfg.system}"
@@ -114,6 +116,9 @@ project "LkEngine"
         "LK_CHAR_UTF8", --"LK_CHAR_UNICODE",
         "LK_ENGINE_OPENGL",
         "LK_OPENGL4",   -- OpenGL 4
+
+        "LK_EDITOR",
+
         "LK_PHYSICS_API_BULLET3",
         "LK_PHYSICS_API_BOX2D",
 
