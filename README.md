@@ -3,7 +3,7 @@
 
 ---
 
-![Static Badge](https://img.shields.io/badge/LkEngine-v0.1.2--alpha-cyan)
+![Static Badge](https://img.shields.io/badge/LkEngine-v0.1.2--alpha-blue)
 
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
 ![Core-Tests](https://github.com/lukkelele/LkEngine/actions/workflows/Core-Tests.yml/badge.svg)
@@ -35,12 +35,12 @@ I have lots of ideas that I want to see if they could work and this project has 
 My goal is to have a robust application that is _easy_ to extend and add features on.<br>
 A rich core API that is good for performance and easy to use.<br>
 With features such as:
+- Support for multiple platforms.
 - Static reflection.
-- Development tools _(e.g for debugging and profiling)_.
-- Serialization, configurability and persistance.
-- Dynamic configurability without rebuilding _(e.g changing log levels, enabling profiling)_.
+- Development tools (e.g for debugging and profiling).
+- Serialization and persistance.
+- Dynamic configurability without rebuilding (changing log levels, enabling profiling).
 - Crash and error handling.
-- Multiple platform support.
 
 This is somewhat of a playground for me. I will not always conform to standard practices as otherwise is a good rule to follow for a "_real_" project.
 
@@ -98,13 +98,12 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 ## Engine Features <a id="Engine-Features"></a>
 
 ### Available
-:white_check_mark:
+:white_check_mark: Serialization<br>
+:white_check_mark: Camera System<br>
 
 ### In Progress
 :black_square_button: Static Reflection<br>
-:black_square_button: Camera System<br>
 :black_square_button: Profiling and Instrumentation<br>
-:black_square_button: Serialization<br>
 :black_square_button: Physics and Raycasting<br>
 :black_square_button: Asset Manager<br>
 :black_square_button: Renderer Submission System<br>
