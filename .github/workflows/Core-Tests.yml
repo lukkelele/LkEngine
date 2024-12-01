@@ -49,7 +49,7 @@ jobs:
       run: |
         python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResults.yaml
 
-    - name: Upload Artifacts # The project is then uploaded as an artifact named 'site'.
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: TestResults
@@ -78,9 +78,10 @@ jobs:
           name: TestResults
           path: Download
 
-      - name: Deploy
+      - name: Deploy Results
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: "Download"
-          commit-message: "Deploying results from: CoreTests"
+          target-folder: "AutomationTest/CoreTests"
+          commit-message: "Deploying results from: ${{ env.RUNNER_NAME }}"
 
