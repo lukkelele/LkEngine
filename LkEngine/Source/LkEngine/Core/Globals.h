@@ -15,6 +15,8 @@ namespace LkEngine {
 	{
 		int Argc = 0;
 		char** Argv{};
+
+		std::vector<std::string> Args{};
 	};
 
 	namespace Global {

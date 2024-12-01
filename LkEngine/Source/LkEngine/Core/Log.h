@@ -102,7 +102,6 @@ namespace LkEngine {
         static void RegisterLogger(const ELoggerType Type,
 								   const std::string& Name,
 								   const ELogLevel LogLevel = ELogLevel::Info,
-								   const bool SaveToDisk = true,
 								   const std::vector<LogLevelColorConfig>& LevelConfigs = {},
 								   const Color::EColorCode MainColor = Color::EColorCode::Reset);
 

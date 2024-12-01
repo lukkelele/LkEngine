@@ -22,11 +22,13 @@ namespace LkEngine::Global {
 			BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]).parent_path().string() + PathSeparator;
 		}
 
-	#if defined(LK_ENGINE_CORE)
 		WorkingDir = std::filesystem::current_path();
+
+	#if defined(LK_ENGINE_CORE)
 		EngineConfig = WorkingDir;
 		EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
 	#endif
+		std::printf("Working Directory: %S\n", WorkingDir.c_str());
 
 		bArgumentsSet = true;
 	}

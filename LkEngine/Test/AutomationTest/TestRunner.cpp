@@ -20,19 +20,14 @@ namespace LkEngine {
 			LFileSystem::CreateDirectory("Results");
 		}
 
-		/* Register a test logger. */
+		/* Register test logger. */
 		std::vector<LogLevelColorConfig> LevelConfigs = {
 			{ ELogLevel::Debug, Color::Cyan  },
 			{ ELogLevel::Info,  Color::White },
 			{ ELogLevel::Error,	Color::Red   }
 		};
 	
-		constexpr bool bSaveLogfile = true;
-		Logger.RegisterLogger(ELoggerType::TestRunner, 
-							  "TEST", 
-							  ELogLevel::Debug, 
-							  bSaveLogfile, 
-							  LevelConfigs);
+		Logger.RegisterLogger(ELoggerType::TestRunner, "TEST", ELogLevel::Debug, LevelConfigs);
 	}
 
 	void LTestRunner::RegisterTests()

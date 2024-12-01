@@ -16,22 +16,21 @@ namespace LkEngine {
 
 	namespace fs = std::filesystem;
 
-	LLog::LLog()
+	namespace 
 	{
 	#if defined(LK_EDITOR)
-		const char* FileName = "LkEditor";
+		constexpr const char* FileName = "LkEditor";
 	#elif defined(LK_ENGINE_AUTOMATION_TEST)
-		const char* FileName = "LkTest";
+		constexpr const char* FileName = "LkTest";
 	#else
-		const char* FileName = "LkEngine";
+		constexpr const char* FileName = "LkEngine";
 	#endif
+	}
 
+	LLog::LLog()
+	{
 		// TODO: Read configuration and application args for setting log levels on initialization.
-		Initialize(
-			LK_FORMAT_STRING("{}-{}.log", FileName, Time::CurrentTimestamp()).c_str(),
-			"CORE", 
-			"CLIENT"
-		);
+		Initialize(LK_FORMAT_STRING("{}-{}.log", FileName, Time::CurrentTimestamp()).c_str());
 
 		LogDirectory = fs::path(LK_FORMAT_STRING("{}/Logs", fs::current_path().string()).c_str());
 		LK_CORE_INFO("Log Directory: {}", LogDirectory.string());
@@ -75,6 +74,7 @@ namespace LkEngine {
 		LogSinks.push_back(ColorSinkLogger);
 
 		/* Logfile Sink. */
+		std::printf("Logfile Sink: %s\n", Logfile.c_str());
 		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logfile, true));
 
 		/* Terminal sink. */
@@ -245,7 +245,6 @@ namespace LkEngine {
     void LLog::RegisterLogger(const ELoggerType Type, 
 							  const std::string& Name, 
 							  const ELogLevel LogLevel,
-							  const bool SaveToDisk,
 							  const std::vector<LogLevelColorConfig>& LevelConfigs, 
 							  const Color::EColorCode MainColor)
 	{
@@ -272,16 +271,6 @@ namespace LkEngine {
 
 		LogSinks.push_back(ColorSinkLogger);
 		LogSinks[0]->set_pattern(Color::GetEscapeCode(MainColor) + std::string(ColorSinkPattern) + AnsiColorReset);
-
-		if (SaveToDisk)
-		{
-			/* Logfile sink. */
-			const std::string Logfile = LogDirectory.string() + PathSeparator + Name;
-			LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logfile, true));
-
-			static constexpr const char* FileSinkPattern = "[%H:%M:%S] [%l] [%t] [%n] %v";
-			LogSinks[1]->set_pattern(FileSinkPattern);
-		}
 
 		auto& Logger = GetLogger(Type);
 		Logger = std::make_shared<spdlog::logger>(Name, LogSinks.begin(), LogSinks.end());
