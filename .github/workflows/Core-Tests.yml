@@ -60,6 +60,8 @@ jobs:
     concurrency: ci-${{ github.ref }}
     needs: [CoreTests] # Depends on the first job to complete before running and uses ubuntu-latest instead of Windows.
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
