@@ -1,0 +1,4 @@
+AutomationTest:
+  - Dummy_Arithmetic_OneEqualOne: 1
+  - Dummy_Arithmetic_OneLessThanTwo: 1
+  - Dummy_Arithmetic_TwoGreaterThanOne: 1
