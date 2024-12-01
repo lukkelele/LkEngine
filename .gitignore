@@ -48,6 +48,8 @@
 **/glfw/examples
 **/glfw/tests
 
+LkEngine/Test/Logs
+
 **/External/bin
 **/External/*bin-int*
 **/out
