@@ -41,7 +41,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        ./LkEngine/Binaries/AutomationTest-windows/LkEngine_AutomationTests.exe
+        ./LkEngine/LkEngine/Binaries/AutomationTest-windows/LkEngine_AutomationTests.exe
 
     - name: Evaluate Test Result
       run: |
