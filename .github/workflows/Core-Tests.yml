@@ -75,6 +75,10 @@ jobs:
           pwd
           ls -lh
 
+      - name: Install rsync
+        run: |
+          apt-get update && apt-get install -y rsync
+
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
