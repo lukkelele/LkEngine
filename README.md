@@ -4,11 +4,9 @@
 ---
 
 ![Static Badge](https://img.shields.io/badge/LkEngine-v0.1.2--alpha-blue)
-<object data="https://img.shields.io/badge/LkEngine-github.io-darkgray?link=https%3A%2F%2Flukkelele.github.io%2FLkEngine.html"> </object>
 
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
 ![Core-Tests](https://github.com/lukkelele/LkEngine/actions/workflows/Core-Tests.yml/badge.svg)
-
 
 
 ## Platform Support
