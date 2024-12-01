@@ -33,8 +33,8 @@ CMakeFlags = [
 ]
 
 # Platform-specific options.
-IsPlatformWindows = platform.system() == "Windows"
-library_extension = ".lib" if IsPlatformWindows else ".a"
+bPlatformWindows = platform.system() == "Windows"
+library_extension = ".lib" if bPlatformWindows else ".a"
 
 def _RunCMakeConfiguration():
     """Run CMake configure command."""
@@ -42,14 +42,14 @@ def _RunCMakeConfiguration():
 
 def _BuildGlfw():
     """Run CMake build command."""
-    build_command = ["cmake", "--build", ".", "--config", "Release"] if IsPlatformWindows else ["make", "-j"]
+    build_command = ["cmake", "--build", ".", "--config", "Release"] if bPlatformWindows else ["make", "-j"]
     result = subprocess.check_call(build_command, cwd=BuildDir)
     return result
 
 def _MoveGeneratedLibraryFile():
     """Copy the generated library to the desired location."""
     #Logger.info(f"Copying library file to: '{OutputDir}'")
-    src_file = os.path.join(BuildDir, "src", "Release", "glfw3" + library_extension) if IsPlatformWindows else os.path.join(BuildDir, "src", "libglfw3.a")
+    src_file = os.path.join(BuildDir, "src", "Release", "glfw3" + library_extension) if bPlatformWindows else os.path.join(BuildDir, "src", "libglfw3.a")
     dest_file = os.path.join(OutputDir, "glfw3" + library_extension)
     shutil.copy2(src_file, dest_file)
 
