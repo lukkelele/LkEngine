@@ -70,6 +70,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Determine location
+        run: |
+          pwd
+          ls -lh
+
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
