@@ -46,5 +46,7 @@ jobs:
 
     - name: Evaluate Test Result
       run: |
-        python LkEngine/Test/TestResultParser.py .\Binaries\AutomationTest-windows\LkEngine_AutomationTests\Results\TestResult.yaml
+        ls 
+        ls Binaries
+        python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResult.yaml
 
