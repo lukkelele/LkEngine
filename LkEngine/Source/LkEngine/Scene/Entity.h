@@ -38,25 +38,25 @@ namespace LkEngine {
 		template<typename... T>
 		bool HasComponent()
 		{
-			return Scene->Registry.has<T...>(Handle);
+			return Scene->Registry.all_of<T...>(Handle);
 		}
 
 		template<typename... T>
 		bool HasComponent() const
 		{
-			return Scene->Registry.has<T...>(Handle);
+			return Scene->Registry.all_of<T...>(Handle);
 		}
 
 		template<typename... T>
 		bool HasAny()
 		{
-			return Scene->Registry.any<T...>(Handle);
+			return Scene->Registry.any_of<T...>(Handle);
 		}
 
 		template<typename... T>
 		bool HasAny() const
 		{
-			return Scene->Registry.any<T...>(Handle);
+			return Scene->Registry.any_of<T...>(Handle);
 		}
 
 		template<typename T>
@@ -83,7 +83,10 @@ namespace LkEngine {
 		template<typename T>
 		void RemoveComponentIfExists()
 		{
-			Scene->Registry.remove_if_exists<T>(Handle);
+			if (Scene->Registry.all_of<T>(Handle))
+			{
+				Scene->Registry.remove<T>(Handle);
+			}
 		}
 
 		template<typename T, typename... ARGS>
@@ -92,7 +95,7 @@ namespace LkEngine {
 			Scene->Registry.emplace<T>(Handle, std::forward<ARGS>(args)...);
 		}
 
-		FORCEINLINE const std::string& Name() { return GetComponent<LTagComponent>().Tag; }
+		FORCEINLINE const std::string& Name() const { return GetComponent<LTagComponent>().Tag; }
 		FORCEINLINE LTagComponent& Tag() { return GetComponent<LTagComponent>(); }
 		FORCEINLINE LTransformComponent& Transform() { return GetComponent<LTransformComponent>(); }
 

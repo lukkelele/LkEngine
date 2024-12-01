@@ -54,16 +54,19 @@ namespace LkEngine {
 	{
 		const ImRect WindowContent = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
 
+		LK_CORE_ASSERT(false, "FIX ENTT .each and .size");
 		if (Scene)
 		{
 			//ImGui::SeparatorText(fmt::format("Current Scene - {}", Scene->Name).c_str());
 			ImGui::SeparatorText(LK_FORMAT_STRING("Scene - {}", Scene->Name).c_str());
+		#if 0
 			ImGui::Text("Entities: %d", Scene->Registry.size());
 			Scene->Registry.each([&](auto EntityID)
 			{
 				LEntity Entity { EntityID, Scene.Get() };
 				DrawEntityNode(Entity);
 			});
+		#endif
 
 			/// TODO: Make it so the input interface is used here instead of raw ImGui calls.
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())

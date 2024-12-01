@@ -87,14 +87,14 @@ namespace LkEngine {
 
 	LEntity LScene::CreateEntityWithID(UUID uuid, const std::string& name)
 	{
-		LEntity entity = { Registry.create(), this };
-		entity.AddComponent<LIDComponent>(uuid);
+		LEntity Entity = { Registry.create(), this };
+		Entity.AddComponent<LIDComponent>(uuid);
 
-		LTagComponent& TagComponent = entity.AddComponent<LTagComponent>();
+		LTagComponent& TagComponent = Entity.AddComponent<LTagComponent>();
 		TagComponent.Tag = name.empty() ? "Entity" : name;
-		m_EntityIDMap[uuid] = entity;
+		m_EntityIDMap[uuid] = Entity;
 
-		return entity;
+		return Entity;
 	}
 
 	// TODO: Change name to GetEntityWithID
@@ -116,13 +116,14 @@ namespace LkEngine {
 
 	LEntity LScene::FindEntity(std::string_view name)
 	{
-		auto view = Registry.view<LTagComponent>();
-		for (auto entity : view)
+		/* TODO: Use predicate instead of for-loop like this. */
+		auto View = Registry.view<LTagComponent>();
+		for (auto Entity : View)
 		{
-			const LTagComponent& tc = view.get<LTagComponent>(entity);
+			const LTagComponent& tc = View.get<LTagComponent>(Entity);
 			if (tc.Tag == name)
 			{
-				return LEntity{ entity , this };
+				return LEntity{ Entity , this };
 			}
 		}
 
@@ -133,31 +134,29 @@ namespace LkEngine {
 	{
 		auto view = Registry.view<LIDComponent>();
 		std::vector<LEntity> entities{};
-		for (const auto& entity : view)
+		for (const auto& Entity : view)
 		{
-			entities.push_back({ entity, this });
+			entities.push_back({ Entity, this });
 		}
 
 		return entities;
 	}
 
-	void LScene::DestroyEntity(LEntity entity)
+	void LScene::DestroyEntity(const LEntity Entity)
 	{
-		m_EntityIDMap.erase(entity.GetUUID());
-		Registry.destroy(entity);
-		LK_CORE_DEBUG("Entity {} deleted", entity.Name());
+		m_EntityIDMap.erase(Entity.GetUUID());
+		Registry.destroy(Entity);
+		LK_CORE_DEBUG("Entity {} deleted", Entity.Name());
 	}
 
 	bool LScene::HasEntity(const LEntity Entity) const
 	{
-		return (Registry.has<LIDComponent>(Entity) 
-				&& (Entity.Scene != nullptr) 
-				&& (Entity.Handle != entt::null));
+		return (Registry.all_of<LIDComponent>(Entity) && Entity.Scene && (Entity.Handle != entt::null));
 	}
 
-	bool LScene::IsEntityInRegistry(LEntity entity) const
+	bool LScene::IsEntityInRegistry(const LEntity Entity) const
 	{
-		return Registry.has<LIDComponent>(entity);
+		return Registry.all_of<LIDComponent>(Entity);
 	}
 
 	void LScene::SortEntities()
@@ -228,7 +227,7 @@ namespace LkEngine {
 		auto& world = Registry.get<Box2DWorldComponent>(sceneView.front()).World;
 
 		LEntity e = { Entity, this };
-		UUID entityID = e.GetUUID();
+		UUID EntityID = e.GetUUID();
 		LTransformComponent& transform = e.Transform();
 		auto& rigidBody2D = Registry.get<LRigidBody2DComponent>(Entity);
 
@@ -273,10 +272,10 @@ namespace LkEngine {
 		body->SetLinearDamping(rigidBody2D.LinearDrag);
 		body->SetAngularDamping(rigidBody2D.AngularDrag);
 		body->SetBullet(rigidBody2D.IsBullet);
-		body->GetUserData().pointer = (uintptr_t)entityID;
+		body->GetUserData().pointer = (uintptr_t)EntityID;
 		rigidBody2D.RuntimeBody = body;
 		#endif
-		//LK_CORE_DEBUG("OnComponentAdded<LRigidBody2DComponent>  {}", entity.Name());
+		//LK_CORE_DEBUG("OnComponentAdded<LRigidBody2DComponent>  {}", Entity.Name());
 	}
 
 	template<>
@@ -336,7 +335,7 @@ namespace LkEngine {
 		Entity.SetParentUUID(Parent.GetUUID());
 		Parent.GetChildren().push_back(Entity.GetUUID());
 
-		//ConvertToLocalSpace(entity);
+		//ConvertToLocalSpace(Entity);
 	}
 
 	void LScene::UnparentEntity(LEntity Entity, bool bConvertToWorldSpace)
@@ -353,7 +352,7 @@ namespace LkEngine {
 
 		//if (bConvertToWorldSpace)
 		//{
-		//	ConvertToWorldSpace(entity);
+		//	ConvertToWorldSpace(Entity);
 		//}
 
 		Entity.SetParentUUID(0);
@@ -366,36 +365,34 @@ namespace LkEngine {
 		TargetScene->Name = Name;
 		TargetScene->bIsEditorScene = bIsEditorScene;
 
-		std::unordered_map<UUID, entt::entity> enttMap;
+		std::unordered_map<UUID, entt::entity> EntityMap;
 		auto View = Registry.view<LIDComponent>();
 		for (auto Entity : View)
 		{
-			/* Retrieve UUID. */
+			/* Retrieve the UUID and the entity name. */
 			const UUID EntityUUID = Registry.get<LIDComponent>(Entity).ID;
-
-			/* Retrieve the entity name. */
 			const std::string& EntityName = Registry.get<LTagComponent>(Entity).Tag;
 
-			/* Create identical entity on the target scene. */
+			/* Create identical Entity on the target scene. */
 			LEntity EntityCopy = TargetScene->CreateEntityWithID(EntityUUID, EntityName);
-			enttMap[EntityUUID] = EntityCopy.Handle;
+			EntityMap[EntityUUID] = EntityCopy.Handle;
 		}
 
 #if 0
 		auto targetView = TargetScene->Registry.view<LIDComponent>();
-		for (auto entity : targetView)
+		for (auto Entity : targetView)
 		{
-			//UUID id = targetView.get<LIDComponent>(entity).ID;
-			TargetScene->Registry.destroy(entity);
+			//UUID id = targetView.get<LIDComponent>(Entity).ID;
+			TargetScene->Registry.destroy(Entity);
 		}
 #endif
 
-		CopyComponent<LTagComponent>(TargetScene->Registry, Registry, enttMap);
-		CopyComponent<LTransformComponent>(TargetScene->Registry, Registry, enttMap);
-		CopyComponent<LSpriteComponent>(TargetScene->Registry, Registry, enttMap);
-		CopyComponent<LCameraComponent>(TargetScene->Registry, Registry, enttMap);
-		CopyComponent<LRigidBody2DComponent>(TargetScene->Registry, Registry, enttMap);
-		CopyComponent<LBoxCollider2DComponent>(TargetScene->Registry, Registry, enttMap);
+		CopyComponent<LTagComponent>(TargetScene->Registry, Registry, EntityMap);
+		CopyComponent<LTransformComponent>(TargetScene->Registry, Registry, EntityMap);
+		CopyComponent<LSpriteComponent>(TargetScene->Registry, Registry, EntityMap);
+		CopyComponent<LCameraComponent>(TargetScene->Registry, Registry, EntityMap);
+		CopyComponent<LRigidBody2DComponent>(TargetScene->Registry, Registry, EntityMap);
+		CopyComponent<LBoxCollider2DComponent>(TargetScene->Registry, Registry, EntityMap);
 
 		/* This ensures a consistent ordering when iterating ID's in the UI_SceneContent menu. */
 		TargetScene->SortEntities();
@@ -481,9 +478,9 @@ namespace LkEngine {
 		// LMeshComponent
 		{
 			auto MeshView = Registry.view<LMeshComponent>();
-			for (auto entity : MeshView)
+			for (auto Entity : MeshView)
 			{
-				LMeshComponent& MeshComp = Registry.get<LMeshComponent>(entity);
+				LMeshComponent& MeshComp = Registry.get<LMeshComponent>(Entity);
 				if (MeshComp.Mesh)
 				{
 					if (LAssetManager::IsMemoryAsset(MeshComp.Mesh))
@@ -556,9 +553,9 @@ namespace LkEngine {
 		/* LStaticMeshComponent. */
 		{
 			auto StaticMeshView = Registry.view<LStaticMeshComponent>();
-			for (auto entity : StaticMeshView)
+			for (auto Entity : StaticMeshView)
 			{
-				auto& StaticMeshComp = Registry.get<LStaticMeshComponent>(entity);
+				auto& StaticMeshComp = Registry.get<LStaticMeshComponent>(Entity);
 				if (StaticMeshComp.StaticMesh)
 				{
 					if (LAssetManager::IsMemoryAsset(StaticMeshComp.StaticMesh))

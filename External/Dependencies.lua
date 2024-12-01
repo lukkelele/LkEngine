@@ -82,7 +82,7 @@ Dependency = {
 	},
 
 	Entt = {
-		IncludeDir = "%{wks.location}/External/Entt/entt/include" 
+		IncludeDir = "%{wks.location}/External/Entt/entt/single_include" 
 	},
 
 	Tracy = {

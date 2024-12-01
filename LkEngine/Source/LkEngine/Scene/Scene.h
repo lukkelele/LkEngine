@@ -101,21 +101,19 @@ namespace LkEngine {
 			auto SourceEntities = SourceRegistry.view<T>();
 			for (auto SourceEntity : SourceEntities)
 			{
-				entt::entity destEntity = enttMap.at(SourceRegistry.get<LIDComponent>(SourceEntity).ID);
-				auto& SourceComponent = SourceRegistry.get<T>(SourceEntity);
-				auto& destComponent = DestinationRegistry.emplace_or_replace<T>(destEntity, SourceComponent);
+				entt::entity DestEntity = enttMap.at(SourceRegistry.get<LIDComponent>(SourceEntity).ID);
+				auto& SourceComp = SourceRegistry.get<T>(SourceEntity);
+				auto& DestComp = DestinationRegistry.emplace_or_replace<T>(DestEntity, SourceComp);
 			}
 		}
 
 		template<typename TComponent>
-		void CopyComponentIfExists(entt::entity Destination, 
-								   entt::registry& DestinationRegistry, 
-								   entt::entity Source)
+		void CopyComponentIfExists(entt::entity Destination, entt::registry& DestinationRegistry, entt::entity Source)
 		{
-			if (Registry.has<TComponent>(Source))
+			if (Registry.all_of<TComponent>(Source))
 			{
-				auto& SourceComponent = Registry.get<TComponent>(Source);
-				DestinationRegistry.emplace_or_replace<TComponent>(Destination, SourceComponent);
+				auto& SourceComp = Registry.get<TComponent>(Source);
+				DestinationRegistry.emplace_or_replace<TComponent>(Destination, SourceComp);
 			}
 		}
 
