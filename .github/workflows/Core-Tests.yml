@@ -50,7 +50,7 @@ jobs:
         python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResults.yaml
 
     - name: Upload Artifacts # The project is then uploaded as an artifact named 'site'.
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
         name: TestResults
         path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
