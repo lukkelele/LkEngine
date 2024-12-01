@@ -10,7 +10,7 @@ insert_final_newline = true
 
 # Visual C++ Code Style settings
 
-cpp_generate_documentation_comments = xml
+cpp_generate_documentation_comments = doxygen
 
 # Visual C++ Formatting settings
 
@@ -72,3 +72,15 @@ cpp_space_around_assignment_operator = insert
 cpp_space_pointer_reference_alignment = left
 cpp_space_around_ternary_operator = insert
 cpp_wrap_preserve_blocks = never
+
+
+# Python
+[*.py]
+indent_style = space
+indent_size = 4
+
+# Lua
+[*.lua]
+indent_style = space
+indent_size = 4
+

@@ -1,4 +1,4 @@
-name: Core-Tests
+name: CoreTests
 
 on:
   push:
@@ -55,12 +55,6 @@ jobs:
         name: TestResults
         path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
 
-    #- name: Deploy results
-    #  uses: JamesIves/github-pages-deploy-action@v4
-    #  with:
-    #    token: ${{ secrets.GITHUB_TOKEN }}
-    #    folder: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
-    #    branch: gh-pages
 
   Deploy-Test-Results:
     concurrency: ci-${{ github.ref }}
@@ -77,7 +71,7 @@ jobs:
 
       - name: Install rsync
         run: |
-          apt-get update && apt-get install -y rsync
+          sudo apt-get update && sudo apt-get install -y rsync
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
