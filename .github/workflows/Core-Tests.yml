@@ -27,10 +27,17 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
+      with: 
+        vs-version: '[17.0,'
+        msbuild-architecture: x64
 
-    - name: Build Engine 
+    - name: Setup Engine 
       run: |
         python Tools/LkEngine-Setup.py
+
+    - name: Build 
+      run: |
+        MSBuild.exe LkEngine.sln -property:Configuration=AutomationTest
 
     - name: Run Tests
       run: |
