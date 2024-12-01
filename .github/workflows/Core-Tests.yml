@@ -62,8 +62,7 @@ jobs:
     #    folder: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
     #    branch: gh-pages
 
-
-  Deploy-CoreTests-Results:
+  Deploy-Test-Results:
     concurrency: ci-${{ github.ref }}
     needs: [CoreTests] # Depends on the first job to complete before running and uses ubuntu-latest instead of Windows.
     runs-on: ubuntu-latest
@@ -72,7 +71,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: TestResults
 
