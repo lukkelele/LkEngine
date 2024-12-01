@@ -24,7 +24,6 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install pyyaml
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
@@ -40,11 +39,17 @@ jobs:
       run: |
         MSBuild.exe LkEngine.sln -property:Configuration=AutomationTest
 
-    - name: Run Tests
+    - name: Run tests
       run: |
         .\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe TestResults.yaml
 
-    - name: Evaluate Test Result
+    - name: Evaluate test resuls
       run: |
         python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResults.yaml
+
+    - name: Publish test results
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
 
