@@ -21,18 +21,12 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Upgrade Pip 
+    - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
 
-    - name: Locate MSBuild
-      id: msbuild-locate
-      run: |
-        echo "Locating MSBuild..."
-        $msbuild = &"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
-        echo "MSBuild Path: $msbuild"
-        echo "::set-output name=msbuild::$msbuild"
-      shell: powershell
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
 
     - name: Build Engine 
       run: |
