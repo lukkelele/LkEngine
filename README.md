@@ -1,6 +1,5 @@
 # LkEngine :shaved_ice: 
 > Game Engine written in C++20<br>
-> Upgraded version of my first engine **LukkelEngine** ([repo](https://github.com/lukkelele/LukkelEngine/tree/main)).<br>
 
 ---
 
@@ -29,7 +28,6 @@
 # Project <a id="Project"></a>
 
 **LkEngine** (pronounced *_Lukkel-Engine_*) is a game engine written in C\++20. <br>
-An earlier version existed called **LukkelEngine** that I scrapped and began anew.<br>
 The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast doing it.<br>
 I have lots of ideas that I want to see if they could work and this project has been a very good environment for me to try stuff out.
 <br>
@@ -123,5 +121,7 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 ---
 
 ## Misc
+
+:warning: TODO: Move this to the github.io page instead.
 
 ### :heavy_minus_sign: [Development](Docs/Development.md)
