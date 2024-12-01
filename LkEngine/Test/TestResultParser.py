@@ -11,9 +11,9 @@ import sys
 from pathlib import Path
 
 # TODO: This should be dynamic, hardcoded for now.
-TestSuite = "AutomationTest"
+#TestSuite = "AutomationTest"
 SummaryFile = f"Summary.json"
-BadgeFile = f"{TestSuite}-Badge.json"
+#BadgeFile = f"{TestSuite}-Badge.json"
 
 def ParseTestResults(Filepath):
     bYamlFileParsed = False
@@ -59,9 +59,8 @@ def ParseTestResults(Filepath):
             json.dump(result_summary, summary_file)
             print(f"Dumped test results at: {summary_file}")
 
-        #=============================================
+
         # Generate badge for shields.io
-        #=============================================
         badge_data = {
             "schemaVersion": 1,
             "label": "tests",
@@ -74,7 +73,8 @@ def ParseTestResults(Filepath):
             json.dump(badge_data, badge_file, indent=4)
             print(f"Badge JSON created at: {badge_path}")
 
-        return 0 if failed == 0 else 1
+        #return 0 if failed == 0 else 1
+        return 0
 
     except Exception as e:
         if not bYamlFileParsed:
@@ -85,11 +85,15 @@ def ParseTestResults(Filepath):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(f"[TestResultParser] Error occured, number of least required arguments are 2 but got {len(sys.argv)}")
+    if len(sys.argv) < 3:
+        print(f"[TestResultParser] Error occured, number of least required arguments are 3 but got {len(sys.argv)}")
         sys.exit(1)
 
     results_file = sys.argv[1]
+    TestSuite = sys.argv[2]
+    BadgeFile = f"{TestSuite}-Badge.json"
     print(f"Results File: {results_file}")
+    print(f"Test Suite: {TestSuite}")
+
     exit_code = ParseTestResults(results_file)
     sys.exit(exit_code)

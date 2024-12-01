@@ -47,11 +47,11 @@ jobs:
 
     - name: Run tests
       run: |
-        & "${env:TEST_DIR}\LkEngine_AutomationTests.exe" ${env:TEST_RESULT_FILE}
+        & "${env:TEST_DIR}\LkEngine_AutomationTests.exe" ${env:TEST_RESULT_FILE} "CoreTests"
 
     - name: Evaluate test resuls
       run: |
-        python LkEngine/Test/TestResultParser.py ${env:TEST_DIR}/Results/${env:TEST_RESULT_FILE}
+        python LkEngine/Test/TestResultParser.py ${env:TEST_DIR}/Results/${env:TEST_RESULT_FILE} "CoreTests"
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4

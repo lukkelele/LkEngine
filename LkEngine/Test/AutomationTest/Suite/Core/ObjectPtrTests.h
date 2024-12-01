@@ -8,7 +8,6 @@
 	 Test Declarations. 
  -----------------------------------------------------------------*/
 
-
 /* Dummy tests. */
 LK_DECLARE_AUTOMATION_TEST(Dummy_Arithmetic_OneEqualOne);
 LK_DECLARE_AUTOMATION_TEST(Dummy_Arithmetic_OneLessThanTwo);
