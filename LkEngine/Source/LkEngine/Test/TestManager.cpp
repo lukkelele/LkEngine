@@ -48,21 +48,14 @@ namespace LkEngine {
 
 	void LTestManager::RunTests(const std::string& TestSuite)
 	{
+		LK_CORE_ASSERT(!TestSuite.empty(), "TestSuite is empty");
 		const FRuntimeArguments& RuntimeArgs = Global::GetRuntimeArguments();
-		std::string ResultFile;
-		if (RuntimeArgs.Argc > 1)
-		{
-			ResultFile = RuntimeArgs.Argv[1];
-		}
-		else
-		{
-			ResultFile = "TestResult.yaml"; 
-		}
+
+		const std::string ResultFile = LK_FORMAT_STRING("TestResult-{}.yaml", TestSuite); 
 
 		YAML::Emitter Out;
-
 		Out << YAML::BeginMap;
-		Out << YAML::Key << "AutomationTest" << YAML::Value << YAML::BeginSeq;
+		Out << YAML::Key << TestSuite << YAML::Value << YAML::BeginSeq;
 
 		for (const auto& [TestName, TestInstance] : TestInstanceMap)
 		{

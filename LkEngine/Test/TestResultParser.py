@@ -4,16 +4,18 @@
 # Parse and summarize test results.
 # Generates a shield.io badge that is used to display the test report in
 # the README.
+#
+# Usage:
+#        TestResultParser.py <TEST_RESULTS>
 #--------------------------------------------------------------------------
 import yaml
 import json
+import os
 import sys
+import re
 from pathlib import Path
 
-# TODO: This should be dynamic, hardcoded for now.
-#TestSuite = "AutomationTest"
 SummaryFile = f"Summary.json"
-#BadgeFile = f"{TestSuite}-Badge.json"
 
 def ParseTestResults(Filepath):
     bYamlFileParsed = False
@@ -25,6 +27,9 @@ def ParseTestResults(Filepath):
         # Extract the test results.
         tests = data.get(f"{TestSuite}", [])
         total = len(tests)
+        if total == 0:
+            print(f"Found 0 tests for {TestSuite}")
+            return 1
         passed_tests = []
         failed_tests = []
 
@@ -59,13 +64,16 @@ def ParseTestResults(Filepath):
             json.dump(result_summary, summary_file)
             print(f"Dumped test results at: {summary_file}")
 
-
-        # Generate badge for shields.io
+        # Generate badge used on the README.
         badge_data = {
             "schemaVersion": 1,
             "label": "tests",
             "message": f"{passed}/{total}",
-            "color": "success" if failed == 0 else "critical"
+            "color": (
+                "success" if failed == 0 else 
+                "warning" if passed / total >= 0.50 else
+                "critical"
+            )
         }
 
         badge_path = ResultDir / BadgeFile
@@ -73,7 +81,6 @@ def ParseTestResults(Filepath):
             json.dump(badge_data, badge_file, indent=4)
             print(f"Badge JSON created at: {badge_path}")
 
-        #return 0 if failed == 0 else 1
         return 0
 
     except Exception as e:
@@ -85,15 +92,23 @@ def ParseTestResults(Filepath):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print(f"[TestResultParser] Error occured, number of least required arguments are 3 but got {len(sys.argv)}")
+    if len(sys.argv) < 2:
+        print(f"[TestResultParser] Error occured, number of least required arguments are 2 but got {len(sys.argv)}")
         sys.exit(1)
 
     results_file = sys.argv[1]
-    TestSuite = sys.argv[2]
+
+    # Extract the text between '-' and '.yaml'.
+    match = re.match(r"^.*-(.*?)\.yaml$", os.path.basename(results_file))
+    if not match:
+        print(f"Failed to extract test suite from filename: {results_file}")
+        sys.exit(1)
+
+    TestSuite = match.group(1)
     BadgeFile = f"{TestSuite}-Badge.json"
     print(f"Results File: {results_file}")
     print(f"Test Suite: {TestSuite}")
+    print(f"Badge File: {BadgeFile}")
 
     exit_code = ParseTestResults(results_file)
     sys.exit(exit_code)

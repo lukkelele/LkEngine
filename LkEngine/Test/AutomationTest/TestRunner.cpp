@@ -40,11 +40,12 @@ namespace LkEngine {
 
 	void LTestRunner::Run()
 	{
-		LTestManager::Get().RunTests();
+		LTestManager::Get().RunTests("CoreTests");
 	}
 
 }
 
+/* TODO: Add testsuite registration in the LK_DEFINE_AUTOMATION_TEST macro. */
 
 int main(int Argc, char* Argv[])
 {
