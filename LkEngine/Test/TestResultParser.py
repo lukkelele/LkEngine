@@ -15,7 +15,6 @@ import sys
 import re
 from pathlib import Path
 
-SummaryFile = f"Summary.json"
 
 def ParseTestResults(Filepath):
     bYamlFileParsed = False
@@ -96,19 +95,20 @@ if __name__ == "__main__":
         print(f"[TestResultParser] Error occured, number of least required arguments are 2 but got {len(sys.argv)}")
         sys.exit(1)
 
-    results_file = sys.argv[1]
+    TestResultFile = sys.argv[1]
 
     # Extract the text between '-' and '.yaml'.
-    match = re.match(r"^.*-(.*?)\.yaml$", os.path.basename(results_file))
+    match = re.match(r"^.*-(.*?)\.yaml$", os.path.basename(TestResultFile))
     if not match:
-        print(f"Failed to extract test suite from filename: {results_file}")
+        print(f"Failed to extract test suite from filename: {TestResultFile}")
         sys.exit(1)
 
     TestSuite = match.group(1)
+    SummaryFile = f"{TestSuite}-Summary.json"
     BadgeFile = f"{TestSuite}-Badge.json"
-    print(f"Results File: {results_file}")
+    print(f"Results File: {TestResultFile}")
     print(f"Test Suite: {TestSuite}")
     print(f"Badge File: {BadgeFile}")
 
-    exit_code = ParseTestResults(results_file)
+    exit_code = ParseTestResults(TestResultFile)
     sys.exit(exit_code)

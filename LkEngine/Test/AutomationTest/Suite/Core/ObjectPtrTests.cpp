@@ -6,7 +6,8 @@
 
 LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_OneEqualOne) 
 {
-	return TestEqual(GetName(), 1, 1);
+	//return TestEqual(GetName(), 1, 1);
+	return TestEqual(GetName(), 0, 1);
 };
 
 LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_OneLessThanTwo) 
