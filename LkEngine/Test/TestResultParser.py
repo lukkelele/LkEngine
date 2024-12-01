@@ -7,6 +7,11 @@ import json
 import sys
 from pathlib import Path
 
+# TODO: This should be dynamic, hardcoded for now.
+TestSuite = "AutomationTest"
+#SummaryFile = f"{TestSuite}-Summary.json"
+SummaryFile = f"Summary.json"
+
 def ParseTestResults(Filepath):
     bYamlFileParsed = False
     try:
@@ -15,7 +20,7 @@ def ParseTestResults(Filepath):
             data = yaml.safe_load(file)
 
         # Extract the test results.
-        tests = data.get('AutomationTest', [])
+        tests = data.get(f"{TestSuite}", [])
         total = len(tests)
         passed_tests = []
         failed_tests = []
@@ -47,7 +52,8 @@ def ParseTestResults(Filepath):
 
         # Save summary to a JSON file.
         ResultDir = Path(Filepath).parent
-        with open(f"{ResultDir}/Test-Summary.json", "w") as summary_file:
+        #with open(f"{ResultDir}/Test-Summary.json", "w") as summary_file:
+        with open(f"{ResultDir}/{SummaryFile}", "w") as summary_file:
             json.dump(result_summary, summary_file)
 
         return 0 if failed == 0 else 1

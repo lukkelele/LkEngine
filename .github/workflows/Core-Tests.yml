@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+env:
+  TEST_DIR: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests
+  TEST_RESULT_FILE: TestResult-CoreTests.yaml
+
 jobs:
   CoreTests:
     runs-on: windows-latest
@@ -43,17 +47,20 @@ jobs:
 
     - name: Run tests
       run: |
-        .\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe TestResults.yaml
+        $TEST_DIR\LkEngine_AutomationTests.exe $TEST_RESULT_FILE
+        #.\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe TestResults.yaml
 
     - name: Evaluate test resuls
       run: |
-        python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResults.yaml
+        python LkEngine/Test/TestResultParser.py $TEST_DIR/Results/$TEST_RESULT_FILE.yaml
+        #python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResults.yaml
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: TestResults
-        path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
+        path: $TEST_DIR/Results
+        #path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
 
 
   Deploy-Test-Results:
