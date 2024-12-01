@@ -24,6 +24,7 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
+        python -m pip install pyyaml
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
@@ -41,9 +42,9 @@ jobs:
 
     - name: Run Tests
       run: |
-        ./LkEngine/LkEngine/Binaries/AutomationTest-windows/LkEngine_AutomationTests.exe
+        .\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe TestResults.yaml
 
     - name: Evaluate Test Result
       run: |
-        python LkEngine/Test/TestResultParser.py
+        python LkEngine/Test/TestResultParser.py .\Binaries\AutomationTest-windows\LkEngine_AutomationTests\Results\TestResult.yaml
 

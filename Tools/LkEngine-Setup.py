@@ -27,6 +27,7 @@ RequiredPythonDependencies = [
     "requests",
     "fake-useragent",
     "colorama",
+    "pyyaml",
 ]
 # Install Python dependencies.
 for RequiredPythonPackage in RequiredPythonDependencies:
