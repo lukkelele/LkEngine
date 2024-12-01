@@ -75,6 +75,8 @@ def ParseTestResults(Filepath):
             )
         }
 
+        print(f"Badge Data: {badge_data}")
+
         badge_path = ResultDir / BadgeFile
         with open(badge_path, "w") as badge_file:
             json.dump(badge_data, badge_file, indent=4)
@@ -95,20 +97,20 @@ if __name__ == "__main__":
         print(f"[TestResultParser] Error occured, number of least required arguments are 2 but got {len(sys.argv)}")
         sys.exit(1)
 
-    TestResultFile = sys.argv[1]
+    results_file = sys.argv[1]
 
     # Extract the text between '-' and '.yaml'.
-    match = re.match(r"^.*-(.*?)\.yaml$", os.path.basename(TestResultFile))
+    match = re.match(r"^.*-(.*?)\.yaml$", os.path.basename(results_file))
     if not match:
-        print(f"Failed to extract test suite from filename: {TestResultFile}")
+        print(f"Failed to extract test suite from filename: {results_file}")
         sys.exit(1)
 
     TestSuite = match.group(1)
     SummaryFile = f"{TestSuite}-Summary.json"
     BadgeFile = f"{TestSuite}-Badge.json"
-    print(f"Results File: {TestResultFile}")
+    print(f"Results File: {results_file}")
     print(f"Test Suite: {TestSuite}")
     print(f"Badge File: {BadgeFile}")
 
-    exit_code = ParseTestResults(TestResultFile)
+    exit_code = ParseTestResults(results_file)
     sys.exit(exit_code)
