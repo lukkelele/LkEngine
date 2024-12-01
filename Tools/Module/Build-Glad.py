@@ -94,7 +94,6 @@ def BuildGlad():
     os.makedirs(BuildDir, exist_ok=True)
     try:
         if not _IsGladModuleInstalled():
-            Logger.warning("Glad module not found, installing it")
             _InstallGladModule()
         BuildResult = _GenerateGladLoader()
         _MoveGeneratedFiles()
