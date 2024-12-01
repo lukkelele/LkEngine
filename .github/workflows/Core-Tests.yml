@@ -49,9 +49,16 @@ jobs:
       run: |
         python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResults.yaml
 
-    - name: Publish test results
-      uses: peaceiris/actions-gh-pages@v3
+    #- name: Publish test results
+    #  uses: peaceiris/actions-gh-pages@v3
+    #  with:
+    #    github_token: ${{ secrets.GITHUB_TOKEN }}
+    #    publish_dir: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
+
+    - name: Deploy results
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
+        token: ${{ secrets.GITHUB_TOKEN }}
+        folder: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
+        branch: gh-pages
 
