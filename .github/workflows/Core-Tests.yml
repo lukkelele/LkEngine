@@ -49,16 +49,35 @@ jobs:
       run: |
         python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResults.yaml
 
-    #- name: Publish test results
-    #  uses: peaceiris/actions-gh-pages@v3
-    #  with:
-    #    github_token: ${{ secrets.GITHUB_TOKEN }}
-    #    publish_dir: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
-
-    - name: Deploy results
-      uses: JamesIves/github-pages-deploy-action@v4
+    - name: Upload Artifacts # The project is then uploaded as an artifact named 'site'.
+      uses: actions/upload-artifact@v1
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        folder: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
-        branch: gh-pages
+        name: TestResults
+        path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
+
+    #- name: Deploy results
+    #  uses: JamesIves/github-pages-deploy-action@v4
+    #  with:
+    #    token: ${{ secrets.GITHUB_TOKEN }}
+    #    folder: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
+    #    branch: gh-pages
+
+
+  Deploy-CoreTests-Results:
+    concurrency: ci-${{ github.ref }}
+    needs: [CoreTests] # Depends on the first job to complete before running and uses ubuntu-latest instead of Windows.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v1
+        with:
+          name: TestResults
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: 'TestResults' # Must match the artifact name.
 
