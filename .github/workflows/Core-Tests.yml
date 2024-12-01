@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  TEST_DIR: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests
+  TEST_DIR: .\Binaries\AutomationTest-windows\LkEngine_AutomationTests
   TEST_RESULT_FILE: TestResult-CoreTests.yaml
 
 jobs:
@@ -47,20 +47,17 @@ jobs:
 
     - name: Run tests
       run: |
-        $TEST_DIR\LkEngine_AutomationTests.exe $TEST_RESULT_FILE
-        #.\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe TestResults.yaml
+        & "${env:TEST_DIR}\LkEngine_AutomationTests.exe" ${env:TEST_RESULT_FILE}
 
     - name: Evaluate test resuls
       run: |
-        python LkEngine/Test/TestResultParser.py $TEST_DIR/Results/$TEST_RESULT_FILE.yaml
-        #python LkEngine/Test/TestResultParser.py Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results/TestResults.yaml
+        python LkEngine/Test/TestResultParser.py ${env:TEST_DIR}/Results/${env:TEST_RESULT_FILE}
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: TestResults
-        path: $TEST_DIR/Results
-        #path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
+        path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
 
 
   Deploy-Test-Results:
@@ -75,20 +72,20 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y rsync
 
-      - name: Create artifact destination
+      - name: Create artifact download directory
         run: |
           mkdir Download
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: TestResults
+          name: TestResults # Needs to match artifact name in 'actions/upload-artifact'.
           path: Download
 
       - name: Deploy Results
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: "Download"
-          target-folder: "AutomationTest/CoreTests"
-          commit-message: "Deploying results from: ${{ env.RUNNER_NAME }}"
+          target-folder: "TestResults/CoreTests"
+          commit-message: "Deploying results from: CoreTests"
 

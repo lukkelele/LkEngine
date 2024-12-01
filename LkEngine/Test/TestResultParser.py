@@ -1,6 +1,9 @@
 #--------------------------------------------------------------------------
 # [LkEngine] TestResultParser.py
-#
+# 
+# Parse and summarize test results.
+# Generates a shield.io badge that is used to display the test report in
+# the README.
 #--------------------------------------------------------------------------
 import yaml
 import json
@@ -9,8 +12,8 @@ from pathlib import Path
 
 # TODO: This should be dynamic, hardcoded for now.
 TestSuite = "AutomationTest"
-#SummaryFile = f"{TestSuite}-Summary.json"
 SummaryFile = f"Summary.json"
+BadgeFile = f"{TestSuite}-Badge.json"
 
 def ParseTestResults(Filepath):
     bYamlFileParsed = False
@@ -52,9 +55,24 @@ def ParseTestResults(Filepath):
 
         # Save summary to a JSON file.
         ResultDir = Path(Filepath).parent
-        #with open(f"{ResultDir}/Test-Summary.json", "w") as summary_file:
         with open(f"{ResultDir}/{SummaryFile}", "w") as summary_file:
             json.dump(result_summary, summary_file)
+            print(f"Dumped test results at: {summary_file}")
+
+        #=============================================
+        # Generate badge for shields.io
+        #=============================================
+        badge_data = {
+            "schemaVersion": 1,
+            "label": "tests",
+            "message": f"{passed}/{total}",
+            "color": "success" if failed == 0 else "critical"
+        }
+
+        badge_path = ResultDir / BadgeFile
+        with open(badge_path, "w") as badge_file:
+            json.dump(badge_data, badge_file, indent=4)
+            print(f"Badge JSON created at: {badge_path}")
 
         return 0 if failed == 0 else 1
 
@@ -72,5 +90,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     results_file = sys.argv[1]
+    print(f"Results File: {results_file}")
     exit_code = ParseTestResults(results_file)
     sys.exit(exit_code)
