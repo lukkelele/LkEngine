@@ -3,6 +3,9 @@
 
 ---
 
+![Static Badge](https://img.shields.io/badge/LkEngine-v0.1.2--alpha-cyan)
+
+
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
 ![Core-Tests](https://github.com/lukkelele/LkEngine/actions/workflows/Core-Tests.yml/badge.svg)
 
@@ -19,9 +22,7 @@
 	- [Linux](#Platform-Linux)
 	- [Dependencies](#Engine-Dependencies)
 3. [Engine Features](#Engine-Features)
-4. [Development](#development)
-    - [LkEngine](#lkengine-development)
-    - [LukkelEngine (old)](#lukkelengine-old)
+4. [Development](#Engine-Development)
 
 ---
 
@@ -95,7 +96,7 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 
 ---
 
-## Engine Features
+## Engine Features <a id="Engine-Features"></a>
 
 ### Available
 :white_check_mark:
@@ -124,4 +125,4 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 
 :warning: TODO: Move this to the github.io page instead.
 
-### :heavy_minus_sign: [Development](Docs/Development.md)
+### :heavy_minus_sign: [Development](Docs/Development.md) <a id="Engine-Development"></a>
