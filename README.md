@@ -7,7 +7,7 @@
 
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
 ![Core-Tests](https://github.com/lukkelele/LkEngine/actions/workflows/Core-Tests.yml/badge.svg)
-![Core-Test-Results](https://img.shields.io/badge/dynamic/json?color=lightgray&label=Core-Tests&query=$.message&url=https://raw.githubusercontent.com/lukkelele/LkEngine/gh-pages/TestResults/CoreTests/AutomationTest-Badge.json)
+![Core-Test-Results](https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCoreTests%2FAutomationTest-Badge.json&style=plastic&label=Core-Tests)
 
 
 ## Platform Support
