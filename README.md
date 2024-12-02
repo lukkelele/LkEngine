@@ -13,7 +13,7 @@
 #### :black_square_button: Linux <br>
 
 ## Content
-1. [Project](#project)
+1. [Project](#Project)
 2. [Setup and Installation](#Setup-and-Installation)
     - [Windows](#Platform-Windows)
 	- [Linux](#Platform-Linux)
