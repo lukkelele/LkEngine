@@ -1,5 +1,7 @@
 CoreTests:
+  - ObjectPtr_ReferenceCount_Creation: 1
   - Dummy_Arithmetic_OneEqualOne: 1
   - Dummy_Arithmetic_OneLessThanTwo: 1
   - Dummy_Arithmetic_TwoGreaterThanThree: 1
   - Dummy_Arithmetic_TwoGreaterThanOne: 1
+  - ObjectPtr_ReferenceCount_CopyOnce: 1

@@ -1,1 +1,1 @@
-{"Total": 4, "Passed": {"Count": 4, "Tests": ["Dummy_Arithmetic_OneEqualOne", "Dummy_Arithmetic_OneLessThanTwo", "Dummy_Arithmetic_TwoGreaterThanThree", "Dummy_Arithmetic_TwoGreaterThanOne"]}, "Failed": {"Count": 0, "Tests": []}}
+{"Total": 6, "Passed": {"Count": 6, "Tests": ["ObjectPtr_ReferenceCount_Creation", "Dummy_Arithmetic_OneEqualOne", "Dummy_Arithmetic_OneLessThanTwo", "Dummy_Arithmetic_TwoGreaterThanThree", "Dummy_Arithmetic_TwoGreaterThanOne", "ObjectPtr_ReferenceCount_CopyOnce"]}, "Failed": {"Count": 0, "Tests": []}}
