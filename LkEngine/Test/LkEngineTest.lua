@@ -8,6 +8,9 @@ project "LkEngine_AutomationTests"
 	objdir (IntermediateDirectory)
 
 	defines {
+        "LK_AUTOMATION_TEST_ALL",
+        "LK_AUTOMATION_TEST_CORE",
+
 		"YAML_CPP_STATIC_DEFINE",
 		"NOMINMAX",
         "FMT_UNICODE",

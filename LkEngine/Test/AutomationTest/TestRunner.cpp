@@ -41,6 +41,7 @@ namespace LkEngine {
 		/* Object Pointer tests. */
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_Creation>());
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyOnce>());
+		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyTwice>());
 	}
 
 	void LTestRunner::Run()
