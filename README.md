@@ -8,7 +8,6 @@
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
 <img height="20" alt="Endpoint Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCoreTests%2FCoreTests-Badge.json&style=plastic&label=Core-Tests">
 
-
 ## Platform Support
 #### :white_check_mark: Windows<br>
 #### :black_square_button: Linux <br>
@@ -24,10 +23,10 @@
 
 ---
 
-# Project <a id="Project"></a> <a href="https://lukkelele.github.io/LkEngine" target="_blank"> <img height="28" alt="github.io.LkEngine" src="https://img.shields.io/badge/github.io-LkEngine-darkgray">
+# Project <a id="Project"></a> <a href="https://lukkelele.github.io/LkEngine" target="_blank"> <img height="23" alt="github.io.LkEngine" src="https://img.shields.io/badge/github.io-LkEngine-darkgray">
 </a>
 
-**LkEngine** (pronounced *_Lukkel-Engine_*) is a game engine written in C\++20. <br>
+**LkEngine** (pronounced *Lukkel-Engine*) is a game engine written in C\++20. <br>
 The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast doing it.<br>
 I have lots of ideas that I want to see if they could work and this project has been a very good environment for me to try stuff out.
 <br>
