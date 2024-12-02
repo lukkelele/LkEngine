@@ -58,9 +58,13 @@ namespace LkEngine::Test {
 
 		/**
 		 * @brief Run the test.
-		 * Implemented by every test.
 		 */
 		virtual bool RunTest() = 0;
+
+		/**
+		 * @brief Get the test suite.
+		 */
+		virtual ETestSuite GetTestSuite() const = 0;
 
 	public:
 		bool TestEqual(const char* What, const int32_t Actual, const int32_t Expected);

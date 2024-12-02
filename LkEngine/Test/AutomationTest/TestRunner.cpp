@@ -36,6 +36,7 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<Dummy_Arithmetic_OneEqualOne>());
 		Tests.push_back(std::make_shared<Dummy_Arithmetic_OneLessThanTwo>());
 		Tests.push_back(std::make_shared<Dummy_Arithmetic_TwoGreaterThanOne>());
+		Tests.push_back(std::make_shared<Dummy_Arithmetic_TwoGreaterThanThree>());
 	}
 
 	void LTestRunner::Run()

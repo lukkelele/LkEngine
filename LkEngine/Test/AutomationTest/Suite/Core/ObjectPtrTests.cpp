@@ -19,6 +19,11 @@ LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_TwoGreaterThanOne)
 	return TestEqual(GetName(), (2 > 1), true);
 };
 
+LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_TwoGreaterThanThree) 
+{
+	return TestLessThan(GetName(), 2, 3);
+};
+
 LK_DEFINE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_Creation) 
 {
 	return true;
