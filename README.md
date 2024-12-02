@@ -118,6 +118,7 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 ## Misc
 
 
-[github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/)
+* [github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/) <br>
+* [github.io.lukkelele/LkEngine/Development](https://github.com/lukkelele/LkEngine/blob/gh-pages/Development.md)
 
 ### :heavy_minus_sign: [Development](Docs/Development.md) <a id="Engine-Development"></a>
