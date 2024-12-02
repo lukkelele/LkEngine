@@ -4,6 +4,11 @@
 /*****************************************************************/
 #pragma once
 
+#include "LkEngine/Core/CoreMacros.h"
+#include "LkEngine/Core/Assert.h"
+#include "LkEngine/Core/Log.h"
+
+
 namespace LkEngine::Test 
 {
 	enum class ETestSuite
@@ -15,18 +20,23 @@ namespace LkEngine::Test
 	};
 }
 
-namespace TestNamespace = ::LkEngine::Test;
-
 /**
  * Declare an Automation Test.
  */
-#define LK_DECLARE_AUTOMATION_TEST(TestClass, ...)                 \
-    class TestClass : public ::LkEngine::Test::LAutomationTestBase \
-    {                                                              \
-    public:                                                        \
-        TestClass();                                               \
-        virtual bool RunTest() override;                           \
-        virtual ::LkEngine::Test::ETestSuite GetTestSuite() const override; \
+#define LK_DECLARE_AUTOMATION_TEST(TestClass, ...)                  \
+    class TestClass : public ::LkEngine::Test::LAutomationTestBase  \
+    {                                                               \
+    public:                                                         \
+        TestClass();                                                \
+        virtual bool RunTest() override;                            \
+		::LkEngine::Test::ETestSuite GetTestSuite() const           \
+		{                                                           \
+			using namespace ::LkEngine::Test;                       \
+			return __VA_OPT__(static_cast<ETestSuite>(__VA_ARGS__)) \
+				   __VA_OPT__(;) ETestSuite::Unknown;               \
+		}                                                           \
+	private:                                                        \
+		LCLASS(TestClass);                                          \
     };
 
 
@@ -35,7 +45,26 @@ namespace TestNamespace = ::LkEngine::Test;
  */
 #define LK_DEFINE_AUTOMATION_TEST(TestClass, ...)                 \
     TestClass::TestClass()                                        \
-          : ::LkEngine::Test::LAutomationTestBase(#TestClass) {}  \
+          : ::LkEngine::Test::LAutomationTestBase(#TestClass)     \
+	{ \
+		LCLASS_REGISTER(); \
+		::LkEngine::LTestManager::Get().DetectAutomationTest<TestClass>(this); \
+	} \
+    bool TestClass::RunTest()
+
+
+#if 0
+
+/**
+ * Define an Automation Test.
+ */
+#define LK_DEFINE_AUTOMATION_TEST(TestClass, ...)                 \
+    TestClass::TestClass()                                        \
+          : ::LkEngine::Test::LAutomationTestBase(#TestClass)     \
+	{ \
+		LCLASS_REGISTER(); \
+		::LkEngine::LTestManager::Get().DetectAutomationTest<TestClass>(this); \
+	} \
     ::LkEngine::Test::ETestSuite TestClass::GetTestSuite() const  \
 	{                                                             \
 		using namespace ::LkEngine::Test;                         \
@@ -45,20 +74,7 @@ namespace TestNamespace = ::LkEngine::Test;
     bool TestClass::RunTest()
 
 
-#if 0
-
-/**
- * Declare an Automation Test.
- */
-#define LK_DECLARE_AUTOMATION_TEST(TestClass, ...)                 \
-    class TestClass : public ::LkEngine::Test::LAutomationTestBase \
-    {                                                              \
-		namespace TestNS = ::LkEngine::Test;                       \
-    public:                                                        \
-        TestClass();                                               \
-        virtual bool RunTest() override;                           \
-        virtual TestNS::ETestSuite GetTestSuite() const override; \
-    };
+//---------------------------------------------------------------
 
 /**
  * Define an Automation Test.
@@ -76,22 +92,6 @@ namespace TestNamespace = ::LkEngine::Test;
 //---------------------------------------
 
 /**
- * Define an Automation Test.
- */
-#define LK_DEFINE_AUTOMATION_TEST(TestClass, ...)                 \
-    TestClass::TestClass()                                        \
-          : ::LkEngine::Test::LAutomationTestBase(#TestClass) {}  \
-    ::LkEngine::Test::ETestSuite GetTestSuite() const             \
-	{                                                             \
-		return __VA_OPTS__(static_cast<::LkEngine::Test::ETestSuite>(__VA_ARGS__))  \
-			   __VA_OPTS__(;) ::LkEngine::Test::ETestSuite::Unknown;                \
-	} \
-    bool TestClass::RunTest()
-
-
-//---------------------------------------
-
-/**
  * Declare an Automation Test.
  */
 #define LK_DECLARE_AUTOMATION_TEST(TestClass, ...)                 \
@@ -104,29 +104,24 @@ namespace TestNamespace = ::LkEngine::Test;
     };
 
 
-/**
- * Define an Automation Test.
- */
-#define LK_DEFINE_AUTOMATION_TEST(TestClass, ...)                 \
-    TestClass::TestClass()                                        \
-          : ::LkEngine::Test::LAutomationTestBase(#TestClass) {}  \
-    ETestSuite GetTestSuite() const                               \
-	{                                                             \
-		return __VA_OPTS__(static_cast<ETestSuite>(__VA_ARGS__))  \
-			   __VA_OPTS__(;) ETestSuite::Unknown;                \
-	} \
-    bool TestClass::RunTest()
-
-/**
- * Define an Automation Test.
- */
-#define LK_DEFINE_AUTOMATION_TEST(TestClass)                       \
-    class TestClass : public ::LkEngine::Test::LAutomationTestBase \
-    {                                                              \
-    public:                                                        \
-        TestClass() : ::LkEngine::Test::LAutomationTestBase(#TestClass) {}   \
-        virtual bool RunTest() override;                           \
-    };                                                             \
-    bool TestClass::RunTest()
-
 #endif
+
+
+namespace LkEngine::Enum 
+{
+	static constexpr const char* ToString(const ::LkEngine::Test::ETestSuite TestSuite)
+	{
+		using namespace LkEngine::Test;
+		switch (TestSuite)
+		{
+			case ETestSuite::Core:     return "Core";
+			case ETestSuite::All:      return "All";
+			case ETestSuite::Unknown:  return "Unknown";
+			case ETestSuite::COUNT:    return "COUNT";
+		}
+
+		LK_CORE_ASSERT(false, "Enum::ToString failed");
+		return nullptr;
+	}
+
+}

@@ -144,13 +144,13 @@ namespace LkEngine {
 		using ThisClass = Class; \
 		virtual std::string ClassName() const override { return #Class; } \
 		static std::string_view StaticClassName() { return #Class; } \
-		static const LClass* StaticClass() \
+		static const ::LkEngine::LClass* StaticClass() \
 		{ \
-			return LClass::Get(LType<Class>::ID()); \
+			return ::LkEngine::LClass::Get(::LkEngine::LType<Class>::ID()); \
 		} \
-		virtual const LClass* ClassRegistration() override \
+		virtual const ::LkEngine::LClass* ClassRegistration() override \
 		{ \
-			LClass* ObjectClass = LClass::Register<Class>(#Class); \
+			::LkEngine::LClass* ObjectClass = ::LkEngine::LClass::Register<Class>(#Class); \
 			return ObjectClass; \
 		} \
 
@@ -159,11 +159,11 @@ namespace LkEngine {
  * LCLASS_REGISTER
  */
 #define LCLASS_REGISTER(...) \
-		LClass* ClassObject = const_cast<LClass*>(LClass::Get(typeid(this))); \
+		::LkEngine::LClass* ClassObject = const_cast<::LkEngine::LClass*>(::LkEngine::LClass::Get(typeid(this))); \
 		if (!ClassObject) \
 		{ \
-			ClassObject = const_cast<LClass*>(ClassRegistration()); \
-			LObjectBase::SetClass(const_cast<LClass*>(ClassObject)); \
+			ClassObject = const_cast<::LkEngine::LClass*>(ClassRegistration()); \
+			::LkEngine::LObjectBase::SetClass(const_cast<::LkEngine::LClass*>(ClassObject)); \
 		} \
 
 

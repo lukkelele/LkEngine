@@ -2,14 +2,13 @@
 
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/CoreMacros.h"
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
+
+#include "LkEngine/Test/AutomationTest.h"
 
 
 namespace LkEngine {
-
-	namespace Test 
-	{
-		class LAutomationTestBase;
-	}
 
 	class LTestManager
 	{
@@ -18,6 +17,36 @@ namespace LkEngine {
 		~LTestManager() = default;
 
 		static LTestManager& Get();
+
+		template<typename T>
+		CORE_API bool DetectAutomationTest(LObject* InTestInstance)
+		{
+			using namespace Test;
+			LK_CORE_ASSERT(InTestInstance);
+			const LClass* Class = InTestInstance->GetClass();
+			LK_CORE_ASSERT(Class);
+			const std::string ClassName = Class->GetName();
+			printf("DetectAutomationTest: %s", ClassName.c_str());
+
+			LAutomationTestBase* TestInstance = static_cast<LAutomationTestBase*>(InTestInstance);
+			const ETestSuite TestSuite = TestInstance->GetTestSuite();
+
+			printf("  Suite: (%s, ", Enum::ToString(TestSuite));
+
+			if (TestSuiteMap.contains(TestInstance->GetTestSuite()))
+			{
+				auto& TestCollection = TestSuiteMap[TestSuite];
+				TestCollection.push_back(TestInstance);
+			}
+			else
+			{
+				TestSuiteMap[TestSuite] = { TestInstance };
+			}
+
+			printf("%d) \n", (int)TestSuiteMap[TestSuite].size());
+
+			return true;
+		}
 
 		CORE_API bool RegisterAutomationTest(const std::string& TestName, Test::LAutomationTestBase* InTestInstance);
 		CORE_API bool UnregisterAutomationTest(const std::string& TestName, Test::LAutomationTestBase* InTestInstance);
@@ -52,6 +81,11 @@ namespace LkEngine {
 		 * @brief Test instances.
 		 */
 		std::unordered_map<std::string, Test::LAutomationTestBase*> TestInstanceMap{};
+
+		/**
+		 * @brief 
+		 */
+		std::unordered_map<Test::ETestSuite, std::vector<Test::LAutomationTestBase*>> TestSuiteMap{};
 
 	private:
 		CORE_API static bool bCaptureStack;

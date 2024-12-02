@@ -1,5 +1,8 @@
 #include "ObjectPtrTests.h"
 
+#include "LkEngine/Test/TestManager.h"
+
+
 /** 
  * Test Definitions. 
  */

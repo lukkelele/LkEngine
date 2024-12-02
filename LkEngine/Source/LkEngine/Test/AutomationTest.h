@@ -50,7 +50,7 @@ namespace LkEngine::Test {
 	/**
 	 * @class LAutomationTestBase
 	 */
-	class LAutomationTestBase
+	class LAutomationTestBase : public LObject
 	{
 	public:
 		explicit LAutomationTestBase(const std::string& InName);
@@ -99,6 +99,8 @@ namespace LkEngine::Test {
 	protected:
 		LTestExecutionData ExecutionData{};
 		std::string TestName{};
+	private:
+		LCLASS(LAutomationTestBase);
 	};
 
 
