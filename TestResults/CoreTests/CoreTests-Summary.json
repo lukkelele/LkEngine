@@ -1,1 +1,1 @@
-{"Total": 3, "Passed": {"Count": 3, "Tests": ["Dummy_Arithmetic_OneEqualOne", "Dummy_Arithmetic_OneLessThanTwo", "Dummy_Arithmetic_TwoGreaterThanOne"]}, "Failed": {"Count": 0, "Tests": []}}
+{"Total": 4, "Passed": {"Count": 4, "Tests": ["Dummy_Arithmetic_OneEqualOne", "Dummy_Arithmetic_OneLessThanTwo", "Dummy_Arithmetic_TwoGreaterThanThree", "Dummy_Arithmetic_TwoGreaterThanOne"]}, "Failed": {"Count": 0, "Tests": []}}
