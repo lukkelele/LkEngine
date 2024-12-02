@@ -38,10 +38,12 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<Dummy_Arithmetic_TwoGreaterThanOne>());
 		Tests.push_back(std::make_shared<Dummy_Arithmetic_TwoGreaterThanThree>());
 
+	#if defined(LK_AUTOMATION_TEST_CORE)
 		/* Object Pointer tests. */
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_Creation>());
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyOnce>());
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyTwice>());
+	#endif
 	}
 
 	void LTestRunner::Run()

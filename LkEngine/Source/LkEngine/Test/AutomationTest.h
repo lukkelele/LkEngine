@@ -46,7 +46,6 @@ namespace LkEngine::Test {
 		std::deque<FTestExecutionEntry> Entries{};
 	};
 
-
 	/**
 	 * @class LAutomationTestBase
 	 */
@@ -67,26 +66,24 @@ namespace LkEngine::Test {
 		virtual ETestSuite GetTestSuite() const = 0;
 
 	public:
-		bool TestEqual(const char* What, const int32_t Actual, const int32_t Expected);
-		bool TestEqual(const char* What, const int64_t Actual, const int64_t Expected);
-		bool TestEqual(const char* What, const std::size_t Actual, const std::size_t Expected);
-		bool TestEqual(const char* What, const float Actual, const float Expected);
-		bool TestGreaterEqual(const char* What, const int32_t Actual, const int32_t Expected);
-		bool TestGreaterEqual(const char* What, const int64_t Actual, const int64_t Expected);
-		bool TestGreaterEqual(const char* What, const std::size_t Actual, const std::size_t Expected);
-		bool TestGreaterEqual(const char* What, const float Actual, const float Expected);
-		bool TestGreaterThan(const char* What, const int32_t Actual, const int32_t Expected);
-		bool TestGreaterThan(const char* What, const int64_t Actual, const int64_t Expected);
-		bool TestGreaterThan(const char* What, const float Actual, const float Expected);
-		bool TestGreaterThan(const char* What, const std::size_t Actual, const std::size_t Expected);
-		bool TestLessEqual(const char* What, const int32_t Actual, const int32_t Expected);
-		bool TestLessEqual(const char* What, const int64_t Actual, const int64_t Expected);
-		bool TestLessEqual(const char* What, const float Actual, const float Expected);
-		bool TestLessThan(const char* What, const int32_t Actual, const int32_t Expected);
-		bool TestLessThan(const char* What, const int64_t Actual, const int64_t Expected);
-		bool TestLessThan(const char* What, const float Actual, const float Expected);
-
-		bool IsExpectedMessage(const std::string& Message, const ELogLevel LogVerbosity = ELogLevel::Fatal);
+		bool TestEqual(const int32_t Actual, const int32_t Expected, const char* Message);
+		bool TestEqual(const int64_t Actual, const int64_t Expected, const char* Message);
+		bool TestEqual(const std::size_t Actual, const std::size_t Expected, const char* Message);
+		bool TestEqual(const float Actual, const float Expected, const char* Message);
+		bool TestGreaterEqual(const int32_t Actual, const int32_t Expected, const char* Message);
+		bool TestGreaterEqual(const int64_t Actual, const int64_t Expected, const char* Message);
+		bool TestGreaterEqual(const std::size_t Actual, const std::size_t Expected, const char* Message);
+		bool TestGreaterEqual(const float Actual, const float Expected, const char* Message);
+		bool TestGreaterThan(const int32_t Actual, const int32_t Expected, const char* Message);
+		bool TestGreaterThan(const int64_t Actual, const int64_t Expected, const char* Message);
+		bool TestGreaterThan(const float Actual, const float Expected, const char* Message);
+		bool TestGreaterThan(const std::size_t Actual, const std::size_t Expected, const char* Message);
+		bool TestLessEqual(const int32_t Actual, const int32_t Expected, const char* Message);
+		bool TestLessEqual(const int64_t Actual, const int64_t Expected, const char* Message);
+		bool TestLessEqual(const float Actual, const float Expected, const char* Message);
+		bool TestLessThan(const int32_t Actual, const int32_t Expected, const char* Message);
+		bool TestLessThan(const int64_t Actual, const int64_t Expected, const char* Message);
+		bool TestLessThan(const float Actual, const float Expected, const char* Message);
 
 		void AddError(const std::string& ErrorMessage);
 

@@ -3,17 +3,15 @@
 
 ---
 
-![Static Badge](https://img.shields.io/badge/LkEngine-v0.1.2--alpha-blue)
+<img height="22" alt="VersionBadge" src="https://img.shields.io/badge/LkEngine-v0.1.2--alpha-blue">
 
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
-![Core-Test-Results](https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCoreTests%2FCoreTests-Badge.json&style=plastic&label=Core-Tests)
-<!--![Core-Tests](https://github.com/lukkelele/LkEngine/actions/workflows/Core-Tests.yml/badge.svg)-->
+<img height="20" alt="Endpoint Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCoreTests%2FCoreTests-Badge.json&style=plastic&label=Core-Tests">
 
 
 ## Platform Support
 #### :white_check_mark: Windows<br>
 #### :black_square_button: Linux <br>
-
 
 ## Content
 1. [Project](#project)
@@ -26,24 +24,22 @@
 
 ---
 
-# Project <a id="Project"></a>
+# Project <a id="Project"></a> <a href="https://lukkelele.github.io/LkEngine" target="_blank"> <img height="28" alt="github.io.LkEngine" src="https://img.shields.io/badge/github.io-LkEngine-darkgray">
+</a>
 
 **LkEngine** (pronounced *_Lukkel-Engine_*) is a game engine written in C\++20. <br>
 The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast doing it.<br>
 I have lots of ideas that I want to see if they could work and this project has been a very good environment for me to try stuff out.
 <br>
 <br>
-My goal is to have a robust application that is _easy_ to extend and add features on.<br>
-A rich core API that is good for performance and easy to use.<br>
+The goal is to have an application with an API that is good for performance and easy to use.<br>
 With features such as:
-- Support for multiple platforms.
+- Multiple platform support.
 - Static reflection.
-- Development tools (e.g for debugging and profiling).
 - Serialization and persistance.
-- Dynamic configurability without rebuilding (changing log levels, enabling profiling).
+- Development tools (e.g debugging and profiling).
 - Crash and error handling.
-
-This is somewhat of a playground for me. I will not always conform to standard practices as otherwise is a good rule to follow for a "_real_" project.
+- Application launcher.
 
 ## Setup and Installation <a id="Setup-and-Installation"></a>
 For development I've been using Visual Studio Community 22 (64-bit).<br>
@@ -111,7 +107,7 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 
 ---
 
-## Todo
+### Todo
 :small_blue_diamond: **Vulkan Support.**<br>
 :small_blue_diamond: **Renderer Debugging tools (e.g drawing lines in world space).**<br>
 :small_blue_diamond: **3D Physics and Raycasting.**<br>
@@ -122,6 +118,7 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 
 ## Misc
 
-:warning: TODO: Move this to the github.io page instead.
+
+[github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/)
 
 ### :heavy_minus_sign: [Development](Docs/Development.md) <a id="Engine-Development"></a>

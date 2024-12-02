@@ -33,214 +33,207 @@ namespace LkEngine::Test {
 
 	void LAutomationTestBase::AddError(const std::string& ErrorMessage)
 	{
-		if (!IsExpectedMessage(ErrorMessage, ELogLevel::Warning))
-		{
-			/* TODO: Add error event. */
-			LK_TEST_TRACE_TAG(LK_FORMAT_STRING("AutomationTest::{}", GetName()), "Failed");
-		}
+		/* TODO: Add error event. */
+		LK_TEST_TRACE_TAG(LK_FORMAT_STRING("AutomationTest::{}", GetName()), "Failed");
 	}
 
-	bool LAutomationTestBase::TestEqual(const char* What, const int32_t Actual, const int32_t Expected)
+	bool LAutomationTestBase::TestEqual(const int32_t Actual, const int32_t Expected, const char* Message)
 	{
 		if (Actual != Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestEqual(const char* What, const int64_t Actual, const int64_t Expected)
+	bool LAutomationTestBase::TestEqual(const int64_t Actual, const int64_t Expected, const char* Message)
 	{
 		if (Actual != Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestEqual(const char* What, const std::size_t Actual, const std::size_t Expected)
+	bool LAutomationTestBase::TestEqual(const std::size_t Actual, const std::size_t Expected, const char* Message)
 	{
 		if (Actual != Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestEqual(const char* What, const float Actual, const float Expected)
+	bool LAutomationTestBase::TestEqual(const float Actual, const float Expected, const char* Message)
 	{
 		if (Actual != Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestGreaterEqual(const char* What, const int32_t Actual, const int32_t Expected)
+	bool LAutomationTestBase::TestGreaterEqual(const int32_t Actual, const int32_t Expected, const char* Message)
 	{
 		if (Actual < Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestGreaterEqual(const char* What, const int64_t Actual, const int64_t Expected)
+	bool LAutomationTestBase::TestGreaterEqual(const int64_t Actual, const int64_t Expected, const char* Message)
 	{
 		if (Actual < Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestGreaterEqual(const char* What, const std::size_t Actual, const std::size_t Expected)
+	bool LAutomationTestBase::TestGreaterEqual(const std::size_t Actual, const std::size_t Expected, const char* Message)
 	{
 		if (Actual < Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestGreaterEqual(const char* What, const float Actual, const float Expected)
+	bool LAutomationTestBase::TestGreaterEqual(const float Actual, const float Expected, const char* Message)
 	{
 		if (Actual < Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestGreaterThan(const char* What, const int32_t Actual, const int32_t Expected)
+	bool LAutomationTestBase::TestGreaterThan(const int32_t Actual, const int32_t Expected, const char* Message)
 	{
 		if (Actual <= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestGreaterThan(const char* What, const int64_t Actual, const int64_t Expected)
+	bool LAutomationTestBase::TestGreaterThan(const int64_t Actual, const int64_t Expected, const char* Message)
 	{
 		if (Actual <= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestGreaterThan(const char* What, const float Actual, const float Expected)
+	bool LAutomationTestBase::TestGreaterThan(const float Actual, const float Expected, const char* Message)
 	{
 		if (Actual <= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestGreaterThan(const char* What, const std::size_t Actual, const std::size_t Expected)
+	bool LAutomationTestBase::TestGreaterThan(const std::size_t Actual, const std::size_t Expected, const char* Message)
 	{
 		if (Actual <= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestLessEqual(const char* What, const int32_t Actual, const int32_t Expected)
+	bool LAutomationTestBase::TestLessEqual(const int32_t Actual, const int32_t Expected, const char* Message)
 	{
 		if (Actual > Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestLessEqual(const char* What, const int64_t Actual, const int64_t Expected)
+	bool LAutomationTestBase::TestLessEqual(const int64_t Actual, const int64_t Expected, const char* Message)
 	{
 		if (Actual > Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestLessEqual(const char* What, const float Actual, const float Expected)
+	bool LAutomationTestBase::TestLessEqual(const float Actual, const float Expected, const char* Message)
 	{
 		if (Actual > Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestLessThan(const char* What, const int32_t Actual, const int32_t Expected)
+	bool LAutomationTestBase::TestLessThan(const int32_t Actual, const int32_t Expected, const char* Message)
 	{
 		if (Actual >= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestLessThan(const char* What, const int64_t Actual, const int64_t Expected)
+	bool LAutomationTestBase::TestLessThan(const int64_t Actual, const int64_t Expected, const char* Message)
 	{
 		if (Actual >= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::TestLessThan(const char* What, const float Actual, const float Expected)
+	bool LAutomationTestBase::TestLessThan(const float Actual, const float Expected, const char* Message)
 	{
 		if (Actual >= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", What, Expected, Actual));
+			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
 		return true;
 	}
 
-	bool LAutomationTestBase::IsExpectedMessage(const std::string& Message, const ELogLevel LogVerbosity)
-	{
-		return false;
-	}
 
 }

@@ -1,8 +1,6 @@
 #include "LKpch.h"
 #include "TestManager.h"
 
-//#include "AutomationTest.h"
-
 #include "LkEngine/Core/Globals.h"
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/Serialization/YAMLSerialization.h"

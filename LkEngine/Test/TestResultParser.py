@@ -29,6 +29,7 @@ def ParseTestResults(Filepath):
         if total == 0:
             print(f"Found 0 tests for {TestSuite}")
             return 1
+
         passed_tests = []
         failed_tests = []
 
@@ -60,13 +61,16 @@ def ParseTestResults(Filepath):
         # Save summary to a JSON file.
         ResultDir = Path(Filepath).parent
         with open(f"{ResultDir}/{SummaryFile}", "w") as summary_file:
-            json.dump(result_summary, summary_file)
+            json.dump(result_summary, summary_file, indent=4)
             print(f"Dumped test results at: {summary_file}")
 
         # Generate badge used on the README.
-        badge_data = {
+        # * All tests OK:   Green
+        # * >50% tests OK:  Yellow
+        # * <=50% tests OK: Red
+        BadgeData = {
             "schemaVersion": 1,
-            "label": "tests",
+            "label": f"{TestSuite}",
             "message": f"{passed}/{total}",
             "color": (
                 "success" if failed == 0 else 
@@ -75,12 +79,11 @@ def ParseTestResults(Filepath):
             )
         }
 
-        print(f"Badge Data: {badge_data}")
-
-        badge_path = ResultDir / BadgeFile
-        with open(badge_path, "w") as badge_file:
-            json.dump(badge_data, badge_file, indent=4)
-            print(f"Badge JSON created at: {badge_path}")
+        print(f"Badge Data: {BadgeData}")
+        BadgePath = ResultDir / BadgeFile
+        with open(BadgePath, "w") as badge_file:
+            json.dump(BadgeData, badge_file, indent=4)
+            print(f"Badge JSON created at: {BadgePath}")
 
         return 0
 
@@ -109,7 +112,7 @@ if __name__ == "__main__":
     SummaryFile = f"{TestSuite}-Summary.json"
     BadgeFile = f"{TestSuite}-Badge.json"
     print(f"Results File: {results_file}")
-    print(f"Test Suite: {TestSuite}")
+    print(f"TestSuite: {TestSuite}")
     print(f"Badge File: {BadgeFile}")
 
     exit_code = ParseTestResults(results_file)

@@ -55,59 +55,6 @@ namespace LkEngine::Test
     bool TestClass::RunTest()
 
 
-#if 0
-
-/**
- * Define an Automation Test.
- */
-#define LK_DEFINE_AUTOMATION_TEST(TestClass, ...)                 \
-    TestClass::TestClass()                                        \
-          : ::LkEngine::Test::LAutomationTestBase(#TestClass)     \
-	{ \
-		LCLASS_REGISTER(); \
-		::LkEngine::LTestManager::Get().DetectAutomationTest<TestClass>(this); \
-	} \
-    ::LkEngine::Test::ETestSuite TestClass::GetTestSuite() const  \
-	{                                                             \
-		using namespace ::LkEngine::Test;                         \
-		return __VA_OPT__(static_cast<ETestSuite>(__VA_ARGS__))   \
-			   __VA_OPT__(;) ETestSuite::Unknown;                 \
-	}                                                             \
-    bool TestClass::RunTest()
-
-
-//---------------------------------------------------------------
-
-/**
- * Define an Automation Test.
- */
-#define LK_DEFINE_AUTOMATION_TEST(TestClass, ...)                 \
-    TestClass::TestClass()                                        \
-          : ::LkEngine::Test::LAutomationTestBase(#TestClass) {}  \
-    TestNS::ETestSuite GetTestSuite() const             \
-	{                                                             \
-		return __VA_OPTS__(static_cast<TestNS::ETestSuite>(__VA_ARGS__))  \
-			   __VA_OPTS__(;) TestNS::ETestSuite::Unknown;                \
-	} \
-    bool TestClass::RunTest()
-
-//---------------------------------------
-
-/**
- * Declare an Automation Test.
- */
-#define LK_DECLARE_AUTOMATION_TEST(TestClass, ...)                 \
-    class TestClass : public ::LkEngine::Test::LAutomationTestBase \
-    {                                                              \
-    public:                                                        \
-        TestClass();                                               \
-        virtual bool RunTest() override;                           \
-        virtual ETestSuite GetTestSuite() const override;          \
-    };
-
-
-#endif
-
 
 namespace LkEngine::Enum 
 {
@@ -116,9 +63,9 @@ namespace LkEngine::Enum
 		using namespace LkEngine::Test;
 		switch (TestSuite)
 		{
-			case ETestSuite::Core:     return "Core";
-			case ETestSuite::All:      return "All";
 			case ETestSuite::Unknown:  return "Unknown";
+			case ETestSuite::All:      return "All";
+			case ETestSuite::Core:     return "Core";
 			case ETestSuite::COUNT:    return "COUNT";
 		}
 
