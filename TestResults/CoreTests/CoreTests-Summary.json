@@ -1,1 +1,19 @@
-{"Total": 7, "Passed": {"Count": 7, "Tests": ["ObjectPtr_ReferenceCount_Creation", "Dummy_Arithmetic_OneEqualOne", "ObjectPtr_ReferenceCount_CopyTwice", "Dummy_Arithmetic_OneLessThanTwo", "Dummy_Arithmetic_TwoGreaterThanThree", "Dummy_Arithmetic_TwoGreaterThanOne", "ObjectPtr_ReferenceCount_CopyOnce"]}, "Failed": {"Count": 0, "Tests": []}}
+{
+    "Total": 7,
+    "Passed": {
+        "Count": 7,
+        "Tests": [
+            "ObjectPtr_ReferenceCount_Creation",
+            "Dummy_Arithmetic_OneEqualOne",
+            "ObjectPtr_ReferenceCount_CopyTwice",
+            "Dummy_Arithmetic_OneLessThanTwo",
+            "Dummy_Arithmetic_TwoGreaterThanThree",
+            "Dummy_Arithmetic_TwoGreaterThanOne",
+            "ObjectPtr_ReferenceCount_CopyOnce"
+        ]
+    },
+    "Failed": {
+        "Count": 0,
+        "Tests": []
+    }
+}
