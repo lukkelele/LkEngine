@@ -23,5 +23,6 @@ LK_DECLARE_AUTOMATION_TEST(Dummy_Arithmetic_TwoGreaterThanThree, LK_TEST_SUITE_C
 
 
 /* Object Pointer tests. */
-LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_Creation);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_Creation, LK_TEST_SUITE_CORE);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_CopyOnce, LK_TEST_SUITE_CORE);
 

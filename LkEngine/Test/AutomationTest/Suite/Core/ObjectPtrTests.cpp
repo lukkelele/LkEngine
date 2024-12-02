@@ -2,6 +2,7 @@
 
 #include "LkEngine/Test/TestManager.h"
 
+using namespace LkEngine;
 
 /** 
  * Test Definitions. 
@@ -29,6 +30,14 @@ LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_TwoGreaterThanThree)
 
 LK_DEFINE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_Creation) 
 {
-	return true;
+	TObjectPtr<LObject> TestObject;
+	return TestEqual("Reference count is expected to be 1", TestObject->GetReferenceCount(), 1);
+};
+
+LK_DEFINE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_CopyOnce) 
+{
+	TObjectPtr<LObject> TestObject;
+	TObjectPtr<LObject> CopiedObject(TestObject);
+	return TestEqual("Reference count is expected to be 2", TestObject->GetReferenceCount(), 2);
 };
 
