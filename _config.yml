@@ -1,0 +1,17 @@
+title: lukkelele
+remote_theme: pages-themes/slate@v0.2.0
+
+include:
+ - _layouts
+ - _pages
+ - _posts
+ - LkEngine
+
+plugins:
+- jekyll-remote-theme
+
+defaults:
+  - scope:
+      path: "assets/img"
+    values:
+      image: true
