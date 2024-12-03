@@ -34,46 +34,34 @@
 *.out
 *.app
 
-#.vs
-
 **/.vs
-**/CMakeFiles
-
-# Ignore docs for now
-**/docs/*.css
-**/docs/*.scss
-**/docs/*.html
-**/docs/*.dox
-**/docs/*.dox
-**/glfw/examples
-**/glfw/tests
-
-LkEngine/Test/Logs
-
-**/External/bin
-**/External/*bin-int*
-**/out
-**/External/**/build*
-**/External/*build*
 **/*.vcxproj*
-External/**/*.vcx*
-External/**/*.vcxproj
-External/glm/**/test
-External/Glad/glad/include
-
+**/CMakeFiles
 **/*.sln
 **/*.ini
-
 **/*.log
 **/.idea
 **/*.swp
+**/*.tlog
 
-# LkEngine Binaries and Object files
+
+# -- LkEngine --
 Binaries
 Binaries-Int
 Intermediate
+**/External/bin
+**/External/*bin-int*
+**/External/**/build*
+**/External/*build*
+External/**/*.vcx*
+External/**/*.vcxproj
+External/Glm/**/test
+External/Glad/glad/include
+External/Glad/glad/src
+External/**/examples
+External/**/tests
 
-**/*.tlog
+LkEngine/Test/Logs
 
 # Ignore lkconf files as they should be generated locally and saved there.
 **/*.lkconf
@@ -81,3 +69,10 @@ Intermediate
 
 # Runtime directories.
 LkRuntime/Projects
+
+# Ignore docs for now
+**/docs/*.css
+**/docs/*.scss
+**/docs/*.html
+**/docs/*.dox
+**/docs/*.dox
