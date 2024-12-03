@@ -58,8 +58,6 @@ External/**/*.vcxproj
 External/Glm/**/test
 External/Glad/glad/include
 External/Glad/glad/src
-External/Glad/src
-External/Glad/include
 External/**/examples
 External/**/tests
 
