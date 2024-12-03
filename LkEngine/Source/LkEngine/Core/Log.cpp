@@ -26,7 +26,9 @@ namespace LkEngine {
 		constexpr const char* FileName = "LkEngine";
 	#endif
 
-		const std::string Logfile = LogDirectory.string() + std::string(FileName);
+		//const std::string Logfile = LogDirectory.string() + std::string(FileName);
+		//const std::string Logfile = LK_FORMAT_STRING("{}-{}.log", FileName, Time::CurrentTimestamp());
+		std::string Logfile;
 
 		using ColorSinkType = spdlog::sinks::stdout_color_sink_mt;
 
@@ -45,7 +47,7 @@ namespace LkEngine {
 	{
 		LogSinks.reserve(2);
 		/* Use binary workdir for log directory. */
-		LogDirectory = fs::path(LK_FORMAT_STRING("{}/Logs", fs::current_path().string()).c_str());
+		LogDirectory = fs::path(LK_FORMAT_STRING("{}/Logs/", fs::current_path().string()).c_str());
 
 		/* Keep a maximum of 10 logfiles present. */
 		LogUtility::CleanLogDirectory(LogDirectory, 10);
@@ -70,7 +72,6 @@ namespace LkEngine {
 
 	void LLog::Initialize(std::string_view InLogFilename)
 	{
-		std::string Logfile;
 		if (!InLogFilename.empty())
 		{
 			Logfile = InLogFilename;	
@@ -79,10 +80,6 @@ namespace LkEngine {
 		{
 			Logfile = LK_FORMAT_STRING("{}-{}.log", FileName, Time::CurrentTimestamp());
 		}
-		//LK_PRINT("Log Directory: {}", LogDirectory.string());
-
-		//const std::string Logfile = LogDirectory.string() + std::string(InLogFilename);
-		spdlog::info("LogFile: {}", Logfile);
 
 		/* Color Sink. */
 		auto ColorSinkLogger = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -92,8 +89,9 @@ namespace LkEngine {
 		LogSinks.push_back(ColorSinkLogger);
 
 		/* Logfile Sink. */
-		std::printf("Logfile Sink: %s\n", Logfile.c_str());
-		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logfile, true));
+		std::printf("Logfile: %s\n", Logfile.c_str());
+		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(LogDirectory.string() + Logfile, true));
+		//LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logfile, true));
 
 		LogSinks[0]->set_pattern(ColorSinkPattern);
 		LogSinks[1]->set_pattern(FileSinkPattern);
@@ -118,6 +116,7 @@ namespace LkEngine {
 
 	void LLog::RegisterLoggers()
 	{
+	#if 0
 		/* Create the color and file sink. */
 		std::vector<spdlog::sink_ptr> LogSinks;
 		LogSinks.reserve(2);
@@ -130,8 +129,8 @@ namespace LkEngine {
 		LogSinks.push_back(ColorSinkLogger);
 
 		/* Logfile Sink. */
-		//const std::string Logfile = LogDirectory.string() + std::string(Logfile);
 		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logfile, true));
+	#endif
 
 		LogSinks[0]->set_pattern(ColorSinkPattern);
 		LogSinks[1]->set_pattern(FileSinkPattern);
