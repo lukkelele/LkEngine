@@ -1,6 +1,7 @@
 #include "LkEngine/Core/Application.h"
 
 #include "RuntimeLayer.h"
+#include "LkEngine/Core/Time/Time.h"
 
 
 /**
@@ -33,6 +34,9 @@ private:
 
 int main(int Argc, char* Argv[])
 {
+	LkEngine::Global::SetRuntimeArguments(Argc, Argv);
+
+	using namespace LkEngine;
     LkEngine::FApplicationSpecification ApplicationSpec = {
         .Title = "LkEditor",
         .Width = 1920,
@@ -41,6 +45,10 @@ int main(int Argc, char* Argv[])
 
     ApplicationSpec.Argc = Argc;
     ApplicationSpec.Argv = Argv;
+
+	LkEngine::LLog& Logger = LkEngine::LLog::Get();
+	Logger.Initialize();
+	LK_CORE_INFO("Log Directory: {}", LogDirectory.string());
 
     LRuntimeApplication Application(ApplicationSpec);
     Application.Initialize();

@@ -10,7 +10,6 @@ namespace LkEngine {
 
 	LApplication::LApplication(const FApplicationSpecification& InSpecification)
 		: Specification(InSpecification)
-		, Log(LLog::Instance())
 		, MetadataRegistry(LMetadataRegistry::Get())
 		, GarbageCollector(LGarbageCollector::Get())
 		, ThreadManager(LThreadManager::Instance())
@@ -19,9 +18,9 @@ namespace LkEngine {
 		Instance = this;
 
 		LCrashHandler::AttachInstance(this);
-
-		Global::SetRuntimeArguments(Specification.Argc, Specification.Argv);
 		GarbageCollector.Initialize();
+
+		LLog::RegisterLoggers();
 	}
 
 	LApplication::~LApplication()

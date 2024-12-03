@@ -130,13 +130,12 @@ namespace LkEngine {
 		FTimestep Timestep{};
 		FTimestep LastTimestep{};
 
-		LLog& Log;
 		LMetadataRegistry& MetadataRegistry;
 		LGarbageCollector& GarbageCollector;
-		LLayerStack LayerStack;
 		LThreadManager& ThreadManager;
 
 		TUniquePtr<LWindow> Window;
+		LLayerStack LayerStack;
 
 		TObjectPtr<LRenderer> Renderer;
 		uint32_t m_CurrentFrameIndex = 0;
@@ -149,7 +148,6 @@ namespace LkEngine {
 		std::mutex EventQueueMutex;
 		std::queue<std::function<void()>> EventQueue;
 		std::vector<FEventCallback> EventCallbacks;
-		//TObjectPtr<LProject> Project{};
 
 		LPerformanceProfiler* PerformanceProfiler{};
 		std::unordered_map<const char*, LPerformanceProfiler::FFrameData> ProfilerPreviousFrameData;

@@ -40,10 +40,6 @@ namespace LkEngine {
 	void LSceneManagerPanel::Initialize()
 	{
 		GOnSceneSetActive.Add(this, &LSceneManagerPanel::SetScene);
-
-		/* TODO: Figure out a replacement for this approach. */
-		//ComponentCopyScene = TObjectPtr<LScene>::Create("CopyScene", false);
-		//ComponentCopyEntity = ComponentCopyScene->CreateEntity();
 	}
 
 	void LSceneManagerPanel::OnRender()
@@ -54,24 +50,16 @@ namespace LkEngine {
 	{
 		const ImRect WindowContent = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
 
-		LK_CORE_ASSERT(false, "FIX ENTT .each and .size");
 		if (Scene)
 		{
-			//ImGui::SeparatorText(fmt::format("Current Scene - {}", Scene->Name).c_str());
 			ImGui::SeparatorText(LK_FORMAT_STRING("Scene - {}", Scene->Name).c_str());
-		#if 0
-			ImGui::Text("Entities: %d", Scene->Registry.size());
-			Scene->Registry.each([&](auto EntityID)
+			auto& EntityStorage = Scene->Registry.storage<entt::entity>();
+			ImGui::Text("Entities: %d", EntityStorage.size());
+
+			for (auto EntityID : EntityStorage)
 			{
 				LEntity Entity { EntityID, Scene.Get() };
 				DrawEntityNode(Entity);
-			});
-		#endif
-
-			/// TODO: Make it so the input interface is used here instead of raw ImGui calls.
-			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			{
-				//SELECTION::SelectedEntity = {};
 			}
 		}
 
@@ -80,9 +68,8 @@ namespace LkEngine {
 			const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload("SCENE_ENTITY_NODE", ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
 			if (Payload)
 			{
-				const size_t Count = (Payload->DataSize / sizeof(UUID));
-
-				for (size_t i = 0; i < Count; i++)
+				const std::size_t Count = (Payload->DataSize / sizeof(UUID));
+				for (std::size_t i = 0; i < Count; i++)
 				{
 					const UUID EntityID = *((static_cast<UUID*>(Payload->Data)) + i);
 					LEntity Entity = Scene->GetEntityWithUUID(EntityID);

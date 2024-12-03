@@ -12,7 +12,8 @@ namespace LkEngine {
 
 	LTestRunner::LTestRunner()
 	{
-		LLog& Logger = LLog::Instance();
+		LLog& Logger = LLog::Get();
+		Logger.Initialize();
 
 		/* Create 'Results' directory to store test results in if it does not already exist. */
 		if (!LFileSystem::Exists("Results"))
@@ -53,17 +54,9 @@ namespace LkEngine {
 
 }
 
-/* TODO: Add testsuite registration in the LK_DEFINE_AUTOMATION_TEST macro. */
 
 int main(int Argc, char* Argv[])
 {
-	std::printf("Argc=%d\n", Argc);
-	for (int i = 0; i < Argc; i++)
-	{
-		std::printf("Argv %d: %s\n", i, Argv[i]);
-	}
-	std::printf("\n");
-
 	using namespace LkEngine;
 	Global::SetRuntimeArguments(Argc, Argv);
 

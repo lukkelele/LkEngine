@@ -19,9 +19,10 @@ namespace LkEngine {
 		std::vector<std::string> Args{};
 	};
 
-	namespace Global {
+	namespace Global 
+	{
+		void SetRuntimeArguments(const int InArgc, char* Argv[]);
 
-		void SetRuntimeArguments(const int InArgc, char* InArgv[]);
 		const FRuntimeArguments& GetRuntimeArguments();
 
 		/**

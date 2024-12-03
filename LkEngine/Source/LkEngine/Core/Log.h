@@ -9,8 +9,11 @@
 
 #include <stdint.h>
 #include <cstring>
-#include <map>
 #include <filesystem>
+#include <iostream>
+#include <iterator>
+#include <format>
+#include <map>
 
 /**
  * Set loglevel names to UPPERCASE.
@@ -91,13 +94,10 @@ namespace LkEngine {
         LLog();
         ~LLog();
 
-        static LLog& Instance();
+        static LLog& Get();
 
-        static void Initialize(std::string_view LogfileName = "LkEngine.log",
-                               std::string_view CoreLoggerName = "CORE",
-                               std::string_view ClientLoggerName = "CLIENT");
-
-        static void Initialize(const FLoggerInitArguments& InitArgs);
+        static void Initialize(std::string_view LogfileName = "");
+		static void RegisterLoggers();
 
         static void RegisterLogger(const ELoggerType Type,
 								   const std::string& Name,
@@ -122,7 +122,6 @@ namespace LkEngine {
 				case ELoggerType::TestRunner:	return GetLogger_TestRunner(); 
             }
 
-            LK_CORE_ASSERT(false, "Unknown logger type");
             return GetLogger_Core();
         }
 
@@ -147,6 +146,25 @@ namespace LkEngine {
         static void PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix,
                                        std::format_string<TArgs...> Message, TArgs&&... Args);
         static void PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix);
+
+
+	#if defined(LK_PLATFORM_WINDOWS)
+		template<typename... TArgs>
+		static void Print(std::format_string<TArgs...> Format, TArgs&&... Args)
+	#elif defined(LK_PLATFORM_LINUX)
+		template<typename... TArgs>
+		static void Print(fmt::format_string<TArgs...> Format, TArgs&&... Args)
+	#endif
+		{
+			std::ostream_iterator<char> Out(std::cout);
+			std::format_to(Out, "{}", std::forward<TArgs>(Args)...);
+			//std::format_to(Out, std::make_format_args(std::forward<TArgs>(Args)...));
+			//std::format_to(Out, std::forward<TArgs>(Args)...);
+			//const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+			//std::format_to(Out, FormattedString.c_str());
+			//const std::string FormattedString = std::vformat(Format, std::make_format_args(std::forward<TArgs>(Args)...));
+			//std::printf("%s\n", FormattedString.c_str());
+		}
 
         FORCEINLINE static const char* LevelToString(const ELogLevel Level)
         {
@@ -232,13 +250,17 @@ namespace LkEngine {
 	Logging Macros.
 -----------------------------------------------------------------*/
 
+/* TODO: Needs fix. */
+//#define LK_PRINT(...)       ::LkEngine::LLog::Print(__VA_ARGS__)
+#define LK_PRINT(...)
+
 /* Core Logging. */
-#define LK_CORE_TRACE(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_CORE_DEBUG(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
-#define LK_CORE_INFO(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_CORE_WARN(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_CORE_ERROR(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_CORE_FATAL(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
+#define LK_CORE_TRACE(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
+#define LK_CORE_DEBUG(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
+#define LK_CORE_INFO(...)    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
+#define LK_CORE_WARN(...)    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
+#define LK_CORE_ERROR(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
+#define LK_CORE_FATAL(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
 
 #define LK_CORE_TRACE_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Trace, Tag, __VA_ARGS__)
 #define LK_CORE_DEBUG_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Debug, Tag, __VA_ARGS__)
@@ -419,16 +441,37 @@ namespace LkEngine {
 
 	template<typename... TArgs>
 	void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix,
-								  std::format_string<TArgs...> Message, TArgs&&... Args)
+								  std::format_string<TArgs...> Format, TArgs&&... Args)
 	{
-		const std::string FormattedString = std::format(Message, std::forward<TArgs>(Args)...);
-		GetLogger(LoggerType)->error("{0}: {1}", Prefix, FormattedString);
+		const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+		if (auto Logger = GetLogger(LoggerType); Logger != nullptr)
+		{
+			Logger->error("{0}: {1}", Prefix, FormattedString);
+			return;
+		}
+
+		GetLogger_Core()->error("{0}: {1}", Prefix, FormattedString);
 	}
 
 	FORCEINLINE void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix)
 	{
 		LLog::GetLogger(LoggerType)->error("{0}", Prefix);
 	}
+
+#if 0
+	//void LLog::Print(std::format_string<std::type_identity_t<TArgs>...> Format, TArgs&&... Args)
+#if defined(LK_PLATFORM_WINDOWS)
+	template<typename... TArgs>
+	void LLog::Print(std::format_string<TArgs...> Format, TArgs&&... Args)
+#elif defined(LK_PLATFORM_LINUX)
+	template<typename... TArgs>
+	void LLog::Print(fmt::format_string<TArgs...> Format, TArgs&&... Args)
+#endif
+	{
+		const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+		std::printf("%s\n", FormattedString.c_str());
+	}
+#endif
 
 }
 
