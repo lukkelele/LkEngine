@@ -7,6 +7,10 @@ project "LkRuntime"
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
+    defines {
+        "LK_ENGINE_RUNTIME",
+    }
+
 	files {
 		"%{prj.location}/Source/**.h",
 		"%{prj.location}/Source/**.cpp",
