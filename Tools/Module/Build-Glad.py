@@ -20,10 +20,10 @@ generator = "c"
 api = "gl=4.6"
 
 # Paths to Glad, build and output directories.
-GladDir = os.path.abspath(os.path.join("..", "..", "External", "Glad", "glad"))
+GladDir = os.path.abspath(os.path.join("..", "..", "External", "Glad"))
 BuildDir = os.path.abspath(os.path.join(GladDir, "build"))
-OutputPath = os.path.abspath(os.path.join(GladDir, "output"))
-OutputDir = os.path.abspath(os.path.join("..", "..", "External", "Glad", "glad"))
+OutputPath = os.path.abspath(os.path.join(GladDir, "build"))
+OutputDir = os.path.abspath(os.path.join("..", "..", "External", "Glad"))
 
 # Ensure output directory exists.
 os.makedirs(OutputDir, exist_ok=True)

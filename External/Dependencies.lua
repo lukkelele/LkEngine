@@ -20,7 +20,7 @@ Dependency = {
 	},
 
 	Glad = {
-        IncludeDir = "%{wks.location}/External/Glad/glad/include",
+        IncludeDir = "%{wks.location}/External/Glad/include",
 	},
 
 	Spdlog = {

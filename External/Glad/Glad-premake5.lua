@@ -7,13 +7,14 @@ project "Glad"
 	objdir (IntermediateDirectory)
 
     files {
-        "glad/include/glad/glad.h",
-        "glad/src/glad.c",
+        "include/glad/glad.h",
+        "src/glad.c",
 
-        "glad/include/KHR/khrplatform.h",
+        "include/KHR/khrplatform.h",
     }
 
     includedirs { 
+        "include",
         "glad/include" 
     }
     
