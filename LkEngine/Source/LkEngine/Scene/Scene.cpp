@@ -9,8 +9,6 @@
 
 #include "LkEngine/Editor/EditorLayer.h"
 
-#include "LkEngine/Debug/Debugger2D.h"
-
 #include "LkEngine/Core/Application.h"
 
 

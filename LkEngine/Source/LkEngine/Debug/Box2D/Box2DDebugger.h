@@ -1,8 +1,6 @@
 #pragma once
 
-#include "LkEngine/Debug/Debugger2D.h"
-
-#if 0 /// FIXME: DISABLED FOR NOW
+#if 0 /* Disabled for now. */
 #include <box2d/b2_draw.h>
 
 

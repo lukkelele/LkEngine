@@ -108,9 +108,9 @@ namespace LkEngine {
 		});
 
 		/* Editor UI components. */
-		SceneManagerPanel = MakeShared<LSceneManagerPanel>();
-		ContentBrowser = MakeUnique<LContentBrowser>();
-		ComponentEditor = MakeUnique<LComponentEditor>();
+		SceneManagerPanel = std::make_shared<LSceneManagerPanel>();
+		ContentBrowser = std::make_unique<LContentBrowser>();
+		ComponentEditor = std::make_unique<LComponentEditor>();
 
 		Window->OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
 		{

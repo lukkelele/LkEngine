@@ -282,7 +282,7 @@ namespace LkEngine {
 	public:
 		using DelegateFunction = typename Meta::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::Type;
 
-		LSharedPtrDelegate(TSharedPtr<T> InObjectRef, 
+		LSharedPtrDelegate(std::shared_ptr<T> InObjectRef, 
 						   const DelegateFunction InFunction, 
 						   Args2&&... InPayload)
 			: ObjectRef(InObjectRef)
@@ -291,7 +291,7 @@ namespace LkEngine {
 		{
 		}
 
-		LSharedPtrDelegate(TWeakPtr<T> InObjectRef, 
+		LSharedPtrDelegate(std::weak_ptr<T> InObjectRef, 
 						   const DelegateFunction InFunction, 
 						   const std::tuple<Args2...>& InPayload)
 			: ObjectRef(InObjectRef)
@@ -325,12 +325,12 @@ namespace LkEngine {
 			}
 			else
 			{
-				TSharedPtr<T> Object = ObjectRef.lock();
+				std::shared_ptr<T> Object = ObjectRef.lock();
 				return (Object.get()->*Function)(std::forward<TArgs>(Args)..., std::get<Is>(Payload)...);
 			}
 		}
 
-		TWeakPtr<T> ObjectRef;
+		std::weak_ptr<T> ObjectRef;
 		DelegateFunction Function;
 		std::tuple<Args2...> Payload;
 	};
@@ -773,7 +773,7 @@ namespace LkEngine {
 		}
 
 		template<typename T, typename... TArgs2>
-		[[nodiscard]] static LDelegate CreatedShared(const TSharedPtr<T>& ObjectRef, 
+		[[nodiscard]] static LDelegate CreatedShared(const std::shared_ptr<T>& ObjectRef, 
 													 NonConstMemberFunction<T, TArgs2...> InFunction, 
 													 TArgs2... Args)
 		{
@@ -786,7 +786,7 @@ namespace LkEngine {
 		}
 
 		template<typename T, typename... TArgs2>
-		[[nodiscard]] static LDelegate CreatedShared(const TSharedPtr<T>& ObjectRef, 
+		[[nodiscard]] static LDelegate CreatedShared(const std::shared_ptr<T>& ObjectRef, 
 													 ConstMemberFunction<T, TArgs2...> InFunction, 
 													 TArgs2... Args)
 		{
@@ -835,14 +835,14 @@ namespace LkEngine {
 		}
 
 		template<typename T, typename... Args2>
-		void BindShared(TSharedPtr<T> ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
+		void BindShared(std::shared_ptr<T> ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
 		{
 			static_assert(!std::is_const_v<T>, "Attempted to bind a non-const member function on a const object reference");
 			*this = CreatedShared<T, Args2... >(ObjectRef, InFunction, std::forward<Args2>(args)...);
 		}
 
 		template<typename T, typename... Args2>
-		void BindShared(TSharedPtr<T> ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
+		void BindShared(std::shared_ptr<T> ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
 		{
 			*this = CreatedShared<T, Args2...>(ObjectRef, InFunction, std::forward<Args2>(args)...);
 		}
@@ -1023,14 +1023,14 @@ namespace LkEngine {
 
 		/** Shared Pointer, non-const function. */
 		template<typename T, typename... Args2>
-		FDelegateHandle Add(TSharedPtr<T> ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... Args)
+		FDelegateHandle Add(std::shared_ptr<T> ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... Args)
 		{
 			return AddHandler(TDelegate::CreatedShared(ObjectRef, InFunction, std::forward<Args2>(Args)...));
 		}
 
 		/** Shared Pointer, const function. */
 		template<typename T, typename... Args2>
-		FDelegateHandle Add(TSharedPtr<T> ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... Args)
+		FDelegateHandle Add(std::shared_ptr<T> ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... Args)
 		{
 			return AddHandler(TDelegate::CreatedShared(ObjectRef, InFunction, std::forward<Args2>(Args)...));
 		}

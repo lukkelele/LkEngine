@@ -5,7 +5,7 @@
 
 namespace LkEngine {
 
-    using TabEntry = std::pair<uint8_t, TSharedPtr<LTab>>;
+    using TabEntry = std::pair<uint8_t, std::shared_ptr<LTab>>;
 
     class LEditorTabManager
     {
@@ -20,28 +20,28 @@ namespace LkEngine {
 
         static void End();
 
-        static TSharedPtr<LTab> NewTab(std::string_view TabName, 
+        static std::shared_ptr<LTab> NewTab(std::string_view TabName, 
                                        const ETabType TabType, 
                                        const bool SetAsActive = false);
 
-        FORCEINLINE static void SetActiveTab(TSharedPtr<LTab> Tab)
+        FORCEINLINE static void SetActiveTab(std::shared_ptr<LTab> Tab)
         {
 			ActiveTab = Tab;
 			if (Tab && (Tab->GetTabType() == ETabType::NodeEditor))
 			{
-				TSharedPtr<LNodeEditorTab> NodeTab = std::static_pointer_cast<LNodeEditorTab>(Tab);
+				std::shared_ptr<LNodeEditorTab> NodeTab = std::static_pointer_cast<LNodeEditorTab>(Tab);
 				NodeTab->NodeEditor->ActivateContext();
 			}
         }
 
         FORCEINLINE static void SetActiveTab(std::string_view TabName)
         {
-            if (TSharedPtr<LTab> Tab = GetTab(TabName))
+            if (std::shared_ptr<LTab> Tab = GetTab(TabName))
             {
 				ActiveTab = Tab;
 				if (Tab && (Tab->GetTabType() == ETabType::NodeEditor))
 				{
-					TSharedPtr<LNodeEditorTab> NodeTab = std::static_pointer_cast<LNodeEditorTab>(Tab);
+					std::shared_ptr<LNodeEditorTab> NodeTab = std::static_pointer_cast<LNodeEditorTab>(Tab);
 					NodeTab->NodeEditor->ActivateContext();
 				}
             }
@@ -52,7 +52,7 @@ namespace LkEngine {
             return static_cast<int>(Tabs.size());
         }
 
-        FORCEINLINE static TSharedPtr<LTab> GetActiveTab() 
+        FORCEINLINE static std::shared_ptr<LTab> GetActiveTab() 
         { 
             return ActiveTab; 
         }
@@ -68,7 +68,7 @@ namespace LkEngine {
         }
 
         template<typename T>
-        FORCEINLINE static TSharedPtr<LTab> GetTab(T Arg)
+        FORCEINLINE static std::shared_ptr<LTab> GetTab(T Arg)
         {
             static_assert(std::disjunction_v<
                             std::is_same<T, std::uint8_t>,
@@ -79,24 +79,24 @@ namespace LkEngine {
         }
 
         template<>
-        FORCEINLINE static TSharedPtr<LTab> GetTab(const uint8_t TabIndex);
+        FORCEINLINE static std::shared_ptr<LTab> GetTab(const uint8_t TabIndex);
 
         template<>
-        FORCEINLINE static TSharedPtr<LTab> GetTab(std::string_view TabName);
+        FORCEINLINE static std::shared_ptr<LTab> GetTab(std::string_view TabName);
 
         static void PopTab();
 
-        FORCEINLINE static void CloseTab(TSharedPtr<LTab> Tab)
+        FORCEINLINE static void CloseTab(std::shared_ptr<LTab> Tab)
         {
 			Tab->Closed = true;
 			TabsToClose.push_back(Tab);
         }
 
     private:
-        static TSharedPtr<LTab> ActiveTab;
-        static std::unordered_map<uint8_t, TSharedPtr<LTab>> Tabs;
+        static std::shared_ptr<LTab> ActiveTab;
+        static std::unordered_map<uint8_t, std::shared_ptr<LTab>> Tabs;
 
-        inline static std::vector<TSharedPtr<LTab>> TabsToClose{};
+        inline static std::vector<std::shared_ptr<LTab>> TabsToClose{};
         inline static bool bSwitchToNewTabsOnCreation = false;
 
         friend class LEditorLayer;
@@ -104,7 +104,7 @@ namespace LkEngine {
 
 
 	template<>
-	inline static TSharedPtr<LTab> LEditorTabManager::GetTab(const uint8_t TabIndex)
+	inline static std::shared_ptr<LTab> LEditorTabManager::GetTab(const uint8_t TabIndex)
     {
         if (Tabs.contains(TabIndex))
         {
@@ -115,7 +115,7 @@ namespace LkEngine {
     }
 
 	template<>
-	inline static TSharedPtr<LTab> LEditorTabManager::GetTab(std::string_view TabName)
+	inline static std::shared_ptr<LTab> LEditorTabManager::GetTab(std::string_view TabName)
 	{
 		auto FindTabInCollection = [TabName](const TabEntry& Entry)
 		{

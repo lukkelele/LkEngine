@@ -133,9 +133,12 @@ namespace LkEngine {
 		/* Window. */
 		if (YAML::Node WindowNode = Data["Window"])
 		{
-			LWindow& Window = Application->GetWindow();
 			int Width = LWindow::DEFAULT_WIDTH;
 			int Height = LWindow::DEFAULT_HEIGHT;
+		#ifdef USE_WINDOW_REF
+			LWindow& Window = Application->GetWindow();
+		#else
+		#endif
 
 			if (WindowNode["Width"])
 			{
@@ -146,7 +149,11 @@ namespace LkEngine {
 				Height = WindowNode["Height"].as<int>();
 			}
 
+		#ifdef USE_WINDOW_REF
 			Window.SetSize({ Width, Height });
+		#endif
+			Spec.Width = Width;
+			Spec.Height = Height;
 		}
 
 		/* Renderer. */
@@ -157,8 +164,9 @@ namespace LkEngine {
 			{
 				ClearColor = RendererNode["ClearColor"].as<glm::vec4>();
 			}
-			LRenderer::ClearColor = ClearColor;
 
+			LRenderer::ClearColor = ClearColor;
+			//Spec.ClearColor = ClearColor;
 		}
 
 		return true;

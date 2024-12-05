@@ -2,10 +2,9 @@
 #include "ThreadManager.h"
 
 
-
 namespace LkEngine {
 
-	LThreadManager& LThreadManager::Instance()
+	LThreadManager& LThreadManager::Get()
 	{
 		static LThreadManager ThreadManager;
 		return ThreadManager;
@@ -13,7 +12,7 @@ namespace LkEngine {
 
 	void LThreadManager::UpdateThreads()
 	{
-		for (const TSharedPtr<TThread>& Thread : ThreadPool)
+		for (const std::shared_ptr<TThread>& Thread : ThreadPool)
 		{
 			const bool bThreadIsRunning = Thread->IsRunning();
 		}

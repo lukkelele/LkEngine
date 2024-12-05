@@ -134,16 +134,16 @@ namespace LkEngine {
 		LGarbageCollector& GarbageCollector;
 		LThreadManager& ThreadManager;
 
-		TUniquePtr<LWindow> Window;
+		std::unique_ptr<LWindow> Window;
 		LLayerStack LayerStack;
 
 		TObjectPtr<LRenderer> Renderer;
 		uint32_t m_CurrentFrameIndex = 0;
 
 		TObjectPtr<LUILayer> UILayer;
-		TUniquePtr<LEditorLayer> Editor;
+		std::unique_ptr<LEditorLayer> Editor;
 
-		TUniquePtr<PhysicsSystem> m_PhysicsSystem;
+		std::unique_ptr<PhysicsSystem> m_PhysicsSystem;
 
 		std::mutex EventQueueMutex;
 		std::queue<std::function<void()>> EventQueue;

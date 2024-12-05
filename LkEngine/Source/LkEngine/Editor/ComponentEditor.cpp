@@ -54,12 +54,12 @@ namespace LkEngine {
                         SelectedMaterial = MaterialName;
 
                         /* Create new edit tab for the material. */
-                        TSharedPtr<LTab> NewTab = LEditorTabManager::NewTab(
+                        std::shared_ptr<LTab> NewTab = LEditorTabManager::NewTab(
                             LK_FORMAT_STRING("Edit->{}", MaterialName).c_str(),
                             ETabType::MaterialEditor
                         );
 
-                        if (TSharedPtr<LMaterialEditorTab> MaterialEditorTabRef = std::static_pointer_cast<LMaterialEditorTab>(NewTab))
+                        if (std::shared_ptr<LMaterialEditorTab> MaterialEditorTabRef = std::static_pointer_cast<LMaterialEditorTab>(NewTab))
                         {
 							MaterialEditorTabRef->MaterialRef = Material;
                         }

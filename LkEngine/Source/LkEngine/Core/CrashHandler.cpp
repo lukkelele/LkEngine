@@ -23,14 +23,14 @@ namespace LkEngine {
 		LK_CORE_VERIFY(CrashHandler == nullptr, "CrashHandler already assigned");
 		LK_CORE_DEBUG_TAG("CrashHandler", "Attaching application instance");
 
-#ifdef LK_PLATFORM_WINDOWS
-		CrashHandler = MakeUnique<LWindowsCrashHandler>(ApplicationRef);
-#elif defined(LK_PLATFORM_LINUX)
+	#if defined(LK_PLATFORM_WINDOWS)
+		CrashHandler = std::make_unique<LWindowsCrashHandler>(ApplicationRef);
+	#elif defined(LK_PLATFORM_LINUX)
 		LK_CORE_ASSERT(false, "Linux not supported as of yet");
 		return;
-#endif
+	#endif
 
-		// Attach signals.
+		/* Attach signals. */
 		std::signal(SIGINT, &LCrashHandler::SignalHandler);
 		std::signal(SIGSEGV, &LCrashHandler::SignalHandler);
 		std::signal(SIGABRT, &LCrashHandler::SignalHandler);
@@ -38,7 +38,7 @@ namespace LkEngine {
 
 	void LCrashHandler::SignalHandler(const int Signal)
 	{
-		LK_CORE_ASSERT(SignalToStringMap.contains(Signal), "Signal does not exist in SignalToStringMap!");
+		LK_CORE_ASSERT(SignalToStringMap.contains(Signal), "Signal does not exist in SignalToStringMap");
 		if (CrashHandler && !bIsShuttingDown)
 		{
 			bIsShuttingDown = true;
@@ -46,7 +46,7 @@ namespace LkEngine {
 							  Signal);
 
 			const std::string InfoDump = CrashHandler->GenerateApplicationCrashDump();
-			// CrashHandler->LogCrashInformation(InfoDump);
+			//CrashHandler->LogCrashInformation(InfoDump);
 
 			CrashHandler.release();
 		}

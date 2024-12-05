@@ -1,8 +1,7 @@
-///|//////////////////////////////////////////////////////
-/// LThreadManager
-///
-///
-///|//////////////////////////////////////////////////////
+/******************************************************************
+ * LThreadManager
+ *
+ ******************************************************************/
 #pragma once
 
 #include "LkEngine/Core/Thread.h"
@@ -11,7 +10,8 @@
 /* Windows Platform */
 #if defined(LK_PLATFORM_WINDOWS)
 #  include "LkEngine/Platform/Windows/WindowsThread.h"
-namespace LkEngine {
+namespace LkEngine 
+{
 	using TThread = LThread<LWindowsThread>;
 }
 #endif
@@ -49,10 +49,10 @@ namespace LkEngine {
 			ThreadData.CommandQueue.push(Function);
 		}
 
-		static LThreadManager& Instance();
+		static LThreadManager& Get();
 
 	private:
-		std::vector<TSharedPtr<TThread>> ThreadPool{};
+		std::vector<std::shared_ptr<TThread>> ThreadPool{};
 	};
 
 
@@ -61,8 +61,7 @@ namespace LkEngine {
 	{
 		LK_CORE_DEBUG_TAG("ThreadManager", "Creating new thread, indexed={}", ThreadPool.size());
 
-		TSharedPtr<TThread> Thread = MakeShared<TThread>(
-			std::forward<TCallable>(Function), std::forward<TArgs>(Args)...);
+		std::shared_ptr<TThread> Thread = std::make_shared<TThread>(std::forward<TCallable>(Function), std::forward<TArgs>(Args)...);
 		ThreadPool.push_back(Thread);
 
 		if (ThreadStartArgs.bRunAfterCreation)

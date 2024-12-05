@@ -3,7 +3,7 @@
 #include "LkEngine/Renderer/Renderer.h"
 
 
-#if 0 /// FIXME: DISABLED FOR NOW
+#if 0 /* Disabled for now. */
 namespace LkEngine {
 
     Box2DDebugger::Box2DDebugger()

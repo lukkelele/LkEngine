@@ -14,7 +14,6 @@
 #include <string_view>
 
 #include "LkEngine/Core/CoreMacros.h"
-#include "LkEngine/Core/Memory/MemoryPtr.h"
 
 
 namespace LkEngine {
@@ -83,10 +82,10 @@ namespace LkEngine {
 		struct IsSmartPointer : std::false_type {};
 
 		template <typename T>
-		struct IsSmartPointer<TUniquePtr<T>> : std::true_type {};
+		struct IsSmartPointer<std::unique_ptr<T>> : std::true_type {};
 
 		template <typename T>
-		struct IsSmartPointer<TSharedPtr<T>> : std::true_type {};
+		struct IsSmartPointer<std::shared_ptr<T>> : std::true_type {};
 
 		template <typename T>
 		struct RemovePointerReferenceSmart 
@@ -95,13 +94,13 @@ namespace LkEngine {
 		};
 
 		template <typename T>
-		struct RemovePointerReferenceSmart<TUniquePtr<T>> 
+		struct RemovePointerReferenceSmart<std::unique_ptr<T>> 
 		{
 			using type = T;
 		};
 
 		template <typename T>
-		struct RemovePointerReferenceSmart<TSharedPtr<T>> 
+		struct RemovePointerReferenceSmart<std::shared_ptr<T>> 
 		{
 			using type = T;
 		};

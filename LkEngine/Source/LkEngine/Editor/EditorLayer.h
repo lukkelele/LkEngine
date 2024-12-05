@@ -149,15 +149,15 @@ namespace LkEngine {
 
 		FEventCallback m_EventCallback; /// UPDATE ME
 
-		TSharedPtr<LSceneManagerPanel> SceneManagerPanel{};
+		std::shared_ptr<LSceneManagerPanel> SceneManagerPanel{};
 
 		TObjectPtr<LProject> Project{};
 
 		// Editor
 		TObjectPtr<LViewport> EditorViewport;
-		TUniquePtr<LNodeEditor> NodeEditor;
-		TUniquePtr<LComponentEditor> ComponentEditor{};
-		TUniquePtr<LContentBrowser> ContentBrowser;
+		std::unique_ptr<LNodeEditor> NodeEditor;
+		std::unique_ptr<LComponentEditor> ComponentEditor{};
+		std::unique_ptr<LContentBrowser> ContentBrowser;
 		// ~Editor
 
 		TObjectPtr<LWindow> Window{};

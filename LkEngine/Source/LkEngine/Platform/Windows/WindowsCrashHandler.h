@@ -21,7 +21,7 @@ namespace LkEngine {
 
 	private:
 		/* Reference to application instance. */
-		TSharedPtr<LApplication> Application{};
+		std::shared_ptr<LApplication> Application{};
 	};
 
 }

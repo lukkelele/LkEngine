@@ -1,19 +1,21 @@
 #include "LKpch.h"
 #include "PhysicsAPI.h"
 
-#ifdef LK_PHYSICS_API_BULLET3
-    #include "LkEngine/Physics/Bullet/BulletPhysics.h"
+#if defined(LK_PHYSICS_API_BULLET3)
+#	include "LkEngine/Physics/Bullet/BulletPhysics.h"
 #else
-    #include "LkEngine/Physics/OtherPhysicsSDK/OtherPhysicsSDK.h"
+#	include "LkEngine/Physics/OtherPhysicsSDK/OtherPhysicsSDK.h"
 #endif
 
 namespace LkEngine {
 
-    TSharedPtr<PhysicsAPI> PhysicsAPI::Create()
+    std::shared_ptr<PhysicsAPI> PhysicsAPI::Create()
     {
-    #ifdef LK_PHYSICS_API_BULLET3
+    #if defined(LK_PHYSICS_API_BULLET3)
         return std::make_shared<BulletPhysics>();
-    #else
+	#else
+	#	error "Unknown physics API"
+		LK_CORE_ASSERT(false, "Unknown physics API");
         return nullptr;
     #endif
     }

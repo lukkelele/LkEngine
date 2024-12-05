@@ -60,12 +60,6 @@
 #	define VARARGS		__cdecl
 #	define FORCEINLINE	__forceinline
 #	define LK_ITOA(c, buf, size, p)  void() // FIXME
-#	define WARNINGS_DISABLE() \
-        _Pragma("GCC diagnostic push") \
-        _Pragma("GCC diagnostic ignored \"-Wall\"") \
-        _Pragma("GCC diagnostic ignored \"-Wextra\"") \
-        _Pragma("GCC diagnostic ignored \"-Wpedantic\"")
-#	define WARNINGS_ENABLE() _Pragma("GCC diagnostic pop")
 #endif
 
 /**
@@ -79,7 +73,7 @@
 #endif
 
 /* Log formatter. */
-#ifdef SPDLOG_USE_STD_FORMAT
+#if defined(SPDLOG_USE_STD_FORMAT)
 #	define LK_FMT_LIB  std
 #else
 #	define LK_FMT_LIB  spdlog::fmt_lib

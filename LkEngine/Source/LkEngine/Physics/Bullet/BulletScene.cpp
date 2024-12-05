@@ -24,7 +24,7 @@ namespace LkEngine {
         // empty for now
     }
 
-    TSharedPtr<PhysicsBody> BulletScene::GetEntityBodyByID(UUID entityID) const
+    std::shared_ptr<PhysicsBody> BulletScene::GetEntityBodyByID(UUID entityID) const
     {
         return nullptr;
     }

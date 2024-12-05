@@ -2,7 +2,7 @@
  * LLog
  *
  * Logger class and logging implementation for the entire engine.
- *******************************************************************/
+ ******************************************************************/
 #pragma once
 
 #include "LkEngine/Core/CoreMacros.h"

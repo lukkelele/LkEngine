@@ -15,9 +15,8 @@ namespace LkEngine {
     static std::string WindowsExceptionStringBuffer{};
 
 	LWindowsCrashHandler::LWindowsCrashHandler(LApplication* ApplicationRef)
-		: Application(TSharedPtr<LApplication>(ApplicationRef))
+		: Application(std::shared_ptr<LApplication>(ApplicationRef))
 	{
-        //Instance = this;
         static auto* Instance = this;
 
         static auto WindowsCrashFunc = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG

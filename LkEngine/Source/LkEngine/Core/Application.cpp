@@ -12,7 +12,7 @@ namespace LkEngine {
 		: Specification(InSpecification)
 		, MetadataRegistry(LMetadataRegistry::Get())
 		, GarbageCollector(LGarbageCollector::Get())
-		, ThreadManager(LThreadManager::Instance())
+		, ThreadManager(LThreadManager::Get())
 	{
 		LCLASS_REGISTER(LApplication);
 		Instance = this;
@@ -34,9 +34,13 @@ namespace LkEngine {
 
 	void LApplication::Initialize()
 	{
-		Window = MakeUnique<LWindow>(Specification);
+		if (!ReadConfigurationFile(Specification))
+		{
+			LK_CORE_ERROR("Failed to read configuration file");
+		}
 
-		ReadConfigurationFile(Specification);
+		Window = std::make_unique<LWindow>(Specification);
+
 		SetupDirectories();
 
 		LK_VERIFY(NFD::Init());
@@ -60,7 +64,7 @@ namespace LkEngine {
 
 	#if LK_USE_EDITOR
 		/* Create and initialize EditorLayer. */
-		Editor = MakeUnique<LEditorLayer>();
+		Editor = std::make_unique<LEditorLayer>();
 		Editor->Initialize();
 		LayerStack.PushOverlay(Editor.get());
 	#endif

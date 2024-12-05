@@ -24,6 +24,8 @@ namespace LkEngine {
         std::string WorkingDirectory{};
         std::filesystem::path ConfigurationFile = "LkEngine.config";
 		std::filesystem::path StartProject{};
+
+		//glm::vec4 ClearColor = { 0.30f, 0.30f, 0.30f, 1.0f };
     };
 
 }

@@ -35,7 +35,7 @@ namespace LkEngine {
 
 	private:
 		/** CrashHandler reference, type depends on platform. */
-		inline static TUniquePtr<ICrashHandler> CrashHandler = nullptr;
+		inline static std::unique_ptr<ICrashHandler> CrashHandler = nullptr;
 
 		inline static bool bIsShuttingDown = false;
 	};

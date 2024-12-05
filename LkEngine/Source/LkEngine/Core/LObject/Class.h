@@ -8,7 +8,6 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/Template/TypeTrait.h"
-#include "LkEngine/Core/Memory/MemoryPtr.h"
 #include "LkEngine/Core/LObject/Enum.h"
 #include "LkEngine/Core/LObject/ObjectBase.h"
 
@@ -74,7 +73,7 @@ namespace LkEngine {
 				return ClassMetadataMap[typeid(T)].get();
 			}
 
-			ClassMetadataMap[typeid(T)] = MakeUnique<LClass>(ClassName, typeid(T), [](LObjectBase* ClassObject) -> void* 
+			ClassMetadataMap[typeid(T)] = std::make_unique<LClass>(ClassName, typeid(T), [](LObjectBase* ClassObject) -> void* 
 			{ 
 				return static_cast<T*>(ClassObject); 
 			});
@@ -118,7 +117,7 @@ namespace LkEngine {
 		bool bRegistered = false;
 
 		/** Static storage for all LClasses. */
-		inline static std::unordered_map<std::type_index, TUniquePtr<LClass>> ClassMetadataMap{};
+		inline static std::unordered_map<std::type_index, std::unique_ptr<LClass>> ClassMetadataMap{};
 	};
 
 }
