@@ -14,10 +14,25 @@ import shutil
 from ScriptUtils import ScriptLogger
 Logger = ScriptLogger("LkEngine")
 
-# Glad generation arguments.
-profile = "core"
-generator = "c"
-api = "gl=4.6"
+Profile = "core"
+Generator = "c"
+Api = "gl=4.6"
+Extensions = [
+    "GL_ARB_bindless_texture", 
+    "GL_ARB_texture_storage", 
+    "GL_ARB_texture_buffer_object", 
+    "GL_ARB_depth_texture", 
+    "GL_ARB_draw_instanced", 
+    "GL_ARB_draw_buffers",
+    "GL_ARB_texture_cube_map",
+    "GL_ARB_texture_cube_map_array",
+    "GL_ARB_texture_multisample",
+    "GL_ARB_instanced_arrays",
+    "GL_ARB_sample_shading",
+    "GL_ARB_debug_output",
+    "GL_ARB_timer_query",
+    "GL_ARB_direct_state_access",
+]
 
 # Paths to Glad, build and output directories.
 GladDir = os.path.abspath(os.path.join("..", "..", "External", "Glad"))
@@ -31,7 +46,7 @@ os.makedirs(OutputDir, exist_ok=True)
 # Platform-specific options.
 PlatformWindows = (platform.system() == "Windows")
 
-def _IsGladModuleInstalled():
+def IsGladModuleInstalled():
     """Checks if the Glad module is installed."""
     try:
         __import__("glad")
@@ -39,7 +54,7 @@ def _IsGladModuleInstalled():
     except ImportError:
         return False
 
-def _InstallGladModule():
+def InstallGladModule():
     """Install the Glad module."""
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "glad"])
@@ -48,14 +63,15 @@ def _InstallGladModule():
         Logger.error(f"Failed to install GLAD module, error: {e}")
         sys.exit(1)
 
-def _GenerateGladLoader():
+def GenerateGladLoader():
     """Generate GLAD loader."""
     try:
         command = [
             sys.executable, "-m", "glad",
-            f"--profile={profile}",
-            f"--api={api}",
-            f"--generator={generator}",
+            f"--profile={Profile}",
+            f"--api={Api}",
+            f"--extensions={','.join(Extensions) if Extensions else ''}",
+            f"--generator={Generator}",
             f"--out-path={OutputPath}"
         ]
         subprocess.check_call(command)
@@ -63,7 +79,7 @@ def _GenerateGladLoader():
         Logger.error(f"[GLAD] Generation of files failed, error: {e}")
         sys.exit(1)
 
-def _MoveGeneratedFiles():
+def MoveGeneratedFiles():
     """Moves generated files from output directory to the Glad directory."""
     IncludeDir = os.path.join(OutputPath, "include")
     SourceDir = os.path.join(OutputPath, "src")
@@ -93,10 +109,10 @@ def BuildGlad():
     """Generate glad loader files."""
     os.makedirs(BuildDir, exist_ok=True)
     try:
-        if not _IsGladModuleInstalled():
-            _InstallGladModule()
-        BuildResult = _GenerateGladLoader()
-        _MoveGeneratedFiles()
+        if not IsGladModuleInstalled():
+            InstallGladModule()
+        BuildResult = GenerateGladLoader()
+        MoveGeneratedFiles()
         return BuildResult
     except subprocess.CalledProcessError as e:
         Logger.error(f"[GLAD] Error occurred during the build process: {e}")
