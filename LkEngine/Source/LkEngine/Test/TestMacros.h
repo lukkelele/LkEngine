@@ -6,7 +6,7 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/Assert.h"
-#include "LkEngine/Core/Log.h"
+#include "LkEngine/Core/Log/Log.h"
 
 #define LK_TEST_SUITE_ALL     ::LkEngine::Test::ETestSuite::All
 #define LK_TEST_SUITE_CORE    ::LkEngine::Test::ETestSuite::Core

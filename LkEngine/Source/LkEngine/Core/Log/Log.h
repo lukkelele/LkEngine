@@ -6,14 +6,21 @@
 #pragma once
 
 #include "LkEngine/Core/CoreMacros.h"
+#include "LogMacros.h"
+#include "LogFormatters.h"
 
 #include <stdint.h>
 #include <cstring>
+#include <codecvt>
 #include <filesystem>
-#include <iostream>
-#include <iterator>
 #include <format>
+#include <locale>
 #include <map>
+
+#if LK_LOG_USE_IOSTREAM
+#	include <iostream>
+#	include <iterator>
+#endif
 
 /**
  * Set loglevel names to UPPERCASE.
@@ -36,6 +43,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "LkEngine/Core/Assert.h"
+#include "LkEngine/Core/Utility/StringUtils.h"
 
 #include "LkEngine/Renderer/Color.h"
 
@@ -85,10 +93,7 @@ namespace LkEngine {
             ELogLevel Filter = ELogLevel::Debug;
 
             FTagDetails() = default;
-            FTagDetails(const ELogLevel InFilter)
-                : Filter(InFilter)
-            {
-            }
+            FTagDetails(const ELogLevel InFilter) : Filter(InFilter) {}
         };
 
         LLog();
@@ -125,15 +130,9 @@ namespace LkEngine {
             return GetLogger_Core();
         }
 
-#if defined(LK_PLATFORM_WINDOWS)
         template<typename... TArgs>
         static void PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
                                  std::format_string<TArgs...> Format, TArgs&&... Args);
-#elif defined(LK_PLATFORM_LINUX)
-        template<typename... TArgs>
-        static void PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
-                                 fmt::format_string<TArgs...> Format, TArgs&&... Args);
-#endif
 
         template<typename... TArgs>
         static void PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag,
@@ -147,23 +146,29 @@ namespace LkEngine {
                                        std::format_string<TArgs...> Message, TArgs&&... Args);
         static void PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix);
 
-
-	#if defined(LK_PLATFORM_WINDOWS)
 		template<typename... TArgs>
 		static void Print(std::format_string<TArgs...> Format, TArgs&&... Args)
-	#elif defined(LK_PLATFORM_LINUX)
-		template<typename... TArgs>
-		static void Print(fmt::format_string<TArgs...> Format, TArgs&&... Args)
-	#endif
 		{
+		#if LK_LOG_USE_IOSTREAM
 			std::ostream_iterator<char> Out(std::cout);
-			std::format_to(Out, "{}", std::forward<TArgs>(Args)...);
-			//std::format_to(Out, std::make_format_args(std::forward<TArgs>(Args)...));
-			//std::format_to(Out, std::forward<TArgs>(Args)...);
-			//const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
-			//std::format_to(Out, FormattedString.c_str());
-			//const std::string FormattedString = std::vformat(Format, std::make_format_args(std::forward<TArgs>(Args)...));
-			//std::printf("%s\n", FormattedString.c_str());
+			std::format_to(Out, Format, std::forward<TArgs>(Args)...);
+		#else
+			const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+			printf("%s", FormattedString.c_str());
+		#endif
+		}
+
+		template<typename... TArgs>
+		static void PrintLn(std::format_string<TArgs...> Format, TArgs&&... Args)
+		{
+		#if LK_LOG_USE_IOSTREAM
+			std::ostream_iterator<char> Out(std::cout);
+			std::format_to(Out, Format, std::forward<TArgs>(Args)...);
+			*Out = '\n';
+		#else
+			const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+			printf("%s\n", FormattedString.c_str());
+		#endif
 		}
 
         FORCEINLINE static const char* LevelToString(const ELogLevel Level)
@@ -171,8 +176,9 @@ namespace LkEngine {
             switch (Level)
             {
                 case ELogLevel::Trace:   return "Trace";
+                case ELogLevel::Debug:	 return "Debug";
                 case ELogLevel::Info:	 return "Info";
-                case ELogLevel::Warning: return "Warn";
+                case ELogLevel::Warning: return "Warning";
                 case ELogLevel::Error:   return "Error";
                 case ELogLevel::Fatal:   return "Fatal";
             }
@@ -181,17 +187,17 @@ namespace LkEngine {
             return "";
         }
 
-        /* TODO: Convert InString to lowercase before check takes place. */
         FORCEINLINE static ELogLevel LevelFromString(std::string_view InString)
         {
-            if (InString == "Trace")      return ELogLevel::Trace;
-            else if (InString == "Debug") return ELogLevel::Debug;
-            else if (InString == "Info")  return ELogLevel::Info;
-            else if (InString == "Warn")  return ELogLevel::Warning;
-            else if (InString == "Error") return ELogLevel::Error;
-            else if (InString == "Fatal") return ELogLevel::Fatal;
+			const std::string StrLower = StringUtils::ToLower(InString);
+            if (StrLower == "trace")         return ELogLevel::Trace;
+            else if (StrLower == "debug")    return ELogLevel::Debug;
+            else if (StrLower == "info")     return ELogLevel::Info;
+            else if (StrLower == "warning")  return ELogLevel::Warning;
+            else if (StrLower == "error")    return ELogLevel::Error;
+            else if (StrLower == "fatal")    return ELogLevel::Fatal;
 
-            LK_CORE_ASSERT(false, "LevelFromString failed for \"{}\"", InString);
+            LK_CORE_ASSERT(false, "LevelFromString failed for \"{}\" (lower: \"{}\")", InString, StrLower);
             return ELogLevel::Info;
         }
 
@@ -243,109 +249,15 @@ namespace LkEngine {
         /** @brief Tag details for every logger type. */
         inline static std::map<std::string, FTagDetails> EnabledTags;
     };
-
 }
 
-/*----------------------------------------------------------------
-	Logging Macros.
------------------------------------------------------------------*/
 
-/* TODO: Needs fix. */
-//#define LK_PRINT(...)       ::LkEngine::LLog::Print(__VA_ARGS__)
-#define LK_PRINT(...)
+namespace LkEngine
+{
 
-/* Core Logging. */
-#define LK_CORE_TRACE(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_CORE_DEBUG(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
-#define LK_CORE_INFO(...)    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_CORE_WARN(...)    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_CORE_ERROR(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_CORE_FATAL(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
-
-#define LK_CORE_TRACE_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Trace, Tag, __VA_ARGS__)
-#define LK_CORE_DEBUG_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Debug, Tag, __VA_ARGS__)
-#define LK_CORE_INFO_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Info, Tag, __VA_ARGS__)
-#define LK_CORE_WARN_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Warning, Tag, __VA_ARGS__)
-#define LK_CORE_ERROR_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Error, Tag, __VA_ARGS__)
-#define LK_CORE_FATAL_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Core, ::LkEngine::ELogLevel::Fatal, Tag, __VA_ARGS__)
-
-/* Client Logging. */
-#define LK_TRACE(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_DEBUG(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_INFO(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_WARN(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_ERROR(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_FATAL(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
-
-#define LK_TRACE_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Trace, Tag, __VA_ARGS__)
-#define LK_DEBUG_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Debug, Tag, __VA_ARGS__)
-#define LK_INFO_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Info, Tag, __VA_ARGS__)
-#define LK_WARN_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Warning, Tag, __VA_ARGS__)
-#define LK_ERROR_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Error, Tag, __VA_ARGS__)
-#define LK_FATAL_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Fatal, Tag, __VA_ARGS__)
-
-/* UI Logging. */
-#define LK_UI_TRACE(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_UI_DEBUG(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
-#define LK_UI_INFO(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_UI_WARN(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_UI_ERROR(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_UI_FATAL(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
-
-#define LK_UI_TRACE_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Trace, Tag, __VA_ARGS__)
-#define LK_UI_DEBUG_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Debug, Tag, __VA_ARGS__)
-#define LK_UI_INFO_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Info, Tag, __VA_ARGS__)
-#define LK_UI_WARN_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Warning, Tag, __VA_ARGS__)
-#define LK_UI_ERROR_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Error, Tag, __VA_ARGS__)
-#define LK_UI_FATAL_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Fatal, Tag, __VA_ARGS__)
-
-/* Asset Logging. */
-#define LK_ASSET_TRACE(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_ASSET_DEBUG(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
-#define LK_ASSET_INFO(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_ASSET_WARN(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_ASSET_ERROR(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_ASSET_FATAL(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
-
-#define LK_ASSET_TRACE_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Trace, Tag, __VA_ARGS__)
-#define LK_ASSET_DEBUG_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Debug, Tag, __VA_ARGS__)
-#define LK_ASSET_INFO_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Info, Tag, __VA_ARGS__)
-#define LK_ASSET_WARN_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Warning, Tag, __VA_ARGS__)
-#define LK_ASSET_ERROR_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Error, Tag, __VA_ARGS__)
-#define LK_ASSET_FATAL_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Fatal, Tag, __VA_ARGS__)
-
-/* Test Logging. */
-#define LK_TEST_TRACE(...)	  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_TEST_DEBUG(...)	  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
-#define LK_TEST_INFO(...)	  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_TEST_WARN(...)	  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_TEST_ERROR(...)	  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_TEST_FATAL(...)	  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
-
-#define LK_TEST_TRACE_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Trace, Tag, __VA_ARGS__)
-#define LK_TEST_DEBUG_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Debug, Tag, __VA_ARGS__)
-#define LK_TEST_INFO_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Info, Tag, __VA_ARGS__)
-#define LK_TEST_WARN_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Warning, Tag, __VA_ARGS__)
-#define LK_TEST_ERROR_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Error, Tag, __VA_ARGS__)
-#define LK_TEST_FATAL_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Fatal, Tag, __VA_ARGS__)
-
-#define LK_TEST_SUCCESS(...)          ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Info,  __VA_ARGS__)
-#define LK_TEST_FAIL(...)	          ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_TEST_SUCCESS_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Info,  Tag, __VA_ARGS__)
-#define LK_TEST_FAIL_TAG(Tag, ...)	  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::TestRunner, ::LkEngine::ELogLevel::Error, Tag, __VA_ARGS__)
-
-
-namespace LkEngine {
-
-#if defined(LK_PLATFORM_WINDOWS)
 	template<typename... TArgs>
 	void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
 							std::format_string<TArgs...> Format, TArgs&&... Args)
-#elif defined(LK_PLATFORM_LINUX)
-	template<typename... TArgs>
-	void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
-							fmt::format_string<TArgs...> Format, TArgs&&... Args)
-#endif
 	{
 		FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];
 		if (TagDetails.Enabled && TagDetails.Filter <= Level)
@@ -450,28 +362,13 @@ namespace LkEngine {
 			return;
 		}
 
-		GetLogger_Core()->error("{0}: {1}", Prefix, FormattedString);
+		PrintLn("{2} {0}: {1} {3}", Prefix, FormattedString, LK_COLOR_BG_BRIGHT_RED, LK_COLOR_RESET);
 	}
 
-	FORCEINLINE void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix)
+	FORCEINLINE void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Message)
 	{
-		LLog::GetLogger(LoggerType)->error("{0}", Prefix);
+		LLog::GetLogger(LoggerType)->error("{0}", Message);
 	}
-
-#if 0
-	//void LLog::Print(std::format_string<std::type_identity_t<TArgs>...> Format, TArgs&&... Args)
-#if defined(LK_PLATFORM_WINDOWS)
-	template<typename... TArgs>
-	void LLog::Print(std::format_string<TArgs...> Format, TArgs&&... Args)
-#elif defined(LK_PLATFORM_LINUX)
-	template<typename... TArgs>
-	void LLog::Print(fmt::format_string<TArgs...> Format, TArgs&&... Args)
-#endif
-	{
-		const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
-		std::printf("%s\n", FormattedString.c_str());
-	}
-#endif
 
 }
 
@@ -540,10 +437,11 @@ namespace LkEngine {
 					if (LogFile.path().extension() == ".log")
 					{
 						fs::remove(LogFile.path());
-						LK_CORE_TRACE_TAG("Log", "Deleted logfile: {}", LogFile.path().string());
 					}
 				}
 			}
 		}
 	}
 }
+
+

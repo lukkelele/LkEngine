@@ -2,7 +2,7 @@
 
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/Assert.h"
-#include "LkEngine/Core/Log.h" /* FIXME: Move to Assert.h */
+//#include "LkEngine/Core/Log/Log.h"
 
 
 namespace LkEngine {

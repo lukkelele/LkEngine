@@ -2,7 +2,7 @@
 
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/CoreMacros.h"
-#include "LkEngine/Core/Log.h"
+#include "LkEngine/Core/Log/Log.h"
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 

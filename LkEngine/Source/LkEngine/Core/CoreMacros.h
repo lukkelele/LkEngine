@@ -5,6 +5,7 @@
  *******************************************************************/
 #pragma once
 
+#include <cassert>
 #include <typeinfo>
 #include <regex>
 
@@ -13,9 +14,9 @@
 #	define CORE_API
 #else
 #	ifdef LK_ENGINE_CORE
-#		define CORE_API __declspec(dllexport)
+#		define CORE_API  __declspec(dllexport)
 #	else
-#		define CORE_API __declspec(dllimport)
+#		define CORE_API  __declspec(dllimport)
 #	endif
 #endif
 
@@ -65,6 +66,16 @@
         _Pragma("GCC diagnostic ignored \"-Wextra\"") \
         _Pragma("GCC diagnostic ignored \"-Wpedantic\"")
 #	define WARNINGS_ENABLE() _Pragma("GCC diagnostic pop")
+#endif
+
+/**
+ * Assert that does not utilize LLog.
+ * Used at places where the use of the regular asserts cause cyclic inclusion.
+ */
+#if defined(LK_ENGINE_DEBUG)
+#	define LK_RAW_ASSERT(Condition, ...)  assert(Condition && __VA_ARGS__)
+#else
+#	define LK_RAW_ASSERT(Condition, ...)  
 #endif
 
 /* Log formatter. */

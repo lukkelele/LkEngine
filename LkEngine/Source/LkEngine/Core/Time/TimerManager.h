@@ -10,7 +10,7 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/Assert.h"
-#include "LkEngine/Core/Log.h"
+#include "LkEngine/Core/Log/Log.h"
 #include "LkEngine/Core/Time/TimerHandle.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
 

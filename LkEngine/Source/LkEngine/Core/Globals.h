@@ -21,8 +21,10 @@ namespace LkEngine {
 
 	namespace Global 
 	{
-		void SetRuntimeArguments(const int InArgc, char* Argv[]);
-
+		/**
+		 * @brief Runtime arguments passed to main.
+		 */
+		void SetRuntimeArguments(const int Argc, char* Argv[]);
 		const FRuntimeArguments& GetRuntimeArguments();
 
 		/**

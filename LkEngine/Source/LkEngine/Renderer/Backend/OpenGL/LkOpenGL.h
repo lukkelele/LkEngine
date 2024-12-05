@@ -14,8 +14,6 @@
 #include "LkEngine/Renderer/BlendingSpecification.h"
 #include "LkEngine/Renderer/ArrayTextureSpecification.h"
 
-#include "LkEngine/Utility/StringUtils.h"
-
 
 /**
  * LK_OpenGL_Verify

@@ -14,12 +14,12 @@ namespace LkEngine::Global {
 	static std::filesystem::path EngineConfig{};
 	static std::filesystem::path ConfigDir{};
 
-	void SetRuntimeArguments(const int InArgc, char* Argv[])
+	void SetRuntimeArguments(const int Argc, char* Argv[])
 	{
 		static bool bArgumentsSet = false;
 		LK_CORE_ASSERT(bArgumentsSet == false && "SetRuntimeArguments incorrectly called more than once");
 
-		RuntimeArguments.Argc = InArgc;
+		RuntimeArguments.Argc = Argc;
 		RuntimeArguments.Argv = Argv;
 		if (RuntimeArguments.Argc >= 1)
 		{
@@ -29,13 +29,13 @@ namespace LkEngine::Global {
 		namespace fs = std::filesystem;
 
 		WorkingDir = std::filesystem::current_path();
-		LK_PRINT("Working Directory: {}", WorkingDir.c_str());
+		//LK_PRINTLN("Working Directory: {}", WorkingDir);
 
 		int Traversed = 0;
 		fs::path Path = WorkingDir;
 		while (Path.filename() != "LkEngine")
 		{
-			LK_PRINT("Current Path: {}", Path.c_str());
+			//LK_PRINTLN("Current Path: {}", Path);
 			Path = Path.parent_path();
 			Traversed++;
 			LK_CORE_VERIFY(Traversed <= 4, "Cannot find LkEngine configuration file");
@@ -47,21 +47,20 @@ namespace LkEngine::Global {
 		/* The engine config is placed in the 'LkEngine/LkRuntime' directory. */
 		EngineDir = Path;
 		EngineDir += PathSeparator + std::string("LkRuntime");
-		LK_CORE_ASSERT(LFileSystem::IsDirectory(EngineDir), "Engine directory is not valid");
+		LK_CORE_VERIFY(LFileSystem::IsDirectory(EngineDir), "Engine directory is not valid");
 
 		ConfigDir = EngineDir;
 		ConfigDir += PathSeparator + std::string("Configuration");
-		LK_PRINT("ConfigDir: {}", ConfigDir.c_str());
+		//LK_PRINTLN("ConfigDir: {}", ConfigDir);
 		if (!LFileSystem::Exists(ConfigDir))
 		{
 			LFileSystem::CreateDirectory(ConfigDir);
-			LK_CORE_ASSERT(LFileSystem::IsDirectory(ConfigDir), "Configuration directory is not valid");
+			LK_CORE_VERIFY(LFileSystem::IsDirectory(ConfigDir), "Configuration directory is not valid");
 		}
 
 		EngineConfig = ConfigDir;
 		EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
-		LK_PRINT("EngineDir: {}", std::filesystem::absolute(EngineDir).c_str());
-		LK_PRINT("EngineConfig: {}", std::filesystem::absolute(EngineConfig).c_str());
+		//LK_PRINTLN("EngineDir: {}     EngineConfig: {}", std::filesystem::absolute(EngineDir), std::filesystem::absolute(EngineConfig));
 
 		bArgumentsSet = true;
 	}

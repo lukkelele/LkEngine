@@ -9,7 +9,7 @@
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Core/Time/Timer.h"
-#include "LkEngine/Core/Log.h"
+#include "LkEngine/Core/Log/Log.h"
 #include "LkEngine/Core/Layer.h"
 
 #include "LkEngine/Core/Application.h"

@@ -1,11 +1,11 @@
 /******************************************************************
  * Assert
  *
- * Macros for core assertion setup.
  *******************************************************************/
 #pragma once
 
 #include "PlatformDetection.h"
+
 
 /**
  * Variadic argument support.
@@ -49,7 +49,7 @@
 			}                                            \
 		}
 #else
-#	define LK_CORE_ASSERT(Condition, ...) static_cast<void>(0)
+#	define LK_CORE_ASSERT(Condition, ...)  static_cast<void>(0)
 #	define LK_ASSERT(Condition, ...)	   static_cast<void>(0)
 #endif
 

@@ -6,23 +6,11 @@
 
 #include "TypeTrait.h"
 
-#include "LkEngine/Core/Log.h"
+#include "LkEngine/Core/Log/Log.h"
 #include "LkEngine/Core/Assert.h"
 
 
 namespace LkEngine {
-
-	template <typename T>
-	FORCEINLINE T&& Forward(std::remove_reference_t<T>& Object)
-	{
-		return (T&&)Object;
-	}
-
-	template <typename T>
-	FORCEINLINE T&& Forward(std::remove_reference_t<T>&& Object)
-	{
-		return (T&&)Object;
-	}
 
 	/**
 	 * @brief Uses implicit conversion to create an instance of a specific type.
@@ -55,45 +43,14 @@ namespace LkEngine {
 	}
 
 	/**
-	 * Disallowed for rvalue references because it cannot extend their lifetime.
+	 * Not allowed for rvalue references because their lifetime cannot be extended.
 	 */
 	template <typename T>
 	void AsConst(const T&& Ref) = delete;
 
-	/**
-	 * @brief Helper class to make it easy to use key/value pairs with a container.
+	/** 
+	 * Bitmask. 
 	 */
-	template <typename KeyType, typename ValueType>
-	struct TKeyValuePair
-	{
-		KeyType Key;
-		ValueType Value;
-
-		TKeyValuePair(const KeyType& InKey, const ValueType& InValue)
-			: Key(InKey)
-			, Value(InValue)
-		{
-		}
-
-		TKeyValuePair(const KeyType& InKey)
-			: Key(InKey)
-		{
-		}
-
-		TKeyValuePair() = default;
-		
-		bool operator==(const TKeyValuePair& Other) const { return (Key == Other.Key); }
-		bool operator!=(const TKeyValuePair& Other) const { return (Key != Other.Key); }
-		bool operator<(const TKeyValuePair& Other) const { return (Key < Other.Key); }
-
-		FORCEINLINE bool operator()(const TKeyValuePair& A, const TKeyValuePair& B) const
-		{
-			return A.Key < B.Key;
-		}
-	};
-
-
-	/** Bitmask. */
 	template <typename T>
 	FORCEINLINE T BitMask(const uint32_t Count);
 

@@ -1,5 +1,5 @@
 #include "LKpch.h"
-#include "LkEngine/Core/Log.h"
+#include "Log.h"
 
 #include "LkEngine/Core/Time/Time.h"
 #include "LkEngine/Core/Globals.h"
@@ -16,8 +16,9 @@ namespace LkEngine {
 
 	namespace fs = std::filesystem;
 
-	namespace 
-	{
+	namespace {
+		using ColorSinkType = spdlog::sinks::stdout_color_sink_mt;
+
 	#if defined(LK_EDITOR)
 		constexpr const char* FileName = "LkEditor";
 	#elif defined(LK_ENGINE_AUTOMATION_TEST)
@@ -26,12 +27,6 @@ namespace LkEngine {
 		constexpr const char* FileName = "LkEngine";
 	#endif
 
-		//const std::string Logfile = LogDirectory.string() + std::string(FileName);
-		//const std::string Logfile = LK_FORMAT_STRING("{}-{}.log", FileName, Time::CurrentTimestamp());
-		std::string Logfile;
-
-		using ColorSinkType = spdlog::sinks::stdout_color_sink_mt;
-
 		/* Terminal sink. */
 		constexpr const char* ColorSinkPattern = "%^[%H:%M:%S] [%t] [%n] %v%$";
 		constexpr const char* UISinkPattern    = "%^[%H:%M:%S] [%t] [%n] %v%$";
@@ -39,24 +34,21 @@ namespace LkEngine {
 		/* Logfile sink. */
 		constexpr const char* FileSinkPattern = "[%H:%M:%S] [%l] [%t] [%n] %v";
 
-		/* Create the color and file sink. */
+		/* Color and file sink. */
 		std::vector<spdlog::sink_ptr> LogSinks;
+
+		std::string Logfile;
 	}
 
 	LLog::LLog()
 	{
 		LogSinks.reserve(2);
-		/* Use binary workdir for log directory. */
+
+		/* Use binary workdir as directory for logs. */
 		LogDirectory = fs::path(LK_FORMAT_STRING("{}/Logs/", fs::current_path().string()).c_str());
 
 		/* Keep a maximum of 10 logfiles present. */
 		LogUtility::CleanLogDirectory(LogDirectory, 10);
-
-	#if 0
-		// TODO: Read configuration and application args for setting log levels on initialization.
-		Initialize(LK_FORMAT_STRING("{}-{}.log", FileName, Time::CurrentTimestamp()).c_str());
-		LK_CORE_INFO("Log Directory: {}", LogDirectory.string());
-	#endif
 	}
 
 	LLog::~LLog()
@@ -89,9 +81,8 @@ namespace LkEngine {
 		LogSinks.push_back(ColorSinkLogger);
 
 		/* Logfile Sink. */
-		std::printf("Logfile: %s\n", Logfile.c_str());
+		LK_PRINTLN("Logfile: {}", Logfile); /* Cannot use regular logging features here since core logger does not exist yet. */
 		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(LogDirectory.string() + Logfile, true));
-		//LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logfile, true));
 
 		LogSinks[0]->set_pattern(ColorSinkPattern);
 		LogSinks[1]->set_pattern(FileSinkPattern);
@@ -111,27 +102,10 @@ namespace LkEngine {
 			Logger_Client->flush_on(spdlog::level::trace);
 			spdlog::register_logger(Logger_Client);
 		}
-
 	}
 
 	void LLog::RegisterLoggers()
 	{
-	#if 0
-		/* Create the color and file sink. */
-		std::vector<spdlog::sink_ptr> LogSinks;
-		LogSinks.reserve(2);
-
-		/* Color Sink. */
-		auto ColorSinkLogger = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-		ColorSinkLogger->set_color(spdlog::level::trace, Color::Green);
-		ColorSinkLogger->set_color(spdlog::level::debug, Color::Cyan);
-		ColorSinkLogger->set_color(spdlog::level::info, Color::White);
-		LogSinks.push_back(ColorSinkLogger);
-
-		/* Logfile Sink. */
-		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logfile, true));
-	#endif
-
 		LogSinks[0]->set_pattern(ColorSinkPattern);
 		LogSinks[1]->set_pattern(FileSinkPattern);
 
@@ -188,25 +162,23 @@ namespace LkEngine {
 							  const std::vector<LogLevelColorConfig>& LevelConfigs, 
 							  const Color::EColorCode MainColor)
 	{
-		using ColorSinkType = spdlog::sinks::stdout_color_sink_mt;
-
 		/* Create the color and file sink. */
 		std::vector<spdlog::sink_ptr> Sinks;
 		Sinks.reserve(2);
 
 		/* Color sink. */
 		auto ColorSinkLogger = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+
 		/* Default level color configuration. */
 		ColorSinkLogger->set_color(spdlog::level::trace, Color::Green);
 		ColorSinkLogger->set_color(spdlog::level::debug, Color::Cyan);
 		ColorSinkLogger->set_color(spdlog::level::info, Color::White);
 
-		for (const auto& [Level, Color]: LevelConfigs)
+		for (const auto& [Level, Color] : LevelConfigs)
 		{
 			ColorSinkLogger->set_color(ToSpdlogLevel(Level), Color);
 		}
 
-		static constexpr const char* ColorSinkPattern = "%^[%H:%M:%S] [%t] [%n] %v%$";
 		const std::string AnsiColorReset = "\033[0m";
 
 		Sinks.push_back(ColorSinkLogger);

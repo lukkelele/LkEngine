@@ -1,14 +1,13 @@
 /******************************************************************
  * LObjectBase
  * 
- *
  *****************************************************************/
 #pragma once
 
 #include <concepts>
 
 #include "LkEngine/Core/CoreTypes.h"
-#include "LkEngine/Core/Log.h"
+#include "LkEngine/Core/Log/Log.h"
 
 #include "Enum.h"
 
@@ -55,8 +54,6 @@ namespace LkEngine {
 	/**
 	 * LObjectBase
 	 */
-	//template<LObjectCore ObjectCore>
-	//class LObjectBase
 	class LObjectBase
 	{
 	public:
@@ -116,7 +113,9 @@ namespace LkEngine {
 		LClass* ClassPrivate = nullptr;
 	};
 
-	/** Helper to detect a member function. */
+	/** 
+	 * Helper to detect a member function. 
+	 */
 	template <typename, typename = void>
 	struct HasGetClass : std::false_type {};
 

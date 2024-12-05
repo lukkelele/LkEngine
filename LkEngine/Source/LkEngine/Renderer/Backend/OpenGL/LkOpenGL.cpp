@@ -9,6 +9,8 @@
 #include "OpenGLShader.h"
 #include "OpenGLTexture.h"
 
+#include "LkEngine/Core/Utility/StringUtils.h"
+
 
 namespace LkEngine {
 
