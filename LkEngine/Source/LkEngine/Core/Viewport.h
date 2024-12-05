@@ -39,7 +39,6 @@ namespace LkEngine {
 			if (Size != NewSize)
 			{
 				Size = NewSize;
-				//LK_CORE_DEBUG_TAG("Viewport", "Set Size: {}", Size.ToString());
 				bDirty = true;
 			}
 		}
@@ -51,7 +50,6 @@ namespace LkEngine {
 			if (Size.X != InX)
 			{
 				Size.X = InX;
-				//LK_CORE_DEBUG_TAG("Viewport", "Set SizeX: {}", Size.X);
 				bDirty = true;
 			}
 		}
@@ -63,7 +61,6 @@ namespace LkEngine {
 			if (Size.Y != InY)
 			{
 				Size.Y = InY;
-				//LK_CORE_DEBUG_TAG("Viewport", "Set SizeY: {}", Size.Y);
 				bDirty = true;
 			}
 		}
@@ -116,7 +113,6 @@ namespace LkEngine {
 		{ 
 			if (!NewScalers.IsNull() && (Scalers != NewScalers))
 			{
-				//LK_CORE_DEBUG_TAG("Viewport", "SetScalers: {}", NewScalers.ToString());
 				Scalers = NewScalers;
 			}
 		}
@@ -125,6 +121,8 @@ namespace LkEngine {
 		{
 			bDirty = Dirty;
 		}
+
+		static void SetViewport(const int PosX, const int PosY, const int Width, const int Height);
 
 	public:
 		FOnViewportSizeUpdated OnSizeUpdated;

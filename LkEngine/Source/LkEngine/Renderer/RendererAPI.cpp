@@ -8,7 +8,7 @@ namespace LkEngine {
 
     TObjectPtr<LRendererAPI> LRendererAPI::Create()
     {
-        switch (LRendererAPI::Current())
+        switch (LRendererAPI::Get())
         {
             case ERendererAPI::OpenGL: 
             {

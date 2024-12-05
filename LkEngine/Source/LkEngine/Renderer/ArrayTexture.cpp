@@ -10,7 +10,7 @@ namespace LkEngine {
 
     TObjectPtr<LArrayTexture> LArrayTexture::Create(const FArrayTextureSpecification& Specification)
     {
-        switch (LRendererAPI::Current())
+        switch (LRendererAPI::Get())
         {
             case ERendererAPI::OpenGL: 
             {

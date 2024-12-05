@@ -42,7 +42,8 @@ namespace LkEngine {
 
 		if (!bGlfwInitialized)
 		{
-			LK_ASSERT(glfwInit() == GLFW_TRUE, "GLFW failed to initialize, glfwInit() != GLFW_TRUE");
+			const int GlfwInit = glfwInit();
+			LK_VERIFY(GlfwInit == GLFW_TRUE, "GLFW failed to initialize, error ({}): '{}'", GlfwInit, strerror(errno));
 			glfwSetErrorCallback([](const int Error, const char* Description)
 			{
 				LK_CORE_ERROR_TAG("GLFW", "Error ({0}): {1}", Error, Description);
@@ -52,7 +53,7 @@ namespace LkEngine {
 		/* Set context profile and the version to use for the Renderer API. */
 		LRenderContext::SetProfile(ERenderProfile::Core);
 
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: 
 			{
@@ -101,9 +102,6 @@ namespace LkEngine {
 			Window.OnViewportSizeUpdated.Broadcast(NewWidth, NewHeight);
 
 			Window.SetSize({ NewWidth, NewHeight });
-			//LK_CORE_DEBUG_TAG("Window", "Resize: ({}, {})   Viewport ({}, {})", 
-			//				  Window.GetWidth(), Window.GetHeight(), 
-			//				  Window.GetViewportWidth(), Window.GetViewportHeight());
 		});
 
 		glfwSetKeyCallback(GlfwWindow, [](GLFWwindow* Window, int Key, int ScanCode, int Action, int Modifiers)
@@ -150,9 +148,7 @@ namespace LkEngine {
 		/* Framebuffer resize callback. */
 		glfwSetFramebufferSizeCallback(GlfwWindow, [](GLFWwindow* GlfwWindow, int Width, int Height)
 		{
-			//LK_CORE_TRACE_TAG("GLFW", "Framebuffer Size Callback  ({}, {})", Width, Height);
-			/* FIXME: Should be no raw OpenGL calls. */
-			glViewport(0, 0, Width, Height);
+			LViewport::SetViewport(0, 0, Width, Height);
 		});
 
 		/* Character input callback. */

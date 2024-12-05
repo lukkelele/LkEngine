@@ -12,7 +12,7 @@ namespace LkEngine {
 
 	TObjectPtr<LUILayer> LUILayer::Create()
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImGuiLayer>::Create();
 			case ERendererAPI::None:   return nullptr;

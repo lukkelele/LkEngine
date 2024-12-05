@@ -11,7 +11,7 @@ namespace LkEngine {
 
 	TObjectPtr<LUniformBuffer> LUniformBuffer::Create(const uint64_t Size)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: 
 			{

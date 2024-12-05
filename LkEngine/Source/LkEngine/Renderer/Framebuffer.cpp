@@ -10,7 +10,7 @@ namespace LkEngine {
 
 	TObjectPtr<LFramebuffer> LFramebuffer::Create(const FFramebufferSpecification& InSpecification)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:	
 			{
@@ -27,7 +27,7 @@ namespace LkEngine {
 
 	void LFramebuffer::TargetSwapChain()
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:	
 			{

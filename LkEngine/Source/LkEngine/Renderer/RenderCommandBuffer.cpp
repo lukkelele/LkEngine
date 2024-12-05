@@ -10,7 +10,7 @@ namespace LkEngine {
 
 	TObjectPtr<LRenderCommandBuffer> LRenderCommandBuffer::Create(const uint32_t count, const std::string& debugName)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:  
 			{
@@ -27,7 +27,7 @@ namespace LkEngine {
 
 	TObjectPtr<LRenderCommandBuffer> LRenderCommandBuffer::CreateFromSwapChain(const std::string& debugName)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:  
 			{

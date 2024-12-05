@@ -12,7 +12,7 @@ namespace LkEngine {
 
 	TObjectPtr<LPipeline> LPipeline::Create(const FPipelineSpecification& InSpecification)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:
 			{

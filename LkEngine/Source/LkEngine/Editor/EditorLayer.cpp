@@ -17,7 +17,6 @@
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/IO/FileSystem.h"
-#include "LkEngine/Core/Event/SceneEvent.h" /* REMOVE */
 #include "LkEngine/Input/Mouse.h"
 
 #include "LkEngine/UI/UICore.h"
@@ -1160,12 +1159,12 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_AboutPopup()
 	{
-		#define LK_ENGINE_VERSION "0.1.2" /* @FIXME: PLACE IN PROJECT CONFIG */
+		static const std::string EngineVersion = LVersion::ToString(LK_ENGINE_VERSION);
 		UI::ShowMessageBox("About", []()
 		{
 			/* Section: Title. */
 			UI::Font::Push("Large");
-			ImGui::Text("LkEngine %s", LK_ENGINE_VERSION);
+			ImGui::Text("LkEngine %s", EngineVersion.c_str());
 			UI::Font::Pop();
 
 			/* Section: About description. */
@@ -1183,8 +1182,13 @@ namespace LkEngine {
 			/* Section: Software Info. */
 			if (ImGui::CollapsingHeader("Software Information", nullptr))
 			{
+				// static const std::string GlfwVersion = std::string(glfwGetVersionString());
+				static const std::string GlfwVersion(glfwGetVersionString());
 				ImGui::TextColored(ImVec4(0.70f, 0.70f, 0.70f, 1.0f), "Contains source code provided by");
-				//ImGui::Text("ImGui: %s (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+				ImGui::BulletText("GLFW: %d.%d.%d", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
+			#if defined(LK_ENGINE_OPENGL)
+				ImGui::BulletText("OpenGL: %d.%d", LOpenGL::GetMajorVersion(), LOpenGL::GetMinorVersion());
+			#endif
 				ImGui::BulletText("ImGui: %s (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
 
 				/* TODO: Place dependencies here. */
@@ -1405,6 +1409,35 @@ namespace LkEngine {
 		LastTabCount = TabManager.GetTabCount();
 	}
 
+	void LEditorLayer::UI_OpenGLExtensions()
+	{
+		UI::ShowMessageBox("Supported Extensions", []()
+		{
+			/* Section: Title. */
+			UI::Font::Push("Large");
+			ImGui::Text("OpenGL Extensions");
+			UI::Font::Pop();
+
+			ImGui::Separator();
+			ImGui::TextWrapped("Extensions");
+			ImGui::Separator();
+
+			int Index = 1;
+			for (const auto& Extension : LOpenGL::GetSupportedExtensions())
+			{
+				ImGui::Text("%d: %s", Index++, Extension.c_str());
+			}
+
+			if (ImGui::Button("OK"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+		}, 
+			200, 0,    /* Width     / Height     */
+			0, 0,	   /* Min Width / Min Height */
+			200, 100   /* Max Width / Max Height */
+		);
+	}
 
 	void LEditorLayer::UI_MainMenuBar()
 	{
@@ -1519,12 +1552,16 @@ namespace LkEngine {
 
 			if (ImGui::MenuItem("About"))
 			{
-				LK_CORE_DEBUG("Opening 'About' popup");
 				UI_AboutPopup();
 			}
 
+			if (ImGui::MenuItem("Extensions"))
+			{
+				UI_OpenGLExtensions();
+			}
+
 			/* Horizontal space. */
-			ImGui::Dummy(ImVec2(40, 0));
+			ImGui::Dummy(ImVec2(240, 0));
 
 			if (ImGui::BeginMenu(std::string("Project: " + Project->GetName()).c_str()))
 			{

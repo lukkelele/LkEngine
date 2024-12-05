@@ -147,8 +147,7 @@ namespace LkEngine {
 
 		static TObjectPtr<LRendererAPI> Create();
 
-		/** Get current RendererAPI. */
-		FORCEINLINE static ERendererAPI Current() { return RendererAPI; }
+		FORCEINLINE static ERendererAPI Get() { return RendererAPI; }
 
 		static void SetAPI(ERendererAPI InRendererApiType);
 

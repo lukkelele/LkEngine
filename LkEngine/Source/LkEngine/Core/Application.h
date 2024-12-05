@@ -5,6 +5,8 @@
  *******************************************************************/
 #pragma once
 
+#include "LkEngine/Version.h"
+
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/Globals.h"
 
@@ -47,9 +49,16 @@
 
 #include "LkEngine/Physics/PhysicsSystem.h"
 
-#define LK_USE_EDITOR 1
 
 namespace LkEngine {
+
+	namespace Core 
+	{
+		/**
+		 * @brief Setup necessary engine components such as logging and global config options.
+		 */
+		void Setup(const int Argc, char* Argv[]);
+	}
 
 	class LApplication : public LObject
 	{

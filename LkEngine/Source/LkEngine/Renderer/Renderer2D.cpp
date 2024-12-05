@@ -36,7 +36,7 @@ namespace LkEngine
             QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
 			/* Create the quad framebuffer. */
-            LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad framebuffer");
+            LK_CORE_TRACE_TAG("Renderer2D", "Creating quad framebuffer");
             FFramebufferSpecification QuadFramebufferSpec{};
 		    QuadFramebufferSpec.Attachments = {
                 EImageFormat::RGBA32F, 
@@ -56,14 +56,14 @@ namespace LkEngine
             QuadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
             QuadPipelineSpec.Shader = QuadShader;
 
-            LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad pipeline");
+            LK_CORE_TRACE_TAG("Renderer2D", "Creating quad pipeline");
             FRenderPassSpecification QuadPassSpec;
             QuadPassSpec.DebugName = "Renderer2D-RenderPass-Quad";
             QuadPassSpec.Pipeline = LPipeline::Create(QuadPipelineSpec);
             //QuadMaterial = LMaterial::Create(QuadShader, "QuadMaterial");
 
             /* Use correct amount of texture array uniforms. */
-            LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad renderpass");
+            LK_CORE_TRACE_TAG("Renderer2D", "Creating quad renderpass");
             for (uint8_t ArrayIndex = 0; ArrayIndex < Specification.ArrayTexturesCount; ArrayIndex++)
             {
                 QuadPassSpec.Pipeline->BindTextureArray(ArrayIndex);
@@ -99,7 +99,7 @@ namespace LkEngine
                 Offset += 4;
             }
 
-            LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad indexbuffer");
+            LK_CORE_TRACE_TAG("Renderer2D", "Creating quad indexbuffer");
             TObjectPtr<LIndexBuffer> quadIB = LIndexBuffer::Create(QuadIndices, MaxIndices);
             QuadVertexBuffer->SetIndexBuffer(quadIB);
             QuadVertexBufferPtr = QuadVertexBufferBase;
@@ -109,7 +109,7 @@ namespace LkEngine
 
         /* Lines. */
         {
-            LK_CORE_DEBUG_TAG("Renderer2D", "Creating line vertexbuffer");
+            LK_CORE_TRACE_TAG("Renderer2D", "Creating line vertexbuffer");
             LineVertexBuffer = LVertexBuffer::Create(MaxVertices * sizeof(FLineVertex));
             FVertexBufferLayout LineVertexBufferLayout{ };
             LineVertexBuffer->SetLayout({

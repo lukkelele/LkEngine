@@ -10,7 +10,7 @@ namespace LkEngine {
 
 	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(void* InBuffer, const uint32_t InSize)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:
 			{
@@ -28,7 +28,7 @@ namespace LkEngine {
 
 	TObjectPtr<LIndexBuffer> LIndexBuffer::Create(const uint32_t InSize)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:
 			{

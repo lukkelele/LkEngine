@@ -12,7 +12,7 @@ namespace LkEngine {
 
     TObjectPtr<LSwapChain> LSwapChain::Create(uint32_t* width, uint32_t* height, bool vsync)
     {
-        switch (LRendererAPI::Current())
+        switch (LRendererAPI::Get())
         {
             case ERendererAPI::OpenGL: 
             {

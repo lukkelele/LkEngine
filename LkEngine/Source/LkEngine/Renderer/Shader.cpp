@@ -15,7 +15,7 @@ namespace LkEngine {
 
 	TObjectPtr<LShader> LShader::Create(const std::string& InFilePath)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:
 			{
@@ -32,7 +32,7 @@ namespace LkEngine {
 
 	TObjectPtr<LShader> LShader::Create(const FShaderProgramSource& ShaderProgramSource)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLShader>::Create(ShaderProgramSource);
 

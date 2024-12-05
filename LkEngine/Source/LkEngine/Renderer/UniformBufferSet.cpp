@@ -10,7 +10,7 @@ namespace LkEngine {
 	TObjectPtr<LUniformBufferSet> LUniformBufferSet::Create(const uint32_t size, 
 															const uint32_t framesInFlight)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: 
 			{

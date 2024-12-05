@@ -14,7 +14,8 @@
 
 namespace LkEngine {
 
-	//static constexpr uint32_t MaxTexturesPerArray = 32;
+	LOpenGL::GLVersion LOpenGL::Version;
+	std::vector<std::string> LOpenGL::SupportedExtensions;
 
 	/**
 	 * LOpenGL::Debug

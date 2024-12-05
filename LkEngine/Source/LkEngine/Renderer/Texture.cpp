@@ -9,7 +9,7 @@ namespace LkEngine {
 
 	TObjectPtr<LTexture> LTexture::Create(const FTextureSpecification& Specification)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: 
 			{
@@ -27,7 +27,7 @@ namespace LkEngine {
 
 	TObjectPtr<LTexture2D> LTexture2D::Create(const FTextureSpecification& Specification, FBuffer BufferData)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: 
 			{
@@ -45,7 +45,7 @@ namespace LkEngine {
 
 	TObjectPtr<LTexture2D> LTexture2D::Create(const FTextureSpecification& Specification)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: 
 			{
@@ -64,7 +64,7 @@ namespace LkEngine {
 	TObjectPtr<LTextureCube> LTextureCube::Create(const FTextureSpecification& Specification, 
 												  const std::vector<std::filesystem::path>& InFacePaths)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: 
 			{

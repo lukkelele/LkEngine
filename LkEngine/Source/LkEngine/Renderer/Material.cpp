@@ -10,7 +10,7 @@ namespace LkEngine {
 
     TObjectPtr<LMaterial> LMaterial::Create(const TObjectPtr<LShader>& Shader, const std::string& Name)
     {
-        switch (LRendererAPI::Current())
+        switch (LRendererAPI::Get())
         {
             case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLMaterial>::Create(Shader, Name);
 
@@ -23,7 +23,7 @@ namespace LkEngine {
 
     TObjectPtr<LMaterial> LMaterial::Copy(const TObjectPtr<LMaterial>& Other, const std::string& Name)
     {
-        switch (LRendererAPI::Current())
+        switch (LRendererAPI::Get())
         {
             case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLMaterial>::Create(Other, Name);
 

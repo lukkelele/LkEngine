@@ -8,6 +8,16 @@
 
 namespace LkEngine {
 
+	void Core::Setup(const int Argc, char* Argv[])
+	{
+		Global::SetRuntimeArguments(Argc, Argv);
+
+		LLog& Logger = LLog::Get();
+		Logger.Initialize();
+
+		LK_CORE_INFO("LkEngine Version: {}", LVersion::ToString(LK_ENGINE_VERSION));
+	}
+
 	LApplication::LApplication(const FApplicationSpecification& InSpecification)
 		: Specification(InSpecification)
 		, MetadataRegistry(LMetadataRegistry::Get())
@@ -62,7 +72,7 @@ namespace LkEngine {
 		UILayer->Initialize();
 		UILayer->SetDarkTheme();
 
-	#if LK_USE_EDITOR
+	#if LK_ENGINE_EDITOR
 		/* Create and initialize EditorLayer. */
 		Editor = std::make_unique<LEditorLayer>();
 		Editor->Initialize();
@@ -91,7 +101,7 @@ namespace LkEngine {
 
 			LRenderer::BeginFrame();
 
-	#if LK_USE_EDITOR
+	#if LK_ENGINE_EDITOR
 			/** LkEditor */
 			if (Editor->IsEnabled())
 			{
@@ -251,3 +261,4 @@ namespace LkEngine {
 	}
 
 }
+

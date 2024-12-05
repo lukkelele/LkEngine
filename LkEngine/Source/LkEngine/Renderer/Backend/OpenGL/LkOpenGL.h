@@ -74,11 +74,35 @@ namespace LkEngine {
 		}
 	}
 
+	static_assert(sizeof(int) == sizeof(GLint));
+	static_assert(sizeof(GLubyte) == sizeof(byte));
+
 	/**
 	 * LOpenGLBase
 	 */
 	struct LOpenGLBase
 	{
+		/**
+		 * @brief Load info about the GL backend. 
+		 * Load major/minor version, populate vector with supported extensions.
+		 */
+		FORCEINLINE static void LoadInfo()
+		{
+			int Major, Minor;
+			LK_OpenGL_Verify(glGetIntegerv(GL_MAJOR_VERSION, &Major));
+			LK_OpenGL_Verify(glGetIntegerv(GL_MINOR_VERSION, &Minor));
+			Version.Major = Major;
+			Version.Minor = Minor;
+
+			int Extensions;
+			glGetIntegerv(GL_NUM_EXTENSIONS, &Extensions);
+			SupportedExtensions.reserve(Extensions);
+			for (int i = 0; i < Extensions; i++)
+			{
+				SupportedExtensions.push_back(std::string(reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i))));
+			}
+		}
+
 		FORCEINLINE static std::string GetVersion()
 		{
 			char CharBuf[140];
@@ -86,6 +110,40 @@ namespace LkEngine {
 
 			return std::string(CharBuf);
 		}
+
+		FORCEINLINE static bool IsExtensionSupported(const char* Extension)
+		{
+			int Extensions;
+			LK_OpenGL_Verify(glGetIntegerv(GL_NUM_EXTENSIONS, &Extensions));
+			for (GLint i = 0; i < Extensions; i++)
+			{
+				const char* Ext = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+				if (strcmp(Ext, Extension) == 0)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		FORCEINLINE static const std::vector<std::string>& GetSupportedExtensions() 
+		{ 
+			return SupportedExtensions; 
+		}
+
+		FORCEINLINE static int GetMajorVersion() { return Version.Major; }
+		FORCEINLINE static int GetMinorVersion() { return Version.Minor; }
+
+	protected:
+		struct GLVersion
+		{
+			int Major = 0;
+			int Minor = 0;
+		};
+		static GLVersion Version;
+
+		static std::vector<std::string> SupportedExtensions;
 	};
 
 	/**
@@ -145,13 +203,13 @@ namespace LkEngine {
 			return glGetString(GL_EXTENSIONS);
 		}
 
-		FORCEINLINE static void PrintOpenGLExtensions()
+		FORCEINLINE static void PrintExtensions()
 		{
 			int Extensions{};
 			LK_OpenGL_Verify(glGetIntegerv(GL_NUM_EXTENSIONS, &Extensions));
 			for (int Index = 0; Index < Extensions; Index++)
 			{
-				const GLubyte* Extension = glGetStringi(GL_EXTENSIONS, Index);
+				const byte* Extension = glGetStringi(GL_EXTENSIONS, Index);
 				LK_CORE_INFO("OpenGL Extension: {}", std::string(reinterpret_cast<const char*>(Extension)));
 			}
 		}

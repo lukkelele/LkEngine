@@ -10,7 +10,7 @@ namespace LkEngine {
 
 	TObjectPtr<LVertexBuffer> LVertexBuffer::Create(void* InBuffer, const uint32_t InSize, const EVertexBufferUsage BufferUsage) 
 	{ 
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLVertexBuffer>::Create(InBuffer, InSize, BufferUsage);
 
@@ -24,7 +24,7 @@ namespace LkEngine {
 
 	TObjectPtr<LVertexBuffer> LVertexBuffer::Create(const uint32_t InSize, const EVertexBufferUsage BufferUsage) 
 	{ 
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLVertexBuffer>::Create(InSize, BufferUsage);
 

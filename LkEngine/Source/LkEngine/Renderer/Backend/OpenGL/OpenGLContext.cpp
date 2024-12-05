@@ -43,6 +43,9 @@ namespace LkEngine {
 		SetDepthEnabled(false);
 
 		SetBlendFunction(InSourceBlendFunction, InDestinationBlendFunction);
+
+		/* Fetch backend info. */
+		LOpenGL::LoadInfo();
 	}
 
 	void LOpenGLContext::SetViewport(const glm::vec2& ViewportPos, const glm::vec2& ViewportSize)

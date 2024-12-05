@@ -110,6 +110,8 @@ namespace LkEngine {
 		void UI_ViewportTexture();
 		void UI_WindowStatistics();
 		void UI_TabManager();
+		
+		void UI_OpenGLExtensions();
 
 		void PrepareForLeftSidebar() const;
 		void PrepareForRightSidebar() const;

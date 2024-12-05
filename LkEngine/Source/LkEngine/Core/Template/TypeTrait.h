@@ -14,6 +14,7 @@
 #include <string_view>
 
 #include "LkEngine/Core/CoreMacros.h"
+#include "LkEngine/Core/CoreTypes.h"
 
 
 namespace LkEngine {
@@ -162,13 +163,13 @@ namespace LkEngine {
 			std::vector<FMemberData> Members;
 
 			/** */
-			FORCEINLINE void AddMember(std::string_view InName, std::string_view InType)
+			void AddMember(std::string_view InName, std::string_view InType)
 			{
 				Members.push_back({ InName, InType });
 			}
 
 			/** */
-			FORCEINLINE const std::vector<FMemberData>& GetMembers() const
+			const std::vector<FMemberData>& GetMembers() const
 			{
 				return Members;
 			}
@@ -203,8 +204,7 @@ namespace LkEngine {
 			}, Members);
 		}
 
-		/* Function argument type deduction. */
-		// A utility template to deduce the argument type of the function
+		/** @brief Deduce argument type of a function argument. */
 		template <typename TClass, typename ReturnType, typename Argument>
 		Argument DeduceArgumentType(ReturnType(TClass::*Function)(Argument))
 		{

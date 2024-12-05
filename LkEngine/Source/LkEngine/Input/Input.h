@@ -44,6 +44,11 @@ namespace LkEngine {
 		static ECursorMode GetCursorMode();
 
 		static FKeyData& UpdateKeyState(const EKey Key, EKeyState NewState);
+
+		/**
+		 * @brief Update the state of a mouse button.
+		 * Return the button data container with the updated state.
+		 */
 		static FMouseButtonData& UpdateButtonState(const EMouseButton Button, const EMouseButtonState NewState);
 
 		static void TransitionPressedKeys();

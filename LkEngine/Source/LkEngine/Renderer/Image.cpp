@@ -10,7 +10,7 @@ namespace LkEngine {
 
 	TObjectPtr<LImage> LImage::Create(const FImageSpecification& ImageSpecification, FBuffer InImageBuffer)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage>::Create(ImageSpecification, std::move(InImageBuffer));
 
@@ -23,7 +23,7 @@ namespace LkEngine {
 
 	TObjectPtr<LImage> LImage::Create(const FImageSpecification& ImageSpecification, void* InData)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage>::Create(ImageSpecification, InData);
 
@@ -40,7 +40,7 @@ namespace LkEngine {
 	 ************************************************************************************/
 	TObjectPtr<LImage2D> LImage2D::Create(const FImageSpecification& ImageSpecification, FBuffer InBuffer)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage2D>::Create(ImageSpecification, std::move(InBuffer));
 
@@ -53,7 +53,7 @@ namespace LkEngine {
 
 	TObjectPtr<LImage2D> LImage2D::Create(const FImageSpecification& ImageSpecification, void* InData)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLImage2D>::Create(ImageSpecification, InData);
 

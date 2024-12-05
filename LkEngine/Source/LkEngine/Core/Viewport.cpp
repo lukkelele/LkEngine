@@ -1,6 +1,10 @@
 #include "LKpch.h"
 #include "Viewport.h"
 
+#if defined(LK_ENGINE_OPENGL)
+#include "LkEngine/Renderer/Backend/OpenGL/LkOpenGL.h"
+#endif
+
 
 namespace LkEngine {
 
@@ -15,11 +19,17 @@ namespace LkEngine {
 
 		if (bDirty)
 		{
-			//LK_CORE_DEBUG_TAG("Viewport", "Broadcasting size={}  Scalers={}", Size.ToString(), Scalers.ToString());
 			OnSizeUpdated.Broadcast(Size.X, Size.Y);
 
 			bDirty = false;
 		}
+	}
+
+	void LViewport::SetViewport(const int PosX, const int PosY, const int Width, const int Height)
+	{
+	#if defined(LK_ENGINE_OPENGL)
+		glViewport(PosX, PosY, Width, Height);
+	#endif
 	}
 
 }

@@ -12,7 +12,7 @@ namespace LkEngine {
 
 	TObjectPtr<LRenderContext> LRenderContext::Create(LWindow* WindowRef)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:
 			{
@@ -29,7 +29,7 @@ namespace LkEngine {
 
 	void LRenderContext::SetProfile(const ERenderProfile InProfile)
 	{
-		ERendererAPI RenderAPI = LRendererAPI::Current();
+		ERendererAPI RenderAPI = LRendererAPI::Get();
 
 		switch (InProfile)
 		{
@@ -66,7 +66,7 @@ namespace LkEngine {
 
 	void LRenderContext::SetVersion(const int MajorVersion, const int MinorVersion)
 	{
-		switch (LRendererAPI::Current())
+		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:
 			{
