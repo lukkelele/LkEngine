@@ -1,3 +1,14 @@
+-- Version --
+LK_ENGINE_MAJOR = 0
+LK_ENGINE_MINOR = 2
+LK_ENGINE_PATCH = 1
+
+function EncodeVersion(Major, Minor, Patch)
+    return (Major << 24) | (Minor << 16) | Patch
+end
+
+LK_ENGINE_VERSION = EncodeVersion(LK_ENGINE_MAJOR, LK_ENGINE_MINOR, LK_ENGINE_PATCH)
+
 workspace "LkEngine"
     architecture "x86_64"
     startproject "LkRuntime"
@@ -15,6 +26,11 @@ workspace "LkEngine"
     }
 
     defines {
+        "LK_ENGINE_MAJOR=" .. LK_ENGINE_MAJOR,
+        "LK_ENGINE_MINOR=" .. LK_ENGINE_MINOR,
+        "LK_ENGINE_PATCH=" .. LK_ENGINE_PATCH,
+        "LK_ENGINE_VERSION=" .. LK_ENGINE_VERSION,
+
         "LK_ENGINE_STATIC_LIB",
         "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
 		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
@@ -75,7 +91,6 @@ workspace "LkEngine"
             "LK_ENGINE_DEBUG", 
             "LK_ENGINE_AUTOMATION_TEST",
         }
-        undefines { "LK_EDITOR" }
 
 
 BuildOutputDirectory = "%{cfg.buildcfg}-%{cfg.system}"
@@ -119,7 +134,7 @@ project "LkEngine"
         "LK_ENGINE_OPENGL",
         "LK_OPENGL4",   -- OpenGL 4
 
-        "LK_EDITOR",
+        "LK_ENGINE_EDITOR=1",
 
         "LK_PHYSICS_API_BULLET3",
         "LK_PHYSICS_API_BOX2D",
