@@ -3,57 +3,63 @@
 
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/IO/FileSystem.h"
+#include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Scene/Entity.h"
 
 #include "LkEngine/Editor/EditorLayer.h"
 
 
+#define LK_UI_USE_DOCKBUILDER 1
+
 namespace LkEngine::UI {
 
 	static std::unordered_map<std::string, FMessageBox> MessageBoxes;
-	static std::unordered_map<FFontEntry, ImFont*> Fonts;
 
-    ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_None
-        | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
-        | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
-        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollWithMouse
-        | ImGuiWindowFlags_NoInputs;
+	static bool bDockspaceInitialized = false;
 
-    ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_None
-        | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
-        | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus 
-        | ImGuiWindowFlags_NoInputs;
+	ImGuiID DockID_EditorViewport;
+	ImGuiID DockID_TopBar;
+	ImGuiID DockID_Sidebar1;
+	ImGuiID DockID_Sidebar2;
+	ImGuiID DockID_BottomBar;
 
-    ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_None
-        | ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode 
-        | ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoTabBar;
+    ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
+		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs
+		| ImGuiWindowFlags_NoDocking;
+
+    ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar
+		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus
+		| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDocking;
+
+    ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode
+		| ImGuiDockNodeFlags_NoDockingInCentralNode;
 
     ImGuiWindowFlags MenuBarFlags = ImGuiWindowFlags_MenuBar
         | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
 
     ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
-        | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus 
-        | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoMove;
-
-    ImGuiWindowFlags SidebarDockspaceFlags = ImGuiDockNodeFlags_NoDockingSplit | ImGuiDockNodeFlags_NoTabBar;
+		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus
+		| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoMove;
 
     ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
         | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus 
         | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
-    ImGuiWindowFlags ViewportTextureFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
-        | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
-        | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize;
+    ImGuiWindowFlags EditorViewportFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
+		| ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus
+		| ImGuiWindowFlags_NoDocking;
 
     static uint32_t Counter = 0;
     static int UIContextID = 0;
     static char IDBuffer[16] = "##";
     static char LabelIDBuffer[1024];
-
-    static int PushedStyleVars = 0;
-    static int PushedStyleColors = 0;
 
     const char* GenerateID()
     {
@@ -81,7 +87,7 @@ namespace LkEngine::UI {
     void PopID(const char* ID)
     {
         ImGui::PopID();
-    }
+	}
 
     bool IsInputEnabled()
     {
@@ -115,49 +121,12 @@ namespace LkEngine::UI {
             io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
             io.ConfigFlags |= ImGuiConfigFlags_NavNoCaptureKeyboard;
         }
-    }
+	}
 
-    void Separator(const ImVec2 Size, const ImVec4 Color)
-    {
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, Color);
-        ImGui::BeginChild("sep", Size);
-        ImGui::EndChild();
-        ImGui::PopStyleColor();
-    }
-
-    bool IsWindowFocused(const char* WindowName, const bool CheckRootWindow)
-    {
-        ImGuiWindow* CurrentNavWindow = GImGui->NavWindow;
-
-        if (CheckRootWindow)
-        {
-            // Get the actual nav window (not e.g a table)
-            ImGuiWindow* LastWindow = NULL;
-            while (LastWindow != CurrentNavWindow)
-            {
-                LastWindow = CurrentNavWindow;
-                CurrentNavWindow = CurrentNavWindow->RootWindow;
-            }
-        }
-
-        return (CurrentNavWindow == ImGui::FindWindowByName(WindowName));
-    }
-
-    void Begin(std::string WindowTitle, ImGuiWindowFlags WindowFlags, bool* Open)
-    {
-        Begin(WindowTitle.c_str(), WindowFlags, Open);
-    }
-
-    void Begin(const char* WindowTitle, ImGuiWindowFlags WindowFlags, bool* Open)
+    void Begin(const char* WindowTitle, bool* Open, ImGuiWindowFlags WindowFlags)
     {
         UI::PushID();
         ImGui::Begin(WindowTitle, Open, WindowFlags);
-    }
-
-    void Begin(ImGuiWindowFlags WindowFlags, bool* Open)
-    {
-        UI::PushID();
-        ImGui::Begin(UI::GenerateID(), Open, WindowFlags);
     }
 
     void End()
@@ -166,55 +135,97 @@ namespace LkEngine::UI {
         UI::PopID();
     }
     
-    void BeginCoreViewport()
+    void BeginViewport(TObjectPtr<LWindow> Window)
     {
-        UI::PushID(UI_CORE_VIEWPORT);
-		ImGui::Begin(UI_CORE_VIEWPORT, nullptr, CoreViewportFlags);
-    }
-
-    void EndCoreViewport()
-    {
-        ImGui::End();
-        UI::PopID(UI_CORE_VIEWPORT);
-    }
-
-    void BeginDockSpace(const char* DockspaceID)
-    {
-		ImGuiStyle& Style = ImGui::GetStyle();
-
 		if (UI::DockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
 		{
 		    UI::CoreViewportFlags |= ImGuiWindowFlags_NoBackground;
 			UI::HostWindowFlags |= ImGuiWindowFlags_NoBackground;
 		}
 
-		float MinWinSizeX = Style.WindowMinSize.x;
-		Style.WindowMinSize.x = 370.0f;
-		ImGui::DockSpace(ImGui::GetID(LkEngine_DockSpace), ImVec2(0, 0), UI::DockspaceFlags);
-		Style.WindowMinSize.x = MinWinSizeX;
+        ImGuiViewport* Viewport = ImGui::GetMainViewport();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		ImGui::Begin(LkEngine_DockSpace, NULL, UI::HostWindowFlags);
-		ImGui::PopStyleColor(1);
-		ImGui::PopStyleVar(1);
-    }
+		FScopedStyle WindowRounding(ImGuiStyleVar_WindowRounding, 0.0f);
+		FScopedStyle WindowBorderSize(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		FScopedStyle WindowPadding(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		FScopedColor MenuBarBg(ImGuiCol_MenuBarBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+        ImGui::SetNextWindowPos(Viewport->Pos);
+        ImGui::SetNextWindowSize(Viewport->Size);
+        ImGui::SetNextWindowViewport(Viewport->ID);
+        ImGui::Begin(LK_UI_CORE_VIEWPORT, nullptr, HostWindowFlags);
+		ImGuiID DockspaceID = ImGui::GetID(LK_UI_DOCKSPACE);
 
-    void BeginViewport(const char* ViewportID, LWindow* WindowRef, ImGuiViewport* Viewport)
-    {
+		if (ImGui::DockBuilderGetNode(DockspaceID) == nullptr)
+		{
+			/* Remove existing layout. */
+			LK_UI_DEBUG("Removing existing docking layout");
+			ImGui::DockBuilderRemoveNode(DockspaceID);
+
+			/* Add empty node. */
+			ImGuiDockNodeFlags DockFlags = ImGuiDockNodeFlags_DockSpace;
+			ImGui::DockBuilderAddNode(DockspaceID, DockFlags);
+			ImGui::DockBuilderSetNodeSize(DockspaceID, Viewport->Size);
+
+			ImGuiID DockID_Main = DockspaceID;
+			ImGuiID DockID_Left = ImGui::DockBuilderSplitNode(DockID_Main, ImGuiDir_Left, 0.15f, nullptr, &DockID_Main);
+			ImGuiID DockID_Right = ImGui::DockBuilderSplitNode(DockID_Main, ImGuiDir_Right, 0.15f, nullptr, &DockID_Main);
+			ImGuiID DockID_Bottom = ImGui::DockBuilderSplitNode(DockID_Main, ImGuiDir_Down, 0.20f, nullptr, &DockID_Main);
+			ImGuiID DockID_Top = ImGui::DockBuilderSplitNode(DockID_Main, ImGuiDir_Up, 0.04f, nullptr, &DockID_Main);
+
+			ImGui::DockBuilderDockWindow(LK_UI_SIDEBAR_1,       DockID_Left);
+			ImGui::DockBuilderDockWindow(LK_UI_EDITOR_VIEWPORT, DockID_Main);
+			ImGui::DockBuilderDockWindow(LK_UI_SIDEBAR_2,       DockID_Right);
+			ImGui::DockBuilderDockWindow(LK_UI_BOTTOMBAR,       DockID_Bottom);
+			ImGui::DockBuilderDockWindow(LK_UI_TOPBAR,          DockID_Top);
+
+			DockID_EditorViewport = DockID_Main;
+			DockID_Sidebar1 = DockID_Left;
+			DockID_Sidebar2 = DockID_Right;
+			DockID_BottomBar = DockID_Bottom;
+
+			/* Finish the dockspace. */
+			LK_UI_INFO("Building dockspace");
+			ImGui::DockBuilderFinish(DockspaceID);
+
+			/* Disable splitting over entire viewport. */
+			if (ImGuiDockNode* DockNode = ImGui::DockBuilderGetNode(ImGui::GetID(LK_UI_DOCKSPACE)))
+			{
+				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoDockingOverMe;
+				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoDockingSplit;
+			}
+
+			/* Disable docking over editor viewport. */
+			if (ImGuiDockNode* DockNode = ImGui::DockBuilderGetNode(LK_UI_DOCK_EDITOR_VIEWPORT); DockNode != nullptr)
+			{
+				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoDocking;
+			}
+
+			bDockspaceInitialized = true;
+		}
+
+		if (!bDockspaceInitialized)
+		{
+			ImGuiDockNode* DockspaceNode = ImGui::DockBuilderGetNode(DockspaceID);
+			LK_CORE_VERIFY(DockspaceNode, "Dockspace node is nullptr");
+			DockspaceNode->LocalFlags |= ImGuiDockNodeFlags_NoDockingOverMe;
+			DockspaceNode->LocalFlags |= ImGuiDockNodeFlags_NoDockingSplit;
+
+			/* Disable docking in the central node. */
+			ImGuiDockNode* CentralNode = FindCentralNode(ImGui::GetID(LK_UI_DOCKSPACE));
+			LK_CORE_VERIFY(CentralNode, "Cannot find central node");
+			CentralNode->LocalFlags |= ImGuiDockNodeFlags_NoDocking;
+
+			bDockspaceInitialized = true;
+		}
+
+		/* Submit the dockspace. */
+		ImGui::DockSpace(DockspaceID, ImVec2(0, 0), UI::DockspaceFlags);
+		ImGui::End(); /* LK_UI_CORE_VIEWPORT */
+
 		ImGui::SetNextWindowPos(Viewport->Pos);
 		ImGui::SetNextWindowSize(Viewport->Size);
 		ImGui::SetNextWindowViewport(Viewport->ID);
-
-		GLFWwindow* GlfwWindow= WindowRef->GetGlfwWindow();
-		const bool bIsMaximized = (bool)glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED);
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		ImGui::Begin(UI_CORE_VIEWPORT, NULL, UI::CoreViewportFlags);
-		ImGui::PopStyleColor(); 
-		ImGui::PopStyleVar(2);
+		ImGui::Begin(LK_UI_CORE_VIEWPORT, nullptr, UI::CoreViewportFlags);
     }
 
 	void ShowMessageBox(const char* Title, 
@@ -321,131 +332,59 @@ namespace LkEngine::UI {
 		}
 	}
 
-	void PushStyleVar(const ImGuiStyleVar StyleVar, const ImVec2& Var)
-    {
-        ImGui::PushStyleVar(StyleVar, Var);
-        PushedStyleVars++;
-    }
-
-    void PushStyleVar(const ImGuiStyleVar StyleVar, const glm::vec2& Var)
-    {
-        ImGui::PushStyleVar(StyleVar, ImVec2(Var.x, Var.y));
-        PushedStyleVars++;
-    }
-
-    void PopStyleVar(const uint8_t VarsToPop)
-    {
-        ImGui::PopStyleVar(VarsToPop);
-        PushedStyleVars = PushedStyleVars - VarsToPop;
-        LK_CORE_VERIFY(PushedStyleVars >= 0, "UI StyleVar Push/Pop stack invalid!");
-    }
-
-    void PushStyleColor(const ImGuiCol ColorVar, const ImVec4& Color)
-    {
-        ImGui::PushStyleColor(ColorVar, Color);
-        PushedStyleColors++;
-    }
-
-    void PushStyleColor(const ImGuiCol ColorVar, const glm::vec4& Color)
-    {
-        ImGui::PushStyleColor(ColorVar, ImVec4(Color.r, Color.g, Color.b, Color.a));
-        PushedStyleColors++;
-    }
-
-    void PopStyleColor(const uint8_t VarsToPop)
-    {
-        ImGui::PopStyleColor(VarsToPop);
-        PushedStyleColors = PushedStyleColors - VarsToPop;
-        LK_CORE_VERIFY(PushedStyleColors >= 0, "UI Color Push/Pop stack invalid!");
-    }
-
-    void PopStyleStack()
-    {
-        if (PushedStyleColors > 0)
-        {
-            PopStyleColor(PushedStyleColors);
-        }
-
-        if (PushedStyleVars > 0)
-        {
-            PopStyleVar(PushedStyleVars);
-        }
-    }
-
-	void Font::Add(const FFontConfiguration& FontConfig, bool IsDefault)
+	ImGuiDockNode* FindCentralNode(const ImGuiID DockspaceID)
 	{
-		LK_CORE_ASSERT(LFileSystem::Exists(FontConfig.FilePath), "Invalid font filepath");
-
-		using EntryPair = std::pair<FFontEntry, ImFont*>;
-		auto FindFont = [&FontConfig](const EntryPair& FontEntry) -> bool
+		ImGuiDockNode* RootNode = ImGui::DockBuilderGetNode(DockspaceID);
+		if (!RootNode)
 		{
-			return (FontEntry.first.Name == FontConfig.FontName);
-		};
-		if (auto Iter = std::find_if(Fonts.begin(), Fonts.end(), FindFont); Iter != Fonts.end())
-		{
-			LK_CORE_WARN("Failed to add font '{}', the name is already taken by another font", FontConfig.FontName);
-			return;
+			return nullptr;
 		}
 
-		ImFontConfig ImguiFontConfig;
-		ImguiFontConfig.MergeMode = FontConfig.MergeWithLast;
-		auto& IO = ImGui::GetIO();
-		ImFont* Font = IO.Fonts->AddFontFromFileTTF(
-			FontConfig.FilePath.data(), 
-			FontConfig.Size, 
-			&ImguiFontConfig, 
-			(FontConfig.GlyphRanges == nullptr ? IO.Fonts->GetGlyphRangesDefault() : FontConfig.GlyphRanges)
-		);
-		LK_CORE_VERIFY(Font, "Failed to load font");
+		std::queue<ImGuiDockNode*> NodeQueue;
+		NodeQueue.push(RootNode);
 
-		FFontEntry FontEntry = {
-			.Name = FontConfig.FontName
-		};
-		Fonts[FontEntry] = Font;
+		while (!NodeQueue.empty())
+		{
+			ImGuiDockNode* CurrentNode = NodeQueue.front();
+			NodeQueue.pop();
 
-		if (IsDefault)
-		{
-			IO.FontDefault = Font;
-		}
-	}
+			if (CurrentNode->IsCentralNode())
+			{
+				return CurrentNode;
+			}
 
-	void Font::Push(const std::string& FontName)
-	{
-		using EntryPair = std::pair<FFontEntry, ImFont*>;
-		auto FindFont = [&FontName](const EntryPair& FontEntry) -> bool
-		{
-			return (FontEntry.first.Name == FontName);
-		};
-		if (auto Iter = std::find_if(Fonts.begin(), Fonts.end(), FindFont); Iter != Fonts.end())
-		{
-			ImGui::PushFont(Iter->second);
-			return;
+			/* Add child nodes to the queue for further exploration. */
+			if (CurrentNode->ChildNodes[0])
+			{
+				NodeQueue.push(CurrentNode->ChildNodes[0]);
+			}
+
+			if (CurrentNode->ChildNodes[1])
+			{
+				NodeQueue.push(CurrentNode->ChildNodes[1]);
+			}
 		}
 
-		/* Use default font if no font was found. */
-		const auto& IO = ImGui::GetIO();
-		ImGui::PushFont(IO.FontDefault);
-	}
-
-	void Font::Pop()
-	{
-		ImGui::PopFont();
-	}
-
-	ImFont* Font::Get(const std::string& FontName)
-	{
-		using EntryPair = std::pair<FFontEntry, ImFont*>;
-		auto FindFont = [&FontName](const EntryPair& FontEntry) -> bool
-		{
-			return (FontEntry.first.Name == FontName);
-		};
-		if (auto Iter = std::find_if(Fonts.begin(), Fonts.end(), FindFont); Iter != Fonts.end())
-		{
-			return Iter->second;
-		}
-
-		LK_VERIFY(false, "Failed to find font '{}'", FontName);
+		/* No central node found. */
 		return nullptr;
+	}
+
+	ImTextureID GetTextureID(TObjectPtr<LTexture2D> Texture)
+	{
+		if (LRendererAPI::Get() == ERendererAPI::OpenGL)
+		{
+			const TObjectPtr<LOpenGLTexture2D> OpenGLTexture = Texture.As<LOpenGLTexture2D>();
+			const GLuint TextureID = OpenGLTexture->GetRendererID();
+
+			if (TextureID == 0)
+			{
+				return (ImTextureID)0;
+			}
+
+			return static_cast<ImTextureID>(TextureID);
+		}
+
+		return (ImTextureID)0;
 	}
 
 }

@@ -19,7 +19,7 @@ namespace LkEngine {
 		~LDebugPanel() = default;
 
 		virtual void OnRender() override;
-		virtual void OnRenderUI() override;
+		virtual void OnRenderUI(bool& IsOpen) override;
 
 	public:
 		inline static bool bWindow_ObjectReferences = false;

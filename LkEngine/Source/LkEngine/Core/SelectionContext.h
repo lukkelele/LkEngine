@@ -19,6 +19,13 @@ namespace LkEngine {
 	/** Global, selected entity. */
 	extern TObjectPtr<LObject> GSelectedObject;
 
+	enum class ESelectionContext
+	{
+		Global = 0, 
+		Scene, 
+		ContentBrowser, 
+	};
+
 	class LSelectionContext : public LObject
 	{
 	public:
@@ -27,10 +34,18 @@ namespace LkEngine {
 
 		static LSelectionContext& Get();
 
+		FORCEINLINE static void Select(const LEntity InEntity)
+		{
+			SelectedEntityID = InEntity.GetUUID();
+		}
+
 		FORCEINLINE void SelectEntity(const LEntity InEntity)
 		{
+			SelectedEntityID = InEntity.GetUUID();
+		#if 0
 			GSelectedObject = InEntity;
 			OnObjectSelectionChanged.Broadcast(InEntity);
+		#endif
 		}
 
 		FORCEINLINE void Clear()
@@ -39,6 +54,7 @@ namespace LkEngine {
 		}
 
 	public:
+		static UUID SelectedEntityID;
 		FOnObjectSelectionChanged OnObjectSelectionChanged;
 	private:
 		LCLASS(LSelectionContext)

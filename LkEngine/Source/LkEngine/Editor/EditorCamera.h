@@ -36,7 +36,7 @@ namespace LkEngine {
 
 		void Initialize();
 
-		void OnUpdate(const FTimestep DeltaTime);
+		void OnUpdate(const float DeltaTime);
 		void UpdateCameraView();
 
 		/// @TODO: Patch out

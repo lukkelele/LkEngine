@@ -32,105 +32,6 @@ namespace LkEngine {
 	{
 	}
 
-	void LSceneSerializer::SerializeEntity(YAML::Emitter& Out, LEntity Entity)
-	{
-		UUID uuid = Entity.GetComponent<LIDComponent>().ID;
-		Out << YAML::BeginMap; // Entity
-		Out << YAML::Key << "Entity";
-		Out << YAML::Value << uuid;
-
-		if (Entity.HasComponent<LTagComponent>())
-		{
-			Out << YAML::Key << "TagComponent";
-			Out << YAML::BeginMap; // TagComponent
-
-			const LTagComponent& Tag = Entity.GetComponent<LTagComponent>().Tag;
-			Out << YAML::Key << "Tag" << YAML::Value << Tag;
-
-			Out << YAML::EndMap; // TagComponent
-		}
-
-		if (Entity.HasComponent<LTransformComponent>())
-		{
-			Out << YAML::Key << "TransformComponent";
-			Out << YAML::BeginMap; // TransformComponent
-
-			const LTransformComponent& Transform = Entity.GetComponent<LTransformComponent>();
-			Out << YAML::Key << "Position" << YAML::Value << Transform.Translation;
-			Out << YAML::Key << "Rotation" << YAML::Value << Transform.GetRotationEuler();
-			Out << YAML::Key << "Scale" << YAML::Value << Transform.Scale;
-
-			Out << YAML::EndMap; // TransformComponent
-		}
-
-		if (Entity.HasComponent<LSpriteComponent>())
-		{
-			Out << YAML::Key << "SpriteComponent";
-			Out << YAML::BeginMap; // SpriteComponent
-
-			const LSpriteComponent& Sprite = Entity.GetComponent<LSpriteComponent>();
-			Out << YAML::Key << "Size" << YAML::Value << Sprite.GetSize();
-			Out << YAML::Key << "Color" << YAML::Value << Sprite.GetColor();
-
-			Out << YAML::EndMap; // SpriteComponent
-		}
-
-		//if (Entity.HasComponent<MaterialComponent>())
-		//{
-		//	Out << YAML::Key << "MaterialComponent";
-		//	Out << YAML::BeginMap; // MaterialComponent
-		//	auto& material = Entity.GetComponent<MaterialComponent>();
-		//	Out << YAML::Key << "TextureName" << YAML::Value << material.GetTexture()->GetName();
-		//	Out << YAML::EndMap; // SpriteComponent
-		//}
-
-		if (Entity.HasComponent<LCameraComponent>())
-		{
-			Out << YAML::Key << "CameraComponent";
-			Out << YAML::BeginMap; // LCameraComponent
-
-			const LCameraComponent& CameraComponent = Entity.GetComponent<LCameraComponent>();
-			const LCamera& Camera = *CameraComponent.Camera;
-
-			Out << YAML::Key << "Camera" << YAML::Value;
-			Out << YAML::BeginMap; // Camera
-			Out << YAML::Key << "ProjectionType" << YAML::Value << static_cast<int>(Camera.GetProjectionType());
-			Out << YAML::Key << "OrthographicNear" << YAML::Value << Camera.GetOrthographicNearClip();
-			Out << YAML::Key << "OrthographicFar" << YAML::Value << Camera.GetOrthographicFarClip();
-			Out << YAML::EndMap; // Camera
-
-			Out << YAML::EndMap; // LCameraComponent
-		}
-
-		if (Entity.HasComponent<LRigidBody2DComponent>())
-		{
-			Out << YAML::Key << "RigidBody2DComponent";
-			Out << YAML::BeginMap; // LRigidBody2DComponent
-
-			const LRigidBody2DComponent& Rigidbody2DComponent = Entity.GetComponent<LRigidBody2DComponent>();
-			Out << YAML::Key << "BodyType" << YAML::Value << static_cast<int>(Rigidbody2DComponent.BodyType);
-			Out << YAML::Key << "FixedRotation" << YAML::Value << Rigidbody2DComponent.FixedRotation;
-
-			Out << YAML::EndMap; // LRigidBody2DComponent
-		}
-
-		if (Entity.HasComponent<LBoxCollider2DComponent>())
-		{
-			Out << YAML::Key << "BoxCollider2DComponent";
-			Out << YAML::BeginMap; // BoxCollider2DComponent
-
-			const LBoxCollider2DComponent& BoxCollider2DComponent = Entity.GetComponent<LBoxCollider2DComponent>();
-			Out << YAML::Key << "Offset" << YAML::Value << BoxCollider2DComponent.Offset;
-			Out << YAML::Key << "Size" << YAML::Value << BoxCollider2DComponent.Size;
-			Out << YAML::Key << "Density" << YAML::Value << BoxCollider2DComponent.Density;
-			Out << YAML::Key << "Friction" << YAML::Value << BoxCollider2DComponent.Friction;
-
-			Out << YAML::EndMap; // BoxCollider2DComponent
-		}
-
-		Out << YAML::EndMap; // Entity
-	}
-
 	void LSceneSerializer::Serialize(const std::filesystem::path& Filepath)
 	{
 		YAML::Emitter Out;
@@ -157,7 +58,7 @@ namespace LkEngine {
 		}
 
 		#if 0 /// DISABLED
-		// 2D Physics
+		/* 2D Physics. */
 		Out << YAML::Key << "Physics2D";
 		Out << YAML::Value << YAML::BeginMap;
 		{
@@ -200,12 +101,66 @@ namespace LkEngine {
 		Out << YAML::EndMap;
 	}
 
+	bool LSceneSerializer::Deserialize(const std::filesystem::path& Filepath)
+	{
+		LK_CORE_VERIFY(Scene, "Invalid scene reference");
+		LK_CORE_VERIFY(LFileSystem::Exists(Filepath), "Scene serialization failed, the filepath '{}' does not exist", Filepath.string());
+		LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing scene: '{}'", Filepath);
+		Scene->Clear();
+
+		bool bOperationSuccess = false;
+
+		std::ifstream InputStream(Filepath);
+		std::stringstream StringStream;
+		StringStream << InputStream.rdbuf();
+		try
+		{
+			bOperationSuccess = DeserializeFromYAML(StringStream.str());
+		}
+		catch (const YAML::Exception& Exception)
+		{
+			LK_ASSERT(false, "Failed to deserialize scene '{}': {}", Filepath.string(), Exception.what());
+			bOperationSuccess = false;
+		}
+
+		return bOperationSuccess;
+	}
+
+	bool LSceneSerializer::DeserializeRuntime(const FAssetHandle InSceneHandle)
+	{
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
+		return true;
+	}
+
+	TObjectPtr<LScene> LSceneSerializer::LoadScene()
+	{
+		if (Scene)
+		{
+			Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
+			Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
+		}
+		else
+		{
+			LK_CORE_ERROR_TAG("SceneSerializer", "LoadScene failed, no scene available");
+		}
+
+		return Scene;
+	}
+
+
 	/// FIXME: Refactor
 	bool LSceneSerializer::DeserializeFromYAML(const std::string& YamlString)
 	{
+		if (YamlString.empty())
+		{
+			LK_CORE_ERROR_TAG("SceneSerializer", "Cannot deserialize scene, yaml string is empty");
+			return false;
+		}
+
 		YAML::Node data = YAML::Load(YamlString);
 		if (!data["Scene"])
 		{
+			LK_CORE_ERROR_TAG("SceneSerializer", "Root 'Scene' node does not exists\nYaml Data:\n{}", YamlString);
 			return false;
 		}
 
@@ -219,6 +174,9 @@ namespace LkEngine {
 		const bool bIsEditorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
 		Scene->bIsEditorScene = bIsEditorScene;
 		const uint32_t SceneEntityHandle = data["SceneHandle"].as<uint32_t>();
+
+		Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
+		Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
 
 		/* EditorCamera. */
 		const YAML::Node& EditorCameraNode = data["EditorCamera"];
@@ -235,7 +193,7 @@ namespace LkEngine {
 			DeserializeEntities(EntitiesNode, Scene);
 		}
 
-		/* Sort LIDComponent by by Entity handle(which is essentially the order in which they were created). */
+		/* Sort LIDComponent by the entity handle (which is essentially the order in which they were created). */
 		Scene->Registry.sort<LIDComponent>([this](const auto Lhs, const auto Rhs)
 		{
 			auto LhsEntity = Scene->m_EntityIDMap.find(Lhs.ID);
@@ -252,23 +210,120 @@ namespace LkEngine {
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 
+	void LSceneSerializer::SerializeEntity(YAML::Emitter& Out, LEntity Entity)
+	{
+		const UUID ID = Entity.GetComponent<LIDComponent>().ID;
+		Out << YAML::BeginMap; /* Entity */
+		Out << YAML::Key << "Entity";
+		Out << YAML::Value << ID;
+
+		if (Entity.HasComponent<LTagComponent>())
+		{
+			Out << YAML::Key << "TagComponent";
+			Out << YAML::BeginMap;
+
+			const LTagComponent& Tag = Entity.GetComponent<LTagComponent>().Tag;
+			Out << YAML::Key << "Tag" << YAML::Value << Tag;
+
+			Out << YAML::EndMap; /* TagComponent */
+		}
+
+		if (Entity.HasComponent<LTransformComponent>())
+		{
+			Out << YAML::Key << "TransformComponent";
+			Out << YAML::BeginMap;
+			const LTransformComponent& Transform = Entity.GetComponent<LTransformComponent>();
+			Out << YAML::Key << "Position" << YAML::Value << Transform.Translation;
+			Out << YAML::Key << "Rotation" << YAML::Value << Transform.GetRotationEuler();
+			Out << YAML::Key << "Scale" << YAML::Value << Transform.Scale;
+			Out << YAML::EndMap; /* TransformComponent */
+		}
+
+		if (Entity.HasComponent<LSpriteComponent>())
+		{
+			Out << YAML::Key << "SpriteComponent";
+			Out << YAML::BeginMap; 
+
+			const LSpriteComponent& Sprite = Entity.GetComponent<LSpriteComponent>();
+			Out << YAML::Key << "Size" << YAML::Value << Sprite.GetSize();
+			Out << YAML::Key << "Color" << YAML::Value << Sprite.GetColor();
+
+			Out << YAML::EndMap; 
+		}
+
+		#if 0
+		if (Entity.HasComponent<LMaterialComponent>())
+		{
+			Out << YAML::Key << "MaterialComponent";
+			Out << YAML::BeginMap; // MaterialComponent
+			auto& material = Entity.GetComponent<MaterialComponent>();
+			Out << YAML::Key << "TextureName" << YAML::Value << material.GetTexture()->GetName();
+			Out << YAML::EndMap;
+		}
+		#endif
+
+		if (Entity.HasComponent<LCameraComponent>())
+		{
+			Out << YAML::Key << "CameraComponent";
+			Out << YAML::BeginMap; /* LCameraComponent */
+
+			const LCameraComponent& CameraComponent = Entity.GetComponent<LCameraComponent>();
+			const LCamera& Camera = *CameraComponent.Camera;
+
+			Out << YAML::Key << "Camera" << YAML::Value;
+			Out << YAML::BeginMap; 
+			{
+				Out << YAML::Key << "ProjectionType" << YAML::Value << static_cast<int>(Camera.GetProjectionType());
+				Out << YAML::Key << "OrthographicNear" << YAML::Value << Camera.GetOrthographicNearClip();
+				Out << YAML::Key << "OrthographicFar" << YAML::Value << Camera.GetOrthographicFarClip();
+			}
+			Out << YAML::EndMap;
+			Out << YAML::EndMap; /* LCameraComponent */
+		}
+
+		if (Entity.HasComponent<LRigidBody2DComponent>())
+		{
+			const LRigidBody2DComponent& Rigidbody2DComponent = Entity.GetComponent<LRigidBody2DComponent>();
+			Out << YAML::Key << "RigidBody2DComponent";
+			Out << YAML::BeginMap;
+			Out << YAML::Key << "BodyType" << YAML::Value << static_cast<int>(Rigidbody2DComponent.BodyType);
+			Out << YAML::Key << "FixedRotation" << YAML::Value << Rigidbody2DComponent.FixedRotation;
+			Out << YAML::EndMap;
+		}
+
+		if (Entity.HasComponent<LBoxCollider2DComponent>())
+		{
+			const LBoxCollider2DComponent& BoxCollider2DComponent = Entity.GetComponent<LBoxCollider2DComponent>();
+			Out << YAML::Key << "BoxCollider2DComponent";
+			Out << YAML::BeginMap;
+			Out << YAML::Key << "Offset" << YAML::Value << BoxCollider2DComponent.Offset;
+			Out << YAML::Key << "Size" << YAML::Value << BoxCollider2DComponent.Size;
+			Out << YAML::Key << "Density" << YAML::Value << BoxCollider2DComponent.Density;
+			Out << YAML::Key << "Friction" << YAML::Value << BoxCollider2DComponent.Friction;
+			Out << YAML::EndMap; 
+		}
+
+		Out << YAML::EndMap; /* Entity */
+	}
+
 	void LSceneSerializer::DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> SceneRef)
 	{
-		LK_VERIFY(SceneRef && SceneRef->IsValid());
-		for (const YAML::Node& Entity : EntitiesNode)
+		LK_VERIFY(SceneRef, "Deserialization of entities failed, scene reference is not valid");
+		for (const YAML::Node& EntityNode : EntitiesNode)
 		{
-			uint64_t uuid = Entity["Entity"].as<uint64_t>();
+			const uint64_t EntityID = EntityNode["Entity"].as<uint64_t>();
 
 			std::string EntityName{};
-			const YAML::Node& TagComponentNode = Entity["TagComponent"];
+			const YAML::Node& TagComponentNode = EntityNode["TagComponent"];
 			if (TagComponentNode)
 			{
 				EntityName = TagComponentNode["Tag"].as<std::string>();
 			}
 
-			LEntity DeserializedEntity = SceneRef->CreateEntityWithID(uuid, EntityName);
+			LK_CORE_DEBUG_TAG("SceneSerializer", "Creating entity: {} ({})", EntityName, EntityID);
+			LEntity DeserializedEntity = SceneRef->CreateEntityWithID(EntityID, EntityName);
 
-			const YAML::Node& TransformComponentNode = Entity["TransformComponent"];
+			const YAML::Node& TransformComponentNode = EntityNode["TransformComponent"];
 			if (TransformComponentNode)
 			{
 				/* Entities always have Transforms. */
@@ -288,7 +343,7 @@ namespace LkEngine {
 				TransformComponent.Scale = TransformComponentNode["Scale"].as<glm::vec3>();
 			}
 
-			const YAML::Node& SpriteComponentNode = Entity["SpriteComponent"];
+			const YAML::Node& SpriteComponentNode = EntityNode["SpriteComponent"];
 			if (SpriteComponentNode)
 			{
 				LSpriteComponent& SpriteComponent = DeserializedEntity.AddComponent<LSpriteComponent>();
@@ -296,7 +351,7 @@ namespace LkEngine {
 				SpriteComponent.Color = SpriteComponentNode["Color"].as<glm::vec4>(glm::vec4(0.0f));
 			}
 
-			const YAML::Node& CameraComponentNode = Entity["CameraComponent"];
+			const YAML::Node& CameraComponentNode = EntityNode["CameraComponent"];
 			if (CameraComponentNode)
 			{
 				LCameraComponent& CameraComponent = DeserializedEntity.AddComponent<LCameraComponent>();
@@ -323,31 +378,22 @@ namespace LkEngine {
 
 			}
 
-			const YAML::Node& RigidBody2DNode = Entity["LRigidBody2DComponent"];
+			const YAML::Node& RigidBody2DNode = EntityNode["LRigidBody2DComponent"];
 			if (RigidBody2DNode)
 			{
 				LRigidBody2DComponent& RigidBodyComponent = DeserializedEntity.AddComponent<LRigidBody2DComponent>();
 				RigidBodyComponent.BodyType = static_cast<LRigidBody2DComponent::Type>(RigidBody2DNode["BodyType"].as<int>());
-
-				RigidBodyComponent.FixedRotation = RigidBody2DNode["FixedRotation"] 
-					? RigidBody2DNode["FixedRotation"].as<bool>() 
-					: false;
+				RigidBodyComponent.FixedRotation = RigidBody2DNode["FixedRotation"] ? RigidBody2DNode["FixedRotation"].as<bool>() : false;
 			}
 
-			const YAML::Node& BoxColliderNode = Entity["BoxCollider2DComponent"];
+			const YAML::Node& BoxColliderNode = EntityNode["BoxCollider2DComponent"];
 			if (BoxColliderNode)
 			{
 				LBoxCollider2DComponent& BoxColliderComponent = DeserializedEntity.AddComponent<LBoxCollider2DComponent>();
 				BoxColliderComponent.Offset = BoxColliderNode["Offset"].as<glm::vec2>();
 				BoxColliderComponent.Size = BoxColliderNode["Size"].as<glm::vec2>();
-
-				BoxColliderComponent.Density = BoxColliderNode["Density"] 
-					? BoxColliderNode["Density"].as<float>() 
-					: 1.0f;
-
-				BoxColliderComponent.Friction = BoxColliderNode["Friction"] 
-					? BoxColliderNode["Friction"].as<float>() 
-					: 1.0f;
+				BoxColliderComponent.Density = BoxColliderNode["Density"] ? BoxColliderNode["Density"].as<float>() : 1.0f;
+				BoxColliderComponent.Friction = BoxColliderNode["Friction"] ? BoxColliderNode["Friction"].as<float>() : 1.0f;
 			}
 
 			SceneRef->SortEntities();
@@ -364,7 +410,7 @@ namespace LkEngine {
 			Out << YAML::Key << "Distance"   << YAML::Value << EditorCamera.GetDistance();
 			Out << YAML::Key << "FocalPoint" << YAML::Value << EditorCamera.GetFocalPoint();
 
-			// Perspective 
+			/* Perspective */
 			Out << YAML::Key << "Perspective" << YAML::Value;
 			Out << YAML::Value << YAML::BeginMap;
 			{
@@ -373,9 +419,9 @@ namespace LkEngine {
 				Out << YAML::Key << "PerspectiveFar"    << YAML::Value << EditorCamera.GetPerspectiveFarClip();
 			}
 			Out << YAML::Value << YAML::EndMap;
-			// ~Perspective
+			/* ~Perspective */
 
-			// Orthographic
+			/* Orthographic */
 			Out << YAML::Key << "Orthographic" << YAML::Value;
 			Out << YAML::Value << YAML::BeginMap;
 			{
@@ -384,7 +430,7 @@ namespace LkEngine {
 				Out << YAML::Key << "OrthographicFar"  << YAML::Value << EditorCamera.GetOrthographicFarClip();
 			}
 			Out << YAML::Value << YAML::EndMap;
-			// ~Orthographic
+			/* ~Orthographic */
 
 			Out << YAML::Key << "Pitch"          << YAML::Value << EditorCamera.GetPitch();
 			Out << YAML::Key << "Yaw"            << YAML::Value << EditorCamera.GetYaw();
@@ -414,6 +460,9 @@ namespace LkEngine {
 
 				EditorCamera.SetPerspectiveNearClip(EditorCamera.m_PerspectiveNear);
 				EditorCamera.SetPerspectiveFarClip(EditorCamera.m_PerspectiveFar);
+
+				EditorCamera.m_ViewportWidth = Scene->m_ViewportWidth;
+				EditorCamera.m_ViewportHeight = Scene->m_ViewportHeight;
 
 				EditorCamera.SetPerspectiveProjectionMatrix(
 					glm::radians(EditorCamera.m_DegPerspectiveFOV), 
@@ -470,50 +519,6 @@ namespace LkEngine {
 				EditorCamera.CameraMode = EEditorCameraMode::None;
 			}
 		}
-	}
-
-	bool LSceneSerializer::Deserialize(const std::filesystem::path& Filepath)
-	{
-		LK_CORE_VERIFY(Scene, "Invalid scene reference");
-		Scene->Clear();
-
-		bool bOperationSuccess = false;
-
-		std::ifstream InputStream(Filepath);
-		std::stringstream StringStream;
-		StringStream << InputStream.rdbuf();
-		try
-		{
-			bOperationSuccess = DeserializeFromYAML(StringStream.str());
-		}
-		catch (const YAML::Exception& Exception)
-		{
-			LK_ASSERT(false, "Failed to deserialize scene '{}': {}", Filepath.string(), Exception.what());
-			bOperationSuccess = false;
-		}
-
-		return bOperationSuccess;
-	}
-
-	bool LSceneSerializer::DeserializeRuntime(const FAssetHandle InSceneHandle)
-	{
-		LK_MARK_FUNC_NOT_IMPLEMENTED();
-		return true;
-	}
-
-	TObjectPtr<LScene> LSceneSerializer::LoadScene()
-	{
-		if (Scene)
-		{
-			Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
-			Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
-		}
-		else
-		{
-			LK_CORE_ERROR_TAG("SceneSerializer", "LoadScene failed, no scene available");
-		}
-
-		return Scene;
 	}
 
 }

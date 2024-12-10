@@ -210,7 +210,8 @@ namespace LkEngine {
 		bool IsA() const
 		{
 			static_assert(sizeof(T) > 0, "IsA<T> failed, incomplete type");
-			return (StaticClassName() == T::StaticClassName()); /// TODO: CHANGE THIS
+			//return (StaticClassName() == T::StaticClassName()); /// TODO: CHANGE THIS
+			return (GetClass()->GetName() == T::StaticClassName()); /// TODO: CHANGE THIS
 		}
 
 		/**

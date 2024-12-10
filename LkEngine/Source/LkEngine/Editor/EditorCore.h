@@ -2,18 +2,20 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 
+#include <imgui/imgui.h>
+#include <ImGuizmo/ImGuizmo.h>
+
 
 namespace LkEngine {
 
 	/** 
      * EGizmo 
      */
-	enum class EGizmo : uint16_t
+	enum class EGizmo
 	{ 
-		Translate	= LK_BIT(0),
-		Rotate		= LK_BIT(1),
-		Scale		= LK_BIT(2),
+		Translate = ImGuizmo::TRANSLATE,
+		Rotate	  = ImGuizmo::ROTATE,
+		Scale	  = ImGuizmo::SCALE
 	};
-
 
 }

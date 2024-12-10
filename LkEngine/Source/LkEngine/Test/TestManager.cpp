@@ -63,7 +63,7 @@ namespace LkEngine {
 			const bool bTestResult = TestInstance->RunTest();
 			if (bTestResult)
 			{
-				LK_TEST_SUCCESS(LK_COLOR_BRIGHT_GREEN "{}: OK", TestName);
+				LK_TEST_SUCCESS(LK_ANSI_COLOR_BRIGHT_GREEN "{}: OK", TestName);
 			}
 			else
 			{
@@ -79,7 +79,7 @@ namespace LkEngine {
 		Out << YAML::EndSeq;
 		Out << YAML::EndMap;
 
-		const std::string ResultDir = Global::GetBinaryDir().string() + "Results";
+		const std::string ResultDir = LFileSystem::GetBinaryDir().string() + "Results";
 		if (!LFileSystem::Exists(ResultDir))
 		{
 			LFileSystem::CreateDirectory(ResultDir);

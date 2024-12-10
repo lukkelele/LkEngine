@@ -49,7 +49,7 @@ namespace LkEngine {
 	{
 	}
 
-	void LContentBrowser::OnRenderUI()
+	void LContentBrowser::OnRenderUI(bool& IsOpen)
 	{
         /// FIXME
 		if (ImGui::ImageButton("FILE_ICON", (ImTextureID)(LContentBrowser::FileIconTexture->GetRendererID()), ImVec2(48, 48), ImVec2(0, 0)))

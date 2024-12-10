@@ -15,6 +15,7 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
+#include <ImGuizmo/ImGuizmo.h>
 
 
 namespace LkEngine {
@@ -26,7 +27,7 @@ namespace LkEngine {
         ~LOpenGLImGuiLayer() = default;
 
         virtual void Initialize() override;
-        virtual void Shutdown() override;
+        virtual void Destroy() override;
 
         /**
          * @brief TODO
@@ -46,8 +47,7 @@ namespace LkEngine {
 		virtual void InitializeFonts() override;
 
     private:
-        bool bInitialized = false;
-
+		std::filesystem::path LayoutConfig{};
         LCLASS(LOpenGLImGuiLayer);
     };
 

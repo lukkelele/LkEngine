@@ -5,6 +5,17 @@
 
 #include "LkEngine/Core/String.h"
 
+/* TODO: Forward declare ImVec2 and ImVec4 and do not directly include imgui.h, 
+ *       need to fix the inclusion hierarchy before that is possible though. */
+#if 1
+#	include <imgui/imgui.h>
+#else
+namespace ImGui 
+{
+	struct ImVec2;
+	struct ImVec4;
+}
+#endif
 
 namespace LkEngine {
 
@@ -42,6 +53,12 @@ namespace LkEngine {
 		}
 
 		TVector2(const glm::vec2& InVec)
+			: X(InVec.x)
+			, Y(InVec.y)
+		{
+		} 
+
+		TVector2(const ImVec2& InVec)
 			: X(InVec.x)
 			, Y(InVec.y)
 		{
@@ -137,17 +154,38 @@ namespace LkEngine {
 			return 0.0f;
 		}
 
-		FORCEINLINE std::string ToString() const
+		template<typename StringType = std::string>
+		FORCEINLINE StringType ToString() const
 		{
-			if constexpr (std::is_floating_point_v<T>)
+			if constexpr (std::is_same_v<StringType, std::string>)
 			{
-				return LK_FORMAT_STRING("({:.2f}, {:.2f})", X, Y);
+				if constexpr (std::is_floating_point_v<T>)
+				{
+					return LK_FORMAT_STRING("({:.2f}, {:.2f})", X, Y);
+				}
+				else
+				{
+					return LK_FORMAT_STRING("({}, {})", X, Y);
+				}
 			}
-			else
+			else if constexpr (std::is_same_v<StringType, const char*>)
 			{
-				return LK_FORMAT_STRING("({}, {})", X, Y);
+				static constexpr uint16_t BufSize = 256;
+				if constexpr (std::is_floating_point_v<T>)
+				{
+					static std::array<char, BufSize> Buffer;
+					std::snprintf(Buffer.data(), Buffer.size(), "(%.2f, %.2f)", X, Y);
+					return Buffer.data();
+				}
+				else
+				{
+					static std::array<char, BufSize> Buffer;
+					std::snprintf(Buffer.data(), Buffer.size(), "(%d, %d)", X, Y);
+					return Buffer.data();
+				}
 			}
 		}
+
 
 		friend std::ostream& operator<<(std::ostream& os, const TVector2& Vector) 
 		{

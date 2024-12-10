@@ -89,7 +89,7 @@ namespace LkEngine {
 		}
 		glfwSetInputMode(GlfwWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
 		glfwSetInputMode(GlfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		glfwSetWindowSizeLimits(GlfwWindow, 420, 280, 2560, 1440);
+		glfwSetWindowSizeLimits(GlfwWindow, 340, 200, 5000, 5000);
 
 		glfwSetWindowSizeCallback(GlfwWindow, [](GLFWwindow* InGlfwWindow, int NewWidth, int NewHeight) 
 		{

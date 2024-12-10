@@ -4,7 +4,7 @@
 #include "Property.h"
 #include "LkEngine/Core/SelectionContext.h"
 
-#include "LkEngine/Renderer/Framebuffer.h"
+#include "LkEngine/Renderer/FrameBuffer.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
 
 #include "LkEngine/Editor/EditorLayer.h"
@@ -18,8 +18,7 @@ namespace LkEngine {
 	/* Log helper function. */
 	static void DumpAttachedComponents(LEntity Entity)
 	{
-		if (Entity.HasComponent<LIDComponent>() 
-			&& (static_cast<uint32_t>(Entity.GetUUID()) != 0))
+		if (Entity.HasComponent<LIDComponent>() && (static_cast<uint32_t>(Entity.GetUUID()) != 0))
 		{
 			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LIDComponent: {}", Entity.HasComponent<LIDComponent>());
 			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LTagComponent: {}", Entity.HasComponent<LTagComponent>());
@@ -46,15 +45,32 @@ namespace LkEngine {
 	{
 	}
 
-	void LSceneManagerPanel::OnRenderUI()
+	void LSceneManagerPanel::OnRenderUI(bool& IsOpen)
 	{
+		const bool IsWindowDocked = UI::IsWindowDocked(LK_UI_SCENEMANAGER);
+		if (bIsWindow)
+		{
+			if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(LK_UI_SCENEMANAGER))
+			{
+				ImGui::BringWindowToDisplayFront(ThisWindow);
+			}
+
+			ImGuiWindowFlags Flags = ImGuiWindowFlags_None;
+			if (IsWindowDocked)
+			{
+				//Flags |= ImGuiWindowFlags_NoMove;
+			}
+
+			ImGui::Begin(LK_UI_SCENEMANAGER, &IsOpen, Flags);
+		}
+
 		const ImRect WindowContent = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
 
 		if (Scene)
 		{
-			ImGui::SeparatorText(LK_FORMAT_STRING("Scene - {}", Scene->Name).c_str());
+			ImGui::SeparatorText(LK_FORMAT_STRING("{}", Scene->Name).c_str());
 			auto& EntityStorage = Scene->Registry.storage<entt::entity>();
-			ImGui::Text("Entities: %d", EntityStorage.size());
+			ImGui::Text("Content: %d", EntityStorage.size());
 
 			for (auto EntityID : EntityStorage)
 			{
@@ -78,6 +94,11 @@ namespace LkEngine {
 			}
 
 			ImGui::EndDragDropTarget();
+		}
+
+		if (bIsWindow)
+		{
+			ImGui::End();
 		}
 	}
 
@@ -163,22 +184,19 @@ namespace LkEngine {
 
 		LK_CORE_VERIFY(Entity.Scene, "Entity doesn't have a scene assigned");
 
-		/* FIXME: Fix the UI_SELECTED_ENTITY_INFO identifier. */
-
-		//UI::BeginSubwindow(UI_SELECTED_ENTITY_INFO);
-		ImGui::PushID(UI_SELECTED_ENTITY_INFO);
+		ImGui::PushID(UI::ID::SelectedEntityInfo);
 		if (ImGui::Begin("SceneManagerPanel-FIXME", nullptr))
 		{
 			if (Entity.HasComponent<LTagComponent>())
 			{
-				auto& tag = Entity.GetComponent<LTagComponent>().Tag;
+				auto& Tag = Entity.GetComponent<LTagComponent>().Tag;
 
-				char buffer[256];
-				memset(buffer, 0, sizeof(buffer));
-				std::strncpy(buffer, tag.c_str(), sizeof(buffer));
-				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+				char Buffer[256];
+				memset(Buffer, 0, sizeof(Buffer));
+				std::strncpy(Buffer, Tag.c_str(), sizeof(Buffer));
+				if (ImGui::InputText("##Tag", Buffer, sizeof(Buffer)))
 				{
-					tag = std::string(buffer);
+					Tag = std::string(Buffer);
 				}
 			}
 
@@ -186,8 +204,9 @@ namespace LkEngine {
 			ImGui::PushItemWidth(-1);
 
 			if (ImGui::Button("Add Component"))
+			{
 				ImGui::OpenPopup("AddComponent");
-
+			}
 			if (ImGui::BeginPopup("AddComponent"))
 			{
 				ImGui::EndPopup();
@@ -197,32 +216,32 @@ namespace LkEngine {
 			//---------------------------------------------------------------------------
 			// Transform Component
 			//---------------------------------------------------------------------------
-			DrawComponent<LTransformComponent>("Transform", Entity, [&Entity](auto& transform)
+			DrawComponent<LTransformComponent>("Transform", Entity, [&Entity](auto& Transform)
 			{
 				ImGui::Text("Position");
-				UI::Property::PositionXYZ(transform.Translation, 2.0);
+				UI::Property::PositionXYZ(Transform.Translation, 2.0);
 
 				ImGui::Text("Scale");
-				ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
+				ImGui::SliderFloat3("##scale", &Transform.Scale.x, 0.10f, 15.0f, "%.2f");
 
 				ImGui::Text("Rotation");
-				ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
-				auto rot = transform.GetRotation();
-				//transform.Rotation = glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
-				transform.SetRotation(glm::angleAxis(rot.x, glm::vec3(0.0f, 0.0f, 1.0f)));
-				//transform.SetRotation(rot);
+				ImGui::SliderAngle("##2d-rotation", &Transform.Rotation2D, -360.0f, 360.0f, "%1.f");
+				auto rot = Transform.GetRotation();
+				//Transform.Rotation = glm::angleAxis(Transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f));
+				Transform.SetRotation(glm::angleAxis(rot.x, glm::vec3(0.0f, 0.0f, 1.0f)));
+				//Transform.SetRotation(rot);
 			});
 
 			//---------------------------------------------------------------------------
 			// Sprite Component
 			//---------------------------------------------------------------------------
-			DrawComponent<LSpriteComponent>("Sprite", Entity, [&Entity](auto& sprite)
+			DrawComponent<LSpriteComponent>("Sprite", Entity, [&Entity](auto& Sprite)
 			{
 				ImGui::Text("Sprite Component");
 				ImGui::Text("Size");
 				ImGui::SameLine();
-				ImGui::SliderFloat2("##Size", &sprite.Size.x, 0.0f, 800.0f, "%1.f");
-				UI::Property::RGBAColor(sprite.Color);
+				ImGui::SliderFloat2("##Size", &Sprite.Size.x, 0.0f, 800.0f, "%1.f");
+				UI::Property::RGBAColor(Sprite.Color);
 				
 			});
 
@@ -334,16 +353,16 @@ namespace LkEngine {
             ImGui::SeparatorText(SELECTION::SelectedEntity.Name().c_str());
             ImGui::Indent();
 
-			LTransformComponent& transform = SELECTION::SelectedEntity.GetComponent<LTransformComponent>();
+			LTransformComponent& Transform = SELECTION::SelectedEntity.GetComponent<LTransformComponent>();
             ImGui::Text("Position");
-			UI::Property::PositionXY(transform.Translation, pos_step_size);
+			UI::Property::PositionXY(Transform.Translation, pos_step_size);
 
             ImGui::Text("Scale");
-            ImGui::SliderFloat3("##scale", &transform.Scale.x, 0.10f, 15.0f, "%.2f");
+            ImGui::SliderFloat3("##scale", &Transform.Scale.x, 0.10f, 15.0f, "%.2f");
 
             ImGui::Text("Rotation");
-            ImGui::SliderAngle("##2d-rotation", &transform.Rotation2D, -360.0f, 360.0f, "%1.f");
-			transform.SetRotation(glm::angleAxis(transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f)));
+            ImGui::SliderAngle("##2d-rotation", &Transform.Rotation2D, -360.0f, 360.0f, "%1.f");
+			Transform.SetRotation(glm::angleAxis(Transform.Rotation2D, glm::vec3(0.0f, 0.0f, 1.0f)));
 
             ImGui::Unindent();
 		}
@@ -381,6 +400,8 @@ namespace LkEngine {
 
 		if (ImGui::IsItemClicked())
 		{
+			LK_UI_INFO("Clicked: {} ({})", Tag, Entity);
+			LSelectionContext::Select(Entity);
 		}
 
 		bool EntityDeleted = false;
@@ -390,7 +411,7 @@ namespace LkEngine {
 		{
 			if (ImGui::MenuItem("Delete object"))
 			{
-				EntityDeleted= true;
+				EntityDeleted = true;
 			}
 			else if (ImGui::MenuItem("Reset object"))
 			{

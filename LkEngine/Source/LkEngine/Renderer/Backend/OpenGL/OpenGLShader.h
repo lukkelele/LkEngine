@@ -96,7 +96,7 @@ namespace LkEngine {
 		
 		FORCEINLINE virtual std::size_t GetHash() const override
 		{
-			return Hash::GenerateFNVHash(FilePath.string());
+			return LHash::GenerateFNVHash(FilePath.string());
 		}
 
 		FORCEINLINE virtual std::string GetName() const override

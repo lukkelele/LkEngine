@@ -19,29 +19,17 @@ namespace LkEngine {
 		std::vector<std::string> Args{};
 	};
 
-	namespace Global 
+	struct Global
 	{
 		/**
 		 * @brief Runtime arguments passed to main.
 		 */
-		void SetRuntimeArguments(const int Argc, char* Argv[]);
-		const FRuntimeArguments& GetRuntimeArguments();
+		static void SetRuntimeArguments(const int Argc, char* Argv[]);
+		static const FRuntimeArguments& GetRuntimeArguments();
 
-		/**
-		 * @brief Get the working directory.
-		 */
-		std::filesystem::path GetWorkingDir();
-
-		/**
-		 * @brief Get the binary executable directory.
-		 */
-		std::filesystem::path GetBinaryDir();
-
-		/**
-		 * @brief Get the engine config.
-		 */
-		std::filesystem::path GetEngineConfig();
-
-	}
+	private:
+		static int Argc;
+		static std::vector<std::string> Argv;
+	};
 
 }

@@ -35,11 +35,11 @@ namespace LkEngine {
 		bool DeserializeRuntime(const FAssetHandle InSceneHandle);
 
 	private:
-		static void SerializeEntity(YAML::Emitter& Out, LEntity Entity);
-		static void DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> SceneRef);
+		void SerializeEntity(YAML::Emitter& Out, LEntity Entity);
+		void DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> SceneRef);
 
-		static void SerializeEditorCamera(YAML::Emitter& Out, LEditorCamera& EditorCamera);
-		static void DeserializeEditorCamera(const YAML::Node& EditorCameraNode, LEditorCamera& EditorCamera);
+		void SerializeEditorCamera(YAML::Emitter& Out, LEditorCamera& EditorCamera);
+		void DeserializeEditorCamera(const YAML::Node& EditorCameraNode, LEditorCamera& EditorCamera);
 
 	public:
 		static std::string FILE_FILTER;

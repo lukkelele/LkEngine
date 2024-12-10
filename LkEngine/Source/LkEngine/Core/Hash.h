@@ -5,31 +5,31 @@
 
 namespace LkEngine {
 
-	class Hash
+	class LHash
 	{
 	public:
-		static constexpr uint32_t GenerateFNVHash(std::string_view str)
+		FORCEINLINE static constexpr uint32_t GenerateFNVHash(std::string_view String)
 		{
 			constexpr uint32_t FNV_PRIME = 16777619u;
 			constexpr uint32_t OFFSET_BASIS = 2166136261u;
 
-			const size_t length = str.length();
-			const char* data = str.data();
+			const std::size_t Length = String.length();
+			const char* Data = String.data();
 
-			uint32_t hash = OFFSET_BASIS;
-			for (size_t i = 0; i < length; ++i)
+			uint32_t Hash = OFFSET_BASIS;
+			for (std::size_t i = 0; i < Length; i++)
 			{
-				hash ^= *data++;
-				hash *= FNV_PRIME;
+				Hash ^= *Data++;
+				Hash *= FNV_PRIME;
 			}
-			hash ^= '\0';
-			hash *= FNV_PRIME;
+			Hash ^= '\0';
+			Hash *= FNV_PRIME;
 
-			return hash;
+			return Hash;
 		}
 
-		static uint32_t CRC32(const char* str);
-		static uint32_t CRC32(const std::string& string);
+		static uint32_t CRC32(const char* String);
+		static uint32_t CRC32(const std::string& String);
 	};
 
 }

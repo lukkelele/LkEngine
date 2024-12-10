@@ -2,6 +2,7 @@
 #include "OpenGLImGuiLayer.h"
 
 #include "LkEngine/Core/Application.h"
+#include "LkEngine/Core/IO/FileSystem.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -15,32 +16,45 @@ namespace LkEngine {
     LOpenGLImGuiLayer::LOpenGLImGuiLayer()
     {
 		LCLASS_REGISTER();
+
+		LayoutConfig = LFileSystem::GetConfigDir() / "EditorLayout.ini";
     }
 
     void LOpenGLImGuiLayer::Initialize()
     {
-        /// TODO: Get window config and apply settings from that.
 	    ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
-		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     
+		ImGuiIO& IO = ImGui::GetIO();
 
-		io.ConfigDockingAlwaysTabBar = false;
+		/* Configuration file. */
+		IO.IniFilename = nullptr; /* No config. */
+		const std::string ConfigStr = LayoutConfig.string();
+		ImGui::LoadIniSettingsFromDisk(ConfigStr.c_str());
+
+		IO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
+		IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
+		//IO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     
+
+		IO.ConfigDockingAlwaysTabBar = false;
+
+	#if defined(LK_ENGINE_DEBUG)
+		IO.ConfigDebugHighlightIdConflicts = true;
+	#endif
 
 		ImGuiStyle& Style = ImGui::GetStyle();
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		if (IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			Style.WindowRounding = 0.0f;
 			Style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
+
+		Style.DockingSeparatorSize = 2.0f;
 
 		/* Initialize ImGui for GLFW and OpenGL. */
         LApplication& Application = *LApplication::Get();
         LWindow& Window = Application.GetWindow();
 	    ImGui_ImplGlfw_InitForOpenGL(Window.GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(Window.GetShaderVersion().c_str());
-		LK_CORE_DEBUG("ImGui Version: {}", ImGui::GetVersion());
+		LK_CORE_TRACE("ImGui Version: {}", ImGui::GetVersion());
 
 		/* Add fonts. */
 		LK_CORE_INFO_TAG("UI", "Adding fonts");
@@ -49,8 +63,13 @@ namespace LkEngine {
 		bInitialized = true;
     }
 
-    void LOpenGLImGuiLayer::Shutdown()
+    void LOpenGLImGuiLayer::Destroy()
     {
+		LK_CORE_DEBUG_TAG("OpenGLImGuiLayer", "Destroying");
+
+		LK_CORE_DEBUG_TAG("OpenGLImGuiLayer", "Saving editor layout configuration to: {}", LayoutConfig.string());
+		ImGui::SaveIniSettingsToDisk(LayoutConfig.string().c_str());
+
 		ImGui_ImplGlfw_Shutdown();
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui::DestroyContext();
@@ -200,7 +219,7 @@ namespace LkEngine {
     }
 
     void UI::Image(const TObjectPtr<LImage2D>& image, const ImVec2& size, 
-                   const ImVec2& uv0, const ImVec2& uv1, 
+				   const ImVec2& uv0, const ImVec2& uv1, 
                    const ImVec4& tint_col, const ImVec4& BorderColumn)
     {
         ImGui::Image((ImTextureID)(image->GetRendererID()),

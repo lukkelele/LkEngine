@@ -48,8 +48,7 @@ namespace LkEngine {
 
 		FImageSpecification Specification{};
 		std::string m_FilePath{};
-
-		glm::vec4 m_TintColor = Color::RGBA::Transparent;
+		glm::vec4 m_TintColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 		LCLASS(LOpenGLImage);
 	};
@@ -100,7 +99,7 @@ namespace LkEngine {
 		FBuffer m_ImageData{};
 		std::filesystem::path m_FilePath{};
 
-		glm::vec4 m_TintColor = Color::RGBA::Transparent;
+		glm::vec4 m_TintColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 		LCLASS(LOpenGLImage2D);
 	};

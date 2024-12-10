@@ -50,8 +50,8 @@ namespace LkEngine {
 		template<typename T>
 		static TObjectPtr<T> GetAsset(FAssetHandle AssetHandle)
 		{
-			TObjectPtr<LAsset> asset = LProject::GetRuntimeAssetManager()->GetAsset(AssetHandle);
-			return asset.As<T>();
+			TObjectPtr<LAsset> Asset = LProject::GetRuntimeAssetManager()->GetAsset(AssetHandle);
+			return Asset.As<T>();
 		}
 
 		template<typename T>

@@ -14,7 +14,7 @@ namespace LkEngine {
 	{
 	}
 
-	void LDebugPanel::OnRenderUI()
+	void LDebugPanel::OnRenderUI(bool& IsOpen)
 	{
 		if (bWindow_ObjectReferences)
 		{

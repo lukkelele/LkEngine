@@ -4,17 +4,14 @@
 #include "LkEngine/Core/IO/FileSystem.h"
 
 
-namespace LkEngine::Global {
+namespace LkEngine {
 
 	static FRuntimeArguments RuntimeArguments;
 
-	static std::filesystem::path WorkingDir{};
-	static std::filesystem::path BinaryDir{};
-	static std::filesystem::path EngineDir{};
-	static std::filesystem::path EngineConfig{};
-	static std::filesystem::path ConfigDir{};
+	int Global::Argc;
+	std::vector<std::string> Global::Argv;
 
-	void SetRuntimeArguments(const int Argc, char* Argv[])
+	void Global::SetRuntimeArguments(const int Argc, char* Argv[])
 	{
 		static bool bArgumentsSet = false;
 		LK_CORE_ASSERT(bArgumentsSet == false && "SetRuntimeArguments incorrectly called more than once");
@@ -23,19 +20,17 @@ namespace LkEngine::Global {
 		RuntimeArguments.Argv = Argv;
 		if (RuntimeArguments.Argc >= 1)
 		{
-			BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]).parent_path().string() + PathSeparator;
+			LFileSystem::BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]).parent_path().string() + PathSeparator;
 		}
 
 		namespace fs = std::filesystem;
 
-		WorkingDir = std::filesystem::current_path();
-		//LK_PRINTLN("Working Directory: {}", WorkingDir);
+		LFileSystem::WorkingDir = std::filesystem::current_path();
 
 		int Traversed = 0;
-		fs::path Path = WorkingDir;
+		fs::path Path = LFileSystem::WorkingDir;
 		while (Path.filename() != "LkEngine")
 		{
-			//LK_PRINTLN("Current Path: {}", Path);
 			Path = Path.parent_path();
 			Traversed++;
 			LK_CORE_VERIFY(Traversed <= 4, "Cannot find LkEngine configuration file");
@@ -45,44 +40,30 @@ namespace LkEngine::Global {
 
 		LK_CORE_ASSERT(Path.filename() == "LkEngine", "Path is not LkEngine");
 		/* The engine config is placed in the 'LkEngine/LkRuntime' directory. */
-		EngineDir = Path;
-		EngineDir += PathSeparator + std::string("LkRuntime");
-		LK_CORE_VERIFY(LFileSystem::IsDirectory(EngineDir), "Engine directory is not valid");
+		LFileSystem::EngineDir = Path;
+		LFileSystem::EngineDir += PathSeparator + std::string("LkRuntime");
+		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid");
+		LFileSystem::ConfigDir = LFileSystem::WorkingDir;
 
-		ConfigDir = EngineDir;
-		ConfigDir += PathSeparator + std::string("Configuration");
+		LFileSystem::ConfigDir = LFileSystem::EngineDir;
+		LFileSystem::ConfigDir += PathSeparator + std::string("Configuration");
 		//LK_PRINTLN("ConfigDir: {}", ConfigDir);
-		if (!LFileSystem::Exists(ConfigDir))
+		if (!LFileSystem::Exists(LFileSystem::ConfigDir))
 		{
-			LFileSystem::CreateDirectory(ConfigDir);
-			LK_CORE_VERIFY(LFileSystem::IsDirectory(ConfigDir), "Configuration directory is not valid");
+			LFileSystem::CreateDirectory(LFileSystem::ConfigDir);
+			LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::ConfigDir), "Configuration directory is not valid");
 		}
 
-		EngineConfig = ConfigDir;
-		EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
+		LFileSystem::EngineConfig = LFileSystem::ConfigDir;
+		LFileSystem::EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
 		//LK_PRINTLN("EngineDir: {}     EngineConfig: {}", std::filesystem::absolute(EngineDir), std::filesystem::absolute(EngineConfig));
 
 		bArgumentsSet = true;
 	}
 
-	const FRuntimeArguments& GetRuntimeArguments()
+	const FRuntimeArguments& Global::GetRuntimeArguments()
 	{
 		return RuntimeArguments;
-	}
-
-	std::filesystem::path GetWorkingDir()
-	{
-		return WorkingDir;
-	}
-
-	std::filesystem::path GetBinaryDir()
-	{
-		return BinaryDir;
-	}
-
-	std::filesystem::path GetEngineConfig()
-	{
-		return EngineConfig;
 	}
 
 }

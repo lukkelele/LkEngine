@@ -17,7 +17,7 @@ namespace LkEngine {
 		~LRenderer() = default;
 
 		/**
-		 * @brief Create pipeline components.
+		 * @brief Create Pipeline components.
 		 */
 		static void Initialize();
 		static void Shutdown();
@@ -27,24 +27,28 @@ namespace LkEngine {
 		static void EndFrame();
 		static void SwapQueues();
 
-		static void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer,
-									TObjectPtr<LRenderPass> renderPass);
+		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+								   TObjectPtr<LPipeline> Pipeline,
+								   TObjectPtr<LVertexBuffer> VertexBuffer, 
+								   TObjectPtr<LIndexBuffer> IndexBuffer,
+								   const glm::mat4& Transform, 
+								   const uint32_t IndexCount = 0);
 
-		static void EndRenderPass(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer);
+		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+								   TObjectPtr<LPipeline> Pipeline,
+								   TObjectPtr<LShader> Shader, 
+								   TObjectPtr<LVertexBuffer> VertexBuffer,
+								   TObjectPtr<LIndexBuffer> IndexBuffer, 
+								   const glm::mat4& Transform,
+								   const uint32_t IndexCount = 0);
 
-		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, TObjectPtr<LPipeline> pipeline,
-								   TObjectPtr<LVertexBuffer> VertexBuffer, TObjectPtr<LIndexBuffer> indexBuffer,
-								   const glm::mat4& Transform, const uint32_t indexCount = 0);
-
-		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, TObjectPtr<LPipeline> pipeline,
-								   TObjectPtr<LShader> Shader, TObjectPtr<LVertexBuffer> VertexBuffer,
-								   TObjectPtr<LIndexBuffer> indexBuffer, const glm::mat4& Transform,
-								   const uint32_t indexCount = 0);
-
-		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> renderCommandBuffer, TObjectPtr<LPipeline> pipeline,
-								   TObjectPtr<LMaterial> material, TObjectPtr<LVertexBuffer> VertexBuffer,
-								   TObjectPtr<LIndexBuffer> indexBuffer, const glm::mat4& Transform,
-								   const uint32_t indexCount = 0);
+		static void RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
+								   TObjectPtr<LPipeline> Pipeline,
+								   TObjectPtr<LMaterial> Material, 
+								   TObjectPtr<LVertexBuffer> VertexBuffer,
+								   TObjectPtr<LIndexBuffer> IndexBuffer, 
+								   const glm::mat4& Transform,
+								   const uint32_t IndexCount = 0);
 
 		static void SubmitImage(const TObjectPtr<LImage> Image);
 		static void SubmitImage(const TObjectPtr<LImage2D> Image);
@@ -55,22 +59,16 @@ namespace LkEngine {
 
 		static void SubmitLines(const LVertexBuffer& va, const LIndexBuffer& ib, const LShader& Shader);
 
-		// SubmitQuad
+		// Quad
 		static void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0);
 		static void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0);
 		static void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID = 0);
 		static void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID = 0);
-		// ~SubmitQuad
+		// ~Quad
 
-		static void SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, const glm::vec4 Color,
-								 uint64_t EntityID = 0);
-
-		static void SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size,
-								 TObjectPtr<LTexture> Texture, uint64_t EntityID = 0);
-
-		static void SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size,
-								 TObjectPtr<LTexture> Texture, const glm::vec4& Color, uint64_t EntityID = 0);
-
+		static void SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, const glm::vec4 Color, uint64_t EntityID = 0);
+		static void SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID = 0);
+		static void SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, TObjectPtr<LTexture> Texture, const glm::vec4& Color, uint64_t EntityID = 0);
 		static void SubmitIndexed(LVertexBuffer& VertexBuffer, const uint32_t Count);
 
 		static void DrawMesh(TObjectPtr<LMesh>& Mesh, const TObjectPtr<LShader> Shader);
@@ -111,11 +109,17 @@ namespace LkEngine {
 
 			Submit([RenderCmd, Function]()
 			{
-				const uint32_t index = LRenderer::RT_GetCurrentFrameIndex();
+				const uint32_t Index = LRenderer::RT_GetCurrentFrameIndex();
 				auto StorageBuffer = GetRenderCommandQueue().Allocate(RenderCmd, sizeof(Function));
 				new (StorageBuffer) TFunction(std::forward<TFunction>((TFunction&&)Function));
 			});
 		}
+
+		static void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
+									TObjectPtr<LRenderPass> RenderPass);
+
+		static void EndRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer);
+
 
 		FORCEINLINE static uint32_t GetSamplersCount() { return SamplerCount; }
 		FORCEINLINE static void IncrementSamplerCount() { SamplerCount++; }

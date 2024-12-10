@@ -4,6 +4,7 @@
 
 namespace LkEngine {
 
+	UUID LSelectionContext::SelectedEntityID = 0;
 	TObjectPtr<LObject> GSelectedObject{};
 
 	LSelectionContext& LSelectionContext::Get()

@@ -6,12 +6,45 @@
 
 #include <glm/glm.hpp>
 
+#include "Font.h"
 #include "LkEngine/Scene/Components.h"
+
+#if defined(LK_ENGINE_OPENGL)
+#	include "LkEngine/Renderer/Backend/OpenGL/OpenGLTexture.h"
+#endif
 
 #define LK_MESSAGE_BOX_OK_BUTTON		LK_BIT(0)
 #define LK_MESSAGE_BOX_CANCEL_BUTTON	LK_BIT(1)
 #define LK_MESSAGE_BOX_USER_FUNCTION	LK_BIT(2)
 #define LK_MESSAGE_BOX_AUTO_SIZE		LK_BIT(3)
+
+/* UI Identifiers. */
+#define LK_UI_CORE_VIEWPORT          ::LkEngine::UI::ID::CoreViewport
+#define LK_UI_EDITOR_VIEWPORT        ::LkEngine::UI::ID::ViewportTexture
+#define LK_UI_DOCKSPACE              ::LkEngine::UI::ID::Dockspace
+#define LK_UI_TOPBAR                 ::LkEngine::UI::ID::TopBar
+#define LK_UI_SIDEBAR_1              ::LkEngine::UI::ID::Sidebar1
+#define LK_UI_SIDEBAR_2              ::LkEngine::UI::ID::Sidebar2
+#define LK_UI_BOTTOMBAR              ::LkEngine::UI::ID::BottomBar
+#define LK_UI_SCENEMANAGER           ::LkEngine::PanelID::SceneManager
+
+#define LK_UI_DOCK_EDITOR_VIEWPORT   ::LkEngine::UI::DockID_EditorViewport
+#define LK_UI_DOCK_TOPBAR            ::LkEngine::UI::DockID_TopBar
+#define LK_UI_DOCK_SIDEBAR_1         ::LkEngine::UI::DockID_Sidebar1
+#define LK_UI_DOCK_SIDEBAR_2         ::LkEngine::UI::DockID_Sidebar2
+#define LK_UI_DOCK_BOTTOMBAR         ::LkEngine::UI::DockID_BottomBar
+
+#define LK_UI_DEBUG_DOCKNODE(Name) \
+		if (ImGuiDockNode* DockNode = ImGui::DockBuilderGetNode(ImGui::GetWindowDockID())) \
+		{ \
+			ImGui::Text("Dock ID: %lld", DockNode->ID); \
+			if (DockNode->ParentNode) ImGui::Text("Parent Node: %lld", DockNode->ParentNode->ID); \
+			else ImGui::Text("Parent Node: None"); \
+			ImGui::Text("Windows: %d", DockNode->Windows.Size); \
+			ImGui::Text("Dock Size: (%.2f, %.2f)", DockNode->Size.x, DockNode->Size.y); \
+			ImGui::Text("Dock Pos: (%.2f, %.2f)", DockNode->Pos.x, DockNode->Pos.y); \
+			ImGui::Separator(); \
+		} 
 
 
 namespace LkEngine 
@@ -19,30 +52,67 @@ namespace LkEngine
     class LWindow;
     class LEntity;
 
-    static constexpr const char* LkEngine_DockSpace = "##LkEngine-DockSpace";
-    
-	/// UPDATE/REFACTOR
-    static constexpr const char* UI_CORE_VIEWPORT = "##lkengine-core-Viewport";
-    static constexpr const char* UI_RENDER_WINDOW = "##lkengine-render-window";
-    static constexpr const char* UI_TOP_BAR = "##lkengine-top-bar";
-    static constexpr const char* UI_BOTTOM_BAR = "##lkengine-lower-bar";
-    static constexpr const char* UI_SELECTED_ENTITY_INFO = "##lkengine-selected-entity-info";
+	namespace PanelID 
+	{
+		static constexpr const char* ApplicationSettings = "ApplicationSettings";
+		static constexpr const char* ContentBrowser      = "ContentBrowser";
+		static constexpr const char* SceneManager        = "SceneManager";
+		static constexpr const char* EditorConsole       = "EditorConsole";
+		static constexpr const char* ComponentEditor     = "ComponentEditor";
+	}
+
 }
 
 namespace LkEngine::UI {
 
-    static constexpr const char* Sidebar1 = "##LkEngine-SIDEBAR-1";
-    static constexpr const char* Sidebar2 = "##LkEngine-SIDEBAR-2";
+	namespace ID 
+	{
+		static constexpr const char* CoreViewport       = "##LkEngine-CoreViewport";
+		static constexpr const char* Dockspace          = "##LkEngine-DockSpace";    
+		static constexpr const char* RenderWindow       = "##LkEngine-RenderWindow";
+		static constexpr const char* ViewportTexture    = "##LkEngine-ViewportTexture";
+		static constexpr const char* TopBar             = "##LkEngine-TopBar";
+		static constexpr const char* Sidebar1           = "Sidebar##1";
+		static constexpr const char* Sidebar2           = "Sidebar##2";
+		static constexpr const char* BottomBar          = "BottomBar##1";
+		static constexpr const char* SelectedEntityInfo = "##LkEngine-Selected-Entity-Info"; /* REMOVE */
+	}
+	
+	class FScopedStyle
+	{
+	public:
+		template<typename T>
+		FScopedStyle(const ImGuiStyleVar StyleVar, T Value) { ImGui::PushStyleVar(StyleVar, Value); }
+		~FScopedStyle() { ImGui::PopStyleVar(); }
+		FScopedStyle(const FScopedStyle&) = delete;
+		FScopedStyle& operator=(const FScopedStyle&) = delete;
+	};
 
+	class FScopedColor
+	{
+	public:
+		template<typename T>
+		FScopedColor(const ImGuiCol ColorID, T Color) { ImGui::PushStyleColor(ColorID, ImColor(Color).Value); }
+		~FScopedColor() { ImGui::PopStyleColor(); }
+		FScopedColor(const FScopedColor&) = delete;
+		FScopedColor& operator=(const FScopedColor&) = delete;
+	};
+
+	/* TODO: Reevaluate this. */
     /* UI Flags. */
     extern ImGuiWindowFlags		CoreViewportFlags;
     extern ImGuiWindowFlags		HostWindowFlags;
     extern ImGuiWindowFlags		SidebarFlags;
-    extern ImGuiWindowFlags		SidebarDockspaceFlags;
     extern ImGuiWindowFlags		MenuBarFlags;
     extern ImGuiWindowFlags		TabBarFlags;
-    extern ImGuiWindowFlags		ViewportTextureFlags;
+    extern ImGuiWindowFlags		EditorViewportFlags;
     extern ImGuiDockNodeFlags	DockspaceFlags; 
+
+	extern ImGuiID DockID_EditorViewport;
+	extern ImGuiID DockID_TopBar;
+	extern ImGuiID DockID_Sidebar1;
+	extern ImGuiID DockID_Sidebar2;
+	extern ImGuiID DockID_BottomBar;
 
 	/**
 	 * @struct FMessageBox
@@ -68,34 +138,107 @@ namespace LkEngine::UI {
     void PushID(const char* ID);
     void PopID();
     void PopID(const char* ID);
-    void Separator(ImVec2 Size, ImVec4 Color);
     bool IsInputEnabled();
     bool IsMouseEnabled();
     bool IsKeyboardEnabled();
     void SetInputEnabled(bool Enabled);
 
-    void Begin(std::string WindowTitle, const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None, bool* Open = nullptr);
-    void Begin(const char* WindowTitle, const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None, bool* Open = nullptr);
-    void Begin(ImGuiWindowFlags WindowFlags, bool* Open = nullptr);
-
+    void Begin(const char* WindowTitle, bool* Open = nullptr, const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None);
     void End();
 
-    /* Core Viewport, also known as Main Window */
-    void BeginCoreViewport();
-    void EndCoreViewport();
+	void BeginViewport(TObjectPtr<LWindow> Window);
 
-    /// REFACTOR
+	ImGuiDockNode* FindCentralNode(const ImGuiID DockspaceID);
+
+	/**
+	 * EFindType
+	 * 
+	 *  Identifier type to use when attempting to find an object.
+	 */
+	enum class EFindType
+	{
+		ID,
+		Name,
+	};
+
     /**
-     * Insert UI widgets inside already existing windows on the screen.
-     * Is determined by SelectedEntityWindow
+     * @brief Check if a window is focused, defaults to use the window name.
      */
-    bool IsWindowFocused(const char* WindowName, const bool CheckRootWindow);
-    //const char* GetSelectedEntityWindowName();
+	template<EFindType FindType = EFindType::Name, typename T = const char*>
+    FORCEINLINE static bool IsWindowFocused(T Identifier, const bool CheckRootWindow = true)
+	{
+		LK_CORE_ASSERT(false);
+		return false;
+	}
 
-    void BeginDockSpace(const char* DockspaceID);
-    void BeginViewport(const char* ViewportID, LWindow* WindowRef, ImGuiViewport* Viewport);
+	template<>
+    FORCEINLINE static bool IsWindowFocused(const char* WindowName, const bool CheckRootWindow)
+    {
+        ImGuiWindow* CurrentNavWindow = GImGui->NavWindow;
+        if (CheckRootWindow)
+        {
+			/* Get the nav window and not something else (like a table). */
+            ImGuiWindow* LastWindow = nullptr;
+            while (LastWindow != CurrentNavWindow)
+            {
+                LastWindow = CurrentNavWindow;
+                CurrentNavWindow = CurrentNavWindow->RootWindow;
+            }
+        }
 
-    /// FIXME
+        return (CurrentNavWindow == ImGui::FindWindowByName(WindowName));
+    }
+
+	template<>
+    FORCEINLINE static bool IsWindowFocused(const ImGuiID ID, const bool CheckRootWindow)
+    {
+        ImGuiWindow* CurrentNavWindow = GImGui->NavWindow;
+        if (CheckRootWindow)
+        {
+			/* Get the nav window and not something else (like a table). */
+            ImGuiWindow* LastWindow = nullptr;
+            while (LastWindow != CurrentNavWindow)
+            {
+                LastWindow = CurrentNavWindow;
+                CurrentNavWindow = CurrentNavWindow->RootWindow;
+            }
+        }
+
+        return (CurrentNavWindow == ImGui::FindWindowByID(ID));
+    }
+
+    /**
+     * @brief Check if a window is docked, defaults to use the window name.
+     */
+	template<EFindType FindType = EFindType::Name, typename T = const char*>
+	FORCEINLINE static bool IsWindowDocked(T Identifier)
+	{
+		LK_CORE_ASSERT(false);
+		return false;
+	}
+
+	template<>
+	FORCEINLINE static bool IsWindowDocked<EFindType::ID>(const ImGuiID ID)
+	{
+		if (ImGuiWindow* Window = ImGui::FindWindowByID(ID); Window != nullptr)
+		{
+			return (Window->DockNode != nullptr);
+		}
+
+		return false;
+	}
+
+	template<>
+	FORCEINLINE static bool IsWindowDocked<EFindType::Name>(const char* WindowName)
+	{
+		if (ImGuiWindow* Window = ImGui::FindWindowByName(WindowName); Window != nullptr)
+		{
+			return (Window->DockNode != nullptr);
+		}
+
+		return false;
+	}
+
     void Image(const TObjectPtr<LTexture2D>& texture, 
                const ImVec2& Size, 
                const ImVec2& UV0 = ImVec2(0, 0), 
@@ -123,7 +266,6 @@ namespace LkEngine::UI {
                const glm::vec2& UV1 = glm::vec2(1, 1), 
                const glm::vec4& TintColor = glm::vec4(1, 1, 1, 1), 
                const glm::vec4& BorderColor = glm::vec4(0, 0, 0, 0));
-    // ~
 
 	void RenderMessageBoxes();
 	void ShowMessageBox(const char* Title,
@@ -136,81 +278,64 @@ namespace LkEngine::UI {
 						const uint32_t MaxHeight = -1,
 						uint32_t Flags = LK_MESSAGE_BOX_AUTO_SIZE);
 
-    constexpr const char* VIEWPORT_TEXTURE = "LkEngine-ViewportTexture";
+	ImTextureID GetTextureID(TObjectPtr<LTexture2D> Texture);
 
-    void PushStyleVar(const ImGuiStyleVar StyleVar, const ImVec2& Var);
-    void PushStyleVar(const ImGuiStyleVar StyleVar, const glm::vec2& Var);
-    void PopStyleVar(uint8_t VarsToPop = 1);
-
-    void PushStyleColor(const ImGuiCol ColorVar, const ImVec4& Color);
-    void PushStyleColor(const ImGuiCol ColorVar, const glm::vec4& Color);
-    void PopStyleColor(const uint8_t VarsToPop = 1);
-    void PopStyleStack();
-
-	enum class EFontSize
+	inline void DrawButtonImage(const TObjectPtr<LTexture2D>& ImageNormal, 
+								const TObjectPtr<LTexture2D>& ImageHovered, 
+								const TObjectPtr<LTexture2D>& ImagePressed, 
+								ImU32 tintNormal, 
+								ImU32 tintHovered, 
+								ImU32 tintPressed, 
+								ImVec2 RectMin, 
+								ImVec2 RectMax)
 	{
-		Regular = 0,
-		Smaller,
-		Small,
-		Large,
-		Larger,
-		Title,
-		Header,
-	};
-
-	enum class EFont
-	{
-		Default = 0,
-		SourceSansPro,
-		Roboto,
-	};
-
-	struct FFontConfiguration
-	{
-		std::string FontName{};
-		std::string_view FilePath{};
-		float Size = 18.0f;
-
-		bool MergeWithLast = false;
-		const ImWchar* GlyphRanges = nullptr;
-	};
-
-	struct FFontEntry
-	{
-		std::string Name{};
-
-		bool operator==(const FFontEntry& Other) const
+		ImDrawList* DrawList = ImGui::GetWindowDrawList();
+		if (ImGui::IsItemActive())
 		{
-			return (Name == Other.Name);
+			DrawList->AddImage(GetTextureID(ImagePressed), RectMin, RectMax, ImVec2(0, 0), ImVec2(1, 1), tintPressed);
+		}
+		else if (ImGui::IsItemHovered())
+		{
+			DrawList->AddImage(GetTextureID(ImageHovered), RectMin, RectMax, ImVec2(0, 0), ImVec2(1, 1), tintHovered);
+		}
+		else
+		{
+			DrawList->AddImage(GetTextureID(ImageNormal), RectMin, RectMax, ImVec2(0, 0), ImVec2(1, 1), tintNormal);
 		}
 	};
 
-	namespace Font 
+	inline void DrawButtonImage(const TObjectPtr<LTexture2D>& Image, ImU32 TintNormal, ImU32 TintHovered, ImU32 TintPressed, ImRect Rectangle)
 	{
-		void Add(const FFontConfiguration& FontConfig, bool IsDefault = false);
-		void Push(const std::string& FontName);
-		void Pop();
-		ImFont* Get(const std::string& FontName);
+		DrawButtonImage(Image, Image, Image, TintNormal, TintHovered, TintPressed, Rectangle.Min, Rectangle.Max);
+	};
+
+
+	/* MOVE THESE UTILITY FUNCTIONS ELSEWHERE */
+	inline ImRect GetItemRect()
+	{
+		return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+	}
+
+	inline ImRect RectExpanded(const ImRect& Rect, const float x, const float y)
+	{
+		ImRect Result = Rect;
+		Result.Min.x -= x;
+		Result.Min.y -= y;
+		Result.Max.x += x;
+		Result.Max.y += y;
+		return Result;
+	}
+
+	inline ImRect RectOffset(const ImRect& Rect, const float x, const float y)
+	{
+		ImRect Result = Rect;
+		Result.Min.x += x;
+		Result.Min.y += y;
+		Result.Max.x += x;
+		Result.Max.y += y;
+		return Result;
 	}
 
 }
 
-namespace std 
-{
-    template<>
-    struct hash<LkEngine::UI::FFontEntry>
-    {
-        std::size_t operator()(const LkEngine::UI::FFontEntry& Entry) const noexcept
-        {
-			std::size_t Hash = 0;
-            for (const char Character : Entry.Name)
-            {
-				/* Common hash multiplier. */
-                Hash = (Hash * 31 + static_cast<unsigned char>(Character));
-            }
-
-            return Hash;
-        }
-    };
-}
 

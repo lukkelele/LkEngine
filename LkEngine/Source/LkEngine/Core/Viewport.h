@@ -77,6 +77,24 @@ namespace LkEngine {
 		}
 
 		/**
+		 * @brief Sey position in the X-axis.
+		 */
+		FORCEINLINE void SetPositionX(const float NewPosX) 
+		{ 
+			Position.X = NewPosX;
+			bDirty = true;
+		}
+
+		/**
+		 * @brief Sey position in the Y-axis.
+		 */
+		FORCEINLINE void SetPositionY(const float NewPosY) 
+		{ 
+			Position.Y = NewPosY;
+			bDirty = true;
+		}
+
+		/**
 		 * @brief Set viewport bounds for top-left or bottom-right bound.
 		 */
 		FORCEINLINE void SetViewportBounds(const uint8_t Index, const LVector2& Bounds)
@@ -86,6 +104,7 @@ namespace LkEngine {
 			{
 				ViewportBounds[Index] = Bounds;
 				LK_CORE_DEBUG_TAG("Viewport", "Set viewport bounds {} to {}", Index, Bounds.ToString());
+				bDirty = true;
 			}
 		}
 

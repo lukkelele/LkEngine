@@ -24,6 +24,7 @@
 
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/UILayer.h"
+#include "LkEngine/UI/PanelManager.h"
 #include "LkEngine/UI/ContentBrowser.h"
 
 #define LK_UI_ENABLE_LEFT_SIDEBAR_CONTENT 1
@@ -90,16 +91,18 @@ namespace LkEngine {
 		void SaveSceneAs();
 
 	private:
-		void DrawObjectGizmo(const TObjectPtr<LObject>& InObject);
-		void HandleExternalWindows();
+		void PrepareForTopBar();
+		void PrepareForLeftSidebar() const;
+		void PrepareForRightSidebar() const;
+		void PrepareForBottomBar();
+
+		void DrawObjectGizmo(LEntity Entity);
+		void UI_RenderExternalWindows();
 
 		void UI_MainMenuBar();
+		void UI_ToolBar();
 		void UI_HandleManualWindowResize();
 		void UI_AboutPopup();
-
-		void UI_SceneContent();
-		void UI_CreateMenu();
-		void UI_RenderSettingsWindow();
 
 		void UI_SyncEditorWindowSizes(const LVector2& InViewportSize);
 
@@ -113,27 +116,25 @@ namespace LkEngine {
 		
 		void UI_OpenGLExtensions();
 
-		void PrepareForLeftSidebar() const;
-		void PrepareForRightSidebar() const;
-		void PrepareForBottomBar() const;
-
 		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return ViewportFramebuffer; }
 
 		LEntity CreateCube(); /* TODO: REMOVE */
 
+		void UI_RenderSettingsWindow(); /* TODO: Re-evaluate */
+
 	public:
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 
-		bool bShouldUpdateWindowSizes = true;
-		bool ShowRenderSettingsWindow = false;
+		bool ShowRenderSettingsWindow = false; /* TODO: REMOVE */
 		bool bFillSidebarsVertically = true; // Always fill out sidebars vertically
 	private:
-		inline static bool bWindowsHaveChangedInSize = true;
 		inline static bool bShowEditorWindowSizesWindow = false;
 
 	private:
 		LEditorTabManager& TabManager;
+		TObjectPtr<LPanelManager> PanelManager;
 
+		TObjectPtr<LProject> Project{};
 		TObjectPtr<LScene> EditorScene = nullptr;
 		bool bEnabled = true;
 
@@ -151,15 +152,8 @@ namespace LkEngine {
 
 		FEventCallback m_EventCallback; /// UPDATE ME
 
-		std::shared_ptr<LSceneManagerPanel> SceneManagerPanel{};
-
-		TObjectPtr<LProject> Project{};
-
 		// Editor
 		TObjectPtr<LViewport> EditorViewport;
-		std::unique_ptr<LNodeEditor> NodeEditor;
-		std::unique_ptr<LComponentEditor> ComponentEditor{};
-		std::unique_ptr<LContentBrowser> ContentBrowser;
 		// ~Editor
 
 		TObjectPtr<LWindow> Window{};

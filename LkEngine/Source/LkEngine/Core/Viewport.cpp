@@ -20,11 +20,11 @@ namespace LkEngine {
 		if (bDirty)
 		{
 			OnSizeUpdated.Broadcast(Size.X, Size.Y);
-
 			bDirty = false;
 		}
 	}
 
+	/* MOVE ELSEWHERE */
 	void LViewport::SetViewport(const int PosX, const int PosY, const int Width, const int Height)
 	{
 	#if defined(LK_ENGINE_OPENGL)

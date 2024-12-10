@@ -26,7 +26,7 @@ namespace LkEngine {
         // TODO
     }
 
-    void LComponentEditor::OnRenderUI()
+    void LComponentEditor::OnRenderUI(bool& IsOpen)
     {
         //static std::unordered_map<std::string, TObjectPtr<LMaterial>> MaterialMap{};
         static std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>> MaterialMap{};

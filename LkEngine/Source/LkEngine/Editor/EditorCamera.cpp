@@ -41,9 +41,11 @@ namespace LkEngine {
 		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 
 		LK_CORE_TRACE_TAG("EditorCamera", "m_Position = ({}, {}, {})", m_Position.x, m_Position.y, m_Position.z);
+
+		bIsActive = true;
 	}
 
-	void LEditorCamera::OnUpdate(const FTimestep DeltaTime)
+	void LEditorCamera::OnUpdate(const float DeltaTime)
 	{
 		const glm::vec2 Mouse{ LMouse::GetMouseX(), LMouse::GetMouseY() };
 		const glm::vec2 MouseDelta = (Mouse - m_InitialMousePosition) * 0.002f;

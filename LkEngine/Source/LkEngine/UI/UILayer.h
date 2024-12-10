@@ -29,7 +29,7 @@ namespace LkEngine {
         virtual ~LUILayer() = default;
 
         virtual void Initialize() = 0;
-        virtual void Shutdown() = 0;
+        virtual void Destroy() = 0;
 
         virtual void OnAttach() = 0;
         virtual void OnDetach() = 0;
@@ -37,7 +37,7 @@ namespace LkEngine {
         virtual void BeginFrame() = 0;
         virtual void EndFrame() = 0;
 
-        virtual void SetDarkTheme() = 0;
+        virtual void SetDarkTheme() = 0; /* Remove */
 
         static TObjectPtr<LUILayer> Create();
 

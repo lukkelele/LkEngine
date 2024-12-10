@@ -31,7 +31,7 @@ namespace LkEngine::UI {
 				new_size.y = IM_FLOOR(new_size.y);
 			}
 
-			// Minimum size
+			/* Minimum size. */
 			if (!(window->Flags & (ImGuiWindowFlags_ChildWindow | ImGuiWindowFlags_AlwaysAutoResize)))
 			{
 			#if 0

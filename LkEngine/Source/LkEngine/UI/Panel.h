@@ -16,7 +16,7 @@ namespace LkEngine {
 		virtual void Initialize() {};
 		
 		virtual void OnRender() = 0;
-		virtual void OnRenderUI() = 0;
+		virtual void OnRenderUI(bool& IsOpen) = 0;
 	};
 
 }

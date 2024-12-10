@@ -42,13 +42,10 @@ namespace LkEngine {
 		if (LFileSystem::IsDirectory(Filepath))
 		{
 			Filepath = (Filepath / fs::path(Filepath.filename().string() + "." + LProject::FILE_EXTENSION));
-			LK_CORE_FATAL("Filesystem Directory: {}", Filepath.string());
 		}
 
-		FProjectSerializer ProjectSerializer(this);
-
 		/** Load serialized data into the project instance. */
-		LK_CORE_WARN("Deserializing project");
+		FProjectSerializer ProjectSerializer(this);
 		if (!ProjectSerializer.Deserialize(Filepath))
 		{
 			LK_CORE_ERROR_TAG("Project", "Deserialization of project '{}' failed", Filepath.string());

@@ -29,7 +29,7 @@ namespace LkEngine {
 		virtual void Initialize() override;
 
 		virtual void OnRender() override;
-		virtual void OnRenderUI() override;
+		virtual void OnRenderUI(bool& IsOpen) override;
 
 	public:
 		inline static TObjectPtr<LTexture> FileIconTexture;

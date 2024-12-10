@@ -12,13 +12,12 @@ namespace LkEngine {
 	{
 	public:
 		LSceneManagerPanel(TObjectPtr<LScene> InScene = nullptr);
-		//LSceneManagerPanel() = delete; /* FIXME: EVALUATE */
 		~LSceneManagerPanel() = default;
 
 		virtual void Initialize() override;
 
 		virtual void OnRender() override;
-		virtual void OnRenderUI() override;
+		virtual void OnRenderUI(bool& IsOpen) override;
 
 		void DrawEntityNode(LEntity entity);
 		static void DrawComponents(LEntity entity);
@@ -40,12 +39,11 @@ namespace LkEngine {
 		void UI_CameraSettings();
 
 	private:
+		bool bIsWindow = true;
 		TObjectPtr<LScene> Scene{};
 
-		/// FIXME: REWORK THIS
-		/* TODO: Figure out a replacement for this approach. */
-		//TObjectPtr<LScene> ComponentCopyScene{};
-		//LEntity ComponentCopyEntity;
+		TObjectPtr<LScene> ComponentCopyScene{};
+		LEntity ComponentCopyEntity;
 
 		LCLASS(LSceneManagerPanel);
 	};

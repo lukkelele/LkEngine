@@ -101,6 +101,7 @@ namespace LkEngine {
 
 	bool FProjectSerializer::DeserializeFromYaml(const std::string& YamlString, FProjectConfiguration& ProjectConfig)
 	{
+		LK_CORE_DEBUG_TAG("ProjectSerializer", "Deserializing YAML");
 		YAML::Node RootNode = YAML::Load(YamlString)["Project"];
 		if (!RootNode.IsDefined())
 		{
@@ -108,13 +109,10 @@ namespace LkEngine {
 			return false;
 		}
 
-		LK_CORE_DEBUG_TAG("ProjectSerializer", "Deserializing project data");
-
 		LK_DESERIALIZE_PROPERTY(Name, ProjectConfig.Name, RootNode, "Unknown");
 		LK_DESERIALIZE_PROPERTY(AutoSave, ProjectConfig.bAutoSave, RootNode, true);
 
-		LK_CORE_FATAL_TAG("ProjectSerializer", "Read name: {}", ProjectConfig.Name);
-
+		LK_CORE_TRACE_TAG("ProjectSerializer", "Read Name: {}", ProjectConfig.Name);
 
 		return true;
 	}

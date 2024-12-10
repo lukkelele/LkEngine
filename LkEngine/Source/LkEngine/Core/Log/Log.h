@@ -22,6 +22,8 @@
 #	include <iterator>
 #endif
 
+#define LK_ASSERT_MESSAGE_BOX 1
+
 /**
  * Set loglevel names to UPPERCASE.
  * Must be defined BEFORE including spdlog.
@@ -359,15 +361,31 @@ namespace LkEngine
 		if (auto Logger = GetLogger(LoggerType); Logger != nullptr)
 		{
 			Logger->error("{0}: {1}", Prefix, FormattedString);
-			return;
+		}
+		else
+		{
+			PrintLn("{2}{0}: {1}{3}", Prefix, FormattedString, LK_ANSI_COLOR_BG_BRIGHT_RED, LK_ANSI_COLOR_RESET);
 		}
 
-		PrintLn("{2} {0}: {1} {3}", Prefix, FormattedString, LK_COLOR_BG_BRIGHT_RED, LK_COLOR_RESET);
+	#if LK_ASSERT_MESSAGE_BOX
+		MessageBoxA(nullptr, FormattedString.c_str(), "LkEngine Error", (MB_OK | MB_ICONERROR));
+	#endif
 	}
 
 	FORCEINLINE void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Message)
 	{
-		LLog::GetLogger(LoggerType)->error("{0}", Message);
+		if (auto Logger = GetLogger(LoggerType); Logger != nullptr)
+		{
+			LLog::GetLogger(LoggerType)->error("{0}", Message);
+		}
+		else
+		{
+			PrintLn("{1}{0}{2}", Message, LK_ANSI_COLOR_BG_BRIGHT_RED, LK_ANSI_COLOR_RESET);
+		}
+		
+	#if LK_ASSERT_MESSAGE_BOX
+		MessageBoxA(nullptr, Message.data(), "LkEngine Error", (MB_OK | MB_ICONERROR));
+	#endif
 	}
 
 }

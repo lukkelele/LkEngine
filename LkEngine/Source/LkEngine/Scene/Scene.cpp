@@ -30,18 +30,13 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("Scene", "Scene created '{}' with handle '{}'", Name, SceneEntity);
 
 		/* The file extension is handled by LSceneSerializer. */
-		const std::filesystem::path SceneFile = LK_FORMAT_STRING("Scenes/{}", Name);
+		const std::filesystem::path SceneFile = LK_FORMAT_STRING("Scenes/{}.{}", Name, LScene::FILE_EXTENSION);
 
 		/* Attempt to load scene data, if any exist. */
 		LSceneSerializer Serializer(this);
-		if (Serializer.Deserialize(SceneFile))
-		{
-			LK_CORE_DEBUG("Scene serialization OK for '{}'", Name);
-		}
-		else
+		if (!Serializer.Deserialize(SceneFile))
 		{
 			LK_CORE_WARN("Scene serialization failed, loading default values for '{}'", Name);
-
 			Registry.emplace<LSceneComponent>(SceneEntity, SceneID);
 
 			m_ViewportWidth = LWindow::Get().GetViewportWidth();
@@ -95,7 +90,6 @@ namespace LkEngine {
 		return Entity;
 	}
 
-	// TODO: Change name to GetEntityWithID
 	LEntity LScene::GetEntityWithUUID(UUID ID) const
 	{
 		LK_ASSERT(m_EntityIDMap.find(ID) != m_EntityIDMap.end(), "Entity \"{}\" is not present in the scene", ID);
@@ -112,14 +106,14 @@ namespace LkEngine {
 		return LEntity{};
 	}
 
-	LEntity LScene::FindEntity(std::string_view name)
+	LEntity LScene::FindEntity(std::string_view Name)
 	{
 		/* TODO: Use predicate instead of for-loop like this. */
 		auto View = Registry.view<LTagComponent>();
 		for (auto Entity : View)
 		{
 			const LTagComponent& tc = View.get<LTagComponent>(Entity);
-			if (tc.Tag == name)
+			if (tc.Tag == Name)
 			{
 				return LEntity{ Entity , this };
 			}
@@ -399,7 +393,7 @@ namespace LkEngine {
 		TargetScene->m_ViewportHeight = m_ViewportHeight;
 	}
 
-	void LScene::OnRender(TObjectPtr<LSceneRenderer> SceneRenderer, FTimestep Timestep)
+	void LScene::OnRender(TObjectPtr<LSceneRenderer> SceneRenderer, const float DeltaTime)
 	{
 		FSceneRendererCamera SceneCamera;
 		SceneCamera.Camera = Camera;
@@ -408,10 +402,19 @@ namespace LkEngine {
 		SceneRenderer->BeginScene(SceneCamera);
 	}
 
-	void LScene::OnRenderEditor(LEditorCamera& EditorCamera, FTimestep Timestep)
+	void LScene::OnRenderEditor(LEditorCamera& EditorCamera, const float DeltaTime)
 	{
 		EditorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
-		EditorCamera.OnUpdate(Timestep);
+		EditorCamera.OnUpdate(DeltaTime);
+
+		/* Static Meshes. */
+		{
+			auto Group = Registry.group<LStaticMeshComponent>(entt::get<LTransformComponent>);
+			for (auto Entity : Group)
+			{
+				LK_CORE_INFO("Entity: {}", Entity);
+			}
+		}
 	}
 
 	LEntity LScene::GetMainCameraEntity()

@@ -6,6 +6,12 @@
 
 namespace LkEngine {
 
+	std::filesystem::path LFileSystem::WorkingDir{};
+	std::filesystem::path LFileSystem::BinaryDir{};
+	std::filesystem::path LFileSystem::EngineDir{};
+	std::filesystem::path LFileSystem::EngineConfig{};
+	std::filesystem::path LFileSystem::ConfigDir{};
+
 	namespace fs = std::filesystem;
 
 	bool LFileSystem::Move(const std::filesystem::path& OldFilepath, const std::filesystem::path& NewFilepath)

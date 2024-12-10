@@ -155,7 +155,7 @@ namespace LkEngine {
 		{
 			/* Serialize application configuration. */
 			LApplicationSerializer Serializer(this);
-			Serializer.Serialize(Global::GetEngineConfig());
+			Serializer.Serialize(LFileSystem::GetEngineConfig());
 
 			if (TObjectPtr<LProject> Project = LProject::Current())
 			{
@@ -169,6 +169,8 @@ namespace LkEngine {
 
 			Renderer->Shutdown();
 
+			UILayer->Destroy();
+
 			LK_CORE_TRACE_TAG("Application", "Window->Shutdown()");
 			Window->Shutdown();
 
@@ -179,7 +181,7 @@ namespace LkEngine {
 	bool LApplication::ReadConfigurationFile(FApplicationSpecification& InSpecification)
 	{
 		LApplicationSerializer Serializer(this);
-		return Serializer.Deserialize(Global::GetEngineConfig(), InSpecification);
+		return Serializer.Deserialize(LFileSystem::GetEngineConfig(), InSpecification);
 	}
 
 	void LApplication::SetupDirectories()

@@ -6,44 +6,45 @@
 #include <time.h>
 
 #include <glm/glm.hpp>
+#include <imgui/imgui.h>
 
 
-/* Colors. */
-#define LK_COLOR_RESET              "\033[0m"
+/* ANSI Colors. */
+#define LK_ANSI_COLOR_RESET              "\033[0m"
 /* Foreground Colors */
-#define LK_COLOR_BLACK              "\033[30m"
-#define LK_COLOR_RED                "\033[31m"
-#define LK_COLOR_GREEN              "\033[32m"
-#define LK_COLOR_YELLOW             "\033[33m"
-#define LK_COLOR_BLUE               "\033[34m"
-#define LK_COLOR_MAGENTA            "\033[35m"
-#define LK_COLOR_CYAN               "\033[36m"
-#define LK_COLOR_WHITE              "\033[37m"
-#define LK_COLOR_BRIGHT_BLACK       "\033[90m"
-#define LK_COLOR_BRIGHT_RED         "\033[91m"
-#define LK_COLOR_BRIGHT_GREEN       "\033[92m"
-#define LK_COLOR_BRIGHT_YELLOW      "\033[93m"
-#define LK_COLOR_BRIGHT_BLUE        "\033[94m"
-#define LK_COLOR_BRIGHT_MAGENTA     "\033[95m"
-#define LK_COLOR_BRIGHT_CYAN        "\033[96m"
-#define LK_COLOR_BRIGHT_WHITE       "\033[97m"
+#define LK_ANSI_COLOR_BLACK              "\033[30m"
+#define LK_ANSI_COLOR_RED                "\033[31m"
+#define LK_ANSI_COLOR_GREEN              "\033[32m"
+#define LK_ANSI_COLOR_YELLOW             "\033[33m"
+#define LK_ANSI_COLOR_BLUE               "\033[34m"
+#define LK_ANSI_COLOR_MAGENTA            "\033[35m"
+#define LK_ANSI_COLOR_CYAN               "\033[36m"
+#define LK_ANSI_COLOR_WHITE              "\033[37m"
+#define LK_ANSI_COLOR_BRIGHT_BLACK       "\033[90m"
+#define LK_ANSI_COLOR_BRIGHT_RED         "\033[91m"
+#define LK_ANSI_COLOR_BRIGHT_GREEN       "\033[92m"
+#define LK_ANSI_COLOR_BRIGHT_YELLOW      "\033[93m"
+#define LK_ANSI_COLOR_BRIGHT_BLUE        "\033[94m"
+#define LK_ANSI_COLOR_BRIGHT_MAGENTA     "\033[95m"
+#define LK_ANSI_COLOR_BRIGHT_CYAN        "\033[96m"
+#define LK_ANSI_COLOR_BRIGHT_WHITE       "\033[97m"
 /* Background Colors */
-#define LK_COLOR_BG_BLACK           "\033[40m"
-#define LK_COLOR_BG_RED             "\033[41m"
-#define LK_COLOR_BG_GREEN           "\033[42m"
-#define LK_COLOR_BG_YELLOW          "\033[43m"
-#define LK_COLOR_BG_BLUE            "\033[44m"
-#define LK_COLOR_BG_MAGENTA         "\033[45m"
-#define LK_COLOR_BG_CYAN            "\033[46m"
-#define LK_COLOR_BG_WHITE           "\033[47m"
-#define LK_COLOR_BG_BRIGHT_BLACK    "\033[100m"
-#define LK_COLOR_BG_BRIGHT_RED      "\033[101m"
-#define LK_COLOR_BG_BRIGHT_GREEN    "\033[102m"
-#define LK_COLOR_BG_BRIGHT_YELLOW   "\033[103m"
-#define LK_COLOR_BG_BRIGHT_BLUE     "\033[104m"
-#define LK_COLOR_BG_BRIGHT_MAGENTA  "\033[105m"
-#define LK_COLOR_BG_BRIGHT_CYAN     "\033[106m"
-#define LK_COLOR_BG_BRIGHT_WHITE    "\033[107m"
+#define LK_ANSI_COLOR_BG_BLACK           "\033[40m"
+#define LK_ANSI_COLOR_BG_RED             "\033[41m"
+#define LK_ANSI_COLOR_BG_GREEN           "\033[42m"
+#define LK_ANSI_COLOR_BG_YELLOW          "\033[43m"
+#define LK_ANSI_COLOR_BG_BLUE            "\033[44m"
+#define LK_ANSI_COLOR_BG_MAGENTA         "\033[45m"
+#define LK_ANSI_COLOR_BG_CYAN            "\033[46m"
+#define LK_ANSI_COLOR_BG_WHITE           "\033[47m"
+#define LK_ANSI_COLOR_BG_BRIGHT_BLACK    "\033[100m"
+#define LK_ANSI_COLOR_BG_BRIGHT_RED      "\033[101m"
+#define LK_ANSI_COLOR_BG_BRIGHT_GREEN    "\033[102m"
+#define LK_ANSI_COLOR_BG_BRIGHT_YELLOW   "\033[103m"
+#define LK_ANSI_COLOR_BG_BRIGHT_BLUE     "\033[104m"
+#define LK_ANSI_COLOR_BG_BRIGHT_MAGENTA  "\033[105m"
+#define LK_ANSI_COLOR_BG_BRIGHT_CYAN     "\033[106m"
+#define LK_ANSI_COLOR_BG_BRIGHT_WHITE    "\033[107m"
 
 
 namespace LkEngine::Color {
@@ -52,18 +53,6 @@ namespace LkEngine::Color {
 	extern std::uniform_int_distribution<int> Dist;
 
 	/* clang-format off */
-
-    namespace RGBA 
-    {
-        extern glm::vec4 Transparent;
-        extern glm::vec4 White;
-        extern glm::vec4 Black;
-        extern glm::vec4 Gray;
-        extern glm::vec4 Red;
-        extern glm::vec4 Green;
-        extern glm::vec4 Blue;
-    }
-
 
 	/**
 	 * TODO: Move this to a 'Core' subfolder as this is not entirely 
@@ -394,3 +383,31 @@ namespace LkEngine::Color {
 	}
 
 }
+
+
+/**
+ * RGBA32
+ */
+namespace LkEngine::RGBA32 
+{
+	static constexpr uint32_t BrightGreen = IM_COL32(18, 140, 40, 255);
+	static constexpr uint32_t NiceBlue    = IM_COL32(83, 232, 254, 255);
+
+	static constexpr uint32_t Accent      = IM_COL32(236, 158, 36, 255);
+	static constexpr uint32_t Highlight   = IM_COL32(39, 185, 242, 255);
+	static constexpr uint32_t Compliment  = IM_COL32(78, 151, 166, 255);
+
+	namespace Text 
+	{
+		static constexpr uint32_t Normal   = IM_COL32(190, 190, 190, 255);
+		static constexpr uint32_t Brighter = IM_COL32(204, 204, 204, 255);
+		static constexpr uint32_t Darker   = IM_COL32(128, 128, 128, 255);
+		static constexpr uint32_t Error    = IM_COL32(232, 55, 55, 255);
+	}
+
+	static constexpr uint32_t Titlebar       = IM_COL32(30, 30, 30, 255);
+	static constexpr uint32_t TitlebarOrange = IM_COL32(186, 66, 30, 255);
+	static constexpr uint32_t TitlebarGreen  = IM_COL32(22, 84, 29, 255);
+	static constexpr uint32_t TitlebarRed    = IM_COL32(190, 32, 30, 255);
+}
+

@@ -47,10 +47,10 @@ namespace LkEngine {
 		LScene() = delete;
 		~LScene() = default;
 
-		void OnRender(TObjectPtr<LSceneRenderer> InSceneRenderer, FTimestep Timestep);
-		void OnRenderEditor(LEditorCamera& InEditorCamera, FTimestep Timestep);
+		void OnRender(TObjectPtr<LSceneRenderer> InSceneRenderer, const float DeltaTime);
+		void OnRenderEditor(LEditorCamera& InEditorCamera, const float DeltaTime);
 		void EndScene();
-
+		
 		LEntity GetMainCameraEntity();
 		std::vector<LEntity> GetEntities();
 		FORCEINLINE uint64_t GetEntityCount() const { return m_EntityIDMap.size(); }
