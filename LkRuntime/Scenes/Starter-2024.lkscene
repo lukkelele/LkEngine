@@ -3,10 +3,10 @@ Active: true
 EditorScene: true
 SceneHandle: 0
 EditorCamera:
-  Position: [-7.3484426, 10.392269, -7.3484416]
+  Position: [8.464383, 3.6476567, -10.979696]
   Origin: [0, 0, 0]
-  Distance: 14.696887
-  FocalPoint: [0, 0, 0]
+  Distance: 14.761928
+  FocalPoint: [-0.49468136, -0.053087234, 0.15377522]
   Perspective:
     DegPerspectiveFOV: 45
     PerspectiveNear: 0.1
@@ -15,15 +15,7 @@ EditorCamera:
     OrthographicSize: 10
     OrthographicNear: -1
     OrthographicFar: 1
-  Pitch: 0.7853982
-  Yaw: 2.3561945
+  Pitch: 0.25339827
+  Yaw: 3.8191907
   ProjectionType: 1
   CameraMode: 2
-Entities:
-  - Entity: 16310273084298233097
-    TagComponent:
-      Tag: Cube
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
