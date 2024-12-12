@@ -96,11 +96,6 @@ namespace LkEngine {
 		EditorWindowScalers.Y = EditorWindowSize.Y / Window->GetHeight();
 		EditorViewport->SetScalers(EditorWindowScalers);
 
-		GOnObjectCreated.Add([&](const LObject* NewObject)
-		{
-			LK_CORE_DEBUG_TAG("Editor", "Object Class=\"{}\"  Name=\"{}\"", NewObject->GetClass()->GetName(), NewObject->ClassName());
-		});
-
 		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
 		{
 			SetScene(NewActiveScene);
@@ -232,19 +227,17 @@ namespace LkEngine {
 		DebugPanel = TObjectPtr<LDebugPanel>::Create();
 
 		/* TODO: Load last open project, else load an empty 'default' project. */
-		if (!LProject::Current())
+		if (LProject::Current() == nullptr)
 		{
-			//EmptyProject();
-			StarterProject();
+			if (true /* == HasStarterProject */)
+			{
+				StarterProject();
+			}
+			else
+			{
+				EmptyProject();
+			}
 		}
-
-		/* Bind delegate for GEditorOnSelectionChanged. */
-		auto OnSelectionChanged = [&](const LObject& Object)
-		{
-			LK_CORE_DEBUG_TAG("Editor", "OnSelectionChanged: '{}', references: {}", 
-							  Object.ClassName(), Object.GetReferenceCount());
-		};
-		GEditorOnSelectionChanged.Add(OnSelectionChanged);
 
 		/* Force editor viewport to sync data. */
 		EditorViewport->SetDirty(true);
@@ -254,7 +247,10 @@ namespace LkEngine {
 		Renderer2D = TObjectPtr<LRenderer2D>::Create(Renderer2DSpec);
 		Renderer2D->Initialize();
 
+	#if 1
 		CubeAssetHandle = LAssetManager::GetDebugCubeHandle();
+		LK_CORE_WARN("CubeAssetHandle: {}", CubeAssetHandle);
+	#endif
 
 		/* FIXME: Temporary debugging. */
 		LOpenGL_Debug::InitializeEnvironment();
@@ -284,6 +280,46 @@ namespace LkEngine {
 			LFramebuffer::TargetSwapChain();
 		});
 
+		LRenderer::Submit([&]()
+		{
+			LRenderer::GetViewportFramebuffer()->Bind();
+			LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
+
+			const glm::mat4 ProjectionMatrix = EditorCamera->GetProjectionMatrix();
+			const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(EditorCamera->GetViewMatrix()));
+
+			if (EditorScene)
+			{
+				for (LEntity Entity : EditorScene->GetEntities())
+				{
+					if (!Entity.HasComponent<LMeshComponent>())
+					{
+						continue;
+					}
+
+					auto& MeshComp = Entity.GetComponent<LMeshComponent>();
+					//TObjectPtr<LMesh> Cube = LAssetManager::GetAsset<LMesh>(CubeAssetHandle);
+					TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(MeshComp.Mesh);
+					/// FIXME
+					if (!Mesh)
+					{
+						continue;
+					}
+					LK_CORE_ASSERT(Mesh, "Failed to retrieve mesh from asset ID '{}'", MeshComp.Mesh);
+
+					TObjectPtr<LMaterialTable> MeshMaterials = Mesh->GetMaterials();
+					if (MeshMaterials->HasMaterial(0))
+					{
+						const FAssetHandle MaterialHandle = MeshMaterials->GetMaterialHandle(0);
+						TObjectPtr<LMaterial> Material = Mesh->GetMaterial(0);
+					}
+				}
+			}
+
+			LFramebuffer::TargetSwapChain();
+		});
+
+	#if 0
 		LRenderer::Submit([&]()
 		{
 			LRenderer::GetViewportFramebuffer()->Bind();
@@ -327,6 +363,7 @@ namespace LkEngine {
 				LFramebuffer::TargetSwapChain();
 			}
 		});
+	#endif
 
 		/**
 		 * Render the debug skybox.
@@ -400,7 +437,7 @@ namespace LkEngine {
 		/*----------------------------------------------------------------------------
 			                              Top Bar
 		-----------------------------------------------------------------------------*/
-		PrepareForTopBar();
+		UI_PrepareTopBar();
 		UI::Begin(LK_UI_TOPBAR, nullptr, UI::SidebarFlags | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 		{
 			//LK_UI_DEBUG_DOCKNODE(LK_UI_TOPBAR);
@@ -411,7 +448,7 @@ namespace LkEngine {
 		/*----------------------------------------------------------------------------
 			                             Sidebar 1
 		-----------------------------------------------------------------------------*/
-		PrepareForLeftSidebar();
+		UI_PrepareLeftSidebar();
 		UI::Begin(LK_UI_SIDEBAR_1, nullptr, UI::SidebarFlags);
 		{
 			//LK_UI_DEBUG_DOCKNODE(LK_UI_SIDEBAR_1);
@@ -439,13 +476,12 @@ namespace LkEngine {
 		/*----------------------------------------------------------------------------
 			                             Sidebar 2
 		-----------------------------------------------------------------------------*/
-		PrepareForRightSidebar();
+		UI_PrepareRightSidebar();
 		UI::Begin(LK_UI_SIDEBAR_2, nullptr, UI::SidebarFlags);
 		{
 			//LK_UI_DEBUG_DOCKNODE(LK_UI_SIDEBAR_2);
 
 			/* Window Information. */
-			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			if (ImGui::TreeNode("Window Information"))
 			{
 				UI_ShowViewportAndWindowDetails();
@@ -462,13 +498,15 @@ namespace LkEngine {
 			if (ImGui::Checkbox("Render Skybox", &bRenderSkybox)) 
 			{
 			}
+
+			ImGui::Text("Assets Dir: %S", LFileSystem::GetAssetsDir().c_str());
 		}
 		UI::End(); /* LK_UI_SIDEBAR_2 */
 
 		/*----------------------------------------------------------------------------
 			                          Bottom Bar
 		-----------------------------------------------------------------------------*/
-		PrepareForBottomBar();
+		UI_PrepareBottomBar();
 		UI::Begin(LK_UI_BOTTOMBAR, nullptr, UI::SidebarFlags);
 		{
 			//LK_UI_DEBUG_DOCKNODE(LK_UI_DOCK_BOTTOMBAR);
@@ -723,9 +761,9 @@ namespace LkEngine {
 	void LEditorLayer::EmptyProject()
 	{
 		LK_CORE_INFO_TAG("Editor", "Loading empty project");
-		if (LProject::Current())
+		if (TObjectPtr<LProject> CurrentProject = LProject::Current(); CurrentProject != nullptr)
 		{
-			/* TODO: Close Current project. */
+			/* TODO: Close already opened project. */
 		}
 
 		NewScene("Untitled");
@@ -739,18 +777,36 @@ namespace LkEngine {
 	void LEditorLayer::StarterProject()
 	{
 		LK_CORE_INFO_TAG("Editor", "Loading starter project");
-		if (LProject::Current())
+		if (TObjectPtr<LProject> CurrentProject = LProject::Current(); CurrentProject != nullptr)
 		{
-			/* TODO: Close Current project. */
+			/* TODO: Close already opened project. */
 		}
 
 		static std::string StarterProjectName = "Starter-2024";
 		NewScene(StarterProjectName);
 
+		/* 1180 */
+	#if 0
+		LEntity Entity_Cube1 = EditorScene->CreateEntity("Cube-1");
+		auto& MeshComp1 = Entity_Cube1.AddComponent<LMeshComponent>();
+
+		LEntity Entity_Cube2 = EditorScene->CreateEntity("Cube-2");
+		auto& MeshComp2 = Entity_Cube2.AddComponent<LMeshComponent>();
+
+		LEntity Entity_Cube3 = EditorScene->CreateEntity("Cube-3");
+		auto& MeshComp3 = Entity_Cube3.AddComponent<LMeshComponent>();
+	#endif
+
 		Project = TObjectPtr<LProject>::Create();
 		//Project->SetName(StarterProjectName);
-		Project->Load(LK_FORMAT_STRING("Projects/{}", StarterProjectName));
+		Project->Load(LK_FORMAT_STRING("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
 		LProject::SetActive(Project);
+
+	#if 0
+		MeshComp1.Mesh = CubeAssetHandle;
+		MeshComp2.Mesh = CubeAssetHandle;
+		MeshComp3.Mesh = CubeAssetHandle;
+	#endif
 	}
 
 	void LEditorLayer::SaveProjectAs()
@@ -783,7 +839,7 @@ namespace LkEngine {
 	#endif
 	}
 
-	void LEditorLayer::PrepareForTopBar() 
+	void LEditorLayer::UI_PrepareTopBar() 
 	{
 		if (ImGuiWindow* TopBar = ImGui::FindWindowByName(LK_UI_TOPBAR); TopBar != nullptr)
 		{
@@ -802,7 +858,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LEditorLayer::PrepareForLeftSidebar() const
+	void LEditorLayer::UI_PrepareLeftSidebar() const
 	{
 		if (ImGuiWindow* SidebarWindow = ImGui::FindWindowByName(LK_UI_SIDEBAR_1); SidebarWindow != nullptr)
 		{
@@ -842,7 +898,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LEditorLayer::PrepareForRightSidebar() const
+	void LEditorLayer::UI_PrepareRightSidebar() const
 	{
 		if (ImGuiWindow* SidebarWindow = ImGui::FindWindowByName(LK_UI_SIDEBAR_2); SidebarWindow != nullptr)
 		{
@@ -884,7 +940,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LEditorLayer::PrepareForBottomBar()
+	void LEditorLayer::UI_PrepareBottomBar()
 	{
 		if (ImGuiWindow* BottomBarWindow = ImGui::FindWindowByName(LK_UI_BOTTOMBAR); BottomBarWindow != nullptr)
 		{

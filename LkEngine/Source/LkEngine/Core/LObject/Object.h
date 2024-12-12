@@ -256,10 +256,10 @@ namespace LkEngine {
 		}
 
 	protected:
-		FObjectHandle Handle = 0;
+		FObjectHandle Handle = 0; /* TODO: Rename to 'ObjectHandle' */
 
 		bool bInitialized = false;
-		LObjectFlag Flags = EObjectFlag::None;
+		LObjectFlag Flags = EObjectFlag::None; /* TODO: Rename 'Flags' to 'ObjectFlags' */
 
 		FObjectDestructBegin OnDestructBegin{};
 		FObjectDestructEnd OnDestructEnd{};

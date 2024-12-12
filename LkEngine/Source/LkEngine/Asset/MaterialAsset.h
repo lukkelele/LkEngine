@@ -78,6 +78,13 @@ namespace LkEngine {
         ~LMaterialTable() = default;
 
         void SetMaterial(const uint32_t Index, const FAssetHandle AssetHandle);
+
+		FORCEINLINE FAssetHandle GetMaterial(const uint32_t Index) const
+		{
+			LK_CORE_ASSERT(HasMaterial(Index), "GetMaterial failed for index {}", Index);
+			return Materials.at(Index);
+		}
+
         void ClearMaterial(const uint32_t Index);
         void InsertLast(const FAssetHandle Material);
 

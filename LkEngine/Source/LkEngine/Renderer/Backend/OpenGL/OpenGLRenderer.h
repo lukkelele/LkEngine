@@ -26,7 +26,7 @@ namespace LkEngine {
 		~LOpenGLRenderer() = default;
 
         virtual void Initialize() override;
-        virtual void Shutdown() override;
+        virtual void Destroy() override;
 
         virtual void BeginFrame() override;
         virtual void EndFrame() override;

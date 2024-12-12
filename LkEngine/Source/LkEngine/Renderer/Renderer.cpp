@@ -85,10 +85,10 @@ namespace LkEngine {
 		RendererAPI->Initialize();
 	}
 
-	void LRenderer::Shutdown()
+	void LRenderer::Destroy()
 	{
 		LK_VERIFY(RendererAPI, "Renderer API reference invalid");
-		RendererAPI->Shutdown();
+		RendererAPI->Destroy();
 	}
 
 	void LRenderer::Clear()

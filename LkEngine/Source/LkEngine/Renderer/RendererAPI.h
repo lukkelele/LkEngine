@@ -34,7 +34,7 @@ namespace LkEngine {
     {
 	public:
 		virtual void Initialize() = 0;
-		virtual void Shutdown() = 0;
+		virtual void Destroy() = 0;
 
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;

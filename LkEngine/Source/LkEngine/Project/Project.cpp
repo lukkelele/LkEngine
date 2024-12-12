@@ -52,6 +52,18 @@ namespace LkEngine {
 		}
 	}
 
+	std::filesystem::path LProject::GetAssetDirectory()
+	{
+		return LFileSystem::GetAssetsDir();
+	}
+
+	std::filesystem::path LProject::GetAssetRegistryPath()
+	{
+		/* TODO: This should be unique for every project and not some global path hardcoded like now. */
+		//return LFileSystem::GetRuntimeDir() / "AssetRegistry.lkreg";
+		return LFileSystem::GetAssetsDir() / "AssetRegistry.lkr";
+	}
+
 	bool LProject::Save()
 	{
 		LK_CORE_INFO_TAG("Project", "Saving: \"{}\"", Configuration.Name);

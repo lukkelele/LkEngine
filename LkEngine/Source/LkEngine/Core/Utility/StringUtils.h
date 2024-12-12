@@ -13,10 +13,12 @@
 
 namespace LkEngine::StringUtils {
 
-	template<typename TChar>
-    static std::basic_string<TChar> ToLower(std::basic_string_view<TChar> String)
+	template<typename TChar = char, typename StringType>
+    static std::basic_string<TChar> ToLower(const StringType& Input)
     {
-        std::basic_string<TChar> Result(String);
+		std::basic_string_view<TChar> StringView(Input);
+        std::basic_string<TChar> Result(StringView);
+
         std::transform(Result.begin(), Result.end(), Result.begin(), [](TChar Character) 
 		{
             return static_cast<TChar>(std::tolower(Character, std::locale{}));
@@ -25,10 +27,12 @@ namespace LkEngine::StringUtils {
         return Result;
     }
 
-    template<typename TChar>
-    static std::basic_string<TChar> ToUpper(std::basic_string_view<TChar> String)
+	template<typename TChar = char, typename StringType>
+    static std::basic_string<TChar> ToUpper(const StringType& Input)
     {
-        std::basic_string<TChar> Result(String);
+		std::basic_string_view<TChar> StringView(Input);
+        std::basic_string<TChar> Result(StringView);
+
         std::transform(Result.begin(), Result.end(), Result.begin(), [](TChar Character)
 		{
             return static_cast<TChar>(std::toupper(Character, std::locale{}));
@@ -39,47 +43,23 @@ namespace LkEngine::StringUtils {
 
     static std::string ToLower(const char* String)
     {
-        return ToLower(std::string_view(String));
+        return ToLower<char>(std::string_view(String));
     }
 
     static std::string ToUpper(const char* String)
     {
-        return ToUpper(std::string_view(String));
+        return ToUpper<char>(std::string_view(String));
     }
 
     static std::wstring ToLower(const wchar_t* String)
     {
-        return ToLower(std::wstring_view(String));
+        return ToLower<wchar_t>(std::wstring_view(String));
     }
 
     static std::wstring ToUpper(const wchar_t* String)
     {
-        return ToUpper(std::wstring_view(String));
+        return ToUpper<wchar_t>(std::wstring_view(String));
     }
-
-#if 0
-	static std::string ToLower(std::string_view String)
-	{
-		std::string Result(String);
-        std::transform(Result.begin(), Result.end(), Result.begin(), [](unsigned char Character) 
-		{
-            return std::tolower(Character);
-        });
-
-		return Result;
-	}
-
-	static std::string ToUpper(std::string_view String)
-	{
-		std::string Result(String);
-        std::transform(Result.begin(), Result.end(), Result.begin(), [](unsigned char Character) 
-		{
-            return std::toupper(Character);
-        });
-
-        return Result;
-	}
-#endif
 
 	static std::string BytesToString(const uint64_t Bytes)
 	{

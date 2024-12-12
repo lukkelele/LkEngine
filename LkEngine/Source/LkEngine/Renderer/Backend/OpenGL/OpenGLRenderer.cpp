@@ -105,7 +105,7 @@ namespace LkEngine {
 		SetPrimitiveTopology(ERenderTopology::Triangles);
 	}
 
-	void LOpenGLRenderer::Shutdown()
+	void LOpenGLRenderer::Destroy()
 	{
 		if (GeometricPass)
 		{

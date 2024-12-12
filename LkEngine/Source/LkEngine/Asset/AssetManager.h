@@ -10,6 +10,9 @@ namespace LkEngine {
 	class LAssetManager
 	{
 	public:
+		static void Initialize();
+		static void Destroy();
+
 		FORCEINLINE static bool IsAssetHandleValid(FAssetHandle AssetHandle) 
 		{ 
 			return LProject::GetRuntimeAssetManager()->IsAssetHandleValid(AssetHandle); 
@@ -77,50 +80,50 @@ namespace LkEngine {
 		}
 
 		template<typename TAsset, typename... TArgs>
-		static FAssetHandle CreateMemoryOnlyAsset(TArgs&&... args)
-		{
-			static_assert(std::is_base_of<LAsset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
-
-			TObjectPtr<TAsset> asset = TObjectPtr<TAsset>::Create(std::forward<TArgs>(args)...);
-			asset->Handle = FAssetHandle(); 
-
-			LProject::GetRuntimeAssetManager()->AddMemoryOnlyAsset(asset);
-			return asset->Handle;
-		}
-
-		template<typename TAsset, typename... TArgs>
-		static FAssetHandle CreateMemoryOnlyRendererAsset(TArgs&&... args)
-		{
-			static_assert(std::is_base_of<LAsset, TAsset>::value, "CreateMemoryOnlyAsset only works for types derived from Asset");
-
-			TObjectPtr<TAsset> asset = TAsset::Create(std::forward<TArgs>(args)...);
-			asset->Handle = FAssetHandle();
-
-			LProject::GetAssetManager()->AddMemoryOnlyAsset(asset);
-
-			return asset->Handle;
-		}
-
-		template<typename TAsset, typename... TArgs>
-		static FAssetHandle CreateMemoryOnlyAssetWithHandle(FAssetHandle handle, TArgs&&... args)
+		static FAssetHandle CreateMemoryOnlyAsset(TArgs&&... Args)
 		{
 			static_assert(std::is_base_of_v<LAsset, TAsset>, "CreateMemoryOnlyAsset only works for types derived from Asset");
 
-			TObjectPtr<TAsset> asset = TObjectPtr<TAsset>::Create(std::forward<TArgs>(args)...);
-			asset->Handle = handle;
+			TObjectPtr<TAsset> Asset = TObjectPtr<TAsset>::Create(std::forward<TArgs>(Args)...);
+			Asset->Handle = FAssetHandle(); 
 
-			LProject::GetAssetManager()->AddMemoryOnlyAsset(asset);
-			return asset->Handle;
+			LProject::GetRuntimeAssetManager()->AddMemoryOnlyAsset(Asset);
+			return Asset->Handle;
+		}
+
+		template<typename TAsset, typename... TArgs>
+		static FAssetHandle CreateMemoryOnlyRendererAsset(TArgs&&... Args)
+		{
+			static_assert(std::is_base_of_v<LAsset, TAsset>, "CreateMemoryOnlyAsset only works for types derived from Asset");
+
+			TObjectPtr<TAsset> Asset = TAsset::Create(std::forward<TArgs>(Args)...);
+			Asset->Handle = FAssetHandle();
+
+			LProject::GetAssetManager()->AddMemoryOnlyAsset(Asset);
+
+			return Asset->Handle;
+		}
+
+		template<typename TAsset, typename... TArgs>
+		static FAssetHandle CreateMemoryOnlyAssetWithHandle(FAssetHandle handle, TArgs&&... Args)
+		{
+			static_assert(std::is_base_of_v<LAsset, TAsset>, "CreateMemoryOnlyAsset only works for types derived from Asset");
+
+			TObjectPtr<TAsset> Asset = TObjectPtr<TAsset>::Create(std::forward<TArgs>(Args)...);
+			Asset->Handle = handle;
+
+			LProject::GetAssetManager()->AddMemoryOnlyAsset(Asset);
+			return Asset->Handle;
 		}
 
 		template<typename TAsset>
-		static FAssetHandle AddMemoryOnlyAsset(TObjectPtr<TAsset> asset)
+		static FAssetHandle AddMemoryOnlyAsset(TObjectPtr<TAsset> Asset)
 		{
 			static_assert(std::is_base_of_v<LAsset, TAsset>, "AddMemoryOnlyAsset only works for types derived from Asset");
-			asset->Handle = FAssetHandle(); 
+			Asset->Handle = FAssetHandle(); 
 
-			LProject::GetAssetManager()->AddMemoryOnlyAsset(asset);
-			return asset->Handle;
+			LProject::GetAssetManager()->AddMemoryOnlyAsset(Asset);
+			return Asset->Handle;
 		}
 
 		static bool IsMemoryAsset(FAssetHandle handle) 

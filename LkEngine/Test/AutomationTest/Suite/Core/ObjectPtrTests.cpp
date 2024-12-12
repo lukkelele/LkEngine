@@ -1,14 +1,16 @@
 #include "ObjectPtrTests.h"
 
-#include "LkEngine/Test/TestManager.h"
-#include "LkEngine/Test/DummyTestClass.h"
+#include "AutomationTest/TestManager.h"
+#include "AutomationTest/DummyTestClass.h"
+
+#include <LkEngine/Core/Utility/StringUtils.h>
 
 using namespace LkEngine;
 using namespace LkEngine::Test;
 
-/** 
- * Test Definitions. 
- */
+/*=================================================================
+                        Test Definitions
+ =================================================================*/ 
 
 LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_OneEqualOne) 
 {
@@ -30,8 +32,14 @@ LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_TwoGreaterThanThree)
 	return TestLessThan(2, 3, GetName());
 };
 
+/*=================================================================
+                           Core Tests
+ =================================================================*/ 
 #if defined(LK_AUTOMATION_TEST_CORE)
 
+/*--------------------------------------------------
+	 Object Pointer Tests.
+ --------------------------------------------------*/
 LK_DEFINE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_Creation) 
 {
 	using namespace LkEngine::Test;
@@ -54,4 +62,40 @@ LK_DEFINE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_CopyTwice)
 	return TestEqual(TestObject->GetReferenceCount(), 3, GetName());
 };
 
-#endif
+/*--------------------------------------------------
+	 StringUtils Tests.
+ --------------------------------------------------*/
+LK_DEFINE_AUTOMATION_TEST(StringUtils_ToLower_ConstChar) 
+{
+	constexpr const char* TestString = "TEST_STRING";
+	constexpr const char* Expected = "test_string";
+	const std::string Result = StringUtils::ToLower(TestString);
+	return (Result == Expected);
+};
+
+LK_DEFINE_AUTOMATION_TEST(StringUtils_ToUpper_ConstChar) 
+{
+	constexpr const char* TestString = "test_string";
+	constexpr const char* Expected = "TEST_STRING";
+	const std::string Result = StringUtils::ToUpper(TestString);
+	return (Result == Expected);
+};
+
+LK_DEFINE_AUTOMATION_TEST(StringUtils_ToLower_String) 
+{
+	const std::string TestString("TEST_STRING");
+	const std::string Expected("test_string");
+	const std::string Result = StringUtils::ToLower(TestString);
+	return (Result == Expected);
+};
+
+LK_DEFINE_AUTOMATION_TEST(StringUtils_ToUpper_String) 
+{
+	const std::string TestString("test_string");
+	const std::string Expected("TEST_STRING");
+	const std::string Result = StringUtils::ToUpper(TestString);
+	return (Result == Expected);
+};
+
+
+#endif /* LK_AUTOMATION_TEST_CORE */

@@ -42,6 +42,7 @@ namespace LkEngine {
 		/* The engine config is placed in the 'LkEngine/LkRuntime' directory. */
 		LFileSystem::EngineDir = Path;
 		LFileSystem::EngineDir += PathSeparator + std::string("LkRuntime");
+		LFileSystem::RuntimeDir = LFileSystem::EngineDir;
 		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid");
 		LFileSystem::ConfigDir = LFileSystem::WorkingDir;
 
@@ -57,6 +58,8 @@ namespace LkEngine {
 		LFileSystem::EngineConfig = LFileSystem::ConfigDir;
 		LFileSystem::EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
 		//LK_PRINTLN("EngineDir: {}     EngineConfig: {}", std::filesystem::absolute(EngineDir), std::filesystem::absolute(EngineConfig));
+
+		LFileSystem::AssetsDir = fs::absolute(LFileSystem::EngineDir / "Assets");
 
 		bArgumentsSet = true;
 	}

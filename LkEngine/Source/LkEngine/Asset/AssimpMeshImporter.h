@@ -17,7 +17,10 @@ namespace LkEngine {
 	{
 	public:
 		LAssimpMeshImporter(const std::filesystem::path& InFilePath);
+		LAssimpMeshImporter() = delete;
 		~LAssimpMeshImporter() = default;
+
+		bool IsValid() const;
 
 		TObjectPtr<LMeshSource> ImportToMeshSource();
 

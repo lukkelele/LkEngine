@@ -91,13 +91,13 @@ namespace LkEngine {
 	{
 		FAssetHandle Handle = 0;
 		EAssetType Type = EAssetType::None;
-		std::filesystem::path FilePath;
-		bool IsDataLoaded = false;
-		bool IsMemoryAsset = false;
+		std::filesystem::path FilePath{};
+		bool bIsDataLoaded = false;
+		bool bIsMemoryAsset = false;
 
 		FORCEINLINE bool IsValid() const 
 		{ 
-			return (Handle != 0);
+			return (Handle > 0);
 		}
 	};
 

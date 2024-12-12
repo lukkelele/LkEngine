@@ -20,7 +20,7 @@ namespace LkEngine {
 		 * @brief Create Pipeline components.
 		 */
 		static void Initialize();
-		static void Shutdown();
+		static void Destroy();
 
 		static void Clear();
 		static void BeginFrame();

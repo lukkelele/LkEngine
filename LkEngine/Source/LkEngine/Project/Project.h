@@ -49,6 +49,9 @@ namespace LkEngine {
 		 */
 		FORCEINLINE static TObjectPtr<LProject> Current() { return ActiveProject; }
 
+		static std::filesystem::path GetAssetDirectory();
+		static std::filesystem::path GetAssetRegistryPath();
+
 		bool Save();
 		uint64_t GetSize() const;
 

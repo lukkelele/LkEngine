@@ -212,19 +212,33 @@ namespace LkEngine {
 
 	void LSceneSerializer::SerializeEntity(YAML::Emitter& Out, LEntity Entity)
 	{
-		const UUID ID = Entity.GetComponent<LIDComponent>().ID;
+		/* TODO: Validate that no other entry exists already. */
+		if (!Entity.HasComponent<LTagComponent>() && !Entity.HasComponent<LTransformComponent>())
+		{
+			LK_CORE_INFO("Skipping serialization of entity: {}", Entity);
+			return;
+		}
+
+		/* REMOVE ME */
+		if (Entity.GetComponent<LTagComponent>().Tag == "DebugCube")
+		{
+			LK_CORE_WARN("Skipping serialization of entity: DebugCube");
+			return;
+		}
+
+		const UUID ID = Entity.GetUUID();
 		Out << YAML::BeginMap; /* Entity */
 		Out << YAML::Key << "Entity";
 		Out << YAML::Value << ID;
 
-		if (Entity.HasComponent<LTagComponent>())
+		LK_CORE_ERROR("Serializing entity: {}", ID);
+
+		/* TagComponent */
+		const LTagComponent& TagComp = Entity.GetComponent<LTagComponent>().Tag;
 		{
 			Out << YAML::Key << "TagComponent";
 			Out << YAML::BeginMap;
-
-			const LTagComponent& Tag = Entity.GetComponent<LTagComponent>().Tag;
-			Out << YAML::Key << "Tag" << YAML::Value << Tag;
-
+			Out << YAML::Key << "Tag" << YAML::Value << TagComp.Tag;
 			Out << YAML::EndMap; /* TagComponent */
 		}
 
@@ -250,6 +264,37 @@ namespace LkEngine {
 
 			Out << YAML::EndMap; 
 		}
+
+		if (!Entity.HasComponent<LMeshComponent>())
+		{
+			LK_CORE_DEBUG("{} does not have a mesh component", TagComp.Tag);
+		}
+		if (Entity.HasComponent<LMeshComponent>())
+		{
+			LK_CORE_DEBUG("Serializing mesh component ({})", TagComp.Tag);
+			Out << YAML::Key << "MeshComponent";
+			Out << YAML::BeginMap; /* MeshComponent */
+
+			const auto& MeshComp = Entity.GetComponent<LMeshComponent>();
+			Out << YAML::Key << "AssetID" << YAML::Value << MeshComp.Mesh;
+
+			TObjectPtr<LMaterialTable> MaterialTable = MeshComp.MaterialTable;
+			LK_CORE_ASSERT(MaterialTable, "Pointer to MaterialTable is not valid");
+			if (MaterialTable->GetMaterialCount() > 0)
+			{
+				Out << YAML::Key << "MaterialTable" << YAML::Value << YAML::BeginMap; /* MaterialTable */
+				for (uint32_t Index = 0; Index < MaterialTable->GetMaterialCount(); Index++)
+				{
+					const FAssetHandle Handle = (MaterialTable->HasMaterial(Index) ? MaterialTable->GetMaterial(Index) : (FAssetHandle)0);
+					Out << YAML::Key << Index << YAML::Value << Handle;
+				}
+				Out << YAML::EndMap; /* MaterialTable */
+			}
+
+			Out << YAML::Key << "Visible" << YAML::Value << MeshComp.Visible;
+			Out << YAML::EndMap; /* MeshComponent */
+		}
+
 
 		#if 0
 		if (Entity.HasComponent<LMaterialComponent>())
@@ -346,9 +391,37 @@ namespace LkEngine {
 			const YAML::Node& SpriteComponentNode = EntityNode["SpriteComponent"];
 			if (SpriteComponentNode)
 			{
-				LSpriteComponent& SpriteComponent = DeserializedEntity.AddComponent<LSpriteComponent>();
+				auto& SpriteComponent = DeserializedEntity.AddComponent<LSpriteComponent>();
 				SpriteComponent.Size = SpriteComponentNode["Size"].as<glm::vec2>(glm::vec2(0.0f));
 				SpriteComponent.Color = SpriteComponentNode["Color"].as<glm::vec4>(glm::vec4(0.0f));
+			}
+
+			const YAML::Node& MeshCompNode = EntityNode["MeshComponent"];
+			if (MeshCompNode)
+			{
+				auto& MeshComp = DeserializedEntity.AddComponent<LMeshComponent>();
+				MeshComp.Mesh = MeshCompNode["AssetID"].as<uint64_t>();
+				if (MeshCompNode["MaterialTable"])
+				{
+					YAML::Node MaterialTableNode = MeshCompNode["MaterialTable"];
+					for (auto MaterialEntry : MaterialTableNode)
+					{
+						const uint32_t Index = MaterialEntry.first.as<uint32_t>();
+						const FAssetHandle MaterialAsset = MaterialEntry.second.as<FAssetHandle>();
+						if (MaterialAsset && LAssetManager::IsAssetHandleValid(MaterialAsset))
+						{
+							MeshComp.MaterialTable->SetMaterial(Index, MaterialAsset);
+						}
+						else
+						{
+							LK_CORE_DEBUG_TAG("SceneSerializer", "Could not set material in table, faulty index: {}", Index);
+						}
+					}
+				}
+				if (MeshCompNode["Visible"])
+				{
+					MeshComp.Visible = MeshCompNode["Visible"].as<bool>();
+				}
 			}
 
 			const YAML::Node& CameraComponentNode = EntityNode["CameraComponent"];
@@ -375,7 +448,6 @@ namespace LkEngine {
 						CameraComponent.Camera->SetOrthographicFarClip(CameraNode["OrthographicFar"].as<float>());
 					}
 				}
-
 			}
 
 			const YAML::Node& RigidBody2DNode = EntityNode["LRigidBody2DComponent"];

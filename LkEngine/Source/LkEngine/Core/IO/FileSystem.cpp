@@ -10,7 +10,10 @@ namespace LkEngine {
 	std::filesystem::path LFileSystem::BinaryDir{};
 	std::filesystem::path LFileSystem::EngineDir{};
 	std::filesystem::path LFileSystem::EngineConfig{};
+	std::filesystem::path LFileSystem::RuntimeDir{};
 	std::filesystem::path LFileSystem::ConfigDir{};
+	std::filesystem::path LFileSystem::AssetsDir{};
+	std::filesystem::path LFileSystem::ProjectsDir{};
 
 	namespace fs = std::filesystem;
 

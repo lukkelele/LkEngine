@@ -1,11 +1,11 @@
 #pragma once
 
-#include "LkEngine/Core/CoreTypes.h"
-#include "LkEngine/Core/CoreMacros.h"
-#include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/ObjectPtr.h"
+#include <LkEngine/Core/CoreTypes.h>
+#include <LkEngine/Core/CoreMacros.h>
+#include <LkEngine/Core/LObject/Object.h>
+#include <LkEngine/Core/LObject/ObjectPtr.h>
 
-#include "LkEngine/Test/AutomationTest.h"
+#include "AutomationTest.h"
 
 
 namespace LkEngine {
@@ -26,12 +26,13 @@ namespace LkEngine {
 			const LClass* Class = InTestInstance->GetClass();
 			LK_CORE_ASSERT(Class);
 			const std::string ClassName = Class->GetName();
-			printf("DetectAutomationTest: %s", ClassName.c_str());
+			//printf("DetectAutomationTest: %s", ClassName.c_str());
+			LK_PRINT("DetectAutomationTest: {}", ClassName.c_str());
 
 			LAutomationTestBase* TestInstance = static_cast<LAutomationTestBase*>(InTestInstance);
 			const ETestSuite TestSuite = TestInstance->GetTestSuite();
-
-			printf("  Suite: (%s, ", Enum::ToString(TestSuite));
+			//printf("  Suite: (%s, ", Enum::ToString(TestSuite));
+			LK_PRINT("  Suite: ({}, ", Enum::ToString(TestSuite));
 
 			if (TestSuiteMap.contains(TestInstance->GetTestSuite()))
 			{
@@ -43,7 +44,8 @@ namespace LkEngine {
 				TestSuiteMap[TestSuite] = { TestInstance };
 			}
 
-			printf("%d) \n", (int)TestSuiteMap[TestSuite].size());
+			//printf("%d) \n", (int)TestSuiteMap[TestSuite].size());
+			LK_PRINTLN("{}) \n", TestSuiteMap[TestSuite].size());
 
 			return true;
 		}

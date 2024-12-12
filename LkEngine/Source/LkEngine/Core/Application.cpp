@@ -167,8 +167,8 @@ namespace LkEngine {
 				Project->Save();
 			}
 
-			Renderer->Shutdown();
-
+			LAssetManager::Destroy();
+			LRenderer::Destroy();
 			UILayer->Destroy();
 
 			LK_CORE_TRACE_TAG("Application", "Window->Shutdown()");

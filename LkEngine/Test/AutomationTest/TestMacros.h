@@ -43,6 +43,11 @@ namespace LkEngine::Test
 
 
 /**
+ * TODO: Should be able to wrap a try-catch around the test definition and
+ *       report an error and return false for tests that fail miserably.
+ *       So that the test code can fail internally and still run and report errors.
+ */
+/**
  * Define an Automation Test.
  */
 #define LK_DEFINE_AUTOMATION_TEST(TestClass, ...)                 \

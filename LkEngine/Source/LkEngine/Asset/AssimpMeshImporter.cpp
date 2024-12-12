@@ -88,6 +88,12 @@ namespace LkEngine {
 		// AssimpLogStream::Initialize();
 	}
 
+	bool LAssimpMeshImporter::IsValid() const
+	{
+		/* TODO: Validate the filepath existance here. */
+		return true;
+	}
+
 	TObjectPtr<LMeshSource> LAssimpMeshImporter::ImportToMeshSource()
 	{
 		LK_CORE_DEBUG_TAG("AssimpMeshImporter", "Loading mesh: {0}", FilePath.string());

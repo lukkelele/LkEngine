@@ -47,15 +47,21 @@ namespace LkEngine {
 
 		FORCEINLINE static std::filesystem::path GetWorkingDir() { return WorkingDir; }
 		FORCEINLINE static std::filesystem::path GetBinaryDir() { return BinaryDir; }
-		FORCEINLINE static std::filesystem::path GetConfigDir() { return ConfigDir; }
+		FORCEINLINE static std::filesystem::path GetEngineDir() { return EngineConfig; }
 		FORCEINLINE static std::filesystem::path GetEngineConfig() { return EngineConfig; }
+		FORCEINLINE static std::filesystem::path GetRuntimeDir() { return RuntimeDir; }
+		FORCEINLINE static std::filesystem::path GetConfigDir() { return ConfigDir; }
+		FORCEINLINE static std::filesystem::path GetAssetsDir() { return AssetsDir; }
 
 	private:
 		static std::filesystem::path WorkingDir;
 		static std::filesystem::path BinaryDir;
 		static std::filesystem::path EngineDir;
 		static std::filesystem::path EngineConfig;
+		static std::filesystem::path RuntimeDir;
 		static std::filesystem::path ConfigDir;
+		static std::filesystem::path AssetsDir;
+		static std::filesystem::path ProjectsDir;
 
 		friend struct Global;
 	};

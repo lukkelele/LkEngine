@@ -13,7 +13,6 @@
  */
 namespace YAML 
 {
-
 	template<>
 	struct convert<glm::vec2>
 	{
@@ -118,7 +117,8 @@ namespace YAML
 		static Node encode(const LkEngine::FAssetHandle& RHS)
 		{
 			Node node;
-			node.push_back((uint64_t)RHS);
+			//node.push_back((uint64_t)RHS);
+			node.push_back(static_cast<uint64_t>(RHS));
 			return node;
 		}
 
@@ -133,7 +133,7 @@ namespace YAML
 
 namespace LkEngine {
 
-	// Overloaded bitwise operators 
+	/* Overloaded bitwise operators. */
 	inline YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
 	{
 		out << YAML::Flow;

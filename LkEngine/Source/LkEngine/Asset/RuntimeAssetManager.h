@@ -11,26 +11,40 @@ namespace LkEngine {
     {
     public:
 		LRuntimeAssetManager();
-		~LRuntimeAssetManager() = default;
+		~LRuntimeAssetManager();
 
-		void Initialize();
+		virtual void Initialize() override;
+		virtual void Destroy() override;
 
 		template<typename AssetType>
 		TObjectPtr<AssetType> ImportAsset(std::filesystem::path filepath);
 
         TObjectPtr<LAsset> GetAsset(FAssetHandle Asset);
-
 		EAssetType GetAssetType(const FAssetHandle AssetHandle);
 
-        FORCEINLINE bool IsMemoryAsset(const FAssetHandle AssetHandle) 
+        FORCEINLINE bool IsMemoryAsset(const FAssetHandle AssetHandle) const
 		{ 
 			return MemoryAssets.contains(AssetHandle); 
 		}
 
 		bool ReloadData(const FAssetHandle AssetHandle);
 		void AddMemoryOnlyAsset(TObjectPtr<LAsset> Asset);
+		bool IsAssetHandleValid(const FAssetHandle AssetHandle) const;
 
-		bool IsAssetHandleValid(const FAssetHandle AssetHandle);
+		std::filesystem::path GetFileSystemPath(const FAssetMetadata& metadata);
+		std::filesystem::path GetFileSystemPath(const FAssetHandle Handle);
+
+		/**
+		 * @brief 
+		 * @todo: MAKE PRIVATE
+		 */
+		void LoadAssetRegistry();
+
+		/**
+		 * @brief 
+		 * @todo: MAKE PRIVATE
+		 */
+		void WriteRegistryToDisk();
 
         const FAssetMetadata& GetMetadata(FAssetHandle AssetHandle);
         const FAssetMetadata& GetMetadata(const TObjectPtr<LAsset>& AssetRef);
@@ -42,7 +56,6 @@ namespace LkEngine {
 		EAssetType GetAssetTypeFromPath(const std::filesystem::path& InFilePath);
 
         std::filesystem::path GetRelativePath(const std::filesystem::path& InFilePath);
-		void WriteRegistryToFile();
 
 		template<typename T>
 		TObjectPtr<T> GetAsset(const std::string& InFilePath)
@@ -74,7 +87,7 @@ namespace LkEngine {
 				Metadata.FilePath = GetRelativePath(DirectoryPath + "/" + FileName);
 			}
 
-			Metadata.IsDataLoaded = true;
+			Metadata.bIsDataLoaded = true;
 			Metadata.Type = T::GetStaticType();
 
 			AssetRegistry[Metadata.Handle] = Metadata;

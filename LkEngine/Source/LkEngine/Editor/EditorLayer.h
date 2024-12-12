@@ -91,10 +91,10 @@ namespace LkEngine {
 		void SaveSceneAs();
 
 	private:
-		void PrepareForTopBar();
-		void PrepareForLeftSidebar() const;
-		void PrepareForRightSidebar() const;
-		void PrepareForBottomBar();
+		void UI_PrepareTopBar();
+		void UI_PrepareLeftSidebar() const;
+		void UI_PrepareRightSidebar() const;
+		void UI_PrepareBottomBar();
 
 		void DrawObjectGizmo(LEntity Entity);
 		void UI_RenderExternalWindows();

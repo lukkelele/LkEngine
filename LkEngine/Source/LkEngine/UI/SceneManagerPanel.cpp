@@ -390,7 +390,15 @@ namespace LkEngine {
 		}
 
 		const std::string& Tag = Entity.GetComponent<LTagComponent>().Tag;
-		const std::string TagWithEntityHandle = LK_FORMAT_STRING("{}  ({})", Tag, Entity.Handle);
+		std::string TagWithEntityHandle = LK_FORMAT_STRING("{} ({})", Tag, Entity.Handle);
+		if (Entity.HasComponent<LMeshComponent>())
+		{
+			TagWithEntityHandle = LK_FORMAT_STRING("{} (AssetID: {})", Tag, Entity.GetComponent<LMeshComponent>().Mesh);
+		}
+		else
+		{
+			TagWithEntityHandle = LK_FORMAT_STRING("{} ({})", Tag, Entity.Handle);
+		}
 
 		const bool bEntitySelected = false;
 		ImGuiTreeNodeFlags flags = (bEntitySelected ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
@@ -400,7 +408,15 @@ namespace LkEngine {
 
 		if (ImGui::IsItemClicked())
 		{
-			LK_UI_INFO("Clicked: {} ({})", Tag, Entity);
+			if (Entity.HasComponent<LMeshComponent>())
+			{
+				LK_UI_INFO("Clicked: {} (AssetID={})", Tag, Entity.GetComponent<LMeshComponent>().Mesh);
+			}
+			else
+			{
+				LK_UI_INFO("Clicked: {}", Tag);
+			}
+
 			LSelectionContext::Select(Entity);
 		}
 

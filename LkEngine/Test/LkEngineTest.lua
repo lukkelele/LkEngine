@@ -23,11 +23,8 @@ project "LkEngine_AutomationTests"
 
 	includedirs {
 		"%{prj.location}",
-		"%{prj.location}/AutomationTest",
 
-		"%{wks.location}/LkEngine",
-		"%{wks.location}/LkEngine/Source",
-
+		"%{wks.location}/LkEngine/Source", -- LkEngine source
 		"%{ExternalDirectory}",
 
         "%{Dependency.Glfw.IncludeDir}",
