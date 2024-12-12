@@ -49,6 +49,8 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_ConstChar>());
 		Tests.push_back(std::make_shared<StringUtils_ToLower_String>());
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_String>());
+		Tests.push_back(std::make_shared<StringUtils_ToLower_WideString>());
+		Tests.push_back(std::make_shared<StringUtils_ToUpper_WideString>());
 	#endif
 	}
 

@@ -97,5 +97,22 @@ LK_DEFINE_AUTOMATION_TEST(StringUtils_ToUpper_String)
 	return (Result == Expected);
 };
 
+LK_DEFINE_AUTOMATION_TEST(StringUtils_ToLower_WideString) 
+{
+	const std::wstring TestString(L"TEST_STRING");
+	const std::wstring Expected(L"test_string");
+	//const std::wstring Result = StringUtils::ToLower<wchar_t>(TestString);
+	const std::wstring Result = StringUtils::ToLower(TestString);
+	return (Result == Expected);
+};
+
+LK_DEFINE_AUTOMATION_TEST(StringUtils_ToUpper_WideString) 
+{
+	const std::wstring TestString(L"test_string");
+	const std::wstring Expected(L"TEST_STRING");
+	//const std::wstring Result = StringUtils::ToUpper<wchar_t>(TestString);
+	const std::wstring Result = StringUtils::ToUpper(TestString);
+	return (Result == Expected);
+};
 
 #endif /* LK_AUTOMATION_TEST_CORE */

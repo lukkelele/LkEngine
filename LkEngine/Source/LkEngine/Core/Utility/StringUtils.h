@@ -61,6 +61,16 @@ namespace LkEngine::StringUtils {
         return ToUpper<wchar_t>(std::wstring_view(String));
     }
 
+    static std::wstring ToLower(const std::wstring& String)
+    {
+        return ToLower<wchar_t>(String);
+    }
+
+    static std::wstring ToUpper(const std::wstring& String)
+    {
+		return ToUpper<wchar_t>(String);
+    }
+
 	static std::string BytesToString(const uint64_t Bytes)
 	{
 		static constexpr uint64_t GB = 1024 * 1024 * 1024;
