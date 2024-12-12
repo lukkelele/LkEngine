@@ -40,10 +40,27 @@ namespace LkEngine {
 
 		LK_CORE_ASSERT(Path.filename() == "LkEngine", "Path is not LkEngine");
 		/* The engine config is placed in the 'LkEngine/LkRuntime' directory. */
+
+		/**
+		 * TODO: Evaluate how to best solve this.
+		 *       Should just find the root engine directory for all build configurations.
+		 */
+		//LK_PRINTLN("Before entering, PATH: {}    Parent: {}", Path.string(), Path.parent_path().string());
+		while (Path.parent_path().filename() == "LkEngine")
+		{
+			Path = Path.parent_path();
+			//LK_PRINTLN("Path: {}", Path.string());
+		}
+
 		LFileSystem::EngineDir = Path;
 		LFileSystem::EngineDir += PathSeparator + std::string("LkRuntime");
 		LFileSystem::RuntimeDir = LFileSystem::EngineDir;
-		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid");
+	#if defined(LK_ENGINE_AUTOMATION_TEST)
+		LK_PRINTLN("WorkingDir:  {}", LFileSystem::WorkingDir.string());
+		LK_PRINTLN("EngineDir:   {}", LFileSystem::EngineDir.string());
+		LK_PRINTLN("RuntimeDir:  {}", LFileSystem::RuntimeDir.string());
+	#endif
+		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid: '{}'", LFileSystem::EngineDir.string());
 		LFileSystem::ConfigDir = LFileSystem::WorkingDir;
 
 		LFileSystem::ConfigDir = LFileSystem::EngineDir;

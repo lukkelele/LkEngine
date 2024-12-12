@@ -329,11 +329,7 @@ namespace LkEngine {
 	EAssetType LRuntimeAssetManager::GetAssetTypeFromExtension(const std::string& InExtension)
 	{
 		/* FIXME: Write test for string utils functions - verify that the result string is converted correctly. */
-		std::string TestStr = "WOOOow KOLla MIG!";
-		const std::string Test = StringUtils::ToLower(TestStr);
 		const std::string Extension = StringUtils::ToLower(InExtension);
-		LK_CORE_WARN("Extension: {}   From: {}", Extension, InExtension);
-		LK_CORE_FATAL("Test: {}   From: {}", Test, TestStr);
 		if (AssetExtensionMap.find(Extension) == AssetExtensionMap.end())
 		{
 			return EAssetType::None;

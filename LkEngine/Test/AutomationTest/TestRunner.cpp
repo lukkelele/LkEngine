@@ -1,10 +1,10 @@
 #include "TestRunner.h"
 #include "TestLayer.h"
 
-#include "LkEngine/Test/TestManager.h"
-#include "LkEngine/Core/Application.h"
-#include "LkEngine/Core/IO/FileSystem.h"
+#include <LkEngine/Core/Application.h>
+#include <LkEngine/Core/IO/FileSystem.h>
 
+#include "AutomationTest/TestManager.h"
 #include "AutomationTest/Suite/Core/ObjectPtrTests.h"
 
 

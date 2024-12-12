@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "LkEngine/Test/TestMacros.h"
-#include "LkEngine/Test/AutomationTest.h"
+#include "AutomationTest/TestMacros.h"
+#include "AutomationTest/AutomationTest.h"
 
 
 namespace LkEngine {
