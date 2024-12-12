@@ -44,6 +44,11 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_Creation>());
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyOnce>());
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyTwice>());
+		/* StringUtils tests. */
+		Tests.push_back(std::make_shared<StringUtils_ToLower_ConstChar>());
+		Tests.push_back(std::make_shared<StringUtils_ToUpper_ConstChar>());
+		Tests.push_back(std::make_shared<StringUtils_ToLower_String>());
+		Tests.push_back(std::make_shared<StringUtils_ToUpper_String>());
 	#endif
 	}
 

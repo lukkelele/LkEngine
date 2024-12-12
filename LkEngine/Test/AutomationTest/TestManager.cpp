@@ -80,6 +80,7 @@ namespace LkEngine {
 		Out << YAML::EndMap;
 
 		const std::string ResultDir = LFileSystem::GetBinaryDir().string() + "Results";
+		LK_TEST_DEBUG("Results dir: {}", ResultDir);
 		if (!LFileSystem::Exists(ResultDir))
 		{
 			LFileSystem::CreateDirectory(ResultDir);
