@@ -57,8 +57,11 @@ jobs:
     - name: Run Tests
       shell: pwsh
       run: |
-        & ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe"
+        echo "Files in TEST_DIR:"
+        Get-ChildItem -Path "${{ env.TEST_DIR }}"
+        & "${env:TEST_DIR}\\LkEngine_AutomationTests.exe"
       timeout-minutes: 2
+      #& ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe"
 
     - name: Evaluate Test Results
       run: |
