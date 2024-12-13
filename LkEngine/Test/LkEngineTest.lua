@@ -17,12 +17,15 @@ project "LkEngine_AutomationTests"
 	}
 
 	files {
+		"%{prj.location}/**.h",
+		"%{prj.location}/**.cpp",
 		"%{prj.location}/AutomationTest/**.h",
 		"%{prj.location}/AutomationTest/**.cpp",
 	}
 
 	includedirs {
 		"%{prj.location}",
+		"%{prj.location}/AutomationTest",
 
 		"%{wks.location}/LkEngine/Source", -- LkEngine source
 		"%{ExternalDirectory}",
@@ -59,4 +62,3 @@ project "LkEngine_AutomationTests"
 		filter { "configurations:Release or configurations:Dist" }	
 		    runtime "Release"
 			optimize "On"
-

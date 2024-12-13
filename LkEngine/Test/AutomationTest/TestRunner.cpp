@@ -12,10 +12,11 @@ namespace LkEngine {
 
 	LTestRunner::LTestRunner()
 	{
+		LK_PRINTLN("Starting up...");
 		/* Create 'Results' directory to store test results in if it does not already exist. */
-		if (!LFileSystem::Exists("Results"))
+		if (!LFileSystem::Exists(std::filesystem::current_path() / "Results"))
 		{
-			LFileSystem::CreateDirectory("Results");
+			LFileSystem::CreateDirectory(std::filesystem::current_path() / "Results");
 		}
 
 		/* Register test logger. */
@@ -43,14 +44,12 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyOnce>());
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyTwice>());
 		/* StringUtils tests. */
-	#if defined(LK_AUTOMATION_TEST_CORE_STRINGUTILS)
 		Tests.push_back(std::make_shared<StringUtils_ToLower_ConstChar>());
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_ConstChar>());
 		Tests.push_back(std::make_shared<StringUtils_ToLower_String>());
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_String>());
 		Tests.push_back(std::make_shared<StringUtils_ToLower_WideString>());
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_WideString>());
-	#endif
 	#endif
 	}
 
@@ -64,16 +63,12 @@ namespace LkEngine {
 
 int main(int Argc, char* Argv[])
 {
-	printf("Starting TestRunner\n");
 	using namespace LkEngine;
-
-#if 0
-	LkEngine::Core::Setup(Argc, Argv);
+	//LkEngine::Core::Setup(Argc, Argv); /* Does not work with the Github Action Runner for some reason. */
 
     LTestRunner TestRunner;
 	TestRunner.RegisterTests();
 	TestRunner.Run();
-#endif
 
     return 0;
 }

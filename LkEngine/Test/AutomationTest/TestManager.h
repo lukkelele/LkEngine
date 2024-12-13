@@ -30,7 +30,6 @@ namespace LkEngine {
 
 			LAutomationTestBase* TestInstance = static_cast<LAutomationTestBase*>(InTestInstance);
 			const ETestSuite TestSuite = TestInstance->GetTestSuite();
-			//printf("  Suite: (%s, ", Enum::ToString(TestSuite));
 			LK_PRINT("  Suite: ({}, ", Enum::ToString(TestSuite));
 
 			if (TestSuiteMap.contains(TestInstance->GetTestSuite()))

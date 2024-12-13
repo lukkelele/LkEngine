@@ -44,7 +44,6 @@
 **/*.swp
 **/*.tlog
 
-
 # -- LkEngine --
 Binaries
 Binaries-Int
@@ -64,8 +63,13 @@ External/**/tests
 Docs/Doxygen
 LkEngine/Test/Logs
 
-# Ignore lkconf files as they should be generated locally and saved there.
+# LkEngine configuration files.
 **/*.lkconf
+# LkEngine Asset Registry files.
+**/*.lkr
+# LkEngine Starter Scene. Disable ignore when wanting to update the scene(s).
+**/*/Starter-*.lkscene
+
 **/*/*pycache*
 
 # Runtime directories.
@@ -77,3 +81,4 @@ LkRuntime/Projects
 **/docs/*.html
 **/docs/*.dox
 **/docs/*.dox
+

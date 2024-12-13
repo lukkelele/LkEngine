@@ -1,8 +1,9 @@
-#include "LKpch.h"
 #include "TestManager.h"
 
+#include <LkEngine/Core/Core.h>
 #include <LkEngine/Core/Globals.h>
 #include <LkEngine/Core/IO/FileSystem.h>
+#include <LkEngine/Serialization/FileStream.h>
 #include <LkEngine/Serialization/YAMLSerialization.h>
 
 
@@ -58,8 +59,6 @@ namespace LkEngine {
 		for (const auto& [TestName, TestInstance] : TestInstanceMap)
 		{
 			LK_CORE_ASSERT(TestInstance, "Invalid test instance");
-
-			LK_TEST_INFO("Running: {}", TestName);
 			const bool bTestResult = TestInstance->RunTest();
 			if (bTestResult)
 			{
