@@ -33,7 +33,7 @@ namespace LkEngine {
 	LSceneManagerPanel::LSceneManagerPanel(TObjectPtr<LScene> InScene)
 		: Scene(InScene)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	void LSceneManagerPanel::Initialize()

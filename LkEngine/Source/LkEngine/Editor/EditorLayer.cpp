@@ -65,7 +65,7 @@ namespace LkEngine {
 		: LLayer("EditorLayer")
 		, TabManager(LEditorTabManager::Get())
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 		Instance = this;
 
 		m_ShowStackTool = false;
@@ -247,7 +247,7 @@ namespace LkEngine {
 		Renderer2D = TObjectPtr<LRenderer2D>::Create(Renderer2DSpec);
 		Renderer2D->Initialize();
 
-	#if 1
+	#if 0
 		CubeAssetHandle = LAssetManager::GetDebugCubeHandle();
 		LK_CORE_WARN("CubeAssetHandle: {}", CubeAssetHandle);
 	#endif

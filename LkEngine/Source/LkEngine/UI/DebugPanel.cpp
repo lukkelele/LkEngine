@@ -7,7 +7,7 @@ namespace LkEngine {
 
 	LDebugPanel::LDebugPanel()
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	void LDebugPanel::OnRender()

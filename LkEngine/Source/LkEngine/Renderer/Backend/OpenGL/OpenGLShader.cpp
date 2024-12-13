@@ -7,7 +7,7 @@ namespace LkEngine {
 	LOpenGLShader::LOpenGLShader(const std::filesystem::path& InFilePath)
 		: FilePath(InFilePath)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		FShaderProgramSource ShaderProgramSource;
 		if (ParseShader(ShaderProgramSource, InFilePath))
@@ -23,7 +23,7 @@ namespace LkEngine {
 
 	LOpenGLShader::LOpenGLShader(const FShaderProgramSource& ShaderProgramSource)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		if (ShaderProgramSource.IsValid())
 		{

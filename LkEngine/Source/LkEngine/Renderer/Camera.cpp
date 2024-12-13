@@ -7,13 +7,13 @@ namespace LkEngine {
 
 	LCamera::LCamera()
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	LCamera::LCamera(const glm::mat4& InProjection)
 		: m_ProjectionMatrix(InProjection)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	LCamera::LCamera(const float InDegFov, const float InWidth, const float InHeight, 

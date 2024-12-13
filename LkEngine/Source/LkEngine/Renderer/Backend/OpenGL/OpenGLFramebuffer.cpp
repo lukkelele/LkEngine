@@ -18,7 +18,7 @@ namespace LkEngine {
 		, m_ClearColor(InSpecification.ClearColor)
 		, m_DepthAttachmentSpecification(EImageFormat::DEPTH24STENCIL8)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		for (FFramebufferTextureSpecification& FramebufferTextureSpec : m_Specification.Attachments.Attachments)
 		{

@@ -28,7 +28,7 @@ namespace LkEngine {
 
 	LOpenGLRenderer::LOpenGLRenderer()
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	void LOpenGLRenderer::Initialize()

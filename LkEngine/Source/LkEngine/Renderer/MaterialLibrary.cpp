@@ -11,7 +11,7 @@ namespace LkEngine {
 
     LMaterialLibrary::LMaterialLibrary()
     {
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
     }
 
     LMaterialLibrary& LMaterialLibrary::Get()

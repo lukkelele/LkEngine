@@ -15,7 +15,7 @@ namespace LkEngine {
 
     LOpenGLImGuiLayer::LOpenGLImGuiLayer()
     {
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		LayoutConfig = LFileSystem::GetConfigDir() / "EditorLayout.ini";
     }

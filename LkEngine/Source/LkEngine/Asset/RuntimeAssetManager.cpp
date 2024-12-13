@@ -2,6 +2,7 @@
 #include "RuntimeAssetManager.h"
 
 #include "AssetManager.h"
+#include "MeshSerializer.h"
 
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/Core/Utility/StringUtils.h"
@@ -24,13 +25,12 @@ namespace LkEngine {
 		std::vector<TTexture2DPair> Textures2D{};
 	};
 
-	static FRuntimeCache RuntimeCache{};
-
+	static FRuntimeCache RuntimeCache{}; /* TODO: REMOVE */
 
 	LRuntimeAssetManager::LRuntimeAssetManager()
 		: TextureLibrary(LTextureLibrary::Get())
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	LRuntimeAssetManager::~LRuntimeAssetManager()
@@ -62,6 +62,56 @@ namespace LkEngine {
 	{
 		WriteRegistryToDisk();
 	}
+
+	template<typename T>
+	TObjectPtr<T> LRuntimeAssetManager::ImportAsset(const std::filesystem::path& InFilePath)
+	{
+		LK_UNUSED(InFilePath);
+	}
+	
+	template<>
+    TObjectPtr<LMesh> LRuntimeAssetManager::ImportAsset<LMesh>(const std::filesystem::path& InFilePath)
+    {
+		for (const auto& [Handle, Metadata] : AssetRegistry)
+		{
+			if (Metadata.FilePath == InFilePath)
+			{
+				LK_CORE_INFO("Found {} asset with filepath '{}', returning it", 
+							 Enum::ToString(Metadata.Type), InFilePath.string());
+				//LK_CORE_VERIFY(LoadedAssets[Metadata.Handle], "{} asset '{}' is not loaded to memory", Enum::ToString(Metadata.Type), Metadata.Handle);
+				/* Load the asset if not loaded in memory. */
+				if (!LoadedAssets[Metadata.Handle])
+				{
+				}
+				return LoadedAssets[Metadata.Handle];
+			}
+		}
+
+		LK_CORE_INFO_TAG("RuntimeAssetManager", "Importing asset from: {}", InFilePath.string());
+        LAssimpMeshImporter MeshImporter(InFilePath);
+		if (!MeshImporter.IsValid())
+		{
+			LK_CORE_ERROR("Mesh importer is not valid for: '{}'", InFilePath);
+			return nullptr;
+		}
+
+        TObjectPtr<LMeshSource> MeshSource = MeshImporter.ImportToMeshSource();
+		TObjectPtr<LMesh> Mesh = TObjectPtr<LMesh>::Create(MeshSource);
+
+		LoadedAssets[Mesh->Handle] = Mesh;
+
+		FAssetMetadata Metadata;
+		Metadata.Handle = Mesh->Handle;
+		Metadata.Type = EAssetType::MeshSource;
+		Metadata.FilePath = InFilePath;
+		Metadata.bIsMemoryAsset = false;
+		AssetRegistry[Mesh->Handle] = Metadata;
+		LK_CORE_INFO_TAG("RuntimeAssetManager", "Loaded mesh source '{}', {} vertices and {} indices", 
+						 Mesh->Handle, MeshSource->GetVertices().size(), MeshSource->GetIndices().size());
+
+		return LoadedAssets[Mesh->Handle];
+    }
+
 
 	void LRuntimeAssetManager::AddMemoryOnlyAsset(TObjectPtr<LAsset> asset)
 	{
@@ -105,41 +155,6 @@ namespace LkEngine {
 		return EAssetType::None;
 	}
 
-	template<typename T>
-	TObjectPtr<T> LRuntimeAssetManager::ImportAsset(const std::filesystem::path InFilePath)
-	{
-		LK_UNUSED(InFilePath);
-	}
-	
-	template<>
-    TObjectPtr<LMesh> LRuntimeAssetManager::ImportAsset<LMesh>(const std::filesystem::path InFilePath)
-    {
-		LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Importing asset from: {}", InFilePath.string());
-        LAssimpMeshImporter MeshImporter = LAssimpMeshImporter(InFilePath);
-		if (!MeshImporter.IsValid())
-		{
-			LK_CORE_ERROR("Mesh importer is not valid for: '{}'", InFilePath);
-			return nullptr;
-		}
-
-        TObjectPtr<LMeshSource> MeshSource = MeshImporter.ImportToMeshSource();
-		TObjectPtr<LMesh> Mesh = TObjectPtr<LMesh>::Create(MeshSource);
-
-		m_LoadedAssets[Mesh->Handle] = Mesh;
-		LK_CORE_WARN_TAG("RuntimeAssetManager", "Loaded mesh '{}' with {} vertices and {} indices", 
-						 Mesh->Handle, MeshSource->GetVertices().size(), MeshSource->GetIndices().size());
-
-		FAssetMetadata Metadata;
-		Metadata.Handle = Mesh->Handle;
-		Metadata.Type = EAssetType::Mesh;
-		Metadata.FilePath = InFilePath;
-		Metadata.bIsMemoryAsset = false;
-		AssetRegistry[Mesh->Handle] = Metadata;
-		LK_FATAL_TAG("RuntimeAssetManager", "AssetRegistry: {}", AssetRegistry.Count());
-
-		return m_LoadedAssets[Mesh->Handle];
-    }
-
 	TObjectPtr<LAsset> LRuntimeAssetManager::GetAsset(const FAssetHandle AssetHandle)
     {
 		if (IsMemoryAsset(AssetHandle))
@@ -147,7 +162,7 @@ namespace LkEngine {
 			return MemoryAssets[AssetHandle];
 		}
 
-		return m_LoadedAssets[AssetHandle];
+		return LoadedAssets[AssetHandle];
 	#if 0
 		FAssetMetadata& Metadata = GetMetadataInternal(AssetHandle);
 		if (!Metadata.IsValid())
@@ -164,11 +179,11 @@ namespace LkEngine {
 				return nullptr;
 			}
 
-			m_LoadedAssets[AssetHandle] = Asset;
+			LoadedAssets[AssetHandle] = Asset;
 		}
 		else
 		{
-			Asset = m_LoadedAssets[AssetHandle];
+			Asset = LoadedAssets[AssetHandle];
 		}
 
 		return Asset;
@@ -225,6 +240,7 @@ namespace LkEngine {
 				continue;
 			}
 
+			LK_CORE_DEBUG("Handle: {}   Type: {}   FilePath: {}", Metadata.Handle, Enum::ToString(Metadata.Type), Metadata.FilePath);
 			AssetRegistry[Metadata.Handle] = Metadata;
 		}
 	}
@@ -247,6 +263,12 @@ namespace LkEngine {
 				continue;
 			}
 
+			if (Metadata.Type == EAssetType::None)
+			{
+				LK_CORE_WARN_TAG("RuntimeAssetManager", "Type for '{}' is None, skipping it", Metadata.Handle);
+				continue;
+			}
+
 			std::string PathToSerialize = Metadata.FilePath.string();
 			std::replace(PathToSerialize.begin(), PathToSerialize.end(), '\\', '/');
 			SortedMap[Metadata.Handle] = { PathToSerialize, Metadata.Type };
@@ -264,6 +286,7 @@ namespace LkEngine {
 			Out << YAML::Key << "Type" << YAML::Value << Enum::ToString(Entry.Type);
 			Out << YAML::Key << "FilePath" << YAML::Value << Entry.FilePath;
 			Out << YAML::EndMap;
+			LK_CORE_DEBUG("Handle: {}   Type: {}   FilePath: {}", Handle, Enum::ToString(Entry.Type), Entry.FilePath);
 		}
 		Out << YAML::EndSeq;
 		Out << YAML::EndMap;
@@ -322,8 +345,20 @@ namespace LkEngine {
 
 	std::filesystem::path LRuntimeAssetManager::GetRelativePath(const std::filesystem::path& FilePath)
 	{
+		std::filesystem::path RelativePath = FilePath.lexically_normal();
+		const std::string TempPath = FilePath.string();
+		if (TempPath.find(LProject::GetAssetDirectory().string()) != std::string::npos)
+		{
+			RelativePath = std::filesystem::relative(FilePath, LProject::GetAssetDirectory());
+			if (RelativePath.empty())
+			{
+				RelativePath = FilePath.lexically_normal();
+			}
+		}
+		return RelativePath;
+
 		/* Return rvalue so we trigger move semantics for performance. */
-		return FilePath.lexically_normal();
+		//return FilePath.lexically_normal();
 	}
 
 	EAssetType LRuntimeAssetManager::GetAssetTypeFromExtension(const std::string& InExtension)
@@ -395,6 +430,11 @@ namespace LkEngine {
 
 		if (TObjectPtr<LScene> CurrentScene = LScene::GetActiveScene())
 		{
+			LK_CORE_INFO("Loading Cube.gltf");
+			ImportAsset<LMesh>("Assets/Meshes/Cube.gltf");
+			LK_CORE_INFO("Loading Cone.gltf");
+			ImportAsset<LMesh>("Assets/Meshes/Cone.gltf");
+		#if 0
 			/* Create cube. */
 			std::filesystem::path FilePath("Assets/Meshes/Cube.gltf");
 			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Importing cube from: '{}'", FilePath.string());
@@ -405,14 +445,14 @@ namespace LkEngine {
 
 			/* Setup the vertexbuffer layout. */
 			TObjectPtr<LMeshSource> CubeSource = Cube->GetMeshSource();
-			CubeSource->m_VertexBuffer->SetLayout({
+			CubeSource->VertexBuffer->SetLayout({
 			    { "a_Position",   EShaderDataType::Float3 },
 			    { "a_Normal",     EShaderDataType::Float3 },
 			    { "a_Binormal",   EShaderDataType::Float3 },
 			    { "a_Tangent",    EShaderDataType::Float3 },
 			    { "a_TexCoord",   EShaderDataType::Float2 },
 			});
-			CubeSource->m_VertexBuffer->SetIndexBuffer(CubeSource->m_IndexBuffer);
+			CubeSource->VertexBuffer->SetIndexBuffer(CubeSource->IndexBuffer);
 
 			/* Cube Metadata in the asset registry. */
 			FAssetMetadata CubeMetadata;
@@ -453,6 +493,7 @@ namespace LkEngine {
 			DebugCube = Cube;
 
 			LK_CORE_DEBUG_TAG("RuntimeAssetManager", "Cube created with Handle {}", Cube->Handle);
+		#endif
 		}
 		else
 		{

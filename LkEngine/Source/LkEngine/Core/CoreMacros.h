@@ -163,7 +163,7 @@ namespace LkEngine {
 /** 
  * LCLASS_REGISTER
  */
-#define LCLASS_REGISTER(...) \
+#define LOBJECT_REGISTER(...) \
 		::LkEngine::LClass* ClassObject = const_cast<::LkEngine::LClass*>(::LkEngine::LClass::Get(typeid(this))); \
 		if (!ClassObject) \
 		{ \

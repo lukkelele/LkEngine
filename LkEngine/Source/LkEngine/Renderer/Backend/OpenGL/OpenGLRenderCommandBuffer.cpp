@@ -8,7 +8,7 @@ namespace LkEngine {
 
 	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(uint32_t Count, std::string_view InName) 
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		LK_UNUSED(Count);
 		LK_UNUSED(InName);
@@ -16,7 +16,7 @@ namespace LkEngine {
 
 	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(std::string_view InName, bool InSwapchain)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		LK_UNUSED(InName);
 		LK_UNUSED(InSwapchain);

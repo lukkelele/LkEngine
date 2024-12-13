@@ -17,7 +17,7 @@ namespace LkEngine {
 		virtual void Destroy() override;
 
 		template<typename AssetType>
-		TObjectPtr<AssetType> ImportAsset(std::filesystem::path filepath);
+		TObjectPtr<AssetType> ImportAsset(const std::filesystem::path& Filepath);
 
         TObjectPtr<LAsset> GetAsset(FAssetHandle Asset);
 		EAssetType GetAssetType(const FAssetHandle AssetHandle);
@@ -94,14 +94,14 @@ namespace LkEngine {
 
 			TObjectPtr<T> Asset = TObjectPtr<T>::Create(std::forward<TArgs>(Args)...);
 			Asset->Handle = Metadata.Handle;
-			m_LoadedAssets[Asset->Handle] = Asset;
+			LoadedAssets[Asset->Handle] = Asset;
 
 			return Asset;
 		}
 
 		const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetLoadedAssets() 
 		{ 
-			return m_LoadedAssets;
+			return LoadedAssets;
 		}
 
 		const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetMemoryOnlyAssets() 
@@ -126,7 +126,7 @@ namespace LkEngine {
 		void LoadPrimitiveShapes();
 
     private:
-        std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> m_LoadedAssets;
+        std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> LoadedAssets;
 		std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> MemoryAssets;
 
         LAssetRegistry AssetRegistry;

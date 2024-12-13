@@ -7,7 +7,7 @@ namespace LkEngine {
 	LOpenGLArrayTexture::LOpenGLArrayTexture(const FArrayTextureSpecification& InSpecification)
 		: Specification(InSpecification)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		auto [Width, Height] = LOpenGL::ConvertDimensionsToWidthAndHeight(Specification.Dimension);
 		m_Width = Width;

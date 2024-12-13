@@ -9,7 +9,7 @@ namespace LkEngine {
 	OpenGLSwapChain::OpenGLSwapChain(uint32_t* InWidth, uint32_t* InHeight, const bool InVSync)
 	{
 		LK_UNUSED(InWidth && InHeight && InVSync);
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	void OpenGLSwapChain::Initialize()

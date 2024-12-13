@@ -193,7 +193,7 @@ namespace LkEngine {
 						};
 					}
 
-					MeshSource->m_Vertices.push_back(Vertex);
+					MeshSource->Vertices.push_back(Vertex);
 				}
 
 				// Indices
@@ -205,13 +205,13 @@ namespace LkEngine {
 						Mesh->mFaces[i].mIndices[1],
 						Mesh->mFaces[i].mIndices[2]
 					};
-					MeshSource->m_Indices.push_back(Index);
+					MeshSource->Indices.push_back(Index);
 
 					/* TODO: Fix overflow warning. */
 					MeshSource->m_TriangleCache[m].emplace_back(
-						MeshSource->m_Vertices[Index.V1 + Submesh.BaseVertex],
-						MeshSource->m_Vertices[Index.V2 + Submesh.BaseVertex],
-						MeshSource->m_Vertices[Index.V3 + Submesh.BaseVertex]);
+						MeshSource->Vertices[Index.V1 + Submesh.BaseVertex],
+						MeshSource->Vertices[Index.V2 + Submesh.BaseVertex],
+						MeshSource->Vertices[Index.V3 + Submesh.BaseVertex]);
 				}
 			}
 
@@ -238,16 +238,16 @@ namespace LkEngine {
 			LK_CORE_WARN_TAG("AssimpMeshImporter", "No meshes found when trying to import");
 		}
 
-		if (MeshSource->m_Vertices.size())
+		if (MeshSource->Vertices.size())
 		{
-			MeshSource->m_VertexBuffer = LVertexBuffer::Create(MeshSource->m_Vertices.data(),
-															   static_cast<uint64_t>(MeshSource->m_Vertices.size() * sizeof(FVertex)));
+			MeshSource->VertexBuffer = LVertexBuffer::Create(MeshSource->Vertices.data(),
+															   static_cast<uint64_t>(MeshSource->Vertices.size() * sizeof(FVertex)));
 		}
 
-		if (MeshSource->m_Indices.size())
+		if (MeshSource->Indices.size())
 		{
-			MeshSource->m_IndexBuffer = LIndexBuffer::Create(MeshSource->m_Indices.data(),
-															 static_cast<uint64_t>(MeshSource->m_Indices.size() * sizeof(FIndex)));
+			MeshSource->IndexBuffer = LIndexBuffer::Create(MeshSource->Indices.data(),
+															 static_cast<uint64_t>(MeshSource->Indices.size() * sizeof(FIndex)));
 		}
 
 		return MeshSource;

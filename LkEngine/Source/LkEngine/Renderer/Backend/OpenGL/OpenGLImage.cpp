@@ -10,7 +10,7 @@ namespace LkEngine {
 		: Specification(InSpecification)
 		, m_ImageData(std::move(InBuffer))
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		if (m_ImageData.Data)
 		{
@@ -44,7 +44,7 @@ namespace LkEngine {
 	LOpenGLImage::LOpenGLImage(const FImageSpecification& InSpecification, void* InData)
 		: Specification(InSpecification)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		if (InData)
 		{
@@ -169,7 +169,7 @@ namespace LkEngine {
 		: Specification(InSpecification)
 		, m_ImageData(std::move(InBuffer))
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		if (m_ImageData)
 		{
@@ -206,7 +206,7 @@ namespace LkEngine {
 	LOpenGLImage2D::LOpenGLImage2D(const FImageSpecification& InSpecification, void* InData)
 		: Specification(InSpecification)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		if (InData)
 		{

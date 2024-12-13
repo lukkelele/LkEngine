@@ -22,7 +22,7 @@ namespace LkEngine {
 
 	LProject::LProject()
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	void LProject::Load(const std::string& ProjectPath)

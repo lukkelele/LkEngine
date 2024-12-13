@@ -28,7 +28,7 @@ namespace LkEngine {
 
     LTextureLibrary::LTextureLibrary()
     {
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
         m_Collection2D.clear();
 

@@ -23,8 +23,8 @@ namespace LkEngine {
 	}
 
 	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices, const std::vector<FIndex>& InIndices, const glm::mat4& InTransform)
-		: m_Vertices(InVertices)
-		, m_Indices(InIndices)
+		: Vertices(InVertices)
+		, Indices(InIndices)
 	{
 		LASSET_REGISTER();
 		Handle = {};
@@ -37,22 +37,22 @@ namespace LkEngine {
 		Submeshes.push_back(Submesh);
 
 		/* Create Vertex and index buffers. */
-		m_VertexBuffer = LVertexBuffer::Create(m_Vertices.data(), static_cast<uint32_t>(m_Vertices.size() * sizeof(FVertex)));
-		m_IndexBuffer = LIndexBuffer::Create(m_Indices.data(), static_cast<uint32_t>(m_Indices.size() * sizeof(FIndex)));
-		LK_CORE_ASSERT(Submesh.IndexCount == m_IndexBuffer->GetCount(), "IndexBuffer count mismatch");
+		VertexBuffer = LVertexBuffer::Create(Vertices.data(), static_cast<uint32_t>(Vertices.size() * sizeof(FVertex)));
+		IndexBuffer = LIndexBuffer::Create(Indices.data(), static_cast<uint32_t>(Indices.size() * sizeof(FIndex)));
+		LK_CORE_ASSERT(Submesh.IndexCount == IndexBuffer->GetCount(), "IndexBuffer count mismatch");
 	}
 
 	LMeshSource::LMeshSource(const std::vector<FVertex>& InVertices, const std::vector<FIndex>& InIndices, const std::vector<LSubmesh>& InSubmeshes)
-		: m_Vertices(InVertices)
-		, m_Indices(InIndices)
+		: Vertices(InVertices)
+		, Indices(InIndices)
 		, Submeshes(InSubmeshes)
 	{
 		LASSET_REGISTER();
 		Handle = {};
 
 		/* Create Vertex and index buffers. */
-		m_VertexBuffer = LVertexBuffer::Create(m_Vertices.data(), static_cast<uint64_t>(m_Vertices.size() * sizeof(FVertex)));
-		m_IndexBuffer = LIndexBuffer::Create(m_Indices.data(), static_cast<uint64_t>(m_Indices.size() * sizeof(FIndex)));
+		VertexBuffer = LVertexBuffer::Create(Vertices.data(), static_cast<uint64_t>(Vertices.size() * sizeof(FVertex)));
+		IndexBuffer = LIndexBuffer::Create(Indices.data(), static_cast<uint64_t>(Indices.size() * sizeof(FIndex)));
 	}
 
 	void LMeshSource::DumpVertexBuffer()
@@ -60,9 +60,9 @@ namespace LkEngine {
 		LK_CORE_TRACE("------------------------------------------------------");
 		LK_CORE_TRACE("Vertex Buffer Dump");
 		LK_CORE_TRACE("Mesh: {0}", m_FilePath.string());
-		for (size_t i = 0; i < m_Vertices.size(); i++)
+		for (size_t i = 0; i < Vertices.size(); i++)
 		{
-			const FVertex& Vertex = m_Vertices[i];
+			const FVertex& Vertex = Vertices[i];
 			LK_CORE_TRACE("Vertex: {0}", i);
 			LK_CORE_TRACE("Position: {0}, {1}, {2}", Vertex.Position.x, Vertex.Position.y, Vertex.Position.z);
 			LK_CORE_TRACE("Normal: {0}, {1}, {2}", Vertex.Normal.x, Vertex.Normal.y, Vertex.Normal.z);

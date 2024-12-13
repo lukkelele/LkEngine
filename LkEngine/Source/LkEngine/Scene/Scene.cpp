@@ -24,7 +24,7 @@ namespace LkEngine {
 		: Name(SceneName)
 		, bIsEditorScene(IsEditorScene)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		SceneEntity = Registry.create();
 		LK_CORE_DEBUG_TAG("Scene", "Scene created '{}' with handle '{}'", Name, SceneEntity);

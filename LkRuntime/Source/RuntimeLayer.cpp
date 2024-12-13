@@ -5,7 +5,7 @@ namespace LkEngine {
 
 	LRuntimeLayer::LRuntimeLayer(const std::filesystem::path& ProjectPath)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 		LK_UNUSED(ProjectPath);
 	}
 

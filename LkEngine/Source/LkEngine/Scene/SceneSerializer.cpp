@@ -23,7 +23,7 @@ namespace LkEngine {
 	LSceneSerializer::LSceneSerializer(LScene* InScene)
 		: Scene(InScene)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 		LK_CORE_VERIFY(Scene, "Invalid LScene reference");
 	}
 

@@ -6,7 +6,7 @@ namespace LkEngine
 {
 	LRenderer2DAPI::LRenderer2DAPI()
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 }

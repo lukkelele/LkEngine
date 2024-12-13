@@ -22,7 +22,7 @@ namespace LkEngine {
 		, ViewportSize({ WindowSpecification.Width, WindowSpecification.Height })
 		, bVSync(WindowSpecification.VSync)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 		Instance = this;
 
 		/* Window Data. */

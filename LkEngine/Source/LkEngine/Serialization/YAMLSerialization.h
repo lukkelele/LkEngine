@@ -129,6 +129,38 @@ namespace YAML
 		}
 	};
 
+	/* LMesh / LMeshSource / LStaticMesh */
+	template<>
+	struct convert<std::vector<uint32_t>>
+	{
+		static Node encode(const std::vector<uint32_t>& Value)
+		{
+			Node YamlNode;
+			for (uint32_t Element : Value)
+			{
+				YamlNode.push_back(Element);
+			}
+
+			return YamlNode;
+		}
+
+		static bool decode(const Node& NodeRef, std::vector<uint32_t>& Result)
+		{
+			if (!NodeRef.IsSequence())
+			{
+				return false;
+			}
+
+			Result.resize(NodeRef.size());
+			for (std::size_t i = 0; i < NodeRef.size(); i++)
+			{
+				Result[i] = NodeRef[i].as<uint32_t>();
+			}
+
+			return true;
+		}
+	};
+
 }
 
 namespace LkEngine {
@@ -153,6 +185,20 @@ namespace LkEngine {
 		out << YAML::Flow;
 		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
 		return out;
+	}
+
+	/* LMesh / LMeshSource / LStaticMesh */
+	inline YAML::Emitter& operator<<(YAML::Emitter& Out, const std::vector<uint32_t>& Value)
+	{
+		Out << YAML::Flow;
+		Out << YAML::BeginSeq;
+		for (const uint32_t Element : Value)
+		{
+			Out << Element;
+		}
+		Out << YAML::EndSeq;
+
+		return Out;
 	}
 
 }

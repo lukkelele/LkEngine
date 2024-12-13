@@ -44,7 +44,7 @@ namespace LkEngine {
 
 	LRenderer::LRenderer()
 	{
-		LCLASS_REGISTER(LRenderer);
+		LOBJECT_REGISTER(LRenderer);
 	}
 
 	void LRenderer::Initialize()

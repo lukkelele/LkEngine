@@ -17,7 +17,7 @@ namespace LkEngine {
 
     LComponentEditor::LComponentEditor()
     {
-        LCLASS_REGISTER();
+        LOBJECT_REGISTER();
     }
 
     void LComponentEditor::Initialize()

@@ -15,7 +15,7 @@ namespace LkEngine {
 	LOpenGLContext::LOpenGLContext(LWindow* InWindow)
 		: Window(InWindow)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		m_GlfwWindow = Window->GetGlfwWindow();
 

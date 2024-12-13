@@ -125,7 +125,7 @@ namespace LkEngine {
 
 	LShaderLibrary::LShaderLibrary()
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
     void LShaderLibrary::Add(const TObjectPtr<LShader>& Shader)

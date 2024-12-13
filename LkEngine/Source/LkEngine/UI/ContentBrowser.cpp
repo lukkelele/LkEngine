@@ -23,7 +23,7 @@ namespace LkEngine {
 
     LContentBrowser::LContentBrowser()
     {
-        LCLASS_REGISTER();
+        LOBJECT_REGISTER();
     }
 
     void LContentBrowser::Initialize()

@@ -17,7 +17,7 @@ namespace LkEngine::Test {
 	public:
 		LDummyTestClass()
 		{
-			LCLASS_REGISTER();
+			LOBJECT_REGISTER();
 		}
 
 		~LDummyTestClass() = default;

@@ -15,7 +15,7 @@ namespace LkEngine {
 		, m_FilePath(std::filesystem::path(InSpecification.Path))
 		, FileName(m_FilePath.filename().string())
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		LK_CORE_VERIFY(std::filesystem::is_regular_file(m_FilePath), "Texture file is not valid, \"{}\"", m_FilePath.string());
 
@@ -30,7 +30,7 @@ namespace LkEngine {
 		, m_FilePath(std::filesystem::path(InSpecification.Path))
 		, FileName(m_FilePath.filename().string())
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		LK_CORE_VERIFY(std::filesystem::is_regular_file(m_FilePath), "Path is not valid: \"{}\"", m_FilePath.string());
 		FImageSpecification ImageSpec(Specification);
@@ -147,7 +147,7 @@ namespace LkEngine {
 		, m_Width(InSpecification.Width)
 		, m_Height(InSpecification.Height)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		LK_OpenGL_Verify(glGenTextures(1, &m_RendererID));
 		LK_OpenGL_Verify(glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID));

@@ -54,7 +54,7 @@ namespace LkEngine::Test
     TestClass::TestClass()                                        \
           : ::LkEngine::Test::LAutomationTestBase(#TestClass)     \
 	{ \
-		LCLASS_REGISTER(); \
+		LOBJECT_REGISTER(); \
 	} \
     bool TestClass::RunTest()
 

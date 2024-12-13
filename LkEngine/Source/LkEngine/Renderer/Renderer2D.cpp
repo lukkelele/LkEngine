@@ -18,7 +18,7 @@ namespace LkEngine
         , MaxLineVertices(InSpecification.MaxLines * 2)
         , MaxLineIndices(InSpecification.MaxLines * 6)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 		LK_CORE_ASSERT((MaxVertices > 0) && (MaxIndices > 0) && (MaxLineVertices > 0) && (MaxLineIndices > 0));
 	}
 

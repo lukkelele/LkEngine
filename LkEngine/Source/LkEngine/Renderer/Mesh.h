@@ -283,8 +283,8 @@ namespace LkEngine {
 
 		FORCEINLINE std::vector<LSubmesh>& GetSubmeshes() { return Submeshes; }
 		FORCEINLINE const std::vector<LSubmesh>& GetSubmeshes() const { return Submeshes; }
-		FORCEINLINE const std::vector<FVertex>& GetVertices() const { return m_Vertices; }
-		FORCEINLINE const std::vector<FIndex>& GetIndices() const { return m_Indices; }
+		FORCEINLINE const std::vector<FVertex>& GetVertices() const { return Vertices; }
+		FORCEINLINE const std::vector<FIndex>& GetIndices() const { return Indices; }
 
 		FORCEINLINE bool IsSubmeshRigged(const uint32_t SubmeshIndex) const 
 		{ 
@@ -293,7 +293,7 @@ namespace LkEngine {
 
 		FORCEINLINE const std::vector<FBoneInfluence>& GetBoneInfluences() const 
 		{ 
-			return m_BoneInfluences; 
+			return BoneInfluences; 
 		}
 
 		FORCEINLINE std::vector<TObjectPtr<LMaterial>>& GetMaterials()
@@ -319,17 +319,17 @@ namespace LkEngine {
 
 		FORCEINLINE TObjectPtr<LVertexBuffer> GetVertexBuffer()
 		{
-			return m_VertexBuffer;
+			return VertexBuffer;
 		}
 
 		FORCEINLINE TObjectPtr<LVertexBuffer> GetBoneInfluenceBuffer()
 		{
-			return m_BoneInfluenceBuffer;
+			return BoneInfluenceBuffer;
 		}
 
 		FORCEINLINE TObjectPtr<LIndexBuffer> GetIndexBuffer()
 		{
-			return m_IndexBuffer;
+			return IndexBuffer;
 		}
 
 		static EAssetType GetStaticType() { return EAssetType::MeshSource; }
@@ -376,15 +376,15 @@ namespace LkEngine {
 	private:
 		std::vector<LSubmesh> Submeshes{};
 
-		TObjectPtr<LVertexBuffer> m_VertexBuffer{};
-		TObjectPtr<LVertexBuffer> m_BoneInfluenceBuffer{};
-		TObjectPtr<LIndexBuffer> m_IndexBuffer{};
+		TObjectPtr<LVertexBuffer> VertexBuffer{};
+		TObjectPtr<LVertexBuffer> BoneInfluenceBuffer{};
+		TObjectPtr<LIndexBuffer> IndexBuffer{};
 
-		std::vector<FVertex> m_Vertices{};
-		std::vector<FIndex> m_Indices{};
+		std::vector<FVertex> Vertices{};
+		std::vector<FIndex> Indices{};
 
-		std::vector<FBoneInfluence> m_BoneInfluences{};
-		std::vector<FBoneInfo> m_BoneInfo{};
+		std::vector<FBoneInfluence> BoneInfluences{};
+		std::vector<FBoneInfo> BoneInfo{};
 
 		/* Not implemented yet. */
 #if 0

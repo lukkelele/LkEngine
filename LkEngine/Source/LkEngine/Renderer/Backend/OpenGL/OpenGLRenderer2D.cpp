@@ -29,7 +29,7 @@ namespace LkEngine {
         //, m_MaxLineVertices(InSpecification.MaxLines * 2)
         //, m_MaxLineIndices(InSpecification.MaxLines * 6)
     {
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
         //Renderer2DAPI = this;
 
         CameraBuffer = {};

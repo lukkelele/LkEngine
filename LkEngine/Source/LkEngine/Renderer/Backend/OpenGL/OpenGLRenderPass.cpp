@@ -10,7 +10,7 @@ namespace LkEngine {
 	LOpenGLRenderPass::LOpenGLRenderPass(const FRenderPassSpecification& InSpecification)
 		: Specification(InSpecification)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	void LOpenGLRenderPass::SetInput(std::string_view Name, TObjectPtr<LImage> Image)

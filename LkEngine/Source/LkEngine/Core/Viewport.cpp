@@ -10,7 +10,7 @@ namespace LkEngine {
 
 	LViewport::LViewport()
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 	}
 
 	void LViewport::Update()

@@ -9,7 +9,7 @@ namespace LkEngine {
 	LOpenGLUniformBufferSet::LOpenGLUniformBufferSet(const uint32_t InSize, const uint32_t InFramesInFlight)
 		: m_FramesInFlight(InFramesInFlight)
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 		if (InFramesInFlight == 0)
 		{
 			m_FramesInFlight = LRenderer::GetFramesInFlight();

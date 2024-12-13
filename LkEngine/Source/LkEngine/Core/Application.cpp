@@ -24,7 +24,7 @@ namespace LkEngine {
 		, GarbageCollector(LGarbageCollector::Get())
 		, ThreadManager(LThreadManager::Get())
 	{
-		LCLASS_REGISTER(LApplication);
+		LOBJECT_REGISTER(LApplication);
 		Instance = this;
 
 		LCrashHandler::AttachInstance(this);

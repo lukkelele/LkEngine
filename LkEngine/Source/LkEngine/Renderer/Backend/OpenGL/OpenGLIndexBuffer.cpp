@@ -8,7 +8,7 @@ namespace LkEngine {
 		: m_Size(InSize)
 		, m_Count(InSize / sizeof(decltype(InSize)))
     {
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		LK_OpenGL_Verify(glCreateBuffers(1, &m_RendererID));
 		LK_OpenGL_Verify(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
@@ -20,7 +20,7 @@ namespace LkEngine {
 		: m_Size(InSize)
 		, m_Count(InSize / sizeof(decltype(InSize)))
 	{
-		LCLASS_REGISTER();
+		LOBJECT_REGISTER();
 
 		LK_OpenGL_Verify(glCreateBuffers(1, &m_RendererID));
 		LK_OpenGL_Verify(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
