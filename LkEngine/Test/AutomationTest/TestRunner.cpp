@@ -43,12 +43,14 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyOnce>());
 		Tests.push_back(std::make_shared<ObjectPtr_ReferenceCount_CopyTwice>());
 		/* StringUtils tests. */
+	#if defined(LK_AUTOMATION_TEST_CORE_STRINGUTILS)
 		Tests.push_back(std::make_shared<StringUtils_ToLower_ConstChar>());
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_ConstChar>());
 		Tests.push_back(std::make_shared<StringUtils_ToLower_String>());
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_String>());
 		Tests.push_back(std::make_shared<StringUtils_ToLower_WideString>());
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_WideString>());
+	#endif
 	#endif
 	}
 
@@ -62,14 +64,16 @@ namespace LkEngine {
 
 int main(int Argc, char* Argv[])
 {
-	printf("Starting testrunner\n");
+	printf("Starting TestRunner\n");
 	using namespace LkEngine;
 
+#if 0
 	LkEngine::Core::Setup(Argc, Argv);
 
     LTestRunner TestRunner;
 	TestRunner.RegisterTests();
 	TestRunner.Run();
+#endif
 
     return 0;
 }

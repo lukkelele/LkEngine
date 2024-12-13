@@ -46,22 +46,13 @@ jobs:
         MSBuild.exe LkEngine.sln -property:Configuration=AutomationTest
       timeout-minutes: 15
 
-    - name: Debug
-      run: |
-        Get-ChildItem ".\Binaries\"
-        Get-ChildItem ".\Binaries\AutomationTest-windows\"
-        Get-ChildItem ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\"
-        Get-ChildItem ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe" 
-        Get-ChildItem -Path ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe" -Filter "*.exe" | Select-Object FullName, LastWriteTime, Length
-
     - name: Run Tests
       shell: pwsh
       run: |
         echo "Files in TEST_DIR:"
         Get-ChildItem -Path "${{ env.TEST_DIR }}"
-        & "${env:TEST_DIR}\\LkEngine_AutomationTests.exe"
+        & "${env:TEST_DIR}\LkEngine_AutomationTests.exe"
       timeout-minutes: 2
-      #& ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe"
 
     - name: Evaluate Test Results
       run: |
