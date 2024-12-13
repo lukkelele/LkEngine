@@ -44,20 +44,33 @@ jobs:
     - name: Build 
       run: |
         MSBuild.exe LkEngine.sln -property:Configuration=AutomationTest
+      timeout-minutes: 15
 
-    - name: Run tests
+    - name: Debug
       run: |
-        & "${env:TEST_DIR}\LkEngine_AutomationTests.exe" ${env:TEST_RESULT_FILE} "CoreTests"
+        Get-ChildItem ".\Binaries\"
+        Get-ChildItem ".\Binaries\AutomationTest-windows\"
+        Get-ChildItem ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\"
+        Get-ChildItem ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe" 
+        Get-ChildItem -Path ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe" -Filter "*.exe" | Select-Object FullName, LastWriteTime, Length
 
-    - name: Evaluate test resuls
+    - name: Run Tests
+      shell: pwsh
+      run: |
+        & ".\Binaries\AutomationTest-windows\LkEngine_AutomationTests\LkEngine_AutomationTests.exe"
+      timeout-minutes: 2
+
+    - name: Evaluate Test Results
       run: |
         python LkEngine/Test/TestResultParser.py ${env:TEST_DIR}/Results/${env:TEST_RESULT_FILE} "CoreTests"
+      timeout-minutes: 2
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: TestResults
         path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
+      timeout-minutes: 20
 
 
   Deploy-Test-Results:

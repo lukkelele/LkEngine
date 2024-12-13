@@ -55,7 +55,6 @@ namespace LkEngine::Test
           : ::LkEngine::Test::LAutomationTestBase(#TestClass)     \
 	{ \
 		LCLASS_REGISTER(); \
-		::LkEngine::LTestManager::Get().DetectAutomationTest<TestClass>(this); \
 	} \
     bool TestClass::RunTest()
 

@@ -17,6 +17,7 @@ from pathlib import Path
 
 
 def ParseTestResults(Filepath):
+    print(f"Parsing test results")
     bYamlFileParsed = False
     try:
         # Load the YAML file.
@@ -26,8 +27,8 @@ def ParseTestResults(Filepath):
         # Extract the test results.
         tests = data.get(f"{TestSuite}", [])
         total = len(tests)
+        print(f"Found {total} tests for {TestSuite}")
         if total == 0:
-            print(f"Found 0 tests for {TestSuite}")
             return 1
 
         passed_tests = []

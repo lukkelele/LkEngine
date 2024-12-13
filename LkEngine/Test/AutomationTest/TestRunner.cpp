@@ -12,9 +12,6 @@ namespace LkEngine {
 
 	LTestRunner::LTestRunner()
 	{
-		LLog& Logger = LLog::Get();
-		Logger.Initialize();
-
 		/* Create 'Results' directory to store test results in if it does not already exist. */
 		if (!LFileSystem::Exists("Results"))
 		{
@@ -28,6 +25,7 @@ namespace LkEngine {
 			{ ELogLevel::Error,	Color::Red   }
 		};
 	
+		LLog& Logger = LLog::Get();
 		Logger.RegisterLogger(ELoggerType::TestRunner, "TEST", ELogLevel::Debug, LevelConfigs);
 	}
 
@@ -64,8 +62,10 @@ namespace LkEngine {
 
 int main(int Argc, char* Argv[])
 {
+	printf("Starting testrunner\n");
 	using namespace LkEngine;
-	Global::SetRuntimeArguments(Argc, Argv);
+
+	LkEngine::Core::Setup(Argc, Argv);
 
     LTestRunner TestRunner;
 	TestRunner.RegisterTests();

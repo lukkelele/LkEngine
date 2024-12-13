@@ -45,7 +45,6 @@ namespace LkEngine {
 		 * TODO: Evaluate how to best solve this.
 		 *       Should just find the root engine directory for all build configurations.
 		 */
-		//LK_PRINTLN("Before entering, PATH: {}    Parent: {}", Path.string(), Path.parent_path().string());
 		while (Path.parent_path().filename() == "LkEngine")
 		{
 			Path = Path.parent_path();

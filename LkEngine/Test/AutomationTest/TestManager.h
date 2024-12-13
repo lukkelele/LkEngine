@@ -26,7 +26,6 @@ namespace LkEngine {
 			const LClass* Class = InTestInstance->GetClass();
 			LK_CORE_ASSERT(Class);
 			const std::string ClassName = Class->GetName();
-			//printf("DetectAutomationTest: %s", ClassName.c_str());
 			LK_PRINT("DetectAutomationTest: {}", ClassName.c_str());
 
 			LAutomationTestBase* TestInstance = static_cast<LAutomationTestBase*>(InTestInstance);
@@ -44,8 +43,7 @@ namespace LkEngine {
 				TestSuiteMap[TestSuite] = { TestInstance };
 			}
 
-			//printf("%d) \n", (int)TestSuiteMap[TestSuite].size());
-			LK_PRINTLN("{}) \n", TestSuiteMap[TestSuite].size());
+			LK_PRINTLN("{}) ", TestSuiteMap[TestSuite].size());
 
 			return true;
 		}
