@@ -3,9 +3,9 @@ Active: true
 EditorScene: true
 SceneHandle: 0
 EditorCamera:
-  Position: [8.464383, 3.6476567, -10.979696]
+  Position: [-8.476263, 5.6246657, -10.890283]
   Origin: [0, 0, 0]
-  Distance: 14.761928
+  Distance: 14.761901
   FocalPoint: [-0.49468136, -0.053087234, 0.15377522]
   Perspective:
     DegPerspectiveFOV: 45
@@ -15,7 +15,44 @@ EditorCamera:
     OrthographicSize: 10
     OrthographicNear: -1
     OrthographicFar: 1
-  Pitch: 0.25339827
-  Yaw: 3.8191907
+  Pitch: 0.39479834
+  Yaw: 2.5157912
   ProjectionType: 1
   CameraMode: 2
+Entities:
+  - Entity: 628765632066857106
+    TagComponent:
+      Tag: Cube-1
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 2867232429297247773
+      MaterialTable:
+        0: 0
+      Visible: true
+  - Entity: 3079153983459664096
+    TagComponent:
+      Tag: Cube-2
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 2867232429297247773
+      MaterialTable:
+        0: 0
+      Visible: true
+  - Entity: 14464868180992324067
+    TagComponent:
+      Tag: Cube-3
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      AssetID: 2867232429297247773
+      MaterialTable:
+        0: 0
+      Visible: true
