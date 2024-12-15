@@ -1,7 +1,7 @@
 {
-    "Total": 7,
+    "Total": 13,
     "Passed": {
-        "Count": 7,
+        "Count": 13,
         "Tests": [
             "ObjectPtr_ReferenceCount_Creation",
             "Dummy_Arithmetic_OneEqualOne",
@@ -9,7 +9,13 @@
             "Dummy_Arithmetic_OneLessThanTwo",
             "Dummy_Arithmetic_TwoGreaterThanThree",
             "Dummy_Arithmetic_TwoGreaterThanOne",
-            "ObjectPtr_ReferenceCount_CopyOnce"
+            "ObjectPtr_ReferenceCount_CopyOnce",
+            "StringUtils_ToLower_ConstChar",
+            "StringUtils_ToUpper_ConstChar",
+            "StringUtils_ToLower_String",
+            "StringUtils_ToUpper_String",
+            "StringUtils_ToLower_WideString",
+            "StringUtils_ToUpper_WideString"
         ]
     },
     "Failed": {

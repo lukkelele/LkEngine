@@ -6,3 +6,9 @@ CoreTests:
   - Dummy_Arithmetic_TwoGreaterThanThree: 1
   - Dummy_Arithmetic_TwoGreaterThanOne: 1
   - ObjectPtr_ReferenceCount_CopyOnce: 1
+  - StringUtils_ToLower_ConstChar: 1
+  - StringUtils_ToUpper_ConstChar: 1
+  - StringUtils_ToLower_String: 1
+  - StringUtils_ToUpper_String: 1
+  - StringUtils_ToLower_WideString: 1
+  - StringUtils_ToUpper_WideString: 1
