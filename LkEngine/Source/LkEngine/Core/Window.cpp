@@ -3,17 +3,11 @@
 
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Viewport.h"
+#include "LkEngine/Input/Keyboard.h"
 #include "LkEngine/Renderer/Renderer.h"
 
 
 namespace LkEngine {
-
-	#if 0
-	static void GlfwErrorCallback(int Error, const char* Description)
-	{
-		LK_CORE_ERROR_TAG("GLFW", "Error ({0}): {1}", Error, Description);
-	}
-	#endif
 
 	LWindow::LWindow(const FWindowSpecification& WindowSpecification)
 		: Specification(WindowSpecification)
@@ -112,33 +106,23 @@ namespace LkEngine {
 			{
 				case GLFW_PRESS:
 				{
-					LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Pressed);
-			#if 0
-					KeyPressedEvent Event(static_cast<EKey>(Key), 0);
-					WindowDataRef.EventCallback(Event);
-					//WindowDataRef.OnWindowEvent.Broadcast(Event);
-			#endif
+					const FKeyData& KeyData = LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Pressed);
+					LKeyboard::OnKeyPressed.Broadcast(KeyData);
 					break;
 				}
 
 				case GLFW_RELEASE:
 				{
-			#if 0
-					LInput::UpdateKeyState((EKey)Key, EKeyState::Released);
-					KeyReleasedEvent Event((EKey)Key);
-					WindowDataRef.EventCallback(Event);
-			#endif
+					const FKeyData& KeyData = LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Released);
+					LKeyboard::OnKeyReleased.Broadcast(KeyData);
 					break;
 				}
 
 				case GLFW_REPEAT:
 				{
-					LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Held);
-				#if 0
-					KeyPressedEvent Event(static_cast<EKey>(Key), 1);
-					WindowDataRef.EventCallback(Event);
-					WindowDataRef.OnWindowEvent.Broadcast(Event);
-				#endif
+					FKeyData& KeyData = LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Held);
+					KeyData.RepeatCount++;
+					LKeyboard::OnKeyHeld.Broadcast(KeyData);
 
 					break;
 				}

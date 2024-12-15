@@ -171,6 +171,11 @@ namespace LkEngine {
 		SourceSansPro_Italic.Size = DefaultFontSize;
 		UI::Font::Add(SourceSansPro_Italic);
 
+		FFontConfiguration SourceSansPro_ItalicLarge;
+		SourceSansPro_ItalicLarge.FontName = "ItalicLarge";
+		SourceSansPro_ItalicLarge.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Italic.ttf";
+		SourceSansPro_ItalicLarge.Size = LargeFontSize;
+		UI::Font::Add(SourceSansPro_ItalicLarge);
 
 		/*----------------------------------------------------
 			Roboto

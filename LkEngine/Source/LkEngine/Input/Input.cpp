@@ -13,7 +13,8 @@ namespace LkEngine {
 
 	void LInput::Initialize()
 	{
-        LKeyboard::Initialize();
+		LKeyboard& Keyboard = LKeyboard::Get();
+        Keyboard.Initialize();
 
         LMouse::Initialize();
 		MouseDataMap.insert({ EMouseButton::Button0, FMouseButtonData() });
@@ -24,98 +25,14 @@ namespace LkEngine {
 		MouseDataMap.insert({ EMouseButton::Button5, FMouseButtonData() });
 	}
 
-	void LInput::SetScene(const TObjectPtr<LScene>& InScene)
-	{
-		if (!InScene || Scene == InScene)
-		{
-			return;
-		}
-
-		Scene = InScene;
-	}
-
 	void LInput::Update()
 	{
-		if (Scene == nullptr)
+		/* HeldData holds the initial recorded timestamp when the held event 
+		 * was triggered and the second entry is updated continuosly. */
+		for (auto& [Key, HeldData] : KeyHeldMap)
 		{
-			return;
+			HeldData.second = std::chrono::steady_clock::now();
 		}
-
-		LEditorLayer* Editor = LEditorLayer::Get();
-		if (LMouse::IsButtonPressed(EMouseButton::Button0) == false)
-		{
-			if (LKeyboard::IsKeyPressed(EKey::Escape))
-			{
-				LK_CORE_TRACE("De-selecting (clicked escape)");
-				if (Editor && Editor->IsEnabled())
-				{
-					//LEntity entity = { (entt::entity)0, Scene.Get()};
-					LEntity entity = { (entt::entity)0, Scene };
-					LK_UNUSED(entity);
-
-					//SELECTION::SelectedEntity = entity;
-				}
-
-				return;
-			}
-		}
-
-	#if 0
-		/// @NOTE: This was moved here from the editor layer.
-		// The window space is calculated from topleft corner, 
-		// so remove LMouse::Pos.y to get the actual cursor placement
-		{
-			LMouse::Pos = LMouse::GetRawPos();
-			LMouse::Pos.x -= LeftSidebarSize.x;
-			LMouse::Pos.y = ViewportBounds[1].Y - BottomBarSize.y - LMouse::Pos.y;
-
-			LMouse::ScaledPos.x = (LMouse::Pos.x) / ViewportScalers.x;
-			LMouse::ScaledPos.y = (LMouse::Pos.y) / ViewportScalers.y;
-
-			LMouse::CenterPos.x = (LMouse::Pos.x / Window->GetWidth()) * 2.0f - 1.0f;
-			LMouse::CenterPos.y = ((LMouse::Pos.y / Window->GetHeight()) * 2.0f - 1.0f) * -1.0f;
-		}
-	#endif
-
-	#if 0
-        const glm::vec2 mousePos = Mouse::GetPos();
-        std::vector<Raycast2DResult> raycastResults = Physics2D::RaycastFromScreen(*Scene);
-		for (const Raycast2DResult& RaycastResult : raycastResults)
-		{
-			LK_CORE_DEBUG_TAG("RaycastResult2D", "{}", RaycastResult.ToString());
-		}
-
-		const int raycastHits = raycastResults.size();
-
-		if (raycastHits == 1)
-		{
-			LK_CORE_DEBUG("Hitcast result == 1");
-		    Raycast2DResult raycast = raycastResults.at(0);
-		    LEntity entity = raycast.HitEntity;
-
-		    if (Mouse::IsButtonPressed(EMouseButton::Button0))
-		    {
-		    }
-		}
-		else if (raycastHits > 1)
-		{
-			LK_CORE_WARN("Hitcast results > 1");
-		    for (auto& raycast : raycastResults)
-		    {
-		    }
-		}
-		else /* No hits. */
-		{
-		}
-
-        if (LKeyboard::IsKeyPressed(EKey::Escape))
-        {
-			LK_CORE_DEBUG("De-selecting (clicked escape)");
-			if (Editor && Editor->IsEnabled())
-			{
-			}
-        }
-	#endif
 	}
 
 	bool LInput::IsMouseButtonPressed(const EMouseButton Button)
@@ -162,14 +79,14 @@ namespace LkEngine {
 			}
 			LK_CORE_DEBUG("viewport->PlatformUserData != nullptr !!!");
 
-			GLFWwindow* windowHandle = *(GLFWwindow**)viewport->PlatformUserData; // First member is GLFWwindow
-			if (!windowHandle)
+			GLFWwindow* WindowHandle = *(GLFWwindow**)viewport->PlatformUserData; // First member is GLFWwindow
+			if (!WindowHandle)
 			{
-				LK_CORE_ASSERT(false, "windowHandle (GLFWwindow*) is nullptr");
+				LK_CORE_ASSERT(false, "WindowHandle (GLFWwindow*) is nullptr");
 				continue;
 			}
 
-			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(windowHandle), static_cast<int32_t>(Button));
+			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(WindowHandle), static_cast<int32_t>(Button));
 			if (state == GLFW_PRESS || state == GLFW_REPEAT)
 			{
 				pressed = true;
@@ -208,47 +125,10 @@ namespace LkEngine {
 
 	bool LInput::IsKeyDown(const EKey Key)
 	{
-		const bool bEnableImGui = LApplication::Get()->GetSpecification().ImGuiEnabled;
-		if (!bEnableImGui)
-		{
-			auto& window = LApplication::Get()->GetWindow();
-			auto state = glfwGetKey(static_cast<GLFWwindow*>(window.GetGlfwWindow()), static_cast<int32_t>(Key));
-			return state == GLFW_PRESS || state == GLFW_REPEAT;
-		}
-		
-		LWindow& WindowRef = LApplication::Get()->GetWindow();
-		GLFWwindow* win = static_cast<GLFWwindow*>(WindowRef.GetGlfwWindow());
-		bool pressed = false;
-		auto state = glfwGetKey(win, static_cast<int32_t>(Key));
-		if (state == GLFW_PRESS || state == GLFW_REPEAT)
-		{
-			pressed = true;
-		}
+		LWindow& Window = LApplication::Get()->GetWindow();
+		const int State = glfwGetKey(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), static_cast<int32_t>(Key));
 
-		//------------------------------------------------------------
-		// ImGui  Multi-Viewports
-		// Needs io.Config |= ImGuiConfigFlags_ViewportsEnable
-		//------------------------------------------------------------
-#if LK_USE_MULTI_VIEWPORTS
-		ImGuiContext* context = ImGui::GetCurrentContext();
-		for (ImGuiViewport* viewport : context->Viewports)
-		{
-			if (!viewport->PlatformUserData)
-				continue;
-
-			GLFWwindow* windowHandle = *(GLFWwindow**)viewport->PlatformUserData; // First member is GLFWwindow
-			if (!windowHandle)
-				continue;
-			auto state = glfwGetKey(windowHandle, static_cast<int32_t>(Key));
-			if (state == GLFW_PRESS || state == GLFW_REPEAT)
-			{
-				pressed = true;
-				break;
-			}
-		}
-#endif
-
-		return pressed;
+		return ((State == GLFW_PRESS) || (State == GLFW_REPEAT));
 	}
 
 	bool LInput::IsKeyReleased(const EKey Key)
@@ -275,12 +155,34 @@ namespace LkEngine {
 		return static_cast<ECursorMode>(InputMode);
 	}
 
+	FKeyData& LInput::GetKeyData(const EKey Key)
+	{
+		LK_CORE_ASSERT(KeyDataMap.contains(Key), "Key '{}' is not in the KeyDataMap", Enum::ToString(Key));
+		return KeyDataMap[Key];
+	}
+
 	FKeyData& LInput::UpdateKeyState(const EKey Key, const EKeyState NewState)
 	{
 		FKeyData& KeyData = KeyDataMap[Key];
 		KeyData.Key = Key;
 		KeyData.OldState = KeyData.State;
 		KeyData.State = NewState;
+
+		if (NewState == EKeyState::Pressed)
+		{
+			KeyData.RepeatCount = 0;
+		}
+		else if (NewState == EKeyState::Released)
+		{
+			/* Remove any held key data whenever key is released. */
+			std::erase_if(KeyHeldMap, [Key](const auto& CurrentKey) { return (Key == CurrentKey.first); });
+		}
+		/* Insert timestamp once on the initial held event. */
+		else if ((NewState == EKeyState::Held) && (KeyData.RepeatCount <= 1))
+		{
+			using namespace std::chrono;
+			KeyHeldMap.insert({ Key, { steady_clock::now(), steady_clock::now() } });
+		}
 
 		return KeyData;
 	}
@@ -316,6 +218,44 @@ namespace LkEngine {
 				UpdateButtonState(Button, EMouseButtonState::Held);
 			}
 		}
+	}
+
+	void LInput::ClearReleased()
+	{
+		/* Keyboard. */
+		for (const auto& [Key, KeyData] : KeyDataMap)
+		{
+			if (KeyData.State == EKeyState::Released)
+			{
+				UpdateKeyState(Key, EKeyState::None);
+			}
+		}
+
+		/* Mouse. */
+		for (const auto& [Button, ButtonData] : MouseDataMap)
+		{
+			if (ButtonData.State == EMouseButtonState::Released)
+			{
+				UpdateButtonState(Button, EMouseButtonState::None);
+			}
+		}
+	}
+
+	std::size_t LInput::GetPressedKeys(std::vector<EKey>& InKeys)
+	{
+		InKeys.clear();
+		InKeys.reserve(KeyDataMap.size());
+
+		for (const auto& [Key, KeyData] : KeyDataMap)
+		{
+			if ((KeyData.State == EKeyState::Pressed) || (KeyData.State == EKeyState::Held))
+			{
+				InKeys.emplace_back(Key);
+			}
+		}
+
+		InKeys.shrink_to_fit();
+		return InKeys.size();
 	}
 
 }

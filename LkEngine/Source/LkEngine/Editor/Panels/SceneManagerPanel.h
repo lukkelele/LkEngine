@@ -19,6 +19,9 @@ namespace LkEngine {
 		virtual void OnRender() override;
 		virtual void OnRenderUI(bool& IsOpen) override;
 
+		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
+		virtual void DeserializeFromYaml(const YAML::Node& Data) override;
+
 		void DrawEntityNode(LEntity entity);
 		static void DrawComponents(LEntity entity);
 

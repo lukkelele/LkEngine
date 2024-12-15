@@ -27,8 +27,6 @@
 #include "LkEngine/Editor/PanelManager.h"
 #include "LkEngine/Editor/Panels/ContentBrowser.h"
 
-#define LK_UI_ENABLE_LEFT_SIDEBAR_CONTENT 1
-
 
 namespace LkEngine {
 
@@ -57,7 +55,11 @@ namespace LkEngine {
 
 		virtual void Initialize() override;
 
+		virtual void OnAttach() override;
+		virtual void OnDetach() override;
+
 		virtual void OnUpdate(const float DeltaTime) override;
+
 
 		void RenderViewport();
 		void RenderViewport(TObjectPtr<LImage> Image);
@@ -85,6 +87,8 @@ namespace LkEngine {
 		void SaveSceneAs();
 
 	private:
+		void PollInput();
+
 		void UI_PrepareTopBar();
 		void UI_PrepareLeftSidebar() const;
 		void UI_PrepareRightSidebar() const;

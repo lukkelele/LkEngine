@@ -8,20 +8,18 @@
 
 namespace LkEngine {
 
-	///
-	/// FIXME: UPDATE THIS ENTIRE IMPL
-	///
+	LKeyboard::FOnKeyPressed LKeyboard::OnKeyPressed;
+	LKeyboard::FOnKeyReleased LKeyboard::OnKeyReleased;
+	LKeyboard::FOnKeyHeld LKeyboard::OnKeyHeld;
 
-	static bool bInitialized = false;
+	LKeyboard::LKeyboard()
+	{
+		LOBJECT_REGISTER();
+	}
 
 	void LKeyboard::Initialize()
 	{
-		if (bInitialized)
-		{
-			return;
-		}
-
-		bInitialized = true;
+		LObject::Initialize();
 	}
 
 	bool LKeyboard::IsKeyPressed(const EKey Key)
@@ -30,6 +28,12 @@ namespace LkEngine {
 		const int KeyState = glfwGetKey(GlfwWindow, static_cast<int32_t>(Key));
 
 		return (KeyState == GLFW_PRESS);
+	}
+
+	LKeyboard& LKeyboard::Get()
+	{
+		static LKeyboard Keyboard;
+		return Keyboard;
 	}
 
 }

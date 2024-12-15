@@ -142,6 +142,7 @@ namespace LkEngine {
 		);
 	#endif
 
+		/* TODO: Add static check in delegate implementation so no empty functions are able to get passed. */
 		Window->OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
 		{
 		});
@@ -155,7 +156,6 @@ namespace LkEngine {
 			WindowScalers.Y = EditorWindowSize.Y / NewHeight;
 			EditorViewport->SetScalers(WindowScalers);
 
-			LK_CORE_WARN("Updating viewport bounds to ({}, {})", NewWidth, NewHeight);
 			ViewportBounds[0] = { 0, 0 };
 			ViewportBounds[1] = { NewWidth, NewHeight };
 		});
@@ -232,8 +232,6 @@ namespace LkEngine {
 		});
 
 		PanelManager->Initialize();
-		//LK_CORE_DEBUG_TAG("Editor", "Adding debugging panel");
-		//DebugPanel = TObjectPtr<LDebugPanel>::Create();
 
 		/* TODO: Load last open project, else load an empty 'default' project. */
 		if (LProject::Current() == nullptr)
@@ -259,7 +257,30 @@ namespace LkEngine {
 		/* FIXME: Temporary debugging. */
 		LOpenGL_Debug::InitializeEnvironment();
 
+		/* Keyboard events. */
+		LKeyboard::OnKeyPressed.Add([&](const FKeyData& PressedKeyData)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "Pressed: {} ({})", Enum::ToString(PressedKeyData.Key), Enum::ToString(PressedKeyData.State));
+		});
+
+		LKeyboard::OnKeyReleased.Add([&](const FKeyData& ReleasedKeyData)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "Released: {} ({})", Enum::ToString(ReleasedKeyData.Key), Enum::ToString(ReleasedKeyData.State));
+		});
+
 		bInitialized = true;
+	}
+
+	void LEditorLayer::OnAttach()
+	{
+		LK_CORE_WARN_TAG("Editor", "OnAttach");
+		PanelManager->Deserialize();
+	}
+
+	void LEditorLayer::OnDetach()
+	{
+		LK_CORE_WARN_TAG("Editor", "OnDetach");
+		PanelManager->Serialize();
 	}
 
 	void LEditorLayer::OnUpdate(const float DeltaTime)
@@ -514,6 +535,57 @@ namespace LkEngine {
 		UI::Begin(LK_UI_BOTTOMBAR, nullptr, UI::SidebarFlags);
 		{
 			//LK_UI_DEBUG_DOCKNODE(LK_UI_DOCK_BOTTOMBAR);
+
+			static std::vector<EKey> PressedKeys;
+			const std::size_t PressedKeyCount = LInput::GetPressedKeys(PressedKeys);
+			ImGui::Text("Pressed Keys: %d", (int)PressedKeyCount);
+			if (PressedKeyCount > 0)
+			{
+				if (ImGui::BeginTable("PressedKeysTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+				{
+					/* Set up the columns for the table. */
+					ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableSetupColumn("Repeat Count", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+					ImGui::TableSetupColumn("Time Held (ms)", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+					ImGui::TableHeadersRow();
+
+					for (const EKey PressedKey : PressedKeys)
+					{
+						using namespace std::chrono;
+
+						const FKeyData& KeyData = LInput::GetKeyData(PressedKey);
+						const auto TimeHeld = LInput::GetKeyHeldTime<milliseconds>(PressedKey);
+
+						ImGui::TableNextRow();
+
+						/* Column 1: Key Name */
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("%s", Enum::ToString(PressedKey));
+
+						/* Column 2: Repeat Count */
+						ImGui::TableSetColumnIndex(1);
+						ImGui::Text("%d", KeyData.RepeatCount);
+
+						/* Column 3: Time Held in milliseconds */
+						ImGui::TableSetColumnIndex(2);
+						ImGui::Text("%d", static_cast<int>(TimeHeld.count()));
+					}
+
+					ImGui::EndTable();
+				}
+
+			#if 0
+				int Index = 0;
+				for (const EKey PressedKey : PressedKeys)
+				{
+					using namespace std::chrono;
+					const FKeyData& KeyData = LInput::GetKeyData(PressedKey);
+					const auto TimeHeld = LInput::GetKeyHeldTime<milliseconds>(PressedKey);
+					ImGui::Text("%s  Repeat: %d  (%d)", Enum::ToString(PressedKey), KeyData.RepeatCount, (int)TimeHeld.count());
+					Index++;
+				}
+			#endif
+			}
 		}
 		UI::End(); /* Bottom Bar. */
 
@@ -877,7 +949,15 @@ namespace LkEngine {
 	#endif
 	}
 
-	void LEditorLayer::UI_PrepareTopBar() 
+	void LEditorLayer::PollInput()
+	{
+		if (LInput::IsKeyPressed(EKey::LeftControl))
+		{
+			LK_CORE_INFO("KeyPressed: LeftControl");
+		}
+	}
+
+	void LEditorLayer::UI_PrepareTopBar()
 	{
 		if (ImGuiWindow* TopBar = ImGui::FindWindowByName(LK_UI_TOPBAR); TopBar != nullptr)
 		{
@@ -988,7 +1068,9 @@ namespace LkEngine {
 
 				/** Add the docking separator size here to make the alignment linear for both sidebars. */
 				ImGuiStyle& Style = ImGui::GetStyle();
-				BottomBarSize = { DockNode->Size.x + Style.DockingSeparatorSize, DockNode->Size.y };
+				
+				/* TODO: Check if any other windows are docked. */
+				//BottomBarSize = { DockNode->Size.x + Style.DockingSeparatorSize, DockNode->Size.y };
 
 				EditorViewport->SetSizeX(BottomBarSize.X - Style.DockingSeparatorSize);
 				EditorViewport->SetPositionX(EditorViewport->GetPosition().X - Style.DockingSeparatorSize);
@@ -1002,11 +1084,32 @@ namespace LkEngine {
 					DockNode->LocalFlags |= ImGuiDockNodeFlags_NoWindowMenuButton;
 					DockNode->LocalFlags |= ImGuiDockNodeFlags_NoTabBar;
 					BottomBarWindow->Flags &= ~ImGuiWindowFlags_NoTitleBar;
+
+					//BottomBarSize = { DockNode->Size.x + Style.DockingSeparatorSize, DockNode->Size.y };
+					if (DockNode->ParentNode->ChildNodes[0]->VisibleWindow && DockNode->ParentNode->ChildNodes[1]->VisibleWindow)
+					{
+						BottomBarSize = { DockNode->ParentNode->Size.x + Style.DockingSeparatorSize, DockNode->ParentNode->Size.y };
+					}
+					else
+					{
+						BottomBarSize = { DockNode->Size.x + Style.DockingSeparatorSize, DockNode->Size.y };
+					}
 				}
 				else if (DockNode->Windows.Size > 1)
 				{
 					DockNode->LocalFlags &= ~ImGuiDockNodeFlags_NoTabBar;
 					DockNode->LocalFlags &= ~ImGuiDockNodeFlags_NoWindowMenuButton;
+					LK_CORE_VERIFY(DockNode->ParentNode, "BottomBar has no parent node");
+
+					//BottomBarSize = { DockNode->ParentNode->Size.x + Style.DockingSeparatorSize, DockNode->ParentNode->Size.y };
+					if (DockNode->ParentNode->ChildNodes[0]->VisibleWindow && DockNode->ParentNode->ChildNodes[1]->VisibleWindow)
+					{
+						BottomBarSize = { DockNode->ParentNode->Size.x + Style.DockingSeparatorSize, DockNode->ParentNode->Size.y };
+					}
+					else
+					{
+						BottomBarSize = { DockNode->Size.x + Style.DockingSeparatorSize, DockNode->Size.y };
+					}
 				}
 			}
 		}
@@ -1054,8 +1157,6 @@ namespace LkEngine {
 						((LMouse::CenterPos.y * WindowSize.Y * 0.50f) / ViewportScalers.y));
 			ImGui::Text("Mouse Scalers (%.2f, %.2f)", ViewportScalers.x, ViewportScalers.y);
 			ImGui::Separator();
-
-			///ImGui::Text("Last Right Sidebar Size: (%1.f, %1.f)", LastSidebarRightSize.X, LastSidebarRightSize.Y);
 		}
 		ImGui::EndGroup();
 	}
@@ -1070,24 +1171,22 @@ namespace LkEngine {
 			ImGui::Text("LkEngine %s", EngineVersion.c_str());
 			UI::Font::Pop();
 
-			/* Section: About description. */
+			/* Section: About description */
 			ImGui::Separator();
 			ImGui::TextWrapped("Game and rendering engine written in C++20.");
 			ImGui::Separator();
 
-			/* Section: Written By. */
+			/* Section: Written By */
 			UI::Font::Push("Bold");
 			ImGui::Text("Developed by");
 			UI::Font::Pop();
 			ImGui::BulletText("Lukas Gunnarsson (Lukkelele)");
 			ImGui::Separator();
 
-			/* Section: Software Info. */
-			/* TODO: Place dependencies here. */
+			/* Section: Dependencies */
 			UI::Font::Push("Italic");
 			{
-				static const std::string GlfwVersion(glfwGetVersionString());
-				ImGui::TextColored(ImVec4(0.70f, 0.70f, 0.70f, 1.0f), "Contains source code provided by");
+				ImGui::TextColored(ImVec4(0.50f, 0.50f, 0.50f, 1.0f), "Contains source code provided by");
 				ImGui::BulletText("GLFW: %d.%d.%d", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
 			#if defined(LK_ENGINE_OPENGL)
 				ImGui::BulletText("OpenGL: %d.%d", LOpenGL::GetMajorVersion(), LOpenGL::GetMinorVersion());
@@ -1100,7 +1199,6 @@ namespace LkEngine {
 			UI::Font::Pop();
 
 			ImGui::Separator();
-
 			if (ImGui::Button("OK"))
 			{
 				ImGui::CloseCurrentPopup();
@@ -1396,7 +1494,6 @@ namespace LkEngine {
 				if (ImGui::MenuItem("Live Objects"))
 				{
 					LK_CORE_DEBUG_TAG("Editor", "Open -> Live Objects");
-					//if (FPanelData* PanelData = PanelManager->GetPanelData(LHash::GenerateFNVHash(PanelID::DebugPanel)))
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
 					{
 						PanelData->bIsOpen = true;
@@ -1404,10 +1501,19 @@ namespace LkEngine {
 					}
 				}
 
+				if (ImGui::MenuItem("View Asset Registry"))
+				{
+					LK_CORE_DEBUG_TAG("Editor", "Open -> Asset Registry");
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
+					{
+						PanelData->bIsOpen = true;
+						PanelData->Panel.As<LToolsPanel>()->bWindow_AssetRegistry = true;
+					}
+				}
+
 				if (ImGui::MenuItem("Registered Fonts"))
 				{
 					LK_CORE_DEBUG_TAG("Editor", "Open -> Registered Fonts");
-					//if (FPanelData* PanelData = PanelManager->GetPanelData(LHash::GenerateFNVHash(PanelID::DebugPanel)))
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
 					{
 						PanelData->bIsOpen = true;

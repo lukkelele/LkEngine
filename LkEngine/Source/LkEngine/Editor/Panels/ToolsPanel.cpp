@@ -1,11 +1,17 @@
 #include "LKpch.h"
 #include "ToolsPanel.h"
 
+#include "LkEngine/Project/Project.h"
+
+#include "LkEngine/Asset/AssetImporter.h"
+#include "LkEngine/Asset/RuntimeAssetManager.h"
+
 
 namespace LkEngine {
 
 	bool LToolsPanel::bWindow_ObjectReferences = false;
 	bool LToolsPanel::bWindow_RegisteredFonts = false;
+	bool LToolsPanel::bWindow_AssetRegistry = false;
 
 	LToolsPanel::LToolsPanel()
 	{
@@ -19,17 +25,59 @@ namespace LkEngine {
 			UI_ObjectReferences();
 		}
 
+		if (bWindow_AssetRegistry)
+		{ 
+			UI_AssetRegistry();
+		}
+
 		if (bWindow_RegisteredFonts)
 		{ 
 			UI_RegisteredFonts();
 		}
 
-		IsOpen = (bWindow_ObjectReferences || bWindow_RegisteredFonts);
+		IsOpen = (bWindow_ObjectReferences || bWindow_AssetRegistry || bWindow_RegisteredFonts);
+	}
+
+	void LToolsPanel::SerializeToYaml(YAML::Emitter& Out) const
+	{
+		LK_CORE_TRACE_TAG("ToolsPanel", "Serializing to YAML");
+		Out << YAML::Key << "Windows" << YAML::Value << YAML::BeginMap;
+		{
+			Out << YAML::Key << "ObjectReferences" << YAML::Value << bWindow_ObjectReferences;
+			Out << YAML::Key << "AssetRegistry" << YAML::Value << bWindow_AssetRegistry;
+			Out << YAML::Key << "RegisteredFonts" << YAML::Value << bWindow_RegisteredFonts;
+		}
+		Out << YAML::EndMap;
+	}
+
+	void LToolsPanel::DeserializeFromYaml(const YAML::Node& Data)
+	{
+		const YAML::Node& WindowsNode = Data["Windows"];
+		if (!WindowsNode)
+		{
+			LK_CORE_ERROR_TAG("ToolsPanel", "Node 'Windows' is not valid");
+			return;
+		}
+
+		if (WindowsNode["ObjectReferences"])
+        {
+            bWindow_ObjectReferences = WindowsNode["ObjectReferences"].as<bool>();
+        }
+
+        if (WindowsNode["AssetRegistry"])
+        {
+            bWindow_AssetRegistry = WindowsNode["AssetRegistry"].as<bool>();
+        }
+
+        if (WindowsNode["RegisteredFonts"])
+        {
+            bWindow_RegisteredFonts = WindowsNode["RegisteredFonts"].as<bool>();
+        }
 	}
 
 	void LToolsPanel::UI_ObjectReferences()
 	{
-		static ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoDocking;
+		static ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
 		ImGui::SetNextWindowSize(ImVec2(720, 960), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Object References", &bWindow_ObjectReferences, WindowFlags);
 		{
@@ -190,6 +238,52 @@ namespace LkEngine {
 				MaxVisibleItems = std::numeric_limits<int>::max();
 			}
 
+		}
+
+		LK_UI_DEBUG_ON_HOVER();
+		ImGui::End();
+	}
+
+	void LToolsPanel::UI_AssetRegistry()
+	{
+		const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
+		ImGui::SetNextWindowSize(ImVec2(500, 560), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Asset Registry", &bWindow_AssetRegistry, WindowFlags);
+
+		if (TObjectPtr<LProject> Project = LProject::Current(); Project != nullptr)
+		{
+			TObjectPtr<LRuntimeAssetManager> AssetManager = Project->GetRuntimeAssetManager();
+			LK_CORE_VERIFY(AssetManager, "Invalid asset manager reference");
+			const LAssetRegistry& AssetRegistry = AssetManager->GetAssetRegistry();
+
+			if (ImGui::BeginTable("##Table-AssetRegistry", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+			{
+				ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize("Index").x);
+				ImGui::TableSetupColumn("Handle");
+				ImGui::TableSetupColumn("Filepath", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableHeadersRow();
+
+				int Index = 1;
+				for (const auto& [AssetHandle, Metadata] : AssetRegistry) 
+				{
+					ImGui::TableNextRow();
+					/* Column 1: Index */
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("%d", Index);
+
+					/* Column 2: Font Size */
+					ImGui::TableSetColumnIndex(1);
+					ImGui::Text("%lld   (%lld)", AssetHandle, Metadata.Handle);
+
+					/* Column 3: Filepath */
+					ImGui::TableSetColumnIndex(2);
+					ImGui::Text("%s", Metadata.FilePath.string().c_str());
+
+					Index++;
+				}
+
+				ImGui::EndTable();
+			}
 		}
 
 		LK_UI_DEBUG_ON_HOVER();

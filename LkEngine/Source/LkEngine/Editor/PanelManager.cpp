@@ -80,12 +80,15 @@ namespace LkEngine {
 		{
 			for (std::size_t Category = 0; Category < Panels.size(); Category++)
 			{
-				for (const auto& [PanelID, Panel] : Panels[Category])
+				for (const auto& [PanelID, PanelData] : Panels[Category])
 				{
+					LK_CORE_INFO_TAG("PanelManager", "Serializing: {}", PanelData.Name);
 					Out << YAML::BeginMap;
 					Out << YAML::Key << "ID" << YAML::Value << PanelID;
-					Out << YAML::Key << "Name" << YAML::Value << Panel.Name;
-					Out << YAML::Key << "IsOpen" << YAML::Value << Panel.bIsOpen;
+					Out << YAML::Key << "Name" << YAML::Value << PanelData.Name;
+					Out << YAML::Key << "IsOpen" << YAML::Value << PanelData.bIsOpen;
+					PanelData.Panel->SerializeToYaml(Out);
+
 					Out << YAML::EndMap;
 				}
 			}
@@ -100,9 +103,10 @@ namespace LkEngine {
 
 	void LPanelManager::Deserialize()
 	{
-		std::filesystem::path EditorLayoutPath = LFileSystem::GetConfigDir() / "EditorLayout.yaml";
+		const std::filesystem::path EditorLayoutPath = LFileSystem::GetConfigDir() / "EditorLayout.yaml";
 		if (!LFileSystem::Exists(EditorLayoutPath))
 		{
+			LK_CORE_ERROR_TAG("PanelManager", "Editor layout cannot be found ({})", EditorLayoutPath.string());
 			return;
 		}
 
@@ -127,6 +131,7 @@ namespace LkEngine {
 			}
 
 			PanelData->bIsOpen = PanelNode["IsOpen"].as<bool>(PanelData->bIsOpen);
+			PanelData->Panel->DeserializeFromYaml(PanelNode);
 		}
 	}
 

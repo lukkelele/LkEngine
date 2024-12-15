@@ -115,6 +115,8 @@ namespace LkEngine {
 		const std::vector<TTexture2DPair>& GetTextures2D() const;
 		int GetTextures2D(std::vector<TTexture2DPair>& TextureContainer);
 
+		FORCEINLINE const LAssetRegistry& GetAssetRegistry() const { return AssetRegistry; }
+
 	public:
 		/**
 		 * @brief Base cube.

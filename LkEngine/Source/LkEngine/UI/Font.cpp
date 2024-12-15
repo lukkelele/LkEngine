@@ -9,18 +9,35 @@ namespace LkEngine::UI {
 
 	static std::unordered_map<FFontEntry, ImFont*> Fonts;
 
+	const std::unordered_map<EFontSize, float> FontSizeMap = {
+		{ EFontSize::Regular,  20.0f },
+		{ EFontSize::Small,    12.0f },
+		{ EFontSize::Smaller,  16.0f },
+		{ EFontSize::Large,    24.0f },
+		{ EFontSize::Larger,   28.0f },
+		{ EFontSize::Title,    44.0f },
+		{ EFontSize::Header,   34.0f },
+	};
+
+	/**
+	 * TODO: This should be able to add fonts with the same name but register them
+	 *       with different sizes and default to the default set fontsize.
+	 */
 	void Font::Add(const FFontConfiguration& FontConfig, bool IsDefault)
 	{
-		LK_CORE_ASSERT(LFileSystem::Exists(FontConfig.FilePath), "Invalid font filepath");
-
+		LK_CORE_VERIFY(LFileSystem::Exists(FontConfig.FilePath), "Invalid font filepath");
 		using EntryPair = std::pair<FFontEntry, ImFont*>;
 		auto FindFont = [&FontConfig](const EntryPair& FontEntry) -> bool
 		{
+		#if defined(LK_UI_FONT_REWORKED)
+			return ((FontEntry.first.Name == FontConfig.FontName) && (FontEntry.first.Size == FontConfig.Size));
+		#else
 			return (FontEntry.first.Name == FontConfig.FontName);
+		#endif
 		};
 		if (auto Iter = std::find_if(Fonts.begin(), Fonts.end(), FindFont); Iter != Fonts.end())
 		{
-			LK_CORE_WARN("Failed to add font '{}', the name is already taken by another font", FontConfig.FontName);
+			LK_CORE_WARN("Failed to add font '{}', the name is already registered", FontConfig.FontName);
 			return;
 		}
 

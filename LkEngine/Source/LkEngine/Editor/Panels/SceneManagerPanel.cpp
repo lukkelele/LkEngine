@@ -104,6 +104,16 @@ namespace LkEngine {
 		}
 	}
 
+	void LSceneManagerPanel::SerializeToYaml(YAML::Emitter& Out) const
+	{
+		/* Empty for now. */
+	}
+
+	void LSceneManagerPanel::DeserializeFromYaml(const YAML::Node& Data)
+	{
+		/* Empty for now. */
+	}
+
 	template<typename T, typename TUIFunction>
 	void LSceneManagerPanel::DrawComponent(const std::string& ComponentName, LEntity Entity, TUIFunction UIFunction)
 	{

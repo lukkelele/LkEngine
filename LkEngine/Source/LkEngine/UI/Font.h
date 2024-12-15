@@ -6,6 +6,9 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+/* Use newer font registration system with changes to sizes. */
+//#define LK_UI_FONT_REWORKED 
+
 
 namespace LkEngine {
 
@@ -19,6 +22,8 @@ namespace LkEngine {
 		Title,
 		Header,
 	};
+
+	extern const std::unordered_map<EFontSize, float> FontSizeMap;
 
 	enum class EFont
 	{
@@ -78,7 +83,12 @@ namespace std
             for (const char Character : Entry.Name)
             {
 				/* Common hash multiplier. */
+			#if defined(LK_UI_FONT_REWORKED)
                 Hash = (Hash * 31 + static_cast<unsigned char>(Character));
+				Hash += Entry.Size;
+			#else
+				Hash = (Hash * 31 + static_cast<unsigned char>(Character));
+			#endif
             }
 
             return Hash;

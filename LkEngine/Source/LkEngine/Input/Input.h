@@ -22,10 +22,6 @@ namespace LkEngine {
 		static void Initialize();
 
 		static void Update();
-		static void SetScene(const TObjectPtr<LScene>& InScene); 
-
-		FORCEINLINE static float GetMouseX() { return LMouse::GetMouseX(); }
-		FORCEINLINE static float GetMouseY() { return LMouse::GetMouseY(); }
 
 		static bool IsKeyPressed(EKey Key);
 		static bool IsKeyHeld(EKey Key);
@@ -38,10 +34,10 @@ namespace LkEngine {
 		static bool IsMouseButtonReleased(const EMouseButton Button);
 		static bool IsAnyMouseButtonPressed();
 
-		static std::pair<float, float> GetMousePosition();
-
 		static void SetCursorMode(ECursorMode mode);
 		static ECursorMode GetCursorMode();
+
+		static FKeyData& GetKeyData(const EKey Key);
 
 		static FKeyData& UpdateKeyState(const EKey Key, EKeyState NewState);
 
@@ -54,24 +50,41 @@ namespace LkEngine {
 		static void TransitionPressedKeys();
 		static void TransitionPressedButtons();
 
+		/**
+		 * @brief Clear released inputs.
+		 */
+		static void ClearReleased();
+
+		template<typename TDuration>
+		static TDuration GetKeyHeldTime(const EKey Key)
+		{
+			using namespace std::chrono;
+			LK_CORE_ASSERT(KeyHeldMap.contains(Key), "Key '{}' is not held down", Enum::ToString(Key));
+			return duration_cast<TDuration>(KeyHeldMap.at(Key).second - KeyHeldMap.at(Key).first);
+		}
+
 		FORCEINLINE static FMouseButtonData& GetMouseData(const EMouseButton MouseButton)
 		{
 			LK_CORE_ASSERT(MouseDataMap.contains(MouseButton));
 			return (MouseDataMap.at(MouseButton));
 		}
 
-		FORCEINLINE static EMouseButton GetLastMouseButton() 
-		{ 
-			return LastMouseButton; 
-		}
+		FORCEINLINE static EMouseButton GetLastMouseButton() { return LastMouseButton; }
+
+		static std::size_t GetPressedKeys(std::vector<EKey>& InKeys);
+
+		FORCEINLINE static float GetMouseX() { return LMouse::GetMouseX(); }
+		FORCEINLINE static float GetMouseY() { return LMouse::GetMouseY(); }
 
     private:
-        inline static TObjectPtr<LScene> Scene = nullptr;
-
 		inline static EMouseButton LastMouseButton = EMouseButton::None;
 
 		inline static std::map<EKey, FKeyData> KeyDataMap{};
 		inline static std::map<EMouseButton, FMouseButtonData> MouseDataMap{};
+
+		using FKeyHeldData = std::pair<std::chrono::steady_clock::time_point, std::chrono::steady_clock::time_point>;
+		//inline static std::map<EKey, std::chrono::steady_clock::time_point> KeyHeldMap{};
+		inline static std::map<EKey, FKeyHeldData> KeyHeldMap{};
     };
 
 }

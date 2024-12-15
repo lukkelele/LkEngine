@@ -95,9 +95,10 @@ namespace LkEngine {
 			Timestep = Timer.GetDeltaTime();
 
 			LInput::Update();
-	#if 0
+			ProcessEvents();
+		#if 0
 			LRenderer::Submit([&]() { Window->GetSwapChain().BeginFrame(); });
-	#endif
+		#endif
 
 			LRenderer::BeginFrame();
 
@@ -145,7 +146,7 @@ namespace LkEngine {
 			m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % LRenderer::GetFramesInFlight();
 			LastTimestep = Timestep;
 
-			ProcessEvents();
+			LInput::ClearReleased();
 		}
 	}
 
@@ -166,6 +167,8 @@ namespace LkEngine {
 
 				Project->Save();
 			}
+
+			LayerStack.~LLayerStack();
 
 			LAssetManager::Destroy();
 			LRenderer::Destroy();

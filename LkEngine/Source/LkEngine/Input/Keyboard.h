@@ -1,6 +1,9 @@
 #pragma once
 
 #include "LkEngine/Core/CoreMacros.h"
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
+
 #include "LkEngine/Core/Delegate/Delegate.h"
 
 #include "LkEngine/Input/Keycodes.h"
@@ -16,20 +19,29 @@ namespace LkEngine {
 		EKey Key{};
 		EKeyState State = EKeyState::None;
 		EKeyState OldState = EKeyState::None;
+		int RepeatCount = 0;
 	};
 
-	///
-	/// FIXME: UPDATE THIS ENTIRE IMPL
-	///
-	class LKeyboard
+	class LKeyboard : public LObject
 	{
 	public:
 		LK_DECLARE_MULTICAST_DELEGATE(FOnKeyPressed, const FKeyData&);
 		LK_DECLARE_MULTICAST_DELEGATE(FOnKeyReleased, const FKeyData&);
-
+		LK_DECLARE_MULTICAST_DELEGATE(FOnKeyHeld, const FKeyData&);
 	public:
-		static void Initialize();
+		LKeyboard();
+
+		void Initialize();
 
 		static bool IsKeyPressed(const EKey Key);
+
+		static LKeyboard& Get();
+
+	public:
+		static FOnKeyPressed OnKeyPressed;   /* TODO: Might remove this as static. */
+		static FOnKeyReleased OnKeyReleased; /* TODO: Might remove this as static. */
+		static FOnKeyHeld OnKeyHeld;         /* TODO: Might remove this as static. */
+	private:
+		LCLASS(LKeyboard);
 	};
 }

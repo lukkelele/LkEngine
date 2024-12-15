@@ -68,17 +68,14 @@ namespace LkEngine {
 		/* Translate Mode. */
 		if (LKeyboard::IsKeyPressed(EKey::T))
 		{
-			LK_CORE_DEBUG_TAG("EditorCamera", "TRANSLATE MODE");
 		}
 		/* Rotation Mode. */
 		else if (LKeyboard::IsKeyPressed(EKey::R))
 		{
-			LK_CORE_DEBUG_TAG("EditorCamera", "ROTATION MODE");
 		}
 		/* Scale Mode. */
 		else if (LKeyboard::IsKeyPressed(EKey::S))
 		{
-			LK_CORE_DEBUG_TAG("EditorCamera", "SCALE MODE");
 		}
 
 		if ((LInput::IsMouseButtonDown(EMouseButton::Button1)) && (!LInput::IsKeyDown(EKey::LeftAlt)))

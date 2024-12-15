@@ -5,6 +5,8 @@
 
 #include "LkEngine/UI/UICore.h"
 
+#include "LkEngine/Serialization/YAMLSerialization.h"
+
 
 namespace LkEngine {
 
@@ -17,6 +19,9 @@ namespace LkEngine {
 		
 		virtual void OnRender() = 0;
 		virtual void OnRenderUI(bool& IsOpen) = 0;
+
+		virtual void SerializeToYaml(YAML::Emitter& Out) const = 0;
+		virtual void DeserializeFromYaml(const YAML::Node& Data) = 0;
 	};
 
 }
