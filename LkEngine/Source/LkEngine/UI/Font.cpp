@@ -35,8 +35,11 @@ namespace LkEngine::UI {
 		);
 		LK_CORE_VERIFY(Font, "Failed to load font");
 
-		FFontEntry FontEntry = {
-			.Name = FontConfig.FontName
+		/* Populate the map with the registered font. */
+		const FFontEntry FontEntry = {
+			.Name = FontConfig.FontName,
+			.Size = FontConfig.Size,
+			.FilePath = FontConfig.FilePath
 		};
 		Fonts[FontEntry] = Font;
 
@@ -83,6 +86,17 @@ namespace LkEngine::UI {
 
 		LK_VERIFY(false, "Failed to find font '{}'", FontName);
 		return nullptr;
+	}
+
+	std::size_t Font::GetRegistered(std::vector<FFontEntry>& InFonts)
+	{
+		InFonts.clear();
+		InFonts.reserve(Fonts.size());
+
+		auto GetFontEntry = [](const auto& FontEntry) { return FontEntry.first; };
+		std::ranges::transform(Fonts, std::back_inserter(InFonts), GetFontEntry);
+
+		return InFonts.size();
 	}
 
 

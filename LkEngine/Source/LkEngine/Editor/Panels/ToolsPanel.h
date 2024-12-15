@@ -1,10 +1,11 @@
 /******************************************************************
- * LObjectPtr
+ * LToolsPanel
  * 
+ * UI Panel.
  *******************************************************************/
 #pragma once
 
-#include "Panel.h"
+#include "LkEngine/UI/Panel.h"
 
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
@@ -12,26 +13,24 @@
 
 namespace LkEngine {
 
-	class LDebugPanel : public IPanel
+	class LToolsPanel : public IPanel
 	{
 	public:
-		LDebugPanel();
-		~LDebugPanel() = default;
+		LToolsPanel();
+		~LToolsPanel() = default;
 
-		virtual void OnRender() override;
+		virtual void OnRender() override {}
 		virtual void OnRenderUI(bool& IsOpen) override;
 
-	public:
-		inline static bool bWindow_ObjectReferences = false;
-
 	private:
-		/**
-		 * @brief Object references window.
-		 */
 		void UI_ObjectReferences();
+		void UI_RegisteredFonts();
 
+	public:
+		static bool bWindow_ObjectReferences;
+		static bool bWindow_RegisteredFonts;
 	private:
-		LCLASS(LDebugPanel);
+		LCLASS(LToolsPanel);
 	};
 
 }

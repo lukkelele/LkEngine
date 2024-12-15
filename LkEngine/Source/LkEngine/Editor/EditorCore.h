@@ -18,4 +18,6 @@ namespace LkEngine {
 		Scale	  = ImGuizmo::SCALE
 	};
 
+	extern bool GDebug_DisplayWindowSizeOnHover;
+
 }

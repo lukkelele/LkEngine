@@ -7,6 +7,11 @@
 
 namespace LkEngine {
 
+	LPanelManager::LPanelManager()
+	{
+		LOBJECT_REGISTER();
+	}
+
 	LPanelManager::~LPanelManager()
 	{
 		for (auto& PanelMap : Panels)
@@ -64,24 +69,6 @@ namespace LkEngine {
 		}
 
 		LK_CORE_ERROR_TAG("PanelManager", "Couldn't find Panel with id '{0}'", PanelID);
-	}
-
-	FPanelData* LPanelManager::GetPanelData(const uint32_t PanelID)
-	{
-		for (auto& PanelMap : Panels)
-		{
-			if (PanelMap.find(PanelID) != PanelMap.end())
-			{
-				return &PanelMap.at(PanelID);
-			}
-		}
-
-		return nullptr;
-	}
-
-	const FPanelData* LPanelManager::GetPanelData(const uint32_t PanelID) const
-	{
-		return nullptr;
 	}
 
 	void LPanelManager::Serialize()

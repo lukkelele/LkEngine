@@ -1,37 +1,42 @@
 #include "LKpch.h"
-#include "DebugPanel.h"
-
+#include "ToolsPanel.h"
 
 
 namespace LkEngine {
 
-	LDebugPanel::LDebugPanel()
+	bool LToolsPanel::bWindow_ObjectReferences = false;
+	bool LToolsPanel::bWindow_RegisteredFonts = false;
+
+	LToolsPanel::LToolsPanel()
 	{
 		LOBJECT_REGISTER();
 	}
 
-	void LDebugPanel::OnRender()
-	{
-	}
-
-	void LDebugPanel::OnRenderUI(bool& IsOpen)
+	void LToolsPanel::OnRenderUI(bool& IsOpen)
 	{
 		if (bWindow_ObjectReferences)
 		{
 			UI_ObjectReferences();
 		}
+
+		if (bWindow_RegisteredFonts)
+		{ 
+			UI_RegisteredFonts();
+		}
+
+		IsOpen = (bWindow_ObjectReferences || bWindow_RegisteredFonts);
 	}
 
-	void LDebugPanel::UI_ObjectReferences()
+	void LToolsPanel::UI_ObjectReferences()
 	{
 		static ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoDocking;
+		ImGui::SetNextWindowSize(ImVec2(720, 960), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Object References", &bWindow_ObjectReferences, WindowFlags);
 		{
 			static std::size_t SelectedIndex = -1;
 			static std::size_t SelectedIndexPrev = -1;
 
 			/* Items to show, shows a scrollbar if greater. */
-			//static int MaxVisibleItems = 20;
 			static int MaxVisibleItems = std::numeric_limits<int>::max();
 			static std::vector<bool> Selected(MaxVisibleItems, false);
 
@@ -100,7 +105,6 @@ namespace LkEngine {
 
 					/* Object classname. */
 					char Label[200];
-					//sprintf_s(Label, LK_ARRAYSIZE(Label), "%s ##%lld", LiveObject->GetClass()->GetName().c_str(), reinterpret_cast<intptr_t>(LiveObject.Get()));
 					std::sprintf(Label, "%s ##%lld", LiveObject->GetClass()->GetName().c_str(), reinterpret_cast<uintptr_t>(LiveObject.Get()));
 
 					const bool bIsCurrentlySelected = Selected[Index];
@@ -187,6 +191,61 @@ namespace LkEngine {
 			}
 
 		}
+
+		LK_UI_DEBUG_ON_HOVER();
+		ImGui::End();
+	}
+
+	void LToolsPanel::UI_RegisteredFonts()
+	{
+		static std::vector<FFontEntry> RegisteredFonts;
+		const std::size_t RegisteredFontsCount = UI::Font::GetRegistered(RegisteredFonts);
+
+		/* Place the default font named 'Default' first. */
+		std::sort(RegisteredFonts.begin(), RegisteredFonts.end(), [](const FFontEntry& A, const FFontEntry& B)
+		{
+			return (A.Name == "Default") || (B.Name != "Default" && A.Name < B.Name);
+		});
+
+		/* Determine the maximum width based on the longest font name. */
+		auto FontEntryComparitor = [](const FFontEntry& A, const FFontEntry& B)
+		{
+			return A.Name.length() < B.Name.length();
+		};
+
+		/* Calculate the width dynamically based on the longest name, with some padding. */
+		static constexpr float NamePadding = 12.0f;
+		const auto LongestNameIt = std::max_element(RegisteredFonts.begin(), RegisteredFonts.end(), FontEntryComparitor);
+		const float NameColumnWidth = ImGui::CalcTextSize(LongestNameIt->Name.c_str()).x + NamePadding;
+
+		const std::string WindowName = std::format("Registered Fonts: {}", RegisteredFontsCount);
+		ImGui::Begin(WindowName.c_str(), &bWindow_RegisteredFonts);
+		if (ImGui::BeginTable("RegisteredFontsTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+		{
+			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, NameColumnWidth);
+			ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 34.0f);
+			ImGui::TableSetupColumn("Filepath", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableHeadersRow();
+			for (const auto& Font : RegisteredFonts)
+			{
+				ImGui::TableNextRow();
+				/* Column 1: Font Name */
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("%s", Font.Name.c_str());
+
+				/* Column 2: Font Size */
+				ImGui::TableSetColumnIndex(1);
+				ImGui::Text("%.1f", Font.Size);
+
+				/* Column 3: Filepath */
+				ImGui::TableSetColumnIndex(2);
+				ImGui::Text("%s", Font.FilePath.c_str());
+			}
+
+			ImGui::EndTable();
+		}
+
+		LK_UI_DEBUG_ON_HOVER();
 
 		ImGui::End();
 	}

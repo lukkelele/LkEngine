@@ -10,8 +10,6 @@
 #include "LkEngine/Renderer/MaterialLibrary.h"
 #include "LkEngine/Renderer/Renderer.h"
 
-#include "LkEngine/UI/ImGui/ImGuiUtilities.h"
-
 
 namespace LkEngine {
 
@@ -23,7 +21,6 @@ namespace LkEngine {
     void LComponentEditor::Initialize()
     {
         LObject::Initialize();
-        // TODO
     }
 
     void LComponentEditor::OnRenderUI(bool& IsOpen)

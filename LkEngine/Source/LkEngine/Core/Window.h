@@ -122,7 +122,6 @@ namespace LkEngine {
                 Size.X = static_cast<uint16_t>(InSize.X);
                 Size.Y = static_cast<uint16_t>(InSize.Y);
 
-                //OnWindowSizeUpdated.Broadcast(static_cast<uint16_t>(Size.X), static_cast<uint16_t>(Size.Y));
                 OnWindowSizeUpdated.Broadcast((uint16_t)Size.X, (uint16_t)Size.Y);
             }
         }
@@ -131,7 +130,7 @@ namespace LkEngine {
         { 
             if (ViewportSize.X != NewWidth)
             {
-                ViewportSize.Y = NewWidth; 
+                ViewportSize.X = static_cast<float>(NewWidth);
                 OnViewportSizeUpdated.Broadcast(static_cast<uint16_t>(ViewportSize.X), static_cast<uint16_t>(ViewportSize.Y));
             }
         }
@@ -140,7 +139,7 @@ namespace LkEngine {
         { 
             if (ViewportSize.Y != NewHeight)
             {
-                ViewportSize.Y = static_cast<decltype(ViewportSize.Y)>(NewHeight); 
+                ViewportSize.Y = static_cast<float>(NewHeight); 
                 OnViewportSizeUpdated.Broadcast(static_cast<uint16_t>(ViewportSize.X), static_cast<uint16_t>(ViewportSize.Y));
             }
         }
@@ -176,7 +175,6 @@ namespace LkEngine {
         /// 
         /// UPDATE ALL THIS 
         /// 
-
 		FORCEINLINE float GetScalerX() const { return m_ViewportScalers.X; }
 		FORCEINLINE float GetScalerY() const { return m_ViewportScalers.Y; }
 		FORCEINLINE LVector2 GetScalers() const { return m_ViewportScalers; }

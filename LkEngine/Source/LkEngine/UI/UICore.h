@@ -47,6 +47,17 @@
 		} 
 
 
+#define LK_UI_DEBUG_ON_HOVER(...)                                                   \
+		if (GDebug_DisplayWindowSizeOnHover)                                        \
+		{                                                                           \
+			if (ImGui::IsWindowHovered())                                           \
+			{                                                                       \
+				const ImVec2 WindowSize = ImGui::GetWindowSize();                   \
+				ImGui::SetTooltip("Size (%.2f, %.2f)", WindowSize.x, WindowSize.y); \
+			}                                                                       \
+		}                                                                           
+
+
 namespace LkEngine 
 {
     class LWindow;
@@ -59,6 +70,7 @@ namespace LkEngine
 		static constexpr const char* SceneManager        = "SceneManager";
 		static constexpr const char* EditorConsole       = "EditorConsole";
 		static constexpr const char* ComponentEditor     = "ComponentEditor";
+		static constexpr const char* Tools               = "Tools";
 	}
 
 }

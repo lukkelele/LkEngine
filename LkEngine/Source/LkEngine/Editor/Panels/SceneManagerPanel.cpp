@@ -1,12 +1,13 @@
 #include "LKpch.h"
 #include "SceneManagerPanel.h"
 
-#include "Property.h"
+#include "LkEngine/UI/Property.h"
 #include "LkEngine/Core/SelectionContext.h"
 
 #include "LkEngine/Renderer/FrameBuffer.h"
 #include "LkEngine/Renderer/TextureLibrary.h"
 
+#include "LkEngine/Editor/EditorCore.h"
 #include "LkEngine/Editor/EditorLayer.h"
 
 #include "LkEngine/UI/UILayer.h"
@@ -98,6 +99,7 @@ namespace LkEngine {
 
 		if (bIsWindow)
 		{
+			LK_UI_DEBUG_ON_HOVER();
 			ImGui::End();
 		}
 	}

@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <array>
 #include <queue>
+#include <ranges>
 
 #include "LkEngine/Core/Assert.h"
 #include "LkEngine/Core/Log/Log.h"

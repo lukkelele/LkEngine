@@ -33,7 +33,7 @@ namespace LkEngine {
 	class LPanelManager : public LObject
 	{
 	public:
-		LPanelManager() = default;
+		LPanelManager();
 		~LPanelManager();
 
 		void Initialize();
@@ -42,8 +42,37 @@ namespace LkEngine {
 
 		void RemovePanel(const char* PanelID);
 
-		FPanelData* GetPanelData(const uint32_t PanelID);
-		const FPanelData* GetPanelData(const uint32_t PanelID) const;
+		FORCEINLINE FPanelData* GetPanelData(const uint32_t PanelID)
+		{
+			for (auto& PanelMap : Panels)
+			{
+				if (PanelMap.find(PanelID) != PanelMap.end())
+				{
+					return &PanelMap.at(PanelID);
+				}
+			}
+
+			return nullptr;
+		}
+
+		FORCEINLINE const FPanelData* GetPanelData(const uint32_t PanelID) const
+		{
+			return GetPanelData(PanelID);
+		}
+
+		FORCEINLINE FPanelData* GetPanelData(const char* PanelName)
+		{
+			const uint32_t PanelID = LHash::GenerateFNVHash(PanelName);
+			for (auto& PanelMap : Panels)
+			{
+				if (PanelMap.find(PanelID) != PanelMap.end())
+				{
+					return &PanelMap.at(PanelID);
+				}
+			}
+
+			return nullptr;
+		}
 
 		std::unordered_map<uint32_t, FPanelData>& GetPanels(const EPanelCategory Category) 
 		{ 

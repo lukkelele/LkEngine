@@ -20,16 +20,17 @@
 #include "LkEngine/Input/Mouse.h"
 
 #include "LkEngine/UI/UICore.h"
-#include "LkEngine/UI/DockSpace.h"
 #include "LkEngine/UI/Property.h"
-#include "LkEngine/UI/SceneManagerPanel.h"
-#include "LkEngine/UI/ContentBrowser.h"
-#include "LkEngine/UI/DebugPanel.h"
+#include "Panels/SceneManagerPanel.h"
+#include "Panels/ContentBrowser.h"
+#include "Panels/ToolsPanel.h"
 
 #if defined(LK_ENGINE_OPENGL)
 #include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
 #include "LkEngine/Renderer/Backend/OpenGL/OpenGLImGuiLayer.h"
 #endif
+
+#include <nfd.hpp>
 
 
 namespace LkEngine {
@@ -43,8 +44,10 @@ namespace LkEngine {
 		LVector2 LeftSidebarSize = { 340.0f, 0.0f };
 		LVector2 RightSidebarSize = { 340.0f, 0.0f };
 
-		bool bShowMetricTool = false;
-		bool bShowStyleEditor = false;
+		/* Windows. */
+		bool bWindow_MetricTool = false;
+		bool bWindow_StyleEditor = false;
+		
 		bool bRenderSkybox = true;
 
 		float TranslationSnapValue = 0.50f;
@@ -52,10 +55,10 @@ namespace LkEngine {
 		float ScaleSnapValue = 0.50f;
 	}
 
+	bool GDebug_DisplayWindowSizeOnHover = false;
+
 	static TObjectPtr<LTexture2D> FloorTexture;
 	static TObjectPtr<LTexture2D> CubeTexture;
-
-	TObjectPtr<LDebugPanel> DebugPanel{};
 
 	/* --- REMOVE ME --- */
 	static FAssetHandle CubeAssetHandle;
@@ -105,6 +108,14 @@ namespace LkEngine {
 		PanelManager = TObjectPtr<LPanelManager>::Create();
 
 	#if 1
+		PanelManager->AddPanel<LToolsPanel>(
+			EPanelCategory::View, 
+			PanelID::Tools,
+			EPanelInitState::NotOpen
+		);
+	#endif
+
+	#if 1
 		PanelManager->AddPanel<LSceneManagerPanel>(
 			EPanelCategory::View, 
 			PanelID::SceneManager, 
@@ -133,8 +144,6 @@ namespace LkEngine {
 
 		Window->OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
 		{
-			/* Sync the sizes of the editor panels whenever window size is modified. */
-			SetUpdateWindowFlag(true);
 		});
 
 		Window->OnViewportSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
@@ -146,8 +155,9 @@ namespace LkEngine {
 			WindowScalers.Y = EditorWindowSize.Y / NewHeight;
 			EditorViewport->SetScalers(WindowScalers);
 
-			/* Sync the sizes of the editor panels whenever viewport size is modified. */
-			SetUpdateWindowFlag(true);
+			LK_CORE_WARN("Updating viewport bounds to ({}, {})", NewWidth, NewHeight);
+			ViewportBounds[0] = { 0, 0 };
+			ViewportBounds[1] = { NewWidth, NewHeight };
 		});
 	}
 
@@ -222,9 +232,8 @@ namespace LkEngine {
 		});
 
 		PanelManager->Initialize();
-
-		LK_CORE_DEBUG_TAG("Editor", "Adding debugging panel");
-		DebugPanel = TObjectPtr<LDebugPanel>::Create();
+		//LK_CORE_DEBUG_TAG("Editor", "Adding debugging panel");
+		//DebugPanel = TObjectPtr<LDebugPanel>::Create();
 
 		/* TODO: Load last open project, else load an empty 'default' project. */
 		if (LProject::Current() == nullptr)
@@ -246,11 +255,6 @@ namespace LkEngine {
 		FRenderer2DSpecification Renderer2DSpec;
 		Renderer2D = TObjectPtr<LRenderer2D>::Create(Renderer2DSpec);
 		Renderer2D->Initialize();
-
-	#if 0
-		CubeAssetHandle = LAssetManager::GetDebugCubeHandle();
-		LK_CORE_WARN("CubeAssetHandle: {}", CubeAssetHandle);
-	#endif
 
 		/* FIXME: Temporary debugging. */
 		LOpenGL_Debug::InitializeEnvironment();
@@ -651,30 +655,73 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_RenderExternalWindows()
 	{
-		if (ShowRenderSettingsWindow)
+		if (bWindow_MetricTool)
 		{
-			UI_RenderSettingsWindow();
+			ImGui::ShowMetricsWindow(&bWindow_MetricTool);
 		}
 
-		if (bShowEditorWindowSizesWindow)
-		{
-			ImGui::Begin("EditorLayer Window Sizes", &bShowEditorWindowSizesWindow);
-			UI_ShowEditorWindowsDetails();
-			ImGui::End();
-		}
-
-		if (bShowMetricTool)
-		{
-			ImGui::ShowMetricsWindow(&bShowMetricTool);
-		}
-
-		if (bShowStyleEditor)
+		if (bWindow_StyleEditor)
 		{
 			ImGuiStyle& Style = ImGui::GetStyle();
-			ImGui::Begin("Style Editor", &bShowStyleEditor);
+			ImGui::Begin("Style Editor", &bWindow_StyleEditor);
 			ImGui::ShowStyleEditor(&Style);
 			ImGui::End();
 		}
+
+	#if 0
+		if (bWindow_RegisteredFonts)
+		{
+			static std::vector<FFontEntry> RegisteredFonts;
+			const std::size_t RegisteredFontsCount = UI::Font::GetRegistered(RegisteredFonts);
+
+			/* Place the default font named 'Default' first. */
+			std::sort(RegisteredFonts.begin(), RegisteredFonts.end(), [](const FFontEntry& A, const FFontEntry& B)
+			{
+				return (A.Name == "Default") || (B.Name != "Default" && A.Name < B.Name);
+			});
+
+			/* Determine the maximum width based on the longest font name. */
+			auto FontEntryComparitor = [](const FFontEntry& A, const FFontEntry& B)
+			{
+				return A.Name.length() < B.Name.length();
+			};
+
+			/* Calculate the width dynamically based on the longest name, with some padding. */
+			static constexpr float NamePadding = 12.0f;
+			const auto LongestNameIt = std::max_element(RegisteredFonts.begin(), RegisteredFonts.end(), FontEntryComparitor);
+			const float NameColumnWidth = ImGui::CalcTextSize(LongestNameIt->Name.c_str()).x + NamePadding;
+
+			const std::string WindowName = std::format("Registered Fonts: {}", RegisteredFontsCount);
+			ImGui::Begin(WindowName.c_str(), &bWindow_RegisteredFonts);
+			if (ImGui::BeginTable("RegisteredFontsTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+			{
+				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, NameColumnWidth);
+				ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 34.0f);
+				ImGui::TableSetupColumn("Filepath", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableHeadersRow();
+				for (const auto& Font : RegisteredFonts)
+				{
+					ImGui::TableNextRow();
+					/* Column 1: Font Name */
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("%s", Font.Name.c_str());
+
+					/* Column 2: Font Size */
+					ImGui::TableSetColumnIndex(1);
+					ImGui::Text("%.1f", Font.Size);
+
+					/* Column 3: Filepath */
+					ImGui::TableSetColumnIndex(2);
+					ImGui::Text("\"%s\"", Font.FilePath.c_str());
+					ImGui::Text("%s (%.1f)  \"%s\"", Font.Name.c_str(), Font.Size, Font.FilePath.c_str());
+				}
+
+				ImGui::EndTable();
+			}
+
+			ImGui::End();
+		}
+	#endif
 	}
 
 	// TODO: Right alignment in the child window
@@ -741,15 +788,6 @@ namespace LkEngine {
 			glfwSetWindowSize(GlfwWindow, (int)(NewSize.X), (int)(NewSize.Y));
 		}
 	#endif
-	}
-
-	/// TODO: Rename this
-	void LEditorLayer::SetUpdateWindowFlag(const bool Flag)
-	{
-		/* Window width and height has been changed as this function has been called,
-		 * therefore need to update the Viewport bounds. */
-		ViewportBounds[0] = { 0, 0 };
-		ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
 	}
 
 	void LEditorLayer::NewScene(const std::string& SceneName)
@@ -1045,18 +1083,20 @@ namespace LkEngine {
 			ImGui::Separator();
 
 			/* Section: Software Info. */
-			static const std::string GlfwVersion(glfwGetVersionString());
-			ImGui::TextColored(ImVec4(0.70f, 0.70f, 0.70f, 1.0f), "Contains source code provided by");
-			ImGui::BulletText("GLFW: %d.%d.%d", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
-		#if defined(LK_ENGINE_OPENGL)
-			ImGui::BulletText("OpenGL: %d.%d", LOpenGL::GetMajorVersion(), LOpenGL::GetMinorVersion());
-		#endif
-			ImGui::BulletText("ImGui: %s (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
-			ImGui::BulletText("ENTT: %s", ENTT_VERSION);
-
 			/* TODO: Place dependencies here. */
 			UI::Font::Push("Italic");
-			ImGui::Text("... list dependencies here");
+			{
+				static const std::string GlfwVersion(glfwGetVersionString());
+				ImGui::TextColored(ImVec4(0.70f, 0.70f, 0.70f, 1.0f), "Contains source code provided by");
+				ImGui::BulletText("GLFW: %d.%d.%d", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
+			#if defined(LK_ENGINE_OPENGL)
+				ImGui::BulletText("OpenGL: %d.%d", LOpenGL::GetMajorVersion(), LOpenGL::GetMinorVersion());
+			#endif
+				ImGui::BulletText("ImGui: %s (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+				ImGui::BulletText("ENTT: %s", ENTT_VERSION);
+				ImGui::BulletText("nativefiledialog: %s", "1.2.1"); /* TODO: Get version from library, currently no way to do that(?). */
+				ImGui::BulletText("yaml-cpp: %s", "0.6.0");         /* TODO: Get version from library, currently no way to do that(?). */
+			}
 			UI::Font::Pop();
 
 			ImGui::Separator();
@@ -1254,17 +1294,20 @@ namespace LkEngine {
 
 			if (ImGui::BeginMenu("Project"))
 			{
-				/* Save project. */
-				if (ImGui::MenuItem("Save"))
-				{
-					LK_CORE_VERIFY(Project);
-					Project->Save();
-				}
-
 				/* New project. */
 				if (ImGui::MenuItem("New"))
 				{
-					LK_INFO("Creating new project");
+					LK_CORE_INFO_TAG("Editor", "Creating new project");
+				}
+
+				/* Save project. */
+				if (ImGui::MenuItem("Save"))
+				{
+					if (Project)
+					{
+						LK_CORE_DEBUG_TAG("Editor", "Saving project");
+						Project->Save();
+					}
 				}
 
 				/* Load existing project. */
@@ -1293,33 +1336,6 @@ namespace LkEngine {
 				}
 
 				ImGui::EndMenu(); /* View. */
-			}
-
-			if (ImGui::BeginMenu("Debug"))
-			{
-				if (ImGui::MenuItem("Live Objects"))
-				{
-					DebugPanel->bWindow_ObjectReferences = true;
-				}
-
-				if (ImGui::MenuItem("Metric Tool"))
-				{
-					bShowMetricTool = true;
-				}
-
-				if (ImGui::MenuItem("Style Editor"))
-				{
-					bShowStyleEditor = true;
-				}
-
-			#if defined(LK_ENGINE_DEBUG) && defined(LK_ENGINE_OPENGL)
-				if (ImGui::MenuItem("OpenGL Extensions"))
-				{
-					UI_OpenGLExtensions();
-				}
-			#endif
-
-				ImGui::EndMenu(); /* Debug. */
 			}
 
 			if (ImGui::BeginMenu("Scene"))
@@ -1364,6 +1380,58 @@ namespace LkEngine {
 
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Tools"))
+			{
+				if (ImGui::MenuItem("Metric Tool"))
+				{
+					bWindow_MetricTool = true;
+				}
+
+				if (ImGui::MenuItem("Style Editor"))
+				{
+					bWindow_StyleEditor = true;
+				}
+
+				if (ImGui::MenuItem("Live Objects"))
+				{
+					LK_CORE_DEBUG_TAG("Editor", "Open -> Live Objects");
+					//if (FPanelData* PanelData = PanelManager->GetPanelData(LHash::GenerateFNVHash(PanelID::DebugPanel)))
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
+					{
+						PanelData->bIsOpen = true;
+						PanelData->Panel.As<LToolsPanel>()->bWindow_ObjectReferences = true;
+					}
+				}
+
+				if (ImGui::MenuItem("Registered Fonts"))
+				{
+					LK_CORE_DEBUG_TAG("Editor", "Open -> Registered Fonts");
+					//if (FPanelData* PanelData = PanelManager->GetPanelData(LHash::GenerateFNVHash(PanelID::DebugPanel)))
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
+					{
+						PanelData->bIsOpen = true;
+						PanelData->Panel.As<LToolsPanel>()->bWindow_RegisteredFonts = true;
+					}
+				}
+
+			#if defined(LK_ENGINE_DEBUG) && defined(LK_ENGINE_OPENGL)
+				if (ImGui::MenuItem("OpenGL Extensions"))
+				{
+					UI_OpenGLExtensions();
+				}
+			#endif
+
+				if (ImGui::BeginMenu("Engine Debug"))
+				{
+					ImGui::Checkbox("Show window sizes on hover", &GDebug_DisplayWindowSizeOnHover);
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndMenu(); /* Debug. */
+			}
+
 
 			if (ImGui::MenuItem("About"))
 			{

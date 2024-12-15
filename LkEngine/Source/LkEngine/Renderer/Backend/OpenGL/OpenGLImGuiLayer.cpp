@@ -147,25 +147,25 @@ namespace LkEngine {
 			Source Sans Code Pro
 		-----------------------------------------------------*/
 		/* Default font. */
-		UI::FFontConfiguration SourceSansPro_Semibold;
+		FFontConfiguration SourceSansPro_Semibold;
 		SourceSansPro_Semibold.FontName = "Default";
 		SourceSansPro_Semibold.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Semibold.ttf";
 		SourceSansPro_Semibold.Size = DefaultFontSize;
 		UI::Font::Add(SourceSansPro_Semibold, true);
 
-		UI::FFontConfiguration SourceSansPro_Bold;
+		FFontConfiguration SourceSansPro_Bold;
 		SourceSansPro_Bold.FontName = "Bold";
 		SourceSansPro_Bold.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
 		SourceSansPro_Bold.Size = DefaultFontSize;
 		UI::Font::Add(SourceSansPro_Bold);
 
-		UI::FFontConfiguration SourceSansPro_Large;
+		FFontConfiguration SourceSansPro_Large;
 		SourceSansPro_Large.FontName = "Large";
 		SourceSansPro_Large.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Semibold.ttf";
 		SourceSansPro_Large.Size = LargeFontSize;
 		UI::Font::Add(SourceSansPro_Large);
 
-		UI::FFontConfiguration SourceSansPro_Italic;
+		FFontConfiguration SourceSansPro_Italic;
 		SourceSansPro_Italic.FontName = "Italic";
 		SourceSansPro_Italic.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Italic.ttf";
 		SourceSansPro_Italic.Size = DefaultFontSize;
@@ -175,19 +175,19 @@ namespace LkEngine {
 		/*----------------------------------------------------
 			Roboto
 		-----------------------------------------------------*/
-		UI::FFontConfiguration Roboto_Bold;
+		FFontConfiguration Roboto_Bold;
 		Roboto_Bold.FontName = "Roboto_Bold";
 		Roboto_Bold.FilePath = "Assets/Fonts/Roboto/Roboto-Bold.ttf";
 		Roboto_Bold.Size = DefaultFontSize;
 		UI::Font::Add(Roboto_Bold);
 
-		UI::FFontConfiguration Roboto_Large;
+		FFontConfiguration Roboto_Large;
 		Roboto_Large.FontName = "Roboto_Large";
 		Roboto_Large.FilePath = "Assets/Fonts/Roboto/Roboto-Regular.ttf";
 		Roboto_Large.Size = LargeFontSize;
 		UI::Font::Add(Roboto_Large);
 
-		UI::FFontConfiguration Roboto_SemiMedium;
+		FFontConfiguration Roboto_SemiMedium;
 		Roboto_SemiMedium.FontName = "Roboto_SemiMedium";
 		Roboto_SemiMedium.FilePath = "Assets/Fonts/Roboto/Roboto-SemiMedium.ttf";
 		Roboto_SemiMedium.Size = DefaultFontSize;

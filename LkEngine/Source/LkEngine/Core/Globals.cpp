@@ -3,6 +3,19 @@
 
 #include "LkEngine/Core/IO/FileSystem.h"
 
+/**
+ * Allow logging when running tests. 
+ * This is done to provide better context to potential errors that might occur
+ * when running the tests in the github action runner.
+ */
+#if defined(LK_ENGINE_AUTOMATION_TEST)
+#	define LK_GLOBALS_PRINT(...)     LK_PRINT(__VA_ARGS__)
+#	define LK_GLOBALS_PRINTLN(...)   LK_PRINTLN(__VA_ARGS__)
+#else
+#	define LK_GLOBALS_PRINT(...)
+#	define LK_GLOBALS_PRINTLN(...)
+#endif
+
 
 namespace LkEngine {
 
@@ -15,7 +28,7 @@ namespace LkEngine {
 
 	void Global::SetRuntimeArguments(const int Argc, char* Argv[])
 	{
-		LK_PRINTLN("Setting runtime arguments");
+		LK_GLOBALS_PRINTLN("Setting runtime arguments");
 		static bool bArgumentsSet = false;
 		LK_CORE_VERIFY(bArgumentsSet == false && "SetRuntimeArguments incorrectly called more than once");
 
@@ -27,7 +40,7 @@ namespace LkEngine {
 		}
 
 		LFileSystem::WorkingDir = std::filesystem::current_path();
-		LK_PRINTLN("Working Directory: {}", LFileSystem::WorkingDir.string());
+		LK_GLOBALS_PRINTLN("Working Directory: {}", LFileSystem::WorkingDir.string());
 
 		fs::path Path = LFileSystem::WorkingDir;
 		{
@@ -36,7 +49,7 @@ namespace LkEngine {
 			{
 				Path = Path.parent_path();
 				Traversed++;
-				LK_PRINTLN("Path: {}   Traversed: {}", Path.string(), Traversed);
+				LK_GLOBALS_PRINTLN("Path: {}   Traversed: {}", Path.string(), Traversed);
 				LK_CORE_VERIFY(Traversed <= 4, "Cannot find LkEngine root directory");
 			}
 		}
@@ -54,18 +67,16 @@ namespace LkEngine {
 		{
 			Path = Path.parent_path();
 			Traversed++;
-			LK_PRINTLN("Path: {}   Traversed: {}", Path.string(), Traversed);
+			LK_GLOBALS_PRINTLN("Path: {}   Traversed: {}", Path.string(), Traversed);
 			LK_CORE_VERIFY(Traversed <= 4, "Traversal to find LkEngine root directory failed");
 		}
 
 		LFileSystem::EngineDir = Path;
 		LFileSystem::EngineDir += PathSeparator + std::string("LkRuntime");
 		LFileSystem::RuntimeDir = LFileSystem::EngineDir;
-	#if defined(LK_ENGINE_AUTOMATION_TEST)
-		LK_PRINTLN("WorkingDir:  {}", LFileSystem::WorkingDir.string());
-		LK_PRINTLN("EngineDir:   {}", LFileSystem::EngineDir.string());
-		LK_PRINTLN("RuntimeDir:  {}", LFileSystem::RuntimeDir.string());
-	#endif
+		LK_GLOBALS_PRINTLN("WorkingDir:  {}", LFileSystem::WorkingDir.string());
+		LK_GLOBALS_PRINTLN("EngineDir:   {}", LFileSystem::EngineDir.string());
+		LK_GLOBALS_PRINTLN("RuntimeDir:  {}", LFileSystem::RuntimeDir.string());
 		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid: '{}'", LFileSystem::EngineDir.string());
 		LFileSystem::ConfigDir = LFileSystem::WorkingDir;
 

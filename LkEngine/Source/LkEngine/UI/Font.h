@@ -7,7 +7,7 @@
 #include <imgui/imgui_internal.h>
 
 
-namespace LkEngine::UI {
+namespace LkEngine {
 
 	enum class EFontSize
 	{
@@ -30,7 +30,7 @@ namespace LkEngine::UI {
 	struct FFontConfiguration
 	{
 		std::string FontName{};
-		std::string_view FilePath{};
+		std::string FilePath{};
 		float Size = 18.0f;
 
 		bool MergeWithLast = false;
@@ -40,6 +40,8 @@ namespace LkEngine::UI {
 	struct FFontEntry
 	{
 		std::string Name{};
+		float Size = 0.0f;
+		std::string FilePath{};
 
 		bool operator==(const FFontEntry& Other) const
 		{
@@ -47,12 +49,20 @@ namespace LkEngine::UI {
 		}
 	};
 
-	namespace Font 
+	/**
+	 * Font
+	 *
+	 *  Manipulate fonts in the UI.
+	 *  Uses Begin/End style of API.
+	 */
+	namespace UI::Font 
 	{
 		void Add(const FFontConfiguration& FontConfig, bool IsDefault = false);
 		void Push(const std::string& FontName);
 		void Pop();
 		ImFont* Get(const std::string& FontName);
+
+		std::size_t GetRegistered(std::vector<FFontEntry>& InFonts);
 	}
 
 }
@@ -60,9 +70,9 @@ namespace LkEngine::UI {
 namespace std 
 {
     template<>
-    struct hash<LkEngine::UI::FFontEntry>
+    struct hash<LkEngine::FFontEntry>
     {
-        std::size_t operator()(const LkEngine::UI::FFontEntry& Entry) const noexcept
+        std::size_t operator()(const LkEngine::FFontEntry& Entry) const noexcept
         {
 			std::size_t Hash = 0;
             for (const char Character : Entry.Name)

@@ -24,8 +24,8 @@
 
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/UILayer.h"
-#include "LkEngine/UI/PanelManager.h"
-#include "LkEngine/UI/ContentBrowser.h"
+#include "LkEngine/Editor/PanelManager.h"
+#include "LkEngine/Editor/Panels/ContentBrowser.h"
 
 #define LK_UI_ENABLE_LEFT_SIDEBAR_CONTENT 1
 
@@ -69,17 +69,11 @@ namespace LkEngine {
 		FORCEINLINE TObjectPtr<LScene> GetEditorScene() { return EditorScene; }
 		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
 
-		void SetUpdateWindowFlag(bool flag);
-
 		FORCEINLINE bool IsEnabled() const { return bEnabled; }
-
-		/* FIXME: Update all of these, refactor away. */
-		FORCEINLINE EEditorWindowType GetCurrentWindowType() const { return CurrentWindowType; }
-		FORCEINLINE LVector2 GetEditorWindowSize() const { return EditorViewport->GetSize(); }
 
 		FORCEINLINE static LEditorLayer* Get()
 		{
-			LK_CORE_ASSERT(Instance, "Editor not valid");
+			LK_CORE_ASSERT(Instance, "Editor instance not valid");
 			return Instance;
 		}
 
