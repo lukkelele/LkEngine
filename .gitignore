@@ -74,6 +74,7 @@ LkEngine/Test/Logs
 
 # Runtime directories.
 LkRuntime/Projects
+LkEngine/Test/Results
 
 # Ignore docs for now
 **/docs/*.css

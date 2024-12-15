@@ -12,7 +12,6 @@ namespace LkEngine {
 
 	LTestRunner::LTestRunner()
 	{
-		LK_PRINTLN("Starting up...");
 		/* Create 'Results' directory to store test results in if it does not already exist. */
 		if (!LFileSystem::Exists(std::filesystem::current_path() / "Results"))
 		{
@@ -69,6 +68,7 @@ int main(int Argc, char* Argv[])
     LTestRunner TestRunner;
 	TestRunner.RegisterTests();
 	TestRunner.Run();
+	LK_PRINTLN("Results are placed in: {}", (std::filesystem::current_path() / "Results").string());
 
     return 0;
 }
