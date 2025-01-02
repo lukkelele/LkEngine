@@ -33,6 +33,7 @@ BraceWrapping:
   BeforeWhile: true
   IndentBraces: false
   SplitEmptyRecord: true
+  SplitEmptyFunction: false 
 BreakBeforeBinaryOperators: NonAssignment
 BreakInheritanceList: AfterColon
 BreakBeforeTernaryOperators: true
