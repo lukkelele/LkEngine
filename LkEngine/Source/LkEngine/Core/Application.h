@@ -9,7 +9,8 @@
 
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/Globals.h"
-
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 #include "LkEngine/Core/ApplicationConfig.h"
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Layer.h"
@@ -24,11 +25,9 @@
 #include "LkEngine/Core/Memory/GarbageCollector.h"
 #include "LkEngine/Core/Event/KeyEvent.h"
 #include "LkEngine/Core/Event/MouseEvent.h"
-
-#include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/ObjectPtr.h"
-
-#include "LkEngine/Input/Input.h"
+#include "LkEngine/Core/Input/Input.h"
+#include "LkEngine/Core/Input/Mouse.h"
+#include "LkEngine/Core/Input/Keyboard.h"
 
 #include "LkEngine/UI/UILayer.h"
 
@@ -36,8 +35,6 @@
 
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
-#include "LkEngine/Input/Mouse.h"
-#include "LkEngine/Input/Keyboard.h"
 
 #include "LkEngine/Serialization/FileStream.h"
 

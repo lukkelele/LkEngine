@@ -11,14 +11,14 @@ namespace LkEngine {
 	LApplicationSerializer::LApplicationSerializer(LApplication* InApplication)
 		: Application(InApplication)
 	{
-		LK_CORE_ASSERT(InApplication, "Application instance is nullptr");
+		LK_CORE_VERIFY(InApplication, "Application instance is nullptr");
 	}
 
 	LApplicationSerializer::LApplicationSerializer(LApplication* InApplication, const std::filesystem::path& InConfigFile)
 		: Application(InApplication)
 		, ConfigFile(InConfigFile)
 	{
-		LK_CORE_ASSERT(InApplication, "Application instance is nullptr");
+		LK_CORE_VERIFY(InApplication, "Application instance is nullptr");
 		LK_CORE_ASSERT(!InConfigFile.empty() && InConfigFile.has_filename(), "Invalid filepath: {}", InConfigFile.string());
 	}
 
@@ -27,14 +27,13 @@ namespace LkEngine {
 		LK_CORE_ASSERT(!InConfigFile.empty(), "Invoked Serialize with no config");
 		ConfigFile = InConfigFile;
 
-		LK_CORE_DEBUG_TAG("ApplicationSerializer", "Serializing: \"{}\"", ConfigFile.string());
 		YAML::Emitter Out;
 		SerializeToYaml(Out);
 
 		std::ofstream FileOut(ConfigFile);
 		if (FileOut.is_open() && FileOut.good())
 		{
-			LK_CORE_DEBUG_TAG("ApplicationSerializer", "Saving to file: {}", ConfigFile.string());
+			LK_CORE_DEBUG_TAG("ApplicationSerializer", "Saving engine config to file: {}", ConfigFile.string());
 			FileOut << Out.c_str();
 		}
 		else
@@ -103,6 +102,12 @@ namespace LkEngine {
 				{
 					Out << YAML::Key << "Height" << YAML::Value << LWindow::DEFAULT_HEIGHT;
 				}
+
+				const FWindowSpecification& WindowSpec = Window.GetSpecification();
+				Out << YAML::Key << "Fullscreen" << YAML::Value << WindowSpec.bFullscreen;
+				
+				const FWindowData& WindowData = Window.GetData();
+				Out << YAML::Key << "Maximized" << YAML::Value << WindowData.bMaximized;
 			}
 			Out << YAML::Value << YAML::EndMap;
 
@@ -135,10 +140,6 @@ namespace LkEngine {
 		{
 			int Width = LWindow::DEFAULT_WIDTH;
 			int Height = LWindow::DEFAULT_HEIGHT;
-		#ifdef USE_WINDOW_REF
-			LWindow& Window = Application->GetWindow();
-		#else
-		#endif
 
 			if (WindowNode["Width"])
 			{
@@ -149,9 +150,17 @@ namespace LkEngine {
 				Height = WindowNode["Height"].as<int>();
 			}
 
-		#ifdef USE_WINDOW_REF
-			Window.SetSize({ Width, Height });
-		#endif
+			if (WindowNode["Fullscreen"])
+			{
+				Spec.Fullscreen = WindowNode["Fullscreen"].as<bool>();
+			}
+
+			if (WindowNode["Maximized"])
+			{
+				Spec.StartMaximized = WindowNode["Maximized"].as<bool>();
+			}
+
+			LK_CORE_WARN_TAG("ApplicationSerializer", "Starting window maximized: {}", Spec.StartMaximized ? "Yes" : "No");
 			Spec.Width = Width;
 			Spec.Height = Height;
 		}

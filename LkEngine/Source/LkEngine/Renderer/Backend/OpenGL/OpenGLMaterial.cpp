@@ -40,8 +40,7 @@ namespace LkEngine {
         }
 
 		UniformStorageBuffer = InMaterial->GetUniformStorageBuffer();
-
-        LK_CORE_WARN_TAG("OpenGLMaterial", "Created new material based on another material called \"{}\"", InMaterial->GetName());
+        LK_CORE_TRACE_TAG("OpenGLMaterial", "Created new material based on another: \"{}\"", InMaterial->GetName());
 	}
 
     void LOpenGLMaterial::Invalidate()

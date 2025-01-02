@@ -12,9 +12,11 @@ namespace LkEngine {
 
 	void LAssetImporter::Initialize()
 	{
+		LK_CORE_DEBUG_TAG("AssetImporter", "Setting up asset serializers");
 		SerializerMap.clear();
 		SerializerMap[EAssetType::MeshSource] = std::make_unique<LMeshSourceSerializer>();
 		SerializerMap[EAssetType::Mesh] = std::make_unique<LMeshSerializer>();
+		LK_CORE_INFO_TAG("AssetImporter", "Asset Serializers: {}", SerializerMap.size());
 	}
 
 	void LAssetImporter::Serialize(const FAssetMetadata& Metadata, const TObjectPtr<LAsset>& Asset)
@@ -42,7 +44,7 @@ namespace LkEngine {
 			return false;
 		}
 
-		return SerializerMap[Asset->GetAssetType()]->TryLoadData(Metadata, Asset);
+		return SerializerMap[Metadata.Type]->TryLoadData(Metadata, Asset);
 	}
 
 }

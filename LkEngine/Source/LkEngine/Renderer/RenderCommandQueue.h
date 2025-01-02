@@ -5,13 +5,13 @@
 
 namespace LkEngine {
 
-	class RenderCommandQueue
+	class LRenderCommandQueue
 	{
 	public:
 		typedef void(*FRenderCommandFn)(void*);
 
-		RenderCommandQueue();
-		~RenderCommandQueue();
+		LRenderCommandQueue();
+		~LRenderCommandQueue();
 
 		void* Allocate(FRenderCommandFn CommandFunction, const uint32_t Size);
 		void Execute();

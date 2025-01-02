@@ -4,9 +4,9 @@
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
-#include "LkEngine/Input/Mouse.h"
-#include "LkEngine/Input/MouseCodes.h"
-#include "LkEngine/Input/Keycodes.h"
+#include "LkEngine/Core/Input/Mouse.h"
+#include "LkEngine/Core/Input/MouseCodes.h"
+#include "LkEngine/Core/Input/Keycodes.h"
 
 #include "LkEngine/Core/Event/KeyEvent.h"
 #include "LkEngine/Core/Event/MouseEvent.h"
@@ -59,7 +59,16 @@ namespace LkEngine {
 		static TDuration GetKeyHeldTime(const EKey Key)
 		{
 			using namespace std::chrono;
+			/* TODO: Investigate if any the handling of held keys needs to be modified
+			 *       so no crashes occur here. */
+		#if 0
 			LK_CORE_ASSERT(KeyHeldMap.contains(Key), "Key '{}' is not held down", Enum::ToString(Key));
+		#else
+			if (!KeyHeldMap.contains(Key))
+			{
+				return 0s;
+			}
+		#endif
 			return duration_cast<TDuration>(KeyHeldMap.at(Key).second - KeyHeldMap.at(Key).first);
 		}
 

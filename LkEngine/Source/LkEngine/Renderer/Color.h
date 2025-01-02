@@ -390,12 +390,20 @@ namespace LkEngine::Color {
  */
 namespace LkEngine::RGBA32 
 {
-	static constexpr uint32_t BrightGreen = IM_COL32(18, 140, 40, 255);
-	static constexpr uint32_t NiceBlue    = IM_COL32(83, 232, 254, 255);
+	static constexpr uint32_t BrightGreen    = IM_COL32(18, 140, 40, 255);
+	static constexpr uint32_t NiceBlue       = IM_COL32(83, 232, 254, 255);
 
-	static constexpr uint32_t Accent      = IM_COL32(236, 158, 36, 255);
-	static constexpr uint32_t Highlight   = IM_COL32(39, 185, 242, 255);
-	static constexpr uint32_t Compliment  = IM_COL32(78, 151, 166, 255);
+	static constexpr uint32_t Accent         = IM_COL32(236, 158, 36, 255);
+	static constexpr uint32_t Highlight      = IM_COL32(39, 185, 242, 255);
+	static constexpr uint32_t Compliment     = IM_COL32(78, 151, 166, 255);
+	static constexpr uint32_t PropertyField  = IM_COL32(15, 15, 15, 255);
+	static constexpr uint32_t Muted          = IM_COL32(77, 77, 77, 255);
+
+	static constexpr uint32_t GroupHeader    = IM_COL32(43, 43, 43, 255);
+	static constexpr uint32_t Selection      = IM_COL32(237, 192, 119, 255);
+	static constexpr uint32_t SelectionMuted = IM_COL32(237, 201, 142, 23);
+	static constexpr uint32_t Background     = IM_COL32(36, 36, 36, 255); 
+	static constexpr uint32_t BackgroundDark = IM_COL32(26, 26, 26, 255);
 
 	namespace Text 
 	{
@@ -405,9 +413,13 @@ namespace LkEngine::RGBA32
 		static constexpr uint32_t Error    = IM_COL32(232, 55, 55, 255);
 	}
 
-	static constexpr uint32_t Titlebar       = IM_COL32(30, 30, 30, 255);
-	static constexpr uint32_t TitlebarOrange = IM_COL32(186, 66, 30, 255);
-	static constexpr uint32_t TitlebarGreen  = IM_COL32(22, 84, 29, 255);
-	static constexpr uint32_t TitlebarRed    = IM_COL32(190, 32, 30, 255);
+	namespace Titlebar 		
+	{
+		static constexpr uint32_t Default = IM_COL32(30, 30, 30, 255);
+		static constexpr uint32_t Orange  = IM_COL32(186, 66, 30, 255);
+		static constexpr uint32_t Green   = IM_COL32(22, 84, 29, 255);
+		static constexpr uint32_t Red     = IM_COL32(190, 32, 30, 255);
+	}
+
 }
 

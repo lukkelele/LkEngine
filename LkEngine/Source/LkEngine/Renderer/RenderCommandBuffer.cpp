@@ -8,13 +8,13 @@
 
 namespace LkEngine {
 
-	TObjectPtr<LRenderCommandBuffer> LRenderCommandBuffer::Create(const uint32_t count, const std::string& debugName)
+	TObjectPtr<LRenderCommandBuffer> LRenderCommandBuffer::Create(const uint32_t Count, const std::string& DebugName)
 	{
 		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:  
 			{
-				return TObjectPtr<LOpenGLRenderCommandBuffer>::Create(count, debugName);
+				return TObjectPtr<LOpenGLRenderCommandBuffer>::Create(Count, DebugName);
 			}
 
 			case ERendererAPI::None: break;
@@ -25,13 +25,13 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	TObjectPtr<LRenderCommandBuffer> LRenderCommandBuffer::CreateFromSwapChain(const std::string& debugName)
+	TObjectPtr<LRenderCommandBuffer> LRenderCommandBuffer::CreateFromSwapChain(const std::string& DebugName)
 	{
 		switch (LRendererAPI::Get())
 		{
 			case ERendererAPI::OpenGL:  
 			{
-				return TObjectPtr<LOpenGLRenderCommandBuffer>::Create(debugName, true);
+				return TObjectPtr<LOpenGLRenderCommandBuffer>::Create(DebugName, true);
 			}
 
 			case ERendererAPI::None: break;

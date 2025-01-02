@@ -112,6 +112,8 @@
 #	endif
 #endif
 
+#include "LkEngine/Core/LObject/Enum.h"
+
 namespace LkEngine {
 
 	enum class EClassFlag : uint32_t
@@ -119,8 +121,9 @@ namespace LkEngine {
 		None       = LK_BIT(0),
 		Abstract   = LK_BIT(1),
 	};
+	LK_ENUM_CLASS_FLAGS(EClassFlag);
 
-	enum class EClassCastFlag : uint64_t
+	enum class EClassType : uint64_t
 	{
 		LField    = LK_BIT(0),
 		LEnum     = LK_BIT(1),
@@ -128,6 +131,23 @@ namespace LkEngine {
 		LClass    = LK_BIT(3),
 		LObject   = LK_BIT(4),
 	};
+	LK_ENUM_CLASS_FLAGS(EClassType);
+
+	namespace Enum 
+	{
+		static constexpr const char* ToString(const EClassType ClassType)
+		{
+			switch (ClassType)
+			{
+				case EClassType::LField:  return "LField";
+				case EClassType::LEnum:   return "LEnum";
+				case EClassType::LStruct: return "LStruct";
+				case EClassType::LClass:  return "LClass";
+				case EClassType::LObject: return "LObject";
+			}
+			return nullptr;
+		}
+	}
 
 }
 
@@ -153,22 +173,74 @@ namespace LkEngine {
 		{ \
 			return ::LkEngine::LClass::Get(::LkEngine::LType<Class>::ID()); \
 		} \
-		virtual const ::LkEngine::LClass* ClassRegistration() override \
+		virtual const ::LkEngine::LClass* ObjectRegistration() override \
 		{ \
-			::LkEngine::LClass* ObjectClass = ::LkEngine::LClass::Register<Class>(#Class); \
-			return ObjectClass; \
+			if (!LObject_bRegistered) \
+			{ \
+				::LkEngine::LClass* ObjectClass = ::LkEngine::LClass::Register<Class>(#Class); \
+				if (ObjectClass) \
+				{ \
+					LObject_bRegistered = true; \
+				} \
+				return ObjectClass; \
+			} \
+			return ::LkEngine::LClass::Get(::LkEngine::LType<Class>::ID()); \
 		} \
+		inline static bool LObject_bRegistered = false; \
+		inline static ::LkEngine::EClassType LObject_Type = ::LkEngine::EClassType::LClass;
+
+
+/**
+ * LSTRUCT
+ *
+ *  TODO: - SFINAE on LCLASS/LSTRUCT implementations.
+ *        - Change 'Class' to 'Struct' in functions.
+ *        - Struct implementation similar to LClass.
+ */
+#define LSTRUCT(Struct) \
+	public: \
+		using BaseClass = LObject; \
+		using ThisStruct = Struct; \
+		virtual std::string ClassName() const override { return #Struct; } \
+		static std::string_view StaticClassName() { return #Struct; } \
+		static const ::LkEngine::LClass* StaticClass() \
+		{ \
+			return ::LkEngine::LClass::Get(::LkEngine::LType<Struct>::ID()); \
+		} \
+		virtual const ::LkEngine::LClass* ObjectRegistration() override \
+		{ \
+			if (!LObject_bRegistered) \
+			{ \
+				::LkEngine::LClass* ObjectClass = ::LkEngine::LClass::Register<Struct>(#Struct); \
+				if (ObjectClass) \
+				{ \
+					LObject_bRegistered = true; \
+				} \
+				return ObjectClass; \
+			} \
+			return ::LkEngine::LClass::Get(::LkEngine::LType<Struct>::ID()); \
+		} \
+		inline static bool LObject_bRegistered = false; \
+		inline static ::LkEngine::EClassType LObject_Type = ::LkEngine::EClassType::LStruct;
 
 
 /** 
- * LCLASS_REGISTER
+ * LOBJECT_REGISTER
+ * 
+ *  TODO: 
+ *     - Determine if to register class or struct (based on LCLASS or LSTRUCT).
+ *     - The class registration should be re-evaluated, as the call to ObjectRegistration should not be needed.
+ *       The initial call to LClass::Get should be enough.
  */
 #define LOBJECT_REGISTER(...) \
 		::LkEngine::LClass* ClassObject = const_cast<::LkEngine::LClass*>(::LkEngine::LClass::Get(typeid(this))); \
 		if (!ClassObject) \
 		{ \
-			ClassObject = const_cast<::LkEngine::LClass*>(ClassRegistration()); \
-			::LkEngine::LObjectBase::SetClass(const_cast<::LkEngine::LClass*>(ClassObject)); \
+			ClassObject = const_cast<::LkEngine::LClass*>(ObjectRegistration()); \
+			if (!IsClassValid()) \
+			{ \
+				::LkEngine::LObjectBase::SetClass(const_cast<::LkEngine::LClass*>(ClassObject)); \
+			} \
 		} \
 
 
@@ -194,7 +266,7 @@ namespace LkEngine {
 		LClass* ClassObject = const_cast<LClass*>(LClass::Get(typeid(this))); \
 		if (!ClassObject) \
 		{ \
-			ClassObject = const_cast<LClass*>(ClassRegistration()); \
+			ClassObject = const_cast<LClass*>(ObjectRegistration()); \
 			LObjectBase::SetClass(const_cast<LClass*>(ClassObject)); \
 		} \
 

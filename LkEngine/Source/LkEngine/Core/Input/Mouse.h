@@ -1,8 +1,7 @@
 #pragma once
 
 #include "LkEngine/Core/Delegate/Delegate.h"
-
-#include "LkEngine/Input/MouseCodes.h"
+#include "LkEngine/Core/Input/MouseCodes.h"
 #include "LkEngine/Core/Math/Vector.h"
 
 #include <glm/glm.hpp>

@@ -20,7 +20,7 @@ namespace LkEngine {
 
 		FORCEINLINE virtual GLFWwindow* GetGlfwWindow() override
 		{
-			LK_VERIFY(m_GlfwWindow);
+			LK_CORE_ASSERT(m_GlfwWindow, "GlfwWindow is nullptr");
 			return m_GlfwWindow;
 		}
 

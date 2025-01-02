@@ -25,7 +25,7 @@ namespace LkEngine {
 	class LSceneRenderer;
 	struct Physics2DSpecification;
 
-	using EntityMap = std::unordered_map<UUID, LEntity>;
+	using EntityMap = std::unordered_map<LUUID, LEntity>;
 
 	LK_DECLARE_MULTICAST_DELEGATE(FOnSceneSetActive, const TObjectPtr<LScene>&);
 	LK_DECLARE_MULTICAST_DELEGATE(FOnSceneCreated,   const TObjectPtr<LScene>&);
@@ -47,17 +47,25 @@ namespace LkEngine {
 		LScene() = delete;
 		~LScene() = default;
 
-		void OnRender(TObjectPtr<LSceneRenderer> InSceneRenderer, const float DeltaTime);
-		void OnRenderEditor(LEditorCamera& InEditorCamera, const float DeltaTime);
-		void EndScene();
+		void OnRender(TObjectPtr<LSceneRenderer> SceneRenderer, const float DeltaTime);
+		void OnRenderEditor(TObjectPtr<LSceneRenderer> SceneRenderer, LEditorCamera& EditorCamera, const float DeltaTime);
+		void EndScene(); /// FIXME
 		
 		LEntity GetMainCameraEntity();
-		std::vector<LEntity> GetEntities();
+
+		/**
+		 * GetEntities
+		 * 
+		 *  Get registered entities as LEntity or UUID.
+		 */
+		template<typename T = LEntity>
+		std::vector<T> GetEntities();
+
 		FORCEINLINE uint64_t GetEntityCount() const { return m_EntityIDMap.size(); }
 		void SortEntities();
 
 		LEntity FindEntity(std::string_view name);
-		LEntity GetEntityWithUUID(UUID uuid) const;
+		LEntity GetEntityWithUUID(LUUID uuid) const;
 
 		FORCEINLINE entt::registry& GetRegistry() { return Registry; }
 		void DestroyEntity(const LEntity Entity);
@@ -65,12 +73,14 @@ namespace LkEngine {
 		bool IsEntityInRegistry(const LEntity Entity) const;
 
 		LEntity CreateEntity(const std::string& InName = "");
-		LEntity CreateEntityWithID(UUID uuid, const std::string& InName = "");
+		LEntity CreateEntityWithID(LUUID uuid, const std::string& InName = "");
 		LEntity CreateChildEntity(LEntity Parent, const std::string& InName = "");
-		LEntity TryGetEntityWithUUID(UUID id) const;
+		LEntity TryGetEntityWithUUID(LUUID ID) const;
 
 		void ParentEntity(LEntity Entity, LEntity Parent);
 		void UnparentEntity(LEntity Entity, bool bConvertToWorldSpace = true);
+
+		glm::mat4 GetWorldSpaceTransform(LEntity Entity);
 
 		FORCEINLINE std::string GetName() const { return Name; }
 		FORCEINLINE void SetName(const std::string& InName) { Name = InName; }
@@ -86,7 +96,7 @@ namespace LkEngine {
 
 		FORCEINLINE TObjectPtr<LSceneCamera> GetMainCamera() { return Camera; } 
 
-		FORCEINLINE UUID GetUUID() const { return SceneID; }
+		FORCEINLINE LUUID GetUUID() const { return SceneID; }
 
 		void CopyTo(TObjectPtr<LScene>& TargetScene);
 
@@ -96,7 +106,7 @@ namespace LkEngine {
 		template<typename T>
 		static void CopyComponent(entt::registry& DestinationRegistry, 
 			                      entt::registry& SourceRegistry, 
-			                      const std::unordered_map<UUID, entt::entity>& enttMap)
+			                      const std::unordered_map<LUUID, entt::entity>& enttMap)
 		{
 			auto SourceEntities = SourceRegistry.view<T>();
 			for (auto SourceEntity : SourceEntities)
@@ -174,8 +184,8 @@ namespace LkEngine {
 
 		bool bIsEditorScene = false; /// REMOVE
 
-		uint16_t m_ViewportWidth = 0;
-		uint16_t m_ViewportHeight = 0;
+		uint16_t ViewportWidth = 0;
+		uint16_t ViewportHeight = 0;
 
 		TObjectPtr<LSceneCamera> Camera = nullptr;
 		//TObjectPtr<LEditorCamera> EditorCamera = nullptr;

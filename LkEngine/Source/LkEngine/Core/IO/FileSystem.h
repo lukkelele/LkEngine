@@ -23,6 +23,7 @@ namespace LkEngine {
 	{
 	public:
 		static bool Exists(const std::filesystem::path& Filepath);
+		static bool DeleteFile(const std::filesystem::path& Filepath);
 
 		static bool Move(const std::filesystem::path& OldFilepath, const std::filesystem::path& NewFilepath);
 		static bool Copy(const std::filesystem::path& OldFilepath, const std::filesystem::path& NewFilepath);
@@ -34,6 +35,14 @@ namespace LkEngine {
 
 		static bool ShowFileInExplorer(const std::filesystem::path& Path);
 		static bool OpenDirectoryInExplorer(const std::filesystem::path& DirectoryPath);
+
+		static bool MoveFile(const std::filesystem::path& Filepath, const std::filesystem::path& Destination)
+		{
+			return Move(Filepath, Destination / Filepath.filename());
+		}
+
+		static std::string ConvertPathToWindows(const std::filesystem::path& UnixPath);
+		static std::string ConvertPathToUnix(const std::filesystem::path& WindowsPath);
 
 		struct FFileDialogFilterItem
 		{
@@ -47,11 +56,12 @@ namespace LkEngine {
 
 		FORCEINLINE static std::filesystem::path GetWorkingDir() { return WorkingDir; }
 		FORCEINLINE static std::filesystem::path GetBinaryDir() { return BinaryDir; }
-		FORCEINLINE static std::filesystem::path GetEngineDir() { return EngineConfig; }
+		FORCEINLINE static std::filesystem::path GetEngineDir() { return EngineDir; }
 		FORCEINLINE static std::filesystem::path GetEngineConfig() { return EngineConfig; }
 		FORCEINLINE static std::filesystem::path GetRuntimeDir() { return RuntimeDir; }
 		FORCEINLINE static std::filesystem::path GetConfigDir() { return ConfigDir; }
 		FORCEINLINE static std::filesystem::path GetAssetsDir() { return AssetsDir; }
+		FORCEINLINE static std::filesystem::path GetEditorConfig() { return EditorConfig; }
 
 	private:
 		static std::filesystem::path WorkingDir;
@@ -62,6 +72,7 @@ namespace LkEngine {
 		static std::filesystem::path ConfigDir;
 		static std::filesystem::path AssetsDir;
 		static std::filesystem::path ProjectsDir;
+		static std::filesystem::path EditorConfig;
 
 		friend struct Global;
 	};

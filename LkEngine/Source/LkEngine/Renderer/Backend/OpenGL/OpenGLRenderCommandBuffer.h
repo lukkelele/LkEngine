@@ -8,42 +8,42 @@ namespace LkEngine {
 	class LOpenGLRenderCommandBuffer : public LRenderCommandBuffer
 	{
 	public:
-		LOpenGLRenderCommandBuffer(uint32_t Count = 0, std::string_view InName = "");
-		LOpenGLRenderCommandBuffer(std::string_view InName, bool InSwapchain);
+		LOpenGLRenderCommandBuffer(const uint32_t Count = 0, std::string_view InDebugName = "");
+		LOpenGLRenderCommandBuffer(std::string_view InDebugName, const bool InSwapchain);
 		~LOpenGLRenderCommandBuffer();
 
 		virtual void Begin() override;
 		virtual void End() override;
 		virtual void Submit() override;
 
-		virtual float GetExecutionGPUTime(uint32_t frameIndex, uint32_t queryIndex = 0) const override
+		virtual float GetExecutionGpuTime(const uint32_t FrameIndex, const uint32_t QueryIndex = 0) const override
 		{
-			if ((queryIndex == UINT32_MAX) || ((queryIndex / 2) >= m_TimestampNextAvailableQuery / 2))
+			if ((QueryIndex == UINT32_MAX) || ((QueryIndex / 2) >= TimestampNextAvailableQuery / 2))
 			{
 				return 0.0f;
 			}
 
-			return m_ExecutionGPUTimes[frameIndex][(queryIndex / 2)];
+			return ExecutionGpuTimes[FrameIndex][(QueryIndex / 2)];
 		}
 
-		virtual const PipelineStatistics& GetPipelineStatistics(const uint32_t frameIndex) const override;
+		virtual const PipelineStatistics& GetPipelineStatistics(const uint32_t FrameIndex) const override;
 
 		virtual uint32_t BeginTimestampQuery() override;
-		virtual void EndTimestampQuery(uint32_t queryID) override;
+		virtual void EndTimestampQuery(const uint32_t QueryID) override;
 
 	private:
-		std::string m_DebugName;
-		PipelineStatistics m_PipelineStatistics;
+		PipelineStatistics PipelineStatistics;
+		std::string DebugName{};
 
-		bool m_OwnedBySwapChain = false;
+		bool bOwnedBySwapChain = false;
 
-		uint32_t m_TimestampQueryCount = 0;
-		uint32_t m_TimestampNextAvailableQuery = 2;
+		uint32_t TimestampQueryCount = 0;
+		uint32_t TimestampNextAvailableQuery = 2;
 
-		std::vector<std::vector<uint64_t>> m_TimestampQueryResults{};
-		std::vector<std::vector<float>> m_ExecutionGPUTimes{};
+		std::vector<std::vector<uint64_t>> TimestampQueryResults{};
+		std::vector<std::vector<float>> ExecutionGpuTimes{};
 
-		uint32_t m_PipelineQueryCount = 0;
+		uint32_t PipelineQueryCount = 0;
 
 		LCLASS(LOpenGLRenderCommandBuffer);
 	};

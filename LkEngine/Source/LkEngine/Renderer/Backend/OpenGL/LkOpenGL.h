@@ -662,8 +662,6 @@ namespace LkEngine {
 
 		extern uint32_t CubeVAO;
 		extern uint32_t CubeVBO;
-		extern uint32_t PlaneVAO;
-		extern uint32_t PlaneVBO;
 		extern uint32_t QuadVAO;
 		extern uint32_t QuadVBO;
 		extern LRendererID SkyboxVAO;
@@ -950,7 +948,7 @@ namespace LkEngine {
 		void InitializeEnvironment();
 
 		void SetupDebugCube();
-		void GeneratePlaneVaoAndVbo(uint32_t& vao, uint32_t& vbo);
+		void GeneratePlaneVaoAndVbo();
 		void GenerateScreenQuadVaoAndVbo(uint32_t& vao, uint32_t& vbo);
 		void SetupTexturesAndShaders();
 		void SetupSkybox();

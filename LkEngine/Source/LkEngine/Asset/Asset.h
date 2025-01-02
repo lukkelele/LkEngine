@@ -12,7 +12,7 @@
 
 namespace LkEngine {
 
-    using FAssetHandle = UUID;
+    using FAssetHandle = LUUID;
 
 	/// TODO: Documentation
     /**
@@ -44,12 +44,13 @@ namespace LkEngine {
 			return !(*this == Other);
 		}
 
+		/// FIXME: Use LK_ENUM_CLASS_FLAGS
 		FORCEINLINE bool IsFlagSet(const EAssetFlag InFlag) const 
 		{ 
 			return (Flags & static_cast<uint16_t>(InFlag));
 		}
 
-		//void SetFlag(AssetFlag::Type InFlag, bool InValue = true)
+		/// FIXME: Use LK_ENUM_CLASS_FLAGS
 		FORCEINLINE void SetFlag(const EAssetFlag InFlag, bool InValue = true)
 		{
 			if (InValue)
@@ -62,6 +63,11 @@ namespace LkEngine {
 				//Flags &= ~InFlag;
 				Flags &= ~(static_cast<uint16_t>(InFlag));
 			}
+		}
+
+		FORCEINLINE virtual bool IsValid() const
+		{
+			return LObject::IsValid();
 		}
 
     public:
@@ -95,9 +101,15 @@ namespace LkEngine {
 		bool bIsDataLoaded = false;
 		bool bIsMemoryAsset = false;
 
-		FORCEINLINE bool IsValid() const 
-		{ 
-			return (Handle > 0);
+		FORCEINLINE bool IsValid() const { return (Handle > 0); }
+		
+		FORCEINLINE std::string ToString() const
+		{
+			return std::format("[Asset Metadata: {}]\n * Type: {}\n * Filepath: {}\n * Is Loaded: {}\n * Memory Asset: {}",
+							   Handle, Enum::ToString(Type), 
+							   FilePath.string(), 
+							   (bIsDataLoaded ? "Yes" : "No"), 
+							   (bIsMemoryAsset ? "Yes" : "No"));
 		}
 	};
 

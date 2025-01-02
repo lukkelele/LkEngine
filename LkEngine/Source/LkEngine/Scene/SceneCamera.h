@@ -11,147 +11,132 @@ namespace LkEngine {
 	class LSceneCamera : public LCamera
 	{
 	public:
-		//LSceneCamera(const glm::mat4& projection);
-
 		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
-				|| (m_DegPerspectiveFOV != InVerticalFovDeg)
-				|| (m_PerspectiveNear != InNearClip)
-				|| (m_PerspectiveFar != InFarClip))
+				|| (DegPerspectiveFOV != InVerticalFovDeg)
+				|| (PerspectiveNear != InNearClip)
+				|| (PerspectiveFar != InFarClip))
 			{
 				ProjectionType = ECameraProjection::Perspective;
-				m_DegPerspectiveFOV = InVerticalFovDeg;
-				m_PerspectiveNear = InNearClip;
-				m_PerspectiveFar = InFarClip;
+				DegPerspectiveFOV = InVerticalFovDeg;
+				PerspectiveNear = InNearClip;
+				PerspectiveFar = InFarClip;
 
-				bDirty = true;
 				OnCameraProjectionChanged.Broadcast(ECameraProjection::Perspective);
 			}
 		}
 
-		FORCEINLINE void SetOrthographic(const float InWidth, 
-										 const float InHeight, 
-										 const float InNearClip = -1.0f, 
-										 const float InFarClip = 1.0f)
+		FORCEINLINE void SetOrthographic(const float InWidth, const float InHeight, const float InNearClip = -1.0f, const float InFarClip = 1.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
-				|| (m_OrthographicNear != InNearClip)
-				|| (m_OrthographicFar != InFarClip))
+				|| (OrthographicNear != InNearClip)
+				|| (OrthographicFar != InFarClip))
 			{
 				ProjectionType = ECameraProjection::Orthographic;
-				m_OrthographicNear = InNearClip;
-				m_OrthographicFar = InFarClip;
+				OrthographicNear = InNearClip;
+				OrthographicFar = InFarClip;
 
-				bDirty = true;
 				OnCameraProjectionChanged.Broadcast(ECameraProjection::Orthographic);
 			}
 		}
 
-		void SetViewportSize(uint32_t width, uint32_t height);
+		void SetViewportSize(const uint32_t InWidth, const uint32_t InHeight);
 
 		void Update(float ts);
 		void UpdateView();
 		void UpdateProjection();
 		void UpdateViewProjection();
 
-		FORCEINLINE float GetPerspectiveNearClip() const { return m_PerspectiveNear; }
-		FORCEINLINE float GetPerspectiveFarClip() const { return m_PerspectiveFar; }
-		FORCEINLINE float GetDegPerspectiveVerticalFOV() const { return m_DegPerspectiveFOV; }
-		FORCEINLINE float GetRadPerspectiveVerticalFOV() const { return glm::radians(m_DegPerspectiveFOV); }
+	#if 0
+		FORCEINLINE float GetPerspectiveNearClip() const { return PerspectiveNear; }
+		FORCEINLINE float GetPerspectiveFarClip() const { return PerspectiveFar; }
+		FORCEINLINE float GetDegPerspectiveVerticalFOV() const { return DegPerspectiveFOV; }
+		FORCEINLINE float GetRadPerspectiveVerticalFOV() const { return glm::radians(DegPerspectiveFOV); }
 
 		/** */
 		FORCEINLINE void SetDegPerspectiveVerticalFOV(const float InVerticalFovDeg) 
 		{ 
-			if (m_DegPerspectiveFOV != InVerticalFovDeg)
+			if (DegPerspectiveFOV != InVerticalFovDeg)
 			{
-				m_DegPerspectiveFOV = InVerticalFovDeg; 
-				bDirty = true;
+				DegPerspectiveFOV = InVerticalFovDeg; 
 			}
 		}
 
 		/** */
 		FORCEINLINE void SetRadPerspectiveVerticalFOV(const float InVerticalFovRad) 
 		{ 
-			if (const float InVerticalFovDeg = glm::degrees(InVerticalFovRad); m_DegPerspectiveFOV != InVerticalFovDeg)
+			if (const float InVerticalFovDeg = glm::degrees(InVerticalFovRad); DegPerspectiveFOV != InVerticalFovDeg)
 			{
-				m_DegPerspectiveFOV = InVerticalFovDeg;
-				bDirty = true;
+				DegPerspectiveFOV = InVerticalFovDeg;
 			}
 		}
 
 		/** */
 		FORCEINLINE void SetPerspectiveNearClip(const float InNearClip) 
 		{ 
-			if (m_PerspectiveNear != InNearClip)
+			if (PerspectiveNear != InNearClip)
 			{
-				m_PerspectiveNear = InNearClip; 
-				bDirty = true;
+				PerspectiveNear = InNearClip; 
 			}
 		}
 
 		/** */
 		FORCEINLINE void SetPerspectiveFarClip(const float InFarClip) 
 		{ 
-			if (m_PerspectiveFar != InFarClip)
+			if (PerspectiveFar != InFarClip)
 			{
-				m_PerspectiveFar = InFarClip;
-				bDirty = true;
+				PerspectiveFar = InFarClip;
 			}
 		}
 
-		FORCEINLINE float GetOrthographicSize() const { return m_OrthographicSize; }
-		FORCEINLINE float GetOrthographicNearClip() const { return m_OrthographicNear; }
-		FORCEINLINE float GetOrthographicFarClip() const { return m_OrthographicFar; }
+		FORCEINLINE float GetOrthographicSize() const { return OrthographicSize; }
+		FORCEINLINE float GetOrthographicNearClip() const { return OrthographicNear; }
+		FORCEINLINE float GetOrthographicFarClip() const { return OrthographicFar; }
 
 		FORCEINLINE void SetOrthographicSize(const float InSize) 
 		{ 
-			if (m_OrthographicSize != InSize)
+			if (OrthographicSize != InSize)
 			{
-				m_OrthographicSize = InSize; 
-				bDirty = true;
+				OrthographicSize = InSize; 
 			}
 		}
 
 		FORCEINLINE void SetOrthographicNearClip(const float InNearClip) 
 		{ 
-			if (m_OrthographicNear != InNearClip)
+			if (OrthographicNear != InNearClip)
 			{
-				m_OrthographicNear = InNearClip; 
-				bDirty = true;
+				OrthographicNear = InNearClip; 
 			}
 		}
 
 		FORCEINLINE void SetOrthographicFarClip(const float InFarClip) 
 		{ 
-			if (m_OrthographicFar != InFarClip)
+			if (OrthographicFar != InFarClip)
 			{
-				m_OrthographicFar = InFarClip; 
-				bDirty = true;
+				OrthographicFar = InFarClip; 
 			}
 		}
+	#endif
 
-		FORCEINLINE glm::vec3& GetPos() { return m_Pos; }
-		FORCEINLINE glm::vec3 GetPos() const { return m_Pos; }
-
-		FORCEINLINE const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
-		FORCEINLINE const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
+		FORCEINLINE glm::vec3& GetPosition() { return Position; }
+		FORCEINLINE glm::vec3 GetPosition() const { return Position; }
 
 	protected:
-		glm::vec3 m_Pos = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 m_PosDelta = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 m_Origin = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 m_Offset = { 0.0f, 0.0f, 0.0f };
-		glm::vec2 m_MouseDelta = { 0.0f, 0.0f };
-		glm::vec2 m_MousePos = { 0.0f, 0.0f };
+		/** @brief Camera offset. */
+		glm::vec3 CameraBoom{};
+
+		glm::vec2 MouseDelta = { 0.0f, 0.0f };
+		glm::vec2 MousePos = { 0.0f, 0.0f };
 		glm::vec2 m_InitialMousePos{};
 
-		float m_OrthographicSize = 10.0f;
-		float m_OrthographicNear = -1.0f;
-		float m_OrthographicFar = 1.0f;
+		float Distance = 0.0f;
+		float NormalSpeed = 0.0020f;
+		float TravelSpeed = 1.0f;
 
-		glm::mat4 m_ViewMatrix = glm::mat4(1.0f);
-		glm::mat4 m_ViewProjectionMatrix = glm::mat4(1.0f); 
+		float OrthographicSize = 10.0f;
+		float OrthographicNear = -1.0f;
+		float OrthographicFar = 1.0f;
 	};
 
 }

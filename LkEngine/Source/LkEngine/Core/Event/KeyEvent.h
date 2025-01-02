@@ -1,11 +1,14 @@
 #pragma once
 
 #include "LkEngine/Core/Event/Event.h"
-
-#include "LkEngine/Input/Keyboard.h"
+#include "LkEngine/Core/Input/Keyboard.h"
 
 
 namespace LkEngine {
+
+	/**
+	 * TODO: Refactor this. Might even remove as it is no longer used.
+	 */
 
 	class KeyEvent : public LEvent
 	{

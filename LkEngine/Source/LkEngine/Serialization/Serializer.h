@@ -11,7 +11,7 @@
 /**
  * Helper for being able to pass C-strings and implicitly convert them
  * to std::string when using the serialization macros.
- * Is needed for decltype to evaluate correctly.
+ * Required for decltype to evaluate correctly.
  */
 template <typename T>
 static constexpr auto ToStringIfNeeded(T Value)
@@ -27,14 +27,24 @@ static constexpr auto ToStringIfNeeded(T Value)
     }
 }
 
+/**
+ * LK_SERIALIZE_PROPERTY
+ * 
+ *  Serialize a property to a YAML node.
+ *  The property name should NOT be passed with quotes.
+ */
 #define LK_SERIALIZE_PROPERTY(PropertyName, PropertyValue, OutputNode) \
 	OutputNode << YAML::Key << #PropertyName << YAML::Value << PropertyValue
 
 #define LK_SERIALIZE_PROPERTY_ASSET(PropertyName, PropertyValue, OutputData) \
 	OutputData << YAML::Key << #PropertyName << YAML::Value << (PropertyValue ? static_cast<uint64_t>(PropertyValue->Handle) : 0);
 
-				//Destination = FoundNode.as<decltype(ToStringIfNeeded(DefaultValue))>(ToStringIfNeeded(DefaultValue)); 
-				//Destination = FoundNode.as<decltype(DefaultValue)>();          
+/**
+ * LK_DESERIALIZE_PROPERTY
+ * 
+ *  Deserialize a property from a YAML node.
+ *  The property name should NOT be passed with quotes.
+ */
 #define LK_DESERIALIZE_PROPERTY(PropertyName, Destination, Node, DefaultValue) \
 	if (Node.IsMap())                                                          \
 	{                                                                          \
@@ -46,7 +56,7 @@ static constexpr auto ToStringIfNeeded(T Value)
 			}                                                                  \
 			catch (const std::exception& Exception)                            \
 			{                                                                  \
-				LK_CORE_ERROR("LK_DESERIALIZE: {}", Exception.what());         \
+				LK_CORE_ERROR("LK_DESERIALIZE_PROPERTY: {}", Exception.what());\
 				Destination = DefaultValue;                                    \
 			}                                                                  \
 		}                                                                      \

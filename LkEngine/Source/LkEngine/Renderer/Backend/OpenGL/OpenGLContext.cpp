@@ -16,6 +16,7 @@ namespace LkEngine {
 		: Window(InWindow)
 	{
 		LOBJECT_REGISTER();
+		LK_CORE_VERIFY(InWindow, "Window is nullptr");
 
 		m_GlfwWindow = Window->GetGlfwWindow();
 
@@ -24,7 +25,10 @@ namespace LkEngine {
 		Window->OnWindowSizeUpdated.Add(this, &LOpenGLContext::UpdateResolution);
 	}
 
-	void LOpenGLContext::Destroy() {}
+	void LOpenGLContext::Destroy() 
+	{
+		LK_CORE_DEBUG_TAG("OpenGLContext", "Destroying");
+	}
 
 	void LOpenGLContext::Initialize(const ESourceBlendFunction InSourceBlendFunction,
 									const EDestinationBlendFunction InDestinationBlendFunction)
@@ -105,10 +109,9 @@ namespace LkEngine {
 		}
 	}
 
-	/* TODO: Fix the use of ImGui here. Should not be like that. */
 	void LOpenGLContext::UpdateResolution(const uint16_t Width, const uint16_t Height)
 	{
-		//LK_CORE_TRACE_TAG("OpenGLContext", "Update resolution to ({}, {})", Width, Height);
+		/* TODO: Fix the use of ImGui here. Should not be like that. */
 		ImGuiViewport* Viewport = ImGui::GetMainViewport();
 		const ImVec2 Pos = Viewport->WorkPos;
 		LK_OpenGL_Verify(glViewport(Pos.x, Pos.y, Width, Height));
@@ -132,12 +135,12 @@ namespace LkEngine {
 	void LOpenGLContext::SetBlendFunction(const ESourceBlendFunction InSourceBlendFunction,
 										  const EDestinationBlendFunction InDestinationBlendFunction)
 	{
-		LK_CORE_DEBUG_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InSourceBlendFunction));
-		LK_CORE_DEBUG_TAG("OpenGLContext",
-						  "Setting destination blend function: {}",
-						  Enum::ToString(InDestinationBlendFunction));
-		LK_OpenGL_Verify(glBlendFunc(LOpenGL::GetSourceBlendFunction(InSourceBlendFunction),
-							  LOpenGL::GetDestinationBlendFunction(InDestinationBlendFunction)));
+		LK_CORE_TRACE_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InSourceBlendFunction));
+		LK_CORE_TRACE_TAG("OpenGLContext", "Setting destination blend function: {}", Enum::ToString(InDestinationBlendFunction));
+		LK_OpenGL_Verify(glBlendFunc(
+			LOpenGL::GetSourceBlendFunction(InSourceBlendFunction),
+			LOpenGL::GetDestinationBlendFunction(InDestinationBlendFunction))
+		);
 		BlendFunction.Source = InSourceBlendFunction;
 		BlendFunction.Destination = InDestinationBlendFunction;
 	}
@@ -146,16 +149,20 @@ namespace LkEngine {
 	{
 		BlendFunction.Source = InSourceBlendFunction;
 		LK_CORE_TRACE_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InSourceBlendFunction));
-		LK_OpenGL_Verify(glBlendFunc(LOpenGL::GetSourceBlendFunction(BlendFunction.Source),
-							  LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination)));
+		LK_OpenGL_Verify(glBlendFunc(
+			LOpenGL::GetSourceBlendFunction(BlendFunction.Source), 
+			LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination))
+		);
 	}
 
 	void LOpenGLContext::SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationBlendFunction)
 	{
 		BlendFunction.Destination = InDestinationBlendFunction;
 		LK_CORE_TRACE_TAG("OpenGLContext", "Setting source blend function: {}", Enum::ToString(InDestinationBlendFunction));
-		LK_OpenGL_Verify(glBlendFunc(LOpenGL::GetSourceBlendFunction(BlendFunction.Source),
-							  LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination)));
+		LK_OpenGL_Verify(glBlendFunc(
+			LOpenGL::GetSourceBlendFunction(BlendFunction.Source), 
+			LOpenGL::GetDestinationBlendFunction(BlendFunction.Destination))
+		);
 	}
 
 }

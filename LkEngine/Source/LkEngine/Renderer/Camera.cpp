@@ -11,7 +11,7 @@ namespace LkEngine {
 	}
 
 	LCamera::LCamera(const glm::mat4& InProjection)
-		: m_ProjectionMatrix(InProjection)
+		: ProjectionMatrix(InProjection)
 	{
 		LOBJECT_REGISTER();
 	}

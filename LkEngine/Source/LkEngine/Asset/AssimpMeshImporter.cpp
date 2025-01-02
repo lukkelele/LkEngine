@@ -79,7 +79,7 @@ namespace LkEngine {
 			LK_MESH_LOG("{0:^{1}}}}", "", depth * 3);
 		}
 
-	} // namespace Utils
+	}
 
 	LAssimpMeshImporter::LAssimpMeshImporter(const std::filesystem::path& InFilePath)
 		: FilePath(InFilePath)

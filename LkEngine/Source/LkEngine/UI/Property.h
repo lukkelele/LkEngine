@@ -12,7 +12,8 @@
 namespace LkEngine::UI {
 
 	/// FIXME: REFACTOR THIS
-    namespace Property {
+    namespace Property_OLD 
+	{
 
 		static void Rotation2D(LTransformComponent& Transform)
 		{

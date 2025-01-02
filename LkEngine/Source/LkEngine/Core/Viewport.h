@@ -43,6 +43,16 @@ namespace LkEngine {
 			}
 		}
 
+		FORCEINLINE void SetSize(const float InX, const float InY) 
+		{ 
+			if ((Size.X != InX) || (Size.Y != InY))
+			{
+				Size.X = InX;
+				Size.Y = InY;
+				bDirty = true;
+			}
+		}
+
 		template<typename T>
 		FORCEINLINE void SetSizeX(const T InX)
 		{

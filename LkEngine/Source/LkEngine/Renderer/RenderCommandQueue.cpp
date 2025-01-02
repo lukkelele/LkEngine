@@ -6,19 +6,19 @@
 
 namespace LkEngine {
 
-	RenderCommandQueue::RenderCommandQueue()
+	LRenderCommandQueue::LRenderCommandQueue()
 	{
 		m_CommandBuffer = new uint8_t[10 * 1024 * 1024]; // 10MB Buffer
 		m_CommandBufferPtr = m_CommandBuffer;
-		memset(m_CommandBuffer, 0, 10 * 1024 * 1024);
+		std::memset(m_CommandBuffer, 0, 10 * 1024 * 1024);
 	}
 
-	RenderCommandQueue::~RenderCommandQueue()
+	LRenderCommandQueue::~LRenderCommandQueue()
 	{
 		delete[] m_CommandBuffer;
 	}
 
-	void* RenderCommandQueue::Allocate(FRenderCommandFn CommandFunction, const uint32_t InSize)
+	void* LRenderCommandQueue::Allocate(FRenderCommandFn CommandFunction, const uint32_t InSize)
 	{
 		*(FRenderCommandFn*)m_CommandBufferPtr = CommandFunction;
 		m_CommandBufferPtr += sizeof(FRenderCommandFn);
@@ -34,7 +34,7 @@ namespace LkEngine {
 		return memory;
 	}
 
-	void RenderCommandQueue::Execute()
+	void LRenderCommandQueue::Execute()
 	{
 		byte* CommandBuffer = m_CommandBuffer;
 
@@ -58,6 +58,5 @@ namespace LkEngine {
 		m_CommandBufferPtr = m_CommandBuffer;
 		m_CommandCount = 0;
 	}
-
 
 }

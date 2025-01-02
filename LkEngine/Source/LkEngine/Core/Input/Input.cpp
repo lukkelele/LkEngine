@@ -31,6 +31,7 @@ namespace LkEngine {
 		 * was triggered and the second entry is updated continuosly. */
 		for (auto& [Key, HeldData] : KeyHeldMap)
 		{
+			KeyDataMap[Key].RepeatCount++;
 			HeldData.second = std::chrono::steady_clock::now();
 		}
 	}

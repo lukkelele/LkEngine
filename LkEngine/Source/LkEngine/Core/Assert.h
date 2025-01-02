@@ -32,21 +32,35 @@
 #		define LK_CORE_ASSERT_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Core,   "Assertion Failed" __VA_OPT__(, ) __VA_ARGS__)
 #		define LK_ASSERT_MESSAGE_INTERNAL(...)		::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Client, "Assertion Failed" __VA_OPT__(, ) __VA_ARGS__)
 #	endif
-#	define LK_CORE_ASSERT(Condition, ...)                     \
-		{                                                     \
-			if (!(Condition))                                 \
-			{                                                 \
-				LK_CORE_ASSERT_MESSAGE_INTERNAL(__VA_ARGS__); \
-				LK_DEBUG_BREAK;                               \
-			}                                                 \
+#	define LK_CORE_ASSERT(Condition, ...)                         \
+		{												          \
+			if (!(Condition))                                     \
+			{                                                     \
+				if constexpr (sizeof(#__VA_ARGS__) > 1)           \
+				{                                                 \
+					LK_CORE_ASSERT_MESSAGE_INTERNAL(__VA_ARGS__); \
+				}                                                 \
+				else                                              \
+				{                                                 \
+					LK_CORE_ASSERT_MESSAGE_INTERNAL("Assertion Failed: {}", LK_FUNCSIG); \
+				}                                                 \
+				LK_DEBUG_BREAK;                                   \
+			}                                                     \
 		}
-#	define LK_ASSERT(Condition, ...)                     \
-		{                                                \
-			if (!(Condition))                            \
-			{                                            \
-				LK_ASSERT_MESSAGE_INTERNAL(__VA_ARGS__); \
-				LK_DEBUG_BREAK;                          \
-			}                                            \
+#	define LK_ASSERT(Condition, ...)                         \
+		{                                                    \
+			if (!(Condition))                                \
+			{                                                \
+				if constexpr (sizeof(#__VA_ARGS__) > 1)      \
+				{                                            \
+					LK_ASSERT_MESSAGE_INTERNAL(__VA_ARGS__); \
+				}                                            \
+				else                                         \
+				{                                            \
+					LK_ASSERT_MESSAGE_INTERNAL("Assertion Failed: {}", LK_FUNCSIG); \
+				}                                            \
+				LK_DEBUG_BREAK;                              \
+			}                                                \
 		}
 #else
 #	define LK_CORE_ASSERT(Condition, ...)  static_cast<void>(0)
@@ -64,21 +78,35 @@
 #		define LK_CORE_VERIFY_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Core,   "Verify Failed" __VA_OPT__(, ) __VA_ARGS__)
 #		define LK_VERIFY_MESSAGE_INTERNAL(...)		::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Client, "Verify Failed" __VA_OPT__(, ) __VA_ARGS__)
 #	endif
-#	define LK_CORE_VERIFY(Condition, ...)                     \
-		{                                                     \
-			if (!(Condition))                                 \
-			{                                                 \
-				LK_CORE_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); \
-				LK_DEBUG_BREAK;                               \
-			}                                                 \
+#	define LK_CORE_VERIFY(Condition, ...)                         \
+		{                                                         \
+			if (!(Condition))                                     \
+			{                                                     \
+				if constexpr (sizeof(#__VA_ARGS__) > 1)           \
+				{                                                 \
+					LK_CORE_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); \
+				}                                                 \
+				else                                              \
+				{                                                 \
+					LK_CORE_VERIFY_MESSAGE_INTERNAL("Verify Failed: {}", LK_FUNCSIG); \
+				}                                                 \
+				LK_DEBUG_BREAK;                                   \
+			}                                                     \
 		}
-#	define LK_VERIFY(Condition, ...)                     \
-		{                                                \
-			if (!(Condition))                            \
-			{                                            \
-				LK_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); \
-				LK_DEBUG_BREAK;                          \
-			}                                            \
+#	define LK_VERIFY(Condition, ...)                         \
+		{                                                    \
+			if (!(Condition))                                \
+			{                                                \
+				if constexpr (sizeof(#__VA_ARGS__) > 1)      \
+				{                                            \
+					LK_VERIFY_MESSAGE_INTERNAL(__VA_ARGS__); \
+				}                                            \
+				else                                         \
+				{                                            \
+					LK_VERIFY_MESSAGE_INTERNAL("Verify Failed: {}", LK_FUNCSIG); \
+				}                                            \
+				LK_DEBUG_BREAK;                              \
+			}                                                \
 		}
 #else
 #	define LK_CORE_VERIFY(Condition, ...)

@@ -36,6 +36,8 @@ namespace LkEngine {
 	class LProject : public LObject
 	{
 	public:
+		LK_DECLARE_MULTICAST_DELEGATE(FOnProjectChanged, TObjectPtr<LProject>);
+	public:
 		LProject();
 		~LProject() = default;
 
@@ -80,6 +82,7 @@ namespace LkEngine {
 
 	public:
 		inline static constexpr const char* FILE_EXTENSION = "lkproject";
+		static FOnProjectChanged OnProjectChanged;
 	private:
 		FProjectConfiguration Configuration{};
 

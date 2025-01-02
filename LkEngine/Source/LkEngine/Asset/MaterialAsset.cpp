@@ -1,10 +1,13 @@
 #include "LKpch.h"
 #include "MaterialAsset.h"
 
+#include "LkEngine/Renderer/MaterialLibrary.h"
+
 
 namespace LkEngine {
 
-	namespace {
+	namespace 
+	{
 		/* clang-format off */
 		const std::string s_AlbedoColorUniform	= "u_MaterialUniforms.AlbedoColor";
 		const std::string s_UseNormalMapUniform = "u_MaterialUniforms.UseNormalMap";
@@ -29,6 +32,7 @@ namespace LkEngine {
 		Material = LMaterial::Copy(InMaterial);
 		LK_CORE_DEBUG_TAG("MaterialAsset", "Created material asset ({}) with material {}", Handle, InMaterial->GetName());
 
+		/// FIXME
 		LK_CORE_ASSERT(Material->GetTexture(""), "Material ({}) texture is nullptr!", Material->GetName());
 	}
 
@@ -38,61 +42,75 @@ namespace LkEngine {
 		LASSET_REGISTER();
 
 		Handle = {};
+
+		if (m_Transparent)
+		{
+			Handle = LMaterialLibrary::BaseMaterial->Handle;
+			Material = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL)->GetMaterial();
+			LK_CORE_DEBUG_TAG("MaterialAsset", "Created transparent material asset: {}", Handle);
+		}
+		else
+		{
+			Handle = LMaterialLibrary::BaseMaterial->Handle;
+			Material = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL)->GetMaterial();
+			LK_CORE_DEBUG_TAG("MaterialAsset", "Created non-transparent material asset: {}", Handle);
+		}
+
 		SetDefaults();
-		LK_CORE_INFO_TAG("MaterialAsset", "Created material asset with default settings");
+		//LK_CORE_INFO_TAG("MaterialAsset", "Created material asset '{}' with default settings", Handle);
 	}
 
 	glm::vec3& LMaterialAsset::GetAlbedoColor()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->GetVector3(s_AlbedoColorUniform);
 	}
 
 	void LMaterialAsset::SetAlbedoColor(const glm::vec3& color)
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		Material->Set(s_AlbedoColorUniform, color);
 	}
 
 	float& LMaterialAsset::GetMetalness()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->GetFloat(s_MetalnessUniform);
 	}
 
 	void LMaterialAsset::SetMetalness(float value)
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		Material->Set(s_MetalnessUniform, value);
 	}
 
 	float& LMaterialAsset::GetRoughness()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->GetFloat(s_RoughnessUniform);
 	}
 
 	void LMaterialAsset::SetRoughness(float value)
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		Material->Set(s_RoughnessUniform, value);
 	}
 
 	float& LMaterialAsset::GetEmission()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->GetFloat(s_EmissionUniform);
 	}
 
 	void LMaterialAsset::SetEmission(float value)
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		Material->Set(s_EmissionUniform, value);
 	}
 
 	float& LMaterialAsset::GetTransparency()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->GetFloat(s_TransparencyUniform);
 	}
 
@@ -104,73 +122,72 @@ namespace LkEngine {
 
 	TObjectPtr<LTexture2D> LMaterialAsset::GetAlbedoMap()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->TryGetTexture(s_AlbedoMapUniform);
 	}
 
 	void LMaterialAsset::SetAlbedoMap(TObjectPtr<LTexture2D> texture)
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		Material->Set(s_AlbedoMapUniform, texture);
 	}
 
 	void LMaterialAsset::ClearAlbedoMap()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		//Material->Set(s_AlbedoMapUniform, Renderer::GetWhiteTexture());
 	}
 
 	TObjectPtr<LTexture2D> LMaterialAsset::GetNormalMap()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->TryGetTexture(s_NormalMapUniform);
 	}
 
 	void LMaterialAsset::SetNormalMap(TObjectPtr<LTexture2D> texture)
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		Material->Set(s_NormalMapUniform, texture);
 	}
 
 	TObjectPtr<LTexture2D> LMaterialAsset::GetMetalnessMap()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->TryGetTexture(s_MetalnessMapUniform);
 	}
 
 	void LMaterialAsset::SetMetalnessMap(TObjectPtr<LTexture2D> texture)
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		Material->Set(s_MetalnessMapUniform, texture);
 	}
 
 	void LMaterialAsset::ClearMetalnessMap()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		//Material->Set(s_MetalnessMapUniform, Renderer::GetWhiteTexture());
 	}
 
 	TObjectPtr<LTexture2D> LMaterialAsset::GetRoughnessMap()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		return Material->TryGetTexture(s_RoughnessMapUniform);
 	}
 
 	void LMaterialAsset::SetRoughnessMap(TObjectPtr<LTexture2D> texture)
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		Material->Set(s_RoughnessMapUniform, texture);
 	}
 
 	void LMaterialAsset::ClearRoughnessMap()
 	{
-		LK_CORE_VERIFY(Material);
+		LK_CORE_VERIFY(Material, "{}", LK_FUNCSIG);
 		//Material->Set(s_RoughnessMapUniform, Renderer::GetWhiteTexture());
 	}
 
 	void LMaterialAsset::SetDefaults()
 	{
-		LK_CORE_VERIFY(Material);
 		if (m_Transparent)
 		{
 			/* Set defaults. */
@@ -211,6 +228,8 @@ namespace LkEngine {
 	{
 		LASSET_REGISTER();
 
+		LK_CORE_INFO_TAG("MaterialTable", "Copying table with {} materials", Other->GetMaterialCount());
+
 		const auto& MeshMaterials = Other->GetMaterials();
 		for (auto& [Index, Handle] : MeshMaterials)
 		{
@@ -219,16 +238,21 @@ namespace LkEngine {
 		}
 	}
 
+	LMaterialTable::~LMaterialTable()
+	{
+		LK_CORE_FATAL_TAG("MaterialTable", "Destroyed table with {} materials", Materials.size());
+	}
+
 	void LMaterialTable::SetMaterial(const uint32_t Index, const FAssetHandle AssetHandle)
 	{
+		LK_CORE_VERIFY(AssetHandle > 0, "SetMaterial called with invalid asset handle: {}", AssetHandle);
 		Materials[Index] = AssetHandle;
 		if (Index >= MaterialCount)
 		{
 			MaterialCount = Index + 1;
 		}
 
-		LK_CORE_DEBUG_TAG("MaterialTable", "Assigning material {} to handle {} (count: {})", 
-						  Index, AssetHandle, MaterialCount);
+		LK_CORE_DEBUG_TAG("MaterialTable", "Assigning material '{}' to index {} (count: {})", AssetHandle, Index, MaterialCount);
 	}
 
 	void LMaterialTable::InsertLast(const FAssetHandle AssetHandle)

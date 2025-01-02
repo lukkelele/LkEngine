@@ -13,7 +13,7 @@ namespace LkEngine {
 		virtual void Simulate(const float DeltaTime) = 0;
 		virtual void Destroy() = 0;
 
-		virtual std::shared_ptr<PhysicsBody> GetEntityBodyByID(UUID EntityID) const = 0;
+		virtual std::shared_ptr<PhysicsBody> GetEntityBodyByID(LUUID EntityID) const = 0;
 		virtual std::shared_ptr<PhysicsBody> GetEntityBody(LEntity Entity) const 
         { 
             return GetEntityBodyByID(Entity.GetUUID()); 

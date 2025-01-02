@@ -8,7 +8,6 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/Template/TypeTrait.h"
-#include "LkEngine/Core/LObject/Enum.h"
 #include "LkEngine/Core/LObject/ObjectBase.h"
 
 

@@ -18,11 +18,12 @@ namespace LkEngine {
 
 	struct FTextureSpecification
 	{
-		std::string Path = "";
-		std::string Name = "";
+		std::string Path{};
+		std::string Name{};
 		uint32_t Width = 1;
 		uint32_t Height = 1;
-		bool GenerateMips = true;
+		bool bGenerateMips = true;
+		bool bFlipVertical = false;
 
 		EImageFormat Format = EImageFormat::RGBA;
 		ETextureWrap SamplerWrap = ETextureWrap::Clamp;
@@ -33,7 +34,7 @@ namespace LkEngine {
 		bool Storage = false;
 		bool StoreLocally = false;
 
-		std::string DebugName;
+		std::string DebugName{};
 	};
 
 	struct FImageSubresourceRange
@@ -73,8 +74,9 @@ namespace LkEngine {
 		ETextureFilter Filter = ETextureFilter::Linear;
 		ETextureAnistropicFiltering AnistropicFiltering = ETextureAnistropicFiltering::Trilnear;
 
-		bool Deinterleaved = false;
-		bool Transfer = false; // Will it be used for transfer ops?
+		bool bDeinterleaved = false;
+		bool bTransfer = false;
+		bool bFlipVertical = false;
 
 		std::string Name{};
 		std::string DebugName{};
@@ -90,7 +92,9 @@ namespace LkEngine {
 			, Name(InSpecification.Name)
 			, DebugName(InSpecification.DebugName)
 		{
-			InSpecification.GenerateMips ? Mips = ImageUtils::CalculateMipCount(InSpecification.Width, InSpecification.Height) : Mips = 1;
+			InSpecification.bGenerateMips 
+				? Mips = ImageUtils::CalculateMipCount(InSpecification.Width, InSpecification.Height) 
+				: Mips = 1;
 			Size = ImageUtils::GetMemorySize(InSpecification.Format, InSpecification.Width, InSpecification.Height);
 		}
 		~FImageSpecification() = default;

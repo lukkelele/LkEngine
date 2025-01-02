@@ -11,6 +11,7 @@ namespace LkEngine {
     static constexpr const char* BASE_MATERIAL = "BaseMaterial";
 
     class LMaterialAsset;
+	/// FIXME: MOVE THIS TO ASSET MANAGER ENTIRELY
 
     class LMaterialLibrary : public LObject
     {
@@ -20,7 +21,7 @@ namespace LkEngine {
         static LMaterialLibrary& Get();
 
         void Initialize();
-        void Add(const TObjectPtr<LMaterial> InMaterial);
+        TObjectPtr<LMaterialAsset> Add(const TObjectPtr<LMaterial> InMaterial);
 
         TObjectPtr<LMaterialAsset> GetMaterial(const FAssetHandle Handle);
         TObjectPtr<LMaterialAsset> GetMaterial(std::string_view InMaterialName);
@@ -44,6 +45,8 @@ namespace LkEngine {
         /** Initialization for basic materials. */
         void CreateBasicMaterials();
 
+	public:
+		static TObjectPtr<LMaterialAsset> BaseMaterial;
     private:
 		inline static std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>> m_LoadedMaterialAssets;
         inline static std::unordered_map<std::string, FAssetHandle> m_Collection;

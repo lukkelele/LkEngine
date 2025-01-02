@@ -22,7 +22,7 @@ namespace LkEngine {
 
 	class LMetadataRegistry;
 
-	using FObjectHandle = UUID;
+	using FObjectHandle = LUUID;
 
 	template<typename T>
 	class TObjectPtr;
@@ -134,10 +134,10 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Get object class.
-		 * @note  Implemented by LCLASS macro.
+		 * @brief Register object class.
+		 * @note  Implemented by the LOBJECT macro (LCLASS/LSTRUCT).
 		 */
-		virtual const LClass* ClassRegistration() = 0;
+		virtual const LClass* ObjectRegistration() = 0;
 
 		/**
 		 * @brief Static class name.

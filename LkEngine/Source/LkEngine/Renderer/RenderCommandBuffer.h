@@ -18,17 +18,17 @@ namespace LkEngine {
 		virtual void End() = 0;
 		virtual void Submit() = 0;
 
-		virtual float GetExecutionGPUTime(uint32_t frameIndex, uint32_t queryIndex = 0) const = 0;
-		virtual const PipelineStatistics& GetPipelineStatistics(uint32_t frameIndex) const = 0;
+		virtual float GetExecutionGpuTime(const uint32_t FrameIndex, const uint32_t QueryIndex = 0) const = 0;
+		virtual const PipelineStatistics& GetPipelineStatistics(const uint32_t FrameIndex) const = 0;
 
 		virtual uint32_t BeginTimestampQuery() = 0;
-		virtual void EndTimestampQuery(uint32_t queryID) = 0;
+		virtual void EndTimestampQuery(const uint32_t QueryID) = 0;
 
-		static TObjectPtr<LRenderCommandBuffer> Create(const uint32_t count = 0, const std::string& debugName = "");
-		static TObjectPtr<LRenderCommandBuffer> CreateFromSwapChain(const std::string& debugName = "");
+		static TObjectPtr<LRenderCommandBuffer> Create(const uint32_t Count = 0, const std::string& InDebugName = "");
+		static TObjectPtr<LRenderCommandBuffer> CreateFromSwapChain(const std::string& InDebugName = "");
 
 	private:
-		LCLASS(LRenderCommandBuffer)
+		LCLASS(LRenderCommandBuffer);
 	};
 
 

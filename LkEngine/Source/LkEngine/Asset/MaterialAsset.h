@@ -14,7 +14,7 @@ namespace LkEngine {
 		explicit LMaterialAsset(const TObjectPtr<LMaterial>& Material);
         LMaterialAsset(const bool bIsTransparent = false);
 		LMaterialAsset() = delete;
-        ~LMaterialAsset() = default;
+		~LMaterialAsset() = default;
 
 		static EAssetType GetStaticType() { return EAssetType::Material; }
 
@@ -29,6 +29,8 @@ namespace LkEngine {
 
 		float& GetEmission();
 		void SetEmission(float value);
+
+		FORCEINLINE bool IsValid() const { return (Material != nullptr); }
 
 		TObjectPtr<LMaterial> GetMaterial() const { return Material; }
 
@@ -73,9 +75,9 @@ namespace LkEngine {
     class LMaterialTable : public LObject
     {
     public:
-        LMaterialTable(const uint32_t MaterialCount = 1);
+        LMaterialTable(const uint32_t InMaterialCount = 0);
         LMaterialTable(TObjectPtr<LMaterialTable> Other);
-        ~LMaterialTable() = default;
+		~LMaterialTable();
 
         void SetMaterial(const uint32_t Index, const FAssetHandle AssetHandle);
 

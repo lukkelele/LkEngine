@@ -3,10 +3,8 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
-
 #include "LkEngine/Core/Delegate/Delegate.h"
-
-#include "LkEngine/Input/Keycodes.h"
+#include "LkEngine/Core/Input/Keycodes.h"
 
 
 namespace LkEngine {

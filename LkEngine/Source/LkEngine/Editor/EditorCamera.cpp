@@ -13,42 +13,42 @@ namespace LkEngine {
 	LEditorCamera::LEditorCamera(const float InFovDeg, const float InWidth, const float InHeight, 
 								 const float InNearP, const float InFarP)
 	{
-		m_PerspectiveNear = InNearP;
-		m_PerspectiveFar = InFarP;
+		PerspectiveNear = InNearP;
+		PerspectiveFar = InFarP;
 
 		static constexpr glm::vec3 BasePosition = { -5, 5, 5 }; 
-		m_Position = BasePosition;
+		Position = BasePosition;
 
-		m_Pitch = 0.0f;
-		m_Yaw = glm::pi<float>();
+		Pitch = 0.0f;
+		Yaw = glm::pi<float>();
 
 		/* Calculate projection matrix. */
-		m_ProjectionMatrix = glm::perspectiveFov(glm::radians(InFovDeg), InWidth, InHeight, InNearP, InFarP);
+		ProjectionMatrix = glm::perspectiveFov(glm::radians(InFovDeg), InWidth, InHeight, InNearP, InFarP);
 	}
 
 	void LEditorCamera::Initialize()
 	{
-		m_Distance = glm::distance(m_Position, m_FocalPoint);
+		Distance = glm::distance(Position, FocalPoint);
 
-		m_Yaw = 3.0f * glm::pi<float>() / 4.0f;
-		m_Pitch = glm::pi<float>() / 4.0f;
+		Yaw = 3.0f * glm::pi<float>() / 4.0f;
+		Pitch = glm::pi<float>() / 4.0f;
 
-		m_Position = CalculatePosition();
+		Position = CalculatePosition();
 
 		const glm::quat Orientation = GetOrientation();
-		m_Direction = glm::eulerAngles(Orientation) * (180.0f / glm::pi<float>());
-		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(Orientation);
-		m_ViewMatrix = glm::inverse(m_ViewMatrix);
+		Direction = glm::eulerAngles(Orientation) * (180.0f / glm::pi<float>());
+		ViewMatrix = glm::translate(glm::mat4(1.0f), Position) * glm::toMat4(Orientation);
+		ViewMatrix = glm::inverse(ViewMatrix);
 
-		LK_CORE_TRACE_TAG("EditorCamera", "m_Position = ({}, {}, {})", m_Position.x, m_Position.y, m_Position.z);
+		LK_CORE_TRACE_TAG("EditorCamera", "Position = ({}, {}, {})", Position.x, Position.y, Position.z);
 
 		bIsActive = true;
 	}
 
 	void LEditorCamera::OnUpdate(const float DeltaTime)
 	{
-		const glm::vec2 Mouse{ LMouse::GetMouseX(), LMouse::GetMouseY() };
-		const glm::vec2 MouseDelta = (Mouse - m_InitialMousePosition) * 0.002f;
+		const glm::vec2 MousePos{ LMouse::GetMouseX(), LMouse::GetMouseY() };
+		const glm::vec2 MouseDelta = (MousePos - InitialMousePosition) * 0.002f;
 
 		/* TODO: I don't like this approach of continously checking if active or not
 		         and then handling UI input. This should get taken care of somewhere else.
@@ -84,63 +84,63 @@ namespace LkEngine {
 			LMouse::Disable();
 
 			const float YawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-			const float speed = GetCameraSpeed();
+			const float CameraSpeed = GetCameraSpeed();
 
 			if (LInput::IsKeyDown(EKey::Q))
 			{
-				m_PositionDelta -= DeltaTime * speed * glm::vec3{ 0.f, YawSign, 0.f };
+				PositionDelta -= DeltaTime * CameraSpeed * glm::vec3{ 0.0f, YawSign, 0.0f };
 			}
 			if (LInput::IsKeyDown(EKey::E))
 			{
-				m_PositionDelta += DeltaTime * speed * glm::vec3{ 0.f, YawSign, 0.f };
+				PositionDelta += DeltaTime * CameraSpeed * glm::vec3{ 0.0f, YawSign, 0.0f };
 			}
 			if (LInput::IsKeyDown(EKey::S))
 			{
-				m_PositionDelta -= DeltaTime * speed * m_Direction;
+				PositionDelta -= DeltaTime * CameraSpeed * Direction;
 			}
 			if (LInput::IsKeyDown(EKey::W))
 			{
-				m_PositionDelta -= DeltaTime * speed * m_Direction;
+				PositionDelta -= DeltaTime * CameraSpeed * Direction;
 			}
 			if (LInput::IsKeyDown(EKey::A))
 			{
-				m_PositionDelta -= DeltaTime * speed * m_RightDirection;
+				PositionDelta -= DeltaTime * CameraSpeed * RightDirection;
 			}
 			if (LInput::IsKeyDown(EKey::D))
 			{
-				m_PositionDelta += DeltaTime * speed * m_RightDirection;
+				PositionDelta += DeltaTime * CameraSpeed * RightDirection;
 			}
 
 			if (LKeyboard::IsKeyPressed(EKey::H))
 			{
 				ProjectionType = ECameraProjection::Orthographic;
-				m_Position = { 2, 2, 0 };
+				Position = { 2, 2, 0 };
 			}
 			if (LKeyboard::IsKeyPressed(EKey::P))
 			{
 				ProjectionType = ECameraProjection::Perspective;
-				m_Position = { -330, -140, -910 };
-				m_Yaw = -3.10f;
-				m_Pitch = 6.40f;
+				Position = { -330, -140, -910 };
+				Yaw = -3.10f;
+				Pitch = 6.40f;
 			}
 
 			static constexpr float MaxRate = 0.120f;
-			m_YawDelta += glm::clamp(YawSign * MouseDelta.x * RotationSpeed(), -MaxRate, MaxRate);
-			m_PitchDelta += glm::clamp(MouseDelta.y * RotationSpeed(), -MaxRate, MaxRate);
+			YawDelta += glm::clamp(YawSign * MouseDelta.x * GetRotationSpeed(), -MaxRate, MaxRate);
+			PitchDelta += glm::clamp(MouseDelta.y * GetRotationSpeed(), -MaxRate, MaxRate);
 
-			m_RightDirection = glm::cross(m_Direction, glm::vec3{ 0.f, YawSign, 0.f });
+			RightDirection = glm::cross(Direction, glm::vec3{ 0.0f, YawSign, 0.0f });
 
-			m_Direction = glm::rotate(glm::normalize(
-				glm::cross(glm::angleAxis(-m_PitchDelta, m_RightDirection),
-					glm::angleAxis(-m_YawDelta, glm::vec3{ 0.f, YawSign, 0.f })
+			Direction = glm::rotate(glm::normalize(
+				glm::cross(glm::angleAxis(-PitchDelta, RightDirection),
+					glm::angleAxis(-YawDelta, glm::vec3{ 0.0f, YawSign, 0.0f })
 				)
-			), m_Direction);
+			), Direction);
 
-			const float distance = glm::distance(m_FocalPoint, m_Position);
-			m_FocalPoint = m_Position + GetForwardDirection() * distance;
-			m_Distance = distance;
+			const float ScalarDistance = glm::distance(FocalPoint, Position);
+			FocalPoint = Position + GetForwardDirection() * ScalarDistance;
+			Distance = ScalarDistance;
 
-			LK_CORE_ASSERT(m_Distance < 10000, "Perspective   Distance is larger than 10k");
+			LK_CORE_ASSERT(Distance < 10000, "Distance is larger than 10k");
 		}
 		//-----------------------------------------------
 		// Arcball  |  Modes: Pan/Rotate/Zoom 
@@ -177,14 +177,14 @@ namespace LkEngine {
 			LMouse::Enable();
 		}
 
-		m_InitialMousePosition = Mouse;
-		m_Position += m_PositionDelta;
-		m_Yaw += m_YawDelta;
-		m_Pitch += m_PitchDelta;
+		InitialMousePosition = MousePos;
+		Position += PositionDelta;
+		Yaw += YawDelta;
+		Pitch += PitchDelta;
 
 		if (CameraMode == EEditorCameraMode::Arcball)
 		{
-			m_Position = CalculatePosition();
+			Position = CalculatePosition();
 		}
 
 		UpdateCameraView();
@@ -196,11 +196,11 @@ namespace LkEngine {
 		{
 			case ECameraProjection::Perspective:
 			{
-				SetPerspectiveProjectionMatrix(glm::radians(m_DegPerspectiveFOV), 
+				SetPerspectiveProjectionMatrix(glm::radians(DegPerspectiveFOV), 
 											   static_cast<float>(InWidth),
 											   static_cast<float>(InHeight), 
-											   m_PerspectiveNear, 
-											   m_PerspectiveFar);
+											   PerspectiveNear, 
+											   PerspectiveFar);
 				return;
 			}
 
@@ -208,8 +208,8 @@ namespace LkEngine {
 			{
 				SetOrthoProjectionMatrix(static_cast<float>(InWidth), 
 										 static_cast<float>(InHeight), 
-										 m_OrthographicNear, 
-										 m_OrthographicFar);
+										 OrthographicNear, 
+										 OrthographicFar);
 				return;
 			}
 
@@ -221,82 +221,89 @@ namespace LkEngine {
 
 	void LEditorCamera::UpdateCameraView()
 	{
-		const float YawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		// Handle problem with up direction same as normal
-		const float cosAngle = glm::dot(GetForwardDirection(), GetUpDirection());
-		if (cosAngle * YawSign > 0.99f)
-			m_PitchDelta = 0.f;
+		const float YawSign = ((GetUpDirection().y < 0) ? -1.0f : 1.0f);
 
-		const glm::vec3 lookAt = m_Position + GetForwardDirection();
-		m_Direction = glm::normalize(lookAt - m_Position);
-		m_Distance = glm::distance(m_Position, m_FocalPoint);
-		m_ViewMatrix = glm::lookAt(m_Position, lookAt, glm::vec3{ 0.f, YawSign, 0.f });
+		/* In case direction is the same as the normal. */
+		const float CosAngle = glm::dot(GetForwardDirection(), GetUpDirection());
+		if (CosAngle * YawSign > 0.99f)
+		{
+			PitchDelta = 0.0f;
+		}
 
-		m_YawDelta *= 0.6f;
-		m_PitchDelta *= 0.6f;
-		m_PositionDelta *= 0.8f;
+		const glm::vec3 LookAt = Position + GetForwardDirection();
+		Direction = glm::normalize(LookAt - Position);
+		Distance = glm::distance(Position, FocalPoint);
+		ViewMatrix = glm::lookAt(Position, LookAt, glm::vec3{ 0.0f, YawSign, 0.0f });
+
+		YawDelta *= 0.60f;
+		PitchDelta *= 0.60f;
+		PositionDelta *= 0.80f;
 	}
 
 	void LEditorCamera::MousePan(const glm::vec2& Delta)
 	{
-		auto [xSpeed, ySpeed] = PanSpeed();
-		m_FocalPoint -= GetRightDirection() * Delta.x * xSpeed * m_Distance;
-		m_FocalPoint += GetUpDirection() * Delta.y * ySpeed * m_Distance;
+		auto [xSpeed, ySpeed] = GetPanSpeed();
+		FocalPoint -= GetRightDirection() * Delta.x * xSpeed * Distance;
+		FocalPoint += GetUpDirection() * Delta.y * ySpeed * Distance;
 	}
 
 	void LEditorCamera::MouseRotate(const glm::vec2& Delta)
 	{
 		const float YawSign = GetUpDirection().y < 0.0f ? -1.0f : 1.0f;
-		m_YawDelta += YawSign * Delta.x * RotationSpeed();
-		m_PitchDelta += Delta.y * RotationSpeed();
+		YawDelta += YawSign * Delta.x * GetRotationSpeed();
+		PitchDelta += Delta.y * GetRotationSpeed();
 	}
 
 	void LEditorCamera::MouseZoom(const float Delta)
 	{
-		m_Distance -= Delta * ZoomSpeed();
+		Distance -= Delta * GetZoomSpeed();
 		const glm::vec3 ForwardDir = GetForwardDirection();
-		m_Position = m_FocalPoint - ForwardDir * m_Distance;
+		Position = FocalPoint - ForwardDir * Distance;
 
-		if (m_Distance < 1.0f)
+		if (Distance < 1.0f)
 		{
-			m_FocalPoint += ForwardDir * m_Distance;
-			m_Distance = 1.0f;
+			FocalPoint += ForwardDir * Distance;
+			Distance = 1.0f;
 		}
 
-		m_PositionDelta += Delta * ZoomSpeed() * ForwardDir;
+		PositionDelta += Delta * GetZoomSpeed() * ForwardDir;
 	}
 
-	float LEditorCamera::ZoomSpeed() const
+	float LEditorCamera::GetZoomSpeed() const
 	{
-		float distance = m_Distance * 0.2f;
-		distance = glm::max(distance, 0.0f);
-		float speed = distance * distance;
-		speed = glm::min(speed, 120.0f);
-		return speed;
+		float ZoomDistance = Distance * 0.20f;
+		ZoomDistance = glm::max(ZoomDistance, 0.0f);
+
+		float ZoomSpeed = ZoomDistance * ZoomDistance;
+		ZoomSpeed = glm::min(ZoomSpeed, 120.0f);
+
+		return ZoomSpeed;
 	}
 
-	std::pair<float, float> LEditorCamera::PanSpeed() const
+	std::pair<float, float> LEditorCamera::GetPanSpeed() const
 	{
-		const float x = glm::min(float(m_ViewportWidth) / 1000.0f, 2.4f); // max = 2.4f
+		/* Maximum: 2.40f */
+		const float x = glm::min(float(ViewportWidth) / 1000.0f, 2.4f);
 		const float xFactor = 0.0366f * (x * x) - 0.1778f * x + 0.3021f;
 
-		const float y = glm::min(float(m_ViewportHeight) / 1000.0f, 2.4f); // max = 2.4f
+		/* Maximum: 2.40f */
+		const float y = glm::min(float(ViewportHeight) / 1000.0f, 2.4f);
 		const float yFactor = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
 
 		return { xFactor, yFactor };
 	}
 
-	bool LEditorCamera::OnMouseScroll(MouseScrolledEvent& e)
+	bool LEditorCamera::OnMouseScroll(MouseScrolledEvent& Event)
 	{
 		// Right Mouse Button.
 		if (LInput::IsMouseButtonDown(EMouseButton::Button1))
 		{
-			m_NormalSpeed += e.GetYOffset() * 0.3f * m_NormalSpeed;
-			m_NormalSpeed = std::clamp(m_NormalSpeed, MIN_SPEED, MAX_SPEED);
+			NormalSpeed += Event.GetYOffset() * 0.3f * NormalSpeed;
+			NormalSpeed = std::clamp(NormalSpeed, MIN_SPEED, MAX_SPEED);
 		}
 		else
 		{
-			MouseZoom(e.GetYOffset() * 0.1f);
+			MouseZoom(Event.GetYOffset() * 0.10f);
 			UpdateCameraView();
 		}
 		return true;
@@ -305,36 +312,36 @@ namespace LkEngine {
 	bool LEditorCamera::OnKeyPress(KeyPressedEvent& Event)
 	{
 		const glm::vec2 MousePosition = { LMouse::GetMouseX(), LMouse::GetMouseY() };
-		const glm::vec2 MouseDelta = (MousePosition - m_InitialMousePosition) * 0.002f;
+		const glm::vec2 MouseDelta = (MousePosition - InitialMousePosition) * 0.002f;
 
 		const float YawSign = (GetUpDirection().y >= 0) ? 1.0f : -1.0f;
-		const float speed = GetCameraSpeed();
-		const float ts = 10;
+		const float CameraSpeed = GetCameraSpeed();
+		const float TimeStep = 10.0f;
 
 		const EKey PressedKey = Event.GetKey();
 		if (PressedKey == EKey::Q)
 		{
-			m_PositionDelta -= ts * speed * glm::vec3{ 0.f, YawSign, 0.f };
+			PositionDelta -= TimeStep * CameraSpeed * glm::vec3{ 0.0f, YawSign, 0.0f };
 		}
 		if (PressedKey == EKey::E)
 		{
-			m_PositionDelta += ts * speed * glm::vec3{ 0.f, YawSign, 0.f };
+			PositionDelta += TimeStep * CameraSpeed * glm::vec3{ 0.0f, YawSign, 0.0f };
 		}
 		if (PressedKey == EKey::W)
 		{
-			m_PositionDelta += ts * speed * m_Direction;
+			PositionDelta += TimeStep * CameraSpeed * Direction;
 		}
 		if (PressedKey == EKey::A)
 		{
-			m_PositionDelta -= ts * speed * m_RightDirection;
+			PositionDelta -= TimeStep * CameraSpeed * RightDirection;
 		}
 		if (PressedKey == EKey::S)
 		{
-			//m_PositionDelta -= ts * speed * m_Direction;
+			//PositionDelta -= TimeStep * CameraSpeed * Direction;
 		}
 		if (PressedKey == EKey::D)
 		{
-			m_PositionDelta += ts * speed * m_RightDirection;
+			PositionDelta += TimeStep * CameraSpeed * RightDirection;
 		}
 
 		if (PressedKey == EKey::T)
@@ -370,15 +377,16 @@ namespace LkEngine {
 
 	float LEditorCamera::GetCameraSpeed() const
 	{
-		float Speed = m_NormalSpeed;
+		static constexpr float BaseMultiplier = 2.0f;
+		float Speed = NormalSpeed;
 		if (LInput::IsKeyDown(EKey::LeftControl))
 		{
-			Speed /= (2.0f - glm::log(m_NormalSpeed));
+			Speed /= (BaseMultiplier - glm::log(NormalSpeed));
 		}
 
 		if (LInput::IsKeyDown(EKey::LeftShift))
 		{
-			Speed *= (2.0f - glm::log(m_NormalSpeed));
+			Speed *= (BaseMultiplier - glm::log(NormalSpeed));
 		}
 
 		return glm::clamp(Speed, MIN_SPEED, MAX_SPEED);

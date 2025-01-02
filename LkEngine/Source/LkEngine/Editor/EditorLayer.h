@@ -15,17 +15,18 @@
 #include "LkEngine/Core/SelectionContext.h"
 #include "LkEngine/Core/Math/Math.h"
 
+#include "LkEngine/Editor/EditorGlobals.h"
+#include "LkEngine/Editor/EditorSettings.h"
+#include "LkEngine/Editor/PanelManager.h"
+#include "LkEngine/Editor/Panels/ContentBrowserPanel.h"
+
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
-
-#include "LkEngine/Editor/EditorGlobals.h"
 
 #include "LkEngine/Renderer/Framebuffer.h"
 
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/UILayer.h"
-#include "LkEngine/Editor/PanelManager.h"
-#include "LkEngine/Editor/Panels/ContentBrowser.h"
 
 
 namespace LkEngine {
@@ -58,8 +59,7 @@ namespace LkEngine {
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 
-		virtual void OnUpdate(const float DeltaTime) override;
-
+		virtual void OnUpdate(const float InDeltaTime) override;
 
 		void RenderViewport();
 		void RenderViewport(TObjectPtr<LImage> Image);
@@ -87,12 +87,10 @@ namespace LkEngine {
 		void SaveSceneAs();
 
 	private:
-		void PollInput();
-
 		void UI_PrepareTopBar();
 		void UI_PrepareLeftSidebar() const;
 		void UI_PrepareRightSidebar() const;
-		void UI_PrepareBottomBar();
+		void UI_PrepareEditorViewport();
 
 		void DrawObjectGizmo(LEntity Entity);
 		void UI_RenderExternalWindows();
@@ -114,7 +112,11 @@ namespace LkEngine {
 		
 		void UI_OpenGLExtensions();
 
-		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return ViewportFramebuffer; }
+		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() 
+		{ 
+			LK_CORE_ASSERT(ViewportFramebuffer, "Invalid viewport framebuffer");
+			return ViewportFramebuffer; 
+		}
 
 		LEntity CreateCube(); /* TODO: REMOVE */
 
@@ -127,13 +129,14 @@ namespace LkEngine {
 		bool bFillSidebarsVertically = true; // Always fill out sidebars vertically
 	private:
 		inline static bool bShowEditorWindowSizesWindow = false;
-
 	private:
+		FEditorSettings& Settings;
 		LEditorTabManager& TabManager;
 		TObjectPtr<LPanelManager> PanelManager;
 
 		TObjectPtr<LProject> Project{};
-		TObjectPtr<LScene> EditorScene = nullptr;
+		TObjectPtr<LScene> EditorScene{};
+		TObjectPtr<LSceneRenderer> SceneRenderer{};
 		bool bEnabled = true;
 
 		LVector2 ViewportBounds[2];
@@ -142,18 +145,11 @@ namespace LkEngine {
 
 		TObjectPtr<LEditorCamera> EditorCamera; /* TODO: Remove pointer, just make raw member. */
 
-		bool m_ShowMetricsTool = false;
-		bool m_ShowStackTool = false;
-		bool m_ShowStyleEditorLayer = false;
-
 		EGizmo GizmoType = EGizmo::Translate;
 
 		FEventCallback m_EventCallback; /// UPDATE ME
 
-		// Editor
 		TObjectPtr<LViewport> EditorViewport;
-		// ~Editor
-
 		TObjectPtr<LWindow> Window{};
 		TObjectPtr<LRenderer2D> Renderer2D{};
 

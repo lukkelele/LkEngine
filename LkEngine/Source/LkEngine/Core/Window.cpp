@@ -3,7 +3,7 @@
 
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Viewport.h"
-#include "LkEngine/Input/Keyboard.h"
+#include "LkEngine/Core/Input/Keyboard.h"
 #include "LkEngine/Renderer/Renderer.h"
 
 
@@ -14,22 +14,16 @@ namespace LkEngine {
 		, Title(WindowSpecification.Title)
 		, Size({ WindowSpecification.Width, WindowSpecification.Height })
 		, ViewportSize({ WindowSpecification.Width, WindowSpecification.Height })
-		, bVSync(WindowSpecification.VSync)
 	{
 		LOBJECT_REGISTER();
 		Instance = this;
 
-		/* Window Data. */
 		Data.Title = Title;
 		Data.Width = static_cast<uint32_t>(Size.X);
 		Data.Height = static_cast<uint32_t>(Size.Y);
+		Data.bVSync = WindowSpecification.bVSync;
 	}
 
-	LWindow::~LWindow()
-	{
-		/* TODO: */
-	}
-	
 	void LWindow::Initialize()
 	{
 		LObject::Initialize();
@@ -62,7 +56,7 @@ namespace LkEngine {
 	
 		/* Create GLFW window. */
 		GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), static_cast<int>(Size.Y), Title.c_str(), nullptr, nullptr);
-		LK_CORE_ASSERT(GlfwWindow != nullptr);
+		LK_CORE_VERIFY(GlfwWindow != nullptr);
 		glfwMakeContextCurrent(GlfwWindow);
 
 		/* Create render context. */
@@ -87,9 +81,6 @@ namespace LkEngine {
 
 		glfwSetWindowSizeCallback(GlfwWindow, [](GLFWwindow* InGlfwWindow, int NewWidth, int NewHeight) 
 		{
-			int SizeX, SizeY;
-			glfwGetWindowSize(InGlfwWindow, &SizeX, &SizeY);
-
 			LWindow& Window = LWindow::Get();
 			Window.SetViewportWidth(NewWidth);
 			Window.SetViewportHeight(NewHeight);
@@ -121,9 +112,7 @@ namespace LkEngine {
 				case GLFW_REPEAT:
 				{
 					FKeyData& KeyData = LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Held);
-					KeyData.RepeatCount++;
 					LKeyboard::OnKeyHeld.Broadcast(KeyData);
-
 					break;
 				}
 			}
@@ -195,6 +184,31 @@ namespace LkEngine {
 				WindowData.OnMouseScrolled.Broadcast(EMouseScroll::Down);
 			}
 		});
+		
+		/* Maximize callback. */
+		glfwSetWindowMaximizeCallback(GlfwWindow, [](GLFWwindow* Window, int Maximized)
+		{
+			FWindowData& WindowData = *static_cast<FWindowData*>(glfwGetWindowUserPointer(Window));
+			if (Maximized == GLFW_TRUE)
+			{
+				WindowData.bMaximized = true;
+			}
+			else
+			{
+				WindowData.bMaximized = false;
+			}
+
+			WindowData.OnWindowMaximized.Broadcast(WindowData.bMaximized);
+		});
+
+		Data.bFullscreen = (glfwGetWindowMonitor(GlfwWindow) != nullptr);
+		
+		if (Specification.bStartMaximized)
+		{
+			Maximize();
+		}
+
+		Data.bMaximized = IsMaximized();
 
 		bGlfwInitialized = true;
 	}
@@ -222,11 +236,82 @@ namespace LkEngine {
 			GlfwWindow = nullptr;
 		}
 	}
-	
+
+	bool LWindow::IsFullscreen() const
+	{
+		LK_CORE_ASSERT(GlfwWindow);
+		return (glfwGetWindowMonitor(GlfwWindow) != nullptr);
+	}
+
+	void LWindow::SetFullscreen(const bool Fullscreen)
+	{
+		LK_CORE_DEBUG_TAG("Window", "Setting fullscreen: {}", Fullscreen);
+		GLFWmonitor* Monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* VideoMode = glfwGetVideoMode(Monitor);
+
+		/* TODO: Rework this. */
+		Data.bFullscreen = IsFullscreen();
+		if (Data.bFullscreen == Fullscreen)
+		{
+			LK_CORE_INFO_TAG("Window", "The window is already in fullscreen");
+			return;
+		}
+
+		if (Fullscreen)
+		{
+			/* Set the window to fullscreen. */
+			glfwSetWindowMonitor(GlfwWindow, Monitor, 0, 0, VideoMode->width, VideoMode->height, VideoMode->refreshRate);
+			Data.bFullscreen = true;
+		}
+		else
+		{
+			static int WindowPosX, WindowPosY;
+			static int WindowedWidth, WindowedHeight;
+			glfwGetWindowPos(GlfwWindow, &WindowPosX, &WindowPosY);
+			glfwGetWindowSize(GlfwWindow, &WindowedWidth, &WindowedHeight);
+
+			glfwSetWindowMonitor(GlfwWindow, Monitor, WindowPosX, WindowPosY, WindowedWidth, WindowedHeight, 0);
+			Data.bFullscreen = false;
+		}
+	}
+
+	void LWindow::Maximize()
+	{
+		LK_CORE_ASSERT(GlfwWindow);
+		if (glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED) == GLFW_FALSE)
+		{
+			glfwMaximizeWindow(GlfwWindow);
+			Data.bMaximized = true;
+		}
+		else
+		{
+			glfwRestoreWindow(GlfwWindow);
+			Data.bMaximized = false;
+		}
+	}
+
+	bool LWindow::IsMaximized() const
+	{
+		LK_CORE_ASSERT(GlfwWindow);
+		return (glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED) == GLFW_TRUE);
+	}
+
+	void LWindow::Minimize()
+	{
+		LK_CORE_ASSERT(GlfwWindow);
+		glfwIconifyWindow(GlfwWindow);
+	}
+
+	bool LWindow::IsMinimized() const
+	{
+		LK_CORE_ASSERT(GlfwWindow);
+		return (glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED) == GLFW_FALSE);
+	}
+
 	void LWindow::SetVSync(bool InEnabled)
 	{
-		bVSync = InEnabled;
-		if (bVSync)
+		Data.bVSync = InEnabled;
+		if (Data.bVSync)
 		{
 			glfwSwapInterval(1);
 		}

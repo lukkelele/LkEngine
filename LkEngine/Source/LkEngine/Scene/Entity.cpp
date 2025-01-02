@@ -5,10 +5,16 @@
 
 namespace LkEngine {
 
+	LEntity::LEntity()
+	{
+		LOBJECT_REGISTER();
+	}
+
 	LEntity::LEntity(entt::entity InHandle, TObjectPtr<LScene> InScene)
 		: Handle(InHandle)
 		, Scene(InScene)
 	{
+		LOBJECT_REGISTER();
 	}
 
 	LEntity LEntity::GetParent() const
@@ -18,13 +24,13 @@ namespace LkEngine {
 
 	bool LEntity::IsAncestorOf(LEntity Entity) const
 	{
-		const std::vector<UUID>& Children = GetChildren();
+		const std::vector<LUUID>& Children = GetChildren();
 		if (Children.empty())
 		{
 			return false;
 		}
 
-		for (const UUID& Child : Children)
+		for (const LUUID& Child : Children)
 		{
 			if (Child == Entity.GetUUID())
 			{
@@ -32,7 +38,7 @@ namespace LkEngine {
 			}
 		}
 
-		for (const UUID& Child : Children)
+		for (const LUUID& Child : Children)
 		{
 			if (Scene->GetEntityWithUUID(Child).IsAncestorOf(Entity))
 			{

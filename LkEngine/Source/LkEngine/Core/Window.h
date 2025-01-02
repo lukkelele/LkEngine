@@ -6,15 +6,13 @@
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
-
+#include "LkEngine/Core/Input/Keyboard.h"
+#include "LkEngine/Core/Input/Mouse.h"
 #include "LkEngine/Core/ApplicationConfig.h"
 
 #include "LkEngine/Renderer/RenderContext.h"
 #include "LkEngine/Renderer/SwapChain.h"
 #include "LkEngine/Renderer/RenderPass.h"
-
-#include "LkEngine/Input/Keyboard.h"
-#include "LkEngine/Input/Mouse.h"
 
 
 namespace LkEngine {
@@ -24,14 +22,13 @@ namespace LkEngine {
     /* @TODO: Don't use the application config here. */
 	struct FWindowSpecification
 	{
-        /// @TODO: Get version
 		std::string Title = "LkEngine";
 		uint32_t Width = 1600;
 		uint32_t Height = 1080;
-		bool Decorated = true;
-		bool Fullscreen = false;
-		bool VSync = true;
-        bool StartMaximized = false;
+		bool bDecorated = true;
+		bool bFullscreen = false;
+		bool bVSync = true;
+        bool bStartMaximized = false;
         std::filesystem::path IconPath{};
 
         FWindowSpecification() = default;
@@ -39,13 +36,16 @@ namespace LkEngine {
             : Title(ApplicationSpec.Title)
             , Width(ApplicationSpec.Width)
             , Height(ApplicationSpec.Height)
-            , Fullscreen(ApplicationSpec.Fullscreen)
-            , Decorated(true)
-            , VSync(ApplicationSpec.VSync)
-            , StartMaximized(ApplicationSpec.StartMaximized) 
+            , bFullscreen(ApplicationSpec.Fullscreen)
+            , bDecorated(true)
+            , bVSync(ApplicationSpec.VSync)
+            , bStartMaximized(ApplicationSpec.StartMaximized) 
         {
         }
 	};
+
+	/** Window maximized callback. */
+	LK_DECLARE_MULTICAST_DELEGATE(FOnWindowMaximized, const bool);
 
 	/**
 	 * FWindowData
@@ -58,10 +58,15 @@ namespace LkEngine {
 		uint32_t Width = 0;
 		uint32_t Height = 0;
 
+		bool bVSync = true;
+		bool bMaximized = false;
+		bool bFullscreen = false;
+
 		FEventCallback EventCallback;
 
         LKeyboard::FOnKeyPressed OnKeyPressed;
 
+		FOnWindowMaximized OnWindowMaximized;
 		LMouse::FOnMouseButtonPressed OnMouseButtonPressed;
 		LMouse::FOnMouseButtonReleased OnMouseButtonReleased;
 		LMouse::FOnMouseScrolled OnMouseScrolled;
@@ -78,7 +83,8 @@ namespace LkEngine {
 		LK_DECLARE_MULTICAST_DELEGATE(FOnViewportScalersUpdated, const float, const float);
     public:
         LWindow(const FWindowSpecification& WindowSpecification);
-        ~LWindow();
+		LWindow() = delete;
+		~LWindow() = default;
 
         virtual void Initialize() override;
 
@@ -88,18 +94,25 @@ namespace LkEngine {
 
         FORCEINLINE GLFWwindow* GetGlfwWindow() const { return GlfwWindow; }
 
+		void Maximize();
+		bool IsMaximized() const;
+		void Minimize();
+		bool IsMinimized() const;
+		bool IsFullscreen() const;
+		void SetFullscreen(const bool Fullscreen);
+
         FORCEINLINE LVector2 GetSize() const { return Size; }
         FORCEINLINE uint16_t GetWidth() const { return Size.X; }
         FORCEINLINE uint16_t GetHeight() const { return static_cast<uint16_t>(Size.Y); }
         FORCEINLINE uint16_t GetViewportWidth()  const { return ViewportSize.X; }
         FORCEINLINE uint16_t GetViewportHeight() const { return ViewportSize.Y; }
 
-        FORCEINLINE LVector2 GetPosition() const { return m_Pos; }
+        FORCEINLINE LVector2 GetPosition() const { return Pos; }
         FORCEINLINE LVector2 GetViewportSize() const { return ViewportSize; }
 
         FORCEINLINE std::string GetTitle() const { return Title; }
-        FORCEINLINE std::string GetShaderVersion() const { return m_GlslVersion; }
-        FORCEINLINE bool IsVSyncEnabled() const { return bVSync; }
+        FORCEINLINE std::string GetShaderVersion() const { return GlslVersion; }
+        FORCEINLINE bool IsVSyncEnabled() const { return Data.bVSync; }
 
         FORCEINLINE TObjectPtr<LRenderContext> GetRenderContext() 
         { 
@@ -175,34 +188,29 @@ namespace LkEngine {
         /// 
         /// UPDATE ALL THIS 
         /// 
-		FORCEINLINE float GetScalerX() const { return m_ViewportScalers.X; }
-		FORCEINLINE float GetScalerY() const { return m_ViewportScalers.Y; }
-		FORCEINLINE LVector2 GetScalers() const { return m_ViewportScalers; }
+		FORCEINLINE float GetScalerX() const { return ViewportScalers.X; }
+		FORCEINLINE float GetScalerY() const { return ViewportScalers.Y; }
+		FORCEINLINE LVector2 GetScalers() const { return ViewportScalers; }
 
-		FORCEINLINE void SetScalerX(const float InX)
-		{
-			m_ViewportScalers.X = InX;
-		}
-
-		FORCEINLINE void SetScalerY(const float InY)
-		{
-			m_ViewportScalers.Y = InY;
-		}
-
+		FORCEINLINE void SetScalerX(const float InX) { ViewportScalers.X = InX; }
+		FORCEINLINE void SetScalerY(const float InY) { ViewportScalers.Y = InY; }
 		FORCEINLINE void SetScalers(const float InX, const float InY)
 		{
-			m_ViewportScalers.X = InX;
-			m_ViewportScalers.Y = InY;
+			ViewportScalers.X = InX;
+			ViewportScalers.Y = InY;
 		}
 
-        /* TODO : Event category. */
+		/// PATCH OUT
+        /* TODO: Event category. */
         FORCEINLINE void SetEventCallback(const FEventCallback& Callback)
         {
             Data.EventCallback = Callback;
         }
 
-        FORCEINLINE FWindowData& GetWindowData() { return Data; }
-        FORCEINLINE const FWindowData& GetWindowData() const { return Data; }
+        FORCEINLINE FWindowData& GetData() { return Data; }
+        FORCEINLINE const FWindowData& GetData() const { return Data; }
+
+        FORCEINLINE const FWindowSpecification& GetSpecification() const { return Specification; }
 
         FORCEINLINE static LWindow& Get() { return *Instance; }
 
@@ -213,22 +221,20 @@ namespace LkEngine {
         static constexpr uint16_t DEFAULT_WIDTH  = 1600;
         static constexpr uint16_t DEFAULT_HEIGHT = 1080;
     private:
-        FWindowSpecification Specification{};
-        std::string Title = "";
+        FWindowData Data{};
+        FWindowSpecification Specification{}; /* TODO: Replace entirely with FWindowData? */
+		std::string Title{};
 
 	    bool bGlfwInitialized = false;
-        GLFWwindow* GlfwWindow = nullptr;
+		GLFWwindow* GlfwWindow{};
 
         LVector2 Size{};
         LVector2 ViewportSize{};
 
-        LVector2 m_Pos = { 0.0f, 0.0f };
-        LVector2 m_ViewportScalers = { 1.0f, 1.0f };
+        LVector2 Pos = { 0.0f, 0.0f };
+        LVector2 ViewportScalers = { 1.0f, 1.0f };
 
-        std::string m_GlslVersion = "";
-        bool bVSync = false;
-
-        FWindowData Data{};
+		std::string GlslVersion{}; /// REMOVE
 
         TObjectPtr<LPipeline> m_Pipeline = nullptr;
         TObjectPtr<LSwapChain> m_SwapChain = nullptr;

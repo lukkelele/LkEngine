@@ -9,10 +9,10 @@
 
 namespace LkEngine {
 
-	enum class EPanelInitState
+	enum class EPanelInitState : uint8_t
 	{
-		OpenByDefault,
-		NotOpen,
+		Closed = 0,
+		Open,
 	};
 
 	struct FPanelData
@@ -93,12 +93,12 @@ namespace LkEngine {
 			auto& PanelMap = Panels[(std::size_t)Category];
 			if (PanelMap.find(ID) != PanelMap.end())
 			{
-				LK_CORE_ERROR_TAG("PanelManager", "A panel with id '{}' already exists", PanelData.ID);
+				LK_CORE_ERROR_TAG("PanelManager", "A panel with ID '{}' already exists", PanelData.ID);
 				return nullptr;
 			}
 
 			PanelMap[ID] = PanelData;
-			LK_CORE_DEBUG_TAG("PanelManager", "Add panel {} ({})", PanelData.Name, PanelData.ID);
+			LK_CORE_TRACE_TAG("PanelManager", "Add panel {} ({})", PanelData.Name, PanelData.ID);
 
 			return PanelData.Panel.As<TPanel>();
 		}
@@ -106,14 +106,14 @@ namespace LkEngine {
 		template<typename TPanel, typename... TArgs>
 		TObjectPtr<TPanel> AddPanel(const EPanelCategory Category, const char* StringID, EPanelInitState InitState, TArgs&&... Args)
 		{
-			const bool bIsOpenByDefault = (InitState == EPanelInitState::OpenByDefault);
+			const bool bIsOpenByDefault = (InitState == EPanelInitState::Open);
 			return AddPanel<TPanel>(Category, FPanelData{ StringID, StringID, TObjectPtr<TPanel>::Create(std::forward<TArgs>(Args)...), bIsOpenByDefault });
 		}
 
 		template<typename TPanel, typename... TArgs>
 		TObjectPtr<TPanel> AddPanel(const EPanelCategory Category, const char* StringID, const char* DisplayName, EPanelInitState InitState, TArgs&&... Args)
 		{
-			const bool bIsOpenByDefault = (InitState == EPanelInitState::OpenByDefault);
+			const bool bIsOpenByDefault = (InitState == EPanelInitState::Open);
 			return AddPanel<TPanel>(Category, FPanelData{ StringID, DisplayName, TObjectPtr<TPanel>::Create(std::forward<TArgs>(Args)...), bIsOpenByDefault });
 		}
 

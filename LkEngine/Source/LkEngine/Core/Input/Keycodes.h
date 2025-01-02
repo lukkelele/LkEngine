@@ -8,6 +8,11 @@
 
 namespace LkEngine {
 
+	/**
+	 * EKey
+	 *
+	 *  Key code.
+	 */
 	enum class EKey : uint16_t
 	{
 		Space = 32,
@@ -98,6 +103,11 @@ namespace LkEngine {
 		Menu = 348
 	};
 
+	/**
+	 * EKeyState
+	 *
+	 *  State of a key.
+	 */
 	enum class EKeyState
 	{
 		None = -1,
@@ -105,6 +115,7 @@ namespace LkEngine {
 		Held,
 		Released
 	};
+
 
 	namespace Enum 
 	{
@@ -199,9 +210,7 @@ namespace LkEngine {
 				case EKey::Menu:		 return "Menu";
 			}
 
-			// LK_RAW_ASSERT(false, "Unknown EKey value");
 			LK_CORE_ASSERT(false, "Unknown EKey value: {}", static_cast<uint32_t>(Key));
-
 			return nullptr;
 		}
 
@@ -215,7 +224,7 @@ namespace LkEngine {
 				case EKeyState::Released: return "Released";
 			}
 
-			assert(false);
+			LK_CORE_ASSERT(false, "Unknown EKeyState value: {}", static_cast<int>(State));
 			return nullptr;
 		}
 

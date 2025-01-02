@@ -17,7 +17,7 @@ namespace LkEngine {
     {
 		LOBJECT_REGISTER();
 
-		LayoutConfig = LFileSystem::GetConfigDir() / "EditorLayout.ini";
+		LayoutConfig = LFileSystem::GetConfigDir() / "ImGuiLayout.ini";
     }
 
     void LOpenGLImGuiLayer::Initialize()
@@ -48,16 +48,16 @@ namespace LkEngine {
 		}
 
 		Style.DockingSeparatorSize = 2.0f;
+		Style.WindowMenuButtonPosition = ImGuiDir_Right;
 
 		/* Initialize ImGui for GLFW and OpenGL. */
-        LApplication& Application = *LApplication::Get();
-        LWindow& Window = Application.GetWindow();
+        LWindow& Window = LApplication::Get()->GetWindow();
 	    ImGui_ImplGlfw_InitForOpenGL(Window.GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(Window.GetShaderVersion().c_str());
-		LK_CORE_TRACE("ImGui Version: {}", ImGui::GetVersion());
+		LK_CORE_TRACE_TAG("OpenGLImGuiLayer", "ImGui Version: {}", ImGui::GetVersion());
 
 		/* Add fonts. */
-		LK_CORE_INFO_TAG("UI", "Adding fonts");
+		LK_CORE_TRACE_TAG("UI", "Adding fonts");
 		InitializeFonts();
 
 		bInitialized = true;
@@ -65,7 +65,7 @@ namespace LkEngine {
 
     void LOpenGLImGuiLayer::Destroy()
     {
-		LK_CORE_DEBUG_TAG("OpenGLImGuiLayer", "Destroying");
+		LK_CORE_TRACE_TAG("OpenGLImGuiLayer", "Destroying");
 
 		LK_CORE_DEBUG_TAG("OpenGLImGuiLayer", "Saving editor layout configuration to: {}", LayoutConfig.string());
 		ImGui::SaveIniSettingsToDisk(LayoutConfig.string().c_str());
@@ -201,49 +201,58 @@ namespace LkEngine {
 
     /*-----------------------------------------------------------------------------*/
 
-    void UI::Image(const TObjectPtr<LTexture2D>& texture, 
-                   const ImVec2& size, 
-                   const ImVec2& uv0, 
-                   const ImVec2& uv1, 
-                   const ImVec4& tint_col, 
+    void UI::Image(const TObjectPtr<LTexture2D>& Texture, 
+                   const ImVec2& Size, 
+                   const ImVec2& UV0, 
+                   const ImVec2& UV1, 
+                   const ImVec4& TintColor, 
                    const ImVec4& BorderColumn)
     {
-        ImGui::Image((ImTextureID)texture->GetRendererID(), size, uv0, uv1, tint_col, BorderColumn);
+        ImGui::Image((ImTextureID)Texture->GetRendererID(), Size, UV0, UV1, TintColor, BorderColumn);
     }
 
-    void UI::Image(const TObjectPtr<LTexture2D>& texture, const glm::vec2& size, 
-                   const glm::vec2& uv0, const glm::vec2& uv1, 
-                   const glm::vec4& tint_col, const glm::vec4& BorderColumn)
+    void UI::Image(const TObjectPtr<LTexture2D>& Texture, 
+				   const glm::vec2& Size, 
+                   const glm::vec2& UV0, 
+				   const glm::vec2& UV1, 
+                   const glm::vec4& TintColor, 
+				   const glm::vec4& BorderColumn)
     {
-        ImGui::Image((ImTextureID)(texture->GetRendererID()),
-                     ImVec2(size.x, size.y), 
-                     ImVec2(uv0.x, uv0.y), 
-                     ImVec2(uv1.x, uv1.y), 
-                     ImVec4(tint_col.r, tint_col.g, tint_col.b, tint_col.a), 
-                     ImVec4(BorderColumn.r, BorderColumn.g, BorderColumn.b, BorderColumn.a));
+        ImGui::Image((ImTextureID)(Texture->GetRendererID()),
+					 ImVec2(Size.x, Size.y), 
+					 ImVec2(UV0.x, UV0.y), 
+					 ImVec2(UV1.x, UV1.y), 
+					 ImVec4(TintColor.r, TintColor.g, TintColor.b, TintColor.a), 
+					 ImVec4(BorderColumn.r, BorderColumn.g, BorderColumn.b, BorderColumn.a));
     }
 
-    void UI::Image(const TObjectPtr<LImage2D>& image, const ImVec2& size, 
-				   const ImVec2& uv0, const ImVec2& uv1, 
-                   const ImVec4& tint_col, const ImVec4& BorderColumn)
+    void UI::Image(const TObjectPtr<LImage2D>& Image, 
+				   const ImVec2& Size, 
+				   const ImVec2& UV0, 
+				   const ImVec2& UV1, 
+                   const ImVec4& TintColor, 
+				   const ImVec4& BorderColumn)
     {
-        ImGui::Image((ImTextureID)(image->GetRendererID()),
-                     size, 
-                     uv0, 
-                     uv1, 
-                     tint_col, 
+        ImGui::Image((ImTextureID)(Image->GetRendererID()),
+                     Size, 
+                     UV0, 
+                     UV1, 
+                     TintColor, 
                      BorderColumn);
     }
 
-    void UI::Image(const TObjectPtr<LImage2D>& image, const glm::vec2& size, 
-                   const glm::vec2& uv0, const glm::vec2& uv1, 
-                   const glm::vec4& tint_col, const glm::vec4& BorderColumn)
+    void UI::Image(const TObjectPtr<LImage2D>& Image, 
+				   const glm::vec2& Size, 
+                   const glm::vec2& UV0, 
+				   const glm::vec2& UV1, 
+                   const glm::vec4& TintColor, 
+				   const glm::vec4& BorderColumn)
     {
-        ImGui::Image((ImTextureID)image->GetRendererID(), 
-                     ImVec2(size.x, size.y), 
-                     ImVec2(uv0.x, uv0.y), 
-                     ImVec2(uv1.x, uv1.y), 
-                     ImVec4(tint_col.r, tint_col.g, tint_col.b, tint_col.a), 
+        ImGui::Image((ImTextureID)Image->GetRendererID(), 
+                     ImVec2(Size.x, Size.y), 
+                     ImVec2(UV0.x, UV0.y), 
+                     ImVec2(UV1.x, UV1.y), 
+                     ImVec4(TintColor.r, TintColor.g, TintColor.b, TintColor.a), 
                      ImVec4(BorderColumn.r, BorderColumn.g, BorderColumn.b, BorderColumn.a));
     }
 

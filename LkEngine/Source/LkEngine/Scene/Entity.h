@@ -18,7 +18,7 @@ namespace LkEngine {
 	class LEntity : public LObject
 	{
 	public:
-		LEntity() = default;
+		LEntity();
 		LEntity(entt::entity InHandle, TObjectPtr<LScene> InScene);
 		~LEntity() = default;
 
@@ -62,14 +62,14 @@ namespace LkEngine {
 		template<typename T>
 		T& GetComponent()
 		{
-			LK_CORE_ASSERT(HasComponent<T>(), "Entity does not have that component");
+			LK_CORE_ASSERT(HasComponent<T>(), "Entity '{}' does not have that component", Handle);
 			return Scene->Registry.get<T>(Handle);
 		}
 
 		template<typename T>
 		const T& GetComponent() const
 		{
-			LK_CORE_ASSERT(HasComponent<T>(), "Entity does not have that component");
+			LK_CORE_ASSERT(HasComponent<T>(), "Entity '{}' does not have that component", Handle);
 			return Scene->Registry.get<T>(Handle);
 		}
 
@@ -119,7 +119,7 @@ namespace LkEngine {
 
 		LEntity GetParent() const;
 
-		FORCEINLINE UUID GetUUID() const 
+		FORCEINLINE LUUID GetUUID() const 
 		{ 
 			return GetComponent<LIDComponent>().ID; 
 		}
@@ -143,8 +143,8 @@ namespace LkEngine {
 
 			if (InParent)
 			{
-				std::vector<UUID>& Children = InParent.GetChildren();
-				const UUID uuid = GetUUID();
+				std::vector<LUUID>& Children = InParent.GetChildren();
+				const LUUID uuid = GetUUID();
 
 				if (std::find(Children.begin(), Children.end(), uuid) == Children.end())
 				{
@@ -153,29 +153,29 @@ namespace LkEngine {
 			}
 		}
 
-		UUID GetSceneUUID() const;
+		LUUID GetSceneUUID() const;
 
-		FORCEINLINE void SetParentUUID(UUID parent) 
+		FORCEINLINE void SetParentUUID(LUUID parent) 
 		{ 
 			GetComponent<LRelationshipComponent>().ParentHandle = parent; 
 		}
 
-		FORCEINLINE UUID GetParentUUID() const 
+		FORCEINLINE LUUID GetParentUUID() const 
 		{ 
 			return GetComponent<LRelationshipComponent>().ParentHandle; 
 		}
 
-		FORCEINLINE std::vector<UUID>& GetChildren() 
+		FORCEINLINE std::vector<LUUID>& GetChildren() 
 		{ 
 			return GetComponent<LRelationshipComponent>().Children; 
 		}
 
-		const std::vector<UUID>& GetChildren() const { return GetComponent<LRelationshipComponent>().Children; }
+		const std::vector<LUUID>& GetChildren() const { return GetComponent<LRelationshipComponent>().Children; }
 
 		bool RemoveChild(LEntity Child)
 		{
-			const UUID ChildID = Child.GetUUID();
-			std::vector<UUID>& Children = GetChildren();
+			const LUUID ChildID = Child.GetUUID();
+			std::vector<LUUID>& Children = GetChildren();
 
 			/* FIXME: Use compressed if statement */
 			auto Iter = std::find(Children.begin(), Children.end(), ChildID);

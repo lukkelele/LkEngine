@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-#include "LkEngine/Input/MouseCodes.h"
+#include "LkEngine/Core/Input/MouseCodes.h"
 
 
 namespace LkEngine {

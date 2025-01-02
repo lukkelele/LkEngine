@@ -35,6 +35,11 @@ namespace LkEngine {
 		virtual const std::filesystem::path& GetPath() const = 0;
 		virtual std::string_view GetFilename() const = 0;
 
+		virtual bool IsValid() const override
+		{
+			return ((GetRendererID() > 0) && (GetWidth() > 0) && (GetHeight() > 0));
+		}
+
 		/** Factory function. */
 		static TObjectPtr<LTexture> Create(const FTextureSpecification& Specification);
 
@@ -67,12 +72,13 @@ namespace LkEngine {
 		virtual void Unload() = 0;
 		virtual bool Loaded() const = 0;
 
-		FORCEINLINE virtual ETextureType GetType() const override 
-		{ 
-			return ETextureType::Texture2D; 
-		}
-
+		FORCEINLINE virtual ETextureType GetType() const override { return ETextureType::Texture2D; }
 		FORCEINLINE static EAssetType GetStaticType() { return EAssetType::Texture; }
+
+		virtual bool IsValid() const override
+		{
+			return ((GetRendererID() > 0) && (GetImage() != nullptr));
+		}
 
 		static TObjectPtr<LTexture2D> Create(const FTextureSpecification& Specification);
 		static TObjectPtr<LTexture2D> Create(const FTextureSpecification& Specification, FBuffer ImageData);

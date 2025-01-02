@@ -53,15 +53,17 @@ namespace LkEngine {
 
 		SetupDirectories();
 
-		LK_VERIFY(NFD::Init());
+		LK_CORE_VERIFY(NFD::Init());
 
 		Window->Initialize();
+		/* TODO: Patch out. */
 		Window->SetEventCallback([this](LEvent& Event)
 		{
 			OnEvent(Event);
 		});
 
 		LInput::Initialize();
+		LSelectionContext::Get();
 
 		/* Initialize the renderer. */
 		Renderer = TObjectPtr<LRenderer>::Create();
@@ -96,33 +98,24 @@ namespace LkEngine {
 
 			LInput::Update();
 			ProcessEvents();
-		#if 0
-			LRenderer::Submit([&]() { Window->GetSwapChain().BeginFrame(); });
-		#endif
 
 			LRenderer::BeginFrame();
 
 	#if LK_ENGINE_EDITOR
-			/** LkEditor */
+			/** Editor. */
 			if (Editor->IsEnabled())
 			{
-				TObjectPtr<LEditorCamera> EditorCamera = Editor->GetEditorCamera();
-				LRenderer::BeginScene(EditorCamera->GetViewProjectionMatrix());
-
-				Editor->RenderViewport();
-
 				/* Update all layers. */
 				for (TObjectPtr<LLayer>& Layer : LayerStack)
 				{
 					Layer->OnUpdate(Timestep);
 				}
 
-				LRenderer::EndScene();
+				Editor->RenderViewport();
 			}
 	#endif
 
-			/* UI */
-			if (Specification.ImGuiEnabled)
+			/* UI. */
 			{
 				LRenderer::Submit([Application]()
 				{

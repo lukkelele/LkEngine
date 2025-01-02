@@ -16,10 +16,12 @@ namespace LkEngine {
 		virtual void Initialize() override;
 		virtual void Destroy() override;
 
+		FAssetHandle ImportAsset(const std::filesystem::path& Filepath);
+
 		template<typename AssetType>
 		TObjectPtr<AssetType> ImportAsset(const std::filesystem::path& Filepath);
 
-        TObjectPtr<LAsset> GetAsset(FAssetHandle Asset);
+        TObjectPtr<LAsset> GetAsset(const FAssetHandle Asset);
 		EAssetType GetAssetType(const FAssetHandle AssetHandle);
 
         FORCEINLINE bool IsMemoryAsset(const FAssetHandle AssetHandle) const
@@ -30,6 +32,7 @@ namespace LkEngine {
 		bool ReloadData(const FAssetHandle AssetHandle);
 		void AddMemoryOnlyAsset(TObjectPtr<LAsset> Asset);
 		bool IsAssetHandleValid(const FAssetHandle AssetHandle) const;
+		bool IsAssetLoaded(const FAssetHandle Handle) const;
 
 		std::filesystem::path GetFileSystemPath(const FAssetMetadata& metadata);
 		std::filesystem::path GetFileSystemPath(const FAssetHandle Handle);
@@ -117,14 +120,7 @@ namespace LkEngine {
 
 		FORCEINLINE const LAssetRegistry& GetAssetRegistry() const { return AssetRegistry; }
 
-	public:
-		/**
-		 * @brief Base cube.
-		 */
-		TObjectPtr<LMesh> DebugCube{};
-
 	private:
-		void LoadMaterials();
 		void LoadPrimitiveShapes();
 
     private:

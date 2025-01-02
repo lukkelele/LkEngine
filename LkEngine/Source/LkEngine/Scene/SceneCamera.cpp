@@ -13,16 +13,16 @@ namespace LkEngine
 		{
 			case ECameraProjection::Perspective:
 				SetPerspectiveProjectionMatrix(glm::radians(
-					m_DegPerspectiveFOV), 
+					DegPerspectiveFOV), 
 					(float)Width, 
 					(float)Height, 
-					m_PerspectiveNear, 
-					m_PerspectiveFar
+					PerspectiveNear, 
+					PerspectiveFar
 				);
 				break;
 
 			case ECameraProjection::Orthographic:
-				SetOrthoProjectionMatrix(Width, Height, m_OrthographicNear, m_OrthographicFar);
+				SetOrthoProjectionMatrix(Width, Height, OrthographicNear, OrthographicFar);
 				break;
 		}
 	}
@@ -40,19 +40,19 @@ namespace LkEngine
 			/* WASD */
 			if (LKeyboard::IsKeyPressed(EKey::W))
 			{
-				m_Pos += glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
+				Position += glm::vec3(0, 1, 0) * ts * TravelSpeed;
 			}
 			if (LKeyboard::IsKeyPressed(EKey::A))
 			{
-				m_Pos -= glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
+				Position -= glm::vec3(1, 0, 0) * ts * TravelSpeed;
 			}
 			if (LKeyboard::IsKeyPressed(EKey::S))
 			{
-				m_Pos -= glm::vec3(0, 1, 0) * ts * m_TravelSpeed;
+				Position -= glm::vec3(0, 1, 0) * ts * TravelSpeed;
 			}
 			if (LKeyboard::IsKeyPressed(EKey::D))
 			{
-				m_Pos += glm::vec3(1, 0, 0) * ts * m_TravelSpeed;
+				Position += glm::vec3(1, 0, 0) * ts * TravelSpeed;
 			}
 
 			if (LKeyboard::IsKeyPressed(EKey::Q))
@@ -88,16 +88,17 @@ namespace LkEngine
 		Bottom = -Height / 2.0f;
 		Top = Height / 2.0f;
 
-		m_ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top);
+		ProjectionMatrix = glm::ortho(Left, Right, Bottom, Top);
 	}
 
 	void LSceneCamera::UpdateView()
 	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), { (m_Pos.x + m_Offset.x), (m_Pos.y + m_Offset.y), (m_Pos.z + m_Offset.z) }) *
-			glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0, 0, 1));
+		const glm::mat4 Transform = glm::translate( 
+			glm::mat4(1.0f), 
+			{ (Position.x + CameraBoom.x), (Position.y + CameraBoom.y), (Position.z + CameraBoom.z) }
+		) * glm::rotate(glm::mat4(1.0f), glm::radians(Rotation), glm::vec3(0, 0, 1));
 
-		m_ViewMatrix = glm::inverse(transform);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+		ViewMatrix = glm::inverse(Transform);
 	}
 
 }

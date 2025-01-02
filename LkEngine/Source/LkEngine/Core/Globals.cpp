@@ -80,16 +80,26 @@ namespace LkEngine {
 		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid: '{}'", LFileSystem::EngineDir.string());
 		LFileSystem::ConfigDir = LFileSystem::WorkingDir;
 
+	#if 0
 		LFileSystem::ConfigDir = LFileSystem::EngineDir;
 		LFileSystem::ConfigDir += PathSeparator + std::string("Configuration");
+	#else
+		LFileSystem::ConfigDir = LFileSystem::EngineDir / "Configuration";
+	#endif
 		if (!LFileSystem::Exists(LFileSystem::ConfigDir))
 		{
 			LFileSystem::CreateDirectory(LFileSystem::ConfigDir);
 			LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::ConfigDir), "Configuration directory is not valid");
 		}
 
+	#if 0
 		LFileSystem::EngineConfig = LFileSystem::ConfigDir;
 		LFileSystem::EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
+		LFileSystem::EditorConfig = LFileSystem::ConfigDir / "EditorSettings.yaml";
+	#else
+		LFileSystem::EngineConfig = LFileSystem::ConfigDir / "LkEngine.lkconf";
+		LFileSystem::EditorConfig = LFileSystem::ConfigDir / "EditorSettings.yaml";
+	#endif
 
 		LFileSystem::AssetsDir = fs::absolute(LFileSystem::EngineDir / "Assets");
 

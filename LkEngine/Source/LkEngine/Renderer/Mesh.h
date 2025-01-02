@@ -428,10 +428,16 @@ namespace LkEngine {
 		LMesh(const TObjectPtr<LMesh>& Other);
 		virtual ~LMesh() = default;
 
-		FORCEINLINE std::vector<uint32_t>& GetSubmeshes() { return Submeshes; }
-		FORCEINLINE const std::vector<uint32_t>& GetSubmeshes() const { return Submeshes; }
+		FORCEINLINE std::vector<uint32_t>& GetSubmeshes()
+		{
+			return Submeshes;
+		}
+		FORCEINLINE const std::vector<uint32_t>& GetSubmeshes() const
+		{
+			return Submeshes;
+		}
 
-		void SetSubmeshes(const std::vector<uint32_t>& submeshes);
+		void SetSubmeshes(const std::vector<uint32_t>& InSubmeshes);
 
 		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() { return MeshSource; }
 		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const { return MeshSource; }
@@ -441,39 +447,35 @@ namespace LkEngine {
 			MeshSource = InMeshSource;
 		}
 
-		FORCEINLINE TObjectPtr<LMaterialTable> GetMaterials() const
-		{
-			return Materials;
+		FORCEINLINE TObjectPtr<LMaterialTable> GetMaterialTable() const { return MaterialTable; }
+
+		FORCEINLINE FAssetHandle GetMaterialHandle(const int Index) 
+		{ 
+			return MaterialTable->GetMaterialHandle(Index);
 		}
 
-		FORCEINLINE FAssetHandle GetMaterialHandle(const int Index)
-		{
-			return Materials->GetMaterialHandle(Index);
-		}
+		static EAssetType GetStaticType() { return EAssetType::Mesh; }
+		TObjectPtr<LVertexBuffer> GetVertexBuffer() { return MeshSource->GetVertexBuffer(); }
+		TObjectPtr<LIndexBuffer> GetIndexBuffer() { return MeshSource->GetIndexBuffer(); }
 
 		TObjectPtr<LMaterial> GetMaterial(const int Index = 0);
 
-		static EAssetType GetStaticType() { return EAssetType::Mesh; }
-
-		TObjectPtr<LVertexBuffer> GetVertexBuffer()
-		{
-			return GetMeshSource()->GetVertexBuffer();
-		}
-
-		TObjectPtr<LIndexBuffer> GetIndexBuffer() { return GetMeshSource()->GetIndexBuffer(); }
+		FORCEINLINE const std::string& GetName() const { return Name; }
+		FORCEINLINE void SetName(std::string_view InName) { Name = InName; }
 
 	private:
-		TObjectPtr<LMeshSource> MeshSource;
-		std::vector<uint32_t> Submeshes;
+		TObjectPtr<LMeshSource> MeshSource{};
+		std::vector<uint32_t> Submeshes{};
+		TObjectPtr<LMaterialTable> MaterialTable{};
 
-		TObjectPtr<LMaterialTable> Materials;
+		std::string Name{};
 
 		friend class LScene;
 		friend class LRenderer;
 		friend class LAssetManager;
 		friend class LRuntimeAssetManager;
 		friend class LOpenGLRenderer;
-		friend class MeshViewerPanel;
+		friend class MeshViewerPanel; /* REMOVE */
 
 		LASSET(LMesh)
 	};

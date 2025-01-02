@@ -56,7 +56,7 @@ namespace LkEngine {
 			LK_CORE_TRACE_TAG("OpenGLRenderer", "Added array texture {} with name \"{}\"", i, ArrayTextureSpec.DebugName);
 		}
 
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Binding array textures");
+		LK_CORE_TRACE_TAG("OpenGLRenderer", "Binding array textures");
 		const auto& Textures2D = LTextureLibrary::Get().GetTextures2D();
 		for (const auto& [TextureName, Texture] : Textures2D)
 		{
@@ -89,7 +89,7 @@ namespace LkEngine {
 			}
 		}
 
-		LK_CORE_DEBUG_TAG("OpenGLRenderer", "Creating render passes");
+		LK_CORE_TRACE_TAG("OpenGLRenderer", "Creating render passes");
 		/* Create render passes. */
 		/* Render Pass: Geometric */
 		FRenderPassSpecification RP_Geometric;

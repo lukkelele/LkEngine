@@ -81,7 +81,7 @@ namespace LkEngine {
 		LogSinks.push_back(ColorSinkLogger);
 
 		/* Logfile Sink. */
-		LK_PRINTLN("Logfile: {}", Logfile); /* Cannot use regular logging features here since core logger does not exist yet. */
+		//LK_PRINTLN("Logfile: {}", Logfile); /* Cannot use regular logging features here since core logger does not exist yet. */
 		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(LogDirectory.string() + Logfile, true));
 
 		LogSinks[0]->set_pattern(ColorSinkPattern);

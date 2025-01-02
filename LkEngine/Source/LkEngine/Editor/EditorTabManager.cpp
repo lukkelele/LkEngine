@@ -58,7 +58,7 @@ namespace LkEngine {
             Tab = std::make_shared<LMaterialEditorTab>(TabName);
         }
 
-        UUID TabIndex = UUID();
+        LUUID TabIndex = LUUID();
         Tab->Index = TabIndex;
         Tabs.emplace(TabIndex, Tab);
 

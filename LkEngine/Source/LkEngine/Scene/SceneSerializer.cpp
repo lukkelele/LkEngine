@@ -83,7 +83,7 @@ namespace LkEngine {
 		Out << YAML::Value << YAML::BeginSeq;
 		{
 			/* Sort entities by UUID. */
-			std::map<UUID, entt::entity> SortedEntityMap;
+			std::map<LUUID, entt::entity> SortedEntityMap;
 			auto IDComponentView = Scene->Registry.view<LIDComponent>();
 			for (const entt::entity Entity : IDComponentView)
 			{
@@ -136,8 +136,8 @@ namespace LkEngine {
 	{
 		if (Scene)
 		{
-			Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
-			Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
+			Scene->ViewportWidth = LWindow::Get().GetViewportWidth();
+			Scene->ViewportHeight = LWindow::Get().GetViewportHeight();
 		}
 		else
 		{
@@ -175,8 +175,8 @@ namespace LkEngine {
 		Scene->bIsEditorScene = bIsEditorScene;
 		const uint32_t SceneEntityHandle = data["SceneHandle"].as<uint32_t>();
 
-		Scene->m_ViewportWidth = LWindow::Get().GetViewportWidth();
-		Scene->m_ViewportHeight = LWindow::Get().GetViewportHeight();
+		Scene->ViewportWidth = LWindow::Get().GetViewportWidth();
+		Scene->ViewportHeight = LWindow::Get().GetViewportHeight();
 
 		/* EditorCamera. */
 		const YAML::Node& EditorCameraNode = data["EditorCamera"];
@@ -226,12 +226,11 @@ namespace LkEngine {
 			return;
 		}
 
-		const UUID ID = Entity.GetUUID();
+		const LUUID ID = Entity.GetUUID();
 		Out << YAML::BeginMap; /* Entity */
 		Out << YAML::Key << "Entity";
 		Out << YAML::Value << ID;
-
-		LK_CORE_ERROR("Serializing entity: {}", ID);
+		LK_CORE_TRACE_TAG("SceneSerializer", "Serializing entity: {}", ID);
 
 		/* TagComponent */
 		const LTagComponent& TagComp = Entity.GetComponent<LTagComponent>().Tag;
@@ -265,13 +264,8 @@ namespace LkEngine {
 			Out << YAML::EndMap; 
 		}
 
-		if (!Entity.HasComponent<LMeshComponent>())
-		{
-			LK_CORE_DEBUG("{} does not have a mesh component", TagComp.Tag);
-		}
 		if (Entity.HasComponent<LMeshComponent>())
 		{
-			LK_CORE_DEBUG("Serializing mesh component ({})", TagComp.Tag);
 			Out << YAML::Key << "MeshComponent";
 			Out << YAML::BeginMap; /* MeshComponent */
 
@@ -294,18 +288,6 @@ namespace LkEngine {
 			Out << YAML::Key << "Visible" << YAML::Value << MeshComp.Visible;
 			Out << YAML::EndMap; /* MeshComponent */
 		}
-
-
-		#if 0
-		if (Entity.HasComponent<LMaterialComponent>())
-		{
-			Out << YAML::Key << "MaterialComponent";
-			Out << YAML::BeginMap; // MaterialComponent
-			auto& material = Entity.GetComponent<MaterialComponent>();
-			Out << YAML::Key << "TextureName" << YAML::Value << material.GetTexture()->GetName();
-			Out << YAML::EndMap;
-		}
-		#endif
 
 		if (Entity.HasComponent<LCameraComponent>())
 		{
@@ -407,14 +389,15 @@ namespace LkEngine {
 					for (auto MaterialEntry : MaterialTableNode)
 					{
 						const uint32_t Index = MaterialEntry.first.as<uint32_t>();
-						const FAssetHandle MaterialAsset = MaterialEntry.second.as<FAssetHandle>();
-						if (MaterialAsset && LAssetManager::IsAssetHandleValid(MaterialAsset))
+						const FAssetHandle Handle = MaterialEntry.second.as<FAssetHandle>();
+						//if (LAssetManager::IsAssetHandleValid(Handle))
+						if (Handle > 0)
 						{
-							MeshComp.MaterialTable->SetMaterial(Index, MaterialAsset);
+							MeshComp.MaterialTable->SetMaterial(Index, Handle);
 						}
 						else
 						{
-							LK_CORE_DEBUG_TAG("SceneSerializer", "Could not set material in table, faulty index: {}", Index);
+							LK_CORE_WARN_TAG("SceneSerializer", "Could not set material '{}' in table with index {}", Handle, Index);
 						}
 					}
 				}
@@ -517,53 +500,53 @@ namespace LkEngine {
 		if (EditorCameraNode)
 		{
 			/* Position, origin, distance and focalpoint. */
-			EditorCamera.m_Position = EditorCameraNode["Position"].as<glm::vec3>(glm::vec3(0.0f));
-			EditorCamera.m_Origin = EditorCameraNode["Origin"].as<glm::vec3>(glm::vec3(0.0f));
-			EditorCamera.m_Distance = EditorCameraNode["Distance"].as<float>();
-			EditorCamera.m_FocalPoint = EditorCameraNode["FocalPoint"].as<glm::vec3>(glm::vec3(0.0f));
+			EditorCamera.Position = EditorCameraNode["Position"].as<glm::vec3>(glm::vec3(0.0f));
+			EditorCamera.Origin = EditorCameraNode["Origin"].as<glm::vec3>(glm::vec3(0.0f));
+			EditorCamera.Distance = EditorCameraNode["Distance"].as<float>();
+			EditorCamera.FocalPoint = EditorCameraNode["FocalPoint"].as<glm::vec3>(glm::vec3(0.0f));
 
 			/* Perspective data. */
 			const YAML::Node& PerspectiveCameraNode = EditorCameraNode["Perspective"];
 			if (PerspectiveCameraNode.IsMap())
 			{
-				EditorCamera.m_DegPerspectiveFOV = PerspectiveCameraNode["DegPerspectiveFOV"].as<float>();
-				EditorCamera.m_PerspectiveNear = PerspectiveCameraNode["PerspectiveNear"].as<float>();
-				EditorCamera.m_PerspectiveFar = PerspectiveCameraNode["PerspectiveFar"].as<float>();
+				EditorCamera.DegPerspectiveFOV = PerspectiveCameraNode["DegPerspectiveFOV"].as<float>();
+				EditorCamera.PerspectiveNear = PerspectiveCameraNode["PerspectiveNear"].as<float>();
+				EditorCamera.PerspectiveFar = PerspectiveCameraNode["PerspectiveFar"].as<float>();
 
-				EditorCamera.SetPerspectiveNearClip(EditorCamera.m_PerspectiveNear);
-				EditorCamera.SetPerspectiveFarClip(EditorCamera.m_PerspectiveFar);
+				EditorCamera.SetPerspectiveNearClip(EditorCamera.PerspectiveNear);
+				EditorCamera.SetPerspectiveFarClip(EditorCamera.PerspectiveFar);
 
-				EditorCamera.m_ViewportWidth = Scene->m_ViewportWidth;
-				EditorCamera.m_ViewportHeight = Scene->m_ViewportHeight;
+				EditorCamera.ViewportWidth = Scene->ViewportWidth;
+				EditorCamera.ViewportHeight = Scene->ViewportHeight;
 
 				EditorCamera.SetPerspectiveProjectionMatrix(
-					glm::radians(EditorCamera.m_DegPerspectiveFOV), 
-					EditorCamera.m_ViewportWidth,
-					EditorCamera.m_ViewportHeight,
-					EditorCamera.m_PerspectiveNear,
-					EditorCamera.m_PerspectiveFar
+					glm::radians(EditorCamera.DegPerspectiveFOV), 
+					EditorCamera.ViewportWidth,
+					EditorCamera.ViewportHeight,
+					EditorCamera.PerspectiveNear,
+					EditorCamera.PerspectiveFar
 				);
 
-				EditorCamera.SetPerspective(EditorCamera.m_DegPerspectiveFOV, 
-											EditorCamera.m_PerspectiveNear, 
-											EditorCamera.m_PerspectiveFar);
+				EditorCamera.SetPerspective(EditorCamera.DegPerspectiveFOV, 
+											EditorCamera.PerspectiveNear, 
+											EditorCamera.PerspectiveFar);
 			}
 
 			/* Orthographic data. */
 			const YAML::Node& OrthographicCameraNode = EditorCameraNode["Orthographic"];
 			if (OrthographicCameraNode.IsMap())
 			{
-				EditorCamera.m_OrthographicSize = OrthographicCameraNode["OrthographicSize"].as<float>();
-				EditorCamera.m_OrthographicNear = OrthographicCameraNode["OrthographicNear"].as<float>();
-				EditorCamera.m_OrthographicFar  = OrthographicCameraNode["OrthographicFar"].as<float>();
+				EditorCamera.OrthographicSize = OrthographicCameraNode["OrthographicSize"].as<float>();
+				EditorCamera.OrthographicNear = OrthographicCameraNode["OrthographicNear"].as<float>();
+				EditorCamera.OrthographicFar  = OrthographicCameraNode["OrthographicFar"].as<float>();
 
-				EditorCamera.SetOrthographicNearClip(EditorCamera.m_OrthographicNear);
-				EditorCamera.SetOrthographicFarClip(EditorCamera.m_OrthographicFar);
+				EditorCamera.SetOrthographicNearClip(EditorCamera.OrthographicNear);
+				EditorCamera.SetOrthographicFarClip(EditorCamera.OrthographicFar);
 			}
 
 			/* Pitch and Yaw. */
-			EditorCamera.m_Pitch = EditorCameraNode["Pitch"].as<float>();
-			EditorCamera.m_Yaw = EditorCameraNode["Yaw"].as<float>();
+			EditorCamera.Pitch = EditorCameraNode["Pitch"].as<float>();
+			EditorCamera.Yaw = EditorCameraNode["Yaw"].as<float>();
 
 			/* Projection Type. */
 			const int ProjectionType = EditorCameraNode["ProjectionType"].as<int>();

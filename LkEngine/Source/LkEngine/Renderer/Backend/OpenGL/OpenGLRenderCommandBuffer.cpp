@@ -6,20 +6,23 @@
 
 namespace LkEngine {
 
-	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(uint32_t Count, std::string_view InName) 
+	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(const uint32_t Count, std::string_view InDebugName) 
+		: DebugName(InDebugName)
 	{
 		LOBJECT_REGISTER();
 
 		LK_UNUSED(Count);
-		LK_UNUSED(InName);
+		LK_UNUSED(InDebugName);
+
+		LK_CORE_DEBUG_TAG("OpenGLRenderCommandBuffer", "Created new OpenGL command buffer '{}', count: {}", InDebugName, Count);
 	}
 
-	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(std::string_view InName, bool InSwapchain)
+	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(std::string_view InDebugName, const bool InSwapchain)
 	{
 		LOBJECT_REGISTER();
 
-		LK_UNUSED(InName);
 		LK_UNUSED(InSwapchain);
+		LK_CORE_DEBUG_TAG("OpenGLRenderCommandBuffer", "Created new OpenGL command buffer '{}'", InDebugName);
 	}
 
 	LOpenGLRenderCommandBuffer::~LOpenGLRenderCommandBuffer()
@@ -28,7 +31,7 @@ namespace LkEngine {
 
 	void LOpenGLRenderCommandBuffer::Begin()
 	{
-		m_TimestampNextAvailableQuery = 2;
+		TimestampNextAvailableQuery = 2;
 	}
 	
 	void LOpenGLRenderCommandBuffer::End()
@@ -43,7 +46,7 @@ namespace LkEngine {
 	{
 		/* Unused for now. */
 		LK_UNUSED(FrameIndex);
-		return m_PipelineStatistics;
+		return PipelineStatistics;
 	}
 
 	uint32_t LOpenGLRenderCommandBuffer::BeginTimestampQuery()
@@ -51,7 +54,7 @@ namespace LkEngine {
 		return 1;
 	}
 
-	void LOpenGLRenderCommandBuffer::EndTimestampQuery(uint32_t queryID)
+	void LOpenGLRenderCommandBuffer::EndTimestampQuery(const uint32_t QueryID)
 	{
 	}
 

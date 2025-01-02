@@ -20,6 +20,8 @@ namespace LkEngine {
 
 	namespace fs = std::filesystem;
 
+	LProject::FOnProjectChanged LProject::OnProjectChanged{};
+
 	LProject::LProject()
 	{
 		LOBJECT_REGISTER();
@@ -50,6 +52,9 @@ namespace LkEngine {
 		{
 			LK_CORE_ERROR_TAG("Project", "Deserialization of project '{}' failed", Filepath.string());
 		}
+
+		/* TODO: Load the project configuration from the project serializer. */
+		Configuration.AssetDirectory = LFileSystem::GetAssetsDir().string();
 	}
 
 	std::filesystem::path LProject::GetAssetDirectory()
@@ -117,6 +122,7 @@ namespace LkEngine {
 		{
 			if (InProject->RuntimeAssetManager)
 			{
+				/* TODO: Destroy and re-initialize the asset manager here. */
 				LK_CORE_INFO_TAG("Project", "AssetManager already initialized for project '{}'", ActiveProject->GetName());
 				RuntimeAssetManager = ActiveProject->RuntimeAssetManager;
 			}
@@ -126,6 +132,8 @@ namespace LkEngine {
 				RuntimeAssetManager = TObjectPtr<LRuntimeAssetManager>::Create();
 				RuntimeAssetManager->Initialize();
 			}
+
+			OnProjectChanged.Broadcast(ActiveProject);
 		}
 	}
 

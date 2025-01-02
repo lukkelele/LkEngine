@@ -37,10 +37,9 @@ namespace LkEngine {
 
 		if (!Specification.Path.empty())
 		{
+			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Loading image from: '{}'", m_FilePath.string());
+			stbi_set_flip_vertically_on_load(Specification.bFlipVertical);
 			int Width, Height, Channels;
-			stbi_set_flip_vertically_on_load(1);
-
-			LK_CORE_TRACE_TAG("OpenGLTexture2D", "Loading image from path \"{}\"", m_FilePath.string());
 			stbi_uc* LoadedData = stbi_load(Specification.Path.c_str(), &Width, &Height, &Channels, 4);
 
 			const uint32_t DataSize = ImageUtils::GetMemorySize(Specification.Format,
@@ -50,6 +49,8 @@ namespace LkEngine {
 			ImageSpec.Size = (uint64_t)Width * (uint64_t)Height * (uint64_t)Channels;
 			if (ImageSpec.Size != DataSize)
 			{
+				LK_CORE_DEBUG_TAG("OpenGLTexture", "Creating image, resizing it to ({}, {}) from ({}, {})", 
+								  InSpecification.Width, InSpecification.Height, Width, Height);
 				LoadedData = MemoryUtils::ResizeImageData(LoadedData, 
 														  DataSize, 
 														  Width, 
@@ -122,27 +123,34 @@ namespace LkEngine {
 
 	uint32_t LOpenGLTexture2D::GetMipLevelCount() const
 	{
+		LK_CORE_ASSERT(m_Image);
 		return m_Image->GetSpecification().Mips;
 	}
 
 	void LOpenGLTexture2D::Resize(const uint32_t NewWidth, const uint32_t NewHeight)
 	{
+		LK_CORE_ASSERT(m_Image);
 		m_Image->Resize(NewWidth, NewHeight);
 	}
 
 	void LOpenGLTexture2D::Invalidate()
 	{
+		LK_CORE_ASSERT(m_Image);
 		m_Image->Invalidate();
 	}
 
 	uint64_t LOpenGLTexture2D::GetARBHandle() const
 	{
+		LK_CORE_ASSERT(m_Image);
 		return glGetTextureHandleARB(m_Image->GetRendererID());
 	}
 
 
+	/******************************************************************
+	 * LOpenGLTextureCube
+	 ******************************************************************/
 	LOpenGLTextureCube::LOpenGLTextureCube(const FTextureSpecification& InSpecification, 
-										 std::vector<std::filesystem::path> InFacePaths)
+										   std::vector<std::filesystem::path> InFacePaths)
 		: Specification(InSpecification)
 		, m_Width(InSpecification.Width)
 		, m_Height(InSpecification.Height)
@@ -153,12 +161,12 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID));
 
 		int Width, Height, Channels;
-		stbi_set_flip_vertically_on_load(false);
+		stbi_set_flip_vertically_on_load(Specification.bFlipVertical);
 		for (std::size_t i = 0; i < InFacePaths.size(); i++)
 		{
 			std::filesystem::path& FacePath = InFacePaths[i];
 			stbi_uc* Data = stbi_load(FacePath.string().c_str(), &Width, &Height, &Channels, 4);
-			LK_CORE_VERIFY(Data, "OpenGLTextureCube failed to load data for face path: \"{}\"", FacePath.string());
+			LK_CORE_VERIFY(Data, "OpenGLTextureCube failed to load data for face path: '{}'", FacePath.string());
 
 			LK_OpenGL_Verify(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 										  0,
@@ -171,11 +179,10 @@ namespace LkEngine {
 										  Data));
 
 			stbi_image_free(Data);
-			LK_CORE_DEBUG_TAG("OpenGLTextureCube", "Created face {} with: '{}'", i, FacePath.string());
+			LK_CORE_TRACE_TAG("OpenGLTextureCube", "Created face {} with: '{}'", i, FacePath.string());
 		}
 
-		stbi_set_flip_vertically_on_load(true);
-
+		//stbi_set_flip_vertically_on_load(true);
 		LK_OpenGL_Verify(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		LK_OpenGL_Verify(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 		LK_OpenGL_Verify(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));

@@ -45,7 +45,7 @@ namespace LkEngine {
 
 	namespace Enum 
 	{
-		inline EAssetType FromString(std::string_view AssetType)
+		FORCEINLINE static EAssetType FromString(std::string_view AssetType)
 		{
 			if (AssetType == "None")        return EAssetType::None;
 			if (AssetType == "Scene")       return EAssetType::Scene;

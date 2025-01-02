@@ -71,7 +71,7 @@ namespace LkEngine {
             TextureSpecification.Path = "Assets/Textures/grass.png";
             TextureSpecification.Name = "grass-512x512";
             TextureSpecification.DebugName = "grass-512x512";
-            TextureSpecification.GenerateMips = true;
+            TextureSpecification.bGenerateMips = true;
 			TextureSpecification.Format = EImageFormat::RGBA32F;
             TextureSpecification.SamplerWrap = ETextureWrap::Repeat;
             TextureSpecification.SamplerFilter = ETextureFilter::Linear;
@@ -81,7 +81,7 @@ namespace LkEngine {
             TextureSpecification.Path = "Assets/Textures/Debug/Skybox-WaterIsland/Back.jpg";
             TextureSpecification.Name = "Skybox-WaterIsland-Back-512x512";
             TextureSpecification.DebugName = "Skybox-WaterIsland-Back-512x512";
-            TextureSpecification.GenerateMips = false;
+            TextureSpecification.bGenerateMips = false;
 			TextureSpecification.Format = EImageFormat::RGBA32F;
             TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
@@ -97,7 +97,7 @@ namespace LkEngine {
             TextureSpecification.Path = "Assets/Textures/brickwall.jpg";
             TextureSpecification.Name = "brickwall";
             TextureSpecification.DebugName = "brickwall";
-            TextureSpecification.GenerateMips = true;
+            TextureSpecification.bGenerateMips = true;
             TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
 			AddTexture(TextureSpecification);
@@ -111,7 +111,7 @@ namespace LkEngine {
 			TextureSpecification.DebugName = "wood-container_512x512";
 			TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
 			TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
-            TextureSpecification.GenerateMips = true;
+            TextureSpecification.bGenerateMips = true;
 			AddTexture(TextureSpecification);
 
 		}
@@ -127,7 +127,7 @@ namespace LkEngine {
 			TextureSpecification.DebugName = "wood-container";
 			TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
 			TextureSpecification.SamplerFilter = ETextureFilter::Linear;
-            TextureSpecification.GenerateMips = true;
+            TextureSpecification.bGenerateMips = true;
 			AddTexture(TextureSpecification);
 
 			// Wood container 2
@@ -159,7 +159,7 @@ namespace LkEngine {
             TextureSpecification.Path = "Assets/Textures/metal.png";
             TextureSpecification.Name = "MetalGround";
             TextureSpecification.DebugName = "MetalGround";
-            TextureSpecification.GenerateMips = true;
+            TextureSpecification.bGenerateMips = true;
             TextureSpecification.SamplerWrap = ETextureWrap::Repeat;
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
 			AddTexture(TextureSpecification);
@@ -168,7 +168,7 @@ namespace LkEngine {
             TextureSpecification.Name = "wood";
             TextureSpecification.DebugName = "wood";
             TextureSpecification.Path = "Assets/Textures/wood.png";
-            TextureSpecification.GenerateMips = true;
+            TextureSpecification.bGenerateMips = true;
             TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
 			AddTexture(TextureSpecification);
@@ -177,7 +177,7 @@ namespace LkEngine {
             TextureSpecification.Name = "Skybox-WaterIsland-Back";
             TextureSpecification.DebugName = "Skybox-WaterIsland-Back";
             TextureSpecification.Path = "Assets/Textures/Debug/Skybox-WaterIsland/Back.jpg";
-            TextureSpecification.GenerateMips = false;
+            TextureSpecification.bGenerateMips = false;
             TextureSpecification.Format = EImageFormat::RGBA32F;
             TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;

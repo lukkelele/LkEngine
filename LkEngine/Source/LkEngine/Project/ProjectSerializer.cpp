@@ -18,7 +18,6 @@ namespace LkEngine {
 	void FProjectSerializer::Serialize(const std::filesystem::path& OutFile)
 	{
 		LK_CORE_VERIFY(!OutFile.empty(), "Cannot serialize an empty file");
-		LK_CORE_DEBUG_TAG("ProjectSerializer", "Serializing: \"{}\"", OutFile.string());
 
 		/* Create the project directory if it does not exist. */
 		if (!fs::exists(OutFile.parent_path()))
@@ -35,7 +34,7 @@ namespace LkEngine {
 		std::ofstream FileOut(ProjectSave);
 		if (FileOut.is_open() && FileOut.good())
 		{
-			LK_CORE_DEBUG_TAG("ProjectSerializer", "Serializing to: \"{}\"", ProjectSave);
+			LK_CORE_DEBUG_TAG("ProjectSerializer", "Serializing: \"{}\"", ProjectSave);
 			FileOut << Out.c_str();
 		}
 		else

@@ -31,9 +31,9 @@ namespace LkEngine {
 
 	struct LIDComponent
 	{
-		UUID ID;
+		LUUID ID;
 
-		operator UUID() { return ID; }
+		operator LUUID() { return ID; }
 	};
 
 	struct LTagComponent
@@ -53,11 +53,11 @@ namespace LkEngine {
 
 	struct LRelationshipComponent
 	{
-		UUID ParentHandle = 0;
-		std::vector<UUID> Children;
+		LUUID ParentHandle = 0;
+		std::vector<LUUID> Children;
 
 		LRelationshipComponent() = default;
-		LRelationshipComponent(const UUID InParentHandle)
+		LRelationshipComponent(const LUUID InParentHandle)
 			: ParentHandle(InParentHandle)
 		{
 		}
@@ -187,16 +187,6 @@ namespace LkEngine {
 
 	struct LCameraComponent
 	{
-#if 0
-		enum class Type 
-		{ 
-			None = -1, 
-			Perspective, 
-			Orthographic 
-		};
-
-		Type ProjectionType = Type::None;
-#endif
 		TObjectPtr<LSceneCamera> Camera{};
 		ECameraProjection ProjectionType = ECameraProjection::None;
 
@@ -276,7 +266,7 @@ namespace LkEngine {
 		/**
 		 * @brief The entities whose transforms will used to "skin" the rig if mesh is rigged.
 		 */
-		std::vector<UUID> BoneEntityIDs{};
+		std::vector<LUUID> BoneEntityIDs{};
 
 		bool Visible = true;
 
@@ -355,7 +345,7 @@ namespace LkEngine {
 
 	struct LSceneComponent
 	{
-		UUID SceneID{};
+		LUUID SceneID{};
 	};
 
 	template<typename... TComponent>

@@ -153,7 +153,7 @@ namespace LkEngine
 
     void LRenderer2D::BeginScene(const LSceneCamera& Camera) 
     {
-        CameraBuffer.ViewProjection = Camera.GetViewProjectionMatrix();
+        CameraBuffer.ViewProjection = Camera.GetViewProjection();
         CameraUniformBuffer->SetData(&CameraBuffer, sizeof(FCameraData));
 
         StartBatch();

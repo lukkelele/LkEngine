@@ -39,9 +39,9 @@ namespace LkEngine {
 			LK_CORE_WARN("Scene serialization failed, loading default values for '{}'", Name);
 			Registry.emplace<LSceneComponent>(SceneEntity, SceneID);
 
-			m_ViewportWidth = LWindow::Get().GetViewportWidth();
-			m_ViewportHeight = LWindow::Get().GetViewportHeight();
-			LK_CORE_DEBUG_TAG("Scene", "Viewport ({}, {})", m_ViewportWidth, m_ViewportHeight);
+			ViewportWidth = LWindow::Get().GetViewportWidth();
+			ViewportHeight = LWindow::Get().GetViewportHeight();
+			LK_CORE_DEBUG_TAG("Scene", "Viewport ({}, {})", ViewportWidth, ViewportHeight);
 		}
 
 		LK_INFO("Created scene called '{}'", Name);
@@ -78,7 +78,7 @@ namespace LkEngine {
 		return Entity;
 	}
 
-	LEntity LScene::CreateEntityWithID(UUID uuid, const std::string& name)
+	LEntity LScene::CreateEntityWithID(LUUID uuid, const std::string& name)
 	{
 		LEntity Entity = { Registry.create(), this };
 		Entity.AddComponent<LIDComponent>(uuid);
@@ -90,15 +90,15 @@ namespace LkEngine {
 		return Entity;
 	}
 
-	LEntity LScene::GetEntityWithUUID(UUID ID) const
+	LEntity LScene::GetEntityWithUUID(const LUUID ID) const
 	{
-		LK_ASSERT(m_EntityIDMap.find(ID) != m_EntityIDMap.end(), "Entity \"{}\" is not present in the scene", ID);
+		LK_CORE_ASSERT(m_EntityIDMap.find(ID) != m_EntityIDMap.end(), "Entity '{}' is not present in the scene", ID);
 		return m_EntityIDMap.at(ID);
 	}
 
-	LEntity LScene::TryGetEntityWithUUID(UUID id) const
+	LEntity LScene::TryGetEntityWithUUID(LUUID ID) const
 	{
-		if (const auto Iter = m_EntityIDMap.find(id); Iter != m_EntityIDMap.end())
+		if (const auto Iter = m_EntityIDMap.find(ID); Iter != m_EntityIDMap.end())
 		{
 			return Iter->second;
 		}
@@ -112,8 +112,8 @@ namespace LkEngine {
 		auto View = Registry.view<LTagComponent>();
 		for (auto Entity : View)
 		{
-			const LTagComponent& tc = View.get<LTagComponent>(Entity);
-			if (tc.Tag == Name)
+			const LTagComponent& TagComp = View.get<LTagComponent>(Entity);
+			if (TagComp.Tag == Name)
 			{
 				return LEntity{ Entity , this };
 			}
@@ -122,23 +122,62 @@ namespace LkEngine {
 		return {};
 	}
 
+#if 0
 	std::vector<LEntity> LScene::GetEntities()
 	{
-		auto view = Registry.view<LIDComponent>();
-		std::vector<LEntity> entities{};
-		for (const auto& Entity : view)
+		auto View = Registry.view<LIDComponent>();
+		std::vector<LEntity> Entities;
+		Entities.resize(View.size());
+		for (auto Entity : View)
 		{
-			entities.push_back({ Entity, this });
+			Entities.push_back({ Entity, this });
 		}
 
-		return entities;
+		return Entities;
+	}
+#endif
+
+	template<typename T>
+	std::vector<T> LScene::GetEntities()
+	{
+		static_assert(std::disjunction_v<std::is_same<T, LEntity>, std::is_same<T, LUUID>>, "Invalid type T");
+		return {};
+	}
+
+	template<>
+	std::vector<LEntity> LScene::GetEntities()
+	{
+		auto View = Registry.view<LIDComponent>();
+		std::vector<LEntity> Entities;
+		Entities.resize(View.size());
+		for (auto EntityID : View)
+		{
+			Entities.push_back({ EntityID, this });
+		}
+
+		return Entities;
+	}
+
+	template<>
+	std::vector<LUUID> LScene::GetEntities()
+	{
+		auto View = Registry.view<LIDComponent>();
+		std::vector<LUUID> Entities;
+		Entities.resize(View.size());
+		for (auto EntityID : View)
+		{
+			/* FIXME: Must be another way of converting an EntityID to a UUID. */
+			Entities.push_back(LEntity(EntityID, this).GetUUID());
+		}
+
+		return Entities;
 	}
 
 	void LScene::DestroyEntity(const LEntity Entity)
 	{
 		m_EntityIDMap.erase(Entity.GetUUID());
 		Registry.destroy(Entity);
-		LK_CORE_DEBUG("Entity {} deleted", Entity.Name());
+		LK_CORE_DEBUG_TAG("Scene", "Deleted entity: {}", Entity.Name());
 	}
 
 	bool LScene::HasEntity(const LEntity Entity) const
@@ -163,10 +202,15 @@ namespace LkEngine {
 
 	void LScene::Pause(const bool IsPaused)
 	{
-		bPaused = IsPaused;
+		if (bPaused != IsPaused)
+		{
+			/* TODO: Notify change. */
+		}
 	#if 0
 		m_World->Pause(IsPaused);
 	#endif
+
+		bPaused = IsPaused;
 	}
 
 	void LScene::SwitchCamera()
@@ -342,12 +386,31 @@ namespace LkEngine {
 		auto& ParentChildren = Parent.GetChildren();
 		ParentChildren.erase(std::remove(ParentChildren.begin(), ParentChildren.end(), Entity.GetUUID()), ParentChildren.end());
 
-		//if (bConvertToWorldSpace)
-		//{
-		//	ConvertToWorldSpace(Entity);
-		//}
+	#if 0
+		if (bConvertToWorldSpace)
+		{
+			ConvertToWorldSpace(Entity);
+		}
+	#endif
 
 		Entity.SetParentUUID(0);
+	}
+
+	glm::mat4 LScene::GetWorldSpaceTransform(LEntity Entity)
+	{
+		LK_PROFILE_FUNC();
+		glm::mat4 Transform(1.0f);
+
+		if (Entity.HasComponent<LRelationshipComponent>())
+		{
+			LEntity Parent = TryGetEntityWithUUID(Entity.GetParentUUID());
+			if (Parent)
+			{
+				Transform = GetWorldSpaceTransform(Parent);
+			}
+		}
+
+		return (Transform * Entity.Transform().GetTransform());
 	}
 
 	void LScene::CopyTo(TObjectPtr<LScene>& TargetScene)
@@ -357,12 +420,12 @@ namespace LkEngine {
 		TargetScene->Name = Name;
 		TargetScene->bIsEditorScene = bIsEditorScene;
 
-		std::unordered_map<UUID, entt::entity> EntityMap;
+		std::unordered_map<LUUID, entt::entity> EntityMap;
 		auto View = Registry.view<LIDComponent>();
 		for (auto Entity : View)
 		{
 			/* Retrieve the UUID and the entity name. */
-			const UUID EntityUUID = Registry.get<LIDComponent>(Entity).ID;
+			const LUUID EntityUUID = Registry.get<LIDComponent>(Entity).ID;
 			const std::string& EntityName = Registry.get<LTagComponent>(Entity).Tag;
 
 			/* Create identical Entity on the target scene. */
@@ -389,24 +452,36 @@ namespace LkEngine {
 		/* This ensures a consistent ordering when iterating ID's in the UI_SceneContent menu. */
 		TargetScene->SortEntities();
 
-		TargetScene->m_ViewportWidth = m_ViewportWidth;
-		TargetScene->m_ViewportHeight = m_ViewportHeight;
+		TargetScene->ViewportWidth = ViewportWidth;
+		TargetScene->ViewportHeight = ViewportHeight;
 	}
 
 	void LScene::OnRender(TObjectPtr<LSceneRenderer> SceneRenderer, const float DeltaTime)
 	{
-		FSceneRendererCamera SceneCamera;
-		SceneCamera.Camera = Camera;
-		SceneCamera.ViewMatrix = Camera->GetViewMatrix();
+		LEntity CameraEntity = GetMainCameraEntity();
+		if (!CameraEntity || !CameraEntity.HasAny<LCameraComponent>())
+		{
+			LK_CORE_WARN_TAG("Scene", "Entity is missing camera component");
+			return;
+		}
+
+		LCameraComponent& CameraComp = CameraEntity.GetComponent<LCameraComponent>();
+		const LSceneCamera& SceneCamera = *CameraComp.Camera;
 
 		SceneRenderer->BeginScene(SceneCamera);
 	}
 
-	void LScene::OnRenderEditor(LEditorCamera& EditorCamera, const float DeltaTime)
+	void LScene::OnRenderEditor(TObjectPtr<LSceneRenderer> SceneRenderer, LEditorCamera& EditorCamera, const float DeltaTime)
 	{
-		EditorCamera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+		LK_CORE_ASSERT(SceneRenderer);
+		LK_CORE_ASSERT((ViewportWidth > 0) && (ViewportHeight > 0), "Invalid viewport size");
+		EditorCamera.SetViewportSize(ViewportWidth, ViewportHeight);
 		EditorCamera.OnUpdate(DeltaTime);
 
+		SceneRenderer->SetScene(this);
+		SceneRenderer->BeginScene(EditorCamera);
+
+	#if 0
 		/* Static Meshes. */
 		{
 			auto Group = Registry.group<LStaticMeshComponent>(entt::get<LTransformComponent>);
@@ -415,6 +490,28 @@ namespace LkEngine {
 				LK_CORE_INFO("Entity: {}", Entity);
 			}
 		}
+	#endif
+
+		/* Meshes. */
+		{
+			//auto Group = Registry.group<LMeshComponent>(entt::get<LTransformComponent>);
+			auto View = Registry.view<LMeshComponent>();
+			for (auto EntityID : View)
+			{
+				//LK_CORE_INFO("[OnRenderEditor] Mesh Entity: {}", EntityID);
+				LEntity Entity = LEntity(EntityID, this);
+				LMeshComponent& MeshComp = View.get<LMeshComponent>(EntityID);
+				const glm::mat4 Transform = GetWorldSpaceTransform(Entity);
+
+				TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(MeshComp.Mesh);
+				//LK_CORE_ASSERT(Mesh->GetMaterials()->GetMaterialCount() == MeshComp.MaterialTable->GetMaterialCount(), "Material count mismatch for '{}'", Mesh->Handle);
+
+				//SceneRenderer->SubmitMesh(Mesh, MeshComp.SubmeshIndex, MeshComp.MaterialTable, Transform);
+				SceneRenderer->SubmitMesh(Mesh, MeshComp.SubmeshIndex, Mesh->GetMaterialTable(), Transform);
+			}
+		}
+
+		SceneRenderer->EndScene();
 	}
 
 	LEntity LScene::GetMainCameraEntity()
@@ -425,11 +522,8 @@ namespace LkEngine {
 			LCameraComponent& CameraComponent = EntityView.get<LCameraComponent>(Entity);
 			if (CameraComponent.Primary)
 			{
-				LK_VERIFY(
-					CameraComponent.Camera->GetOrthographicSize() || CameraComponent.Camera->GetDegPerspectiveVerticalFOV(), 
-					"Camera is not fully initialized"
-				);
-
+				LK_VERIFY(CameraComponent.Camera->GetOrthographicSize() || CameraComponent.Camera->GetDegPerspectiveVerticalFOV(), 
+						  "Camera is not fully initialized");
 				return { Entity, this };
 			}
 		}
@@ -447,6 +541,7 @@ namespace LkEngine {
 		Camera = InCamera;
 	}
 
+	/// REMOVE
 	void LScene::SetActiveScene(TObjectPtr<LScene> InScene)
 	{
 		LK_VERIFY(InScene, "Invalid scene");

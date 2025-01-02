@@ -303,7 +303,7 @@ namespace LkEngine {
 
 		std::string ToString() const
 		{
-			return LK_FORMAT_STRING("({:.2f}, {:.2f}, {:.2f})", X, Y, Z);
+			return std::format("({:.2f}, {:.2f}, {:.2f})", X, Y, Z);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const TVector3& Vector) 

@@ -1,21 +1,14 @@
 #include "LKpch.h"
 #include "Mesh.h"
 
+#include "LkEngine/Renderer/MaterialLibrary.h"
+
 #include "LkEngine/Asset/AssetManager.h"
 
 
 namespace LkEngine {
 
-	static std::string LevelToSpaces(uint32_t level)
-	{
-		std::string result = "";
-		for (uint32_t i = 0; i < level; i++)
-		{
-			result += "--";
-		}
-
-		return result;
-	}
+	std::string LevelToSpaces(const uint32_t Level);
 
 	LMeshSource::LMeshSource()
 	{
@@ -74,6 +67,7 @@ namespace LkEngine {
 		LK_CORE_TRACE("------------------------------------------------------");
 	}
 
+	/*----------------------------------------------------------------------------------------*/
 
 	LMesh::LMesh(TObjectPtr<LMeshSource> InMeshSource)
 		: MeshSource(InMeshSource)
@@ -81,17 +75,28 @@ namespace LkEngine {
 		LASSET_REGISTER();
 		Handle = {};
 
+		LK_CORE_VERIFY(MeshSource->Handle == InMeshSource->Handle);
 		SetSubmeshes({});
 
-		const std::vector<TObjectPtr<LMaterial>>& MeshMaterials = MeshSource->GetMaterials();
-		Materials = TObjectPtr<LMaterialTable>::Create(static_cast<uint32_t>(MeshMaterials.size()));
+		MaterialTable = TObjectPtr<LMaterialTable>::Create(static_cast<uint32_t>(MeshSource->GetMaterials().size()));
 
-		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials", Handle, MeshMaterials.size());
-		for (uint32_t i = 0; i < static_cast<uint32_t>(MeshMaterials.size()); i++)
+		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials from MeshSource: {}", 
+						  Handle, MaterialTable->GetMaterials().size(), MeshSource->Handle);
+
+		auto& MaterialMap = MaterialTable->GetMaterials();
+		for (uint32_t i = 0; i < static_cast<uint32_t>(MaterialMap.size()); i++)
 		{
-			TObjectPtr<LMaterialAsset> MaterialAsset = TObjectPtr<LMaterialAsset>::Create(MeshMaterials[i]);
-			Materials->SetMaterial(i, MaterialAsset->Handle);
-			LK_CORE_TRACE_TAG("Mesh", "Setting material indexed {}", i);
+			TObjectPtr<LMaterialAsset> MaterialAsset = TObjectPtr<LMaterialAsset>::Create(MaterialMap[i]);
+			MaterialTable->SetMaterial(i, MaterialAsset->Handle);
+		}
+
+		/* Load base material if no other materials exist. */
+		if (MaterialTable->GetMaterialCount() == 0)
+		{
+			TObjectPtr<LMaterialAsset> BaseMatAsset = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL);
+			LK_CORE_VERIFY(BaseMatAsset, "Base material asset is not valid");
+			LK_CORE_VERIFY(BaseMatAsset->GetMaterial(), "BaseMaterialAsset does not contain a material");
+			MaterialTable->SetMaterial(0, BaseMatAsset->Handle);
 		}
 	}
 
@@ -102,21 +107,30 @@ namespace LkEngine {
 		Handle = {};
 		SetSubmeshes(InSubmeshes);
 
-		const std::vector<TObjectPtr<LMaterial>>& MeshMaterials = InMeshSource->GetMaterials();
-		Materials = TObjectPtr<LMaterialTable>::Create(static_cast<uint32_t>(MeshMaterials.size()));
+		MaterialTable = TObjectPtr<LMaterialTable>::Create(static_cast<uint32_t>(MeshSource->GetMaterials().size()));
 
-		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials", Handle, MeshMaterials.size());
-		for (uint32_t i = 0; i < static_cast<uint32_t>(MeshMaterials.size()); i++)
+		auto& MaterialMap = MaterialTable->GetMaterials();
+		for (uint32_t i = 0; i < static_cast<uint32_t>(MaterialMap.size()); i++)
 		{
-			TObjectPtr<LMaterialAsset> MaterialAsset = TObjectPtr<LMaterialAsset>::Create(MeshMaterials[i]);
-			Materials->SetMaterial(i, MaterialAsset->Handle);
-			LK_CORE_TRACE_TAG("Mesh", "Setting material indexed {}", i);
+			TObjectPtr<LMaterialAsset> MaterialAsset = TObjectPtr<LMaterialAsset>::Create(MaterialMap[i]);
+			MaterialTable->SetMaterial(i, MaterialAsset->Handle);
 		}
+
+		/* Load base material if no other materials exist. */
+		if (MaterialTable->GetMaterialCount() == 0)
+		{
+			TObjectPtr<LMaterialAsset> BaseMatAsset = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL);
+			LK_CORE_VERIFY(BaseMatAsset, "Base material asset is not valid");
+			LK_CORE_VERIFY(BaseMatAsset->GetMaterial(), "BaseMaterialAsset does not contain a material");
+			MaterialTable->SetMaterial(0, BaseMatAsset->Handle);
+		}
+
+		LK_CORE_DEBUG_TAG("Mesh", "Created new mesh ({}) with {} materials", Handle, MaterialTable->GetMaterials().size());
 	}
 
 	LMesh::LMesh(const TObjectPtr<LMesh>& Other)
 		: MeshSource(Other->MeshSource)
-		, Materials(Other->Materials)
+		, MaterialTable(Other->MaterialTable)
 	{
 		LASSET_REGISTER();
 		SetSubmeshes(Other->Submeshes);
@@ -144,8 +158,13 @@ namespace LkEngine {
 	TObjectPtr<LMaterial> LMesh::GetMaterial(const int Index)
 	{
 		/* TODO: Validate index */
-		const FAssetHandle AssetHandle = Materials->GetMaterialHandle(Index);
-		return LAssetManager::GetAsset<LMaterialAsset>(AssetHandle)->GetMaterial();
+		LK_CORE_VERIFY(MaterialTable->HasMaterial(Index), "Index {} is not valid", Index);
+		const FAssetHandle AssetHandle = MaterialTable->GetMaterialHandle(Index);
+		//auto Asset = LAssetManager::GetAsset<LMaterialAsset>(AssetHandle)->GetMaterial();
+		auto Asset = LAssetManager::GetAsset<LMaterialAsset>(AssetHandle);
+		TObjectPtr<LMaterial> Material = Asset->GetMaterial();
+		//return Asset.As<LMaterial>();
+		return Material;
 	}
 
 
@@ -208,6 +227,21 @@ namespace LkEngine {
 				Submeshes[Index] = Index;
 			}
 		}
+	}
+
+
+	/*-------------------------------------------------------------------------------------------*/
+
+
+	std::string LevelToSpaces(const uint32_t Level)
+	{
+		std::string Result = "";
+		for (uint32_t i = 0; i < Level; i++)
+		{
+			Result += "--";
+		}
+
+		return Result;
 	}
 
 

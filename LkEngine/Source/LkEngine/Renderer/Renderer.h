@@ -4,14 +4,24 @@
 
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
+#include "LkEngine/Core/Delegate/Delegate.h"
 
 #include "LkEngine/Scene/Components.h"
 
 
 namespace LkEngine {
 
+	class LShader;
+
 	class LRenderer : public LObject
 	{
+	public:
+		LK_DECLARE_MULTICAST_DELEGATE(FOnMeshSubmission, 
+			TObjectPtr<LMesh>, 
+			TObjectPtr<LShader>,
+			TObjectPtr<LMaterial>
+		);
+
 	public:
 		LRenderer();
 		~LRenderer() = default;
@@ -79,10 +89,6 @@ namespace LkEngine {
 		static TObjectPtr<LFramebuffer> GetViewportFramebuffer();
 		static RendererCapabilities& GetCapabilities();
 
-		static void BeginScene(const LSceneCamera& SceneCamera);
-		static void BeginScene(const glm::mat4& ViewProjection);
-		static void EndScene();
-
 		template<typename TFunction>
 		static void Submit(TFunction&& Function)
 		{
@@ -131,7 +137,7 @@ namespace LkEngine {
 
 		FORCEINLINE static ERenderTopology GetPrimitiveTopology() { return PrimitiveTopology; }
 
-		static RenderCommandQueue& GetRenderCommandQueue();
+		static LRenderCommandQueue& GetRenderCommandQueue();
 		static uint32_t GetRenderQueueIndex();
 		static uint32_t GetRenderQueueSubmissionIndex();
 
@@ -150,10 +156,11 @@ namespace LkEngine {
 		static void LoadTextures();
 
 	public:
-		inline static ERenderTopology PrimitiveTopology;
-
 		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.250f, 1.0f };
 		inline static glm::vec4 DEFAULT_CLEARCOLOR = { 0.200f, 0.200f, 0.250f, 1.0f };
+
+		static FOnMeshSubmission OnMeshSubmission;
+		static ERenderTopology PrimitiveTopology;
 
 	private:
 		inline static uint32_t SamplerCount = 0;

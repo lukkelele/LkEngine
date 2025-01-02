@@ -6,6 +6,9 @@
 
 namespace LkEngine {
 
+	/**
+	 * The following members are set during the evaluation of the runtime arguments in 'Globals.h'.
+	 */
 	std::filesystem::path LFileSystem::WorkingDir{};
 	std::filesystem::path LFileSystem::BinaryDir{};
 	std::filesystem::path LFileSystem::EngineDir{};
@@ -14,6 +17,7 @@ namespace LkEngine {
 	std::filesystem::path LFileSystem::ConfigDir{};
 	std::filesystem::path LFileSystem::AssetsDir{};
 	std::filesystem::path LFileSystem::ProjectsDir{};
+	std::filesystem::path LFileSystem::EditorConfig{};
 
 	namespace fs = std::filesystem;
 
@@ -46,6 +50,22 @@ namespace LkEngine {
 		return std::filesystem::exists(Filepath);
 	}
 
+	bool LFileSystem::DeleteFile(const std::filesystem::path& Filepath)
+	{
+		LK_CORE_ASSERT(!Filepath.empty(), "Cannot delete an empty file");
+		if (!LFileSystem::Exists(Filepath))
+		{ 
+			return false;
+		}
+
+		if (std::filesystem::is_directory(Filepath))
+		{
+			return (std::filesystem::remove_all(Filepath) > 0);
+		}
+
+		return std::filesystem::remove(Filepath);
+	}
+
 	bool LFileSystem::Rename(const std::filesystem::path& OldFilepath, const std::filesystem::path& NewFilepath)
 	{
 		return Move(OldFilepath, NewFilepath);
@@ -61,6 +81,12 @@ namespace LkEngine {
 	bool LFileSystem::CreateDirectory(const std::filesystem::path& Directory)
 	{
 		LK_CORE_VERIFY(!Directory.empty(), "Directory is empty");
+		if (Directory.has_extension())
+		{
+			LK_CORE_WARN_TAG("FileSystem", "The name of directory '{}' contains a file extension, cannot create as directory", Directory.filename());
+			return false;
+		}
+
 		return std::filesystem::create_directories(Directory);
 	}
 
@@ -102,6 +128,32 @@ namespace LkEngine {
 	#elif defined(LK_PLATFORM_LINUX)
 		return ShowFileInExplorer(path);
 	#endif	
+	}
+
+	std::string LFileSystem::ConvertPathToWindows(const std::filesystem::path& UnixPath)
+	{
+		if (UnixPath.empty())
+		{
+			return {};
+		}
+
+		std::string UnixPathStr = UnixPath.string();
+		std::replace(UnixPathStr.begin(), UnixPathStr.end(), '/', '\\');
+
+		return UnixPathStr;
+	}
+
+	std::string LFileSystem::ConvertPathToUnix(const std::filesystem::path& WindowsPath)
+	{
+		if (WindowsPath.empty())
+		{
+			return {};
+		}
+
+		std::string WindowsPathStr = WindowsPath.string();
+		std::replace(WindowsPathStr.begin(), WindowsPathStr.end(), '/', '\\');
+
+		return WindowsPathStr;
 	}
 
 	std::filesystem::path LFileSystem::OpenFileDialog(const std::initializer_list<FFileDialogFilterItem> InFilters)

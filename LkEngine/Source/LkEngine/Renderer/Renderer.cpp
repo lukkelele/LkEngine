@@ -11,6 +11,9 @@
 
 namespace LkEngine {
 
+	ERenderTopology LRenderer::PrimitiveTopology;
+	LRenderer::FOnMeshSubmission LRenderer::OnMeshSubmission;
+
 	struct FShaderDependencies
 	{
 		std::vector<TObjectPtr<LPipeline>> Pipelines{};
@@ -38,9 +41,9 @@ namespace LkEngine {
 
 	static FRendererData* RendererData = nullptr;
 	constexpr static uint32_t RenderCommandQueueCount = 2;
-	static RenderCommandQueue* CommandQueue[RenderCommandQueueCount];
+	static LRenderCommandQueue* CommandQueue[RenderCommandQueueCount];
 	static std::atomic<uint32_t> RenderCommandQueueSubmissionIndex = 0;
-	static RenderCommandQueue ResourceFreeQueue[3];
+	static LRenderCommandQueue ResourceFreeQueue[3];
 
 	LRenderer::LRenderer()
 	{
@@ -49,11 +52,12 @@ namespace LkEngine {
 
 	void LRenderer::Initialize()
 	{
+		LK_CORE_ASSERT(RendererData == nullptr, "RendererData already exist");
 		RendererData = new FRendererData();
 
 		PrimitiveTopology = ERenderTopology::Triangles;
-		CommandQueue[0] = new RenderCommandQueue();
-		CommandQueue[1] = new RenderCommandQueue();
+		CommandQueue[0] = new LRenderCommandQueue();
+		CommandQueue[1] = new LRenderCommandQueue();
 
 		LK_CORE_DEBUG_TAG("Renderer", "Creating Shader library");
 		RendererData->m_ShaderLibrary = TObjectPtr<LShaderLibrary>::Create();
@@ -127,7 +131,7 @@ namespace LkEngine {
 		RendererAPI->SetPrimitiveTopology(InRenderTopology);
 	}
 
-	RenderCommandQueue& LRenderer::GetRenderCommandQueue()
+	LRenderCommandQueue& LRenderer::GetRenderCommandQueue()
 	{
 		return *CommandQueue[RenderCommandQueueSubmissionIndex];
 	}
@@ -247,22 +251,14 @@ namespace LkEngine {
 		RendererAPI->SubmitQuad(TransformComponent.Translation, Size, Texture, TransformComponent.Rotation2D, EntityID);
 	}
 
-	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent,
+	void LRenderer::SubmitSprite(LTransformComponent& TransformComponent, 
 								 const glm::vec2& Size,
-								 TObjectPtr<LTexture>
-									 Texture,
+								 TObjectPtr<LTexture> Texture,
 								 const glm::vec4& Color,
 								 uint64_t EntityID)
 	{
-		RendererAPI
-			->SubmitQuad(TransformComponent.Translation, Size, Texture, Color, TransformComponent.Rotation2D, EntityID);
+		RendererAPI->SubmitQuad(TransformComponent.Translation, Size, Texture, Color, TransformComponent.Rotation2D, EntityID);
 	}
-
-	void LRenderer::BeginScene(const LSceneCamera& InSceneCamera) {}
-
-	void LRenderer::BeginScene(const glm::mat4& ViewProjectionMatrix) {}
-
-	void LRenderer::EndScene() {}
 
 	RendererCapabilities& LRenderer::GetCapabilities()
 	{
@@ -293,51 +289,37 @@ namespace LkEngine {
 	}
 
 	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
-								   TObjectPtr<LPipeline>
-									   Pipeline,
-								   TObjectPtr<LVertexBuffer>
-									   VertexBuffer,
-								   TObjectPtr<LIndexBuffer>
-									   IndexBuffer,
+								   TObjectPtr<LPipeline> Pipeline,
+								   TObjectPtr<LVertexBuffer> VertexBuffer,
+								   TObjectPtr<LIndexBuffer> IndexBuffer,
 								   const glm::mat4& Transform,
 								   uint32_t IndexCount /*= 0*/)
 	{
-		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, VertexBuffer, IndexBuffer, Transform, IndexCount);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
+		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, VertexBuffer, IndexBuffer, Transform, IndexCount);
 	}
 
 	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
-								   TObjectPtr<LPipeline>
-									   Pipeline,
-								   TObjectPtr<LShader>
-									   Shader,
-								   TObjectPtr<LVertexBuffer>
-									   VertexBuffer,
-								   TObjectPtr<LIndexBuffer>
-									   IndexBuffer,
+								   TObjectPtr<LPipeline> Pipeline,
+								   TObjectPtr<LShader> Shader,
+								   TObjectPtr<LVertexBuffer> VertexBuffer,
+								   TObjectPtr<LIndexBuffer> IndexBuffer,
 								   const glm::mat4& Transform,
 								   const uint32_t IndexCount /*= 0*/)
 	{
-		RendererAPI
-			->RenderGeometry(RenderCommandBuffer, Pipeline, Shader, VertexBuffer, IndexBuffer, Transform, IndexCount);
-		// LK_MARK_FUNC_NOT_IMPLEMENTED();
+		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, Shader, VertexBuffer, IndexBuffer, Transform, IndexCount);
 	}
 
 	void LRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
-								   TObjectPtr<LPipeline>
-									   Pipeline,
-								   TObjectPtr<LMaterial>
-									   Material,
-								   TObjectPtr<LVertexBuffer>
-									   VertexBuffer,
-								   TObjectPtr<LIndexBuffer>
-									   IndexBuffer,
+								   TObjectPtr<LPipeline> Pipeline,
+								   TObjectPtr<LMaterial> Material,
+								   TObjectPtr<LVertexBuffer> VertexBuffer,
+								   TObjectPtr<LIndexBuffer> IndexBuffer,
 								   const glm::mat4& Transform,
 								   const uint32_t IndexCount /*= 0*/)
 	{
-		RendererAPI
-			->RenderGeometry(RenderCommandBuffer, Pipeline, Material, VertexBuffer, IndexBuffer, Transform, IndexCount);
 		// LK_MARK_FUNC_NOT_IMPLEMENTED();
+		RendererAPI->RenderGeometry(RenderCommandBuffer, Pipeline, Material, VertexBuffer, IndexBuffer, Transform, IndexCount);
 	}
 
 	TObjectPtr<LTexture2D> LRenderer::GetWhiteTexture()
@@ -354,7 +336,6 @@ namespace LkEngine {
 
 	void LRenderer::DrawMesh(TObjectPtr<LMesh>& Mesh, const TObjectPtr<LShader> Shader)
 	{
-		// RendererAPI->Draw(*mesh->GetMeshSource()->GetVertexBuffer(), *Shader);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 		LK_UNUSED(Mesh && Shader);
 	}
@@ -367,6 +348,7 @@ namespace LkEngine {
 	/* TODO: Make this dynamic instead of using hardcoded entries. */
 	void LRenderer::LoadTextures()
 	{
+		LK_CORE_INFO_TAG("Renderer", "Loading textures");
 		LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
 
 		/* Textures: 512x512 */
@@ -379,7 +361,7 @@ namespace LkEngine {
 			Specification.Path = "Assets/Textures/grass.png";
 			Specification.Name = "grass-512x512";
 			Specification.DebugName = "grass-512x512";
-			Specification.GenerateMips = true;
+			Specification.bGenerateMips = true;
 			Specification.Format = EImageFormat::RGBA32F;
 			Specification.SamplerWrap = ETextureWrap::Repeat;
 			Specification.SamplerFilter = ETextureFilter::Linear;
@@ -389,7 +371,7 @@ namespace LkEngine {
 			Specification.Path = "Assets/Textures/Skybox/back.jpg";
 			Specification.Name = "skybox-ice-back-512x512";
 			Specification.DebugName = "skybox-ice-back-512x512";
-			Specification.GenerateMips = false;
+			Specification.bGenerateMips = false;
 			Specification.Format = EImageFormat::RGBA32F;
 			Specification.SamplerWrap = ETextureWrap::Clamp;
 			Specification.SamplerFilter = ETextureFilter::Nearest;
@@ -406,7 +388,7 @@ namespace LkEngine {
 			Specification.Path = "Assets/Textures/brickwall.jpg";
 			Specification.Name = "brickwall";
 			Specification.DebugName = "brickwall";
-			Specification.GenerateMips = true;
+			Specification.bGenerateMips = true;
 			Specification.SamplerWrap = ETextureWrap::Repeat;
 			Specification.SamplerFilter = ETextureFilter::Linear;
 			TextureLibrary.AddTexture(Specification);
@@ -456,7 +438,7 @@ namespace LkEngine {
 			Specification.Path = "Assets/Textures/metal.png";
 			Specification.Name = "metal-ground";
 			Specification.DebugName = "metal-ground";
-			Specification.GenerateMips = true;
+			Specification.bGenerateMips = true;
 			Specification.SamplerWrap = ETextureWrap::Repeat;
 			Specification.SamplerFilter = ETextureFilter::Nearest;
 			TextureLibrary.AddTexture(Specification);
@@ -465,7 +447,7 @@ namespace LkEngine {
 			Specification.Name = "wood";
 			Specification.DebugName = "wood";
 			Specification.Path = "Assets/Textures/wood.png";
-			Specification.GenerateMips = true;
+			Specification.bGenerateMips = true;
 			Specification.SamplerWrap = ETextureWrap::Repeat;
 			Specification.SamplerFilter = ETextureFilter::Linear;
 			TextureLibrary.AddTexture(Specification);
@@ -474,7 +456,7 @@ namespace LkEngine {
 			Specification.Name = "skybox-ice-back";
 			Specification.DebugName = "skybox-ice-back";
 			Specification.Path = "Assets/Textures/Skybox/back.jpg";
-			Specification.GenerateMips = false;
+			Specification.bGenerateMips = false;
 			Specification.Format = EImageFormat::RGBA32F;
 			Specification.SamplerFilter = ETextureFilter::Nearest;
 			Specification.SamplerWrap = ETextureWrap::Clamp;
@@ -486,6 +468,5 @@ namespace LkEngine {
 	{
 		RendererAPI->SetDepthFunction(InDepthFunction);
 	}
-
 
 }

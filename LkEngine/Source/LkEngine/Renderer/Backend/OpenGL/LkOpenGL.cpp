@@ -29,8 +29,6 @@ namespace LkEngine {
 
 		uint32_t CubeVAO;
 		uint32_t CubeVBO;
-		uint32_t PlaneVAO;
-		uint32_t PlaneVBO;
 		uint32_t QuadVAO;
 		uint32_t QuadVBO;
 
@@ -140,7 +138,6 @@ namespace LkEngine {
 
 			/* Floor. */
 			{
-				LK_OpenGL_Verify(glBindVertexArray(PlaneVAO));
 				PlaneTexture->Bind();
 				DebugShader->Set("u_Model", glm::mat4(1.0f));
 				LK_OpenGL_Verify(glDrawArrays(GL_TRIANGLES, 0, 6));
@@ -176,7 +173,6 @@ namespace LkEngine {
 			DebugShader->Bind();
 			DebugShader->Set("u_ViewMatrix", view);
 			DebugShader->Set("u_ProjectionMatrix", projection);
-			//DebugShader->Set("u_ViewProjectionMatrix", viewProjection);
 			/* EXPERIMENTAL. */
 			DebugShader->Set("Texture1", 0);
 			CubeTexture->Bind(0);
@@ -233,7 +229,7 @@ namespace LkEngine {
 			/* Make the TextureCube follow us. */
 			const glm::mat4 ProjectionMatrix = Camera->GetProjectionMatrix();
 			const glm::mat4 ViewMatrix = glm::mat4(glm::mat3(Camera->GetViewMatrix()));
-			LOpenGL_Debug::SkyboxShader->Set("u_ViewProjectionMatrix", ProjectionMatrix * ViewMatrix);
+			LOpenGL_Debug::SkyboxShader->Set("u_ViewProjection", ProjectionMatrix * ViewMatrix);
 
 			LOpenGL_Debug::SkyboxShader->Set("u_CameraPos", Camera->GetViewMatrix());
 			LOpenGL_Debug::SkyboxShader->Set("u_Model", glm::mat4(SkyboxModelSize));
@@ -251,7 +247,7 @@ namespace LkEngine {
 			SetupTexturesAndShaders();
 
 			SetupDebugCube();
-			GeneratePlaneVaoAndVbo(PlaneVAO, PlaneVBO);
+			GeneratePlaneVaoAndVbo();
 			GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
 
 			CubeTexture_ = LoadTexture("Assets/Textures/container.jpg");
@@ -355,7 +351,7 @@ namespace LkEngine {
 			SkyboxShader->Set("u_Skybox", 0);
 		}
 
-		void GeneratePlaneVaoAndVbo(uint32_t& vao, uint32_t& vbo)
+		void GeneratePlaneVaoAndVbo()
 		{
 			if (!DebugShader)
 			{
@@ -372,7 +368,7 @@ namespace LkEngine {
 				{ "a_Pos",       EShaderDataType::Float3 },
 				{ "a_TexCoord",  EShaderDataType::Float2 },
 			});
-			LK_CORE_TRACE_TAG("LkOpenGL", "Generated CubeVertexBuffer!");
+			LK_CORE_TRACE_TAG("LkOpenGL", "Created plane vertex buffer");
 		}
 
 		void GenerateScreenQuadVaoAndVbo(uint32_t& VaoRef, uint32_t& VboRef)

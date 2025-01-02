@@ -82,7 +82,7 @@ namespace LkEngine {
 			{
 				for (const auto& [PanelID, PanelData] : Panels[Category])
 				{
-					LK_CORE_INFO_TAG("PanelManager", "Serializing: {}", PanelData.Name);
+					LK_CORE_TRACE_TAG("PanelManager", "Serializing: {}", PanelData.Name);
 					Out << YAML::BeginMap;
 					Out << YAML::Key << "ID" << YAML::Value << PanelID;
 					Out << YAML::Key << "Name" << YAML::Value << PanelData.Name;

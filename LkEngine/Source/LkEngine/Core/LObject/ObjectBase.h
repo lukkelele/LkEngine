@@ -85,12 +85,7 @@ namespace LkEngine {
 		/**
 		 * @brief Set the class, should be run once in the LCLASS declaration for an LClass object.
 		 */
-		FORCEINLINE void SetClass(LClass* InClass)
-		{
-			LK_CORE_VERIFY(InClass, "Class object is nullptr");
-			LK_CORE_VERIFY(ClassPrivate == nullptr, "SetClass called multiple times");
-			ClassPrivate = InClass;
-		}
+		void SetClass(LClass* InClass);
 
 		/**
 		 * @brief Get the private class member.
