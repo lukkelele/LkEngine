@@ -213,6 +213,11 @@ project "LkEngine"
 		symbols "On"
         links { "Tracy" }
 
+	filter "configurations:AutomationTest"
+        includedirs {
+            "%{wks.location}/LkEngine/Test",
+        }
+
     filter "kind:StaticLib"
         defines { "LK_ENGINE_STATIC_LIB" }
 
