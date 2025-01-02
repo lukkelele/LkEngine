@@ -5,8 +5,11 @@
 #include <LkEngine/Core/IO/FileSystem.h>
 
 #include "AutomationTest/TestManager.h"
-#include "AutomationTest/Suite/Core/ObjectPtrTests.h"
 
+#if defined(LK_AUTOMATION_TEST_CORE)
+#	include "AutomationTest/Suite/Core/ObjectPtrTests.h"
+#	include "AutomationTest/Suite/Core/EnumTests.h"
+#endif
 
 namespace LkEngine {
 
@@ -49,6 +52,13 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_String>());
 		Tests.push_back(std::make_shared<StringUtils_ToLower_WideString>());
 		Tests.push_back(std::make_shared<StringUtils_ToUpper_WideString>());
+		/* Enum tests. */
+		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Bitwise_AND>());
+		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Bitwise_OR>());
+		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_LessThan>());
+		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo>());
+		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_GreaterThan>());
+		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo>());
 	#endif
 	}
 

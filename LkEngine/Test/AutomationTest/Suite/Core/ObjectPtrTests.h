@@ -10,7 +10,6 @@
 
 /*------------------------------------------------------------------
 	 Dummy Tests.
-
  -----------------------------------------------------------------*/
 LK_DECLARE_AUTOMATION_TEST(Dummy_Arithmetic_OneEqualOne,         LK_TEST_SUITE_CORE);
 LK_DECLARE_AUTOMATION_TEST(Dummy_Arithmetic_OneLessThanTwo,      LK_TEST_SUITE_CORE);

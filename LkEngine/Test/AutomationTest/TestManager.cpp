@@ -85,7 +85,7 @@ namespace LkEngine {
 			LFileSystem::CreateDirectory(ResultDir);
 		}
 		const std::string FileOutPath = LK_FORMAT_STRING("{}/{}", ResultDir, ResultFile);
-		LK_TEST_INFO("Saving test results ({})", FileOutPath);
+		LK_TEST_INFO("Saving test results: {}", FileOutPath);
 		std::ofstream FileOut(FileOutPath);
 		if (FileOut.is_open() && FileOut.good())
 		{
