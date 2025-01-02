@@ -1,11 +1,13 @@
 {
-    "Total": 13,
+    "Total": 19,
     "Passed": {
-        "Count": 13,
+        "Count": 19,
         "Tests": [
+            "Enum_EnumClass_Operator_Bitwise_OR",
             "ObjectPtr_ReferenceCount_Creation",
             "Dummy_Arithmetic_OneEqualOne",
             "ObjectPtr_ReferenceCount_CopyTwice",
+            "Enum_EnumClass_Operator_Comparison_GreaterThan",
             "Dummy_Arithmetic_OneLessThanTwo",
             "Dummy_Arithmetic_TwoGreaterThanThree",
             "Dummy_Arithmetic_TwoGreaterThanOne",
@@ -15,7 +17,11 @@
             "StringUtils_ToLower_String",
             "StringUtils_ToUpper_String",
             "StringUtils_ToLower_WideString",
-            "StringUtils_ToUpper_WideString"
+            "StringUtils_ToUpper_WideString",
+            "Enum_EnumClass_Operator_Bitwise_AND",
+            "Enum_EnumClass_Operator_Comparison_LessThan",
+            "Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo",
+            "Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo"
         ]
     },
     "Failed": {
