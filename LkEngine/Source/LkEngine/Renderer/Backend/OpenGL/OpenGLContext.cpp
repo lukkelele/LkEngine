@@ -19,10 +19,6 @@ namespace LkEngine {
 		LK_CORE_VERIFY(InWindow, "Window is nullptr");
 
 		m_GlfwWindow = Window->GetGlfwWindow();
-
-		/* Attach window delegates. */
-		LK_CORE_DEBUG_TAG("OpenGLContext", "Attaching to OnWindowSizeUpdated delegate");
-		Window->OnWindowSizeUpdated.Add(this, &LOpenGLContext::UpdateResolution);
 	}
 
 	void LOpenGLContext::Destroy() 
@@ -50,6 +46,10 @@ namespace LkEngine {
 
 		/* Fetch backend info. */
 		LOpenGL::LoadInfo();
+
+		/* Attach window delegates. */
+		LK_CORE_DEBUG_TAG("OpenGLContext", "Attaching to OnWindowSizeUpdated delegate");
+		Window->OnWindowSizeUpdated.Add(this, &LOpenGLContext::UpdateResolution);
 	}
 
 	void LOpenGLContext::SetViewport(const glm::vec2& ViewportPos, const glm::vec2& ViewportSize)
@@ -111,13 +111,11 @@ namespace LkEngine {
 
 	void LOpenGLContext::UpdateResolution(const uint16_t Width, const uint16_t Height)
 	{
-		/* TODO: Fix the use of ImGui here. Should not be like that. */
-		ImGuiViewport* Viewport = ImGui::GetMainViewport();
-		const ImVec2 Pos = Viewport->WorkPos;
-		LK_OpenGL_Verify(glViewport(Pos.x, Pos.y, Width, Height));
+		LK_CORE_ASSERT(m_GlfwWindow);
+		int PosX, PosY;
+        glfwGetWindowPos(m_GlfwWindow, &PosX, &PosY);
 
-		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(Width, Height);
+        LK_OpenGL_Verify(glViewport(PosX, PosY, Width, Height));
 	}
 
 	void LOpenGLContext::SetDepthEnabled(const bool InEnabled)

@@ -1050,20 +1050,6 @@ namespace LkEngine {
 		});
 	}
 
-	void LEditorLayer::UI_ShowEditorWindowsDetails()
-	{
-		ImGui::BeginGroup();
-		{
-			ImGui::Text("MenuBarSize: (%1.f, %1.f)", MenuBarSize.X, MenuBarSize.Y);
-			ImGui::Text("TabBarSize: (%1.f, %1.f)", TabBarSize.X, TabBarSize.Y);
-			ImGui::Text("RightSidebarSize: (%1.f, %1.f)", RightSidebarSize.X, RightSidebarSize.Y);
-			ImGui::Text("BottomBarSize: (%1.f, %1.f)", BottomBarSize.X, BottomBarSize.Y);
-			ImGui::Text("Current Tab: %s", TabManager.GetActiveTabName().c_str());
-			ImGui::Text("Tabs: %d", TabManager.GetTabCount());
-		}
-		ImGui::EndGroup();
-	}
-
 	void LEditorLayer::UI_SyncEditorWindowSizes(const LVector2& InViewportSize)
 	{
 		/* Only take the size of the TabBar into account if any tabs exist. */
@@ -1085,17 +1071,19 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_ClearColorModificationMenu()
 	{
-		static ImGuiSliderFlags BackgroundSliderFlags = ImGuiSliderFlags_None;
+		static constexpr ImGuiSliderFlags BackgroundSliderFlags = ImGuiSliderFlags_None;
 		auto& Colors = ImGui::GetStyle().Colors;
 		ImGui::BeginGroup();
 		{
 			UI::PushID("##ClearColorsModification");
-			ImGui::Text("Background");
+			ImGui::Text("Clear Color");
+			ImGui::Indent();
 			ImGui::SliderFloat("##x", &LRenderer::ClearColor.x, 0.0f, 1.0f, " %.3f", BackgroundSliderFlags);
 			ImGui::SliderFloat("##y", &LRenderer::ClearColor.y, 0.0f, 1.0f, " %.3f", BackgroundSliderFlags);
 			ImGui::SliderFloat("##z", &LRenderer::ClearColor.z, 0.0f, 1.0f, " %.3f", BackgroundSliderFlags);
 			ImGui::SliderFloat("##w", &LRenderer::ClearColor.w, 0.0f, 1.0f, " %.3f", BackgroundSliderFlags);
 			ImGui::SliderFloat("UI Alpha", &Colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", BackgroundSliderFlags);
+			ImGui::Unindent();
 			UI::PopID();
 		}
 		ImGui::EndGroup();
@@ -1283,8 +1271,28 @@ namespace LkEngine {
 			{
 				if (ImGui::BeginMenu("Windows"))
 				{
+					if (ImGui::MenuItem("Content Browser"))
+					{
+						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser))
+						{
+							PanelData->bIsOpen = true;
+						}
+					}
 					if (ImGui::MenuItem("Scene Manager"))
 					{
+						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::SceneManager))
+						{
+							PanelData->bIsOpen = true;
+						}
+					}
+					
+					// Re-open all essential editor windows.
+					if (ImGui::MenuItem("Restore default"))
+					{
+						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser))
+						{
+							PanelData->bIsOpen = true;
+						}
 						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::SceneManager))
 						{
 							PanelData->bIsOpen = true;

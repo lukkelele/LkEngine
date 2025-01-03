@@ -223,6 +223,7 @@ namespace LkEngine {
 	{
 		if (RenderContext)
 		{
+			LK_CORE_DEBUG_TAG("Window", "Releasing render context");
 			RenderContext->Destroy();
 			RenderContext.Release();
 			RenderContext = nullptr;

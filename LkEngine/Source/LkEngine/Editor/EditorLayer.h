@@ -104,7 +104,6 @@ namespace LkEngine {
 
 		void UI_ShowMouseDetails();
 		void UI_ShowViewportAndWindowDetails();
-		void UI_ShowEditorWindowsDetails();
 		void UI_ClearColorModificationMenu();
 		void UI_ViewportTexture();
 		void UI_WindowStatistics();

@@ -61,6 +61,12 @@ namespace LkEngine {
 		InitializeFonts();
 
 		bInitialized = true;
+
+		Window.OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
+		{
+			ImGuiIO& IO = ImGui::GetIO();
+			IO.DisplaySize = ImVec2(NewWidth, NewHeight);
+		});
     }
 
     void LOpenGLImGuiLayer::Destroy()
