@@ -29,7 +29,6 @@
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/Template/TypeTrait.h"
 
-#include "LkEngine/Core/Exception.h"
 #include "LkEngine/Core/Time/Timer.h"
 #include "LkEngine/Core/Memory/Buffer.h"
 #include "LkEngine/Core/Hash/UUID.h"
