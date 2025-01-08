@@ -5,19 +5,28 @@
 
 namespace LkEngine {
 
-	/** EMouseButton */
+	/** 
+	 * EMouseButton 
+	 */
 	enum class EMouseButton : uint16_t
 	{
-		Button0,  /* Left   */
-		Button1,  /* Right  */
-		Button2,  /* Middle */
+		Button0, /* Left   */
+		Button1, /* Right  */
+		Button2, /* Middle */
 		Button3,
 		Button4,
 		Button5,
-
 		None,
+
+		/* Keep aliases below the rest. */
+		Left   = Button0,
+		Right  = Button1,
+		Middle = Button2,
 	};
 
+	/**
+	 * EMouseButtonState
+	 */
 	enum class EMouseButtonState
 	{
 		None = -1,
@@ -52,7 +61,7 @@ namespace LkEngine {
 	};
 
 
-	/// @FIXME: Temporary until metadata is available.
+	/// FIXME: Temporary until metadata is available.
 	namespace Enum
 	{
 		FORCEINLINE static constexpr const char* ToString(const EMouseButton MouseButton)

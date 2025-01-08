@@ -49,14 +49,11 @@ namespace LkEngine {
 			ImGui::Begin(LK_UI_SCENEMANAGER, &IsOpen, ImGuiWindowFlags_NoCollapse);
 		}
 
-		//const ImRect WindowContent = { ImGui::GetWindowContentRegionMin(), ImGui::GetWindowContentRegionMax() };
-
 		if (Scene)
 		{
 			ImGui::SeparatorText(std::format("{}", Scene->Name).c_str());
 			auto& EntityStorage = Scene->Registry.storage<entt::entity>();
-			//ImGui::Text("Content: %d", EntityStorage.size());
-			for (auto EntityID : EntityStorage)
+			for (entt::entity EntityID : EntityStorage)
 			{
 				if (static_cast<uint64_t>(EntityID) == 0)
 				{

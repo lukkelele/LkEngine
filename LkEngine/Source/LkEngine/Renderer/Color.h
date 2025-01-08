@@ -399,11 +399,12 @@ namespace LkEngine::RGBA32
 	static constexpr uint32_t PropertyField  = IM_COL32(15, 15, 15, 255);
 	static constexpr uint32_t Muted          = IM_COL32(77, 77, 77, 255);
 
-	static constexpr uint32_t GroupHeader    = IM_COL32(43, 43, 43, 255);
-	static constexpr uint32_t Selection      = IM_COL32(237, 192, 119, 255);
-	static constexpr uint32_t SelectionMuted = IM_COL32(237, 201, 142, 23);
-	static constexpr uint32_t Background     = IM_COL32(36, 36, 36, 255); 
-	static constexpr uint32_t BackgroundDark = IM_COL32(26, 26, 26, 255);
+	static constexpr uint32_t GroupHeader       = IM_COL32(43, 43, 43, 255);
+	static constexpr uint32_t Selection         = IM_COL32(190, 205, 119, 255);
+	static constexpr uint32_t SelectionMuted    = IM_COL32(237, 201, 142, 23);
+	static constexpr uint32_t Background        = IM_COL32(36, 36, 36, 255); 
+	static constexpr uint32_t BackgroundDark    = IM_COL32(26, 26, 26, 255);
+	static constexpr uint32_t BackgroundDarker  = IM_COL32(16, 16, 16, 255);
 
 	namespace Text 
 	{

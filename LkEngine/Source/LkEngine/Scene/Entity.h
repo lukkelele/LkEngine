@@ -107,6 +107,7 @@ namespace LkEngine {
 
 		operator uint32_t() const { return static_cast<uint32_t>(Handle); }
 		operator entt::entity() const { return Handle; }
+		operator LUUID() const { return GetUUID(); }
 		operator LTransformComponent&() { return GetComponent<LTransformComponent>(); }
 		operator bool() const;
 

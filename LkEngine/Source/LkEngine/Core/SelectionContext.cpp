@@ -4,7 +4,7 @@
 
 namespace LkEngine {
 
-	LUUID LSelectionContext::SelectedEntityID = 0;
+	LUUID LSelectionContext::SelectedHandle = 0;
 	std::vector<LUUID> LSelectionContext::SelectedEntities;
 	std::unordered_map<ESelectionContext, std::vector<LUUID>> LSelectionContext::SelectionContextMap;
 
@@ -19,8 +19,9 @@ namespace LkEngine {
 	LSelectionContext::LSelectionContext()
 	{
 		LOBJECT_REGISTER();
+		/* TODO: Remove the test code below. */
 		LK_CORE_ASSERT(GetClass() != nullptr, "GetClass failed");
-		LK_CORE_INFO_TAG("SelectionContext", "Class Name: '{}'", GetClass()->GetName());
+		LK_CORE_DEBUG_TAG("SelectionContext", "Class Name: '{}'", GetClass()->GetName());
 
 		SelectionContextMap.clear();
 		SelectionContextMap.insert({ ESelectionContext::Global, {} });

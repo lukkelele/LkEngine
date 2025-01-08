@@ -170,9 +170,7 @@ namespace LkEngine::UI {
 
     const char* GenerateID();
     void PushID();
-    void PushID(const char* ID);
     void PopID();
-    void PopID(const char* ID);
     bool IsInputEnabled();
     bool IsMouseEnabled();
     bool IsKeyboardEnabled();
@@ -306,6 +304,37 @@ namespace LkEngine::UI {
 
 		return {};
 	}
+
+	template<EFindType FindType = EFindType::Name, typename T = const char*>
+	FORCEINLINE static bool IsWindowHovered(T Identifier)
+	{
+		LK_CORE_ASSERT(false);
+		return false;
+	}
+
+	template<>
+	FORCEINLINE static bool IsWindowHovered<EFindType::Name>(const char* WindowName)
+	{
+		if (ImGuiWindow* Window = ImGui::FindWindowByName(WindowName); Window != nullptr)
+		{
+			ImGuiContext& G = *ImGui::GetCurrentContext();
+			return Window == G.HoveredWindow;
+		}
+
+		return false;
+    }
+
+	template<>
+	FORCEINLINE static bool IsWindowHovered<EFindType::ID>(const ImGuiID ID)
+	{
+		if (ImGuiWindow* Window = ImGui::FindWindowByID(ID); Window != nullptr)
+		{
+			ImGuiContext& G = *ImGui::GetCurrentContext();
+			return Window == G.HoveredWindow;
+		}
+
+		return false;
+    }
 
     void Image(const TObjectPtr<LTexture2D>& texture, 
                const ImVec2& Size, 

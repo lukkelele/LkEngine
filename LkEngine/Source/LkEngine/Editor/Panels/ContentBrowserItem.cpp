@@ -88,7 +88,7 @@ namespace LkEngine {
 
 		if (ItemType != EItemType::Directory)
 		{
-			auto* DrawList = ImGui::GetWindowDrawList();
+			ImDrawList* DrawList = ImGui::GetWindowDrawList();
 
 			/* Draw shadow. */
 			DrawShadow(TopLeft, BottomRight, false);
@@ -104,7 +104,8 @@ namespace LkEngine {
 		LK_CORE_ASSERT(Icon && Icon->IsValid(), "Icon is not valid");
 		ImGui::InvisibleButton("##ThumbnailButton", ImVec2(ThumbnailSize, ThumbnailSize));
 		UI::DrawButtonImage(
-			Icon, IM_COL32(255, 255, 255, 225),
+			Icon, 
+			IM_COL32(255, 255, 255, 225),
 			IM_COL32(255, 255, 255, 255),
 			IM_COL32(255, 255, 255, 255),
 			UI::RectExpanded(UI::GetItemRect(), -6.0f, -6.0f)
@@ -167,7 +168,6 @@ namespace LkEngine {
 				ImGui::EndGroup();
 			}
 
-			/* Vertical spring. */
 			ImGui::Dummy(ImVec2(0.0f, EdgeOffset));
 
 			ImGui::EndGroup();
@@ -205,7 +205,6 @@ namespace LkEngine {
 				ImGui::EndGroup(); /* End horizontal layout for the label. */
 			}
 
-			/* Add a vertical spring for spacing. */
 			const float VerticalSpringOffset = EdgeOffset;
 			ImGui::Dummy(ImVec2(0.0f, VerticalSpringOffset));
 
@@ -248,23 +247,25 @@ namespace LkEngine {
 			}
 		}
 
-		ImGui::PopStyleVar(); // ItemSpacing
+		ImGui::PopStyleVar(); /* ItemSpacing */
 		ImGui::EndGroup();
 
 		/* Draw outline. */
 		if (IsSelected || ImGui::IsItemHovered())
 		{
-			ImRect ItemRect = UI::GetItemRect();
-			auto* DrawList = ImGui::GetWindowDrawList();
+			ImDrawList* DrawList = ImGui::GetWindowDrawList();
 
 			if (IsSelected)
 			{
 				const bool IsMouseDown = ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsItemHovered();
-				const ImColor ColorTransition = UI::ColorWithMultipliedValue(RGBA32::Selection, 0.80f);
+				const ImColor ColorTransition = UI::ColorWithMultipliedValue(RGBA32::Selection, 0.65f);
+
+				const ImVec2 ItemRectMin = (ItemType == EItemType::Directory) ? ImGui::GetItemRectMin() : InfoTopLeft;
+				const ImVec2 ItemRectMax = (ItemType == EItemType::Directory) ? ImGui::GetItemRectMax() : BottomRight;
 
 				DrawList->AddRect(
-					ItemRect.Min, 
-					ItemRect.Max,
+					ItemRectMin,
+					ItemRectMax,
 					(IsMouseDown ? ImColor(ColorTransition) : ImColor(RGBA32::Selection)), 
 					6.0f, 
 					(ItemType == EItemType::Directory ? 0 : ImDrawFlags_RoundCornersBottom), 
@@ -273,11 +274,12 @@ namespace LkEngine {
 			}
 			else /* Is Hovered */
 			{
+				ImRect ItemRect = UI::GetItemRect();
 				if (ItemType != EItemType::Directory)
 				{
 					DrawList->AddRect(
-						ItemRect.Min, 
-						ItemRect.Max,
+						InfoTopLeft, 
+						BottomRight,
 						RGBA32::Muted, 
 						6.0f, 
 						ImDrawFlags_RoundCornersBottom, 
@@ -347,6 +349,7 @@ namespace LkEngine {
 				const bool MouseAction = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
 				const bool IsSelected = LSelectionContext::IsSelected(ESelectionContext::ContentBrowser, ID);
 				const bool SkipBecauseDragging = bIsDragging && IsSelected;
+
 				if (MouseAction && !SkipBecauseDragging)
 				{
 					if (bWasJustSelected)

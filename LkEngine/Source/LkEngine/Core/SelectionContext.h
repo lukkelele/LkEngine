@@ -49,11 +49,12 @@ namespace LkEngine {
 
 		static LSelectionContext& Get();
 
+	#if 0
 		FORCEINLINE static void Select(const LEntity InEntity)
 		{
 			LK_CORE_ASSERT(InEntity.GetUUID());
 			SelectedEntities.clear();
-			SelectedEntityID = InEntity.GetUUID();
+			SelectedHandle = InEntity.GetUUID();
 		}
 
 		FORCEINLINE static void Deselect(const LEntity InEntity)
@@ -68,49 +69,77 @@ namespace LkEngine {
 			}
 		#endif
 		}
+	#endif
+
+		FORCEINLINE static void Select(const LUUID Handle)
+		{
+			SelectedEntities.clear();
+			SelectedHandle = Handle;
+		}
+
+		FORCEINLINE static void Select(const ESelectionContext Context, const LUUID Handle, const bool Multiselect = false)
+		{
+			SelectedHandle = Handle;
+			auto& SelectionContext = SelectionContextMap.at(Context);
+			if (!Multiselect)
+			{
+				SelectionContext.clear();
+			}
+
+			SelectionContext.push_back(Handle);
+		}
+
+		FORCEINLINE static void Deselect(const LUUID Handle)
+		{
+			std::erase_if(SelectedEntities, [Handle](const LUUID& CurrentHandle)
+			{
+				return (Handle == CurrentHandle);
+			});
+		}
 
 		FORCEINLINE static void Deselect(const ESelectionContext Context, const LUUID Handle)
 		{
 			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-			std::vector<LUUID>& SelectionContext = SelectionContextMap.at(Context);
-		#if 0
-			auto Iter = std::find(SelectionContext.begin(), SelectionContext.end(), Handle);
-			if (Iter != SelectionContext.end())
+			auto& SelectionContext = SelectionContextMap.at(Context);
+			std::erase_if(SelectionContext, [Handle](const LUUID& CurrentHandle)
 			{
-				//std::erase(SelectionContext, Iter);
-				SelectionContext.erase(Iter);
-			}
-		#endif
+				return (Handle == CurrentHandle);
+			});
 		}
 
-		FORCEINLINE static bool DeselectAll()
+		FORCEINLINE static void DeselectAll()
 		{
 			LK_CORE_DEBUG_TAG("SelectionContext", "DeselectAll");
-			for (auto& [Context, SelectionArray] : SelectionContextMap)
+			for (auto& [Context, Selection] : SelectionContextMap)
 			{
 				LK_CORE_DEBUG_TAG("SelectionContext", "Deselecting: {}", Enum::ToString(Context));
+				Selection.clear();
 			}
-
-			return true;
 		}
 
-		FORCEINLINE static bool DeselectAll(const ESelectionContext Context)
+		FORCEINLINE static void DeselectAll(const ESelectionContext Context)
 		{
-			LK_CORE_DEBUG_TAG("SelectionContext", "DeselectAll: {}", Enum::ToString(Context));
-			return true;
+			LK_CORE_DEBUG_TAG("SelectionContext", "Deselecting all for: {}", Enum::ToString(Context));
+			auto& SelectionContext = SelectionContextMap.at(Context);
+			SelectionContext.clear();
 		}
 
+	#if 0
 		FORCEINLINE static bool IsSelected(const LEntity InEntity)
 		{
-			return (SelectedEntityID == InEntity.GetUUID());
+			return (SelectedHandle == InEntity.GetUUID());
+		}
+	#endif
+		FORCEINLINE static bool IsSelected(const LUUID Handle)
+		{
+			return (SelectedHandle == Handle);
 		}
 
-		/* TODO: Implement this fully. */
 		FORCEINLINE static bool IsSelected(const ESelectionContext Context, const LUUID Handle)
 		{
 			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
 			LK_CORE_ASSERT(Handle > 0, "AssetHandle is 0");
-			const std::vector<LUUID>& SelectionContext = SelectionContextMap.at(Context);
+			const auto& SelectionContext = SelectionContextMap.at(Context);
 			return (std::find(SelectionContext.begin(), SelectionContext.end(), Handle) != SelectionContext.end());
 		}
 
@@ -125,14 +154,16 @@ namespace LkEngine {
 			return SelectionContextMap[Context].size();
 		}
 
+	#if 0
 		FORCEINLINE void SelectEntity(const LEntity InEntity)
 		{
-			SelectedEntityID = InEntity.GetUUID();
+			SelectedHandle = InEntity.GetUUID();
 		#if 0
 			GSelectedObject = InEntity;
 			OnObjectSelectionChanged.Broadcast(InEntity);
 		#endif
 		}
+	#endif
 
 		FORCEINLINE static std::vector<LUUID>& GetSelected()
 		{
@@ -145,9 +176,10 @@ namespace LkEngine {
 		}
 
 	public:
-		static LUUID SelectedEntityID;
 		static std::vector<LUUID> SelectedEntities;
 		static std::unordered_map<ESelectionContext, std::vector<LUUID>> SelectionContextMap;
+
+		static LUUID SelectedHandle;
 
 		FOnObjectSelectionChanged OnObjectSelectionChanged;
 

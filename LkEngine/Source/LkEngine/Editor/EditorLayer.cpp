@@ -57,6 +57,7 @@ namespace LkEngine {
 		/* Windows. */
 		bool bWindow_MetricTool = false;
 		bool bWindow_StyleEditor = false;
+		bool bWindow_ImGuiLogWindow = false;
 		bool bRenderSkybox = true;
 
 		/// MOVE
@@ -214,28 +215,35 @@ namespace LkEngine {
 		/* Mouse button pressed. */
 		WindowData.OnMouseButtonPressed.Add([&](const FMouseButtonData& MouseButtonData)
 		{
-			//LK_CORE_TRACE_TAG("Editor", "MouseButtonPressed: {}", static_cast<int>(MouseButtonData.Button));
+			//LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed: {}", Enum::ToString(MouseButtonData.Button));
+			if (MouseButtonData.Button == EMouseButton::Left)
+			{
+				LSelectionContext::DeselectAll(ESelectionContext::ContentBrowser);
+			}
 		});
 
 		/* Mouse button released. */
 		WindowData.OnMouseButtonReleased.Add([&](const FMouseButtonData& MouseButtonData)
 		{
-			//LK_CORE_TRACE_TAG("Editor", "MouseButtonReleased: {}", static_cast<int>(MouseButtonData.Button));
+			//LK_CORE_DEBUG_TAG("Editor", "MouseButtonReleased: {}", static_cast<int>(MouseButtonData.Button));
 		});
 
 		/* Mouse scroll. */
 		WindowData.OnMouseScrolled.Add([&](const EMouseScroll MouseScroll)
 		{
-			//LK_CORE_TRACE_TAG("Editor", "Mouse Scroll: {}", Enum::ToString(MouseScroll));
+			//LK_CORE_DEBUG_TAG("Editor", "Mouse Scroll: {}", Enum::ToString(MouseScroll));
 			if (EditorCamera)
 			{
-				if (MouseScroll == EMouseScroll::Up)
+				if (UI::IsWindowHovered(LK_UI_EDITOR_VIEWPORT))
 				{
-					EditorCamera->MouseZoom(-0.01f);
-				}
-				else if (MouseScroll == EMouseScroll::Down)
-				{
-					EditorCamera->MouseZoom(0.01f);
+					if (MouseScroll == EMouseScroll::Up)
+					{
+						EditorCamera->MouseZoom(-0.01f);
+					}
+					else if (MouseScroll == EMouseScroll::Down)
+					{
+						EditorCamera->MouseZoom(0.01f);
+					}
 				}
 			}
 		});
@@ -246,7 +254,7 @@ namespace LkEngine {
 		FramebufferSpec.Attachments = { EImageFormat::RGBA32F, EImageFormat::DEPTH24STENCIL8 };
 		FramebufferSpec.Samples = 1;
 		FramebufferSpec.ClearColorOnLoad = false;
-		FramebufferSpec.ClearColor = { 0.1f, 0.5f, 0.5f, 1.0f };
+		FramebufferSpec.ClearColor = { 0.10f, 0.50f, 0.50f, 1.0f };
 		FramebufferSpec.DebugName = "EditorLayer-Framebuffer";
 		FramebufferSpec.Width = Window->GetWidth();
 		FramebufferSpec.Height = Window->GetHeight();
@@ -537,9 +545,9 @@ namespace LkEngine {
 				UI_ViewportTexture();
 
 				/* FIXME: Fix this code. */
-				if (LSelectionContext::SelectedEntityID > 0)
+				if (LSelectionContext::SelectedHandle > 0)
 				{
-					const LEntity SelectedEntity = EditorScene->TryGetEntityWithUUID(LSelectionContext::SelectedEntityID);
+					const LEntity SelectedEntity = EditorScene->TryGetEntityWithUUID(LSelectionContext::SelectedHandle);
 					if (SelectedEntity)
 					{
 						DrawObjectGizmo(SelectedEntity);
@@ -676,6 +684,11 @@ namespace LkEngine {
 			ImGui::Begin("Style Editor", &bWindow_StyleEditor);
 			ImGui::ShowStyleEditor(&Style);
 			ImGui::End();
+		}
+
+		if (bWindow_ImGuiLogWindow)
+		{
+			ImGui::ShowDebugLogWindow(&bWindow_ImGuiLogWindow);
 		}
 	}
 
@@ -1075,7 +1088,7 @@ namespace LkEngine {
 		auto& Colors = ImGui::GetStyle().Colors;
 		ImGui::BeginGroup();
 		{
-			UI::PushID("##ClearColorsModification");
+			ImGui::PushID("##ClearColorsModification");
 			ImGui::Text("Clear Color");
 			ImGui::Indent();
 			ImGui::SliderFloat("##x", &LRenderer::ClearColor.x, 0.0f, 1.0f, " %.3f", BackgroundSliderFlags);
@@ -1084,7 +1097,7 @@ namespace LkEngine {
 			ImGui::SliderFloat("##w", &LRenderer::ClearColor.w, 0.0f, 1.0f, " %.3f", BackgroundSliderFlags);
 			ImGui::SliderFloat("UI Alpha", &Colors[ImGuiCol_WindowBg].w, 0.0f, 1.0f, " %.2f", BackgroundSliderFlags);
 			ImGui::Unindent();
-			UI::PopID();
+			ImGui::PopID();
 		}
 		ImGui::EndGroup();
 	}
@@ -1287,7 +1300,7 @@ namespace LkEngine {
 					}
 					
 					// Re-open all essential editor windows.
-					if (ImGui::MenuItem("Restore default"))
+					if (ImGui::MenuItem("Restore default windows"))
 					{
 						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser))
 						{
@@ -1311,7 +1324,7 @@ namespace LkEngine {
 					bShowEditorWindowSizesWindow = !bShowEditorWindowSizesWindow;
 				}
 
-				ImGui::EndMenu(); /* View. */
+				ImGui::EndMenu(); // View.
 			}
 
 			if (ImGui::BeginMenu("Scene"))
@@ -1354,7 +1367,7 @@ namespace LkEngine {
 					Serializer.Serialize("scene.lukkelele");
 				}
 
-				ImGui::EndMenu();
+				ImGui::EndMenu(); // Scene.
 			}
 
 			if (ImGui::BeginMenu("Tools"))
@@ -1367,6 +1380,11 @@ namespace LkEngine {
 				if (ImGui::MenuItem("Style Editor"))
 				{
 					bWindow_StyleEditor = true;
+				}
+
+				if (ImGui::MenuItem("ImGui Logging"))
+				{
+					bWindow_ImGuiLogWindow = true;
 				}
 
 				if (ImGui::MenuItem("Live Objects"))
@@ -1436,7 +1454,7 @@ namespace LkEngine {
 					ImGui::EndMenu();
 				}
 
-				ImGui::EndMenu(); /* Debug. */
+				ImGui::EndMenu(); // Debug.
 			}
 
 
@@ -1445,12 +1463,12 @@ namespace LkEngine {
 				UI_AboutPopup();
 			}
 
-			/* Horizontal space. */
+			// Horizontal space.
 			ImGui::Dummy(ImVec2(240, 0));
 
 			if (ImGui::BeginMenu(std::string("Project: " + Project->GetName()).c_str()))
 			{
-				ImGui::EndMenu(); /* Project + Name. */
+				ImGui::EndMenu(); // Project + Name.
 			}
 		}
 		ImGui::EndMainMenuBar();
@@ -1460,7 +1478,7 @@ namespace LkEngine {
 	{
 		static constexpr float ButtonSize = 32.0f + 5.0f;
 		static constexpr float EdgeOffset = 4.0f;
-		static constexpr float WindowHeight = 32.0f; /* ImGui pixel limitation. */
+		static constexpr float WindowHeight = 32.0f; // ImGui pixel limitation.
 		static constexpr float NumberOfButtons = 3.0f;
 		static constexpr float BackgroundWidth = (EdgeOffset * 6.0f) + (ButtonSize * NumberOfButtons) + EdgeOffset * (NumberOfButtons - 1.0f) * 2.0f;
 

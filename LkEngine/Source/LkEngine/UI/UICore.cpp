@@ -47,12 +47,12 @@ namespace LkEngine::UI {
 
     static uint32_t Counter = 0;
     static int UIContextID = 0;
-    static char IDBuffer[16] = "##";
-    static char LabelIDBuffer[1024];
+    static char IDBuffer[16 + 2 + 1] = "##";
+    static char LabelIDBuffer[1024 + 1];
 
     const char* GenerateID()
     {
-        LK_ITOA(Counter++, IDBuffer + 2, sizeof(IDBuffer) - 2, 16);
+		snprintf(IDBuffer + 2, 16, "%u", Counter++);
         return IDBuffer;
     }
 
@@ -62,21 +62,11 @@ namespace LkEngine::UI {
         Counter = 0;
     }
 
-    void PushID(const char* ID)
-    {
-        ImGui::PushID(ID);
-    }
-
     void PopID()
     {
         ImGui::PopID();
         UIContextID--;
     }
-
-    void PopID(const char* ID)
-    {
-        ImGui::PopID();
-	}
 
     bool IsInputEnabled()
     {

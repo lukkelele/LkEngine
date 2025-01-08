@@ -295,8 +295,7 @@ namespace LkEngine {
 
 	bool LEditorCamera::OnMouseScroll(MouseScrolledEvent& Event)
 	{
-		// Right Mouse Button.
-		if (LInput::IsMouseButtonDown(EMouseButton::Button1))
+		if (LInput::IsMouseButtonDown(EMouseButton::Right))
 		{
 			NormalSpeed += Event.GetYOffset() * 0.3f * NormalSpeed;
 			NormalSpeed = std::clamp(NormalSpeed, MIN_SPEED, MAX_SPEED);
@@ -362,6 +361,7 @@ namespace LkEngine {
 
 	void LEditorCamera::OnEvent(LEvent& Event)
 	{
+	#if 0
 		EventDispatcher Dispatcher(Event);
 
 		Dispatcher.Dispatch<KeyPressedEvent>([this](KeyPressedEvent& Event) 
@@ -373,6 +373,7 @@ namespace LkEngine {
 		{ 
 			return OnMouseScroll(Event); 
 		});
+	#endif
 	}
 
 	float LEditorCamera::GetCameraSpeed() const

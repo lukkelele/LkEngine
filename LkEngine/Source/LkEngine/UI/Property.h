@@ -206,7 +206,7 @@ namespace LkEngine::UI {
 
 		static void RGBAColor(glm::vec4& Color, float ColumnWidth = 100.0f)
 		{
-			UI::PushID("##UI_Property-RGBA_Color");
+			ImGui::PushID("##UI_Property-RGBA_Color");
 			ImGuiTableFlags Flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
@@ -279,7 +279,7 @@ namespace LkEngine::UI {
 			}
 			ImGui::PopStyleVar(2);
 
-			UI::PopID();
+			ImGui::PopID();
 		}
 
     }

@@ -165,7 +165,11 @@ namespace LkEngine {
 		void RenderBottomBar(const float Height = 30.0f);
 
 		void RenderItems();
-		void RenderDirectoryHierarchy(TObjectPtr<FDirectoryInfo> Directory);
+
+		/**
+		 * @brief Render the directories and files in the outliner.
+		 */
+		void RenderOutlinerHierarchy(TObjectPtr<FDirectoryInfo> Directory);
 
 	private:
 		TObjectPtr<LScene> SceneContext{};

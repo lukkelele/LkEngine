@@ -45,10 +45,7 @@ namespace LkEngine {
 
 	void LContentBrowserPanel::OnRenderUI(bool& IsOpen)
 	{
-		static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable 
-			| ImGuiTableFlags_SizingFixedFit 
-			| ImGuiTableFlags_BordersInnerV;
-
+		// Handle dock window.
 		if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(LK_UI_CONTENTBROWSER); ThisWindow != nullptr)
 		{
 			if (ThisWindow->DockNode)
@@ -57,26 +54,31 @@ namespace LkEngine {
 			}
 		}
 
-		UI::Begin(LK_UI_CONTENTBROWSER, &IsOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		//UI::Begin(LK_UI_CONTENTBROWSER, &IsOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		ImGui::Begin(LK_UI_CONTENTBROWSER, &IsOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(10.0f, 2.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(10.0f, 6.0f));
 
+		static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable 
+			| ImGuiTableFlags_SizingFixedFit 
+			| ImGuiTableFlags_BordersInnerV;
+		//UI::PushID();
 		if (ImGui::BeginTable(UI::GenerateID(), 2, TableFlags, ImVec2(0.0f, 0.0f)))
 		{
 			ImGui::TableSetupColumn("Outliner", 0, 300.0f);
-			ImGui::TableSetupColumn("Directory", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableSetupColumn("Directory Structure", ImGuiTableColumnFlags_WidthStretch);
 
 			ImGui::TableNextRow();
 
-			/* Content Outliner. */
+			// Content Outliner.
 			ImGui::TableSetColumnIndex(0);
-			ImGui::BeginChild("##FoldersCommon");
+			ImGui::BeginChild("##OutlinerFolders");
 			{
 				if (BaseDirectory)
 				{
-					std::vector<TObjectPtr<FDirectoryInfo>> DirectoryArray;
+					std::vector<TObjectPtr<FDirectoryInfo>> DirectoryArray; // TODO: Should not be needed to be recreated every tick.
 					DirectoryArray.reserve(BaseDirectory->SubDirectories.size());
 					for (auto& [SubDirHandle, SubDir] : BaseDirectory->SubDirectories)
 					{
@@ -90,17 +92,17 @@ namespace LkEngine {
 
 					for (auto& ChildDirectory : DirectoryArray)
 					{
-						RenderDirectoryHierarchy(ChildDirectory);
+						RenderOutlinerHierarchy(ChildDirectory);
 					}
 				}
 			}
 			ImGui::EndChild();
 
-			/* Directory Content. */
+			// Directory Content.
 			ImGui::TableSetColumnIndex(1);
 			static constexpr float TopBarHeight = 26.0f;
 			static constexpr float BottomBarHeight = 32.0f;
-			ImGui::BeginChild("##DirectoryStructure", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetWindowHeight() - TopBarHeight - BottomBarHeight));
+			ImGui::BeginChild("##ContentBrowser-DirectoryStructure", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetWindowHeight() - TopBarHeight - BottomBarHeight));
 			{
 				RenderTopBar();
 
@@ -136,14 +138,18 @@ namespace LkEngine {
 
 				RenderBottomBar();
 			}
-			ImGui::EndChild(); /* DirectoryStructure. */
+			ImGui::EndChild(); // DirectoryStructure.
 
 			ImGui::EndTable();
+			//ImGui::PopID();
 		}
+		//UI::PopID();
 
-		UI::VSeparator(6.0f);
-		ImGui::PopStyleVar(3); /* ItemSpacing, FramePadding, CellPadding. */
-		UI::End(); /* LK_UI_CONTENTBROWSER */
+		UI::VSeparator(3.0f);
+		ImGui::PopStyleVar(3); // ItemSpacing, FramePadding, CellPadding.
+
+		//UI::End(); // LK_UI_CONTENTBROWSER
+		ImGui::End(); // LK_UI_CONTENTBROWSER
 	}
 
 	void LContentBrowserPanel::SetSceneContext(const TObjectPtr<LScene> InSceneContext)
@@ -656,6 +662,8 @@ namespace LkEngine {
 			if (ItemAction.Field & EContentBrowserAction::Selected)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Selected item: {}", Item->GetName());
+				//LSelectionContext::Select(Item->GetID());
+				LSelectionContext::Select(ESelectionContext::ContentBrowser, Item->GetID());
 			}
 			/* Action: Deselect. */
 			if (ItemAction.Field & EContentBrowserAction::Deselected)
@@ -711,22 +719,27 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowserPanel::RenderDirectoryHierarchy(TObjectPtr<FDirectoryInfo> Directory)
+	void LContentBrowserPanel::RenderOutlinerHierarchy(TObjectPtr<FDirectoryInfo> Directory)
 	{
 		const std::string Name = Directory->FilePath.filename().string();
 		const std::string ID = Name + "_TreeNode";
 		const bool PreviousState = ImGui::TreeNodeBehaviorIsOpen(ImGui::GetID(ID.c_str()));
 
 		ImGuiWindow* Window = ImGui::GetCurrentWindow();
+		const bool IsWindowFocused = ImGui::IsWindowFocused();
 
 	#if defined(LK_CONTENT_BROWSER_USE_HEIGHT_HACK)
-		/* ImGui height hack. */
+		// ImGui height hack.
 		Window->DC.CurrLineSize.y = 20.0f;
 		Window->DC.CurrLineTextBaseOffset = 3.0f;
 	#endif
+		/// FIXME: The previously selected nodes that are in lower depths are not marked 
+		/// when DC.CurrLineSize.y is not added.
 		const ImRect ItemRect = { 
-			Window->WorkRect.Min.x, Window->DC.CursorPos.y, 
-			Window->WorkRect.Max.x, Window->DC.CursorPos.y + Window->DC.CurrLineSize.y 
+			Window->WorkRect.Min.x, Window->DC.CursorPos.y,
+			Window->WorkRect.Max.x, Window->DC.CursorPos.y
+			//Window->WorkRect.Max.x, Window->DC.CursorPos.y + ImGui::GetCurrentContext()->FontSize + ImGui::GetStyle().FramePadding.y * 2
+			//Window->WorkRect.Max.x, Window->DC.CursorPos.y + Window->DC.CurrLineSize.y 
 		};
 
 		const bool IsItemClicked = [&ItemRect, &ID]
@@ -737,8 +750,6 @@ namespace LkEngine {
 			}
 			return false;
 		}();
-
-		const bool IsWindowFocused = ImGui::IsWindowFocused();
 
 		/* Fill with selection color if any of the child entities are selected. */
 		auto CheckIfAnyDescendantSelected = [&](TObjectPtr<FDirectoryInfo>& InDirectory, auto InIsAnyDescendantSelected) -> bool
@@ -760,47 +771,53 @@ namespace LkEngine {
 		};
 
 		const bool IsAnyDescendantSelected = CheckIfAnyDescendantSelected(Directory, CheckIfAnyDescendantSelected);
-		const bool IsActiveDirectory = (Directory->Handle == CurrentDirectory->Handle);
 
-		auto FillWithColor = [&](const ImColor& color)
+		auto DrawNodeBackground = [&](const ImColor& InColor)
 		{
-			const ImU32 BgColor = ImGui::ColorConvertFloat4ToU32(color);
-			ImGui::GetWindowDrawList()->AddRectFilled(ItemRect.Min, ItemRect.Max, BgColor);
+			const ImU32 Color = ImGui::ColorConvertFloat4ToU32(InColor);
+			ImGui::GetWindowDrawList()->AddRectFilled(ItemRect.Min, ItemRect.Max, Color);
 		};
 
-		ImGuiTreeNodeFlags Flags = (IsActiveDirectory ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_SpanFullWidth;
+		const bool IsActiveDirectory = (Directory->Handle == CurrentDirectory->Handle);
 
-		/* Fill the background. */
+		ImGuiTreeNodeFlags Flags = (IsActiveDirectory ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_SpanFullWidth;
+		//LK_CORE_INFO("IsActiveDirectory - {}: {}", Directory->FilePath.string(), (IsActiveDirectory ? "Yes" : "No"));
+		//Flags |= ImGuiTreeNodeFlags_Framed;
+
+		// Fill the background if selected/clicked.
 		if (IsActiveDirectory || IsItemClicked)
 		{
 			if (IsWindowFocused)
 			{
-				FillWithColor(RGBA32::Selection);
+				DrawNodeBackground(RGBA32::Selection);
+				//DrawNodeBackground(RGBA32::Text::Error);
 			}
 			else
 			{
 				const ImColor Color = UI::ColorWithMultipliedValue(RGBA32::Selection, 0.80f);
-				FillWithColor(UI::ColorWithMultipliedSaturation(Color, 0.70f));
+				DrawNodeBackground(UI::ColorWithMultipliedSaturation(Color, 0.70f));
 			}
 
-			ImGui::PushStyleColor(ImGuiCol_Text, RGBA32::BackgroundDark);
+			//ImGui::PushStyleColor(ImGuiCol_Text, RGBA32::BackgroundDarker);
+			ImGui::PushStyleColor(ImGuiCol_Text, RGBA32::NiceBlue);
 		}
 		else if (IsAnyDescendantSelected)
 		{
-			FillWithColor(RGBA32::SelectionMuted);
+			DrawNodeBackground(RGBA32::SelectionMuted);
 		}
 
-		/* Tree Node. */
+		// Tree Node.
 		const bool IsOpen = UI::TreeNode(ID, Name, Flags, FEditorResources::FolderIcon);
+
 		if (IsActiveDirectory || IsItemClicked)
 		{
 			ImGui::PopStyleColor();
 		}
 
-		/* Fix for slight overlap. */
+		// Fix for slight overlap.
 		UI::ShiftCursorY(3.0f);
 
-		/* Context Menu. */
+		// Context Menu.
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 4.0f));
 		if (ImGui::BeginPopupContextItem())
 		{
@@ -839,7 +856,7 @@ namespace LkEngine {
 
 			ImGui::EndPopup();
 		}
-		ImGui::PopStyleVar(); /* ItemSpacing */
+		ImGui::PopStyleVar(); // ItemSpacing.
 
 		/* Draw children directories. */
 		if (IsOpen)
@@ -858,15 +875,16 @@ namespace LkEngine {
 
 			for (auto& ChildDirectory : DirectoryArray)
 			{
-				RenderDirectoryHierarchy(ChildDirectory);
+				RenderOutlinerHierarchy(ChildDirectory);
 			}
 		}
 
 		UpdateDropArea(Directory);
 
-		if (IsOpen != (PreviousState && !IsActiveDirectory))
+		//if (IsOpen != (PreviousState && !IsActiveDirectory))
+		if (IsOpen != PreviousState)
 		{
-			if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.01f))
+			if (!ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.010f))
 			{
 				ChangeDirectory(Directory);
 			}
