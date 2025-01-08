@@ -1,7 +1,6 @@
 # LkEngine Development
 > Development progress.
 
-The content is listed in a format of one yar at a time.
 
 ---
 
