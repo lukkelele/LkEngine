@@ -5,6 +5,7 @@ The content is listed in a format of one yar at a time.
 
 ---
 
+* [2025](#Year-2025)
 * [2024](#Year-2024)
   - [January](#2024-January)
   - [February](#2024-February)
@@ -13,6 +14,19 @@ The content is listed in a format of one yar at a time.
   - [October](#2023-October)
   - [November](#2023-November)
   - [December](#2023-December)
+
+---
+
+# 2025 <a id="Year-2025"></a>
+### January 8
+Early view of the content browser and content outliner.
+<div align="center">
+	<img align="center" src="Images/2025/LkEngine-2025-01-08.png" width=740 height=440>
+	<p align="center">
+	</p>
+</div>
+
+<br>
 
 ---
 
