@@ -2,6 +2,8 @@
 > Development progress.
 
 
+### TODO: Place images as newest -> oldest instead of oldest -> newest
+
 ---
 
 * [2025](#Year-2025)
