@@ -21,13 +21,8 @@
 # 2025 <a id="Year-2025"></a>
 ### January 8
 Early view of the content browser and content outliner.
-<div align="center">
-	<img align="center" src="Images/2025/LkEngine-2025-01-08.png" width=740 height=440>
-	<p align="center">
-	</p>
-</div>
 
-<br>
+![2025January8](Images/2025/LkEngine-2025-01-08.png)
 
 ---
 
