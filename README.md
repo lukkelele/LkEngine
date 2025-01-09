@@ -20,6 +20,7 @@
 	- [Dependencies](#Engine-Dependencies)
 3. [Engine Features](#Engine-Features)
 4. [Development](#Engine-Development)
+	- [Showcase](#Engine-Development-Showcase)
 
 ---
 
@@ -115,10 +116,13 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 
 ---
 
-## Misc
+## Development <a id="Engine-Development"></a>
 
-
+* [Documentation](Docs/Development.md) <a id="Engine-Development"></a>
 * [github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/) <br>
 * [github.io.lukkelele/LkEngine/Development](https://github.com/lukkelele/LkEngine/blob/gh-pages/Development.md)
 
-### :heavy_minus_sign: [Development](Docs/Development.md) <a id="Engine-Development"></a>
+
+### Showcase <a id="Engine-Development-Showcase"></a>
+
+![2025-January-8](Docs/Images/2025/LkEngine-2025-01-08.png)
