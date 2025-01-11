@@ -9,6 +9,7 @@
 #if defined(LK_AUTOMATION_TEST_CORE)
 #	include "AutomationTest/Suite/Core/ObjectPtrTests.h"
 #	include "AutomationTest/Suite/Core/EnumTests.h"
+#	include "AutomationTest/Suite/Core/VectorTests.h"
 #endif
 
 namespace LkEngine {
@@ -59,6 +60,13 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo>());
 		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_GreaterThan>());
 		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo>());
+		/* Math tests. */
+		Tests.push_back(std::make_shared<Math_Vector2_Compability_Glm_Copy>());
+		Tests.push_back(std::make_shared<Math_Vector2_Compability_Glm_CopyConstructor>());
+		Tests.push_back(std::make_shared<Math_Vector3_Compability_Glm_Copy>());
+		Tests.push_back(std::make_shared<Math_Vector3_Compability_Glm_CopyConstructor>());
+		Tests.push_back(std::make_shared<Math_Vector2_Compability_ImGui_Copy>());
+		Tests.push_back(std::make_shared<Math_Vector2_Compability_ImGui_CopyConstructor>());
 	#endif
 	}
 
