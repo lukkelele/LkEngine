@@ -23,7 +23,7 @@ enum class ETestEnum : uint32_t
 LK_ENUM_CLASS_FLAGS(ETestEnum);
 static_assert(std::is_same_v<LK_Enum_Type_ETestEnum, std::underlying_type_t<ETestEnum>>);
 
-/* TODO: Cannot subtract 1, need to shift value. */
+/* TODO: Cannot subtract 1, need to shift value because bitmask. */
 //static_assert((ETestEnum)((int)ETestEnum::COUNT - 1) <= std::numeric_limits<std::underlying_type_t<ETestEnum>>::max());
 static_assert(ETestEnum::COUNT <= std::numeric_limits<std::underlying_type_t<ETestEnum>>::max());
 
@@ -48,7 +48,6 @@ namespace LkEngine::Enum
 
 LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Bitwise_AND)
 {
-	//using SizeType = std::underlying_type_t<ETestEnum>;
 	using SizeType = LK_Enum_Type_ETestEnum;
 	bool bTest1 = false;
 	{
