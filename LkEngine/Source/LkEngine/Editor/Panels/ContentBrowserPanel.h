@@ -64,7 +64,7 @@ namespace LkEngine {
 			Items.clear();
 		}
 
-		FORCEINLINE void Erase(const FAssetHandle Handle)
+		FORCEINLINE void Erase(const LUUID Handle)
 		{
 			const std::size_t Index = Find(Handle);
 			if (Index == InvalidItem)
@@ -77,7 +77,7 @@ namespace LkEngine {
 			Items.erase(Iter);
 		}
 
-		FORCEINLINE std::size_t Find(const FAssetHandle Handle)
+		[[nodiscard]] FORCEINLINE std::size_t Find(const LUUID Handle)
 		{
 			if (Items.empty())
 			{
@@ -85,11 +85,11 @@ namespace LkEngine {
 			}
 
 			std::scoped_lock<std::mutex> Lock(Mutex);
-			for (std::size_t i = 0; i < Items.size(); i++)
+			for (std::size_t Idx = 0; Idx < Items.size(); Idx++)
 			{
-				if (Items[i]->GetID() == Handle)
+				if (Items[Idx]->GetID() == Handle)
 				{
-					return i;
+					return Idx;
 				}
 			}
 

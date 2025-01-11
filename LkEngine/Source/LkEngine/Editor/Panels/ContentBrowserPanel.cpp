@@ -802,7 +802,6 @@ namespace LkEngine {
 		const bool IsActiveDirectory = (Directory->Handle == CurrentDirectory->Handle);
 
 		ImGuiTreeNodeFlags Flags = (IsActiveDirectory ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_SpanFullWidth;
-		//LK_CORE_INFO("IsActiveDirectory - {}: {}", Directory->FilePath.string(), (IsActiveDirectory ? "Yes" : "No"));
 		//Flags |= ImGuiTreeNodeFlags_Framed;
 
 		/* Fill the background if selected/clicked. */
@@ -829,7 +828,7 @@ namespace LkEngine {
 
 		/**
 		 * Check to see if the any of the subdirectories have subdirs in them. 
-		 * We should not render the arrow/bullet if that is the case.
+		 * We should not render the arrow/bullet if that isn't the case.
 		 */
 		ImGuiDir OpenDirection = ImGuiDir_None;
 		if (Directory && (Directory->SubDirectories.size() > 0))

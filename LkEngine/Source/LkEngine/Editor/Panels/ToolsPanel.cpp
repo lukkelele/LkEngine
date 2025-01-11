@@ -1,6 +1,7 @@
 #include "LKpch.h"
 #include "ToolsPanel.h"
 
+#include "LkEngine/Core/SelectionContext.h"
 #include "LkEngine/Core/Input/Input.h"
 
 #include "LkEngine/Project/Project.h"
@@ -9,6 +10,8 @@
 #include "LkEngine/Asset/RuntimeAssetManager.h"
 
 #include "LkEngine/Serialization/Serializer.h"
+
+#include "LkEngine/Editor/Panels/ContentBrowserPanel.h"
 
 
 namespace LkEngine {
@@ -316,32 +319,72 @@ namespace LkEngine {
 		Window_InputInfo.bTreeNode_Selection = ImGui::TreeNodeEx("Selection", ImGuiTreeNodeFlags_None);
 		if (Window_InputInfo.bTreeNode_Selection)
 		{
-			ImGui::Text("Selection");
-			ImGui::Separator();
-
 			static const std::string Title = "Selection";
 			if (ImGui::BeginTable(Title.c_str(), 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
 			{
-				/* Set up the columns for the table. */
-				//ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, 120.0f);
-				ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthStretch, 120.0f);
-				ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+				const auto& SceneSelection = LSelectionContext::GetSelected(ESelectionContext::Scene);
+				const auto& ContentBrowserSelection = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
+				const int TableRows = (SceneSelection.size() > ContentBrowserSelection.size() ? SceneSelection.size() : ContentBrowserSelection.size());
+
+				LContentBrowserPanel& ContentBrowser = LContentBrowserPanel::Get();
+				FContentBrowserItemList& CurrentBrowserItems = ContentBrowser.GetCurrentItems();
+
+				ImGui::TableSetupColumn("Scene", ImGuiTableColumnFlags_WidthStretch, 120.0f);
+				ImGui::TableSetupColumn("Content Browser", ImGuiTableColumnFlags_WidthStretch, 120.0f);
+				//ImGui::TableSetupColumn("Content Browser", ImGuiTableColumnFlags_WidthFixed, 100.0f);
 				ImGui::TableHeadersRow();
 
-				ImGui::TableNextRow();
-				//for (const auto& Item : Items)
-				//{
-				//ImGui::TableNextRow();
-				//}
+				if (TableRows > 0)
+				{
+					for (int SelectionIdx = 0; SelectionIdx < TableRows; SelectionIdx++)
+					{
+						ImGui::TableNextRow();
 
-				/* Column 1: Item */
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("TestItem1");
+						/* Column 1: Scene */
+						ImGui::TableSetColumnIndex(0);
+						if (SelectionIdx < SceneSelection.size())
+						{
+							const LUUID& SelectedUuid = SceneSelection.at(SelectionIdx);
+							ImGui::Text("%llu", SelectedUuid);
+						}
+						else
+						{
+							ImGui::Text("Empty");
+						}
 
-				/// TODO
-				/* Column 2: NULL for now */
-				ImGui::TableSetColumnIndex(1);
-				ImGui::Text("NULL");
+						/* Column 2: ContentBrowser */
+						ImGui::TableSetColumnIndex(1);
+						if (SelectionIdx < ContentBrowserSelection.size())
+						{
+							const LUUID& SelectedUuid = ContentBrowserSelection.at(SelectionIdx);
+							const std::size_t ItemIdx = CurrentBrowserItems.Find(SelectedUuid);
+							LK_CORE_ASSERT(ItemIdx != FContentBrowserItemList::InvalidItem, "Invalid item index of UUID '{}'", SelectedUuid);
+							TObjectPtr<LContentBrowserItem> BrowserItem = CurrentBrowserItems[ItemIdx];
+							LK_CORE_ASSERT(BrowserItem);
+							//ImGui::Text("%llu", SelectedUuid);
+							ImGui::Text("%s", BrowserItem->GetName().c_str());
+						}
+						else
+						{
+							ImGui::Text("Empty");
+						}
+					}
+				}
+				/**
+				 * Add one row if no items are selected.
+				 */
+				else
+				{
+					ImGui::TableNextRow();
+
+					/* Column 1: Scene */
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Empty");
+
+					/* Column 2: ContentBrowser */
+					ImGui::TableSetColumnIndex(1);
+					ImGui::Text("Empty");
+				}
 
 				ImGui::EndTable();
 			}
@@ -361,7 +404,6 @@ namespace LkEngine {
 			const std::string Title = std::format("Pressed Keys: {}", PressedKeyCount);
 			if (ImGui::BeginTable(Title.c_str(), 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
 			{
-				/* Set up the columns for the table. */
 				ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize("Key ------").x);
 				ImGui::TableSetupColumn("Repeat Count", ImGuiTableColumnFlags_WidthFixed, 100.0f);
 				ImGui::TableSetupColumn("Time Held (ms)", ImGuiTableColumnFlags_WidthFixed, 120.0f);

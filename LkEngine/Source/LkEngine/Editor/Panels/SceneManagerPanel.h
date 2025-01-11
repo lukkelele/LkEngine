@@ -47,7 +47,7 @@ namespace LkEngine {
 		template<typename TVectorType, typename TComponent, typename GetOtherFunc>
 		uint32_t GetInconsistentVectorAxis(GetOtherFunc OtherFunc)
 		{
-			const std::vector<LUUID>& Entities = LSelectionContext::GetSelected();
+			const std::vector<LUUID>& Entities = LSelectionContext::GetSelected(ESelectionContext::Scene);
 			if (Entities.size() < 2)
 			{
 				return 0;
@@ -136,12 +136,5 @@ namespace LkEngine {
 
 		LCLASS(LSceneManagerPanel);
 	};
-
-	bool DrawVec3Control(const std::string& Label,
-						 glm::vec3& Values,
-						 bool& ManuallyEdited,
-						 const float ResetValue = 0.0f,
-						 const float ColumnWidth = 100.0f,
-						 uint32_t RenderMultiSelectAxes = 0);
 
 }

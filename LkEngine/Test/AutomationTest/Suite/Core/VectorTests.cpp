@@ -31,7 +31,6 @@ static float GenerateRandomFloat(const float Min, const float Max)
 template<typename T>
 static T GenerateRandomVector(const float Min = FLOAT_MIN, const float Max = FLOAT_MAX)
 {
-	static_assert(false, "Vector type not specified");
 	return T();
 }
 

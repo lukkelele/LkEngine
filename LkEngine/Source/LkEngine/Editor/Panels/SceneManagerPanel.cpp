@@ -169,7 +169,7 @@ namespace LkEngine {
 			Name = Entity.GetComponent<LTagComponent>().Tag.c_str();
 		}
 
-		const bool IsSelected = LSelectionContext::IsSelected(Entity);
+		const bool IsSelected = LSelectionContext::IsSelected(ESelectionContext::Scene, Entity);
 
 		ImGuiTreeNodeFlags TreeNodeFlags = (IsSelected ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None);
 		TreeNodeFlags |= ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -177,7 +177,7 @@ namespace LkEngine {
 		const bool Opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, TreeNodeFlags, Entity.Name().c_str());
 
 		/* Get the selected entities. */
-		const std::vector<LUUID>& Entities = LSelectionContext::GetSelected();
+		const std::vector<LUUID>& Entities = LSelectionContext::GetSelected(ESelectionContext::Scene);
 
 		if (Opened)
 		{
@@ -230,7 +230,6 @@ namespace LkEngine {
 
 					/* Transform. */
 					ImGui::TableNextRow();
-					//Changed = UI::Draw::Vec3Control("Transform", Translation, TranslationModified, 0.10f, 100.0f, TranslationAxes);
 					Changed = UI::Draw::Vec3Control(
 						"Transform", 
 						Translation, 
