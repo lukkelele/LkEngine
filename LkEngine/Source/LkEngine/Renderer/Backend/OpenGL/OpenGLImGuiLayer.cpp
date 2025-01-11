@@ -36,8 +36,10 @@ namespace LkEngine {
 
 		IO.ConfigDockingAlwaysTabBar = false;
 
-	#if defined(LK_ENGINE_DEBUG)
+	#if defined(LK_UI_HIGHLIGHT_ID_CONFLICTS)
 		IO.ConfigDebugHighlightIdConflicts = true;
+	#else
+		IO.ConfigDebugHighlightIdConflicts = false;
 	#endif
 
 		ImGuiStyle& Style = ImGui::GetStyle();

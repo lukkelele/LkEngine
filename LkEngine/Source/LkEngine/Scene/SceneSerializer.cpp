@@ -157,29 +157,29 @@ namespace LkEngine {
 			return false;
 		}
 
-		YAML::Node data = YAML::Load(YamlString);
-		if (!data["Scene"])
+		YAML::Node Data = YAML::Load(YamlString);
+		if (!Data["Scene"])
 		{
 			LK_CORE_ERROR_TAG("SceneSerializer", "Root 'Scene' node does not exists\nYaml Data:\n{}", YamlString);
 			return false;
 		}
 
 		/* Scene. */
-		std::string SceneName = data["Scene"].as<std::string>(); 
+		std::string SceneName = Data["Scene"].as<std::string>(); 
 		Scene->SetName(SceneName);
 
-		const bool bIsActiveScene = (data["Active"].as<std::string>() == "true" ? true : false);
+		const bool bIsActiveScene = (Data["Active"].as<std::string>() == "true" ? true : false);
 		Scene->SetActive(bIsActiveScene);
 
-		const bool bIsEditorScene = data["EditorScene"].as<std::string>() == "true" ? true : false;
+		const bool bIsEditorScene = Data["EditorScene"].as<std::string>() == "true" ? true : false;
 		Scene->bIsEditorScene = bIsEditorScene;
-		const uint32_t SceneEntityHandle = data["SceneHandle"].as<uint32_t>();
+		const uint32_t SceneEntityHandle = Data["SceneHandle"].as<uint32_t>();
 
 		Scene->ViewportWidth = LWindow::Get().GetViewportWidth();
 		Scene->ViewportHeight = LWindow::Get().GetViewportHeight();
 
 		/* EditorCamera. */
-		const YAML::Node& EditorCameraNode = data["EditorCamera"];
+		const YAML::Node& EditorCameraNode = Data["EditorCamera"];
 		if (EditorCameraNode)
 		{
 			TObjectPtr<LEditorCamera> EditorCamera = LEditorLayer::Get()->GetEditorCamera();
@@ -187,7 +187,7 @@ namespace LkEngine {
 		}
 
 		/* Scene entities. */
-		YAML::Node EntitiesNode = data["Entities"];
+		YAML::Node EntitiesNode = Data["Entities"];
 		if (EntitiesNode)
 		{
 			DeserializeEntities(EntitiesNode, Scene);

@@ -24,8 +24,21 @@ namespace LkEngine {
 		Scale	  = ImGuizmo::SCALE
 	};
 
-	extern bool GDebug_DisplayWindowSizeOnHover;
-	extern bool GDebug_BoundingBoxesOnHover;
+	/* TODO: Move to other file. */
+	namespace Debug 
+	{
+		namespace UI 
+		{
+			extern bool bDisplayWindowSizeOnHover;
+			extern bool bBoundingBoxesOnHover;
+
+			namespace ContentBrowser 
+			{
+				extern bool bDrawOutlinerBorders;
+				extern ImVec4 OutlinerBorderColor;
+			}
+		}
+	}
 
 	/**
 	 * FEditorResources

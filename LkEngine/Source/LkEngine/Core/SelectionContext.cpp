@@ -8,8 +8,6 @@ namespace LkEngine {
 	std::vector<LUUID> LSelectionContext::SelectedEntities;
 	std::unordered_map<ESelectionContext, std::vector<LUUID>> LSelectionContext::SelectionContextMap;
 
-	TObjectPtr<LObject> GSelectedObject{}; /* TODO: Re-evaluate */
-
 	LSelectionContext& LSelectionContext::Get()
 	{
 		static LSelectionContext SelectionContext;

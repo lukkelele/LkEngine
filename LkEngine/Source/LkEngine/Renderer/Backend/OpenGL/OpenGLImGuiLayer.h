@@ -29,9 +29,6 @@ namespace LkEngine {
         virtual void Initialize() override;
         virtual void Destroy() override;
 
-        /**
-         * @brief TODO
-         */
         virtual void OnUpdate(const float DeltaTime) {}
         virtual void OnRenderUI() override {};
 

@@ -22,7 +22,6 @@ namespace LkEngine::UI {
 								 const char* Hint = "Search...", 
 								 bool* GrabFocus = nullptr)
 		{
-			//UI::PushID();
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 1.0f);
 
 			bool Modified = false;
@@ -193,8 +192,6 @@ namespace LkEngine::UI {
 			/* Restore cursor position and styles. */
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 1.0f);
 			ImGui::PopStyleVar(2);
-
-			//UI::PopID();
 
 			return Modified;
 		}

@@ -359,23 +359,6 @@ namespace LkEngine {
 		return true;
 	}
 
-	void LEditorCamera::OnEvent(LEvent& Event)
-	{
-	#if 0
-		EventDispatcher Dispatcher(Event);
-
-		Dispatcher.Dispatch<KeyPressedEvent>([this](KeyPressedEvent& Event) 
-		{ 
-			return OnKeyPress(Event); 
-		});
-
-		Dispatcher.Dispatch<MouseScrolledEvent>([this](MouseScrolledEvent& Event)
-		{ 
-			return OnMouseScroll(Event); 
-		});
-	#endif
-	}
-
 	float LEditorCamera::GetCameraSpeed() const
 	{
 		static constexpr float BaseMultiplier = 2.0f;

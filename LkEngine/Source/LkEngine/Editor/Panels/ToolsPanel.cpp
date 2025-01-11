@@ -13,14 +13,6 @@
 
 namespace LkEngine {
 
-	bool LToolsPanel::bWindow_ObjectReferences = false;
-	bool LToolsPanel::bWindow_AssetRegistry = false;
-	bool LToolsPanel::bWindow_InputInfo = false;
-	bool LToolsPanel::bWindow_UserInterfaceTools = false;
-	bool LToolsPanel::bWindow_RegisteredFonts = false;
-
-	bool LToolsPanel::bUserInterfaceTools_TreeNode_MessageBoxes = true;
-
 	LToolsPanel::LToolsPanel()
 	{
 		LOBJECT_REGISTER();
@@ -28,36 +20,36 @@ namespace LkEngine {
 
 	void LToolsPanel::OnRenderUI(bool& IsOpen)
 	{
-		if (bWindow_ObjectReferences)
+		if (Window_ObjectReferences.bOpen)
 		{
 			UI_ObjectReferences();
 		}
 
-		if (bWindow_AssetRegistry)
+		if (Window_AssetRegistry.bOpen)
 		{ 
 			UI_AssetRegistry();
 		}
 
-		if (bWindow_InputInfo)
+		if (Window_InputInfo.bOpen)
 		{
 			UI_InputInfo();
 		}
 
-		if (bWindow_UserInterfaceTools)
+		if (Window_UserInterfaceTools.bOpen)
 		{
 			UI_UserInterfaceTools();
 		}
 
-		if (bWindow_RegisteredFonts)
+		if (Window_Fonts.bOpen)
 		{ 
-			UI_RegisteredFonts();
+			UI_Fonts();
 		}
 
-		IsOpen = (bWindow_ObjectReferences 
-			|| bWindow_AssetRegistry 
-			|| bWindow_InputInfo
-			|| bWindow_UserInterfaceTools
-			|| bWindow_RegisteredFonts
+		IsOpen = (Window_ObjectReferences.bOpen
+			|| Window_AssetRegistry.bOpen
+			|| Window_InputInfo.bOpen
+			|| Window_UserInterfaceTools.bOpen
+			|| Window_Fonts.bOpen
 		);
 	}
 
@@ -66,11 +58,16 @@ namespace LkEngine {
 		LK_CORE_TRACE_TAG("ToolsPanel", "Serializing to YAML");
 		Out << YAML::Key << "Windows" << YAML::Value << YAML::BeginMap;
 		{
-			LK_SERIALIZE_PROPERTY(ObjectReferences, bWindow_ObjectReferences, Out);
-			LK_SERIALIZE_PROPERTY(AssetRegistry, bWindow_AssetRegistry, Out);
-			LK_SERIALIZE_PROPERTY(InputInfo, bWindow_InputInfo, Out);
-			LK_SERIALIZE_PROPERTY(UserInterfaceTools, bWindow_UserInterfaceTools, Out);
-			LK_SERIALIZE_PROPERTY(RegisteredFonts, bWindow_RegisteredFonts, Out);
+			LK_SERIALIZE_PROPERTY(ObjectReferences, Window_ObjectReferences.bOpen, Out);
+			LK_SERIALIZE_PROPERTY(AssetRegistry, Window_AssetRegistry.bOpen, Out);
+
+			/* Window: InputInfo */
+			LK_SERIALIZE_PROPERTY(InputInfo, Window_InputInfo.bOpen, Out);
+			LK_SERIALIZE_PROPERTY(InputInfo_TreeNode_KeyInfo, Window_InputInfo.bTreeNode_KeyInfo, Out);
+			LK_SERIALIZE_PROPERTY(InputInfo_TreeNode_Selection, Window_InputInfo.bTreeNode_Selection, Out);
+
+			LK_SERIALIZE_PROPERTY(UserInterfaceTools, Window_UserInterfaceTools.bOpen, Out);
+			LK_SERIALIZE_PROPERTY(Fonts, Window_Fonts.bOpen, Out);
 		}
 		Out << YAML::EndMap;
 	}
@@ -84,18 +81,22 @@ namespace LkEngine {
 			return;
 		}
 		
-		LK_DESERIALIZE_PROPERTY(ObjectReferences, bWindow_ObjectReferences, WindowsNode, false);
-		LK_DESERIALIZE_PROPERTY(AssetRegistry, bWindow_AssetRegistry, WindowsNode, false);
-		LK_DESERIALIZE_PROPERTY(InputInfo, bWindow_InputInfo, WindowsNode, false);
-		LK_DESERIALIZE_PROPERTY(UserInterfaceTools, bWindow_UserInterfaceTools, WindowsNode, false);
-		LK_DESERIALIZE_PROPERTY(RegisteredFonts, bWindow_RegisteredFonts, WindowsNode, false);
+		LK_DESERIALIZE_PROPERTY(ObjectReferences, Window_ObjectReferences.bOpen, WindowsNode, false);
+		LK_DESERIALIZE_PROPERTY(AssetRegistry, Window_AssetRegistry.bOpen, WindowsNode, false);
+
+		LK_DESERIALIZE_PROPERTY(InputInfo, Window_InputInfo.bOpen, WindowsNode, false);
+		LK_DESERIALIZE_PROPERTY(InputInfo_TreeNode_KeyInfo, Window_InputInfo.bTreeNode_KeyInfo, WindowsNode, false);
+		LK_DESERIALIZE_PROPERTY(InputInfo_TreeNode_Selection, Window_InputInfo.bTreeNode_Selection, WindowsNode, false);
+
+		LK_DESERIALIZE_PROPERTY(UserInterfaceTools, Window_UserInterfaceTools.bOpen, WindowsNode, false);
+		LK_DESERIALIZE_PROPERTY(Fonts, Window_Fonts.bOpen, WindowsNode, false);
 	}
 
 	void LToolsPanel::UI_ObjectReferences()
 	{
 		static ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
 		ImGui::SetNextWindowSize(ImVec2(720, 960), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Object References", &bWindow_ObjectReferences, WindowFlags);
+		ImGui::Begin("Object References", &Window_ObjectReferences.bOpen, WindowFlags);
 		{
 			static std::size_t SelectedIndex = -1;
 			static std::size_t SelectedIndexPrev = -1;
@@ -263,7 +264,7 @@ namespace LkEngine {
 	{
 		const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
 		ImGui::SetNextWindowSize(ImVec2(500, 560), ImGuiCond_FirstUseEver);
-		ImGui::Begin("Asset Registry", &bWindow_AssetRegistry, WindowFlags);
+		ImGui::Begin("Asset Registry", &Window_AssetRegistry.bOpen, WindowFlags);
 
 		if (TObjectPtr<LProject> Project = LProject::Current(); Project != nullptr)
 		{
@@ -305,65 +306,55 @@ namespace LkEngine {
 		ImGui::End();
 	}
 
-	void LToolsPanel::UI_RegisteredFonts()
-	{
-		static std::vector<FFontEntry> RegisteredFonts;
-		const std::size_t RegisteredFontsCount = UI::Font::GetRegistered(RegisteredFonts);
-
-		/* Place the default font named 'Default' first. */
-		std::sort(RegisteredFonts.begin(), RegisteredFonts.end(), [](const FFontEntry& A, const FFontEntry& B)
-		{
-			return (A.Name == "Default") || (B.Name != "Default" && A.Name < B.Name);
-		});
-
-		/* Determine the maximum width based on the longest font name. */
-		auto FontEntryComparitor = [](const FFontEntry& A, const FFontEntry& B)
-		{
-			return A.Name.length() < B.Name.length();
-		};
-
-		/* Calculate the width dynamically based on the longest name, with some padding. */
-		static constexpr float NamePadding = 12.0f;
-		const auto LongestNameIt = std::max_element(RegisteredFonts.begin(), RegisteredFonts.end(), FontEntryComparitor);
-		const float NameColumnWidth = ImGui::CalcTextSize(LongestNameIt->Name.c_str()).x + NamePadding;
-
-		const std::string WindowName = std::format("Registered Fonts: {}", RegisteredFontsCount);
-		ImGui::Begin(WindowName.c_str(), &bWindow_RegisteredFonts);
-		if (ImGui::BeginTable("RegisteredFontsTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
-		{
-			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, NameColumnWidth);
-			ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 34.0f);
-			ImGui::TableSetupColumn("Filepath", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableHeadersRow();
-			for (const auto& Font : RegisteredFonts)
-			{
-				ImGui::TableNextRow();
-				/* Column 1: Font Name */
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("%s", Font.Name.c_str());
-
-				/* Column 2: Font Size */
-				ImGui::TableSetColumnIndex(1);
-				ImGui::Text("%.1f", Font.Size);
-
-				/* Column 3: Filepath */
-				ImGui::TableSetColumnIndex(2);
-				ImGui::Text("%s", Font.FilePath.c_str());
-			}
-
-			ImGui::EndTable();
-		}
-
-		LK_UI_DEBUG_ON_HOVER();
-
-		ImGui::End();
-	}
-
 	void LToolsPanel::UI_InputInfo()
 	{
-		ImGui::Begin("Input Info", &bWindow_InputInfo);
+		ImGui::SetNextWindowSize(ImVec2(400, 680), ImGuiCond_FirstUseEver);
+		ImGui::Begin("Input Info", &Window_InputInfo.bOpen, ImGuiWindowFlags_NoCollapse);
 
-		/* Keyboard Inputs. */
+		/* TreeNode: Selection */
+		ImGui::SetNextItemOpen(Window_InputInfo.bTreeNode_Selection, ImGuiCond_Once);
+		Window_InputInfo.bTreeNode_Selection = ImGui::TreeNodeEx("Selection", ImGuiTreeNodeFlags_None);
+		if (Window_InputInfo.bTreeNode_Selection)
+		{
+			ImGui::Text("Selection");
+			ImGui::Separator();
+
+			static const std::string Title = "Selection";
+			if (ImGui::BeginTable(Title.c_str(), 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
+			{
+				/* Set up the columns for the table. */
+				//ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+				ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthStretch, 120.0f);
+				ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+				ImGui::TableHeadersRow();
+
+				ImGui::TableNextRow();
+				//for (const auto& Item : Items)
+				//{
+				//ImGui::TableNextRow();
+				//}
+
+				/* Column 1: Item */
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("TestItem1");
+
+				/// TODO
+				/* Column 2: NULL for now */
+				ImGui::TableSetColumnIndex(1);
+				ImGui::Text("NULL");
+
+				ImGui::EndTable();
+			}
+
+			ImGui::TreePop();
+		}
+
+		UI::VSeparator(14.0f);
+
+		/* TreeNode: Key Info */
+		ImGui::SetNextItemOpen(Window_InputInfo.bTreeNode_KeyInfo, ImGuiCond_Once);
+		Window_InputInfo.bTreeNode_KeyInfo = ImGui::TreeNodeEx("Key Info", ImGuiTreeNodeFlags_None);
+		if (Window_InputInfo.bTreeNode_KeyInfo)
 		{
 			static std::vector<EKey> PressedKeys;
 			const std::size_t PressedKeyCount = LInput::GetPressedKeys(PressedKeys);
@@ -400,6 +391,8 @@ namespace LkEngine {
 
 				ImGui::EndTable();
 			}
+
+			ImGui::TreePop();
 		}
 
 		ImGui::End();
@@ -407,11 +400,11 @@ namespace LkEngine {
 
 	void LToolsPanel::UI_UserInterfaceTools()
 	{
-		ImGui::Begin("UI Tools", &bWindow_UserInterfaceTools);
+		ImGui::Begin("UI Tools", &Window_UserInterfaceTools.bOpen);
 
 		/* TODO: Serialize the 'Open-by-default'-logic to load the editor in the same state 
 		 *       it was closed in. */
-		if (UI::BeginTreeNode("Message Boxes", bUserInterfaceTools_TreeNode_MessageBoxes))
+		if (UI::BeginTreeNode("Message Boxes", Window_UserInterfaceTools.bTreeNode_MessageBoxes))
 		{
 			static constexpr float TitleWidth = 148.0f;
 
@@ -443,9 +436,7 @@ namespace LkEngine {
 				ImGui::Indent();
 				{
 					ImGui::Checkbox("Ok Button", &bOkButton);
-					//ImGui::SameLine();
 					ImGui::Checkbox("Cancel Button", &bCancelButton);
-					//ImGui::SameLine();
 					ImGui::Checkbox("Auto Resize", &bAutoResize);
 				}
 				ImGui::Unindent();
@@ -521,7 +512,61 @@ namespace LkEngine {
 			UI::EndTreeNode();
 		}
 
-		
+		ImGui::End();
+	}
+
+
+	void LToolsPanel::UI_Fonts()
+	{
+		static std::vector<FFontEntry> RegisteredFonts;
+		const std::size_t RegisteredFontsCount = UI::Font::GetRegistered(RegisteredFonts);
+
+		/* Place the default font named 'Default' first. */
+		std::sort(RegisteredFonts.begin(), RegisteredFonts.end(), [](const FFontEntry& A, const FFontEntry& B)
+		{
+			return (A.Name == "Default") || (B.Name != "Default" && A.Name < B.Name);
+		});
+
+		/* Determine the maximum width based on the longest font name. */
+		auto FontEntryComparitor = [](const FFontEntry& A, const FFontEntry& B)
+		{
+			return A.Name.length() < B.Name.length();
+		};
+
+		/* Calculate the width dynamically based on the longest name, with some padding. */
+		static constexpr float NamePadding = 12.0f;
+		const auto LongestNameIt = std::max_element(RegisteredFonts.begin(), RegisteredFonts.end(), FontEntryComparitor);
+		const float NameColumnWidth = ImGui::CalcTextSize(LongestNameIt->Name.c_str()).x + NamePadding;
+
+		const std::string WindowName = std::format("Registered Fonts: {}", RegisteredFontsCount);
+		ImGui::Begin(WindowName.c_str(), &Window_Fonts.bOpen);
+		if (ImGui::BeginTable("RegisteredFontsTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+		{
+			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, NameColumnWidth);
+			ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 34.0f);
+			ImGui::TableSetupColumn("Filepath", ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableHeadersRow();
+			for (const auto& Font : RegisteredFonts)
+			{
+				ImGui::TableNextRow();
+				/* Column 1: Font Name */
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("%s", Font.Name.c_str());
+
+				/* Column 2: Font Size */
+				ImGui::TableSetColumnIndex(1);
+				ImGui::Text("%.1f", Font.Size);
+
+				/* Column 3: Filepath */
+				ImGui::TableSetColumnIndex(2);
+				ImGui::Text("%s", Font.FilePath.c_str());
+			}
+
+			ImGui::EndTable();
+		}
+
+		LK_UI_DEBUG_ON_HOVER();
+
 		ImGui::End();
 	}
 

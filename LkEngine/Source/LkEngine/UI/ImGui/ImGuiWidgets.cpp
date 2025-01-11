@@ -3,6 +3,7 @@
 
 #include "LkEngine/UI/ImGui/LImGui.h"
 #include "LkEngine/Renderer/Color.h"
+
 #include "LkEngine/Editor/EditorCore.h"
 
 
@@ -53,7 +54,8 @@ namespace ImGui {
 						  ImGuiTreeNodeFlags TreeNodeFlags,
 						  const char* Label, 
 						  const char* LabelEnd,
-						  const ImColor IconTint)
+						  const ImColor IconTint,
+						  const ImGuiDir OpenDirection)
 	{
 		ImGuiWindow* Window = GetCurrentWindow();
 		if (!Window || Window->SkipItems)
@@ -109,7 +111,11 @@ namespace ImGui {
 		const bool IsLeaf = (TreeNodeFlags & ImGuiTreeNodeFlags_Leaf) != 0;
 		const bool PushTreeNodeOnOpen = !(TreeNodeFlags & ImGuiTreeNodeFlags_NoTreePushOnOpen);
 
-		bool IsOpen = TreeNodeBehaviorIsOpen(ID);
+		/* Determine if to render the arrow/bullet. */
+		const bool ShouldRenderArrow = (OpenDirection != ImGuiDir_None);
+		//const bool ShouldRenderArrow = true;
+
+		bool IsOpen = TreeNodeBehaviorIsOpen(ID, ImGuiTreeNodeFlags_None);
 
 		const bool ItemAdded = ItemAdd(InteractBB, ID);
 		LastItem.StatusFlags |= ImGuiItemStatusFlags_HasDisplayRect;
@@ -157,7 +163,6 @@ namespace ImGui {
 		}
 
 		const bool Selected = (TreeNodeFlags & ImGuiTreeNodeFlags_Selected) != 0;
-		const bool WasSelected = Selected;
 
 		bool bHovered, bHeld;
 		const bool Pressed = ButtonBehavior(InteractBB, ID, &bHovered, &bHeld, ButtonFlags);
@@ -191,15 +196,26 @@ namespace ImGui {
 				}
 			}
 
-			if ((G.NavId == ID) && (G.NavMoveDir == ImGuiDir_Left) && IsOpen)
+			if (G.NavId == ID)
 			{
-				Toggled = true;
-				NavMoveRequestCancel();
-			}
-			if ((G.NavId == ID) && (G.NavMoveDir == ImGuiDir_Right) && !IsOpen)
-			{
-				Toggled = true;
-				NavMoveRequestCancel();
+				if (IsOpen)
+				{
+					/* Left. */
+					if (G.NavMoveDir == ImGuiDir_Left)
+					{
+						Toggled = true;
+						NavMoveRequestCancel();
+					}
+				}
+				else
+				{
+					/* Right. */
+					if (G.NavMoveDir == ImGuiDir_Right)
+					{
+						Toggled = true;
+						NavMoveRequestCancel();
+					}
+				}
 			}
 
 			if (Toggled)
@@ -207,7 +223,6 @@ namespace ImGui {
 				IsOpen = !IsOpen;
 				Window->DC.StateStorage->SetInt(ID, IsOpen);
 				LastItem.StatusFlags |= ImGuiItemStatusFlags_ToggledOpen;
-				LK_CORE_DEBUG("Item '{}' was {} (Selected: {})", ID, IsOpen ? "opened" : "closed", Selected ? "Yes" : "No");
 			}
 		}
 
@@ -219,7 +234,7 @@ namespace ImGui {
 		const ImU32 ArrowColor = Selected ? ::LkEngine::RGBA32::BackgroundDark : ::LkEngine::RGBA32::Muted;
 
 		static constexpr float Pad = 3.0f;
-		static constexpr float ArrowWidth = 20.0f + 4.0f;
+		static constexpr float ArrowWidth = 20.0f + 1.0f; /* 21 <-> 24 */
 		const float IconSize = FrameHeight - Pad * 2.0f;
 
 		const ImU32 BgColor = GetColorU32((bHeld && bHovered) 
@@ -240,12 +255,12 @@ namespace ImGui {
 							 ImVec2(TextPos.x - TextOffsetX * 0.60f, TextPos.y + G.FontSize * 0.50f), 
 							 ArrowColor);
 			}
-			else if (!IsLeaf)
+			else if (!IsLeaf && ShouldRenderArrow)
 			{
 				RenderArrow(Window->DrawList, 
 							ImVec2(TextPos.x - TextOffsetX + Padding.x, TextPos.y), 
 							ArrowColor, 
-							(IsOpen ? ImGuiDir_Down : ImGuiDir_Right), 
+							(IsOpen ? OpenDirection : ImGuiDir_Right),
 							1.0f);
 			}
 			/* Leaf without bullet, left - adjusted text. */
@@ -266,16 +281,17 @@ namespace ImGui {
 				const ImGuiItemStatusFlags ItemStatusFlags = LastItem.StatusFlags;
 				const ImRect ItemRect = LastItem.Rect;
 
+				using namespace LkEngine;
 				//::LkEngine::UI::ShiftCursorY(-FrameHeight + Pad);
 				::LkEngine::UI::ShiftCursorY(-FrameHeight - Pad - G.FontSize * 0.10f);
 				::LkEngine::UI::ShiftCursorX(ArrowWidth + Pad);
 				::LkEngine::UI::Image(
 					Icon,
-					//ImVec2(FrameHeight - Pad * 2.0f, FrameHeight - Pad * 2.0f),
 					ImVec2(IconSize, IconSize),
 					ImVec2(0, 0),
 					ImVec2(1, 1), 
-					IconTint
+					IconTint,
+					Debug::UI::ContentBrowser::bDrawOutlinerBorders ? Debug::UI::ContentBrowser::OutlinerBorderColor : ImVec4(0.0f, 0.0f, 0.0f, 0.0f)
 				);
 
 				/* Restore item data. */
@@ -295,18 +311,20 @@ namespace ImGui {
 				RenderNavHighlight(FrameBB, ID, NavHighlightFlags);
 			}
 
+			/* Bullet. */
 			if (TreeNodeFlags & ImGuiTreeNodeFlags_Bullet)
 			{
 				RenderBullet(Window->DrawList, 
 							 ImVec2(TextPos.x - TextOffsetX * 0.50f, TextPos.y + G.FontSize * 0.50f), 
 							 ArrowColor);
 			}
-			else if (!IsLeaf)
+			/* Arrow. */
+			else if (!IsLeaf && ShouldRenderArrow)
 			{
 				RenderArrow(Window->DrawList, 
 							ImVec2(TextPos.x - TextOffsetX + Padding.x, TextPos.y + G.FontSize * 0.15f), 
 							ArrowColor, 
-							(IsOpen ? ImGuiDir_Down : ImGuiDir_Right),
+							(IsOpen ? OpenDirection : ImGuiDir_Right),
 							0.70f);
 			}
 
@@ -317,15 +335,17 @@ namespace ImGui {
 				const ImGuiItemStatusFlags ItemStatusFlags = LastItem.StatusFlags;
 				const ImRect ItemRect = LastItem.Rect;
 
+				using namespace LkEngine;
 				::LkEngine::UI::ShiftCursorY(-FrameHeight - Pad - G.FontSize * 0.10f);
+				//::LkEngine::UI::ShiftCursorY(-FrameHeight + Pad);
 				::LkEngine::UI::ShiftCursorX(ArrowWidth + Pad);
 				::LkEngine::UI::Image(
 					Icon,
-					//ImVec2(FrameHeight - Pad * 2.0f, FrameHeight - Pad * 2.0f),
 					ImVec2(IconSize, IconSize),
 					ImVec2(0, 0),
-					ImVec2(1, 1), 
-					IconTint
+					ImVec2(1, 1),
+					IconTint,
+					Debug::UI::ContentBrowser::bDrawOutlinerBorders ? Debug::UI::ContentBrowser::OutlinerBorderColor : ImVec4(0.0f, 0.0f, 0.0f, 0.0f)
 				);
 
 				/* Restore item data. */

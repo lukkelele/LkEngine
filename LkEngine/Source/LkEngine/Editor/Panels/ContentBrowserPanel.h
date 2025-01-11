@@ -23,7 +23,7 @@ namespace LkEngine {
 	/**
 	 * FContentBrowserItemList
 	 *
-	 *  Data structure for containing content browser items.
+	 *  Data structure for content browser items.
 	 */
 	struct FContentBrowserItemList
 	{
@@ -64,9 +64,9 @@ namespace LkEngine {
 			Items.clear();
 		}
 
-		FORCEINLINE void erase(const FAssetHandle Handle)
+		FORCEINLINE void Erase(const FAssetHandle Handle)
 		{
-			const std::size_t Index = FindItem(Handle);
+			const std::size_t Index = Find(Handle);
 			if (Index == InvalidItem)
 			{
 				return;
@@ -77,7 +77,7 @@ namespace LkEngine {
 			Items.erase(Iter);
 		}
 
-		FORCEINLINE std::size_t FindItem(const FAssetHandle Handle)
+		FORCEINLINE std::size_t Find(const FAssetHandle Handle)
 		{
 			if (Items.empty())
 			{
@@ -133,6 +133,8 @@ namespace LkEngine {
 		virtual void DeserializeFromYaml(const YAML::Node& Data) override;
 
 	private:
+		void UpdateInput();
+
 		void Refresh();
 		void SortItemList();
 		void ChangeDirectory(TObjectPtr<FDirectoryInfo> Directory);
@@ -150,7 +152,7 @@ namespace LkEngine {
 		void OnBrowseForward();
 		void OnBrowseBackward();
 
-		void ClearSelectedObjects();
+		void ClearCurrentSelection();
 		void UpdateDropArea(const TObjectPtr<FDirectoryInfo>& DirectoryInfo);
 
 		/**
@@ -185,7 +187,10 @@ namespace LkEngine {
 		std::vector<TObjectPtr<FDirectoryInfo>> BreadCrumbData{};
 		char SearchBuffer[LContentBrowserItem::INPUT_BUFFER_SIZE];
 
+		bool bIsContentBrowserHovered = false;
 		bool bIsAnyItemHovered = false;
+
+		/** Flag to update the navigation path for the breadcrumbs. */
 		bool bUpdateNavigationPath = false;
 
 		std::map<std::string, TObjectPtr<LTexture2D>> AssetIconMap{};

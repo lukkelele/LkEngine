@@ -49,9 +49,6 @@ namespace LkEngine {
 			}
 		}
 
-		/// @TODO: Patch out
-		void OnEvent(LEvent& e);
-
 		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, 
 										const float InNearClip = 0.1f, 
 										const float InFarClip = 1000.0f)
@@ -102,9 +99,9 @@ namespace LkEngine {
 			UpdateCameraView();
 		}
 
-		void MousePan(const glm::vec2& delta);
-		void MouseRotate(const glm::vec2& delta);
-		void MouseZoom(float delta);
+		void MousePan(const glm::vec2& Delta);
+		void MouseRotate(const glm::vec2& Delta);
+		void MouseZoom(const float Delta);
 
 		std::pair<float, float> GetPanSpeed() const;
 		float GetZoomSpeed() const;

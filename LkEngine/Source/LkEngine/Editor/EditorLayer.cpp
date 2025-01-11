@@ -56,6 +56,7 @@ namespace LkEngine {
 
 		/* Windows. */
 		bool bWindow_MetricTool = false;
+		bool bWindow_IdStackTool = false;
 		bool bWindow_StyleEditor = false;
 		bool bWindow_ImGuiLogWindow = false;
 		bool bRenderSkybox = true;
@@ -70,9 +71,19 @@ namespace LkEngine {
 		std::unordered_map<FAssetHandle, FMeshSubmissionMetadata> MeshSubmissions{};
 	}
 
-	/* Declared in UICore. */
-	bool GDebug_DisplayWindowSizeOnHover = false;
-	bool GDebug_BoundingBoxesOnHover = false;
+	/// FIXME
+	/* Declared in UICore, should move to some other file. */
+	namespace Debug::UI 
+	{
+		bool bDisplayWindowSizeOnHover = false;
+		bool bBoundingBoxesOnHover = false;
+
+		namespace ContentBrowser 
+		{
+			bool bDrawOutlinerBorders = false;
+			ImVec4 OutlinerBorderColor = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+		}
+	}
 
 	static TObjectPtr<LTexture2D> FloorTexture; /* REMOVE */
 	static TObjectPtr<LTexture2D> CubeTexture;  /* REMOVE */
@@ -218,7 +229,7 @@ namespace LkEngine {
 			//LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed: {}", Enum::ToString(MouseButtonData.Button));
 			if (MouseButtonData.Button == EMouseButton::Left)
 			{
-				LSelectionContext::DeselectAll(ESelectionContext::ContentBrowser);
+				//LSelectionContext::DeselectAll(ESelectionContext::ContentBrowser);
 			}
 		});
 
@@ -371,8 +382,6 @@ namespace LkEngine {
 		{
 			LK_CORE_INFO_TAG("Editor", "Shortcut: Debug Item");
 			ImGui::DebugStartItemPicker();
-			//ImGui::DebugDrawItemRect();
-			//ImGui::DebugDrawLineExtents();
 		}
 	}
 
@@ -678,6 +687,11 @@ namespace LkEngine {
 			ImGui::ShowMetricsWindow(&bWindow_MetricTool);
 		}
 
+		if (bWindow_IdStackTool)
+		{
+			ImGui::ShowIDStackToolWindow(&bWindow_IdStackTool);
+		}
+
 		if (bWindow_StyleEditor)
 		{
 			ImGuiStyle& Style = ImGui::GetStyle();
@@ -926,7 +940,6 @@ namespace LkEngine {
 				else if (DockNode->Windows.Size > 1)
 				{
 					DockNode->LocalFlags &= ~ImGuiDockNodeFlags_NoTabBar;
-					//DockNode->LocalFlags &= ~ImGuiDockNodeFlags_NoWindowMenuButton;
 					SidebarWindow->Flags &= ~ImGuiWindowFlags_NoTitleBar;
 
 					if (DockNode->VisibleWindow)
@@ -947,16 +960,8 @@ namespace LkEngine {
 				ImGuiViewport* Viewport = ImGui::GetWindowViewport();
 				ImGuiStyle& Style = ImGui::GetStyle();
 
-				// The frame padding from the top bar affects the viewport texture 
-				// so it is also accounted for in the docknode size.
-			#if 0
-				// The DockingSeparatorSize is removed twice because of the left and right sidebars.
-				DockNode->Size = ImVec2(Viewport->Size.x - (LeftSidebarSize.X + RightSidebarSize.X) - 2 * Style.DockingSeparatorSize,
-										DockNode->Size.y - 2 * Style.DockingSeparatorSize + TopBarData.FramePadding.y);
-			#else
 				DockNode->Size = ImVec2(DockNode->Size.x,
 										DockNode->Size.y - 2 * Style.DockingSeparatorSize + TopBarData.FramePadding.y);
-			#endif
 
 				EditorViewport->SetSize(DockNode->Size.x, DockNode->Size.y);
 
@@ -964,9 +969,7 @@ namespace LkEngine {
 				EditorViewport->SetPositionX(EditorViewport->GetSize().X);
 
 				Window->Flags |= ImGuiWindowFlags_NoTitleBar;
-				//Window->Flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
 				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoTabBar;
-				//DockNode->LocalFlags |= ImGuiDockNodeFlags_NoUndocking;
 				DockNode->LocalFlags &= ~ImGuiDockNodeFlags_NoDocking;
 			}
 		}
@@ -1082,6 +1085,7 @@ namespace LkEngine {
 		}
 	}
 
+	/// TODO: Move elsewhere.
 	void LEditorLayer::UI_ClearColorModificationMenu()
 	{
 		static constexpr ImGuiSliderFlags BackgroundSliderFlags = ImGuiSliderFlags_None;
@@ -1377,6 +1381,11 @@ namespace LkEngine {
 					bWindow_MetricTool = true;
 				}
 
+				if (ImGui::MenuItem("ID Stack Tool"))
+				{
+					bWindow_IdStackTool = true;
+				}
+
 				if (ImGui::MenuItem("Style Editor"))
 				{
 					bWindow_StyleEditor = true;
@@ -1394,7 +1403,7 @@ namespace LkEngine {
 					{
 						/* TODO: Assert the panel class type before invoking TObjectPtr::As */
 						PanelData->bIsOpen = true;
-						PanelData->Panel.As<LToolsPanel>()->bWindow_ObjectReferences = true;
+						PanelData->Panel.As<LToolsPanel>()->Window_ObjectReferences.bOpen = true;
 					}
 				}
 
@@ -1405,7 +1414,7 @@ namespace LkEngine {
 					{
 						/* TODO: Assert the panel class type before invoking TObjectPtr::As */
 						PanelData->bIsOpen = true;
-						PanelData->Panel.As<LToolsPanel>()->bWindow_AssetRegistry = true;
+						PanelData->Panel.As<LToolsPanel>()->Window_AssetRegistry.bOpen = true;
 					}
 				}
 
@@ -1415,7 +1424,7 @@ namespace LkEngine {
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
 					{
 						PanelData->bIsOpen = true;
-						PanelData->Panel.As<LToolsPanel>()->bWindow_InputInfo = true;
+						PanelData->Panel.As<LToolsPanel>()->Window_InputInfo.bOpen = true;
 					}
 				}
 
@@ -1425,7 +1434,7 @@ namespace LkEngine {
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
 					{
 						PanelData->bIsOpen = true;
-						PanelData->Panel.As<LToolsPanel>()->bWindow_UserInterfaceTools = true;
+						PanelData->Panel.As<LToolsPanel>()->Window_UserInterfaceTools.bOpen = true;
 					}
 				}
 
@@ -1435,7 +1444,7 @@ namespace LkEngine {
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
 					{
 						PanelData->bIsOpen = true;
-						PanelData->Panel.As<LToolsPanel>()->bWindow_RegisteredFonts = true;
+						PanelData->Panel.As<LToolsPanel>()->Window_Fonts.bOpen = true;
 					}
 				}
 
@@ -1448,13 +1457,20 @@ namespace LkEngine {
 
 				if (ImGui::BeginMenu("Engine Debug"))
 				{
-					ImGui::Checkbox("Show window sizes on hover", &GDebug_DisplayWindowSizeOnHover);
-					ImGui::Checkbox("Bounding boxes on hover", &GDebug_BoundingBoxesOnHover);
+					ImGui::Checkbox("Show window sizes on hover", &Debug::UI::bDisplayWindowSizeOnHover);
+					ImGui::Checkbox("Bounding boxes on hover", &Debug::UI::bBoundingBoxesOnHover);
+
+					if (ImGui::BeginMenu("Content Browser"))
+					{
+						ImGui::Checkbox("Outliner Borders", &Debug::UI::ContentBrowser::bDrawOutlinerBorders);
+						/// TODO: Dropdown menu for the color of the outliner border color.
+						ImGui::EndMenu(); // Content Browser.
+					}
 
 					ImGui::EndMenu();
 				}
 
-				ImGui::EndMenu(); // Debug.
+				ImGui::EndMenu(); // Engine Debug.
 			}
 
 

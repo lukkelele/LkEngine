@@ -6,12 +6,6 @@
 #include "LkEngine/Core/Globals.h"
 #include "LkEngine/Core/IO/FileSystem.h"
 
-#define LK_ENTER_GROUP(Name) CurrentGroup = RootNode[Name];
-#define LK_READ_VALUE(Name, Type, Var, DefaultValue)  Var = CurrentGroup[Name].as<Type>(DefaultValue)
-
-#define LK_BEGIN_GROUP(Name)              Out << YAML::Key << Name << YAML::Value << YAML::BeginMap;
-#define LK_END_GROUP()                    Out << YAML::EndMap;
-#define LK_SERIALIZE_VALUE(Name, InValue) Out << YAML::Key << Name << YAML::Value << InValue;
 
 namespace LkEngine {
 
@@ -90,22 +84,29 @@ namespace LkEngine {
 	void FEditorSettingsSerializer::SerializeToYaml(YAML::Emitter& Out, const FEditorSettings& Settings)
 	{
 		Out << YAML::BeginMap;
-		LK_BEGIN_GROUP("EditorSettings");
+		LK_SERIALIZE_BEGIN_GROUP(EditorSettings);
 		{
-			LK_BEGIN_GROUP("Editor");
+			LK_SERIALIZE_BEGIN_GROUP(Editor);
 			{
-				LK_SERIALIZE_VALUE("TranslationSnapValue", Settings.TranslationSnapValue);
-				LK_SERIALIZE_VALUE("RotationSnapValue", Settings.RotationSnapValue);
-				LK_SERIALIZE_VALUE("ScaleSnapValue", Settings.ScaleSnapValue);
+				LK_SERIALIZE_VALUE(TranslationSnapValue, Settings.TranslationSnapValue);
+				LK_SERIALIZE_VALUE(RotationSnapValue, Settings.RotationSnapValue);
+				LK_SERIALIZE_VALUE(ScaleSnapValue, Settings.ScaleSnapValue);
 			}
-			LK_END_GROUP();
+			LK_SERIALIZE_END_GROUP();
 
-			LK_BEGIN_GROUP("ContentBrowser");
+			LK_SERIALIZE_BEGIN_GROUP(ContentBrowser);
 			{
-				LK_SERIALIZE_VALUE("ThumbnailSize", Settings.ContentBrowserThumbnailSize);
+				LK_SERIALIZE_VALUE(ThumbnailSize, Settings.ContentBrowserThumbnailSize);
+
+				LK_SERIALIZE_BEGIN_GROUP(Debug);
+				{
+					LK_SERIALIZE_VALUE(DrawOutlinerBorders, Debug::UI::ContentBrowser::bDrawOutlinerBorders);
+				}
+				LK_SERIALIZE_END_GROUP();
 			}
-			LK_END_GROUP();
+			LK_SERIALIZE_END_GROUP();
 		}
+		LK_SERIALIZE_END_GROUP();
 		Out << YAML::EndMap;
 	}
 
@@ -124,21 +125,35 @@ namespace LkEngine {
 		}
 
 		YAML::Node RootNode = Data["EditorSettings"];
-		YAML::Node CurrentGroup = RootNode;
-		LK_CORE_VERIFY(RootNode["Editor"] && RootNode["ContentBrowser"], "Editor settings file is missing one ore more nodes");
 
-		LK_ENTER_GROUP("Editor");
+		/* Node: Editor */
+		if (YAML::Node EditorNode = RootNode["Editor"])
 		{
-			LK_READ_VALUE("TranslationSnapValue", float, Settings.TranslationSnapValue, 0.50f);
-			LK_READ_VALUE("RotationSnapValue", float, Settings.RotationSnapValue, 45.0f);
-			LK_READ_VALUE("ScaleSnapValue", float, Settings.ScaleSnapValue, 0.50f);
+			LK_DESERIALIZE_PROPERTY(TranslationSnapValue, Settings.TranslationSnapValue, EditorNode, 0.50f);
+			LK_DESERIALIZE_PROPERTY(RotationSnapValue, Settings.RotationSnapValue, EditorNode, 45.0f);
+			LK_DESERIALIZE_PROPERTY(ScaleSnapValue, Settings.ScaleSnapValue, EditorNode, 0.50f);
+		}
+		else
+		{
+			LK_CORE_ERROR_TAG("EditorSettings", "Missing 'Editor' node");
 		}
 
-		LK_ENTER_GROUP("ContentBrowser");
+		/* Node: ContentBrowser */
+		if (YAML::Node ContentBrowserNode = RootNode["ContentBrowser"])
 		{
-			LK_READ_VALUE("ThumbnailSize", uint16_t, Settings.ContentBrowserThumbnailSize, 128);
+			LK_DESERIALIZE_PROPERTY(ThumbnailSize, Settings.ContentBrowserThumbnailSize, ContentBrowserNode, 128);
+
+			if (YAML::Node DebugNode = ContentBrowserNode["Debug"])
+			{
+				LK_DESERIALIZE_PROPERTY(DrawOutlinerBorders, Debug::UI::ContentBrowser::bDrawOutlinerBorders, DebugNode, false);
+			}
+		}
+		else
+		{
+			LK_CORE_ERROR_TAG("EditorSettings", "Missing 'ContentBrowser' node");
 		}
 
 		return true;
 	}
+
 }

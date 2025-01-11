@@ -62,13 +62,19 @@ static constexpr auto ToStringIfNeeded(T Value)
 		}                                                                      \
 		else                                                                   \
 		{                                                                      \
+			LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY", "Failed to find node: '{}'", #PropertyName); \
 			Destination = DefaultValue;                                        \
 		}                                                                      \
 	}                                                                          \
 	else                                                                       \
 	{                                                                          \
+		LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY", "Root node used with property '{}' is not a YAML::Map", #PropertyName); \
 		Destination = DefaultValue;                                            \
 	}
+
+#define LK_SERIALIZE_BEGIN_GROUP(Name)    Out << YAML::Key << #Name << YAML::Value << YAML::BeginMap;
+#define LK_SERIALIZE_END_GROUP()          Out << YAML::EndMap;
+#define LK_SERIALIZE_VALUE(Name, InValue) Out << YAML::Key << #Name << YAML::Value << InValue;
 
 
 namespace LkEngine {

@@ -72,15 +72,19 @@ namespace LkEngine::UI {
 
 			ImGuiStyle& Style = ImGui::GetStyle();
 
-			ImGuiWindowFlags WindowFlags = 0;
+			//ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
+			ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoSavedSettings;
+
 			if (MessageBoxRef.Flags & EMessageBoxFlag::AutoSize)
 			{
 				WindowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 
 				if (HasOkButton || HasCancelButton)
 				{
+					const ImVec2 MinSizeConstraint = ImVec2((float)MessageBoxRef.MinWidth + 2.0f * (OkButtonSize.x + Style.FramePadding.x + Style.WindowPadding.x),
+															(float)MessageBoxRef.MinHeight + 2.0f * (OkButtonSize.y + Style.FramePadding.y + Style.WindowPadding.y));
 					ImGui::SetNextWindowSizeConstraints( 
-						ImVec2((float)MessageBoxRef.MinWidth + 2.0f * (OkButtonSize.x + Style.FramePadding.x + Style.WindowPadding.x), (float)MessageBoxRef.MinHeight + 2.0f * (OkButtonSize.y + Style.FramePadding.y + Style.WindowPadding.y)),
+						MinSizeConstraint,
 						ImVec2((float)MessageBoxRef.MaxWidth, (float)MessageBoxRef.MaxHeight)
 					);
 				}

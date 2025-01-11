@@ -299,7 +299,7 @@ namespace LkEngine {
 		{
 			bIsDragging = true;
 
-			const auto& SelectionStack = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
+			const auto& SelectedItems = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
 			if (!LSelectionContext::IsSelected(ESelectionContext::ContentBrowser, ID))
 			{
 				Result.Set(EContentBrowserAction::ClearSelections, true);
@@ -307,11 +307,11 @@ namespace LkEngine {
 
 			auto& CurrentItems = LContentBrowserPanel::Get().GetCurrentItems();
 
-			if (!SelectionStack.empty())
+			if (!SelectedItems.empty())
 			{
-				for (const auto& selectedItemHandles : SelectionStack)
+				for (const auto& SelectedItemHandles : SelectedItems)
 				{
-					const std::size_t Index = CurrentItems.FindItem(selectedItemHandles);
+					const std::size_t Index = CurrentItems.Find(SelectedItemHandles);
 					if (Index == FContentBrowserItemList::InvalidItem)
 					{
 						continue;
@@ -320,15 +320,15 @@ namespace LkEngine {
 					const TObjectPtr<LContentBrowserItem>& Item = CurrentItems[Index];
 					UI::Image(Item->GetIcon(), ImVec2(20, 20));
 					ImGui::SameLine();
-					const auto& ItemName = Item->GetName();
+					const std::string& ItemName = Item->GetName();
 					ImGui::TextUnformatted(ItemName.c_str());
 				}
 
 				/* Accept drag'n'drop payload. */
 				ImGui::SetDragDropPayload(
 					"AssetPayload", 
-					SelectionStack.data(), 
-					sizeof(FAssetHandle) * SelectionStack.size()
+					SelectedItems.data(), 
+					sizeof(FAssetHandle) * SelectedItems.size()
 				);
 			}
 

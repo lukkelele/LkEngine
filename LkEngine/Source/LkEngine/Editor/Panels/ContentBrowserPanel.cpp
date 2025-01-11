@@ -2,6 +2,7 @@
 #include "ContentBrowserPanel.h"
 
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/Core/Input/Input.h" /// FIXME: Remove the 'Input' directory and just place the files under 'Core'
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/UI/UICore.h"
 #include "LkEngine/UI/ImGui/ImGuiWidgets.h"
@@ -54,16 +55,14 @@ namespace LkEngine {
 			}
 		}
 
-		//UI::Begin(LK_UI_CONTENTBROWSER, &IsOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		ImGui::Begin(LK_UI_CONTENTBROWSER, &IsOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		bIsContentBrowserHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(10.0f, 6.0f));
 
-		static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable 
-			| ImGuiTableFlags_SizingFixedFit 
-			| ImGuiTableFlags_BordersInnerV;
+		static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV;
 		//UI::PushID();
 		if (ImGui::BeginTable(UI::GenerateID(), 2, TableFlags, ImVec2(0.0f, 0.0f)))
 		{
@@ -72,7 +71,7 @@ namespace LkEngine {
 
 			ImGui::TableNextRow();
 
-			// Content Outliner.
+			/* Content Outliner. */
 			ImGui::TableSetColumnIndex(0);
 			ImGui::BeginChild("##OutlinerFolders");
 			{
@@ -98,7 +97,7 @@ namespace LkEngine {
 			}
 			ImGui::EndChild();
 
-			// Directory Content.
+			/* Directory Content. */
 			ImGui::TableSetColumnIndex(1);
 			static constexpr float TopBarHeight = 26.0f;
 			static constexpr float BottomBarHeight = 32.0f;
@@ -122,8 +121,7 @@ namespace LkEngine {
 
 					/**
 					 * Render items. 
-					 * 
-					 *  Iterates the current directory and renders every entry. 
+					 * Iterates the content of the current directory and renders every browser item. 
 					 */
 					{
 						static constexpr float RowSpacing = 12.0f;
@@ -133,6 +131,12 @@ namespace LkEngine {
 						UI::FScopedStyle Padding(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
 						RenderItems();
 					}
+
+					if (ImGui::IsWindowFocused() && !ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+					{
+						UpdateInput();
+					}
+
 				}
 				ImGui::EndChild();
 
@@ -141,9 +145,7 @@ namespace LkEngine {
 			ImGui::EndChild(); // DirectoryStructure.
 
 			ImGui::EndTable();
-			//ImGui::PopID();
 		}
-		//UI::PopID();
 
 		UI::VSeparator(3.0f);
 		ImGui::PopStyleVar(3); // ItemSpacing, FramePadding, CellPadding.
@@ -206,6 +208,24 @@ namespace LkEngine {
 	void LContentBrowserPanel::DeserializeFromYaml(const YAML::Node& Data)
 	{
 		LK_UNUSED(Data);
+	}
+
+	void LContentBrowserPanel::UpdateInput()
+	{
+		if (!bIsContentBrowserHovered)
+		{
+			return;
+		}
+
+		if ((!bIsAnyItemHovered && ImGui::IsMouseDown(ImGuiMouseButton_Left)) || LInput::IsKeyDown(EKey::Escape))
+		{
+			ClearCurrentSelection();
+		}
+
+		if (LInput::IsKeyDown(EKey::F5))
+		{
+			Refresh();
+		}
 	}
 
 	void LContentBrowserPanel::Refresh()
@@ -294,7 +314,7 @@ namespace LkEngine {
 		PreviousDirectory = Directory;
 		CurrentDirectory = Directory;
 
-		ClearSelectedObjects();
+		ClearCurrentSelection();
 	}
 
 	FAssetHandle LContentBrowserPanel::ProcessDirectory(const fs::path& DirectoryPath, const TObjectPtr<FDirectoryInfo>& ParentDir)
@@ -405,12 +425,13 @@ namespace LkEngine {
 		ChangeDirectory(PreviousDirectory);
 	}
 
-	void LContentBrowserPanel::ClearSelectedObjects()
+	void LContentBrowserPanel::ClearCurrentSelection()
 	{
+		//LK_CORE_DEBUG_TAG("ContentBrowser", "Clearing current selection");
 		std::vector<LUUID> SelectedItems = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
 		for (LUUID ItemHandle : SelectedItems)
 		{
-			const std::size_t Index = ItemList.FindItem(ItemHandle);
+			const std::size_t Index = ItemList.Find(ItemHandle);
 			if (Index == FContentBrowserItemList::InvalidItem)
 			{
 				continue;
@@ -437,11 +458,11 @@ namespace LkEngine {
 				for (uint32_t i = 0; i < Count; i++)
 				{
 					const FAssetHandle AssetHandle = *(((FAssetHandle*)Payload->Data) + i);
-					const std::size_t Index = ItemList.FindItem(AssetHandle);
+					const std::size_t Index = ItemList.Find(AssetHandle);
 					if (Index != FContentBrowserItemList::InvalidItem)
 					{
 						ItemList[Index]->Move(DirectoryInfo->FilePath);
-						ItemList.erase(AssetHandle);
+						ItemList.Erase(AssetHandle);
 					}
 				}
 			}
@@ -662,7 +683,6 @@ namespace LkEngine {
 			if (ItemAction.Field & EContentBrowserAction::Selected)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Selected item: {}", Item->GetName());
-				//LSelectionContext::Select(Item->GetID());
 				LSelectionContext::Select(ESelectionContext::ContentBrowser, Item->GetID());
 			}
 			/* Action: Deselect. */
@@ -691,6 +711,7 @@ namespace LkEngine {
 			if (ItemAction.Field & EContentBrowserAction::Hovered)
 			{
 				//LK_CORE_DEBUG_TAG("ContentBrowser", "Hovered: {}", Item->GetName());
+				bIsAnyItemHovered = true;
 			}
 
 			Item->EndRender();
@@ -752,7 +773,7 @@ namespace LkEngine {
 		}();
 
 		/* Fill with selection color if any of the child entities are selected. */
-		auto CheckIfAnyDescendantSelected = [&](TObjectPtr<FDirectoryInfo>& InDirectory, auto InIsAnyDescendantSelected) -> bool
+		auto CheckIfAnyDescendantSelected = [&](TObjectPtr<FDirectoryInfo>& InDirectory, auto IsAnyDescendantSelectedFunc) -> bool
 		{
 			if (InDirectory->Handle == CurrentDirectory->Handle)
 			{
@@ -761,7 +782,7 @@ namespace LkEngine {
 
 			for (auto& [ChildHandle, ChildDir] : InDirectory->SubDirectories)
 			{
-				if (InIsAnyDescendantSelected(ChildDir, InIsAnyDescendantSelected))
+				if (IsAnyDescendantSelectedFunc(ChildDir, IsAnyDescendantSelectedFunc))
 				{
 					return true;
 				}
@@ -784,7 +805,7 @@ namespace LkEngine {
 		//LK_CORE_INFO("IsActiveDirectory - {}: {}", Directory->FilePath.string(), (IsActiveDirectory ? "Yes" : "No"));
 		//Flags |= ImGuiTreeNodeFlags_Framed;
 
-		// Fill the background if selected/clicked.
+		/* Fill the background if selected/clicked. */
 		if (IsActiveDirectory || IsItemClicked)
 		{
 			if (IsWindowFocused)
@@ -806,18 +827,34 @@ namespace LkEngine {
 			DrawNodeBackground(RGBA32::SelectionMuted);
 		}
 
-		// Tree Node.
-		const bool IsOpen = UI::TreeNode(ID, Name, Flags, FEditorResources::FolderIcon);
+		/**
+		 * Check to see if the any of the subdirectories have subdirs in them. 
+		 * We should not render the arrow/bullet if that is the case.
+		 */
+		ImGuiDir OpenDirection = ImGuiDir_None;
+		if (Directory && (Directory->SubDirectories.size() > 0))
+		{
+			OpenDirection = ImGuiDir_Down;
+		}
+
+		/**
+		 * Render the tree node. 
+		 * Whenever the selected entry does not have any subdirectories, do not toggle the arrow down.
+		 */
+		const bool IsOpen = UI::TreeNode(ID, Name, Flags, FEditorResources::FolderIcon, OpenDirection);
 
 		if (IsActiveDirectory || IsItemClicked)
 		{
 			ImGui::PopStyleColor();
 		}
 
-		// Fix for slight overlap.
 		UI::ShiftCursorY(3.0f);
 
-		// Context Menu.
+		/**
+		 * Context Menu. 
+		 *
+		 *  Show the context menu on right clicks.
+		 */
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 4.0f));
 		if (ImGui::BeginPopupContextItem())
 		{
@@ -825,8 +862,8 @@ namespace LkEngine {
 			{
 				if (ImGui::MenuItem("Folder"))
 				{
-					const bool Created = LFileSystem::CreateDirectory(LFileSystem::GetAssetsDir() / Directory->FilePath / "New Folder");
-					if (Created)
+					const bool DirectoryCreated = LFileSystem::CreateDirectory(LFileSystem::GetAssetsDir() / Directory->FilePath / "New Folder");
+					if (DirectoryCreated)
 					{
 						Refresh();
 					}
@@ -875,6 +912,7 @@ namespace LkEngine {
 
 			for (auto& ChildDirectory : DirectoryArray)
 			{
+				//UI::FScopedStyle IndentSpacing(ImGuiStyleVar_IndentSpacing, 12.0f);
 				RenderOutlinerHierarchy(ChildDirectory);
 			}
 		}

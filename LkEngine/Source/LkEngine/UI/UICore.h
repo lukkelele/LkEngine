@@ -40,7 +40,7 @@
 
 
 #define LK_UI_DEBUG_ON_HOVER(...)                                                   \
-		if (GDebug_DisplayWindowSizeOnHover)                                        \
+		if (Debug::UI::bDisplayWindowSizeOnHover)                                   \
 		{                                                                           \
 			if (ImGui::IsWindowHovered())                                           \
 			{                                                                       \

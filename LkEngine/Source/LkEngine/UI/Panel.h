@@ -23,6 +23,19 @@ namespace LkEngine {
 
 		virtual void SerializeToYaml(YAML::Emitter& Out) const = 0;
 		virtual void DeserializeFromYaml(const YAML::Node& Data) = 0;
+
+	protected:
+		/**
+		 * FWindow
+		 * 
+		 *  Data container for serializing data for subwindows 
+		 *  to restore on startup.
+		 */
+		struct FWindow
+		{
+			bool bOpen = false;
+		};
+
 	};
 
 }

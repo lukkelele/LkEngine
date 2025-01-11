@@ -32,19 +32,38 @@ namespace LkEngine {
 		void UI_AssetRegistry();
 		void UI_InputInfo();
 		void UI_UserInterfaceTools();
-		void UI_RegisteredFonts();
+		void UI_Fonts();
 
 	public:
-		static bool bWindow_ObjectReferences;
-		static bool bWindow_AssetRegistry;
-		static bool bWindow_InputInfo;
-		static bool bWindow_UserInterfaceTools;
-		static bool bWindow_RegisteredFonts;
+		struct FWindow_ObjectReferences : public FWindow
+		{
+		};
 
-		/**
-		 * @brief Message boxes node in the 'UserInterfaceTools' window.
-		 */
-		static bool bUserInterfaceTools_TreeNode_MessageBoxes;
+		struct FWindow_InputInfo : public FWindow
+		{
+			bool bTreeNode_Selection = true;
+			bool bTreeNode_KeyInfo = false;
+		};
+
+		struct FWindow_UserInterfaceTools : public FWindow
+		{
+			bool bTreeNode_MessageBoxes = true;
+		};
+
+		struct FWindow_AssetRegistry : public FWindow
+		{
+		};
+
+		struct FWindow_Fonts : public FWindow
+		{
+		};
+
+		inline static FWindow_ObjectReferences Window_ObjectReferences{};
+		inline static FWindow_AssetRegistry Window_AssetRegistry{};
+		inline static FWindow_InputInfo Window_InputInfo{};
+		inline static FWindow_UserInterfaceTools Window_UserInterfaceTools{};
+		inline static FWindow_Fonts Window_Fonts{};
+
 	private:
 		LCLASS(LToolsPanel);
 	};
