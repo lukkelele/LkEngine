@@ -1,6 +1,7 @@
 CoreTests:
   - Enum_EnumClass_Operator_Bitwise_OR: 1
   - ObjectPtr_ReferenceCount_Creation: 1
+  - Math_Vector2_Compability_ImGui_Copy: 1
   - Dummy_Arithmetic_OneEqualOne: 1
   - ObjectPtr_ReferenceCount_CopyTwice: 1
   - Enum_EnumClass_Operator_Comparison_GreaterThan: 1
@@ -18,3 +19,8 @@ CoreTests:
   - Enum_EnumClass_Operator_Comparison_LessThan: 1
   - Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo: 1
   - Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo: 1
+  - Math_Vector2_Compability_Glm_Copy: 1
+  - Math_Vector2_Compability_Glm_CopyConstructor: 1
+  - Math_Vector3_Compability_Glm_Copy: 1
+  - Math_Vector3_Compability_Glm_CopyConstructor: 1
+  - Math_Vector2_Compability_ImGui_CopyConstructor: 1

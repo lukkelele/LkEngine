@@ -1,10 +1,11 @@
 {
-    "Total": 19,
+    "Total": 25,
     "Passed": {
-        "Count": 19,
+        "Count": 25,
         "Tests": [
             "Enum_EnumClass_Operator_Bitwise_OR",
             "ObjectPtr_ReferenceCount_Creation",
+            "Math_Vector2_Compability_ImGui_Copy",
             "Dummy_Arithmetic_OneEqualOne",
             "ObjectPtr_ReferenceCount_CopyTwice",
             "Enum_EnumClass_Operator_Comparison_GreaterThan",
@@ -21,7 +22,12 @@
             "Enum_EnumClass_Operator_Bitwise_AND",
             "Enum_EnumClass_Operator_Comparison_LessThan",
             "Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo",
-            "Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo"
+            "Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo",
+            "Math_Vector2_Compability_Glm_Copy",
+            "Math_Vector2_Compability_Glm_CopyConstructor",
+            "Math_Vector3_Compability_Glm_Copy",
+            "Math_Vector3_Compability_Glm_CopyConstructor",
+            "Math_Vector2_Compability_ImGui_CopyConstructor"
         ]
     },
     "Failed": {
