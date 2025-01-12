@@ -28,8 +28,8 @@
 </a>
 
 **LkEngine** (pronounced *Lukkel-Engine*) is a game engine written in C\++20. <br>
-The sole reason for the project is to learn more and have fun. I really enjoy coding so I have a blast doing it.<br>
-I have lots of ideas that I want to see if they could work and this project has been a very good environment for me to try stuff out.
+This project is for fun and to learn more. I really enjoy coding so I have a blast doing it.<br>
+I have lots of ideas that I want to see if they could work and this project is good environment for me to try stuff out.
 <br>
 <br>
 The goal is to have an application with an API that is good for performance and easy to use.<br>
@@ -37,13 +37,12 @@ With features such as:
 - Multiple platform support.
 - Static reflection.
 - Serialization and persistance.
-- Development tools (e.g debugging and profiling).
 - Crash and error handling.
+- Development tools (e.g debugging and profiling).
 - Application launcher.
 
 ## Setup and Installation <a id="Setup-and-Installation"></a>
 For development I've been using Visual Studio Community 22 (64-bit).<br>
-Other IDE's should in theory be able to build and run the engine but I cannot make any promises.
 
 ### Windows <a id="Platform-Windows"></a>
 Make sure the following are installed:
@@ -96,14 +95,14 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 
 ### Available
 :white_check_mark: Serialization<br>
+:white_check_mark: Renderer Submission System<br>
 :white_check_mark: Camera System<br>
+:white_check_mark: Asset Manager<br>
+:white_check_mark: Profiling and Instrumentation<br>
 
 ### In Progress
 :black_square_button: Static Reflection<br>
-:black_square_button: Profiling and Instrumentation<br>
 :black_square_button: Physics and Raycasting<br>
-:black_square_button: Asset Manager<br>
-:black_square_button: Renderer Submission System<br>
 
 ---
 
@@ -118,7 +117,8 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 
 ## Development <a id="Engine-Development"></a>
 
-* [Documentation](Docs/Development.md) <a id="Engine-Development"></a>
+See more images and screenshots in the [documentation](Docs/Development.md).
+
 * [github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/) <br>
 * [github.io.lukkelele/LkEngine/Development](https://github.com/lukkelele/LkEngine/blob/gh-pages/Development.md)
 
