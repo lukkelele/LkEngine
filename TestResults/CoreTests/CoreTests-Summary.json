@@ -1,20 +1,23 @@
 {
-    "Total": 25,
+    "Total": 29,
     "Passed": {
-        "Count": 25,
+        "Count": 29,
         "Tests": [
+            "Math_Vector4_Float_Compability_Glm_Copy",
             "Enum_EnumClass_Operator_Bitwise_OR",
             "ObjectPtr_ReferenceCount_Creation",
-            "Math_Vector2_Compability_ImGui_Copy",
             "Dummy_Arithmetic_OneEqualOne",
             "ObjectPtr_ReferenceCount_CopyTwice",
             "Enum_EnumClass_Operator_Comparison_GreaterThan",
             "Dummy_Arithmetic_OneLessThanTwo",
             "Dummy_Arithmetic_TwoGreaterThanThree",
+            "Math_Vector4_Float_Compability_ImGui_Copy",
             "Dummy_Arithmetic_TwoGreaterThanOne",
             "ObjectPtr_ReferenceCount_CopyOnce",
             "StringUtils_ToLower_ConstChar",
+            "Math_Vector4_Float_Compability_Glm_CopyConstructor",
             "StringUtils_ToUpper_ConstChar",
+            "Math_Vector3_Float_Compability_Glm_CopyConstructor",
             "StringUtils_ToLower_String",
             "StringUtils_ToUpper_String",
             "StringUtils_ToLower_WideString",
@@ -23,11 +26,12 @@
             "Enum_EnumClass_Operator_Comparison_LessThan",
             "Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo",
             "Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo",
-            "Math_Vector2_Compability_Glm_Copy",
-            "Math_Vector2_Compability_Glm_CopyConstructor",
-            "Math_Vector3_Compability_Glm_Copy",
-            "Math_Vector3_Compability_Glm_CopyConstructor",
-            "Math_Vector2_Compability_ImGui_CopyConstructor"
+            "Math_Vector2_Float_Compability_Glm_Copy",
+            "Math_Vector2_Float_Compability_Glm_CopyConstructor",
+            "Math_Vector3_Float_Compability_Glm_Copy",
+            "Math_Vector2_Float_Compability_ImGui_Copy",
+            "Math_Vector2_Float_Compability_ImGui_CopyConstructor",
+            "Math_Vector4_Float_Compability_ImGui_CopyConstructor"
         ]
     },
     "Failed": {
