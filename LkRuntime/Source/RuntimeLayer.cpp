@@ -35,7 +35,7 @@ namespace LkEngine {
 		LK_UNUSED(InFilepath);
 	}
 
-	void LRuntimeLayer::LoadScene(const FAssetHandle SceneHandle)
+	void LRuntimeLayer::LoadScene(const LUUID SceneHandle)
 	{
 		LK_UNUSED(SceneHandle);
 	}

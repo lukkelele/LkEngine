@@ -20,7 +20,7 @@ namespace LkEngine {
 		void OpenProject();
 
 		void OpenScene(const std::string& InFilepath);
-		void LoadScene(const FAssetHandle SceneHandle);
+		void LoadScene(const LUUID SceneHandle);
 
 	private:
 		void OnScenePlay();
