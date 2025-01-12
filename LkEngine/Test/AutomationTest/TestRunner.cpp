@@ -61,12 +61,16 @@ namespace LkEngine {
 		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_GreaterThan>());
 		Tests.push_back(std::make_shared<Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo>());
 		/* Math tests. */
-		Tests.push_back(std::make_shared<Math_Vector2_Compability_Glm_Copy>());
-		Tests.push_back(std::make_shared<Math_Vector2_Compability_Glm_CopyConstructor>());
-		Tests.push_back(std::make_shared<Math_Vector3_Compability_Glm_Copy>());
-		Tests.push_back(std::make_shared<Math_Vector3_Compability_Glm_CopyConstructor>());
-		Tests.push_back(std::make_shared<Math_Vector2_Compability_ImGui_Copy>());
-		Tests.push_back(std::make_shared<Math_Vector2_Compability_ImGui_CopyConstructor>());
+		Tests.push_back(std::make_shared<Math_Vector2_Float_Compability_Glm_Copy>());
+		Tests.push_back(std::make_shared<Math_Vector2_Float_Compability_Glm_CopyConstructor>());
+		Tests.push_back(std::make_shared<Math_Vector3_Float_Compability_Glm_Copy>());
+		Tests.push_back(std::make_shared<Math_Vector3_Float_Compability_Glm_CopyConstructor>());
+		Tests.push_back(std::make_shared<Math_Vector4_Float_Compability_Glm_Copy>());
+		Tests.push_back(std::make_shared<Math_Vector4_Float_Compability_Glm_CopyConstructor>());
+		Tests.push_back(std::make_shared<Math_Vector2_Float_Compability_ImGui_Copy>());
+		Tests.push_back(std::make_shared<Math_Vector2_Float_Compability_ImGui_CopyConstructor>());
+		Tests.push_back(std::make_shared<Math_Vector4_Float_Compability_ImGui_Copy>());
+		Tests.push_back(std::make_shared<Math_Vector4_Float_Compability_ImGui_CopyConstructor>());
 	#endif
 	}
 
