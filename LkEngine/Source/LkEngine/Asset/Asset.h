@@ -12,9 +12,6 @@
 
 namespace LkEngine {
 
-    using FAssetHandle = LUUID;
-
-	/// TODO: Documentation
     /**
      * LAsset
 	 *
@@ -44,24 +41,20 @@ namespace LkEngine {
 			return !(*this == Other);
 		}
 
-		/// FIXME: Use LK_ENUM_CLASS_FLAGS
 		FORCEINLINE bool IsFlagSet(const EAssetFlag InFlag) const 
 		{ 
 			return (Flags & static_cast<uint16_t>(InFlag));
 		}
 
-		/// FIXME: Use LK_ENUM_CLASS_FLAGS
 		FORCEINLINE void SetFlag(const EAssetFlag InFlag, bool InValue = true)
 		{
 			if (InValue)
 			{
-				//Flags |= InFlag;
-				Flags |= static_cast<uint16_t>(InFlag);
+				Flags |= static_cast<std::underlying_type_t<EAssetFlag>>(InFlag);
 			}
 			else
 			{
-				//Flags &= ~InFlag;
-				Flags &= ~(static_cast<uint16_t>(InFlag));
+				Flags &= ~(static_cast<std::underlying_type_t<EAssetFlag>>(InFlag));
 			}
 		}
 
@@ -71,8 +64,14 @@ namespace LkEngine {
 		}
 
     public:
-        FAssetHandle Handle = 0;
-		uint16_t Flags = static_cast<uint16_t>(EAssetFlag::None);
+        LUUID Handle = 0;
+
+		/**
+		 * The underlying type needs to be used for the member because 
+		 * of the enum class. The operations use the enum class as usual,
+		 * the primitive type is only used for the flag storage.
+		 */
+		std::underlying_type_t<EAssetFlag> Flags = static_cast<std::underlying_type_t<EAssetFlag>>(EAssetFlag::None);
 
 	private:
 		LCLASS(LAsset)
@@ -95,7 +94,7 @@ namespace LkEngine {
 
 	struct FAssetMetadata
 	{
-		FAssetHandle Handle = 0;
+		LUUID Handle = 0;
 		EAssetType Type = EAssetType::None;
 		std::filesystem::path FilePath{};
 		bool bIsDataLoaded = false;

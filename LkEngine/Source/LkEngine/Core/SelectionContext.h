@@ -14,6 +14,11 @@
 
 namespace LkEngine {
 
+	/**
+	 * ESelectionContext
+	 * 
+	 *  Used a way to sort selections depending on where they are performed.
+	 */
 	enum class ESelectionContext
 	{
 		Global = 0, 
@@ -155,8 +160,10 @@ namespace LkEngine {
 		{
 			if (Context == ESelectionContext::Global)
 			{
+				static std::vector<LUUID> Combined;
+				Combined.clear();
+
 				auto AllRanges = SelectionContextMap | std::views::values | std::views::join;
-				std::vector<LUUID> Combined;
 				Combined.reserve(std::ranges::distance(AllRanges));
 				std::ranges::copy(AllRanges, std::back_inserter(Combined));
 				return Combined;

@@ -20,7 +20,7 @@ namespace LkEngine {
 	static char RenameBuffer[LContentBrowserItem::INPUT_BUFFER_SIZE];
 
 	LContentBrowserItem::LContentBrowserItem(const EItemType InType, 
-											 const FAssetHandle InID, 
+											 const LUUID InID, 
 											 std::string_view InName, 
 											 const TObjectPtr<LTexture2D> InIcon)
 		: ItemType(InType)
@@ -328,7 +328,7 @@ namespace LkEngine {
 				ImGui::SetDragDropPayload(
 					"AssetPayload", 
 					SelectedItems.data(), 
-					sizeof(FAssetHandle) * SelectedItems.size()
+					sizeof(LUUID) * SelectedItems.size()
 				);
 			}
 
@@ -338,11 +338,13 @@ namespace LkEngine {
 
 		if (ImGui::IsItemHovered())
 		{
-			Result.Set(EContentBrowserAction::Hovered, true);
+			//Result.Set(EContentBrowserAction::Hovered, true);
+			Result.Flags |= EContentBrowserAction::Hovered;
 
 			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && !bIsRenaming)
 			{
-				Result.Set(EContentBrowserAction::Activated, true);
+				//Result.Set(EContentBrowserAction::Activated, true);
+				Result.Flags |= EContentBrowserAction::Activated;
 			}
 			else
 			{
@@ -359,23 +361,26 @@ namespace LkEngine {
 
 					if (IsSelected && LInput::IsKeyDown(EKey::LeftControl) && !bWasJustSelected)
 					{
-						Result.Set(EContentBrowserAction::Deselected, true);
+						//Result.Set(EContentBrowserAction::Deselected, true);
+						Result.Flags |= EContentBrowserAction::Deselected;
 					}
 
 					if (!IsSelected)
 					{
-						Result.Set(EContentBrowserAction::Selected, true);
+						//Result.Set(EContentBrowserAction::Selected, true);
+						Result.Flags |= EContentBrowserAction::Selected;
 						bWasJustSelected = true;
 					}
 
 					if (!LInput::IsKeyDown(EKey::LeftControl) && !LInput::IsKeyDown(EKey::LeftShift) && bWasJustSelected)
 					{
-						Result.Set(EContentBrowserAction::ClearSelections, true);
+						//Result.Set(EContentBrowserAction::ClearSelections, true);
+						Result.Flags |= EContentBrowserAction::ClearSelections;
 					}
 
 					if (LInput::IsKeyDown(EKey::LeftShift))
 					{
-						Result.Set(EContentBrowserAction::SelectToHere, true);
+						Result.Flags |= EContentBrowserAction::SelectToHere;
 					}
 				}
 			}

@@ -163,7 +163,7 @@ namespace LkEngine {
 
 		static TObjectPtr<LScene> GetActiveScene() { return ActiveScene; }
 
-		std::unordered_set<FAssetHandle> GetAssetList();
+		std::unordered_set<LUUID> GetAssetList();
 
 	public:
 		static constexpr const char* FILE_EXTENSION = "lkscene";
@@ -173,7 +173,7 @@ namespace LkEngine {
 	private:
 		std::string Name = "";
 
-		FAssetHandle SceneID = 0;
+		LUUID SceneID = 0;
 		entt::entity SceneEntity;
 
 		bool bPaused = false;

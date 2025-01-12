@@ -112,9 +112,9 @@ namespace YAML
 	};
 
 	template<>
-	struct convert<LkEngine::FAssetHandle>
+	struct convert<LkEngine::LUUID>
 	{
-		static Node encode(const LkEngine::FAssetHandle& RHS)
+		static Node encode(const LkEngine::LUUID& RHS)
 		{
 			Node node;
 			//node.push_back((uint64_t)RHS);
@@ -122,7 +122,7 @@ namespace YAML
 			return node;
 		}
 
-		static bool decode(const Node& node, LkEngine::FAssetHandle& RHS)
+		static bool decode(const Node& node, LkEngine::LUUID& RHS)
 		{
 			RHS = node.as<uint64_t>();
 			return true;

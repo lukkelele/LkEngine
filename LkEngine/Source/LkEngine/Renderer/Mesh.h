@@ -449,7 +449,7 @@ namespace LkEngine {
 
 		FORCEINLINE TObjectPtr<LMaterialTable> GetMaterialTable() const { return MaterialTable; }
 
-		FORCEINLINE FAssetHandle GetMaterialHandle(const int Index) 
+		FORCEINLINE LUUID GetMaterialHandle(const int Index) 
 		{ 
 			return MaterialTable->GetMaterialHandle(Index);
 		}

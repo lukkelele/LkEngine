@@ -15,7 +15,7 @@
 namespace LkEngine {
 
 	/* TODO: MOVE FUNCTION */
-	static void InsertMeshMaterials(TObjectPtr<LMeshSource> MeshSource, std::unordered_set<FAssetHandle>& AssetList);
+	static void InsertMeshMaterials(TObjectPtr<LMeshSource> MeshSource, std::unordered_set<LUUID>& AssetList);
 
 	FOnSceneSetActive GOnSceneSetActive{};
 	FOnSceneCreated   GOnSceneCreated{};
@@ -566,10 +566,10 @@ namespace LkEngine {
 		Registry.clear<AllComponents>();
 	}
 
-	std::unordered_set<FAssetHandle> LScene::GetAssetList()
+	std::unordered_set<LUUID> LScene::GetAssetList()
 	{
-		std::unordered_set<FAssetHandle> AssetList;
-		std::unordered_set<FAssetHandle> MissingAssets;
+		std::unordered_set<LUUID> AssetList;
+		std::unordered_set<LUUID> MissingAssets;
 
 		// LMeshComponent
 		{
@@ -717,7 +717,7 @@ namespace LkEngine {
 		return AssetList;
 	}
 
-	static void InsertMeshMaterials(TObjectPtr<LMeshSource> MeshSource, std::unordered_set<FAssetHandle>& AssetList)
+	static void InsertMeshMaterials(TObjectPtr<LMeshSource> MeshSource, std::unordered_set<LUUID>& AssetList)
 	{
 		// Mesh materials
 		const auto& materials = MeshSource->GetMaterials();

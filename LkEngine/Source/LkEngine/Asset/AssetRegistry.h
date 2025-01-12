@@ -10,13 +10,13 @@ namespace LkEngine {
 	class LAssetRegistry
 	{
 	public:
-		FAssetMetadata& operator[](const FAssetHandle AssetHandle);
-		FAssetMetadata& Get(const FAssetHandle AssetHandle);
-		const FAssetMetadata& Get(const FAssetHandle AssetHandle) const;
+		FAssetMetadata& operator[](const LUUID AssetHandle);
+		FAssetMetadata& Get(const LUUID AssetHandle);
+		const FAssetMetadata& Get(const LUUID AssetHandle) const;
 
 		size_t Count() const { return m_AssetRegistry.size(); }
-		bool Contains(const FAssetHandle AssetHandle) const;
-		size_t Remove(const FAssetHandle AssetHandle);
+		bool Contains(const LUUID AssetHandle) const;
+		size_t Remove(const LUUID AssetHandle);
 		void Clear();
 
 		auto begin() { return m_AssetRegistry.begin(); }
@@ -25,7 +25,7 @@ namespace LkEngine {
 		auto end() const { return m_AssetRegistry.cend(); }
 
 	private:
-		std::unordered_map<FAssetHandle, FAssetMetadata> m_AssetRegistry;
+		std::unordered_map<LUUID, FAssetMetadata> m_AssetRegistry;
 	};
 
 }

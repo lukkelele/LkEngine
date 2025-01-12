@@ -116,7 +116,7 @@ namespace LkEngine {
 			return false;
 		}
 
-		const FAssetHandle MeshSourceHandle = RootNode["MeshSource"].as<uint64_t>();
+		const LUUID MeshSourceHandle = RootNode["MeshSource"].as<uint64_t>();
 		TObjectPtr<LMeshSource> MeshSource = LAssetManager::GetAsset<LMeshSource>(MeshSourceHandle);
 		if (!MeshSource)
 		{

@@ -39,24 +39,25 @@ namespace LkEngine {
 	 */
 	struct FContentBrowserItemAction
 	{
-		uint16_t Field = 0;
+		using FlagType = uint16_t;
+		FlagType Flags = 0;
 
 		void Set(const EContentBrowserAction Flag, const bool Value)
 		{
+			static_assert(std::numeric_limits<decltype(Flags)>::max() == std::numeric_limits<std::underlying_type_t<EContentBrowserAction>>::max());
 			if (Value)
 			{
-				//Field |= (uint16_t)Flag;
-				Field |= (uint16_t)Flag;
+				Flags |= (FlagType)Flag;
 			}
 			else
 			{
-				Field &= ~(uint16_t)Flag;
+				Flags &= ~(FlagType)Flag;
 			}
 		}
 
 		bool IsSet(const EContentBrowserAction Flag) const 
 		{ 
-			return Flag & Field; 
+			return Flags & Flag;
 		}
 	};
 	
@@ -74,7 +75,7 @@ namespace LkEngine {
 		};
 	public:
 		LContentBrowserItem(const EItemType InType, 
-							const FAssetHandle InID, 
+							const LUUID InID, 
 							std::string_view InName,
 							const TObjectPtr<LTexture2D> InIcon);
 		LContentBrowserItem() = delete;
@@ -87,7 +88,7 @@ namespace LkEngine {
 		virtual void Delete() {};
 		virtual bool Move(const std::filesystem::path& Destination) { return false; }
 
-		FORCEINLINE FAssetHandle GetID() const { return ID; }
+		FORCEINLINE LUUID GetID() const { return ID; }
 		FORCEINLINE EItemType GetType() const { return ItemType; }
 
 		/**
@@ -116,7 +117,7 @@ namespace LkEngine {
 		inline static constexpr int DISPLAY_NAME_MAX_LENGTH = 22;
 	private:
 		EItemType ItemType = EItemType::None;
-		FAssetHandle ID = 0;
+		LUUID ID = 0;
 		std::string FileName{};
 		std::string DisplayName{};
 		TObjectPtr<LTexture2D> Icon{};
@@ -135,12 +136,12 @@ namespace LkEngine {
 	 */
 	struct FDirectoryInfo : public LObject
 	{
-		FAssetHandle Handle = 0;
+		LUUID Handle = 0;
 		std::filesystem::path FilePath{};
-		std::vector<FAssetHandle> Assets;
+		std::vector<LUUID> Assets;
 
 		TObjectPtr<FDirectoryInfo> Parent{};
-		std::map<FAssetHandle, TObjectPtr<FDirectoryInfo>> SubDirectories;
+		std::map<LUUID, TObjectPtr<FDirectoryInfo>> SubDirectories;
 
 		FDirectoryInfo()
 		{

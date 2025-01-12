@@ -47,7 +47,7 @@ namespace LkEngine {
 		return MatAsset;
     }
 
-    TObjectPtr<LMaterialAsset> LMaterialLibrary::GetMaterial(const FAssetHandle Handle)
+    TObjectPtr<LMaterialAsset> LMaterialLibrary::GetMaterial(const LUUID Handle)
 	{
         if (auto Iter = m_LoadedMaterialAssets.find(Handle); Iter != m_LoadedMaterialAssets.end())
         {

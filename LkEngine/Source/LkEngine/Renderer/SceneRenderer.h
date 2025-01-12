@@ -67,13 +67,13 @@ namespace LkEngine {
 		 */
 		struct FMeshKey
 		{
-			FAssetHandle MeshHandle = 0;
-			FAssetHandle MaterialHandle = 0;
+			LUUID MeshHandle = 0;
+			LUUID MaterialHandle = 0;
 			uint32_t SubmeshIndex = 0;
 			bool bIsSelected = false;
 
-			FMeshKey(const FAssetHandle InMeshHandle, 
-					 const FAssetHandle InMaterialHandle, 
+			FMeshKey(const LUUID InMeshHandle, 
+					 const LUUID InMaterialHandle, 
 					 const uint32_t InSubmeshIndex, 
 					 const bool IsSelected)
 				: MeshHandle(InMeshHandle)

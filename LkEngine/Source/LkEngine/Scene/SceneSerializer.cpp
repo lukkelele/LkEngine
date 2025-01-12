@@ -126,7 +126,7 @@ namespace LkEngine {
 		return bOperationSuccess;
 	}
 
-	bool LSceneSerializer::DeserializeRuntime(const FAssetHandle InSceneHandle)
+	bool LSceneSerializer::DeserializeRuntime(const LUUID InSceneHandle)
 	{
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 		return true;
@@ -204,7 +204,7 @@ namespace LkEngine {
 		return true;
 	}
 
-	void LSceneSerializer::SerializeRuntime(const FAssetHandle InSceneHandle)
+	void LSceneSerializer::SerializeRuntime(const LUUID InSceneHandle)
 	{
 		LK_UNUSED(InSceneHandle);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
@@ -279,7 +279,7 @@ namespace LkEngine {
 				Out << YAML::Key << "MaterialTable" << YAML::Value << YAML::BeginMap; /* MaterialTable */
 				for (uint32_t Index = 0; Index < MaterialTable->GetMaterialCount(); Index++)
 				{
-					const FAssetHandle Handle = (MaterialTable->HasMaterial(Index) ? MaterialTable->GetMaterial(Index) : (FAssetHandle)0);
+					const LUUID Handle = (MaterialTable->HasMaterial(Index) ? MaterialTable->GetMaterial(Index) : (LUUID)0);
 					Out << YAML::Key << Index << YAML::Value << Handle;
 				}
 				Out << YAML::EndMap; /* MaterialTable */
@@ -389,7 +389,7 @@ namespace LkEngine {
 					for (auto MaterialEntry : MaterialTableNode)
 					{
 						const uint32_t Index = MaterialEntry.first.as<uint32_t>();
-						const FAssetHandle Handle = MaterialEntry.second.as<FAssetHandle>();
+						const LUUID Handle = MaterialEntry.second.as<LUUID>();
 						//if (LAssetManager::IsAssetHandleValid(Handle))
 						if (Handle > 0)
 						{

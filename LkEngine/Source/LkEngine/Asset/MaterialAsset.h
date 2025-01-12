@@ -79,23 +79,23 @@ namespace LkEngine {
         LMaterialTable(TObjectPtr<LMaterialTable> Other);
 		~LMaterialTable();
 
-        void SetMaterial(const uint32_t Index, const FAssetHandle AssetHandle);
+        void SetMaterial(const uint32_t Index, const LUUID AssetHandle);
 
-		FORCEINLINE FAssetHandle GetMaterial(const uint32_t Index) const
+		FORCEINLINE LUUID GetMaterial(const uint32_t Index) const
 		{
 			LK_CORE_ASSERT(HasMaterial(Index), "GetMaterial failed for index {}", Index);
 			return Materials.at(Index);
 		}
 
         void ClearMaterial(const uint32_t Index);
-        void InsertLast(const FAssetHandle Material);
+        void InsertLast(const LUUID Material);
 
         FORCEINLINE bool HasMaterial(const uint32_t Index) const 
         { 
             return (Materials.find(Index) != Materials.end());
         }
 
-        FORCEINLINE FAssetHandle GetMaterialHandle(const uint32_t Index) const
+        FORCEINLINE LUUID GetMaterialHandle(const uint32_t Index) const
         {
             LK_CORE_ASSERT(HasMaterial(Index));
             return Materials.at(Index);
@@ -116,18 +116,18 @@ namespace LkEngine {
          */
         void Clear();
 
-        std::map<uint32_t, FAssetHandle>& GetMaterials() 
+        std::map<uint32_t, LUUID>& GetMaterials() 
 		{ 
 			return Materials; 
 		}
 
-        const std::map<uint32_t, FAssetHandle>& GetMaterials() const 
+        const std::map<uint32_t, LUUID>& GetMaterials() const 
 		{ 
 			return Materials; 
 		}
 
     private:
-		std::map<uint32_t, FAssetHandle> Materials{};
+		std::map<uint32_t, LUUID> Materials{};
         uint32_t MaterialCount = 0;
 
         LCLASS(LMaterialTable)

@@ -259,7 +259,7 @@ namespace LkEngine {
 
 	struct LMeshComponent
 	{
-		FAssetHandle Mesh;
+		LUUID Mesh;
 		uint32_t SubmeshIndex = 0;
 		TObjectPtr<LMaterialTable> MaterialTable = TObjectPtr<LMaterialTable>::Create();
 
@@ -278,7 +278,7 @@ namespace LkEngine {
 			, BoneEntityIDs(Other.BoneEntityIDs)
 		{
 		}
-		LMeshComponent(const FAssetHandle InMesh, const uint32_t InSubmeshIndex = 0)
+		LMeshComponent(const LUUID InMesh, const uint32_t InSubmeshIndex = 0)
 			: Mesh(InMesh)
 			, SubmeshIndex(InSubmeshIndex)
 		{
@@ -287,7 +287,7 @@ namespace LkEngine {
 
 	struct LStaticMeshComponent
 	{
-		FAssetHandle StaticMesh;
+		LUUID StaticMesh;
 		TObjectPtr<LMaterialTable> MaterialTable = TObjectPtr<LMaterialTable>::Create();
 		bool Visible = true;
 
@@ -300,7 +300,7 @@ namespace LkEngine {
 		{
 		}
 
-		LStaticMeshComponent(const FAssetHandle InStaticMesh)
+		LStaticMeshComponent(const LUUID InStaticMesh)
 			: StaticMesh(InStaticMesh)
 		{
 		}
@@ -363,7 +363,8 @@ namespace LkEngine {
 		LBoxCollider2DComponent,
 		LMeshComponent,
 		LStaticMeshComponent,
-		LSceneComponent>;
+		LSceneComponent
+	>;
 
 }
 

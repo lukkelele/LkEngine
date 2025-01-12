@@ -70,7 +70,7 @@ namespace LkEngine {
 		const bool IsRigged = Submesh.bIsRigged;
 		const uint32_t MaterialIndex = Submesh.MaterialIndex;
 
-		const FAssetHandle MaterialHandle = MaterialTable->HasMaterial(MaterialIndex) 
+		const LUUID MaterialHandle = MaterialTable->HasMaterial(MaterialIndex) 
 			? MaterialTable->GetMaterial(MaterialIndex) 
 			: Mesh->GetMaterialTable()->GetMaterial(MaterialIndex);
 

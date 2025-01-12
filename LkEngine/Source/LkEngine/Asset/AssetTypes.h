@@ -1,24 +1,21 @@
 #pragma once 
 
-#include "LkEngine/Core/Core.h"
+//#include "LkEngine/Core/Core.h"
+#include "LkEngine/Core/LObject/Enum.h"
 
 
 namespace LkEngine {
 
 	/**
-	 * AssetFlag enum.
-	 * Allows bitwise logic without any casting.
+	 * EAssetFlag
 	 */
-	namespace AssetFlag
+	enum class EAssetFlag : uint16_t
 	{
-		enum class Type : uint16_t
-		{
-			None       = 0 << 0,
-			Missing    = 1 << 1,
-			Invalid    = 1 << 2
-		};
-	}
-	using EAssetFlag = AssetFlag::Type;
+		None       = 0 << 0,
+		Missing    = 1 << 1,
+		Invalid    = 1 << 2
+	};
+	LK_ENUM_CLASS_FLAGS(EAssetFlag);
 
 	/**
 	 * EAssetType

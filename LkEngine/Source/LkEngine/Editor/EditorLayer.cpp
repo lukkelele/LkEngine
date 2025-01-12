@@ -40,13 +40,19 @@ namespace LkEngine {
 	namespace 
 	{
 		float DeltaTime = 0.0f; /* TODO: Make this a global variable. */
+		
+		bool bViewportHovered = false;
+		bool bViewportFocused = false;
+		bool bEditorViewportHovered = false;
+		bool bEditorViewportFocused = false;
 
 		LVector2 MenuBarSize = { 0.0f, 30.0f };
 		LVector2 TopBarSize = { 0.0f, 54.0f };
 		LVector2 TabBarSize = { 0.0f, 34.0f };
-		LVector2 BottomBarSize = { 0.0f, 240.0f };
+		LVector2 BottomBarSize = { 0.0f, 240.0f }; /// REMOVE
 		LVector2 LeftSidebarSize = { 340.0f, 0.0f };
 		LVector2 RightSidebarSize = { 340.0f, 0.0f };
+		bool bFillSidebarsVertically = true;
 
 		struct FTopBarData
 		{
@@ -59,38 +65,18 @@ namespace LkEngine {
 		bool bWindow_IdStackTool = false;
 		bool bWindow_StyleEditor = false;
 		bool bWindow_ImGuiLogWindow = false;
+		bool bWindow_RenderSettingsWindow = false; /* TODO: REMOVE */
 		bool bRenderSkybox = true;
 
-		/// MOVE
+		/// TODO: Move
 		struct FMeshSubmissionMetadata
 		{
 			std::string Name = "Unknown";
 			std::string ShaderName{};
 			std::string MaterialName{};
 		};
-		std::unordered_map<FAssetHandle, FMeshSubmissionMetadata> MeshSubmissions{};
+		std::unordered_map<LUUID, FMeshSubmissionMetadata> MeshSubmissions{};
 	}
-
-	/// FIXME
-	/* Declared in UICore, should move to some other file. */
-	namespace Debug::UI 
-	{
-		bool bDisplayWindowSizeOnHover = false;
-		bool bBoundingBoxesOnHover = false;
-
-		namespace ContentBrowser 
-		{
-			bool bDrawOutlinerBorders = false;
-			ImVec4 OutlinerBorderColor = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-		}
-	}
-
-	static TObjectPtr<LTexture2D> FloorTexture; /* REMOVE */
-	static TObjectPtr<LTexture2D> CubeTexture;  /* REMOVE */
-
-	/* --- REMOVE ME --- */
-	static FAssetHandle CubeAssetHandle; /// REMOVE
-	/* ----------------- */
 
 	/**
 	 * TODO: Move lots of the initialization code to OnAttach instead.
@@ -217,19 +203,30 @@ namespace LkEngine {
 		LK_CORE_ASSERT(Window, "Window reference is nullptr");
 		FWindowData& WindowData = Window->GetData();
 
-		/* Mouse button released. */
 		WindowData.OnWindowMaximized.Add([&](const bool Maximized)
 		{
 			LK_CORE_INFO_TAG("Editor", "Maximized: {}", Maximized);
 		});
 
-		/* Mouse button pressed. */
+		/**
+		 * Mouse button pressed.
+		 */
 		WindowData.OnMouseButtonPressed.Add([&](const FMouseButtonData& MouseButtonData)
 		{
 			//LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed: {}", Enum::ToString(MouseButtonData.Button));
-			if (MouseButtonData.Button == EMouseButton::Left)
+
+			if (ImGuizmo::IsOver())
 			{
-				//LSelectionContext::DeselectAll(ESelectionContext::ContentBrowser);
+				LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed '{}', ImGuizmo is active, returning", Enum::ToString(MouseButtonData.Button));
+				return;
+			}
+
+			const bool CtrlDown = LInput::IsKeyDown(EKey::LeftControl) || LInput::IsKeyDown(EKey::RightControl);
+			const bool ShiftDown = LInput::IsKeyDown(EKey::LeftShift) || LInput::IsKeyDown(EKey::RightShift);
+
+			if (!CtrlDown)
+			{
+				LSelectionContext::DeselectAll();
 			}
 		});
 
@@ -403,7 +400,8 @@ namespace LkEngine {
 		EditorScene->OnRenderEditor(SceneRenderer, *EditorCamera, DeltaTime);
 
 		/**
-		 * Render the debug skybox.
+		 * Render the skybox.
+		 * NOTE: This is only here until cube environments are able to be submitted as an entity to the renderer.
 		 */
 		if (bRenderSkybox)
 		{
@@ -416,12 +414,13 @@ namespace LkEngine {
 
 	void LEditorLayer::RenderViewport(TObjectPtr<LImage> Image) 
 	{
+		/* TODO: Remove this function (?) */
 		LK_UNUSED(Image);
 	}
 
 	void LEditorLayer::OnRender()
 	{
-		LK_MARK_FUNC_NOT_IMPLEMENTED("IS USED");
+		LK_MARK_FUNC_NOT_IMPLEMENTED();
 		LRenderer::Submit([&]()
 		{
 			LOpenGL_Debug::RenderMirrorTexture(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
@@ -548,11 +547,31 @@ namespace LkEngine {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		UI::Begin(LK_UI_CORE_VIEWPORT, nullptr, UI::CoreViewportFlags);
 		{
+			bViewportHovered = ImGui::IsWindowHovered();
+			bViewportFocused = ImGui::IsWindowFocused();
+
 			UI_PrepareEditorViewport();
 			UI::Begin(LK_UI_EDITOR_VIEWPORT, nullptr, UI::EditorViewportFlags);
 			{
+				bEditorViewportHovered = ImGui::IsWindowHovered();
+				bEditorViewportFocused = ImGui::IsWindowFocused();
+
+				/* Render viewport image. */
 				UI_ViewportTexture();
 
+				const auto& SelectedEntities = LSelectionContext::GetSelected(ESelectionContext::Scene);
+				for (const LUUID& EntityID : SelectedEntities)
+				{
+				#if 0
+					const LEntity SelectedEntity = EditorScene->TryGetEntityWithUUID(LSelectionContext::SelectedHandle);
+					if (SelectedEntity)
+					{
+						DrawObjectGizmo(SelectedEntity);
+					}
+				#endif
+				}
+					
+			#if 0
 				/* FIXME: Fix this code. */
 				if (LSelectionContext::SelectedHandle > 0)
 				{
@@ -562,6 +581,11 @@ namespace LkEngine {
 						DrawObjectGizmo(SelectedEntity);
 					}
 				}
+			#endif
+
+				UI_WindowStatistics();
+
+				UI_HandleDragAndDrop();
 			}
 			UI::End(); /* LK_UI_EDITOR_VIEWPORT */
 		}
@@ -625,9 +649,9 @@ namespace LkEngine {
 		const glm::mat4& ProjectionMatrix = EditorCamera->GetProjectionMatrix();
 
 		/* Viewport bounds can be indexed from 0 to 1. */
-		const LVector2* ViewportBounds = EditorViewport->GetViewportBounds();
-		const float PosX = ViewportBounds[0].X;
-		const float PosY = ViewportBounds[0].Y;
+		const LVector2* EditorViewportBounds = EditorViewport->GetViewportBounds();
+		const float PosX = EditorViewportBounds[0].X;
+		const float PosY = EditorViewportBounds[0].Y;
 
 		if (ImGuiWindow* Window = ImGui::FindWindowByName(LK_UI_EDITOR_VIEWPORT))
 		{
@@ -640,16 +664,24 @@ namespace LkEngine {
 			/// TODO: Do a getter here instead of calculating inline.
 			if (TabManager.GetTabCount() == 1)
 			{
-				ImGuizmo::SetRect(PosX, (PosY - BottomBarSize.Y + MenuBarSize.Y), 
-								  EditorWindowSize.X, EditorWindowSize.Y);
+				ImGuizmo::SetRect(
+					PosX, 
+					(PosY - BottomBarSize.Y + MenuBarSize.Y), 
+					EditorWindowSize.X, 
+					EditorWindowSize.Y
+				);
 			}
 			else
 			{
-				ImGuizmo::SetRect(PosX, (PosY - BottomBarSize.Y + MenuBarSize.Y + TabBarSize.Y), 
-								  EditorWindowSize.X, EditorWindowSize.Y);
+				ImGuizmo::SetRect(
+					PosX, 
+					(PosY - BottomBarSize.Y + MenuBarSize.Y + TabBarSize.Y), 
+					EditorWindowSize.X, 
+					EditorWindowSize.Y
+				);
 			}
 
-			const bool bSnapValues = LInput::IsKeyDown(EKey::LeftControl);
+			const bool ShouldSnapValues = LInput::IsKeyDown(EKey::LeftControl);
 			const float SnapValue = Settings.TranslationSnapValue;
 			const float SnapValues[3] = { SnapValue, SnapValue, SnapValue };
 
@@ -660,7 +692,7 @@ namespace LkEngine {
 				ImGuizmo::LOCAL, //ImGuizmo::WORLD, 
 				glm::value_ptr(TransformMatrix),
 				nullptr,
-				bSnapValues ? SnapValues : nullptr
+				ShouldSnapValues ? SnapValues : nullptr
 			);
 
 			if (ImGuizmo::IsUsing())
@@ -704,66 +736,6 @@ namespace LkEngine {
 		{
 			ImGui::ShowDebugLogWindow(&bWindow_ImGuiLogWindow);
 		}
-	}
-
-	// TODO: Right alignment in the child window
-	void LEditorLayer::UI_WindowStatistics()
-	{
-		const LVector2 WindowSize = EditorViewport->GetSize();
-
-		/* Window statistics, FPS counter etc. */
-		static ImVec2 StatisticsWindowSize = ImVec2(ImGui::CalcTextSize("Forward Direction: { N1, N2, N3 }").x + 200, 500);
-
-	#if 0
-		/* No tabs are present. */
-		if (TabManager.GetTabCount() == 1)
-		{
-			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.X + WindowSize.X - StatisticsWindowSize.x * 1.0f, MenuBarSize.Y), ImGuiCond_Always);
-		}
-		/* Multiple tabs. */
-		else
-		{
-			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.X + WindowSize.X - StatisticsWindowSize.x, MenuBarSize.Y + TabBarSize.Y), ImGuiCond_Always);
-		}
-	#endif
-		ImGui::BeginChild("##WindowStats", StatisticsWindowSize, false, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoInputs);
-		{
-			const float FPS = 1000.0f / LApplication::Get()->GetTimestep();
-			ImGui::Text("FPS: %1.f", FPS);
-
-			if (EditorCamera->bIsActive)
-			{
-				ImGui::Text("FOV: %1.f", EditorCamera->DegPerspectiveFOV);
-				const glm::vec3& CamPos = EditorCamera->GetPosition();
-
-				ImGui::Text("Pos (%.2f, %.2f, %.2f)", CamPos.x, CamPos.y, CamPos.z);
-				ImGui::Text("Camera Zoom: %.3f", EditorCamera->GetZoomSpeed());
-				ImGui::Text("Speed: %.3f", EditorCamera->GetCameraSpeed());
-
-				ImGui::Text("Distance: %.2f", EditorCamera->GetDistance());
-				ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", EditorCamera->GetFocalPoint().x,
-							EditorCamera->GetFocalPoint().y, EditorCamera->GetFocalPoint().z);
-
-				ImGui::Text("Mouse Button: %s", Enum::ToString(LInput::GetLastMouseButton()));
-				ImGui::Text("Editor Window: %s", EditorViewport->GetSize().ToString().c_str());
-				ImGui::Text("Editor Window Scalers: %s", EditorViewport->GetScalers().ToString<const char*>());
-			}
-		}
-		ImGui::EndChild();
-	}
-
-	void LEditorLayer::UI_HandleManualWindowResize()
-	{
-	#if 0
-		GLFWwindow* GlfwWindow = LApplication::Get()->GetWindow().GetGlfwWindow();
-		const bool WindowMaximized = (bool)glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED);
-		ImVec2 NewSize, NewPosition;
-		if (!WindowMaximized && UI::UpdateWindowManualResize(ImGui::GetCurrentWindow(), NewSize, NewPosition))
-		{
-			glfwSetWindowPos(GlfwWindow, (int)(NewPosition.x), (int)(NewPosition.y));
-			glfwSetWindowSize(GlfwWindow, (int)(NewSize.X), (int)(NewSize.Y));
-		}
-	#endif
 	}
 
 	void LEditorLayer::NewScene(const std::string& SceneName)
@@ -1196,6 +1168,11 @@ namespace LkEngine {
 		LastTabCount = TabManager.GetTabCount();
 	}
 
+	void LEditorLayer::UI_HandleDragAndDrop()
+	{
+		/* TODO: Handle drag'n'drop (e.g asset loading) */
+	}
+
 	void LEditorLayer::UI_OpenGLExtensions()
 	{
 		UI::ShowMessageBox("Supported Extensions", []()
@@ -1321,11 +1298,7 @@ namespace LkEngine {
 
 				if (ImGui::MenuItem("Renderer Settings"))
 				{
-					ShowRenderSettingsWindow = !ShowRenderSettingsWindow;
-				}
-				if (ImGui::MenuItem("EditorLayer Window Sizes"))
-				{
-					bShowEditorWindowSizesWindow = !bShowEditorWindowSizesWindow;
+					bWindow_RenderSettingsWindow = !bWindow_RenderSettingsWindow;
 				}
 
 				ImGui::EndMenu(); // View.
@@ -1535,17 +1508,29 @@ namespace LkEngine {
 		}
 	}
 
+	LEditorLayer::FRayCast LEditorLayer::CastRay(const LEditorCamera& Camera, const float MousePosX, const float MousePosY)
+	{
+		const glm::vec4 MouseClipPos = { MousePosX, MousePosY, -1.0f, 1.0f };
+
+		const auto InverseProj = glm::inverse(Camera.GetProjectionMatrix());
+		const glm::vec4 Ray = InverseProj * MouseClipPos;
+
+		const auto InverseView = glm::inverse(glm::mat3(Camera.GetViewMatrix()));
+
+		return FRayCast(Camera.GetPosition(), InverseView * glm::vec3(Ray));
+	}
+
 	/// REMOVE?
 	LEntity LEditorLayer::CreateCube()
 	{
-		FAssetHandle CubeHandle = LAssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Source/Cube.gltf");
+		LUUID CubeHandle = LAssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Source/Cube.gltf");
 		TObjectPtr<LMesh> CubeMesh = LAssetManager::GetAsset<LMesh>(CubeHandle);
 
 		LEntity NewCubeEntity = EditorScene->CreateEntity();
 
 		/// TODO: Just use a search function instead of iterating through like this
-		std::unordered_set<FAssetHandle> AssetList = EditorScene->GetAssetList();
-		for (const FAssetHandle AssetHandle : AssetList)
+		std::unordered_set<LUUID> AssetList = EditorScene->GetAssetList();
+		for (const LUUID AssetHandle : AssetList)
 		{
 			TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(AssetHandle);
 			if (Mesh == CubeMesh)
@@ -1571,14 +1556,30 @@ namespace LkEngine {
 		return NewCubeEntity;
 	}
 
+	std::pair<float, float> LEditorLayer::GetMouseViewportSpace(const bool IsPrimaryViewport)
+	{
+		LK_CORE_ASSERT(EditorViewport);
+		auto [MouseX, MouseY] = ImGui::GetMousePos();
+
+		const auto& ViewportBoundsRef = IsPrimaryViewport ? ViewportBounds : EditorViewport->GetViewportBounds();
+		MouseX -= ViewportBoundsRef[0].X;
+		MouseY -= ViewportBoundsRef[0].Y;
+
+		const float ViewportWidth = ViewportBoundsRef[1].X - ViewportBoundsRef[0].X;
+		const float ViewportHeight = ViewportBoundsRef[1].Y - ViewportBoundsRef[0].Y;
+
+		return { (MouseX / ViewportWidth) * 2.0f - 1.0f, ((MouseY / ViewportHeight) * 2.0f - 1.0f) * -1.0f };
+	}
+
 	void LEditorLayer::UI_RenderSettingsWindow()
 	{
-		if (ImGui::Begin("Render Settings", &ShowRenderSettingsWindow, ImGuiWindowFlags_NoDocking))
+		if (ImGui::Begin("Render Settings", &bWindow_RenderSettingsWindow, ImGuiWindowFlags_None))
 		{
 			TObjectPtr<LRenderContext> RenderContext = LWindow::Get().GetRenderContext();
 			bool bBlendingEnabled = RenderContext->GetBlendingEnabled();
 			if (ImGui::Checkbox("Blending", &bBlendingEnabled))
 			{
+			#if 0
 				if (bBlendingEnabled)
 				{
 					RenderContext->SetBlendingEnabled(true);
@@ -1587,10 +1588,12 @@ namespace LkEngine {
 				{
 					RenderContext->SetBlendingEnabled(false);
 				}
+			#endif
+				RenderContext->SetBlendingEnabled(bBlendingEnabled);
 			}
 
 			const std::string CurrentRenderTopology = Enum::ToString(LRenderer::GetPrimitiveTopology());
-			if (ImGui::BeginCombo("Topology", CurrentRenderTopology.c_str(), NULL))
+			if (ImGui::BeginCombo("Topology", CurrentRenderTopology.c_str(), ImGuiComboFlags_None))
 			{
 				if (ImGui::MenuItem("Triangles"))
 				{
@@ -1670,6 +1673,57 @@ namespace LkEngine {
 			ImGui::End();
 		}
 	}
+
+	// TODO: Right alignment in the child window
+	void LEditorLayer::UI_WindowStatistics()
+	{
+		const LVector2 WindowSize = EditorViewport->GetSize();
+
+	#if 0
+		/* No tabs are present. */
+		if (TabManager.GetTabCount() == 1)
+		{
+			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.X + WindowSize.X - StatisticsWindowSize.x * 1.0f, MenuBarSize.Y), ImGuiCond_Always);
+		}
+		/* Multiple tabs. */
+		else
+		{
+			ImGui::SetNextWindowPos(ImVec2(LeftSidebarSize.X + WindowSize.X - StatisticsWindowSize.x, MenuBarSize.Y + TabBarSize.Y), ImGuiCond_Always);
+		}
+	#endif
+		ImGui::BeginChild("##WindowStats", ImVec2(400, 500), false, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoInputs);
+		{
+			const float FPS = 1000.0f / LApplication::Get()->GetTimestep();
+			ImGui::Text("FPS: %1.f", FPS);
+
+			if (EditorCamera->bIsActive)
+			{
+				ImGui::Text("FOV: %1.f", EditorCamera->DegPerspectiveFOV);
+				const glm::vec3& CamPos = EditorCamera->GetPosition();
+
+				ImGui::Text("Camera");
+				ImGui::Indent();
+				ImGui::Text("Pos (%.2f, %.2f, %.2f)", CamPos.x, CamPos.y, CamPos.z);
+				ImGui::Text("Zoom: %.3f", EditorCamera->GetZoomSpeed());
+				ImGui::Text("Speed: %.3f", EditorCamera->GetCameraSpeed());
+				ImGui::Unindent();
+
+				ImGui::Text("Distance: %.2f", EditorCamera->GetDistance());
+				ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", EditorCamera->GetFocalPoint().x,
+							EditorCamera->GetFocalPoint().y, EditorCamera->GetFocalPoint().z);
+
+				ImGui::Text("Mouse Button: %s", Enum::ToString(LInput::GetLastMouseButton()));
+
+				ImGui::Text("Editor");
+				ImGui::Indent();
+				ImGui::Text("Window: %s", EditorViewport->GetSize().ToString().c_str());
+				ImGui::Text("Window Scalers: %s", EditorViewport->GetScalers().ToString<const char*>());
+				ImGui::Unindent();
+			}
+		}
+		ImGui::EndChild();
+	}
+
 
 
 }

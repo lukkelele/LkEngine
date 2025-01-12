@@ -361,8 +361,8 @@ namespace LkEngine {
 							LK_CORE_ASSERT(ItemIdx != FContentBrowserItemList::InvalidItem, "Invalid item index of UUID '{}'", SelectedUuid);
 							TObjectPtr<LContentBrowserItem> BrowserItem = CurrentBrowserItems[ItemIdx];
 							LK_CORE_ASSERT(BrowserItem);
-							//ImGui::Text("%llu", SelectedUuid);
 							ImGui::Text("%s", BrowserItem->GetName().c_str());
+							//ImGui::Text("%llu", SelectedUuid);
 						}
 						else
 						{

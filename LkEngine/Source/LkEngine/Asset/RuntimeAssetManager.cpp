@@ -62,7 +62,7 @@ namespace LkEngine {
 		WriteRegistryToDisk();
 	}
 
-	FAssetHandle LRuntimeAssetManager::ImportAsset(const std::filesystem::path& Filepath)
+	LUUID LRuntimeAssetManager::ImportAsset(const std::filesystem::path& Filepath)
 	{
 		fs::path Path = GetRelativePath(Filepath);
 
@@ -78,7 +78,7 @@ namespace LkEngine {
 		}
 
 		FAssetMetadata Metadata;
-		Metadata.Handle = FAssetHandle();
+		Metadata.Handle = LUUID();
 		Metadata.FilePath = Path;
 		Metadata.Type = AssetType;
 		AssetRegistry[Metadata.Handle] = Metadata;
@@ -155,7 +155,7 @@ namespace LkEngine {
 		YAML::Node Data = YAML::Load(StringStream.str());
 		YAML::Node MeshNode = Data["Mesh"];
 
-		const FAssetHandle MeshSourceHandle = static_cast<FAssetHandle>(MeshNode["MeshSource"].as<uint64_t>());
+		const LUUID MeshSourceHandle = static_cast<LUUID>(MeshNode["MeshSource"].as<uint64_t>());
 		TObjectPtr<LMeshSource> MeshSource = GetAsset(MeshSourceHandle).As<LMeshSource>();
 		TObjectPtr<LMesh> Mesh = TObjectPtr<LMesh>::Create(MeshSource);
 		Mesh->SetName(InFilePath.filename().string());
@@ -180,7 +180,7 @@ namespace LkEngine {
 		MemoryAssets[Asset->Handle] = Asset;
 	}
 
-	bool LRuntimeAssetManager::ReloadData(const FAssetHandle AssetHandle)
+	bool LRuntimeAssetManager::ReloadData(const LUUID AssetHandle)
 	{
 		FAssetMetadata& Metadata = GetMetadataInternal(AssetHandle);
 		if (!Metadata.IsValid())
@@ -201,7 +201,7 @@ namespace LkEngine {
 		return Metadata.bIsDataLoaded;
 	}
 
-	bool LRuntimeAssetManager::IsAssetHandleValid(const FAssetHandle AssetHandle) const
+	bool LRuntimeAssetManager::IsAssetHandleValid(const LUUID AssetHandle) const
 	{
 		if (AssetHandle <= 0)
 		{
@@ -211,7 +211,7 @@ namespace LkEngine {
 		return IsMemoryAsset(AssetHandle);
 	}
 
-	bool LRuntimeAssetManager::IsAssetLoaded(const FAssetHandle Handle) const
+	bool LRuntimeAssetManager::IsAssetLoaded(const LUUID Handle) const
 	{
 		return LoadedAssets.contains(Handle);
 	}
@@ -221,12 +221,12 @@ namespace LkEngine {
 		return std::filesystem::absolute(LProject::GetAssetDirectory() / Metadata.FilePath);
 	}
 
-	std::filesystem::path LRuntimeAssetManager::GetFileSystemPath(const FAssetHandle Handle)
+	std::filesystem::path LRuntimeAssetManager::GetFileSystemPath(const LUUID Handle)
 	{
 		return GetFileSystemPath(GetMetadata(Handle));
 	}
 
-	EAssetType LRuntimeAssetManager::GetAssetType(FAssetHandle AssetHandle)
+	EAssetType LRuntimeAssetManager::GetAssetType(LUUID AssetHandle)
 	{
 		if (TObjectPtr<LAsset> Asset = GetAsset(AssetHandle))
 		{
@@ -236,7 +236,7 @@ namespace LkEngine {
 		return EAssetType::None;
 	}
 
-	TObjectPtr<LAsset> LRuntimeAssetManager::GetAsset(const FAssetHandle AssetHandle)
+	TObjectPtr<LAsset> LRuntimeAssetManager::GetAsset(const LUUID AssetHandle)
     {
 		if (IsMemoryAsset(AssetHandle))
 		{
@@ -376,7 +376,7 @@ namespace LkEngine {
 		FileOut << Out.c_str();
 	}
 
-	const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const FAssetHandle Handle)
+	const FAssetMetadata& LRuntimeAssetManager::GetMetadata(const LUUID Handle)
 	{
 		if (AssetRegistry.Contains(Handle))
 		{
@@ -386,7 +386,7 @@ namespace LkEngine {
 		return NullMetadata;
 	}
 
-    FAssetMetadata& LRuntimeAssetManager::GetMetadataInternal(const FAssetHandle Handle)
+    FAssetMetadata& LRuntimeAssetManager::GetMetadataInternal(const LUUID Handle)
 	{
 		if (AssetRegistry.Contains(Handle))
 		{
@@ -396,7 +396,7 @@ namespace LkEngine {
 	    return NullMetadata; 
 	}
 
-    FAssetHandle LRuntimeAssetManager::GetAssetHandleFromFilePath(const std::filesystem::path& FilePath)
+    LUUID LRuntimeAssetManager::GetAssetHandleFromFilePath(const std::filesystem::path& FilePath)
 	{
 		return GetMetadata(FilePath).Handle;
 	}

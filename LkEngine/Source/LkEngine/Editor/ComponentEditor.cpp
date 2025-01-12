@@ -26,7 +26,7 @@ namespace LkEngine {
     void LComponentEditor::OnRenderUI(bool& IsOpen)
     {
         //static std::unordered_map<std::string, TObjectPtr<LMaterial>> MaterialMap{};
-        static std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>> MaterialMap{};
+        static std::unordered_map<LUUID, TObjectPtr<LMaterialAsset>> MaterialMap{};
 
         static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;
         if (ImGui::TreeNodeEx("Materials", treeNodeFlags))

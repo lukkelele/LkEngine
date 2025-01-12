@@ -142,7 +142,7 @@ namespace LkEngine {
 		/**
 		 * Process a directory.
 		 */
-		FAssetHandle ProcessDirectory(const std::filesystem::path& DirectoryPath,
+		LUUID ProcessDirectory(const std::filesystem::path& DirectoryPath,
 									  const TObjectPtr<FDirectoryInfo>& ParentDir);
 
 		void Search(const std::string& Query, 
@@ -183,7 +183,7 @@ namespace LkEngine {
 		TObjectPtr<FDirectoryInfo> NextDirectory{};
 		TObjectPtr<FDirectoryInfo> PreviousDirectory{};
 
-		std::unordered_map<FAssetHandle, TObjectPtr<FDirectoryInfo>> Directories{};
+		std::unordered_map<LUUID, TObjectPtr<FDirectoryInfo>> Directories{};
 		std::vector<TObjectPtr<FDirectoryInfo>> BreadCrumbData{};
 		char SearchBuffer[LContentBrowserItem::INPUT_BUFFER_SIZE];
 

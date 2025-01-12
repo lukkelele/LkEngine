@@ -243,7 +243,7 @@ namespace LkEngine {
 		LK_CORE_FATAL_TAG("MaterialTable", "Destroyed table with {} materials", Materials.size());
 	}
 
-	void LMaterialTable::SetMaterial(const uint32_t Index, const FAssetHandle AssetHandle)
+	void LMaterialTable::SetMaterial(const uint32_t Index, const LUUID AssetHandle)
 	{
 		LK_CORE_VERIFY(AssetHandle > 0, "SetMaterial called with invalid asset handle: {}", AssetHandle);
 		Materials[Index] = AssetHandle;
@@ -255,7 +255,7 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("MaterialTable", "Assigning material '{}' to index {} (count: {})", AssetHandle, Index, MaterialCount);
 	}
 
-	void LMaterialTable::InsertLast(const FAssetHandle AssetHandle)
+	void LMaterialTable::InsertLast(const LUUID AssetHandle)
 	{
 		Materials[MaterialCount++] = AssetHandle;
 	}

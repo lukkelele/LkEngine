@@ -36,6 +36,7 @@ namespace LkEngine {
 	class LNodeEditor;
 	class LScene;
 	class LSceneManagerPanel;
+	class LSubmesh;
 	class LRenderer2D;
 	class LProject;
 	class LViewport;
@@ -97,7 +98,6 @@ namespace LkEngine {
 
 		void UI_MainMenuBar();
 		void UI_ToolBar();
-		void UI_HandleManualWindowResize();
 		void UI_AboutPopup();
 
 		void UI_SyncEditorWindowSizes(const LVector2& InViewportSize);
@@ -108,8 +108,25 @@ namespace LkEngine {
 		void UI_ViewportTexture();
 		void UI_WindowStatistics();
 		void UI_TabManager();
+
+		void UI_HandleDragAndDrop();
 		
 		void UI_OpenGLExtensions();
+		void UI_RenderSettingsWindow(); /* TODO: Re-evaluate */
+
+		struct FRayCast
+		{
+			LVector Pos;
+			LVector Dir;
+
+			FRayCast(const LVector& InPos, const LVector& InDir)
+				: Pos(InPos)
+				, Dir(InDir) 
+			{
+			}
+		};
+
+		FRayCast CastRay(const LEditorCamera& Camera, const float MousePosX, const float MousePosY);
 
 		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() 
 		{ 
@@ -119,15 +136,20 @@ namespace LkEngine {
 
 		LEntity CreateCube(); /* TODO: REMOVE */
 
-		void UI_RenderSettingsWindow(); /* TODO: Re-evaluate */
+		std::pair<float, float> GetMouseViewportSpace(const bool IsPrimaryViewport);
+
+		/**
+		 * FSelectionData
+		 */
+		struct FSelectionData
+		{
+			LEntity Entity;
+			LSubmesh* Mesh{};
+			float Distance = 0.0f;
+		};
 
 	public:
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
-
-		bool ShowRenderSettingsWindow = false; /* TODO: REMOVE */
-		bool bFillSidebarsVertically = true; // Always fill out sidebars vertically
-	private:
-		inline static bool bShowEditorWindowSizesWindow = false;
 	private:
 		FEditorSettings& Settings;
 		LEditorTabManager& TabManager;
@@ -138,21 +160,21 @@ namespace LkEngine {
 		TObjectPtr<LSceneRenderer> SceneRenderer{};
 		bool bEnabled = true;
 
-		LVector2 ViewportBounds[2];
+		TObjectPtr<LWindow> Window{};
+		TObjectPtr<LRenderer2D> Renderer2D{};
+
+		LVector2 ViewportBounds[2]; /* TODO: Change name to 'PrimaryViewportBounds' */
+		TObjectPtr<LViewport> EditorViewport;
 		TObjectPtr<LFramebuffer> ViewportFramebuffer;
 		TObjectPtr<LSceneRenderer> ViewportRenderer{};
-
 		TObjectPtr<LEditorCamera> EditorCamera; /* TODO: Remove pointer, just make raw member. */
 
 		EGizmo GizmoType = EGizmo::Translate;
 
 		FEventCallback m_EventCallback; /// UPDATE ME
 
-		TObjectPtr<LViewport> EditorViewport;
-		TObjectPtr<LWindow> Window{};
-		TObjectPtr<LRenderer2D> Renderer2D{};
 
-		EEditorWindowType CurrentWindowType = EEditorWindowType::None;
+		EEditorWindowType CurrentWindowType = EEditorWindowType::None; /// REMOVE
 
 		/// REWORK ALL THESE FRIEND DECLARATIONS
 		/// -> ESPECIALLY THIS TO Physics2D !!!!!!!

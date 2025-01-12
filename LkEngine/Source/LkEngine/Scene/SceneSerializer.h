@@ -31,8 +31,8 @@ namespace LkEngine {
 		/** FIXME: Move this to LProject, should not exist in here. */
 		TObjectPtr<LScene> LoadScene();
 
-		void SerializeRuntime(const FAssetHandle InSceneHandle);
-		bool DeserializeRuntime(const FAssetHandle InSceneHandle);
+		void SerializeRuntime(const LUUID InSceneHandle);
+		bool DeserializeRuntime(const LUUID InSceneHandle);
 
 	private:
 		void SerializeEntity(YAML::Emitter& Out, LEntity Entity);

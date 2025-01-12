@@ -159,7 +159,7 @@ namespace LkEngine {
 	{
 		/* TODO: Validate index */
 		LK_CORE_VERIFY(MaterialTable->HasMaterial(Index), "Index {} is not valid", Index);
-		const FAssetHandle AssetHandle = MaterialTable->GetMaterialHandle(Index);
+		const LUUID AssetHandle = MaterialTable->GetMaterialHandle(Index);
 		//auto Asset = LAssetManager::GetAsset<LMaterialAsset>(AssetHandle)->GetMaterial();
 		auto Asset = LAssetManager::GetAsset<LMaterialAsset>(AssetHandle);
 		TObjectPtr<LMaterial> Material = Asset->GetMaterial();

@@ -174,7 +174,7 @@ namespace LkEngine {
 
 		Project = InProject;
 
-		FAssetHandle BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
+		LUUID BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
 		BaseDirectory = Directories[BaseDirectoryHandle];
 		ChangeDirectory(BaseDirectory);
 
@@ -235,7 +235,7 @@ namespace LkEngine {
 		Directories.clear();
 
 		TObjectPtr<FDirectoryInfo> CurrentDirectory = CurrentDirectory;
-		const FAssetHandle BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
+		const LUUID BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
 		BaseDirectory = Directories[BaseDirectoryHandle];
 		CurrentDirectory = GetDirectory(CurrentDirectory->FilePath);
 
@@ -281,8 +281,8 @@ namespace LkEngine {
 				ItemList.Items.push_back(TObjectPtr<LContentBrowserDirectory>::Create(SubDir));
 			}
 
-			std::vector<FAssetHandle> InvalidAssets;
-			for (FAssetHandle AssetHandle : Directory->Assets)
+			std::vector<LUUID> InvalidAssets;
+			for (LUUID AssetHandle : Directory->Assets)
 			{
 				FAssetMetadata Metadata = LProject::Current()->GetRuntimeAssetManager()->GetMetadata(AssetHandle);
 				
@@ -317,7 +317,7 @@ namespace LkEngine {
 		ClearCurrentSelection();
 	}
 
-	FAssetHandle LContentBrowserPanel::ProcessDirectory(const fs::path& DirectoryPath, const TObjectPtr<FDirectoryInfo>& ParentDir)
+	LUUID LContentBrowserPanel::ProcessDirectory(const fs::path& DirectoryPath, const TObjectPtr<FDirectoryInfo>& ParentDir)
 	{
 		const auto& Directory = GetDirectory(DirectoryPath);
 		if (Directory)
@@ -326,7 +326,7 @@ namespace LkEngine {
 		}
 
 		TObjectPtr<FDirectoryInfo> DirectoryInfo = TObjectPtr<FDirectoryInfo>::Create();
-		DirectoryInfo->Handle = FAssetHandle();
+		DirectoryInfo->Handle = LUUID();
 		DirectoryInfo->Parent = ParentDir;
 
 		if (DirectoryPath == Project->GetAssetDirectory())
@@ -342,7 +342,7 @@ namespace LkEngine {
 		{
 			if (Entry.is_directory())
 			{
-				const FAssetHandle SubdirHandle = ProcessDirectory(Entry.path(), DirectoryInfo);
+				const LUUID SubdirHandle = ProcessDirectory(Entry.path(), DirectoryInfo);
 				DirectoryInfo->SubDirectories[SubdirHandle] = Directories[SubdirHandle];
 				continue;
 			}
@@ -454,10 +454,10 @@ namespace LkEngine {
 			const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload("AssetPayload");
 			if (Payload)
 			{
-				const uint32_t Count = Payload->DataSize / sizeof(FAssetHandle);
+				const uint32_t Count = Payload->DataSize / sizeof(LUUID);
 				for (uint32_t i = 0; i < Count; i++)
 				{
-					const FAssetHandle AssetHandle = *(((FAssetHandle*)Payload->Data) + i);
+					const LUUID AssetHandle = *(((LUUID*)Payload->Data) + i);
 					const std::size_t Index = ItemList.Find(AssetHandle);
 					if (Index != FContentBrowserItemList::InvalidItem)
 					{
@@ -680,35 +680,38 @@ namespace LkEngine {
 			const FContentBrowserItemAction ItemAction = Item->Render();
 
 			/* Action: Select. */
-			if (ItemAction.Field & EContentBrowserAction::Selected)
+			if (ItemAction.Flags & EContentBrowserAction::Selected)
 			{
-				LK_CORE_DEBUG_TAG("ContentBrowser", "Selected item: {}", Item->GetName());
-				LSelectionContext::Select(ESelectionContext::ContentBrowser, Item->GetID());
+				if (!LSelectionContext::IsSelected(ESelectionContext::ContentBrowser, Item->GetID()))
+				{
+					LK_CORE_DEBUG_TAG("ContentBrowser", "Selected item: {}", Item->GetName());
+					LSelectionContext::Select(ESelectionContext::ContentBrowser, Item->GetID());
+				}
 			}
 			/* Action: Deselect. */
-			if (ItemAction.Field & EContentBrowserAction::Deselected)
+			if (ItemAction.Flags & EContentBrowserAction::Deselected)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Deselected item: {}", Item->GetName());
 			}
 			/* Action: Show In Explorer. */
-			if (ItemAction.Field & EContentBrowserAction::ShowInExplorer)
+			if (ItemAction.Flags & EContentBrowserAction::ShowInExplorer)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Show in explorer: {}", Item->GetName());
 				LK_CORE_ASSERT(Project && CurrentDirectory);
 				LFileSystem::ShowFileInExplorer(Project->GetAssetDirectory() / CurrentDirectory->FilePath / Item->GetName());
 			}
 			/* Action: Start Renaming. */
-			if (ItemAction.Field & EContentBrowserAction::StartRenaming)
+			if (ItemAction.Flags & EContentBrowserAction::StartRenaming)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Start renaming: {}", Item->GetName());
 			}
 			/* Action: Reload. */
-			if (ItemAction.Field & EContentBrowserAction::Reload)
+			if (ItemAction.Flags & EContentBrowserAction::Reload)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Reload");
 			}
 			/* Action: Hovered. */
-			if (ItemAction.Field & EContentBrowserAction::Hovered)
+			if (ItemAction.Flags & EContentBrowserAction::Hovered)
 			{
 				//LK_CORE_DEBUG_TAG("ContentBrowser", "Hovered: {}", Item->GetName());
 				bIsAnyItemHovered = true;
@@ -717,14 +720,14 @@ namespace LkEngine {
 			Item->EndRender();
 
 			/* Action: Renamed. */
-			if (ItemAction.Field & EContentBrowserAction::Renamed)
+			if (ItemAction.Flags & EContentBrowserAction::Renamed)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Renamed: {}", Item->GetName());
 				break;
 			}
 
 			/* Action: Activated. */
-			if (ItemAction.Field & EContentBrowserAction::Activated)
+			if (ItemAction.Flags & EContentBrowserAction::Activated)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Activated: {}", Item->GetName());
 				if (Item->GetType() == LContentBrowserItem::EItemType::Directory)

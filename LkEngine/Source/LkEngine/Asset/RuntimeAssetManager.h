@@ -16,26 +16,26 @@ namespace LkEngine {
 		virtual void Initialize() override;
 		virtual void Destroy() override;
 
-		FAssetHandle ImportAsset(const std::filesystem::path& Filepath);
+		LUUID ImportAsset(const std::filesystem::path& Filepath);
 
 		template<typename AssetType>
 		TObjectPtr<AssetType> ImportAsset(const std::filesystem::path& Filepath);
 
-        TObjectPtr<LAsset> GetAsset(const FAssetHandle Asset);
-		EAssetType GetAssetType(const FAssetHandle AssetHandle);
+        TObjectPtr<LAsset> GetAsset(const LUUID Asset);
+		EAssetType GetAssetType(const LUUID AssetHandle);
 
-        FORCEINLINE bool IsMemoryAsset(const FAssetHandle AssetHandle) const
+        FORCEINLINE bool IsMemoryAsset(const LUUID AssetHandle) const
 		{ 
 			return MemoryAssets.contains(AssetHandle); 
 		}
 
-		bool ReloadData(const FAssetHandle AssetHandle);
+		bool ReloadData(const LUUID AssetHandle);
 		void AddMemoryOnlyAsset(TObjectPtr<LAsset> Asset);
-		bool IsAssetHandleValid(const FAssetHandle AssetHandle) const;
-		bool IsAssetLoaded(const FAssetHandle Handle) const;
+		bool IsAssetHandleValid(const LUUID AssetHandle) const;
+		bool IsAssetLoaded(const LUUID Handle) const;
 
 		std::filesystem::path GetFileSystemPath(const FAssetMetadata& metadata);
-		std::filesystem::path GetFileSystemPath(const FAssetHandle Handle);
+		std::filesystem::path GetFileSystemPath(const LUUID Handle);
 
 		/**
 		 * @brief 
@@ -49,12 +49,12 @@ namespace LkEngine {
 		 */
 		void WriteRegistryToDisk();
 
-        const FAssetMetadata& GetMetadata(FAssetHandle AssetHandle);
+        const FAssetMetadata& GetMetadata(LUUID AssetHandle);
         const FAssetMetadata& GetMetadata(const TObjectPtr<LAsset>& AssetRef);
         const FAssetMetadata& GetMetadata(const std::filesystem::path& InFilePath);
-        FAssetMetadata& GetMetadataInternal(const FAssetHandle AssetHandle);
+        FAssetMetadata& GetMetadataInternal(const LUUID AssetHandle);
 
-        FAssetHandle GetAssetHandleFromFilePath(const std::filesystem::path& InFilePath);
+        LUUID GetAssetHandleFromFilePath(const std::filesystem::path& InFilePath);
 		EAssetType GetAssetTypeFromExtension(const std::string& Extension);
 		EAssetType GetAssetTypeFromPath(const std::filesystem::path& InFilePath);
 
@@ -79,7 +79,7 @@ namespace LkEngine {
 			static_assert(std::is_base_of_v<LAsset, T>, "CreateNewAsset only works for Assets derived from LAsset");
 
 			FAssetMetadata Metadata{};
-			Metadata.Handle = FAssetHandle();
+			Metadata.Handle = LUUID();
 
 			if (DirectoryPath.empty() || DirectoryPath == ".")
 			{
@@ -102,12 +102,12 @@ namespace LkEngine {
 			return Asset;
 		}
 
-		const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetLoadedAssets() 
+		const std::unordered_map<LUUID, TObjectPtr<LAsset>>& GetLoadedAssets() 
 		{ 
 			return LoadedAssets;
 		}
 
-		const std::unordered_map<FAssetHandle, TObjectPtr<LAsset>>& GetMemoryOnlyAssets() 
+		const std::unordered_map<LUUID, TObjectPtr<LAsset>>& GetMemoryOnlyAssets() 
 		{ 
 			return MemoryAssets;
 		}
@@ -124,8 +124,8 @@ namespace LkEngine {
 		void LoadPrimitiveShapes();
 
     private:
-        std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> LoadedAssets;
-		std::unordered_map<FAssetHandle, TObjectPtr<LAsset>> MemoryAssets;
+        std::unordered_map<LUUID, TObjectPtr<LAsset>> LoadedAssets;
+		std::unordered_map<LUUID, TObjectPtr<LAsset>> MemoryAssets;
 
         LAssetRegistry AssetRegistry;
 
