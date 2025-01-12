@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "AutomationTest/TestMacros.h"
 #include "AutomationTest/AutomationTest.h"
 
@@ -17,11 +15,7 @@ namespace LkEngine {
 		LTestRunner();
 		virtual ~LTestRunner() = default;
 
-		void RegisterTests();
 		void Run();
-
-	private:
-		std::vector<std::shared_ptr<Test::LAutomationTestBase>> Tests{};
 	};
 
 }

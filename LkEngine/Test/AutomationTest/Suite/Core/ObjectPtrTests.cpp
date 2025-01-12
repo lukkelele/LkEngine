@@ -8,9 +8,12 @@
 using namespace LkEngine;
 using namespace LkEngine::Test;
 
+
 /*=================================================================
-                        Test Definitions
+                           Core Tests
+
  =================================================================*/ 
+
 
 LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_OneEqualOne) 
 {
@@ -32,10 +35,6 @@ LK_DEFINE_AUTOMATION_TEST(Dummy_Arithmetic_TwoGreaterThanThree)
 	return TestLessThan(2, 3, GetName());
 };
 
-/*=================================================================
-                           Core Tests
- =================================================================*/ 
-#if defined(LK_AUTOMATION_TEST_CORE)
 
 /*--------------------------------------------------
 	 Object Pointer Tests.
@@ -112,5 +111,3 @@ LK_DEFINE_AUTOMATION_TEST(StringUtils_ToUpper_WideString)
 	const std::wstring Result = StringUtils::ToUpper(TestString);
 	return (Result == Expected);
 };
-
-#endif /* LK_AUTOMATION_TEST_CORE */

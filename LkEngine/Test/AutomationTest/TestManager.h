@@ -18,52 +18,32 @@ namespace LkEngine {
 
 		static LTestManager& Get();
 
-		template<typename T>
-		CORE_API bool DetectAutomationTest(LObject* InTestInstance)
-		{
-			using namespace Test;
-			LK_CORE_ASSERT(InTestInstance);
-			const LClass* Class = InTestInstance->GetClass();
-			LK_CORE_ASSERT(Class);
-			const std::string ClassName = Class->GetName();
-			LK_PRINT("DetectAutomationTest: {}", ClassName.c_str());
-
-			LAutomationTestBase* TestInstance = static_cast<LAutomationTestBase*>(InTestInstance);
-			const ETestSuite TestSuite = TestInstance->GetTestSuite();
-			LK_PRINT("  Suite: ({}, ", Enum::ToString(TestSuite));
-
-			if (TestSuiteMap.contains(TestInstance->GetTestSuite()))
-			{
-				auto& TestCollection = TestSuiteMap[TestSuite];
-				TestCollection.push_back(TestInstance);
-			}
-			else
-			{
-				TestSuiteMap[TestSuite] = { TestInstance };
-			}
-
-			LK_PRINTLN("{}) ", TestSuiteMap[TestSuite].size());
-
-			return true;
-		}
-
+		/**
+		 * Register a test.
+		 * Invoked in the LAutomationTestBase constructor.
+		 */
 		CORE_API bool RegisterAutomationTest(const std::string& TestName, Test::LAutomationTestBase* InTestInstance);
-		CORE_API bool UnregisterAutomationTest(const std::string& TestName, Test::LAutomationTestBase* InTestInstance);
-
-		CORE_API void RunTests(const std::string& TestSuite = "All");
 
 		/**
-		 * @brief Start a test.
+		 * Unregister a test.
+		 * Invoked in the LAutomationTestBase destructor.
+		 */
+		CORE_API bool UnregisterAutomationTest(const std::string& TestName, Test::LAutomationTestBase* InTestInstance);
+
+		CORE_API void RunTests(const Test::ETestSuite Suite = Test::ETestSuite::All) const;
+
+		/** 
+		 * Start a test. 
 		 */
 		CORE_API bool StartTest(const std::string& TestName);
 
-		/**
-		 * @brief Stop a test if it is running.
+		/** 
+		 * Stop a test if it is running. 
 		 */
 		CORE_API bool StopTest(const std::string& TestName);
 
 		/**
-		 * @brief Get the currently running test.
+		 * Get the currently running test.
 		 */
 		Test::LAutomationTestBase* GetCurrentTest() const
 		{
@@ -75,16 +55,44 @@ namespace LkEngine {
 			bCaptureStack = Enabled;
 		}
 
+		/**
+		 * Function to create a test instance.
+		 * Used in the test macros to register tests statically.
+		 */
+		using FTestCreator = std::function<std::shared_ptr<Test::LAutomationTestBase>()>;
+
+		/**
+		 * Add a test creator to a suite.
+		 * The test creator function is what creates the test instance that is evaluated.
+		 */
+		void AddToSuite(const Test::ETestSuite Suite, FTestCreator CreatorFunc)
+        {
+			/* TODO: Cannot use log macros here because the registration takes place before the logger is instantiated.
+			 *       Needs to be fixed. */
+			//LK_PRINTLN("[TestManager] Registering test {} to suite '{}'", TestCreatorMap[Suite].size() + 1, Enum::ToString(Suite));
+            TestCreatorMap[Suite].push_back(std::move(CreatorFunc));
+        }
+
+        const std::vector<FTestCreator>& GetTests(const Test::ETestSuite Suite) const
+        {
+            static const std::vector<FTestCreator> EmptySuite;
+            auto Iter = TestCreatorMap.find(Suite);
+            return (Iter != TestCreatorMap.end()) ? Iter->second : EmptySuite;
+        }
+
 	public:
 		/**
 		 * @brief Test instances.
 		 */
 		std::unordered_map<std::string, Test::LAutomationTestBase*> TestInstanceMap{};
 
-		/**
-		 * @brief 
-		 */
+		/* TODO: REMOVE */
 		std::unordered_map<Test::ETestSuite, std::vector<Test::LAutomationTestBase*>> TestSuiteMap{};
+
+		/**
+		 * Test creator functions mapped to their corresponding test suites.
+		 */
+		std::unordered_map<Test::ETestSuite, std::vector<FTestCreator>> TestCreatorMap;
 
 	private:
 		CORE_API static bool bCaptureStack;

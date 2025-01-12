@@ -13,19 +13,21 @@ using namespace LkEngine;
 
 enum class ETestEnum : uint32_t
 {
-	None   = LK_BIT(0),
 	Value1 = LK_BIT(1),
 	Value2 = LK_BIT(2),
 	Value3 = LK_BIT(3),
 	Value4 = LK_BIT(4),
 	COUNT  = LK_BIT(5)
 };
-LK_ENUM_CLASS_FLAGS(ETestEnum);
-static_assert(std::is_same_v<LK_Enum_Type_ETestEnum, std::underlying_type_t<ETestEnum>>);
 
-/* TODO: Cannot subtract 1, need to shift value because bitmask. */
-//static_assert((ETestEnum)((int)ETestEnum::COUNT - 1) <= std::numeric_limits<std::underlying_type_t<ETestEnum>>::max());
-static_assert(ETestEnum::COUNT <= std::numeric_limits<std::underlying_type_t<ETestEnum>>::max());
+LK_ENUM_CLASS_FLAGS(ETestEnum);
+
+LK_ENUM_RANGE_BY_VALUES(ETestEnum, 
+	ETestEnum::Value1, 
+	ETestEnum::Value2, 
+	ETestEnum::Value3, 
+	ETestEnum::Value4
+);
 
 namespace LkEngine::Enum 
 {
@@ -33,7 +35,6 @@ namespace LkEngine::Enum
 	{
 		switch (EnumValue)
 		{
-			case ETestEnum::None:   return "None";
 			case ETestEnum::Value1: return "Value1";
 			case ETestEnum::Value2: return "Value2";
 			case ETestEnum::Value3: return "Value3";
@@ -46,167 +47,259 @@ namespace LkEngine::Enum
 	}
 }
 
+static_assert(std::is_same_v<LK_Enum_Type_ETestEnum, std::underlying_type_t<ETestEnum>>);
+
+/* TODO: Cannot subtract 1, need to shift value because bitmask. */
+static_assert(ETestEnum::COUNT <= std::numeric_limits<std::underlying_type_t<ETestEnum>>::max());
+
+std::unordered_map<int, ETestEnum> TestPairMap;
+
+static constexpr int TestIterations = 25;
+
+
 LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Bitwise_AND)
 {
 	using SizeType = LK_Enum_Type_ETestEnum;
-	bool bTest1 = false;
+
+	bool Test1 = false;
 	{
 		constexpr SizeType TestValue = LK_BIT(1);
-		bTest1 = ((TestValue & LK_BIT(1)) == (TestValue & ETestEnum::Value1));
-		if (!bTest1)
-		{
-			LK_PRINTLN("[{}] Test 1: {}", GetName(), (bTest1 ? "OK" : "Failed"));
-		}
+		Test1 = ((TestValue & LK_BIT(1)) == (TestValue & ETestEnum::Value1));
+	}
+	if (!Test1)
+	{
+		LK_TEST_ERROR("[{}] Failed: Test 1", GetName());
 	}
 
-	bool bTest2 = false;
+	bool Test2 = false;
 	{
 		constexpr SizeType TestValue = LK_BIT(2);
-		bTest2 = ((TestValue & LK_BIT(2)) == (TestValue & ETestEnum::Value2));
-		if (!bTest2)
-		{
-			LK_PRINTLN("[{}] Test 2: {}", GetName(), (bTest2 ? "OK" : "Failed"));
-		}
+		Test2 = ((TestValue & LK_BIT(2)) == (TestValue & ETestEnum::Value2));
+	}
+	if (!Test2)
+	{
+		LK_TEST_ERROR("[{}] Failed: Test 2", GetName());
 	}
 
-	bool bTest3 = false;
+	bool Test3 = false;
 	{
 		constexpr SizeType TestValue = LK_BIT(3);
-		bTest3 = ((TestValue & LK_BIT(3)) == (TestValue & ETestEnum::Value3));
-		if (!bTest3)
-		{
-			LK_PRINTLN("[{}] Test 3: {}", GetName(), (bTest3 ? "OK" : "Failed"));
-		}
+		Test3 = ((TestValue & LK_BIT(3)) == (TestValue & ETestEnum::Value3));
+	}
+	if (!Test3)
+	{
+		LK_TEST_ERROR("[{}] Failed: Test 3", GetName());
 	}
 
-	bool bTest4 = false;
+	/* TODO: Use enum-range impl here instead. */
+	bool Test4 = false;
 	{
-		constexpr int Iterations = 10;
 		int Failed = 0;
-		bool bCurrentResult = false;
+		bool CurrentResult = false;
 
-		for (int i = 0; i < Iterations; i++)
+		for (int i = 0; i < TestIterations; i++)
 		{
 			/* Value 1. */
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bCurrentResult = ((TestValue & LK_BIT(1)) == (TestValue & ETestEnum::Value1));
-			if (!bCurrentResult)
+			CurrentResult = ((TestValue & LK_BIT(1)) == (TestValue & ETestEnum::Value1));
+			if (!CurrentResult)
 			{
 				Failed++;
 				LK_PRINTLN("[{}] Test 4: ({}) Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
 			}
 		}
 
-		for (int i = 0; i < Iterations; i++)
+		for (int i = 0; i < TestIterations; i++)
 		{
 			/* Value 2. */
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bCurrentResult = ((TestValue & LK_BIT(2)) == (TestValue & ETestEnum::Value2));
-			if (!bCurrentResult)
+			CurrentResult = ((TestValue & LK_BIT(2)) == (TestValue & ETestEnum::Value2));
+			if (!CurrentResult)
 			{
 				Failed++;
-				LK_TEST_WARN("[{}] Test 4: ({}) Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
+				LK_TEST_ERROR("[{}] Test 4: ({}) Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
 			}
 		}
 
-		for (int i = 0; i < Iterations; i++)
+		for (int i = 0; i < TestIterations; i++)
 		{
 			/* Value 3. */
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bCurrentResult = ((TestValue & LK_BIT(3)) == (TestValue & ETestEnum::Value3));
-			if (!bCurrentResult)
+			CurrentResult = ((TestValue & LK_BIT(3)) == (TestValue & ETestEnum::Value3));
+			if (!CurrentResult)
 			{
 				Failed++;
-				LK_TEST_WARN("[{}] Test 4: ({}) Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
+				LK_TEST_ERROR("[{}] Test 4: ({}) Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
 			}
 		}
 
-		bTest4 = (Failed == 0);
+		Test4 = (Failed == 0);
 	}
 
-	return (bTest1 && bTest2 && bTest3 && bTest4);
+	bool Test5 = false;
+	{
+		bool CurrentResult = false;
+
+		for (int i = 0; i < TestIterations; i++)
+		{
+			for (ETestEnum Enum : TEnumRange<ETestEnum>())
+			{
+				const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
+
+				SizeType TestValue1 = TestValue;
+				SizeType TestValue2 = TestValue;
+				TestValue1 &= (SizeType)Enum;  /* Integer bitwise operator. */
+				TestValue2 &= Enum;            /* Custom bitwise operator. */
+
+				CurrentResult = (TestValue1 == TestValue2);
+				if (!CurrentResult)
+				{
+					LK_TEST_ERROR("[{}] [Test 5] Value: {} ", GetName(), TestValue);
+					/* Exit directly if a single test iteration fails. */
+					break;
+					//return false;
+				}
+				//else LK_TEST_INFO("[{}] [Test 5] [OK] '{}'  Value1={}  Value2={} ({})", GetName(), TestValue, TestValue1, TestValue2, Enum::ToString(Enum));
+			}
+
+			if (!CurrentResult)
+			{
+				break;
+			}
+		}
+
+		Test5 = CurrentResult;
+	}
+
+	return (Test1 && Test2 && Test3 && Test4 && Test5);
 };
 
 LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Bitwise_OR)
 {
 	using SizeType = std::underlying_type_t<ETestEnum>;
 
-	bool bTest1 = false;
+	bool Test1 = false;
 	{
 		constexpr SizeType TestValue = LK_BIT(1);
-		bTest1 = ((TestValue | LK_BIT(1)) == (TestValue | ETestEnum::Value1));
-		if (!bTest1)
+		Test1 = ((TestValue | LK_BIT(1)) == (TestValue | ETestEnum::Value1));
+		if (!Test1)
 		{
-			LK_TEST_WARN("[{}] Test 1: {}", GetName(), (bTest1 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 1: {}", GetName(), (Test1 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest2 = false;
+	bool Test2 = false;
 	{
 		constexpr SizeType TestValue = LK_BIT(2);
-		bTest2 = ((TestValue | LK_BIT(2)) == (TestValue | ETestEnum::Value2));
-		if (!bTest2)
+		Test2 = ((TestValue | LK_BIT(2)) == (TestValue | ETestEnum::Value2));
+		if (!Test2)
 		{
-			LK_TEST_WARN("[{}] Test 2: {}", GetName(), (bTest2 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 2: {}", GetName(), (Test2 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest3 = false;
+	bool Test3 = false;
 	{
 		constexpr SizeType TestValue = LK_BIT(3);
-		bTest3 = ((TestValue | LK_BIT(3)) == (TestValue | ETestEnum::Value3));
-		if (!bTest3)
+		Test3 = ((TestValue | LK_BIT(3)) == (TestValue | ETestEnum::Value3));
+		if (!Test3)
 		{
-			LK_TEST_WARN("[{}] Test 3: {}", GetName(), (bTest3 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 3: {}", GetName(), (Test3 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest4 = false;
+	bool Test4 = false;
 	{
-		constexpr int Iterations = 10;
 		int Failed = 0;
-		bool bCurrentResult = false;
+		bool CurrentResult = false;
 
-		for (int i = 0; i < Iterations; i++)
+		for (int i = 0; i < TestIterations; i++)
 		{
 			/* Value 1. */
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bCurrentResult = ((TestValue | LK_BIT(1)) == (TestValue | ETestEnum::Value1));
-			if (!bCurrentResult)
+			CurrentResult = ((TestValue | LK_BIT(1)) == (TestValue | ETestEnum::Value1));
+			if (!CurrentResult)
 			{
 				Failed++;
-				LK_TEST_WARN("[{}] Test 4: Value1 ({}), Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
+				LK_TEST_ERROR("[{}] Test 4: Value1 ({}), Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
 			}
 		}
 
-		for (int i = 0; i < Iterations; i++)
+		for (int i = 0; i < TestIterations; i++)
 		{
 			/* Value 2. */
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bCurrentResult = ((TestValue | LK_BIT(2)) == (TestValue | ETestEnum::Value2));
-			if (!bCurrentResult)
+			CurrentResult = ((TestValue | LK_BIT(2)) == (TestValue | ETestEnum::Value2));
+			if (!CurrentResult)
 			{
 				Failed++;
-				LK_TEST_WARN("[{}] Test 4: Value2 ({}), Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
+				LK_TEST_ERROR("[{}] Test 4: Value2 ({}), Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
 			}
 		}
 
-		for (int i = 0; i < Iterations; i++)
+		for (int i = 0; i < TestIterations; i++)
 		{
 			/* Value 3. */
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bCurrentResult = ((TestValue | LK_BIT(3)) == (TestValue | ETestEnum::Value3));
-			if (!bCurrentResult)
+			CurrentResult = ((TestValue | LK_BIT(3)) == (TestValue | ETestEnum::Value3));
+			if (!CurrentResult)
 			{
 				Failed++;
-				LK_TEST_WARN("[{}] Test 4: Value3 ({}), Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
+				LK_TEST_ERROR("[{}] Test 4: Value3 ({}), Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
 			}
 		}
 
-		bTest4 = (Failed == 0);
+		for (int i = 0; i < TestIterations; i++)
+		{
+			/* Value 4. */
+			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
+			CurrentResult = ((TestValue | LK_BIT(4)) == (TestValue | ETestEnum::Value4));
+			if (!CurrentResult)
+			{
+				Failed++;
+				LK_TEST_ERROR("[{}] Test 4: Value4 ({}), Value: {}  Failed: {}", GetName(), i, TestValue, Failed); 
+			}
+		}
+
+		Test4 = (Failed == 0);
 	}
 
-	return (bTest1 && bTest2 && bTest3 && bTest4);
+	bool Test5 = false;
+	{
+		bool CurrentResult = false;
+
+		for (int i = 0; i < TestIterations; i++)
+		{
+			for (ETestEnum Enum : TEnumRange<ETestEnum>())
+			{
+				const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
+
+				SizeType TestValue1 = TestValue;
+				SizeType TestValue2 = TestValue;
+				TestValue1 |= (SizeType)Enum;  /* Integer bitwise operator. */
+				TestValue2 |= Enum;            /* Custom bitwise operator. */
+
+				CurrentResult = (TestValue1 == TestValue2);
+				if (!CurrentResult)
+				{
+					LK_TEST_ERROR("[{}] [Test 5] Value: {} ", GetName(), TestValue);
+					/* Exit directly if a single test iteration fails. */
+					break;
+					//return false;
+				}
+				//else LK_TEST_INFO("[{}] [Test 5] [OK] '{}'  Value1={}  Value2={} ({})", GetName(), TestValue, TestValue1, TestValue2, Enum::ToString(Enum));
+			}
+
+			if (!CurrentResult)
+			{
+				break;
+			}
+		}
+
+		Test5 = CurrentResult;
+	}
+
+	return (Test1 && Test2 && Test3 && Test4 && Test5);
 };
 
 /*-------------------------------------------------------------------
@@ -215,47 +308,48 @@ LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Bitwise_OR)
 LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_LessThan)
 {
 	using SizeType = std::underlying_type_t<ETestEnum>;
-	bool bTest1 = false;
+
+	bool Test1 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest1 = ((TestValue < LK_BIT(1)) == (TestValue < ETestEnum::Value1));
-		if (!bTest1)
+		Test1 = ((TestValue < LK_BIT(1)) == (TestValue < ETestEnum::Value1));
+		if (!Test1)
 		{
-			LK_TEST_WARN("[{}] Test 1: {}", GetName(), (bTest1 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 1: {}", GetName(), (Test1 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest2 = false;
+	bool Test2 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest2 = ((TestValue < LK_BIT(2)) == (TestValue < ETestEnum::Value2));
-		if (!bTest2)
+		Test2 = ((TestValue < LK_BIT(2)) == (TestValue < ETestEnum::Value2));
+		if (!Test2)
 		{
-			LK_TEST_WARN("[{}] Test 1: {}", GetName(), (bTest2 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 2: {}", GetName(), (Test2 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest3 = false;
+	bool Test3 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest3 = ((TestValue < LK_BIT(3)) == (TestValue < ETestEnum::Value3));
-		if (!bTest3)
+		Test3 = ((TestValue < LK_BIT(3)) == (TestValue < ETestEnum::Value3));
+		if (!Test3)
 		{
-			LK_TEST_WARN("[{}] Test 1: {}", GetName(), (bTest3 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 3: {}", GetName(), (Test3 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest4 = false;
+	bool Test4 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest4 = ((TestValue < LK_BIT(4)) == (TestValue < ETestEnum::Value4));
-		if (!bTest4)
+		Test4 = ((TestValue < LK_BIT(4)) == (TestValue < ETestEnum::Value4));
+		if (!Test4)
 		{
-			LK_TEST_WARN("[{}] Test 1: {}", GetName(), (bTest4 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 4: {}", GetName(), (Test4 ? "OK" : "Failed"));
 		}
 	}
 
-	return (bTest1 && bTest2 && bTest3 && bTest4);
+	return (Test1 && Test2 && Test3 && Test4);
 }
 
 /*-------------------------------------------------------------------
@@ -264,47 +358,48 @@ LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_LessThan)
 LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo)
 {
 	using SizeType = std::underlying_type_t<ETestEnum>;
-	bool bTest1 = false;
+
+	bool Test1 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest1 = ((TestValue <= LK_BIT(1)) == (TestValue <= ETestEnum::Value1));
-		if (!bTest1)
+		Test1 = ((TestValue <= LK_BIT(1)) == (TestValue <= ETestEnum::Value1));
+		if (!Test1)
 		{
-			LK_TEST_WARN("[{}] Test 1: {}", GetName(), (bTest1 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 1: {}", GetName(), (Test1 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest2 = false;
+	bool Test2 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest2 = ((TestValue <= LK_BIT(2)) == (TestValue <= ETestEnum::Value2));
-		if (!bTest2)
+		Test2 = ((TestValue <= LK_BIT(2)) == (TestValue <= ETestEnum::Value2));
+		if (!Test2)
 		{
-			LK_TEST_WARN("[{}] Test 2: {}", GetName(), (bTest2 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 2: {}", GetName(), (Test2 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest3 = false;
+	bool Test3 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest3 = ((TestValue <= LK_BIT(3)) == (TestValue <= ETestEnum::Value3));
-		if (!bTest3)
+		Test3 = ((TestValue <= LK_BIT(3)) == (TestValue <= ETestEnum::Value3));
+		if (!Test3)
 		{
-			LK_TEST_WARN("[{}] Test 3: {}", GetName(), (bTest3 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 3: {}", GetName(), (Test3 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest4 = false;
+	bool Test4 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest4 = ((TestValue <= LK_BIT(4)) == (TestValue <= ETestEnum::Value4));
-		if (!bTest4)
+		Test4 = ((TestValue <= LK_BIT(4)) == (TestValue <= ETestEnum::Value4));
+		if (!Test4)
 		{
-			LK_TEST_WARN("[{}] Test 4: {}", GetName(), (bTest4 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 4: {}", GetName(), (Test4 ? "OK" : "Failed"));
 		}
 	}
 
-	return (bTest1 && bTest2 && bTest3 && bTest4);
+	return (Test1 && Test2 && Test3 && Test4);
 }
 
 /*-------------------------------------------------------------------
@@ -313,47 +408,48 @@ LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo)
 LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_GreaterThan)
 {
 	using SizeType = std::underlying_type_t<ETestEnum>;
-	bool bTest1 = false;
+
+	bool Test1 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest1 = ((TestValue > LK_BIT(1)) == (TestValue > ETestEnum::Value1));
-		if (!bTest1)
+		Test1 = ((TestValue > LK_BIT(1)) == (TestValue > ETestEnum::Value1));
+		if (!Test1)
 		{
-			LK_TEST_WARN("[{}] Test 1: {}", GetName(), (bTest1 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 1: {}", GetName(), (Test1 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest2 = false;
+	bool Test2 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest2 = ((TestValue > LK_BIT(2)) == (TestValue > ETestEnum::Value2));
-		if (!bTest2)
+		Test2 = ((TestValue > LK_BIT(2)) == (TestValue > ETestEnum::Value2));
+		if (!Test2)
 		{
-			LK_TEST_WARN("[{}] Test 2: {}", GetName(), (bTest2 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 2: {}", GetName(), (Test2 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest3 = false;
+	bool Test3 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest3 = ((TestValue > LK_BIT(3)) == (TestValue > ETestEnum::Value3));
-		if (!bTest3)
+		Test3 = ((TestValue > LK_BIT(3)) == (TestValue > ETestEnum::Value3));
+		if (!Test3)
 		{
-			LK_TEST_WARN("[{}] Test 3: {}", GetName(), (bTest3 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 3: {}", GetName(), (Test3 ? "OK" : "Failed"));
 		}
 	}
 
-	bool bTest4 = false;
+	bool Test4 = false;
 	{
 		const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-		bTest4 = ((TestValue > LK_BIT(4)) == (TestValue > ETestEnum::Value4));
-		if (!bTest4)
+		Test4 = ((TestValue > LK_BIT(4)) == (TestValue > ETestEnum::Value4));
+		if (!Test4)
 		{
-			LK_TEST_WARN("[{}] Test 4: {}", GetName(), (bTest4 ? "OK" : "Failed"));
+			LK_TEST_ERROR("[{}] Test 4: {}", GetName(), (Test4 ? "OK" : "Failed"));
 		}
 	}
 
-	return (bTest1 && bTest2 && bTest3 && bTest4);
+	return (Test1 && Test2 && Test3 && Test4);
 }
 
 /*-------------------------------------------------------------------
@@ -363,54 +459,55 @@ LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualT
 {
 	using SizeType = std::underlying_type_t<ETestEnum>;
 	const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-	constexpr int Iterations = 10;
+
+	/* TODO: Patch this with the enum-ranged for-loop approach instead. */
 
 	int Errors = 0; /* TODO: Remove this and replace with internal error counter in the test class. */
 
-	for (int i = 0; i < Iterations; i++)
+	for (int i = 0; i < TestIterations; i++)
 	{
-		bool bTest1 = false;
+		bool Test1 = false;
 		{
-			bTest1 = ((TestValue >= LK_BIT(1)) == (TestValue >= ETestEnum::Value1));
-			if (!bTest1)
+			Test1 = ((TestValue >= LK_BIT(1)) == (TestValue >= ETestEnum::Value1));
+			if (!Test1)
 			{
-				LK_TEST_WARN("[{}] Test 1: {}", GetName(), (bTest1 ? "OK" : "Failed"));
+				LK_TEST_ERROR("[{}] Test 1: {}", GetName(), (Test1 ? "OK" : "Failed"));
 				AddError(std::format("Test 1 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
 				Errors++;
 			}
 		}
 
-		bool bTest2 = false;
+		bool Test2 = false;
 		{
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bTest2 = ((TestValue >= LK_BIT(2)) == (TestValue >= ETestEnum::Value2));
-			if (!bTest2)
+			Test2 = ((TestValue >= LK_BIT(2)) == (TestValue >= ETestEnum::Value2));
+			if (!Test2)
 			{
-				LK_TEST_WARN("[{}] Test 2: {}", GetName(), (bTest2 ? "OK" : "Failed"));
+				LK_TEST_ERROR("[{}] Test 2: {}", GetName(), (Test2 ? "OK" : "Failed"));
 				AddError(std::format("Test 2 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
 				Errors++;
 			}
 		}
 
-		bool bTest3 = false;
+		bool Test3 = false;
 		{
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bTest3 = ((TestValue >= LK_BIT(3)) == (TestValue >= ETestEnum::Value3));
-			if (!bTest3)
+			Test3 = ((TestValue >= LK_BIT(3)) == (TestValue >= ETestEnum::Value3));
+			if (!Test3)
 			{
-				LK_TEST_WARN("[{}] Test 3: {}", GetName(), (bTest3 ? "OK" : "Failed"));
+				LK_TEST_ERROR("[{}] Test 3: {}", GetName(), (Test3 ? "OK" : "Failed"));
 				AddError(std::format("Test 3 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
 				Errors++;
 			}
 		}
 
-		bool bTest4 = false;
+		bool Test4 = false;
 		{
 			const SizeType TestValue = LkEngine::Math::GenerateRandomNumber<SizeType>();
-			bTest4 = ((TestValue >= LK_BIT(4)) == (TestValue >= ETestEnum::Value4));
-			if (!bTest4)
+			Test4 = ((TestValue >= LK_BIT(4)) == (TestValue >= ETestEnum::Value4));
+			if (!Test4)
 			{
-				LK_TEST_WARN("[{}] Test 4: {}", GetName(), (bTest4 ? "OK" : "Failed"));
+				LK_TEST_ERROR("[{}] Test 4: {}", GetName(), (Test4 ? "OK" : "Failed"));
 				AddError(std::format("Test 4 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
 				Errors++;
 			}

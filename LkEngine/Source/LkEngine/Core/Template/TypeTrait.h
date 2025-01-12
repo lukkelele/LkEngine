@@ -43,7 +43,7 @@ namespace LkEngine {
 		 * 
 		 *  String literal applicable for templates.
 		 */
-		template<size_t N>
+		template<std::size_t N>
 		struct TString
 		{
 			constexpr TString(const char(&InString)[N])
@@ -79,34 +79,34 @@ namespace LkEngine {
 		template<typename T>
 		using RemovePointerAndReference_t = typename RemovePointerAndReference<T>::type;
 
-		template <typename T>
+		template<typename T>
 		struct IsSmartPointer : std::false_type {};
 
-		template <typename T>
+		template<typename T>
 		struct IsSmartPointer<std::unique_ptr<T>> : std::true_type {};
 
-		template <typename T>
+		template<typename T>
 		struct IsSmartPointer<std::shared_ptr<T>> : std::true_type {};
 
-		template <typename T>
+		template<typename T>
 		struct RemovePointerReferenceSmart 
 		{
 			using type = std::remove_pointer_t<std::remove_reference_t<std::remove_const_t<T>>>;
 		};
 
-		template <typename T>
+		template<typename T>
 		struct RemovePointerReferenceSmart<std::unique_ptr<T>> 
 		{
 			using type = T;
 		};
 
-		template <typename T>
+		template<typename T>
 		struct RemovePointerReferenceSmart<std::shared_ptr<T>> 
 		{
 			using type = T;
 		};
 
-		template <typename T>
+		template<typename T>
 		using RemovePointerReferenceSmart_t = typename RemovePointerReferenceSmart<T>::type;
 
 		/** 
@@ -120,7 +120,7 @@ namespace LkEngine {
 			static constexpr bool value = std::is_base_of<TBase, RemovePointerReferenceSmart_t<T>>::value;
 		};
 
-		template <typename TBase, typename T>
+		template<typename TBase, typename T>
 		inline constexpr bool IsBaseOf_v = IsBaseOf<TBase, T>::value;
 		
 		/**

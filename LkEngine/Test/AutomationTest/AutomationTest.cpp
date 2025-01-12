@@ -12,12 +12,14 @@ namespace LkEngine::Test {
 	LAutomationTestBase::LAutomationTestBase(const std::string& InName)
 		: TestName(InName)
 	{
+		LOBJECT_REGISTER();
 		LK_CORE_VERIFY(!TestName.empty());
-		LK_TEST_DEBUG_TAG("AutomationTest", "Registering: {}", TestName);
+		LK_TEST_TRACE_TAG("AutomationTest", "Created: {}", TestName);
+
 		const bool bTestRegistration = LTestManager::Get().RegisterAutomationTest(TestName, this);
 		if (!bTestRegistration)
 		{
-			LK_CORE_ERROR("Failed to register '{}'", TestName);
+			LK_CORE_ERROR("Failed to register: '{}'", TestName);
 		}
 	}
 
@@ -34,14 +36,14 @@ namespace LkEngine::Test {
 	void LAutomationTestBase::AddError(const std::string& ErrorMessage)
 	{
 		/* TODO: Add error event. */
-		LK_TEST_TRACE_TAG(LK_FORMAT_STRING("AutomationTest::{}", GetName()), "Failed");
+		LK_TEST_TRACE_TAG(std::format("AutomationTest::{}", GetName()), "Failed");
 	}
 
 	bool LAutomationTestBase::TestEqual(const int32_t Actual, const int32_t Expected, const char* Message)
 	{
 		if (Actual != Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -52,7 +54,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual != Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -63,7 +65,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual != Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -74,7 +76,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual != Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -85,7 +87,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual < Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -96,7 +98,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual < Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -107,7 +109,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual < Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -118,7 +120,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual < Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -129,7 +131,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual <= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -140,7 +142,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual <= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -151,7 +153,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual <= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -162,7 +164,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual <= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -173,7 +175,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual > Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -184,7 +186,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual > Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -195,7 +197,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual > Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -206,7 +208,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual >= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -217,7 +219,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual >= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 
@@ -228,7 +230,7 @@ namespace LkEngine::Test {
 	{
 		if (Actual >= Expected)
 		{
-			AddError(LK_FORMAT_STRING("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
+			AddError(std::format("Expected '{}' to be {}, but it was {}", Message, Expected, Actual));
 			return false;
 		}
 

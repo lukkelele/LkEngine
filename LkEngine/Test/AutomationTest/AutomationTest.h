@@ -100,5 +100,4 @@ namespace LkEngine::Test {
 		LCLASS(LAutomationTestBase);
 	};
 
-
 }

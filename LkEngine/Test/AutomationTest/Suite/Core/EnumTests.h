@@ -7,6 +7,8 @@
 #include "AutomationTest/TestMacros.h"
 #include "AutomationTest/AutomationTest.h"
 
+#include "AutomationTest/TestManager.h" /* Required because of static test registration. */
+
 
 /*=================================================================
                            Enum Tests

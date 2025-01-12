@@ -22,10 +22,20 @@ namespace LkEngine {
 	bool LTestManager::RegisterAutomationTest(const std::string& TestName, LAutomationTestBase* InTestInstance)
 	{
 		LK_CORE_VERIFY(!TestName.empty(), "Test name is empty");
+		LK_CORE_VERIFY(InTestInstance);
+
+		LK_TEST_TRACE_TAG("TestManager", "Registering test: {}", TestName);
+		/* FIXME: The call to 'GetTestSuite' causes crashes but the instance is OK, need to investigate further. */
+		//LK_TEST_DEBUG_TAG("TestManager", "Registering test: {} ({})", TestName, Enum::ToString(InTestInstance->GetTestSuite()));
+
 		const bool bTestRegistered = TestInstanceMap.contains(TestName);
 		if (!bTestRegistered)
 		{
 			TestInstanceMap.insert({ TestName, InTestInstance });
+		}
+		else
+		{
+			LK_CORE_WARN_TAG("TestManager", "Test '{}' already registered", TestName);
 		}
 
 		return !bTestRegistered;
@@ -45,20 +55,31 @@ namespace LkEngine {
 		return bTestRegistered;
 	}
 
-	void LTestManager::RunTests(const std::string& TestSuite)
+	void LTestManager::RunTests(const Test::ETestSuite Suite) const
 	{
-		LK_CORE_ASSERT(!TestSuite.empty(), "TestSuite is empty");
-		const FRuntimeArguments& RuntimeArgs = Global::GetRuntimeArguments();
+		const std::vector<FTestCreator>& Tests = GetTests(Suite);
+		if (Tests.empty())
+		{
+			LK_TEST_ERROR_TAG("TestManager", "No tests registered for '{}'", Enum::ToString(Suite));
+			return;
+		}
 
-		const std::string ResultFile = LK_FORMAT_STRING("TestResult-{}.yaml", TestSuite); 
+		LK_TEST_INFO_TAG("TestManager", "Running {} tests for: {}", Tests.size(), Enum::ToString(Suite));
+		const FRuntimeArguments& RuntimeArgs = Global::GetRuntimeArguments();
+		const std::string ResultFile = std::format("TestResult-{}.yaml", Enum::ToString(Suite)); 
 
 		YAML::Emitter Out;
 		Out << YAML::BeginMap;
-		Out << YAML::Key << TestSuite << YAML::Value << YAML::BeginSeq;
+		Out << YAML::Key << Enum::ToString(Suite) << YAML::Value << YAML::BeginSeq;
 
-		for (const auto& [TestName, TestInstance] : TestInstanceMap)
+		for (const auto& TestCreator : Tests)
 		{
-			LK_CORE_ASSERT(TestInstance, "Invalid test instance");
+			std::shared_ptr<Test::LAutomationTestBase> TestInstance = TestCreator();
+			LK_CORE_ASSERT(TestInstance);
+			const std::string TestName = TestInstance->GetName();
+
+			/* Run the test. */
+			LK_TEST_TRACE_TAG("TestManager", "Running: {} ({})", TestName, Enum::ToString(TestInstance->GetTestSuite()));
 			const bool bTestResult = TestInstance->RunTest();
 			if (bTestResult)
 			{
@@ -79,12 +100,13 @@ namespace LkEngine {
 		Out << YAML::EndMap;
 
 		const std::string ResultDir = LFileSystem::GetBinaryDir().string() + "Results";
-		LK_TEST_DEBUG("Results dir: {}", ResultDir);
+		LK_TEST_TRACE_TAG("TestManager", "Results directory: {}", ResultDir);
 		if (!LFileSystem::Exists(ResultDir))
 		{
 			LFileSystem::CreateDirectory(ResultDir);
 		}
-		const std::string FileOutPath = LK_FORMAT_STRING("{}/{}", ResultDir, ResultFile);
+
+		const std::string FileOutPath = std::format("{}/{}", ResultDir, ResultFile);
 		LK_TEST_INFO("Saving test results: {}", FileOutPath);
 		std::ofstream FileOut(FileOutPath);
 		if (FileOut.is_open() && FileOut.good())
