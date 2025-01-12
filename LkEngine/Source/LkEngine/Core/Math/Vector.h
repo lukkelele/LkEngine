@@ -3,8 +3,6 @@
 #include <type_traits>
 #include <ostream>
 
-#include "LkEngine/Core/String.h"
-
 /* TODO: Forward declare ImVec2 and ImVec4 and do not directly include imgui.h, 
  *       need to fix the inclusion hierarchy before that is possible though. */
 #if 1
@@ -17,38 +15,41 @@ namespace ImGui
 }
 #endif
 
+#define LK_VECTOR_ANONYMOUS_STRUCT 0
+
+
 namespace LkEngine {
 
 	/**
 	 * TVector2
 	 */
-	template<typename T>
-	class TVector2
+	template<typename VecType>
+	struct TVector2
 	{
 	public:
 		TVector2()
-			: X(T())
-			, Y(T())
+			: X(VecType())
+			, Y(VecType())
 		{
 		} 
 
-		TVector2(const T InX, const T InY)
+		TVector2(const VecType InX, const VecType InY)
 			: X(InX)
 			, Y(InY)
 		{
 		} 
 
-		template<typename R, typename = std::enable_if_t<std::is_convertible_v<R, T>>>
-		TVector2(const R InX, const R InY)
-			: X(static_cast<T>(InX))
-			, Y(static_cast<T>(InY))
+		template<typename OtherType, typename = std::enable_if_t<std::is_convertible_v<OtherType, VecType>>>
+		TVector2(const OtherType InX, const OtherType InY)
+			: X(static_cast<VecType>(InX))
+			, Y(static_cast<VecType>(InY))
 		{
 		} 
 
-		template<typename R, typename = std::enable_if_t<std::is_convertible_v<R, T>>>
-		TVector2(const TVector2<R>& Other)
-			: X(static_cast<T>(Other.X))
-			, Y(static_cast<T>(Other.Y))
+		template<typename OtherType, typename = std::enable_if_t<std::is_convertible_v<OtherType, VecType>>>
+		TVector2(const TVector2<OtherType>& Other)
+			: X(static_cast<VecType>(Other.X))
+			, Y(static_cast<VecType>(Other.Y))
 		{
 		}
 
@@ -93,11 +94,11 @@ namespace LkEngine {
 			return TVector2((X - Other.X), (Y - Other.Y));
 		}
 
-		template<typename R>
-		TVector2 operator-(const TVector2<R>& Other) const 
+		template<typename OtherType>
+		TVector2 operator-(const TVector2<OtherType>& Other) const 
 		{
-			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
-			return TVector2((X - static_cast<T>(Other.X)), (Y - static_cast<T>(Other.Y)));
+			static_assert(std::is_convertible_v<OtherType, VecType>, "Narrowing conversion");
+			return TVector2((X - static_cast<VecType>(Other.X)), (Y - static_cast<VecType>(Other.Y)));
 		}
 
 		TVector2 operator+(const TVector2& Other) const 
@@ -105,19 +106,19 @@ namespace LkEngine {
 			return TVector2((X + Other.X), (Y + Other.Y));
 		}
 
-		template<typename R>
-		TVector2 operator+(const TVector2<R>& Other) const 
+		template<typename OtherType>
+		TVector2 operator+(const TVector2<OtherType>& Other) const 
 		{
-			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
-			return TVector2((X + static_cast<T>(Other.X)), (Y + static_cast<T>(Other.Y)));
+			static_assert(std::is_convertible_v<OtherType, VecType>, "Narrowing conversion");
+			return TVector2((X + static_cast<VecType>(Other.X)), (Y + static_cast<VecType>(Other.Y)));
 		}
 
-		template<typename R>
-		TVector2& operator=(const TVector2<R> Other)
+		template<typename OtherType>
+		TVector2& operator=(const TVector2<OtherType> Other)
 		{
-			static_assert(std::is_convertible_v<R, T>, "Narrowing conversion, R -> T");
-			X = static_cast<T>(Other.X);
-			Y = static_cast<T>(Other.Y);
+			static_assert(std::is_convertible_v<OtherType, VecType>, "Narrowing conversion");
+			X = static_cast<VecType>(Other.X);
+			Y = static_cast<VecType>(Other.Y);
 			return *this;
 		} 
 
@@ -131,22 +132,15 @@ namespace LkEngine {
 			return !(*this == Other);
 		}
 
-		template<typename R>
-		bool operator==(const TVector2<R>& Other) const 
+		template<typename OtherType>
+		bool operator==(const TVector2<OtherType>& Other) const 
 		{
-			return ((X == static_cast<T>(Other.X))
-					&& (Y == static_cast<T>(Other.Y)));
+			return ((X == static_cast<VecType>(Other.X)) && (Y == static_cast<VecType>(Other.Y)));
 		}
 
 		FORCEINLINE bool IsNull() const
 		{
 			return ((X == 0) && (Y == 0));
-		}
-
-		/** Implicit conversion to glm::vec2. */
-		operator glm::vec2()
-		{
-			return glm::vec2(X, Y);
 		}
 
 		static float Distance(const TVector2& A, const TVector2& B)
@@ -159,7 +153,7 @@ namespace LkEngine {
 		{
 			if constexpr (std::is_same_v<StringType, std::string>)
 			{
-				if constexpr (std::is_floating_point_v<T>)
+				if constexpr (std::is_floating_point_v<VecType>)
 				{
 					return LK_FORMAT_STRING("({:.2f}, {:.2f})", X, Y);
 				}
@@ -171,7 +165,7 @@ namespace LkEngine {
 			else if constexpr (std::is_same_v<StringType, const char*>)
 			{
 				static constexpr uint16_t BufSize = 256;
-				if constexpr (std::is_floating_point_v<T>)
+				if constexpr (std::is_floating_point_v<VecType>)
 				{
 					static std::array<char, BufSize> Buffer;
 					std::snprintf(Buffer.data(), Buffer.size(), "(%.2f, %.2f)", X, Y);
@@ -186,57 +180,64 @@ namespace LkEngine {
 			}
 		}
 
-
 		friend std::ostream& operator<<(std::ostream& os, const TVector2& Vector) 
 		{
 			os << Vector.ToString();
 			return os;
 		}
 
-	public:
-		T X;
-		T Y;
+		operator glm::vec2() { return glm::vec2(X, Y); }
+		operator ImVec2() { return ImVec2(X, Y); }
 
 		static_assert(std::disjunction_v<
-			std::is_same<T, int>, 
-			std::is_same<T, uint16_t>, 
-			std::is_same<T, uint32_t>, 
-			std::is_same<T, uint64_t>, 
-			std::is_same<T, float>, 
-			std::is_same<T, double>
-		>, "TVector2 can only be instantiated with int, float or double.");
-	};
+			std::is_same<VecType, int>, 
+			std::is_same<VecType, uint16_t>, 
+			std::is_same<VecType, uint32_t>, 
+			std::is_same<VecType, uint64_t>, 
+			std::is_same<VecType, int16_t>, 
+			std::is_same<VecType, int32_t>, 
+			std::is_same<VecType, int64_t>, 
+			std::is_same<VecType, float>, 
+			std::is_same<VecType, double>
+		>, "TVector2 can only be instantiated with int, float or double types");
 
-	using LVector2 = TVector2<float>;
+	public:
+	#if LK_VECTOR_ANONYMOUS_STRUCT
+		union
+		{
+			struct { VecType X, Y; };
+			struct { VecType R, G; };
+			struct { VecType S, T; };
+		};
+	#else
+		union { VecType X, R, S; };
+		union { VecType Y, G, T; };
+	#endif
+	};
 
 
 	/**
-	 * TVector
+	 * TVector3
 	 */
-	template<typename T>
-	class TVector3
+	template<typename VecType>
+	struct TVector3
 	{
 	public:
 		TVector3()
-			: X(T())
-			, Y(T())
-			, Z(T()) 
+			: X(VecType())
+			, Y(VecType())
+			, Z(VecType()) 
 		{
-			static_assert(std::disjunction_v<
-				std::is_same<T, int>, 
-				std::is_same<T, float>, 
-				std::is_same<T, double>
-			>, "TVector can only be instantiated with int, float or double.");
 		} 
 
-		TVector3(T InX, T InY, T InZ)
+		TVector3(VecType InX, VecType InY, VecType InZ)
 			: X(InX)
 			, Y(InY)
 			, Z(InZ) 
 		{
 		}
 
-		TVector3(T InXYZ)
+		TVector3(VecType InXYZ)
 			: X(InXYZ)
 			, Y(InXYZ)
 			, Z(InXYZ) 
@@ -297,7 +298,6 @@ namespace LkEngine {
 
 		TVector3 Normalize()
 		{
-			/// @FIXME:
 			return { };
 		}
 
@@ -312,18 +312,182 @@ namespace LkEngine {
 			return os;
 		}
 
+		operator glm::vec3() { return glm::vec3(X, Y, Z); }
+
 		static_assert(std::disjunction_v<
-			std::is_same<T, int>, 
-			std::is_same<T, float>, 
-			std::is_same<T, double>
-		>, "TVector can only be instantiated with int, float or double.");
+			std::is_same<VecType, int>, 
+			std::is_same<VecType, uint16_t>, 
+			std::is_same<VecType, uint32_t>, 
+			std::is_same<VecType, uint64_t>, 
+			std::is_same<VecType, int16_t>, 
+			std::is_same<VecType, int32_t>, 
+			std::is_same<VecType, int64_t>, 
+			std::is_same<VecType, float>, 
+			std::is_same<VecType, double>
+		>, "TVector3 can only be instantiated with int, float or double types");
 
 	public:
-		T X;
-		T Y;
-		T Z;
+	#if LK_VECTOR_ANONYMOUS_STRUCT
+		union
+		{
+			struct { VecType X, Y, Z; };
+			struct { VecType R, G, B; };
+			struct { VecType S, T, P; };
+		};
+	#else
+		union { VecType X, R, S; };
+		union { VecType Y, G, T; };
+		union { VecType Z, B, P; };
+	#endif
 	};
 
-	using LVector = TVector3<float>;
+
+	/**
+	 * TVector4
+	 */
+	template<typename VecType>
+	struct TVector4
+	{
+	public:
+		TVector4()
+			: X(VecType())
+			, Y(VecType())
+			, Z(VecType()) 
+			, W(VecType()) 
+		{
+		} 
+
+		TVector4(VecType InX, VecType InY, VecType InZ, VecType InW)
+			: X(InX)
+			, Y(InY)
+			, Z(InZ) 
+			, W(InW)
+		{
+		}
+
+		TVector4(VecType InXYZW)
+			: X(InXYZW)
+			, Y(InXYZW)
+			, Z(InXYZW) 
+			, W(InXYZW)
+		{
+		}
+
+		TVector4(const glm::vec4& InVec)
+			: X(InVec.x)
+			, Y(InVec.y)
+			, Z(InVec.z) 
+			, W(InVec.w) 
+		{
+		}
+
+		TVector4(const ImVec4& InVec)
+			: X(InVec.x)
+			, Y(InVec.y)
+			, Z(InVec.z) 
+			, W(InVec.w) 
+		{
+		}
+
+		~TVector4() 
+		{
+		} 
+
+		TVector4& operator+=(const TVector4 Other)
+		{
+			X += Other.X;
+			Y += Other.Y;
+			Z += Other.Z;
+			W += Other.W;
+			return *this;
+		}
+
+		TVector4& operator-=(const TVector4& Other)
+		{
+			X -= Other.X;
+			Y -= Other.Y;
+			Z -= Other.Z;
+			W -= Other.W;
+			return *this;
+		}
+
+		TVector4 operator-(const TVector4& Other) const 
+		{
+			return TVector4((X - Other.X), (Y - Other.Y), (Z - Other.Z), (W - Other.W));
+		}
+
+		TVector4 operator+(const TVector4& Other) const 
+		{
+			return TVector4((X + Other.X), (Y + Other.Y), (Z + Other.Z), (W + Other.W));
+		}
+
+		bool operator==(const TVector4& Other) const 
+		{
+			return ((X == Other.X) && (Y == Other.Y) && (Z == Other.Z) && (W == Other.W));
+		}
+
+		bool operator!=(const TVector4& Other) const 
+		{
+			return !(*this == Other);
+		}
+
+		static float Distance(const TVector4& A, const TVector4& B)
+		{
+			return 0.0f;
+		}
+
+		TVector4 Normalize()
+		{
+			return { };
+		}
+
+		std::string ToString() const
+		{
+			return std::format("({:.2f}, {:.2f}, {:.2f}, {:.2f})", X, Y, Z, W);
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const TVector4& Vector) 
+		{
+			os << *Vector.ToString();
+			return os;
+		}
+
+		operator glm::vec4() { return glm::vec4(X, Y, Z, W); }
+		operator ImVec4() { return ImVec4(X, Y, Z, W); }
+
+		static_assert(std::disjunction_v<
+			std::is_same<VecType, int>, 
+			std::is_same<VecType, uint16_t>, 
+			std::is_same<VecType, uint32_t>, 
+			std::is_same<VecType, uint64_t>, 
+			std::is_same<VecType, int16_t>, 
+			std::is_same<VecType, int32_t>, 
+			std::is_same<VecType, int64_t>, 
+			std::is_same<VecType, float>, 
+			std::is_same<VecType, double>
+		>, "TVector4 can only be instantiated with int, float or double types");
+
+	public:
+	#if LK_VECTOR_ANONYMOUS_STRUCT
+		union
+		{
+			struct { VecType X, Y, Z, W; };
+			struct { VecType R, G, B, A; };
+			struct { VecType S, T, P, Q; };
+		};
+	#else
+		union { VecType X, R, S; };
+		union { VecType Y, G, T; };
+		union { VecType Z, B, P; };
+		union { VecType W, A, Q; };
+	#endif
+	};
+
+
+	/* Typedefs. */
+	using LVector2 = TVector2<float>;
+	using LVector3 = TVector3<float>;
+	using LVector4 = TVector4<float>;
+	using LVector  = LVector3;
 
 }
