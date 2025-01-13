@@ -10,7 +10,7 @@ on:
 
 env:
   TEST_DIR: .\Binaries\AutomationTest-windows\LkEngine_AutomationTests
-  TEST_RESULT_FILE: TestResult-CoreTests.yaml
+  TEST_RESULT_FILE: TestResult-Core.yaml
 
 jobs:
   CoreTests:
