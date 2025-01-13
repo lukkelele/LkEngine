@@ -56,7 +56,7 @@ def ParseTestResults(Filepath):
             }
         }
 
-        print(f"Test Results: {ResultSummary['Passed']['Count']}/{Total} passed ({100 * float(Passed/Total):.1f}%)")
+        print(f"Test Results: {ResultSummary['Passed']['Count']}/{Total} passed ({100 * float(Passed/Total):.1f}%)", flush=True)
         bYamlFileParsed = True
 
         # Save summary to a JSON file.
@@ -79,25 +79,25 @@ def ParseTestResults(Filepath):
             )
         }
 
-        print(f"Badge Data: {BadgeData}")
+        print(f"Badge Data: {BadgeData}", flush=True)
         BadgePath = ResultDir / BadgeFileName
         with open(BadgePath, "w") as BadgeFile:
             json.dump(BadgeData, BadgeFile, indent=4)
-            print(f"Badge JSON created at: {BadgePath}")
+            print(f"Badge JSON created at: {BadgePath}", flush=True)
 
         return 0
 
     except Exception as e:
         if not bYamlFileParsed:
-            print(f"[TestResultParser] Parsing of YAML file failed\n * File: {Filepath}\n * {e}")
+            print(f"[TestResultParser] Parsing of YAML file failed\n * File: {Filepath}\n * {e}", flush=True)
         else:
-            print(f"[TestResultParser] Failed to save test summary\n * {e}")
+            print(f"[TestResultParser] Failed to save test summary\n * {e}", flush=True)
         return 1
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print(f"[TestResultParser] Error occured, number of least required arguments are 2 but got {len(sys.argv)}")
+        print(f"[TestResultParser] Error occured, number of least required arguments are 2 but got {len(sys.argv)}", flush=True)
         sys.exit(1)
 
     TestResultFile = sys.argv[1]
@@ -110,8 +110,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     TestSuite = Match.group(1)
-    SummaryFileName = f"{TestSuite}-Summary.json"
-    BadgeFileName = f"{TestSuite}-Badge.json"
+    #SummaryFileName = f"{TestSuite}-Summary.json"
+    #BadgeFileName = f"{TestSuite}-Badge.json"
+    SummaryFileName = f"Summary.json"
+    BadgeFileName = f"Badge.json"
     print(f"TestSuite: {TestSuite}", flush=True)
     print(f"Badge File: {BadgeFileName}", flush=True)
 

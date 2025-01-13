@@ -49,21 +49,20 @@ jobs:
     - name: Run Tests
       shell: pwsh
       run: |
-        & "${env:TEST_DIR}\LkEngine_AutomationTests.exe" ${env:TEST_RESULT_FILE} "CoreTests"
+        & "${env:TEST_DIR}\LkEngine_AutomationTests.exe" ${env:TEST_RESULT_FILE} "Core"
       timeout-minutes: 2
 
     - name: Evaluate Test Results
       run: |
         echo "Files in TEST_DIR:" 
         Get-ChildItem -Path "${{env.TEST_DIR}}"
-        python LkEngine/Test/TestResultParser.py Results/${env:TEST_RESULT_FILE} "CoreTests"
+        python LkEngine/Test/TestResultParser.py Results/${env:TEST_RESULT_FILE} "Core"
       timeout-minutes: 2
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: TestResults
-        #path: ./Binaries/AutomationTest-windows/LkEngine_AutomationTests/Results
         path: ./Results
       timeout-minutes: 20
 
@@ -94,6 +93,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: "Download"
-          target-folder: "TestResults/CoreTests"
-          commit-message: "Deploying results from: CoreTests"
+          target-folder: "TestResults/Core"
+          commit-message: "Deploying results from 'CoreTests' to 'TestResults/Core'"
 
