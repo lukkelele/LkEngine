@@ -1,7 +1,7 @@
 #--------------------------------------------------------------------------
 # [LkEngine] TestResultParser.py
 # 
-# Parse and summarize test results.
+# Parse and summarize test Results.
 # Generates a shield.io badge that is used to display the test report in
 # the README.
 #
@@ -17,53 +17,53 @@ from pathlib import Path
 
 
 def ParseTestResults(Filepath):
-    print(f"Parsing test results")
+    print(f"Parsing test results", flush=True)
     bYamlFileParsed = False
     try:
         # Load the YAML file.
-        with open(Filepath, "r") as file:
-            data = yaml.safe_load(file)
+        with open(Filepath, "r") as File:
+            Data = yaml.safe_load(File)
 
         # Extract the test results.
-        tests = data.get(f"{TestSuite}", [])
-        total = len(tests)
-        print(f"Found {total} tests for {TestSuite}")
-        if total == 0:
+        Tests = Data.get(f"{TestSuite}", [])
+        Total = len(Tests)
+        print(f"Found {Total} tests for {TestSuite}", flush=True)
+        if Total == 0:
             return 1
 
-        passed_tests = []
-        failed_tests = []
+        PassedTests = []
+        FailedTests = []
 
-        for test in tests:
-            for test_name, result in test.items():
-                if result == 1:
-                    passed_tests.append(test_name)
+        for Test in Tests:
+            for TestName, Result in Test.items():
+                if Result == 1:
+                    PassedTests.append(TestName)
                 else:
-                    failed_tests.append(test_name)
+                    FailedTests.append(TestName)
 
-        failed = len(failed_tests)
-        passed = len(passed_tests)
+        Failed = len(FailedTests)
+        Passed = len(PassedTests)
 
-        result_summary = {
-            "Total": total,
+        ResultSummary = {
+            "Total": Total,
             "Passed": {
-                "Count": passed,
-                "Tests": passed_tests
+                "Count": Passed,
+                "Tests": PassedTests
             },
             "Failed": {
-                "Count": failed,
-                "Tests": failed_tests
+                "Count": Failed,
+                "Tests": FailedTests
             }
         }
 
-        print(f"Test Results: {result_summary['Passed']['Count']}/{total} passed ({100 * float(passed/total):.1f}%)")
+        print(f"Test Results: {ResultSummary['Passed']['Count']}/{Total} passed ({100 * float(Passed/Total):.1f}%)")
         bYamlFileParsed = True
 
         # Save summary to a JSON file.
         ResultDir = Path(Filepath).parent
-        with open(f"{ResultDir}/{SummaryFile}", "w") as summary_file:
-            json.dump(result_summary, summary_file, indent=4)
-            print(f"Dumped test results at: {summary_file}")
+        with open(f"{ResultDir}/{SummaryFileName}", "w") as SummaryFile:
+            json.dump(ResultSummary, SummaryFile, indent=4)
+            print(f"Dumped test Results at: {SummaryFile}", flush=True)
 
         # Generate badge used on the README.
         # * All tests OK:   Green
@@ -72,18 +72,17 @@ def ParseTestResults(Filepath):
         BadgeData = {
             "schemaVersion": 1,
             "label": f"{TestSuite}",
-            "message": f"{passed}/{total}",
+            "message": f"{Passed}/{Total}",
             "color": (
-                "success" if failed == 0 else 
-                "warning" if passed / total >= 0.50 else
-                "critical"
+                "success" if Failed == 0 else 
+                "warning" if Passed / Total >= 0.50 else "critical"
             )
         }
 
         print(f"Badge Data: {BadgeData}")
-        BadgePath = ResultDir / BadgeFile
-        with open(BadgePath, "w") as badge_file:
-            json.dump(BadgeData, badge_file, indent=4)
+        BadgePath = ResultDir / BadgeFileName
+        with open(BadgePath, "w") as BadgeFile:
+            json.dump(BadgeData, BadgeFile, indent=4)
             print(f"Badge JSON created at: {BadgePath}")
 
         return 0
@@ -101,20 +100,20 @@ if __name__ == "__main__":
         print(f"[TestResultParser] Error occured, number of least required arguments are 2 but got {len(sys.argv)}")
         sys.exit(1)
 
-    results_file = sys.argv[1]
+    TestResultFile = sys.argv[1]
+    print(f"Results File: {TestResultFile}", flush=True)
 
     # Extract the text between '-' and '.yaml'.
-    match = re.match(r"^.*-(.*?)\.yaml$", os.path.basename(results_file))
-    if not match:
-        print(f"Failed to extract test suite from filename: {results_file}")
+    Match = re.match(r"^.*-(.*?)\.yaml$", os.path.basename(TestResultFile))
+    if not Match:
+        print(f"Failed to extract test suite from filename: {TestResultFile}")
         sys.exit(1)
 
-    TestSuite = match.group(1)
-    SummaryFile = f"{TestSuite}-Summary.json"
-    BadgeFile = f"{TestSuite}-Badge.json"
-    print(f"Results File: {results_file}")
-    print(f"TestSuite: {TestSuite}")
-    print(f"Badge File: {BadgeFile}")
+    TestSuite = Match.group(1)
+    SummaryFileName = f"{TestSuite}-Summary.json"
+    BadgeFileName = f"{TestSuite}-Badge.json"
+    print(f"TestSuite: {TestSuite}", flush=True)
+    print(f"Badge File: {BadgeFileName}", flush=True)
 
-    exit_code = ParseTestResults(results_file)
-    sys.exit(exit_code)
+    ExitCode = ParseTestResults(TestResultFile)
+    sys.exit(ExitCode)
