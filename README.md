@@ -1,5 +1,5 @@
 # LkEngine :shaved_ice: 
-> Game Engine written in C++20<br>
+> Game Engine written in C++20
 
 ---
 
@@ -94,13 +94,15 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 ## Engine Features <a id="Engine-Features"></a>
 
 ### Available
-:white_check_mark: Serialization<br>
-:white_check_mark: Renderer Submission System<br>
+:white_check_mark: OpenGL Renderer<br>
+:white_check_mark: Render Submission System<br>
 :white_check_mark: Camera System<br>
 :white_check_mark: Asset Manager<br>
 :white_check_mark: Profiling and Instrumentation<br>
+:white_check_mark: Serialization<br>
 
 ### In Progress
+:black_square_button: Editor Development (LkEditor)<br>
 :black_square_button: Static Reflection<br>
 :black_square_button: Physics and Raycasting<br>
 
