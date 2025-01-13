@@ -6,7 +6,7 @@
 <img height="22" alt="VersionBadge" src="https://img.shields.io/badge/LkEngine-v0.1.2--alpha-blue">
 
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
-<img height="20" alt="Endpoint Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCoreTests%2FCoreTests-Badge.json&style=plastic&label=Core-Tests">
+<img height="20" alt="Endpoint Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCore%2FCoreTests-Badge.json&style=plastic&label=Core-Tests">
 
 ## Platform Support
 #### :white_check_mark: Windows<br>
