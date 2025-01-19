@@ -7,7 +7,8 @@
 #include "AutomationTest/TestMacros.h"
 #include "AutomationTest/AutomationTest.h"
 
-#include "AutomationTest/TestManager.h" /* Required because of static test registration. */
+/* Required because of the static test registration in LK_DECLARE_AUTOMATION_TEST. */
+#include "AutomationTest/TestManager.h"
 
 
 /*=================================================================
