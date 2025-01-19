@@ -481,33 +481,43 @@ namespace LkEngine {
 		SceneRenderer->SetScene(this);
 		SceneRenderer->BeginScene(EditorCamera);
 
-	#if 0
 		/* Static Meshes. */
 		{
-			auto Group = Registry.group<LStaticMeshComponent>(entt::get<LTransformComponent>);
-			for (auto Entity : Group)
+			auto View = Registry.view<LStaticMeshComponent>();
+			for (entt::entity EntityID : View)
 			{
-				LK_CORE_INFO("Entity: {}", Entity);
+				LEntity Entity = LEntity(EntityID, this);
+				auto& StaticMeshComp = View.get<LStaticMeshComponent>(EntityID);
+
+				if (LAssetManager::IsAssetHandleValid(StaticMeshComp.StaticMesh))
+				{
+					LK_CORE_ASSERT(StaticMeshComp.MaterialTable, "MaterialTable is nullptr for LStaticMeshComponent: '{}'", StaticMeshComp.StaticMesh);
+					const glm::mat4 Transform = GetWorldSpaceTransform(Entity);
+
+					TObjectPtr<LStaticMesh> StaticMesh = LAssetManager::GetAsset<LStaticMesh>(StaticMeshComp.StaticMesh);
+					LK_CORE_ASSERT(StaticMesh, "StaticMesh {} is nullptr", StaticMeshComp.StaticMesh);
+					SceneRenderer->SubmitStaticMesh(StaticMesh, StaticMeshComp.MaterialTable, Transform);
+				}
 			}
 		}
-	#endif
 
 		/* Meshes. */
 		{
-			//auto Group = Registry.group<LMeshComponent>(entt::get<LTransformComponent>);
 			auto View = Registry.view<LMeshComponent>();
-			for (auto EntityID : View)
+			for (entt::entity EntityID : View)
 			{
-				//LK_CORE_INFO("[OnRenderEditor] Mesh Entity: {}", EntityID);
 				LEntity Entity = LEntity(EntityID, this);
-				LMeshComponent& MeshComp = View.get<LMeshComponent>(EntityID);
-				const glm::mat4 Transform = GetWorldSpaceTransform(Entity);
+				auto& MeshComp = View.get<LMeshComponent>(EntityID);
 
-				TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(MeshComp.Mesh);
-				//LK_CORE_ASSERT(Mesh->GetMaterials()->GetMaterialCount() == MeshComp.MaterialTable->GetMaterialCount(), "Material count mismatch for '{}'", Mesh->Handle);
+				if (LAssetManager::IsAssetHandleValid(MeshComp.Mesh))
+				{
+					LK_CORE_ASSERT(MeshComp.MaterialTable, "MaterialTable is nullptr for LMeshComponent: '{}'", MeshComp.Mesh);
+					const glm::mat4 Transform = GetWorldSpaceTransform(Entity);
 
-				//SceneRenderer->SubmitMesh(Mesh, MeshComp.SubmeshIndex, MeshComp.MaterialTable, Transform);
-				SceneRenderer->SubmitMesh(Mesh, MeshComp.SubmeshIndex, Mesh->GetMaterialTable(), Transform);
+					TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(MeshComp.Mesh);
+					LK_CORE_ASSERT(Mesh, "Mesh {} is nullptr", MeshComp.Mesh);
+					SceneRenderer->SubmitMesh(Mesh, MeshComp.SubmeshIndex, MeshComp.MaterialTable, Transform);
+				}
 			}
 		}
 
@@ -522,8 +532,7 @@ namespace LkEngine {
 			LCameraComponent& CameraComponent = EntityView.get<LCameraComponent>(Entity);
 			if (CameraComponent.Primary)
 			{
-				LK_VERIFY(CameraComponent.Camera->GetOrthographicSize() || CameraComponent.Camera->GetDegPerspectiveVerticalFOV(), 
-						  "Camera is not fully initialized");
+				LK_VERIFY(CameraComponent.Camera->GetOrthographicSize() || CameraComponent.Camera->GetDegPerspectiveVerticalFOV(), "Camera is not fully initialized");
 				return { Entity, this };
 			}
 		}
@@ -573,8 +582,8 @@ namespace LkEngine {
 
 		// LMeshComponent
 		{
-			auto MeshView = Registry.view<LMeshComponent>();
-			for (auto Entity : MeshView)
+			auto View = Registry.view<LMeshComponent>();
+			for (auto Entity : View)
 			{
 				LMeshComponent& MeshComp = Registry.get<LMeshComponent>(Entity);
 				if (MeshComp.Mesh)
@@ -591,13 +600,13 @@ namespace LkEngine {
 						AssetList.insert(MeshComp.Mesh);
 
 						/* MeshSource is required too. */
-						TObjectPtr<LMesh> mesh = LAssetManager::GetAsset<LMesh>(MeshComp.Mesh);
-						if (!mesh)
+						TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(MeshComp.Mesh);
+						if (!Mesh)
 						{
 							continue;
 						}
 
-						TObjectPtr<LMeshSource> MeshSource = mesh->GetMeshSource();
+						TObjectPtr<LMeshSource> MeshSource = Mesh->GetMeshSource();
 						if (MeshSource && LAssetManager::IsAssetHandleValid(MeshSource->Handle))
 						{
 							AssetList.insert(MeshSource->Handle);
@@ -648,8 +657,8 @@ namespace LkEngine {
 
 		/* LStaticMeshComponent. */
 		{
-			auto StaticMeshView = Registry.view<LStaticMeshComponent>();
-			for (auto Entity : StaticMeshView)
+			auto View = Registry.view<LStaticMeshComponent>();
+			for (auto Entity : View)
 			{
 				auto& StaticMeshComp = Registry.get<LStaticMeshComponent>(Entity);
 				if (StaticMeshComp.StaticMesh)

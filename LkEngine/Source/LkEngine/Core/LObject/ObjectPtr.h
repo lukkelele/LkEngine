@@ -12,6 +12,12 @@
 /** Log whenever a reference is added/removed. */
 #define LK_DEBUG_LOG_LIVE_REFERENCES 0
 
+#if 0
+#	define LK_PTR_ASSERT(...) LK_CORE_ASSERT(__VA_ARGS__)
+#else
+#	define LK_PTR_ASSERT(...)
+#endif
+
 namespace LkEngine {
 
 	template<typename T>
@@ -26,7 +32,8 @@ namespace LkEngine {
 	 *  Management of live references.
 	 *  For internal use by TObjectPtr.
 	 */
-	namespace TObjectPtr_Internal {
+	namespace TObjectPtr_Internal 
+	{
 		extern std::unordered_set<void*> LiveReferences;
 		extern std::mutex LiveReferenceMutex;
 
@@ -40,8 +47,7 @@ namespace LkEngine {
 		 * @brief Populare a vector with live objects.
 		 * @return The count of objects returned.
 		 */
-		int GetLiveObjects(std::vector<TObjectPtr<LObject>>& ObjectArray,
-						   const bool FilterByStaticClass = true);
+		int GetLiveObjects(std::vector<TObjectPtr<LObject>>& ObjectArray, const bool FilterByStaticClass = true);
 	}
 
 	/**
@@ -216,21 +222,48 @@ namespace LkEngine {
 			return (ObjectPtr == nullptr ? !Other : ObjectPtr == Other.ObjectPtr);
 		}
 
-		FORCEINLINE T* operator->() { return ObjectPtr; }
-		FORCEINLINE const T* operator->() const { return ObjectPtr; }
+		FORCEINLINE T* operator->() 
+		{ 
+			LK_PTR_ASSERT(ObjectPtr, "TObjectPtr::operator-> failed, ObjectPtr is nullptr");
+			return ObjectPtr; 
+		}
 
-		FORCEINLINE T& operator*() { return *ObjectPtr; }
-		FORCEINLINE const T& operator*() const { return *ObjectPtr; }
+		FORCEINLINE const T* operator->() const 
+		{
+			LK_PTR_ASSERT(ObjectPtr, "TObjectPtr::operator-> failed, ObjectPtr is nullptr");
+			return ObjectPtr; 
+		}
 
-		FORCEINLINE T* Get() { return static_cast<T*>(ObjectPtr); }
-		FORCEINLINE const T* Get() const { return static_cast<T*>(ObjectPtr); }
+		FORCEINLINE T& operator*() 
+		{ 
+			LK_PTR_ASSERT(ObjectPtr, "TObjectPtr::operator* failed, ObjectPtr is nullptr");
+			return *ObjectPtr; 
+		}
 
+		FORCEINLINE const T& operator*() const 
+		{ 
+			LK_PTR_ASSERT(ObjectPtr, "TObjectPtr::operator* failed, ObjectPtr is nullptr");
+			return *ObjectPtr; 
+		}
+
+		FORCEINLINE T* Get() 
+		{ 
+			LK_PTR_ASSERT(ObjectPtr, "TObjectPtr::Get failed, ObjectPtr is nullptr");
+			return static_cast<T*>(ObjectPtr); 
+		}
+
+		FORCEINLINE const T* Get() const 
+		{ 
+			LK_PTR_ASSERT(ObjectPtr, "TObjectPtr::Get failed, ObjectPtr is nullptr");
+			return static_cast<T*>(ObjectPtr); 
+		}
 
 		/* TODO: This cast function needs to be checked out a bit. I'm not entirely sure this 
 		 *       is behaving as it should. */
 		template<typename R>
 		FORCEINLINE TObjectPtr<R> As() const
 		{
+			//static_assert(std::is_base_of_v<T, R> || std::is_base_of_v<R, T>, "TObjectPtr invalid cast type");
 			return TObjectPtr<R>(*this);
 		}
 
@@ -262,6 +295,7 @@ namespace LkEngine {
 	private:
 		FORCEINLINE void TObjectPtr_IncrementReferenceCount() const
 		{
+			LK_PTR_ASSERT(ObjectPtr, "IncrementReferenceCount failed, invalid ObjectPtr");
 			ObjectPtr->IncrementReferenceCount();
 			TObjectPtr_Internal::AddToLiveReferences((void*)ObjectPtr);
 		}

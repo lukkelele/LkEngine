@@ -23,20 +23,20 @@ namespace LkEngine {
         void Initialize();
         TObjectPtr<LMaterialAsset> Add(const TObjectPtr<LMaterial> InMaterial);
 
-        TObjectPtr<LMaterialAsset> GetMaterial(const LUUID Handle);
-        TObjectPtr<LMaterialAsset> GetMaterial(std::string_view InMaterialName);
+        TObjectPtr<LMaterialAsset> GetMaterial(const FAssetHandle Handle);
+        TObjectPtr<LMaterialAsset> GetMaterial(const std::string& InMaterialName);
 
-        FORCEINLINE int GetMaterials(std::unordered_map<LUUID, TObjectPtr<LMaterialAsset>>& InMaterialMap) const
+        FORCEINLINE int GetMaterials(std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>>& InMaterialMap) const
         { 
             InMaterialMap.clear();
-            InMaterialMap = m_LoadedMaterialAssets;
+            InMaterialMap = LoadedMaterialAssets;
 
             return static_cast<int>(InMaterialMap.size());
         }
 
-        FORCEINLINE std::unordered_map<LUUID, TObjectPtr<LMaterialAsset>>& GetLoadedMaterialAssets() 
+        std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>>& GetLoadedMaterialAssets() 
         { 
-            return m_LoadedMaterialAssets; 
+            return LoadedMaterialAssets; 
         }
 
 		std::string DumpLoadedAssets();
@@ -48,8 +48,8 @@ namespace LkEngine {
 	public:
 		static TObjectPtr<LMaterialAsset> BaseMaterial;
     private:
-		inline static std::unordered_map<LUUID, TObjectPtr<LMaterialAsset>> m_LoadedMaterialAssets;
-        inline static std::unordered_map<std::string, LUUID> m_Collection;
+		inline static std::unordered_map<FAssetHandle, TObjectPtr<LMaterialAsset>> LoadedMaterialAssets;
+        inline static std::unordered_map<std::string, FAssetHandle> AssetNameMap;
 
         LCLASS(LMaterialLibrary)
     };

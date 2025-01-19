@@ -73,15 +73,13 @@ namespace LkEngine {
 				ImageSpec.Width = m_Specification.Width;
 				ImageSpec.Height = m_Specification.Height;
 				ImageSpec.Format = m_ColorAttachmentSpecifications[i].ImageFormat;
-				ImageSpec.Name = LK_FORMAT_STRING("Framebuffer_Image-{}", 
-												  Enum::ToString(m_ColorAttachmentSpecifications[i].ImageFormat));
-				ImageSpec.DebugName = LK_FORMAT_STRING("Framebuffer_Image-{}", 
-													   Enum::ToString(m_ColorAttachmentSpecifications[i].ImageFormat));
+				ImageSpec.Name = std::format("Framebuffer_Image-{}", Enum::ToString(m_ColorAttachmentSpecifications[i].ImageFormat));
+				ImageSpec.DebugName = std::format("Framebuffer_Image-{}", Enum::ToString(m_ColorAttachmentSpecifications[i].ImageFormat));
 				ImageSpec.Format = EImageFormat::RGBA32F;
 				ImageSpec.Wrap = ETextureWrap::None;
 				ImageSpec.Filter = ETextureFilter::None;
 				ImageSpec.Mips = 1; // No mipmapping
-				ImageSpec.Path = "Assets/Textures/white-texture.png"; /* FIXME: Do not use raw pathing like this. */
+				ImageSpec.Path = "Assets/Textures/White.png"; /* FIXME: Do not use raw pathing like this. */
 
 				FBuffer ImageData = FBuffer(LTextureLibrary::Get().GetWhiteTexture()->GetImageBuffer());
 				LK_CORE_VERIFY(ImageData.Data, "Image data from white texture is NULL");
@@ -92,7 +90,7 @@ namespace LkEngine {
 					                             (GL_COLOR_ATTACHMENT0 + i), 
 					                             GL_TEXTURE_2D, 
 					                             m_ColorAttachments[0]->GetRendererID(), 0));
-				LK_CORE_TRACE_TAG("Framebuffer", "Color Attachment ID {}", m_ColorAttachments[i]->GetRendererID());
+				LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Color Attachment ID: {}", m_ColorAttachments[i]->GetRendererID());
 			}
 		}
 
@@ -116,7 +114,7 @@ namespace LkEngine {
 			LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Created depth texture with an image format of DEPTH24STENCIL8");
 		}
 
-		LK_CORE_VERIFY(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
+		LK_CORE_VERIFY(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete");
 		LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Created framebuffer with {} color attachments", m_ColorAttachments.size());
 
 		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, 0));
@@ -133,16 +131,16 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
-	int LOpenGLFramebuffer::ReadPixel(uint32_t AttachmentIndex, int x, int y)
+	int LOpenGLFramebuffer::ReadPixel(const uint32_t AttachmentIndex, const int PosX, const int PosY)
 	{
 		LK_OpenGL_Verify(glReadBuffer(GL_COLOR_ATTACHMENT0 + AttachmentIndex));
 		int PixelData;
-		LK_OpenGL_Verify(glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &PixelData));
+		LK_OpenGL_Verify(glReadPixels(PosX, PosY, 1, 1, GL_RED_INTEGER, GL_INT, &PixelData));
 
 		return PixelData;
 	}
 
-	void LOpenGLFramebuffer::ClearAttachment(uint32_t AttachmentIndex, int Value)
+	void LOpenGLFramebuffer::ClearAttachment(const uint32_t AttachmentIndex, int Value)
 	{
 		LK_CORE_ASSERT(AttachmentIndex < m_ColorAttachments.size(), "Attachment Index < m_ColorAttachments.size()");
 		FFramebufferTextureSpecification& FramebufferTextureSpec = m_ColorAttachmentSpecifications[AttachmentIndex];

@@ -63,13 +63,8 @@ namespace LkEngine {
 		bool bFullscreen = false;
 
 		FEventCallback EventCallback;
-
-        LKeyboard::FOnKeyPressed OnKeyPressed;
-
+        //LKeyboard::FOnKeyPressed OnKeyPressed;
 		FOnWindowMaximized OnWindowMaximized;
-		LMouse::FOnMouseButtonPressed OnMouseButtonPressed;
-		LMouse::FOnMouseButtonReleased OnMouseButtonReleased;
-		LMouse::FOnMouseScrolled OnMouseScrolled;
 	};
 
     /**

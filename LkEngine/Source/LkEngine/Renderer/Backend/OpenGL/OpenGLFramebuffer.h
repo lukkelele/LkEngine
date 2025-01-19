@@ -13,7 +13,7 @@ namespace LkEngine {
         ~LOpenGLFramebuffer();
         
 		virtual void Invalidate() override;
-		virtual int ReadPixel(uint32_t AttachmentIndex, int PosX, int PosY) override;
+		virtual int ReadPixel(const uint32_t AttachmentIndex, const int PosX, const int PosY) override;
 		virtual void ClearAttachment(uint32_t AttachmentIndex, int value) override;
 		virtual void Clear() override;
 		virtual uint32_t GetColorAttachmentRendererID(uint32_t Index = 0) const override;

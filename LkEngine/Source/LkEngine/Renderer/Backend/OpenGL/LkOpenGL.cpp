@@ -250,14 +250,12 @@ namespace LkEngine {
 			GeneratePlaneVaoAndVbo();
 			GenerateScreenQuadVaoAndVbo(QuadVAO, QuadVBO);
 
-			CubeTexture_ = LoadTexture("Assets/Textures/container.jpg");
-			FloorTexture_ = LoadTexture("Assets/Textures/metal.png");
+			CubeTexture_ = LoadTexture("Assets/Textures/Debug/WoodContainer.jpg");
+			FloorTexture_ = LoadTexture("Assets/Textures/Debug/Metal.png");
 
 			SetupSkybox();
 		}
 
-		// void GenerateCubeVaoAndVbo(uint32_t& vao, uint32_t& vbo)
-		/* TODO: Remove passed arguments. */
 		void SetupDebugCube()
 		{
 			LK_CORE_WARN_TAG("LOpenGL", "Generating cube VAO and VBO");
@@ -314,12 +312,12 @@ namespace LkEngine {
 			/* Textures. */
 			if (!CubeTexture)
 			{
-				CubeTexture = LTextureLibrary::Get().GetTexture("wood-container");
+				CubeTexture = LTextureLibrary::Get().GetTexture("WoodContainer");
 			}
 
 			if (!PlaneTexture)
 			{
-				PlaneTexture = LTextureLibrary::Get().GetTexture("MetalGround");
+				PlaneTexture = LTextureLibrary::Get().GetTexture("Metal");
 				LK_CORE_ASSERT(PlaneTexture, "Plane Texture failed to setup");
 			}
 		}

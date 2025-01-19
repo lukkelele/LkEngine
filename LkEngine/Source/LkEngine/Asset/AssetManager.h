@@ -13,19 +13,19 @@ namespace LkEngine {
 		static void Initialize();
 		static void Destroy();
 
-		FORCEINLINE static bool IsAssetHandleValid(LUUID AssetHandle) 
+		FORCEINLINE static bool IsAssetHandleValid(FAssetHandle Handle) 
 		{ 
-			return LProject::GetRuntimeAssetManager()->IsAssetHandleValid(AssetHandle); 
+			return LProject::GetRuntimeAssetManager()->IsAssetHandleValid(Handle); 
 		}
 
-		FORCEINLINE static EAssetType GetAssetType(LUUID AssetHandle) 
+		FORCEINLINE static EAssetType GetAssetType(FAssetHandle Handle) 
 		{ 
-			return LProject::GetRuntimeAssetManager()->GetAssetType(AssetHandle); 
+			return LProject::GetRuntimeAssetManager()->GetAssetType(Handle); 
 		}
 
-		FORCEINLINE static bool ReloadData(LUUID AssetHandle) 
+		FORCEINLINE static bool ReloadData(const FAssetHandle Handle) 
 		{ 
-			return LProject::GetRuntimeAssetManager()->ReloadData(AssetHandle); 
+			return LProject::GetRuntimeAssetManager()->ReloadData(Handle); 
 		}
 
 		FORCEINLINE static int GetTextures2D(std::vector<TTexture2DPair>& TextureContainer)
@@ -39,9 +39,9 @@ namespace LkEngine {
 		}
 
 		template<typename T>
-		static TObjectPtr<T> GetAsset(LUUID AssetHandle)
+		static TObjectPtr<T> GetAsset(const FAssetHandle Handle)
 		{
-			TObjectPtr<LAsset> Asset = LProject::GetRuntimeAssetManager()->GetAsset(AssetHandle);
+			TObjectPtr<LAsset> Asset = LProject::GetRuntimeAssetManager()->GetAsset(Handle);
 			return Asset.As<T>();
 		}
 
@@ -62,20 +62,20 @@ namespace LkEngine {
 			return LProject::GetRuntimeAssetManager()->GetMemoryOnlyAssets(); 
 		}
 
-		static LUUID GetAssetHandleFromFilePath(const std::filesystem::path& filepath)
+		static LUUID GetAssetHandleFromFilePath(const std::filesystem::path& InFilepath)
 		{
-			return LProject::GetRuntimeAssetManager()->GetAssetHandleFromFilePath(filepath);
+			return LProject::GetRuntimeAssetManager()->GetAssetHandleFromFilePath(InFilepath);
 		}
 
 		template<typename TAsset, typename... TArgs>
 		static LUUID CreateMemoryOnlyAsset(TArgs&&... Args)
 		{
 			static_assert(std::is_base_of_v<LAsset, TAsset>, "CreateMemoryOnlyAsset only works for types derived from Asset");
-
 			TObjectPtr<TAsset> Asset = TObjectPtr<TAsset>::Create(std::forward<TArgs>(Args)...);
-			Asset->Handle = LUUID(); 
+			Asset->Handle = FAssetHandle(); 
 
 			LProject::GetRuntimeAssetManager()->AddMemoryOnlyAsset(Asset);
+
 			return Asset->Handle;
 		}
 
@@ -83,9 +83,8 @@ namespace LkEngine {
 		static LUUID CreateMemoryOnlyRendererAsset(TArgs&&... Args)
 		{
 			static_assert(std::is_base_of_v<LAsset, TAsset>, "CreateMemoryOnlyAsset only works for types derived from Asset");
-
 			TObjectPtr<TAsset> Asset = TAsset::Create(std::forward<TArgs>(Args)...);
-			Asset->Handle = LUUID();
+			Asset->Handle = FAssetHandle();
 
 			LProject::GetAssetManager()->AddMemoryOnlyAsset(Asset);
 
@@ -93,14 +92,14 @@ namespace LkEngine {
 		}
 
 		template<typename TAsset, typename... TArgs>
-		static LUUID CreateMemoryOnlyAssetWithHandle(LUUID handle, TArgs&&... Args)
+		static LUUID CreateMemoryOnlyAssetWithHandle(FAssetHandle Handle, TArgs&&... Args)
 		{
 			static_assert(std::is_base_of_v<LAsset, TAsset>, "CreateMemoryOnlyAsset only works for types derived from Asset");
-
 			TObjectPtr<TAsset> Asset = TObjectPtr<TAsset>::Create(std::forward<TArgs>(Args)...);
-			Asset->Handle = handle;
+			Asset->Handle = Handle;
 
 			LProject::GetAssetManager()->AddMemoryOnlyAsset(Asset);
+
 			return Asset->Handle;
 		}
 
@@ -108,20 +107,16 @@ namespace LkEngine {
 		static LUUID AddMemoryOnlyAsset(TObjectPtr<TAsset> Asset)
 		{
 			static_assert(std::is_base_of_v<LAsset, TAsset>, "AddMemoryOnlyAsset only works for types derived from Asset");
-			Asset->Handle = LUUID(); 
+			Asset->Handle = FAssetHandle(); 
 
 			LProject::GetAssetManager()->AddMemoryOnlyAsset(Asset);
+
 			return Asset->Handle;
 		}
 
-		static bool IsMemoryAsset(LUUID handle) 
+		static bool IsMemoryAsset(FAssetHandle Handle) 
 		{ 
-			return LProject::GetRuntimeAssetManager()->IsMemoryAsset(handle); 
-		}
-
-		static void RemoveAsset(LUUID InHandle)
-		{
-			LK_UNUSED(InHandle);
+			return LProject::GetRuntimeAssetManager()->IsMemoryAsset(Handle); 
 		}
 
 	};

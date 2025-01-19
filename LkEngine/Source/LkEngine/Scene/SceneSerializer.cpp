@@ -35,13 +35,13 @@ namespace LkEngine {
 	void LSceneSerializer::Serialize(const std::filesystem::path& Filepath)
 	{
 		YAML::Emitter Out;
-		SerializeToYAML(Out);
+		SerializeToYaml(Out);
 
 		std::ofstream FileOut(Filepath);
 		FileOut << Out.c_str();
 	}
 
-	void LSceneSerializer::SerializeToYAML(YAML::Emitter& Out)
+	void LSceneSerializer::SerializeToYaml(YAML::Emitter& Out)
 	{
 		Out << YAML::BeginMap;
 		Out << YAML::Key << "Scene"       << YAML::Value << Scene->GetName();
@@ -115,7 +115,7 @@ namespace LkEngine {
 		StringStream << InputStream.rdbuf();
 		try
 		{
-			bOperationSuccess = DeserializeFromYAML(StringStream.str());
+			bOperationSuccess = DeserializeFromYaml(StringStream.str());
 		}
 		catch (const YAML::Exception& Exception)
 		{
@@ -149,7 +149,7 @@ namespace LkEngine {
 
 
 	/// FIXME: Refactor
-	bool LSceneSerializer::DeserializeFromYAML(const std::string& YamlString)
+	bool LSceneSerializer::DeserializeFromYaml(const std::string& YamlString)
 	{
 		if (YamlString.empty())
 		{
@@ -264,6 +264,7 @@ namespace LkEngine {
 			Out << YAML::EndMap; 
 		}
 
+		/* Mesh. */
 		if (Entity.HasComponent<LMeshComponent>())
 		{
 			Out << YAML::Key << "MeshComponent";
@@ -273,21 +274,48 @@ namespace LkEngine {
 			Out << YAML::Key << "AssetID" << YAML::Value << MeshComp.Mesh;
 
 			TObjectPtr<LMaterialTable> MaterialTable = MeshComp.MaterialTable;
-			LK_CORE_ASSERT(MaterialTable, "Pointer to MaterialTable is not valid");
+			LK_CORE_ASSERT(MaterialTable, "Serialization of a LMeshComponent failed, the MaterialTable is not valid");
 			if (MaterialTable->GetMaterialCount() > 0)
 			{
 				Out << YAML::Key << "MaterialTable" << YAML::Value << YAML::BeginMap; /* MaterialTable */
 				for (uint32_t Index = 0; Index < MaterialTable->GetMaterialCount(); Index++)
 				{
-					const LUUID Handle = (MaterialTable->HasMaterial(Index) ? MaterialTable->GetMaterial(Index) : (LUUID)0);
+					const FAssetHandle Handle = (MaterialTable->HasMaterial(Index) ? MaterialTable->GetMaterial(Index) : (FAssetHandle)0);
 					Out << YAML::Key << Index << YAML::Value << Handle;
 				}
 				Out << YAML::EndMap; /* MaterialTable */
 			}
 
-			Out << YAML::Key << "Visible" << YAML::Value << MeshComp.Visible;
+			Out << YAML::Key << "Visible" << YAML::Value << MeshComp.bVisible;
 			Out << YAML::EndMap; /* MeshComponent */
 		}
+
+		/* Static Mesh. */
+		if (Entity.HasComponent<LStaticMeshComponent>())
+		{
+			Out << YAML::Key << "StaticMeshComponent";
+			Out << YAML::BeginMap; /* MeshComponent */
+
+			const LStaticMeshComponent& StaticMeshComp = Entity.GetComponent<LStaticMeshComponent>();
+			Out << YAML::Key << "AssetID" << YAML::Value << StaticMeshComp.StaticMesh;
+
+			TObjectPtr<LMaterialTable> MaterialTable = StaticMeshComp.MaterialTable;
+			LK_CORE_ASSERT(MaterialTable, "Serialization of a LStaticMeshComponent failed, the MaterialTable is not valid");
+			if (MaterialTable->GetMaterialCount() > 0)
+			{
+				Out << YAML::Key << "MaterialTable" << YAML::Value << YAML::BeginMap; /* MaterialTable */
+				for (uint32_t Index = 0; Index < MaterialTable->GetMaterialCount(); Index++)
+				{
+					const FAssetHandle Handle = (MaterialTable->HasMaterial(Index) ? MaterialTable->GetMaterial(Index) : (FAssetHandle)0);
+					Out << YAML::Key << Index << YAML::Value << Handle;
+				}
+				Out << YAML::EndMap; /* MaterialTable */
+			}
+
+			Out << YAML::Key << "Visible" << YAML::Value << StaticMeshComp.bVisible;
+			Out << YAML::EndMap; /* MeshComponent */
+		}
+
 
 		if (Entity.HasComponent<LCameraComponent>())
 		{
@@ -378,32 +406,67 @@ namespace LkEngine {
 				SpriteComponent.Color = SpriteComponentNode["Color"].as<glm::vec4>(glm::vec4(0.0f));
 			}
 
-			const YAML::Node& MeshCompNode = EntityNode["MeshComponent"];
-			if (MeshCompNode)
+			/* Static Mesh. */
 			{
-				auto& MeshComp = DeserializedEntity.AddComponent<LMeshComponent>();
-				MeshComp.Mesh = MeshCompNode["AssetID"].as<uint64_t>();
-				if (MeshCompNode["MaterialTable"])
+				const YAML::Node& StaticMeshCompNode = EntityNode["StaticMeshComponent"];
+				if (StaticMeshCompNode)
 				{
-					YAML::Node MaterialTableNode = MeshCompNode["MaterialTable"];
-					for (auto MaterialEntry : MaterialTableNode)
+					static_assert(std::is_same_v<FAssetHandle::SizeType, uint64_t>);
+					LStaticMeshComponent& MeshComp = DeserializedEntity.AddComponent<LStaticMeshComponent>();
+					MeshComp.StaticMesh = StaticMeshCompNode["AssetID"].as<uint64_t>();
+
+					if (StaticMeshCompNode["MaterialTable"])
 					{
-						const uint32_t Index = MaterialEntry.first.as<uint32_t>();
-						const LUUID Handle = MaterialEntry.second.as<LUUID>();
-						//if (LAssetManager::IsAssetHandleValid(Handle))
-						if (Handle > 0)
+						YAML::Node MaterialTableNode = StaticMeshCompNode["MaterialTable"];
+						for (auto MaterialEntry : MaterialTableNode)
 						{
-							MeshComp.MaterialTable->SetMaterial(Index, Handle);
-						}
-						else
-						{
-							LK_CORE_WARN_TAG("SceneSerializer", "Could not set material '{}' in table with index {}", Handle, Index);
+							const uint32_t Index = MaterialEntry.first.as<uint32_t>();
+							const FAssetHandle MatAsset = MaterialEntry.second.as<FAssetHandle>();
+							MeshComp.MaterialTable->SetMaterial(Index, MatAsset);
 						}
 					}
+
+					if (StaticMeshCompNode["Visible"])
+					{
+						MeshComp.bVisible = StaticMeshCompNode["Visible"].as<bool>();
+					}
+					LK_CORE_TRACE_TAG("SceneSerializer", "Deserialized StaticMeshComponent: {}", MeshComp.StaticMesh);
 				}
-				if (MeshCompNode["Visible"])
+			}
+
+			/* Mesh. */
+			{
+				const YAML::Node& MeshCompNode = EntityNode["MeshComponent"];
+				if (MeshCompNode)
 				{
-					MeshComp.Visible = MeshCompNode["Visible"].as<bool>();
+					static_assert(std::is_same_v<FAssetHandle::SizeType, uint64_t>);
+					LMeshComponent& MeshComp = DeserializedEntity.AddComponent<LMeshComponent>();
+					MeshComp.Mesh = MeshCompNode["AssetID"].as<FAssetHandle>();
+
+					if (MeshCompNode["MaterialTable"])
+					{
+						YAML::Node MaterialTableNode = MeshCompNode["MaterialTable"];
+						for (auto MaterialEntry : MaterialTableNode)
+						{
+							const uint32_t Index = MaterialEntry.first.as<uint32_t>();
+							const FAssetHandle Handle = MaterialEntry.second.as<FAssetHandle>();
+
+							//if (Handle > 0)
+							if (LAssetManager::IsAssetHandleValid(Handle))
+							{
+								MeshComp.MaterialTable->SetMaterial(Index, Handle);
+							}
+							else
+							{
+								LK_CORE_ERROR_TAG("SceneSerializer", "Could not set material '{}' in table with index {} (Mesh)", Handle, Index);
+							}
+						}
+					}
+
+					if (MeshCompNode["Visible"])
+					{
+						MeshComp.bVisible = MeshCompNode["Visible"].as<bool>();
+					}
 				}
 			}
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetManagerBase.h"
+#include "AssetImporter.h"
 
 #include "LkEngine/Renderer/TextureLibrary.h"
 
@@ -21,27 +22,27 @@ namespace LkEngine {
 		template<typename AssetType>
 		TObjectPtr<AssetType> ImportAsset(const std::filesystem::path& Filepath);
 
-        TObjectPtr<LAsset> GetAsset(const LUUID Asset);
-		EAssetType GetAssetType(const LUUID AssetHandle);
+        TObjectPtr<LAsset> GetAsset(const FAssetHandle Handle);
+		EAssetType GetAssetType(const FAssetHandle Handle);
 
-        FORCEINLINE bool IsMemoryAsset(const LUUID AssetHandle) const
+        FORCEINLINE bool IsMemoryAsset(const FAssetHandle Handle) const
 		{ 
-			return MemoryAssets.contains(AssetHandle); 
+			return MemoryAssets.contains(Handle); 
 		}
 
-		bool ReloadData(const LUUID AssetHandle);
+		bool ReloadData(const FAssetHandle Handle);
 		void AddMemoryOnlyAsset(TObjectPtr<LAsset> Asset);
-		bool IsAssetHandleValid(const LUUID AssetHandle) const;
-		bool IsAssetLoaded(const LUUID Handle) const;
+		bool IsAssetHandleValid(const FAssetHandle Handle) const;
+		bool IsAssetLoaded(const FAssetHandle Handle) const;
 
 		std::filesystem::path GetFileSystemPath(const FAssetMetadata& metadata);
-		std::filesystem::path GetFileSystemPath(const LUUID Handle);
+		std::filesystem::path GetFileSystemPath(const FAssetHandle Handle);
 
 		/**
 		 * @brief 
 		 * @todo: MAKE PRIVATE
 		 */
-		void LoadAssetRegistry();
+		bool LoadAssetRegistry();
 
 		/**
 		 * @brief 
@@ -49,10 +50,10 @@ namespace LkEngine {
 		 */
 		void WriteRegistryToDisk();
 
-        const FAssetMetadata& GetMetadata(LUUID AssetHandle);
+        const FAssetMetadata& GetMetadata(const FAssetHandle Handle) const;
         const FAssetMetadata& GetMetadata(const TObjectPtr<LAsset>& AssetRef);
         const FAssetMetadata& GetMetadata(const std::filesystem::path& InFilePath);
-        FAssetMetadata& GetMetadataInternal(const LUUID AssetHandle);
+        FAssetMetadata& GetMetadataInternal(const FAssetHandle Handle);
 
         LUUID GetAssetHandleFromFilePath(const std::filesystem::path& InFilePath);
 		EAssetType GetAssetTypeFromExtension(const std::string& Extension);
@@ -63,13 +64,13 @@ namespace LkEngine {
 		template<typename T>
 		TObjectPtr<T> GetAsset(const std::string& InFilePath)
 		{
-			/* TODO: Static validity check for retrieved Asset cast to T. */
 			TObjectPtr<LAsset> Asset = GetAsset(GetAssetHandleFromFilePath(InFilePath));
 			if (Asset)
 			{
 				return Asset->As<T>();
 			}
 
+			LK_CORE_ERROR_TAG("RuntimeAssetManager", "Failed to find asset with path: {}", InFilePath);
 			return nullptr;
 		}
 
@@ -79,7 +80,7 @@ namespace LkEngine {
 			static_assert(std::is_base_of_v<LAsset, T>, "CreateNewAsset only works for Assets derived from LAsset");
 
 			FAssetMetadata Metadata{};
-			Metadata.Handle = LUUID();
+			Metadata.Handle = FAssetHandle();
 
 			if (DirectoryPath.empty() || DirectoryPath == ".")
 			{
@@ -94,10 +95,12 @@ namespace LkEngine {
 			Metadata.Type = T::GetStaticType();
 
 			AssetRegistry[Metadata.Handle] = Metadata;
+			WriteRegistryToDisk();
 
 			TObjectPtr<T> Asset = TObjectPtr<T>::Create(std::forward<TArgs>(Args)...);
 			Asset->Handle = Metadata.Handle;
 			LoadedAssets[Asset->Handle] = Asset;
+			LAssetImporter::Serialize(Metadata, Asset);
 
 			return Asset;
 		}
@@ -121,13 +124,15 @@ namespace LkEngine {
 		FORCEINLINE const LAssetRegistry& GetAssetRegistry() const { return AssetRegistry; }
 
 	private:
+		void LoadBaseMaterial();
 		void LoadPrimitiveShapes();
 
     private:
-        std::unordered_map<LUUID, TObjectPtr<LAsset>> LoadedAssets;
-		std::unordered_map<LUUID, TObjectPtr<LAsset>> MemoryAssets;
+		std::unordered_map<LUUID, TObjectPtr<LAsset>> LoadedAssets{};
+		std::unordered_map<LUUID, TObjectPtr<LAsset>> MemoryAssets{};
 
         LAssetRegistry AssetRegistry;
+		bool bAssetRegistryValid = false;
 
 		LTextureLibrary& TextureLibrary;
     };

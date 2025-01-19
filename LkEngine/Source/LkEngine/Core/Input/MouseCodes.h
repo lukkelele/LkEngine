@@ -5,9 +5,7 @@
 
 namespace LkEngine {
 
-	/** 
-	 * EMouseButton 
-	 */
+	/** EMouseButton */
 	enum class EMouseButton : uint16_t
 	{
 		Button0, /* Left   */
@@ -24,9 +22,7 @@ namespace LkEngine {
 		Middle = Button2,
 	};
 
-	/**
-	 * EMouseButtonState
-	 */
+	/** EMouseButtonState */
 	enum class EMouseButtonState
 	{
 		None = -1,
@@ -43,7 +39,8 @@ namespace LkEngine {
 		Locked = 2
 	};
 
-	enum class EMouseScroll
+	/** EMouseScrollDirection */
+	enum class EMouseScrollDirection
 	{
 		None,
 		Up,
@@ -61,33 +58,45 @@ namespace LkEngine {
 	};
 
 
-	/// FIXME: Temporary until metadata is available.
 	namespace Enum
 	{
 		FORCEINLINE static constexpr const char* ToString(const EMouseButton MouseButton)
 		{
 			switch (MouseButton)
 			{
-				case EMouseButton::Button0:  return "Button0";
-				case EMouseButton::Button1:  return "Button1";
-				case EMouseButton::Button2:  return "Button2";
-				case EMouseButton::Button3:  return "Button3";
-				case EMouseButton::Button4:  return "Button4";
-				case EMouseButton::Button5:  return "Button5";
-				case EMouseButton::None:     return "None";
+				case EMouseButton::Button0: return "Button0";
+				case EMouseButton::Button1: return "Button1";
+				case EMouseButton::Button2: return "Button2";
+				case EMouseButton::Button3: return "Button3";
+				case EMouseButton::Button4: return "Button4";
+				case EMouseButton::Button5: return "Button5";
+				case EMouseButton::None:    return "None";
 			}
 
 			assert(false);
 			return nullptr;
 		}
 
-		FORCEINLINE static constexpr const char* ToString(const EMouseScroll ScrollDirection)
+		FORCEINLINE static constexpr const char* ToString(const ECursorMode CursorMode)
+		{
+			switch (CursorMode)
+			{
+				case ECursorMode::Normal: return "Normal";
+				case ECursorMode::Hidden: return "Hidden";
+				case ECursorMode::Locked: return "Locked";
+			}
+
+			assert(false);
+			return nullptr;
+		}
+
+		FORCEINLINE static constexpr const char* ToString(const EMouseScrollDirection ScrollDirection)
 		{
 			switch (ScrollDirection)
 			{
-				case EMouseScroll::Up:    return "Up";
-				case EMouseScroll::Down:  return "Down";
-				case EMouseScroll::None:  return "None";
+				case EMouseScrollDirection::Up:   return "Up";
+				case EMouseScrollDirection::Down: return "Down";
+				case EMouseScrollDirection::None: return "None";
 			}
 
 			assert(false);

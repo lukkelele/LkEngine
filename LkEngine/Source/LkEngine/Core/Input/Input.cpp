@@ -137,15 +137,21 @@ namespace LkEngine {
 		return ((KeyDataMap.find(Key) != KeyDataMap.end()) && (KeyDataMap[Key].State == EKeyState::Released));
 	}
 
-	void LInput::SetCursorMode(ECursorMode mode)
+	void LInput::SetCursorMode(const ECursorMode CursorMode)
 	{
 		LWindow& Window = LApplication::Get()->GetWindow();
-		glfwSetInputMode(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
+		glfwSetInputMode(
+			Window.GetGlfwWindow(), 
+			GLFW_CURSOR, 
+			GLFW_CURSOR_NORMAL + static_cast<int>(CursorMode)
+		);
 
+	#if 0
 		if (LApplication::Get()->GetSpecification().ImGuiEnabled)
 		{
-			UI::SetInputEnabled(mode == ECursorMode::Normal);
+			UI::SetInputEnabled(CursorMode == ECursorMode::Normal);
 		}
+	#endif
 	}
 
 	ECursorMode LInput::GetCursorMode()

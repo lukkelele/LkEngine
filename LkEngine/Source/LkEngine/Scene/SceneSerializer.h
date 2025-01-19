@@ -25,8 +25,8 @@ namespace LkEngine {
 		void Serialize(const std::filesystem::path& Filepath);
 		bool Deserialize(const std::filesystem::path& Filepath);
 
-		void SerializeToYAML(YAML::Emitter& out);
-		bool DeserializeFromYAML(const std::string& YamlString);
+		void SerializeToYaml(YAML::Emitter& out);
+		bool DeserializeFromYaml(const std::string& YamlString);
 
 		/** FIXME: Move this to LProject, should not exist in here. */
 		TObjectPtr<LScene> LoadScene();

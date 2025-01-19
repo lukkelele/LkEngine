@@ -56,7 +56,7 @@ namespace LkEngine {
 		if (!UI::IsWindowDocked<UI::EFindType::Name>(WindowName))
 		{
 			/* Only constraint the window size when the window undocked. */
-			ImGui::SetNextWindowSizeConstraints(ImVec2(460, 320), ImVec2(6000, 6000));
+			ImGui::SetNextWindowSizeConstraints(ImVec2(460, 520), ImVec2(6000, 6000));
 		}
 		ImGui::Begin(WindowName, &bWindow_CoreSettings, WindowFlags);
 

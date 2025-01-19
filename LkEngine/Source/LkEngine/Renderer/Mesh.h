@@ -2,6 +2,7 @@
 
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
+#include "LkEngine/Core/Math/AABB.h"
 
 #include "LkEngine/Asset/Asset.h"
 #include "LkEngine/Asset/MaterialAsset.h"
@@ -120,9 +121,9 @@ namespace LkEngine {
 			}
 		}
 
-		static void Serialize(StreamWriter* serializer, const FBoneInfluence& BoneInfluence)
+		static void Serialize(StreamWriter* Serializer, const FBoneInfluence& BoneInfluence)
 		{
-			serializer->WriteRaw(BoneInfluence);
+			Serializer->WriteRaw(BoneInfluence);
 		}
 
 		static void Deserialize(StreamReader* Deserializer, FBoneInfluence& BoneInfluence)
@@ -164,28 +165,12 @@ namespace LkEngine {
 		FTriangle() = delete;
 	};
 
-	struct FAABB
-	{
-		glm::vec3 Min;
-		glm::vec3 Max;
-
-		FAABB()
-			: Min(0.0f)
-			, Max(0.0f)
-		{
-		}
-
-		FAABB(const glm::vec3& InMin,
-			  const glm::vec3& InMax)
-			: Min(InMin)
-			, Max(InMax)
-		{
-		}
-	};
-
 	class LSubmesh
 	{
 	public:
+		LSubmesh() = default;
+		~LSubmesh() = default;
+
 		uint32_t BaseVertex{};
 		uint32_t BaseIndex{};
 		uint32_t MaterialIndex{};
@@ -198,13 +183,13 @@ namespace LkEngine {
 		/** Local transform.*/
 		glm::mat4 LocalTransform{ 1.0f };
 
-		FAABB BoundingBox;
+		FAABB BoundingBox{};
 
 		std::string NodeName{};
 		std::string MeshName{};
 		bool bIsRigged = false;
 
-		FORCEINLINE static void Serialize(StreamWriter* Serializer, const LSubmesh& Submesh)
+		static void Serialize(StreamWriter* Serializer, const LSubmesh& Submesh)
 		{
 			Serializer->WriteRaw(Submesh.BaseVertex);
 			Serializer->WriteRaw(Submesh.BaseIndex);
@@ -219,7 +204,7 @@ namespace LkEngine {
 			Serializer->WriteRaw(Submesh.bIsRigged);
 		}
 
-		FORCEINLINE static void Deserialize(StreamReader* Deserializer, LSubmesh& Submesh)
+		static void Deserialize(StreamReader* Deserializer, LSubmesh& Submesh)
 		{
 			Deserializer->ReadRaw(Submesh.BaseVertex);
 			Deserializer->ReadRaw(Submesh.BaseIndex);
@@ -232,6 +217,12 @@ namespace LkEngine {
 			Deserializer->ReadString(Submesh.NodeName);
 			Deserializer->ReadString(Submesh.MeshName);
 			Deserializer->ReadRaw(Submesh.bIsRigged);
+		}
+
+		std::string ToString() const
+		{
+			return std::format("[Submesh: {}] VertexCount={}  IndexCount={}  MaterialIndex={}", MeshName, VertexCount, IndexCount, MaterialIndex);
+			//return std::format("[Submesh]");
 		}
 	};
 
@@ -283,11 +274,13 @@ namespace LkEngine {
 
 		FORCEINLINE std::vector<LSubmesh>& GetSubmeshes() { return Submeshes; }
 		FORCEINLINE const std::vector<LSubmesh>& GetSubmeshes() const { return Submeshes; }
+
 		FORCEINLINE const std::vector<FVertex>& GetVertices() const { return Vertices; }
 		FORCEINLINE const std::vector<FIndex>& GetIndices() const { return Indices; }
 
 		FORCEINLINE bool IsSubmeshRigged(const uint32_t SubmeshIndex) const 
 		{ 
+			LK_CORE_ASSERT(!Submeshes.empty() && (SubmeshIndex < Submeshes.size()));
 			return Submeshes[SubmeshIndex].bIsRigged; 
 		}
 
@@ -298,80 +291,60 @@ namespace LkEngine {
 
 		FORCEINLINE std::vector<TObjectPtr<LMaterial>>& GetMaterials()
 		{
-			return m_Materials;
+			return Materials;
 		}
 
 		FORCEINLINE const std::vector<TObjectPtr<LMaterial>>& GetMaterials() const
 		{
-			return m_Materials;
+			return Materials;
 		}
 
 		FORCEINLINE const std::filesystem::path& GetFilePath() const
 		{
-			return m_FilePath;
+			return FilePath;
 		}
 
 		FORCEINLINE const std::vector<FTriangle> GetTriangleCache(const uint32_t Index) const
 		{
-			LK_VERIFY(m_TriangleCache.contains(Index));
-			return m_TriangleCache.at(Index);
+			LK_VERIFY(TriangleCache.contains(Index));
+			return TriangleCache.at(Index);
 		}
 
-		FORCEINLINE TObjectPtr<LVertexBuffer> GetVertexBuffer()
-		{
-			return VertexBuffer;
+		FORCEINLINE TObjectPtr<LVertexBuffer> GetVertexBuffer() 
+		{ 
+			LK_CORE_ASSERT(VertexBuffer);
+			return VertexBuffer; 
 		}
 
-		FORCEINLINE TObjectPtr<LVertexBuffer> GetBoneInfluenceBuffer()
-		{
-			return BoneInfluenceBuffer;
+		FORCEINLINE TObjectPtr<LIndexBuffer> GetIndexBuffer() 
+		{ 
+			LK_CORE_ASSERT(IndexBuffer);
+			return IndexBuffer; 
 		}
 
-		FORCEINLINE TObjectPtr<LIndexBuffer> GetIndexBuffer()
-		{
-			return IndexBuffer;
+		FORCEINLINE TObjectPtr<LVertexBuffer> GetBoneInfluenceBuffer() 
+		{ 
+			return BoneInfluenceBuffer; 
 		}
 
 		static EAssetType GetStaticType() { return EAssetType::MeshSource; }
+		//const FAABB& GetBoundingBox() const { return m_BoundingBox; }
 
-		// const AABB& GetBoundingBox() const { return m_BoundingBox; }
+		FORCEINLINE const std::vector<FMeshNode>& GetNodes() const 
+		{ 
+			return MeshNodes; 
+		}
 
 		FORCEINLINE const FMeshNode& GetRootNode() const
 		{
-			LK_CORE_ASSERT(m_Nodes.size() > 0, "No root node exists");
-			return m_Nodes[0];
-		}
-
-		const std::vector<FMeshNode>& GetNodes() const
-		{
-			return m_Nodes;
+			LK_CORE_ASSERT(!MeshNodes.empty(), "No root node exists");
+			return MeshNodes[0];
 		}
 
 		/**
 		 * Dump vertex buffer info to log.
 		 */
 		void DumpVertexBuffer();
-
-		/* Not implemented yet. */
-#if 0
-		FORCEINLINE bool HasSkeleton() const 
-		{ 
-			return static_cast<bool>(m_Skeleton); 
-		}
-
-		FORCEINLINE const LSkeleton& GetSkeleton() const 
-		{ 
-			LK_CORE_ASSERT(m_Skeleton, "Attempted to access null skeleton"); 
-			return *m_Skeleton; 
-		}
-
-		bool IsCompatibleSkeleton(const uint32_t animationIndex, const LSkeleton& Skeleton) const;
-
-		std::vector<std::string> GetAnimationNames() const;
-
-		const LAnimation* GetAnimation(const uint32_t AnimationIndex, const LSkeleton& Skeleton, const bool IsMaskedRootMotion, 
-									   const glm::vec3& RootTranslationMask, const float RootRotationMask) const;
-#endif
 
 	private:
 		std::vector<LSubmesh> Submeshes{};
@@ -386,22 +359,12 @@ namespace LkEngine {
 		std::vector<FBoneInfluence> BoneInfluences{};
 		std::vector<FBoneInfo> BoneInfo{};
 
-		/* Not implemented yet. */
-#if 0
-		/* Skeleton. */
-		mutable TObjectPtr<LSkeleton> Skeleton;
+		std::vector<TObjectPtr<LMaterial>> Materials{};
+		std::unordered_map<uint32_t, std::vector<FTriangle>> TriangleCache;
+		std::vector<FMeshNode> MeshNodes{};
+		FAABB BoundingBox{};
 
-		/* Animations. */
-		mutable std::vector<TObjectPtr<LAnimation>> Animations;
-		std::vector<std::string> AnimationNames;
-#endif
-
-		std::vector<TObjectPtr<LMaterial>> m_Materials{};
-		std::unordered_map<uint32_t, std::vector<FTriangle>> m_TriangleCache;
-		std::vector<FMeshNode> m_Nodes{};
-		FAABB m_BoundingBox{};
-
-		std::filesystem::path m_FilePath{};
+		std::filesystem::path FilePath{};
 
 		friend class LScene;
 		friend class LSceneRenderer;
@@ -428,40 +391,37 @@ namespace LkEngine {
 		LMesh(const TObjectPtr<LMesh>& Other);
 		virtual ~LMesh() = default;
 
-		FORCEINLINE std::vector<uint32_t>& GetSubmeshes()
-		{
-			return Submeshes;
-		}
-		FORCEINLINE const std::vector<uint32_t>& GetSubmeshes() const
-		{
-			return Submeshes;
-		}
+		std::vector<uint32_t>& GetSubmeshes() { return Submeshes; }
+		const std::vector<uint32_t>& GetSubmeshes() const { return Submeshes; }
 
 		void SetSubmeshes(const std::vector<uint32_t>& InSubmeshes);
 
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() { return MeshSource; }
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const { return MeshSource; }
+		TObjectPtr<LMeshSource> GetMeshSource() { return MeshSource; }
+		TObjectPtr<LMeshSource> GetMeshSource() const { return MeshSource; }
 
-		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> InMeshSource)
+		void SetMeshAsset(TObjectPtr<LMeshSource> InMeshSource)
 		{
 			MeshSource = InMeshSource;
 		}
 
-		FORCEINLINE TObjectPtr<LMaterialTable> GetMaterialTable() const { return MaterialTable; }
-
-		FORCEINLINE LUUID GetMaterialHandle(const int Index) 
-		{ 
-			return MaterialTable->GetMaterialHandle(Index);
-		}
+		TObjectPtr<LMaterialTable> GetMaterialTable() const { return MaterialTable; }
 
 		static EAssetType GetStaticType() { return EAssetType::Mesh; }
+
+		/* TODO: Remove GetVertexBuffer and GetIndexBuffer. */
 		TObjectPtr<LVertexBuffer> GetVertexBuffer() { return MeshSource->GetVertexBuffer(); }
 		TObjectPtr<LIndexBuffer> GetIndexBuffer() { return MeshSource->GetIndexBuffer(); }
 
-		TObjectPtr<LMaterial> GetMaterial(const int Index = 0);
+		TObjectPtr<LMaterial> GetMaterial(const uint32_t Index = 0);
 
-		FORCEINLINE const std::string& GetName() const { return Name; }
-		FORCEINLINE void SetName(std::string_view InName) { Name = InName; }
+		FAssetHandle GetMaterialHandle(const uint32_t Index) 
+		{ 
+			LK_CORE_ASSERT(MaterialTable && MaterialTable->HasMaterial(Index));
+			return MaterialTable->GetMaterial(Index); 
+		}
+
+		const std::string& GetName() const { return Name; }
+		void SetName(const std::string& InName) { Name = InName; }
 
 	private:
 		TObjectPtr<LMeshSource> MeshSource{};
@@ -470,12 +430,12 @@ namespace LkEngine {
 
 		std::string Name{};
 
+		friend class LAssetManager;
 		friend class LScene;
 		friend class LRenderer;
-		friend class LAssetManager;
+		friend class LSceneRenderer;
 		friend class LRuntimeAssetManager;
 		friend class LOpenGLRenderer;
-		friend class MeshViewerPanel; /* REMOVE */
 
 		LASSET(LMesh)
 	};
@@ -491,51 +451,41 @@ namespace LkEngine {
 		LStaticMesh(const TObjectPtr<LStaticMesh>& Other);
 		virtual ~LStaticMesh() = default;
 
-		FORCEINLINE std::vector<uint32_t>& GetSubmeshes()
-		{
-			return Submeshes;
-		}
-
-		FORCEINLINE const std::vector<uint32_t>& GetSubmeshes() const
-		{
-			return Submeshes;
-		}
+		std::vector<uint32_t>& GetSubmeshes() { return Submeshes; } 
+		const std::vector<uint32_t>& GetSubmeshes() const { return Submeshes; }
 
 		void SetSubmeshes(const std::vector<uint32_t>& InSubmeshes);
 
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource()
-		{
-			return MeshSource;
-		}
+		TObjectPtr<LMeshSource> GetMeshSource() { return MeshSource; }
+		TObjectPtr<LMeshSource> GetMeshSource() const { return MeshSource; }
 
-		FORCEINLINE TObjectPtr<LMeshSource> GetMeshSource() const
+		void SetMeshAsset(TObjectPtr<LMeshSource> InMeshAsset)
 		{
-			return MeshSource;
-		}
-
-		FORCEINLINE void SetMeshAsset(TObjectPtr<LMeshSource> InMeshAsset)
-		{
-			/// TODO: Mark dirty
 			MeshSource = InMeshAsset;
 		}
 
-		TObjectPtr<LMaterialTable> GetMaterials() const
+		TObjectPtr<LMaterialTable> GetMaterialTable() const
 		{
-			return Materials;
+			LK_CORE_ASSERT(MaterialTable);
+			return MaterialTable;
 		}
 
 		static EAssetType GetStaticType() { return EAssetType::StaticMesh; }
+
+		void SetName(const std::string& InName) { Name = InName; }
 
 	private:
 		TObjectPtr<LMeshSource> MeshSource{};
 		std::vector<uint32_t> Submeshes{};
 
-		// Materials
-		TObjectPtr<LMaterialTable> Materials{};
+		TObjectPtr<LMaterialTable> MaterialTable{};
 
+		std::string Name{};
+
+		friend class LAssetManager;
 		friend class LScene;
 		friend class LRenderer;
-		friend class LAssetManager;
+		friend class LSceneRenderer;
 		friend class LRuntimeAssetManager;
 		friend class LOpenGLRenderer;
 		friend class LSceneHierarchyPanel;

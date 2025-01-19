@@ -18,10 +18,10 @@ namespace LkEngine {
 
 		if (auto Iter = LiveReferences.insert(InObject); Iter.second == true)
 		{
-		#if (LK_DEBUG_LOG_LIVE_REFERENCES == 1)
+		#if LK_DEBUG_LOG_LIVE_REFERENCES
 			LClass* ClassInfo = const_cast<LClass*>(Object->GetClass());
-			LK_CORE_DEBUG_TAG("ObjectPtr", "Adding reference to \"{}\" ({}), total: {}", 
-							  ClassInfo->GetName(), reinterpret_cast<uint64_t>(InObject), Object->GetReferenceCount());
+			LK_PRINTLN("[ObjectPtr] Adding reference to \"{}\" ({}), total: {}", 
+					   ClassInfo->GetName(), reinterpret_cast<uint64_t>(InObject), Object->GetReferenceCount());
 		#endif
 		}
 	}
@@ -33,15 +33,17 @@ namespace LkEngine {
 
 		if (LiveReferences.find(InObject) != LiveReferences.end())
 		{
-			//LK_CORE_INFO("Removing {} from live references", static_cast<LObject*>(InObject)->ClassName());
+		#if (LK_DEBUG_LOG_LIVE_REFERENCES == 1)
+			LK_PRINTLN("[ObjectPtr] Removing {} from live references", static_cast<LObject*>(InObject)->ClassName());
+		#endif
 			LiveReferences.erase(InObject);
 		}
 		else
 		{
 		#if (LK_DEBUG_LOG_LIVE_REFERENCES == 1)
-			LK_CORE_DEBUG_TAG("ObjectPtr", "Was not able to remove {} from live references with {} active references ", 
-							  static_cast<LObject*>(InObject)->ClassName(), 
-							  static_cast<LObject*>(InObject)->GetReferenceCount());
+			LK_PRINTLN("[ObjectPtr] Failed to remove '{}' from live references with {} active references", 
+					   static_cast<LObject*>(InObject)->ClassName(), 
+					   static_cast<LObject*>(InObject)->GetReferenceCount());
 		#endif
 		}
 	}

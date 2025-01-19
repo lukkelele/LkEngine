@@ -14,7 +14,8 @@ namespace LkEngine {
 		explicit LMaterialAsset(const TObjectPtr<LMaterial>& Material);
         LMaterialAsset(const bool bIsTransparent = false);
 		LMaterialAsset() = delete;
-		~LMaterialAsset() = default;
+		~LMaterialAsset();
+		//~LMaterialAsset() = default;
 
 		static EAssetType GetStaticType() { return EAssetType::Material; }
 
@@ -79,32 +80,23 @@ namespace LkEngine {
         LMaterialTable(TObjectPtr<LMaterialTable> Other);
 		~LMaterialTable();
 
-        void SetMaterial(const uint32_t Index, const LUUID AssetHandle);
+        void SetMaterial(const uint32_t Index, const FAssetHandle AssetHandle);
 
-		FORCEINLINE LUUID GetMaterial(const uint32_t Index) const
+		FORCEINLINE FAssetHandle GetMaterial(const uint32_t Index) const
 		{
-			LK_CORE_ASSERT(HasMaterial(Index), "GetMaterial failed for index {}", Index);
+			LK_CORE_ASSERT(HasMaterial(Index), "GetMaterial failed for index: {}", Index);
 			return Materials.at(Index);
 		}
 
         void ClearMaterial(const uint32_t Index);
-        void InsertLast(const LUUID Material);
+        void InsertLast(const FAssetHandle Material);
 
         FORCEINLINE bool HasMaterial(const uint32_t Index) const 
         { 
             return (Materials.find(Index) != Materials.end());
         }
 
-        FORCEINLINE LUUID GetMaterialHandle(const uint32_t Index) const
-        {
-            LK_CORE_ASSERT(HasMaterial(Index));
-            return Materials.at(Index);
-        }
-
-        FORCEINLINE uint32_t GetMaterialCount() const 
-        { 
-            return MaterialCount; 
-        }
+        FORCEINLINE uint32_t GetMaterialCount() const { return MaterialCount; }
 
         FORCEINLINE void SetMaterialCount(const uint32_t InMaterialCount) 
         { 
@@ -116,18 +108,11 @@ namespace LkEngine {
          */
         void Clear();
 
-        std::map<uint32_t, LUUID>& GetMaterials() 
-		{ 
-			return Materials; 
-		}
-
-        const std::map<uint32_t, LUUID>& GetMaterials() const 
-		{ 
-			return Materials; 
-		}
+        std::map<uint32_t, FAssetHandle>& GetMaterials() { return Materials; }
+        const std::map<uint32_t, FAssetHandle>& GetMaterials() const { return Materials; }
 
     private:
-		std::map<uint32_t, LUUID> Materials{};
+		std::map<uint32_t, FAssetHandle> Materials{};
         uint32_t MaterialCount = 0;
 
         LCLASS(LMaterialTable)

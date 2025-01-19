@@ -8,6 +8,7 @@
 namespace LkEngine {
 
 	class LMesh;
+	class LStaticMesh;
 	class LScene;
 	class LPipeline;
 	class LRenderer;
@@ -44,6 +45,8 @@ namespace LkEngine {
 
 		void SetScene(TObjectPtr<LScene> InScene);
 
+		void SubmitStaticMesh(TObjectPtr<LStaticMesh> StaticMesh, TObjectPtr<LMaterialTable> MaterialTable, const glm::mat4& Transform);
+
 		void SubmitMesh(TObjectPtr<LMesh> Mesh, 
 						const uint32_t SubmeshIndex, 
 						TObjectPtr<LMaterialTable> MaterialTable, 
@@ -63,17 +66,17 @@ namespace LkEngine {
 
 	private:
 		/**
-		 * @struct FMeshKey
+		 * FMeshKey
 		 */
 		struct FMeshKey
 		{
-			LUUID MeshHandle = 0;
-			LUUID MaterialHandle = 0;
+			FAssetHandle MeshHandle = 0;
+			FAssetHandle MaterialHandle = 0;
 			uint32_t SubmeshIndex = 0;
 			bool bIsSelected = false;
 
-			FMeshKey(const LUUID InMeshHandle, 
-					 const LUUID InMaterialHandle, 
+			FMeshKey(const FAssetHandle InMeshHandle, 
+					 const FAssetHandle InMaterialHandle, 
 					 const uint32_t InSubmeshIndex, 
 					 const bool IsSelected)
 				: MeshHandle(InMeshHandle)
@@ -96,11 +99,12 @@ namespace LkEngine {
 		};
 
 		/**
-		 * @struct FDrawCommand
+		 * FDrawCommand
 		 */
+		template<typename MeshType = LMesh>
 		struct FDrawCommand
 		{
-			TObjectPtr<LMesh> Mesh{};
+			TObjectPtr<MeshType> Mesh{};
 			uint32_t SubmeshIndex{};
 			TObjectPtr<LMaterialTable> MaterialTable;
 			TObjectPtr<LMaterial> OverrideMaterial;
@@ -143,8 +147,11 @@ namespace LkEngine {
 		TObjectPtr<LRenderPass> GeometryPass;
 		TObjectPtr<LUniformBufferSet> UBSCamera;
 
-		std::map<FMeshKey, FDrawCommand> DrawList{};
+		std::map<FMeshKey, FDrawCommand<LMesh>> MeshDrawList{};
 		std::map<FMeshKey, FTransformMapData> MeshTransformMap;
+
+		std::map<FMeshKey, FDrawCommand<LStaticMesh>> StaticMeshDrawList{};
+		std::map<FMeshKey, FTransformMapData> StaticMeshTransformMap;
 
 		LCLASS(LSceneRenderer)
     };

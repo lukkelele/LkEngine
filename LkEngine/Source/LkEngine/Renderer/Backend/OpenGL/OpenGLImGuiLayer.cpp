@@ -22,6 +22,8 @@ namespace LkEngine {
 
     void LOpenGLImGuiLayer::Initialize()
     {
+		LObject::Initialize();
+
 	    ImGui::CreateContext();
 		ImGuiIO& IO = ImGui::GetIO();
 
@@ -30,7 +32,7 @@ namespace LkEngine {
 		const std::string ConfigStr = LayoutConfig.string();
 		ImGui::LoadIniSettingsFromDisk(ConfigStr.c_str());
 
-		IO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
+		//IO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
 		IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     
 		//IO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     
 
@@ -61,8 +63,6 @@ namespace LkEngine {
 		/* Add fonts. */
 		LK_CORE_TRACE_TAG("UI", "Adding fonts");
 		InitializeFonts();
-
-		bInitialized = true;
 
 		Window.OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
 		{

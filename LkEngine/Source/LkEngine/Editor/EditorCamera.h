@@ -83,9 +83,6 @@ namespace LkEngine {
 
 		void SetViewportSize(const uint16_t InWidth, const uint16_t InHeight);
 
-		/// TODO: Patch out
-		FORCEINLINE EGizmo GetGizmoMode() const { return GizmoMode; }
-
 		FORCEINLINE glm::vec3 CalculatePosition() const
 		{
 			return (FocalPoint - (GetForwardDirection() * Distance + PositionDelta));
@@ -126,7 +123,6 @@ namespace LkEngine {
 		glm::vec3 InitialRotation{};
 
 		EEditorCameraMode CameraMode = EEditorCameraMode::Arcball;
-		EGizmo GizmoMode = EGizmo::Translate; /* FIXME */
 
 		bool bPitchLocked = false; /// EVALUATE
 		bool bYawLocked = false;   /// EVALUATE

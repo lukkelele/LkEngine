@@ -11,9 +11,9 @@ namespace LkEngine {
 	 */
 	enum class EAssetFlag : uint16_t
 	{
-		None       = 0 << 0,
-		Missing    = 1 << 1,
-		Invalid    = 1 << 2
+		None     = LK_BIT(0),
+		Missing  = LK_BIT(1),
+		Invalid  = LK_BIT(2),
 	};
 	LK_ENUM_CLASS_FLAGS(EAssetFlag);
 
@@ -36,9 +36,10 @@ namespace LkEngine {
 		Skeleton,
 		Animation,
 		EnvMap,
-		Audio
+		Audio,
+		COUNT 
 	};
-
+	LK_ENUM_RANGE_BY_FIRST_AND_LAST(EAssetType, EAssetType::None, EAssetType::COUNT);
 
 	namespace Enum 
 	{

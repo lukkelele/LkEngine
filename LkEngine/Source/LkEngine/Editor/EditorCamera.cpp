@@ -65,20 +65,7 @@ namespace LkEngine {
 		}
 	#endif
 
-		/* Translate Mode. */
-		if (LKeyboard::IsKeyPressed(EKey::T))
-		{
-		}
-		/* Rotation Mode. */
-		else if (LKeyboard::IsKeyPressed(EKey::R))
-		{
-		}
-		/* Scale Mode. */
-		else if (LKeyboard::IsKeyPressed(EKey::S))
-		{
-		}
-
-		if ((LInput::IsMouseButtonDown(EMouseButton::Button1)) && (!LInput::IsKeyDown(EKey::LeftAlt)))
+		if (LInput::IsMouseButtonDown(EMouseButton::Right) && !LInput::IsKeyDown(EKey::LeftAlt))
 		{
 			CameraMode = EEditorCameraMode::Flycam;
 			LMouse::Disable();
@@ -113,15 +100,15 @@ namespace LkEngine {
 
 			if (LKeyboard::IsKeyPressed(EKey::H))
 			{
-				ProjectionType = ECameraProjection::Orthographic;
-				Position = { 2, 2, 0 };
-			}
-			if (LKeyboard::IsKeyPressed(EKey::P))
-			{
-				ProjectionType = ECameraProjection::Perspective;
-				Position = { -330, -140, -910 };
-				Yaw = -3.10f;
-				Pitch = 6.40f;
+				if (ProjectionType == ECameraProjection::Perspective)
+				{
+					ProjectionType = ECameraProjection::Orthographic;
+				}
+				else
+				{
+					ProjectionType = ECameraProjection::Perspective;
+				}
+				LK_CORE_INFO_TAG("EditorCamera", "Toggling projection type: {}", Enum::ToString(ProjectionType));
 			}
 
 			static constexpr float MaxRate = 0.120f;
@@ -130,9 +117,10 @@ namespace LkEngine {
 
 			RightDirection = glm::cross(Direction, glm::vec3{ 0.0f, YawSign, 0.0f });
 
-			Direction = glm::rotate(glm::normalize(
-				glm::cross(glm::angleAxis(-PitchDelta, RightDirection),
-					glm::angleAxis(-YawDelta, glm::vec3{ 0.0f, YawSign, 0.0f })
+			Direction = glm::rotate(
+				glm::normalize( 
+					glm::cross(glm::angleAxis(-PitchDelta, RightDirection),
+					glm::angleAxis(-YawDelta, glm::vec3(0.0f, YawSign, 0.0f))
 				)
 			), Direction);
 
@@ -150,19 +138,19 @@ namespace LkEngine {
 			CameraMode = EEditorCameraMode::Arcball;
 
 			/* Camera Mode: Pan */
-			if (LInput::IsMouseButtonDown(EMouseButton::Button2))
+			if (LInput::IsMouseButtonDown(EMouseButton::Middle))
 			{
 				LMouse::Disable();
 				MousePan(MouseDelta);
 			}
 			/* Camera Mode: Rotate */
-			else if (LInput::IsMouseButtonDown(EMouseButton::Button0))
+			else if (LInput::IsMouseButtonDown(EMouseButton::Left))
 			{
 				LMouse::Disable();
 				MouseRotate(MouseDelta);
 			}
 			/* Camera Mode: Zoom */
-			else if (LInput::IsMouseButtonDown(EMouseButton::Button1))
+			else if (LInput::IsMouseButtonDown(EMouseButton::Right))
 			{
 				LMouse::Disable();
 				MouseZoom((MouseDelta.x + MouseDelta.y) * 0.10f);
@@ -174,7 +162,10 @@ namespace LkEngine {
 		}
 		else
 		{
-			LMouse::Enable();
+			if (!LMouse::IsEnabled())
+			{
+				LMouse::Enable();
+			}
 		}
 
 		InitialMousePosition = MousePos;
@@ -311,7 +302,7 @@ namespace LkEngine {
 	bool LEditorCamera::OnKeyPress(KeyPressedEvent& Event)
 	{
 		const glm::vec2 MousePosition = { LMouse::GetMouseX(), LMouse::GetMouseY() };
-		const glm::vec2 MouseDelta = (MousePosition - InitialMousePosition) * 0.002f;
+		const glm::vec2 MouseDelta = (MousePosition - InitialMousePosition) * 0.0020f;
 
 		const float YawSign = (GetUpDirection().y >= 0) ? 1.0f : -1.0f;
 		const float CameraSpeed = GetCameraSpeed();
@@ -320,11 +311,11 @@ namespace LkEngine {
 		const EKey PressedKey = Event.GetKey();
 		if (PressedKey == EKey::Q)
 		{
-			PositionDelta -= TimeStep * CameraSpeed * glm::vec3{ 0.0f, YawSign, 0.0f };
+			PositionDelta -= TimeStep * CameraSpeed * glm::vec3(0.0f, YawSign, 0.0f);
 		}
 		if (PressedKey == EKey::E)
 		{
-			PositionDelta += TimeStep * CameraSpeed * glm::vec3{ 0.0f, YawSign, 0.0f };
+			PositionDelta += TimeStep * CameraSpeed * glm::vec3(0.0f, YawSign, 0.0f);
 		}
 		if (PressedKey == EKey::W)
 		{
@@ -341,19 +332,6 @@ namespace LkEngine {
 		if (PressedKey == EKey::D)
 		{
 			PositionDelta += TimeStep * CameraSpeed * RightDirection;
-		}
-
-		if (PressedKey == EKey::T)
-		{
-			GizmoMode = EGizmo::Translate;
-		}
-		if (PressedKey == EKey::R)
-		{
-			GizmoMode = EGizmo::Rotate;
-		}
-		if (PressedKey == EKey::S)
-		{
-			GizmoMode = EGizmo::Scale;
 		}
 
 		return true;

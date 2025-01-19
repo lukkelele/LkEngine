@@ -110,7 +110,7 @@ namespace LkEngine {
 		virtual void BindTexture(const uint32_t AttachmentIndex = 0, const uint32_t TextureSlot = 0) const = 0;
 
 		virtual void Clear() = 0;
-		virtual int ReadPixel(const uint32_t AttachmentIndex, int PosX, int PosY) = 0;
+		virtual int ReadPixel(const uint32_t AttachmentIndex, const int PosX, const int PosY) = 0;
 		virtual void ClearAttachment(const uint32_t AttachmentIndex, int value) = 0;
 		virtual LRendererID GetColorAttachmentRendererID(const uint32_t Index = 0) const = 0;
 

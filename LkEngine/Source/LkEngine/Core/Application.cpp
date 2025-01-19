@@ -77,7 +77,6 @@ namespace LkEngine {
 	#if LK_ENGINE_EDITOR
 		/* Create and initialize EditorLayer. */
 		Editor = std::make_unique<LEditorLayer>();
-		Editor->Initialize();
 		LayerStack.PushOverlay(Editor.get());
 	#endif
 

@@ -144,7 +144,7 @@ namespace LkEngine
             }
         }
 
-        bInitialized = true;
+        bObjectInitialized = true;
     }
 
     void LRenderer2D::Shutdown() 

@@ -35,16 +35,14 @@ namespace LkEngine {
 	 */
 	class LObject : public LObjectBase
 	{
-		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestructBegin, const FObjectHandle&);
-		LK_DECLARE_MULTICAST_DELEGATE(FObjectDestructEnd, const FObjectHandle&);
-
 	public:
 		LObject();
 
 		LObject(const LObject& Other)
-			: Handle(Other.Handle)
-			, bInitialized(Other.bInitialized)
-			, Flags(Other.Flags)
+			: ObjectHandle(Other.ObjectHandle)
+			, bObjectInitialized(Other.bObjectInitialized)
+			, ObjectFlags(Other.ObjectFlags)
+			, Ptr_ReferenceCount(Other.Ptr_ReferenceCount.load())
 		{
 		}
 
@@ -57,10 +55,10 @@ namespace LkEngine {
 				return *this;
 			}
 
-			Handle = Other.Handle;
-			bInitialized = Other.bInitialized;
-			Flags = Other.Flags;
-			ReferenceCount = Other.ReferenceCount.load();
+			ObjectHandle = Other.ObjectHandle;
+			bObjectInitialized = Other.bObjectInitialized;
+			ObjectFlags = Other.ObjectFlags;
+			Ptr_ReferenceCount = Other.Ptr_ReferenceCount.load();
 
 			return *this;
 		}
@@ -68,7 +66,7 @@ namespace LkEngine {
 		/** @brief Get the object handle. */
 		FORCEINLINE FObjectHandle GetObjectHandle() const
 		{
-			return Handle;
+			return ObjectHandle;
 		}
 
 		/**
@@ -77,22 +75,17 @@ namespace LkEngine {
 		virtual void Initialize();
 
 		/**
-		 * @brief Destroy object and release from memory.
-		 */
-		virtual void BeginDestroy();
-
-		/**
 		 * @brief Check if object is initialized.
 		 */
 		FORCEINLINE virtual bool IsInitialized() const
 		{
-			return bInitialized;
+			return bObjectInitialized;
 		}
 
 		/**
-		 * @brief Check if object is valid for use.
+		 * Check if object is valid for use.
 		 */
-		FORCEINLINE virtual bool IsValid() const
+		FORCEINLINE virtual bool IsObjectValid() const
 		{
 			if (HasAnyFlags(EObjectFlag::Garbage | EObjectFlag::BeginDestroy | EObjectFlag::FinishDestroy))
 			{
@@ -103,23 +96,25 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Check if object has a specific flag.
+		 * Check if object has a specific flag.
 		 */
-		FORCEINLINE bool HasFlag(const LObjectFlag InFlag) const
+		FORCEINLINE bool HasFlag(const EObjectFlag InFlag) const
 		{
-			return ((Flags & InFlag) == InFlag);
+			return ((ObjectFlags & InFlag) == static_cast<std::underlying_type_t<EObjectFlag>>(InFlag));
 		}
 
 		/**
-		 * @brief Check if object has any of the passed flags.
+		 * Check if object has any of the passed flags.
 		 */
-		FORCEINLINE bool HasAnyFlags(const LObjectFlag InFlags) const
+		FORCEINLINE bool HasAnyFlags(const EObjectFlag InFlags) const
 		{
-			return (Flags & InFlags);
+			return static_cast<bool>(ObjectFlags & InFlags);
 		}
 
 		/**
-		 * @brief Get static class, is implemented for every LClass.
+		 * Get static class object. 
+		 * 
+		 *  Implemented for every LClass.
 		 */
 		FORCEINLINE static const LClass* StaticClass()
 		{
@@ -134,25 +129,27 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Register object class.
-		 * @note  Implemented by the LOBJECT macro (LCLASS/LSTRUCT).
+		 * Register object class.
+		 * 
+		 *  Implemented by the LOBJECT macro (LCLASS/LSTRUCT).
 		 */
 		virtual const LClass* ObjectRegistration() = 0;
 
 		/**
-		 * @brief Static class name.
-		 * @note  Implemented by LCLASS macro.
+		 * Static class name.
+		 * 
+		 *  Implemented by LCLASS macro.
 		 */
 		FORCEINLINE static std::string StaticClassName() { return "LObject"; }
 
 		/**
-		 * @brief Get the class for this object.
+		 * Get the class for this LObject.
 		 *
-		 * No null-checks should be done inside this function since it is
-		 * used to determine the class registration at places, i.e the return value
-		 * is used to determine if the class is registered depending if nullptr or not.
+		 *  No null-checks should be done inside this function since it is
+		 *  used to determine the class registration at places, i.e the return value
+		 *  is used to determine if the class is registered depending if nullptr or not.
 		 *
-		 * @note Implemented by LCLASS macro.
+		 *  Implemented by LCLASS macro.
 		 */
 		FORCEINLINE virtual const LClass* GetClass() const
 		{
@@ -160,31 +157,22 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Get name of class.
-		 * @note  Implemented by LCLASS macro.
+		 * Get name of the LObject class.
+		 * 
+		 *  Implemented by LCLASS macro.
 		 */
 		virtual std::string ClassName() const = 0;
 
 		/**
-		 * @brief Check to see if object is selected.
+		 * Mark object as garbage.
 		 */
-		bool IsSelected() const;
-
-		/**
-		 * @brief Serialize object.
-		 */
-		virtual std::string Serialize() const { return ""; }
-
-		/**
-		 * @brief Mark object as garbage.
-		 */
-		FORCEINLINE void MarkAsGarbage()
+		void MarkAsGarbage()
 		{
-			Flags |= EObjectFlag::Garbage;
+			ObjectFlags |= EObjectFlag::Garbage;
 		}
 
 		/**
-		 * @brief Cast object to type T.
+		 * Cast object to type T.
 		 */
 		template<typename T>
 		T& As()
@@ -194,7 +182,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Cast object to type T.
+		 * Cast object to type T.
 		 */
 		template<typename T>
 		const T& As() const
@@ -204,25 +192,24 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Check if object is or is a derivation of T.
+		 * Check if object is or is a derivation of T.
 		 */
 		template<typename T>
 		bool IsA() const
 		{
 			static_assert(sizeof(T) > 0, "IsA<T> failed, incomplete type");
-			//return (StaticClassName() == T::StaticClassName()); /// TODO: CHANGE THIS
 			return (GetClass()->GetName() == T::StaticClassName()); /// TODO: CHANGE THIS
 		}
 
 		/**
-		 * @brief Check if object is considered an asset.
+		 * Check if object is considered an asset.
 		 */
 		FORCEINLINE virtual bool IsAsset() const { return false; }
 
 		/**
-		 * @brief Return current reference count from all object pointers.
+		 * Return current reference count from all object pointers.
 		 */
-		FORCEINLINE uint32_t GetReferenceCount() const { return ReferenceCount.load(); }
+		FORCEINLINE uint32_t GetReferenceCount() const { return Ptr_ReferenceCount.load(); }
 
 		template <typename T>
 		static void ValidateLObjectImplementation()
@@ -230,42 +217,36 @@ namespace LkEngine {
 			static_assert(HasLClassMacro<T>, "Class must include the LCLASS macro.");
 		}
 
-	protected:
-		/**
-		 * @brief End stage of object destruction.
-		 */
-		virtual void FinalizeDestruction();
-
 	private:
 		/**
-		 * @brief Increment reference count.
-		 * @note  Managed by TObjectPtr.
+		 * Increment reference count.
+		 *
+		 *  Managed by TObjectPtr.
 		 */
 		FORCEINLINE void IncrementReferenceCount() const
 		{
-			ReferenceCount++;
+			Ptr_ReferenceCount++;
 		}
 
 		/**
-		 * @brief Decrement reference count.
-		 * @note  Managed by TObjectPtr.
+		 * Decrement reference count.
+		 *
+		 *  Managed by TObjectPtr.
 		 */
 		FORCEINLINE void DecrementReferenceCount() const
 		{
-			ReferenceCount--;
+			LK_CORE_ASSERT(Ptr_ReferenceCount > 0, "LObject::DecrementReferenceCount failed");
+			Ptr_ReferenceCount--;
 		}
 
 	protected:
-		FObjectHandle Handle = 0; /* TODO: Rename to 'ObjectHandle' */
+		FObjectHandle ObjectHandle = 0; /* TODO: Rename to 'ObjectHandle' */
 
-		bool bInitialized = false;
-		LObjectFlag Flags = EObjectFlag::None; /* TODO: Rename 'Flags' to 'ObjectFlags' */
-
-		FObjectDestructBegin OnDestructBegin{};
-		FObjectDestructEnd OnDestructEnd{};
+		bool bObjectInitialized = false;
+		EObjectFlag ObjectFlags = EObjectFlag::None; /* TODO: Rename 'Flags' to 'ObjectFlags' */
 
 		/** Reference count is managed by TObjectPtr. */
-		mutable std::atomic<uint32_t> ReferenceCount = 0;
+		mutable std::atomic<uint32_t> Ptr_ReferenceCount = 0;
 
 		template<typename T>
 		friend class TObjectPtr;
@@ -278,13 +259,6 @@ namespace LkEngine {
 			return !(Object->HasAnyFlags(EObjectFlag::Garbage));
 		}
 	};
-
-	/**
-	 * GIsObjectSelectedInEditor
-	 *
-	 *  Check to see if an object is selected.
-	 */
-	extern TFunction<bool(const LObject*)> GIsObjectSelectedInEditor;
 
 	FORCEINLINE bool IsValid(const LObject* Object)
 	{
@@ -313,15 +287,12 @@ namespace LkEngine {
 	template<typename TObject>
 	inline constexpr bool IsBaseOfObject = std::is_base_of<LObject, std::decay_t<TObject>>::value;
 
-	/// TODO: Move to garbage collector or some other registry structure.
-	LK_DECLARE_MULTICAST_DELEGATE(FOnObjectCreated, const LObject*);
-	extern FOnObjectCreated GOnObjectCreated;
-
 }
 
-/** Allow usage of LObject's in maps and sets. */
-namespace std {
 
+/** Allow usage of LObject's in maps and sets. */
+namespace std 
+{
 	template<>
 	struct hash<LkEngine::LObject>
 	{
@@ -330,5 +301,4 @@ namespace std {
 			return std::hash<uint64_t>()(Object.GetObjectHandle());
 		}
 	};
-
 }

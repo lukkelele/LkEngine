@@ -12,6 +12,8 @@
 
 namespace LkEngine {
 
+	using FAssetHandle = LUUID;
+
     /**
      * LAsset
 	 *
@@ -23,17 +25,11 @@ namespace LkEngine {
         virtual ~LAsset() = default;
 
 		FORCEINLINE static EAssetType GetStaticType() { return EAssetType::None; }
-
-		/**
-		 * GetAssetType
-		 *
-		 *  Implemented by LASSET.
-		 */
 		FORCEINLINE virtual EAssetType GetAssetType() const { return EAssetType::None; }
 
 		virtual bool operator==(const LAsset& Other) const
 		{
-			return Handle == Other.Handle;
+			return (Handle == Other.Handle);
 		}
 		
 		virtual bool operator!=(const LAsset& Other) const
@@ -41,30 +37,30 @@ namespace LkEngine {
 			return !(*this == Other);
 		}
 
-		FORCEINLINE bool IsFlagSet(const EAssetFlag InFlag) const 
+		bool IsFlagSet(const EAssetFlag InFlag) const 
 		{ 
-			return (Flags & static_cast<uint16_t>(InFlag));
+			return (Flags & InFlag);
 		}
 
-		FORCEINLINE void SetFlag(const EAssetFlag InFlag, bool InValue = true)
+		void SetFlag(const EAssetFlag InFlag, bool InValue = true)
 		{
 			if (InValue)
 			{
-				Flags |= static_cast<std::underlying_type_t<EAssetFlag>>(InFlag);
+				Flags |= InFlag;
 			}
 			else
 			{
-				Flags &= ~(static_cast<std::underlying_type_t<EAssetFlag>>(InFlag));
+				Flags &= ~InFlag;
 			}
 		}
 
-		FORCEINLINE virtual bool IsValid() const
+		virtual bool IsValid() const
 		{
-			return LObject::IsValid();
+			return ((Flags & EAssetFlag::Missing) | (Flags & EAssetFlag::Invalid));
 		}
 
     public:
-        LUUID Handle = 0;
+        FAssetHandle Handle = 0;
 
 		/**
 		 * The underlying type needs to be used for the member because 
@@ -94,17 +90,29 @@ namespace LkEngine {
 
 	struct FAssetMetadata
 	{
-		LUUID Handle = 0;
+		FAssetHandle Handle = 0;
 		EAssetType Type = EAssetType::None;
 		std::filesystem::path FilePath{};
 		bool bIsDataLoaded = false;
 		bool bIsMemoryAsset = false;
 
-		FORCEINLINE bool IsValid() const { return (Handle > 0); }
+		FORCEINLINE bool IsValid() const 
+		{ 
+			return ((Handle > 0) && !bIsMemoryAsset);
+		}
 		
-		FORCEINLINE std::string ToString() const
+		FORCEINLINE std::string ToString(const bool CompactFormat = true) const
 		{
-			return std::format("[Asset Metadata: {}]\n * Type: {}\n * Filepath: {}\n * Is Loaded: {}\n * Memory Asset: {}",
+			if (CompactFormat)
+			{
+				return std::format("Asset={:8} Type={} File={} Loaded={} MemoryOnly={}",
+								   Handle, Enum::ToString(Type), 
+								   FilePath.string(), 
+								   (bIsDataLoaded ? "Yes" : "No"), 
+								   (bIsMemoryAsset ? "Yes" : "No"));
+			}
+
+			return std::format("[Asset: {}]\n * Type: {}\n * Filepath: {}\n * Loaded: {}\n * Memory Asset: {}",
 							   Handle, Enum::ToString(Type), 
 							   FilePath.string(), 
 							   (bIsDataLoaded ? "Yes" : "No"), 

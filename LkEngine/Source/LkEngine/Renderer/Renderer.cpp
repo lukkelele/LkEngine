@@ -351,14 +351,16 @@ namespace LkEngine {
 		LK_CORE_INFO_TAG("Renderer", "Loading textures");
 		LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
 
+		/// TODO: Use LFileSystem::GetAssetDirectory() in here.
+
+		#if 0
 		/* Textures: 512x512 */
 		{
 			FTextureSpecification Specification{};
-
 			/* Grass. */
 			Specification.Width = 512;
 			Specification.Height = 512;
-			Specification.Path = "Assets/Textures/grass.png";
+			Specification.Path = "Assets/Textures/Grass.png";
 			Specification.Name = "grass-512x512";
 			Specification.DebugName = "grass-512x512";
 			Specification.bGenerateMips = true;
@@ -377,7 +379,9 @@ namespace LkEngine {
 			Specification.SamplerFilter = ETextureFilter::Nearest;
 			TextureLibrary.AddTexture(Specification);
 		}
+		#endif
 
+		#if 0
 		/* Textures: 1024x1024 */
 		{
 			FTextureSpecification Specification{};
@@ -393,6 +397,7 @@ namespace LkEngine {
 			Specification.SamplerFilter = ETextureFilter::Linear;
 			TextureLibrary.AddTexture(Specification);
 		}
+		#endif
 
 		/* Textures: 2048x2048 */
 		{
@@ -402,56 +407,38 @@ namespace LkEngine {
 			Specification.Format = EImageFormat::RGBA32F;
 			Specification.Width = 2048;
 			Specification.Height = 2048;
-			Specification.Path = "Assets/Textures/container.jpg";
-			Specification.Name = "wood-container";
-			Specification.DebugName = "wood-container";
+			Specification.Path = "Assets/Textures/Debug/WoodContainer.jpg";
+			Specification.Name = "WoodContainer";
+			Specification.DebugName = "WoodContainer";
 			Specification.SamplerWrap = ETextureWrap::Clamp;
 			Specification.SamplerFilter = ETextureFilter::Nearest;
 			TextureLibrary.AddTexture(Specification);
 
-			/* Wood Container 2. */
-			Specification.Path = "Assets/Textures/container2.png";
-			Specification.Name = "wood-container2";
-			Specification.DebugName = "wood-container2";
-			TextureLibrary.AddTexture(Specification);
-
 			/* Bricks. */
-			Specification.Path = "Assets/Textures/brickorange.jpg";
-			Specification.Name = "bricks";
-			Specification.DebugName = "bricks";
-			TextureLibrary.AddTexture(Specification);
-
-			/* Åle Texture. */
-			Specification.Path = "Assets/Textures/Misc/ale_1024x1024.png";
-			Specification.Name = "ale1024";
-			Specification.DebugName = "ale1024";
-			TextureLibrary.AddTexture(Specification);
-
-			/* Lukas Texture. */
-			Specification.Path = "Assets/Textures/Misc/luka1024.jpg";
-			Specification.Name = "luka1024";
-			Specification.DebugName = "lukas-1024x1024";
-			Specification.SamplerWrap = ETextureWrap::Repeat;
+			Specification.Path = "Assets/Textures/Debug/Bricks.jpg";
+			Specification.Name = "Bricks";
+			Specification.DebugName = "Bricks";
 			TextureLibrary.AddTexture(Specification);
 
 			/* Metal. */
-			Specification.Path = "Assets/Textures/metal.png";
-			Specification.Name = "metal-ground";
-			Specification.DebugName = "metal-ground";
+			Specification.Path = "Assets/Textures/Debug/Metal.png";
+			Specification.Name = "Metal";
+			Specification.DebugName = "Metal";
 			Specification.bGenerateMips = true;
 			Specification.SamplerWrap = ETextureWrap::Repeat;
 			Specification.SamplerFilter = ETextureFilter::Nearest;
 			TextureLibrary.AddTexture(Specification);
 
 			/* Wood. */
-			Specification.Name = "wood";
-			Specification.DebugName = "wood";
-			Specification.Path = "Assets/Textures/wood.png";
+			Specification.Name = "Wood";
+			Specification.DebugName = "Wood";
+			Specification.Path = "Assets/Textures/Debug/Wood.png";
 			Specification.bGenerateMips = true;
 			Specification.SamplerWrap = ETextureWrap::Repeat;
 			Specification.SamplerFilter = ETextureFilter::Linear;
 			TextureLibrary.AddTexture(Specification);
 
+		#if 0
 			/* Ice Skybox. */
 			Specification.Name = "skybox-ice-back";
 			Specification.DebugName = "skybox-ice-back";
@@ -461,6 +448,7 @@ namespace LkEngine {
 			Specification.SamplerFilter = ETextureFilter::Nearest;
 			Specification.SamplerWrap = ETextureWrap::Clamp;
 			TextureLibrary.AddTexture(Specification);
+		#endif
 		}
 	}
 

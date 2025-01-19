@@ -29,7 +29,7 @@ namespace LkEngine {
 		inline           EnumClass& operator&=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
 		inline           EnumClass& operator^=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) ^ static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
 		inline constexpr EnumClass  operator| (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) | static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr EnumClass  operator& (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
+		inline constexpr LK_Enum_Type_##EnumClass operator& (EnumClass Lhs, EnumClass Rhs) { return (LK_Enum_Type_##EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
 		inline constexpr EnumClass  operator^ (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) ^ static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
 		inline constexpr bool       operator! (EnumClass  E)                  { return !static_cast<LK_Enum_Type_##EnumClass>(E); } \
 		inline constexpr EnumClass  operator~ (EnumClass  E)                  { return (EnumClass)~static_cast<LK_Enum_Type_##EnumClass>(E); } \
@@ -52,6 +52,9 @@ namespace LkEngine {
 		inline EnumClass& operator&=(EnumClass& Lhs, LK_Enum_Type_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & Rhs); } \
 		inline EnumClass& operator|=(EnumClass& Lhs, LK_Enum_Type_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) | Rhs); } 
 
+#if 0
+		inline constexpr EnumClass  operator& (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } 
+#endif
 
 	/**
 	 * @brief Friends all bitwise operators for enum classes so the 

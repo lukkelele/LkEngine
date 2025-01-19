@@ -18,14 +18,14 @@ namespace LkEngine {
 
 	bool LMeshSourceSerializer::TryLoadData(const FAssetMetadata& Metadata, TObjectPtr<LAsset>& Asset) const
 	{
-		LK_CORE_INFO_TAG("MeshSourceSerializer", "TryLoadData -> {}", Metadata.FilePath.string());
+		LK_CORE_TRACE_TAG("MeshSourceSerializer", "TryLoadData: {}", Metadata.FilePath.string());
 		const std::filesystem::path FilePath = LProject::GetRuntimeAssetManager()->GetFileSystemPath(Metadata);
 		LAssimpMeshImporter Importer(FilePath.string());
 
 		TObjectPtr<LMeshSource> MeshSource = Importer.ImportToMeshSource();
 		if (!MeshSource)
 		{
-			LK_CORE_TRACE("Failed to import MeshSource from: {}", FilePath.string());
+			LK_CORE_ERROR_TAG("MeshSerializer", "Failed to import MeshSource from: {}", FilePath.string());
 			return false;
 		}
 
@@ -43,7 +43,7 @@ namespace LkEngine {
 		const std::string YamlString = SerializeToYaml(Mesh);
 
 		std::filesystem::path SerializePath = LProject::Current()->GetAssetDirectory() / Metadata.FilePath;
-		LK_CORE_TRACE_TAG("MeshSerializer", "Serializing to {}", SerializePath.string());
+		LK_CORE_TRACE_TAG("MeshSerializer", "Serializing: {}", Metadata.ToString());
 		std::ofstream FileOut(SerializePath);
 		if (!FileOut.is_open())
 		{
@@ -58,6 +58,7 @@ namespace LkEngine {
 
 	bool LMeshSerializer::TryLoadData(const FAssetMetadata& Metadata, TObjectPtr<LAsset>& Asset) const
 	{
+		LK_CORE_TRACE_TAG("MeshSerializer", "TryLoadData: {}", Metadata.FilePath.string());
 		const std::filesystem::path FilePath = LProject::GetAssetDirectory() / Metadata.FilePath;
 		std::ifstream Stream(FilePath);
 		LK_CORE_ASSERT(Stream, "Inputstream failed for: {}", FilePath.string());
@@ -67,6 +68,7 @@ namespace LkEngine {
 		TObjectPtr<LMesh> Mesh;
 		if (!DeserializeFromYaml(StringStream.str(), Mesh))
 		{
+			LK_CORE_ERROR_TAG("MeshSerializer", "Deserialization failed for: {}", FilePath.string());
 			return false;
 		}
 
@@ -107,24 +109,128 @@ namespace LkEngine {
 		YAML::Node Data = YAML::Load(YamlString);
 		if (!Data["Mesh"])
 		{
+			LK_CORE_ERROR_TAG("MeshSerializer", "The node 'Mesh' is missing from the root node");
 			return false;
 		}
 
 		const YAML::Node& RootNode = Data["Mesh"];
 		if (!RootNode["MeshSource"])
 		{
+			LK_CORE_ERROR_TAG("MeshSerializer", "The node 'MeshSource' is missing from the root node");
 			return false;
 		}
 
-		const LUUID MeshSourceHandle = RootNode["MeshSource"].as<uint64_t>();
+		const FAssetHandle MeshSourceHandle = RootNode["MeshSource"].as<uint64_t>();
 		TObjectPtr<LMeshSource> MeshSource = LAssetManager::GetAsset<LMeshSource>(MeshSourceHandle);
 		if (!MeshSource)
 		{
+			LK_CORE_ERROR_TAG("MeshSerializer", "Failed to get asset as a LMeshSource with: '{}'", MeshSourceHandle);
 			return false; 
 		}
 
 		auto SubmeshIndices = RootNode["SubmeshIndices"].as<std::vector<uint32_t>>();
 		TargetMesh = TObjectPtr<LMesh>::Create(MeshSource, SubmeshIndices);
+
+		return true;
+	}
+
+	/*************************************************************************************************/
+
+	void LStaticMeshSerializer::Serialize(const FAssetMetadata& Metadata, const TObjectPtr<LAsset>& Asset) const
+	{
+		TObjectPtr<LStaticMesh> Mesh = Asset.As<LStaticMesh>();
+		const std::string YamlString = SerializeToYaml(Mesh);
+
+		const std::filesystem::path SerializePath = LProject::Current()->GetAssetDirectory() / Metadata.FilePath;
+		LK_CORE_TRACE_TAG("StaticMeshSerializer", "Serializing: {}", Metadata.ToString());
+		std::ofstream FileOut(SerializePath);
+		if (!FileOut.is_open())
+		{
+			LK_CORE_ERROR_TAG("StaticMeshSerializer", "Failed to serialize LStaticMesh to: '{}'", SerializePath);
+			return;
+		}
+
+		FileOut << YamlString;
+		FileOut.flush();
+		FileOut.close();
+	}
+
+	bool LStaticMeshSerializer::TryLoadData(const FAssetMetadata& Metadata, TObjectPtr<LAsset>& Asset) const
+	{
+		LK_CORE_TRACE_TAG("StaticMeshSerializer", "TryLoadData: {}", Metadata.FilePath.string());
+		const std::filesystem::path FilePath = LProject::GetAssetDirectory() / Metadata.FilePath;
+		std::ifstream Stream(FilePath);
+		LK_CORE_ASSERT(Stream, "Inputstream failed for: {}", FilePath.string());
+		std::stringstream StringStream;
+		StringStream << Stream.rdbuf();
+
+		TObjectPtr<LStaticMesh> Mesh;
+		if (!DeserializeFromYaml(StringStream.str(), Mesh))
+		{
+			LK_CORE_ERROR_TAG("StaticMeshSerializer", "Deserialization failed for: {}", FilePath.string());
+			return false;
+		}
+
+		Mesh->Handle = Metadata.Handle;
+		Asset = Mesh;
+		LK_CORE_TRACE_TAG("StaticMeshSerializer", "Loaded data for: {}", Metadata.ToString());
+
+		return true;
+	}
+
+	std::string LStaticMeshSerializer::SerializeToYaml(TObjectPtr<LStaticMesh> Mesh) const
+	{
+		YAML::Emitter Out;
+		Out << YAML::BeginMap;
+		Out << YAML::Key << "Mesh";
+		{
+			Out << YAML::BeginMap;
+			Out << YAML::Key << "MeshSource";
+			Out << YAML::Value << Mesh->GetMeshSource()->Handle;
+			Out << YAML::Key << "SubmeshIndices";
+			Out << YAML::Flow;
+			if (Mesh->GetSubmeshes().size() == Mesh->GetMeshSource()->GetSubmeshes().size())
+			{
+				Out << YAML::Value << std::vector<uint32_t>();
+			}
+			else
+			{
+				Out << YAML::Value << Mesh->GetSubmeshes();
+			}
+			Out << YAML::EndMap;
+		}
+		Out << YAML::EndMap;
+
+		return std::string(Out.c_str());
+	}
+
+	bool LStaticMeshSerializer::DeserializeFromYaml(const std::string& YamlString, TObjectPtr<LStaticMesh>& TargetMesh) const
+	{
+		YAML::Node Data = YAML::Load(YamlString);
+		if (!Data["Mesh"])
+		{
+			LK_CORE_ERROR_TAG("StaticMeshSerializer", "The node 'Mesh' is missing from the root node");
+			return false;
+		}
+
+		const YAML::Node& RootNode = Data["Mesh"];
+		if (!RootNode["MeshSource"])
+		{
+			LK_CORE_ERROR_TAG("StaticMeshSerializer", "The node 'MeshSource' is missing from the root node");
+			return false;
+		}
+
+		static_assert(std::is_same_v<FAssetHandle::SizeType, uint64_t>);
+		const FAssetHandle MeshSourceHandle = RootNode["MeshSource"].as<uint64_t>();
+		TObjectPtr<LMeshSource> MeshSource = LAssetManager::GetAsset<LMeshSource>(MeshSourceHandle);
+		if (!MeshSource)
+		{
+			LK_CORE_ERROR_TAG("StaticMeshSerializer", "Failed to get asset as a 'MeshSource' using: '{}'", MeshSourceHandle);
+			return false; 
+		}
+
+		auto SubmeshIndices = RootNode["SubmeshIndices"].as<std::vector<uint32_t>>();
+		TargetMesh = TObjectPtr<LStaticMesh>::Create(MeshSource, SubmeshIndices);
 
 		return true;
 	}

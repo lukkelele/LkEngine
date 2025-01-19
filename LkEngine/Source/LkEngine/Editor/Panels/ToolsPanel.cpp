@@ -331,7 +331,6 @@ namespace LkEngine {
 
 				ImGui::TableSetupColumn("Scene", ImGuiTableColumnFlags_WidthStretch, 120.0f);
 				ImGui::TableSetupColumn("Content Browser", ImGuiTableColumnFlags_WidthStretch, 120.0f);
-				//ImGui::TableSetupColumn("Content Browser", ImGuiTableColumnFlags_WidthFixed, 100.0f);
 				ImGui::TableHeadersRow();
 
 				if (TableRows > 0)
@@ -362,7 +361,6 @@ namespace LkEngine {
 							TObjectPtr<LContentBrowserItem> BrowserItem = CurrentBrowserItems[ItemIdx];
 							LK_CORE_ASSERT(BrowserItem);
 							ImGui::Text("%s", BrowserItem->GetName().c_str());
-							//ImGui::Text("%llu", SelectedUuid);
 						}
 						else
 						{

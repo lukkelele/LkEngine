@@ -39,12 +39,12 @@ namespace LkEngine {
 		Specification.Height = 2048;
         Specification.SamplerFilter = ETextureFilter::None;
         Specification.SamplerWrap = ETextureWrap::None;
-        Specification.Path = "Assets/Textures/white-texture.png";
-        Specification.Name = "white-texture";
-        Specification.DebugName = "white-texture";
+        Specification.Path = "Assets/Textures/White.png";
+        Specification.Name = "White";
+        Specification.DebugName = "White";
         m_WhiteTexture = LTexture2D::Create(Specification);
 
-        m_Collection2D.insert({ "white-texture", m_WhiteTexture });
+        m_Collection2D.insert({ Specification.Name, m_WhiteTexture });
     }
 
     LTextureLibrary::~LTextureLibrary()
@@ -61,6 +61,7 @@ namespace LkEngine {
     {
         LObject::Initialize();
 
+	#if 0
 		// Textures: 512x512
 		{
 			FTextureSpecification TextureSpecification;
@@ -87,120 +88,60 @@ namespace LkEngine {
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
 			AddTexture(TextureSpecification);
 		}
+	#endif
 
-		// Textures: 1024x1024
-		{
-			FTextureSpecification TextureSpecification;
-			// Brickwall
-			TextureSpecification.Width = 1024;
-		    TextureSpecification.Height = 1024;
-            TextureSpecification.Path = "Assets/Textures/brickwall.jpg";
-            TextureSpecification.Name = "brickwall";
-            TextureSpecification.DebugName = "brickwall";
-            TextureSpecification.bGenerateMips = true;
-            TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
-            TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
-			AddTexture(TextureSpecification);
-
-			// Wood container
-			TextureSpecification.Format = EImageFormat::RGBA32F;
-			TextureSpecification.Width = 512;
-			TextureSpecification.Height = 512;
-			TextureSpecification.Path = "Assets/Textures/container.jpg";
-			TextureSpecification.Name = "wood-container_512x512";
-			TextureSpecification.DebugName = "wood-container_512x512";
-			TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
-			TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
-            TextureSpecification.bGenerateMips = true;
-			AddTexture(TextureSpecification);
-
-		}
 		// Textures: 2048x2048 
 		{
             FTextureSpecification TextureSpecification{};
-			// Wood container
+			/* Wood Container. */
 			TextureSpecification.Format = EImageFormat::RGBA32F;
 			TextureSpecification.Width = 2048;
 			TextureSpecification.Height = 2048;
-			TextureSpecification.Path = "Assets/Textures/container.jpg";
-			TextureSpecification.Name = "wood-container";
-			TextureSpecification.DebugName = "wood-container";
+			TextureSpecification.Path = "Assets/Textures/Debug/WoodContainer.jpg";
+			TextureSpecification.Name = "WoodContainer";
+			TextureSpecification.DebugName = "WoodContainer";
 			TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
 			TextureSpecification.SamplerFilter = ETextureFilter::Linear;
             TextureSpecification.bGenerateMips = true;
 			AddTexture(TextureSpecification);
 
-			// Wood container 2
-			TextureSpecification.Path = "Assets/Textures/container2.png";
-			TextureSpecification.Name = "wood-container2";
-			TextureSpecification.DebugName = "wood-container2";
+			/* Bricks. */
+			TextureSpecification.Path = "Assets/Textures/Debug/Bricks.jpg";
+			TextureSpecification.Name = "Bricks";
+			TextureSpecification.DebugName = "Bricks";
 			AddTexture(TextureSpecification);
 
-			// Bricks
-			TextureSpecification.Path = "Assets/Textures/bricks_orange.jpg";
-			TextureSpecification.Name = "bricks";
-			TextureSpecification.DebugName = "bricks";
-			AddTexture(TextureSpecification);
-
-			// Åle texture
-			TextureSpecification.Format = EImageFormat::RGBA32F;
-			TextureSpecification.Path = "Assets/Textures/Misc/ale_1024x1024.png";
-			TextureSpecification.Name = "ale1024";
-			TextureSpecification.DebugName = "ale1024";
-			AddTexture(TextureSpecification);
-
-			// Lukas texture
-			TextureSpecification.Path = "Assets/Textures/Misc/lukas_1024.jpg";
-			TextureSpecification.Name = "lukas_1024";
-			TextureSpecification.DebugName = "lukas-1024x1024";
-			AddTexture(TextureSpecification);
-
-			// Metal
-            TextureSpecification.Path = "Assets/Textures/metal.png";
-            TextureSpecification.Name = "MetalGround";
-            TextureSpecification.DebugName = "MetalGround";
+			/* Metal. */
+            TextureSpecification.Path = "Assets/Textures/Debug/Metal.png";
+            TextureSpecification.Name = "Metal";
+            TextureSpecification.DebugName = "Metal";
             TextureSpecification.bGenerateMips = true;
             TextureSpecification.SamplerWrap = ETextureWrap::Repeat;
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
 			AddTexture(TextureSpecification);
 
-			// Wood
-            TextureSpecification.Name = "wood";
-            TextureSpecification.DebugName = "wood";
-            TextureSpecification.Path = "Assets/Textures/wood.png";
+			/* Wood. */
+            TextureSpecification.Path = "Assets/Textures/Debug/Wood.png";
+            TextureSpecification.Name = "Wood";
+            TextureSpecification.DebugName = "Wood";
             TextureSpecification.bGenerateMips = true;
             TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
             TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
 			AddTexture(TextureSpecification);
-
-			// Skybox
-            TextureSpecification.Name = "Skybox-WaterIsland-Back";
-            TextureSpecification.DebugName = "Skybox-WaterIsland-Back";
-            TextureSpecification.Path = "Assets/Textures/Debug/Skybox-WaterIsland/Back.jpg";
-            TextureSpecification.bGenerateMips = false;
-            TextureSpecification.Format = EImageFormat::RGBA32F;
-            TextureSpecification.SamplerWrap = ETextureWrap::Clamp;
-            TextureSpecification.SamplerFilter = ETextureFilter::Nearest;
-			AddTexture(TextureSpecification);
         }
 
-        bInitialized = true;
     }
 
     /// FIXME: Do not iterate like this. So inefficent
-    TObjectPtr<LTexture2D> LTextureLibrary::GetTexture(const int textureID)
+    TObjectPtr<LTexture2D> LTextureLibrary::GetTexture(const int TextureID)
     {
-        LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
-        if (m_Collection2D.empty())
-        {
-            LK_CORE_ASSERT(false, "2D Texture Library is empty");
-            return nullptr;
-        }
+        LK_CORE_ASSERT(bObjectInitialized, "TextureLibrary is not initialized");
+        LK_CORE_ASSERT(m_Collection2D.empty(), "2D Texture Library is empty");
 
         for (auto Iter = m_Collection2D.begin(); Iter != m_Collection2D.end(); ++Iter)
         {
             auto& texture = *Iter;
-            if (texture.second->GetRendererID() == textureID)
+            if (texture.second->GetRendererID() == TextureID)
             {
                 return texture.second;
             }
@@ -211,7 +152,7 @@ namespace LkEngine {
 
     TObjectPtr<LTexture2D> LTextureLibrary::GetTexture(std::string_view TextureName)
     {
-        LK_CORE_VERIFY(bInitialized, "TextureLibrary is not initialized");
+        LK_CORE_VERIFY(bObjectInitialized, "TextureLibrary is not initialized");
 		LK_CORE_VERIFY(!m_Collection2D.empty(), "Texture 2D library is empty");
 		LK_VERIFY(!TextureName.empty());
 
@@ -238,8 +179,7 @@ namespace LkEngine {
                 if (((TextureSpecification.Width == Entry.second->GetWidth()) && (TextureSpecification.Height == Entry.second->GetHeight()))
                     || (Entry.first == TextureSpecification.Name))
                 {
-                    LK_CORE_WARN_TAG("TextureLibrary", "Texture {} already exists and has same dimensions "
-                                     "as the passed Specificationification, returning it", TextureSpecification.Name);
+                    LK_CORE_WARN_TAG("TextureLibrary", "Texture {} already exists and has same dimensions as the passed specification", TextureSpecification.Name);
                     return Entry.second;
                 }
             }
@@ -283,8 +223,7 @@ namespace LkEngine {
 
         auto RetrieveTexture = [&](const TTexture2DPair& Entry)
         {
-			return (Entry.second->GetName() != "white-texture")
-				&& (Entry.second->GetName() != "black-texture");
+			return (Entry.second->GetName() != "White") && (Entry.second->GetName() != "Black");
         };
 
         /* Copy all entries. */
@@ -305,19 +244,18 @@ namespace LkEngine {
         }
 
         TextureContainer.clear();
-        TextureContainer.push_back({ "white-texture", m_WhiteTexture });
+        TextureContainer.push_back({ m_WhiteTexture->GetName().data(), m_WhiteTexture});
 
         auto RetrieveTexture = [&](const TTexture2DPair& Entry)
         {
-			return (Entry.second->GetName() != "white-texture")
-				&& (Entry.second->GetName() != "black-texture");
+			return (Entry.second->GetName() != "White") && (Entry.second->GetName() != "Black");
         };
 
         /* Copy all entries to the container. */
         std::ranges::copy(
-            m_Collection2D
-			| std::views::filter(RetrieveTexture)
-            , std::back_inserter(TextureContainer)
+            m_Collection2D 
+			| std::views::filter(RetrieveTexture), 
+			std::back_inserter(TextureContainer)
         );
 
         return TextureContainer.size();
@@ -325,13 +263,13 @@ namespace LkEngine {
 
     bool LTextureLibrary::VerifyTexturesAreLoaded()
     {
-        LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
+        LK_CORE_ASSERT(bObjectInitialized, "TextureLibrary is not initialized");
         return true;
     }
 
     bool LTextureLibrary::HasTextureWithFilename(const std::string& FileName)
     {
-        LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
+        LK_CORE_ASSERT(bObjectInitialized, "TextureLibrary is not initialized");
         return std::ranges::any_of(m_Collection2D, [&](const TTexture2DPair& Entry)
 		{
 		    return (Entry.second->GetFilename() == FileName);
@@ -340,7 +278,7 @@ namespace LkEngine {
 
     TObjectPtr<LTexture> LTextureLibrary::TryToGetTextureWithFilename(const std::string& Filename)
     {
-        LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
+        LK_CORE_ASSERT(bObjectInitialized, "TextureLibrary is not initialized");
 
         /* Search in 2D collection to begin. */
 		if (auto Texture = std::ranges::find_if(m_Collection2D, [&](const TTexture2DPair& Entry)
@@ -373,7 +311,7 @@ namespace LkEngine {
 
     TTextureMap& LTextureLibrary::GetTextureCollection(std::string_view collectionName)
     {
-        LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
+        LK_CORE_ASSERT(bObjectInitialized, "TextureLibrary is not initialized");
         /// UPDATE: Dont Iterate like this here
         for (auto& collection : m_Collections)
         {
@@ -389,7 +327,7 @@ namespace LkEngine {
 
     TTexture2DMap& LTextureLibrary::GetTexture2DCollection(std::string_view collectionName)
     {
-        LK_CORE_ASSERT(bInitialized, "TextureLibrary is not initialized");
+        LK_CORE_ASSERT(bObjectInitialized, "TextureLibrary is not initialized");
         for (auto& collection : m_Collections2D)
         {
             if (collection.first == collectionName)

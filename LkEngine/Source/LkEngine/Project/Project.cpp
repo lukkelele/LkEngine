@@ -111,8 +111,6 @@ namespace LkEngine {
 		if (ActiveProject && ActiveProject != InProject)
 		{
 			/* Release resources. */
-			RuntimeAssetManager->BeginDestroy();
-
 			RuntimeAssetManager.Release();
 			RuntimeAssetManager = nullptr;
 		}

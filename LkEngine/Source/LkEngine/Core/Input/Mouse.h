@@ -19,7 +19,9 @@ namespace LkEngine {
 	public:
 		LK_DECLARE_MULTICAST_DELEGATE(FOnMouseButtonPressed, const FMouseButtonData&);
 		LK_DECLARE_MULTICAST_DELEGATE(FOnMouseButtonReleased, const FMouseButtonData&);
-		LK_DECLARE_MULTICAST_DELEGATE(FOnMouseScrolled, const EMouseScroll);
+		LK_DECLARE_MULTICAST_DELEGATE(FOnMouseScrolled, const EMouseScrollDirection);
+		LK_DECLARE_MULTICAST_DELEGATE(FOnCursorModeChanged, const ECursorMode);
+		LK_DECLARE_MULTICAST_DELEGATE(FOnMouseEnabled, const bool);
 	public:
 		static void Initialize();
 
@@ -29,8 +31,9 @@ namespace LkEngine {
 
 		static void Enable();
 		static void Disable();
+		static bool IsEnabled();
 
-		static bool IsButtonPressed(const EMouseButton button);
+		static bool IsButtonPressed(const EMouseButton MouseButton);
 
 		static float GetMouseX();
 		static float GetMouseY();
@@ -45,9 +48,14 @@ namespace LkEngine {
 		inline static glm::vec2 Pos = { 0.0f, 0.0f };
 		inline static glm::vec2 ScaledPos = { 1.0f, 1.0f };
 
-		// Mouse position with origin (0, 0) in the center of the screen
 		inline static glm::vec2 CenterPos = { 0.0f, 0.0f }; 
 		inline static glm::vec2 ScaledCenterPos = { 0.0f, 0.0f };
+
+		inline static FOnMouseEnabled OnMouseEnabled;
+		inline static FOnMouseButtonPressed OnMouseButtonPressed;
+		inline static FOnMouseButtonReleased OnMouseButtonReleased;
+		inline static FOnMouseScrolled OnMouseScrolled;
+		inline static FOnCursorModeChanged OnCursorModeChanged;
 
 	private:
 		friend class LWindow;

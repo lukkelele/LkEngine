@@ -19,7 +19,7 @@ namespace LkEngine::UI {
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
 		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
 		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs
-		| ImGuiWindowFlags_NoDocking;
+		| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNavFocus;
 
 	ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize

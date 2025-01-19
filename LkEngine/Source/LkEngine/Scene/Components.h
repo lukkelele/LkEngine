@@ -145,7 +145,6 @@ namespace LkEngine {
 		}
 	};
 
-
 	struct LSpriteComponent
 	{
 		std::string FilePath;
@@ -242,7 +241,6 @@ namespace LkEngine {
 		LRigidBody2DComponent(const LRigidBody2DComponent& Other) = default;
 	};
 
-
 	struct LBoxCollider2DComponent
 	{
 		glm::vec2 Offset = { 0.0f, 0.0f };
@@ -259,16 +257,14 @@ namespace LkEngine {
 
 	struct LMeshComponent
 	{
-		LUUID Mesh;
+		FAssetHandle Mesh;
 		uint32_t SubmeshIndex = 0;
 		TObjectPtr<LMaterialTable> MaterialTable = TObjectPtr<LMaterialTable>::Create();
 
-		/**
-		 * @brief The entities whose transforms will used to "skin" the rig if mesh is rigged.
-		 */
-		std::vector<LUUID> BoneEntityIDs{};
+		/** The entities whose transforms will used to "skin" the rig if mesh is rigged. */
+		std::vector<FAssetHandle> BoneEntityIDs{};
 
-		bool Visible = true;
+		bool bVisible = true;
 
 		LMeshComponent() = default;
 		LMeshComponent(const LMeshComponent& Other)
@@ -278,7 +274,7 @@ namespace LkEngine {
 			, BoneEntityIDs(Other.BoneEntityIDs)
 		{
 		}
-		LMeshComponent(const LUUID InMesh, const uint32_t InSubmeshIndex = 0)
+		LMeshComponent(const FAssetHandle InMesh, const uint32_t InSubmeshIndex = 0)
 			: Mesh(InMesh)
 			, SubmeshIndex(InSubmeshIndex)
 		{
@@ -287,20 +283,18 @@ namespace LkEngine {
 
 	struct LStaticMeshComponent
 	{
-		LUUID StaticMesh;
+		FAssetHandle StaticMesh;
 		TObjectPtr<LMaterialTable> MaterialTable = TObjectPtr<LMaterialTable>::Create();
-		bool Visible = true;
+		bool bVisible = true;
 
 		LStaticMeshComponent() = default;
-
 		LStaticMeshComponent(const LStaticMeshComponent& Other)
 			: StaticMesh(Other.StaticMesh)
 			, MaterialTable(TObjectPtr<LMaterialTable>::Create(Other.MaterialTable))
-			, Visible(Other.Visible)
+			, bVisible(Other.bVisible)
 		{
 		}
-
-		LStaticMeshComponent(const LUUID InStaticMesh)
+		LStaticMeshComponent(const FAssetHandle InStaticMesh)
 			: StaticMesh(InStaticMesh)
 		{
 		}

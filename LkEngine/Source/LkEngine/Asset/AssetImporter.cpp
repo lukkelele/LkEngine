@@ -12,21 +12,16 @@ namespace LkEngine {
 
 	void LAssetImporter::Initialize()
 	{
-		LK_CORE_DEBUG_TAG("AssetImporter", "Setting up asset serializers");
 		SerializerMap.clear();
 		SerializerMap[EAssetType::MeshSource] = std::make_unique<LMeshSourceSerializer>();
 		SerializerMap[EAssetType::Mesh] = std::make_unique<LMeshSerializer>();
-		LK_CORE_INFO_TAG("AssetImporter", "Asset Serializers: {}", SerializerMap.size());
+		SerializerMap[EAssetType::StaticMesh] = std::make_unique<LStaticMeshSerializer>();
+		LK_CORE_DEBUG_TAG("AssetImporter", "Serializers: {}", SerializerMap.size());
 	}
 
 	void LAssetImporter::Serialize(const FAssetMetadata& Metadata, const TObjectPtr<LAsset>& Asset)
 	{
-		if (!SerializerMap.contains(Metadata.Type))
-		{
-			LK_CORE_WARN_TAG("AssetImporter", "No importer exists for {}", Enum::ToString(Metadata.Type));
-			return;
-		}
-
+		FAssetImporterValidator::ValidateSerializer(Metadata);
 		SerializerMap[Asset->GetAssetType()]->Serialize(Metadata, Asset);
 	}
 
@@ -38,12 +33,8 @@ namespace LkEngine {
 
 	bool LAssetImporter::TryLoadData(const FAssetMetadata& Metadata, TObjectPtr<LAsset>& Asset)
 	{
-		if (!SerializerMap.contains(Metadata.Type))
-		{
-			LK_CORE_WARN_TAG("AssetImporter", "No importer exists for {}", Enum::ToString(Metadata.Type));
-			return false;
-		}
-
+		FAssetImporterValidator::ValidateSerializer(Metadata);
+		LK_CORE_TRACE_TAG("AssetImporter", "TryLoadData: {}", Metadata.ToString());
 		return SerializerMap[Metadata.Type]->TryLoadData(Metadata, Asset);
 	}
 

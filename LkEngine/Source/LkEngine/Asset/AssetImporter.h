@@ -17,6 +17,19 @@ namespace LkEngine {
 
 	private:
 		static std::unordered_map<EAssetType, std::unique_ptr<IAssetSerializer>> SerializerMap;
+
+		friend struct FAssetImporterValidator;
+	};
+
+	struct FAssetImporterValidator
+	{
+		static void ValidateSerializer(const FAssetMetadata& Metadata)
+		{
+			if (!LAssetImporter::SerializerMap.contains(Metadata.Type))
+			{
+				LK_CORE_ASSERT(false, "No asset importer exists for: {}", Enum::ToString(Metadata.Type));
+			}
+		}
 	};
 
 }

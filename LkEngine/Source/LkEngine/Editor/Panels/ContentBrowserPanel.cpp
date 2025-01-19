@@ -46,7 +46,7 @@ namespace LkEngine {
 
 	void LContentBrowserPanel::OnRenderUI(bool& IsOpen)
 	{
-		// Handle dock window.
+		/* Handle dock window. */
 		if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(LK_UI_CONTENTBROWSER); ThisWindow != nullptr)
 		{
 			if (ThisWindow->DockNode)
@@ -55,7 +55,11 @@ namespace LkEngine {
 			}
 		}
 
-		ImGui::Begin(LK_UI_CONTENTBROWSER, &IsOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoScrollbar 
+			| ImGuiWindowFlags_NoScrollWithMouse
+			| ImGuiWindowFlags_NoNavFocus;
+
+		ImGui::Begin(LK_UI_CONTENTBROWSER, &IsOpen, WindowFlags);
 		bIsContentBrowserHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));

@@ -12,9 +12,9 @@ namespace LkEngine {
 
 	struct FEditorSettings
 	{
-		float TranslationSnapValue = 0.50f;
-		float RotationSnapValue = 45.0f;
-		float ScaleSnapValue = 0.50f;
+		float TranslationSnapValue = 0.10f;
+		float RotationSnapValue = 5.0f;
+		float ScaleSnapValue = 0.10f;
 
 		uint16_t ContentBrowserThumbnailSize = 128;
 		bool bContentBrowserShowAssetTypes = false;
@@ -35,10 +35,8 @@ namespace LkEngine {
 		void Deserialize(const std::filesystem::path& EditorConfig, FEditorSettings& Settings);
 
 	private:
-        // Yaml
         void SerializeToYaml(YAML::Emitter& Out, const FEditorSettings& Settings);
         bool DeserializeFromYaml(const std::string& YamlString, FEditorSettings& Settings);
-        // ~Yaml
 	};
 
 }

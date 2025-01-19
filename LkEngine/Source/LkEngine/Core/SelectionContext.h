@@ -58,8 +58,17 @@ namespace LkEngine {
 		FORCEINLINE static void Select(const ESelectionContext Context, const LUUID Handle)
 		{
 			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-			auto& SelectionContext = SelectionContextMap.at(Context);
-			SelectionContext.push_back(Handle);
+			std::vector<LUUID>& SelectionContext = SelectionContextMap.at(Context);
+
+			auto Iter = std::find(SelectionContext.begin(), SelectionContext.end(), Handle);
+			if (Iter != SelectionContext.end())
+			{
+				(*Iter) = Handle;
+			}
+			else
+			{
+				SelectionContext.push_back(Handle);
+			}
 
 			SelectedHandle = Handle;
 		}
@@ -67,6 +76,7 @@ namespace LkEngine {
 		FORCEINLINE static void Deselect(const ESelectionContext Context, const LUUID Handle)
 		{
 			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
+			LK_CORE_DEBUG_TAG("SelectionContext", "Deselecting: {}", Handle);
 			if (Context == ESelectionContext::Global)
 			{
 				for (auto& [Context, Selection] : SelectionContextMap)
@@ -91,7 +101,7 @@ namespace LkEngine {
 			else
 			{
 				LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-				auto& SelectionContext = SelectionContextMap.at(Context);
+				std::vector<LUUID>& SelectionContext = SelectionContextMap.at(Context);
 				std::erase_if(SelectionContext, [Handle](const LUUID& CurrentHandle)
 				{
 					return (Handle == CurrentHandle);
@@ -105,6 +115,7 @@ namespace LkEngine {
 		 */
 		FORCEINLINE static void DeselectAll()
 		{
+			LK_CORE_DEBUG_TAG("SelectionContext", "DeselectAll");
 			for (auto& [Context, Selection] : SelectionContextMap)
 			{
 				LK_CORE_TRACE_TAG("SelectionContext", "Deselecting: {}", Enum::ToString(Context));
@@ -117,27 +128,32 @@ namespace LkEngine {
 		 */
 		FORCEINLINE static void DeselectAll(const ESelectionContext Context)
 		{
-			LK_CORE_TRACE_TAG("SelectionContext", "Deselecting all for: {}", Enum::ToString(Context));
+			LK_CORE_DEBUG_TAG("SelectionContext", "DeselectAll: {}", Enum::ToString(Context));
 			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-			if (Context == ESelectionContext::Global)
+			if (Context != ESelectionContext::Global)
+			{
+				LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
+				SelectionContextMap.at(Context).clear();
+			}
+			else
 			{
 				for (auto& [Context, Selection] : SelectionContextMap)
 				{
 					Selection.clear();
 				}
 			}
-			else
-			{
-				LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-				SelectionContextMap.at(Context).clear();
-			}
 		}
 
 		FORCEINLINE static bool IsSelected(const ESelectionContext Context, const LUUID Handle)
 		{
-			LK_CORE_ASSERT(Handle > 0, "AssetHandle is 0");
+			LK_CORE_ASSERT(Handle > 0, "Handle is 0");
 			const auto& SelectionContext = SelectionContextMap.at(Context);
-			if (Context == ESelectionContext::Global)
+			if (Context != ESelectionContext::Global)
+			{
+				LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
+				return (std::find(SelectionContext.begin(), SelectionContext.end(), Handle) != SelectionContext.end());
+			}
+			else
 			{
 				for (auto& [Context, Selection] : SelectionContextMap)
 				{
@@ -148,11 +164,6 @@ namespace LkEngine {
 				}
 
 				return false;
-			}
-			else
-			{
-				LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-				return (std::find(SelectionContext.begin(), SelectionContext.end(), Handle) != SelectionContext.end());
 			}
 		}
 

@@ -133,6 +133,12 @@ namespace LkEngine {
 	};
 	LK_ENUM_CLASS_FLAGS(EClassType);
 
+	enum class ELogFormat : uint16_t
+	{
+		Compact = 0,
+		Verbose
+	};
+
 	namespace Enum 
 	{
 		static constexpr const char* ToString(const EClassType ClassType)
@@ -144,6 +150,16 @@ namespace LkEngine {
 				case EClassType::LStruct: return "LStruct";
 				case EClassType::LClass:  return "LClass";
 				case EClassType::LObject: return "LObject";
+			}
+			return nullptr;
+		}
+
+		static constexpr const char* ToString(const ELogFormat Format)
+		{
+			switch (Format)
+			{
+				case ELogFormat::Compact: return "Compact";
+				case ELogFormat::Verbose: return "Verbose";
 			}
 			return nullptr;
 		}

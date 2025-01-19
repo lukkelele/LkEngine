@@ -39,14 +39,14 @@ namespace LkEngine {
 		{
 			if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(LK_UI_SCENEMANAGER))
 			{
-				//ImGui::BringWindowToDisplayFront(ThisWindow);
 				if (ThisWindow->DockNode)
 				{
 					ThisWindow->DockNode->LocalFlags |= ImGuiDockNodeFlags_NoWindowMenuButton;
 				}
 			}
 
-			ImGui::Begin(LK_UI_SCENEMANAGER, &IsOpen, ImGuiWindowFlags_NoCollapse);
+			ImGui::Begin(LK_UI_SCENEMANAGER, &IsOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavFocus);
+			ImGui::Text("Window Focused: %s", UI::IsWindowFocused(LK_UI_SCENEMANAGER) ? "Yes" : "No");
 		}
 
 		if (Scene)
@@ -116,11 +116,11 @@ namespace LkEngine {
 		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 		//float LineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 2, 2 });
-		float LineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 1.0f;
+		const float LineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 1.0f;
 
 		/* TODO: Reduce the height. */
 		ImGui::Separator();
-		const bool bOpen = ImGui::TreeNodeEx((void*)typeid(T).hash_code(),TreeNodeFlags, ComponentName.c_str());
+		const bool bOpen = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), TreeNodeFlags, ComponentName.c_str());
 		ImGui::PopStyleVar();
 
 		ImGui::SameLine(ContentRegionAvailable.x - LineHeight * 0.5f);
@@ -169,33 +169,62 @@ namespace LkEngine {
 			Name = Entity.GetComponent<LTagComponent>().Tag.c_str();
 		}
 
-		const bool IsSelected = LSelectionContext::IsSelected(ESelectionContext::Scene, Entity);
+		const bool IsEntitySelected = LSelectionContext::IsSelected(ESelectionContext::Scene, Entity);
 
-		ImGuiTreeNodeFlags TreeNodeFlags = (IsSelected ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None);
+		ImGuiTreeNodeFlags TreeNodeFlags = (IsEntitySelected ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None);
 		TreeNodeFlags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 
-		const bool Opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, TreeNodeFlags, Entity.Name().c_str());
+		//const ImGuiID EntityImGuiID = ImGui::GetID((uint64_t)(uint32_t)Entity);
+		const ImGuiID EntityImGuiID = ImGui::GetID((void*)(uint64_t)(uint32_t)Entity);
+
+		const bool WasNodeOpened = ImGui::TreeNodeBehaviorIsOpen(EntityImGuiID);
+		const bool NodeOpened = ImGui::TreeNodeEx((void*)EntityImGuiID, TreeNodeFlags, Entity.Name().c_str());
+		//const bool WasNodeOpened = ImGui::TreeNodeBehaviorIsOpen((void*)(uint64_t)(uint32_t)Entity);
+		//const bool NodeOpened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, TreeNodeFlags, Entity.Name().c_str());
 
 		/* Get the selected entities. */
+		/// TODO: Remove the depenency for the selection vector in the call to DrawComponent.
 		const std::vector<LUUID>& Entities = LSelectionContext::GetSelected(ESelectionContext::Scene);
 
-		if (Opened)
+		if (NodeOpened)
 		{
-			ImGui::Text("UUID: %ulld", Entity.GetUUID());
+			ImGui::Text("UUID: %ull", Entity.GetUUID());
 
+			/**
+			 * Draw: MeshComponent
+			 */
 			if (Entity.HasComponent<LMeshComponent>())
 			{
 				TObjectPtr<LRuntimeAssetManager> AssetManager = LProject::Current()->GetRuntimeAssetManager();
 				DrawComponent<LMeshComponent>("Mesh", Entity, Entities, [&Entity, &AssetManager](LMeshComponent& Mesh)
 				{
 					auto& Metadata = AssetManager->GetMetadata(Mesh.Mesh);
-					ImGui::Text("AssetID: %lld", Mesh.Mesh);
+					ImGui::Text("Asset: %ull", Mesh.Mesh);
 					ImGui::Text("Loaded: %s", Metadata.bIsDataLoaded ? "Yes" : "No");
 					ImGui::Text("Memory Asset: %s", Metadata.bIsMemoryAsset ? "Yes" : "No");
 					ImGui::Text("Filepath: %s", Metadata.FilePath.string().c_str());
 				});
 			}
 
+			/**
+			 * Draw: StaticMeshComponent
+			 */
+			if (Entity.HasComponent<LStaticMeshComponent>())
+			{
+				TObjectPtr<LRuntimeAssetManager> AssetManager = LProject::Current()->GetRuntimeAssetManager();
+				DrawComponent<LStaticMeshComponent>("StaticMesh", Entity, Entities, [&Entity, &AssetManager](LStaticMeshComponent& Mesh)
+				{
+					auto& Metadata = AssetManager->GetMetadata(Mesh.StaticMesh);
+					ImGui::Text("Asset: %ull", Mesh.StaticMesh);
+					ImGui::Text("Loaded: %s", Metadata.bIsDataLoaded ? "Yes" : "No");
+					ImGui::Text("Memory Asset: %s", Metadata.bIsMemoryAsset ? "Yes" : "No");
+					ImGui::Text("Filepath: %s", Metadata.FilePath.string().c_str());
+				});
+			}
+
+			/**
+			 * Draw: TransformComponent
+			 */
 			if (Entity.HasComponent<LTransformComponent>())
 			{
 				DrawComponent<LTransformComponent>("Transform", Entity, Entities, [&](LTransformComponent& TransformComp)
@@ -278,7 +307,6 @@ namespace LkEngine {
 							RotationAxes = GetInconsistentVectorAxis(Rotation, OldRotation);
 							ScaleAxes = GetInconsistentVectorAxis(Scale, OldScale);
 
-						#if 1
 							/* Translation. */
 							if ((TranslationAxes & EVectorAxis::X) != 0)
 							{
@@ -322,60 +350,6 @@ namespace LkEngine {
 							{
 								TransformComp.Scale.z = Scale.z;
 							}
-						#else
-							/* FIXME: To be used when selection works fully. 
-							 *        When raycasting works for selecting individual components in the scene.
-							 */
-							for (auto& EntityID : Entities)
-							{
-								LEntity Entity = Scene->GetEntityWithUUID(EntityID);
-								auto& Component = Entity.GetComponent<LTransformComponent>();
-
-								/* Translation. */
-								if ((TranslationAxes & EVectorAxis::X) != 0)
-								{
-									Component.Translation.x = Translation.x;
-								}
-								if ((TranslationAxes & EVectorAxis::Y) != 0)
-								{
-									Component.Translation.y = Translation.y;
-								}
-								if ((TranslationAxes & EVectorAxis::Z) != 0)
-								{
-									Component.Translation.z = Translation.z;
-								}
-
-								/* Rotation. */
-								glm::vec3 ComponentRotation = Component.GetRotationEuler();
-								if ((RotationAxes & EVectorAxis::X) != 0)
-								{
-									ComponentRotation.x = glm::radians(Rotation.x);
-								}
-								if ((RotationAxes & EVectorAxis::Y) != 0)
-								{
-									ComponentRotation.y = glm::radians(Rotation.y);
-								}
-								if ((RotationAxes & EVectorAxis::Z) != 0)
-								{
-									ComponentRotation.z = glm::radians(Rotation.z);
-								}
-								Component.SetRotationEuler(ComponentRotation);
-
-								/* Scale. */
-								if ((ScaleAxes & EVectorAxis::X) != 0)
-								{
-									Component.Scale.x = Scale.x;
-								}
-								if ((ScaleAxes & EVectorAxis::Y) != 0)
-								{
-									Component.Scale.y = Scale.y;
-								}
-								if ((ScaleAxes & EVectorAxis::Z) != 0)
-								{
-									Component.Scale.z = Scale.z;
-								}
-							}
-						#endif
 						}
 						else
 						{
@@ -383,13 +357,13 @@ namespace LkEngine {
 							const glm::vec3 RotationDiff = Rotation - OldRotation;
 							const glm::vec3 ScaleDiff = Scale - OldScale;
 
-						#if 1
 							TransformComp.Translation += TranslationDiff;
 							glm::vec3 ComponentRotation = TransformComp.GetRotationEuler();
 							ComponentRotation += glm::radians(RotationDiff);
 							TransformComp.SetRotationEuler(ComponentRotation);
 							TransformComp.Scale += ScaleDiff;
-						#else
+
+						#if 0
 							for (const auto& EntityID : Entities)
 							{
 								LEntity Entity = Scene->GetEntityWithUUID(EntityID);
@@ -413,6 +387,13 @@ namespace LkEngine {
 					UI::Draw::Underline();
 					UI::ShiftCursorY(18.0f);
 				});
+			}
+
+			/* Select the entity in the scene context if the node was opened this tick. */
+			if (!IsEntitySelected && NodeOpened)
+			{
+				LK_CORE_INFO_TAG("SceneManager", "Selecting {} ({}) in the scene context", Entity.Name(), Entity.GetUUID());
+				LSelectionContext::Select(ESelectionContext::Scene, Entity);
 			}
 
 			ImGui::TreePop();

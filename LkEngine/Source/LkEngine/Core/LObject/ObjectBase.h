@@ -27,29 +27,24 @@ namespace LkEngine {
 	 * 
 	 *  Used for object initialization, loading and garbage collection.
 	 */
-	using LObjectFlag = uint32_t;
-
-	namespace EObjectFlag
+	enum class EObjectFlag : uint32_t
 	{
-		enum Flag : LObjectFlag
-		{
-			None = 0,              /* No flags. */
-			NeedInitialization,    /* Need to be initialized. */
-			NeedLoad,              /* Needs to get loaded to memory. */
-			BeginDestroy,          /* Begin object destruction. */
-			FinishDestroy,         /* Object destroyed. */
-			Garbage,               /* Object deemed garbage and should get deleted. */
-		};
-	}
+		None = 0,              /* No flags. */
+		NeedInitialization,    /* Need to be initialized. */
+		NeedLoad,              /* Needs to get loaded to memory. */
+		BeginDestroy,          /* Begin object destruction. */
+		FinishDestroy,         /* Object destroyed. */
+		Garbage,               /* Object deemed garbage and should get deleted. */
+	};
+	LK_ENUM_CLASS_FLAGS(EObjectFlag);
 
-	/* clang-format off */
+
 	/// TODO: Implement this
 	template<typename TObject>
 	concept LObjectCore = requires(TObject Object)
 	{
 		{ Object.GetName() } -> std::same_as<std::string>;
 	};
-	/* clang-format on */
 
 	/**
 	 * LObjectBase
@@ -58,7 +53,7 @@ namespace LkEngine {
 	{
 	public:
 		/** 
-		 * @brief Returns true if this object is of the specified type. 
+		 * Returns true if this object is of the specified type. 
 		 */
 		template <typename OtherClassType>
 		FORCEINLINE bool IsA(OtherClassType OtherObject) const
@@ -76,19 +71,22 @@ namespace LkEngine {
 		}
 
 		template <typename ClassType>
-		static FORCEINLINE bool IsChildOf(const ClassType* InObjectClass, const ClassType* InTestClass)
+		static FORCEINLINE bool IsChildOf(const ClassType* InObjectClass, const ClassType* InOtherClass)
 		{
-			return InObjectClass->IsChildOf(InTestClass);
+			LK_CORE_ASSERT(InObjectClass);
+			return InObjectClass->IsChildOf(InOtherClass);
 		}
 
 	protected:
 		/**
-		 * @brief Set the class, should be run once in the LCLASS declaration for an LClass object.
+		 * Set the class.
+		 *
+		 *  Run once in the LCLASS declaration for an LClass object.
 		 */
 		void SetClass(LClass* InClass);
 
 		/**
-		 * @brief Get the private class member.
+		 * Get the private class member.
 		 */
 		FORCEINLINE const LClass* GetClass() const
 		{
@@ -107,6 +105,9 @@ namespace LkEngine {
 	private:
 		LClass* ClassPrivate = nullptr;
 	};
+
+
+	/* TODO: Clean this up. */
 
 	/** 
 	 * Helper to detect a member function. 

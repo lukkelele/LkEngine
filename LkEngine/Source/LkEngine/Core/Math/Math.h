@@ -22,14 +22,31 @@
 namespace LkEngine 
 {
     struct LTransformComponent;
+
+	static std::string ToString(const LVector2& Vector, const uint8_t F = 2)
+	{
+		return Vector.ToString();
+	}
+
+	static std::string ToString(const LVector& Vector, const uint8_t F = 2)
+	{
+		return Vector.ToString();
+	}
+
+	static std::string ToString(const LVector4& Vector, const uint8_t F = 2)
+	{
+		return Vector.ToString();
+	}
+
+	static std::string ToString(const glm::vec3& Vector, const uint8_t F = 2)
+	{
+		return std::format("({:.2f}, {:.2f}, {:.2f})", Vector.x, Vector.y, Vector.z);
+	}
 }
 
 /* Box2D. */
 struct b2Vec2;
 struct b2Vec3;
-/* ImGui. */
-struct ImVec2;
-struct ImVec4;
 
 namespace LkEngine::Math {
 
@@ -252,7 +269,7 @@ namespace LkEngine::Math {
     float Get2DRotationFromQuaternion(const glm::quat& quat);
 
 	template<typename TVector>
-	TVector GetForwardVector(const glm::mat4& TransformMatrix)
+	FORCEINLINE TVector GetForwardVector(const glm::mat4& TransformMatrix)
 	{
         static_assert(std::disjunction_v<
 					  std::is_same<TVector, glm::vec3>, 
@@ -262,7 +279,7 @@ namespace LkEngine::Math {
 	}
 
 	template<typename TVector>
-	TVector GetRightVector(const glm::mat4& TransformMatrix)
+	FORCEINLINE TVector GetRightVector(const glm::mat4& TransformMatrix)
 	{
         static_assert(std::disjunction_v<
 					  std::is_same<TVector, glm::vec3>, 
@@ -272,7 +289,7 @@ namespace LkEngine::Math {
 	}
 
 	template<typename TVector>
-	TVector Normalize(const TVector& InVector)
+	FORCEINLINE TVector Normalize(const TVector& InVector)
 	{
         static_assert(std::disjunction_v<
 					  std::is_same<TVector, LVector>,

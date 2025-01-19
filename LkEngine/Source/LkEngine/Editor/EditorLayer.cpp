@@ -76,6 +76,8 @@ namespace LkEngine {
 			std::string MaterialName{};
 		};
 		std::unordered_map<LUUID, FMeshSubmissionMetadata> MeshSubmissions{};
+
+		std::vector<FSelectionData> SelectionData;
 	}
 
 	/**
@@ -90,106 +92,11 @@ namespace LkEngine {
 		LOBJECT_REGISTER();
 		Instance = this;
 
+		SelectionData.clear();
 		CurrentWindowType = EEditorWindowType::Viewport;
 
 		Window = &LApplication::Get()->GetWindow();
-		LK_CORE_ASSERT(Window, "Window is nullptr");
-
-		/* Setup viewport bounds and sizes of the sidebars. */
-		ViewportBounds[0] = { 0, 0 };
-		ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
-		LeftSidebarSize.Y = ViewportBounds[1].Y;
-		RightSidebarSize.Y = ViewportBounds[1].Y;
-
-		/* Editor viewport. */
-		EditorViewport = TObjectPtr<LViewport>::Create();
-		EditorViewport->SetViewportBounds(0, { 0.0f, 0.0f });
-		EditorViewport->SetViewportBounds(1, { Window->GetWidth(), Window->GetHeight() });
-		EditorViewport->SetPosition({ LeftSidebarSize.X, BottomBarSize.Y });
-		EditorViewport->SetSize({ (Window->GetWidth() - LeftSidebarSize.X, RightSidebarSize.X),
-								  (Window->GetHeight() - BottomBarSize.Y) });
-
-		/* Set scalers for the editor viewport. */
-		const LVector2 EditorWindowSize = EditorViewport->GetSize();
-		LVector2 EditorWindowScalers;
-		EditorWindowScalers.X = EditorWindowSize.X / Window->GetWidth();
-		EditorWindowScalers.Y = EditorWindowSize.Y / Window->GetHeight();
-		EditorViewport->SetScalers(EditorWindowScalers);
-
-		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
-		{
-			SetScene(NewActiveScene);
-		});
-
-		/* Load all editor resources. */
-		LK_CORE_DEBUG_TAG("Editor", "Loading editor resources");
-		FEditorResources::Initialize();
-
-		/* Editor UI components. */
-		PanelManager = TObjectPtr<LPanelManager>::Create();
-
-		/* Panel: Editor Settings. */
-		PanelManager->AddPanel<LEditorSettingsPanel>(
-			EPanelCategory::View, 
-			PanelID::EditorSettings,
-			EPanelInitState::Closed
-		);
-
-		/* Panel: Tools. */
-		PanelManager->AddPanel<LToolsPanel>(
-			EPanelCategory::View, 
-			PanelID::Tools,
-			EPanelInitState::Closed
-		);
-
-		/* Panel: Scene Manager. */
-		PanelManager->AddPanel<LSceneManagerPanel>(
-			EPanelCategory::View, 
-			PanelID::SceneManager, 
-			"Scene Manager", 
-			EPanelInitState::Open, 
-			EditorScene
-		);
-
-		/* TODO: Add callbacks/delegates to content browser instance. */
-		TObjectPtr<LContentBrowserPanel> ContentBrowser = PanelManager->AddPanel<LContentBrowserPanel>(
-			EPanelCategory::View,
-			PanelID::ContentBrowser,
-			"Content Browser",
-			EPanelInitState::Open
-		);
-
-	#if 0
-		PanelManager->AddPanel<LComponentEditor>(
-			EPanelCategory::View, 
-			PanelID::ComponentEditor, 
-			"Component Editor"
-		);
-	#endif
-
-		/* TODO: Add static check in delegate implementation so no empty functions are able to get passed. */
-		Window->OnWindowSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
-		{
-			/* Empty for now. */
-		});
-
-		Window->OnViewportSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
-		{
-			/* Update scalers. */
-			const LVector2 EditorWindowSize = EditorViewport->GetSize();
-			LVector2 WindowScalers;
-			WindowScalers.X = EditorWindowSize.X / NewWidth;
-			WindowScalers.Y = EditorWindowSize.Y / NewHeight;
-			EditorViewport->SetScalers(WindowScalers);
-
-			ViewportBounds[0] = { 0, 0 };
-			ViewportBounds[1] = { NewWidth, NewHeight };
-		});
-
-		UI::OnMessageBoxCancelled.Add([&](const char* WindowName)
-		{
-			LK_CORE_DEBUG_TAG("Editor", "Message Box Cancelled: {}", WindowName);
-		});
+		LK_CORE_VERIFY(Window);
 	}
 
 	/**
@@ -197,67 +104,9 @@ namespace LkEngine {
 	 */
 	void LEditorLayer::Initialize()
 	{
-		LObject::Initialize();
+		//FWindowData& WindowData = Window->GetData();
 
-		/* Attach to LWindow delegates. */
-		LK_CORE_ASSERT(Window, "Window reference is nullptr");
-		FWindowData& WindowData = Window->GetData();
-
-		WindowData.OnWindowMaximized.Add([&](const bool Maximized)
-		{
-			LK_CORE_INFO_TAG("Editor", "Maximized: {}", Maximized);
-		});
-
-		/**
-		 * Mouse button pressed.
-		 */
-		WindowData.OnMouseButtonPressed.Add([&](const FMouseButtonData& MouseButtonData)
-		{
-			//LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed: {}", Enum::ToString(MouseButtonData.Button));
-
-			if (ImGuizmo::IsOver())
-			{
-				LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed '{}', ImGuizmo is active, returning", Enum::ToString(MouseButtonData.Button));
-				return;
-			}
-
-			const bool CtrlDown = LInput::IsKeyDown(EKey::LeftControl) || LInput::IsKeyDown(EKey::RightControl);
-			const bool ShiftDown = LInput::IsKeyDown(EKey::LeftShift) || LInput::IsKeyDown(EKey::RightShift);
-
-			if (!CtrlDown)
-			{
-				LSelectionContext::DeselectAll();
-			}
-		});
-
-		/* Mouse button released. */
-		WindowData.OnMouseButtonReleased.Add([&](const FMouseButtonData& MouseButtonData)
-		{
-			//LK_CORE_DEBUG_TAG("Editor", "MouseButtonReleased: {}", static_cast<int>(MouseButtonData.Button));
-		});
-
-		/* Mouse scroll. */
-		WindowData.OnMouseScrolled.Add([&](const EMouseScroll MouseScroll)
-		{
-			//LK_CORE_DEBUG_TAG("Editor", "Mouse Scroll: {}", Enum::ToString(MouseScroll));
-			if (EditorCamera)
-			{
-				if (UI::IsWindowHovered(LK_UI_EDITOR_VIEWPORT))
-				{
-					if (MouseScroll == EMouseScroll::Up)
-					{
-						EditorCamera->MouseZoom(-0.01f);
-					}
-					else if (MouseScroll == EMouseScroll::Down)
-					{
-						EditorCamera->MouseZoom(0.01f);
-					}
-				}
-			}
-		});
-
-		/* Viewport Framebuffer. */
-		LK_CORE_TRACE_TAG("Editor", "Creating viewport framebuffer");
+		/* Viewport framebuffer. */
 		FFramebufferSpecification FramebufferSpec;
 		FramebufferSpec.Attachments = { EImageFormat::RGBA32F, EImageFormat::DEPTH24STENCIL8 };
 		FramebufferSpec.Samples = 1;
@@ -280,6 +129,7 @@ namespace LkEngine {
 		EditorCamera->SetPosition({ -10, 4, -10 });
 
 		/* Attach editor viewport delegates to the editor camera. */
+		LK_CORE_ASSERT(EditorViewport);
 		EditorViewport->OnSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
 		{
 			EditorCamera->SetViewportSize(NewWidth, NewHeight);
@@ -290,8 +140,6 @@ namespace LkEngine {
 			EditorWindowScalers.Y = static_cast<float>(NewHeight) / Window->GetHeight();
 			EditorViewport->SetScalers(EditorWindowScalers);
 		});
-
-		PanelManager->Initialize();
 
 		/* TODO: Load last open project, else load an empty 'default' project. */
 		if (LProject::Current() == nullptr)
@@ -314,22 +162,23 @@ namespace LkEngine {
 		Renderer2D = TObjectPtr<LRenderer2D>::Create(Renderer2DSpec);
 		Renderer2D->Initialize();
 
-		/* FIXME: Temporary debugging. */
+		/* FIXME: Temporarily here. */
 		LOpenGL_Debug::InitializeEnvironment();
 
-		/* Keyboard events. */
-		LKeyboard::OnKeyPressed.Add([&](const FKeyData& PressedKeyData)
-		{
-			//LK_CORE_DEBUG_TAG("Editor", "Pressed: {} ({})", Enum::ToString(PressedKeyData.Key), Enum::ToString(PressedKeyData.State));
-		});
+		/** Bind mouse and keyboard callbacks. */
+		LMouse::OnMouseEnabled.Add(this, &LEditorLayer::OnMouseEnabled);
+		LMouse::OnMouseButtonPressed.Add(this, &LEditorLayer::OnMouseButtonPressed);
+		LMouse::OnMouseButtonReleased.Add(this, &LEditorLayer::OnMouseButtonReleased);
+		LMouse::OnMouseScrolled.Add(this, &LEditorLayer::OnMouseScrolled);
+		LMouse::OnCursorModeChanged.Add(this, &LEditorLayer::OnMouseCursorModeChanged);
 
-		LKeyboard::OnKeyReleased.Add([&](const FKeyData& ReleasedKeyData)
-		{
-			//LK_CORE_DEBUG_TAG("Editor", "Released: {} ({})", Enum::ToString(ReleasedKeyData.Key), Enum::ToString(ReleasedKeyData.State));
-		});
+		LKeyboard::OnKeyPressed.Add(this, &LEditorLayer::OnKeyPressed);
+		LKeyboard::OnKeyReleased.Add(this, &LEditorLayer::OnKeyReleased);
 
+	#if 0
 		LRenderer::OnMeshSubmission.Add([&](TObjectPtr<LMesh> SubmittedMesh, TObjectPtr<LShader> UsedShader, TObjectPtr<LMaterial> Material)
 		{
+			LK_CORE_DEBUG_TAG("Editor", "OnMeshSubmission");
 			LK_CORE_ASSERT(SubmittedMesh, "OnMeshSubmission error, mesh is not valid");
 			LK_CORE_ASSERT(UsedShader, "OnMeshSubmission error, shader is not valid");
 			LK_CORE_ASSERT(Material, "OnMeshSubmission error, material is not valid");
@@ -338,14 +187,46 @@ namespace LkEngine {
 			Data.ShaderName = UsedShader->GetName();
 			Data.MaterialName = Material->GetName();
 		});
+	#endif
 
-		bInitialized = true;
+		UI::OnMessageBoxCancelled.Add([&](const char* WindowName)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "Message Box Cancelled: {}", WindowName);
+		});
 	}
 
 	void LEditorLayer::OnAttach()
 	{
-		LK_CORE_TRACE_TAG("Editor", "OnAttach");
-		PanelManager->Deserialize();
+		LK_CORE_VERIFY(Window);
+		LK_CORE_DEBUG_TAG("Editor", "OnAttach");
+
+		LObject::Initialize();
+
+		/* Setup viewport bounds and sizes of the sidebars. */
+		ViewportBounds[0] = { 0, 0 };
+		ViewportBounds[1] = { Window->GetViewportWidth(), Window->GetViewportHeight() };
+		LeftSidebarSize.Y = ViewportBounds[1].Y;
+		RightSidebarSize.Y = ViewportBounds[1].Y;
+
+		/* Editor viewport. */
+		EditorViewport = TObjectPtr<LViewport>::Create();
+		EditorViewport->SetViewportBounds(0, { 0.0f, 0.0f });
+		EditorViewport->SetViewportBounds(1, { Window->GetWidth(), Window->GetHeight() });
+		EditorViewport->SetPosition({ LeftSidebarSize.X, BottomBarSize.Y });
+		EditorViewport->SetSize({ (Window->GetWidth() - LeftSidebarSize.X, RightSidebarSize.X),
+								  (Window->GetHeight() - BottomBarSize.Y) });
+
+		/* Set scalers for the editor viewport. */
+		const LVector2 EditorWindowSize = EditorViewport->GetSize();
+		LVector2 EditorWindowScalers;
+		EditorWindowScalers.X = EditorWindowSize.X / Window->GetWidth();
+		EditorWindowScalers.Y = EditorWindowSize.Y / Window->GetHeight();
+		EditorViewport->SetScalers(EditorWindowScalers);
+
+		LK_CORE_DEBUG_TAG("Editor", "Loading editor resources");
+		FEditorResources::Initialize();
+
+		InitializePanelManager();
 
 		/* Load editor settings. */
 		Settings.Load();
@@ -353,6 +234,14 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("Editor", "Creating scene renderer");
 		FSceneRendererSpecification RendererSpec{};
 		SceneRenderer = TObjectPtr<LSceneRenderer>::Create(EditorScene, RendererSpec);
+
+		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "[GOnSceneSetActive] Setting active scene to: {}", NewActiveScene->GetName());
+			SetScene(NewActiveScene);
+		});
+
+		Initialize();
 	}
 
 	void LEditorLayer::OnDetach()
@@ -448,7 +337,7 @@ namespace LkEngine {
 
 		/*----------------------------------------------------------------------------
 			                              Top Bar
-		-----------------------------------------------------------------------------*/
+		 ----------------------------------------------------------------------------*/
 		UI_PrepareTopBar();
 		UI::Begin(LK_UI_TOPBAR, nullptr, UI::SidebarFlags | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 		{
@@ -459,7 +348,7 @@ namespace LkEngine {
 
 		/*----------------------------------------------------------------------------
 			                             Sidebar 1
-		-----------------------------------------------------------------------------*/
+		 ----------------------------------------------------------------------------*/
 		UI_PrepareLeftSidebar();
 		UI::Begin(LK_UI_SIDEBAR_1, nullptr, UI::SidebarFlags);
 		{
@@ -500,12 +389,22 @@ namespace LkEngine {
 				Window->Maximize();
 			}
 			ImGui::EndGroup();
+
+			ImGui::Text("Editor Viewport Focused: %s", UI::IsWindowFocused(LK_UI_EDITOR_VIEWPORT) ? "Yes" : "No");
+			if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(LK_UI_EDITOR_VIEWPORT); EditorViewportWindow != nullptr)
+			{
+				ImGui::Text("Editor Viewport ID: %lld", EditorViewportWindow->ID);
+			}
+			else
+			{
+				ImGui::Text("Editor Viewport ID: Unknown");
+			}
 		}
 		UI::End(); /* LK_UI_SIDEBAR_1 */
 
 		/*----------------------------------------------------------------------------
 			                             Sidebar 2
-		-----------------------------------------------------------------------------*/
+		 ----------------------------------------------------------------------------*/
 		UI_PrepareRightSidebar();
 		UI::Begin(LK_UI_SIDEBAR_2, nullptr, UI::SidebarFlags);
 		{
@@ -559,10 +458,10 @@ namespace LkEngine {
 				/* Render viewport image. */
 				UI_ViewportTexture();
 
-				const auto& SelectedEntities = LSelectionContext::GetSelected(ESelectionContext::Scene);
-				for (const LUUID& EntityID : SelectedEntities)
+				const auto& Selection = LSelectionContext::GetSelected(ESelectionContext::Scene);
+				for (const LUUID& EntityID : Selection)
 				{
-				#if 0
+				#if 1
 					const LEntity SelectedEntity = EditorScene->TryGetEntityWithUUID(LSelectionContext::SelectedHandle);
 					if (SelectedEntity)
 					{
@@ -660,26 +559,7 @@ namespace LkEngine {
 		#if 1
 			ImGuizmo::SetOrthographic(static_cast<int>(EditorCamera->GetProjectionType()));
 			ImGuizmo::SetDrawlist();
-
-			/// TODO: Do a getter here instead of calculating inline.
-			if (TabManager.GetTabCount() == 1)
-			{
-				ImGuizmo::SetRect(
-					PosX, 
-					(PosY - BottomBarSize.Y + MenuBarSize.Y), 
-					EditorWindowSize.X, 
-					EditorWindowSize.Y
-				);
-			}
-			else
-			{
-				ImGuizmo::SetRect(
-					PosX, 
-					(PosY - BottomBarSize.Y + MenuBarSize.Y + TabBarSize.Y), 
-					EditorWindowSize.X, 
-					EditorWindowSize.Y
-				);
-			}
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
 			const bool ShouldSnapValues = LInput::IsKeyDown(EKey::LeftControl);
 			const float SnapValue = Settings.TranslationSnapValue;
@@ -688,7 +568,7 @@ namespace LkEngine {
 			ImGuizmo::Manipulate(
 				glm::value_ptr(ViewMatrix),
 				glm::value_ptr(ProjectionMatrix),
-				static_cast<ImGuizmo::OPERATION>(EditorCamera->GetGizmoMode()),
+				static_cast<ImGuizmo::OPERATION>(Gizmo),
 				ImGuizmo::LOCAL, //ImGuizmo::WORLD, 
 				glm::value_ptr(TransformMatrix),
 				nullptr,
@@ -783,9 +663,20 @@ namespace LkEngine {
 		auto& MeshComp3 = Entity_Cube3.AddComponent<LMeshComponent>();
 	#endif
 
+	#if 0
+		LEntity Entity_StaticCube1 = EditorScene->CreateEntity("StaticCube-1");
+		LStaticMeshComponent& StaticMeshComp1 = Entity_StaticCube1.AddComponent<LStaticMeshComponent>();
+
+		LEntity Entity_StaticCube2 = EditorScene->CreateEntity("StaticCube-2");
+		LStaticMeshComponent& StaticMeshComp2 = Entity_StaticCube2.AddComponent<LStaticMeshComponent>();
+
+		LEntity Entity_StaticCube3 = EditorScene->CreateEntity("StaticCube-3");
+		LStaticMeshComponent& StaticMeshComp3 = Entity_StaticCube3.AddComponent<LStaticMeshComponent>();
+	#endif
+
 		Project = TObjectPtr<LProject>::Create();
 		//Project->SetName(StarterProjectName);
-		Project->Load(LK_FORMAT_STRING("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
+		Project->Load(std::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
 		LProject::SetActive(Project);
 	}
 
@@ -817,6 +708,252 @@ namespace LkEngine {
 		SceneFilePath = Filepath.string();
 		std::replace(SceneFilePath.begin(), SceneFilePath.end(), '\\', '/');
 	#endif
+	}
+
+	void LEditorLayer::InitializePanelManager()
+	{
+		/* Editor UI components. */
+		PanelManager = TObjectPtr<LPanelManager>::Create();
+
+		/* Panel: Editor Settings. */
+		PanelManager->AddPanel<LEditorSettingsPanel>(
+			EPanelCategory::View, 
+			PanelID::EditorSettings,
+			EPanelInitState::Closed
+		);
+
+		/* Panel: Tools. */
+		PanelManager->AddPanel<LToolsPanel>(
+			EPanelCategory::View, 
+			PanelID::Tools,
+			EPanelInitState::Closed
+		);
+
+		/* Panel: Scene Manager. */
+		PanelManager->AddPanel<LSceneManagerPanel>(
+			EPanelCategory::View, 
+			PanelID::SceneManager, 
+			"Scene Manager", 
+			EPanelInitState::Open, 
+			EditorScene
+		);
+
+		/* TODO: Add callbacks/delegates to content browser instance. */
+		TObjectPtr<LContentBrowserPanel> ContentBrowser = PanelManager->AddPanel<LContentBrowserPanel>(
+			EPanelCategory::View,
+			PanelID::ContentBrowser,
+			"Content Browser",
+			EPanelInitState::Open
+		);
+
+		PanelManager->Deserialize();
+
+		PanelManager->Initialize();
+	}
+
+	void LEditorLayer::OnViewportSizeUpdated(const uint16_t NewWidth, const uint16_t NewHeight)
+	{
+		LK_CORE_ASSERT(EditorViewport);
+		LK_CORE_ASSERT(NewWidth > 0 && NewHeight > 0, "Viewport size update failed, division by zero");
+
+		/* Update scalers. */
+		const LVector2 EditorWindowSize = EditorViewport->GetSize();
+		LVector2 WindowScalers;
+		WindowScalers.X = EditorWindowSize.X / NewWidth;
+		WindowScalers.Y = EditorWindowSize.Y / NewHeight;
+		EditorViewport->SetScalers(WindowScalers);
+
+		ViewportBounds[0] = { 0, 0 };
+		ViewportBounds[1] = { NewWidth, NewHeight };
+	}
+
+	void LEditorLayer::OnKeyPressed(const FKeyData& KeyData)
+	{
+		LK_CORE_TRACE_TAG("Editor", "OnKeyPressed: {}", Enum::ToString(KeyData.Key));
+
+		if (UI::IsWindowFocused(LK_UI_EDITOR_VIEWPORT) || UI::IsWindowFocused(LK_UI_SCENEMANAGER))
+		{
+			if ((bViewportHovered || bEditorViewportHovered) && !LInput::IsMouseButtonDown(EMouseButton::Right))
+			{
+				switch (KeyData.Key)
+				{
+					case EKey::Q:
+						LK_CORE_DEBUG_TAG("Editor", "Gizmo: All");
+						Gizmo = -1;
+						break;
+
+					case EKey::W:
+						LK_CORE_DEBUG_TAG("Editor", "Gizmo: Translate");
+						Gizmo = ImGuizmo::OPERATION::TRANSLATE;
+						break;
+
+					case EKey::E:
+						LK_CORE_DEBUG_TAG("Editor", "Gizmo: Rotate");
+						Gizmo = ImGuizmo::OPERATION::ROTATE;
+						break;
+
+					case EKey::R:
+						LK_CORE_DEBUG_TAG("Editor", "Gizmo: Scale");
+						Gizmo = ImGuizmo::OPERATION::SCALE;
+						break;
+
+					case EKey::F:
+						/// TODO
+						LK_CORE_DEBUG_TAG("Editor", "Focusing on selected entity");
+						break;
+				}
+			}
+
+			switch (KeyData.Key)
+			{
+				case EKey::Escape:
+					LK_CORE_DEBUG_TAG("Editor", "Pressed Escape - Deselecting");
+					LSelectionContext::DeselectAll();
+					break;
+			}
+		}
+	}
+
+	void LEditorLayer::OnKeyReleased(const FKeyData& KeyData)
+	{
+		LK_CORE_TRACE_TAG("Editor", "OnKeyReleased: {}", Enum::ToString(KeyData.Key));
+	}
+
+	void LEditorLayer::OnMouseEnabled(const bool Enabled)
+	{
+		LK_CORE_DEBUG_TAG("Editor", "OnMouseEnabled: {}", Enabled);
+
+		static ImGuiID FocusedWindowID = 0;
+
+		if (Enabled)
+		{
+			if (FocusedWindowID > 0)
+			{
+				if (ImGuiWindow* FocusedWindow = ImGui::FindWindowByID(FocusedWindowID); FocusedWindow != nullptr)
+				{
+					LK_CORE_DEBUG_TAG("Editor", "Focusing: {}", FocusedWindow->ID);
+					ImGui::FocusWindow(FocusedWindow);
+				}
+			}
+		}
+		/* Cache the window focus. */
+		else
+		{
+			ImGuiWindow* CurrentNavWindow = GImGui->NavWindow;
+
+		#if 0
+			/* Find the root window. */
+			ImGuiWindow* LastWindow = nullptr;
+			while (LastWindow != CurrentNavWindow)
+			{
+				LastWindow = CurrentNavWindow;
+				CurrentNavWindow = CurrentNavWindow->RootWindow;
+			}
+		#endif
+
+			if (CurrentNavWindow)
+			{
+				LK_CORE_DEBUG_TAG("Editor", "Caching focused window ID: {}", CurrentNavWindow->ID);
+				FocusedWindowID = CurrentNavWindow->ID;
+			}
+			else
+			{
+				FocusedWindowID = 0;
+			}
+		}
+
+		LK_CORE_DEBUG_TAG("Editor", "OnMouseEnabled  FocusedWindowID: {}", FocusedWindowID);
+	}
+
+	void LEditorLayer::OnMouseButtonPressed(const FMouseButtonData& ButtonData)
+	{
+		LK_CORE_TRACE_TAG("Editor", "MouseButtonPressed: {}", Enum::ToString(ButtonData.Button));
+
+		if (ButtonData.Button != EMouseButton::Left)
+		{
+			return;
+		}
+
+		if (!bViewportHovered && !bEditorViewportHovered)
+		{
+			return;
+		}
+
+		if (LInput::IsKeyDown(EKey::LeftAlt) || LInput::IsMouseButtonDown(EMouseButton::Right))
+		{
+			return;
+		}
+
+		if (ImGuizmo::IsOver())
+		{
+			LK_CORE_DEBUG_TAG("Editor", "MouseButtonPressed: '{}', ImGuizmo is active, returning", Enum::ToString(ButtonData.Button));
+			return;
+		}
+
+		RaycastScene(SelectionData);
+
+		const bool CtrlDown = LInput::IsKeyDown(EKey::LeftControl) || LInput::IsKeyDown(EKey::RightControl);
+		const bool ShiftDown = LInput::IsKeyDown(EKey::LeftShift) || LInput::IsKeyDown(EKey::RightShift);
+
+		if (!CtrlDown)
+		{
+			LK_CORE_DEBUG_TAG("Editor", "OnMouseButtonPressed, deselecting entities");
+			LSelectionContext::DeselectAll();
+		}
+
+		if (!SelectionData.empty())
+		{
+			LEntity Entity = SelectionData.front().Entity;
+			if (ShiftDown)
+			{
+				while (Entity.GetParent())
+				{
+					Entity = Entity.GetParent();
+				}
+			}
+
+			/* Toggle selection if entity is already selected. */
+			if (LSelectionContext::IsSelected(ESelectionContext::Scene, Entity.GetUUID()) && CtrlDown)
+			{
+				LK_CORE_DEBUG_TAG("Editor", "Deselecting {} ({}), Ctrl is down", Entity.Name(), Entity.GetUUID());
+				LSelectionContext::Deselect(ESelectionContext::Scene, Entity.GetUUID());
+			}
+			else
+			{
+				LK_CORE_DEBUG_TAG("Editor", "Selecting {} ({})", Entity.Name(), Entity.GetUUID());
+				LSelectionContext::Select(ESelectionContext::Scene, Entity.GetUUID());
+			}
+		}
+	}
+
+	void LEditorLayer::OnMouseButtonReleased(const FMouseButtonData& ButtonData)
+	{
+		LK_CORE_TRACE_TAG("Editor", "MouseButtonReleased: {}", Enum::ToString(ButtonData.Button));
+	}
+
+	void LEditorLayer::OnMouseScrolled(const EMouseScrollDirection ScrollDir)
+	{
+		LK_CORE_TRACE_TAG("Editor", "MouseScrolled: {}", Enum::ToString(ScrollDir));
+
+		if (EditorCamera)
+		{
+			if (UI::IsWindowHovered(LK_UI_EDITOR_VIEWPORT))
+			{
+				if (ScrollDir == EMouseScrollDirection::Up)
+				{
+					EditorCamera->MouseZoom(-0.010f);
+				}
+				else if (ScrollDir == EMouseScrollDirection::Down)
+				{
+					EditorCamera->MouseZoom(0.010f);
+				}
+			}
+		}
+	}
+
+	void LEditorLayer::OnMouseCursorModeChanged(const ECursorMode CursorMode)
+	{
+		LK_CORE_DEBUG_TAG("Editor", "Cursor Mode: {}", Enum::ToString(CursorMode));
 	}
 
 	void LEditorLayer::UI_PrepareTopBar()
@@ -1508,16 +1645,20 @@ namespace LkEngine {
 		}
 	}
 
-	LEditorLayer::FRayCast LEditorLayer::CastRay(const LEditorCamera& Camera, const float MousePosX, const float MousePosY)
+	void LEditorLayer::CastRay(FRayCast& RayCast, const LEditorCamera& Camera, const float MousePosX, const float MousePosY)
 	{
 		const glm::vec4 MouseClipPos = { MousePosX, MousePosY, -1.0f, 1.0f };
-
-		const auto InverseProj = glm::inverse(Camera.GetProjectionMatrix());
+		const glm::mat4 InverseProj = glm::inverse(Camera.GetProjectionMatrix());
 		const glm::vec4 Ray = InverseProj * MouseClipPos;
+		const glm::mat3 InverseView = glm::inverse(glm::mat3(Camera.GetViewMatrix()));
 
-		const auto InverseView = glm::inverse(glm::mat3(Camera.GetViewMatrix()));
-
-		return FRayCast(Camera.GetPosition(), InverseView * glm::vec3(Ray));
+	#if 0
+		RayCast.Pos = LVector(Camera.GetPosition());
+		RayCast.Dir = LVector(InverseView * glm::vec3(Ray));
+	#else
+		RayCast.Pos = Camera.GetPosition();
+		RayCast.Dir = InverseView * glm::vec3(Ray);
+	#endif
 	}
 
 	/// REMOVE?
@@ -1611,7 +1752,7 @@ namespace LkEngine {
 
 			ImGui::SeparatorText("Blend Function");
 			if (ImGui::BeginCombo(
-					LK_FORMAT_STRING("Source: {}", Enum::ToString(RenderContext->GetSourceBlendFunction())).c_str(), 
+					std::format("Source: {}", Enum::ToString(RenderContext->GetSourceBlendFunction())).c_str(), 
 					nullptr, 
 					ImGuiComboFlags_NoPreview)
 				)
@@ -1641,7 +1782,7 @@ namespace LkEngine {
 
 			/* Destination Blend. */
 			if (ImGui::BeginCombo(
-					LK_FORMAT_STRING("Destination: {}", Enum::ToString(RenderContext->GetDestinationBlendFunction())).c_str(), 
+					std::format("Destination: {}", Enum::ToString(RenderContext->GetDestinationBlendFunction())).c_str(), 
 					nullptr, 
 					ImGuiComboFlags_NoPreview)
 				)
@@ -1671,6 +1812,97 @@ namespace LkEngine {
 			}
 
 			ImGui::End();
+		}
+	}
+
+	void LEditorLayer::RaycastScene(std::vector<FSelectionData>& SelectionData)
+	{
+		static FRayCast RayCast;
+
+		auto [MouseX, MouseY] = GetMouseViewportSpace(bEditorViewportHovered);
+		if ((MouseX > -1.0f) && (MouseX < 1.0f) && (MouseY > -1.0f) && (MouseY < 1.0f))
+		{
+			const LEditorCamera& Camera = *EditorCamera;
+
+			CastRay(RayCast, Camera, MouseX, MouseY);
+
+			/* Meshes. */
+			auto MeshView = EditorScene->GetAllEntitiesWith<LMeshComponent>();
+			for (auto EntityID : MeshView)
+			{
+				LEntity Entity = { EntityID, EditorScene };
+				auto& MeshComp = Entity.GetComponent<LMeshComponent>();
+				TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(MeshComp.Mesh);
+				if (!Mesh || Mesh->IsFlagSet(EAssetFlag::Missing))
+				{
+					continue;
+				}
+
+				std::vector<LSubmesh>& Submeshes = Mesh->GetMeshSource()->GetSubmeshes();
+				LSubmesh& Submesh = Submeshes[MeshComp.SubmeshIndex];
+				const glm::mat4 Transform = EditorScene->GetWorldSpaceTransform(Entity);
+				const FRay Ray = {
+					glm::inverse(Transform) * glm::vec4(RayCast.Pos.As<glm::vec3>(), 1.0f),
+					glm::inverse(glm::mat3(Transform)) * RayCast.Dir.As<glm::vec3>()
+				};
+
+				float t;
+				const bool RayIntersectsBoundingBox = Ray.IntersectsAABB(Submesh.BoundingBox, t);
+				if (RayIntersectsBoundingBox)
+				{
+					const std::vector<FTriangle>& TriangleCache = Mesh->GetMeshSource()->GetTriangleCache(MeshComp.SubmeshIndex);
+					for (const FTriangle& Triangle : TriangleCache)
+					{
+						if (Ray.IntersectsTriangle(Triangle.V0.Position, Triangle.V1.Position, Triangle.V2.Position, t))
+						{
+							SelectionData.push_back({ Entity, &Submesh, t });
+							break;
+						}
+					}
+				}
+			}
+
+			/* Static Meshes. */
+			auto StaticMeshView = EditorScene->GetAllEntitiesWith<LStaticMeshComponent>();
+			for (auto EntityID : StaticMeshView)
+			{
+				LEntity Entity = { EntityID, EditorScene };
+				auto& StaticMeshComp = Entity.GetComponent<LStaticMeshComponent>();
+				auto StaticMesh = LAssetManager::GetAsset<LStaticMesh>(StaticMeshComp.StaticMesh);
+				if (!StaticMesh || StaticMesh->IsFlagSet(EAssetFlag::Missing))
+				{
+					continue;
+				}
+
+				std::vector<LSubmesh>& Submeshes = StaticMesh->GetMeshSource()->GetSubmeshes();
+				for (uint32_t Idx = 0; Idx < Submeshes.size(); Idx++)
+				{
+					LSubmesh& Submesh = Submeshes[Idx];
+
+					const glm::mat4 Transform = EditorScene->GetWorldSpaceTransform(Entity);
+					const FRay Ray = {
+						glm::inverse(Transform) * glm::vec4(RayCast.Pos.As<glm::vec3>(), 1.0f),
+						glm::inverse(glm::mat3(Transform)) * RayCast.Dir.As<glm::vec3>()
+					};
+
+					float t;
+					const bool RayIntersectsBoundingBox = Ray.IntersectsAABB(Submesh.BoundingBox, t);
+					if (RayIntersectsBoundingBox)
+					{
+						const std::vector<FTriangle>& TriangleCache = StaticMesh->GetMeshSource()->GetTriangleCache(Idx);
+						for (const FTriangle& Triangle : TriangleCache)
+						{
+							if (Ray.IntersectsTriangle(Triangle.V0.Position, Triangle.V1.Position, Triangle.V2.Position, t))
+							{
+								SelectionData.push_back({ Entity, &Submesh, t });
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			std::sort(SelectionData.begin(), SelectionData.end(), [](auto& a, auto& b) { return a.Distance < b.Distance; });
 		}
 	}
 

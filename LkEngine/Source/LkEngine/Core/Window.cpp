@@ -124,6 +124,7 @@ namespace LkEngine {
 			LViewport::SetViewport(0, 0, Width, Height);
 		});
 
+	#if 0
 		/* Character input callback. */
 		glfwSetCharCallback(GlfwWindow, [](GLFWwindow* Window, uint32_t Codepoint)
 		{
@@ -132,11 +133,11 @@ namespace LkEngine {
 			KeyTypedEvent Event(static_cast<EKey>(Codepoint));
 			WindowDataRef.EventCallback(Event);
 		});
+	#endif
 
 		/* Mouse button callbacks. */
 		glfwSetMouseButtonCallback(GlfwWindow, [](GLFWwindow* GlfwWindow, int Button, int Action, int Modifiers)
 		{
-			FWindowData& WindowDataRef = *static_cast<FWindowData*>(glfwGetWindowUserPointer(GlfwWindow));
 			switch (Action)
 			{
 				case GLFW_PRESS:
@@ -144,9 +145,11 @@ namespace LkEngine {
 					double MousePosX, MousePosY;
 					glfwGetCursorPos(GlfwWindow, &MousePosX, &MousePosY);
 
-					const FMouseButtonData& ButtonData = LInput::UpdateButtonState(static_cast<EMouseButton>(Button), 
-																				   EMouseButtonState::Pressed);
-					WindowDataRef.OnMouseButtonPressed.Broadcast(ButtonData);
+					const FMouseButtonData& ButtonData = LInput::UpdateButtonState(
+						static_cast<EMouseButton>(Button), 
+						EMouseButtonState::Pressed
+					);
+					LMouse::OnMouseButtonPressed.Broadcast(ButtonData);
 
 					break;
 				}
@@ -156,9 +159,11 @@ namespace LkEngine {
 					double MousePosX, MousePosY;
 					glfwGetCursorPos(GlfwWindow, &MousePosX, &MousePosY);
 
-					const FMouseButtonData& ButtonData = LInput::UpdateButtonState(static_cast<EMouseButton>(Button), 
-																				   EMouseButtonState::Pressed);
-					WindowDataRef.OnMouseButtonReleased.Broadcast(ButtonData);
+					const FMouseButtonData& ButtonData = LInput::UpdateButtonState(
+						static_cast<EMouseButton>(Button), 
+						EMouseButtonState::Pressed
+					);
+					LMouse::OnMouseButtonReleased.Broadcast(ButtonData);
 
 					break;
 				}
@@ -174,14 +179,13 @@ namespace LkEngine {
 		/* Mouse scroll callback. */
 		glfwSetScrollCallback(GlfwWindow, [](GLFWwindow* Window, double OffsetX, double OffsetY)
 		{
-			FWindowData& WindowData = *(static_cast<FWindowData*>(glfwGetWindowUserPointer(Window)));
 			if (OffsetY > 0)
 			{
-				WindowData.OnMouseScrolled.Broadcast(EMouseScroll::Up);
+				LMouse::OnMouseScrolled.Broadcast(EMouseScrollDirection::Up);
 			}
 			else if (OffsetY < 0)
 			{
-				WindowData.OnMouseScrolled.Broadcast(EMouseScroll::Down);
+				LMouse::OnMouseScrolled.Broadcast(EMouseScrollDirection::Down);
 			}
 		});
 		
@@ -221,6 +225,7 @@ namespace LkEngine {
 	
 	void LWindow::Shutdown()
 	{
+	#if 0
 		if (RenderContext)
 		{
 			LK_CORE_DEBUG_TAG("Window", "Releasing render context");
@@ -228,6 +233,7 @@ namespace LkEngine {
 			RenderContext.Release();
 			RenderContext = nullptr;
 		}
+	#endif
 
 		if (GlfwWindow)
 		{

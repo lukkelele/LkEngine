@@ -6,44 +6,49 @@ namespace LkEngine {
     
 	static std::mutex AssetRegistryMutex;
 
-	FAssetMetadata& LAssetRegistry::operator[](const LUUID AssetHandle)
+	FAssetMetadata& LAssetRegistry::operator[](const FAssetHandle Handle)
 	{
 		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
-		LK_ASSET_TRACE_TAG("AssetRegistry", "Retrieving asset handle: {}", AssetHandle);
-		return m_AssetRegistry[AssetHandle];
+		return RegistryMap[Handle];
 	}
 
-	const FAssetMetadata& LAssetRegistry::Get(const LUUID AssetHandle) const
+	const FAssetMetadata& LAssetRegistry::operator[](const FAssetHandle Handle) const
 	{
 		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
-		LK_ASSERT(m_AssetRegistry.find(AssetHandle) != m_AssetRegistry.end());
-		return m_AssetRegistry.at(AssetHandle);
+		LK_ASSERT(RegistryMap.find(Handle) != RegistryMap.end());
+		return RegistryMap.at(Handle);
 	}
 
-	FAssetMetadata& LAssetRegistry::Get(const LUUID AssetHandle)
+	const FAssetMetadata& LAssetRegistry::Get(const FAssetHandle Handle) const
 	{
 		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
-		return m_AssetRegistry[AssetHandle];
+		LK_ASSERT(RegistryMap.find(Handle) != RegistryMap.end());
+		return RegistryMap.at(Handle);
 	}
 
-	bool LAssetRegistry::Contains(const LUUID AssetHandle) const
+	FAssetMetadata& LAssetRegistry::Get(const FAssetHandle Handle)
 	{
 		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
-		return m_AssetRegistry.find(AssetHandle) != m_AssetRegistry.end();
+		return RegistryMap[Handle];
 	}
 
-	size_t LAssetRegistry::Remove(const LUUID AssetHandle)
+	bool LAssetRegistry::Contains(const FAssetHandle Handle) const
 	{
 		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
-		LK_ASSET_TRACE_TAG("AssetRegistry", "Removing AssetHandle", AssetHandle);
-		return m_AssetRegistry.erase(AssetHandle);
+		return RegistryMap.find(Handle) != RegistryMap.end();
+	}
+
+	std::size_t LAssetRegistry::Remove(const FAssetHandle Handle)
+	{
+		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
+		return RegistryMap.erase(Handle);
 	}
 
 	void LAssetRegistry::Clear()
 	{
 		std::scoped_lock<std::mutex> ScopedLock(AssetRegistryMutex);
-		LK_ASSET_DEBUG_TAG("AssetRegistry", "Clearing registry");
-		m_AssetRegistry.clear();
+		LK_CORE_DEBUG_TAG("AssetRegistry", "Clearing registry");
+		RegistryMap.clear();
 	}
 
 }

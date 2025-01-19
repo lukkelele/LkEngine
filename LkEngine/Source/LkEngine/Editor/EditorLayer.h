@@ -14,6 +14,7 @@
 #include "LkEngine/Core/Viewport.h"
 #include "LkEngine/Core/SelectionContext.h"
 #include "LkEngine/Core/Math/Math.h"
+#include "LkEngine/Core/Math/Ray.h"
 
 #include "LkEngine/Editor/EditorGlobals.h"
 #include "LkEngine/Editor/EditorSettings.h"
@@ -49,6 +50,21 @@ namespace LkEngine {
 		NodeEditorLayer,
 	};
 
+	/**
+	 * FSelectionData
+	 */
+	struct FSelectionData
+	{
+		LEntity Entity;
+		LSubmesh* Mesh{};
+		float Distance = 0.0f;
+	};
+
+	/**
+	 * LEditorLayer
+	 *
+	 *  Editor layer.
+	 */
 	class LEditorLayer : public LLayer
 	{
 	public:
@@ -88,6 +104,19 @@ namespace LkEngine {
 		void SaveSceneAs();
 
 	private:
+		void InitializePanelManager();
+
+		void OnViewportSizeUpdated(const uint16_t NewWidth, const uint16_t NewHeight);
+
+		void OnKeyPressed(const FKeyData& KeyData);
+		void OnKeyReleased(const FKeyData& KeyData);
+
+		void OnMouseEnabled(const bool Enabled);
+		void OnMouseButtonPressed(const FMouseButtonData& ButtonData);
+		void OnMouseButtonReleased(const FMouseButtonData& ButtonData);
+		void OnMouseScrolled(const EMouseScrollDirection ScrollDir);
+		void OnMouseCursorModeChanged(const ECursorMode CursorMode);
+
 		void UI_PrepareTopBar();
 		void UI_PrepareLeftSidebar() const;
 		void UI_PrepareRightSidebar() const;
@@ -114,19 +143,8 @@ namespace LkEngine {
 		void UI_OpenGLExtensions();
 		void UI_RenderSettingsWindow(); /* TODO: Re-evaluate */
 
-		struct FRayCast
-		{
-			LVector Pos;
-			LVector Dir;
-
-			FRayCast(const LVector& InPos, const LVector& InDir)
-				: Pos(InPos)
-				, Dir(InDir) 
-			{
-			}
-		};
-
-		FRayCast CastRay(const LEditorCamera& Camera, const float MousePosX, const float MousePosY);
+		void RaycastScene(std::vector<FSelectionData>& SelectionData);
+		void CastRay(FRayCast& RayCast, const LEditorCamera& Camera, const float MousePosX, const float MousePosY);
 
 		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() 
 		{ 
@@ -137,16 +155,6 @@ namespace LkEngine {
 		LEntity CreateCube(); /* TODO: REMOVE */
 
 		std::pair<float, float> GetMouseViewportSpace(const bool IsPrimaryViewport);
-
-		/**
-		 * FSelectionData
-		 */
-		struct FSelectionData
-		{
-			LEntity Entity;
-			LSubmesh* Mesh{};
-			float Distance = 0.0f;
-		};
 
 	public:
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
@@ -169,10 +177,9 @@ namespace LkEngine {
 		TObjectPtr<LSceneRenderer> ViewportRenderer{};
 		TObjectPtr<LEditorCamera> EditorCamera; /* TODO: Remove pointer, just make raw member. */
 
-		EGizmo GizmoType = EGizmo::Translate;
+		int Gizmo = static_cast<int>(ImGuizmo::OPERATION::TRANSLATE);
 
 		FEventCallback m_EventCallback; /// UPDATE ME
-
 
 		EEditorWindowType CurrentWindowType = EEditorWindowType::None; /// REMOVE
 
