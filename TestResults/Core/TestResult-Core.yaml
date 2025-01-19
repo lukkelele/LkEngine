@@ -18,6 +18,16 @@ Core:
   - StringUtils_ToUpper_String: 1
   - StringUtils_ToLower_WideString: 1
   - StringUtils_ToUpper_WideString: 1
+  - Math_Vector3_Operation_Add: 1
+  - Math_Vector3_Operation_Subtract: 1
+  - Math_Vector3_Operation_Min: 1
+  - Math_Vector3_Operation_Max: 1
+  - Math_Vector3_Operation_Dot: 1
+  - Math_Vector3_Operation_Cross: 1
+  - Math_Vector3_Operation_Normalize: 1
+  - Math_Vector3_Operation_NormalizeSafe: 1
+  - Math_Vector3_Operation_Distance: 1
+  - Math_Vector3_Operation_DistanceSquared: 1
   - Math_Vector2_Float_Compability_Glm_Copy: 1
   - Math_Vector2_Float_Compability_Glm_CopyConstructor: 1
   - Math_Vector3_Float_Compability_Glm_Copy: 1

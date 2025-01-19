@@ -1,7 +1,7 @@
 {
-    "Total": 29,
+    "Total": 39,
     "Passed": {
-        "Count": 29,
+        "Count": 39,
         "Tests": [
             "Enum_EnumClass_Operator_Bitwise_AND",
             "Enum_EnumClass_Operator_Bitwise_OR",
@@ -22,6 +22,16 @@
             "StringUtils_ToUpper_String",
             "StringUtils_ToLower_WideString",
             "StringUtils_ToUpper_WideString",
+            "Math_Vector3_Operation_Add",
+            "Math_Vector3_Operation_Subtract",
+            "Math_Vector3_Operation_Min",
+            "Math_Vector3_Operation_Max",
+            "Math_Vector3_Operation_Dot",
+            "Math_Vector3_Operation_Cross",
+            "Math_Vector3_Operation_Normalize",
+            "Math_Vector3_Operation_NormalizeSafe",
+            "Math_Vector3_Operation_Distance",
+            "Math_Vector3_Operation_DistanceSquared",
             "Math_Vector2_Float_Compability_Glm_Copy",
             "Math_Vector2_Float_Compability_Glm_CopyConstructor",
             "Math_Vector3_Float_Compability_Glm_Copy",
