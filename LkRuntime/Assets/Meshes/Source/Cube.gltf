@@ -56,8 +56,8 @@
 	"images":[
 		{
 			"mimeType":"image/jpeg",
-			"name":"container",
-			"uri":"container.jpg"
+			"name":"WoodContainer",
+			"uri":"WoodContainer.jpg"
 		}
 	],
 	"accessors":[
