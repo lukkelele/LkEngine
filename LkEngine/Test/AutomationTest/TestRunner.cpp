@@ -25,7 +25,7 @@ namespace LkEngine {
 		};
 	
 		LLog& Logger = LLog::Get();
-		Logger.RegisterLogger(ELoggerType::TestRunner, "TEST", ELogLevel::Debug, LevelConfigs);
+		Logger.RegisterLogger(ELoggerType::TestRunner, "TEST", ELogLevel::Trace, LevelConfigs);
 	}
 
 	void LTestRunner::Run()

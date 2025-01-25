@@ -1,21 +1,10 @@
 #pragma once
 
-#include <LkEngine/Core/LObject/Object.h>
-#include <LkEngine/Core/LObject/ObjectPtr.h>
-#include <LkEngine/Core/LObject/Class.h>
-
-#include "AutomationTest/TestMacros.h"
-#include "AutomationTest/AutomationTest.h"
-
-/* Required because of the static test registration in LK_DECLARE_AUTOMATION_TEST. */
-#include "AutomationTest/TestManager.h"
-
+#include "TestBase.h"
 
 /*=================================================================
-                            Core Tests
-
+                        ObjectPtr Tests
  =================================================================*/
-
 
 /*------------------------------------------------------------------
 	 Dummy Tests.
@@ -26,19 +15,15 @@ LK_DECLARE_AUTOMATION_TEST(Dummy_Arithmetic_TwoGreaterThanOne,   LK_TEST_SUITE_C
 LK_DECLARE_AUTOMATION_TEST(Dummy_Arithmetic_TwoGreaterThanThree, LK_TEST_SUITE_CORE);
 
 
-/*------------------------------------------------------------------
-	 Object Pointer Tests.
-
-	 Reference counting.
- -----------------------------------------------------------------*/
-LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_Creation,  LK_TEST_SUITE_CORE);
-LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_CopyOnce,  LK_TEST_SUITE_CORE);
-LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_CopyTwice, LK_TEST_SUITE_CORE);
-
-LK_DECLARE_AUTOMATION_TEST(StringUtils_ToLower_ConstChar,      LK_TEST_SUITE_CORE);
-LK_DECLARE_AUTOMATION_TEST(StringUtils_ToUpper_ConstChar,      LK_TEST_SUITE_CORE);
-LK_DECLARE_AUTOMATION_TEST(StringUtils_ToLower_String,         LK_TEST_SUITE_CORE);
-LK_DECLARE_AUTOMATION_TEST(StringUtils_ToUpper_String,         LK_TEST_SUITE_CORE);
-LK_DECLARE_AUTOMATION_TEST(StringUtils_ToLower_WideString,     LK_TEST_SUITE_CORE);
-LK_DECLARE_AUTOMATION_TEST(StringUtils_ToUpper_WideString,     LK_TEST_SUITE_CORE);
+/*=================================================================
+                        ObjectPtr Tests
+ =================================================================*/
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_Operator_Copy,                     LK_TEST_SUITE_CORE);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_Creation,           LK_TEST_SUITE_CORE);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_CopyConstructor,    LK_TEST_SUITE_CORE);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_CopyOnce,           LK_TEST_SUITE_CORE);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_CopyTwice,          LK_TEST_SUITE_CORE);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_ReferenceCount_MoveConstructor,    LK_TEST_SUITE_CORE);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_Function_PassedAsCopy,             LK_TEST_SUITE_CORE);
+LK_DECLARE_AUTOMATION_TEST(ObjectPtr_Function_PassedAsReference,        LK_TEST_SUITE_CORE);
 

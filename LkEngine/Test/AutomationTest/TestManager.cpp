@@ -26,7 +26,6 @@ namespace LkEngine {
 
 		LK_TEST_TRACE_TAG("TestManager", "Registering test: {}", TestName);
 		/* FIXME: The call to 'GetTestSuite' causes crashes but the instance is OK, need to investigate further. */
-		//LK_TEST_DEBUG_TAG("TestManager", "Registering test: {} ({})", TestName, Enum::ToString(InTestInstance->GetTestSuite()));
 
 		const bool bTestRegistered = TestInstanceMap.contains(TestName);
 		if (!bTestRegistered)
@@ -35,7 +34,7 @@ namespace LkEngine {
 		}
 		else
 		{
-			LK_CORE_WARN_TAG("TestManager", "Test '{}' already registered", TestName);
+			LK_TEST_WARN_TAG("TestManager", "Test '{}' already registered", TestName);
 		}
 
 		return !bTestRegistered;
@@ -136,7 +135,7 @@ namespace LkEngine {
 		else
 		{
 			/* Test does not exist. */
-			LK_CORE_ERROR_TAG("TestManager", "Failed to start {}, could not find any registered tests with that name", TestName);
+			LK_TEST_ERROR_TAG("TestManager", "Failed to start {}, could not find any registered tests with that name", TestName);
 		}
 
 		return false;
