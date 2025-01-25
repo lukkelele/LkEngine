@@ -20,22 +20,8 @@ namespace LkEngine {
 
     std::vector<Raycast2DResult> Physics2D::RaycastFromScreen(LScene& SpriteComponentene)
     {
-        std::vector<Raycast2DResult> results = {};
+        std::vector<Raycast2DResult> Results = {};
         glm::vec2 MousePos = LMouse::GetScaledPos();
-
-        // Exit early if no Cameraera is attached to the SpriteComponentene
-        LEditorLayer* Editor = LEditorLayer::Get();
-        if (Editor && Editor->IsEnabled())
-        {
-        }
-        else
-        {
-            if (SpriteComponentene.GetMainCamera() == nullptr)
-            {
-                LK_CORE_INFO_TAG("Raycast2D", "Scene {} has no camera attached to it", SpriteComponentene.GetName());
-                return results;
-            }
-        }
 
         std::vector<LEntity> SceneEntities = SpriteComponentene.GetEntities();
         for (LEntity& Entity : SceneEntities)
@@ -49,6 +35,7 @@ namespace LkEngine {
                     continue;
                 }
 
+            #if 0
                 TObjectPtr<LEditorCamera> Camera = Editor->GetEditorCamera();
                 glm::vec2 CameraPos = Camera->GetPosition();
 
@@ -62,7 +49,6 @@ namespace LkEngine {
 
                 // Place the origin in the middle of the SpriteComponentreen.
                 // This is done by adding half of the window width and height.
-            #if 0
                 if (Editor && Editor->IsEnabled())
                 {
                     // Center the Quad
@@ -86,7 +72,6 @@ namespace LkEngine {
                     QuadPos.x += LWindow::Get().GetWidth() * 0.50f;
                     QuadPos.y += LWindow::Get().GetHeight() * 0.50f;
                 }
-            #endif
 
 
                 const float AngleRad = glm::radians(TransformComponent.GetRotation2D());
@@ -130,13 +115,14 @@ namespace LkEngine {
                         float y = centerY - MousePos.y;
                         glm::vec2 Intersection = { x, y };
                         float Distance = sqrt(pow(x, 2) + pow(y, 2));
-                        results.push_back(Raycast2DResult(Entity, Intersection, { 0, 0 }, Distance));
+                        Results.push_back(Raycast2DResult(Entity, Intersection, { 0, 0 }, Distance));
                     }
                 }
+            #endif
             }
         }
 
-        return results;
+        return Results;
     }
 
 }

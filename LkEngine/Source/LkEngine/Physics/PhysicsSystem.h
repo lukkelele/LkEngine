@@ -2,7 +2,7 @@
 
 #include "PhysicsAPI.h"
 
-#include "LkEngine/Physics2D/Physics2D.h"
+#include "LkEngine/Physics/2D/Physics2D.h"
 
 
 namespace LkEngine {
