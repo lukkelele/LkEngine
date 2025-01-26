@@ -30,7 +30,7 @@ void main()
 out vec4 FragColor;
 
 in vec3 v_Position;
-in vec3 v_Normal;   // In world space
+in vec3 v_Normal; /* World Space. */
 in vec2 v_TexCoord; 
 
 uniform sampler2D u_Diffuse1;
@@ -50,7 +50,6 @@ void main()
 
     /* Sample the normal map and convert it from [0,1] to [-1,1] */
     vec3 NormalMap = texture(u_Normal1, v_TexCoord).rgb * 2.0 - 1.0;
-    /* Assuming the normals are in tangent space. */
     vec3 Normal = normalize(NormalMap);
 
     vec3 LightDir = normalize(LightPos - v_Position);

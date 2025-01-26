@@ -17,13 +17,9 @@ out vec2 v_TexCoord;
 
 uniform mat4 u_Model;
 uniform mat4 u_ViewProjectionMatrix;
-//uniform mat4 u_ViewMatrix;
-//uniform mat4 u_ProjectionMatrix;
-
 
 void main()
 {
-    // Calculate position in world space
     vec3 WorldPosition = vec3(u_Model * vec4(a_Position, 1.0));
     gl_Position = u_ViewProjectionMatrix * vec4(WorldPosition, 1.0);
 
