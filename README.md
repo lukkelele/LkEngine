@@ -32,7 +32,7 @@ This project is for fun and to learn more. I really enjoy coding so I have a bla
 I have lots of ideas that I want to see if they could work and this project is good environment for me to try stuff out.
 <br>
 <br>
-The goal is to have an application with an API that is good for performance and easy to use.<br>
+The goal is to have a rendering application with an API that is good for performance and easy to use.<br>
 With features such as:
 - Multiple platform support.
 - Static reflection.
@@ -127,4 +127,7 @@ See more images and screenshots in the [documentation](Docs/Development.md).
 
 ### Showcase <a id="Engine-Development-Showcase"></a>
 
-![2025-January-8](Docs/Images/2025/LkEngine-2025-01-08.png)
+![2025-January-26-1](Docs/Images/2025/LkEngine-2025-01-26_1.png)
+![2025-January-26-2](Docs/Images/2025/LkEngine-2025-01-26_2.png)
+![2025-January-26-3](Docs/Images/2025/LkEngine-2025-01-26_3.png)
+

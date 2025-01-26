@@ -19,12 +19,25 @@
 ---
 
 # 2025 <a id="Year-2025"></a>
+
+### January 26
+
+Add support for raycasting in scenes.  
+Was quite annoying to make work because of the need to offset the mouse coordinates to align with the editor viewport.
+
+Have been working lots with the asset managers and the serialization of assets lately.  
+Hopefully done with that soon.
+
+![2025-January-26-1](Images/2025/LkEngine-2025-01-26_1.png)
+![2025-January-26-2](Images/2025/LkEngine-2025-01-26_2.png)
+![2025-January-26-3](Images/2025/LkEngine-2025-01-26_3.png)
+
+---
+
 ### January 8
 Early view of the content browser and content outliner.
 
 ![2025-January-08-1](Images/2025/LkEngine-2025-01-08.png)
-
-<br>
 
 ---
 
