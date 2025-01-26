@@ -14,7 +14,8 @@ namespace LkEngine {
 		LK_UNUSED(Count);
 		LK_UNUSED(InDebugName);
 
-		LK_CORE_DEBUG_TAG("OpenGLRenderCommandBuffer", "Created new OpenGL command buffer '{}', count: {}", InDebugName, Count);
+		LK_CORE_TRACE_TAG("OpenGLRenderCommandBuffer", "Created command buffer ({}), count: {}", 
+						  (!InDebugName.empty() ? InDebugName : "Unnamed"), Count);
 	}
 
 	LOpenGLRenderCommandBuffer::LOpenGLRenderCommandBuffer(std::string_view InDebugName, const bool InSwapchain)
@@ -22,7 +23,7 @@ namespace LkEngine {
 		LOBJECT_REGISTER();
 
 		LK_UNUSED(InSwapchain);
-		LK_CORE_DEBUG_TAG("OpenGLRenderCommandBuffer", "Created new OpenGL command buffer '{}'", InDebugName);
+		LK_CORE_TRACE_TAG("OpenGLRenderCommandBuffer", "Created command buffer ({})", (!InDebugName.empty() ? InDebugName : "Unnamed"));
 	}
 
 	LOpenGLRenderCommandBuffer::~LOpenGLRenderCommandBuffer()

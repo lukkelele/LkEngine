@@ -2,7 +2,7 @@
 #include "Scene.h"
 
 #include "LkEngine/Scene/Entity.h"
-#include "LkEngine/Physics2D/Physics2D.h"
+#include "LkEngine/Physics/2D/Physics2D.h"
 
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
@@ -22,34 +22,32 @@ namespace LkEngine {
 
 	LScene::LScene(const std::string& SceneName, const bool IsEditorScene)
 		: Name(SceneName)
-		, bIsEditorScene(IsEditorScene)
+		, bEditorScene(IsEditorScene)
 	{
 		LOBJECT_REGISTER();
+		LK_CORE_VERIFY(!SceneName.empty(), "Scene requires a name");
 
 		SceneEntity = Registry.create();
-		LK_CORE_DEBUG_TAG("Scene", "Scene created '{}' with handle '{}'", Name, SceneEntity);
+		LK_CORE_TRACE_TAG("Scene", "Created {} with handle: {}", Name, SceneEntity);
 
-		/* The file extension is handled by LSceneSerializer. */
-		const std::filesystem::path SceneFile = LK_FORMAT_STRING("Scenes/{}.{}", Name, LScene::FILE_EXTENSION);
+		/* TODO: Relative pathing here, use LFileSystem. */
+		const std::filesystem::path SceneFile = std::format("Scenes/{}{}", Name, LScene::FILE_EXTENSION);
 
 		/* Attempt to load scene data, if any exist. */
 		LSceneSerializer Serializer(this);
 		if (!Serializer.Deserialize(SceneFile))
 		{
-			LK_CORE_WARN("Scene serialization failed, loading default values for '{}'", Name);
+			LK_CORE_WARN_TAG("Scene", "Failed to deserialize, loading default values for: {}", Name);
 			Registry.emplace<LSceneComponent>(SceneEntity, SceneID);
 
 			ViewportWidth = LWindow::Get().GetViewportWidth();
 			ViewportHeight = LWindow::Get().GetViewportHeight();
-			LK_CORE_DEBUG_TAG("Scene", "Viewport ({}, {})", ViewportWidth, ViewportHeight);
 		}
-
-		LK_INFO("Created scene called '{}'", Name);
 	}
 
-	LEntity LScene::CreateEntity(const std::string& name)
+	LEntity LScene::CreateEntity(const std::string& EntityName)
 	{
-		return CreateChildEntity({}, name);
+		return CreateChildEntity({}, EntityName);
 	}
 
 	LEntity LScene::CreateChildEntity(LEntity Parent, const std::string& Name)
@@ -71,34 +69,34 @@ namespace LkEngine {
 			Entity.SetParent(Parent);
 		}
 
-		m_EntityIDMap[IDComp.ID] = Entity;
+		EntityMap[IDComp.ID] = Entity;
 
 		SortEntities();
 
 		return Entity;
 	}
 
-	LEntity LScene::CreateEntityWithID(LUUID uuid, const std::string& name)
+	LEntity LScene::CreateEntityWithID(const LUUID UUID, const std::string& Name)
 	{
 		LEntity Entity = { Registry.create(), this };
-		Entity.AddComponent<LIDComponent>(uuid);
+		Entity.AddComponent<LIDComponent>(UUID);
 
 		LTagComponent& TagComponent = Entity.AddComponent<LTagComponent>();
-		TagComponent.Tag = name.empty() ? "Entity" : name;
-		m_EntityIDMap[uuid] = Entity;
+		TagComponent.Tag = Name.empty() ? "Entity" : Name;
+		EntityMap[UUID] = Entity;
 
 		return Entity;
 	}
 
 	LEntity LScene::GetEntityWithUUID(const LUUID ID) const
 	{
-		LK_CORE_ASSERT(m_EntityIDMap.find(ID) != m_EntityIDMap.end(), "Entity '{}' is not present in the scene", ID);
-		return m_EntityIDMap.at(ID);
+		LK_CORE_ASSERT(EntityMap.find(ID) != EntityMap.end(), "Entity '{}' is not present in the scene", ID);
+		return EntityMap.at(ID);
 	}
 
 	LEntity LScene::TryGetEntityWithUUID(LUUID ID) const
 	{
-		if (const auto Iter = m_EntityIDMap.find(ID); Iter != m_EntityIDMap.end())
+		if (const auto Iter = EntityMap.find(ID); Iter != EntityMap.end())
 		{
 			return Iter->second;
 		}
@@ -175,7 +173,7 @@ namespace LkEngine {
 
 	void LScene::DestroyEntity(const LEntity Entity)
 	{
-		m_EntityIDMap.erase(Entity.GetUUID());
+		EntityMap.erase(Entity.GetUUID());
 		Registry.destroy(Entity);
 		LK_CORE_DEBUG_TAG("Scene", "Deleted entity: {}", Entity.Name());
 	}
@@ -194,8 +192,8 @@ namespace LkEngine {
 	{
 		Registry.sort<LIDComponent>([&](const auto Lhs, const auto Rhs)
 		{
-			auto LhsEntity = m_EntityIDMap.find(Lhs.ID);
-			auto RhsEntity = m_EntityIDMap.find(Rhs.ID);
+			auto LhsEntity = EntityMap.find(Lhs.ID);
+			auto RhsEntity = EntityMap.find(Rhs.ID);
 			return static_cast<uint32_t>(LhsEntity->second) < static_cast<uint32_t>(RhsEntity->second);
 		});
 	}
@@ -415,10 +413,11 @@ namespace LkEngine {
 
 	void LScene::CopyTo(TObjectPtr<LScene>& TargetScene)
 	{
-		LK_CORE_DEBUG_TAG("Scene", "Starting to copy scene \"{}\"", Name);
+		LK_CORE_VERIFY(TargetScene);
+		LK_CORE_DEBUG_TAG("Scene", "Copying scene: {}", Name);
 
 		TargetScene->Name = Name;
-		TargetScene->bIsEditorScene = bIsEditorScene;
+		TargetScene->bEditorScene = bEditorScene;
 
 		std::unordered_map<LUUID, entt::entity> EntityMap;
 		auto View = Registry.view<LIDComponent>();
@@ -433,14 +432,14 @@ namespace LkEngine {
 			EntityMap[EntityUUID] = EntityCopy.Handle;
 		}
 
-#if 0
-		auto targetView = TargetScene->Registry.view<LIDComponent>();
-		for (auto Entity : targetView)
+	#if 0
+		auto TargetView = TargetScene->Registry.view<LIDComponent>();
+		for (auto Entity : TargetView)
 		{
-			//UUID id = targetView.get<LIDComponent>(Entity).ID;
+			LUUID UUID = TargetView.get<LIDComponent>(Entity).ID;
 			TargetScene->Registry.destroy(Entity);
 		}
-#endif
+	#endif
 
 		CopyComponent<LTagComponent>(TargetScene->Registry, Registry, EntityMap);
 		CopyComponent<LTransformComponent>(TargetScene->Registry, Registry, EntityMap);
@@ -456,12 +455,12 @@ namespace LkEngine {
 		TargetScene->ViewportHeight = ViewportHeight;
 	}
 
-	void LScene::OnRender(TObjectPtr<LSceneRenderer> SceneRenderer, const float DeltaTime)
+	void LScene::OnRenderRuntime(TObjectPtr<LSceneRenderer> SceneRenderer, const float DeltaTime)
 	{
 		LEntity CameraEntity = GetMainCameraEntity();
 		if (!CameraEntity || !CameraEntity.HasAny<LCameraComponent>())
 		{
-			LK_CORE_WARN_TAG("Scene", "Entity is missing camera component");
+			LK_CORE_WARN_TAG("Scene", "Entity is missing a camera component");
 			return;
 		}
 
@@ -491,12 +490,39 @@ namespace LkEngine {
 
 				if (LAssetManager::IsAssetHandleValid(StaticMeshComp.StaticMesh))
 				{
-					LK_CORE_ASSERT(StaticMeshComp.MaterialTable, "MaterialTable is nullptr for LStaticMeshComponent: '{}'", StaticMeshComp.StaticMesh);
-					const glm::mat4 Transform = GetWorldSpaceTransform(Entity);
-
 					TObjectPtr<LStaticMesh> StaticMesh = LAssetManager::GetAsset<LStaticMesh>(StaticMeshComp.StaticMesh);
 					LK_CORE_ASSERT(StaticMesh, "StaticMesh {} is nullptr", StaticMeshComp.StaticMesh);
+					LK_CORE_ASSERT(StaticMeshComp.MaterialTable, "MaterialTable is nullptr for LStaticMeshComponent: {}", StaticMeshComp.StaticMesh);
+
+					const glm::mat4 Transform = GetWorldSpaceTransform(Entity);
+
+					/**
+					 * Temporarily assigning different materials based on the entity name until
+					 * material serialization is working as intended.
+					 */
+				#if 1
+					TObjectPtr<LMaterialAsset> MeshMaterial;
+					if (Entity.Name().find("Cube") != std::string::npos)
+					{
+						MeshMaterial = LEditorAssetManager::Material_WoodContainer;
+					}
+					else if (Entity.Name().find("Ramp") != std::string::npos)
+					{
+						MeshMaterial = LEditorAssetManager::Material_Metal;
+					}
+					else if (Entity.Name().find("Plane") != std::string::npos)
+					{
+						MeshMaterial = LEditorAssetManager::Material_Metal;
+					}
+					else
+					{
+						MeshMaterial = LEditorAssetManager::Material_Metal;
+					}
+
+					SceneRenderer->SubmitStaticMesh(StaticMesh, StaticMeshComp.MaterialTable, Transform, MeshMaterial);
+				#else
 					SceneRenderer->SubmitStaticMesh(StaticMesh, StaticMeshComp.MaterialTable, Transform);
+				#endif
 				}
 			}
 		}
@@ -511,7 +537,7 @@ namespace LkEngine {
 
 				if (LAssetManager::IsAssetHandleValid(MeshComp.Mesh))
 				{
-					LK_CORE_ASSERT(MeshComp.MaterialTable, "MaterialTable is nullptr for LMeshComponent: '{}'", MeshComp.Mesh);
+					LK_CORE_ASSERT(MeshComp.MaterialTable, "MaterialTable is nullptr for LMeshComponent: {}", MeshComp.Mesh);
 					const glm::mat4 Transform = GetWorldSpaceTransform(Entity);
 
 					TObjectPtr<LMesh> Mesh = LAssetManager::GetAsset<LMesh>(MeshComp.Mesh);
@@ -522,6 +548,53 @@ namespace LkEngine {
 		}
 
 		SceneRenderer->EndScene();
+	}
+
+	void LScene::OnUpdateRuntime(const float InDeltaTime)
+	{
+		LK_PROFILE_FUNC();
+	}
+
+	void LScene::OnUpdateEditor(const float InDeltaTime)
+	{
+		LK_PROFILE_FUNC();
+	}
+
+	void LScene::EndScene()
+	{
+	}
+
+	void LScene::SetCamera(TObjectPtr<LSceneCamera> InCamera)
+	{ 
+		LK_VERIFY(InCamera);
+		Camera = InCamera;
+	}
+
+	/// REMOVE
+	void LScene::SetActiveScene(TObjectPtr<LScene> InScene)
+	{
+		LK_MARK_FUNC_FOR_REMOVAL();
+		LK_VERIFY(InScene, "Invalid scene");
+		LK_DEBUG("Set active scene to: '{}'", InScene->GetName());
+		ActiveScene = InScene;
+	}
+
+	void LScene::SetActive(const bool Active)
+	{
+		if (Active && (this != ActiveScene.Get()))
+		{
+			LK_CORE_DEBUG("Setting active scene: {}", GetName());
+			ActiveScene = this;
+			LK_CORE_VERIFY(ActiveScene);
+
+			GOnSceneSetActive.Broadcast(this);
+		}
+	}
+
+	void LScene::Clear()
+	{
+		LK_CORE_TRACE_TAG("Scene", "Clearing: {}", Name);
+		Registry.clear<AllComponents>();
 	}
 
 	LEntity LScene::GetMainCameraEntity()
@@ -538,41 +611,6 @@ namespace LkEngine {
 		}
 
 		return {};
-	}
-
-	void LScene::EndScene()
-	{
-	}
-
-	void LScene::SetCamera(TObjectPtr<LSceneCamera> InCamera)
-	{ 
-		LK_VERIFY(InCamera);
-		Camera = InCamera;
-	}
-
-	/// REMOVE
-	void LScene::SetActiveScene(TObjectPtr<LScene> InScene)
-	{
-		LK_VERIFY(InScene, "Invalid scene");
-		LK_DEBUG("Set active scene to: '{}'", InScene->GetName());
-		ActiveScene = InScene;
-	}
-
-	void LScene::SetActive(const bool Active)
-	{
-		if (Active && (ActiveScene.Get() != this))
-		{
-			LK_CORE_DEBUG("Setting active scene: {}", GetName());
-			ActiveScene = this;
-			LK_CORE_VERIFY(ActiveScene, "Active scene reference is not valid");
-
-			GOnSceneSetActive.Broadcast(this);
-		}
-	}
-
-	void LScene::Clear()
-	{
-		Registry.clear<AllComponents>();
 	}
 
 	std::unordered_set<LUUID> LScene::GetAssetList()

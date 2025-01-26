@@ -45,7 +45,7 @@ namespace LkEngine {
 	 * LSelectionContext
 	 *
 	 *  Keeps track of selected objects and items.
-	 *  The selections are sorted in to containers using the enum ESelectionContext.
+	 *  The selections are sorted in containers using the enum ESelectionContext.
 	 */
 	class LSelectionContext : public LObject
 	{
@@ -58,16 +58,16 @@ namespace LkEngine {
 		FORCEINLINE static void Select(const ESelectionContext Context, const LUUID Handle)
 		{
 			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-			std::vector<LUUID>& SelectionContext = SelectionContextMap.at(Context);
+			auto& Selection = SelectionContextMap.at(Context);
 
-			auto Iter = std::find(SelectionContext.begin(), SelectionContext.end(), Handle);
-			if (Iter != SelectionContext.end())
+			auto Iter = std::find(Selection.begin(), Selection.end(), Handle);
+			if (Iter != Selection.end())
 			{
 				(*Iter) = Handle;
 			}
 			else
 			{
-				SelectionContext.push_back(Handle);
+				Selection.push_back(Handle);
 			}
 
 			SelectedHandle = Handle;
@@ -76,7 +76,7 @@ namespace LkEngine {
 		FORCEINLINE static void Deselect(const ESelectionContext Context, const LUUID Handle)
 		{
 			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-			LK_CORE_DEBUG_TAG("SelectionContext", "Deselecting: {}", Handle);
+			LK_CORE_TRACE_TAG("SelectionContext", "Deselecting: {}", Handle);
 			if (Context == ESelectionContext::Global)
 			{
 				for (auto& [Context, Selection] : SelectionContextMap)
@@ -87,8 +87,9 @@ namespace LkEngine {
 					});
 
 					/* 
-					 * TODO: Early exit or not? Depends on if same ID can appear in multiple contexts. 
-					 * Disabled for now. 
+					 * TODO: Not sure about to exit early here or no, depends on if the same 
+					 *       UUID can appear in multiple contexts. 
+					 *       Disabled for now. 
 					 */
 				#if 0
 					if (Erased > 0)
@@ -115,10 +116,9 @@ namespace LkEngine {
 		 */
 		FORCEINLINE static void DeselectAll()
 		{
-			LK_CORE_DEBUG_TAG("SelectionContext", "DeselectAll");
+			LK_CORE_TRACE_TAG("SelectionContext", "DeselectAll");
 			for (auto& [Context, Selection] : SelectionContextMap)
 			{
-				LK_CORE_TRACE_TAG("SelectionContext", "Deselecting: {}", Enum::ToString(Context));
 				Selection.clear();
 			}
 		}
@@ -128,7 +128,7 @@ namespace LkEngine {
 		 */
 		FORCEINLINE static void DeselectAll(const ESelectionContext Context)
 		{
-			LK_CORE_DEBUG_TAG("SelectionContext", "DeselectAll: {}", Enum::ToString(Context));
+			LK_CORE_TRACE_TAG("SelectionContext", "DeselectAll: {}", Enum::ToString(Context));
 			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
 			if (Context != ESelectionContext::Global)
 			{
@@ -147,11 +147,11 @@ namespace LkEngine {
 		FORCEINLINE static bool IsSelected(const ESelectionContext Context, const LUUID Handle)
 		{
 			LK_CORE_ASSERT(Handle > 0, "Handle is 0");
-			const auto& SelectionContext = SelectionContextMap.at(Context);
+			const auto& Selection = SelectionContextMap.at(Context);
 			if (Context != ESelectionContext::Global)
 			{
 				LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
-				return (std::find(SelectionContext.begin(), SelectionContext.end(), Handle) != SelectionContext.end());
+				return (std::find(Selection.begin(), Selection.end(), Handle) != Selection.end());
 			}
 			else
 			{
@@ -186,6 +186,16 @@ namespace LkEngine {
 			}
 		}
 
+		FORCEINLINE static LUUID GetSelected(const ESelectionContext Context, const std::size_t Index)
+		{
+			LK_CORE_ASSERT(Context != ESelectionContext::Global, "Global selection context cannot be used in GetSelected when using indices");
+			LK_CORE_ASSERT(SelectionContextMap.contains(Context), "Selection context '{}' is missing", Enum::ToString(Context));
+			auto& Selection = SelectionContextMap.at(Context);
+			LK_CORE_VERIFY((Index >= 0) && (Index < Selection.size()));
+
+			return Selection.at(Index);
+		}
+
 		/**
 		 * Get the count of currently selected items for a context.
 		 */
@@ -203,9 +213,13 @@ namespace LkEngine {
 			}
 		}
 
+		FORCEINLINE static bool IsAnySelected(const ESelectionContext Context)
+		{
+			return (GetSelectionCount(Context) > 0);
+		}
+
 	public:
-		/** Currently active selection. */
-		static LUUID SelectedHandle;
+		static LUUID SelectedHandle; /* TODO: Remove this and replace it by using sorting of the vectors instead. */
 
 		static std::unordered_map<ESelectionContext, std::vector<LUUID>> SelectionContextMap;
 

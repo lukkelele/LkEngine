@@ -33,7 +33,9 @@ namespace LkEngine {
 		std::ofstream FileOut(ConfigFile);
 		if (FileOut.is_open() && FileOut.good())
 		{
-			LK_CORE_DEBUG_TAG("ApplicationSerializer", "Saving engine config to file: {}", ConfigFile.string());
+			//LK_CORE_DEBUG_TAG("ApplicationSerializer", "Saving engine config: {}", std::filesystem::relative(ConfigFile, LFileSystem::GetEngineDir()).string());
+			LK_CORE_DEBUG_TAG("ApplicationSerializer", "Saving engine config: {}", 
+							  LFileSystem::ConvertToUnixPath(std::filesystem::relative(ConfigFile, LFileSystem::GetEngineDir())));
 			FileOut << Out.c_str();
 		}
 		else
@@ -160,7 +162,6 @@ namespace LkEngine {
 				Spec.StartMaximized = WindowNode["Maximized"].as<bool>();
 			}
 
-			LK_CORE_WARN_TAG("ApplicationSerializer", "Starting window maximized: {}", Spec.StartMaximized ? "Yes" : "No");
 			Spec.Width = Width;
 			Spec.Height = Height;
 		}

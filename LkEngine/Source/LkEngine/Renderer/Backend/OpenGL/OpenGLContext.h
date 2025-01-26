@@ -27,9 +27,11 @@ namespace LkEngine {
 		virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) override;
 		virtual void UpdateResolution(const uint16_t width, const uint16_t height) override;
 
+		virtual bool GetDepthEnabled() const override { return bDepthEnabled; }
 		virtual void SetDepthEnabled(const bool InEnabled) override;
 		virtual void SetDepthFunction(const EDepthFunction depthFunc) override;
 
+		virtual bool GetBlendingEnabled() const override { return bBlendingEnabled; }
 		virtual void SetBlendingEnabled(const bool InEnabled) override;
 		virtual void SetBlendFunction(const ESourceBlendFunction InSourceBlendFunction,
 									  const EDestinationBlendFunction InDestinationBlendFunction) override;
@@ -46,8 +48,6 @@ namespace LkEngine {
 		{
 			return BlendFunction.Destination;
 		}
-
-		FORCEINLINE virtual bool GetBlendingEnabled() const override { return bBlendingEnabled; }
 
 	private:
 		std::string m_GlslVersion{};

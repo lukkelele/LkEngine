@@ -19,15 +19,14 @@
 #include "LkEngine/Editor/EditorGlobals.h"
 #include "LkEngine/Editor/EditorSettings.h"
 #include "LkEngine/Editor/PanelManager.h"
-#include "LkEngine/Editor/Panels/ContentBrowserPanel.h"
 
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
+#include "LkEngine/Scene/SceneSelectionData.h"
 
 #include "LkEngine/Renderer/Framebuffer.h"
-
-#include "LkEngine/UI/UICore.h"
-#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Renderer/UI/UICore.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 
 
 namespace LkEngine {
@@ -51,16 +50,6 @@ namespace LkEngine {
 	};
 
 	/**
-	 * FSelectionData
-	 */
-	struct FSelectionData
-	{
-		LEntity Entity;
-		LSubmesh* Mesh{};
-		float Distance = 0.0f;
-	};
-
-	/**
 	 * LEditorLayer
 	 *
 	 *  Editor layer.
@@ -73,40 +62,33 @@ namespace LkEngine {
 
 		virtual void Initialize() override;
 
+		virtual void OnUpdate(const float InDeltaTime) override;
+		virtual void OnRenderUI() override;
+
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 
-		virtual void OnUpdate(const float InDeltaTime) override;
-
 		void RenderViewport();
-		void RenderViewport(TObjectPtr<LImage> Image);
 		void Render2D();
-
-		virtual void OnRender() override;
-		virtual void OnRenderUI() override;
 
 		FORCEINLINE TObjectPtr<LScene> GetEditorScene() { return EditorScene; }
 		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
 
-		FORCEINLINE bool IsEnabled() const { return bEnabled; }
+		FORCEINLINE static LEditorLayer& Get() { return *Instance; }
 
-		FORCEINLINE static LEditorLayer* Get()
-		{
-			LK_CORE_ASSERT(Instance, "Editor instance not valid");
-			return Instance;
-		}
-
+		bool OpenScene();
+		bool OpenScene(const std::filesystem::path& Filepath, const bool CheckForAutosaves);
 		void SetScene(TObjectPtr<LScene> InScene);
 		void NewScene(const std::string& SceneName = "Untitled");
 		void EmptyProject();
 		void StarterProject();
 		void SaveProjectAs();
-		void SaveSceneAs();
 
 	private:
 		void InitializePanelManager();
 
 		void OnViewportSizeUpdated(const uint16_t NewWidth, const uint16_t NewHeight);
+		void UpdateWindowTitle(const std::string& SceneName);
 
 		void OnKeyPressed(const FKeyData& KeyData);
 		void OnKeyReleased(const FKeyData& KeyData);
@@ -116,6 +98,13 @@ namespace LkEngine {
 		void OnMouseButtonReleased(const FMouseButtonData& ButtonData);
 		void OnMouseScrolled(const EMouseScrollDirection ScrollDir);
 		void OnMouseCursorModeChanged(const ECursorMode CursorMode);
+
+		void OnScenePlay();
+		void OnSceneStop();
+
+		void SaveScene();
+		void SaveSceneAs();
+		void AutoSaveScene();
 
 		void UI_PrepareTopBar();
 		void UI_PrepareLeftSidebar() const;
@@ -128,10 +117,10 @@ namespace LkEngine {
 		void UI_MainMenuBar();
 		void UI_ToolBar();
 		void UI_AboutPopup();
+		void UI_LoadAutoSavePopup();
 
 		void UI_SyncEditorWindowSizes(const LVector2& InViewportSize);
 
-		void UI_ShowMouseDetails();
 		void UI_ShowViewportAndWindowDetails();
 		void UI_ClearColorModificationMenu();
 		void UI_ViewportTexture();
@@ -143,35 +132,55 @@ namespace LkEngine {
 		void UI_OpenGLExtensions();
 		void UI_RenderSettingsWindow(); /* TODO: Re-evaluate */
 
-		void RaycastScene(std::vector<FSelectionData>& SelectionData);
+		/**
+		 * Perform raycast on scene, returns the number of hit entities.
+		 */
+		uint16_t RaycastScene(TObjectPtr<LScene>& TargetScene, std::vector<FSceneSelectionData>& SceneSelectionData);
+
 		void CastRay(FRayCast& RayCast, const LEditorCamera& Camera, const float MousePosX, const float MousePosY);
 
 		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() 
 		{ 
-			LK_CORE_ASSERT(ViewportFramebuffer, "Invalid viewport framebuffer");
+			LK_CORE_ASSERT(ViewportFramebuffer);
 			return ViewportFramebuffer; 
 		}
 
 		LEntity CreateCube(); /* TODO: REMOVE */
 
-		std::pair<float, float> GetMouseViewportSpace(const bool IsPrimaryViewport);
+		std::pair<float, float> GetMouseViewportSpace(const bool IsEditorViewport);
+
+		/**
+		 * Set window focus.
+		 * Used after switching between mouse modes (Pan/Rotate/Zoom) that can remove the focus.
+		 */
+		void UI_SetWindowFocus(const ImGuiID WindowID);
+
+		/**
+		 * Cache the ID of the currently focused window.
+		 */
+		void UI_CacheWindowFocus();
 
 	public:
+		/** Delegate for changes in the selection inside a scene. */
+		FOnSceneSelectionUpdated OnSceneSelectionUpdated;
+
 		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 	private:
-		FEditorSettings& Settings;
+		FEditorSettings& EditorSettings;
 		LEditorTabManager& TabManager;
 		TObjectPtr<LPanelManager> PanelManager;
 
 		TObjectPtr<LProject> Project{};
 		TObjectPtr<LScene> EditorScene{};
+		TObjectPtr<LScene> RuntimeScene{};
+		TObjectPtr<LScene> CurrentScene{};
 		TObjectPtr<LSceneRenderer> SceneRenderer{};
-		bool bEnabled = true;
+		std::string SceneFilePath{};
 
 		TObjectPtr<LWindow> Window{};
 		TObjectPtr<LRenderer2D> Renderer2D{};
 
-		LVector2 ViewportBounds[2]; /* TODO: Change name to 'PrimaryViewportBounds' */
+		LVector2 PrimaryViewportBounds[2];
 		TObjectPtr<LViewport> EditorViewport;
 		TObjectPtr<LFramebuffer> ViewportFramebuffer;
 		TObjectPtr<LSceneRenderer> ViewportRenderer{};
@@ -179,18 +188,17 @@ namespace LkEngine {
 
 		int Gizmo = static_cast<int>(ImGuizmo::OPERATION::TRANSLATE);
 
-		FEventCallback m_EventCallback; /// UPDATE ME
+		FEventCallback EventCallback;
 
-		EEditorWindowType CurrentWindowType = EEditorWindowType::None; /// REMOVE
+		ESceneState SceneState = ESceneState::Edit;
 
-		/// REWORK ALL THESE FRIEND DECLARATIONS
-		/// -> ESPECIALLY THIS TO Physics2D !!!!!!!
-		friend class Physics2D; // For getting UI window size when raycasting
+		struct FAutoSaveData
+		{
+			std::string FilePath{};
+			std::string FilePathAuto{};
+		} AutoSaveData;
 
-		friend class LNodeEditorTab;
-		friend class LMaterialEditorTab;
-		friend class LSceneManagerPanel;
-		friend class LRenderer;
+		friend class LRenderer; /* Allow access to ViewportFramebuffer, temporarily. */
 
 		inline static LEditorLayer* Instance = nullptr;
 	};

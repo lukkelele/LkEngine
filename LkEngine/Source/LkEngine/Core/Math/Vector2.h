@@ -11,7 +11,6 @@
 
 namespace LkEngine {
 
-	#if 1
 	template<typename SizeType>
 	struct TVector2;
 
@@ -204,7 +203,6 @@ namespace LkEngine {
 			}
 		};
 	}
-	#endif
 
 	/**
 	 * TVector2
@@ -334,7 +332,6 @@ namespace LkEngine {
 			return 0.0f;
 		}
 
-	#if 1
 		template<typename VectorTypeA, typename VectorTypeB>
 	    static SizeType Min(const VectorTypeA& A, const VectorTypeB& B)
 		{
@@ -360,7 +357,6 @@ namespace LkEngine {
 		{
 			return Math::Internal::Vector2Impl::Inverse<SizeType, VectorType, VectorType, true>::Calculate(Vector);
 		}
-	#endif
 
 		template<typename StringType = std::string>
 		FORCEINLINE StringType ToString() const
@@ -398,6 +394,24 @@ namespace LkEngine {
 		{
 			os << Vector.ToString();
 			return os;
+		}
+
+		template<typename VectorType>
+		FORCEINLINE VectorType As() const
+		{
+			return VectorType(X, Y);
+		}
+
+		template<>
+		FORCEINLINE glm::vec2 As() const
+		{
+			return glm::vec2(X, Y);
+		}
+
+		template<>
+		FORCEINLINE ImVec2 As() const
+		{
+			return ImVec2(X, Y);
 		}
 
 		operator glm::vec2() { return glm::vec2(X, Y); }

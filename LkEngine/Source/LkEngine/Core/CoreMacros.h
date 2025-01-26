@@ -82,7 +82,10 @@
 
 /* Mark a function 'Not implemented'. */
 #define LK_MARK_FUNC_NOT_IMPLEMENTED(...) \
-	LK_CORE_ASSERT(false, "[ Function not implemented ]\n{}" __VA_OPT__("\nDev note: {}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))
+	LK_CORE_ASSERT(false, "[ FUNCTION NOT IMPLEMENTED ]\n{}" __VA_OPT__("\n{}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))
+
+#define LK_MARK_FUNC_FOR_REMOVAL(...) \
+	LK_CORE_ASSERT(false, "[ FUNCTION IS DEPRECATED AND IS TO BE REMOVED ]\n{}" __VA_OPT__("\n\t{}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))
 
 #if defined(_MSC_VER)
 #	define LK_ASSUME(x)  __assume(x)

@@ -6,9 +6,9 @@
 #include "LkEngine/Editor/EditorTabManager.h"
 #include "LkEngine/Editor/NodeEditor/NodeEditor.h"
 
-#include "LkEngine/Renderer/TextureLibrary.h"
-#include "LkEngine/Renderer/MaterialLibrary.h"
 #include "LkEngine/Renderer/Renderer.h"
+
+#include "LkEngine/Asset/EditorAssetManager.h"
 
 
 namespace LkEngine {
@@ -25,15 +25,14 @@ namespace LkEngine {
 
     void LComponentEditor::OnRenderUI(bool& IsOpen)
     {
-        //static std::unordered_map<std::string, TObjectPtr<LMaterial>> MaterialMap{};
+	#if 0
         static std::unordered_map<LUUID, TObjectPtr<LMaterialAsset>> MaterialMap{};
-
-        static ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;
-        if (ImGui::TreeNodeEx("Materials", treeNodeFlags))
+        static ImGuiTreeNodeFlags TreeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth;
+        if (ImGui::TreeNodeEx("Materials", TreeNodeFlags))
         {
             static std::string SelectedMaterial = "";
 
-            const int RetrievedMaterials = LMaterialLibrary::Get().GetMaterials(MaterialMap);
+            const int RetrievedMaterials = LEditorAssetManager::Get().GetMaterials(MaterialMap);
             for (auto& [ MatAssetHandle, MaterialAsset ] : MaterialMap)
             {
 				//const std::string MaterialName = MaterialAsset->GetMaterial()->GetName();
@@ -71,13 +70,13 @@ namespace LkEngine {
 
             ImGui::TreePop();
         }
-        if (ImGui::TreeNodeEx("Textures", treeNodeFlags))
+        if (ImGui::TreeNodeEx("Textures", TreeNodeFlags))
         {
         #if 0
             for (auto& Texture2DEntry : LTextureLibrary::Get().GetTextures2D())
             {
                 auto& Texture2D = Texture2DEntry.second;
-                if (ImGui::TreeNodeEx(Texture2DEntry.first.c_str(), treeNodeFlags))
+                if (ImGui::TreeNodeEx(Texture2DEntry.first.c_str(), TreeNodeFlags))
                 {
                     RenderTextureEditor(Texture2D);
                     ImGui::TreePop();
@@ -88,6 +87,7 @@ namespace LkEngine {
         }
 
         ImGui::Separator();
+	#endif
     }
 
     void LComponentEditor::RenderMaterialEditor(LMaterial& Material)

@@ -2,11 +2,11 @@
 #include "OpenGLFramebuffer.h"
 
 #include "LkEngine/Renderer/Backend/OpenGL/LkOpenGL.h"
-
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/Texture.h"
 
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/Core/IO/FileSystem.h"
 
 
 namespace LkEngine {
@@ -78,18 +78,22 @@ namespace LkEngine {
 				ImageSpec.Format = EImageFormat::RGBA32F;
 				ImageSpec.Wrap = ETextureWrap::None;
 				ImageSpec.Filter = ETextureFilter::None;
-				ImageSpec.Mips = 1; // No mipmapping
-				ImageSpec.Path = "Assets/Textures/White.png"; /* FIXME: Do not use raw pathing like this. */
+				ImageSpec.Mips = 1; /* No mipmapping. */
+				//ImageSpec.Path = "Assets/Textures/White.png"; /* FIXME: Do not use raw pathing like this. */
+				const std::filesystem::path TexturePath = LFileSystem::GetAssetsDir() / "Textures/White.png";
+				ImageSpec.Path = TexturePath.string();
 
-				FBuffer ImageData = FBuffer(LTextureLibrary::Get().GetWhiteTexture()->GetImageBuffer());
+				FBuffer ImageData = FBuffer(LRenderer::GetWhiteTexture()->GetImageBuffer());
 				LK_CORE_VERIFY(ImageData.Data, "Image data from white texture is NULL");
 				TObjectPtr<LImage2D> Image = LImage2D::Create(ImageSpec, ImageData);
 				m_ColorAttachments.push_back(Image);
 
-				LK_OpenGL_Verify(glFramebufferTexture2D(GL_FRAMEBUFFER, 
-					                             (GL_COLOR_ATTACHMENT0 + i), 
-					                             GL_TEXTURE_2D, 
-					                             m_ColorAttachments[0]->GetRendererID(), 0));
+				LK_OpenGL_Verify(glFramebufferTexture2D(
+					GL_FRAMEBUFFER, 
+					(GL_COLOR_ATTACHMENT0 + i), 
+					GL_TEXTURE_2D, 
+					m_ColorAttachments[0]->GetRendererID(), 0)
+				);
 				LK_CORE_TRACE_TAG("OpenGLFramebuffer", "Color Attachment ID: {}", m_ColorAttachments[i]->GetRendererID());
 			}
 		}

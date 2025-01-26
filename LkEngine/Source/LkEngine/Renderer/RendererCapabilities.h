@@ -6,11 +6,11 @@
 
 namespace LkEngine {
 
-	struct RendererCapabilities
+	struct FRendererCapabilities
 	{
-		std::string Vendor;
-		std::string Device;
-		std::string Version;
+		std::string Vendor{};
+		std::string Device{};
+		std::string Version{};
 
 		int MaxSamples = 0;
 		float MaxAnisotropy = 0.0f;

@@ -21,31 +21,22 @@ namespace LkEngine {
 		virtual void SetData(void* InData, const uint32_t InSize) override;
 		virtual void Invalidate() override;
 
-		FORCEINLINE virtual TObjectPtr<LImage2D> GetImage() override 
-		{ 
-			return m_Image; 
-		}
+		FORCEINLINE virtual TObjectPtr<LImage2D> GetImage() override { return Image; }
+		FORCEINLINE virtual const TObjectPtr<LImage2D>& GetImage() const override { return Image; }
 
-		FORCEINLINE virtual const TObjectPtr<LImage2D>& GetImage() const override 
-		{ 
-			return m_Image; 
-		}
+		virtual void Resize(const uint32_t InWidth, const uint32_t InHeight) override;
 
-		virtual void Resize(const uint32_t width, const uint32_t height) override;
-
-		virtual FBuffer GetImageBuffer() override 
-		{ 
-			return m_Image->GetBuffer(); 
-		}
+		virtual FBuffer GetImageBuffer() override { return Image->GetBuffer(); }
 
 		virtual uint32_t GetMipLevelCount() const override;
 
-		virtual void Bind(uint32_t slot = 0) const override;
-		virtual void Unbind(uint32_t slot = 0) const;
+		virtual void Bind(const uint32_t Slot = 0) const override;
+		virtual void Unbind(const uint32_t Slot = 0) const;
 
 		FORCEINLINE virtual EImageFormat GetFormat() const override 
 		{ 
-			return m_Image->GetSpecification().Format; 
+			LK_CORE_ASSERT(Image);
+			return Image->GetSpecification().Format; 
 		}
 
 		virtual void Lock() override;
@@ -53,22 +44,14 @@ namespace LkEngine {
 		virtual void Load() override;
 		virtual void Unload() override;
 
-		virtual bool Loaded() const override { return m_Loaded; }
+		virtual bool Loaded() const override { return bLoaded; }
 
-		FORCEINLINE virtual LRendererID GetRendererID() const override
-		{
-			return m_Image->GetRendererID();
-		}
-
-		FORCEINLINE virtual LRendererID& GetRendererID() override
-		{
-			return m_Image->GetRendererID();
-		}
+		FORCEINLINE virtual LRendererID GetRendererID() const override { return Image->GetRendererID(); }
+		FORCEINLINE virtual LRendererID& GetRendererID() override { return Image->GetRendererID(); }
 
 		FORCEINLINE virtual uint32_t GetWidth() const override { return m_Width; }
 		FORCEINLINE virtual uint32_t GetHeight() const override { return m_Height; }
 
-		//virtual const std::string& GetName() const override 
 		FORCEINLINE virtual std::string_view GetName() const override { return Specification.Name; }
 		FORCEINLINE virtual std::string_view GetFilename() const override { return FileName; }
 		FORCEINLINE virtual const std::filesystem::path& GetPath() const override { return m_FilePath; }
@@ -78,17 +61,17 @@ namespace LkEngine {
 			return Specification; 
 		}
 
-		FORCEINLINE int GetArrayIndex() const { return m_TextureArrayIndex; }
-		FORCEINLINE void SetArrayIndex(const int ArrayIndex) 
+		int GetArrayTextureIndex() const { return ArrayTextureIndex; }
+		void SetArrayIndex(const int ArrayIndex) 
 		{ 
-			m_TextureArrayIndex = ArrayIndex; 
+			ArrayTextureIndex = ArrayIndex; 
 		}
 
 		/* TODO: Remove */
 		uint64_t GetARBHandle() const;
 
 	private:
-		TObjectPtr<LImage2D> m_Image = nullptr;
+		TObjectPtr<LImage2D> Image = nullptr;
 		uint32_t m_Width{};
 		uint32_t m_Height{};
 		FTextureSpecification Specification;
@@ -96,10 +79,10 @@ namespace LkEngine {
 		std::filesystem::path m_FilePath;
 		std::string FileName{};
 
-		bool m_Loaded = false;
-		bool m_Locked = false;
+		bool bLoaded = false;
+		bool bLocked = false;
 
-		int m_TextureArrayIndex = 0;
+		int ArrayTextureIndex = 0;
 	};
 
 
@@ -110,7 +93,7 @@ namespace LkEngine {
 		LOpenGLTextureCube() = delete;
 		~LOpenGLTextureCube();
 
-		virtual void Bind(uint32_t slot = 0) const override;
+		virtual void Bind(const uint32_t Slot = 0) const override;
 
 		FORCEINLINE virtual EImageFormat GetFormat() const override 
 		{ 

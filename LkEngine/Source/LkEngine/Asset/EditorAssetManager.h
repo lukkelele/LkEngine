@@ -1,16 +1,38 @@
 #pragma once
 
+#include "LkEngine/Core/IO/FileSystem.h"
+
 #include "LkEngine/Asset/IAssetManager.h"
 #include "LkEngine/Asset/AssetImporter.h"
 
 
 namespace LkEngine {
 
-    class LRuntimeAssetManager : public IAssetManager
+    static constexpr const char* BASE_MATERIAL  = "BaseMaterial";
+    static constexpr const char* BASE_MATERIAL2 = "BaseMaterial2";
+
+	struct FTextureLoader
+	{
+		static TObjectPtr<LTexture2D> Load(const std::filesystem::path& RelativePath, FTextureSpecification& Spec)
+		{
+			std::filesystem::path Path = std::filesystem::path("Assets") / RelativePath;
+			if (!LFileSystem::Exists(Path))
+			{
+				LK_CORE_VERIFY(false, "Failed to load texture '{}', the file does not exist", Path.string());
+				return nullptr;
+			}
+
+			Spec.Path = Path.string();
+
+			return LTexture2D::Create(Spec);
+		}
+	};
+
+    class LEditorAssetManager : public IAssetManager
     {
     public:
-		LRuntimeAssetManager();
-		~LRuntimeAssetManager();
+		LEditorAssetManager();
+		~LEditorAssetManager();
 
 		virtual void Initialize() override;
 		virtual void Destroy() override;
@@ -68,7 +90,8 @@ namespace LkEngine {
 		template<typename T, typename... TArgs>
 		TObjectPtr<T> CreateNewAsset(const std::string& FileName, const std::string& DirectoryPath, TArgs&&... Args)
 		{
-			static_assert(std::is_base_of_v<LAsset, T>, "CreateNewAsset only works for assets derived from LAsset");
+			static_assert(std::is_base_of_v<LAsset, T>, "CreateNewAsset only works for Assets derived from LAsset");
+
 			FAssetMetadata Metadata{};
 			Metadata.Handle = FAssetHandle();
 
@@ -117,6 +140,13 @@ namespace LkEngine {
 		void LoadBaseMaterials();
 		void LoadPrimitiveShapes();
 
+	public:
+		inline static TObjectPtr<LMaterialAsset> BaseMaterial{};
+		inline static TObjectPtr<LMaterialAsset> BaseMaterial2{};
+
+		/* Base materials. */
+		inline static TObjectPtr<LMaterialAsset> Material_WoodContainer{};
+		inline static TObjectPtr<LMaterialAsset> Material_Metal{};
     private:
         LAssetRegistry AssetRegistry;
 		bool bAssetRegistryValid = false;

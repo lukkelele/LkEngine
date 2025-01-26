@@ -7,17 +7,20 @@
 namespace LkEngine {
 
 	LOpenGLUniformBufferSet::LOpenGLUniformBufferSet(const uint32_t InSize, const uint32_t InFramesInFlight)
-		: m_FramesInFlight(InFramesInFlight)
+		: FramesInFlight(InFramesInFlight)
 	{
 		LOBJECT_REGISTER();
+
+		UniformBuffers.clear();
+
 		if (InFramesInFlight == 0)
 		{
-			m_FramesInFlight = LRenderer::GetFramesInFlight();
+			FramesInFlight = LRenderer::GetFramesInFlight();
 		}
 
-		for (uint32_t Frame = 0; Frame < m_FramesInFlight; Frame++)
+		for (uint32_t Frame = 0; Frame < FramesInFlight; Frame++)
 		{
-			m_UniformBuffers[Frame] = LUniformBuffer::Create(InSize);
+			UniformBuffers[Frame] = LUniformBuffer::Create(InSize);
 		}
 	}
 
@@ -27,22 +30,15 @@ namespace LkEngine {
 		return Get(Frame);
 	}
 
-	TObjectPtr<LUniformBuffer> LOpenGLUniformBufferSet::RT_Get()
+	TObjectPtr<LUniformBuffer> LOpenGLUniformBufferSet::Get(const uint32_t Frame) 
 	{
-		const uint32_t Frame = LRenderer::RT_GetCurrentFrameIndex();
-		return Get(Frame);
+		LK_CORE_ASSERT(UniformBuffers.contains(Frame));
+		return UniformBuffers.at(Frame);
 	}
 
-	TObjectPtr<LUniformBuffer> LOpenGLUniformBufferSet::Get(uint32_t frame) 
+	void LOpenGLUniformBufferSet::Set(TObjectPtr<LUniformBuffer> InUniformBuffer, const uint32_t Frame)
 	{
-		LK_CORE_ASSERT(m_UniformBuffers.find(frame) != m_UniformBuffers.end());
-		return m_UniformBuffers.at(frame);
-	}
-
-	void LOpenGLUniformBufferSet::Set(TObjectPtr<LUniformBuffer> uniformBuffer, 
-									  uint32_t frame)
-	{
-		m_UniformBuffers[frame] = uniformBuffer;
+		UniformBuffers[Frame] = InUniformBuffer;
 	}
 
 }

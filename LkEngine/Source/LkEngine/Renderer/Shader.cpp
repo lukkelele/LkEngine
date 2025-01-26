@@ -123,26 +123,29 @@ namespace LkEngine {
 
 	/***********************************************************************/
 
+
 	LShaderLibrary::LShaderLibrary()
 	{
 		LOBJECT_REGISTER();
 	}
 
-    void LShaderLibrary::Add(const TObjectPtr<LShader>& Shader)
+	TObjectPtr<LShader>& LShaderLibrary::Get(const std::string& ShaderName)
+	{
+		LK_CORE_ASSERT(ShaderMap.contains(ShaderName), "Shader '{}' is not loaded", ShaderName);
+		return ShaderMap.at(ShaderName);
+	}
+
+	void LShaderLibrary::Add(const TObjectPtr<LShader>& Shader)
     {
-		LK_UNUSED(Shader);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
+		LK_UNUSED(Shader);
     }
 
-    void LShaderLibrary::Load(std::string_view Name, const std::string& InFilePath)
+    void LShaderLibrary::Load(const std::string& ShaderName, const std::filesystem::path& InFilePath)
     {
-		Shaders[Name] = LShader::Create(InFilePath);
-    }
-
-    TObjectPtr<LShader>& LShaderLibrary::Get(std::string_view ShaderName)
-    {
-		LK_ASSERT((Shaders.find(ShaderName) != Shaders.end()));
-		return Shaders.at(ShaderName);
+		LK_CORE_ASSERT(!ShaderMap.contains(ShaderName), "Shader '{}' is already loaded", ShaderName);
+		LK_CORE_DEBUG("Loading shader: {}", ShaderName);
+		ShaderMap[ShaderName] = LShader::Create(InFilePath.string());
     }
 
 }

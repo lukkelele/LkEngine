@@ -1,10 +1,14 @@
 #pragma once
 
+#include "LkEngine/Renderer/UI/Panel.h"
+
 #include "LkEngine/Core/SelectionContext.h"
-#include "LkEngine/UI/Panel.h"
 
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
+#include "LkEngine/Scene/SceneSelectionData.h"
+
+#include "LkEngine/Renderer/SceneRenderer.h"
 
 
 namespace LkEngine {
@@ -43,7 +47,14 @@ namespace LkEngine {
 		 */
 		void SetScene(const TObjectPtr<LScene>& scene);
 
+		void OnSceneRendererDrawListFlush(const FSceneRendererFlushData& InData);
+		void OnSceneSelectionUpdated(const std::vector<FSceneSelectionData>& InSelectionData);
+
 	private:
+		void DrawEntityCreateMenu(LEntity Parent);
+
+		void UI_SceneRaycastData();
+
 		template<typename TVectorType, typename TComponent, typename GetOtherFunc>
 		uint32_t GetInconsistentVectorAxis(GetOtherFunc OtherFunc)
 		{
@@ -133,6 +144,8 @@ namespace LkEngine {
 
 		TObjectPtr<LScene> ComponentCopyScene{};
 		LEntity ComponentCopyEntity;
+
+		std::vector<std::function<void(LEntity)>> EntityMenuPlugins;
 
 		LCLASS(LSceneManagerPanel);
 	};

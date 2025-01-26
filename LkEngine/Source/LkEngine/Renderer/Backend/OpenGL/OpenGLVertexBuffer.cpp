@@ -13,7 +13,8 @@ namespace LkEngine {
 		, m_Usage(InBufferUsage)
 	{
 		LOBJECT_REGISTER();
-		static_assert(sizeof(InSize) == sizeof(GLuint));
+		static_assert(std::is_same_v<std::decay_t<decltype(InSize)>, GLuint>);
+
 		m_LocalData = FBuffer(InBuffer, InSize);
 
 		LK_OpenGL_Verify(glGenVertexArrays(1, &m_VertexArrayID));
@@ -29,7 +30,8 @@ namespace LkEngine {
 		, m_Usage(InBufferUsage)
 	{
 		LOBJECT_REGISTER();
-		static_assert(sizeof(InSize) == sizeof(GLuint));
+		static_assert(std::is_same_v<std::decay_t<decltype(InSize)>, GLuint>);
+
 		m_LocalData.Allocate(InSize);
 
 		LK_OpenGL_Verify(glGenVertexArrays(1, &m_VertexArrayID));
@@ -53,18 +55,10 @@ namespace LkEngine {
 
 	void LOpenGLVertexBuffer::SetData(void* InData, uint32_t InSize, uint32_t InOffset)
 	{
-		static_assert(sizeof(InSize) == sizeof(GLuint));
+		static_assert(std::is_same_v<std::decay_t<decltype(InSize)>, GLuint>);
 		m_LocalData.Data = InData;
 		LK_OpenGL_Verify(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
 		LK_OpenGL_Verify(glBufferSubData(GL_ARRAY_BUFFER, InOffset, InSize, InData));
-	}
-
-	void LOpenGLVertexBuffer::RT_SetData(void* InData, uint32_t InSize, uint32_t offset)
-	{
-		static_assert(sizeof(InSize) == sizeof(GLuint));
-		m_LocalData.Data = InData;
-		LK_OpenGL_Verify(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-		LK_OpenGL_Verify(glBufferSubData(GL_ARRAY_BUFFER, offset, InSize, InData));
 	}
 
 	void LOpenGLVertexBuffer::SetLayout(const FVertexBufferLayout& InLayout)
@@ -199,23 +193,12 @@ namespace LkEngine {
 		}
 	}
 
-#if 0
-	void LOpenGLVertexBuffer::BindVertexArray()
-	{
-		LK_OpenGL(glBindVertexArray(m_VertexArrayID));
-	}
-
-	void LOpenGLVertexBuffer::UnbindVertexArray()
-	{
-		LK_OpenGL(glBindVertexArray(0));
-	}
-#endif
-
 	void LOpenGLVertexBuffer::SetIndexBuffer(const TObjectPtr<LIndexBuffer> InIndexBuffer)
 	{
-		glBindVertexArray(m_VertexArrayID);
-		InIndexBuffer->Bind();
+		LK_OpenGL_Verify(glBindVertexArray(m_VertexArrayID));
+		//InIndexBuffer->Bind();
 		m_IndexBuffer = InIndexBuffer;
+		m_IndexBuffer->Bind();
 	}
 
 }

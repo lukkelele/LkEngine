@@ -1,7 +1,6 @@
 #pragma once
 
-#include "LkEngine/UI/Panel.h"
-
+#include "LkEngine/Renderer/UI/Panel.h"
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/Material.h"
 

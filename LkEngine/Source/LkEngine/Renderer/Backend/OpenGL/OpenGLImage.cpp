@@ -214,11 +214,13 @@ namespace LkEngine {
 			m_ImageData = FBuffer(InData, ImageSize);
 
 			LK_OpenGL_Verify(glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID));
-			LK_OpenGL_Verify(glTextureStorage2D(m_RendererID,
-												ImageUtils::CalculateMipCount(Specification.Width, Specification.Height),
-												LOpenGL::GetImageInternalFormat(Specification.Format),
-												Specification.Width,
-												Specification.Height));
+			LK_OpenGL_Verify(glTextureStorage2D(
+				m_RendererID, 
+				ImageUtils::CalculateMipCount(Specification.Width, Specification.Height),
+				LOpenGL::GetImageInternalFormat(Specification.Format),
+				Specification.Width,
+				Specification.Height)
+			); 
 
 			LK_OpenGL_Verify(
 				glTextureSubImage2D(m_RendererID,

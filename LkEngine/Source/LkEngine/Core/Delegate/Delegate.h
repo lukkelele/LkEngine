@@ -1001,45 +1001,70 @@ namespace LkEngine {
 		 ***************************************************/
 
 		/** Raw Pointer, non-const function. */
-		template<typename T, typename... Args2>
-		FDelegateHandle Add(T* ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... Args)
+		template<typename T, typename... TArgs2>
+		FDelegateHandle Add(T* ObjectRef, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			return AddHandler(TDelegate::CreateRaw(ObjectRef, InFunction, std::forward<Args2>(Args)...));
+			return AddHandler(TDelegate::CreateRaw(ObjectRef, InFunction, std::forward<TArgs2>(Args)...));
 		}
 
 		/** Raw Pointer, const function. */
-		template<typename T, typename... Args2>
-		FDelegateHandle Add(T* ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... Args)
+		template<typename T, typename... TArgs2>
+		FDelegateHandle Add(T* ObjectRef, ConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			return AddHandler(TDelegate::CreateRaw(ObjectRef, InFunction, std::forward<Args2>(Args)...));
+			return AddHandler(TDelegate::CreateRaw(ObjectRef, InFunction, std::forward<TArgs2>(Args)...));
 		}
 
 		/** Lambda. */
-		template<typename LambdaType, typename... Args2>
-		FDelegateHandle Add(LambdaType&& InLambda, Args2&&... LambdaArgs)
+		template<typename LambdaType, typename... TArgs2>
+		FDelegateHandle Add(LambdaType&& InLambda, TArgs2&&... LambdaArgs)
 		{
-			return AddHandler(TDelegate::CreateLambda(std::forward<LambdaType>(InLambda), std::forward<Args2>(LambdaArgs)...));
+			return AddHandler(TDelegate::CreateLambda(std::forward<LambdaType>(InLambda), std::forward<TArgs2>(LambdaArgs)...));
 		}
 
 		/** Shared Pointer, non-const function. */
-		template<typename T, typename... Args2>
-		FDelegateHandle Add(std::shared_ptr<T> ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... Args)
+		template<typename T, typename... TArgs2>
+		FDelegateHandle Add(std::shared_ptr<T> ObjectRef, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			return AddHandler(TDelegate::CreatedShared(ObjectRef, InFunction, std::forward<Args2>(Args)...));
+			return AddHandler(TDelegate::CreatedShared(ObjectRef, InFunction, std::forward<TArgs2>(Args)...));
 		}
 
 		/** Shared Pointer, const function. */
-		template<typename T, typename... Args2>
-		FDelegateHandle Add(std::shared_ptr<T> ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... Args)
+		template<typename T, typename... TArgs2>
+		FDelegateHandle Add(std::shared_ptr<T> ObjectRef, ConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			return AddHandler(TDelegate::CreatedShared(ObjectRef, InFunction, std::forward<Args2>(Args)...));
+			return AddHandler(TDelegate::CreatedShared(ObjectRef, InFunction, std::forward<TArgs2>(Args)...));
 		}
 
-		/** Static Function. */
-		template<typename... Args2>
-		FDelegateHandle Add(void(*InFunction)(TArgs..., Args2...), Args2&&... Args)
+		/**
+		/* -- EXPERIMENTAL --
+		 *
+		 * Not enabled for now because of cyclic inclusion (LObject.h includes this file).
+		 * Should be able to implictly convert the TObjectPtr to a raw pointer (using Get)
+		 * and skip the need to use LObject in this file entirely.
+		 */
+	#if 0
+		/** TObjectPtr, non-const function. */
+		template<typename T, typename... TArgs2>
+		FDelegateHandle Add(TObjectPtr<T> ObjectRef, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			return AddHandler(TDelegate::CreateStatic(InFunction, std::forward<Args2>(Args)...));
+			static_assert(std::is_base_of_v<T, LObject>, "LMulticastDelegate<T>::Add error (non-const), type T is not derived from LObject");
+			return AddHandler(TDelegate::CreatedShared(ObjectRef.Get(), InFunction, std::forward<TArgs2>(Args)...));
+		}
+
+		/** TObjectPtr, const function. */
+		template<typename T, typename... TArgs2>
+		FDelegateHandle Add(TObjectPtr<T> ObjectRef, ConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
+		{
+			static_assert(std::is_base_of_v<T, LObject>, "LMulticastDelegate<T>::Add error (const), type T is not derived from LObject");
+			return AddHandler(TDelegate::CreatedShared(ObjectRef.Get(), InFunction, std::forward<TArgs2>(Args)...));
+		}
+	#endif
+
+		/** Static Function. */
+		template<typename... TArgs2>
+		FDelegateHandle Add(void(*InFunction)(TArgs..., TArgs2...), TArgs2&&... Args)
+		{
+			return AddHandler(TDelegate::CreateStatic(InFunction, std::forward<TArgs2>(Args)...));
 		}
 
 	private:

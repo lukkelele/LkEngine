@@ -10,8 +10,7 @@
 #include "RenderContext.h"
 #include "Shader.h"
 #include "UniformBuffer.h"
-#include "TextureLibrary.h"
-#include "MaterialLibrary.h"
+#include "Texture.h"
 #include "UniformBufferSet.h"
 #include "ArrayTexture.h"
 #include "Mesh.h"
@@ -49,7 +48,6 @@ namespace LkEngine {
 
 		virtual void EndRenderPass(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer) = 0;
 
-		// RenderGeometry
 		virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> InRenderCommandBuffer, 
 									TObjectPtr<LPipeline> InPipeline, 
 									TObjectPtr<LVertexBuffer> InVertexBuffer, 
@@ -72,20 +70,15 @@ namespace LkEngine {
 									TObjectPtr<LIndexBuffer> InIndexBuffer, 
 									const glm::mat4& InTransform, 
 									const uint32_t IndexCount = 0) = 0;
-		// ~RenderGeometry
 
-		// Draw
 		virtual void Draw(const LVertexBuffer& VertexBuffer, const LIndexBuffer& IndexBuffer, const LShader& Shader) = 0;
 		virtual void Draw(LVertexBuffer& VertexBuffer, const LShader& Shader) = 0;
-		// ~Draw
 
         virtual void DrawIndexed(uint64_t IndexCount) = 0;
 
 		virtual void SubmitMesh(TObjectPtr<LMesh>& InMesh, TObjectPtr<LShader>& InShader, const glm::mat4& InTransform) = 0;
-
 		virtual void SubmitIndexed(unsigned int IndexCount) = 0;
 
-		// SubmitQuad
 		virtual void SubmitQuad(const glm::vec2& pos, 
 								const glm::vec2& size, 
 								const glm::vec4& color, 
@@ -133,17 +126,17 @@ namespace LkEngine {
 								const glm::vec4& tintColor, 
 								const float rotation, 
 								uint64_t entityID) = 0;
-		// ~SubmitQuad
 
 		virtual void SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, uint64_t entityID = 0) = 0;
 
 		virtual void SetPrimitiveTopology(const ERenderTopology InRenderTopology) = 0;
 		virtual void SetDepthFunction(const EDepthFunction InDepthFunction) = 0;
+		virtual void SetDepthEnabled(const bool Enabled) = 0;
 
 		virtual void BindArrayTexture(const uint8_t Index) = 0;
 		virtual void BindArrayTexture(const EArrayTextureDimension ArrayTextureDim) = 0;
 
-		virtual RendererCapabilities& GetCapabilities() = 0;
+		virtual FRendererCapabilities& GetCapabilities() = 0;
 
 		static TObjectPtr<LRendererAPI> Create();
 

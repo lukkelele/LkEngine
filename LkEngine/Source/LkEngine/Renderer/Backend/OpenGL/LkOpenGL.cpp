@@ -11,6 +11,8 @@
 
 #include "LkEngine/Core/Utility/StringUtils.h"
 
+#include "LkEngine/Asset/EditorAssetManager.h"
+
 
 namespace LkEngine {
 
@@ -244,6 +246,7 @@ namespace LkEngine {
 
 		void InitializeEnvironment()
 		{
+			LK_CORE_INFO_TAG("LOpenGL", "Initializing debugging environment");
 			SetupTexturesAndShaders();
 
 			SetupDebugCube();
@@ -282,6 +285,8 @@ namespace LkEngine {
 
 		void SetupTexturesAndShaders()
 		{
+			const std::filesystem::path TexturesDir = LFileSystem::GetAssetsDir() / "Textures" / "Debug";
+
 			/* REMOVE */
 			if (!DebugShader || !ScreenShader || !CubeTexture || !PlaneTexture)
 			{
@@ -292,16 +297,13 @@ namespace LkEngine {
 			if (!CubeDebugShader)
 			{
 				CubeDebugShader = LRenderer::GetShaderLibrary()->Get("Renderer_Debug");
-				//const FShaderProgramSource& ShaderSource = CubeDebugShader->GetSource();
-				//LK_CORE_WARN_TAG("LOpenGL", "DebugCubeShader:\n{}\n{}", ShaderSource.Vertex, ShaderSource.Fragment);
 				CubeDebugShader->Set("u_Texture0", 0);
 			}
 
 			if (!DebugShader)
 			{
 				DebugShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Debug");
-				//const FShaderProgramSource& ShaderSource = DebugShader->GetSource();
-				//LK_CORE_WARN_TAG("LOpenGL", "DebugShader -> {}:\n{}\n{}", DebugShader->GetName(), ShaderSource.Vertex, ShaderSource.Fragment);
+				//DebugShader->Set("u_Texture0", 0);
 			}
 
 			if (!ScreenShader)
@@ -312,22 +314,49 @@ namespace LkEngine {
 			/* Textures. */
 			if (!CubeTexture)
 			{
-				CubeTexture = LTextureLibrary::Get().GetTexture("WoodContainer");
+				const std::filesystem::path TexturePath = TexturesDir / "WoodContainer.jpg";
+
+				FTextureSpecification TextureSpec{};
+				TextureSpec.Format = EImageFormat::RGBA32F;
+				TextureSpec.Width = 2048;
+				TextureSpec.Height = 2048;
+				TextureSpec.Path = LFileSystem::ConvertToUnixPath(TexturePath);
+				TextureSpec.Name = LFileSystem::RemoveFileExtension(TexturePath.filename());
+				TextureSpec.DebugName = TextureSpec.Name;
+				TextureSpec.SamplerWrap = ETextureWrap::Clamp;
+				TextureSpec.SamplerFilter = ETextureFilter::Linear;
+				TextureSpec.bGenerateMips = true;
+
+				CubeTexture = FTextureLoader::Load(TexturePath, TextureSpec);
+				LK_CORE_VERIFY(CubeTexture, "CubeTexture failed to load: {}", TexturePath.string());
 			}
 
 			if (!PlaneTexture)
 			{
-				PlaneTexture = LTextureLibrary::Get().GetTexture("Metal");
-				LK_CORE_ASSERT(PlaneTexture, "Plane Texture failed to setup");
+				const std::filesystem::path TexturePath = TexturesDir / "Metal.png";
+
+				FTextureSpecification TextureSpec{};
+				TextureSpec.Format = EImageFormat::RGBA32F;
+				TextureSpec.Width = 2048;
+				TextureSpec.Height = 2048;
+				TextureSpec.Path = LFileSystem::ConvertToUnixPath(TexturePath);
+				TextureSpec.Name = LFileSystem::RemoveFileExtension(TexturePath.filename());
+				TextureSpec.DebugName = TextureSpec.Name;
+				TextureSpec.SamplerWrap = ETextureWrap::Clamp;
+				TextureSpec.SamplerFilter = ETextureFilter::Linear;
+				TextureSpec.bGenerateMips = true;
+
+				PlaneTexture = FTextureLoader::Load(TexturePath, TextureSpec);
+				LK_CORE_VERIFY(PlaneTexture, "PlaneTexture failed to load: {}", TexturePath.string());
 			}
 		}
 
 		void SetupSkybox()
 		{
-			LK_CORE_TRACE("Setting up skybox");
-			LK_CORE_ASSERT(SkyboxVertexBuffer == nullptr, "Skybox already exists");
+			LK_CORE_DEBUG_TAG("LOpenGL", "Setting up skybox");
+			LK_CORE_VERIFY(SkyboxVertexBuffer == nullptr, "Skybox has already been created");
 
-			SkyboxVertexBuffer = LVertexBuffer::Create(Skybox_Vertices, sizeof(Skybox_Vertices));
+			SkyboxVertexBuffer = LVertexBuffer::Create(Geometry::Vertices::Skybox, sizeof(Geometry::Vertices::Skybox));
 			SkyboxVertexBuffer->SetLayout({
 				{ "a_Position", EShaderDataType::Float3 },
 			});
@@ -335,13 +364,13 @@ namespace LkEngine {
 			LK_CORE_ASSERT(SkyboxShader, "Skybox shader is nullptr");
 
 			FTextureSpecification SkyboxSpec;
-			static std::vector<std::filesystem::path> SkyboxFacePaths = {
-				"Assets/Textures/Debug/Skybox-WaterIsland/Right.jpg",
-				"Assets/Textures/Debug/Skybox-WaterIsland/Left.jpg",
-				"Assets/Textures/Debug/Skybox-WaterIsland/Top.jpg",
-				"Assets/Textures/Debug/Skybox-WaterIsland/Bottom.jpg",
-				"Assets/Textures/Debug/Skybox-WaterIsland/Front.jpg",
-				"Assets/Textures/Debug/Skybox-WaterIsland/Back.jpg",
+			static const std::vector<std::filesystem::path> SkyboxFacePaths = {
+				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Right.jpg",
+				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Left.jpg",
+				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Top.jpg",
+				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Bottom.jpg",
+				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Front.jpg",
+				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Back.jpg",
 			};
 			SkyboxTexture = LTextureCube::Create(SkyboxSpec, SkyboxFacePaths);
 			SkyboxTexture->Bind(0);
@@ -361,7 +390,7 @@ namespace LkEngine {
 				ScreenShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Screen");
 			}
 
-			PlaneVertexBuffer = LVertexBuffer::Create(Plane_Vertices, sizeof(Plane_Vertices));
+			PlaneVertexBuffer = LVertexBuffer::Create(Geometry::Vertices::Plane, sizeof(Geometry::Vertices::Plane));
 			PlaneVertexBuffer->SetLayout({
 				{ "a_Pos",       EShaderDataType::Float3 },
 				{ "a_TexCoord",  EShaderDataType::Float2 },

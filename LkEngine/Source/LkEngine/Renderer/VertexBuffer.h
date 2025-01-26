@@ -23,15 +23,7 @@ namespace LkEngine {
 	public:
 		virtual ~LVertexBuffer() = default;
 
-		/**
-		 * @brief Set data in buffer.
-		 */
 		virtual void SetData(void* Buffer, const uint32_t Size, const uint32_t Offset = 0) = 0;
-
-		/**
-		 * @brief Set data in buffer on the render thread.
-		 */
-		virtual void RT_SetData(void* Buffer, const uint32_t Size, const uint32_t Offset = 0) = 0;
 
 		virtual FBuffer GetLocalData() = 0;
 		virtual void SetLayout(const FVertexBufferLayout& layout) = 0;
@@ -46,6 +38,10 @@ namespace LkEngine {
 		virtual FVertexBufferLayout& GetLayout() = 0;
 
 		static TObjectPtr<LVertexBuffer> Create(void* InBuffer, 
+												const uint32_t Size, 
+												const EVertexBufferUsage BufferUsage = EVertexBufferUsage::Dynamic);
+
+		static TObjectPtr<LVertexBuffer> Create(const void* InBuffer, 
 												const uint32_t Size, 
 												const EVertexBufferUsage BufferUsage = EVertexBufferUsage::Dynamic);
 

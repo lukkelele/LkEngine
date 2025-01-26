@@ -9,14 +9,11 @@
 
 namespace LkEngine {
 
-    LApplication* Application = nullptr; /* REMOVE ME */
-
 	void LInput::Initialize()
 	{
 		LKeyboard& Keyboard = LKeyboard::Get();
         Keyboard.Initialize();
 
-        LMouse::Initialize();
 		MouseDataMap.insert({ EMouseButton::Button0, FMouseButtonData() });
 		MouseDataMap.insert({ EMouseButton::Button1, FMouseButtonData() });
 		MouseDataMap.insert({ EMouseButton::Button2, FMouseButtonData() });
@@ -28,7 +25,7 @@ namespace LkEngine {
 	void LInput::Update()
 	{
 		/* HeldData holds the initial recorded timestamp when the held event 
-		 * was triggered and the second entry is updated continuosly. */
+		 * was triggered and the second entry is updated continously. */
 		for (auto& [Key, HeldData] : KeyHeldMap)
 		{
 			KeyDataMap[Key].RepeatCount++;
@@ -48,54 +45,11 @@ namespace LkEngine {
 
 	bool LInput::IsMouseButtonDown(const EMouseButton Button)
 	{
-		/* FIXME: Do not call application here */
-		const bool bImguiEnabled = LApplication::Get()->GetSpecification().ImGuiEnabled;
-		if (bImguiEnabled == false)
-		{
-			LWindow & Window = LApplication::Get()->GetWindow();
-			const int State = glfwGetMouseButton(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), static_cast<int32_t>(Button));
-
-			return (State == GLFW_PRESS);
-		}
-	
-		LWindow& Window = LApplication::Get()->GetWindow();
-		LK_CORE_ASSERT(&Window != nullptr, "Window is nullptr");
-		const int State = glfwGetMouseButton(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), static_cast<int32_t>(Button));
-
-		return (State == GLFW_PRESS);
-
-		//------------------------------------------------------------
-		// ImGui Multi-Viewports
-		// Needs io.Config |= ImGuiConfigFlags_ViewportsEnable
-		//------------------------------------------------------------
-#if LK_USE_MULTI_VIEWPORTS
-		ImGuiContext* context = ImGui::GetCurrentContext();
-		bool pressed = false;
-		for (ImGuiViewport* viewport : context->Viewports)
-		{
-			if (viewport->PlatformUserData == nullptr)
-			{
-				//LK_CORE_ASSERT(false, "viewport->PlatformUserData is nullptr");
-				continue;
-			}
-			LK_CORE_DEBUG("viewport->PlatformUserData != nullptr !!!");
-
-			GLFWwindow* WindowHandle = *(GLFWwindow**)viewport->PlatformUserData; // First member is GLFWwindow
-			if (!WindowHandle)
-			{
-				LK_CORE_ASSERT(false, "WindowHandle (GLFWwindow*) is nullptr");
-				continue;
-			}
-
-			auto state = glfwGetMouseButton(static_cast<GLFWwindow*>(WindowHandle), static_cast<int32_t>(Button));
-			if (state == GLFW_PRESS || state == GLFW_REPEAT)
-			{
-				pressed = true;
-				break;
-			}
-		}
-		return pressed;
-#endif
+		const int MouseButtonState = glfwGetMouseButton(
+			LApplication::Get().Get().GetWindow().GetGlfwWindow(), 
+			static_cast<int32_t>(Button)
+		);
+		return (MouseButtonState == GLFW_PRESS);
 	}
 
 	bool LInput::IsMouseButtonReleased(const EMouseButton Button)
@@ -126,10 +80,9 @@ namespace LkEngine {
 
 	bool LInput::IsKeyDown(const EKey Key)
 	{
-		LWindow& Window = LApplication::Get()->GetWindow();
-		const int State = glfwGetKey(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), static_cast<int32_t>(Key));
-
-		return ((State == GLFW_PRESS) || (State == GLFW_REPEAT));
+		LWindow& Window = LApplication::Get().GetWindow();
+		const int KeyState = glfwGetKey(Window.GetGlfwWindow(), static_cast<int32_t>(Key));
+		return ((KeyState == GLFW_PRESS) || (KeyState == GLFW_REPEAT));
 	}
 
 	bool LInput::IsKeyReleased(const EKey Key)
@@ -139,26 +92,17 @@ namespace LkEngine {
 
 	void LInput::SetCursorMode(const ECursorMode CursorMode)
 	{
-		LWindow& Window = LApplication::Get()->GetWindow();
+		LWindow& Window = LApplication::Get().GetWindow();
 		glfwSetInputMode(
-			Window.GetGlfwWindow(), 
+			LApplication::Get().GetWindow().GetGlfwWindow(),
 			GLFW_CURSOR, 
 			GLFW_CURSOR_NORMAL + static_cast<int>(CursorMode)
 		);
-
-	#if 0
-		if (LApplication::Get()->GetSpecification().ImGuiEnabled)
-		{
-			UI::SetInputEnabled(CursorMode == ECursorMode::Normal);
-		}
-	#endif
 	}
 
 	ECursorMode LInput::GetCursorMode()
 	{
-		LWindow& Window = LApplication::Get()->GetWindow();
-		const int InputMode = glfwGetInputMode(static_cast<GLFWwindow*>(Window.GetGlfwWindow()), GLFW_CURSOR) - GLFW_CURSOR_NORMAL;
-
+		const int InputMode = glfwGetInputMode(LApplication::Get().GetWindow().GetGlfwWindow(), GLFW_CURSOR) - GLFW_CURSOR_NORMAL;
 		return static_cast<ECursorMode>(InputMode);
 	}
 
@@ -174,6 +118,7 @@ namespace LkEngine {
 		KeyData.Key = Key;
 		KeyData.OldState = KeyData.State;
 		KeyData.State = NewState;
+		//LK_CORE_DEBUG_TAG("Input", "Update key state: {}, {} -> {}", Enum::ToString(Key), Enum::ToString(KeyData.OldState), Enum::ToString(KeyData.State));
 
 		if (NewState == EKeyState::Pressed)
 		{
@@ -194,7 +139,7 @@ namespace LkEngine {
 		return KeyData;
 	}
 
-	FMouseButtonData& LInput::UpdateButtonState(const EMouseButton Button, EMouseButtonState NewState)
+	FMouseButtonData& LInput::UpdateButtonState(const EMouseButton Button, const EMouseButtonState NewState)
 	{
 		FMouseButtonData& ButtonData = MouseDataMap[Button];
 		ButtonData.Button = Button;

@@ -9,13 +9,37 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/LObject/Object.h"
 
-/** Log whenever a reference is added/removed. */
-#define LK_DEBUG_LOG_LIVE_REFERENCES 0
+#define LK_OBJECTPTR_CUSTOM_EQUALITY_OP 1
 
-#if 0
+#define LK_DEBUG_LOG_LIVE_REFERENCES 0  /* Log whenever a reference is added/removed. */
+#define LK_DEBUG_LOG_OBJECTPTR       0  /* Log TObjectPtr constructors and destructor calls. */
+#define LK_DEBUG_OBJECTPTR_PARANOID  0  /* Validate the LObject pointer on all TObjectPtr access calls. */
+
+#if LK_DEBUG_OBJECTPTR_PARANOID
 #	define LK_PTR_ASSERT(...) LK_CORE_ASSERT(__VA_ARGS__)
 #else
 #	define LK_PTR_ASSERT(...)
+#endif
+
+#if LK_DEBUG_LOG_OBJECTPTR
+#	define LK_DEBUG_PTR_LOG(...) \
+			if (ObjectPtr) \
+			{ \
+				if (const LClass* ClassInfo = ObjectPtr->GetClass(); ClassInfo != nullptr) \
+				{ \
+					LK_PRINTLN("[TObjectPtr::{}] {}", ClassInfo->GetName(), __VA_ARGS__); \
+				} \
+				else \
+				{ \
+					LK_PRINTLN("[TObjectPtr::LObject] {}", __VA_ARGS__); \
+				} \
+			} \
+			else \
+			{ \
+				LK_PRINTLN("[TObjectPtr] {}", __VA_ARGS__); \
+			} 
+#else
+#	define LK_DEBUG_PTR_LOG(...) 
 #endif
 
 namespace LkEngine {
@@ -23,9 +47,9 @@ namespace LkEngine {
 	template<typename T>
 	class TObjectPtr;
 
-	/*-----------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------
 		Internal Memory Management.
-	-----------------------------------------------------------------------------*/
+	 ----------------------------------------------------------------------------*/
 	/**
 	 * TObjectPtr_Internal
 	 *
@@ -51,17 +75,13 @@ namespace LkEngine {
 	}
 
 	/**
-	 * @class TObjectPtr
+	 * TObjectPtr
 	 *
-	 * @brief A smart pointer for managing LObject's with reference counting and tracking.
-	 *
-	 * `TObjectPtr` is a templated smart pointer class that provides automatic reference counting,
-	 * basic type safety, and the ability to track live object references for memory management.
-	 * It supports initialization from raw pointers, other `TObjectPtr` instances and conversion
-	 * between compatible types.
-	 *
-	 * @note TObjectPtr uses reference counting for lifetime management.
-	 *       When the reference count reaches zero, the object is deleted and its resources released.
+	 *  Smart pointer for managing LObject's with reference counting and tracking.
+	 *  Provides automatic reference counting, basic type safety and the ability 
+	 *  to track live object references for memory management.
+	 *  It supports initialization from raw pointers, other TObjectPtr instances 
+	 *  and conversion between compatible types.
 	 */
 	template<typename T>
 	class TObjectPtr
@@ -70,6 +90,8 @@ namespace LkEngine {
 		TObjectPtr(T* Instance = nullptr)
 			: ObjectPtr(Instance)
 		{
+			LK_DEBUG_PTR_LOG("Copy Constructor (T* Instance = nullptr)");
+			static_assert(std::is_base_of_v<LObject, T>, "TObject is only usable on objects that derive from LObject");
 			if (ObjectPtr)
 			{
 				TObjectPtr_IncrementReferenceCount();
@@ -79,6 +101,7 @@ namespace LkEngine {
 		TObjectPtr(T& Object)
 			: ObjectPtr(&Object)
 		{
+			LK_DEBUG_PTR_LOG("Copy(T&)");
 			if (ObjectPtr)
 			{
 				TObjectPtr_IncrementReferenceCount();
@@ -88,6 +111,7 @@ namespace LkEngine {
 		TObjectPtr(const T& Object)
 			: ObjectPtr(const_cast<std::remove_const_t<T>*>(&Object))
 		{
+			LK_DEBUG_PTR_LOG("Copy(const T&)");
 			if (ObjectPtr)
 			{
 				TObjectPtr_IncrementReferenceCount();
@@ -97,6 +121,7 @@ namespace LkEngine {
 		TObjectPtr(const TObjectPtr<T>& Other)
 			: ObjectPtr(Other.ObjectPtr)
 		{
+			LK_DEBUG_PTR_LOG("Copy(TObjectPtr<T>&)");
 			if (ObjectPtr)
 			{
 				TObjectPtr_IncrementReferenceCount();
@@ -107,6 +132,7 @@ namespace LkEngine {
 		TObjectPtr(const TObjectPtr<R>& Other)
 			: ObjectPtr((T*)Other.ObjectPtr)
 		{
+			LK_DEBUG_PTR_LOG("Copy(const TObjectPtr<R>&)");
 			if (ObjectPtr)
 			{
 				TObjectPtr_IncrementReferenceCount();
@@ -116,6 +142,7 @@ namespace LkEngine {
 		TObjectPtr(TObjectPtr<T>&& Other) noexcept
 			: ObjectPtr(Other.ObjectPtr)
 		{
+			LK_DEBUG_PTR_LOG("Move(TObjectPtr<T>&&)");
 			Other.ObjectPtr = nullptr;
 		}
 
@@ -123,16 +150,22 @@ namespace LkEngine {
 		TObjectPtr(TObjectPtr<R>&& Other)
 			: ObjectPtr((T*)Other.ObjectPtr)
 		{
+			LK_DEBUG_PTR_LOG("Move(TObjectPtr<R>&&)");
 			Other.ObjectPtr = nullptr;
 		}
 
 		~TObjectPtr()
 		{
-			TObjectPtr_DecrementReferenceCount();
+			LK_DEBUG_PTR_LOG("Destructor");
+			if (ObjectPtr)
+			{
+				TObjectPtr_DecrementReferenceCount();
+			}
 		}
 
 		TObjectPtr& operator=(std::nullptr_t)
 		{
+			LK_DEBUG_PTR_LOG("&operator=(std::nullptr_t)");
 			if (ObjectPtr)
 			{
 				TObjectPtr_DecrementReferenceCount();
@@ -142,85 +175,66 @@ namespace LkEngine {
 			return *this;
 		}
 
-		TObjectPtr& operator=(TObjectPtr<T>&& Other) noexcept
-		{
-			if (ObjectPtr != Other.ObjectPtr)
-			{
-				TObjectPtr_DecrementReferenceCount();
-
-				ObjectPtr = Other.ObjectPtr;
-				Other.ObjectPtr = nullptr;
-			}
-
-			return *this;
-		}
-
-		template<typename R>
-		TObjectPtr& operator=(TObjectPtr<R>&& Other)
-		{
-			if (ObjectPtr != Other.ObjectPtr)
-			{
-				TObjectPtr_DecrementReferenceCount();
-
-				ObjectPtr = (T*)Other.ObjectPtr;
-				Other.ObjectPtr = nullptr;
-			}
-
-			return *this;
-		}
-
 		TObjectPtr& operator=(const TObjectPtr<T>& Other)
 		{
-			if (this != &Other)
+			LK_DEBUG_PTR_LOG("&operator=(const TObjectPtr<T>&)");
+			if (this == &Other)
+			{
+				return *this;
+			}
+
+			if (Other.ObjectPtr)
+			{
+				Other.TObjectPtr_IncrementReferenceCount();
+			}
+			if (ObjectPtr)
 			{
 				TObjectPtr_DecrementReferenceCount();
-
-				ObjectPtr = Other.ObjectPtr;
-				if (ObjectPtr)
-				{
-					TObjectPtr_IncrementReferenceCount();
-				}
 			}
+
+			ObjectPtr = Other.ObjectPtr;
 
 			return *this;
 		}
 
 		template<typename R>
-		TObjectPtr& operator=(const TObjectPtr<R>& Other)
+		FORCEINLINE TObjectPtr& operator=(const TObjectPtr<R>& Other)
 		{
-			if (ObjectPtr != Other.ObjectPtr)
+			LK_DEBUG_PTR_LOG("&operator=(const TObjectPtr<R>&)");
+			if (Other.ObjectPtr)
+			{
+				Other.TObjectPtr_IncrementReferenceCount();
+			}
+			if (ObjectPtr)
 			{
 				TObjectPtr_DecrementReferenceCount();
-
-				ObjectPtr = (T*)Other.ObjectPtr;
-				if (ObjectPtr)
-				{
-					TObjectPtr_IncrementReferenceCount();
-				}
 			}
+
+			ObjectPtr = Other.ObjectPtr;
 
 			return *this;
 		}
 
-		operator bool() { return ObjectPtr != nullptr; }
-		operator bool() const { return ObjectPtr != nullptr; }
-
-		/** Check against nullptr. */
-		FORCEINLINE bool operator==(std::nullptr_t) const
+		template<typename R>
+		FORCEINLINE TObjectPtr& operator=(TObjectPtr<R>&& Other)
 		{
-			return (ObjectPtr == nullptr);
+			LK_DEBUG_PTR_LOG("&operator=(TObjectPtr<R>&&)");
+			if (ObjectPtr)
+			{
+				TObjectPtr_DecrementReferenceCount();
+			}
+
+			ObjectPtr = Other.ObjectPtr;
+			Other.ObjectPtr = nullptr;
+
+			return *this;
 		}
 
-		FORCEINLINE bool operator==(const T* Other) const
-		{
-			return (Get() == Other);
-		}
+		FORCEINLINE operator bool() { return ObjectPtr != nullptr; }
+		FORCEINLINE operator bool() const { return ObjectPtr != nullptr; }
 
-		template<typename U, typename Base = std::common_type_t<T*, U*>>
-		FORCEINLINE bool operator==(const TObjectPtr<U>& Other) const
-		{
-			return (ObjectPtr == nullptr ? !Other : ObjectPtr == Other.ObjectPtr);
-		}
+		FORCEINLINE bool operator==(std::nullptr_t) const { return (ObjectPtr == nullptr); }
+		FORCEINLINE bool operator==(const T* Other) const { return (Get() == Other); }
 
 		FORCEINLINE T* operator->() 
 		{ 
@@ -258,22 +272,20 @@ namespace LkEngine {
 			return static_cast<T*>(ObjectPtr); 
 		}
 
-		/* TODO: This cast function needs to be checked out a bit. I'm not entirely sure this 
-		 *       is behaving as it should. */
 		template<typename R>
 		FORCEINLINE TObjectPtr<R> As() const
 		{
-			//static_assert(std::is_base_of_v<T, R> || std::is_base_of_v<R, T>, "TObjectPtr invalid cast type");
+			static_assert(std::disjunction_v<std::is_base_of<T, R>, std::is_base_of<R, T>>, "Cannot cast TObjectPtr to that type");
 			return TObjectPtr<R>(*this);
 		}
 
-		void Reset(T* ObjectRef = nullptr)
+		FORCEINLINE void Reset(T* ObjectRef = nullptr)
 		{
 			TObjectPtr_DecrementReferenceCount();
 			ObjectPtr = ObjectRef;
 		}
 
-		void Release()
+		FORCEINLINE void Release()
 		{
 			TObjectPtr_DecrementReferenceCount();
 			ObjectPtr = nullptr;
@@ -282,7 +294,7 @@ namespace LkEngine {
 		template<typename... TArgs>
 		static TObjectPtr<T> Create(TArgs&&... Args);
 
-		bool IsEqual(const TObjectPtr<T>& Other) const
+		FORCEINLINE bool IsEqual(const TObjectPtr<T>& Other) const
 		{
 			if ((ObjectPtr == nullptr) || (Other.ObjectPtr == nullptr))
 			{
@@ -302,17 +314,14 @@ namespace LkEngine {
 
 		FORCEINLINE void TObjectPtr_DecrementReferenceCount() const
 		{
-			if (ObjectPtr)
+			ObjectPtr->DecrementReferenceCount();
+
+			if (ObjectPtr->GetReferenceCount() == 0)
 			{
-				ObjectPtr->DecrementReferenceCount();
+				TObjectPtr_Internal::RemoveFromLiveReferences((void*)ObjectPtr);
 
-				if (ObjectPtr->GetReferenceCount() == 0)
-				{
-					TObjectPtr_Internal::RemoveFromLiveReferences((void*)ObjectPtr);
-
-					delete ObjectPtr;
-					ObjectPtr = nullptr;
-				}
+				delete ObjectPtr;
+				ObjectPtr = nullptr;
 			}
 		}
 
@@ -323,6 +332,50 @@ namespace LkEngine {
 		friend class TObjectPtr;
 	};
 
+
+	/**
+	 * TWeakPtr
+	 *
+	 *  Weak pointer.
+	 */
+	template<typename T>
+	class TWeakPtr
+	{
+	public:
+		TWeakPtr(T* InObject = nullptr)
+		{
+			ObjectPtr = InObject;
+		}
+
+		TWeakPtr(TObjectPtr<T> InObjectPtr)
+		{
+			ObjectPtr = InObjectPtr.Get();
+		}
+
+		FORCEINLINE T* operator->() { return ObjectPtr; }
+		FORCEINLINE const T* operator->() const { return ObjectPtr; }
+
+		FORCEINLINE T& operator*() { return *ObjectPtr; }
+		FORCEINLINE const T& operator*() const { return *ObjectPtr; }
+
+		FORCEINLINE bool IsValid() const 
+		{ 
+			return ObjectPtr ? TObjectPtr_Internal::IsLive(ObjectPtr) : false;
+		}
+
+		FORCEINLINE operator bool() const { return IsValid(); }
+
+		template<typename R>
+		FORCEINLINE TWeakPtr<R> As() const
+		{
+			return TWeakPtr<R>(dynamic_cast<R*>(ObjectPtr));
+		}
+
+	private:
+		T* ObjectPtr = nullptr;
+	};
+
 }
+
 
 #include "ObjectPtr.tpp"

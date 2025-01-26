@@ -4,11 +4,11 @@
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Input/Input.h" /// FIXME: Remove the 'Input' directory and just place the files under 'Core'
 #include "LkEngine/Core/IO/FileSystem.h"
-#include "LkEngine/UI/UICore.h"
-#include "LkEngine/UI/ImGui/ImGuiWidgets.h"
 
 #include "LkEngine/Renderer/Image.h"
 #include "LkEngine/Renderer/Texture.h"
+#include "LkEngine/Renderer/UI/UICore.h"
+#include "LkEngine/Renderer/UI/ImGui/ImGuiWidgets.h"
 
 #include "LkEngine/Editor/EditorLayer.h"
 
@@ -17,7 +17,7 @@
 #include "LkEngine/Project/Project.h"
 #include "LkEngine/Serialization/Serializer.h"
 
-#define LK_CONTENT_BROWSER_USE_HEIGHT_HACK
+#define LK_CONTENT_BROWSER_USE_HEIGHT_HACK 1
 
 
 namespace LkEngine {
@@ -33,15 +33,12 @@ namespace LkEngine {
 
 		std::memset(SearchBuffer, 0, LContentBrowserItem::INPUT_BUFFER_SIZE);
 
-		/* TODO: Load all file icons here. */
-		//AssetIconMap[".lmesh"] = FEditorResources::MeshFileIcon;
-
 		LProject::OnProjectChanged.Add(this, &LContentBrowserPanel::OnProjectChanged);
     }
 
     void LContentBrowserPanel::Initialize()
     {
-		LK_CORE_DEBUG_TAG("ContentBrowser", "Initializing");
+		LK_CORE_TRACE_TAG("ContentBrowser", "Initializing");
     }
 
 	void LContentBrowserPanel::OnRenderUI(bool& IsOpen)
@@ -165,8 +162,7 @@ namespace LkEngine {
 
 	void LContentBrowserPanel::OnProjectChanged(TObjectPtr<LProject> InProject)
 	{
-		LK_CORE_DEBUG_TAG("ContentBrowserPanel", "OnProjectChanged: {}", InProject->GetName());
-
+		LK_CORE_TRACE_TAG("ContentBrowserPanel", "OnProjectChanged: {}", InProject->GetName());
 		ItemList.Clear();
 		Directories.clear();
 		BaseDirectory = nullptr;
@@ -285,11 +281,11 @@ namespace LkEngine {
 				ItemList.Items.push_back(TObjectPtr<LContentBrowserDirectory>::Create(SubDir));
 			}
 
-			std::vector<LUUID> InvalidAssets;
-			for (LUUID AssetHandle : Directory->Assets)
+			std::vector<FAssetHandle> InvalidAssets;
+			InvalidAssets.reserve(Directory->Assets.size());
+			for (FAssetHandle AssetHandle : Directory->Assets)
 			{
-				FAssetMetadata Metadata = LProject::Current()->GetRuntimeAssetManager()->GetMetadata(AssetHandle);
-				
+				FAssetMetadata Metadata = LProject::Current()->GetAssetManager()->GetMetadata(AssetHandle);
 				if (!Metadata.IsValid())
 				{
 					continue;
@@ -330,7 +326,7 @@ namespace LkEngine {
 		}
 
 		TObjectPtr<FDirectoryInfo> DirectoryInfo = TObjectPtr<FDirectoryInfo>::Create();
-		DirectoryInfo->Handle = LUUID();
+		DirectoryInfo->Handle = FAssetHandle();
 		DirectoryInfo->Parent = ParentDir;
 
 		if (DirectoryPath == Project->GetAssetDirectory())
@@ -346,12 +342,12 @@ namespace LkEngine {
 		{
 			if (Entry.is_directory())
 			{
-				const LUUID SubdirHandle = ProcessDirectory(Entry.path(), DirectoryInfo);
+				const FAssetHandle SubdirHandle = ProcessDirectory(Entry.path(), DirectoryInfo);
 				DirectoryInfo->SubDirectories[SubdirHandle] = Directories[SubdirHandle];
 				continue;
 			}
 
-			auto AssetManager = LProject::Current()->GetRuntimeAssetManager();
+			auto AssetManager = LProject::Current()->GetAssetManager();
 			FAssetMetadata Metadata = AssetManager->GetMetadata(fs::relative(Entry.path(), Project->GetAssetDirectory()));
 			if (!Metadata.IsValid())
 			{
@@ -399,14 +395,21 @@ namespace LkEngine {
 
 		for (auto& AssetHandle : DirectoryInfo->Assets)
 		{
-			const FAssetMetadata& Asset = LProject::Current()->GetRuntimeAssetManager()->GetMetadata(AssetHandle);
-			std::string Filename = StringUtils::ToLower(Asset.FilePath.filename().string());
+			const FAssetMetadata& Asset = LProject::Current()->GetAssetManager()->GetMetadata(AssetHandle);
+			const std::string Filename = StringUtils::ToLower(Asset.FilePath.filename().string());
 
 			if (Filename.find(QueryLowerCase) != std::string::npos)
 			{
-				TObjectPtr<LTexture2D> AssetTexture = (AssetIconMap.find(Asset.FilePath.extension().string()) != AssetIconMap.end()) 
-					? AssetIconMap[Asset.FilePath.extension().string()] 
-					: FEditorResources::FileIcon;
+				TObjectPtr<LTexture2D> AssetTexture;
+				if (AssetIconMap.find(Asset.FilePath.extension().string()) != AssetIconMap.end())
+				{
+					AssetIconMap[Asset.FilePath.extension().string()];
+				}
+				else
+				{ 
+					AssetTexture = FEditorResources::FileIcon;
+				}
+
 				ItemList.Items.push_back(TObjectPtr<LContentBrowserAsset>::Create(Asset, AssetTexture));
 			}
 		}
@@ -415,14 +418,14 @@ namespace LkEngine {
 
 	void LContentBrowserPanel::OnBrowseForward()
 	{
-		LK_CORE_DEBUG_TAG("ContentBrowser", "OnBrowseForward");
+		LK_CORE_TRACE_TAG("ContentBrowser", "OnBrowseForward");
 		LK_CORE_VERIFY(NextDirectory);
 		ChangeDirectory(NextDirectory);
 	}
 
 	void LContentBrowserPanel::OnBrowseBackward()
 	{
-		LK_CORE_DEBUG_TAG("ContentBrowser", "OnBrowseBackward");
+		LK_CORE_TRACE_TAG("ContentBrowser", "OnBrowseBackward");
 		LK_CORE_VERIFY(CurrentDirectory && NextDirectory);
 		NextDirectory = CurrentDirectory;
 		PreviousDirectory = CurrentDirectory->Parent;
@@ -431,9 +434,9 @@ namespace LkEngine {
 
 	void LContentBrowserPanel::ClearCurrentSelection()
 	{
-		//LK_CORE_DEBUG_TAG("ContentBrowser", "Clearing current selection");
-		std::vector<LUUID> SelectedItems = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
-		for (LUUID ItemHandle : SelectedItems)
+		//LK_CORE_INFO_TAG("ContentBrowser", "Clearing current selection");
+		std::vector<FAssetHandle> SelectedItems = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
+		for (const FAssetHandle ItemHandle : SelectedItems)
 		{
 			const std::size_t Index = ItemList.Find(ItemHandle);
 			if (Index == FContentBrowserItemList::InvalidItem)
@@ -454,14 +457,13 @@ namespace LkEngine {
 		LK_CORE_ASSERT(CurrentDirectory, "Failed to update drop area, CurrentDirectory is nullptr");
 		if (DirectoryInfo->Handle != CurrentDirectory->Handle && ImGui::BeginDragDropTarget())
 		{
-			/* TODO: Drag'n'Drop payload names/enums instead of raw strings. */
-			const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload("AssetPayload");
+			const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload(UI::DragDropPayload::Asset);
 			if (Payload)
 			{
-				const uint32_t Count = Payload->DataSize / sizeof(LUUID);
+				const uint32_t Count = Payload->DataSize / sizeof(FAssetHandle);
 				for (uint32_t i = 0; i < Count; i++)
 				{
-					const LUUID AssetHandle = *(((LUUID*)Payload->Data) + i);
+					const FAssetHandle AssetHandle = *(((FAssetHandle*)Payload->Data) + i);
 					const std::size_t Index = ItemList.Find(AssetHandle);
 					if (Index != FContentBrowserItemList::InvalidItem)
 					{
@@ -481,8 +483,6 @@ namespace LkEngine {
 		static constexpr ImGuiChildFlags ChildFlags = ImGuiChildFlags_None;
 		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoScrollbar;
 		ImGui::BeginChild("##ContentBrowser-TopBar", ImVec2(0, Height), ChildFlags, WindowFlags);
-
-		/* Begin horizontal layout for the top bar. */
 		ImGui::BeginGroup();
 		{
 			const float EdgeOffset = 4.0f;
@@ -602,6 +602,7 @@ namespace LkEngine {
 
 				LK_CORE_ASSERT(Project);
 				const std::string& AssetsDirectoryName = fs::relative(Project->GetConfiguration().AssetDirectory).string();
+				LK_CORE_ASSERT(!AssetsDirectoryName.empty(), "Project '{}' does not have an assigned AssetsDirectory in its configuration", Project->GetName());
 				const ImVec2 TextSize = ImGui::CalcTextSize(AssetsDirectoryName.c_str());
 				const float TextPadding = ImGui::GetStyle().FramePadding.y;
 
@@ -679,71 +680,143 @@ namespace LkEngine {
 		for (TObjectPtr<LContentBrowserItem>& Item : ItemList)
 		{
 			Item->BeginRender();
-
-			/* Determine action. */
 			const FContentBrowserItemAction ItemAction = Item->Render();
 
-			/* Action: Select. */
-			if (ItemAction.Flags & EContentBrowserAction::Selected)
+			/**
+			 * The ordering of the browser item actions matters.
+			 * Any previous selection states need to be taken into account 
+			 * and not handled before any deselection actions.
+			 */
+
+			if (ItemAction & EContentBrowserAction::ClearSelections)
 			{
-				if (!LSelectionContext::IsSelected(ESelectionContext::ContentBrowser, Item->GetID()))
+				LK_DEBUG_CONTENTBROWSER_ITEM_LOG("ClearSelections: {}", Item->GetName());
+				ClearCurrentSelection();
+			}
+
+			/* Action: Deselect. */
+			if (ItemAction & EContentBrowserAction::Deselected)
+			{
+				LK_DEBUG_CONTENTBROWSER_ITEM_LOG("Deselected item: {}", Item->GetName());
+				LSelectionContext::Deselect(ESelectionContext::ContentBrowser, Item->GetID());
+			}
+
+			/* Action: Select. */
+			if (ItemAction & EContentBrowserAction::Selected)
+			{
+				LK_DEBUG_CONTENTBROWSER_ITEM_LOG("Selected item: {}", Item->GetName());
+				LSelectionContext::Select(ESelectionContext::ContentBrowser, Item->GetID());
+			}
+
+			/* Action: SelectToHere. */
+			/* Selects multiple items, is only applicable when the item count is 2. 
+			 * This is because the selection cannot be calculated otherwise (needs start -> stop). */
+			if (ItemAction & EContentBrowserAction::SelectToHere)
+			{
+				LK_DEBUG_CONTENTBROWSER_ITEM_LOG("SelectToHere: {}  Count={}", Item->GetName(), LSelectionContext::GetSelectionCount(ESelectionContext::ContentBrowser));
+				if (LSelectionContext::GetSelectionCount(ESelectionContext::ContentBrowser) == 2)
 				{
-					LK_CORE_DEBUG_TAG("ContentBrowser", "Selected item: {}", Item->GetName());
-					LSelectionContext::Select(ESelectionContext::ContentBrowser, Item->GetID());
+					std::size_t FirstIdx = ItemList.Find(LSelectionContext::GetSelected(ESelectionContext::ContentBrowser, 0));
+					std::size_t LastIdx = ItemList.Find(Item->GetID());
+
+					if (FirstIdx > LastIdx)
+					{
+						const std::size_t TempCopy = FirstIdx;
+						FirstIdx = LastIdx;
+						LastIdx = TempCopy;
+					}
+
+					LK_DEBUG_CONTENTBROWSER_ITEM_LOG("SelectToHere  FirstIdx={} LastIdx={}", FirstIdx, LastIdx);
+					for (std::size_t Idx = FirstIdx; Idx < LastIdx; Idx++)
+					{
+						LSelectionContext::Select(ESelectionContext::ContentBrowser, ItemList[Idx]->GetID());
+					}
 				}
 			}
-			/* Action: Deselect. */
-			if (ItemAction.Flags & EContentBrowserAction::Deselected)
-			{
-				LK_CORE_DEBUG_TAG("ContentBrowser", "Deselected item: {}", Item->GetName());
-			}
+
 			/* Action: Show In Explorer. */
-			if (ItemAction.Flags & EContentBrowserAction::ShowInExplorer)
+			if (ItemAction & EContentBrowserAction::ShowInExplorer)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Show in explorer: {}", Item->GetName());
 				LK_CORE_ASSERT(Project && CurrentDirectory);
-				LFileSystem::ShowFileInExplorer(Project->GetAssetDirectory() / CurrentDirectory->FilePath / Item->GetName());
+				if (Item->GetType() == LContentBrowserItem::EItemType::Directory)
+				{
+					LFileSystem::ShowFileInExplorer(Project->GetAssetDirectory() / CurrentDirectory->FilePath / Item->GetName());
+				}
+				else
+				{
+					TObjectPtr<LEditorAssetManager> EditorAssetManager = Project->GetEditorAssetManager();
+					LK_CORE_ASSERT(EditorAssetManager);
+					const FAssetMetadata& ItemMetadata = EditorAssetManager->GetMetadata(Item->GetID());
+					LFileSystem::ShowFileInExplorer(EditorAssetManager->GetFileSystemPath(ItemMetadata));
+				}
 			}
+
 			/* Action: Start Renaming. */
-			if (ItemAction.Flags & EContentBrowserAction::StartRenaming)
+			if (ItemAction & EContentBrowserAction::StartRenaming)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Start renaming: {}", Item->GetName());
 			}
+
 			/* Action: Reload. */
-			if (ItemAction.Flags & EContentBrowserAction::Reload)
+			if (ItemAction & EContentBrowserAction::Copy)
 			{
-				LK_CORE_DEBUG_TAG("ContentBrowser", "Reload");
+				LK_CORE_DEBUG_TAG("ContentBrowser", "Copying: {} ({})", Item->GetName(), Item->GetID());
+				CopiedAssets.Select(Item->GetID());
 			}
-			/* Action: Hovered. */
-			if (ItemAction.Flags & EContentBrowserAction::Hovered)
+
+			/* Action: Reload. */
+			if (ItemAction & EContentBrowserAction::Reload)
 			{
-				//LK_CORE_DEBUG_TAG("ContentBrowser", "Hovered: {}", Item->GetName());
+				LK_CORE_DEBUG_TAG("ContentBrowser", "Reload asset: {} ({})", Item->GetName(), Item->GetID());
+				if (!LAssetManager::ReloadData(Item->GetID()))
+				{
+					LK_CORE_ERROR_TAG("ContentBrowser", "Failed to reload data for item: {} ({})", Item->GetName(), Item->GetID());
+				}
+			}
+
+			/* Action: Hovered. */
+			if (ItemAction & EContentBrowserAction::Hovered)
+			{
 				bIsAnyItemHovered = true;
 			}
 
 			Item->EndRender();
 
 			/* Action: Renamed. */
-			if (ItemAction.Flags & EContentBrowserAction::Renamed)
+			if (ItemAction & EContentBrowserAction::Renamed)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Renamed: {}", Item->GetName());
 				break;
 			}
 
 			/* Action: Activated. */
-			if (ItemAction.Flags & EContentBrowserAction::Activated)
+			if (ItemAction & EContentBrowserAction::Activated)
 			{
 				LK_CORE_DEBUG_TAG("ContentBrowser", "Activated: {}", Item->GetName());
 				if (Item->GetType() == LContentBrowserItem::EItemType::Directory)
 				{
 					LK_CORE_DEBUG_TAG("ContentBrowser", "Entering directory: {}", Item->GetName());
 					LSelectionContext::DeselectAll(ESelectionContext::ContentBrowser);
+
+					// Required to break here as we invalidate the current 
+					// iteration of items whenever a new directory is entered.
 					ChangeDirectory(Item.As<LContentBrowserDirectory>()->GetDirectoryInfo());
 					break;
 				}
+				else
+				{
+					/* TODO: Open editor of some sort, based on the file type. */
+				}
 			}
 
-			/// TODO: Finish the rest of the browser actions.
+			/* Action: Refresh. */
+			if (ItemAction & EContentBrowserAction::Refresh)
+			{
+				LK_CORE_DEBUG_TAG("ContentBrowser", "Refresh: {}", Item->GetName());
+				Refresh();
+				break;
+			}
 		}
 	}
 

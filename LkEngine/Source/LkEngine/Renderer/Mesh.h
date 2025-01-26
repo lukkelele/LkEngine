@@ -373,6 +373,7 @@ namespace LkEngine {
 		friend class LMesh;
 		friend class LAssimpMeshImporter;
 		friend class LAssetManager;
+		friend class LEditorAssetManager;
 		friend class LRuntimeAssetManager;
 
 		LASSET(LMeshSource)

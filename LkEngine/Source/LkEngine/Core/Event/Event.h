@@ -10,15 +10,10 @@ namespace LkEngine {
 	enum class EEventType
 	{
 		Null = 0,
-		Key, KeyPressed, KeyReleased, KeyTyped,
+		Key, KeyPressed, KeyReleased,
 		MouseButtonPressed, MouseButtonReleased, MouseButtonDown, MouseMoved, MouseScrolled,
 		WindowFocus, WindowLostFocus, WindowMoved, WindowResize, WindowClose,
 
-		TextureCreated, TextureDeleted,	
-
-		SceneCreated, SceneDeleted, 
-
-		// Physics
 		ConstraintAdded, ConstraintRemoved, ConstraintAltered,
 		RigidbodyAdded, RigidbodyRemoved, RigidbodyAltered,
 		Collision, Separation
@@ -27,44 +22,46 @@ namespace LkEngine {
 	class LEvent
 	{
 	public:
-		virtual ~LEvent() {}
+		virtual ~LEvent() = default;
 
-		bool Handled = false;
-
-		virtual EEventType GetEventType() const = 0;
+		virtual EEventType GetType() const = 0;
 		virtual const char* GetName() const = 0;
 
 		virtual std::string ToString() const { return GetName(); }
+
+	public:
+		bool bHandled = false;
 	};
 
-	class EventDispatcher
+	class LEventDispatcher
 	{
 		template<typename T>
-		using EventFn = std::function<bool(T&)>;
+		using TEventFn = std::function<bool(T&)>;
 	public:
-		EventDispatcher(LEvent& Event) : m_Event(Event) 
+		LEventDispatcher(LEvent& InEvent) 
+			: EventRef(InEvent) 
 		{
 		}
 
 		template<typename T>
-		bool Dispatch(EventFn<T> func)
+		bool Dispatch(TEventFn<T> InFunc)
 		{
-			if (!m_Event.Handled)
+			if (!EventRef.bHandled)
 			{
-				m_Event.Handled = func(*(T*)&m_Event);
-				LK_CORE_TRACE_TAG("EventDispatcher", "Executing event \"{}\"", m_Event.GetName());
+				EventRef.bHandled = InFunc(*(T*)&EventRef);
+				LK_CORE_TRACE_TAG("EventDispatcher", "Executing: '{}'", EventRef.GetName());
 				return true;
 			}
 			return false;
 		}
 
 	private:
-		LEvent& m_Event;
+		LEvent& EventRef;
 	};
 
-	inline std::ostream& operator<<(std::ostream& os, const LEvent& e)
+	inline std::ostream& operator<<(std::ostream& OStream, const LEvent& InEvent)
 	{
-		return os << e.ToString();
+		return OStream << InEvent.ToString();
 	}
 
 	using FEventCallback = std::function<void(LEvent&)>;

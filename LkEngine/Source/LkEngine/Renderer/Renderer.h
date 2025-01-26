@@ -16,19 +16,9 @@ namespace LkEngine {
 	class LRenderer : public LObject
 	{
 	public:
-		LK_DECLARE_MULTICAST_DELEGATE(FOnMeshSubmission, 
-			TObjectPtr<LMesh>, 
-			TObjectPtr<LShader>,
-			TObjectPtr<LMaterial>
-		);
-
-	public:
 		LRenderer();
 		~LRenderer() = default;
 
-		/**
-		 * @brief Create Pipeline components.
-		 */
 		static void Initialize();
 		static void Destroy();
 
@@ -69,12 +59,10 @@ namespace LkEngine {
 
 		static void SubmitLines(const LVertexBuffer& va, const LIndexBuffer& ib, const LShader& Shader);
 
-		// Quad
 		static void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0);
 		static void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0);
 		static void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID = 0);
 		static void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID = 0);
-		// ~Quad
 
 		static void SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, const glm::vec4 Color, uint64_t EntityID = 0);
 		static void SubmitSprite(LTransformComponent& TransformComponent, const glm::vec2& Size, TObjectPtr<LTexture> Texture, uint64_t EntityID = 0);
@@ -84,10 +72,9 @@ namespace LkEngine {
 		static void DrawMesh(TObjectPtr<LMesh>& Mesh, const TObjectPtr<LShader> Shader);
 
 		static uint32_t GetCurrentFrameIndex();
-		static uint32_t RT_GetCurrentFrameIndex();
 
 		static TObjectPtr<LFramebuffer> GetViewportFramebuffer();
-		static RendererCapabilities& GetCapabilities();
+		static FRendererCapabilities& GetCapabilities();
 
 		template<typename TFunction>
 		static void Submit(TFunction&& Function)
@@ -103,38 +90,16 @@ namespace LkEngine {
 			new (StorageBuffer) TFunction(std::forward<TFunction>(Function));
 		}
 
-		template<typename TFunction>
-		static void SubmitResourceFree(TFunction&& Function)
-		{
-			auto RenderCmd = [](void* Ptr)
-			{
-				auto FunctionPtr = (TFunction*)Ptr;
-				(*FunctionPtr)();
-				FunctionPtr->~TFunction();
-			};
-
-			Submit([RenderCmd, Function]()
-			{
-				const uint32_t Index = LRenderer::RT_GetCurrentFrameIndex();
-				auto StorageBuffer = GetRenderCommandQueue().Allocate(RenderCmd, sizeof(Function));
-				new (StorageBuffer) TFunction(std::forward<TFunction>((TFunction&&)Function));
-			});
-		}
-
-		static void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
-									TObjectPtr<LRenderPass> RenderPass);
-
+		static void BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, TObjectPtr<LRenderPass> RenderPass);
 		static void EndRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer);
 
-
-		FORCEINLINE static uint32_t GetSamplersCount() { return SamplerCount; }
-		FORCEINLINE static void IncrementSamplerCount() { SamplerCount++; }
-		FORCEINLINE static void DecreaseSamplerCount() { SamplerCount--; }
+		static uint32_t GetSamplersCount() { return SamplerCount; }
+		static void IncrementSamplerCount() { SamplerCount++; }
+		static void DecreaseSamplerCount() { SamplerCount--; }
 
 		FORCEINLINE static uint32_t GetFramesInFlight() { return FramesInFlight; }
 
-		static void SetPrimitiveTopology(const ERenderTopology& InRenderTopology);
-
+		static void SetPrimitiveTopology(const ERenderTopology InRenderTopology);
 		FORCEINLINE static ERenderTopology GetPrimitiveTopology() { return PrimitiveTopology; }
 
 		static LRenderCommandQueue& GetRenderCommandQueue();
@@ -148,26 +113,20 @@ namespace LkEngine {
 		static TObjectPtr<LTexture2D> GetWhiteTexture();
 		static TObjectPtr<LTextureCube> GetWhiteTextureCube();
 
-		static void RegisterShaderDependency(TObjectPtr<LShader> InShader, TObjectPtr<LMaterial> InMaterial);
-
+		static void RegisterShader(TObjectPtr<LShader> InShader, TObjectPtr<LMaterial> InMaterial);
 		static void SetDepthFunction(const EDepthFunction InDepthFunction);
 
-	private:
-		static void LoadTextures();
-
 	public:
-		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.250f, 1.0f };
-		inline static glm::vec4 DEFAULT_CLEARCOLOR = { 0.200f, 0.200f, 0.250f, 1.0f };
+		inline static ERenderTopology PrimitiveTopology = ERenderTopology::Triangles;
 
-		static FOnMeshSubmission OnMeshSubmission;
-		static ERenderTopology PrimitiveTopology;
+		inline static glm::vec4 ClearColor = { 0.216f, 0.240f, 0.250f, 1.0f };
+		inline static glm::vec4 DEFAULT_CLEARCOLOR = { 0.250f, 0.250f, 0.250f, 1.0f };
 
 	private:
 		inline static uint32_t SamplerCount = 0;
 		inline static uint32_t FramesInFlight = 2;
 
-		/* Render API */
-		inline static TObjectPtr<LRendererAPI> RendererAPI = nullptr;
+		inline static TObjectPtr<LRendererAPI> RendererAPI{};
 
 		friend class LEditorLayer;
 

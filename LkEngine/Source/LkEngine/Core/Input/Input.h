@@ -23,9 +23,9 @@ namespace LkEngine {
 
 		static void Update();
 
-		static bool IsKeyPressed(EKey Key);
-		static bool IsKeyHeld(EKey Key);
-		static bool IsKeyDown(EKey Key);
+		static bool IsKeyPressed(const EKey Key);
+		static bool IsKeyHeld(const EKey Key);
+		static bool IsKeyDown(const EKey Key);
 		static bool IsKeyReleased(const EKey Key);
 
 		static bool IsMouseButtonPressed(const EMouseButton Button);
@@ -34,7 +34,7 @@ namespace LkEngine {
 		static bool IsMouseButtonReleased(const EMouseButton Button);
 		static bool IsAnyMouseButtonPressed();
 
-		static void SetCursorMode(ECursorMode mode);
+		static void SetCursorMode(const ECursorMode CursorMode);
 		static ECursorMode GetCursorMode();
 
 		static FKeyData& GetKeyData(const EKey Key);
@@ -92,7 +92,6 @@ namespace LkEngine {
 		inline static std::map<EMouseButton, FMouseButtonData> MouseDataMap{};
 
 		using FKeyHeldData = std::pair<std::chrono::steady_clock::time_point, std::chrono::steady_clock::time_point>;
-		//inline static std::map<EKey, std::chrono::steady_clock::time_point> KeyHeldMap{};
 		inline static std::map<EKey, FKeyHeldData> KeyHeldMap{};
     };
 

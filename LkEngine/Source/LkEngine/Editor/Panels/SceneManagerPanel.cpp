@@ -1,11 +1,9 @@
 #include "LKpch.h"
 #include "SceneManagerPanel.h"
 
-#include "LkEngine/UI/Property.h"
 #include "LkEngine/Core/SelectionContext.h"
 
 #include "LkEngine/Renderer/FrameBuffer.h"
-#include "LkEngine/Renderer/TextureLibrary.h"
 #include "LkEngine/Renderer/Color.h"
 
 #include "LkEngine/Editor/EditorCore.h"
@@ -13,10 +11,18 @@
 
 #include "LkEngine/Project/Project.h"
 
-#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Renderer/SceneRenderer.h"
+#include "LkEngine/Renderer/UI/Property.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 
 
 namespace LkEngine {
+
+	namespace 
+	{
+		FSceneRendererFlushData FlushData{};
+		std::vector<FSceneSelectionData> SceneSelectionData{};
+	}
 
 	/// TODO: Move this
 	/* Helper function. */
@@ -51,7 +57,28 @@ namespace LkEngine {
 
 		if (Scene)
 		{
+			LK_CORE_ASSERT(!Scene->Name.empty());
 			ImGui::SeparatorText(std::format("{}", Scene->Name).c_str());
+
+			/* Scene raycast info. */
+			{
+				UI_SceneRaycastData();
+			}
+
+			/* Render info. */
+			{
+				ImGui::Text("Drawlist Info");
+				ImGui::Indent();
+				{
+					ImGui::Text("StaticMesh Size:  %d", FlushData.StaticMeshDrawListSize);
+					ImGui::Text("Mesh Size:        %d", FlushData.MeshDrawListSize);
+				}
+				ImGui::Unindent();
+
+				ImGui::Separator();
+			}
+
+			/* Scene content. */
 			auto& EntityStorage = Scene->Registry.storage<entt::entity>();
 			for (entt::entity EntityID : EntityStorage)
 			{
@@ -79,7 +106,7 @@ namespace LkEngine {
 		#if 0
 			UI::End();
 		#else
-			LK_UI_DEBUG_ON_HOVER();
+			LK_UI_DEBUG_WINDOW_ON_HOVER();
 			ImGui::End();
 		#endif
 		}
@@ -174,32 +201,31 @@ namespace LkEngine {
 		ImGuiTreeNodeFlags TreeNodeFlags = (IsEntitySelected ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None);
 		TreeNodeFlags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 
-		//const ImGuiID EntityImGuiID = ImGui::GetID((uint64_t)(uint32_t)Entity);
 		const ImGuiID EntityImGuiID = ImGui::GetID((void*)(uint64_t)(uint32_t)Entity);
 
 		const bool WasNodeOpened = ImGui::TreeNodeBehaviorIsOpen(EntityImGuiID);
 		const bool NodeOpened = ImGui::TreeNodeEx((void*)EntityImGuiID, TreeNodeFlags, Entity.Name().c_str());
-		//const bool WasNodeOpened = ImGui::TreeNodeBehaviorIsOpen((void*)(uint64_t)(uint32_t)Entity);
-		//const bool NodeOpened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)Entity, TreeNodeFlags, Entity.Name().c_str());
 
-		/* Get the selected entities. */
 		/// TODO: Remove the depenency for the selection vector in the call to DrawComponent.
+		/* Get the selected entities. */
 		const std::vector<LUUID>& Entities = LSelectionContext::GetSelected(ESelectionContext::Scene);
 
 		if (NodeOpened)
 		{
-			ImGui::Text("UUID: %ull", Entity.GetUUID());
+			const std::string UuidStr = std::format("{}", (uint64_t)Entity.GetUUID());
+			ImGui::Text("UUID: %s", UuidStr.c_str());
 
 			/**
 			 * Draw: MeshComponent
 			 */
 			if (Entity.HasComponent<LMeshComponent>())
 			{
-				TObjectPtr<LRuntimeAssetManager> AssetManager = LProject::Current()->GetRuntimeAssetManager();
+				TObjectPtr<IAssetManager> AssetManager = LProject::Current()->GetAssetManager();
 				DrawComponent<LMeshComponent>("Mesh", Entity, Entities, [&Entity, &AssetManager](LMeshComponent& Mesh)
 				{
-					auto& Metadata = AssetManager->GetMetadata(Mesh.Mesh);
-					ImGui::Text("Asset: %ull", Mesh.Mesh);
+					const FAssetMetadata& Metadata = AssetManager->GetMetadata(Mesh.Mesh);
+					const std::string AssetHandleStr = std::format("{}", (uint64_t)Mesh.Mesh);
+					ImGui::Text("Asset: %s", AssetHandleStr.c_str());
 					ImGui::Text("Loaded: %s", Metadata.bIsDataLoaded ? "Yes" : "No");
 					ImGui::Text("Memory Asset: %s", Metadata.bIsMemoryAsset ? "Yes" : "No");
 					ImGui::Text("Filepath: %s", Metadata.FilePath.string().c_str());
@@ -214,8 +240,9 @@ namespace LkEngine {
 				TObjectPtr<LRuntimeAssetManager> AssetManager = LProject::Current()->GetRuntimeAssetManager();
 				DrawComponent<LStaticMeshComponent>("StaticMesh", Entity, Entities, [&Entity, &AssetManager](LStaticMeshComponent& Mesh)
 				{
-					auto& Metadata = AssetManager->GetMetadata(Mesh.StaticMesh);
-					ImGui::Text("Asset: %ull", Mesh.StaticMesh);
+					const FAssetMetadata& Metadata = AssetManager->GetMetadata(Mesh.StaticMesh);
+					const std::string AssetHandleStr = std::format("{}", (uint64_t)Mesh.StaticMesh);
+					ImGui::Text("Asset: %s", AssetHandleStr.c_str());
 					ImGui::Text("Loaded: %s", Metadata.bIsDataLoaded ? "Yes" : "No");
 					ImGui::Text("Memory Asset: %s", Metadata.bIsMemoryAsset ? "Yes" : "No");
 					ImGui::Text("Filepath: %s", Metadata.FilePath.string().c_str());
@@ -387,6 +414,13 @@ namespace LkEngine {
 					UI::Draw::Underline();
 					UI::ShiftCursorY(18.0f);
 				});
+
+				DrawEntityCreateMenu(Entity);
+
+				if (ImGui::MenuItem("Delete"))
+				{
+					LK_CORE_DEBUG_TAG("SceneManager", "Deleting entity: {} ({})", Entity.Name(), Entity.GetUUID());
+				}
 			}
 
 			/* Select the entity in the scene context if the node was opened this tick. */
@@ -454,18 +488,115 @@ namespace LkEngine {
 		Scene = InScene;
 	}
 
+	void LSceneManagerPanel::OnSceneRendererDrawListFlush(const FSceneRendererFlushData& Data)
+	{
+		FlushData = Data;
+	}
+
+	void LSceneManagerPanel::OnSceneSelectionUpdated(const std::vector<FSceneSelectionData>& InSelectionData) 
+	{
+		SceneSelectionData = InSelectionData;
+	}
+
+	void LSceneManagerPanel::DrawEntityCreateMenu(LEntity Parent)
+	{
+		if (!ImGui::BeginMenu("Create"))
+		{
+			return;
+		}
+
+		LEntity NewEntity;
+
+		if (ImGui::MenuItem("Empty"))
+		{
+			NewEntity = Scene->CreateEntity("Empty Entity");
+		}
+
+		if (ImGui::BeginMenu("Camera"))
+		{
+			if (ImGui::MenuItem("From View"))
+			{
+				NewEntity = Scene->CreateEntity("Camera");
+				NewEntity.AddComponent<LCameraComponent>();
+
+				for (auto& PluginFunc : EntityMenuPlugins)
+				{
+					PluginFunc(NewEntity);
+				}
+			}
+
+			if (ImGui::MenuItem("At World Origin"))
+			{
+				NewEntity = Scene->CreateEntity("Camera");
+				NewEntity.AddComponent<LCameraComponent>();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::MenuItem("Text"))
+		{
+		#if 0
+			NewEntity = Scene->CreateEntity("Text");
+			auto& TextComp = NewEntity.AddComponent<LTextComponent>();
+			/* UI::Font or LFont? */
+			TextComp.FontHandle = UI::Font::GetDefault()->Handle;
+		#endif
+		}
+
+		if (ImGui::BeginMenu("3D"))
+		{
+			if (ImGui::MenuItem("Cube"))
+			{
+			}
+
+			if (ImGui::MenuItem("Sphere"))
+			{
+			}
+
+			if (ImGui::MenuItem("Plane"))
+			{
+			}
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenu();
+	}
+
+	void LSceneManagerPanel::UI_SceneRaycastData()
+	{
+		ImGui::BeginGroup();
+		{
+			UI::Font::Push("Large");
+			ImGui::Text("Selection Data");
+			UI::Font::Pop();
+
+			ImGui::Separator();
+			ImGui::Indent();
+			ImGui::Text("Selections: %d", (int)SceneSelectionData.size());
+			for (const FSceneSelectionData& SceneSelectionData : SceneSelectionData)
+			{
+				ImGui::BulletText("%s  Dist: %.2f", SceneSelectionData.Entity.Name().c_str(), SceneSelectionData.Distance);
+			}
+			ImGui::Unindent();
+			ImGui::Separator();
+		}
+		ImGui::EndGroup();
+	}
+
 	/*-------------------------------------------------------------------------------*/
 
 	void DumpAttachedComponents(const LEntity Entity)
 	{
 		if (Entity.HasComponent<LIDComponent>() && (static_cast<uint32_t>(Entity.GetUUID()) != 0))
 		{
-			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LIDComponent: {}", Entity.HasComponent<LIDComponent>());
-			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LTagComponent: {}", Entity.HasComponent<LTagComponent>());
+			LK_CORE_INFO("IDComponent:  {}", Entity.HasComponent<LIDComponent>() ? Entity.GetComponent<LIDComponent>().ID : (LUUID)0);
+			LK_CORE_INFO("TagComponent: {}", Entity.HasComponent<LTagComponent>() ? Entity.Name() : "Unknown");
 		}
 		if (Entity.HasComponent<LTransformComponent>())
 		{
-			LK_CORE_DEBUG_TAG("SceneManagerPanel", "LTransformComponent: {}", Entity.GetComponent<LTransformComponent>().ToString());
+			LK_CORE_INFO("LTransformComponent: {}", Entity.GetComponent<LTransformComponent>().ToString());
 		}
 	}
 

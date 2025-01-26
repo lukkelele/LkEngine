@@ -44,13 +44,15 @@ namespace LkEngine {
 		}
 	};
 
+	enum class EPhysics2D
+	{ 
+		None = 0, 
+		Box2D, 
+	};
+
 	class Physics2D
 	{
 	public:
-		enum class API { None = 0, Box2D = 1 };
-	public:
-		static std::vector<Raycast2DResult> Raycast(LScene& scene, const glm::vec2& point0, const glm::vec2& point1);
-		static std::vector<Raycast2DResult> RaycastFromScreen(LScene& scene);
 	};
 
 

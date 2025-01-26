@@ -43,7 +43,7 @@ namespace LkEngine {
 
         void SetTransparency(float transparency);
         float& GetTransparency();
-		bool IsTransparent() const { return m_Transparent; }
+		bool IsTransparent() const { return bTransparent; }
 
         TObjectPtr<LTexture2D> GetAlbedoMap();
         void SetAlbedoMap(TObjectPtr<LTexture2D> texture);
@@ -65,9 +65,9 @@ namespace LkEngine {
 
 	private:
 		TObjectPtr<LMaterial> Material = nullptr;
-		bool m_Transparent = false;
+		bool bTransparent = false;
 
-		friend class MaterialEditor;
+		friend class LMaterialEditor;
 
         LASSET(LMaterialAsset)
     };

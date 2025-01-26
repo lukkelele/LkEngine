@@ -4,11 +4,12 @@
 #include "LkEngine/Core/SelectionContext.h"
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/Core/Input/Input.h"
+
 #include "LkEngine/Editor/EditorSettings.h"
 #include "LkEngine/Editor/Panels/ContentBrowserPanel.h"
 
 #include "LkEngine/Renderer/Color.h"
-#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 
 #include "LkEngine/Project/Project.h"
 
@@ -58,10 +59,8 @@ namespace LkEngine {
 
 		static constexpr float EdgeOffset = 4.0f;
 		const float TextLineHeight = ImGui::GetTextLineHeightWithSpacing() * 2.0f + EdgeOffset * 2.0f;
-		const float InfoPanelHeight = std::max(
-			(bDisplayAssetType ? (ThumbnailSize * 0.50f) : TextLineHeight),
-			TextLineHeight
-		);
+		const float InfoPanelHeight = std::max((bDisplayAssetType ? (ThumbnailSize * 0.50f) : TextLineHeight), 
+											   TextLineHeight);
 
 		const ImVec2 TopLeft = ImGui::GetCursorScreenPos();
 		const ImVec2 ThumbBottomRight = { TopLeft.x + ThumbnailSize, TopLeft.y + ThumbnailSize };
@@ -75,12 +74,14 @@ namespace LkEngine {
 		{
 			ImDrawList* DrawList = ImGui::GetWindowDrawList();
 			const ImRect ItemRect = UI::RectOffset(ImRect(TopLeft, BottomRight), 1.0f, 1.0f);
-			DrawList->AddRect(ItemRect.Min, 
-							  ItemRect.Max, 
-							  RGBA32::PropertyField, 
-							  6.0f, 
-							  (IsDirectory ? 0 : ImDrawFlags_RoundCornersBottom), 
-							  2.0f);
+			DrawList->AddRect(
+				ItemRect.Min, 
+				ItemRect.Max, 
+				RGBA32::PropertyField, 
+				6.0f, 
+				(IsDirectory ? 0 : ImDrawFlags_RoundCornersBottom), 
+				2.0f
+			);
 		};
 
 		const bool IsFocused = ImGui::IsWindowFocused();
@@ -121,7 +122,7 @@ namespace LkEngine {
 				Rename(RenameBuffer);
 				bIsRenaming = false;
 				SetDisplayNameFromFileName();
-				Result.Set(EContentBrowserAction::Renamed, true);
+				Result |= EContentBrowserAction::Renamed;
 			}
 		};
 
@@ -129,8 +130,9 @@ namespace LkEngine {
 		if (ItemType == EItemType::Directory)
 		{
 			const ImVec2 InfoPanelSize(ThumbnailSize - EdgeOffset * 2.0f, InfoPanelHeight - EdgeOffset);
-			ImGui::BeginGroup();
+
 			/* Center-align the directory name. */
+			ImGui::BeginGroup();
 			{
 				const ImVec2 HorizontalSize(ThumbnailSize - 2.0f, 0.0f);
 				ImGui::BeginGroup();
@@ -243,6 +245,7 @@ namespace LkEngine {
 		{
 			if (LInput::IsKeyDown(EKey::F2) && IsSelected && IsFocused)
 			{
+				LK_CORE_DEBUG_TAG("ContentBrowserItem", "Starting to rename: {} ({})", GetName(), ID);
 				StartRenaming();
 			}
 		}
@@ -298,22 +301,24 @@ namespace LkEngine {
 		if (Dragging = ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 		{
 			bIsDragging = true;
+			LK_CORE_TRACE_TAG("ContentBrowserItem", "Dragging {} ({})", GetName(), ID);
 
 			const auto& SelectedItems = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
 			if (!LSelectionContext::IsSelected(ESelectionContext::ContentBrowser, ID))
 			{
-				Result.Set(EContentBrowserAction::ClearSelections, true);
+				LK_DEBUG_CONTENTBROWSER_ITEM_LOG("Item {} ({}) is not selected, clearing selections", GetName(), ID);
+				Result |= EContentBrowserAction::ClearSelections;
 			}
-
-			auto& CurrentItems = LContentBrowserPanel::Get().GetCurrentItems();
 
 			if (!SelectedItems.empty())
 			{
+				auto& CurrentItems = LContentBrowserPanel::Get().GetCurrentItems();
 				for (const auto& SelectedItemHandles : SelectedItems)
 				{
 					const std::size_t Index = CurrentItems.Find(SelectedItemHandles);
 					if (Index == FContentBrowserItemList::InvalidItem)
 					{
+						LK_CORE_WARN_TAG("ContentBrowserItem", "Invalid handle for selected item indexed {}", Index);
 						continue;
 					}
 
@@ -326,61 +331,68 @@ namespace LkEngine {
 
 				/* Accept drag'n'drop payload. */
 				ImGui::SetDragDropPayload(
-					"AssetPayload", 
+					UI::DragDropPayload::Asset,
 					SelectedItems.data(), 
 					sizeof(LUUID) * SelectedItems.size()
 				);
 			}
 
-			Result.Set(EContentBrowserAction::Selected, true);
+			Result |= EContentBrowserAction::Selected;
 			ImGui::EndDragDropSource();
 		}
 
 		if (ImGui::IsItemHovered())
 		{
-			//Result.Set(EContentBrowserAction::Hovered, true);
-			Result.Flags |= EContentBrowserAction::Hovered;
+			Result |= EContentBrowserAction::Hovered;
 
 			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && !bIsRenaming)
 			{
-				//Result.Set(EContentBrowserAction::Activated, true);
-				Result.Flags |= EContentBrowserAction::Activated;
+				Result |= EContentBrowserAction::Activated;
 			}
 			else
 			{
-				const bool MouseAction = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+				const bool MouseClicked = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
 				const bool IsSelected = LSelectionContext::IsSelected(ESelectionContext::ContentBrowser, ID);
-				const bool SkipBecauseDragging = bIsDragging && IsSelected;
+				const bool SkipBecauseDragging = (bIsDragging && IsSelected);
 
-				if (MouseAction && !SkipBecauseDragging)
+				if (MouseClicked && !SkipBecauseDragging)
 				{
+					/* The action selection should be toggled once only. */
 					if (bWasJustSelected)
 					{
 						bWasJustSelected = false;
 					}
 
-					if (IsSelected && LInput::IsKeyDown(EKey::LeftControl) && !bWasJustSelected)
+					if (IsSelected)
 					{
-						//Result.Set(EContentBrowserAction::Deselected, true);
-						Result.Flags |= EContentBrowserAction::Deselected;
-					}
+						LK_DEBUG_CONTENTBROWSER_ITEM_LOG("{} {}", GetName(), bWasJustSelected ? "was just selected" : "was already selected");
+						if (LInput::IsKeyDown(EKey::LeftControl) && !bWasJustSelected)
+						{
+							LK_DEBUG_CONTENTBROWSER_ITEM_LOG("Deselecting: {} (LeftControl->Down)", GetName());
+							Result |= EContentBrowserAction::Deselected;
+						}
+						else
+						{
+							/* Make this item to be the entire selection (clearing the rest). */
+							Result |= EContentBrowserAction::ClearSelections;
+							Result |= EContentBrowserAction::Selected;
+						}
+					} 
 
 					if (!IsSelected)
 					{
-						//Result.Set(EContentBrowserAction::Selected, true);
-						Result.Flags |= EContentBrowserAction::Selected;
+						Result |= EContentBrowserAction::Selected;
 						bWasJustSelected = true;
 					}
 
 					if (!LInput::IsKeyDown(EKey::LeftControl) && !LInput::IsKeyDown(EKey::LeftShift) && bWasJustSelected)
 					{
-						//Result.Set(EContentBrowserAction::ClearSelections, true);
-						Result.Flags |= EContentBrowserAction::ClearSelections;
+						Result |= EContentBrowserAction::ClearSelections;
 					}
 
 					if (LInput::IsKeyDown(EKey::LeftShift))
 					{
-						Result.Flags |= EContentBrowserAction::SelectToHere;
+						Result |= EContentBrowserAction::SelectToHere;
 					}
 				}
 			}
@@ -389,7 +401,7 @@ namespace LkEngine {
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 4.0f));
 		if (ImGui::BeginPopupContextItem("CBItemContextMenu"))
 		{
-			Result.Set(EContentBrowserAction::Selected, true);
+			Result |= EContentBrowserAction::Selected;
 			OnContextMenuOpen(Result);
 			ImGui::EndPopup();
 		}
@@ -438,40 +450,40 @@ namespace LkEngine {
 	{
 		if (ImGui::MenuItem("Reload"))
 		{
-			ActionResult.Set(EContentBrowserAction::Reload, true);
+			ActionResult |= EContentBrowserAction::Reload;
 		}
 
 		if ((LSelectionContext::GetSelectionCount(ESelectionContext::ContentBrowser) == 1) 
 			&& ImGui::MenuItem("Rename"))
 		{
-			ActionResult.Set(EContentBrowserAction::StartRenaming, true);
+			ActionResult |= EContentBrowserAction::StartRenaming;
 		}
 
 		if (ImGui::MenuItem("Copy"))
 		{
-			ActionResult.Set(EContentBrowserAction::Copy, true);
+			ActionResult |= EContentBrowserAction::Copy;
 		}
 
 		if (ImGui::MenuItem("Duplicate"))
 		{
-			ActionResult.Set(EContentBrowserAction::Duplicate, true);
+			ActionResult |= EContentBrowserAction::Duplicate;
 		}
 
 		if (ImGui::MenuItem("Delete"))
 		{
-			ActionResult.Set(EContentBrowserAction::OpenDeleteDialogue, true);
+			ActionResult |= EContentBrowserAction::OpenDeleteDialogue;
 		}
 
 		ImGui::Separator();
 
 		if (ImGui::MenuItem("Show In Explorer"))
 		{
-			ActionResult.Set(EContentBrowserAction::ShowInExplorer, true);
+			ActionResult |= EContentBrowserAction::ShowInExplorer;
 		}
 
 		if (ImGui::MenuItem("Open Externally"))
 		{
-			ActionResult.Set(EContentBrowserAction::OpenExternal, true);
+			ActionResult |= EContentBrowserAction::OpenExternal;
 		}
 
 		RenderCustomContextItems();

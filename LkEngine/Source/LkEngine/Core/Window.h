@@ -63,7 +63,6 @@ namespace LkEngine {
 		bool bFullscreen = false;
 
 		FEventCallback EventCallback;
-        //LKeyboard::FOnKeyPressed OnKeyPressed;
 		FOnWindowMaximized OnWindowMaximized;
 	};
 
@@ -79,13 +78,13 @@ namespace LkEngine {
     public:
         LWindow(const FWindowSpecification& WindowSpecification);
 		LWindow() = delete;
-		~LWindow() = default;
+		~LWindow();
 
         virtual void Initialize() override;
+        virtual void Destroy() override;
 
         void SwapBuffers();
         void ProcessEvents();
-        void Shutdown();
 
         FORCEINLINE GLFWwindow* GetGlfwWindow() const { return GlfwWindow; }
 
@@ -95,18 +94,18 @@ namespace LkEngine {
 		bool IsMinimized() const;
 		bool IsFullscreen() const;
 		void SetFullscreen(const bool Fullscreen);
+		void SetTitle(const std::string& NewTitle);
 
+        FORCEINLINE std::string GetTitle() const { return Title; }
         FORCEINLINE LVector2 GetSize() const { return Size; }
-        FORCEINLINE uint16_t GetWidth() const { return Size.X; }
+        FORCEINLINE uint16_t GetWidth() const { return static_cast<uint16_t>(Size.X); }
         FORCEINLINE uint16_t GetHeight() const { return static_cast<uint16_t>(Size.Y); }
-        FORCEINLINE uint16_t GetViewportWidth()  const { return ViewportSize.X; }
-        FORCEINLINE uint16_t GetViewportHeight() const { return ViewportSize.Y; }
+        FORCEINLINE uint16_t GetViewportWidth()  const { return static_cast<uint16_t>(ViewportSize.X); }
+        FORCEINLINE uint16_t GetViewportHeight() const { return static_cast<uint16_t>(ViewportSize.Y); }
 
         FORCEINLINE LVector2 GetPosition() const { return Pos; }
         FORCEINLINE LVector2 GetViewportSize() const { return ViewportSize; }
 
-        FORCEINLINE std::string GetTitle() const { return Title; }
-        FORCEINLINE std::string GetShaderVersion() const { return GlslVersion; }
         FORCEINLINE bool IsVSyncEnabled() const { return Data.bVSync; }
 
         FORCEINLINE TObjectPtr<LRenderContext> GetRenderContext() 
@@ -115,11 +114,19 @@ namespace LkEngine {
             return RenderContext; 
         }
 
-        FORCEINLINE void SetDepthEnabled(const bool InEnabled) 
+        void SetDepthEnabled(const bool InEnabled) 
         { 
             if (RenderContext)
             {
                 RenderContext->SetDepthEnabled(InEnabled); 
+            }
+        }
+
+        void SetBlendingEnabled(const bool InEnabled) 
+        { 
+            if (RenderContext)
+            {
+                RenderContext->SetBlendingEnabled(InEnabled); 
             }
         }
 
@@ -195,8 +202,7 @@ namespace LkEngine {
 			ViewportScalers.Y = InY;
 		}
 
-		/// PATCH OUT
-        /* TODO: Event category. */
+        /* TODO: Event category and event queuing. */
         FORCEINLINE void SetEventCallback(const FEventCallback& Callback)
         {
             Data.EventCallback = Callback;
@@ -205,6 +211,7 @@ namespace LkEngine {
         FORCEINLINE FWindowData& GetData() { return Data; }
         FORCEINLINE const FWindowData& GetData() const { return Data; }
 
+        std::string GetShaderVersion() const { return GlslVersion; } /* REMOVE */
         FORCEINLINE const FWindowSpecification& GetSpecification() const { return Specification; }
 
         FORCEINLINE static LWindow& Get() { return *Instance; }

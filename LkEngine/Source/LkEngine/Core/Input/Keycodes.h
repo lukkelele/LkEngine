@@ -15,6 +15,8 @@ namespace LkEngine {
 	 */
 	enum class EKey : uint16_t
 	{
+		None = 0,
+
 		Space = 32,
 		Apostrophe = 39,
 		Comma = 44,
@@ -116,13 +118,13 @@ namespace LkEngine {
 		Released
 	};
 
-
 	namespace Enum 
 	{
 		FORCEINLINE static constexpr const char* ToString(const EKey Key)
 		{
 			switch (Key)
 			{
+				case EKey::None:		 return "None";
 				case EKey::Space:		 return "Space";
 				case EKey::Apostrophe:	 return "Apostrophe";
 				case EKey::Comma:		 return "Comma";
@@ -210,7 +212,7 @@ namespace LkEngine {
 				case EKey::Menu:		 return "Menu";
 			}
 
-			LK_CORE_ASSERT(false, "Unknown EKey value: {}", static_cast<uint32_t>(Key));
+			LK_CORE_VERIFY(false, "Enum::ToString(EKey) failed with value: {}", static_cast<uint16_t>(Key));
 			return nullptr;
 		}
 
@@ -224,7 +226,7 @@ namespace LkEngine {
 				case EKeyState::Released: return "Released";
 			}
 
-			LK_CORE_ASSERT(false, "Unknown EKeyState value: {}", static_cast<int>(State));
+			LK_CORE_VERIFY(false, "Enum::ToString(EKeyState) failed with value: {}", static_cast<int>(State));
 			return nullptr;
 		}
 

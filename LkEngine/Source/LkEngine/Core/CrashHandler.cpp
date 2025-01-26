@@ -21,7 +21,8 @@ namespace LkEngine {
 	void LCrashHandler::AttachInstance(LApplication* ApplicationRef)
 	{
 		LK_CORE_VERIFY(CrashHandler == nullptr, "CrashHandler already assigned");
-		LK_CORE_DEBUG_TAG("CrashHandler", "Attaching application instance");
+		LK_CORE_VERIFY(ApplicationRef);
+		LK_CORE_TRACE_TAG("CrashHandler", "Attaching application instance");
 
 	#if defined(LK_PLATFORM_WINDOWS)
 		CrashHandler = std::make_unique<LWindowsCrashHandler>(ApplicationRef);
@@ -42,8 +43,7 @@ namespace LkEngine {
 		if (CrashHandler && !bIsShuttingDown)
 		{
 			bIsShuttingDown = true;
-			LK_CORE_DEBUG_TAG("CrashHandler", "[SignalHandler] Handling signal: {} ({})", SignalToStringMap[Signal],
-							  Signal);
+			LK_CORE_DEBUG_TAG("CrashHandler", "Handling: {} ({})", SignalToStringMap[Signal], Signal);
 
 			const std::string InfoDump = CrashHandler->GenerateApplicationCrashDump();
 			//CrashHandler->LogCrashInformation(InfoDump);

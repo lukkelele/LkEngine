@@ -25,12 +25,8 @@ namespace LkEngine {
 	class LSceneRenderer;
 	struct Physics2DSpecification;
 
-	using EntityMap = std::unordered_map<LUUID, LEntity>;
-
 	LK_DECLARE_MULTICAST_DELEGATE(FOnSceneSetActive, const TObjectPtr<LScene>&);
 	LK_DECLARE_MULTICAST_DELEGATE(FOnSceneCreated,   const TObjectPtr<LScene>&);
-
-	/** OnSceneSetActive. */
 	extern FOnSceneSetActive GOnSceneSetActive;
 	extern FOnSceneCreated   GOnSceneCreated;
 
@@ -40,6 +36,14 @@ namespace LkEngine {
 		Editor,
 	};
 
+	enum class ESceneState
+	{
+		Edit = 0,
+		Play,
+		Pause,
+		Simulate
+	};
+
 	class LScene : public LAsset
 	{
 	public:
@@ -47,25 +51,23 @@ namespace LkEngine {
 		LScene() = delete;
 		~LScene() = default;
 
-		void OnRender(TObjectPtr<LSceneRenderer> SceneRenderer, const float DeltaTime);
+		void OnRenderRuntime(TObjectPtr<LSceneRenderer> SceneRenderer, const float DeltaTime);
+		void OnUpdateRuntime(const float InDeltaTime);
 		void OnRenderEditor(TObjectPtr<LSceneRenderer> SceneRenderer, LEditorCamera& EditorCamera, const float DeltaTime);
+		void OnUpdateEditor(const float InDeltaTime);
+
 		void EndScene(); /// FIXME
 		
 		LEntity GetMainCameraEntity();
 
-		/**
-		 * GetEntities
-		 * 
-		 *  Get registered entities as LEntity or UUID.
-		 */
 		template<typename T = LEntity>
 		std::vector<T> GetEntities();
 
-		FORCEINLINE uint64_t GetEntityCount() const { return m_EntityIDMap.size(); }
+		uint64_t GetEntityCount() const { return static_cast<uint64_t>(EntityMap.size()); }
 		void SortEntities();
 
-		LEntity FindEntity(std::string_view name);
-		LEntity GetEntityWithUUID(LUUID uuid) const;
+		LEntity FindEntity(std::string_view EntityName);
+		LEntity GetEntityWithUUID(const LUUID UUID) const;
 
 		FORCEINLINE entt::registry& GetRegistry() { return Registry; }
 		void DestroyEntity(const LEntity Entity);
@@ -73,20 +75,20 @@ namespace LkEngine {
 		bool IsEntityInRegistry(const LEntity Entity) const;
 
 		LEntity CreateEntity(const std::string& InName = "");
-		LEntity CreateEntityWithID(LUUID uuid, const std::string& InName = "");
+		LEntity CreateEntityWithID(const LUUID UUID, const std::string& InName = "");
 		LEntity CreateChildEntity(LEntity Parent, const std::string& InName = "");
-		LEntity TryGetEntityWithUUID(LUUID ID) const;
+		LEntity TryGetEntityWithUUID(const LUUID ID) const;
 
 		void ParentEntity(LEntity Entity, LEntity Parent);
 		void UnparentEntity(LEntity Entity, bool bConvertToWorldSpace = true);
 
 		glm::mat4 GetWorldSpaceTransform(LEntity Entity);
 
-		FORCEINLINE std::string GetName() const { return Name; }
-		FORCEINLINE void SetName(const std::string& InName) { Name = InName; }
-		FORCEINLINE bool IsActiveScene() const { return this == ActiveScene.Get(); }
+		std::string GetName() const { return Name; }
+		void SetName(const std::string& InName) { Name = InName; }
 
 		void SetActive(const bool Active);
+		FORCEINLINE bool IsActive() const { return (this == ActiveScene.Get()); }
 
 		void Clear();
 		void Pause(const bool IsPaused);
@@ -94,9 +96,8 @@ namespace LkEngine {
 		void SetCamera(TObjectPtr<LSceneCamera> InSceneCamera);
 		void SwitchCamera();
 
-		FORCEINLINE TObjectPtr<LSceneCamera> GetMainCamera() { return Camera; } 
-
 		FORCEINLINE LUUID GetUUID() const { return SceneID; }
+		FORCEINLINE TObjectPtr<LSceneCamera> GetMainCamera() { return Camera; } 
 
 		void CopyTo(TObjectPtr<LScene>& TargetScene);
 
@@ -133,9 +134,7 @@ namespace LkEngine {
 										   LEntity Source, 
 										   TObjectPtr<LScene> SourceScene)
 		{
-			SourceScene->CopyComponentIfExists<TComponent>((entt::entity)Destination, 
-														   DestinationScene->Registry, 
-														   (entt::entity)Source);
+			SourceScene->CopyComponentIfExists<TComponent>((entt::entity)Destination, DestinationScene->Registry, (entt::entity)Source);
 		}
 
 		template<typename ...Components>
@@ -146,50 +145,34 @@ namespace LkEngine {
 
 		static void SetActiveScene(TObjectPtr<LScene> InScene);
 
-		FORCEINLINE static std::string GetActiveSceneName()
-		{
-			if (ActiveScene)
-			{
-				return ActiveScene->GetName();
-			}
-
-			return "";
-		}
-
-		/**
-		 * @brief Get count of existing scenes.
-		 */
-		FORCEINLINE static uint8_t GetSceneCount() { return SceneCounter; }
-
 		static TObjectPtr<LScene> GetActiveScene() { return ActiveScene; }
 
 		std::unordered_set<LUUID> GetAssetList();
 
+		static uint8_t GetSceneCount() { return SceneCounter; }
+
 	public:
-		static constexpr const char* FILE_EXTENSION = "lkscene";
+		static constexpr const char* FILE_EXTENSION = ".lkscene";
 	private:
-		inline static TObjectPtr<LScene> ActiveScene = nullptr;
+		inline static TObjectPtr<LScene> ActiveScene = nullptr; /* TO REMOVE */
 		inline static uint8_t SceneCounter = 0;
 	private:
+		LUUID SceneID = 0;
 		std::string Name = "";
 
-		LUUID SceneID = 0;
 		entt::entity SceneEntity;
 
 		bool bPaused = false;
-		int m_Frames = 0;
+		bool bEditorScene = false;
+		int Frames = 0;
 
-		EntityMap m_EntityIDMap;
+		std::unordered_map<LUUID, LEntity> EntityMap{};
 		entt::registry Registry{};
-
-		bool bIsEditorScene = false; /// REMOVE
 
 		uint16_t ViewportWidth = 0;
 		uint16_t ViewportHeight = 0;
 
 		TObjectPtr<LSceneCamera> Camera = nullptr;
-		//TObjectPtr<LEditorCamera> EditorCamera = nullptr;
-
 		TObjectPtr<LSceneRenderer> Renderer = nullptr;
 
 		friend class LEntity;
@@ -199,5 +182,23 @@ namespace LkEngine {
 
 		LCLASS(LScene);
 	};
+
+
+	namespace Enum 
+	{
+		static constexpr const char* ToString(const ESceneState SceneState)
+		{
+			switch (SceneState)
+			{
+				case ESceneState::Edit:     return "Edit";
+				case ESceneState::Play:     return "Play";
+				case ESceneState::Pause:    return "Pause";
+				case ESceneState::Simulate: return "Simulate";
+			}
+
+			LK_CORE_ASSERT(false, "Enum::ToString(ESceneState) failed for value: {}", static_cast<int>(SceneState));
+			return nullptr;
+		}
+	}
 
 }

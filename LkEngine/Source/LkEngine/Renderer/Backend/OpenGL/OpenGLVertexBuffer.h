@@ -8,39 +8,24 @@ namespace LkEngine {
     class LOpenGLVertexBuffer : public LVertexBuffer
     {
 	public:
-		LOpenGLVertexBuffer(void* InData, const uint32_t InSize, 
-							const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
+		LOpenGLVertexBuffer(void* InData, const uint32_t InSize, const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
 		LOpenGLVertexBuffer(const uint32_t InSize, const EVertexBufferUsage InBufferUsage = EVertexBufferUsage::Dynamic);
+		LOpenGLVertexBuffer() = delete;
 		~LOpenGLVertexBuffer();
 
-		virtual void SetData(void* data, uint32_t InSize, uint32_t offset = 0) override;
-		virtual void RT_SetData(void* buffer, uint32_t InSize, uint32_t offset = 0) override;
+		virtual void SetData(void* InData, const uint32_t InSize, const uint32_t InOffset = 0) override;
 
 		virtual FBuffer GetLocalData() override { return m_LocalData; }
 		virtual uint32_t GetSize() const override { return m_Size; }
 
-		virtual void SetIndexBuffer(const TObjectPtr<LIndexBuffer> ib) override;
-		virtual void SetLayout(const FVertexBufferLayout& layout) override; 
+		virtual void SetIndexBuffer(const TObjectPtr<LIndexBuffer> InIndexBuffer) override;
+		virtual void SetLayout(const FVertexBufferLayout& InLayout) override; 
 
-		virtual TObjectPtr<LIndexBuffer> GetIndexBuffer() override 
-		{ 
-			return m_IndexBuffer; 
-		}
+		FORCEINLINE LRendererID GetRendererID() const { return m_RendererID; }
+		FORCEINLINE virtual TObjectPtr<LIndexBuffer> GetIndexBuffer() override { return m_IndexBuffer; }
 
-		FORCEINLINE virtual FVertexBufferLayout GetLayout() const override 
-		{ 
-			return Layout; 
-		}
-
-		FORCEINLINE virtual FVertexBufferLayout& GetLayout() override 
-		{ 
-			return Layout; 
-		}
-
-		FORCEINLINE LRendererID GetRendererID() const 
-		{ 
-			return m_RendererID; 
-		}
+		virtual FVertexBufferLayout GetLayout() const override { return Layout; }
+		virtual FVertexBufferLayout& GetLayout() override { return Layout; }
 
 		virtual void Bind() const override;
 

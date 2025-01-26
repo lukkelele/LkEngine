@@ -105,15 +105,43 @@ namespace LkEngine {
 		}
 
 		/**
-		 * @brief Set viewport bounds for top-left or bottom-right bound.
+		 * Set viewport bounds for top-left or bottom-right bound.
 		 */
 		FORCEINLINE void SetViewportBounds(const uint8_t Index, const LVector2& Bounds)
 		{ 
-			LK_VERIFY((Index >= 0) && (Index <= 1), "Invalid viewport index: {}", Index); 
-			if (ViewportBounds[Index] != Bounds)
+			LK_CORE_ASSERT((Index >= 0) && (Index <= 1), "Invalid viewport index: {}", Index); 
+			if (PrimaryViewportBounds[Index] != Bounds)
 			{
-				ViewportBounds[Index] = Bounds;
-				LK_CORE_DEBUG_TAG("Viewport", "Set viewport bounds {} to {}", Index, Bounds.ToString());
+				PrimaryViewportBounds[Index] = Bounds;
+				//LK_CORE_TRACE_TAG("Viewport", "Set viewport bounds {} to {}", Index, Bounds.ToString());
+				bDirty = true;
+			}
+		}
+
+		/**
+		 * Set viewport bounds on the X axis for top-left or bottom-right bound.
+		 */
+		FORCEINLINE void SetViewportBoundsX(const uint8_t Index, const float Bound)
+		{ 
+			LK_CORE_ASSERT((Index >= 0) && (Index <= 1), "Invalid viewport index: {}", Index); 
+			if (PrimaryViewportBounds[Index].X != Bound)
+			{
+				PrimaryViewportBounds[Index].X = Bound;
+				//LK_CORE_TRACE_TAG("Viewport", "Set viewport bounds {} on the X-axis to {}", Index, Bound);
+				bDirty = true;
+			}
+		}
+
+		/**
+		 * Set viewport bounds on the Y axis for top-left or bottom-right bound.
+		 */
+		FORCEINLINE void SetViewportBoundsY(const uint8_t Index, const float Bound)
+		{ 
+			LK_CORE_ASSERT((Index >= 0) && (Index <= 1), "Invalid viewport index: {}", Index); 
+			if (PrimaryViewportBounds[Index].Y != Bound)
+			{
+				PrimaryViewportBounds[Index].Y = Bound;
+				//LK_CORE_TRACE_TAG("Viewport", "Set viewport bounds {} on the Y-axis to {}", Index, Bound);
 				bDirty = true;
 			}
 		}
@@ -123,19 +151,19 @@ namespace LkEngine {
 		 */
 		FORCEINLINE const LVector2* GetViewportBounds() const
 		{
-			return ViewportBounds;
+			return PrimaryViewportBounds.data();
 		}
 
 		FORCEINLINE LVector2& GetViewportBounds(const uint8_t Index) 
 		{
 			LK_VERIFY((Index >= 0) && (Index <= 1), "Invalid viewport index");
-			return ViewportBounds[Index];
+			return PrimaryViewportBounds[Index];
 		}
 
 		FORCEINLINE const LVector2& GetViewportBounds(const uint8_t Index) const
 		{
 			LK_VERIFY((Index >= 0) && (Index <= 1), "Invalid viewport index");
-			return ViewportBounds[Index];
+			return PrimaryViewportBounds[Index];
 		}
 
 		FORCEINLINE void SetScalers(const LVector2& NewScalers) 
@@ -160,9 +188,16 @@ namespace LkEngine {
 		TVector2<uint16_t> Position = { 0.0f, 0.0f };
 		TVector2<float> Scalers = { 1.0f, 1.0f };
 
+	#if 0
 		LVector2 ViewportBounds[2] = { 
 			{ 0.0f, 0.0f }, 
 			{ 0.0f, 0.0f } 
+		};
+	#endif
+
+		std::array<LVector2, 2> PrimaryViewportBounds = {
+			LVector2(0.0f, 0.0f), 
+			LVector2(0.0f, 0.0f) 
 		};
 
 		bool bDirty = true;

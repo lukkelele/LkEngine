@@ -1,14 +1,16 @@
 /******************************************************************
  * LToolsPanel
  * 
- * UI Panel.
+ * UI Panel
  *******************************************************************/
 #pragma once
 
-#include "LkEngine/UI/Panel.h"
+#include "LkEngine/Renderer/UI/Panel.h"
 
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
+
+#include "LkEngine/Editor/EditorCore.h"
 
 #include "LkEngine/Serialization/YamlSerialization.h"
 
@@ -33,6 +35,9 @@ namespace LkEngine {
 		void UI_InputInfo();
 		void UI_UserInterfaceTools();
 		void UI_Fonts();
+
+		void UI_InputInfo_SceneSelection(const LVector2& Size = LVector2(0, 0));
+		void UI_InputInfo_ContentBrowserSelection(const LVector2& Size = LVector2(0, 0));
 
 	public:
 		struct FWindow_ObjectReferences : public FWindow

@@ -1,5 +1,6 @@
 #include "LKpch.h"
 #include "Project.h"
+#include "ProjectSerializer.h"
 
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/SceneSerializer.h"
@@ -7,13 +8,10 @@
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/IO/FileSystem.h"
 
-#include "LkEngine/Renderer/TextureLibrary.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 #include "LkEngine/Editor/EditorLayer.h"
-#include "LkEngine/UI/UILayer.h"
 
 #include "LkEngine/Asset/AssetManager.h"
-
-#include "ProjectSerializer.h"
 
 
 namespace LkEngine {
@@ -29,24 +27,26 @@ namespace LkEngine {
 
 	void LProject::Load(const std::string& ProjectPath)
 	{
-		if (ProjectPath.empty() || !LFileSystem::Exists(ProjectPath))
+		if (ProjectPath.empty())
 		{
-			LK_CORE_ERROR_TAG("Project", "Could not load project: '{}'", ProjectPath);
+			LK_CORE_ERROR_TAG("Project", "Could not load project, the path is empty");
+			return;
+		}
+		else if (!LFileSystem::Exists(ProjectPath))
+		{
+			LK_CORE_ERROR_TAG("Project", "Could not load project, the path does not exist: '{}'", ProjectPath);
 			return;
 		}
 
 		std::filesystem::path Filepath = ProjectPath;
 
-		/**
-		 * Add the name of the project directory with the project suffix to get
-		 * the project name. 
-		 */
+		/* Add the name of the project directory with the project suffix to get the project name. */
 		if (LFileSystem::IsDirectory(Filepath))
 		{
-			Filepath = (Filepath / fs::path(Filepath.filename().string() + "." + LProject::FILE_EXTENSION));
+			Filepath = (Filepath / fs::path(Filepath.filename().string() + LProject::FILE_EXTENSION));
 		}
 
-		/** Load serialized data into the project instance. */
+		/* Load serialized data into the project instance. */
 		FProjectSerializer ProjectSerializer(this);
 		if (!ProjectSerializer.Deserialize(Filepath))
 		{
@@ -57,26 +57,23 @@ namespace LkEngine {
 		Configuration.AssetDirectory = LFileSystem::GetAssetsDir().string();
 	}
 
-	std::filesystem::path LProject::GetAssetDirectory()
-	{
-		return LFileSystem::GetAssetsDir();
-	}
-
-	std::filesystem::path LProject::GetAssetRegistryPath()
-	{
-		/* TODO: This should be unique for every project and not some global path hardcoded like now. */
-		//return LFileSystem::GetRuntimeDir() / "AssetRegistry.lkreg";
-		return LFileSystem::GetAssetsDir() / "AssetRegistry.lkr";
-	}
-
 	bool LProject::Save()
 	{
-		LK_CORE_INFO_TAG("Project", "Saving: \"{}\"", Configuration.Name);
+		LK_CORE_INFO_TAG("Project", "Saving: {}", Configuration.Name);
+
+		if (AssetManager)
+		{
+			AssetManager->WriteRegistryToDisk();
+		}
+		else
+		{
+			LK_CORE_ERROR_TAG("Project", "Failed to write asset registry to disk, no asset manager instance exists");
+		}
 
 		/* Serialize to disk. */
 		FProjectSerializer ProjectSerializer(this);
 
-		const fs::path ProjectPath = LK_FORMAT_STRING("Projects/{}/{}", Configuration.Name, Configuration.Name);
+		const fs::path ProjectPath = std::format("Projects/{}/{}", Configuration.Name, Configuration.Name);
 		if (ProjectPath.empty())
 		{
 			LK_CORE_ERROR_TAG("Project", "Could not save project: '{}'", ProjectPath.string());
@@ -96,7 +93,7 @@ namespace LkEngine {
 		if (TObjectPtr<LScene> Scene = LScene::GetActiveScene())
 		{
 			LSceneSerializer SceneSerializer(Scene);
-			const std::string SceneFilepath = LK_FORMAT_STRING("Scenes/{}.{}", Scene->GetName(), LScene::FILE_EXTENSION);
+			const std::string SceneFilepath = std::format("Scenes/{}{}", Scene->GetName(), LScene::FILE_EXTENSION);
 			SceneSerializer.Serialize(SceneFilepath);
 		}
 
@@ -111,28 +108,38 @@ namespace LkEngine {
 		if (ActiveProject && ActiveProject != InProject)
 		{
 			/* Release resources. */
-			RuntimeAssetManager.Release();
-			RuntimeAssetManager = nullptr;
+			AssetManager = nullptr;
 		}
 
 		ActiveProject = InProject;
 		if (ActiveProject)
 		{
-			if (InProject->RuntimeAssetManager)
+			if (InProject->AssetManager)
 			{
 				/* TODO: Destroy and re-initialize the asset manager here. */
 				LK_CORE_INFO_TAG("Project", "AssetManager already initialized for project '{}'", ActiveProject->GetName());
-				RuntimeAssetManager = ActiveProject->RuntimeAssetManager;
+				AssetManager = TObjectPtr<LEditorAssetManager>::Create();
 			}
 			else
 			{
-				LK_CORE_INFO("Initializing the asset manager");
-				RuntimeAssetManager = TObjectPtr<LRuntimeAssetManager>::Create();
-				RuntimeAssetManager->Initialize();
+				LK_CORE_INFO_TAG("Project", "Creating the asset manager");
+				AssetManager = TObjectPtr<LEditorAssetManager>::Create();
+				AssetManager->Initialize();
 			}
 
 			OnProjectChanged.Broadcast(ActiveProject);
 		}
+	}
+
+	std::filesystem::path LProject::GetAssetDirectory()
+	{
+		return LFileSystem::GetAssetsDir();
+	}
+
+	std::filesystem::path LProject::GetAssetRegistryPath()
+	{
+		/* TODO: This should be unique for every project and not some global path hardcoded like now. */
+		return LFileSystem::GetAssetsDir() / "AssetRegistry.lkr";
 	}
 
 	uint64_t LProject::GetSize() const

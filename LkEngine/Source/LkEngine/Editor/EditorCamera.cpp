@@ -1,12 +1,11 @@
 #include "LKpch.h"
-#include "LkEngine/Editor/EditorCamera.h"
-
-#include "LkEngine/Core/Application.h" /* REMOVE */
-#include "LkEngine/UI/UILayer.h"
+#include "EditorCamera.h"
 
 #include "LkEngine/Core/Window.h"
+#include "LkEngine/Core/Input/Input.h"
 
-//FIXME
+#include "LkEngine/Renderer/UI/UILayer.h"
+
 
 namespace LkEngine {
 
@@ -98,19 +97,6 @@ namespace LkEngine {
 				PositionDelta += DeltaTime * CameraSpeed * RightDirection;
 			}
 
-			if (LKeyboard::IsKeyPressed(EKey::H))
-			{
-				if (ProjectionType == ECameraProjection::Perspective)
-				{
-					ProjectionType = ECameraProjection::Orthographic;
-				}
-				else
-				{
-					ProjectionType = ECameraProjection::Perspective;
-				}
-				LK_CORE_INFO_TAG("EditorCamera", "Toggling projection type: {}", Enum::ToString(ProjectionType));
-			}
-
 			static constexpr float MaxRate = 0.120f;
 			YawDelta += glm::clamp(YawSign * MouseDelta.x * GetRotationSpeed(), -MaxRate, MaxRate);
 			PitchDelta += glm::clamp(MouseDelta.y * GetRotationSpeed(), -MaxRate, MaxRate);
@@ -166,6 +152,26 @@ namespace LkEngine {
 			{
 				LMouse::Enable();
 			}
+		}
+
+		/**
+		 * TODO: Cannot use IsKeyPressed here since the input callbacks from LWindow take
+		 *       priority over the rest of the application when running since the delegates
+		 *       invoke directly and do not queue any events.
+		 */
+		/* Toggle projection type. */
+		//if (LInput::IsKeyPressed(EKey::H) && !LInput::IsKeyHeld(EKey::H))
+		if (LInput::IsKeyDown(EKey::H) && !LInput::IsKeyHeld(EKey::H))
+		{
+			if (ProjectionType == ECameraProjection::Perspective)
+			{
+				ProjectionType = ECameraProjection::Orthographic;
+			}
+			else
+			{
+				ProjectionType = ECameraProjection::Perspective;
+			}
+			LK_CORE_INFO_TAG("EditorCamera", "Projection type: {}", Enum::ToString(ProjectionType));
 		}
 
 		InitialMousePosition = MousePos;
@@ -299,7 +305,7 @@ namespace LkEngine {
 		return true;
 	}
 
-	bool LEditorCamera::OnKeyPress(KeyPressedEvent& Event)
+	bool LEditorCamera::OnKeyPress(LKeyPressedEvent& Event)
 	{
 		const glm::vec2 MousePosition = { LMouse::GetMouseX(), LMouse::GetMouseY() };
 		const glm::vec2 MouseDelta = (MousePosition - InitialMousePosition) * 0.0020f;

@@ -4,9 +4,17 @@
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 #include "LkEngine/Asset/Asset.h"
 
-#include "LkEngine/UI/Panel.h"
-#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Renderer/UI/Panel.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 
+#define LK_DEBUG_CONTENTBROWSER_ITEMS 1
+
+/* Verbose logging for clicking things in the ContentBrowser. */
+#if LK_DEBUG_CONTENTBROWSER_ITEMS
+#	define LK_DEBUG_CONTENTBROWSER_ITEM_LOG(...) LK_CORE_INFO_TAG("ContentBrowser", __VA_ARGS__)
+#else
+#	define LK_DEBUG_CONTENTBROWSER_ITEM_LOG(...)
+#endif
 
 namespace LkEngine {
 
@@ -28,7 +36,7 @@ namespace LkEngine {
 		Copy				= LK_BIT(12),
 		Duplicate			= LK_BIT(13),
 		StartRenaming		= LK_BIT(14),
-		Activated			= LK_BIT(15)
+		Activated			= LK_BIT(15),
 	};
 	LK_ENUM_CLASS_FLAGS(EContentBrowserAction);
 
@@ -42,20 +50,22 @@ namespace LkEngine {
 		using FlagType = uint16_t;
 		FlagType Flags = 0;
 
-		void Set(const EContentBrowserAction Flag, const bool Value)
+		FORCEINLINE void operator|=(const EContentBrowserAction Flag)
 		{
-			static_assert(std::numeric_limits<decltype(Flags)>::max() == std::numeric_limits<std::underlying_type_t<EContentBrowserAction>>::max());
-			if (Value)
-			{
-				Flags |= (FlagType)Flag;
-			}
-			else
-			{
-				Flags &= ~(FlagType)Flag;
-			}
+			Flags |= Flag;
 		}
 
-		bool IsSet(const EContentBrowserAction Flag) const 
+		FORCEINLINE FlagType operator&(const EContentBrowserAction Flag) const
+		{
+			return (Flags & Flag);
+		}
+
+		FORCEINLINE void Clear(const EContentBrowserAction Flag)
+		{
+			Flags &= ~Flag;
+		}
+
+		FORCEINLINE bool IsSet(const EContentBrowserAction Flag) const 
 		{ 
 			return Flags & Flag;
 		}
@@ -138,7 +148,7 @@ namespace LkEngine {
 	{
 		LUUID Handle = 0;
 		std::filesystem::path FilePath{};
-		std::vector<LUUID> Assets;
+		std::vector<LUUID> Assets{};
 
 		TObjectPtr<FDirectoryInfo> Parent{};
 		std::map<LUUID, TObjectPtr<FDirectoryInfo>> SubDirectories;
@@ -174,7 +184,7 @@ namespace LkEngine {
 		virtual void UpdateDrop(FContentBrowserItemAction& ActionResult) override;
 
 	private:
-		TObjectPtr<FDirectoryInfo> DirectoryInfo;
+		TObjectPtr<FDirectoryInfo> DirectoryInfo{};
 
 		LCLASS(LContentBrowserDirectory);
 	};
@@ -213,6 +223,35 @@ namespace LkEngine {
 				case LContentBrowserItem::EItemType::Directory:  return "Directory";
 				case LContentBrowserItem::EItemType::None:       return "None";
 			}
+
+			LK_CORE_ASSERT(false, "ToString(LContentBrowserItem::EItemType) failed for: {}", static_cast<int>(ItemType));
+			return nullptr;
+		}
+
+		static constexpr const char* ToString(const EContentBrowserAction BrowserAction)
+		{
+			switch (BrowserAction)
+			{
+				case EContentBrowserAction::None:               return "None";
+				case EContentBrowserAction::Refresh:            return "Refresh";
+				case EContentBrowserAction::ClearSelections:    return "ClearSelections";
+				case EContentBrowserAction::Selected:           return "Selected";
+				case EContentBrowserAction::Deselected:         return "Deselected";
+				case EContentBrowserAction::Hovered:            return "Hovered";
+				case EContentBrowserAction::Renamed:            return "Renamed";
+				case EContentBrowserAction::OpenDeleteDialogue: return "OpenDeleteDialogue";
+				case EContentBrowserAction::SelectToHere:       return "SelectToHere";
+				case EContentBrowserAction::Moved:              return "Moved";
+				case EContentBrowserAction::ShowInExplorer:     return "ShowInExplorer";
+				case EContentBrowserAction::OpenExternal:       return "OpenExternal";
+				case EContentBrowserAction::Reload:             return "Reload";
+				case EContentBrowserAction::Copy:               return "Copy";
+				case EContentBrowserAction::Duplicate:          return "Duplicate";
+				case EContentBrowserAction::StartRenaming:      return "StartRenaming";
+				case EContentBrowserAction::Activated:          return "Activated";
+			}
+
+			LK_CORE_ASSERT(false, "ToString(EContentBrowserAction) failed for: {}", static_cast<int>(BrowserAction));
 			return nullptr;
 		}
 	}

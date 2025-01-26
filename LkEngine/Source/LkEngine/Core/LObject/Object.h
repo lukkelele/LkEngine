@@ -48,39 +48,25 @@ namespace LkEngine {
 
 		virtual ~LObject() = default;
 
-		LObject& operator=(const LObject& Other)
-		{
-			if (this == &Other)
-			{
-				return *this;
-			}
-
-			ObjectHandle = Other.ObjectHandle;
-			bObjectInitialized = Other.bObjectInitialized;
-			ObjectFlags = Other.ObjectFlags;
-			Ptr_ReferenceCount = Other.Ptr_ReferenceCount.load();
-
-			return *this;
-		}
-
-		/** @brief Get the object handle. */
-		FORCEINLINE FObjectHandle GetObjectHandle() const
-		{
-			return ObjectHandle;
-		}
-
 		/**
-		 * @brief Initialize object.
+		 * Initialize object.
 		 */
 		virtual void Initialize();
 
 		/**
+		 * Destroy object, releasing resources.
+		 */
+		virtual void Destroy() {};
+
+		/**
 		 * @brief Check if object is initialized.
 		 */
-		FORCEINLINE virtual bool IsInitialized() const
-		{
-			return bObjectInitialized;
-		}
+		FORCEINLINE virtual bool IsInitialized() const { return bObjectInitialized; }
+
+		/** 
+		 * Get the object handle. 
+		 */
+		FORCEINLINE FObjectHandle GetObjectHandle() const { return ObjectHandle; }
 
 		/**
 		 * Check if object is valid for use.
@@ -93,22 +79,6 @@ namespace LkEngine {
 			}
 
 			return true;
-		}
-
-		/**
-		 * Check if object has a specific flag.
-		 */
-		FORCEINLINE bool HasFlag(const EObjectFlag InFlag) const
-		{
-			return ((ObjectFlags & InFlag) == static_cast<std::underlying_type_t<EObjectFlag>>(InFlag));
-		}
-
-		/**
-		 * Check if object has any of the passed flags.
-		 */
-		FORCEINLINE bool HasAnyFlags(const EObjectFlag InFlags) const
-		{
-			return static_cast<bool>(ObjectFlags & InFlags);
 		}
 
 		/**
@@ -149,7 +119,7 @@ namespace LkEngine {
 		 *  used to determine the class registration at places, i.e the return value
 		 *  is used to determine if the class is registered depending if nullptr or not.
 		 *
-		 *  Implemented by LCLASS macro.
+		 *  Implemented by the LCLASS macro.
 		 */
 		FORCEINLINE virtual const LClass* GetClass() const
 		{
@@ -159,9 +129,24 @@ namespace LkEngine {
 		/**
 		 * Get name of the LObject class.
 		 * 
-		 *  Implemented by LCLASS macro.
+		 *  Implemented by the LCLASS macro.
 		 */
 		virtual std::string ClassName() const = 0;
+
+		LObject& operator=(const LObject& Other)
+		{
+			if (this == &Other)
+			{
+				return *this;
+			}
+
+			ObjectHandle = Other.ObjectHandle;
+			bObjectInitialized = Other.bObjectInitialized;
+			ObjectFlags = Other.ObjectFlags;
+			Ptr_ReferenceCount = Other.Ptr_ReferenceCount.load();
+
+			return *this;
+		}
 
 		/**
 		 * Mark object as garbage.
@@ -214,7 +199,24 @@ namespace LkEngine {
 		template <typename T>
 		static void ValidateLObjectImplementation()
 		{
-			static_assert(HasLClassMacro<T>, "Class must include the LCLASS macro.");
+			static_assert(HasLClassMacro<T>, "Class must include the LCLASS macro");
+		}
+
+	private:
+		/**
+		 * Check if object has a specific flag.
+		 */
+		FORCEINLINE bool HasFlag(const EObjectFlag InFlag) const
+		{
+			return ((ObjectFlags & InFlag) == static_cast<std::underlying_type_t<EObjectFlag>>(InFlag));
+		}
+
+		/**
+		 * Check if object has any of the passed flags.
+		 */
+		FORCEINLINE bool HasAnyFlags(const EObjectFlag InFlags) const
+		{
+			return static_cast<bool>(ObjectFlags & InFlags);
 		}
 
 	private:
@@ -240,21 +242,23 @@ namespace LkEngine {
 		}
 
 	protected:
-		FObjectHandle ObjectHandle = 0; /* TODO: Rename to 'ObjectHandle' */
+		FObjectHandle ObjectHandle = 0;
 
 		bool bObjectInitialized = false;
-		EObjectFlag ObjectFlags = EObjectFlag::None; /* TODO: Rename 'Flags' to 'ObjectFlags' */
+		EObjectFlag ObjectFlags = EObjectFlag::None;
 
 		/** Reference count is managed by TObjectPtr. */
 		mutable std::atomic<uint32_t> Ptr_ReferenceCount = 0;
 
 		template<typename T>
 		friend class TObjectPtr;
+
+		friend struct FInternalLObjectValidator;
 	};
 
-	struct FInternalLObjectUtility
+	struct FInternalLObjectValidator
 	{
-		FORCEINLINE static bool CheckObjectValidBasedOnItsFlags(const LObject* Object)
+		FORCEINLINE static bool CheckObjectValidBasedOnFlags(const LObject* Object)
 		{
 			return !(Object->HasAnyFlags(EObjectFlag::Garbage));
 		}
@@ -262,7 +266,7 @@ namespace LkEngine {
 
 	FORCEINLINE bool IsValid(const LObject* Object)
 	{
-		return (Object && FInternalLObjectUtility::CheckObjectValidBasedOnItsFlags(Object));
+		return (Object && FInternalLObjectValidator::CheckObjectValidBasedOnFlags(Object));
 	}
 
 	FORCEINLINE bool IsValid(const LObject& Object)

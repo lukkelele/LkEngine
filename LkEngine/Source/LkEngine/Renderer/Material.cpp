@@ -13,11 +13,11 @@ namespace LkEngine {
         switch (LRendererAPI::Get())
         {
             case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLMaterial>::Create(Shader, Name);
-
-            default: break;
+			case ERendererAPI::Vulkan:
+			default: break;
         }
 
-        LK_CORE_ASSERT(false, "Unknown renderer API");
+		LK_CORE_VERIFY(false);
         return nullptr;
     }
 
@@ -26,11 +26,11 @@ namespace LkEngine {
         switch (LRendererAPI::Get())
         {
             case ERendererAPI::OpenGL: return TObjectPtr<LOpenGLMaterial>::Create(Other, Name);
-
+			case ERendererAPI::Vulkan: 
             default: break;
         }
 
-        LK_CORE_ASSERT(false, "Unknown renderer API");
+		LK_CORE_VERIFY(false);
         return nullptr;
     }
 

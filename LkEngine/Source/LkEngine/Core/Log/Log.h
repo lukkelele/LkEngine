@@ -157,6 +157,7 @@ namespace LkEngine {
 		#else
 			const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
 			printf("%s", FormattedString.c_str());
+			fflush(stdout);
 		#endif
 		}
 
@@ -170,6 +171,7 @@ namespace LkEngine {
 		#else
 			const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
 			printf("%s\n", FormattedString.c_str());
+			fflush(stdout);
 		#endif
 		}
 
@@ -256,9 +258,8 @@ namespace LkEngine {
 
 namespace LkEngine
 {
-
 	template<typename... TArgs>
-	void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
+	void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level, 
 							std::format_string<TArgs...> Format, TArgs&&... Args)
 	{
 		FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];

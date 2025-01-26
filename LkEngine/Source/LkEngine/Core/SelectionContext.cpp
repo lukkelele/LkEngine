@@ -18,7 +18,6 @@ namespace LkEngine {
 		LOBJECT_REGISTER();
 
 		SelectionContextMap.clear();
-		//SelectionContextMap.insert({ ESelectionContext::Global, {} });
 		SelectionContextMap.insert({ ESelectionContext::Scene,  {} });
 		SelectionContextMap.insert({ ESelectionContext::ContentBrowser, {} });
 	}

@@ -19,8 +19,8 @@ namespace LkEngine {
 		virtual void Invalidate() override;
 		virtual void OnShaderReloaded() override;
 
-		FORCEINLINE virtual FBuffer& GetUniformStorageBuffer() override { return UniformStorageBuffer; }
 		FORCEINLINE virtual FBuffer GetUniformStorageBuffer() const override { return UniformStorageBuffer; }
+		FORCEINLINE virtual FBuffer& GetUniformStorageBuffer() override { return UniformStorageBuffer; }
 
 		virtual void Set(const std::string& Name, const int Value) override;
 		virtual void Set(const std::string& Name, const bool Value) override;
@@ -41,7 +41,6 @@ namespace LkEngine {
 						 const uint32_t ArrayIndex) override;
 		virtual void Set(const std::string& Name, const TObjectPtr<LImage2D>& Image) override;
 
-		/// FIXME: Do template impl here !!
 		virtual float& GetFloat(const std::string& Name) override;
 		virtual int32_t& GetInt(const std::string& Name) override;
 		virtual uint32_t& GetUInt(const std::string& Name) override;
@@ -64,18 +63,11 @@ namespace LkEngine {
 		virtual TObjectPtr<LTextureCube> GetTextureCube(const std::string& Name) override;
 		virtual TObjectPtr<LTextureCube> TryGetTextureCube(const std::string& Name) override;
 
-		FORCEINLINE virtual TObjectPtr<LShader> GetShader() override
-		{
-			return Shader;
-		}
-
-		FORCEINLINE virtual const std::string& GetName() const override
-		{
-			return Name;
-		}
+		FORCEINLINE virtual TObjectPtr<LShader> GetShader() override { return Shader; }
+		FORCEINLINE virtual const std::string& GetName() const override { return Name; }
 
     private:
-		std::string Name{};
+		std::string Name = "Unknown";
 		FMaterialSpecification Specification{};
 
 		TObjectPtr<LShader> Shader{};

@@ -36,15 +36,17 @@ namespace LkEngine {
         virtual GLFWwindow* GetGlfwWindow() = 0;
         virtual void SetViewport(const glm::vec2& pos, const glm::vec2& size) = 0;
 
+        virtual bool GetDepthEnabled() const = 0;
         virtual void SetDepthEnabled(const bool InEnabled) = 0;
         virtual void SetDepthFunction(const EDepthFunction InDepthFunc) = 0;
+
+        virtual bool GetBlendingEnabled() const = 0;
         virtual void SetBlendingEnabled(const bool InEnabled) = 0;
         virtual void SetBlendFunction(const ESourceBlendFunction InSourceFunc, const EDestinationBlendFunction InDestinationFunc) = 0;
         virtual void SetSourceBlendFunction(const ESourceBlendFunction InSourceFunc) = 0;
         virtual void SetDestinationBlendFunction(const EDestinationBlendFunction InDestinationFunc) = 0;
 
         virtual void UpdateResolution(const uint16_t Width, const uint16_t Height) = 0;
-        virtual bool GetBlendingEnabled() const = 0;
 
         virtual ESourceBlendFunction GetSourceBlendFunction() const = 0;
         virtual EDestinationBlendFunction GetDestinationBlendFunction() const = 0;

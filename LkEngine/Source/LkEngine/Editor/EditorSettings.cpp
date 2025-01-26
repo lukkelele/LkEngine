@@ -29,7 +29,8 @@ namespace LkEngine {
 	void FEditorSettings::Save()
 	{
 		const fs::path EditorConfig = LFileSystem::GetEditorConfig();
-		LK_CORE_DEBUG_TAG("EditorSettings", "Saving: {}", EditorConfig.string());
+		LK_CORE_DEBUG_TAG("EditorSettings", "Saving: {}", 
+						  LFileSystem::ConvertToUnixPath(fs::relative(EditorConfig.string(), LFileSystem::GetEngineDir())));
 
 		FEditorSettingsSerializer Serializer;
 		Serializer.Serialize(EditorConfig);
@@ -38,11 +39,11 @@ namespace LkEngine {
 	void FEditorSettings::Load()
 	{
 		const fs::path EditorConfig = LFileSystem::GetEditorConfig();
-		LK_CORE_DEBUG_TAG("EditorSettings", "Loading: {}", EditorConfig.string());
+		LK_CORE_TRACE_TAG("EditorSettings", "Loading: {}", EditorConfig.string());
 		if (!LFileSystem::Exists(EditorConfig))
 		{
 			bNewEditorConfigFile = true;
-			LK_CORE_INFO_TAG("EditorSettingsSerializer", "Creating editor settings file");
+			LK_CORE_INFO_TAG("EditorSettingsSerializer", "No editor settings config exists, creating one");
 			std::ofstream File(EditorConfig);
 			if (!File.is_open())
 			{

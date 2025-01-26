@@ -4,7 +4,7 @@
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
-#include "LkEngine/UI/Panel.h"
+#include "LkEngine/Renderer/UI/Panel.h"
 
 
 namespace LkEngine {

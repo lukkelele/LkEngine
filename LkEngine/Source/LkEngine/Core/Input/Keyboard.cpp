@@ -23,7 +23,7 @@ namespace LkEngine {
 
 	bool LKeyboard::IsKeyPressed(const EKey Key)
 	{
-		GLFWwindow* GlfwWindow = LApplication::Get()->GetWindow().GetGlfwWindow();
+		GLFWwindow* GlfwWindow = LApplication::Get().GetWindow().GetGlfwWindow();
 		const int KeyState = glfwGetKey(GlfwWindow, static_cast<int32_t>(Key));
 
 		return (KeyState == GLFW_PRESS);

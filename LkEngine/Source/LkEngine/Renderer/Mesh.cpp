@@ -1,8 +1,7 @@
 #include "LKpch.h"
 #include "Mesh.h"
 
-#include "LkEngine/Renderer/MaterialLibrary.h"
-
+#include "LkEngine/Renderer/Material.h"
 #include "LkEngine/Asset/AssetManager.h"
 
 
@@ -116,10 +115,9 @@ namespace LkEngine {
 		/* Load base material if no other materials exist. */
 		if (MaterialTable->GetMaterialCount() == 0)
 		{
-			LK_CORE_WARN_TAG("Mesh", "Material table is empty, setting base material as first entry");
-			TObjectPtr<LMaterialAsset> BaseMatAsset = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL);
-			LK_CORE_VERIFY(BaseMatAsset, "Base material asset is not valid");
-			LK_CORE_VERIFY(BaseMatAsset->GetMaterial(), "BaseMaterialAsset does not contain a material");
+			LK_CORE_DEBUG_TAG("Mesh", "Material table is empty, setting base material as first entry");
+			TObjectPtr<LMaterialAsset> BaseMatAsset = LEditorAssetManager::BaseMaterial;
+			LK_CORE_VERIFY(BaseMatAsset && BaseMatAsset->GetMaterial());
 			MaterialTable->SetMaterial(0, BaseMatAsset->Handle);
 		}
 
@@ -146,10 +144,9 @@ namespace LkEngine {
 		/* Load base material if no other materials exist. */
 		if (MaterialTable->GetMaterialCount() == 0)
 		{
-			LK_CORE_WARN_TAG("Mesh", "Material table is empty, setting base material as first entry");
-			TObjectPtr<LMaterialAsset> BaseMatAsset = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL);
-			LK_CORE_VERIFY(BaseMatAsset, "Base material asset is not valid");
-			LK_CORE_VERIFY(BaseMatAsset->GetMaterial(), "BaseMaterialAsset does not contain a material");
+			LK_CORE_DEBUG_TAG("Mesh", "Material table is empty, setting base material as first entry");
+			TObjectPtr<LMaterialAsset> BaseMatAsset = LEditorAssetManager::BaseMaterial;
+			LK_CORE_VERIFY(BaseMatAsset && BaseMatAsset->GetMaterial());
 			MaterialTable->SetMaterial(0, BaseMatAsset->Handle);
 		}
 
@@ -169,7 +166,6 @@ namespace LkEngine {
 
 	void LMesh::SetSubmeshes(const std::vector<uint32_t>& InSubmeshes)
 	{
-		/// TODO: Set dirty
 		if (!InSubmeshes.empty())
 		{
 			Submeshes = InSubmeshes;

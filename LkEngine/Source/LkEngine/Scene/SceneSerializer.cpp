@@ -17,14 +17,15 @@
 
 namespace LkEngine {
 
-	std::string LSceneSerializer::FILE_FILTER = LK_FORMAT_STRING("LkEngine Scene (*.{})\0*.{}\0", 
-																 LScene::FILE_EXTENSION, LScene::FILE_EXTENSION);
+	std::string LSceneSerializer::FILE_FILTER = std::format(
+		"LkEngine Scene (*{})\0*{}\0", LScene::FILE_EXTENSION, LScene::FILE_EXTENSION
+	);
 
 	LSceneSerializer::LSceneSerializer(LScene* InScene)
 		: Scene(InScene)
 	{
 		LOBJECT_REGISTER();
-		LK_CORE_VERIFY(Scene, "Invalid LScene reference");
+		LK_CORE_VERIFY(Scene);
 	}
 
 	LSceneSerializer::LSceneSerializer(const TObjectPtr<LScene>& InScene)
@@ -45,16 +46,16 @@ namespace LkEngine {
 	{
 		Out << YAML::BeginMap;
 		Out << YAML::Key << "Scene"       << YAML::Value << Scene->GetName();
-		Out << YAML::Key << "Active"      << YAML::Value << Scene->IsActiveScene();
-		Out << YAML::Key << "EditorScene" << YAML::Value << Scene->bIsEditorScene;
+		Out << YAML::Key << "Active"      << YAML::Value << Scene->IsActive();
+		Out << YAML::Key << "EditorScene" << YAML::Value << Scene->bEditorScene;
 		Out << YAML::Key << "SceneHandle" << YAML::Value << static_cast<uint32_t>(Scene->SceneEntity);
 
-		LEditorLayer* Editor = LEditorLayer::Get();
+		LEditorLayer& Editor = LEditorLayer::Get();
 
 		/* EditorCamera. */
-		if (Editor && Editor->GetEditorCamera())
+		if (Editor.GetEditorCamera())
 		{
-			SerializeEditorCamera(Out, *Editor->GetEditorCamera());
+			SerializeEditorCamera(Out, *Editor.GetEditorCamera());
 		}
 
 		#if 0 /// DISABLED
@@ -103,9 +104,9 @@ namespace LkEngine {
 
 	bool LSceneSerializer::Deserialize(const std::filesystem::path& Filepath)
 	{
-		LK_CORE_VERIFY(Scene, "Invalid scene reference");
-		LK_CORE_VERIFY(LFileSystem::Exists(Filepath), "Scene serialization failed, the filepath '{}' does not exist", Filepath.string());
-		LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing scene: '{}'", Filepath);
+		LK_CORE_VERIFY(Scene);
+		LK_CORE_VERIFY(!Filepath.empty() && LFileSystem::Exists(Filepath), "Deserialization failed, invalid filepath: '{}'", Filepath.string());
+		LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing: {}", Filepath.filename().string());
 		Scene->Clear();
 
 		bool bOperationSuccess = false;
@@ -119,7 +120,7 @@ namespace LkEngine {
 		}
 		catch (const YAML::Exception& Exception)
 		{
-			LK_ASSERT(false, "Failed to deserialize scene '{}': {}", Filepath.string(), Exception.what());
+			LK_CORE_ASSERT(false, "Failed to deserialize '{}', error: {}", Filepath.string(), Exception.what());
 			bOperationSuccess = false;
 		}
 
@@ -147,10 +148,9 @@ namespace LkEngine {
 		return Scene;
 	}
 
-
-	/// FIXME: Refactor
 	bool LSceneSerializer::DeserializeFromYaml(const std::string& YamlString)
 	{
+		LK_CORE_VERIFY(Scene);
 		if (YamlString.empty())
 		{
 			LK_CORE_ERROR_TAG("SceneSerializer", "Cannot deserialize scene, yaml string is empty");
@@ -160,7 +160,7 @@ namespace LkEngine {
 		YAML::Node Data = YAML::Load(YamlString);
 		if (!Data["Scene"])
 		{
-			LK_CORE_ERROR_TAG("SceneSerializer", "Root 'Scene' node does not exists\nYaml Data:\n{}", YamlString);
+			LK_CORE_ERROR_TAG("SceneSerializer", "Yaml node 'Scene' does not exist, yaml data:\n{}", YamlString);
 			return false;
 		}
 
@@ -172,7 +172,7 @@ namespace LkEngine {
 		Scene->SetActive(bIsActiveScene);
 
 		const bool bIsEditorScene = Data["EditorScene"].as<std::string>() == "true" ? true : false;
-		Scene->bIsEditorScene = bIsEditorScene;
+		Scene->bEditorScene = bIsEditorScene;
 		const uint32_t SceneEntityHandle = Data["SceneHandle"].as<uint32_t>();
 
 		Scene->ViewportWidth = LWindow::Get().GetViewportWidth();
@@ -182,7 +182,7 @@ namespace LkEngine {
 		const YAML::Node& EditorCameraNode = Data["EditorCamera"];
 		if (EditorCameraNode)
 		{
-			TObjectPtr<LEditorCamera> EditorCamera = LEditorLayer::Get()->GetEditorCamera();
+			TObjectPtr<LEditorCamera> EditorCamera = LEditorLayer::Get().GetEditorCamera();
 			DeserializeEditorCamera(EditorCameraNode, *EditorCamera);
 		}
 
@@ -193,11 +193,11 @@ namespace LkEngine {
 			DeserializeEntities(EntitiesNode, Scene);
 		}
 
-		/* Sort LIDComponent by the entity handle (which is essentially the order in which they were created). */
+		/* Sort the LIDComponent by the entity handle. */
 		Scene->Registry.sort<LIDComponent>([this](const auto Lhs, const auto Rhs)
 		{
-			auto LhsEntity = Scene->m_EntityIDMap.find(Lhs.ID);
-			auto RhsEntity = Scene->m_EntityIDMap.find(Rhs.ID);
+			auto LhsEntity = Scene->EntityMap.find(Lhs.ID);
+			auto RhsEntity = Scene->EntityMap.find(Rhs.ID);
 			return (static_cast<uint32_t>(LhsEntity->second) < static_cast<uint32_t>(RhsEntity->second));
 		});
 
@@ -206,8 +206,8 @@ namespace LkEngine {
 
 	void LSceneSerializer::SerializeRuntime(const LUUID InSceneHandle)
 	{
-		LK_UNUSED(InSceneHandle);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
+		LK_UNUSED(InSceneHandle);
 	}
 
 	void LSceneSerializer::SerializeEntity(YAML::Emitter& Out, LEntity Entity)
@@ -285,6 +285,10 @@ namespace LkEngine {
 				}
 				Out << YAML::EndMap; /* MaterialTable */
 			}
+			else
+			{
+				LK_CORE_TRACE_TAG("SceneSerializer", "Skipping serialization of material table for '{}' (Mesh), the table is empty", MeshComp.Mesh);
+			}
 
 			Out << YAML::Key << "Visible" << YAML::Value << MeshComp.bVisible;
 			Out << YAML::EndMap; /* MeshComponent */
@@ -310,6 +314,10 @@ namespace LkEngine {
 					Out << YAML::Key << Index << YAML::Value << Handle;
 				}
 				Out << YAML::EndMap; /* MaterialTable */
+			}
+			else
+			{
+				LK_CORE_TRACE_TAG("SceneSerializer", "Skipping serialization of materials for '{}' ({}), the table is empty", Entity.Name(), StaticMeshComp.StaticMesh);
 			}
 
 			Out << YAML::Key << "Visible" << YAML::Value << StaticMeshComp.bVisible;
@@ -375,13 +383,13 @@ namespace LkEngine {
 				EntityName = TagComponentNode["Tag"].as<std::string>();
 			}
 
-			LK_CORE_DEBUG_TAG("SceneSerializer", "Creating entity: {} ({})", EntityName, EntityID);
+			LK_CORE_TRACE_TAG("SceneSerializer", "Creating entity: {} ({})", EntityName, EntityID);
 			LEntity DeserializedEntity = SceneRef->CreateEntityWithID(EntityID, EntityName);
 
 			const YAML::Node& TransformComponentNode = EntityNode["TransformComponent"];
 			if (TransformComponentNode)
 			{
-				/* Entities always have Transforms. */
+				/* Entities always have transforms. */
 				LTransformComponent& TransformComponent = DeserializedEntity.AddComponent<LTransformComponent>();
 				TransformComponent.Translation = TransformComponentNode["Position"].as<glm::vec3>(glm::vec3(0.0f));
 

@@ -10,8 +10,6 @@ namespace LkEngine {
 
 	void LAssetManager::Destroy()
 	{
-		/* FIXME */
-		LProject::GetRuntimeAssetManager()->Destroy();
 	}
 
 }

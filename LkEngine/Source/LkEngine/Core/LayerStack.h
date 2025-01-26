@@ -11,6 +11,8 @@ namespace LkEngine {
 		LLayerStack() = default;
 		~LLayerStack();
 
+		void Destroy();
+
 		FORCEINLINE void PushLayer(LLayer* Layer)
 		{
 			if (auto Iter = Layers.emplace((Layers.begin() + InsertIndex), Layer); Iter != Layers.end())
@@ -60,13 +62,13 @@ namespace LkEngine {
 			}
 		}
 
-		TObjectPtr<LLayer> operator[](const size_t LayerIndex)
+		FORCEINLINE TObjectPtr<LLayer> operator[](const std::size_t LayerIndex)
 		{
 			LK_ASSERT((LayerIndex >= 0) && (LayerIndex < Layers.size()), "Invalid layer index: {}", LayerIndex);
 			return Layers[LayerIndex];
 		}
 
-		TObjectPtr<LLayer> operator[](const size_t LayerIndex) const
+		FORCEINLINE TObjectPtr<LLayer> operator[](const std::size_t LayerIndex) const
 		{
 			LK_ASSERT((LayerIndex >= 0) && (LayerIndex < Layers.size()), "Invalid layer index: {}", LayerIndex);
 			return Layers.at(LayerIndex);
@@ -80,14 +82,12 @@ namespace LkEngine {
 			return static_cast<int>(Layers.size());
 		}
 
-		// Iterator
 		std::vector<TObjectPtr<LLayer>>::iterator begin() { return Layers.begin(); }
 		std::vector<TObjectPtr<LLayer>>::iterator end() { return Layers.end(); }
-		// ~Iterator
 
 	private:
-		std::vector<TObjectPtr<LLayer>> Layers;
-		unsigned int InsertIndex = 0;
+		std::vector<TObjectPtr<LLayer>> Layers{};
+		uint32_t InsertIndex = 0;
 
 		LCLASS(LLayerStack);
 	};

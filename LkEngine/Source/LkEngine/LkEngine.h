@@ -19,6 +19,7 @@
 
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 
 #include "LkEngine/Asset/Asset.h"
 #include "LkEngine/Asset/AssetRegistry.h"
@@ -26,7 +27,5 @@
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
-
-#include "LkEngine/UI/UILayer.h"
 
 #include "LkEngine/Physics/PhysicsSystem.h"

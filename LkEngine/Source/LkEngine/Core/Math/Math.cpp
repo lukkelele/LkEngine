@@ -4,8 +4,7 @@
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Core/Window.h"
 
-#include "LkEngine/Physics2D/Physics2D.h"
-
+#include "LkEngine/Physics/2D/Physics2D.h"
 
 
 namespace LkEngine::Math {

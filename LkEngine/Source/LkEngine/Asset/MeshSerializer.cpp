@@ -19,7 +19,7 @@ namespace LkEngine {
 	bool LMeshSourceSerializer::TryLoadData(const FAssetMetadata& Metadata, TObjectPtr<LAsset>& Asset) const
 	{
 		LK_CORE_TRACE_TAG("MeshSourceSerializer", "TryLoadData: {}", Metadata.FilePath.string());
-		const std::filesystem::path FilePath = LProject::GetRuntimeAssetManager()->GetFileSystemPath(Metadata);
+		const std::filesystem::path FilePath = LProject::GetEditorAssetManager()->GetFileSystemPath(Metadata);
 		LAssimpMeshImporter Importer(FilePath.string());
 
 		TObjectPtr<LMeshSource> MeshSource = Importer.ImportToMeshSource();

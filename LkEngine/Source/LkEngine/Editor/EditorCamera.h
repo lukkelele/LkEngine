@@ -104,7 +104,7 @@ namespace LkEngine {
 		float GetZoomSpeed() const;
 
 	private:
-		bool OnKeyPress(KeyPressedEvent& e);
+		bool OnKeyPress(LKeyPressedEvent& e);
 		bool OnMouseScroll(MouseScrolledEvent& e);
 
 	private:

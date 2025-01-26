@@ -73,6 +73,10 @@ namespace LkEngine {
 			Logfile = LK_FORMAT_STRING("{}-{}.log", FileName, Time::CurrentTimestamp());
 		}
 
+	#if defined(LK_ENGINE_STDOUT_FLUSH_ALWAYS)
+		setvbuf(stdout, nullptr, _IONBF, 0);
+	#endif
+
 		/* Color Sink. */
 		auto ColorSinkLogger = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 		ColorSinkLogger->set_color(spdlog::level::trace, Color::Green);
@@ -187,7 +191,7 @@ namespace LkEngine {
 		auto& Logger = GetLogger(Type);
 		Logger = std::make_shared<spdlog::logger>(Name, Sinks.begin(), Sinks.end());
 		Logger->set_level(spdlog::level::trace);
-		Logger->flush_on(spdlog::level::trace);
+		Logger->flush_on(ToSpdlogLevel(LogLevel));
 		spdlog::register_logger(Logger);
 	}
 

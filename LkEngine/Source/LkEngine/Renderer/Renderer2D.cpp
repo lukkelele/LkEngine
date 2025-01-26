@@ -128,7 +128,7 @@ namespace LkEngine
 		    delete[] LineIndices;
         }
 
-        WhiteTexture = LTextureLibrary::Get().GetWhiteTexture();
+		WhiteTexture = LRenderer::GetWhiteTexture();
 
         CameraBuffer.ViewProjection = glm::mat4(1.0f);
         CameraUniformBuffer = LUniformBuffer::Create(sizeof(FCameraData));
@@ -136,11 +136,11 @@ namespace LkEngine
 
         RenderCommandBuffer = LRenderCommandBuffer::Create(0, "Renderer2D_RenderCommandBuffer");
 
-        for (uint32_t i = 0; i < ArrayTextures.size(); i++)
+        for (uint32_t Idx = 0; Idx < (uint32_t)ArrayTextures.size(); Idx++)
         {
-            if (ArrayTextures[i])
+            if (ArrayTextures[Idx])
             {
-                ArrayTextures[i]->Bind();
+                ArrayTextures[Idx]->Bind();
             }
         }
 

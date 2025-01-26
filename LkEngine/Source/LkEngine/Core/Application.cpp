@@ -3,6 +3,8 @@
 
 #include "LkEngine/Core/ApplicationSerializer.h"
 
+#include "LkEngine/Editor/EditorLayer.h"
+
 #include <nfd.hpp>
 
 
@@ -15,7 +17,7 @@ namespace LkEngine {
 		LLog& Logger = LLog::Get();
 		Logger.Initialize();
 
-		LK_CORE_INFO("LkEngine Version: {}", LVersion::ToString(LK_ENGINE_VERSION));
+		LK_CORE_INFO("Starting LkEngine ({})", LVersion::ToString(LK_ENGINE_VERSION));
 	}
 
 	LApplication::LApplication(const FApplicationSpecification& InSpecification)
@@ -37,7 +39,6 @@ namespace LkEngine {
 	{
 		if (bRunning)
 		{
-			LK_CORE_INFO("Shutting down application");
 			Shutdown();
 		}
 	}
@@ -49,21 +50,21 @@ namespace LkEngine {
 			LK_CORE_ERROR("Failed to read configuration file");
 		}
 
-		Window = std::make_unique<LWindow>(Specification);
+		Window = TObjectPtr<LWindow>::Create(Specification);
 
 		SetupDirectories();
 
 		LK_CORE_VERIFY(NFD::Init());
 
 		Window->Initialize();
-		/* TODO: Patch out. */
+		/* TODO: The event system is to be updated. */
 		Window->SetEventCallback([this](LEvent& Event)
 		{
 			OnEvent(Event);
 		});
 
 		LInput::Initialize();
-		LSelectionContext::Get();
+		LSelectionContext::Get(); /* TODO: REMOVE */
 
 		/* Initialize the renderer. */
 		Renderer = TObjectPtr<LRenderer>::Create();
@@ -75,11 +76,11 @@ namespace LkEngine {
 		UILayer->SetDarkTheme();
 
 	#if LK_ENGINE_EDITOR
-		/* Create and initialize EditorLayer. */
-		Editor = std::make_unique<LEditorLayer>();
-		LayerStack.PushOverlay(Editor.get());
+		TObjectPtr<LEditorLayer> Editor = TObjectPtr<LEditorLayer>::Create();
+		LayerStack.PushOverlay(Editor);
 	#endif
 
+		LK_CORE_DEBUG_TAG("Application", "Creating performance profiler");
 		PerformanceProfiler = new LPerformanceProfiler();
 	}
 
@@ -89,37 +90,26 @@ namespace LkEngine {
 
 		LApplication* Application = this;
 		GLFWwindow* GlfwWindow = Window->GetGlfwWindow();
+		LK_CORE_DEBUG_TAG("Application", "Entering main loop");
 
 		Timer.Reset();
 		while (!glfwWindowShouldClose(GlfwWindow))
 		{
-			Timestep = Timer.GetDeltaTime();
+			const float DeltaTime = Timer.GetDeltaTime();
 
 			LInput::Update();
 			ProcessEvents();
 
 			LRenderer::BeginFrame();
 
-	#if LK_ENGINE_EDITOR
-			/** Editor. */
-			if (Editor->IsEnabled())
+			for (TObjectPtr<LLayer>& Layer : LayerStack)
 			{
-				/* Update all layers. */
-				for (TObjectPtr<LLayer>& Layer : LayerStack)
-				{
-					Layer->OnUpdate(Timestep);
-				}
-
-				Editor->RenderViewport();
+				Layer->OnUpdate(DeltaTime);
 			}
-	#endif
 
 			/* UI. */
 			{
-				LRenderer::Submit([Application]()
-				{
-					Application->RenderUI();
-				});
+				LRenderer::Submit([Application]() { Application->RenderUI(); });
 
 				LRenderer::Submit([&]()
 				{
@@ -135,8 +125,9 @@ namespace LkEngine {
 				Window->SwapBuffers();
 			});
 
-			m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % LRenderer::GetFramesInFlight();
-			LastTimestep = Timestep;
+			CurrentFrameIndex = (CurrentFrameIndex + 1) % LRenderer::GetFramesInFlight();
+
+			LastDeltaTime = DeltaTime;
 
 			LInput::ClearReleased();
 		}
@@ -157,20 +148,25 @@ namespace LkEngine {
 				{
 				}
 
+				LK_CORE_DEBUG_TAG("Application", "Saving project: {}", Project->GetName());
 				Project->Save();
 			}
 
-			LayerStack.~LLayerStack();
+			LayerStack.Destroy();
 
-			LAssetManager::Destroy();
+			LK_CORE_DEBUG_TAG("Application", "Destroying renderer");
 			LRenderer::Destroy();
 			UILayer->Destroy();
 
-			LK_CORE_TRACE_TAG("Application", "Window->Shutdown()");
-			Window->Shutdown();
+			LAssetManager::Destroy();
+
+			Window->Destroy();
+			Window.Release();
 
 			bRunning = false;
 		}
+
+		LK_CORE_INFO("Exiting LkEngine");
 	}
 
 	bool LApplication::ReadConfigurationFile(FApplicationSpecification& InSpecification)
@@ -181,6 +177,9 @@ namespace LkEngine {
 
 	void LApplication::SetupDirectories()
 	{
+		// TODO: Check the pathing here before creating any directories.
+		// Should be placed in the assets directory.
+
 		/* Create 'Scenes' directory if it does not exist. */
 		if (!std::filesystem::exists("Scenes"))
 		{
@@ -211,41 +210,40 @@ namespace LkEngine {
 		UILayer->EndFrame();
 	}
 
-	/* FIXME: The event system needs to be re-evaluated to efficiently
-	 *        ripple events down to existing layers and overlays. */
 	void LApplication::OnEvent(LEvent& Event)
 	{
-		EventDispatcher Dispatcher(Event);
+		LEventDispatcher Dispatcher(Event);
 
 		for (TObjectPtr<LLayer>& Layer : LayerStack)
 		{
 			Layer->OnEvent(Event);
-			if (Event.Handled)
+			if (Event.bHandled)
 			{
 				break;
 			}
 		}
 
-		if (Event.Handled)
+		if (Event.bHandled)
 		{
 			return;
 		}
 
-		for (FEventCallback& Callback : EventCallbacks)
+		for (FEventCallback& EventCallback : EventCallbacks)
 		{
-			Callback(Event);
-			if (Event.Handled)
+			EventCallback(Event);
+			if (Event.bHandled)
 			{
 				break;
 			}
 		}
+
+		LK_CORE_ERROR("Event '{}' was not handled", Event.GetName());
 	}
 
 	void LApplication::ProcessEvents()
 	{
 		LInput::TransitionPressedKeys();
 		LInput::TransitionPressedButtons();
-
 		Window->ProcessEvents();
 
 		std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
@@ -255,6 +253,32 @@ namespace LkEngine {
 			EventQueue.front()();
 			EventQueue.pop();
 		}
+	}
+
+	const char* LApplication::GetPlatformName()
+	{
+	#if defined(LK_PLATFORM_WINDOWS)
+		return "Windows";
+	#elif defined(LK_PLATFORM_LINUX)
+		return "Linux";
+	#else
+		LK_CORE_VERIFY(false);
+		return nullptr;
+	#endif
+	}
+
+	const char* LApplication::GetConfigurationName()
+	{
+	#if defined(LK_DEBUG)
+		return "Debug";
+	#elif defined(LK_RELEASE)
+		return "Release";
+	#elif defined(LK_DIST)
+		return "Dist";
+	#else
+		LK_CORE_VERIFY(false);
+		return nullptr;
+	#endif
 	}
 
 }

@@ -29,7 +29,7 @@
 #include "LkEngine/Core/Input/Mouse.h"
 #include "LkEngine/Core/Input/Keyboard.h"
 
-#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 
 #include "LkEngine/Asset/AssetManager.h"
 
@@ -43,8 +43,6 @@
 #include "LkEngine/Scene/Components.h"
 #include "LkEngine/Scene/SceneSerializer.h"
 
-#include "LkEngine/Editor/EditorLayer.h"
-
 #include "LkEngine/Physics/PhysicsSystem.h"
 
 
@@ -53,7 +51,7 @@ namespace LkEngine {
 	namespace Core 
 	{
 		/**
-		 * @brief Setup necessary engine components such as logging and global config options.
+		 * Setup necessary engine components (logging, global config).
 		 */
 		void Setup(const int Argc, char* Argv[]);
 	}
@@ -68,22 +66,27 @@ namespace LkEngine {
 		virtual void Run();
 		virtual void Shutdown();
 
+		FORCEINLINE static LApplication& Get() { return *Instance; }
+
 		bool ReadConfigurationFile(FApplicationSpecification& InSpecification);
 		void SetupDirectories();
 
-		void OnEvent(LEvent& e);
+		void OnEvent(LEvent& Event);
 
 		void RenderUI();
 		void ProcessEvents();
+
+		static const char* GetPlatformName();
+		static const char* GetConfigurationName();
 
 		FORCEINLINE void PushLayer(TObjectPtr<LLayer> InLayer)
 		{
 			LayerStack.PushLayer(InLayer);
 		}
 
-		/// TODO: Add event category to bundle the callback with.
-		FORCEINLINE void AddEventCallback(const FEventCallback& EventCallback)
+		void AddEventCallback(const FEventCallback& EventCallback)
 		{
+			/* TODO: Some solution to add something like an event category to bundle the callback with. */
 			EventCallbacks.push_back(EventCallback);
 		}
 
@@ -93,68 +96,54 @@ namespace LkEngine {
 			EventQueue.push(Event);
 		}
 
-		template<typename TEvent, bool bDispatchImmediately = false, typename... TEventArgs>
+		template<typename TEvent, bool DispatchImmediately = false, typename... TEventArgs>
 		void DispatchEvent(TEventArgs&&... Args)
 		{
-			std::shared_ptr<TEvent> Event = MakeShared<TEvent>(std::forward<TEventArgs>(Args)...);
-			if constexpr (bDispatchImmediately)
+			std::shared_ptr<TEvent> Event = std::make_shared<TEvent>(std::forward<TEventArgs>(Args)...);
+			if constexpr (DispatchImmediately)
 			{
 				OnEvent(*Event);
 			}
 			else
 			{
+				/* Queue the event. */
 				std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
-				EventQueue.push([Event]()
-				{
-					LApplication::Get()->OnEvent(*Event);
-				});
+				EventQueue.push([Event]() { LApplication::Get()->OnEvent(*Event); });
 			}
 		}
 
-		std::string GenerateCrashDump();
-
 		FORCEINLINE LWindow& GetWindow() { return *Window; }
-		FORCEINLINE GLFWwindow* GetGlfwWindow() { return Window->GetGlfwWindow(); }
+		uint32_t GetCurrentFrameIndex() const { return CurrentFrameIndex; }
 
 		FORCEINLINE const FApplicationSpecification& GetSpecification() const { return Specification; }
 
-		FTimestep GetTimestep() const { return Timestep; } /// TODO: MOVE ELSEWHERE
-		uint32_t GetCurrentFrameIndex() const { return m_CurrentFrameIndex; }
+		LPerformanceProfiler* GetPerformanceProfiler() { return PerformanceProfiler; }
 
-		FORCEINLINE LPerformanceProfiler* GetPerformanceProfiler()
-		{
-			return PerformanceProfiler;
-		}
-
-		static LApplication* Get() { return Instance; }
+		FORCEINLINE float GetDeltaTime() const { return LastDeltaTime; }
+		std::string GenerateCrashDump();
 
 	private:
+		bool bRunning = false;
 		FApplicationSpecification Specification{};
 
-		bool bRunning = false;
-
 		LTimer Timer;
-		FTimestep Timestep{};
-		FTimestep LastTimestep{};
+		float LastDeltaTime = 0.0f;
 
 		LMetadataRegistry& MetadataRegistry;
 		LGarbageCollector& GarbageCollector;
 		LThreadManager& ThreadManager;
 
-		std::unique_ptr<LWindow> Window;
+		TObjectPtr<LWindow> Window{};
 		LLayerStack LayerStack;
 
-		TObjectPtr<LRenderer> Renderer;
-		uint32_t m_CurrentFrameIndex = 0;
+		TObjectPtr<LRenderer> Renderer{};
+		uint32_t CurrentFrameIndex = 0;
 
-		TObjectPtr<LUILayer> UILayer;
-		std::unique_ptr<LEditorLayer> Editor;
-
-		std::unique_ptr<PhysicsSystem> m_PhysicsSystem;
+		TObjectPtr<LUILayer> UILayer{};
 
 		std::mutex EventQueueMutex;
-		std::queue<std::function<void()>> EventQueue;
-		std::vector<FEventCallback> EventCallbacks;
+		std::queue<std::function<void()>> EventQueue{};
+		std::vector<FEventCallback> EventCallbacks{};
 
 		LPerformanceProfiler* PerformanceProfiler{};
 		std::unordered_map<const char*, LPerformanceProfiler::FFrameData> ProfilerPreviousFrameData;

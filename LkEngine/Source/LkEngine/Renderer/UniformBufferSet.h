@@ -5,26 +5,20 @@
 
 namespace LkEngine {
 
-	/**
-	 * LUniformBufferSet
-	 */
 	class LUniformBufferSet : public LObject
 	{
 	public:
-		virtual ~LUniformBufferSet() {}
+		virtual ~LUniformBufferSet() = default;
 
 		virtual TObjectPtr<LUniformBuffer> Get() = 0;
-		virtual TObjectPtr<LUniformBuffer> RT_Get() = 0;
-		virtual TObjectPtr<LUniformBuffer> Get(uint32_t frame) = 0;
+		virtual TObjectPtr<LUniformBuffer> Get(const uint32_t Frame) = 0;
 
-		virtual void Set(TObjectPtr<LUniformBuffer> uniformBuffer, uint32_t frame) = 0;
+		virtual void Set(TObjectPtr<LUniformBuffer> InUniformBuffer, uint32_t Frame) = 0;
 
-		static TObjectPtr<LUniformBufferSet> Create(const uint32_t size, 
-													const uint32_t framesInFlight = 0);
+		static TObjectPtr<LUniformBufferSet> Create(const uint32_t InSize, const uint32_t InFramesInFlight = 0);
 
 	private:
 		LCLASS(LUniformBufferSet)
 	};
-
 
 }

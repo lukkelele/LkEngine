@@ -49,7 +49,6 @@ namespace LkEngine {
 
         virtual void EndRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer) override;
 
-        // RenderGeometry
         virtual void RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, 
                                     TObjectPtr<LPipeline> Pipeline, 
                                     TObjectPtr<LVertexBuffer> InVertexBuffer, 
@@ -72,9 +71,8 @@ namespace LkEngine {
                                     TObjectPtr<LIndexBuffer> InIndexBuffer, 
                                     const glm::mat4& Transform, 
                                     const uint32_t IndexCount) override;
-        // ~RenderGeometry
 
-		void SubmitIndexed(unsigned int count) override;
+		virtual void SubmitIndexed(unsigned int count) override;
 
         virtual void SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0) override;
         virtual void SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID = 0) override;
@@ -97,8 +95,9 @@ namespace LkEngine {
 
         virtual void SetPrimitiveTopology(const ERenderTopology InRenderTopology) override;
         virtual void SetDepthFunction(const EDepthFunction InDepthFunction) override;
+		virtual void SetDepthEnabled(const bool Enabled) override;
 
-        virtual RendererCapabilities& GetCapabilities() override;
+        virtual FRendererCapabilities& GetCapabilities() override;
 
         virtual void BindArrayTexture(const uint8_t Index) override;
         virtual void BindArrayTexture(const EArrayTextureDimension Dimension) override;
@@ -109,8 +108,8 @@ namespace LkEngine {
         TObjectPtr<LOpenGLArrayTexture> GetArrayTextureWithDimension(const EArrayTextureDimension Dimension);
 
     private:
-		static_assert(GL_TRIANGLES == sizeof(uint32_t));
-        uint32_t m_Topology = GL_TRIANGLES;
+        int TopologyGL = GL_TRIANGLES;
+		static_assert(std::is_same_v<decltype(TopologyGL), decltype(GL_TRIANGLES)>);
 
         TObjectPtr<LOpenGLRenderer2D> Renderer2D{};
 		TObjectPtr<LOpenGLContext> RenderContext{};

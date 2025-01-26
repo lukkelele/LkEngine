@@ -7,6 +7,7 @@
 
 namespace LkEngine {
 
+	class LMaterial;
 	class LMesh;
 	class LStaticMesh;
 	class LScene;
@@ -17,21 +18,24 @@ namespace LkEngine {
 	class LRenderCommandBuffer;
 	class LVertexBuffer;
 
-#if 0
-	struct FSceneRendererCamera
-	{
-		TObjectPtr<LCamera> Camera{};
-		glm::mat4 ViewMatrix = glm::mat4(1.0f);
-	};
-#endif
-
 	struct FSceneRendererSpecification
 	{
 		uint32_t ShadowCascades = 4;
 	};
 
+	struct FSceneRendererFlushData
+	{
+		uint32_t StaticMeshDrawListSize = 0;
+		uint32_t StaticMeshTransformMapSize = 0;
+
+		uint32_t MeshDrawListSize = 0;
+		uint32_t MeshTransformMapSize = 0;
+	};
+
     class LSceneRenderer : public LObject
     {
+	public:
+		LK_DECLARE_MULTICAST_DELEGATE(FOnDrawListFlush, const FSceneRendererFlushData&);
     public:
 		LSceneRenderer(TObjectPtr<LScene> InScene, 
 					   const FSceneRendererSpecification& InSpecification = FSceneRendererSpecification());
@@ -45,12 +49,16 @@ namespace LkEngine {
 
 		void SetScene(TObjectPtr<LScene> InScene);
 
-		void SubmitStaticMesh(TObjectPtr<LStaticMesh> StaticMesh, TObjectPtr<LMaterialTable> MaterialTable, const glm::mat4& Transform);
+		void SubmitStaticMesh(TObjectPtr<LStaticMesh> StaticMesh, 
+							  TObjectPtr<LMaterialTable> MaterialTable, 
+							  const glm::mat4& Transform,
+							  TObjectPtr<LMaterialAsset> MaterialOverride = nullptr);
 
 		void SubmitMesh(TObjectPtr<LMesh> Mesh, 
 						const uint32_t SubmeshIndex, 
 						TObjectPtr<LMaterialTable> MaterialTable, 
-						const glm::mat4& Transform);
+						const glm::mat4& Transform,
+						TObjectPtr<LMaterialAsset> MaterialOverride = nullptr);
 
 		struct FStatistics
 		{
@@ -64,6 +72,8 @@ namespace LkEngine {
 		void PreRender();
 		void FlushDrawList();
 
+	public:
+		FOnDrawListFlush OnDrawListFlush;
 	private:
 		/**
 		 * FMeshKey
@@ -86,7 +96,7 @@ namespace LkEngine {
 			{
 			}
 
-			bool operator<(const FMeshKey& Other) const
+			FORCEINLINE bool operator<(const FMeshKey& Other) const
 			{
 				if (MeshHandle < Other.MeshHandle)         return true;
 				if (MeshHandle > Other.MeshHandle)         return false;
@@ -94,7 +104,7 @@ namespace LkEngine {
 				if (SubmeshIndex > Other.SubmeshIndex)     return false;
 				if (MaterialHandle < Other.MaterialHandle) return true;
 				if (MaterialHandle > Other.MaterialHandle) return false;
-				return bIsSelected < Other.bIsSelected;
+				return (bIsSelected < Other.bIsSelected);
 			}
 		};
 
@@ -106,8 +116,8 @@ namespace LkEngine {
 		{
 			TObjectPtr<MeshType> Mesh{};
 			uint32_t SubmeshIndex{};
-			TObjectPtr<LMaterialTable> MaterialTable;
-			TObjectPtr<LMaterial> OverrideMaterial;
+			TObjectPtr<LMaterialTable> MaterialTable{};
+			TObjectPtr<LMaterial> OverrideMaterial{};
 
 			uint32_t InstanceCount = 0;
 			uint32_t InstanceOffset = 0;
@@ -152,6 +162,8 @@ namespace LkEngine {
 
 		std::map<FMeshKey, FDrawCommand<LStaticMesh>> StaticMeshDrawList{};
 		std::map<FMeshKey, FTransformMapData> StaticMeshTransformMap;
+
+		friend class LSceneManagerPanel;
 
 		LCLASS(LSceneRenderer)
     };

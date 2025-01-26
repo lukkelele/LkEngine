@@ -13,6 +13,7 @@
 #include "LkEngine/Renderer/VertexBuffer.h"
 #include "LkEngine/Renderer/BlendingSpecification.h"
 #include "LkEngine/Renderer/ArrayTextureSpecification.h"
+#include "LkEngine/Renderer/GeometryPool.h"
 
 
 /**
@@ -776,8 +777,9 @@ namespace LkEngine {
 			0.0f, 1.0f
 		};
 
+	#if 0
 		static float Plane_Vertices[] = {
-			// Positions          // Texture Coords 
+		/*      Positions         Texture Coordinates   */
 			 5.0f, -0.5f,  5.0f,     2.0f, 0.0f,
 			-5.0f, -0.5f,  5.0f,     0.0f, 0.0f,
 			-5.0f, -0.5f, -5.0f,     0.0f, 2.0f,
@@ -786,9 +788,10 @@ namespace LkEngine {
 			-5.0f, -0.5f, -5.0f,     0.0f, 2.0f,
 			 5.0f, -0.5f, -5.0f,     2.0f, 2.0f
 		};
+	#endif
 
 		static float Quad_Vertices[] = { 
-		/* Positions */    /* Texture Coordinates */
+		/*   Positions       Texture Coordinates   */
 			-0.3f,  1.0f,        0.0f, 1.0f,
 			-0.3f,  0.7f,        0.0f, 0.0f,
 			 0.3f,  0.7f,        1.0f, 0.0f,
@@ -798,6 +801,7 @@ namespace LkEngine {
 			 0.3f,  1.0f,        1.0f, 1.0f
 		};
 
+	#if 0
 		static float Skybox_Vertices[] = {
 			-1.0f,  1.0f, -1.0f,
 			-1.0f, -1.0f, -1.0f,
@@ -841,6 +845,7 @@ namespace LkEngine {
 			-1.0f, -1.0f,  1.0f,
 			 1.0f, -1.0f,  1.0f
 		};
+	#endif
 
 		/**
 		 * Cube vertices with normals and texture coordinates.
@@ -964,6 +969,8 @@ namespace LkEngine {
 
 		static uint32_t LoadCubemap(std::vector<std::string> faces)
 		{
+			LK_MARK_FUNC_FOR_REMOVAL();
+
 			uint32_t TextureID;
 			glGenTextures(1, &TextureID);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, TextureID);
@@ -995,13 +1002,16 @@ namespace LkEngine {
 			return TextureID;
 		}
 
-		FORCEINLINE static void GenerateSkybox(LRendererID& skyboxVAO, LRendererID& skyboxVBO)
+		FORCEINLINE static void GenerateSkybox(LRendererID& InSkyboxVao, LRendererID& InSkyboxVbo)
 		{
-			LK_OpenGL_Verify(glGenVertexArrays(1, &skyboxVAO));
-			LK_OpenGL_Verify(glGenBuffers(1, &skyboxVBO));
-			LK_OpenGL_Verify(glBindVertexArray(skyboxVAO));
-			LK_OpenGL_Verify(glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO));
-			LK_OpenGL_Verify(glBufferData(GL_ARRAY_BUFFER, sizeof(Skybox_Vertices), &Skybox_Vertices, GL_STATIC_DRAW));
+			LK_MARK_FUNC_FOR_REMOVAL();
+
+			LK_CORE_DEBUG_TAG("LOpenGL", "Generating skybox");
+			LK_OpenGL_Verify(glGenVertexArrays(1, &InSkyboxVao));
+			LK_OpenGL_Verify(glGenBuffers(1, &InSkyboxVbo));
+			LK_OpenGL_Verify(glBindVertexArray(InSkyboxVao));
+			LK_OpenGL_Verify(glBindBuffer(GL_ARRAY_BUFFER, InSkyboxVbo));
+			LK_OpenGL_Verify(glBufferData(GL_ARRAY_BUFFER, sizeof(Geometry::Vertices::Skybox), &Geometry::Vertices::Skybox, GL_STATIC_DRAW));
 			LK_OpenGL_Verify(glEnableVertexAttribArray(0));
 			LK_OpenGL_Verify(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
 
@@ -1012,6 +1022,8 @@ namespace LkEngine {
 
 		static void RenderSkybox(const LRendererID texture, const glm::mat4& view, const glm::mat4& projection)
 		{
+			LK_MARK_FUNC_FOR_REMOVAL();
+
 			/* Change depth function so depth test passes when values are equal to depth buffer's content. */
 			LK_OpenGL_Verify(glDepthFunc(GL_LEQUAL));
 			SkyboxShader->Bind();

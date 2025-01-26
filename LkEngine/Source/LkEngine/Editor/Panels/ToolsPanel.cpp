@@ -7,7 +7,7 @@
 #include "LkEngine/Project/Project.h"
 
 #include "LkEngine/Asset/AssetImporter.h"
-#include "LkEngine/Asset/RuntimeAssetManager.h"
+#include "LkEngine/Asset/EditorAssetManager.h"
 
 #include "LkEngine/Serialization/Serializer.h"
 
@@ -15,6 +15,13 @@
 
 
 namespace LkEngine {
+
+	namespace 
+	{
+		constexpr std::size_t ASSETHANDLE_MAX_VALUE = std::numeric_limits<LUUID::SizeType>::max();
+		const int ASSETHANDLE_CHAR_COUNT = static_cast<int>(std::log10(ASSETHANDLE_MAX_VALUE)) + 1;
+		const std::string ASSETHANDLE_STRING(ASSETHANDLE_CHAR_COUNT, '1');
+	}
 
 	LToolsPanel::LToolsPanel()
 	{
@@ -259,12 +266,45 @@ namespace LkEngine {
 
 		}
 
-		LK_UI_DEBUG_ON_HOVER();
+		LK_UI_DEBUG_WINDOW_ON_HOVER();
 		ImGui::End();
 	}
 
 	void LToolsPanel::UI_AssetRegistry()
 	{
+		static int CurrentSortColumn = 0;
+		static ImGuiSortDirection CurrentSortDirection = ImGuiSortDirection_Ascending;
+
+		auto SortAssets = [](const std::pair<LUUID, FAssetMetadata>& A, const std::pair<LUUID, FAssetMetadata>& B) -> bool
+		{
+			/* Column 0: AssetHandle */
+			if (CurrentSortColumn == 0)
+			{
+				if (CurrentSortDirection == ImGuiSortDirection_Ascending)
+				{
+					return (A.first < B.first);
+				}
+				else
+				{
+					return (A.first > B.first);
+				}
+			}
+			/* Column 1: FilePath */
+			else if (CurrentSortColumn == 1)
+			{
+				if (CurrentSortDirection == ImGuiSortDirection_Ascending)
+				{
+					return (A.second.FilePath < B.second.FilePath);
+				}
+				else
+				{
+					return (A.second.FilePath > B.second.FilePath);
+				}
+			}
+
+			return false;
+		};
+
 		const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
 		ImGui::SetNextWindowSize(ImVec2(500, 560), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Asset Registry", &Window_AssetRegistry.bOpen, WindowFlags);
@@ -275,37 +315,45 @@ namespace LkEngine {
 			LK_CORE_VERIFY(AssetManager, "Invalid asset manager reference");
 			const LAssetRegistry& AssetRegistry = AssetManager->GetAssetRegistry();
 
-			if (ImGui::BeginTable("##Table-AssetRegistry", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+			/* Copy the asset registry for the sake of sorting it. */
+			std::vector<std::pair<FAssetHandle, FAssetMetadata>> AssetRegistrySorted(AssetRegistry.begin(), AssetRegistry.end());
+			std::sort(AssetRegistrySorted.begin(), AssetRegistrySorted.end(), SortAssets);
+
+			static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Borders 
+				| ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp 
+				| ImGuiTableFlags_Sortable;
+			if (ImGui::BeginTable("##Table-AssetRegistry", 2, TableFlags))
 			{
-				ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize("Index").x);
-				ImGui::TableSetupColumn("Handle");
-				ImGui::TableSetupColumn("Filepath", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Handle", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize(ASSETHANDLE_STRING.c_str()).x);
+				ImGui::TableSetupColumn("Filepath");
 				ImGui::TableHeadersRow();
 
-				int Index = 1;
-				for (const auto& [AssetHandle, Metadata] : AssetRegistry) 
+				ImGuiTableSortSpecs* SortSpecs = ImGui::TableGetSortSpecs();
+				if (SortSpecs && SortSpecs->SpecsDirty)
+				{
+					const ImGuiTableColumnSortSpecs* SortSpec = &SortSpecs->Specs[0];
+					CurrentSortColumn = SortSpec->ColumnIndex;
+					CurrentSortDirection = SortSpec->SortDirection;
+					SortSpecs->SpecsDirty = false;
+				}
+
+				for (const auto& [AssetHandle, Metadata] : AssetRegistrySorted) 
 				{
 					ImGui::TableNextRow();
-					/* Column 1: Index */
+
 					ImGui::TableSetColumnIndex(0);
-					ImGui::Text("%d", Index);
+					const std::string AssetHandleStr = std::format("{}", AssetHandle);
+					ImGui::Text("%s", AssetHandleStr.c_str());
 
-					/* Column 2: Font Size */
 					ImGui::TableSetColumnIndex(1);
-					ImGui::Text("%lld", AssetHandle);
-
-					/* Column 3: Filepath */
-					ImGui::TableSetColumnIndex(2);
 					ImGui::Text("%s", Metadata.FilePath.string().c_str());
-
-					Index++;
 				}
 
 				ImGui::EndTable();
 			}
 		}
 
-		LK_UI_DEBUG_ON_HOVER();
+		LK_UI_DEBUG_WINDOW_ON_HOVER();
 		ImGui::End();
 	}
 
@@ -319,78 +367,22 @@ namespace LkEngine {
 		Window_InputInfo.bTreeNode_Selection = ImGui::TreeNodeEx("Selection", ImGuiTreeNodeFlags_None);
 		if (Window_InputInfo.bTreeNode_Selection)
 		{
-			static const std::string Title = "Selection";
-			if (ImGui::BeginTable(Title.c_str(), 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
-			{
-				const auto& SceneSelection = LSelectionContext::GetSelected(ESelectionContext::Scene);
-				const auto& ContentBrowserSelection = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
-				const int TableRows = (SceneSelection.size() > ContentBrowserSelection.size() ? SceneSelection.size() : ContentBrowserSelection.size());
+			ImGuiStyle& Style = ImGui::GetStyle();
+			const float RowPaddingX = Style.FramePadding.x * 2.0f;
 
-				LContentBrowserPanel& ContentBrowser = LContentBrowserPanel::Get();
-				FContentBrowserItemList& CurrentBrowserItems = ContentBrowser.GetCurrentItems();
+			const ImVec2 WindowSize = ImGui::GetContentRegionAvail();
+			const float RowLength = std::max(ImGui::CalcTextSize(ASSETHANDLE_STRING.c_str()).x + RowPaddingX, 
+											 (WindowSize.x * 0.50f - (2 * Style.FramePadding.x)));
+			const LVector2 TableSize(RowLength, 0);
 
-				ImGui::TableSetupColumn("Scene", ImGuiTableColumnFlags_WidthStretch, 120.0f);
-				ImGui::TableSetupColumn("Content Browser", ImGuiTableColumnFlags_WidthStretch, 120.0f);
-				ImGui::TableHeadersRow();
-
-				if (TableRows > 0)
-				{
-					for (int SelectionIdx = 0; SelectionIdx < TableRows; SelectionIdx++)
-					{
-						ImGui::TableNextRow();
-
-						/* Column 1: Scene */
-						ImGui::TableSetColumnIndex(0);
-						if (SelectionIdx < SceneSelection.size())
-						{
-							const LUUID& SelectedUuid = SceneSelection.at(SelectionIdx);
-							ImGui::Text("%llu", SelectedUuid);
-						}
-						else
-						{
-							ImGui::Text("Empty");
-						}
-
-						/* Column 2: ContentBrowser */
-						ImGui::TableSetColumnIndex(1);
-						if (SelectionIdx < ContentBrowserSelection.size())
-						{
-							const LUUID& SelectedUuid = ContentBrowserSelection.at(SelectionIdx);
-							const std::size_t ItemIdx = CurrentBrowserItems.Find(SelectedUuid);
-							LK_CORE_ASSERT(ItemIdx != FContentBrowserItemList::InvalidItem, "Invalid item index of UUID '{}'", SelectedUuid);
-							TObjectPtr<LContentBrowserItem> BrowserItem = CurrentBrowserItems[ItemIdx];
-							LK_CORE_ASSERT(BrowserItem);
-							ImGui::Text("%s", BrowserItem->GetName().c_str());
-						}
-						else
-						{
-							ImGui::Text("Empty");
-						}
-					}
-				}
-				/**
-				 * Add one row if no items are selected.
-				 */
-				else
-				{
-					ImGui::TableNextRow();
-
-					/* Column 1: Scene */
-					ImGui::TableSetColumnIndex(0);
-					ImGui::Text("Empty");
-
-					/* Column 2: ContentBrowser */
-					ImGui::TableSetColumnIndex(1);
-					ImGui::Text("Empty");
-				}
-
-				ImGui::EndTable();
-			}
+			UI_InputInfo_SceneSelection(TableSize);
+			ImGui::SameLine();
+			UI_InputInfo_ContentBrowserSelection(TableSize);
 
 			ImGui::TreePop();
 		}
 
-		UI::VSeparator(14.0f);
+		UI::VSeparator(10.0f);
 
 		/* TreeNode: Key Info */
 		ImGui::SetNextItemOpen(Window_InputInfo.bTreeNode_KeyInfo, ImGuiCond_Once);
@@ -450,11 +442,6 @@ namespace LkEngine {
 
 			ImGui::Text("Message Boxes: %d", UI::Internal::MessageBoxes.size());
 
-		#if 0
-			UI::Font::Push("Large");
-			ImGui::Text("Message Box");
-			UI::Font::Pop();
-		#endif
 			/* Message Box. */
 			{
 				static char InputBuffer_BoxTitle[128] = { "Message Box" };
@@ -605,9 +592,89 @@ namespace LkEngine {
 			ImGui::EndTable();
 		}
 
-		LK_UI_DEBUG_ON_HOVER();
-
+		LK_UI_DEBUG_WINDOW_ON_HOVER();
 		ImGui::End();
+	}
+
+	void LToolsPanel::UI_InputInfo_SceneSelection(const LVector2& Size)
+	{
+		static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Borders 
+			| ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
+
+		static const std::string Title = "Scene Selection";
+		if (ImGui::BeginTable(Title.c_str(), 1, TableFlags, Size.As<ImVec2>()))
+		{
+			const auto& Selection = LSelectionContext::GetSelected(ESelectionContext::Scene);
+
+			ImGui::TableSetupColumn("Scene", ImGuiTableColumnFlags_WidthStretch, 120.0f);
+			ImGui::TableHeadersRow();
+
+			const int TableRows = static_cast<int>(Selection.size());
+			if (TableRows > 0)
+			{
+				for (int SelectionIdx = 0; SelectionIdx < (int)Selection.size(); SelectionIdx++)
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+
+					const std::string UuidString = std::format("{}", Selection.at(SelectionIdx));
+					ImGui::Text("%s", UuidString.c_str());
+				}
+			}
+			else
+			{
+				/* Add an empty row if no selections exist. */
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("");
+			}
+
+			ImGui::EndTable();
+		}
+	}
+
+	void LToolsPanel::UI_InputInfo_ContentBrowserSelection(const LVector2& Size)
+	{
+		static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Borders 
+			| ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
+
+		static const std::string Title = "ContentBrowser Selection";
+		if (ImGui::BeginTable(Title.c_str(), 1, TableFlags, Size.As<ImVec2>()))
+		{
+			const auto& Selection = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
+
+			LContentBrowserPanel& ContentBrowser = LContentBrowserPanel::Get();
+			FContentBrowserItemList& CurrentBrowserItems = ContentBrowser.GetCurrentItems();
+
+			ImGui::TableSetupColumn("Content Browser", ImGuiTableColumnFlags_WidthStretch, 120.0f);
+			ImGui::TableHeadersRow();
+
+			const int TableRows = static_cast<int>(Selection.size());
+			if (TableRows > 0)
+			{
+				for (int SelectionIdx = 0; SelectionIdx < (int)Selection.size(); SelectionIdx++)
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+
+					const LUUID& SelectedUuid = Selection.at(SelectionIdx);
+					const std::size_t ItemIdx = CurrentBrowserItems.Find(SelectedUuid);
+					LK_CORE_ASSERT(ItemIdx != FContentBrowserItemList::InvalidItem, "Invalid item index of UUID: '{}'", SelectedUuid);
+					TObjectPtr<LContentBrowserItem> BrowserItem = CurrentBrowserItems[ItemIdx];
+					LK_CORE_ASSERT(BrowserItem);
+					ImGui::Text("%s", BrowserItem->GetName().c_str());
+				}
+			}
+			else
+			{
+				/* Add an empty row if no selections exist. */
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("");
+			}
+
+			ImGui::EndTable();
+		}
 	}
 
 }

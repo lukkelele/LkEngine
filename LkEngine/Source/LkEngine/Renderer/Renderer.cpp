@@ -4,23 +4,24 @@
 #include "Texture.h"
 #include "RenderContext.h"
 
+#include "LkEngine/Scene/Entity.h"
+
 #include "LkEngine/Core/Application.h"
 
-#include "LkEngine/Scene/Entity.h"
+#if defined(LK_ENGINE_EDITOR)
+#	include "LkEngine/Editor/EditorLayer.h"
+#endif
 
 
 namespace LkEngine {
 
-	ERenderTopology LRenderer::PrimitiveTopology;
-	LRenderer::FOnMeshSubmission LRenderer::OnMeshSubmission;
-
-	struct FShaderDependencies
+	struct FShaderDependency
 	{
 		std::vector<TObjectPtr<LPipeline>> Pipelines{};
 		std::vector<TObjectPtr<LMaterial>> Materials{};
 	};
 
-	static std::unordered_map<std::size_t, FShaderDependencies> ShaderDependencies;
+	static std::unordered_map<std::size_t, FShaderDependency> ShaderDependencies;
 
 	void LRendererAPI::SetAPI(ERendererAPI InRendererAPI)
 	{
@@ -29,18 +30,14 @@ namespace LkEngine {
 
 	struct FRendererData
 	{
-		TObjectPtr<LShaderLibrary> m_ShaderLibrary;
-		TObjectPtr<LTextureLibrary> TextureLibrary;
-		TObjectPtr<LMaterialLibrary> MaterialLibrary;
+		TObjectPtr<LShaderLibrary> ShaderLibrary{};
 
-		TObjectPtr<LTexture2D> WhiteTexture;
-		TObjectPtr<LTexture2D> BlackTexture;
-
-		LEditorLayer* Editor = nullptr;
+		TObjectPtr<LTexture2D> WhiteTexture{};
+		TObjectPtr<LTexture2D> BlackTexture{};
 	};
 
 	static FRendererData* RendererData = nullptr;
-	constexpr static uint32_t RenderCommandQueueCount = 2;
+	static constexpr uint32_t RenderCommandQueueCount = 2;
 	static LRenderCommandQueue* CommandQueue[RenderCommandQueueCount];
 	static std::atomic<uint32_t> RenderCommandQueueSubmissionIndex = 0;
 	static LRenderCommandQueue ResourceFreeQueue[3];
@@ -53,45 +50,54 @@ namespace LkEngine {
 	void LRenderer::Initialize()
 	{
 		LK_CORE_ASSERT(RendererData == nullptr, "RendererData already exist");
+		LK_CORE_DEBUG_TAG("Renderer", "Initializing");
 		RendererData = new FRendererData();
 
 		PrimitiveTopology = ERenderTopology::Triangles;
 		CommandQueue[0] = new LRenderCommandQueue();
 		CommandQueue[1] = new LRenderCommandQueue();
 
-		LK_CORE_DEBUG_TAG("Renderer", "Creating Shader library");
-		RendererData->m_ShaderLibrary = TObjectPtr<LShaderLibrary>::Create();
-
-		if (TObjectPtr<LShaderLibrary> ShaderLibrary = GetShaderLibrary())
+		RendererData->ShaderLibrary = TObjectPtr<LShaderLibrary>::Create();
+		if (TObjectPtr<LShaderLibrary> ShaderLibrary = GetShaderLibrary(); ShaderLibrary != nullptr)
 		{
-			/* clang-format off */
-			LK_CORE_DEBUG_TAG("Renderer", "Loading Shaders");
-			ShaderLibrary->Load("Renderer2D_Quad",    "Assets/Shaders/OpenGL/Renderer2D_Quad.shader");
-			ShaderLibrary->Load("Renderer2D_Line",    "Assets/Shaders/OpenGL/Renderer2D_Line.shader");
-			ShaderLibrary->Load("Renderer2D_Debug",   "Assets/Shaders/OpenGL/Renderer2D_Debug.shader");
-			ShaderLibrary->Load("Renderer2D_Screen",  "Assets/Shaders/OpenGL/Renderer2D_Screen.shader");
-			ShaderLibrary->Load("Renderer_Debug",     "Assets/Shaders/OpenGL/Renderer_Debug.shader");
-			ShaderLibrary->Load("Renderer_Skybox",    "Assets/Shaders/OpenGL/Renderer_Skybox.shader");
-			ShaderLibrary->Load("Renderer_Model",     "Assets/Shaders/OpenGL/Renderer_Model.shader");
-			/* clang-format on */
+			LK_CORE_DEBUG_TAG("Renderer", "Loading shaders");
+			ShaderLibrary->Load("Renderer2D_Quad",   LFileSystem::GetAssetsDir() / "Shaders/OpenGL/Renderer2D_Quad.shader");
+			ShaderLibrary->Load("Renderer2D_Line",   LFileSystem::GetAssetsDir() / "Shaders/OpenGL/Renderer2D_Line.shader");
+			ShaderLibrary->Load("Renderer2D_Debug",  LFileSystem::GetAssetsDir() / "Shaders/OpenGL/Renderer2D_Debug.shader");
+			ShaderLibrary->Load("Renderer2D_Screen", LFileSystem::GetAssetsDir() / "Shaders/OpenGL/Renderer2D_Screen.shader");
+			ShaderLibrary->Load("Renderer_Debug",    LFileSystem::GetAssetsDir() / "Shaders/OpenGL/Renderer_Debug.shader");
+			ShaderLibrary->Load("Renderer_Skybox",   LFileSystem::GetAssetsDir() / "Shaders/OpenGL/Renderer_Skybox.shader");
+			ShaderLibrary->Load("Renderer_Model",    LFileSystem::GetAssetsDir() / "Shaders/OpenGL/Renderer_Model.shader");
+			LK_CORE_DEBUG_TAG("Renderer", "Loaded {} shaders", RendererData->ShaderLibrary->GetShadersLoaded());
 		}
 
-		LK_CORE_DEBUG_TAG("Renderer", "Creating texture library");
-		RendererData->TextureLibrary = TObjectPtr<LTextureLibrary>(&LTextureLibrary::Get());
-		RendererData->TextureLibrary->Initialize();
-		RendererData->WhiteTexture = RendererData->TextureLibrary->GetWhiteTexture();
-
-		LK_CORE_DEBUG_TAG("Renderer", "Creating Material library");
-		RendererData->MaterialLibrary = TObjectPtr<LMaterialLibrary>::Create();
-		RendererData->MaterialLibrary->Initialize();
+		/* Create white texture. */
+		{
+			LK_CORE_DEBUG_TAG("Renderer", "Creating white texture");
+			FTextureSpecification TextureSpec;
+			TextureSpec.Format = EImageFormat::RGBA32F;
+			TextureSpec.Width = 2048;
+			TextureSpec.Height = 2048;
+			TextureSpec.SamplerFilter = ETextureFilter::None;
+			TextureSpec.SamplerWrap = ETextureWrap::None;
+			const std::filesystem::path TexturePath = LFileSystem::GetAssetsDir() / "Textures" / "White.png";
+			TextureSpec.Path = TexturePath.string();
+			TextureSpec.Name = "White";
+			TextureSpec.DebugName = "White";
+			RendererData->WhiteTexture = LTexture2D::Create(TextureSpec);
+		}
+		LK_CORE_VERIFY(RendererData->WhiteTexture && RendererData->WhiteTexture->IsValid());
 
 		RendererAPI = LRendererAPI::Create();
 		RendererAPI->Initialize();
+
+		RendererAPI->SetDepthEnabled(true);
+		RendererAPI->SetPrimitiveTopology(ERenderTopology::Triangles);
 	}
 
 	void LRenderer::Destroy()
 	{
-		LK_VERIFY(RendererAPI, "Renderer API reference invalid");
+		LK_CORE_VERIFY(RendererAPI);
 		RendererAPI->Destroy();
 	}
 
@@ -125,7 +131,7 @@ namespace LkEngine {
 		RenderCommandQueueSubmissionIndex = (RenderCommandQueueSubmissionIndex + 1) % RenderCommandQueueCount;
 	}
 
-	void LRenderer::SetPrimitiveTopology(const ERenderTopology& InRenderTopology)
+	void LRenderer::SetPrimitiveTopology(const ERenderTopology InRenderTopology)
 	{
 		PrimitiveTopology = InRenderTopology;
 		RendererAPI->SetPrimitiveTopology(InRenderTopology);
@@ -148,20 +154,18 @@ namespace LkEngine {
 
 	TObjectPtr<LFramebuffer> LRenderer::GetViewportFramebuffer()
 	{
-		/* TODO: Should not do it like this for the editor, skip the LRenderer here entirely... */
-		if (LEditorLayer* Editor = LEditorLayer::Get(); Editor && Editor->IsEnabled())
-		{
-			return Editor->ViewportFramebuffer;
-		}
+	#if LK_ENGINE_EDITOR
+		return LEditorLayer::Get().ViewportFramebuffer;
+	#endif
 
-		LK_CORE_ASSERT(false, "Not implemented yet!");
+		LK_CORE_ASSERT(false, "Not implemented");
 		return nullptr;
 	}
 
 	TObjectPtr<LShaderLibrary> LRenderer::GetShaderLibrary()
 	{
-		LK_CORE_ASSERT(RendererData->m_ShaderLibrary, "ShaderLibrary is nullptr");
-		return RendererData->m_ShaderLibrary;
+		LK_CORE_ASSERT(RendererData->ShaderLibrary, "ShaderLibrary is nullptr");
+		return RendererData->ShaderLibrary;
 	}
 
 	LRenderer* LRenderer::Get()
@@ -260,25 +264,17 @@ namespace LkEngine {
 		RendererAPI->SubmitQuad(TransformComponent.Translation, Size, Texture, Color, TransformComponent.Rotation2D, EntityID);
 	}
 
-	RendererCapabilities& LRenderer::GetCapabilities()
+	FRendererCapabilities& LRenderer::GetCapabilities()
 	{
 		return RendererAPI->GetCapabilities();
 	}
 
 	uint32_t LRenderer::GetCurrentFrameIndex()
 	{
-		return LApplication::Get()->GetCurrentFrameIndex();
+		return LApplication::Get().GetCurrentFrameIndex();
 	}
 
-	uint32_t LRenderer::RT_GetCurrentFrameIndex()
-	{
-		/* FIXME: Swapchain owns the RenderThread frame index. */
-		/// FIX THIS !!!!!!!!! OMG !!!
-		return LApplication::Get()->GetWindow().GetSwapChain().GetCurrentBufferIndex();
-	}
-
-	void
-	LRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, TObjectPtr<LRenderPass> renderPass)
+	void LRenderer::BeginRenderPass(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer, TObjectPtr<LRenderPass> renderPass)
 	{
 		RendererAPI->BeginRenderPass(RenderCommandBuffer, renderPass, false);
 	}
@@ -324,7 +320,7 @@ namespace LkEngine {
 
 	TObjectPtr<LTexture2D> LRenderer::GetWhiteTexture()
 	{
-		LK_VERIFY(RendererData->WhiteTexture, "White texture is nullptr");
+		LK_CORE_VERIFY(RendererData->WhiteTexture);
 		return RendererData->WhiteTexture;
 	}
 
@@ -340,116 +336,12 @@ namespace LkEngine {
 		LK_UNUSED(Mesh && Shader);
 	}
 
-	void LRenderer::RegisterShaderDependency(TObjectPtr<LShader> Shader, TObjectPtr<LMaterial> Material)
+	void LRenderer::RegisterShader(TObjectPtr<LShader> Shader, TObjectPtr<LMaterial> Material)
 	{
+		LK_CORE_VERIFY(Shader && Material);
+		FShaderDependency& Materials = ShaderDependencies[Shader->GetHash()];
+		LK_CORE_TRACE_TAG("Renderer", "Registering shader {} to material '{}'", Shader->GetName(), Material->GetName());
 		ShaderDependencies[Shader->GetHash()].Materials.push_back(Material);
-	}
-
-	/* TODO: Make this dynamic instead of using hardcoded entries. */
-	void LRenderer::LoadTextures()
-	{
-		LK_CORE_INFO_TAG("Renderer", "Loading textures");
-		LTextureLibrary& TextureLibrary = LTextureLibrary::Get();
-
-		/// TODO: Use LFileSystem::GetAssetDirectory() in here.
-
-		#if 0
-		/* Textures: 512x512 */
-		{
-			FTextureSpecification Specification{};
-			/* Grass. */
-			Specification.Width = 512;
-			Specification.Height = 512;
-			Specification.Path = "Assets/Textures/Grass.png";
-			Specification.Name = "grass-512x512";
-			Specification.DebugName = "grass-512x512";
-			Specification.bGenerateMips = true;
-			Specification.Format = EImageFormat::RGBA32F;
-			Specification.SamplerWrap = ETextureWrap::Repeat;
-			Specification.SamplerFilter = ETextureFilter::Linear;
-			TextureLibrary.AddTexture(Specification);
-
-			/* Ice Skybox. */
-			Specification.Path = "Assets/Textures/Skybox/back.jpg";
-			Specification.Name = "skybox-ice-back-512x512";
-			Specification.DebugName = "skybox-ice-back-512x512";
-			Specification.bGenerateMips = false;
-			Specification.Format = EImageFormat::RGBA32F;
-			Specification.SamplerWrap = ETextureWrap::Clamp;
-			Specification.SamplerFilter = ETextureFilter::Nearest;
-			TextureLibrary.AddTexture(Specification);
-		}
-		#endif
-
-		#if 0
-		/* Textures: 1024x1024 */
-		{
-			FTextureSpecification Specification{};
-
-			/* Brickwall. */
-			Specification.Width = 1024;
-			Specification.Height = 1024;
-			Specification.Path = "Assets/Textures/brickwall.jpg";
-			Specification.Name = "brickwall";
-			Specification.DebugName = "brickwall";
-			Specification.bGenerateMips = true;
-			Specification.SamplerWrap = ETextureWrap::Repeat;
-			Specification.SamplerFilter = ETextureFilter::Linear;
-			TextureLibrary.AddTexture(Specification);
-		}
-		#endif
-
-		/* Textures: 2048x2048 */
-		{
-			FTextureSpecification Specification{};
-
-			/* Wood Container. */
-			Specification.Format = EImageFormat::RGBA32F;
-			Specification.Width = 2048;
-			Specification.Height = 2048;
-			Specification.Path = "Assets/Textures/Debug/WoodContainer.jpg";
-			Specification.Name = "WoodContainer";
-			Specification.DebugName = "WoodContainer";
-			Specification.SamplerWrap = ETextureWrap::Clamp;
-			Specification.SamplerFilter = ETextureFilter::Nearest;
-			TextureLibrary.AddTexture(Specification);
-
-			/* Bricks. */
-			Specification.Path = "Assets/Textures/Debug/Bricks.jpg";
-			Specification.Name = "Bricks";
-			Specification.DebugName = "Bricks";
-			TextureLibrary.AddTexture(Specification);
-
-			/* Metal. */
-			Specification.Path = "Assets/Textures/Debug/Metal.png";
-			Specification.Name = "Metal";
-			Specification.DebugName = "Metal";
-			Specification.bGenerateMips = true;
-			Specification.SamplerWrap = ETextureWrap::Repeat;
-			Specification.SamplerFilter = ETextureFilter::Nearest;
-			TextureLibrary.AddTexture(Specification);
-
-			/* Wood. */
-			Specification.Name = "Wood";
-			Specification.DebugName = "Wood";
-			Specification.Path = "Assets/Textures/Debug/Wood.png";
-			Specification.bGenerateMips = true;
-			Specification.SamplerWrap = ETextureWrap::Repeat;
-			Specification.SamplerFilter = ETextureFilter::Linear;
-			TextureLibrary.AddTexture(Specification);
-
-		#if 0
-			/* Ice Skybox. */
-			Specification.Name = "skybox-ice-back";
-			Specification.DebugName = "skybox-ice-back";
-			Specification.Path = "Assets/Textures/Skybox/back.jpg";
-			Specification.bGenerateMips = false;
-			Specification.Format = EImageFormat::RGBA32F;
-			Specification.SamplerFilter = ETextureFilter::Nearest;
-			Specification.SamplerWrap = ETextureWrap::Clamp;
-			TextureLibrary.AddTexture(Specification);
-		#endif
-		}
 	}
 
 	void LRenderer::SetDepthFunction(const EDepthFunction InDepthFunction)

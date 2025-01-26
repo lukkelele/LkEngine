@@ -1,7 +1,7 @@
 #pragma once
 
-#include "LkEngine/UI/Panel.h"
-#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Renderer/UI/Panel.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 
 #include "LkEngine/Editor/Panels/ContentBrowserItem.h"
 
@@ -18,7 +18,73 @@ namespace LkEngine {
 			Move,
 			Swap
 		};
+
+		namespace DragDropPayload
+		{
+			static constexpr const char* Asset = "LK_ASSET_PAYLOAD";
+		}
 	}
+
+	struct FSelectionStack
+	{
+		FORCEINLINE void CopyFrom(const FSelectionStack& Other)
+		{
+			SelectionArray.assign(Other.begin(), Other.end());
+		}
+
+		FORCEINLINE void CopyFrom(const std::vector<FAssetHandle>& Other)
+		{
+			SelectionArray.assign(Other.begin(), Other.end());
+		}
+
+		FORCEINLINE void Select(const FAssetHandle Handle)
+		{
+			if (IsSelected(Handle))
+			{
+				return;
+			}
+			SelectionArray.push_back(Handle);
+		}
+
+		FORCEINLINE void Deselect(const FAssetHandle Handle)
+		{
+			if (!IsSelected(Handle))
+			{
+				return;
+			}
+
+			std::erase_if(SelectionArray, [Handle](const FAssetHandle OtherHandle)
+			{
+				return (Handle == OtherHandle);
+			});
+		}
+
+		FORCEINLINE bool IsSelected(const FAssetHandle Handle) const
+		{
+			auto IsHandleSelected = [Handle](const FAssetHandle SelectedHandle) { return (SelectedHandle == Handle); };
+			return std::find_if(SelectionArray.begin(), SelectionArray.end(), IsHandleSelected) != SelectionArray.end();
+		}
+
+		FORCEINLINE void Clear() { SelectionArray.clear(); }
+
+		FORCEINLINE std::size_t Count() const { return SelectionArray.size(); }
+		FORCEINLINE const FAssetHandle* Data() const { return SelectionArray.data(); }
+
+		FORCEINLINE FAssetHandle operator[](const std::size_t Idx) const
+		{
+			LK_CORE_ASSERT((Idx >= 0) && (Idx < SelectionArray.size()));
+			return SelectionArray[Idx];
+		}
+
+		FORCEINLINE std::vector<FAssetHandle>::iterator begin() { return SelectionArray.begin(); }
+		FORCEINLINE std::vector<FAssetHandle>::const_iterator begin() const { return SelectionArray.begin(); }
+		FORCEINLINE std::vector<FAssetHandle>::iterator end() { return SelectionArray.end(); }
+		FORCEINLINE std::vector<FAssetHandle>::const_iterator end() const { return SelectionArray.end(); }
+
+	private:
+		std::vector<FAssetHandle> SelectionArray{};
+	};
+
 
 	/**
 	 * FContentBrowserItemList
@@ -41,9 +107,9 @@ namespace LkEngine {
 			return Items[Index]; 
 		}
 
-		FORCEINLINE const TObjectPtr<LContentBrowserItem>& operator[](const std::size_t Index) const 
+		FORCEINLINE const TObjectPtr<LContentBrowserItem>& operator[](const std::size_t Idx) const 
 		{ 
-			return Items[Index]; 
+			return Items[Idx]; 
 		}
 
 		FContentBrowserItemList() = default;
@@ -64,7 +130,7 @@ namespace LkEngine {
 			Items.clear();
 		}
 
-		FORCEINLINE void Erase(const LUUID Handle)
+		FORCEINLINE void Erase(const FAssetHandle Handle)
 		{
 			const std::size_t Index = Find(Handle);
 			if (Index == InvalidItem)
@@ -77,10 +143,11 @@ namespace LkEngine {
 			Items.erase(Iter);
 		}
 
-		[[nodiscard]] FORCEINLINE std::size_t Find(const LUUID Handle)
+		[[nodiscard]] FORCEINLINE std::size_t Find(const FAssetHandle Handle)
 		{
 			if (Items.empty())
 			{
+				LK_CORE_WARN_TAG("ContentBrowserList", "Items array is empty");
 				return InvalidItem;
 			}
 
@@ -123,14 +190,10 @@ namespace LkEngine {
 		FORCEINLINE FContentBrowserItemList& GetCurrentItems() { return ItemList; }
 		TObjectPtr<FDirectoryInfo> GetDirectory(const std::filesystem::path& Filepath) const;
 
-		static LContentBrowserPanel& Get()
-		{
-			LK_CORE_ASSERT(Instance);
-			return *Instance;
-		}		
-
 		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
 		virtual void DeserializeFromYaml(const YAML::Node& Data) override;
+
+		static LContentBrowserPanel& Get() { return *Instance; }
 
 	private:
 		void UpdateInput();
@@ -142,8 +205,7 @@ namespace LkEngine {
 		/**
 		 * Process a directory.
 		 */
-		LUUID ProcessDirectory(const std::filesystem::path& DirectoryPath,
-									  const TObjectPtr<FDirectoryInfo>& ParentDir);
+		FAssetHandle ProcessDirectory(const std::filesystem::path& DirectoryPath, const TObjectPtr<FDirectoryInfo>& ParentDir);
 
 		void Search(const std::string& Query, 
 					const TObjectPtr<FDirectoryInfo>& DirectoryInfo,
@@ -183,7 +245,7 @@ namespace LkEngine {
 		TObjectPtr<FDirectoryInfo> NextDirectory{};
 		TObjectPtr<FDirectoryInfo> PreviousDirectory{};
 
-		std::unordered_map<LUUID, TObjectPtr<FDirectoryInfo>> Directories{};
+		std::unordered_map<FAssetHandle, TObjectPtr<FDirectoryInfo>> Directories{};
 		std::vector<TObjectPtr<FDirectoryInfo>> BreadCrumbData{};
 		char SearchBuffer[LContentBrowserItem::INPUT_BUFFER_SIZE];
 
@@ -194,6 +256,8 @@ namespace LkEngine {
 		bool bUpdateNavigationPath = false;
 
 		std::map<std::string, TObjectPtr<LTexture2D>> AssetIconMap{};
+
+		FSelectionStack CopiedAssets{};
 
 		inline static LContentBrowserPanel* Instance{};
 

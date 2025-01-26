@@ -21,7 +21,7 @@ namespace LkEngine {
 			return Scene; 
 		}
 
-		EEventType GetEventType() const { return EEventType::SceneCreated; }
+		EEventType GetType() const { return EEventType::SceneCreated; }
 		const char* GetName() const override { return "SceneCreated"; }
 
 	private:
@@ -43,7 +43,7 @@ namespace LkEngine {
 			return m_Scene; 
 		}
 
-		EEventType GetEventType() const { return EEventType::SceneDeleted; }
+		EEventType GetType() const { return EEventType::SceneDeleted; }
 		const char* GetName() const override { return "SceneDeleted"; }
 
 	private:

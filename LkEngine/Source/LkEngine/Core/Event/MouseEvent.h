@@ -17,7 +17,7 @@ namespace LkEngine {
 		float GetY() const { return m_MouseY; }
 
 		const char* GetName() const override { return "MouseMoved"; }
-		EEventType GetEventType() const override { return EEventType::MouseMoved; }
+		EEventType GetType() const override { return EEventType::MouseMoved; }
 
 		std::string ToString() const override
 		{
@@ -41,7 +41,7 @@ namespace LkEngine {
 		float GetYOffset() const { return m_YOffset; }
 
 		const char* GetName() const override { return "MouseScrolled"; }
-		EEventType GetEventType() const override { return EEventType::MouseScrolled; }
+		EEventType GetType() const override { return EEventType::MouseScrolled; }
 
 		std::string ToString() const override
 		{
@@ -92,7 +92,7 @@ namespace LkEngine {
 		}
 
 		FORCEINLINE const char* GetName() const override { return "MouseButtonPressed"; }
-		FORCEINLINE EEventType GetEventType() const override { return EEventType::MouseButtonPressed; }
+		FORCEINLINE EEventType GetType() const override { return EEventType::MouseButtonPressed; }
 
 		std::string ToString() const override
 		{
@@ -114,7 +114,7 @@ namespace LkEngine {
 		}
 
 		FORCEINLINE const char* GetName() const override { return "MouseButtonReleased"; }
-		FORCEINLINE EEventType GetEventType() const override { return EEventType::MouseButtonPressed; }
+		FORCEINLINE EEventType GetType() const override { return EEventType::MouseButtonPressed; }
 
 		std::string ToString() const override
 		{
@@ -137,7 +137,7 @@ namespace LkEngine {
 			return "MouseButtonDown"; 
 		}
 
-		EEventType GetEventType() const override 
+		EEventType GetType() const override 
 		{ 
 			return EEventType::MouseButtonDown; 
 		}

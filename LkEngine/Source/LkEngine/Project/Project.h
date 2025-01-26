@@ -10,6 +10,7 @@
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Serialization/FileStream.h"
 
+#include "LkEngine/Asset/EditorAssetManager.h"
 #include "LkEngine/Asset/RuntimeAssetManager.h"
 
 
@@ -41,14 +42,9 @@ namespace LkEngine {
 		LProject();
 		~LProject() = default;
 
-		/**
-		 * @brief Load a project.
-		 */
 		void Load(const std::string& ProjectPath);
 
-		/**
-		 * @brief Get currently active project.
-		 */
+		/** Get currently active project. */
 		FORCEINLINE static TObjectPtr<LProject> Current() { return ActiveProject; }
 
 		static std::filesystem::path GetAssetDirectory();
@@ -57,20 +53,25 @@ namespace LkEngine {
 		bool Save();
 		uint64_t GetSize() const;
 
-		FORCEINLINE const std::string& GetName() const { return Configuration.Name; }
+		FProjectConfiguration& GetConfiguration() { return Configuration; }
+		const FProjectConfiguration& GetConfiguration() const { return Configuration; }
 
-		FORCEINLINE void SetName(const std::string& InName)
-		{ 
-			Configuration.Name = InName;
+		FORCEINLINE static TObjectPtr<IAssetManager> GetAssetManager()
+		{
+			LK_CORE_VERIFY(AssetManager);
+			return AssetManager;
 		}
 
-		FORCEINLINE FProjectConfiguration& GetConfiguration() { return Configuration; }
-		FORCEINLINE const FProjectConfiguration& GetConfiguration() const { return Configuration; }
+		FORCEINLINE static TObjectPtr<LEditorAssetManager> GetEditorAssetManager() 
+		{ 
+			LK_CORE_VERIFY(AssetManager);
+			return AssetManager.As<LEditorAssetManager>(); 
+		}
 
 		FORCEINLINE static TObjectPtr<LRuntimeAssetManager> GetRuntimeAssetManager() 
 		{ 
-			LK_CORE_VERIFY(RuntimeAssetManager, "Invalid RuntimeAssetManager reference");
-			return RuntimeAssetManager; 
+			LK_CORE_VERIFY(AssetManager);
+			return AssetManager.As<LRuntimeAssetManager>(); 
 		}
 
 		static void SetActive(TObjectPtr<LProject> Project);
@@ -80,14 +81,17 @@ namespace LkEngine {
 			return (ActiveProject == Project);
 		}
 
+		void SetName(const std::string& InName) { Configuration.Name = InName; }
+		const std::string& GetName() const { return Configuration.Name; }
+
 	public:
-		inline static constexpr const char* FILE_EXTENSION = "lkproject";
+		inline static constexpr const char* FILE_EXTENSION = ".lkproject";
 		static FOnProjectChanged OnProjectChanged;
 	private:
 		FProjectConfiguration Configuration{};
 
 		inline static TObjectPtr<LProject> ActiveProject{};
-		inline static TObjectPtr<LRuntimeAssetManager> RuntimeAssetManager{};
+		inline static TObjectPtr<IAssetManager> AssetManager{};
 
 		friend class LEditorLayer;
 

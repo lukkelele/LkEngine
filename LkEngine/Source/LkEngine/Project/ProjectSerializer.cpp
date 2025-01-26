@@ -29,12 +29,12 @@ namespace LkEngine {
 		SerializeToYaml(Out);
 
 		/* Add file extension to the saved file. */
-		const std::string ProjectSave = LK_FORMAT_STRING("{}.{}", OutFile.string(), LProject::FILE_EXTENSION);
+		const std::string ProjectSave = std::format("{}{}", OutFile.string(), LProject::FILE_EXTENSION);
 
 		std::ofstream FileOut(ProjectSave);
 		if (FileOut.is_open() && FileOut.good())
 		{
-			LK_CORE_DEBUG_TAG("ProjectSerializer", "Serializing: \"{}\"", ProjectSave);
+			LK_CORE_DEBUG_TAG("ProjectSerializer", "Saving: {}", ProjectSave);
 			FileOut << Out.c_str();
 		}
 		else
@@ -45,7 +45,7 @@ namespace LkEngine {
 
 	bool FProjectSerializer::Deserialize(const std::filesystem::path& InFile)
 	{
-		LK_CORE_VERIFY(Project, "Invalid project reference");
+		LK_CORE_VERIFY(Project);
 		if (!fs::exists(InFile))
 		{
 			LK_CORE_ERROR_TAG("ProjectSerializer", "Invalid filepath: {}", InFile.string());
@@ -58,7 +58,7 @@ namespace LkEngine {
 			LK_CORE_DEBUG_TAG("ProjectSerializer", "Creating directory: {}", ParentDir.string());
 			if (!fs::create_directories(ParentDir))
 			{
-				LK_CORE_ASSERT(false, "Failed to create directory: {}", ParentDir.string());
+				LK_CORE_VERIFY(false, "Failed to create directory: {}", ParentDir.string());
 			}
 
 			return false;
@@ -73,7 +73,7 @@ namespace LkEngine {
 		}
 		catch (const YAML::Exception& Exception)
 		{
-			LK_CORE_ASSERT(false, "Failed to deserialize \"{}\", error: '{}'", InFile.string(), Exception.what());
+			LK_CORE_ASSERT(false, "Deserialization failed for '{}', error: '{}'", InFile.string(), Exception.what());
 			return false;
 		}
 
@@ -100,18 +100,16 @@ namespace LkEngine {
 
 	bool FProjectSerializer::DeserializeFromYaml(const std::string& YamlString, FProjectConfiguration& ProjectConfig)
 	{
-		LK_CORE_DEBUG_TAG("ProjectSerializer", "Deserializing YAML");
+		LK_CORE_TRACE_TAG("ProjectSerializer", "Deserializing YAML");
 		YAML::Node RootNode = YAML::Load(YamlString)["Project"];
 		if (!RootNode.IsDefined())
 		{
-			LK_CORE_DEBUG_TAG("ProjectSerializer", "Yaml node is missing 'Project' node");
+			LK_CORE_ERROR_TAG("ProjectSerializer", "Yaml node is missing 'Project' node");
 			return false;
 		}
 
 		LK_DESERIALIZE_PROPERTY(Name, ProjectConfig.Name, RootNode, "Unknown");
 		LK_DESERIALIZE_PROPERTY(AutoSave, ProjectConfig.bAutoSave, RootNode, true);
-
-		LK_CORE_TRACE_TAG("ProjectSerializer", "Read Name: {}", ProjectConfig.Name);
 
 		return true;
 	}

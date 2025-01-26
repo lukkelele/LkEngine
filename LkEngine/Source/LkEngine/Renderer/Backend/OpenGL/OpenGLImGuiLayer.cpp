@@ -17,7 +17,8 @@ namespace LkEngine {
     {
 		LOBJECT_REGISTER();
 
-		LayoutConfig = LFileSystem::GetConfigDir() / "ImGuiLayout.ini";
+		LayoutConfig = LFileSystem::ConvertToUnixPath(LFileSystem::GetConfigDir() / "ImGuiLayout.ini");
+		LK_CORE_TRACE_TAG("OpenGLImGuiLayer", "Config: {}", LayoutConfig.string());
     }
 
     void LOpenGLImGuiLayer::Initialize()
@@ -55,7 +56,7 @@ namespace LkEngine {
 		Style.WindowMenuButtonPosition = ImGuiDir_Right;
 
 		/* Initialize ImGui for GLFW and OpenGL. */
-        LWindow& Window = LApplication::Get()->GetWindow();
+        LWindow& Window = LApplication::Get().GetWindow();
 	    ImGui_ImplGlfw_InitForOpenGL(Window.GetGlfwWindow(), true);
 	    ImGui_ImplOpenGL3_Init(Window.GetShaderVersion().c_str());
 		LK_CORE_TRACE_TAG("OpenGLImGuiLayer", "ImGui Version: {}", ImGui::GetVersion());
@@ -73,9 +74,8 @@ namespace LkEngine {
 
     void LOpenGLImGuiLayer::Destroy()
     {
-		LK_CORE_TRACE_TAG("OpenGLImGuiLayer", "Destroying");
-
-		LK_CORE_DEBUG_TAG("OpenGLImGuiLayer", "Saving editor layout configuration to: {}", LayoutConfig.string());
+		LK_CORE_DEBUG_TAG("OpenGLImGuiLayer", "Saving UI configuration: {}", 
+						  std::filesystem::relative(LayoutConfig, LFileSystem::GetEngineDir()).string());
 		ImGui::SaveIniSettingsToDisk(LayoutConfig.string().c_str());
 
 		ImGui_ImplGlfw_Shutdown();

@@ -51,4 +51,27 @@ namespace LkEngine {
         }
     };
 
+
+	namespace Enum
+	{
+		static constexpr const char* ToString(const EDepthFunction DepthFunc)
+		{
+			switch (DepthFunc)
+			{
+				case EDepthFunction::Never:          return "Never";
+				case EDepthFunction::Less:           return "Less";
+				case EDepthFunction::Equal:          return "Equal";
+				case EDepthFunction::LessOrEqual:    return "LessOrEqual";
+				case EDepthFunction::Greater:        return "Greater";
+				case EDepthFunction::NotEqual:       return "NotEqual";
+				case EDepthFunction::GreaterOrEqual: return "GreaterOrEqual";
+				case EDepthFunction::Always:         return "Always";
+			}
+
+			LK_CORE_VERIFY(false, "Enum::ToString(EDepthFunction) failed for value: {}", static_cast<int>(DepthFunc));
+			return nullptr;
+		}
+	}
+
+
 }

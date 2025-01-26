@@ -3,8 +3,6 @@
 
 #include "EditorLayer.h"
 
-#include "LkEngine/Renderer/TextureLibrary.h"
-
 
 namespace LkEngine {
 
@@ -50,14 +48,13 @@ namespace LkEngine {
     // Basically just replicate what's done in Editor, but I have no energy to do that now lol
     void LMaterialEditorTab::OnImGuiRender()
     {
+    #if 0
         LEditorLayer* Editor = LEditorLayer::Get();
         static float div = 0.30f;
 
         static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDocking 
             | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse 
             | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
-
-    #if 0
         ImVec2 NodeWindowSize = ImVec2(Editor->EditorWindowSize.x * (1 - div), Editor->EditorWindowSize.y);
 
 		ImGui::SetNextWindowPos(

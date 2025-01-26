@@ -24,6 +24,15 @@ namespace LkEngine {
 		Data.bVSync = WindowSpecification.bVSync;
 	}
 
+	LWindow::~LWindow()
+	{
+		if (GlfwWindow)
+		{
+			LK_CORE_TRACE_TAG("Window", "Invoking Destroy");
+			Destroy();
+		}
+	}
+
 	void LWindow::Initialize()
 	{
 		LObject::Initialize();
@@ -55,7 +64,7 @@ namespace LkEngine {
 		Data.Height = Specification.Height;
 	
 		/* Create GLFW window. */
-		GlfwWindow = glfwCreateWindow(static_cast<int>(Size.X), static_cast<int>(Size.Y), Title.c_str(), nullptr, nullptr);
+		GlfwWindow = glfwCreateWindow((int)Size.X, (int)Size.Y, Title.c_str(), nullptr, nullptr);
 		LK_CORE_VERIFY(GlfwWindow != nullptr);
 		glfwMakeContextCurrent(GlfwWindow);
 
@@ -98,6 +107,7 @@ namespace LkEngine {
 				case GLFW_PRESS:
 				{
 					const FKeyData& KeyData = LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Pressed);
+					//LK_CORE_DEBUG_TAG("Window", "Key Pressed: {}", Enum::ToString((EKey)Key));
 					LKeyboard::OnKeyPressed.Broadcast(KeyData);
 					break;
 				}
@@ -105,6 +115,7 @@ namespace LkEngine {
 				case GLFW_RELEASE:
 				{
 					const FKeyData& KeyData = LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Released);
+					//LK_CORE_DEBUG_TAG("Window", "Key Released: {}", Enum::ToString((EKey)Key));
 					LKeyboard::OnKeyReleased.Broadcast(KeyData);
 					break;
 				}
@@ -214,7 +225,24 @@ namespace LkEngine {
 
 		Data.bMaximized = IsMaximized();
 
+		/* Set the viewport width and height. */
+		{
+			int ReadWidth, ReadHeight;
+			glfwGetFramebufferSize(GlfwWindow, &ReadWidth, &ReadHeight);
+			ViewportSize.X = ReadWidth;
+			ViewportSize.Y = ReadHeight;
+		}
+
 		bGlfwInitialized = true;
+	}
+
+	void LWindow::Destroy()
+	{
+		if (GlfwWindow)
+		{
+			glfwTerminate();
+			GlfwWindow = nullptr;
+		}
 	}
 
 	void LWindow::SwapBuffers()
@@ -223,27 +251,6 @@ namespace LkEngine {
 		glfwPollEvents();
 	}
 	
-	void LWindow::Shutdown()
-	{
-	#if 0
-		if (RenderContext)
-		{
-			LK_CORE_DEBUG_TAG("Window", "Releasing render context");
-			RenderContext->Destroy();
-			RenderContext.Release();
-			RenderContext = nullptr;
-		}
-	#endif
-
-		if (GlfwWindow)
-		{
-			glfwDestroyWindow(GlfwWindow);
-			glfwTerminate();
-
-			GlfwWindow = nullptr;
-		}
-	}
-
 	bool LWindow::IsFullscreen() const
 	{
 		LK_CORE_ASSERT(GlfwWindow);
@@ -280,6 +287,13 @@ namespace LkEngine {
 			glfwSetWindowMonitor(GlfwWindow, Monitor, WindowPosX, WindowPosY, WindowedWidth, WindowedHeight, 0);
 			Data.bFullscreen = false;
 		}
+	}
+
+	void LWindow::SetTitle(const std::string& NewTitle)
+	{
+		LK_CORE_ASSERT(GlfwWindow);
+		Data.Title = NewTitle;
+		glfwSetWindowTitle(GlfwWindow, Data.Title.c_str());
 	}
 
 	void LWindow::Maximize()

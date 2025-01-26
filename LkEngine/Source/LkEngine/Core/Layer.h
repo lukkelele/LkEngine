@@ -23,16 +23,10 @@ namespace LkEngine {
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 
-		virtual void OnUpdate(const float Timestep) = 0;
+		virtual void OnUpdate(const float DeltaTime) = 0;
+		virtual void OnRenderUI() {};
 
-		virtual void OnRender() {};
-		virtual void OnRenderUI() {}
-
-		/* TODO: Need to figure out the proper handling of events. */
-		virtual void OnEvent(LEvent& Event)
-		{
-			LK_UNUSED(Event);
-		}
+		virtual void OnEvent(LEvent& Event) { LK_UNUSED(Event); }
 
 		FORCEINLINE std::string_view GetName() const { return Name; }
 

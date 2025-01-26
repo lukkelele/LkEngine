@@ -31,8 +31,14 @@ namespace LkEngine {
 
 		ETextureUniformType UniformType = ETextureUniformType::Diffuse;
 
-		bool Storage = false;
-		bool StoreLocally = false;
+		bool bStorage = false;
+		bool bStoreLocally = false;
+
+		/**
+		 * Use the dimensions from the texture file instead of the 
+		 * specified width and height. 
+		 */
+		bool bUseReadDimensions = false;
 
 		std::string DebugName{};
 	};

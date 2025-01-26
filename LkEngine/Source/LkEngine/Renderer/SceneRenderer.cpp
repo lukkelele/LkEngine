@@ -20,11 +20,10 @@ namespace LkEngine {
 	{
 		LOBJECT_REGISTER();
 
-		LK_CORE_DEBUG_TAG("SceneRenderer", "Creating command buffer");
+		LK_CORE_TRACE_TAG("SceneRenderer", "Creating command buffer");
 		CommandBuffer = LRenderCommandBuffer::Create(0, "SceneRenderer");
 
-		/* TODO: Create 2D renderer. */
-		/* ........... */
+		/* TODO: Create 2D renderer here. */
 	}
 
 	void LSceneRenderer::Initialize()
@@ -60,36 +59,37 @@ namespace LkEngine {
 		Scene = InScene;
 	}
 
-	void LSceneRenderer::SubmitStaticMesh(TObjectPtr<LStaticMesh> StaticMesh, 
-										  TObjectPtr<LMaterialTable> MaterialTable, 
-										  const glm::mat4& Transform)
+	void LSceneRenderer::SubmitStaticMesh(TObjectPtr<LStaticMesh> StaticMesh,
+										  TObjectPtr<LMaterialTable> MaterialTable,
+										  const glm::mat4& Transform,
+										  TObjectPtr<LMaterialAsset> MaterialOverride)
+										  //TObjectPtr<LMaterial> MaterialOverride)
 	{
 		LK_PROFILE_FUNC();
 
 		LK_CORE_ASSERT(StaticMesh && StaticMesh->MeshSource);
 		const TObjectPtr<LMeshSource>& MeshSource = StaticMesh->MeshSource;
 		const std::vector<LSubmesh>& Submeshes = MeshSource->Submeshes; 
-		//LK_CORE_ASSERT(!StaticMesh->Submeshes.empty(), "Submeshes for StaticMesh '{}' is empty", StaticMesh->Handle);
+		LK_CORE_ASSERT(!StaticMesh->Submeshes.empty(), "Submeshes for StaticMesh '{}' is empty", StaticMesh->Handle);
 
-		if (StaticMesh->GetSubmeshes().empty())
+		for (const uint32_t SubmeshIndex : StaticMesh->GetSubmeshes())
 		{
-			LK_CORE_ASSERT(!MeshSource->Submeshes.empty(), "MeshSource submesh vector is empty");
-			static constexpr uint32_t SubmeshIndex = 0;
-
 			const glm::mat4 SubmeshTransform = Transform * Submeshes[SubmeshIndex].Transform;
 			const LSubmesh& Submesh = Submeshes[SubmeshIndex];
 			const bool IsRigged = Submesh.bIsRigged;
-
 			const uint32_t MaterialIndex = Submesh.MaterialIndex;
 
-			/// TODO: Needs fixing.
-		#if 1
-			const FAssetHandle MaterialHandle = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL)->Handle;
-		#else
-			const FAssetHandle MaterialHandle = MaterialTable->HasMaterial(MaterialIndex)
-				? MaterialTable->GetMaterial(MaterialIndex)
-				: LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL)->Handle;
-		#endif
+			FAssetHandle MaterialHandle;
+			if (MaterialOverride)
+			{
+				MaterialHandle = MaterialOverride->Handle;
+			}
+			else
+			{
+				MaterialHandle = MaterialTable->HasMaterial(MaterialIndex)
+					? MaterialTable->GetMaterial(MaterialIndex)
+					: LEditorAssetManager::BaseMaterial->Handle;
+			}
 			TObjectPtr<LMaterialAsset> Material = LAssetManager::GetAsset<LMaterialAsset>(MaterialHandle);
 			LK_CORE_VERIFY(Material);
 
@@ -111,56 +111,12 @@ namespace LkEngine {
 				DrawCommand.Mesh = StaticMesh;
 				DrawCommand.SubmeshIndex = SubmeshIndex;
 				DrawCommand.MaterialTable = MaterialTable;
-				DrawCommand.OverrideMaterial = nullptr; /* FIXME */
+				if (MaterialOverride)
+				{
+					DrawCommand.OverrideMaterial = MaterialOverride->GetMaterial();
+				}
 				DrawCommand.bIsRigged = IsRigged; 
 				DrawCommand.InstanceCount++;
-			}
-		}
-		else
-		{
-			for (const uint32_t SubmeshIndex : StaticMesh->GetSubmeshes())
-			{
-				const glm::mat4 SubmeshTransform = Transform * Submeshes[SubmeshIndex].Transform;
-
-				const LSubmesh& Submesh = Submeshes[SubmeshIndex];
-				const bool IsRigged = Submesh.bIsRigged;
-
-				const uint32_t MaterialIndex = Submesh.MaterialIndex;
-
-				/// TODO: Needs fixing.
-			#if 1
-				const FAssetHandle MaterialHandle = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL)->Handle;
-				TObjectPtr<LMaterialAsset> Material = LMaterialLibrary::BaseMaterial;
-			#else
-				const FAssetHandle MaterialHandle = MaterialTable->HasMaterial(MaterialIndex)
-					? MaterialTable->GetMaterial(MaterialIndex)
-					: LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL)->Handle;
-				TObjectPtr<LMaterialAsset> Material = LAssetManager::GetAsset<LMaterialAsset>(MaterialHandle);
-			#endif
-				LK_CORE_VERIFY(Material);
-
-				/* TODO: Replace rigged-bool with EMeshRigged. */
-				FMeshKey MeshKey = { StaticMesh->Handle, MaterialHandle, SubmeshIndex, false /* == IsRigged */ };
-				FTransformVertexData& TransformStorage = MeshTransformMap[MeshKey].Transforms.emplace_back();
-
-				TransformStorage.MRow[0] = { SubmeshTransform[0][0], SubmeshTransform[1][0], SubmeshTransform[2][0], SubmeshTransform[3][0] };
-				TransformStorage.MRow[1] = { SubmeshTransform[0][1], SubmeshTransform[1][1], SubmeshTransform[2][1], SubmeshTransform[3][1] };
-				TransformStorage.MRow[2] = { SubmeshTransform[0][2], SubmeshTransform[1][2], SubmeshTransform[2][2], SubmeshTransform[3][2] };
-
-				{
-					/// TODO: Drawlist selection.
-					const bool IsTransparent = Material->IsTransparent();
-
-					auto& DestDrawList = StaticMeshDrawList;
-					auto& DrawCommand = DestDrawList[MeshKey];
-
-					DrawCommand.Mesh = StaticMesh;
-					DrawCommand.SubmeshIndex = SubmeshIndex;
-					DrawCommand.MaterialTable = MaterialTable;
-					DrawCommand.OverrideMaterial = nullptr; /* FIXME */
-					DrawCommand.bIsRigged = IsRigged; 
-					DrawCommand.InstanceCount++;
-				}
 			}
 		}
 	}
@@ -168,7 +124,8 @@ namespace LkEngine {
 	void LSceneRenderer::SubmitMesh(TObjectPtr<LMesh> Mesh, 
 									const uint32_t SubmeshIndex, 
 									TObjectPtr<LMaterialTable> MaterialTable, 
-									const glm::mat4& Transform)
+									const glm::mat4& Transform,
+									TObjectPtr<LMaterialAsset> MaterialOverride)
 	{
 		LK_PROFILE_FUNC();
 		LK_CORE_ASSERT(Mesh && Mesh->MeshSource && MaterialTable);
@@ -181,15 +138,31 @@ namespace LkEngine {
 		const uint32_t MaterialIndex = Submesh.MaterialIndex;
 
 		/// TODO: Needs fixing.
+	#if 0
+		TObjectPtr<LMaterialAsset> Material = LEditorAssetManager::BaseMaterial;
+		const FAssetHandle MaterialHandle = Material->Handle;
+	#endif
+		
 	#if 1
-		const FAssetHandle MaterialHandle = LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL)->Handle;
-		TObjectPtr<LMaterialAsset> Material = LMaterialLibrary::BaseMaterial;
+		FAssetHandle MaterialHandle;
+		if (MaterialOverride)
+		{
+			MaterialHandle = MaterialOverride->Handle;
+		}
+		else
+		{
+			MaterialHandle = MaterialTable->HasMaterial(MaterialIndex)
+				? MaterialTable->GetMaterial(MaterialIndex)
+				: LEditorAssetManager::BaseMaterial->Handle;
+		}
 	#else
 		const FAssetHandle MaterialHandle = MaterialTable->HasMaterial(MaterialIndex)
 			? MaterialTable->GetMaterial(MaterialIndex)
-			: LMaterialLibrary::Get().GetMaterial(BASE_MATERIAL)->Handle;
+			: LEditorAssetManager::Get().GetMaterial(BASE_MATERIAL)->Handle;
 		TObjectPtr<LMaterialAsset> Material = LAssetManager::GetAsset<LMaterialAsset>(MaterialHandle);
 	#endif
+		TObjectPtr<LMaterialAsset> Material = LAssetManager::GetAsset<LMaterialAsset>(MaterialHandle);
+		LK_CORE_VERIFY(Material);
 
 		/* TODO: Replace rigged-bool with EMeshRigged. */
 		FMeshKey MeshKey = { Mesh->Handle, MaterialHandle, SubmeshIndex, false /* == IsRigged */ };
@@ -200,16 +173,17 @@ namespace LkEngine {
 		TransformStorage.MRow[2] = { Transform[0][2], Transform[1][2], Transform[2][2], Transform[3][2] };
 
 		{
-			/// TODO: Drawlist selection.
 			const bool IsTransparent = Material->IsTransparent();
-
-			auto& DestDrawList = MeshDrawList;
-			auto& DrawCommand = DestDrawList[MeshKey];
+			auto& DestDrawList = MeshDrawList; /// TODO: Drawlist selection.
+			auto& DrawCommand = DestDrawList[MeshKey]; 
 
 			DrawCommand.Mesh = Mesh;
 			DrawCommand.SubmeshIndex = SubmeshIndex;
 			DrawCommand.MaterialTable = MaterialTable;
-			DrawCommand.OverrideMaterial = nullptr; /* FIXME */
+			if (MaterialOverride)
+			{
+				DrawCommand.OverrideMaterial = MaterialOverride->GetMaterial();
+			}
 			DrawCommand.InstanceCount++;
 			DrawCommand.bIsRigged = IsRigged; 
 		}
@@ -226,8 +200,15 @@ namespace LkEngine {
 
 		/* FIXME: Use 'GetMainCamera' here. */
 		//TObjectPtr<LSceneCamera> SceneCamera = Scene->GetMainCamera();
-		TObjectPtr<LSceneCamera> SceneCamera = LEditorLayer::Get()->GetEditorCamera();
+		TObjectPtr<LSceneCamera> SceneCamera = LEditorLayer::Get().GetEditorCamera();
 		LK_CORE_ASSERT(SceneCamera);
+
+		FSceneRendererFlushData FlushData{};
+		FlushData.StaticMeshDrawListSize = (int)(StaticMeshDrawList.size());
+		FlushData.StaticMeshTransformMapSize = (int)(StaticMeshTransformMap.size());
+		FlushData.MeshDrawListSize = (int)(MeshDrawList.size());
+		FlushData.MeshTransformMapSize = (int)(MeshTransformMap.size());
+		OnDrawListFlush.Broadcast(FlushData);
 
 		/* Static Meshes. */
 		for (auto& [MeshKey, DrawCommand] : StaticMeshDrawList)
@@ -244,14 +225,40 @@ namespace LkEngine {
 		#if 0
 			TObjectPtr<LMaterial> Material = DrawCommand.OverrideMaterial 
 				? DrawCommand.OverrideMaterial 
-				: LAssetManager::GetAsset<LMaterial>(DrawCommand.MaterialTable->GetMaterial(DrawCommand.SubmeshIndex));
-		#else
-			//TObjectPtr<LMaterial> Material = LAssetManager::GetAsset<LMaterial>(StaticMesh->GetMaterialTable()->GetMaterial(MaterialIndex));
-			TObjectPtr<LMaterial> Material = LMaterialLibrary::BaseMaterial->GetMaterial();
+				: LAssetManager::GetAsset<LMaterialAsset>(DrawCommand.MaterialTable->GetMaterial(DrawCommand.SubmeshIndex))->GetMaterial();
 		#endif
-			LK_CORE_ASSERT(Material);
 
+		#if 1
+			TObjectPtr<LMaterial> Material;
+			if (DrawCommand.OverrideMaterial)
+			{
+				Material = DrawCommand.OverrideMaterial;
+				//LK_CORE_DEBUG("{}, material override: {}", StaticMesh->Name, Material->GetName());
+			}
+			else
+			{
+				if (DrawCommand.MaterialTable->HasMaterial(DrawCommand.SubmeshIndex))
+				{
+					TObjectPtr<LMaterialAsset> MatAsset = LAssetManager::GetAsset<LMaterialAsset>(DrawCommand.MaterialTable->GetMaterial(DrawCommand.SubmeshIndex));
+					Material = MatAsset->GetMaterial();
+				}
+				else
+				{
+					Material = LEditorAssetManager::BaseMaterial->GetMaterial();
+				}
+			}
+		#else
+			TObjectPtr<LMaterial> Material = DrawCommand.OverrideMaterial 
+				? DrawCommand.OverrideMaterial 
+				: LAssetManager::GetAsset<LMaterialAsset>(DrawCommand.MaterialTable->GetMaterial(DrawCommand.SubmeshIndex))->GetMaterial();
+				//: LEditorAssetManager::BaseMaterial->GetMaterial();
+		#endif
+			LK_CORE_VERIFY(Material);
+			//LK_CORE_INFO_TAG("SceneRenderer", "Rendering {} ({}) with texture {}", StaticMesh->Name, StaticMesh->Handle, Material->GetTexture()->GetName());
+
+			LK_CORE_ASSERT(Material->GetShader(), "Invalid shader for material: {}", Material->GetName());
 			TObjectPtr<LShader> Shader = Material->GetShader();
+			LK_CORE_ASSERT(Material->GetTexture(), "Invalid texture for material: {}", Material->GetName());
 			TObjectPtr<LTexture2D> Texture = Material->GetTexture();
 			LK_CORE_ASSERT(Shader, "DrawCommand is missing a valid shader");
 			LK_CORE_ASSERT(Texture, "DrawCommand is missing a valid texture");
@@ -282,7 +289,6 @@ namespace LkEngine {
 					TObjectPtr<LIndexBuffer> IndexBuffer = MeshSource->GetIndexBuffer();
 					IndexBuffer->Bind();
 
-					//LRenderer::OnMeshSubmission.Broadcast(Mesh, Shader, Material);
 					LK_OpenGL_Verify(glDrawElements(GL_TRIANGLES, IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr));
 
 					LFramebuffer::TargetSwapChain();
@@ -306,11 +312,11 @@ namespace LkEngine {
 		#if 0
 			TObjectPtr<LMaterial> Material = DrawCommand.OverrideMaterial 
 				? DrawCommand.OverrideMaterial 
-				: LAssetManager::GetAsset<LMaterial>(DrawCommand.MaterialTable->GetMaterial(DrawCommand.SubmeshIndex));
+				: LAssetManager::GetAsset<LMaterialAsset>(DrawCommand.MaterialTable->GetMaterial(DrawCommand.SubmeshIndex))->GetMaterial();
 		#else
 			TObjectPtr<LMaterial> Material = Mesh->GetMaterial(0);
 		#endif
-			LK_CORE_ASSERT(Material, "DrawCommand is missing a valid material.");
+			LK_CORE_ASSERT(Material, "DrawCommand is missing a valid material");
 
 			TObjectPtr<LShader> Shader = Material->GetShader();
 			TObjectPtr<LTexture2D> Texture = Material->GetTexture();
@@ -326,7 +332,6 @@ namespace LkEngine {
 					glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
 				));
 
-				LRenderer::OnMeshSubmission.Broadcast(DrawCommand.Mesh, Shader, Material);
 				LRenderer::Submit([SceneCamera, Shader, Texture, MeshSource, Material, ModelMatrix]() mutable
 				{
 					LRenderer::GetViewportFramebuffer()->Bind();
@@ -340,12 +345,9 @@ namespace LkEngine {
 					Texture->Bind(0);
 
 					MeshSource->GetVertexBuffer()->Bind();
-					//Mesh->GetIndexBuffer()->Bind();
-
 					TObjectPtr<LIndexBuffer> IndexBuffer = MeshSource->GetIndexBuffer();
 					IndexBuffer->Bind();
 
-					//LRenderer::OnMeshSubmission.Broadcast(Mesh, Shader, Material);
 					LK_OpenGL_Verify(glDrawElements(GL_TRIANGLES, IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr));
 
 					LFramebuffer::TargetSwapChain();

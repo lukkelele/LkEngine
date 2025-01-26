@@ -2,6 +2,7 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/IO/FileSystem.h"
+
 #include "LkEngine/Editor/EditorGlobals.h"
 
 #include "LkEngine/Renderer/Texture.h"

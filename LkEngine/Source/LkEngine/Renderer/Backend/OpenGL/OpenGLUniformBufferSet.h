@@ -10,22 +10,20 @@ namespace LkEngine {
 	class LOpenGLUniformBufferSet : public LUniformBufferSet
 	{
 	public:
-		LOpenGLUniformBufferSet(uint32_t size, uint32_t framesInFlight);
+		LOpenGLUniformBufferSet(const uint32_t InSize, const uint32_t InFramesInFlight);
+		LOpenGLUniformBufferSet() = delete;
 		~LOpenGLUniformBufferSet() = default;
 
-		TObjectPtr<LUniformBuffer> Get() override;
-		TObjectPtr<LUniformBuffer> RT_Get() override;
-		TObjectPtr<LUniformBuffer> Get(uint32_t frame) override;
+		virtual TObjectPtr<LUniformBuffer> Get() override;
+		virtual TObjectPtr<LUniformBuffer> Get(const uint32_t Frame) override;
 
-		void Set(TObjectPtr<LUniformBuffer> uniformBuffer, uint32_t frame) override;
+		virtual void Set(TObjectPtr<LUniformBuffer> InUniformBuffer, const uint32_t Frame) override;
 
 	private:
-		uint32_t m_FramesInFlight = 0;
-		std::map<uint32_t, TObjectPtr<LUniformBuffer>> m_UniformBuffers;
+		uint32_t FramesInFlight = 0;
+		std::map<uint32_t, TObjectPtr<LUniformBuffer>> UniformBuffers;
 
 		LCLASS(LOpenGLUniformBufferSet)
 	};
-
-
 
 }

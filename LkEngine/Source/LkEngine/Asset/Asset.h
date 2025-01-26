@@ -27,6 +27,28 @@ namespace LkEngine {
 		FORCEINLINE static EAssetType GetStaticType() { return EAssetType::None; }
 		FORCEINLINE virtual EAssetType GetAssetType() const { return EAssetType::None; }
 
+		FORCEINLINE bool HasFlag(const EAssetFlag Flag) const 
+		{ 
+			return (AssetFlags & Flag);
+		}
+
+		FORCEINLINE void SetFlag(const EAssetFlag Flag, bool Value = true)
+		{
+			if (Value)
+			{
+				AssetFlags |= Flag;
+			}
+			else
+			{
+				AssetFlags &= ~Flag;
+			}
+		}
+
+		FORCEINLINE virtual bool IsValid() const
+		{
+			return ((AssetFlags & EAssetFlag::Missing) | (AssetFlags & EAssetFlag::Invalid));
+		}
+
 		virtual bool operator==(const LAsset& Other) const
 		{
 			return (Handle == Other.Handle);
@@ -37,28 +59,6 @@ namespace LkEngine {
 			return !(*this == Other);
 		}
 
-		bool IsFlagSet(const EAssetFlag InFlag) const 
-		{ 
-			return (Flags & InFlag);
-		}
-
-		void SetFlag(const EAssetFlag InFlag, bool InValue = true)
-		{
-			if (InValue)
-			{
-				Flags |= InFlag;
-			}
-			else
-			{
-				Flags &= ~InFlag;
-			}
-		}
-
-		virtual bool IsValid() const
-		{
-			return ((Flags & EAssetFlag::Missing) | (Flags & EAssetFlag::Invalid));
-		}
-
     public:
         FAssetHandle Handle = 0;
 
@@ -67,12 +67,13 @@ namespace LkEngine {
 		 * of the enum class. The operations use the enum class as usual,
 		 * the primitive type is only used for the flag storage.
 		 */
-		std::underlying_type_t<EAssetFlag> Flags = static_cast<std::underlying_type_t<EAssetFlag>>(EAssetFlag::None);
+		std::underlying_type_t<EAssetFlag> AssetFlags = static_cast<std::underlying_type_t<EAssetFlag>>(EAssetFlag::None);
 
 	private:
 		LCLASS(LAsset)
     };
 
+#if 0
 	/**
 	 * LAudioAsset
 	 */
@@ -87,6 +88,7 @@ namespace LkEngine {
 	private:
 		LASSET(LAudioAsset)
 	};
+#endif
 
 	struct FAssetMetadata
 	{
@@ -105,7 +107,7 @@ namespace LkEngine {
 		{
 			if (CompactFormat)
 			{
-				return std::format("Asset={:8} Type={} File={} Loaded={} MemoryOnly={}",
+				return std::format("Asset={:12} Type={} File={} Loaded={} MemoryOnly={}",
 								   Handle, Enum::ToString(Type), 
 								   FilePath.string(), 
 								   (bIsDataLoaded ? "Yes" : "No"), 

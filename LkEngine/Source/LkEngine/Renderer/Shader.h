@@ -97,13 +97,18 @@ namespace LkEngine {
 		LShaderLibrary();
 		~LShaderLibrary() = default;
 
-        TObjectPtr<LShader>& Get(std::string_view shaderName);
+        TObjectPtr<LShader>& Get(const std::string& ShaderName);
 
-        void Add(const TObjectPtr<LShader>& shader);
-		void Load(std::string_view InName, const std::string& InFilepath);
+        void Add(const TObjectPtr<LShader>& InShader);
+		void Load(const std::string& ShaderName, const std::filesystem::path& InFilepath);
+
+		uint32_t GetShadersLoaded() const 
+		{ 
+			return static_cast<uint32_t>(ShaderMap.size()); 
+		}
 
     private:
-        std::unordered_map<std::string_view, TObjectPtr<LShader>> Shaders;
+        std::unordered_map<std::string, TObjectPtr<LShader>> ShaderMap;
 
 		LCLASS(LShaderLibrary);
     };

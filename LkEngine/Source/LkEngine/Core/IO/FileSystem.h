@@ -32,6 +32,7 @@ namespace LkEngine {
 
 		static bool CreateDirectory(const std::filesystem::path& Directory);
 		static bool IsDirectory(const std::filesystem::path& Path);
+		static bool IsNewer(const std::filesystem::path& EntryA, const std::filesystem::path& EntryB);
 
 		static bool ShowFileInExplorer(const std::filesystem::path& Path);
 		static bool OpenDirectoryInExplorer(const std::filesystem::path& DirectoryPath);
@@ -41,8 +42,42 @@ namespace LkEngine {
 			return Move(Filepath, Destination / Filepath.filename());
 		}
 
-		static std::string ConvertPathToWindows(const std::filesystem::path& UnixPath);
-		static std::string ConvertPathToUnix(const std::filesystem::path& WindowsPath);
+		static std::string ConvertToUnixPath(const std::filesystem::path& WindowsPath);
+		static std::string ConvertToWindowsPath(const std::filesystem::path& UnixPath);
+
+		static std::string RemoveFileExtension(const std::string& File)
+		{
+			const std::size_t DotPosition = File.find_last_of('.');
+			if (DotPosition == std::string::npos)
+			{
+				return File;
+			}
+
+			return File.substr(0, DotPosition);
+		}
+
+		static std::string RemoveFileExtension(const std::filesystem::path& File)
+		{
+			std::string FileName = File.string();
+			const std::size_t DotPosition = FileName.find_last_of('.');
+			if (DotPosition == std::string::npos)
+			{
+				return FileName;
+			}
+
+			return FileName.substr(0, DotPosition);
+		}
+
+		static void RemoveFileExtension(std::string& File)
+		{
+			const std::size_t DotPosition = File.find_last_of('.');
+			if (DotPosition == std::string::npos)
+			{
+				return;
+			}
+
+			File = File.substr(0, DotPosition);
+		}
 
 		struct FFileDialogFilterItem
 		{

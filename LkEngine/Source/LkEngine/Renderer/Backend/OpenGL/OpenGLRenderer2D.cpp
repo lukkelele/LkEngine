@@ -2,7 +2,6 @@
 #include "OpenGLRenderer2D.h"
 
 #include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Renderer/TextureLibrary.h"
 
 #include "LkEngine/Core/Window.h"
 

@@ -6,7 +6,7 @@
 #include "OpenGLSwapChain.h"
 #include "LkOpenGL.h"
 
-#include "LkEngine/UI/UILayer.h"
+#include "LkEngine/Renderer/UI/UILayer.h"
 #include "LkEngine/Renderer/Backend/OpenGL/OpenGLImGuiLayer.h"
 
 
@@ -16,7 +16,7 @@ namespace LkEngine {
 		: Window(InWindow)
 	{
 		LOBJECT_REGISTER();
-		LK_CORE_VERIFY(InWindow, "Window is nullptr");
+		LK_CORE_VERIFY(InWindow);
 
 		m_GlfwWindow = Window->GetGlfwWindow();
 	}
@@ -48,7 +48,7 @@ namespace LkEngine {
 		LOpenGL::LoadInfo();
 
 		/* Attach window delegates. */
-		LK_CORE_DEBUG_TAG("OpenGLContext", "Attaching to OnWindowSizeUpdated delegate");
+		LK_CORE_TRACE_TAG("OpenGLContext", "Attaching to OnWindowSizeUpdated delegate");
 		Window->OnWindowSizeUpdated.Add(this, &LOpenGLContext::UpdateResolution);
 	}
 
@@ -120,6 +120,7 @@ namespace LkEngine {
 
 	void LOpenGLContext::SetDepthEnabled(const bool InEnabled)
 	{
+		LK_CORE_TRACE_TAG("OpenGLContext", "{} depth testing", (InEnabled ? "Enabling" : "Disabling"));
 		bDepthEnabled = InEnabled;
 		if (bDepthEnabled)
 		{

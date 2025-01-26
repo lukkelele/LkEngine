@@ -21,13 +21,10 @@ namespace LkEngine {
 		}
     };
 
-	/**
-	 * @brief Index of fallback texture incase all other fails.
-	 */
-	static constexpr int MATERIAL_FALLBACK_TEXTURE = -1;
 
-	/// UPDATE THIS
-	/// * Make the const string ref's into string_view
+    /**
+	 * LMaterial
+     */
     class LMaterial : public LObject
     {
     public:
@@ -56,10 +53,6 @@ namespace LkEngine {
 		virtual void Set(const std::string& Name, const TObjectPtr<LTexture2D>& Texture) = 0;
 		virtual void Set(const std::string& Name, const TObjectPtr<LTexture2D>& Texture, const uint32_t ArrayIndex) = 0;
 		virtual void Set(const std::string& Name, const TObjectPtr<LImage2D>& Image) = 0;
-	#if 0
-		virtual void Set(const std::string& Name, const TObjectPtr<LTextureCube>& Texture) = 0;
-		virtual void Set(const std::string& Name, const Ref<ImageView>& Image) = 0;
-	#endif
 
 		virtual float& GetFloat(const std::string& Name) = 0;
 		virtual int32_t& GetInt(const std::string& Name) = 0;

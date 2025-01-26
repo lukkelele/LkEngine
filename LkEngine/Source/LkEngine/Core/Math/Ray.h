@@ -8,11 +8,11 @@
 
 namespace LkEngine {
 
-	/* TODO: Move elsewhere */
+	/* TODO: Patch out. */
 	struct FRayCast
 	{
-		LVector Pos;
-		LVector Dir;
+		LVector Pos{};
+		LVector Dir{};
 
 		FRayCast() = default;
 		FRayCast(const LVector& InPos, const LVector& InDir)
@@ -24,6 +24,8 @@ namespace LkEngine {
 
 	/**
 	 * FRay
+	 * 
+	 *  Individual ray with an origin and direction.
 	 */
 	struct FRay
     {
@@ -42,13 +44,21 @@ namespace LkEngine {
         {
         }
 
+        /**
+		 * Get a zero initialized ray.
+         */
         static FRay Zero()
         {
             return { LVector(0.0f, 0.0f, 0.0f), LVector(0.0f, 0.0f, 0.0f) };
         }
 
-		/// FIXME
-        bool IntersectsAABB(const FAABB& AABB, float& t) const
+		/**
+		 * Checks if a ray intersects an axis-aligned bounding box (AABB) in 3D space.
+		 * 
+		 * The distance from the ray's origin to the nearest intersection point is set in 't', 
+		 * if any intersection is found.
+		 */
+        FORCEINLINE bool IntersectsAABB(const FAABB& AABB, float& t) const
         {
 			/* The direction vector is inverted to calculate the intersection points. */
 			LVector DirFraction;
@@ -56,7 +66,6 @@ namespace LkEngine {
             DirFraction.Y = (1.0f / Direction.Y);
             DirFraction.Z = (1.0f / Direction.Z);
 
-			/* TODO: Cannot use references here as FAABB uses glm for internal members. */
             const LVector& LeftBottom = AABB.Min;
             const LVector& RightTop = AABB.Max;
 
@@ -70,18 +79,6 @@ namespace LkEngine {
             const float t6 = (RightTop.Z - Origin.Z) * DirFraction.Z;
 
 			/* Point where the ray first enters the AABB. */
-		#if 0
-            const float tmin = LVector::Max(
-				LVector::Max(LVector::Min(t1, t2), LVector::Min(t3, t4)), 
-				LVector::Min(t5, t6)
-			);
-
-			/* Point where the ray exits the AABB. */
-            const float tmax = LVector::Min(
-				LVector::Min(LVector::Max(t1, t2), LVector::Max(t3, t4)), 
-				LVector::Max(t5, t6)
-			);
-		#else
             const float tmin = glm::max(
 				glm::max(glm::min(t1, t2), glm::min(t3, t4)), 
 				glm::min(t5, t6)
@@ -92,7 +89,6 @@ namespace LkEngine {
 				glm::min(glm::max(t1, t2), glm::max(t3, t4)), 
 				glm::max(t5, t6)
 			);
-		#endif
 
 			/* Ray is intersecting with the AABB behind us. */
             if (tmax < 0)
@@ -114,7 +110,13 @@ namespace LkEngine {
             return true;
         }
 
-		bool IntersectsTriangle(const glm::vec3& A, const glm::vec3& B, const glm::vec3& C, float& t) const
+		/**
+		 * Checks if a ray intersects with a triangle in 3D space.
+		 * 
+		 * The distance from the ray's origin to the intersection point 
+		 * is set in 't' if an intersection occurs.
+		 */
+		FORCEINLINE bool IntersectsTriangle(const glm::vec3& A, const glm::vec3& B, const glm::vec3& C, float& t) const
 		{
 			const glm::vec3 E1 = B - A;
 			const glm::vec3 E2 = C - A;
@@ -138,7 +140,13 @@ namespace LkEngine {
 					&& ((u + v) <= 1.0f));
 		}
 
-		bool IntersectsTriangle(const LVector& A, const LVector& B, const LVector& C, float& t) const
+		/**
+		 * Checks if a ray intersects with a triangle in 3D space.
+		 * 
+		 * The distance from the ray's origin to the intersection point 
+		 * is set in 't' if an intersection occurs.
+		 */
+		FORCEINLINE bool IntersectsTriangle(const LVector& A, const LVector& B, const LVector& C, float& t) const
 		{
 			const LVector E1 = B - A;
 			const LVector E2 = C - A;
@@ -161,7 +169,6 @@ namespace LkEngine {
 					&& (v >= 0.0f) 
 					&& ((u + v) <= 1.0f));
 		}
-
 
     };
 
