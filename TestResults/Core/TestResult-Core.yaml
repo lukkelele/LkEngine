@@ -9,9 +9,14 @@ Core:
   - Dummy_Arithmetic_OneLessThanTwo: 1
   - Dummy_Arithmetic_TwoGreaterThanOne: 1
   - Dummy_Arithmetic_TwoGreaterThanThree: 1
+  - ObjectPtr_Operator_Copy: 1
   - ObjectPtr_ReferenceCount_Creation: 1
+  - ObjectPtr_ReferenceCount_CopyConstructor: 1
   - ObjectPtr_ReferenceCount_CopyOnce: 1
   - ObjectPtr_ReferenceCount_CopyTwice: 1
+  - ObjectPtr_ReferenceCount_MoveConstructor: 1
+  - ObjectPtr_Function_PassedAsCopy: 1
+  - ObjectPtr_Function_PassedAsReference: 1
   - StringUtils_ToLower_ConstChar: 1
   - StringUtils_ToUpper_ConstChar: 1
   - StringUtils_ToLower_String: 1

@@ -1,7 +1,7 @@
 {
-    "Total": 39,
+    "Total": 44,
     "Passed": {
-        "Count": 39,
+        "Count": 44,
         "Tests": [
             "Enum_EnumClass_Operator_Bitwise_AND",
             "Enum_EnumClass_Operator_Bitwise_OR",
@@ -13,9 +13,14 @@
             "Dummy_Arithmetic_OneLessThanTwo",
             "Dummy_Arithmetic_TwoGreaterThanOne",
             "Dummy_Arithmetic_TwoGreaterThanThree",
+            "ObjectPtr_Operator_Copy",
             "ObjectPtr_ReferenceCount_Creation",
+            "ObjectPtr_ReferenceCount_CopyConstructor",
             "ObjectPtr_ReferenceCount_CopyOnce",
             "ObjectPtr_ReferenceCount_CopyTwice",
+            "ObjectPtr_ReferenceCount_MoveConstructor",
+            "ObjectPtr_Function_PassedAsCopy",
+            "ObjectPtr_Function_PassedAsReference",
             "StringUtils_ToLower_ConstChar",
             "StringUtils_ToUpper_ConstChar",
             "StringUtils_ToLower_String",
