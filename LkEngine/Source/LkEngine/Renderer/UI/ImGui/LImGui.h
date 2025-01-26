@@ -2,7 +2,7 @@
 
 #include "LkEngine/Core/LObject/Enum.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
-#include "LkEngine/UI/UICore.h"
+#include "LkEngine/Renderer/UI/UICore.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>

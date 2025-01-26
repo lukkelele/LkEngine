@@ -3,10 +3,10 @@
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/LObject/Enum.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
-#include "LkEngine/UI/UICore.h"
+#include "LkEngine/Renderer/UI/UICore.h"
 
 #include "LkEngine/Editor/EditorCore.h" /// FIXME: Refactor FEditorResources out of here.
-#include "LkEngine/UI/ImGui/LImGui.h"
+#include "LkEngine/Renderer/UI/ImGui/LImGui.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>

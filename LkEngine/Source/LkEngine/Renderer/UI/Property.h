@@ -1,9 +1,11 @@
 #pragma once
 
 #include "LkEngine/Core/Core.h"
-#include "LkEngine/Scene/Components.h"
-#include "LkEngine/UI/UICore.h"
 #include "LkEngine/Core/Math/MathLibrary.h"
+
+#include "LkEngine/Renderer/UI/UICore.h"
+
+#include "LkEngine/Scene/Components.h"
 
 #include <imgui/imgui.h>
 #include <imgui_internal.h>

@@ -71,8 +71,8 @@ namespace LkEngine::UI {
     bool IsInputEnabled()
     {
         const ImGuiIO& IO = ImGui::GetIO();
-        return ((IO.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0) 
-			&& (IO.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0;
+        return (((IO.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0) 
+				&& (IO.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0);
     }
 
     bool IsMouseEnabled()
@@ -189,7 +189,7 @@ namespace LkEngine::UI {
 
 		if (!bDockspaceInitialized)
 		{
-			LK_CORE_INFO("Initializing dockspace layout");
+			LK_CORE_DEBUG("Initializing dockspace layout");
 			ImGuiDockNode* DockspaceNode = ImGui::DockBuilderGetNode(DockspaceID);
 			LK_CORE_VERIFY(DockspaceNode, "Dockspace node is nullptr");
 			DockspaceNode->LocalFlags |= ImGuiDockNodeFlags_NoDockingOverMe;

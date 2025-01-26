@@ -3,8 +3,8 @@
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
-#include "LkEngine/UI/UICore.h"
-#include "LkEngine/UI/ImGui/LImGui.h"
+#include "LkEngine/Renderer/UI/UICore.h"
+#include "LkEngine/Renderer/UI/ImGui/LImGui.h"
 
 #include "LkEngine/Serialization/YAMLSerialization.h"
 
