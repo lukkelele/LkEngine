@@ -28,6 +28,7 @@ namespace LkEngine {
 
 		void LoadSceneAssets();
 
+	private:
 		LCLASS(LRuntimeLayer);
 	};
 

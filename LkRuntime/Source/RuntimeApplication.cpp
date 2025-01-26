@@ -16,9 +16,12 @@ public:
         : LkEngine::LApplication(Specification) 
 		, ProjectPath(Specification.StartProject)
     {
+		LOBJECT_REGISTER();
     }
 
-    ~LRuntimeApplication() = default;
+	~LRuntimeApplication()
+	{
+	}
 
 	virtual void Initialize() override
 	{
@@ -45,10 +48,10 @@ int main(int Argc, char* Argv[])
     ApplicationSpec.Argc = Argc;
     ApplicationSpec.Argv = Argv;
 
-    LRuntimeApplication Application(ApplicationSpec);
-    Application.Initialize();
-    Application.Run();
-    Application.Shutdown();
+    LkEngine::TObjectPtr<LRuntimeApplication> Application = LkEngine::TObjectPtr<LRuntimeApplication>::Create(ApplicationSpec);
+    Application->Initialize();
+    Application->Run();
+    Application->Shutdown();
 
     return 0;
 }
