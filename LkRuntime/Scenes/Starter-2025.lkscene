@@ -1,0 +1,72 @@
+Scene: Starter-2025
+Active: true
+EditorScene: true
+SceneHandle: 0
+EditorCamera:
+  Position: [-17.196505, 7.129879, 4.6955776]
+  Origin: [0, 0, 0]
+  Distance: 15.818071
+  FocalPoint: [-2.2604933, 2.103044, 3.3325315]
+  Perspective:
+    DegPerspectiveFOV: 45
+    PerspectiveNear: 0.1
+    PerspectiveFar: 2400
+  Orthographic:
+    OrthographicSize: 10
+    OrthographicNear: -1
+    OrthographicFar: 1
+  Pitch: 0.32339838
+  Yaw: -130.4671
+  ProjectionType: 1
+  CameraMode: 2
+Entities:
+  - Entity: 1735919407767406708
+    TagComponent:
+      Tag: Static-Cube-2
+    TransformComponent:
+      Position: [-0.7512887, 0.53719234, -3.919856]
+      Rotation: [0.005736019, 0.17453301, -3.5463366e-10]
+      Scale: [0.9999995, 1, 1]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true
+  - Entity: 7151618901541716901
+    TagComponent:
+      Tag: Static-Cube-3
+    TransformComponent:
+      Position: [3.1886103, 0.5856097, 2.656678]
+      Rotation: [0, -0.43404782, 0]
+      Scale: [0.9999999, 1, 1.5000001]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true
+  - Entity: 9492541504980216719
+    TagComponent:
+      Tag: Static-Plane-1
+    TransformComponent:
+      Position: [-0.00019454956, -0.7490634, 0]
+      Rotation: [0, -0, 0]
+      Scale: [5.3885326, 0.31999075, 6.008588]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true
+  - Entity: 17688067403604816871
+    TagComponent:
+      Tag: Static-Ramp-1
+    TransformComponent:
+      Position: [-0.27345046, 1.2151185, 9.987829]
+      Rotation: [3.1393933, 0.049606416, 3.121287]
+      Scale: [3.1501927, 3.4899967, 4.7520976]
+    StaticMeshComponent:
+      AssetID: 16507767805386837171
+      Visible: true
+  - Entity: 18387559141236681850
+    TagComponent:
+      Tag: Static-Cube-1
+    TransformComponent:
+      Position: [-3.0794964, 0.748118, 1.7472123]
+      Rotation: [3.1091318, -1.3155103, -3.1222334]
+      Scale: [1.5891027, 1.1088821, 1.4340544]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true

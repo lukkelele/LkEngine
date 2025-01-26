@@ -3,10 +3,10 @@ Active: true
 EditorScene: true
 SceneHandle: 0
 EditorCamera:
-  Position: [-18.120838, 7.4681334, 3.5719657]
+  Position: [-16.064, 4.198904, 0.17063177]
   Origin: [0, 0, 0]
-  Distance: 18.167744
-  FocalPoint: [-0.8126099, 1.9847965, 4.224045]
+  Distance: 17.21658
+  FocalPoint: [0.6704025, 0.28066635, -0.8382435]
   Perspective:
     DegPerspectiveFOV: 45
     PerspectiveNear: 0.1
@@ -15,8 +15,8 @@ EditorCamera:
     OrthographicSize: 10
     OrthographicNear: -1
     OrthographicFar: 1
-  Pitch: 0.30659813
-  Yaw: -42.373844
+  Pitch: 0.22959702
+  Yaw: -73.88764
   ProjectionType: 1
   CameraMode: 2
 Entities:
@@ -34,9 +34,19 @@ Entities:
     TagComponent:
       Tag: StaticCube-3
     TransformComponent:
-      Position: [3, 0.5, 3]
-      Rotation: [0, -0.2617994, 0]
-      Scale: [1, 1, 1.5]
+      Position: [3.126827, 0.5387819, 2.8765492]
+      Rotation: [0, -0.26179942, 0]
+      Scale: [0.9999997, 1, 1.5000001]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true
+  - Entity: 9492541504980216719
+    TagComponent:
+      Tag: StaticPlane-1
+    TransformComponent:
+      Position: [-0.00019454956, -0.78023934, 0]
+      Rotation: [0, -0, 0]
+      Scale: [5.3885326, 0.31999075, 6.008588]
     StaticMeshComponent:
       AssetID: 12699931545793190348
       Visible: true
