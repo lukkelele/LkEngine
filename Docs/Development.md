@@ -1,6 +1,7 @@
 # LkEngine Development
 > Development progress.
 
+TODO: This should be in reverse order per year, i.e December -> January and not January -> December.
 
 ---
 
@@ -19,6 +20,21 @@
 ---
 
 # 2025 <a id="Year-2025"></a>
+
+## February (2025)<a id="2025-February"></a>
+
+### February 2
+
+Showcase of the material editor.
+
+![2025-February-26-1](Images/2025/LkEngine-2025-02-02_1.png)
+![2025-February-26-2](Images/2025/LkEngine-2025-02-02_2.png)
+![2025-February-26-3](Images/2025/LkEngine-2025-02-02_3.png)
+![2025-February-26-3](Images/2025/LkEngine-2025-02-02_4.png)
+
+---
+
+## January (2025)<a id="2025-January"></a>
 
 ### January 26
 
