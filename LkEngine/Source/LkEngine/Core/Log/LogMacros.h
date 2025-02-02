@@ -45,38 +45,30 @@
 #define LK_FATAL_TAG(Tag, ...)   ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Client, ::LkEngine::ELogLevel::Fatal, Tag, __VA_ARGS__)
 
 /** 
- * UI logging.
+ * Editor Console.
  */
-#define LK_UI_TRACE(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_UI_DEBUG(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
-#define LK_UI_INFO(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_UI_WARN(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_UI_ERROR(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_UI_FATAL(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
+#define LK_CONSOLE_TRACE(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
+#define LK_CONSOLE_DEBUG(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
+#define LK_CONSOLE_INFO(...)    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
+#define LK_CONSOLE_WARN(...)    ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
+#define LK_CONSOLE_ERROR(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
+#define LK_CONSOLE_FATAL(...)   ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
 
-#define LK_UI_TRACE_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Trace, Tag, __VA_ARGS__)
-#define LK_UI_DEBUG_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Debug, Tag, __VA_ARGS__)
-#define LK_UI_INFO_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Info, Tag, __VA_ARGS__)
-#define LK_UI_WARN_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Warning, Tag, __VA_ARGS__)
-#define LK_UI_ERROR_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Error, Tag, __VA_ARGS__)
-#define LK_UI_FATAL_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::UI, ::LkEngine::ELogLevel::Fatal, Tag, __VA_ARGS__)
-
-/** 
- * Asset logging.
+/**
+ * Editor Console bundled with the core logger, placing logs in both.
  */
-#define LK_ASSET_TRACE(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_ASSET_DEBUG(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
-#define LK_ASSET_INFO(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_ASSET_WARN(...)  ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_ASSET_ERROR(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_ASSET_FATAL(...) ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
-
-#define LK_ASSET_TRACE_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Trace, Tag, __VA_ARGS__)
-#define LK_ASSET_DEBUG_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Debug, Tag, __VA_ARGS__)
-#define LK_ASSET_INFO_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Info, Tag, __VA_ARGS__)
-#define LK_ASSET_WARN_TAG(Tag, ...)  ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Warning, Tag, __VA_ARGS__)
-#define LK_ASSET_ERROR_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Error, Tag, __VA_ARGS__)
-#define LK_ASSET_FATAL_TAG(Tag, ...) ::LkEngine::LLog::PrintMessageWithTag(::LkEngine::ELoggerType::Asset, ::LkEngine::ELogLevel::Fatal, Tag, __VA_ARGS__)
+#define LK_CORE_CONSOLE_TRACE(...)   LK_CORE_TRACE(__VA_ARGS__); \
+									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
+#define LK_CORE_CONSOLE_DEBUG(...)   LK_CORE_DEBUG(__VA_ARGS__); \
+									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
+#define LK_CORE_CONSOLE_INFO(...)    LK_CORE_INFO(__VA_ARGS__); \
+									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
+#define LK_CORE_CONSOLE_WARN(...)    LK_CORE_WARN(__VA_ARGS__); \
+									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
+#define LK_CORE_CONSOLE_ERROR(...)   LK_CORE_ERROR(__VA_ARGS__); \
+									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
+#define LK_CORE_CONSOLE_FATAL(...)	 LK_CORE_FATAL(__VA_ARGS__); \
+									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
 
 /** 
  * Test logging. 

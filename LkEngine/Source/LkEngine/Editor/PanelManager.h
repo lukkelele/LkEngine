@@ -38,7 +38,7 @@ namespace LkEngine {
 
 		void Initialize();
 
-		void OnRenderUI();
+		void RenderUI();
 
 		void RemovePanel(const char* PanelID);
 

@@ -31,15 +31,11 @@
 #define SPDLOG_LEVEL_NAMES \
 	{ "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF" }
 
-/* Ignore warnings raised inside external headers. */
 #pragma warning(push, 0)
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 #include <spdlog/fmt/fmt.h>
 #pragma warning(pop)
-
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/basic_file_sink.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -69,8 +65,7 @@ namespace LkEngine {
     {
         Core = 0,
         Client,
-        UI,
-        Asset,
+        EditorConsole,
 		TestRunner,
     };
 
@@ -104,7 +99,6 @@ namespace LkEngine {
         static LLog& Get();
 
         static void Initialize(std::string_view LogfileName = "");
-		static void RegisterLoggers();
 
         static void RegisterLogger(const ELoggerType Type,
 								   const std::string& Name,
@@ -114,22 +108,20 @@ namespace LkEngine {
 
         FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_Core() { return Logger_Core; }
         FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_Client() { return Logger_Client; }
-        FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_UI() { return Logger_UI; }
-        FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_Asset() { return Logger_Asset; }
+        FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_EditorConsole() { return Logger_EditorConsole; }
         FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_TestRunner() { return Logger_TestRunner; }
 
         FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger(const ELoggerType LoggerType)
         {
             switch (LoggerType)
             {
-				case ELoggerType::Core:			return GetLogger_Core();
-                case ELoggerType::Client:		return GetLogger_Client();
-                case ELoggerType::UI:			return GetLogger_UI();
-                case ELoggerType::Asset:		return GetLogger_Asset();
-				case ELoggerType::TestRunner:	return GetLogger_TestRunner(); 
+				case ELoggerType::Core:			 return Logger_Core;
+                case ELoggerType::Client:		 return Logger_Client;
+				case ELoggerType::EditorConsole: return Logger_EditorConsole; 
+				case ELoggerType::TestRunner:	 return Logger_TestRunner;
             }
 
-            return GetLogger_Core();
+			return Logger_Core;
         }
 
         template<typename... TArgs>
@@ -194,19 +186,19 @@ namespace LkEngine {
         FORCEINLINE static ELogLevel LevelFromString(std::string_view InString)
         {
 			const std::string StrLower = StringUtils::ToLower(InString);
-            if (StrLower == "trace")         return ELogLevel::Trace;
-            else if (StrLower == "debug")    return ELogLevel::Debug;
-            else if (StrLower == "info")     return ELogLevel::Info;
-            else if (StrLower == "warning")  return ELogLevel::Warning;
-            else if (StrLower == "error")    return ELogLevel::Error;
-            else if (StrLower == "fatal")    return ELogLevel::Fatal;
+            if (StrLower == "trace")        return ELogLevel::Trace;
+            else if (StrLower == "debug")   return ELogLevel::Debug;
+            else if (StrLower == "info")    return ELogLevel::Info;
+            else if (StrLower == "warning") return ELogLevel::Warning;
+            else if (StrLower == "error")   return ELogLevel::Error;
+            else if (StrLower == "fatal")   return ELogLevel::Fatal;
 
-            LK_CORE_ASSERT(false, "LevelFromString failed for \"{}\" (lower: \"{}\")", InString, StrLower);
+            LK_CORE_ASSERT(false, "LevelFromString failed for '{}' (lower: '{}')", InString, StrLower);
             return ELogLevel::Info;
         }
 
         /**
-         * @brief Convert a ELogLevel to spdlog::level.
+         * Convert a ELogLevel to spdlog::level.
          */
         FORCEINLINE static constexpr spdlog::level::level_enum ToSpdlogLevel(const ELogLevel Level)
         {
@@ -224,21 +216,17 @@ namespace LkEngine {
             return spdlog::level::info;
         }
 
-        /**
-         * @brief Get the name of a logger by using the logger type.
-         */
         FORCEINLINE static std::string_view GetLoggerName(const ELoggerType LoggerType)
         {
             switch (LoggerType)
             {
-                case ELoggerType::Core:        return GetLogger_Core()->name();
-                case ELoggerType::Client:	   return GetLogger_Client()->name();
-                case ELoggerType::UI:		   return GetLogger_UI()->name();
-                case ELoggerType::Asset:	   return GetLogger_Asset()->name();
-                case ELoggerType::TestRunner:  return GetLogger_TestRunner()->name();
+                case ELoggerType::Core:          return Logger_Core->name();
+                case ELoggerType::Client:	     return Logger_Client->name();
+				case ELoggerType::EditorConsole: return Logger_EditorConsole->name();
+                case ELoggerType::TestRunner:    return Logger_TestRunner->name();
             }
 
-            LK_CORE_ASSERT(false, "Invalid logger type");
+            LK_CORE_ASSERT(false, "Unknown logger type");
             return "";
         }
 
@@ -246,8 +234,7 @@ namespace LkEngine {
     private:
         inline static std::shared_ptr<spdlog::logger> Logger_Core = nullptr;
         inline static std::shared_ptr<spdlog::logger> Logger_Client = nullptr;
-        inline static std::shared_ptr<spdlog::logger> Logger_UI= nullptr;
-        inline static std::shared_ptr<spdlog::logger> Logger_Asset = nullptr;
+        inline static std::shared_ptr<spdlog::logger> Logger_EditorConsole = nullptr;
         inline static std::shared_ptr<spdlog::logger> Logger_TestRunner = nullptr;
 
         /** @brief Tag details for every logger type. */
@@ -256,11 +243,11 @@ namespace LkEngine {
 }
 
 
-namespace LkEngine
-{
+namespace LkEngine {
+
 	template<typename... TArgs>
-	void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level, 
-							std::format_string<TArgs...> Format, TArgs&&... Args)
+	FORCEINLINE void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level, 
+										std::format_string<TArgs...> Format, TArgs&&... Args)
 	{
 		FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];
 		if (TagDetails.Enabled && TagDetails.Filter <= Level)
@@ -291,8 +278,8 @@ namespace LkEngine
 	}
 
 	template<typename... TArgs>
-	void LLog::PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag,
-								   std::format_string<TArgs...> Format, TArgs&&... Args)
+	FORCEINLINE void LLog::PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag, 
+											   std::format_string<TArgs...> Format, TArgs&&... Args)
 	{
 		const FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];
 		if (TagDetails.Enabled && (TagDetails.Filter <= Level))
@@ -355,8 +342,8 @@ namespace LkEngine
 	}
 
 	template<typename... TArgs>
-	void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix,
-								  std::format_string<TArgs...> Format, TArgs&&... Args)
+	FORCEINLINE void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix, 
+											  std::format_string<TArgs...> Format, TArgs&&... Args)
 	{
 		const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
 		if (auto Logger = GetLogger(LoggerType); Logger != nullptr)
@@ -393,13 +380,12 @@ namespace LkEngine
 
 
 /********************************************************
-				   Utility functions.
+				 Log Utility Functions.
 ********************************************************/
 namespace LkEngine {
 
 	namespace LogUtility 
 	{
-
 		/** Assuming the log files are formatted with a timestamp. */
 		static bool CompareLogFiles(const std::filesystem::directory_entry& A, const std::filesystem::directory_entry& B)
 		{

@@ -23,7 +23,7 @@ namespace LkEngine {
 	{
 	}
 
-	void LTestLayer::OnUpdate(const float Timestep)
+	void LTestLayer::Tick(const float Timestep)
 	{
 		LK_UNUSED(Timestep);
 	}

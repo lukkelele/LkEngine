@@ -23,7 +23,6 @@ namespace LkEngine {
 	 *        be used as a regular enum.
 	 */
 	#define LK_ENUM_CLASS_FLAGS(EnumClass) \
-		template<> struct ::LkEngine::Enum::Internal::IsFlagEnum<EnumClass> : std::true_type { }; \
 		using LK_Enum_Type_##EnumClass = std::underlying_type_t<EnumClass>; \
 		inline           EnumClass& operator|=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) | static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
 		inline           EnumClass& operator&=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
@@ -52,10 +51,6 @@ namespace LkEngine {
 		inline EnumClass& operator&=(EnumClass& Lhs, LK_Enum_Type_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & Rhs); } \
 		inline EnumClass& operator|=(EnumClass& Lhs, LK_Enum_Type_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) | Rhs); } 
 
-#if 0
-		inline constexpr EnumClass  operator& (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } 
-#endif
-
 	/**
 	 * @brief Friends all bitwise operators for enum classes so the 
 	 *        definition can be kept private/protected.
@@ -70,7 +65,9 @@ namespace LkEngine {
 		friend constexpr bool       operator! (EnumClass  E); \
 		friend constexpr EnumClass  operator~ (EnumClass  E);
 
-
+	/**
+	 * LK_ENUM_RANGE_BY_FIRST_AND_LAST
+	 */
 	#define LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, First, Last) \
 		template<> \
 		struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
@@ -80,6 +77,9 @@ namespace LkEngine {
 			static constexpr std::underlying_type_t<EnumType> End   = (std::underlying_type_t<EnumType>)(Last) + 1; \
 		};
 
+	/**
+	 * LK_ENUM_RANGE_BY_VALUES
+	 */
 	#define LK_ENUM_RANGE_BY_VALUES(EnumType, ...) \
 		template<> \
 		struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
@@ -93,19 +93,60 @@ namespace LkEngine {
 			} \
 		};
 
+	/**
+	 * LK_ENUM_RANGE_BY_COUNT
+	 */
 	#define LK_ENUM_RANGE_BY_COUNT(EnumType, Count) \
 				LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, 0, (std::underlying_type_t<EnumType>)(Count) - 1)
 
+	/**
+	 * TODO: The ENUM_RANGE_FLAGS macros need to be able to 
+	 *       support the enum value 'None' that is equal to -1.
+	 */
 
-	namespace Enum::Internal 
-	{
-		/** Declared true when LK_ENUM_CLASS_FLAGS macro is used on an enum class. */
-		template<typename EnumType>
-		struct IsFlagEnum : std::false_type { };
+	/**
+	 * LK_ENUM_RANGE_FLAGS_BY_COUNT
+	 */
+	#define LK_ENUM_RANGE_FLAGS_BY_COUNT(EnumType) \
+	template<> \
+    struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
+    { \
+        enum { RangeType = 2 }; \
+        static constexpr std::underlying_type_t<EnumType> ValidFlags() \
+        { \
+            using IntType = std::underlying_type_t<EnumType>; \
+            IntType Flags = 0; \
+            for (IntType Idx = 1; Idx < static_cast<IntType>(EnumType::COUNT); Idx <<= 1) \
+            { \
+                Flags |= Idx; \
+            } \
+            return Flags; \
+        } \
+    };
 
-		template<typename EnumType>
-		inline constexpr bool IsFlagEnum_v = IsFlagEnum<EnumType>::value;
-	}
+	/**
+	 * LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST
+	 */
+	#define LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EnumType, First, Last) \
+	template<> \
+    struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
+    { \
+        enum { RangeType = 2 }; \
+        static constexpr std::underlying_type_t<EnumType> ValidFlags() \
+        { \
+            using IntType = std::underlying_type_t<EnumType>; \
+            IntType Flags = static_cast<IntType>(First); \
+            for (IntType Idx = Flags; Idx <= static_cast<IntType>(Last); Idx <<= 1) \
+            { \
+                Flags |= Idx; \
+            } \
+            return Flags; \
+        } \
+    };
+
+	#define LK_ENUM_RANGE_TYPE_CONTIGIOUS   0
+	#define LK_ENUM_RANGE_TYPE_VALUEARRAY   1
+	#define LK_ENUM_RANGE_TYPE_FLAG         2
 
 	namespace Enum::Internal::Range
 	{
@@ -113,22 +154,19 @@ namespace LkEngine {
 		 * Enum range traits.
 		 *  0: Continous.
 		 *  1: Value based.
-		 *  2: Flag based. (IMPL NOT DONE)
+		 *  2: Flag based.
 		 */
 		template<typename EnumType>
 		struct Type { enum { RangeType = -1 }; };
 
 		template<typename EnumType>
-		struct ContiguousIterator
+		struct TContiguousIterator
 		{
 			using IntType = std::underlying_type_t<EnumType>;
 
-			FORCEINLINE explicit ContiguousIterator(IntType InValue)
-				: Value(InValue)
-			{
-			}
+			FORCEINLINE explicit TContiguousIterator(IntType InValue) : Value(InValue) {}
 
-			FORCEINLINE ContiguousIterator& operator++()
+			FORCEINLINE TContiguousIterator& operator++()
 			{
 				++Value;
 				return *this;
@@ -137,7 +175,7 @@ namespace LkEngine {
 			FORCEINLINE EnumType operator*() const { return (EnumType)Value; }
 
 		private:
-			FORCEINLINE friend bool operator!=(const ContiguousIterator& Lhs, const ContiguousIterator& Rhs)
+			FORCEINLINE friend bool operator!=(const TContiguousIterator& Lhs, const TContiguousIterator& Rhs)
 			{
 				return (Lhs.Value != Rhs.Value);
 			}
@@ -147,14 +185,11 @@ namespace LkEngine {
 		};
 
 		template<typename EnumType>
-		struct ValueArrayIterator
+		struct TValueArrayIterator
 		{
-			FORCEINLINE explicit ValueArrayIterator(const EnumType* InPtr)
-				: Ptr(InPtr)
-			{
-			}
+			FORCEINLINE explicit TValueArrayIterator(const EnumType* InPtr) : Ptr(InPtr) {}
 
-			FORCEINLINE ValueArrayIterator& operator++()
+			FORCEINLINE TValueArrayIterator& operator++()
 			{
 				++Ptr;
 				return *this;
@@ -163,7 +198,7 @@ namespace LkEngine {
 			FORCEINLINE EnumType operator*() const { return *Ptr; }
 
 		private:
-			FORCEINLINE friend bool operator!=(const ValueArrayIterator& Lhs, const ValueArrayIterator& Rhs)
+			FORCEINLINE friend bool operator!=(const TValueArrayIterator& Lhs, const TValueArrayIterator& Rhs)
 			{
 				return (Lhs.Ptr != Rhs.Ptr);
 			}
@@ -172,24 +207,24 @@ namespace LkEngine {
 			const EnumType* Ptr;
 		};
 
+		/**
+		 * 
+		 */
 		template<typename EnumType>
-        struct FlagIterator
+        struct TFlagIterator
         {
             using IntType = std::underlying_type_t<EnumType>;
 
-            explicit FlagIterator(IntType Flags) 
-				: RemainingFlags(Flags)
-            {
-            }
+            FORCEINLINE explicit TFlagIterator(IntType Flags) : RemainingFlags(Flags) {}
 
-            FlagIterator& operator++()
+            FORCEINLINE TFlagIterator& operator++()
             {
 				/* Clear the lowest set bit. */
                 RemainingFlags &= (RemainingFlags - 1);
                 return *this;
             }
 
-            EnumType operator*() const
+            FORCEINLINE EnumType operator*() const
             {
 				/* Extract the lowest set bit. */
                 IntType Flag = RemainingFlags & -RemainingFlags;
@@ -197,7 +232,7 @@ namespace LkEngine {
             }
 
 		private:
-            friend bool operator!=(const FlagIterator& Lhs, const FlagIterator& Rhs)
+            friend bool operator!=(const TFlagIterator& Lhs, const TFlagIterator& Rhs)
             {
                 return (Lhs.RemainingFlags != Rhs.RemainingFlags);
             }
@@ -249,27 +284,20 @@ namespace LkEngine {
 		 * Enum range implementation, continous values.
 		 */
 		template<typename EnumType>
-		struct Impl<EnumType, 0>
+		struct Impl<EnumType, LK_ENUM_RANGE_TYPE_CONTIGIOUS>
 		{
-			ContiguousIterator<EnumType> begin() const { return ContiguousIterator<EnumType>(Type<EnumType>::Begin); }
-			ContiguousIterator<EnumType> end() const { return ContiguousIterator<EnumType>(Type<EnumType>::End); }
+			TContiguousIterator<EnumType> begin() const { return TContiguousIterator<EnumType>(Type<EnumType>::Begin); }
+			TContiguousIterator<EnumType> end()   const { return TContiguousIterator<EnumType>(Type<EnumType>::End); }
 		};
 
 		/**
 		 * Enum range implementation, value based.
 		 */
 		template<typename EnumType>
-		struct Impl<EnumType, 1>
+		struct Impl<EnumType, LK_ENUM_RANGE_TYPE_VALUEARRAY>
 		{
-			ValueArrayIterator<EnumType> begin() const 
-			{ 
-				return ValueArrayIterator<EnumType>(Type<EnumType>::template GetPointer<void>(false)); 
-			}
-
-			ValueArrayIterator<EnumType> end() const 
-			{ 
-				return ValueArrayIterator<EnumType>(Type<EnumType>::template GetPointer<void>(true)); 
-			}
+			TValueArrayIterator<EnumType> begin() const { return TValueArrayIterator<EnumType>(Type<EnumType>::template GetPointer<void>(false)); }
+			TValueArrayIterator<EnumType> end()   const { return TValueArrayIterator<EnumType>(Type<EnumType>::template GetPointer<void>(true)); }
 		};
 
 		/**
@@ -277,21 +305,19 @@ namespace LkEngine {
 		 * Enum range implementation, flag values.
 		 */
         template<typename EnumType>
-		struct Impl<EnumType, 2>
+		struct Impl<EnumType, LK_ENUM_RANGE_TYPE_FLAG>
         {
-            FlagIterator<EnumType> begin() const { return FlagIterator<EnumType>(Flags); }
-            FlagIterator<EnumType> end() const { return FlagIterator<EnumType>(0); }
-
-        private:
-            std::underlying_type_t<EnumType> Flags;
+			TFlagIterator<EnumType> begin() const { return TFlagIterator<EnumType>(Type<EnumType>::ValidFlags()); }
+			TFlagIterator<EnumType> end()   const { return TFlagIterator<EnumType>(0); }
         };
 	}
-
 
 	/**
 	 * TEnumRange
 	 * 
-	 *  Creates the range for the enum.
+	 *  Range implementation for the enum.
+	 *  The specified enum uses the Enum::Internal::Range::Type struct that is created
+	 *  with the use of a LK_ENUM_RANGE macro.
 	 */
 	template<typename EnumType>
 	struct TEnumRange : Enum::Internal::Range::Impl<EnumType, Enum::Internal::Range::Type<EnumType>::RangeType>

@@ -5,9 +5,13 @@
 #include "LkEngine/Core/Globals.h"
 #include "LkEngine/Core/IO/File.h"
 
-#include "LkEngine/Renderer/Color.h"
+#define LK_ENGINE_CONSOLE_ENABLED 1
 
-#include <spdlog/sinks/ansicolor_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#if LK_ENGINE_CONSOLE_ENABLED
+#	include "LkEngine/Editor/Panels/EditorConsole/ConsoleSink.h"
+#endif
 
 
 namespace LkEngine {
@@ -16,13 +20,12 @@ namespace LkEngine {
 
 	namespace fs = std::filesystem;
 
-	namespace {
-		using ColorSinkType = spdlog::sinks::stdout_color_sink_mt;
-
-	#if defined(LK_EDITOR)
+	namespace 
+	{
+	#if defined(LK_ENGINE_EDITOR)
 		constexpr const char* FileName = "LkEditor";
 	#elif defined(LK_ENGINE_AUTOMATION_TEST)
-		constexpr const char* FileName = "LkTest";
+		constexpr const char* FileName = "LkTestRunner";
 	#else
 		constexpr const char* FileName = "LkEngine";
 	#endif
@@ -35,17 +38,13 @@ namespace LkEngine {
 		constexpr const char* FileSinkPattern = "[%H:%M:%S] [%l] [%t] [%n] %v";
 
 		/* Color and file sink. */
-		std::vector<spdlog::sink_ptr> LogSinks;
-
 		std::string Logfile;
 	}
 
 	LLog::LLog()
 	{
-		LogSinks.reserve(2);
-
 		/* Use binary workdir as directory for logs. */
-		LogDirectory = fs::path(LK_FORMAT_STRING("{}/Logs/", fs::current_path().string()).c_str());
+		LogDirectory = fs::path(std::format("{}/Logs/", fs::current_path().string()).c_str());
 
 		/* Keep a maximum of 10 logfiles present. */
 		LogUtility::CleanLogDirectory(LogDirectory, 10);
@@ -70,92 +69,87 @@ namespace LkEngine {
 		}
 		else
 		{
-			Logfile = LK_FORMAT_STRING("{}-{}.log", FileName, Time::CurrentTimestamp());
+			Logfile = std::format("{}-{}.log", FileName, Time::CurrentTimestamp());
 		}
+
+		const std::string AppLogFilename = std::format("App-{}.log", Time::CurrentTimestamp());
 
 	#if defined(LK_ENGINE_STDOUT_FLUSH_ALWAYS)
 		setvbuf(stdout, nullptr, _IONBF, 0);
 	#endif
 
-		/* Color Sink. */
-		auto ColorSinkLogger = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-		ColorSinkLogger->set_color(spdlog::level::trace, Color::Green);
-		ColorSinkLogger->set_color(spdlog::level::debug, Color::Cyan);
-		ColorSinkLogger->set_color(spdlog::level::info, Color::White);
-		LogSinks.push_back(ColorSinkLogger);
+		std::vector<spdlog::sink_ptr> CoreSinks = {
+			std::make_shared<spdlog::sinks::basic_file_sink_mt>(LogDirectory.string() + Logfile, true),
+		#if LK_ENGINE_CONSOLE_ENABLED
+			std::make_shared<spdlog::sinks::stdout_color_sink_mt>()
+		#endif
+		};
 
-		/* Logfile Sink. */
-		//LK_PRINTLN("Logfile: {}", Logfile); /* Cannot use regular logging features here since core logger does not exist yet. */
-		LogSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(LogDirectory.string() + Logfile, true));
+		const std::string AppLogFile = LogDirectory.string() + AppLogFilename;
+		std::vector<spdlog::sink_ptr> AppSinks = {
+			std::make_shared<spdlog::sinks::basic_file_sink_mt>(AppLogFile, true),
+		#if LK_ENGINE_CONSOLE_ENABLED
+			std::make_shared<spdlog::sinks::stdout_color_sink_mt>()
+		#endif
+		};
 
-		LogSinks[0]->set_pattern(ColorSinkPattern);
-		LogSinks[1]->set_pattern(FileSinkPattern);
+		std::vector<spdlog::sink_ptr> EditorConsoleSinks = {
+			std::make_shared<spdlog::sinks::basic_file_sink_mt>(AppLogFile, true),
+		#if LK_ENGINE_CONSOLE_ENABLED
+			std::make_shared<LEditorConsoleSink>(1)
+		#endif
+		};
 
-		/* Logger: Core. */
+		/**
+		 * Index 0: File
+		 * Index 1: Stdout
+		 */
+		CoreSinks[0]->set_pattern("[%T] [%l] [%n] %v");
+		AppSinks[0]->set_pattern("[%T] [%l] [%n] %v");
+
+	#if LK_ENGINE_CONSOLE_ENABLED
+		CoreSinks[1]->set_pattern("%^[%T] [%l] [%n] %v%$");
+		if (auto ColorSink = std::static_pointer_cast<spdlog::sinks::stdout_color_sink_mt>(CoreSinks[1]))
 		{
-			Logger_Core = std::make_shared<spdlog::logger>("CORE", LogSinks.begin(), LogSinks.end());
+			ColorSink->set_color(spdlog::level::trace, Color::Green);
+			ColorSink->set_color(spdlog::level::debug, Color::Cyan);
+			ColorSink->set_color(spdlog::level::info, Color::White);
+		}
+
+		AppSinks[1]->set_pattern("%^[%T] [%n] %v%$");
+		if (auto ColorSink = std::static_pointer_cast<spdlog::sinks::stdout_color_sink_mt>(AppSinks[1]))
+		{
+			ColorSink->set_color(spdlog::level::trace, Color::Green);
+			ColorSink->set_color(spdlog::level::debug, Color::Cyan);
+			ColorSink->set_color(spdlog::level::info, Color::White);
+		}
+
+		EditorConsoleSinks[0]->set_pattern("[%T] [%l] [%n] %v");
+		EditorConsoleSinks[1]->set_pattern("%^%v%$");
+		//for (spdlog::sink_ptr& Sink : EditorConsoleSinks)
+		//{
+		//	Sink->set_pattern("%^%v%$");
+		//}
+	#endif
+
+		/* Logger: Core/LkEngine */
+		{
+			Logger_Core = std::make_shared<spdlog::logger>("CORE", CoreSinks.begin(), CoreSinks.end());
 			Logger_Core->set_level(spdlog::level::trace);
 			Logger_Core->flush_on(spdlog::level::trace);
-			spdlog::register_logger(Logger_Core);
 		}
 
-		/* Logger: Client. */
+		/* Logger: Client/App */
 		{
-			Logger_Client = std::make_shared<spdlog::logger>("CLIENT", LogSinks.begin(), LogSinks.end());
+			Logger_Client = std::make_shared<spdlog::logger>("APP", AppSinks.begin(), AppSinks.end());
 			Logger_Client->set_level(spdlog::level::trace);
 			Logger_Client->flush_on(spdlog::level::trace);
-			spdlog::register_logger(Logger_Client);
-		}
-	}
-
-	void LLog::RegisterLoggers()
-	{
-		LogSinks[0]->set_pattern(ColorSinkPattern);
-		LogSinks[1]->set_pattern(FileSinkPattern);
-
-		/* UI Logger. */
-		{
-			ELogLevel LogLevel = ELogLevel::Trace;
-
-			std::shared_ptr<ColorSinkType> UIColorSink = std::make_shared<ColorSinkType>();
-			UIColorSink->set_pattern(UISinkPattern);
-
-			std::vector<spdlog::sink_ptr> UILogSinks { UIColorSink, LogSinks[1] };
-
-			/* Colors. */
-			UIColorSink->set_color(spdlog::level::trace, (FOREGROUND_BLUE | FOREGROUND_RED));
-			UIColorSink->set_color(spdlog::level::debug, (FOREGROUND_GREEN | FOREGROUND_BLUE));
-			UIColorSink->set_color(spdlog::level::info,  (FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED));
-
-			/* Register the logger. */
-			Logger_UI = std::make_shared<spdlog::logger>("UI", UILogSinks.begin(), UILogSinks.end());
-			Logger_UI->set_level(ToSpdlogLevel(LogLevel));
-			Logger_UI->flush_on(ToSpdlogLevel(LogLevel));
-			spdlog::register_logger(Logger_UI);
-
-			EnabledTags[Logger_UI->name()] = LogLevel;
 		}
 
-		/* Asset Logger. */
+		/* Logger: EditorConsole */
 		{
-			ELogLevel LogLevel = ELogLevel::Info;
-
-			std::shared_ptr<ColorSinkType> AssetColorSink = std::make_shared<ColorSinkType>();
-			AssetColorSink->set_pattern(UISinkPattern);
-
-			std::vector<spdlog::sink_ptr> UILogSinks { AssetColorSink, LogSinks[1] };
-
-			/* Colors. */
-			AssetColorSink->set_color(spdlog::level::trace, (FOREGROUND_BLUE | FOREGROUND_RED));
-			AssetColorSink->set_color(spdlog::level::debug, (FOREGROUND_GREEN | FOREGROUND_BLUE));
-			AssetColorSink->set_color(spdlog::level::info,  (FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED));
-
-			Logger_Asset = std::make_shared<spdlog::logger>("ASSET", LogSinks.begin(), LogSinks.end());
-			Logger_Asset->set_level(ToSpdlogLevel(LogLevel));
-			Logger_Asset->flush_on(ToSpdlogLevel(LogLevel));
-			spdlog::register_logger(Logger_Asset);
-
-			EnabledTags[Logger_Asset->name()] = LogLevel;
+			Logger_EditorConsole = std::make_shared<spdlog::logger>("Console", EditorConsoleSinks.begin(), EditorConsoleSinks.end());
+			Logger_EditorConsole->set_level(spdlog::level::trace);
 		}
 
 	}

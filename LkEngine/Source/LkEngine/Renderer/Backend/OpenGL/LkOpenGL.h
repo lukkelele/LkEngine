@@ -22,10 +22,10 @@
  *  Macro for invoking and verifying the result of OpenGL functions.
  *  Handles potential errors and logs them before issuing a crash.
  */
-#define LK_OpenGL_Verify(OpenGLFunction)    \
-	LOpenGL_Internal::CheckForErrors(); \
-	OpenGLFunction;                         \
-	LK_ASSERT(LOpenGL_Internal::VerifyFunctionResult(#OpenGLFunction, __FILE__, __LINE__))
+#define LK_OpenGL_Verify(OpenGLFunction) \
+	LOpenGL_Internal::CheckForErrors();  \
+	OpenGLFunction;                      \
+	LK_CORE_VERIFY(LOpenGL_Internal::VerifyFunctionResult(#OpenGLFunction, __FILE__, __LINE__))
 
 /**
  * LK_OpenGL_Verify_Func
@@ -66,8 +66,8 @@ namespace LkEngine {
 		{
 			while (GLenum Error = glGetError())
 			{
-				LK_CORE_ERROR_TAG("OpenGL", "Error: {}\n Function: {}\n File: {}\n Line: {}", 
-								  Error, InFunction, InFile, InLine);
+				LK_CORE_ERROR_TAG("OpenGL", "Error {}\n Function: {}\n File: {}\n Line: {}", 
+								  static_cast<int>(Error), InFunction, InFile, InLine);
 				return false;
 			}
 
@@ -75,8 +75,9 @@ namespace LkEngine {
 		}
 	}
 
-	static_assert(sizeof(int) == sizeof(GLint));
-	static_assert(sizeof(GLubyte) == sizeof(byte));
+	static_assert(std::conjunction_v<std::is_same<int, GLint>, std::is_same<int32_t, GLint>>);
+	static_assert(std::conjunction_v<std::is_same<uint32_t, GLuint>, std::is_same<unsigned int, GLuint>>);
+	static_assert(std::is_same_v<byte, GLubyte>);
 
 	/**
 	 * LOpenGLBase

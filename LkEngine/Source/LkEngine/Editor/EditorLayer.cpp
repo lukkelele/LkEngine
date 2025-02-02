@@ -22,10 +22,12 @@
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/Core/Input/Mouse.h"
 
+#include "LkEngine/Editor/AssetEditorManager.h"
 #include "LkEngine/Editor/Panels/EditorSettingsPanel.h"
-#include "LkEngine/Editor/Panels/ToolsPanel.h"
+#include "LkEngine/Editor/Panels/EditorConsolePanel.h"
 #include "LkEngine/Editor/Panels/ContentBrowserPanel.h"
 #include "LkEngine/Editor/Panels/SceneManagerPanel.h"
+#include "LkEngine/Editor/Panels/ToolsPanel.h"
 
 #if defined(LK_ENGINE_OPENGL)
 #	include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
@@ -47,16 +49,15 @@ namespace LkEngine {
 		bool bEditorViewportFocused = false;
 
 		LVector2 MenuBarSize = { 0.0f, 30.0f };
-		LVector2 TopBarSize = { 0.0f, 54.0f };
-		LVector2 BottomBarSize = { 0.0f, 240.0f };
 		LVector2 LeftSidebarSize = { 340.0f, 0.0f };
 		LVector2 RightSidebarSize = { 340.0f, 0.0f };
 
 		struct FTopBarData
 		{
+			LVector2 Size = { 0.0f, 54.0f };
 			ImVec2 FramePadding{};
 			ImVec2 WindowPadding{};
-		} TopBarData{};
+		} TopBar{};
 
 		/* Windows. */
 		bool bWindow_MetricTool = false;
@@ -69,6 +70,18 @@ namespace LkEngine {
 		float TimeSinceLastSave = 0.0f;
 
 		std::vector<FSceneSelectionData> SceneSelectionData;
+
+		constexpr int PROJECT_NAME_LENGTH_MIN = 4;
+		constexpr int PROJECT_NAME_LENGTH_MAX = 255;
+		constexpr int PROJECT_FILEPATH_LENGTH_MAX = 512;
+
+		/** Input buffers used in UI contexts. */
+		namespace InputBuffer 
+		{
+			char* ProjectName         = new char[PROJECT_NAME_LENGTH_MAX];
+			char* OpenProjectFilePath = new char[PROJECT_FILEPATH_LENGTH_MAX];
+			char* NewProjectFilePath  = new char[PROJECT_FILEPATH_LENGTH_MAX];
+		}
 	}
 
 	namespace Cache 
@@ -79,7 +92,6 @@ namespace LkEngine {
 	LEditorLayer::LEditorLayer()
 		: LLayer("EditorLayer")
 		, EditorSettings(FEditorSettings::Get())
-		, TabManager(LEditorTabManager::Get())
 	{
 		LOBJECT_REGISTER();
 		Instance = this;
@@ -102,7 +114,7 @@ namespace LkEngine {
 		FramebufferSpec.Samples = 1;
 		FramebufferSpec.ClearColorOnLoad = false;
 		FramebufferSpec.ClearColor = { 0.10f, 0.50f, 0.50f, 1.0f };
-		FramebufferSpec.DebugName = "Editor-Framebuffer";
+		FramebufferSpec.DebugName = "EditorViewport-FB";
 		FramebufferSpec.Width = Window->GetWidth();
 		FramebufferSpec.Height = Window->GetHeight();
 		ViewportFramebuffer = LFramebuffer::Create(FramebufferSpec);
@@ -149,12 +161,12 @@ namespace LkEngine {
 		EditorViewport->SetDirty(true);
 
 		/* Create the 2D renderer. */
+		LK_CORE_DEBUG_TAG("Editor", "Creating 2D renderer");
 		FRenderer2DSpecification Renderer2DSpec;
 		Renderer2D = TObjectPtr<LRenderer2D>::Create(Renderer2DSpec);
 		Renderer2D->Initialize();
 
 		/* FIXME: Temporarily here. */
-		//LOpenGL_Debug::InitializeEnvironment();
 		LOpenGL_Debug::SetupSkybox();
 
 		/** Bind input callbacks. */
@@ -172,15 +184,135 @@ namespace LkEngine {
 			LK_CORE_DEBUG_TAG("Editor", "Message Box Cancelled: {}", WindowName);
 		});
 
-		LK_CORE_ASSERT(LEditorAssetManager::BaseMaterial 
-			&& LEditorAssetManager::BaseMaterial->GetMaterial() 
-			&& LEditorAssetManager::BaseMaterial->GetMaterial()->GetShader()
-		);
+		LProject::OnProjectChanged.Add(this, &LEditorLayer::OnProjectChanged);
+
+		LAssetEditorManager::RegisterEditors();
 
 		LK_CORE_DEBUG_TAG("Editor", "Initialized");
 	}
 
-	void LEditorLayer::OnUpdate(const float InDeltaTime)
+	void LEditorLayer::OnAttach()
+	{
+		LK_CORE_TRACE_TAG("Editor", "OnAttach");
+		LK_CORE_VERIFY(Window);
+
+		LObject::Initialize();
+
+		std::memset(InputBuffer::ProjectName, 0, PROJECT_NAME_LENGTH_MAX);
+		std::memset(InputBuffer::NewProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
+		std::memset(InputBuffer::OpenProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
+
+		/* Setup viewport bounds and sizes of the sidebars. */
+		PrimaryViewportBounds[0] = { 0, 0 };
+		PrimaryViewportBounds[1] = Window->GetViewportSize();
+		LeftSidebarSize.Y = PrimaryViewportBounds[1].Y;
+		RightSidebarSize.Y = PrimaryViewportBounds[1].Y;
+
+		/* Editor viewport. */
+		EditorViewport = TObjectPtr<LViewport>::Create();
+		EditorViewport->SetViewportBounds(0, LVector2(0.0f, 0.0f));
+		EditorViewport->SetViewportBounds(1, Window->GetSize());
+
+		EditorViewport->SetSize(
+			(Window->GetWidth() - LeftSidebarSize.X, RightSidebarSize.X), 
+			(float)(Window->GetHeight())
+		);
+
+		/* Set scalers for the editor viewport. */
+		const LVector2 EditorWindowSize = EditorViewport->GetSize();
+		LVector2 EditorWindowScalers;
+		EditorWindowScalers.X = EditorWindowSize.X / Window->GetWidth();
+		EditorWindowScalers.Y = EditorWindowSize.Y / Window->GetHeight();
+		EditorViewport->SetScalers(EditorWindowScalers);
+
+		LK_CORE_DEBUG_TAG("Editor", "Loading editor resources");
+		FEditorResources::Initialize();
+
+		InitializePanelManager();
+
+		/* Load editor settings. */
+		EditorSettings.Load();
+
+		LK_CORE_DEBUG_TAG("Editor", "Creating scene renderer");
+		FSceneRendererSpecification RendererSpec{};
+		SceneRenderer = TObjectPtr<LSceneRenderer>::Create(EditorScene, RendererSpec);
+		
+		/**
+		 * Attach delegates from LSceneRenderer to LSceneManagerPanel. 
+		 * Provides useful debugging information.
+		 */
+		/* TODO: Cannot pass TObjectPtr to LDelegate without TObjectPtr::Get() */
+		auto SceneManagerPanel = PanelManager->GetPanel<LSceneManagerPanel>(PanelID::SceneManager);
+		SceneRenderer->OnDrawListFlush.Add(SceneManagerPanel.Get(), &LSceneManagerPanel::OnSceneRendererDrawListFlush);
+
+		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
+		{
+			LK_CORE_TRACE_TAG("Editor", "[GOnSceneSetActive] Setting active scene: {}", NewActiveScene->GetName());
+			SetScene(NewActiveScene);
+		});
+
+		Initialize();
+	}
+
+	void LEditorLayer::OnDetach()
+	{
+		LK_CORE_TRACE_TAG("Editor", "OnDetach");
+		PanelManager->Serialize();
+		LAssetEditorManager::UnregisterEditors();
+
+		EditorSettings.Save();
+
+		SceneRenderer->SetScene(nullptr);
+	}
+
+	void LEditorLayer::InitializePanelManager()
+	{
+		LK_CORE_DEBUG_TAG("Editor", "Creating editor panels");
+		PanelManager = TObjectPtr<LPanelManager>::Create();
+
+		/* Panel: Editor Console */
+		auto EditorConsole = PanelManager->AddPanel<LEditorConsolePanel>(
+			EPanelCategory::View,
+			PanelID::EditorConsole,
+			"Console Log",
+			EPanelInitState::Open
+		);
+
+		/* Panel: Editor Settings */
+		PanelManager->AddPanel<LEditorSettingsPanel>(
+			EPanelCategory::View, 
+			PanelID::EditorSettings,
+			EPanelInitState::Closed
+		);
+
+		/* TODO: Add callbacks/delegates to content browser instance. */
+		/* Panel: Content Browser */
+		auto ContentBrowser = PanelManager->AddPanel<LContentBrowser>(
+			EPanelCategory::View,
+			PanelID::ContentBrowser,
+			"Content Browser",
+			EPanelInitState::Open
+		);
+
+		/* Panel: Scene Manager */
+		auto SceneManager = PanelManager->AddPanel<LSceneManagerPanel>(
+			EPanelCategory::View, 
+			PanelID::SceneManager, 
+			"Scene Manager", 
+			EPanelInitState::Open, 
+			EditorScene
+		);
+		OnSceneSelectionUpdated.Add(SceneManager.Get(), &LSceneManagerPanel::OnSceneSelectionUpdated);
+
+		PanelManager->AddPanel<LToolsPanel>(EPanelCategory::View, PanelID::Tools, EPanelInitState::Closed);
+		//PanelManager->AddPanel<LMaterialEditorPanel>(EPanelCategory::Edit, PanelID::MaterialEditor, EPanelInitState::Closed);
+
+		PanelManager->Deserialize();
+		PanelManager->Initialize();
+	}
+
+
+	void LEditorLayer::Tick(const float InDeltaTime)
 	{
 		LK_PROFILE_FUNC();
 		DeltaTime = InDeltaTime;
@@ -194,16 +326,6 @@ namespace LkEngine {
 				EditorCamera->SetActive(true);
 				EditorScene->OnUpdateEditor(DeltaTime);
 				EditorScene->OnRenderEditor(SceneRenderer, *EditorCamera, DeltaTime);
-
-			#if 0
-				/* Render floor. */
-				LRenderer::Submit([&]()
-				{
-					LRenderer::GetViewportFramebuffer()->Bind();
-					LOpenGL_Debug::RenderFloor(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
-					LFramebuffer::TargetSwapChain();
-				});
-			#endif
 
 				if (bRenderSkybox)
 				{
@@ -227,7 +349,7 @@ namespace LkEngine {
 			case ESceneState::Pause:
 			{
 				EditorCamera->SetActive(true);
-				EditorCamera->OnUpdate(DeltaTime);
+				EditorCamera->Tick(DeltaTime);
 
 				RuntimeScene->OnRenderRuntime(ViewportRenderer, DeltaTime);
 				break;
@@ -239,9 +361,11 @@ namespace LkEngine {
 				break;
 			}
 		}
+
+		LAssetEditorManager::Tick(DeltaTime);
 	}
 
-	void LEditorLayer::OnRenderUI()
+	void LEditorLayer::RenderUI()
 	{
 		ImGuiViewportP* Viewport = (ImGuiViewportP*)ImGui::GetMainViewport();
 		ImGuiIO& IO = ImGui::GetIO();
@@ -256,7 +380,7 @@ namespace LkEngine {
 		UI_MainMenuBar();
 
 		/* Render editor panels. */
-		PanelManager->OnRenderUI();
+		PanelManager->RenderUI();
 
 		/*----------------------------------------------------------------------------
 			                              Top Bar
@@ -309,10 +433,29 @@ namespace LkEngine {
 				}
 			}
 
-			ImGui::BeginGroup();
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			if (ImGui::TreeNode("Shader Sandbox"))
+			{
+				ImGui::Text("Material: WoodContainer");
+				ImGui::SameLine();
+				if (ImGui::Button("Toggle: u_TestBool"))
+				{
+					static bool UniformValue = true;
+					LShader& Shader = *LEditorAssetManager::Material_WoodContainer->GetMaterial()->GetShader();
+					Shader.Set("u_TestBool", UniformValue);
+					LK_CORE_CONSOLE_INFO("Toggled u_TestBool -> {}", (int)UniformValue);
+
+					UniformValue = !UniformValue;
+				}
+
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Editor Viewport Info"))
 			{
 				ImGui::Text("Editor Viewport Bounds 0: %s", EditorViewport->GetViewportBounds(0).ToString<const char*>());
 				ImGui::Text("Editor Viewport Bounds 1: %s", EditorViewport->GetViewportBounds(1).ToString<const char*>());
+				ImGui::Dummy(ImVec2(0, 8));
 				if (ImGuiViewport* MainViewport = ImGui::GetMainViewport(); MainViewport != nullptr)
 				{
 					ImGui::Text("Viewport Size: (%.2f, %.2f)", MainViewport->Size.x, MainViewport->Size.y);
@@ -320,10 +463,75 @@ namespace LkEngine {
 					ImGui::Text("Viewport Pos: (%.2f, %.2f)", MainViewport->Pos.x, MainViewport->Pos.y);
 				}
 
-				ImGui::Text("TopBar: %s", TopBarSize.ToString<const char*>());
-				ImGui::Text("BottomBar: %s", BottomBarSize.ToString<const char*>());
+				ImGui::Dummy(ImVec2(0, 8));
+				ImGui::Text("TopBar: %s", TopBar.Size.ToString<const char*>());
+
+				if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(LK_UI_EDITOR_VIEWPORT))
+				{
+					ImGui::Dummy(ImVec2(0, 8));
+					ImGui::Text("Editor Window Size: %s", LVector2(EditorViewportWindow->Size).ToString<const char*>());
+					ImGui::Text("Editor Window Pos: %s", LVector2(EditorViewportWindow->Pos).ToString<const char*>());
+					ImGui::Text("Editor Window ViewportPos: %s", LVector2(EditorViewportWindow->ViewportPos).ToString<const char*>());
+
+					if (ImGuiDockNode* EditorWindowNode = EditorViewportWindow->DockNode)
+					{
+						ImGui::Dummy(ImVec2(0, 8));
+						ImGui::Text("Editor Dock Window Size: %s", LVector2(EditorWindowNode->Size).ToString<const char*>());
+						ImGui::Text("Editor Dock Window Pos: %s", LVector2(EditorWindowNode->Pos).ToString<const char*>());
+
+						if (ImGuiDockNode* ParentNode = EditorViewportWindow->DockNode->ParentNode)
+						{
+							ImGui::Dummy(ImVec2(0, 8));
+							if (ParentNode->VisibleWindow)
+							{
+								ImGui::Text("Parent Dock Window: %s", ParentNode->VisibleWindow->Name);
+							}
+							else
+							{
+								ImGui::Text("Parent Dock Window: NULL");
+							}
+							ImGui::Text("Parent Dock Window Size: %s", LVector2(ParentNode->Size).ToString().c_str());
+							ImGui::Text("Parent Dock Window Pos: %s", LVector2(ParentNode->Pos).ToString().c_str());
+						}
+					}
+				}
+
+				ImGui::TreePop();
 			}
-			ImGui::EndGroup();
+
+			if (ImGui::TreeNode("Editor Console Testing"))
+			{
+				if (ImGui::Button("Console Log: Spam"))
+				{
+					LK_CONSOLE_DEBUG("Editor panels initialized");
+					LK_CONSOLE_INFO("Info message 1");
+					LK_CONSOLE_INFO("Info message 2");
+					LK_CONSOLE_ERROR("Error message");
+					LK_CONSOLE_WARN("Warn message");
+				}
+
+				if (ImGui::Button("Console Log: DEBUG"))
+				{
+					LK_CONSOLE_DEBUG("Test log DEBUG message");
+				}
+
+				if (ImGui::Button("Console Log: INFO"))
+				{
+					LK_CONSOLE_INFO("Test log INFO message");
+				}
+
+				if (ImGui::Button("Console Log: WARN"))
+				{
+					LK_CONSOLE_WARN("Test log WARN message");
+				}
+
+				if (ImGui::Button("Console Log: ERROR"))
+				{
+					LK_CONSOLE_ERROR("Test log ERROR message");
+				}
+
+				ImGui::TreePop();
+			}
 
 			/* Color modification. */
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
@@ -392,11 +600,13 @@ namespace LkEngine {
 
 			if (ImGui::TreeNode("Config Directories"))
 			{
-				ImGui::Text("Assets Dir: %S", LFileSystem::GetAssetsDir().c_str());
-				ImGui::Text("Engine Dir: %S", LFileSystem::GetEngineDir().c_str());
-				ImGui::Text("Config Dir: %S", LFileSystem::GetConfigDir().c_str());
-				ImGui::Text("Engine Config: %S", LFileSystem::GetEngineConfig().c_str());
-				ImGui::TreePop(); /* Mouse Information */
+				ImGui::Text("Resources: %S", LFileSystem::GetResourcesDir().c_str());
+				ImGui::Text("Assets: %S", LFileSystem::GetAssetsDir().c_str());
+				ImGui::Text("Engine: %S", LFileSystem::GetEngineDir().c_str());
+				ImGui::Text("Config: %S", LFileSystem::GetConfigDir().c_str());
+				ImGui::Text("Engine: %S", LFileSystem::GetEngineConfig().c_str());
+
+				ImGui::TreePop();
 			}
 		}
 		UI::End(); /* LK_UI_SIDEBAR_2 */
@@ -438,17 +648,13 @@ namespace LkEngine {
 		UI::End();
 		ImGui::PopStyleVar(2); /* FramePadding, WindowPadding. */
 
-		/* Render tabs. */
-		UI_TabManager();
-
-		//const LVector2 ViewportSize = Window->GetViewportSize();
 		const LVector2 ViewportSize = { Viewport->WorkSize.x, Viewport->WorkSize.y };
 		UI_SyncEditorWindowSizes(ViewportSize);
 
-		TabManager.End(); /// FIXME
-
 		UI::RenderMessageBoxes();
 		UI_RenderExternalWindows();
+
+		LAssetEditorManager::RenderUI();
 
 		ImGui::End(); /* Core Viewport. */
 	}
@@ -468,75 +674,6 @@ namespace LkEngine {
 			ImVec4(1, 1, 1, 1) /* Tint Color   */
 			//ImVec4(1, 1, 0, 1)  /* Border Color */
 		);
-	}
-
-	void LEditorLayer::OnAttach()
-	{
-		LK_CORE_TRACE_TAG("Editor", "OnAttach");
-		LK_CORE_VERIFY(Window);
-
-		LObject::Initialize();
-
-		/* Setup viewport bounds and sizes of the sidebars. */
-		PrimaryViewportBounds[0] = { 0, 0 };
-		PrimaryViewportBounds[1] = Window->GetViewportSize();
-		LeftSidebarSize.Y = PrimaryViewportBounds[1].Y;
-		RightSidebarSize.Y = PrimaryViewportBounds[1].Y;
-
-		/* Editor viewport. */
-		EditorViewport = TObjectPtr<LViewport>::Create();
-		EditorViewport->SetViewportBounds(0, LVector2(0.0f, 0.0f));
-		EditorViewport->SetViewportBounds(1, Window->GetSize());
-
-		EditorViewport->SetSize(
-			(Window->GetWidth() - LeftSidebarSize.X, RightSidebarSize.X), 
-			(float)(Window->GetHeight())
-		);
-
-		/* Set scalers for the editor viewport. */
-		const LVector2 EditorWindowSize = EditorViewport->GetSize();
-		LVector2 EditorWindowScalers;
-		EditorWindowScalers.X = EditorWindowSize.X / Window->GetWidth();
-		EditorWindowScalers.Y = EditorWindowSize.Y / Window->GetHeight();
-		EditorViewport->SetScalers(EditorWindowScalers);
-
-		LK_CORE_TRACE_TAG("Editor", "Loading editor resources");
-		FEditorResources::Initialize();
-
-		InitializePanelManager();
-
-		/* Load editor settings. */
-		EditorSettings.Load();
-
-		LK_CORE_TRACE_TAG("Editor", "Creating scene renderer");
-		FSceneRendererSpecification RendererSpec{};
-		SceneRenderer = TObjectPtr<LSceneRenderer>::Create(EditorScene, RendererSpec);
-		
-		/**
-		 * Attach delegates from LSceneRenderer to LSceneManagerPanel. 
-		 * Provides useful debugging information.
-		 */
-		/* TODO: Cannot pass TObjectPtr to LDelegate without TObjectPtr::Get() */
-		auto SceneManagerPanel = PanelManager->GetPanel<LSceneManagerPanel>(PanelID::SceneManager);
-		SceneRenderer->OnDrawListFlush.Add(SceneManagerPanel.Get(), &LSceneManagerPanel::OnSceneRendererDrawListFlush);
-
-		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
-		{
-			LK_CORE_TRACE_TAG("Editor", "[GOnSceneSetActive] Setting active scene: {}", NewActiveScene->GetName());
-			SetScene(NewActiveScene);
-		});
-
-		Initialize();
-	}
-
-	void LEditorLayer::OnDetach()
-	{
-		LK_CORE_TRACE_TAG("Editor", "OnDetach");
-		PanelManager->Serialize();
-
-		EditorSettings.Save();
-
-		SceneRenderer->SetScene(nullptr);
 	}
 
 	void LEditorLayer::RenderViewport()
@@ -610,7 +747,7 @@ namespace LkEngine {
 				glm::value_ptr(ViewMatrix),
 				glm::value_ptr(ProjectionMatrix),
 				static_cast<ImGuizmo::OPERATION>(Gizmo),
-				ImGuizmo::LOCAL, //ImGuizmo::WORLD, 
+				ImGuizmo::LOCAL,
 				glm::value_ptr(TransformMatrix),
 				nullptr,
 				ShouldSnapValues ? SnapValues : nullptr
@@ -629,7 +766,7 @@ namespace LkEngine {
 			}
 		#endif
 
-			ImGui::End(); /* Window->Name */
+			ImGui::End();
 		}
 	}
 
@@ -675,6 +812,12 @@ namespace LkEngine {
 		}
 	}
 
+	void LEditorLayer::OpenProject(const std::filesystem::path& ProjectPath)
+	{
+		LK_CORE_ASSERT(!ProjectPath.empty());
+		LK_CORE_INFO_TAG("Editor", "Opening project: {}", ProjectPath);
+	}
+
 	void LEditorLayer::EmptyProject()
 	{
 		LK_CORE_INFO_TAG("Editor", "Loading empty project");
@@ -693,8 +836,8 @@ namespace LkEngine {
 
 	void LEditorLayer::StarterProject()
 	{
-		//static std::string StarterProjectName = "Starter-2024";
-		static std::string StarterProjectName = "Starter-2025";
+		//static const std::string StarterProjectName = "Starter-2024";
+		static const std::string StarterProjectName = "Starter-2025";
 		LK_CORE_INFO_TAG("Editor", "Loading starter project: {}", StarterProjectName);
 
 		if (TObjectPtr<LProject> CurrentProject = LProject::Current(); CurrentProject != nullptr)
@@ -742,52 +885,92 @@ namespace LkEngine {
 	#endif
 	}
 
+	void LEditorLayer::CreateProject(const std::filesystem::path& ProjectPath)
+	{
+		LK_CORE_CONSOLE_DEBUG("Creating project: {}", ProjectPath);
+		if (!LFileSystem::Exists(ProjectPath))
+		{
+			LK_CORE_DEBUG_TAG("Editor", "Creating directory");
+			if (!LFileSystem::CreateDirectory(ProjectPath))
+			{
+				LK_CORE_ERROR_TAG("Editor", "Directory creation failed with path: {}", ProjectPath);
+				return;
+			}
+		}
+
+		if (!LFileSystem::Exists("Resources/Template/NewProject"))
+		{
+			LK_CORE_ERROR_TAG("Editor", "Cannot create new project, the template 'New Project' does not exist");
+			return;
+		}
+
+		LK_CORE_CONSOLE_DEBUG("Copying 'New Project' template to new project directory");
+		std::filesystem::copy(
+			"Resources/Template/NewProject", 
+			ProjectPath, 
+			std::filesystem::copy_options::recursive
+		);
+
+		std::string EngineRootDir = LFileSystem::GetEngineDir().string();
+		LK_CORE_ASSERT(!EngineRootDir.empty(), "The engine directory is empty");
+		std::replace(EngineRootDir.begin(), EngineRootDir.end(), '\\', '/');
+		LK_CORE_CONSOLE_DEBUG("Clean dir: {}", EngineRootDir);
+
+		/**
+		 * Create the project file. 
+		 *
+		 * Copies the template project file and replaces the token project name 
+		 * with the project name entered from the project creation popup.
+		 */
+		std::filesystem::path NewProjectPath;
+		{
+			const std::filesystem::path CompleteProjectPath(ProjectPath / "Project.lkproj");
+
+			std::ifstream InputStream(CompleteProjectPath);
+			LK_CORE_VERIFY(InputStream.is_open(), "InputStream failed for: '{}'", CompleteProjectPath.string());
+			std::stringstream StringStream;
+			StringStream << InputStream.rdbuf();
+			InputStream.close();
+
+			std::string ProjString = StringStream.str();
+			LK_CORE_VERIFY(std::strlen(InputBuffer::ProjectName) > 0);
+			StringUtils::ReplaceToken(ProjString, "$PROJECT_NAME$", InputBuffer::ProjectName);
+
+			std::ofstream OStream(CompleteProjectPath);
+			OStream << ProjString;
+			OStream.close();
+
+			const std::string NewProjectFileName = std::string(InputBuffer::ProjectName) + ".lkproj";
+			NewProjectPath = ProjectPath / (std::string(InputBuffer::ProjectName) + ".lkproj");
+			std::filesystem::rename(CompleteProjectPath, NewProjectPath);
+		}
+
+		if (NewProjectPath.empty())
+		{
+			LK_CORE_CONSOLE_ERROR("An error occured whilst creating a new project located at: ({})", ProjectPath);
+			return;
+		}
+
+		LK_CORE_CONSOLE_DEBUG("Creating template directories for the new project");
+		LFileSystem::CreateDirectory(ProjectPath / "Assets" / "Textures");
+		LFileSystem::CreateDirectory(ProjectPath / "Assets" / "Meshes" / "Default");
+		LFileSystem::CreateDirectory(ProjectPath / "Assets" / "Meshes" / "Default" / "Source");
+		LFileSystem::CreateDirectory(ProjectPath / "Assets" / "Scenes");
+		LFileSystem::CreateDirectory(ProjectPath / "Assets" / "Materials");
+
+		OpenProject(NewProjectPath);
+	}
+
 	void LEditorLayer::SaveProjectAs()
 	{
 	}
 
-	void LEditorLayer::InitializePanelManager()
+	void LEditorLayer::OnProjectChanged(TObjectPtr<LProject> InProject)
 	{
-		LK_CORE_DEBUG_TAG("Editor", "Creating editor panels");
-
-		/* Editor UI components. */
-		PanelManager = TObjectPtr<LPanelManager>::Create();
-
-		/* Panel: Editor Settings */
-		PanelManager->AddPanel<LEditorSettingsPanel>(
-			EPanelCategory::View, 
-			PanelID::EditorSettings,
-			EPanelInitState::Closed
-		);
-
-		/* TODO: Add callbacks/delegates to content browser instance. */
-		/* Panel: Content Browser */
-		auto ContentBrowser = PanelManager->AddPanel<LContentBrowserPanel>(
-			EPanelCategory::View,
-			PanelID::ContentBrowser,
-			"Content Browser",
-			EPanelInitState::Open
-		);
-
-		/* Panel: Scene Manager */
-		auto SceneManagerPanel = PanelManager->AddPanel<LSceneManagerPanel>(
-			EPanelCategory::View, 
-			PanelID::SceneManager, 
-			"Scene Manager", 
-			EPanelInitState::Open, 
-			EditorScene
-		);
-		OnSceneSelectionUpdated.Add(SceneManagerPanel.Get(), &LSceneManagerPanel::OnSceneSelectionUpdated);
-
-		/* Panel: Tools */
-		PanelManager->AddPanel<LToolsPanel>(
-			EPanelCategory::View, 
-			PanelID::Tools,
-			EPanelInitState::Closed
-		);
-
-		PanelManager->Deserialize();
-		PanelManager->Initialize();
+		LK_CORE_DEBUG_TAG("Editor", "OnProjectChanged -> {}", InProject->GetName());
+		std::memset(InputBuffer::ProjectName, 0, PROJECT_NAME_LENGTH_MAX);
+		std::memset(InputBuffer::NewProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
+		std::memset(InputBuffer::OpenProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
 	}
 
 	void LEditorLayer::OnViewportSizeUpdated(const uint16_t NewWidth, const uint16_t NewHeight)
@@ -1052,14 +1235,18 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_PrepareTopBar()
 	{
-		if (ImGuiWindow* TopBar = ImGui::FindWindowByName(LK_UI_TOPBAR); TopBar != nullptr)
+		if (ImGuiWindow* TopBarWindow = ImGui::FindWindowByName(LK_UI_TOPBAR); TopBarWindow != nullptr)
 		{
-			TopBar->Flags |= ImGuiWindowFlags_NoTitleBar;
-			if (ImGuiDockNode* DockNode = TopBar->DockNode; DockNode != nullptr)
+			TopBarWindow->Flags |= ImGuiWindowFlags_NoTitleBar;
+			if (ImGuiDockNode* DockNode = TopBarWindow->DockNode; DockNode != nullptr)
 			{
-				TopBarSize.X = DockNode->Size.x;
-				DockNode->Size.y = TopBarSize.Y;
-				DockNode->SizeRef.y = DockNode->Size.y;
+				if ((DockNode->Size.x <= 0.0f) || (DockNode->Size.y <= 0.0f))
+				{
+					return;
+				}
+				TopBar.Size.X = DockNode->Size.x;
+				DockNode->Size.y = TopBar.Size.Y;
+				DockNode->SizeRef.y = DockNode->Size.y; /* TODO: Is this needed? */
 
 				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoDocking;
 				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoWindowMenuButton;
@@ -1068,8 +1255,8 @@ namespace LkEngine {
 			}
 
 			ImGuiStyle& Style = ImGui::GetStyle();
-			TopBarData.FramePadding = Style.FramePadding;
-			TopBarData.WindowPadding = TopBar->WindowPadding;
+			TopBar.FramePadding = Style.FramePadding;
+			TopBar.WindowPadding = TopBarWindow->WindowPadding;
 		}
 	}
 
@@ -1079,6 +1266,11 @@ namespace LkEngine {
 		{
 			if (ImGuiDockNode* DockNode = SidebarWindow->DockNode; DockNode != nullptr)
 			{
+				if ((DockNode->Size.x <= 0.0f) || (DockNode->Size.y <= 0.0f))
+				{
+					return;
+				}
+
 				ImGuiViewport* Viewport = ImGui::GetWindowViewport();
 
 				LeftSidebarSize = { DockNode->Size.x, DockNode->Size.y };
@@ -1119,6 +1311,11 @@ namespace LkEngine {
 		{
 			if (ImGuiDockNode* DockNode = SidebarWindow->DockNode; DockNode != nullptr)
 			{
+				if ((DockNode->Size.x <= 0.0f) || (DockNode->Size.y <= 0.0f))
+				{
+					return;
+				}
+
 				ImGuiViewport* Viewport = ImGui::GetWindowViewport();
 
 				RightSidebarSize = { DockNode->Size.x, DockNode->Size.y };
@@ -1160,46 +1357,21 @@ namespace LkEngine {
 		{
 			if (ImGuiDockNode* DockNode = Window->DockNode; DockNode != nullptr)
 			{
+				if ((DockNode->Size.x <= 0.0f) || (DockNode->Size.y <= 0.0f))
+				{
+					return;
+				}
+
 				ImGuiViewport* Viewport = ImGui::GetWindowViewport();
 				ImGuiStyle& Style = ImGui::GetStyle();
 
-				DockNode->Size = ImVec2(DockNode->Size.x,
-										DockNode->Size.y - 2 * Style.DockingSeparatorSize + TopBarData.FramePadding.y);
+				/* Modify the size on the y-axis to account for the docking separators. */
+				DockNode->Size = ImVec2(DockNode->Size.x, (DockNode->Size.y - 2 * Style.DockingSeparatorSize + TopBar.FramePadding.y));
 
 				EditorViewport->SetSize(DockNode->Size.x, DockNode->Size.y);
 
-				if (DockNode->ParentNode)
-				{
-					/* There is a vertical split if Child[0] and Child[1] are populated. */
-					ImGuiDockNode* DockChild1 = DockNode->ParentNode->ChildNodes[0];
-					ImGuiDockNode* DockChild2 = DockNode->ParentNode->ChildNodes[1];
-
-					const bool IsVerticalSplit = (DockChild1 && DockChild2);
-					if (IsVerticalSplit)
-					{
-						//if (Child1->VisibleWindow) LK_CORE_INFO("DockChild1: {}  Windows.Size={}", DockChild1->VisibleWindow->Name, DockChild1->Windows.Size);
-						//if (Child2->VisibleWindow) LK_CORE_WARN("DockChild2: {}  Windows.Size={}", DockChild2->VisibleWindow->Name, DockChild2->Windows.Size);
-						bool EditorViewportOnTop = false;
-
-						if (DockChild1->VisibleWindow && (std::strcmp(DockChild1->VisibleWindow->Name, LK_UI_EDITOR_VIEWPORT) == 0))
-						{
-							EditorViewportOnTop = true;
-
-							//BottomBarSize.Y = (Viewport->Size.y - DockNode->Size.y);
-							BottomBarSize.Y = (Viewport->WorkSize.y - DockNode->Size.y);
-							EditorViewport->SetViewportBoundsY(0, Viewport->Size.y - DockNode->Size.y - BottomBarSize.Y);
-							EditorViewport->SetViewportBoundsY(1, DockNode->Pos.y);
-						}
-					#if 0
-						else if (DockChild1->VisibleWindow && (std::strcmp(DockChild1->VisibleWindow->Name, LK_UI_CONTENTBROWSER) == 0))
-						{
-							EditorViewportOnTop = false;
-						}
-					#endif
-					}
-				}
-				/* TODO: Add Style.DockingSeparatorSize here for the position? */
-				//EditorViewport->SetPositionX(EditorViewport->GetSize().X);
+				EditorViewport->SetViewportBounds(0, { DockNode->Pos.x , DockNode->Pos.y });
+				EditorViewport->SetViewportBounds(1, { DockNode->Pos.x + DockNode->Size.x, DockNode->Pos.y + DockNode->Size.y });
 
 				Window->Flags |= ImGuiWindowFlags_NoTitleBar;
 				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoTabBar;
@@ -1302,9 +1474,69 @@ namespace LkEngine {
 		}, 440);
 	}
 
+	void LEditorLayer::UI_NewProjectPopup()
+	{
+		static constexpr uint16_t PopupWidth = 520;
+		UI::ShowMessageBox("New Project", [&]()
+		{
+			UI::FScopedStyle FramePadding(ImGuiStyleVar_FramePadding, ImVec2(10, 8));
+			UI::FScopedStyle FrameRounding(ImGuiStyleVar_FrameRounding, 3.0f);
+
+			UI::Font::Push("Bold");
+			std::string FullProjectPath;
+			if (std::strlen(InputBuffer::NewProjectFilePath) > 0)
+			{
+				FullProjectPath = std::string(InputBuffer::NewProjectFilePath) + "/" + std::string(InputBuffer::ProjectName);
+			}
+
+			LFileSystem::ConvertToPlatformPath(FullProjectPath);
+			ImGui::Text("Project: %s", FullProjectPath.c_str());
+			UI::Font::Pop();
+
+			ImGui::SetNextItemWidth(-1);
+			ImGui::InputTextWithHint("##NewProjectName", "Project Name", InputBuffer::ProjectName, PROJECT_NAME_LENGTH_MAX);
+
+			ImGuiStyle& Style = ImGui::GetStyle();
+			const ImVec2 LabelSize = ImGui::CalcTextSize("...", nullptr, true);
+			const ImVec2 ButtonSize = ImGui::CalcItemSize(
+				ImVec2(0, 0), 
+				(LabelSize.x + Style.FramePadding.x * 2.0f), 
+				(LabelSize.y + Style.FramePadding.y * 2.0f)
+			);
+
+			ImGui::SetNextItemWidth((PopupWidth - 10) - ButtonSize.x - Style.FramePadding.x * 2.0f - Style.ItemInnerSpacing.x - 1);
+			ImGui::InputTextWithHint("##NewProjectLocation", "Location", InputBuffer::NewProjectFilePath, PROJECT_NAME_LENGTH_MAX);
+
+			ImGui::SameLine();
+			if (ImGui::Button("..."))
+			{
+				std::string ProjLocation = LFileSystem::OpenFolderDialog().string();
+				LFileSystem::ConvertToPlatformPath(ProjLocation);
+				std::memcpy(InputBuffer::NewProjectFilePath, ProjLocation.data(), ProjLocation.length());
+			}
+
+			UI::Font::Push("Bold");
+			if (ImGui::Button("Create"))
+			{
+				CreateProject(FullProjectPath);
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				LK_CORE_CONSOLE_INFO("Cancelled creation of new project");
+				std::memset(InputBuffer::NewProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
+				ImGui::CloseCurrentPopup();
+			}
+			UI::Font::Pop();
+
+		}, (uint32_t)EMessageBoxFlag::AutoSize, PopupWidth);
+	}
+
 	void LEditorLayer::UI_SyncEditorWindowSizes(const LVector2& InViewportSize)
 	{
-		EditorViewport->SetSizeY(InViewportSize.Y - BottomBarSize.Y + TopBarSize.Y);
+		//EditorViewport->SetSizeY(InViewportSize.Y - BottomBarSize.Y + TopBarSize.Y);
 
 		/**
 		 * Calculate the bottombar size by using the viewport size 
@@ -1312,17 +1544,6 @@ namespace LkEngine {
 		 */
 		//BottomBarSize.Y = InViewportSize.Y - EditorViewport->GetSize().Y;
 		//LK_CORE_ASSERT(BottomBarSize.Y >= 0.0f, "BottomBarSize.Y is negative: {} ({} - {})", BottomBarSize.Y, InViewportSize.Y, EditorViewport->GetSize().Y);
-
-	#if 0
-		EditorViewport->SetViewportBoundsX(0, LeftSidebarSize.X);
-		EditorViewport->SetViewportBoundsY(0, TabBarSize.Y);
-	#endif
-		EditorViewport->SetViewportBoundsX(0, LeftSidebarSize.X);
-		//EditorViewport->SetViewportBoundsX(1, InViewportSize.X - LeftSidebarSize.X - RightSidebarSize.X);
-		EditorViewport->SetViewportBoundsX(1, InViewportSize.X - RightSidebarSize.X);
-
-		EditorViewport->SetViewportBoundsY(0, TopBarSize.Y);
-		EditorViewport->SetViewportBoundsY(1, InViewportSize.Y - BottomBarSize.Y + TopBarSize.Y);
 
 		LeftSidebarSize.Y = InViewportSize.Y;
 		RightSidebarSize.Y = InViewportSize.Y;
@@ -1425,88 +1646,6 @@ namespace LkEngine {
 		}
 	}
 
-	void LEditorLayer::UI_TabManager()
-	{
-		static int LastTabCount = 0;
-		const int CurrentTabCount = TabManager.GetTabCount();
-
-	#if 0
-		ImGuiViewport* Viewport = ImGui::GetWindowViewport();
-		const LVector2 WindowSize = EditorViewport->GetSize();
-		if (CurrentTabCount > 1)
-		{
-			/* Update the tab bar height as it might have changed. */
-			ImGui::SetNextWindowPos({ LeftSidebarSize.X, MenuBarSize.Y }, ImGuiCond_Always);
-			ImGui::SetNextWindowSize({ Viewport->WorkSize.x, TabBarSize.Y }, ImGuiCond_Always);
-			ImGui::Begin("##LkTabBar", nullptr, UI::TabBarFlags);
-			{
-				if (ImGui::BeginTabBar("MainTab", ImGuiTabBarFlags_Reorderable))
-				{
-					for (const TabEntry& Entry : TabManager.Tabs)
-					{
-						static constexpr float Padding = { 36.0f };
-
-						LTab& Tab = *Entry.second;
-						const bool bIsTabSelected = (TabManager.GetActiveTab()->Index == Tab.Index);
-
-						if (bIsTabSelected)
-						{
-							ImGui::SetNextItemWidth(ImGui::CalcTextSize(Tab.Name.c_str()).x + Padding);
-						}
-						if (ImGui::BeginTabItem(Entry.second->Name.c_str(), nullptr))
-						{
-							if (bIsTabSelected)
-							{
-								ImVec2 pos = (ImGui::GetItemRectMin());
-								pos.x = ImGui::GetItemRectMax().x;
-								pos.x -= Padding * 0.75f;
-								pos.y += Padding * (1.0f / 8.0f);
-
-								if (ImGui::CloseButton(ImGui::GetID(UI::GenerateID()), pos))
-								{
-									if (Tab.GetTabType() != ETabType::Viewport)
-									{
-										TabManager.CloseTab(Entry.second);
-									}
-								}
-							}
-
-							if (Tab.Closed == false)
-							{
-								TabManager.SetActiveTab(Entry.second);
-							}
-
-							if ((Tab.GetTabType() == ETabType::Viewport) || (Tab.Closed == true))
-							{
-								ImGui::EndTabItem();
-								continue;
-							}
-
-							ImGui::SetNextWindowSize({ WindowSize.X, WindowSize.Y }, ImGuiCond_Always);
-							ImGui::Begin("##TabWindow", NULL,
-										 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
-											 | ImGuiWindowFlags_NoResize);
-							/// FIXME
-							Entry.second->OnImGuiRender();
-							ImGui::End();
-
-							ImGui::EndTabItem();
-						}
-					}
-					ImGui::EndTabBar();
-				}
-			}
-			ImGui::End(); /* TabBar. */
-		}
-		/* No tabs. */
-		else
-		{
-		}
-	#endif
-
-		LastTabCount = TabManager.GetTabCount();
-	}
-
 	void LEditorLayer::UI_HandleDragAndDrop()
 	{
 		/* TODO: Handle drag'n'drop (asset loading) */
@@ -1548,6 +1687,17 @@ namespace LkEngine {
 
 			if (ImGui::BeginMenu("File"))
 			{
+				if (ImGui::MenuItem("Create project"))
+				{
+					LK_CORE_INFO_TAG("Editor", "Menu -> Create new project");
+					UI_NewProjectPopup();
+				}
+
+				if (ImGui::MenuItem("Open project")) 
+				{
+					LK_CORE_INFO_TAG("Editor", "Menu -> Open project");
+					LK_CORE_WARN("TODO");
+				}
 
 				ImGui::EndMenu(); /* File. */
 			}
@@ -1573,7 +1723,6 @@ namespace LkEngine {
 				/* New project. */
 				if (ImGui::MenuItem("New"))
 				{
-					LK_CORE_INFO_TAG("Editor", "Creating new project");
 				}
 
 				/* Save project. */
@@ -1595,11 +1744,6 @@ namespace LkEngine {
 				ImGui::EndMenu(); /* Project. */
 			}
 
-			if (ImGui::BeginMenu("Edit"))
-			{
-				ImGui::EndMenu();
-			}
-
 			if (ImGui::BeginMenu("View"))
 			{
 				if (ImGui::BeginMenu("Windows"))
@@ -1618,8 +1762,8 @@ namespace LkEngine {
 							PanelData->bIsOpen = true;
 						}
 					}
-					
-					// Re-open all essential editor windows.
+				
+					/* Re-open all essential editor windows. */
 					if (ImGui::MenuItem("Restore default windows"))
 					{
 						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser))
@@ -1640,7 +1784,17 @@ namespace LkEngine {
 					bWindow_RenderSettingsWindow = !bWindow_RenderSettingsWindow;
 				}
 
-				ImGui::EndMenu(); // View.
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Editor"))
+			{
+				if (ImGui::MenuItem("Material Editor"))
+				{
+					LAssetEditorManager::SetEditorOpen(EAssetType::Material, true);
+				}
+
+				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Scene"))
@@ -1730,6 +1884,17 @@ namespace LkEngine {
 					}
 				}
 
+			#if 0
+				if (ImGui::MenuItem("Material Editor"))
+				{
+					LK_CORE_DEBUG_TAG("Editor", "Open -> Material Editor");
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::MaterialEditor))
+					{
+						PanelData->bIsOpen = true;
+					}
+				}
+			#endif
+
 				if (ImGui::MenuItem("Input Info"))
 				{
 					LK_CORE_DEBUG_TAG("Editor", "Open -> Input Info");
@@ -1742,7 +1907,7 @@ namespace LkEngine {
 
 				if (ImGui::MenuItem("UI Tools"))
 				{
-					LK_CORE_DEBUG_TAG("Editor", "Open -> UI Tools");
+					LK_CORE_DEBUG_TAG("Editor", "Open -> Tools");
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
 					{
 						PanelData->bIsOpen = true;
@@ -1806,7 +1971,7 @@ namespace LkEngine {
 	{
 		static constexpr float ButtonSize = 32.0f + 5.0f;
 		static constexpr float EdgeOffset = 4.0f;
-		static constexpr float WindowHeight = 32.0f; // ImGui pixel limitation.
+		static constexpr float WindowHeight = 32.0f; /* ImGui pixel limitation. */
 		static constexpr float NumberOfButtons = 3.0f;
 		static constexpr float BackgroundWidth = (EdgeOffset * 6.0f) + (ButtonSize * NumberOfButtons) + EdgeOffset * (NumberOfButtons - 1.0f) * 2.0f;
 
@@ -1906,7 +2071,8 @@ namespace LkEngine {
 		LK_CORE_ASSERT(EditorViewport);
 		auto [MouseX, MouseY] = ImGui::GetMousePos();
 
-		const auto& ViewportBoundsRef = IsEditorViewport ? EditorViewport->GetViewportBounds() : PrimaryViewportBounds;
+		//const auto& ViewportBoundsRef = IsEditorViewport ? EditorViewport->GetViewportBounds() : PrimaryViewportBounds;
+		const auto& ViewportBoundsRef = IsEditorViewport ? EditorViewport->GetViewportBounds() : PrimaryViewportBounds.data();
 		MouseX -= ViewportBoundsRef[0].X;
 		MouseY -= ViewportBoundsRef[0].Y;
 

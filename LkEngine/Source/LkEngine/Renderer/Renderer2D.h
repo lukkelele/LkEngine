@@ -27,6 +27,8 @@ namespace LkEngine {
         void BeginScene(const LSceneCamera& Camera, const glm::mat4& Transform);
         void EndScene();
 
+		void SetTargetFramebuffer(TObjectPtr<LFramebuffer> InFramebuffer);
+
 	private:
 		void StartBatch();
 		void NextBatch();
@@ -41,12 +43,9 @@ namespace LkEngine {
         void DrawQuad(const glm::vec2& Position, const glm::vec2& Size, const glm::vec4& Color);
 		void DrawQuad(const glm::vec3& Position, const glm::vec2& Size, const glm::vec4& Color);
 		void DrawQuad(const glm::vec2& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture);
-
 		void DrawQuad(const glm::vec2& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture, const glm::vec4& TintColor);
 		void DrawQuad(const glm::vec3& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture, const glm::vec4& TintColor);
         
-        void DrawRotatedQuad(const glm::vec2& Position, const glm::vec2& Size, const glm::vec4& Color, const float Rotation);
-
         float GetLineWidth();
         void SetLineWidth(const float NewLineWidth);
 
@@ -67,10 +66,10 @@ namespace LkEngine {
 
         /* TODO: Change type to LVector2. */
         inline static constexpr glm::vec2 TextureCoords[] = { 
-            { 0.0f, 0.0f },     /*  Bottom Left.  */
-            { 0.0f, 1.0f },     /*  Top Left.     */
-            { 1.0f, 1.0f },     /*  Top Right.    */
-            { 1.0f, 0.0f }      /*  Bottom Right. */
+            { 0.0f, 0.0f }, /*  Bottom Left.  */
+            { 0.0f, 1.0f }, /*  Top Left.     */
+            { 1.0f, 1.0f }, /*  Top Right.    */
+            { 1.0f, 0.0f }  /*  Bottom Right. */
         };
         
 	public:
@@ -85,10 +84,9 @@ namespace LkEngine {
         const uint32_t MaxLineVertices = 0;
         const uint32_t MaxLineIndices = 0;
 
-        /* Texture Slots. */
+        /* Slots. */
         std::array<TObjectPtr<LTexture2D>, MaxTextureSlots> TextureSlots;
 
-        /* Texture Arrays. */
         std::array<TObjectPtr<LArrayTexture>, MaxArrayTextures> ArrayTextures;
 
         /* Quad. */

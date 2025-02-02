@@ -13,65 +13,92 @@
 
 namespace LkEngine::StringUtils {
 
-	template<typename TChar = char, typename StringType>
-    static std::basic_string<TChar> ToLower(const StringType& Input)
-    {
-		std::basic_string_view<TChar> StringView(Input);
-        std::basic_string<TChar> Result(StringView);
-
-        std::transform(Result.begin(), Result.end(), Result.begin(), [](TChar Character) 
-		{
-            return static_cast<TChar>(std::tolower(Character, std::locale{}));
-        });
-
-        return Result;
-    }
+	[[no_discard]] static constexpr std::string_view RemovePrefix(std::string_view Str, char Prefix = 'L')
+	{
+		return (Str.starts_with(Prefix)) ? Str.substr(1) : Str;
+	}
 
 	template<typename TChar = char, typename StringType>
-    static std::basic_string<TChar> ToUpper(const StringType& Input)
-    {
+	[[no_discard]] static std::basic_string<TChar> ToLower(const StringType& Input)
+	{
 		std::basic_string_view<TChar> StringView(Input);
-        std::basic_string<TChar> Result(StringView);
+		std::basic_string<TChar> Result(StringView);
 
-        std::transform(Result.begin(), Result.end(), Result.begin(), [](TChar Character)
+		std::transform(Result.begin(), Result.end(), Result.begin(), [](TChar Character)
 		{
-            return static_cast<TChar>(std::toupper(Character, std::locale{}));
-        });
+			return static_cast<TChar>(std::tolower(Character, std::locale{}));
+		});
 
-        return Result;
-    }
+		return Result;
+	}
 
-    static std::string ToLower(const char* String)
+#if 0
+	template<typename TChar = char, typename StringType>
+	static void ToLower(StringType& Input)
+	{
+		std::transform(Input.begin(), Input.end(), Input.begin(), [](TChar Character)
+		{
+			return static_cast<TChar>(std::tolower(Character, std::locale{}));
+		});
+	}
+#endif
+
+	template<typename TChar = char, typename StringType>
+	[[no_discard]] static std::basic_string<TChar> ToUpper(const StringType& Input)
+	{
+		std::basic_string_view<TChar> StringView(Input);
+		std::basic_string<TChar> Result(StringView);
+
+		std::transform(Result.begin(), Result.end(), Result.begin(), [](TChar Character)
+		{
+			return static_cast<TChar>(std::toupper(Character, std::locale{}));
+		});
+
+		return Result;
+	}
+
+#if 0
+	template<typename TChar = char, typename StringType>
+	static void ToUpper(StringType& Input)
+	{
+		std::transform(Input.begin(), Input.end(), Input.begin(), [](TChar Character)
+		{
+			return static_cast<TChar>(std::tolower(Character, std::locale{}));
+		});
+	}
+#endif
+
+	[[no_discard]] static std::string ToLower(const char* String)
     {
         return ToLower<char>(std::string_view(String));
     }
 
-    static std::string ToUpper(const char* String)
+    [[no_discard]] static std::string ToUpper(const char* String)
     {
         return ToUpper<char>(std::string_view(String));
     }
 
-    static std::wstring ToLower(const wchar_t* String)
+    [[no_discard]] static std::wstring ToLower(const wchar_t* String)
     {
         return ToLower<wchar_t>(std::wstring_view(String));
     }
 
-    static std::wstring ToUpper(const wchar_t* String)
+    [[no_discard]] static std::wstring ToUpper(const wchar_t* String)
     {
         return ToUpper<wchar_t>(std::wstring_view(String));
     }
 
-    static std::wstring ToLower(const std::wstring& String)
+    [[no_discard]] static std::wstring ToLower(const std::wstring& String)
     {
         return ToLower<wchar_t>(String);
     }
 
-    static std::wstring ToUpper(const std::wstring& String)
+    [[no_discard]] static std::wstring ToUpper(const std::wstring& String)
     {
 		return ToUpper<wchar_t>(String);
     }
 
-	static std::string BytesToString(const uint64_t Bytes)
+	[[no_discard]] static std::string BytesToString(const uint64_t Bytes)
 	{
 		static constexpr uint64_t GB = 1024 * 1024 * 1024;
 		static constexpr uint64_t MB = 1024 * 1024;
@@ -104,7 +131,7 @@ namespace LkEngine::StringUtils {
 	 * @brief Convert a string to a different size, such as wide to narrow and vice versa.
 	 */
 	template<typename TargetString, typename SourceString>
-	static TargetString Convert(const SourceString& Input)
+	[[no_discard]] static TargetString Convert(const SourceString& Input)
 	{
 		/* Wide String to narrow. */
 		if constexpr (std::is_same_v<SourceString, std::wstring> 
@@ -131,6 +158,16 @@ namespace LkEngine::StringUtils {
 		else
 		{
 			static_assert(sizeof(SourceString) <= 0, "Unsupported conversion");
+		}
+	}
+
+	static void ReplaceToken(std::string& String, const char* Token, const std::string& Value)
+	{
+		std::size_t Pos = 0;
+		while ((Pos = String.find(Token, Pos)) != std::string::npos)
+		{
+			String.replace(Pos, strlen(Token), Value);
+			Pos += strlen(Token);
 		}
 	}
 

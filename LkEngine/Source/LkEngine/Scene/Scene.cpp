@@ -120,21 +120,6 @@ namespace LkEngine {
 		return {};
 	}
 
-#if 0
-	std::vector<LEntity> LScene::GetEntities()
-	{
-		auto View = Registry.view<LIDComponent>();
-		std::vector<LEntity> Entities;
-		Entities.resize(View.size());
-		for (auto Entity : View)
-		{
-			Entities.push_back({ Entity, this });
-		}
-
-		return Entities;
-	}
-#endif
-
 	template<typename T>
 	std::vector<T> LScene::GetEntities()
 	{
@@ -165,7 +150,8 @@ namespace LkEngine {
 		for (auto EntityID : View)
 		{
 			/* FIXME: Must be another way of converting an EntityID to a UUID. */
-			Entities.push_back(LEntity(EntityID, this).GetUUID());
+			//Entities.push_back(LEntity(EntityID, this).GetUUID());
+			Entities.push_back(LEntity(EntityID, this));
 		}
 
 		return Entities;
@@ -382,7 +368,9 @@ namespace LkEngine {
 		}
 
 		auto& ParentChildren = Parent.GetChildren();
-		ParentChildren.erase(std::remove(ParentChildren.begin(), ParentChildren.end(), Entity.GetUUID()), ParentChildren.end());
+		//ParentChildren.erase(std::remove(ParentChildren.begin(), ParentChildren.end(), Entity.GetUUID()), ParentChildren.end());
+		auto Iter = std::remove(ParentChildren.begin(), ParentChildren.end(), Entity.GetUUID());
+		ParentChildren.erase(Iter, ParentChildren.end());
 
 	#if 0
 		if (bConvertToWorldSpace)
@@ -423,11 +411,10 @@ namespace LkEngine {
 		auto View = Registry.view<LIDComponent>();
 		for (auto Entity : View)
 		{
-			/* Retrieve the UUID and the entity name. */
 			const LUUID EntityUUID = Registry.get<LIDComponent>(Entity).ID;
 			const std::string& EntityName = Registry.get<LTagComponent>(Entity).Tag;
 
-			/* Create identical Entity on the target scene. */
+			/* Create identical entity on the target scene. */
 			LEntity EntityCopy = TargetScene->CreateEntityWithID(EntityUUID, EntityName);
 			EntityMap[EntityUUID] = EntityCopy.Handle;
 		}
@@ -475,7 +462,7 @@ namespace LkEngine {
 		LK_CORE_ASSERT(SceneRenderer);
 		LK_CORE_ASSERT((ViewportWidth > 0) && (ViewportHeight > 0), "Invalid viewport size");
 		EditorCamera.SetViewportSize(ViewportWidth, ViewportHeight);
-		EditorCamera.OnUpdate(DeltaTime);
+		EditorCamera.Tick(DeltaTime);
 
 		SceneRenderer->SetScene(this);
 		SceneRenderer->BeginScene(EditorCamera);

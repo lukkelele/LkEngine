@@ -25,10 +25,10 @@ namespace LkEngine {
 
 	LToolsPanel::LToolsPanel()
 	{
-		LOBJECT_REGISTER();
+		LPANEL_REGISTER();
 	}
 
-	void LToolsPanel::OnRenderUI(bool& IsOpen)
+	void LToolsPanel::RenderUI(bool& IsOpen)
 	{
 		if (Window_ObjectReferences.bOpen)
 		{
@@ -479,15 +479,15 @@ namespace LkEngine {
 					uint32_t BoxFlags = 0;
 					if (bOkButton)
 					{
-						BoxFlags |= (uint32_t)EMessageBoxFlag::OkButton;
+						BoxFlags |= EMessageBoxFlag::OkButton;
 					}
 					if (bCancelButton)
 					{
-						BoxFlags |= (uint32_t)EMessageBoxFlag::CancelButton;
+						BoxFlags |= EMessageBoxFlag::CancelButton;
 					}
 					if (bAutoResize)
 					{
-						BoxFlags |= (uint32_t)EMessageBoxFlag::AutoSize;
+						BoxFlags |= EMessageBoxFlag::AutoSize;
 					}
 
 					UI::ShowMessageBox(BoxTitle.c_str(), []()
@@ -643,7 +643,7 @@ namespace LkEngine {
 		{
 			const auto& Selection = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
 
-			LContentBrowserPanel& ContentBrowser = LContentBrowserPanel::Get();
+			LContentBrowser& ContentBrowser = LContentBrowser::Get();
 			FContentBrowserItemList& CurrentBrowserItems = ContentBrowser.GetCurrentItems();
 
 			ImGui::TableSetupColumn("Content Browser", ImGuiTableColumnFlags_WidthStretch, 120.0f);

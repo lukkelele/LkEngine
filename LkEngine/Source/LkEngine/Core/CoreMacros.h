@@ -10,10 +10,10 @@
 #include <regex>
 
 /* FIXME */
-#ifdef LK_ENGINE_STATIC_LIB
+#if defined(LK_ENGINE_STATIC_LIB)
 #	define CORE_API
 #else
-#	ifdef LK_ENGINE_CORE
+#	if defined(LK_ENGINE_CORE)
 #		define CORE_API  __declspec(dllexport)
 #	else
 #		define CORE_API  __declspec(dllimport)
@@ -72,15 +72,12 @@
 #	define LK_RAW_ASSERT(Condition, ...)  
 #endif
 
-/* Log formatter. */
 #if defined(SPDLOG_USE_STD_FORMAT)
-#	define LK_FMT_LIB  std
+#	define LK_FMT_LIB std
 #else
-#	define LK_FMT_LIB  spdlog::fmt_lib
+#	define LK_FMT_LIB spdlog::fmt_lib
 #endif
-#define LK_FORMAT_STRING(...)  LK_FMT_LIB::format(__VA_ARGS__)
 
-/* Mark a function 'Not implemented'. */
 #define LK_MARK_FUNC_NOT_IMPLEMENTED(...) \
 	LK_CORE_ASSERT(false, "[ FUNCTION NOT IMPLEMENTED ]\n{}" __VA_OPT__("\n{}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))
 
@@ -115,10 +112,12 @@
 #	endif
 #endif
 
+#define LK_GET_FIRST_ARG(Arg, ...) Arg
+
 #include "LkEngine/Core/LObject/Enum.h"
 
-namespace LkEngine {
-
+namespace LkEngine 
+{
 	enum class EClassFlag : uint32_t
 	{
 		None       = LK_BIT(0),
@@ -136,7 +135,7 @@ namespace LkEngine {
 	};
 	LK_ENUM_CLASS_FLAGS(EClassType);
 
-	enum class ELogFormat : uint16_t
+	enum class ELogFormat : uint8_t
 	{
 		Compact = 0,
 		Verbose
@@ -165,6 +164,14 @@ namespace LkEngine {
 				case ELogFormat::Verbose: return "Verbose";
 			}
 			return nullptr;
+		}
+	}
+
+	namespace Core::Internal 		
+	{
+		FORCEINLINE constexpr const char* RemovePrefix(const char* Str, const char Prefix = 'L')
+		{
+			return (Str[0] == Prefix) ? Str + 1 : Str;
 		}
 	}
 
@@ -289,4 +296,10 @@ namespace LkEngine {
 			LObjectBase::SetClass(const_cast<LClass*>(ClassObject)); \
 		} \
 
+
+#define LPANEL(...) \
+			LCLASS(__VA_ARGS__);
+
+#define LPANEL_REGISTER(...) \
+			LOBJECT_REGISTER(__VA_ARGS__);
 

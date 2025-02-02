@@ -24,8 +24,9 @@
 #define LK_UI_SIDEBAR_1              ::LkEngine::UI::ID::Sidebar1
 #define LK_UI_SIDEBAR_2              ::LkEngine::UI::ID::Sidebar2
 #define LK_UI_BOTTOMBAR              ::LkEngine::UI::ID::BottomBar
-#define LK_UI_SCENEMANAGER           ::LkEngine::PanelID::SceneManager
+#define LK_UI_EDITORCONSOLE          ::LkEngine::PanelID::EditorConsole
 #define LK_UI_CONTENTBROWSER         ::LkEngine::PanelID::ContentBrowser
+#define LK_UI_SCENEMANAGER           ::LkEngine::PanelID::SceneManager
 
 /* TODO: Move debug macros elsewhere. */
 #if LK_UI_DEBUG_DOCKNODES 
@@ -68,15 +69,17 @@ namespace LkEngine
 	{
 		static constexpr const char* ApplicationSettings = "Application Settings";
 		static constexpr const char* EditorSettings      = "Editor Settings";
+		static constexpr const char* EditorConsole       = "Editor Console";
 		static constexpr const char* ContentBrowser      = "Content Browser";
 		static constexpr const char* SceneManager        = "Scene Manager";
-		static constexpr const char* EditorConsole       = "Editor Console";
 		static constexpr const char* ComponentEditor     = "Component Editor";
 		static constexpr const char* Tools               = "Tools";
+		static constexpr const char* MaterialEditor      = "Material Editor";
 	}
 
 	/**
 	 * EVectorAxis
+	 * TODO: Move elsewhere
 	 */
 	enum class EVectorAxis : uint32_t
 	{
@@ -168,6 +171,41 @@ namespace LkEngine::UI {
 		}
 	};
 
+	class FScopedStyleStack
+	{
+	public:
+
+		template <typename ValueType, typename... OtherStylePairs>
+		FScopedStyleStack(const ImGuiStyleVar FirstStyleVar, const ValueType FirstValue, OtherStylePairs&& ... OtherPairs)
+			: StackCount((sizeof...(OtherPairs) / 2) + 1)
+		{
+			static_assert((sizeof...(OtherPairs) & 1u) == 0);
+			PushStyle(FirstStyleVar, FirstValue, std::forward<OtherStylePairs>(OtherPairs)...);
+		}
+
+		~FScopedStyleStack() { ImGui::PopStyleVar(StackCount); }
+
+		FScopedStyleStack(const FScopedStyleStack&) = delete;
+		FScopedStyleStack& operator=(const FScopedStyleStack&) = delete;
+
+	private:
+		int StackCount = 0;
+
+		template <typename ValueType, typename... OtherStylePairs>
+		FORCEINLINE void PushStyle(const ImGuiStyleVar StyleVar, const ValueType Value, OtherStylePairs&& ... OtherPairs)
+		{
+			if constexpr (sizeof...(OtherPairs) == 0)
+			{
+				ImGui::PushStyleVar(StyleVar, Value);
+			}
+			else
+			{
+				ImGui::PushStyleVar(StyleVar, Value);
+				PushStyle(std::forward<OtherStylePairs>(OtherPairs)...);
+			}
+		}
+	};
+
 	class FScopedFont
 	{
 	public:
@@ -176,6 +214,7 @@ namespace LkEngine::UI {
 		FScopedFont(const FScopedFont&) = delete;
 		FScopedFont& operator=(const FScopedFont&) = delete;
 	};
+
 
     const char* GenerateID();
     void PushID();

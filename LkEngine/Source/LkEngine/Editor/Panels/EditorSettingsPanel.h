@@ -12,8 +12,8 @@ namespace LkEngine {
 		LEditorSettingsPanel();
 		~LEditorSettingsPanel() = default;
 
-		virtual void OnRender() override {}
-		virtual void OnRenderUI(bool& IsOpen) override;
+		virtual void Render() override {}
+		virtual void RenderUI(bool& IsOpen) override;
 
 		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
 		virtual void DeserializeFromYaml(const YAML::Node& Data) override;

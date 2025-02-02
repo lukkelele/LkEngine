@@ -7,14 +7,11 @@
 
 namespace LkEngine {
 
-	namespace EncodingFormat
+	enum class EEncodingFormat : int
 	{
-		enum Type : int
-		{
-			Null = 0,
-			Base64,
-			Hex,
-		};
-	}
+		Null = 0,
+		Base64,
+		Hex,
+	};
 
 }

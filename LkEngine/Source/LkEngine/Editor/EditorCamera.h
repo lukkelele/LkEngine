@@ -35,7 +35,7 @@ namespace LkEngine {
 
 		void Initialize();
 
-		void OnUpdate(const float DeltaTime);
+		void Tick(const float DeltaTime);
 		void UpdateCameraView();
 
 		FORCEINLINE float GetDistance() const { return Distance; }

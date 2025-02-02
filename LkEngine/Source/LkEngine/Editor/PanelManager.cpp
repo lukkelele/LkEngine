@@ -34,7 +34,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LPanelManager::OnRenderUI()
+	void LPanelManager::RenderUI()
 	{
 		for (auto& PanelMap : Panels)
 		{
@@ -44,7 +44,7 @@ namespace LkEngine {
 
 				if (PanelData.bIsOpen)
 				{
-					PanelData.Panel->OnRenderUI(PanelData.bIsOpen);
+					PanelData.Panel->RenderUI(PanelData.bIsOpen);
 					bClosedThisFrame = !PanelData.bIsOpen;
 				}
 
@@ -76,7 +76,7 @@ namespace LkEngine {
 		YAML::Emitter Out;
 		Out << YAML::BeginMap;
 
-		Out << YAML::Key << "Panels" << YAML::Value << YAML::BeginSeq;
+		Out << YAML::Key << "PanelManager" << YAML::Value << YAML::BeginSeq;
 		{
 			for (std::size_t Category = 0; Category < Panels.size(); Category++)
 			{
@@ -116,13 +116,13 @@ namespace LkEngine {
 		StringStream << Stream.rdbuf();
 
 		YAML::Node Data = YAML::Load(StringStream.str());
-		if (!Data["Panels"])
+		if (!Data["PanelManager"])
 		{
 			LK_ERROR("Failed to load EditorLayout.yaml from {}", EditorLayoutPath.parent_path().string());
 			return;
 		}
 
-		for (auto PanelNode : Data["Panels"])
+		for (auto PanelNode : Data["PanelManager"])
 		{
 			FPanelData* PanelData = GetPanelData(PanelNode["ID"].as<uint32_t>(0));
 			if (!PanelData)

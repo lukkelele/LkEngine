@@ -44,7 +44,7 @@ namespace LkEngine {
 		bIsActive = true;
 	}
 
-	void LEditorCamera::OnUpdate(const float DeltaTime)
+	void LEditorCamera::Tick(const float DeltaTime)
 	{
 		const glm::vec2 MousePos{ LMouse::GetMouseX(), LMouse::GetMouseY() };
 		const glm::vec2 MouseDelta = (MousePos - InitialMousePosition) * 0.002f;

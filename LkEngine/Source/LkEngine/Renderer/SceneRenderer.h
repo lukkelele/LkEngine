@@ -75,6 +75,12 @@ namespace LkEngine {
 	public:
 		FOnDrawListFlush OnDrawListFlush;
 	private:
+		enum class EMeshRigged
+		{
+			IsRigged,
+			NotRigged
+		};
+
 		/**
 		 * FMeshKey
 		 */

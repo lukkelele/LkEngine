@@ -86,6 +86,9 @@ namespace LkEngine {
 		bAssetRegistryValid = LoadAssetRegistry();
 
 		LoadPrimitiveShapes();
+
+		LK_CORE_ASSERT(BaseMaterial && BaseMaterial->GetMaterial() && BaseMaterial->GetMaterial()->GetShader());
+		LK_CORE_ASSERT(BaseMaterial2 && BaseMaterial2->GetMaterial() && BaseMaterial2->GetMaterial()->GetShader());
 	}
 
 	void LEditorAssetManager::Destroy()

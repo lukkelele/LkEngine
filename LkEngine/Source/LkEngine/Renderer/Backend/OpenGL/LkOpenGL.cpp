@@ -5,7 +5,6 @@
 #include "LkEngine/Renderer/Renderer2D.h"
 
 #include "OpenGLRenderer.h"
-#include "OpenGLRenderer2D.h"
 #include "OpenGLShader.h"
 #include "OpenGLTexture.h"
 

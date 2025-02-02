@@ -1,6 +1,8 @@
 #include "LKpch.h"
 #include "ContentBrowserPanel.h"
 
+#include "LkEngine/Editor/EditorLayer.h"
+
 #include "LkEngine/Core/Window.h"
 #include "LkEngine/Core/Input/Input.h" /// FIXME: Remove the 'Input' directory and just place the files under 'Core'
 #include "LkEngine/Core/IO/FileSystem.h"
@@ -10,10 +12,11 @@
 #include "LkEngine/Renderer/UI/UICore.h"
 #include "LkEngine/Renderer/UI/ImGui/ImGuiWidgets.h"
 
-#include "LkEngine/Editor/EditorLayer.h"
-
 #include "LkEngine/Asset/AssetImporter.h"
 #include "LkEngine/Asset/AssetManager.h"
+
+#include "LkEngine/Editor/AssetEditorManager.h"
+
 #include "LkEngine/Project/Project.h"
 #include "LkEngine/Serialization/Serializer.h"
 
@@ -26,22 +29,27 @@ namespace LkEngine {
 
 	static bool bActivateSearchWidget = false;
 
-    LContentBrowserPanel::LContentBrowserPanel()
+    LContentBrowser::LContentBrowser()
     {
         LOBJECT_REGISTER();
+
+		/**
+		 * The reason for using this type of singleton instead of Meyer's
+		 * is because the LPanelManager is the creator of the LContentBrowser instance.
+		 */
 		Instance = this;
 
 		std::memset(SearchBuffer, 0, LContentBrowserItem::INPUT_BUFFER_SIZE);
 
-		LProject::OnProjectChanged.Add(this, &LContentBrowserPanel::OnProjectChanged);
+		LProject::OnProjectChanged.Add(this, &LContentBrowser::OnProjectChanged);
     }
 
-    void LContentBrowserPanel::Initialize()
+    void LContentBrowser::Initialize()
     {
 		LK_CORE_TRACE_TAG("ContentBrowser", "Initializing");
     }
 
-	void LContentBrowserPanel::OnRenderUI(bool& IsOpen)
+	void LContentBrowser::RenderUI(bool& IsOpen)
 	{
 		/* Handle dock window. */
 		if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(LK_UI_CONTENTBROWSER); ThisWindow != nullptr)
@@ -155,12 +163,12 @@ namespace LkEngine {
 		ImGui::End(); // LK_UI_CONTENTBROWSER
 	}
 
-	void LContentBrowserPanel::SetSceneContext(const TObjectPtr<LScene> InSceneContext)
+	void LContentBrowser::SetSceneContext(const TObjectPtr<LScene> InSceneContext)
 	{
 		SceneContext = InSceneContext;
 	}
 
-	void LContentBrowserPanel::OnProjectChanged(TObjectPtr<LProject> InProject)
+	void LContentBrowser::OnProjectChanged(TObjectPtr<LProject> InProject)
 	{
 		LK_CORE_TRACE_TAG("ContentBrowserPanel", "OnProjectChanged: {}", InProject->GetName());
 		ItemList.Clear();
@@ -181,7 +189,7 @@ namespace LkEngine {
 		std::memset(SearchBuffer, 0, LContentBrowserItem::INPUT_BUFFER_SIZE);
 	}
 
-	TObjectPtr<FDirectoryInfo> LContentBrowserPanel::GetDirectory(const std::filesystem::path& Filepath) const
+	TObjectPtr<FDirectoryInfo> LContentBrowser::GetDirectory(const std::filesystem::path& Filepath) const
 	{
 		if (Filepath.empty() || (Filepath.string() == "."))
 		{
@@ -200,17 +208,17 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	void LContentBrowserPanel::SerializeToYaml(YAML::Emitter& Out) const
+	void LContentBrowser::SerializeToYaml(YAML::Emitter& Out) const
 	{
 		LK_UNUSED(Out);
 	}
 
-	void LContentBrowserPanel::DeserializeFromYaml(const YAML::Node& Data)
+	void LContentBrowser::DeserializeFromYaml(const YAML::Node& Data)
 	{
 		LK_UNUSED(Data);
 	}
 
-	void LContentBrowserPanel::UpdateInput()
+	void LContentBrowser::UpdateInput()
 	{
 		if (!bIsContentBrowserHovered)
 		{
@@ -228,7 +236,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowserPanel::Refresh()
+	void LContentBrowser::Refresh()
 	{
 		LK_CORE_INFO_TAG("ContentBrowserPanel", "Refresh");
 		ItemList.Clear();
@@ -247,7 +255,7 @@ namespace LkEngine {
 		ChangeDirectory(CurrentDirectory);
 	}
 
-	void LContentBrowserPanel::SortItemList()
+	void LContentBrowser::SortItemList()
 	{
 		auto SortFunc = [](const TObjectPtr<LContentBrowserItem>& Item1, const TObjectPtr<LContentBrowserItem>& Item2)
 		{
@@ -262,7 +270,7 @@ namespace LkEngine {
 		std::sort(ItemList.begin(), ItemList.end(), SortFunc);
 	}
 
-	void LContentBrowserPanel::ChangeDirectory(TObjectPtr<FDirectoryInfo> Directory)
+	void LContentBrowser::ChangeDirectory(TObjectPtr<FDirectoryInfo> Directory)
 	{
 		if (!Directory)
 		{
@@ -317,7 +325,7 @@ namespace LkEngine {
 		ClearCurrentSelection();
 	}
 
-	LUUID LContentBrowserPanel::ProcessDirectory(const fs::path& DirectoryPath, const TObjectPtr<FDirectoryInfo>& ParentDir)
+	LUUID LContentBrowser::ProcessDirectory(const fs::path& DirectoryPath, const TObjectPtr<FDirectoryInfo>& ParentDir)
 	{
 		const auto& Directory = GetDirectory(DirectoryPath);
 		if (Directory)
@@ -374,7 +382,7 @@ namespace LkEngine {
 		return DirectoryInfo->Handle;
 	}
 
-	void LContentBrowserPanel::Search(const std::string& Query,
+	void LContentBrowser::Search(const std::string& Query,
 									  const TObjectPtr<FDirectoryInfo>& DirectoryInfo, 
 									  FContentBrowserItemList& ItemList)
 	{
@@ -416,14 +424,14 @@ namespace LkEngine {
 		LK_CORE_ERROR_TAG("ContentBrowser", "After Search | Items: {}", ItemList.Items.size());
 	}
 
-	void LContentBrowserPanel::OnBrowseForward()
+	void LContentBrowser::OnBrowseForward()
 	{
 		LK_CORE_TRACE_TAG("ContentBrowser", "OnBrowseForward");
 		LK_CORE_VERIFY(NextDirectory);
 		ChangeDirectory(NextDirectory);
 	}
 
-	void LContentBrowserPanel::OnBrowseBackward()
+	void LContentBrowser::OnBrowseBackward()
 	{
 		LK_CORE_TRACE_TAG("ContentBrowser", "OnBrowseBackward");
 		LK_CORE_VERIFY(CurrentDirectory && NextDirectory);
@@ -432,7 +440,7 @@ namespace LkEngine {
 		ChangeDirectory(PreviousDirectory);
 	}
 
-	void LContentBrowserPanel::ClearCurrentSelection()
+	void LContentBrowser::ClearCurrentSelection()
 	{
 		//LK_CORE_INFO_TAG("ContentBrowser", "Clearing current selection");
 		std::vector<FAssetHandle> SelectedItems = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
@@ -452,7 +460,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowserPanel::UpdateDropArea(const TObjectPtr<FDirectoryInfo>& DirectoryInfo)
+	void LContentBrowser::UpdateDropArea(const TObjectPtr<FDirectoryInfo>& DirectoryInfo)
 	{
 		LK_CORE_ASSERT(CurrentDirectory, "Failed to update drop area, CurrentDirectory is nullptr");
 		if (DirectoryInfo->Handle != CurrentDirectory->Handle && ImGui::BeginDragDropTarget())
@@ -477,7 +485,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowserPanel::RenderTopBar(const float Height)
+	void LContentBrowser::RenderTopBar(const float Height)
 	{
 		/* Begin child window for the top bar. */
 		static constexpr ImGuiChildFlags ChildFlags = ImGuiChildFlags_None;
@@ -669,11 +677,11 @@ namespace LkEngine {
 		ImGui::EndChild(); /* ContentBrowser-TopBar */
 	}
 
-	void LContentBrowserPanel::RenderBottomBar(const float Height)
+	void LContentBrowser::RenderBottomBar(const float Height)
 	{
 	}
 
-	void LContentBrowserPanel::RenderItems()
+	void LContentBrowser::RenderItems()
 	{
 		bIsAnyItemHovered = false;
 
@@ -799,14 +807,17 @@ namespace LkEngine {
 					LK_CORE_DEBUG_TAG("ContentBrowser", "Entering directory: {}", Item->GetName());
 					LSelectionContext::DeselectAll(ESelectionContext::ContentBrowser);
 
-					// Required to break here as we invalidate the current 
-					// iteration of items whenever a new directory is entered.
+					/* Required to break here as we invalidate the current
+					   iteration of items whenever a new directory is entered. */
 					ChangeDirectory(Item.As<LContentBrowserDirectory>()->GetDirectoryInfo());
 					break;
 				}
 				else
 				{
 					/* TODO: Open editor of some sort, based on the file type. */
+					auto AssetItem = Item.As<LContentBrowserAsset>();
+					const FAssetMetadata& AssetMetadata = AssetItem->GetAssetMetadata();
+					LAssetEditorManager::OpenEditor(LAssetManager::GetAsset<LAsset>(AssetMetadata.Handle));
 				}
 			}
 
@@ -820,7 +831,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowserPanel::RenderOutlinerHierarchy(TObjectPtr<FDirectoryInfo> Directory)
+	void LContentBrowser::RenderOutlinerHierarchy(TObjectPtr<FDirectoryInfo> Directory)
 	{
 		const std::string Name = Directory->FilePath.filename().string();
 		const std::string ID = Name + "_TreeNode";

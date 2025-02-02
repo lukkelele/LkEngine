@@ -91,7 +91,12 @@ namespace LkEngine {
 	void LOpenGLRenderer::Draw(LVertexBuffer& VertexBuffer, const LShader& Shader)
 	{
 		Shader.Bind();
-		LK_OpenGL_Verify(glDrawElements(TopologyGL, VertexBuffer.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
+		LK_OpenGL_Verify(glDrawElements(
+			TopologyGL, 
+			VertexBuffer.GetIndexBuffer()->GetCount(), 
+			GL_UNSIGNED_INT, 
+			nullptr)
+		);
 	}
 
 	void LOpenGLRenderer::Draw(const LVertexBuffer& VertexBuffer, const LIndexBuffer& IndexBuffer, const LShader& Shader)
@@ -99,9 +104,9 @@ namespace LkEngine {
 		LK_OpenGL_Verify(glDrawElements(TopologyGL, IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr));
 	}
 
-	void LOpenGLRenderer::SubmitMesh(TObjectPtr<LMesh>& Mesh, TObjectPtr<LShader>& Shader, const glm::mat4& Transform)
+	void LOpenGLRenderer::RenderMesh(TObjectPtr<LMesh>& Mesh, TObjectPtr<LShader>& Shader, const glm::mat4& Transform)
 	{
-		const uint8_t Topology = TopologyGL;
+		const int Topology = TopologyGL;
 		LRenderer::Submit([&Mesh, &Shader, &Transform, Topology]
 		{
 			LMeshSource& MeshSource = *Mesh->GetMeshSource();
@@ -113,75 +118,6 @@ namespace LkEngine {
 			VertexBuffer.Bind();
 			LK_OpenGL_Verify(glDrawElements(Topology, IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr));
 		});
-	}
-
-	void LOpenGLRenderer::SubmitImage(const TObjectPtr<LImage> image)
-	{
-		//Renderer2D->DrawImage(image);
-	}
-
-	void LOpenGLRenderer::SubmitImage(const TObjectPtr<LImage2D> image)
-	{
-		//Renderer2D->DrawImage(image);
-	}
-
-	void LOpenGLRenderer::SubmitLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& Color, uint64_t EntityID)
-	{
-		//Renderer2D->DrawLine(p1, p2, Color, EntityID);
-	}
-
-	void LOpenGLRenderer::SubmitIndexed(const uint32_t IndexCount)
-	{
-		LK_OpenGL_Verify(glDrawElements(TopologyGL, IndexCount, GL_UNSIGNED_INT, nullptr));
-	}
-
-	void LOpenGLRenderer::DrawIndexed(const uint64_t IndexCount)
-	{
-		LK_OpenGL_Verify(glDrawElements(TopologyGL, static_cast<GLsizei>(IndexCount), GL_UNSIGNED_INT, nullptr));
-	}
-
-	void LOpenGLRenderer::SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID)
-	{
-		//Renderer2D->DrawQuad({ Pos.x, Pos.y, 0.0f }, Size, Color, EntityID);
-	}
-
-	void LOpenGLRenderer::SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& Color, uint64_t EntityID)
-	{
-		//Renderer2D->DrawQuad(Pos, Size, Color, EntityID);
-	}
-
-	void LOpenGLRenderer::SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, const glm::vec4& Color, float Rotation, uint64_t EntityID)
-	{
-		//Renderer2D->DrawQuad({ Pos.x, Pos.y, 0.0f }, Size, Color, Rotation, EntityID);
-	}
-
-	void LOpenGLRenderer::SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, const glm::vec4& Color, float Rotation, uint64_t EntityID)
-	{
-		//Renderer2D->DrawQuad(Pos, Size, Color, Rotation, EntityID);
-	}
-
-	void LOpenGLRenderer::SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture,
-									 const float Rotation, uint64_t EntityID)
-	{
-		//Renderer2D->DrawQuad({ Pos.x, Pos.y, 0.0f }, Size, Texture, Rotation, EntityID);
-	}
-
-	void LOpenGLRenderer::SubmitQuad(const glm::vec2& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture,
-									 const glm::vec4& tintColor, const float Rotation, uint64_t EntityID)
-	{
-		//Renderer2D->DrawQuad({ Pos.x, Pos.y, 0.0f }, Size, Texture, tintColor, Rotation, EntityID);
-	}
-
-	void LOpenGLRenderer::SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size, TObjectPtr<LTexture> Texture,
-									 const glm::vec4& tintColor, float Rotation, uint64_t EntityID)
-	{
-		//Renderer2D->DrawQuad(Pos, Size, Texture, tintColor, Rotation, EntityID);
-	}
-
-	void LOpenGLRenderer::SubmitQuad(const glm::vec3& Pos, const glm::vec2& Size,
-									 TObjectPtr<LTexture> Texture, float Rotation, uint64_t EntityID)
-	{
-		// Renderer2D->DrawQuad(Pos, Size, Texture, Rotation, EntityID);
 	}
 
 	FRendererCapabilities& LOpenGLRenderer::GetCapabilities()
@@ -206,20 +142,10 @@ namespace LkEngine {
 										 const glm::mat4& Transform,
 										 const uint32_t IndexCount /* == 0*/)
 	{
-		LK_CORE_ASSERT(false, "Not implemented");
-	}
-
-	void LOpenGLRenderer::RenderGeometry(TObjectPtr<LRenderCommandBuffer> RenderCommandBuffer,
-										 TObjectPtr<LPipeline> InPipeline,
-										 TObjectPtr<LShader>& Shader,
-										 TObjectPtr<LVertexBuffer>& VertexBuffer,
-										 TObjectPtr<LIndexBuffer>& IndexBuffer,
-										 const glm::mat4& Transform,
-										 const uint32_t IndexCount /* == 0*/)
-	{
-		LK_CORE_ASSERT(false, "RENDER GEOMETRY DISABLED :)");
-		std::deque<LRendererID> BoundArrayTextures = InPipeline.As<LOpenGLPipeline>()->GetBoundArrayTextures();
+		LK_CORE_ASSERT(false, "DISABLED");
+		std::deque<LRendererID> BoundArrayTextures = Pipeline.As<LOpenGLPipeline>()->GetBoundArrayTextures();
 		TObjectPtr<LFramebuffer> Framebuffer = LRenderer::GetViewportFramebuffer();
+		TObjectPtr<LShader> Shader = Material->GetShader();
 
 		/* TODO: Dont submit by & here. */
 		LRenderer::Submit([&, Framebuffer, Shader, VertexBuffer,
@@ -235,7 +161,8 @@ namespace LkEngine {
 			}
 
 			VertexBuffer->Bind();
-			DrawIndexed(IndexCount);
+			/* REPLACE */
+			///DrawIndexed(IndexCount);
 
 			Framebuffer->Unbind();
 		});

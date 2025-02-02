@@ -25,7 +25,7 @@ namespace LkEngine::UI {
 	 */
 	void Font::Add(const FFontConfiguration& FontConfig, bool IsDefault)
 	{
-		LK_CORE_VERIFY(LFileSystem::Exists(FontConfig.FilePath), "Invalid font filepath");
+		LK_CORE_VERIFY(LFileSystem::Exists(FontConfig.FilePath), "Invalid font filepath: {}", FontConfig.FilePath);
 		using EntryPair = std::pair<FFontEntry, ImFont*>;
 		auto FindFont = [&FontConfig](const EntryPair& FontEntry) -> bool
 		{

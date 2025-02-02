@@ -24,7 +24,7 @@ namespace LkEngine {
 
 		LEntity(const LEntity& Other) = default;
 
-		void OnUpdate(float ts) {}
+		void Tick(float ts) {}
 
 		template<typename T, typename ...TArgs>
 		T& AddComponent(TArgs&&... Args)

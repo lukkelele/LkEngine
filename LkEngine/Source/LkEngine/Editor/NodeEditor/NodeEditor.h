@@ -17,7 +17,7 @@ namespace LkEngine {
         LNodeEditor(std::string_view InName);
         ~LNodeEditor() = default;
 
-        void OnRender();
+        void Render();
         void OnImGuiRender(const ImVec2& windowSize = ImVec2(0, 0));
         void Destroy();
 

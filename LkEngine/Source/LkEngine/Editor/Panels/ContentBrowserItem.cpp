@@ -312,7 +312,7 @@ namespace LkEngine {
 
 			if (!SelectedItems.empty())
 			{
-				auto& CurrentItems = LContentBrowserPanel::Get().GetCurrentItems();
+				auto& CurrentItems = LContentBrowser::Get().GetCurrentItems();
 				for (const auto& SelectedItemHandles : SelectedItems)
 				{
 					const std::size_t Index = CurrentItems.Find(SelectedItemHandles);
@@ -568,7 +568,7 @@ namespace LkEngine {
 			return;
 		}
 
-		TObjectPtr<FDirectoryInfo> CurrentDirectory = LContentBrowserPanel::Get().GetDirectory(AssetMetadata.FilePath.parent_path());
+		TObjectPtr<FDirectoryInfo> CurrentDirectory = LContentBrowser::Get().GetDirectory(AssetMetadata.FilePath.parent_path());
 		CurrentDirectory->Assets.erase(
 			std::remove(CurrentDirectory->Assets.begin(), CurrentDirectory->Assets.end(), AssetMetadata.Handle), 
 			CurrentDirectory->Assets.end()

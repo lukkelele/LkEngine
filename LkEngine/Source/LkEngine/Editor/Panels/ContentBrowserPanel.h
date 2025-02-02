@@ -169,20 +169,20 @@ namespace LkEngine {
 
 
 	/**
-	 * LContentBrowserPanel
+	 * LContentBrowser
 	 *
 	 *  Content Browser.
 	 */
-	class LContentBrowserPanel : public IPanel
+	class LContentBrowser : public IPanel
 	{
 	public:
-		LContentBrowserPanel();
-		~LContentBrowserPanel() = default;
+		LContentBrowser(); /// TODO: make private and grant access to LPanelManager
+		~LContentBrowser() = default;
 
 		virtual void Initialize() override;
 
-		virtual void OnRender() override {}
-		virtual void OnRenderUI(bool& IsOpen) override;
+		virtual void Render() override {}
+		virtual void RenderUI(bool& IsOpen) override;
 
 		void SetSceneContext(const TObjectPtr<LScene> InSceneContext);
 		void OnProjectChanged(TObjectPtr<LProject> InProject);
@@ -193,7 +193,7 @@ namespace LkEngine {
 		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
 		virtual void DeserializeFromYaml(const YAML::Node& Data) override;
 
-		static LContentBrowserPanel& Get() { return *Instance; }
+		static LContentBrowser& Get() { return *Instance; }
 
 	private:
 		void UpdateInput();
@@ -259,9 +259,9 @@ namespace LkEngine {
 
 		FSelectionStack CopiedAssets{};
 
-		inline static LContentBrowserPanel* Instance{};
+		inline static LContentBrowser* Instance{};
 
-		LCLASS(LContentBrowserPanel);
+		LCLASS(LContentBrowser);
 	};
 
 }

@@ -1,6 +1,8 @@
 #include "LKpch.h"
 #include "OpenGLShader.h"
 
+#include "LkEngine/Core/IO/FileSystem.h"
+
 
 namespace LkEngine {
 
@@ -17,7 +19,7 @@ namespace LkEngine {
 		}
 		else
 		{
-			LK_CORE_ERROR_TAG("Shader", "Parse of shader file failed at \"{}\"", InFilePath.string());
+			LK_CORE_VERIFY(false, "Parsing of shader failed: '{}'", std::filesystem::relative(InFilePath, LFileSystem::GetEngineDir()).string());
 		}
 	}
 
@@ -37,6 +39,131 @@ namespace LkEngine {
 		{
 			LK_OpenGL_Verify(glDeleteProgram(RendererID));
 		}
+	}
+
+	void LOpenGLShader::Get(std::string_view Uniform, int& Value) 
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glGetUniformiv(RendererID, GetUniformLocation(Uniform.data()), &Value));
+	}
+
+	void LOpenGLShader::Get(std::string_view Uniform, bool& Value) 
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		int ValueRef = 0;
+		LK_OpenGL_Verify(glGetUniformiv(RendererID, GetUniformLocation(Uniform.data()), &ValueRef));
+		Value = static_cast<bool>(ValueRef);
+	}
+
+	void LOpenGLShader::Get(std::string_view Uniform, float& Value) 
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glGetUniformfv(RendererID, GetUniformLocation(Uniform.data()), &Value));
+	}
+
+	void LOpenGLShader::Get(std::string_view Uniform, uint32_t& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glGetUniformuiv(RendererID, GetUniformLocation(Uniform.data()), &Value));
+	}
+
+	void LOpenGLShader::Get(std::string_view Uniform, glm::vec3& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		//float ValueRef[3]{};
+		if (const auto Location = GetUniformLocation(Uniform.data()); Location != -1)
+		{
+			float ValueRef[3]{};
+			LK_OpenGL_Verify(glGetUniformfv(RendererID, Location, ValueRef));
+			//LK_OpenGL_Verify(glGetnUniformfv(RendererID, GetUniformLocation(Uniform.data()), 3, ValueRef));
+
+			Value.x = ValueRef[0];
+			Value.y = ValueRef[1];
+			Value.z = ValueRef[2];
+		}
+		else
+		{
+			LK_CORE_ERROR("Failed to get location for: {} (glm::vec3)", Uniform);
+			//LK_OpenGL_Verify(glGetUniformfv(RendererID, GetUniformLocation(Uniform.data()), ValueRef));
+		}
+	}
+
+	void LOpenGLShader::Get(std::string_view Uniform, glm::vec4& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		float ValueRef[4]{};
+		LK_OpenGL_Verify(glGetUniformfv(RendererID, GetUniformLocation(Uniform.data()), ValueRef));
+
+		Value.x = ValueRef[0];
+		Value.y = ValueRef[1];
+		Value.z = ValueRef[2];
+		Value.w = ValueRef[3];
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const int Value) 
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform1i(GetUniformLocation(Uniform.data()), Value));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const bool Value) 
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform1i(GetUniformLocation(Uniform.data()), static_cast<int>(Value)));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const float Value) 
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform1f(GetUniformLocation(Uniform.data()), Value));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const uint32_t Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform1i(GetUniformLocation(Uniform.data()), Value));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const glm::vec2& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform2f(GetUniformLocation(Uniform.data()), Value.x, Value.y));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const glm::vec3& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform3f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const glm::vec4& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform4f(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const glm::ivec2& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform2i(GetUniformLocation(Uniform.data()), Value.x, Value.y));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const glm::ivec3& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform3i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const glm::ivec4& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniform4i(GetUniformLocation(Uniform.data()), Value.x, Value.y, Value.z, Value.w));
+	}
+
+	void LOpenGLShader::Set(std::string_view Uniform, const glm::mat4& Value)
+	{
+		LK_OpenGL_Verify(glUseProgram(RendererID));
+		LK_OpenGL_Verify(glUniformMatrix4fv(GetUniformLocation(Uniform.data()), 1, GL_FALSE, &Value[0][0]));
 	}
 
 	uint32_t LOpenGLShader::CompileShader(const uint32_t ShaderType, const std::string& ShaderSource)

@@ -365,13 +365,14 @@ namespace LkEngine {
 			{
 				if constexpr (std::is_floating_point_v<SizeType>)
 				{
-					return LK_FORMAT_STRING("({:.2f}, {:.2f})", X, Y);
+					return std::format("({:.2f}, {:.2f})", X, Y);
 				}
 				else
 				{
-					return LK_FORMAT_STRING("({}, {})", X, Y);
+					return std::format("({}, {})", X, Y);
 				}
 			}
+			/* TODO: This does not work as it should, should be removed. */
 			else if constexpr (std::is_same_v<StringType, const char*>)
 			{
 				static constexpr uint16_t BufSize = 256;

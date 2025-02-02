@@ -24,7 +24,7 @@ namespace LkEngine {
     public:
         virtual ~LTab() = default;
 
-        virtual void OnRender() = 0;
+        virtual void Render() = 0;
         virtual void OnImGuiRender() = 0;
 
         FORCEINLINE ETabType GetTabType() const { return Type; }
@@ -54,7 +54,7 @@ namespace LkEngine {
 
         ~ViewportTab() = default;
 
-        void OnRender() override {}
+        void Render() override {}
         void OnImGuiRender() override {}
     };
 
@@ -68,7 +68,7 @@ namespace LkEngine {
         LNodeEditorTab(std::string_view InName);
         ~LNodeEditorTab();
 
-        virtual void OnRender() override {};
+        virtual void Render() override {};
         virtual void OnImGuiRender() override;
 
     public:
@@ -85,7 +85,7 @@ namespace LkEngine {
         LMaterialEditorTab(std::string_view InName);
         ~LMaterialEditorTab();
 
-        virtual void OnRender() override;
+        virtual void Render() override;
         virtual void OnImGuiRender() override;
 
     public:

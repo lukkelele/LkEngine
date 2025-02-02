@@ -23,8 +23,8 @@ namespace LkEngine {
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 
-		virtual void OnUpdate(const float DeltaTime) = 0;
-		virtual void OnRenderUI() {};
+		virtual void Tick(const float DeltaTime) = 0;
+		virtual void RenderUI() {};
 
 		virtual void OnEvent(LEvent& Event) { LK_UNUSED(Event); }
 

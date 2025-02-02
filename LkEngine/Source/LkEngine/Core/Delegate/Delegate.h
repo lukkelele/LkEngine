@@ -697,7 +697,7 @@ namespace LkEngine {
 	 *  Delegate implementation that supports multiple ways
 	 *  of binding functions.
 	 */
-	template<TString DelegateName, typename TReturnValue, typename... TArgs>
+	template<TStringLiteral DelegateName, typename TReturnValue, typename... TArgs>
 	class LDelegate : public LDelegateBase
 	{
 	public:
@@ -863,7 +863,7 @@ namespace LkEngine {
 		template<typename... TArgs>
 		friend class LMulticastDelegate;
 
-		inline static constexpr TString StaticName = DelegateName;
+		inline static constexpr TStringLiteral StaticName = DelegateName;
 	};
 
 
@@ -988,10 +988,10 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const
 		{
-			return LK_FORMAT_STRING("\n[Multicast Delegate]\n" 
-									" - Name:    {}\n"
-									" - RawName: {}\n", 
-									TypeName, typeid(*this).raw_name());
+			return std::format("\n[Multicast Delegate]\n" 
+							   " - Name:     {}\n"
+							   " - Raw Name: {}\n", 
+							   TypeName, typeid(*this).raw_name());
 		}
 
 		/***************************************************

@@ -42,8 +42,23 @@ namespace LkEngine {
 			return Move(Filepath, Destination / Filepath.filename());
 		}
 
-		static std::string ConvertToUnixPath(const std::filesystem::path& WindowsPath);
-		static std::string ConvertToWindowsPath(const std::filesystem::path& UnixPath);
+		/**
+		 * Convert to a path to use the path separator for the current platform.
+		 *  Windows: \
+		 *  Linux:   /
+		 */
+		static void ConvertToPlatformPath(std::string& Path);
+		static void ConvertToUnixPath(std::string& WindowsPath);
+		static void ConvertToWindowsPath(std::string& UnixPath);
+
+		/**
+		 * Convert to a path to use the path separator for the current platform.
+		 *  Windows: \
+		 *  Linux:   /
+		 */
+		[[nodiscard]] static std::string ConvertToPlatformPath(const std::filesystem::path& Path);
+		[[nodiscard]] static std::string ConvertToUnixPath(const std::filesystem::path& WindowsPath);
+		[[nodiscard]] static std::string ConvertToWindowsPath(const std::filesystem::path& UnixPath);
 
 		static std::string RemoveFileExtension(const std::string& File)
 		{
@@ -92,21 +107,25 @@ namespace LkEngine {
 		FORCEINLINE static std::filesystem::path GetWorkingDir() { return WorkingDir; }
 		FORCEINLINE static std::filesystem::path GetBinaryDir() { return BinaryDir; }
 		FORCEINLINE static std::filesystem::path GetEngineDir() { return EngineDir; }
-		FORCEINLINE static std::filesystem::path GetEngineConfig() { return EngineConfig; }
 		FORCEINLINE static std::filesystem::path GetRuntimeDir() { return RuntimeDir; }
 		FORCEINLINE static std::filesystem::path GetConfigDir() { return ConfigDir; }
+		FORCEINLINE static std::filesystem::path GetResourcesDir() { return ResourcesDir; }
 		FORCEINLINE static std::filesystem::path GetAssetsDir() { return AssetsDir; }
+
+		FORCEINLINE static std::filesystem::path GetEngineConfig() { return EngineConfig; }
 		FORCEINLINE static std::filesystem::path GetEditorConfig() { return EditorConfig; }
 
 	private:
 		static std::filesystem::path WorkingDir;
 		static std::filesystem::path BinaryDir;
 		static std::filesystem::path EngineDir;
-		static std::filesystem::path EngineConfig;
 		static std::filesystem::path RuntimeDir;
 		static std::filesystem::path ConfigDir;
+		static std::filesystem::path ResourcesDir;
 		static std::filesystem::path AssetsDir;
 		static std::filesystem::path ProjectsDir;
+
+		static std::filesystem::path EngineConfig;
 		static std::filesystem::path EditorConfig;
 
 		friend struct Global;

@@ -62,30 +62,39 @@ namespace LkEngine {
 
 		virtual void Initialize() override;
 
-		virtual void OnUpdate(const float InDeltaTime) override;
-		virtual void OnRenderUI() override;
+		virtual void Tick(const float InDeltaTime) override;
+		virtual void RenderUI() override;
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 
+	private:
+		void InitializePanelManager();
+
 		void RenderViewport();
 		void Render2D();
+		void DrawObjectGizmo(LEntity Entity);
 
-		FORCEINLINE TObjectPtr<LScene> GetEditorScene() { return EditorScene; }
-		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
-
-		FORCEINLINE static LEditorLayer& Get() { return *Instance; }
+		void OpenProject(const std::filesystem::path& ProjectPath);
+		void EmptyProject();
+		void StarterProject();
+		void CreateProject(const std::filesystem::path& ProjectPath);
+		void SaveProjectAs();
+		void OnProjectChanged(TObjectPtr<LProject> InProject);
 
 		bool OpenScene();
 		bool OpenScene(const std::filesystem::path& Filepath, const bool CheckForAutosaves);
 		void SetScene(TObjectPtr<LScene> InScene);
 		void NewScene(const std::string& SceneName = "Untitled");
-		void EmptyProject();
-		void StarterProject();
-		void SaveProjectAs();
+		void SaveScene();
+		void SaveSceneAs();
+		void AutoSaveScene();
 
-	private:
-		void InitializePanelManager();
+	public:
+		FORCEINLINE TObjectPtr<LScene> GetEditorScene() { return EditorScene; }
+		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
+
+		FORCEINLINE static LEditorLayer& Get() { return *Instance; }
 
 		void OnViewportSizeUpdated(const uint16_t NewWidth, const uint16_t NewHeight);
 		void UpdateWindowTitle(const std::string& SceneName);
@@ -102,48 +111,39 @@ namespace LkEngine {
 		void OnScenePlay();
 		void OnSceneStop();
 
-		void SaveScene();
-		void SaveSceneAs();
-		void AutoSaveScene();
-
 		void UI_PrepareTopBar();
 		void UI_PrepareLeftSidebar() const;
 		void UI_PrepareRightSidebar() const;
 		void UI_PrepareEditorViewport();
-
-		void DrawObjectGizmo(LEntity Entity);
+		void UI_SyncEditorWindowSizes(const LVector2& InViewportSize);
 		void UI_RenderExternalWindows();
+		void UI_HandleDragAndDrop();
 
 		void UI_MainMenuBar();
 		void UI_ToolBar();
 		void UI_AboutPopup();
 		void UI_LoadAutoSavePopup();
-
-		void UI_SyncEditorWindowSizes(const LVector2& InViewportSize);
+		void UI_NewProjectPopup();
 
 		void UI_ShowViewportAndWindowDetails();
 		void UI_ClearColorModificationMenu();
 		void UI_ViewportTexture();
 		void UI_WindowStatistics();
-		void UI_TabManager();
-
-		void UI_HandleDragAndDrop();
-		
+	
 		void UI_OpenGLExtensions();
-		void UI_RenderSettingsWindow(); /* TODO: Re-evaluate */
+		void UI_RenderSettingsWindow(); /* TODO: Re-evaluate, might move this to LToolsPanel. */
 
 		/**
 		 * Perform raycast on scene, returns the number of hit entities.
 		 */
 		uint16_t RaycastScene(TObjectPtr<LScene>& TargetScene, std::vector<FSceneSelectionData>& SceneSelectionData);
 
+		/**
+		 * Cast ray from camera.
+		 */
 		void CastRay(FRayCast& RayCast, const LEditorCamera& Camera, const float MousePosX, const float MousePosY);
 
-		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() 
-		{ 
-			LK_CORE_ASSERT(ViewportFramebuffer);
-			return ViewportFramebuffer; 
-		}
+		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return ViewportFramebuffer; }
 
 		LEntity CreateCube(); /* TODO: REMOVE */
 
@@ -163,11 +163,8 @@ namespace LkEngine {
 	public:
 		/** Delegate for changes in the selection inside a scene. */
 		FOnSceneSelectionUpdated OnSceneSelectionUpdated;
-
-		glm::vec2 ViewportScalers = { 1.0f, 1.0f };
 	private:
 		FEditorSettings& EditorSettings;
-		LEditorTabManager& TabManager;
 		TObjectPtr<LPanelManager> PanelManager;
 
 		TObjectPtr<LProject> Project{};
@@ -180,7 +177,7 @@ namespace LkEngine {
 		TObjectPtr<LWindow> Window{};
 		TObjectPtr<LRenderer2D> Renderer2D{};
 
-		LVector2 PrimaryViewportBounds[2];
+		std::array<LVector2, 2> PrimaryViewportBounds;
 		TObjectPtr<LViewport> EditorViewport;
 		TObjectPtr<LFramebuffer> ViewportFramebuffer;
 		TObjectPtr<LSceneRenderer> ViewportRenderer{};

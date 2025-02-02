@@ -154,7 +154,7 @@ namespace LkEngine {
 			std::string String{};
 			for (const FVertexBufferElement& Element : Elements)
 			{
-				String += LK_FORMAT_STRING("{}: {}\n", Element.Name, Enum::ToString(Element.Type));
+				String += std::format("{}: {}\n", Element.Name, Enum::ToString(Element.Type));
 			}
 
 			return String;

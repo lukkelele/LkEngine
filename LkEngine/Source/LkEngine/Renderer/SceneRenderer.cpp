@@ -63,7 +63,6 @@ namespace LkEngine {
 										  TObjectPtr<LMaterialTable> MaterialTable,
 										  const glm::mat4& Transform,
 										  TObjectPtr<LMaterialAsset> MaterialOverride)
-										  //TObjectPtr<LMaterial> MaterialOverride)
 	{
 		LK_PROFILE_FUNC();
 
@@ -137,13 +136,6 @@ namespace LkEngine {
 		const bool IsRigged = Submesh.bIsRigged;
 		const uint32_t MaterialIndex = Submesh.MaterialIndex;
 
-		/// TODO: Needs fixing.
-	#if 0
-		TObjectPtr<LMaterialAsset> Material = LEditorAssetManager::BaseMaterial;
-		const FAssetHandle MaterialHandle = Material->Handle;
-	#endif
-		
-	#if 1
 		FAssetHandle MaterialHandle;
 		if (MaterialOverride)
 		{
@@ -155,12 +147,6 @@ namespace LkEngine {
 				? MaterialTable->GetMaterial(MaterialIndex)
 				: LEditorAssetManager::BaseMaterial->Handle;
 		}
-	#else
-		const FAssetHandle MaterialHandle = MaterialTable->HasMaterial(MaterialIndex)
-			? MaterialTable->GetMaterial(MaterialIndex)
-			: LEditorAssetManager::Get().GetMaterial(BASE_MATERIAL)->Handle;
-		TObjectPtr<LMaterialAsset> Material = LAssetManager::GetAsset<LMaterialAsset>(MaterialHandle);
-	#endif
 		TObjectPtr<LMaterialAsset> Material = LAssetManager::GetAsset<LMaterialAsset>(MaterialHandle);
 		LK_CORE_VERIFY(Material);
 
@@ -222,13 +208,7 @@ namespace LkEngine {
 
 			LK_CORE_ASSERT(MeshSource->Submeshes.size() > MeshKey.SubmeshIndex);
 			const uint32_t MaterialIndex = MeshSource->Submeshes[MeshKey.SubmeshIndex].MaterialIndex;
-		#if 0
-			TObjectPtr<LMaterial> Material = DrawCommand.OverrideMaterial 
-				? DrawCommand.OverrideMaterial 
-				: LAssetManager::GetAsset<LMaterialAsset>(DrawCommand.MaterialTable->GetMaterial(DrawCommand.SubmeshIndex))->GetMaterial();
-		#endif
 
-		#if 1
 			TObjectPtr<LMaterial> Material;
 			if (DrawCommand.OverrideMaterial)
 			{
@@ -247,14 +227,7 @@ namespace LkEngine {
 					Material = LEditorAssetManager::BaseMaterial->GetMaterial();
 				}
 			}
-		#else
-			TObjectPtr<LMaterial> Material = DrawCommand.OverrideMaterial 
-				? DrawCommand.OverrideMaterial 
-				: LAssetManager::GetAsset<LMaterialAsset>(DrawCommand.MaterialTable->GetMaterial(DrawCommand.SubmeshIndex))->GetMaterial();
-				//: LEditorAssetManager::BaseMaterial->GetMaterial();
-		#endif
 			LK_CORE_VERIFY(Material);
-			//LK_CORE_INFO_TAG("SceneRenderer", "Rendering {} ({}) with texture {}", StaticMesh->Name, StaticMesh->Handle, Material->GetTexture()->GetName());
 
 			LK_CORE_ASSERT(Material->GetShader(), "Invalid shader for material: {}", Material->GetName());
 			TObjectPtr<LShader> Shader = Material->GetShader();
@@ -281,8 +254,9 @@ namespace LkEngine {
 					Shader->Bind();
 					Shader->Set("u_ViewProjection", SceneCamera->GetViewProjection());
 					Shader->Set("u_Model", ModelMatrix);
-					Shader->Set("u_Texture0", 0);
-					Texture->Bind(0);
+					uint32_t Slot = 0;
+					Shader->Get("u_Texture", Slot);
+					Texture->Bind(Slot);
 
 					MeshSource->GetVertexBuffer()->Bind();
 
@@ -341,8 +315,10 @@ namespace LkEngine {
 					Shader->Bind();
 					Shader->Set("u_ViewProjection", SceneCamera->GetViewProjection());
 					Shader->Set("u_Model", ModelMatrix);
-					Shader->Set("u_Texture0", 0);
-					Texture->Bind(0);
+
+					uint32_t Slot = 0;
+					Shader->Get("u_Texture", Slot);
+					Texture->Bind(Slot);
 
 					MeshSource->GetVertexBuffer()->Bind();
 					TObjectPtr<LIndexBuffer> IndexBuffer = MeshSource->GetIndexBuffer();

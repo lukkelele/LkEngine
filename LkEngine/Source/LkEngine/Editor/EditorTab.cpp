@@ -39,7 +39,7 @@ namespace LkEngine {
         NodeEditor->Destroy();
     }
 
-    void LMaterialEditorTab::OnRender()
+    void LMaterialEditorTab::Render()
     {
     }
 

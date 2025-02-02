@@ -23,7 +23,7 @@ namespace LkEngine {
         EditorContext->Initialize();
     }
 
-    void LNodeEditor::OnRender()
+    void LNodeEditor::Render()
     {
     }
 

@@ -15,8 +15,8 @@ namespace LkEngine {
 
         virtual void Initialize() override;
 
-        virtual void OnRender() override {}
-        virtual void OnRenderUI(bool& IsOpen) override;
+        virtual void Render() override {}
+        virtual void RenderUI(bool& IsOpen) override;
 
     private:
         void RenderMaterialEditor(LMaterial& Material);

@@ -25,6 +25,21 @@ namespace LkEngine {
 		Fragment
 	};
 
+	/**
+	 * EUniformVarType
+	 * 
+	 *  The type of an uniform variable in a glsl shader.
+	 */
+	enum class EUniformVarType
+	{
+		None = 0,
+		Bool,
+		Float,
+		Vec3,
+		Sampler2D,
+		Sampler2DArray,
+	};
+
 	class LShader : public LObject
 	{
 	public:
@@ -38,6 +53,13 @@ namespace LkEngine {
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
+
+		virtual void Get(std::string_view Uniform, int& Value) = 0;
+		virtual void Get(std::string_view Uniform, bool& Value) = 0;
+		virtual void Get(std::string_view Uniform, float& Value) = 0;
+		virtual void Get(std::string_view Uniform, uint32_t& Value) = 0;
+		virtual void Get(std::string_view Uniform, glm::vec3& Value) = 0;
+		virtual void Get(std::string_view Uniform, glm::vec4& Value) = 0;
 
 		virtual void Set(std::string_view Uniform, int Value) = 0;
 		virtual void Set(std::string_view Uniform, bool Value) = 0;
@@ -64,14 +86,13 @@ namespace LkEngine {
 
 		virtual const FShaderProgramSource& GetSource() const = 0;
 
-		/* TODO: Use map instead. */
-		FORCEINLINE static const char* ConvertUniformType(const ETextureUniformType Type)
+		static const char* ConvertUniformType(const ETextureUniformType Type)
 		{
 			switch (Type)
 			{
 				case ETextureUniformType::Diffuse:          return "u_Diffuse";
 				case ETextureUniformType::Specular:         return "u_Specular";
-				case ETextureUniformType::Normal:           return "u_Normal"; // FIXME: ReUniform to 'Ambient'?
+				case ETextureUniformType::Normal:           return "u_Normal";
 				case ETextureUniformType::Height:           return "u_Height";
 				case ETextureUniformType::DiffuseRoughness: return "u_DiffuseRoughness";
 				case ETextureUniformType::Emissive:         return "u_Emissive";
@@ -80,6 +101,13 @@ namespace LkEngine {
 			LK_CORE_ASSERT(false, "Could not convert the TextureUniformType {}", static_cast<int>(Type));
 			return nullptr;
 		}
+
+		/**
+		 * Attempt to get a uniform variable from a string.
+		 * Is used for parsing shader sources to retrieve the uniforms
+		 * used for a specific shader.
+		 */
+		static std::pair<EUniformVarType, std::string> GetUniformVariable(const std::string& InString);
 
 	private:
 		LCLASS(LShader);
@@ -109,6 +137,8 @@ namespace LkEngine {
 
     private:
         std::unordered_map<std::string, TObjectPtr<LShader>> ShaderMap;
+
+		friend class LMaterialEditor;
 
 		LCLASS(LShaderLibrary);
     };

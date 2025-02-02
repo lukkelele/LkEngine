@@ -18,9 +18,12 @@
 
 namespace LkEngine {
 
-	enum class EContentBrowserAction : uint16_t
+	/**
+	 * TODO: Add support for 'None' again and change underlying type to int32_t.
+	 */
+	enum class EContentBrowserAction : uint32_t
 	{
-		None                = 0,
+		//None                = -1,
 		Refresh             = LK_BIT(0),
 		ClearSelections     = LK_BIT(1),
 		Selected			= LK_BIT(2),
@@ -39,6 +42,9 @@ namespace LkEngine {
 		Activated			= LK_BIT(15),
 	};
 	LK_ENUM_CLASS_FLAGS(EContentBrowserAction);
+	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EContentBrowserAction, 
+										  EContentBrowserAction::Refresh, 
+										  EContentBrowserAction::Activated);
 
 	/**
 	 * FContentBrowserItemAction
@@ -47,7 +53,7 @@ namespace LkEngine {
 	 */
 	struct FContentBrowserItemAction
 	{
-		using FlagType = uint16_t;
+		using FlagType = std::underlying_type_t<EContentBrowserAction>;
 		FlagType Flags = 0;
 
 		FORCEINLINE void operator|=(const EContentBrowserAction Flag)
@@ -232,7 +238,7 @@ namespace LkEngine {
 		{
 			switch (BrowserAction)
 			{
-				case EContentBrowserAction::None:               return "None";
+				//case EContentBrowserAction::None:               return "None";
 				case EContentBrowserAction::Refresh:            return "Refresh";
 				case EContentBrowserAction::ClearSelections:    return "ClearSelections";
 				case EContentBrowserAction::Selected:           return "Selected";

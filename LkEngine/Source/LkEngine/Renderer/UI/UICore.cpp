@@ -166,8 +166,12 @@ namespace LkEngine::UI {
 			ImGui::DockBuilderDockWindow(LK_UI_CONTENTBROWSER,  DockID_Bottom);
 			ImGui::DockBuilderDockWindow(LK_UI_TOPBAR,          DockID_Top);
 
-			/* Dock windows to right sidebar. */
+			/* Dock the scene manager to the right sidebar. */
 			ImGui::DockBuilderDockWindow(LK_UI_SCENEMANAGER,    DockID_Right);
+
+			/* Dock the editor console to the bottom bar, together with the content browser. */
+			ImGui::DockBuilderDockWindow(LK_UI_EDITORCONSOLE,   DockID_Bottom);
+			ImGui::DockBuilderDockWindow(LK_UI_CONTENTBROWSER,  DockID_Bottom);
 
 			/* Finish the dockspace. */
 			ImGui::DockBuilderFinish(DockspaceID);

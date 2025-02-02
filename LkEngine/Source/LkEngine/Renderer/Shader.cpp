@@ -7,7 +7,6 @@
 
 #include "LkEngine/Renderer/Backend/OpenGL/OpenGLShader.h"
 
-
 #include "RendererAPI.h"
 
 
@@ -95,7 +94,7 @@ namespace LkEngine {
 		}
 
 		std::ifstream InputStreamVertex(InVertexPath);
-		std::string Line{};
+		std::string Line;
 
 		std::stringstream ss[2];
 
@@ -120,9 +119,65 @@ namespace LkEngine {
 		return ShaderProgramSource.IsValid();
 	}
 
+	std::pair<EUniformVarType, std::string> LShader::GetUniformVariable(const std::string& InString)
+	{
+		/* Ignore lines that do not 'uniform' in them or if they are commented. */
+		const std::size_t StartPos = InString.find("uniform");
+		if ((StartPos == std::string::npos) || (StartPos > 0))
+		{
+			return { EUniformVarType::None, "" };
+		}
+
+		static constexpr TStringLiteral Bool = Meta::TStringLiteral("bool");
+		static constexpr TStringLiteral Float = Meta::TStringLiteral("float");
+		static constexpr TStringLiteral Vec3 = Meta::TStringLiteral("vec3");
+		static constexpr TStringLiteral Sampler2d = Meta::TStringLiteral("sampler2D");
+		static constexpr TStringLiteral Sampler2dArray = Meta::TStringLiteral("sampler2DArray");
+
+		/* Uniform: Bool */
+		if (const std::size_t Pos = InString.find(Bool.View()); Pos != std::string::npos)
+		{
+			std::string UniformName = InString.substr(Pos + Bool.Size());
+			std::erase_if(UniformName, [](const char Character) { return Character == ';'; });
+			return { EUniformVarType::Bool, UniformName };
+		}
+
+		/* Uniform: Float */
+		if (const std::size_t Pos = InString.find(Float.View()); Pos != std::string::npos)
+		{
+			std::string UniformName = InString.substr(Pos + Float.Size());
+			std::erase_if(UniformName, [](const char Character) { return Character == ';'; });
+			return { EUniformVarType::Float, UniformName };
+		}
+
+		/* Uniform: Vec3 */
+		if (const std::size_t Pos = InString.find(Vec3.View()); Pos != std::string::npos)
+		{
+			std::string UniformName = InString.substr(Pos + Vec3.Size());
+			std::erase_if(UniformName, [](const char Character) { return Character == ';'; });
+			return { EUniformVarType::Vec3, UniformName };
+		}
+
+		/* Uniform: Sampler2DArray */
+		if (const std::size_t Pos = InString.find(Sampler2dArray.View()); Pos != std::string::npos)
+		{
+			std::string UniformName = InString.substr(Pos + Sampler2dArray.Size());
+			std::erase_if(UniformName, [](const char Character) { return Character == ';'; });
+			return { EUniformVarType::Sampler2DArray, UniformName };
+		}
+
+		/* Uniform: Sampler2D */
+		if (const std::size_t Pos = InString.find(Sampler2d.View()); Pos != std::string::npos)
+		{
+			std::string UniformName = InString.substr(Pos + Sampler2d.Size());
+			std::erase_if(UniformName, [](const char Character) { return Character == ';'; });
+			return { EUniformVarType::Sampler2D, UniformName };
+		}
+
+		return { EUniformVarType::None, "" };
+	}
 
 	/***********************************************************************/
-
 
 	LShaderLibrary::LShaderLibrary()
 	{

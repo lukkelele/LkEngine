@@ -23,7 +23,7 @@ namespace LkEngine {
         LObject::Initialize();
     }
 
-    void LComponentEditor::OnRenderUI(bool& IsOpen)
+    void LComponentEditor::RenderUI(bool& IsOpen)
     {
 	#if 0
         static std::unordered_map<LUUID, TObjectPtr<LMaterialAsset>> MaterialMap{};
@@ -51,7 +51,7 @@ namespace LkEngine {
 
                         /* Create new edit tab for the material. */
                         std::shared_ptr<LTab> NewTab = LEditorTabManager::NewTab(
-                            LK_FORMAT_STRING("Edit->{}", MaterialName).c_str(),
+                            std::format("Edit->{}", MaterialName).c_str(),
                             ETabType::MaterialEditor
                         );
 

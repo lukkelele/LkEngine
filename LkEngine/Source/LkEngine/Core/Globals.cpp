@@ -24,8 +24,6 @@ namespace LkEngine {
 	int Global::Argc;
 	std::vector<std::string> Global::Argv;
 
-	namespace fs = std::filesystem;
-
 	void Global::SetRuntimeArguments(const int Argc, char* Argv[])
 	{
 		LK_GLOBALS_PRINTLN("Setting runtime arguments");
@@ -42,7 +40,7 @@ namespace LkEngine {
 		LFileSystem::WorkingDir = std::filesystem::current_path();
 		LK_GLOBALS_PRINTLN("Working Directory: {}", LFileSystem::WorkingDir.string());
 
-		fs::path Path = LFileSystem::WorkingDir;
+		std::filesystem::path Path = LFileSystem::WorkingDir;
 		{
 			int Traversed = 0;
 			while (Path.filename() != "LkEngine")
@@ -71,37 +69,29 @@ namespace LkEngine {
 			LK_CORE_VERIFY(Traversed <= 4, "Traversal to find LkEngine root directory failed");
 		}
 
-		LFileSystem::EngineDir = Path;
-		LFileSystem::EngineDir += PathSeparator + std::string("LkRuntime");
+		//LFileSystem::EngineDir = Path;
+		//LFileSystem::EngineDir += PathSeparator + std::string("LkRuntime");
+		LFileSystem::EngineDir = Path / "LkRuntime";
 		LFileSystem::RuntimeDir = LFileSystem::EngineDir;
-		LK_GLOBALS_PRINTLN("WorkingDir:  {}", LFileSystem::WorkingDir.string());
-		LK_GLOBALS_PRINTLN("EngineDir:   {}", LFileSystem::EngineDir.string());
-		LK_GLOBALS_PRINTLN("RuntimeDir:  {}", LFileSystem::RuntimeDir.string());
+		LK_GLOBALS_PRINTLN("WorkingDir: {}", LFileSystem::WorkingDir.string());
+		LK_GLOBALS_PRINTLN("EngineDir:  {}", LFileSystem::EngineDir.string());
+		LK_GLOBALS_PRINTLN("RuntimeDir: {}", LFileSystem::RuntimeDir.string());
 		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid: '{}'", LFileSystem::EngineDir.string());
-		LFileSystem::ConfigDir = LFileSystem::WorkingDir;
 
-	#if 0
-		LFileSystem::ConfigDir = LFileSystem::EngineDir;
-		LFileSystem::ConfigDir += PathSeparator + std::string("Configuration");
-	#else
+		//LFileSystem::ConfigDir = LFileSystem::WorkingDir;
 		LFileSystem::ConfigDir = LFileSystem::EngineDir / "Configuration";
-	#endif
+
 		if (!LFileSystem::Exists(LFileSystem::ConfigDir))
 		{
 			LFileSystem::CreateDirectory(LFileSystem::ConfigDir);
 			LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::ConfigDir), "Configuration directory is not valid");
 		}
 
-	#if 0
-		LFileSystem::EngineConfig = LFileSystem::ConfigDir;
-		LFileSystem::EngineConfig += PathSeparator + std::string("LkEngine.lkconf");
-		LFileSystem::EditorConfig = LFileSystem::ConfigDir / "EditorSettings.yaml";
-	#else
 		LFileSystem::EngineConfig = LFileSystem::ConfigDir / "LkEngine.lkconf";
 		LFileSystem::EditorConfig = LFileSystem::ConfigDir / "EditorSettings.yaml";
-	#endif
 
-		LFileSystem::AssetsDir = fs::absolute(LFileSystem::EngineDir / "Assets");
+		LFileSystem::ResourcesDir = std::filesystem::absolute(LFileSystem::EngineDir / "Resources");
+		LFileSystem::AssetsDir    = std::filesystem::absolute(LFileSystem::EngineDir / "Assets");
 
 		bArgumentsSet = true;
 	}

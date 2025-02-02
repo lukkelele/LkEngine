@@ -24,6 +24,8 @@ namespace LkEngine
 
 	void LRenderer2D::Initialize()
     {
+		LK_CORE_DEBUG_TAG("Renderer2D", "Initializing");
+
 		/* Shaders. */
 		QuadShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Quad");
 		LineShader = LRenderer::GetShaderLibrary()->Get("Renderer2D_Line");
@@ -35,8 +37,8 @@ namespace LkEngine
             QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
             QuadVertexPositions[3] = {  0.5f, -0.5f, 0.0f, 1.0f };
 
-			/* Create the quad framebuffer. */
-            LK_CORE_TRACE_TAG("Renderer2D", "Creating quad framebuffer");
+			/* Create the quad InFramebuffer. */
+            LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad InFramebuffer");
             FFramebufferSpecification QuadFramebufferSpec{};
 		    QuadFramebufferSpec.Attachments = {
                 EImageFormat::RGBA32F, 
@@ -56,14 +58,14 @@ namespace LkEngine
             QuadPipelineSpec.DebugName = "Renderer2D-QuadPipeline";
             QuadPipelineSpec.Shader = QuadShader;
 
-            LK_CORE_TRACE_TAG("Renderer2D", "Creating quad pipeline");
+            LK_CORE_DEBUG_TAG("Renderer2D", "Creating quad pipeline");
             FRenderPassSpecification QuadPassSpec;
-            QuadPassSpec.DebugName = "Renderer2D-RenderPass-Quad";
+            QuadPassSpec.DebugName = "RenderPass2D-Quad";
             QuadPassSpec.Pipeline = LPipeline::Create(QuadPipelineSpec);
             //QuadMaterial = LMaterial::Create(QuadShader, "QuadMaterial");
 
             /* Use correct amount of texture array uniforms. */
-            LK_CORE_TRACE_TAG("Renderer2D", "Creating quad renderpass");
+            LK_CORE_TRACE_TAG("Renderer2D", "Creating quad RenderPass");
             for (uint8_t ArrayIndex = 0; ArrayIndex < Specification.ArrayTexturesCount; ArrayIndex++)
             {
                 QuadPassSpec.Pipeline->BindTextureArray(ArrayIndex);
@@ -172,6 +174,10 @@ namespace LkEngine
 		Flush();
     }
 
+	void LRenderer2D::SetTargetFramebuffer(TObjectPtr<LFramebuffer> InFramebuffer)
+	{
+	}
+
 	void LRenderer2D::StartBatch()
 	{
         QuadIndexCount = 0;
@@ -217,9 +223,14 @@ namespace LkEngine
 		LK_UNUSED(Image);
 	}
 
+    void LRenderer2D::DrawLine(const glm::vec2& P0, const glm::vec2& P1, const glm::vec4& Color)
+    {
+    }
+
 	void LRenderer2D::DrawQuad(const glm::mat4& Transform, const glm::vec4& Color)
 	{
-		LK_UNUSED(Transform); LK_UNUSED(Color);
+		LK_UNUSED(Transform); 
+		LK_UNUSED(Color);
 	}
 
 	void LRenderer2D::DrawQuad(const glm::vec2& Position, const glm::vec2& Size, const glm::vec4& Color)
@@ -273,7 +284,9 @@ namespace LkEngine
 
 	void LRenderer2D::DrawQuad(const glm::vec2& Position, const glm::vec2& Size, TObjectPtr<LTexture> Texture)
 	{
-		LK_UNUSED(Position); LK_UNUSED(Size); LK_UNUSED(Texture);
+		LK_UNUSED(Position); 
+		LK_UNUSED(Size); 
+		LK_UNUSED(Texture);
 		LK_MARK_FUNC_NOT_IMPLEMENTED();
 	}
 

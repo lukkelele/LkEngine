@@ -50,8 +50,9 @@ namespace LkEngine {
 		UserFunction = LK_BIT(2),
 		AutoSize     = LK_BIT(3),
 	};
-
 	LK_ENUM_CLASS_FLAGS(EMessageBoxFlag);
+	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EMessageBoxFlag, EMessageBoxFlag::OkButton, EMessageBoxFlag::AutoSize);
+
 }
 
 namespace LkEngine::UI {
@@ -88,6 +89,8 @@ namespace LkEngine::UI {
 		static std::unordered_map<std::string, FMessageBox> MessageBoxes;
 	}
 
+	void Separator(const ImVec2& Size, const ImVec4& Color);
+
 	void ShowMessageBox(const char* Title,
 						const std::function<void()>& RenderFunction,
 						uint32_t Flags = (uint32_t)EMessageBoxFlag::AutoSize,
@@ -119,7 +122,6 @@ namespace LkEngine::UI {
 		UI::FScopedStyle HeaderPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2(FramePaddingX, FramePaddingY));
 
 		ImGui::PushID(Name.c_str());
-		//IsOpen = ImGui::TreeNodeEx("##DummyID", TreeNodeFlags, StringUtils::ToUpper(Name).c_str());
 		const bool IsOpen = ImGui::TreeNodeEx("##DummyID", TreeNodeFlags, Name.c_str());
 		ImGui::PopID();
 
@@ -565,7 +567,7 @@ namespace LkEngine::UI {
 		ShiftCursorY(4.0f);
 		ImGui::PushItemWidth(-1);
 
-		const bool Modified = UI::Draw::DragFloat(std::format("##{0}", Label).c_str(), &Value, Delta, Min, Max);
+		const bool Modified = UI::Draw::DragFloat(std::format("##{}", Label).c_str(), &Value, Delta, Min, Max);
 
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
@@ -574,7 +576,15 @@ namespace LkEngine::UI {
 		return Modified;
 	}
 
-	FORCEINLINE bool Property(const char* Label, glm::vec3& Value, float Delta = 0.10f, float Min = 0.0f, float Max = 0.0f, const char* HelpText = "")
+	/**
+	 * Slider property (float 3).
+	 */
+	FORCEINLINE bool Property(const char* Label, 
+							  glm::vec3& Value, 
+							  float Delta = 0.10f, 
+							  float Min = 0.0f, 
+							  float Max = 0.0f, 
+							  const char* HelpText = "")
 	{
 		ShiftCursor(10.0f, 9.0f);
 		ImGui::Text(Label);
@@ -598,8 +608,7 @@ namespace LkEngine::UI {
 		return Modified;
 	}
 
-	FORCEINLINE bool IsItemHovered(const float DelayInSeconds = 0.10f, 
-								   ImGuiHoveredFlags Flags = ImGuiHoveredFlags_None)
+	FORCEINLINE bool IsItemHovered(const float DelayInSeconds = 0.10f, ImGuiHoveredFlags Flags = ImGuiHoveredFlags_None)
 	{
 		return ImGui::IsItemHovered() && (GImGui->HoveredIdTimer > DelayInSeconds); /* HoveredIdNotActiveTimer. */
 	}
@@ -638,6 +647,215 @@ namespace LkEngine::UI {
 			IM_COL32_WHITE, /* Icon Tint.   */
 			OpenDirection   /* Arrow direction on opened node. */
 		);
+	}
+
+	template<typename T>
+	static void Table(const char* TableName, const char** Columns, const uint32_t ColumnCount, const ImVec2& Size, T RenderFunc)
+	{
+		if ((Size.x <= 0.0f) || (Size.y <= 0.0f))
+		{
+			return;
+		}
+
+		static constexpr float EdgeOffset = 4.0f;
+
+		FScopedStyle CellPadding(ImGuiStyleVar_CellPadding, ImVec2(4.0f, 0.0f));
+		const ImColor BgColor = ImColor(RGBA32::Background);
+		const ImColor ColRowAlt = ColorWithMultipliedValue(BgColor, 1.29f);
+
+		FScopedColor RowColor(ImGuiCol_TableRowBg, BgColor);
+		FScopedColor RowAltColor(ImGuiCol_TableRowBgAlt, ColRowAlt);
+		FScopedColor TableColor(ImGuiCol_ChildBg, BgColor);
+
+		static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_NoPadInnerX
+			| ImGuiTableFlags_Resizable
+			| ImGuiTableFlags_Reorderable
+			| ImGuiTableFlags_ScrollY
+			| ImGuiTableFlags_RowBg;
+
+		if (!ImGui::BeginTable(TableName, ColumnCount, TableFlags, Size))
+		{
+			return;
+		}
+
+		/* Cache the cursor position on the X-axis. */
+		const float CursorX = ImGui::GetCursorScreenPos().x;
+
+		for (uint32_t Idx = 0; Idx < ColumnCount; Idx++)
+		{
+			ImGui::TableSetupColumn(Columns[Idx]);
+		}
+
+		/* Setup table headers. */
+		{
+			const ImColor ActiveColor = ColorWithMultipliedValue(BgColor, 1.35f);
+			FScopedColorStack HeaderCol(ImGuiCol_HeaderHovered, ActiveColor, 
+										ImGuiCol_HeaderActive, ActiveColor);
+
+			ImGui::TableSetupScrollFreeze(ImGui::TableGetColumnCount(), 1);
+			//ImGui::TableNextRow(ImGuiTableRowFlags_Headers, 22.0f);
+			ImGui::TableNextRow(ImGuiTableRowFlags_Headers, 24.0f);
+
+			for (uint32_t Idx = 0; Idx < ColumnCount; Idx++)
+			{
+				ImGui::TableSetColumnIndex(Idx);
+				const char* ColumnName = ImGui::TableGetColumnName(Idx);
+				ImGui::PushID(ColumnName);
+
+				/**
+				 * Not sure about the edge offset on the Y-axis.
+				 * A factor of 1.0f or 2.0f works.
+				 */
+				//UI::ShiftCursor(EdgeOffset * 3.0f, EdgeOffset * 2.0f);
+				UI::ShiftCursor(EdgeOffset * 3.0f, EdgeOffset * 1.0f);
+				ImGui::TableHeader(ColumnName);
+				UI::ShiftCursor(-EdgeOffset * 3.0f, -EdgeOffset * 1.0f);
+				//UI::ShiftCursor(-EdgeOffset * 3.0f, -EdgeOffset * 2.0f);
+
+				ImGui::PopID();
+			}
+
+			ImGui::SetCursorScreenPos(ImVec2(CursorX, ImGui::GetCursorScreenPos().y));
+		}
+
+		RenderFunc();
+
+		ImGui::EndTable();
+	}
+
+	bool TableRowClickable(const char* RowID, const float RowHeight);
+
+	FORCEINLINE bool ColoredButton(const char* Label, const ImVec4& BgColor, const ImVec2& ButtonSize)
+	{
+		FScopedColor ButtonCol(ImGuiCol_Button, BgColor);
+		return ImGui::Button(Label, ButtonSize);
+	}
+
+	FORCEINLINE bool ColoredButton(const char* Label, const ImVec4& BgColor, const ImVec4& FgColor, const ImVec2& ButtonSize)
+	{
+		FScopedColor TextColor(ImGuiCol_Text, FgColor);
+		FScopedColor ButtonColor(ImGuiCol_Button, BgColor);
+		return ImGui::Button(Label, ButtonSize);
+	}
+
+	FORCEINLINE bool BeginCombo(const char* Label, const char* PreviewValue, const ImGuiComboFlags Flags = ImGuiComboFlags_None)
+	{
+		const bool Opened = ImGui::BeginCombo(Label, PreviewValue, Flags);
+		DrawItemActivityOutline();
+
+		return Opened;
+	}
+
+	FORCEINLINE void EndCombo()
+	{
+		ImGui::EndCombo();
+	}
+
+	template<typename TEnum>
+	FORCEINLINE bool PropertyDropdown(const char* Label, 
+									  const char** Options, 
+									  const uint16_t OptionCount, 
+									  TEnum& Selected, 
+									  const char* HelpText = "")
+	{
+		using T = std::underlying_type_t<TEnum>;
+		const T SelectedIndex = static_cast<std::underlying_type_t<TEnum>>(Selected);
+
+		const char* CurrentOption = Options[SelectedIndex];
+		ShiftCursor(10.0f, 9.0f);
+		ImGui::Text(Label);
+
+		if (std::strlen(HelpText) != 0)
+		{
+			ImGui::SameLine();
+			HelpMarker(HelpText);
+		}
+
+		ImGui::NextColumn();
+		ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		bool Modified = false;
+
+		const std::string ID = std::format("##{}", Label);
+		if (UI::BeginCombo(ID.c_str(), CurrentOption))
+		{
+			for (uint16_t Idx = 0; Idx < OptionCount; Idx++)
+			{
+				const bool IsSelected = (CurrentOption == Options[Idx]);
+				if (ImGui::Selectable(Options[Idx], IsSelected))
+				{
+					CurrentOption = Options[Idx];
+					//Selected = (TEnum)Idx;
+					Selected = static_cast<TEnum>(Idx);
+					Modified = true;
+				}
+
+				if (IsSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			UI::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		Draw::Underline();
+
+		return Modified;
+	}
+
+	FORCEINLINE bool PropertyDropdown(const char* Label, 
+									  const char** Options, 
+									  const uint16_t OptionCount, 
+									  int32_t* Selected, 
+									  const char* HelpText = "")
+	{
+		const char* CurrentOption = Options[*Selected];
+		ShiftCursor(10.0f, 9.0f);
+		ImGui::Text(Label);
+
+		if (std::strlen(HelpText) != 0)
+		{
+			ImGui::SameLine();
+			HelpMarker(HelpText);
+		}
+
+		ImGui::NextColumn();
+		ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		bool Modified = false;
+
+		const std::string ID = std::format("##{}", Label);
+		if (UI::BeginCombo(ID.c_str(), CurrentOption))
+		{
+			for (uint16_t Idx = 0; Idx < OptionCount; Idx++)
+			{
+				const bool IsSelected = (CurrentOption == Options[Idx]);
+				if (ImGui::Selectable(Options[Idx], IsSelected))
+				{
+					CurrentOption = Options[Idx];
+					*Selected = Idx;
+					Modified = true;
+				}
+
+				if (IsSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			UI::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		Draw::Underline();
+
+		return Modified;
 	}
 
 }

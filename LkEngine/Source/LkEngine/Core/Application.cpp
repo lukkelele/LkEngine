@@ -31,8 +31,6 @@ namespace LkEngine {
 
 		LCrashHandler::AttachInstance(this);
 		GarbageCollector.Initialize();
-
-		LLog::RegisterLoggers();
 	}
 
 	LApplication::~LApplication()
@@ -104,7 +102,7 @@ namespace LkEngine {
 
 			for (TObjectPtr<LLayer>& Layer : LayerStack)
 			{
-				Layer->OnUpdate(DeltaTime);
+				Layer->Tick(DeltaTime);
 			}
 
 			/* UI. */
@@ -204,7 +202,7 @@ namespace LkEngine {
 
 		for (TObjectPtr<LLayer>& Layer : LayerStack)
 		{
-			Layer->OnRenderUI();
+			Layer->RenderUI();
 		}
 
 		UILayer->EndFrame();

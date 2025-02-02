@@ -39,31 +39,25 @@ namespace LkEngine {
 	namespace Meta {
 
 		/**
-		 * TString
+		 * TStringLiteral
 		 * 
 		 *  String literal applicable for templates.
 		 */
 		template<std::size_t N>
-		struct TString
+		struct TStringLiteral
 		{
-			constexpr TString(const char(&InString)[N])
-			{
-				std::copy_n(InString, N, value);
-			}
+			constexpr TStringLiteral(const char(&InString)[N]) { std::copy_n(InString, N, value); }
 
-			operator std::string_view() const 
-			{
-				return std::string_view(value);
-			}
+			constexpr std::size_t Size() const { return N; }
+			constexpr std::string_view View() const { return std::string_view(value); }
+
+			operator std::string_view() const { return std::string_view(value); }
 
 			char value[N];
 		};
 
 		template <typename T>
-		static std::string TypeName()
-		{
-			return typeid(T).name();
-		};
+		static std::string TypeName() { return typeid(T).name(); };
 
 		/**
 		 * RemovePointerAndReference
@@ -180,9 +174,7 @@ namespace LkEngine {
 		 * Register a member to a class metadata container. 
 		 */
 		template<typename TClass, typename TMemberPtr>
-		constexpr void RegisterClassMember(FClassData& ClassData, 
-										   std::string_view MemberName, 
-										   TMemberPtr TClass::*MemberPtr)
+		constexpr void RegisterClassMember(FClassData& ClassData, std::string_view MemberName, TMemberPtr TClass::*MemberPtr)
 		{
 			/* Deduce the type of the pointer-to-member. */
 			using MemberType = decltype(MemberPtr); 

@@ -15,14 +15,14 @@ namespace LkEngine {
 	class LEncoder
 	{
 	public:
-		template<EncodingFormat::Type FormatType>
+		template<EEncodingFormat FormatType>
 		inline static std::string Encode(const unsigned char* Data, const size_t Length)
 		{
 			return "Encode_NULL";
 		}
 
 		template<>
-		inline static std::string Encode<EncodingFormat::Base64>(const unsigned char* Data, const size_t Length)
+		inline static std::string Encode<EEncodingFormat::Base64>(const unsigned char* Data, const size_t Length)
 		{
 			LK_CORE_ASSERT(Data && (Length > 0));
 
@@ -60,19 +60,19 @@ namespace LkEngine {
 		}
 
 		template<>
-		inline static std::string Encode<EncodingFormat::Hex>(const unsigned char* Data, const size_t Length)
+		inline static std::string Encode<EEncodingFormat::Hex>(const unsigned char* Data, const size_t Length)
 		{
 			return "Hex_Encoded";
 		}
 
-		template<EncodingFormat::Type FormatType>
+		template<EEncodingFormat FormatType>
 		inline static std::string Encode(const char* Data, const size_t Length)
 		{
 			return "Encode_NULL";
 		}
 
 		template<>
-		inline static std::string Encode<EncodingFormat::Base64>(const char* Data, const size_t Length)
+		inline static std::string Encode<EEncodingFormat::Base64>(const char* Data, const size_t Length)
 		{
 			assert(Data != nullptr);
 			assert(Length > 0);
@@ -111,7 +111,7 @@ namespace LkEngine {
 		}
 
 		template<>
-		inline static std::string Encode<EncodingFormat::Hex>(const char* Data, const size_t Length)
+		inline static std::string Encode<EEncodingFormat::Hex>(const char* Data, const size_t Length)
 		{
 			return "Hex_Encoded";
 		}

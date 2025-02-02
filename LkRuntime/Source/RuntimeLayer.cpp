@@ -21,7 +21,7 @@ namespace LkEngine {
 	{
 	}
 
-	void LRuntimeLayer::OnUpdate(const float Timestep)
+	void LRuntimeLayer::Tick(const float Timestep)
 	{
 		LK_UNUSED(Timestep);
 	}

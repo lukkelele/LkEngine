@@ -5,10 +5,6 @@
 #include "YAMLSerialization.h"
 
 /**
- * TODO: LOG IN CONSOLE
- */
-
-/**
  * Helper for being able to pass C-strings and implicitly convert them
  * to std::string when using the serialization macros.
  * Required for decltype to evaluate correctly.
@@ -85,8 +81,8 @@ namespace LkEngine {
 		Yaml,
 	};
 
-	namespace Enum {
-
+	namespace Enum 
+	{
 		FORCEINLINE static constexpr const char* ToString(const ESerializeFormat Format)
 		{
 			switch (Format)
@@ -95,10 +91,23 @@ namespace LkEngine {
 				case ESerializeFormat::Yaml: return "Yaml";
 			}
 
-			LK_ASSERT(false);
+			LK_CORE_VERIFY(false);
 			return nullptr;
 		}
 
 	}
+
+
+	/**
+	 * ISerializable
+	 */
+	class ISerializable
+	{
+	public:
+		virtual ~ISerializable() = default;
+
+		virtual void SerializeToYaml(YAML::Emitter& Out) const = 0;
+		virtual void DeserializeFromYaml(const YAML::Node& Data) = 0;
+	};
 
 }

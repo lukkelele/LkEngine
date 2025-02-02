@@ -13,14 +13,14 @@ namespace LkEngine {
 	std::filesystem::path LFileSystem::WorkingDir{};
 	std::filesystem::path LFileSystem::BinaryDir{};
 	std::filesystem::path LFileSystem::EngineDir{};
-	std::filesystem::path LFileSystem::EngineConfig{};
 	std::filesystem::path LFileSystem::RuntimeDir{};
 	std::filesystem::path LFileSystem::ConfigDir{};
+	std::filesystem::path LFileSystem::ResourcesDir{};
 	std::filesystem::path LFileSystem::AssetsDir{};
 	std::filesystem::path LFileSystem::ProjectsDir{};
-	std::filesystem::path LFileSystem::EditorConfig{};
 
-	namespace fs = std::filesystem;
+	std::filesystem::path LFileSystem::EngineConfig{};
+	std::filesystem::path LFileSystem::EditorConfig{};
 
 	bool LFileSystem::Move(const std::filesystem::path& OldFilepath, const std::filesystem::path& NewFilepath)
 	{
@@ -81,6 +81,7 @@ namespace LkEngine {
 
 	bool LFileSystem::RenameFilename(const std::filesystem::path& OldFilepath, const std::string& NewName)
 	{
+		namespace fs = std::filesystem;
 		const fs::path NewPath = (OldFilepath.parent_path() / fs::path(NewName + OldFilepath.extension().string()));
 
 		return Rename(OldFilepath, NewPath);
@@ -110,16 +111,16 @@ namespace LkEngine {
 
 	bool LFileSystem::ShowFileInExplorer(const std::filesystem::path& Filepath)
 	{
-		const fs::path AbsolutePath = std::filesystem::canonical(Filepath);
+		const std::filesystem::path AbsolutePath = std::filesystem::canonical(Filepath);
 		if (!Exists(AbsolutePath))
 		{
 			return false;
 		}
 
 	#if defined(LK_PLATFORM_WINDOWS)
-		const std::string Command = LK_FORMAT_STRING("explorer.exe /select,\"{0}\"", AbsolutePath.string());
+		const std::string Command = std::format("explorer.exe /select,\"{0}\"", AbsolutePath.string());
 	#elif defined(LK_PLATFORM_LINUX)
-		const std::string Command = LK_FORMAT_STRING("xdg-open \"{0}\"", dirname(AbsolutePath.string().data()));
+		const std::string Command = std::format("xdg-open \"{0}\"", dirname(AbsolutePath.string().data()));
 	#endif
 		system(Command.c_str());
 
@@ -141,6 +142,44 @@ namespace LkEngine {
 	#elif defined(LK_PLATFORM_LINUX)
 		return ShowFileInExplorer(path);
 	#endif	
+	}
+
+	void LFileSystem::ConvertToPlatformPath(std::string& Path)
+	{
+	#if defined(LK_PLATFORM_WINDOWS)
+		ConvertToWindowsPath(Path);
+	#elif defined(LK_PLATFORM_LINUX)
+		ConvertToUnixPath(Path);
+	#endif
+	}
+
+	void LFileSystem::ConvertToUnixPath(std::string& WindowsPath)
+	{
+		if (WindowsPath.empty())
+		{
+			return;
+		}
+
+		std::replace(WindowsPath.begin(), WindowsPath.end(), '\\', '/');
+	}
+
+	void LFileSystem::ConvertToWindowsPath(std::string& UnixPath)
+	{
+		if (UnixPath.empty())
+		{
+			return;
+		}
+
+		std::replace(UnixPath.begin(), UnixPath.end(), '/', '\\');
+	}
+
+	std::string LFileSystem::ConvertToPlatformPath(const std::filesystem::path& Path)
+	{
+	#if defined(LK_PLATFORM_WINDOWS)
+		return ConvertToWindowsPath(Path);
+	#elif defined(LK_PLATFORM_LINUX)
+		return ConvertToUnixPath(Path);
+	#endif
 	}
 
 	std::string LFileSystem::ConvertToUnixPath(const std::filesystem::path& WindowsPath)

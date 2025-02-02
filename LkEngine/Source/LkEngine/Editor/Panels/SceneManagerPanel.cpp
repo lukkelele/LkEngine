@@ -39,7 +39,7 @@ namespace LkEngine {
 		GOnSceneSetActive.Add(this, &LSceneManagerPanel::SetScene);
 	}
 
-	void LSceneManagerPanel::OnRenderUI(bool& IsOpen)
+	void LSceneManagerPanel::RenderUI(bool& IsOpen)
 	{
 		if (bIsWindow)
 		{

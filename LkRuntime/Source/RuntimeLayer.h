@@ -15,7 +15,7 @@ namespace LkEngine {
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 
-		virtual void OnUpdate(const float Timestep) override;
+		virtual void Tick(const float Timestep) override;
 
 		void OpenProject();
 

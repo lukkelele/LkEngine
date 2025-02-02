@@ -13,7 +13,7 @@ namespace LkEngine {
 		LOBJECT_REGISTER();
 	}
 
-	void LEditorSettingsPanel::OnRenderUI(bool& IsOpen)
+	void LEditorSettingsPanel::RenderUI(bool& IsOpen)
 	{
 		if (bWindow_CoreSettings)
 		{

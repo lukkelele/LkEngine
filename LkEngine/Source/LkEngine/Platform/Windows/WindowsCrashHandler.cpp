@@ -42,7 +42,7 @@ namespace LkEngine {
             //oss << *LApplication::Get()->GenerateCrashDump();
 
             std::string CrashInfo = oss.str();
-            std::string base64CrashInfo = LEncoder::Encode<EncodingFormat::Base64>(
+            std::string base64CrashInfo = LEncoder::Encode<EEncodingFormat::Base64>(
                 reinterpret_cast<const unsigned char*>(CrashInfo.c_str()), CrashInfo.length()
             );
 
