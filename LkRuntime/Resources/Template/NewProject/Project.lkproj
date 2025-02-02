@@ -1,0 +1,6 @@
+Project:
+  Name: $PROJECT_NAME$
+  AssetDirectory: Assets
+  AssetRegistry: Assets/AssetRegistry.lkr
+  MeshPath: Assets/Meshes
+  MeshSourcePath: Assets/Meshes/Source
