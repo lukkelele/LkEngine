@@ -57,6 +57,11 @@ Dependency = {
 		Configurations = "Debug,Release"
 	},
 
+	Bullet3 = {
+		IncludeDir = "%{wks.location}/External/Bullet3/bullet3/include",
+		--LibDir = "%{wks.location}/External/Bullet3/bullet3/lib",
+	},
+
 	YamlCpp = {
 		IncludeDir = "%{wks.location}/External/YamlCpp/yaml-cpp/include",
 		LibDir = "%{wks.location}/External/YamlCpp/yaml-cpp/lib",
@@ -121,6 +126,7 @@ include "External/ImGuizmo/ImGuizmo-premake5.lua"
 include "External/ImGuiNodeEditor/ImGuiNodeEditor-premake5.lua"
 include "External/YamlCpp/YamlCpp-premake5.lua"
 include "External/Box2D/Box2D-premake5.lua"
+include "External/Bullet3/Bullet3-premake5.lua"
 include "External/Tracy/Tracy-premake5.lua"
 include "External/NfdExtended/NfdExtended-premake5.lua"
 -- ~Configurations

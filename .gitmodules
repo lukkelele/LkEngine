@@ -37,3 +37,6 @@
 [submodule "External/Glm/glm"]
 	path = External/Glm/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "External/Bullet3/bullet3"]
+	path = External/Bullet3/bullet3
+	url = https://github.com/bulletphysics/bullet3.git
