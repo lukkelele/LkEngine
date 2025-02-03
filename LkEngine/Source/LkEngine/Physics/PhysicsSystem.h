@@ -1,5 +1,4 @@
 #pragma once
-
 #include "PhysicsAPI.h"
 
 #include "LkEngine/Physics/2D/Physics2D.h"
@@ -9,35 +8,26 @@ namespace LkEngine {
 
     enum class EPhysicsAPI
     {
-        Null = 0,
-        Bullet3, /* bullet3 */
+        None = 0,
+        Bullet3,
     };
 
-    class PhysicsSystem
+    class LPhysicsSystem
     {
     public:
-        PhysicsSystem();
-        ~PhysicsSystem() = default;
+        LPhysicsSystem();
+        ~LPhysicsSystem() = default;
 
-        void Initialize() {}
-        void Simulate(const FTimestep DeltaTime);
+        void Simulate(const float DeltaTime);
 
-        FORCEINLINE static EPhysicsAPI GetPhysicsAPI() { return PhysicsAPI; }
+        static EPhysicsAPI GetAPI() { return API; }
 
-        FORCEINLINE static void SetPhysicsAPI(EPhysicsAPI InPhysicsAPI) 
-        { 
-            PhysicsAPI = InPhysicsAPI; 
-        }
-
-        /// REMOVE ?
-        static PhysicsSystem* Get() { return m_Instance; }
+		static void SetAPI(const EPhysicsAPI InAPI);
 
     private:
-        FTimestep Timestep = (1.0f / 60.0f);
+		float Timestep = 0.0f;
 
-        inline static EPhysicsAPI PhysicsAPI = EPhysicsAPI::Null;
-
-        inline static PhysicsSystem* m_Instance = nullptr;
+        inline static EPhysicsAPI API = EPhysicsAPI::None;
     };
 
 }

@@ -4,18 +4,17 @@
 
 namespace LkEngine {
 
-    PhysicsSystem::PhysicsSystem()
+    LPhysicsSystem::LPhysicsSystem()
     {
-        m_Instance = this;
     }
 
-    void PhysicsSystem::Simulate(const FTimestep DeltaTime)
+    void LPhysicsSystem::Simulate(const float DeltaTime)
     {
-        // 2D Physics
+#if 0
+        /* 2D Physics. */
 		static signed int VelocityIterations = 20;
 		static signed int PositionIterations = 8;
 
-#if 0
         auto activeScene = Scene::GetActiveScene();
         if (activeScene)
         {
@@ -25,6 +24,9 @@ namespace LkEngine {
 #endif
     }
 
+	void LPhysicsSystem::SetAPI(const EPhysicsAPI InAPI)
+	{
+	}
 
 }
 

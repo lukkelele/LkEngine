@@ -1,15 +1,15 @@
 #pragma once
 
 #include "LkEngine/Physics/PhysicsAPI.h"
-#include "LkEngine/Scene/Entity.h"
+
 
 namespace LkEngine {
 
-    class BulletPhysics : public PhysicsAPI
+    class LBulletPhysics : public IPhysicsAPI
     {
     public:
-        BulletPhysics();
-        ~BulletPhysics() = default;
+        LBulletPhysics();
+        ~LBulletPhysics() = default;
     };
 
 }

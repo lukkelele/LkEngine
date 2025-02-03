@@ -1,14 +1,16 @@
 #include "LKpch.h"
 #include "BulletPhysics.h"
+
 #include "LkEngine/Physics/PhysicsSystem.h"
+
+#include "LkEngine/Scene/Entity.h"
 
 
 namespace LkEngine {
 
-    BulletPhysics::BulletPhysics()
+    LBulletPhysics::LBulletPhysics()
     {
-        m_PhysicsAPI = this;
-        PhysicsSystem::SetPhysicsAPI(EPhysicsAPI::Bullet3);
+		LK_CORE_DEBUG_TAG("BulletPhysics", "New instance");
     }
 
 }

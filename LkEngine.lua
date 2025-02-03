@@ -163,6 +163,7 @@ project "LkEngine"
         "%{Dependency.Glm.IncludeDir}",
         "%{Dependency.Spdlog.IncludeDir}",
         "%{Dependency.Box2D.IncludeDir}",
+        "%{Dependency.Bullet3.IncludeDir}",
         "%{Dependency.YamlCpp.IncludeDir}",
         "%{Dependency.Tracy.IncludeDir}",
         "%{Dependency.NfdExtended.IncludeDir}",
@@ -177,6 +178,7 @@ project "LkEngine"
         "NfdExtended",
         "YamlCpp",
         "Box2D",
+        "Bullet3",
     }
 
 	filter "system:windows"
