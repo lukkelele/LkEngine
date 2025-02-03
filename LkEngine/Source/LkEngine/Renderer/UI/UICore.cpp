@@ -68,6 +68,8 @@ namespace LkEngine::UI {
         UIContextID--;
     }
 
+	int Internal::GetContextID() { return UIContextID; }
+
     bool IsInputEnabled()
     {
         const ImGuiIO& IO = ImGui::GetIO();

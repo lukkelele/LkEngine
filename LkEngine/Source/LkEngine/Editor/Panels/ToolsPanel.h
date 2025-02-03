@@ -39,6 +39,8 @@ namespace LkEngine {
 		void UI_InputInfo_SceneSelection(const LVector2& Size = LVector2(0, 0));
 		void UI_InputInfo_ContentBrowserSelection(const LVector2& Size = LVector2(0, 0));
 
+		void UI_Sandbox();
+
 	public:
 		struct FWindow_ObjectReferences : public FWindow
 		{
@@ -63,11 +65,16 @@ namespace LkEngine {
 		{
 		};
 
+		struct FWindow_Sandbox : public FWindow
+		{
+		};
+
 		inline static FWindow_ObjectReferences Window_ObjectReferences{};
 		inline static FWindow_AssetRegistry Window_AssetRegistry{};
 		inline static FWindow_InputInfo Window_InputInfo{};
 		inline static FWindow_UserInterfaceTools Window_UserInterfaceTools{};
 		inline static FWindow_Fonts Window_Fonts{};
+		inline static FWindow_Sandbox Window_Sandbox{};
 
 	private:
 		LPANEL(LToolsPanel);

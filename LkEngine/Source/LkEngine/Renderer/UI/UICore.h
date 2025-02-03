@@ -106,6 +106,11 @@ namespace LkEngine::UI {
 		static constexpr const char* BottomBar          = "##LkEngine-BottomBar";
 		static constexpr const char* SelectedEntityInfo = "##LkEngine-Selected-Entity-Info"; /* REMOVE */
 	}
+
+	namespace Internal 		
+	{
+		int GetContextID();
+	}
 	
 	class FScopedStyle
 	{

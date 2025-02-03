@@ -13,13 +13,13 @@
 
 namespace LkEngine::StringUtils {
 
-	[[no_discard]] static constexpr std::string_view RemovePrefix(std::string_view Str, char Prefix = 'L')
+	[[nodiscard]] static constexpr std::string_view RemovePrefix(std::string_view Str, char Prefix = 'L')
 	{
 		return (Str.starts_with(Prefix)) ? Str.substr(1) : Str;
 	}
 
 	template<typename TChar = char, typename StringType>
-	[[no_discard]] static std::basic_string<TChar> ToLower(const StringType& Input)
+	[[nodiscard]] static std::basic_string<TChar> ToLower(const StringType& Input)
 	{
 		std::basic_string_view<TChar> StringView(Input);
 		std::basic_string<TChar> Result(StringView);
@@ -44,7 +44,7 @@ namespace LkEngine::StringUtils {
 #endif
 
 	template<typename TChar = char, typename StringType>
-	[[no_discard]] static std::basic_string<TChar> ToUpper(const StringType& Input)
+	[[nodiscard]] static std::basic_string<TChar> ToUpper(const StringType& Input)
 	{
 		std::basic_string_view<TChar> StringView(Input);
 		std::basic_string<TChar> Result(StringView);
@@ -68,37 +68,37 @@ namespace LkEngine::StringUtils {
 	}
 #endif
 
-	[[no_discard]] static std::string ToLower(const char* String)
+	[[nodiscard]] static std::string ToLower(const char* String)
     {
         return ToLower<char>(std::string_view(String));
     }
 
-    [[no_discard]] static std::string ToUpper(const char* String)
+    [[nodiscard]] static std::string ToUpper(const char* String)
     {
         return ToUpper<char>(std::string_view(String));
     }
 
-    [[no_discard]] static std::wstring ToLower(const wchar_t* String)
+    [[nodiscard]] static std::wstring ToLower(const wchar_t* String)
     {
         return ToLower<wchar_t>(std::wstring_view(String));
     }
 
-    [[no_discard]] static std::wstring ToUpper(const wchar_t* String)
+    [[nodiscard]] static std::wstring ToUpper(const wchar_t* String)
     {
         return ToUpper<wchar_t>(std::wstring_view(String));
     }
 
-    [[no_discard]] static std::wstring ToLower(const std::wstring& String)
+    [[nodiscard]] static std::wstring ToLower(const std::wstring& String)
     {
         return ToLower<wchar_t>(String);
     }
 
-    [[no_discard]] static std::wstring ToUpper(const std::wstring& String)
+    [[nodiscard]] static std::wstring ToUpper(const std::wstring& String)
     {
 		return ToUpper<wchar_t>(String);
     }
 
-	[[no_discard]] static std::string BytesToString(const uint64_t Bytes)
+	[[nodiscard]] static std::string BytesToString(const uint64_t Bytes)
 	{
 		static constexpr uint64_t GB = 1024 * 1024 * 1024;
 		static constexpr uint64_t MB = 1024 * 1024;
@@ -131,7 +131,7 @@ namespace LkEngine::StringUtils {
 	 * @brief Convert a string to a different size, such as wide to narrow and vice versa.
 	 */
 	template<typename TargetString, typename SourceString>
-	[[no_discard]] static TargetString Convert(const SourceString& Input)
+	[[nodiscard]] static TargetString Convert(const SourceString& Input)
 	{
 		/* Wide String to narrow. */
 		if constexpr (std::is_same_v<SourceString, std::wstring> 

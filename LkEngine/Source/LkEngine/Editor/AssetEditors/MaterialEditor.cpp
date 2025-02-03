@@ -84,7 +84,6 @@ namespace LkEngine {
 		}
 
 		UI::BeginPropertyGrid();
-		UI::PushID();
 
 		for (const auto& [UniformType, UniformName] : ShaderUniforms)
 		{
@@ -134,7 +133,6 @@ namespace LkEngine {
 
 		}
 
-		UI::PopID();
 		UI::EndPropertyGrid();
 
 	#if 0
@@ -162,7 +160,6 @@ namespace LkEngine {
 						ImGui::Text("%d", Value);
 
 						ImGui::SameLine(0, 5.0f);
-						//Value ? UI::FScopedColor(ImGuiCol_Button, RGBA32::BrightGreen) : UI::FScopedColor(ImGuiCol_Button, RGBA32::BackgroundDark);
 						ImGui::PushStyleColor(ImGuiCol_Button, (Value ? RGBA32::BrightGreen : RGBA32::BackgroundDark));
 						if (ImGui::Button("Toggle"))
 						{

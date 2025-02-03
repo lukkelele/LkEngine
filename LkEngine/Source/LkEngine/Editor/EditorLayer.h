@@ -41,14 +41,6 @@ namespace LkEngine {
 	class LProject;
 	class LViewport;
 
-	/* FIXME: */
-	enum class EEditorWindowType
-	{
-		None = 0,
-		Viewport,
-		NodeEditorLayer,
-	};
-
 	/**
 	 * LEditorLayer
 	 *

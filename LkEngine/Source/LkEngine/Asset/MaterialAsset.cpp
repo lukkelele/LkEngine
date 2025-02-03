@@ -64,11 +64,6 @@ namespace LkEngine {
 		LK_CORE_ASSERT(Material);
 	}
 
-	LMaterialAsset::~LMaterialAsset()
-	{
-		LK_CORE_WARN_TAG("MaterialAsset", "Releasing resources for: {}", Handle);
-	}
-
 	glm::vec3& LMaterialAsset::GetAlbedoColor()
 	{
 		LK_CORE_ASSERT(Material, "{}", LK_FUNCSIG);

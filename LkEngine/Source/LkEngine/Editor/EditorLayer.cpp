@@ -1884,21 +1884,10 @@ namespace LkEngine {
 					}
 				}
 
-			#if 0
-				if (ImGui::MenuItem("Material Editor"))
-				{
-					LK_CORE_DEBUG_TAG("Editor", "Open -> Material Editor");
-					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::MaterialEditor))
-					{
-						PanelData->bIsOpen = true;
-					}
-				}
-			#endif
-
 				if (ImGui::MenuItem("Input Info"))
 				{
 					LK_CORE_DEBUG_TAG("Editor", "Open -> Input Info");
-					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools); PanelData != nullptr)
 					{
 						PanelData->bIsOpen = true;
 						PanelData->Panel.As<LToolsPanel>()->Window_InputInfo.bOpen = true;
@@ -1908,7 +1897,7 @@ namespace LkEngine {
 				if (ImGui::MenuItem("UI Tools"))
 				{
 					LK_CORE_DEBUG_TAG("Editor", "Open -> Tools");
-					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools); PanelData != nullptr)
 					{
 						PanelData->bIsOpen = true;
 						PanelData->Panel.As<LToolsPanel>()->Window_UserInterfaceTools.bOpen = true;
@@ -1917,13 +1906,22 @@ namespace LkEngine {
 
 				if (ImGui::MenuItem("Registered Fonts"))
 				{
-					LK_CORE_DEBUG_TAG("Editor", "Open -> Registered Fonts");
-					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools); PanelData != nullptr)
 					{
 						PanelData->bIsOpen = true;
 						PanelData->Panel.As<LToolsPanel>()->Window_Fonts.bOpen = true;
 					}
 				}
+
+				if (ImGui::MenuItem("Sandbox"))
+				{
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools); PanelData != nullptr)
+					{
+						PanelData->bIsOpen = true;
+						PanelData->Panel.As<LToolsPanel>()->Window_Sandbox.bOpen = true;
+					}
+				}
+
 
 			#if defined(LK_ENGINE_DEBUG) && defined(LK_ENGINE_OPENGL)
 				if (ImGui::MenuItem("OpenGL Extensions"))

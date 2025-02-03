@@ -55,11 +55,17 @@ namespace LkEngine {
 			UI_Fonts();
 		}
 
+		if (Window_Sandbox.bOpen)
+		{
+			UI_Sandbox();
+		}
+
 		IsOpen = (Window_ObjectReferences.bOpen
 			|| Window_AssetRegistry.bOpen
 			|| Window_InputInfo.bOpen
 			|| Window_UserInterfaceTools.bOpen
 			|| Window_Fonts.bOpen
+			|| Window_Sandbox.bOpen
 		);
 	}
 
@@ -78,6 +84,7 @@ namespace LkEngine {
 
 			LK_SERIALIZE_PROPERTY(UserInterfaceTools, Window_UserInterfaceTools.bOpen, Out);
 			LK_SERIALIZE_PROPERTY(Fonts, Window_Fonts.bOpen, Out);
+			LK_SERIALIZE_PROPERTY(Sandbox, Window_Sandbox.bOpen, Out);
 		}
 		Out << YAML::EndMap;
 	}
@@ -100,6 +107,7 @@ namespace LkEngine {
 
 		LK_DESERIALIZE_PROPERTY(UserInterfaceTools, Window_UserInterfaceTools.bOpen, WindowsNode, false);
 		LK_DESERIALIZE_PROPERTY(Fonts, Window_Fonts.bOpen, WindowsNode, false);
+		LK_DESERIALIZE_PROPERTY(Sandbox, Window_Sandbox.bOpen, WindowsNode, false);
 	}
 
 	void LToolsPanel::UI_ObjectReferences()
@@ -675,6 +683,190 @@ namespace LkEngine {
 
 			ImGui::EndTable();
 		}
+	}
+
+	void LToolsPanel::UI_Sandbox()
+	{
+		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
+		ImGui::Begin("Sandbox", &Window_Sandbox.bOpen, WindowFlags);
+
+		ImGuiStyle& Style = ImGui::GetStyle();
+
+		UI::Font::Push("Title");
+		ImGui::Text("Sandbox");
+		UI::Font::Pop();
+
+		static std::array<const char*, 3> Options = { "Payload1", "Payload2", "Payload3" };
+		static int32_t Selected = 0;
+
+		if (UI::PropertyDropdown("Payload", Options.data(), Options.size(), &Selected, "Type of payload"))
+		{
+			LK_CORE_INFO("Dropdown->Payload: {}", (int)Selected);
+		}
+
+		static float ButtonSizeX = 84.0f;
+		static float ButtonSizeY = 52.0f;
+		static float ButtonOffsetY = 0.0f;
+		{
+			ImGui::Text("Button Size X");
+			ImGui::SameLine(0, 10.0f);
+			ImGui::SetNextItemWidth(90.0f);
+			UI::Draw::DragFloat("##ButtonSizeX", &ButtonSizeX, 1.0f, 10.0f, 300.0f);
+
+			ImGui::Text("Button Size Y");
+			ImGui::SameLine(0, 10.0f);
+			ImGui::SetNextItemWidth(90.0f);
+			UI::Draw::DragFloat("##ButtonSizeY", &ButtonSizeY, 1.0f, 10.0f, 300.0f);
+
+			ImGui::Text("Button Offset Y");
+			ImGui::SameLine(0, 10.0f);
+			ImGui::SetNextItemWidth(90.0f);
+			UI::Draw::DragFloat("##ButtonOffsetY", &ButtonOffsetY, 0.10f, -50.0f, 50.0f);
+		}
+
+		/* Configuration. */
+		{
+			static bool bPortOpen = false;
+
+			UI::Font::Push("Large");
+			ImGui::Text("Configuration");
+			UI::Font::Pop();
+			UI::Draw::Underline();
+
+			UI::BeginPropertyGrid(nullptr, ImVec2(230.0f, 0.0f), ImGuiTableFlags_SizingStretchProp);
+
+			UI::FScopedStyle FrameRounding(ImGuiStyleVar_FrameRounding, 7);
+			{
+				if (UI::Property("Enabled", bPortOpen))
+				{
+					LK_CORE_CONSOLE_INFO("Port is {}", (bPortOpen ? "open" : "closed"));
+				}
+			}
+
+			static std::array<const char*, 3> PortOptions = { "/dev/ttyPORT1", "/dev/ttyPORT2", "/dev/ttyPORT3" };
+			static int32_t PortSelection = 0;
+			UI::FScopedColor FrameBg(ImGuiCol_FrameBg, RGBA32::Compliment);
+			if (UI::PropertyDropdown("Port", PortOptions.data(), PortOptions.size(), &PortSelection, "Target port"))
+			{
+				LK_CORE_INFO("Dropdown->Port: {}", (int)PortSelection);
+			}
+
+			UI::EndPropertyGrid();
+		}
+
+		/* Console. */
+		{
+			ImVec2 ContentAvail = ImGui::GetContentRegionAvail();
+			//ContentAvail.y -= 200.0f;
+
+			static constexpr float RowHeight = 26.0f;
+			static constexpr float OffsetDistY = 6.0f;
+			static constexpr float TextPadX = 6.0f;
+
+			static const ImVec4 Color1 = ImVec4(0.961f, 0.173f, 0.659f, 1.0f);
+			static const ImVec4 Color2 = ImVec4(0.00f, 0.45f, 1.0f, 1.0f);
+			static const ImVec4 Color3 = ImVec4(1.00f, 0.90f, 0.060f, 1.0f);
+			static const ImVec4 Color4 = ImVec4(1.00f, 0.32f, 0.30f, 1.0f);
+
+			static std::array<const char*, 4> Columns = { "Payload", "Type", "Timestamp", "Data" };
+			UI::Table("Console", Columns.data(), Columns.size(), ImVec2(ContentAvail.x, 280.0f), [&]()
+			{
+				const bool RowClicked = UI::TableRowClickable(Options.at(Selected), 26.0f);
+
+				/* Column: Payload */
+				UI::ShiftCursorY(OffsetDistY);
+				UI::Separator(ImVec2(TextPadX, RowHeight - 2 * OffsetDistY), Color1);
+				ImGui::SameLine();
+				UI::ShiftCursorY(-OffsetDistY);
+				ImGui::Text("%s", Options.at(Selected));
+
+				/* Column: Type */
+				ImGui::TableNextColumn();
+				UI::ShiftCursorX(TextPadX);
+				ImGui::Text("%d", (int)Selected);
+
+				/* Column: Timestamp */
+				ImGui::TableNextColumn();
+				UI::ShiftCursorX(TextPadX);
+				static constexpr const char* TimeFormat = "%H:%M:%S";
+				std::time_t TimeNow = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+				std::stringstream TimeString;
+				TimeString << std::put_time(std::localtime(&TimeNow), TimeFormat);
+				ImGui::Text(TimeString.str().c_str());
+
+				/* Column: Data */
+				ImGui::TableNextColumn();
+				UI::ShiftCursorX(TextPadX);
+				ImGui::Text("%0X", 16);
+			});
+		}
+
+		{
+			static bool bRadioButton = false;
+			static constexpr float SpacingX = 5.0f;
+
+			if (ImGui::RadioButton("Radio Button", bRadioButton))
+			{
+				bRadioButton = !bRadioButton;
+			}
+
+			static std::array<const char*, 5> Types = { "Type1", "Type2", "Type3", "Type4", "Type5" };
+			static int32_t SelectedType = 0;
+			static int32_t SelectedType2 = 0;
+
+			ImGui::Text("Creator");
+			/* TODO: Need to fix so PushAligned counts the performed alignments. */
+			ImGui::Dummy(ImVec2(0, 0));
+			UI::PushAligned(SpacingX);
+			if (UI::PropertyDropdown("##Types", Types.data(), Types.size(), &SelectedType, "", 160))
+			{
+				LK_CORE_INFO("Dropdown->Types: {}", SelectedType);
+			}
+			if (UI::PropertyDropdown("##Types2", Types.data(), Types.size(), &SelectedType2, "", 160))
+			{
+				LK_CORE_INFO("Dropdown->Types2: {}", SelectedType2);
+			}
+			UI::PopAligned();
+		}
+
+		{
+			const ImVec2 ContentAvail = ImGui::GetContentRegionAvail();
+			ImGui::Text("Content: (%.2f, %.2f)", ContentAvail.x, ContentAvail.y);
+			const ImVec2 ButtonSize(static_cast<int>(ButtonSizeX), static_cast<int>(ButtonSizeY));
+
+			static constexpr int Buttons = 2;
+			static constexpr float ButtonPadding = 10.0f;
+
+			UI::ShiftCursor((ContentAvail.x - (Buttons * ButtonSize.x) - Style.FramePadding.x - (ButtonPadding)), 
+							(ContentAvail.y - (1.75f * ButtonSize.y) - Style.FramePadding.y - ButtonOffsetY));
+
+			/* Cancel button. */
+			{
+				UI::FScopedColor ButtonActive(ImGuiCol_ButtonActive, RGBA32::Text::Error);
+				UI::FScopedColor ButtonHovered(ImGuiCol_ButtonHovered, RGBA32::SelectionMuted);
+				UI::FScopedStyle FrameRounding(ImGuiStyleVar_FrameRounding, 10);
+				if (ImGui::Button("Cancel", ButtonSize))
+				{
+					LK_CORE_CONSOLE_WARN("Cancel: {}", Options.at(Selected));
+				}
+			}
+
+			ImGui::SameLine(0, ButtonPadding);
+
+			/* Send button. */
+			{
+				UI::FScopedColor ButtonColor(ImGuiCol_Button, RGBA32::Compliment);
+				UI::FScopedColor ButtonActive(ImGuiCol_ButtonActive, RGBA32::BrightGreen);
+				UI::FScopedColor ButtonHovered(ImGuiCol_ButtonHovered, RGBA32::Highlight);
+				UI::FScopedStyle FrameRounding(ImGuiStyleVar_FrameRounding, 10);
+				if (ImGui::Button("Send", ButtonSize))
+				{
+					LK_CORE_CONSOLE_INFO("Send: {}", Options.at(Selected));
+				}
+			}
+		}
+
+		ImGui::End();
 	}
 
 }

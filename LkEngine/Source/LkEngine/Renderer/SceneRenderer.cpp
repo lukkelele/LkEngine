@@ -52,10 +52,8 @@ namespace LkEngine {
 		MeshTransformMap.clear();
 	}
 
-	/* TODO: Evaluate if this should be ran on every tick or not. */
 	void LSceneRenderer::SetScene(TObjectPtr<LScene> InScene)
 	{
-		//LK_CORE_DEBUG_TAG("SceneRenderer", "Set scene to: {}", InScene ? InScene->GetName() : "None");
 		Scene = InScene;
 	}
 

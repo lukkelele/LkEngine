@@ -6,6 +6,11 @@
 
 namespace LkEngine::UI {
 
+	namespace Internal 
+	{
+		std::vector<ImGuiID> GridIdStack{};
+	}
+
 	FOnMessageBoxCancelled OnMessageBoxCancelled;
 
 	void Separator(const ImVec2& Size, const ImVec4& Color)

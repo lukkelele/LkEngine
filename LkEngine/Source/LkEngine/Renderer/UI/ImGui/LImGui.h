@@ -4,6 +4,8 @@
 #include "LkEngine/Core/Delegate/Delegate.h"
 #include "LkEngine/Renderer/UI/UICore.h"
 
+#include <deque>
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
@@ -65,6 +67,11 @@ namespace LkEngine::UI {
 	static constexpr float SLIDER_MIN_UNLIMITED_POS = 0.0f;
 	static constexpr float SLIDER_MAX_UNLIMITED = 0.0f;
 
+	namespace Internal 
+	{
+		extern std::vector<ImGuiID> GridIdStack;
+	}
+
 	/** 
 	 * FMessageBox
 	 */
@@ -87,6 +94,18 @@ namespace LkEngine::UI {
 	namespace Internal 
 	{
 		static std::unordered_map<std::string, FMessageBox> MessageBoxes;
+
+		static std::deque<float> AlignedStack{};
+	}
+
+	FORCEINLINE void PushAligned(const float Spacing = 0.0f)
+	{
+		Internal::AlignedStack.push_front(Spacing);
+	}
+
+	FORCEINLINE void PopAligned()
+	{
+		Internal::AlignedStack.pop_front();
 	}
 
 	void Separator(const ImVec2& Size, const ImVec4& Color);
@@ -384,7 +403,6 @@ namespace LkEngine::UI {
 		{
 			bool Modified = false;
 
-			//UI::PushID();
 			ImGui::TableSetColumnIndex(0);
 			UI::ShiftCursor(17.0f, 7.0f);
 
@@ -404,7 +422,7 @@ namespace LkEngine::UI {
 					ImGui::BeginChild(
 						ImGui::GetID((Label + "Subwindow").c_str()),
 						ImVec2((ImGui::GetContentRegionAvail().x - SpacingX), ImGui::GetFrameHeightWithSpacing() + 8.0f),
-						0, /* Child Flags. */
+						ImGuiChildFlags_None,
 						ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse /* Window Flags. */
 					);
 				}
@@ -450,7 +468,6 @@ namespace LkEngine::UI {
 					ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, RenderMultiSelect);
 					const ImGuiID InputID = ImGui::GetID(("##" + InLabel).c_str());
 					const bool WasTempInputActive = ImGui::TempInputIsActive(InputID);
-					//Modified |= ImGui::DragFloat(("##" + InLabel).c_str(), &InValue, 0.1f, 0.0f, 0.0f, "%.2f", 0);
 					Modified |= ImGui::DragFloat(("##" + InLabel).c_str(), &InValue, ValueSpeed, ValueMin, ValueMax, Format, 0);
 
 					if (ImGui::TempInputIsActive(InputID))
@@ -497,39 +514,56 @@ namespace LkEngine::UI {
 					ImVec4(0.10f, 0.25f, 0.80f, 1.0f), 
 					(RenderMultiSelectAxes & EVectorAxis::Z)
 				);
-				//ImGui::Text("Modified: %s   Manually Edited: %s", (Modified ? "Yes" : "No"), (ManuallyEdited ? "Yes" : "No"));
 
 				ImGui::EndChild();
 			}
-			//UI::PopID();
 
 			return Modified || ManuallyEdited;
 		}
 	}
 
-	FORCEINLINE void BeginPropertyGrid(const uint32_t Columns = 2)
+	FORCEINLINE void BeginPropertyGrid(const char* Label = nullptr,
+									   const ImVec2& Size = ImVec2(0.0f, 0.0f), 
+									   const ImGuiTableFlags Flags = ImGuiTableFlags_SizingStretchProp,
+									   const bool UseHeaderLabels = false)
 	{
-		/* TODO: Evaluate the need of pushing/popping ID's for property grids. */
-		//PushID();
+		UI::PushID();
+		Internal::GridIdStack.push_back(Internal::GetContextID());
+
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
-		ImGui::Columns(Columns);
+		if (!ImGui::BeginTable(Label ? Label : GenerateID(), 2, Flags, Size))
+		{
+			return;
+		}
+
+		static constexpr ImGuiTableColumnFlags ColumnFlags = ImGuiTableColumnFlags_None;
+		for (uint32_t ColumnIdx = 0; ColumnIdx < 2; ColumnIdx++)
+		{
+			ImGui::TableSetupColumn(std::format("##Column-{}", ColumnIdx).c_str(), ColumnFlags);
+		}
+
+		if (UseHeaderLabels)
+		{
+			ImGui::TableHeadersRow();
+		}
+		ImGui::TableNextRow();
 	}
 
 	FORCEINLINE void EndPropertyGrid()
 	{
-		/* TODO: Evaluate the need of pushing/popping ID's for property grids. */
-		ImGui::Columns(1);
-		Draw::Underline();
+		ImGui::EndTable();
 		ImGui::PopStyleVar(2); /* ItemSpacing, FramePadding */
-		ShiftCursorY(18.0f);
-		//PopID();
+
+		UI::PopID();
+		Internal::GridIdStack.pop_back();
 	}
 
 	FORCEINLINE bool Property(const char* Label, bool& Value, const char* HelpText = "")
 	{
 		bool Modified = false;
 
+		ImGui::TableSetColumnIndex(0);
 		ShiftCursor(10.0f, 9.0f);
 		ImGui::Text(Label);
 
@@ -539,21 +573,21 @@ namespace LkEngine::UI {
 			HelpMarker(HelpText);
 		}
 
-		ImGui::NextColumn();
+		ImGui::TableSetColumnIndex(1);
 		ShiftCursorY(4.0f);
+
 		ImGui::PushItemWidth(-1);
-
 		Modified = ImGui::Checkbox(std::format("##{0}", Label).c_str(), &Value);
-
 		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-		Draw::Underline();
+
+		ImGui::TableNextRow();
 
 		return Modified;
 	}
 
 	static bool Property(const char* Label, float& Value, float Delta = 0.10f, float Min = 0.0f, float Max = 0.0f, const char* HelpText = "", const char* HelpSymbol = "(?)")
 	{
+		ImGui::TableSetColumnIndex(0);
 		ShiftCursor(10.0f, 9.0f);
 		ImGui::Text(Label);
 
@@ -563,15 +597,14 @@ namespace LkEngine::UI {
 			HelpMarker(HelpText, HelpSymbol);
 		}
 
-		ImGui::NextColumn();
+		ImGui::TableSetColumnIndex(1);
 		ShiftCursorY(4.0f);
+
 		ImGui::PushItemWidth(-1);
-
 		const bool Modified = UI::Draw::DragFloat(std::format("##{}", Label).c_str(), &Value, Delta, Min, Max);
-
 		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-		Draw::Underline();
+
+		ImGui::TableNextRow();
 
 		return Modified;
 	}
@@ -586,6 +619,8 @@ namespace LkEngine::UI {
 							  float Max = 0.0f, 
 							  const char* HelpText = "")
 	{
+		ImGui::TableSetColumnIndex(0);
+
 		ShiftCursor(10.0f, 9.0f);
 		ImGui::Text(Label);
 
@@ -595,15 +630,14 @@ namespace LkEngine::UI {
 			HelpMarker(HelpText);
 		}
 
-		ImGui::NextColumn();
+		ImGui::TableSetColumnIndex(1);
 		ShiftCursorY(4.0f);
 
 		ImGui::PushItemWidth(-1);
 		const bool Modified = UI::Draw::DragFloat3(std::format("##{0}", Label).c_str(), glm::value_ptr(Value), Delta, Min, Max);
 		ImGui::PopItemWidth();
 
-		ImGui::NextColumn();
-		Draw::Underline();
+		ImGui::TableNextRow();
 
 		return Modified;
 	}
@@ -811,21 +845,57 @@ namespace LkEngine::UI {
 									  const char** Options, 
 									  const uint16_t OptionCount, 
 									  int32_t* Selected, 
-									  const char* HelpText = "")
+									  const char* HelpText = "",
+									  const int ComboWidth = -1)
 	{
-		const char* CurrentOption = Options[*Selected];
-		ShiftCursor(10.0f, 9.0f);
-		ImGui::Text(Label);
+		const bool IsInGrid = !Internal::GridIdStack.empty();
+		const bool ShouldAlign = !Internal::AlignedStack.empty();
 
-		if (std::strlen(HelpText) != 0)
+		if (IsInGrid)
 		{
-			ImGui::SameLine();
-			HelpMarker(HelpText);
+			ImGui::TableSetColumnIndex(0);
 		}
 
-		ImGui::NextColumn();
-		ShiftCursorY(4.0f);
-		ImGui::PushItemWidth(-1);
+		if (ShouldAlign)
+		{
+			ImGui::SameLine(0.0f, Internal::AlignedStack.front());
+		}
+		else
+		{
+			ShiftCursor(10.0f, 9.0f);
+		}
+
+		const char* CurrentOption = Options[*Selected];
+
+		/* Skip rendering text for '#' and '##' identifier labels. */
+		if (Label && Label[0] != '#')
+		{
+			ImGui::Text(Label);
+			if (std::strlen(HelpText) != 0)
+			{
+				ImGui::SameLine();
+				HelpMarker(HelpText);
+			}
+		}
+
+		if (IsInGrid)
+		{
+			ImGui::TableSetColumnIndex(1);
+		}
+		else
+		{
+			ImGui::NextColumn();
+		}
+
+		if (ShouldAlign)
+		{
+			ImGui::SameLine(0.0f, Internal::AlignedStack.front());
+		}
+		else
+		{
+			ShiftCursorY(4.0f);
+		}
+		ImGui::PushItemWidth(ComboWidth);
 
 		bool Modified = false;
 
@@ -852,8 +922,16 @@ namespace LkEngine::UI {
 		}
 
 		ImGui::PopItemWidth();
-		ImGui::NextColumn();
-		Draw::Underline();
+
+		if (IsInGrid)
+		{
+			ImGui::TableNextRow();
+		}
+		else
+		{
+			ImGui::NextColumn();
+			Draw::Underline();
+		}
 
 		return Modified;
 	}

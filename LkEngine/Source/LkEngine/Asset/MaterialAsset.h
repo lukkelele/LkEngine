@@ -14,10 +14,7 @@ namespace LkEngine {
 		explicit LMaterialAsset(const TObjectPtr<LMaterial>& Material);
         LMaterialAsset(const bool bIsTransparent = false);
 		LMaterialAsset() = delete;
-		~LMaterialAsset();
-		//~LMaterialAsset() = default;
-
-		static EAssetType GetStaticType() { return EAssetType::Material; }
+		~LMaterialAsset() = default;
 
 		glm::vec3& GetAlbedoColor();
 		void SetAlbedoColor(const glm::vec3& color);
@@ -59,6 +56,8 @@ namespace LkEngine {
         TObjectPtr<LTexture2D> GetRoughnessMap();
         void SetRoughnessMap(TObjectPtr<LTexture2D> texture);
         void ClearRoughnessMap();
+		
+		FORCEINLINE static EAssetType GetStaticType() { return EAssetType::Material; }
 
 	private:
 		void SetDefaults();
