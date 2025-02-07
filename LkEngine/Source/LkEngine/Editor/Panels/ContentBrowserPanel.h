@@ -173,11 +173,11 @@ namespace LkEngine {
 	 *
 	 *  Content Browser.
 	 */
-	class LContentBrowser : public IPanel
+	class LContentBrowserPanel : public IPanel
 	{
 	public:
-		LContentBrowser(); /// TODO: make private and grant access to LPanelManager
-		~LContentBrowser() = default;
+		LContentBrowserPanel(); /// TODO: make private and grant access to LPanelManager
+		~LContentBrowserPanel() = default;
 
 		virtual void Initialize() override;
 
@@ -185,7 +185,7 @@ namespace LkEngine {
 		virtual void RenderUI(bool& IsOpen) override;
 
 		void SetSceneContext(const TObjectPtr<LScene> InSceneContext);
-		void OnProjectChanged(TObjectPtr<LProject> InProject);
+		virtual void OnProjectChanged(const TObjectPtr<LProject>& InProject) override;
 
 		FORCEINLINE FContentBrowserItemList& GetCurrentItems() { return ItemList; }
 		TObjectPtr<FDirectoryInfo> GetDirectory(const std::filesystem::path& Filepath) const;
@@ -193,7 +193,7 @@ namespace LkEngine {
 		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
 		virtual void DeserializeFromYaml(const YAML::Node& Data) override;
 
-		static LContentBrowser& Get() { return *Instance; }
+		static LContentBrowserPanel& Get() { return *Instance; }
 
 	private:
 		void UpdateInput();
@@ -259,9 +259,9 @@ namespace LkEngine {
 
 		FSelectionStack CopiedAssets{};
 
-		inline static LContentBrowser* Instance{};
+		inline static LContentBrowserPanel* Instance{};
 
-		LCLASS(LContentBrowser);
+		LCLASS(LContentBrowserPanel);
 	};
 
 }

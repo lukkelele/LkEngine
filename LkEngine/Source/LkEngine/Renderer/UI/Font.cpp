@@ -45,7 +45,7 @@ namespace LkEngine::UI {
 		ImguiFontConfig.MergeMode = FontConfig.MergeWithLast;
 		ImGuiIO& IO = ImGui::GetIO();
 		ImFont* Font = IO.Fonts->AddFontFromFileTTF(
-			FontConfig.FilePath.data(), 
+			FontConfig.FilePath.string().c_str(),
 			FontConfig.Size, 
 			&ImguiFontConfig, 
 			(FontConfig.GlyphRanges == nullptr ? IO.Fonts->GetGlyphRangesDefault() : FontConfig.GlyphRanges)
@@ -56,7 +56,7 @@ namespace LkEngine::UI {
 		const FFontEntry FontEntry = {
 			.Name = FontConfig.FontName,
 			.Size = FontConfig.Size,
-			.FilePath = FontConfig.FilePath
+			.FilePath = FontConfig.FilePath.string()
 		};
 		Fonts[FontEntry] = Font;
 
@@ -101,7 +101,7 @@ namespace LkEngine::UI {
 			return Iter->second;
 		}
 
-		LK_VERIFY(false, "Failed to find font '{}'", FontName);
+		LK_VERIFY(false, "Failed to find font: '{}'", FontName);
 		return nullptr;
 	}
 

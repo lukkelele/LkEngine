@@ -29,7 +29,7 @@ namespace LkEngine {
 
 	static bool bActivateSearchWidget = false;
 
-    LContentBrowser::LContentBrowser()
+    LContentBrowserPanel::LContentBrowserPanel()
     {
         LOBJECT_REGISTER();
 
@@ -41,15 +41,15 @@ namespace LkEngine {
 
 		std::memset(SearchBuffer, 0, LContentBrowserItem::INPUT_BUFFER_SIZE);
 
-		LProject::OnProjectChanged.Add(this, &LContentBrowser::OnProjectChanged);
+		LProject::OnProjectChanged.Add(this, &LContentBrowserPanel::OnProjectChanged);
     }
 
-    void LContentBrowser::Initialize()
+    void LContentBrowserPanel::Initialize()
     {
 		LK_CORE_TRACE_TAG("ContentBrowser", "Initializing");
     }
 
-	void LContentBrowser::RenderUI(bool& IsOpen)
+	void LContentBrowserPanel::RenderUI(bool& IsOpen)
 	{
 		/* Handle dock window. */
 		if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(LK_UI_CONTENTBROWSER); ThisWindow != nullptr)
@@ -163,14 +163,14 @@ namespace LkEngine {
 		ImGui::End(); // LK_UI_CONTENTBROWSER
 	}
 
-	void LContentBrowser::SetSceneContext(const TObjectPtr<LScene> InSceneContext)
+	void LContentBrowserPanel::SetSceneContext(const TObjectPtr<LScene> InSceneContext)
 	{
 		SceneContext = InSceneContext;
 	}
 
-	void LContentBrowser::OnProjectChanged(TObjectPtr<LProject> InProject)
+	void LContentBrowserPanel::OnProjectChanged(const TObjectPtr<LProject>& InProject)
 	{
-		LK_CORE_TRACE_TAG("ContentBrowserPanel", "OnProjectChanged: {}", InProject->GetName());
+		LK_CORE_DEBUG_TAG("ContentBrowser", "OnProjectChanged: {}", InProject ? InProject->GetConfiguration().Name : "None");
 		ItemList.Clear();
 		Directories.clear();
 		BaseDirectory = nullptr;
@@ -182,14 +182,14 @@ namespace LkEngine {
 
 		Project = InProject;
 
-		LUUID BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
+		FAssetHandle BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
 		BaseDirectory = Directories[BaseDirectoryHandle];
 		ChangeDirectory(BaseDirectory);
 
 		std::memset(SearchBuffer, 0, LContentBrowserItem::INPUT_BUFFER_SIZE);
 	}
 
-	TObjectPtr<FDirectoryInfo> LContentBrowser::GetDirectory(const std::filesystem::path& Filepath) const
+	TObjectPtr<FDirectoryInfo> LContentBrowserPanel::GetDirectory(const std::filesystem::path& Filepath) const
 	{
 		if (Filepath.empty() || (Filepath.string() == "."))
 		{
@@ -208,17 +208,17 @@ namespace LkEngine {
 		return nullptr;
 	}
 
-	void LContentBrowser::SerializeToYaml(YAML::Emitter& Out) const
+	void LContentBrowserPanel::SerializeToYaml(YAML::Emitter& Out) const
 	{
 		LK_UNUSED(Out);
 	}
 
-	void LContentBrowser::DeserializeFromYaml(const YAML::Node& Data)
+	void LContentBrowserPanel::DeserializeFromYaml(const YAML::Node& Data)
 	{
 		LK_UNUSED(Data);
 	}
 
-	void LContentBrowser::UpdateInput()
+	void LContentBrowserPanel::UpdateInput()
 	{
 		if (!bIsContentBrowserHovered)
 		{
@@ -236,14 +236,14 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowser::Refresh()
+	void LContentBrowserPanel::Refresh()
 	{
-		LK_CORE_INFO_TAG("ContentBrowserPanel", "Refresh");
+		LK_CORE_INFO_TAG("ContentBrowser", "Refresh");
 		ItemList.Clear();
 		Directories.clear();
 
 		TObjectPtr<FDirectoryInfo> CurrentDirectory = CurrentDirectory;
-		const LUUID BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
+		const FAssetHandle BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
 		BaseDirectory = Directories[BaseDirectoryHandle];
 		CurrentDirectory = GetDirectory(CurrentDirectory->FilePath);
 
@@ -255,7 +255,7 @@ namespace LkEngine {
 		ChangeDirectory(CurrentDirectory);
 	}
 
-	void LContentBrowser::SortItemList()
+	void LContentBrowserPanel::SortItemList()
 	{
 		auto SortFunc = [](const TObjectPtr<LContentBrowserItem>& Item1, const TObjectPtr<LContentBrowserItem>& Item2)
 		{
@@ -270,7 +270,7 @@ namespace LkEngine {
 		std::sort(ItemList.begin(), ItemList.end(), SortFunc);
 	}
 
-	void LContentBrowser::ChangeDirectory(TObjectPtr<FDirectoryInfo> Directory)
+	void LContentBrowserPanel::ChangeDirectory(TObjectPtr<FDirectoryInfo> Directory)
 	{
 		if (!Directory)
 		{
@@ -325,7 +325,7 @@ namespace LkEngine {
 		ClearCurrentSelection();
 	}
 
-	LUUID LContentBrowser::ProcessDirectory(const fs::path& DirectoryPath, const TObjectPtr<FDirectoryInfo>& ParentDir)
+	LUUID LContentBrowserPanel::ProcessDirectory(const fs::path& DirectoryPath, const TObjectPtr<FDirectoryInfo>& ParentDir)
 	{
 		const auto& Directory = GetDirectory(DirectoryPath);
 		if (Directory)
@@ -371,7 +371,7 @@ namespace LkEngine {
 			/* Asset import failed, continue. */
 			if (!Metadata.IsValid())
 			{
-				LK_CORE_WARN_TAG("ContentBrowserPanel", "Asset import failed for: {}", Entry.path().string());
+				LK_CORE_WARN_TAG("ContentBrowser", "Asset import failed for: {}", Entry.path().string());
 				continue;
 			}
 
@@ -382,7 +382,7 @@ namespace LkEngine {
 		return DirectoryInfo->Handle;
 	}
 
-	void LContentBrowser::Search(const std::string& Query,
+	void LContentBrowserPanel::Search(const std::string& Query,
 									  const TObjectPtr<FDirectoryInfo>& DirectoryInfo, 
 									  FContentBrowserItemList& ItemList)
 	{
@@ -424,14 +424,14 @@ namespace LkEngine {
 		LK_CORE_ERROR_TAG("ContentBrowser", "After Search | Items: {}", ItemList.Items.size());
 	}
 
-	void LContentBrowser::OnBrowseForward()
+	void LContentBrowserPanel::OnBrowseForward()
 	{
 		LK_CORE_TRACE_TAG("ContentBrowser", "OnBrowseForward");
 		LK_CORE_VERIFY(NextDirectory);
 		ChangeDirectory(NextDirectory);
 	}
 
-	void LContentBrowser::OnBrowseBackward()
+	void LContentBrowserPanel::OnBrowseBackward()
 	{
 		LK_CORE_TRACE_TAG("ContentBrowser", "OnBrowseBackward");
 		LK_CORE_VERIFY(CurrentDirectory && NextDirectory);
@@ -440,7 +440,7 @@ namespace LkEngine {
 		ChangeDirectory(PreviousDirectory);
 	}
 
-	void LContentBrowser::ClearCurrentSelection()
+	void LContentBrowserPanel::ClearCurrentSelection()
 	{
 		//LK_CORE_INFO_TAG("ContentBrowser", "Clearing current selection");
 		std::vector<FAssetHandle> SelectedItems = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
@@ -460,7 +460,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowser::UpdateDropArea(const TObjectPtr<FDirectoryInfo>& DirectoryInfo)
+	void LContentBrowserPanel::UpdateDropArea(const TObjectPtr<FDirectoryInfo>& DirectoryInfo)
 	{
 		LK_CORE_ASSERT(CurrentDirectory, "Failed to update drop area, CurrentDirectory is nullptr");
 		if (DirectoryInfo->Handle != CurrentDirectory->Handle && ImGui::BeginDragDropTarget())
@@ -485,7 +485,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowser::RenderTopBar(const float Height)
+	void LContentBrowserPanel::RenderTopBar(const float Height)
 	{
 		/* Begin child window for the top bar. */
 		static constexpr ImGuiChildFlags ChildFlags = ImGuiChildFlags_None;
@@ -610,7 +610,7 @@ namespace LkEngine {
 
 				LK_CORE_ASSERT(Project);
 				const std::string& AssetsDirectoryName = fs::relative(Project->GetConfiguration().AssetDirectory).string();
-				LK_CORE_ASSERT(!AssetsDirectoryName.empty(), "Project '{}' does not have an assigned AssetsDirectory in its configuration", Project->GetName());
+				LK_CORE_ASSERT(!AssetsDirectoryName.empty(), "Project '{}' does not have an assigned assets directory in its configuration", Project->GetName());
 				const ImVec2 TextSize = ImGui::CalcTextSize(AssetsDirectoryName.c_str());
 				const float TextPadding = ImGui::GetStyle().FramePadding.y;
 
@@ -677,11 +677,11 @@ namespace LkEngine {
 		ImGui::EndChild(); /* ContentBrowser-TopBar */
 	}
 
-	void LContentBrowser::RenderBottomBar(const float Height)
+	void LContentBrowserPanel::RenderBottomBar(const float Height)
 	{
 	}
 
-	void LContentBrowser::RenderItems()
+	void LContentBrowserPanel::RenderItems()
 	{
 		bIsAnyItemHovered = false;
 
@@ -831,7 +831,7 @@ namespace LkEngine {
 		}
 	}
 
-	void LContentBrowser::RenderOutlinerHierarchy(TObjectPtr<FDirectoryInfo> Directory)
+	void LContentBrowserPanel::RenderOutlinerHierarchy(TObjectPtr<FDirectoryInfo> Directory)
 	{
 		const std::string Name = Directory->FilePath.filename().string();
 		const std::string ID = Name + "_TreeNode";

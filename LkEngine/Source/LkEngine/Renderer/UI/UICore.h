@@ -75,6 +75,7 @@ namespace LkEngine
 		static constexpr const char* ComponentEditor     = "Component Editor";
 		static constexpr const char* Tools               = "Tools";
 		static constexpr const char* MaterialEditor      = "Material Editor";
+		static constexpr const char* ThemeManager        = "Theme Manager";
 	}
 
 	/**
@@ -107,11 +108,172 @@ namespace LkEngine::UI {
 		static constexpr const char* SelectedEntityInfo = "##LkEngine-Selected-Entity-Info"; /* REMOVE */
 	}
 
-	namespace Internal 		
+	/**
+	 * Map a property to a type T.
+	 * 
+	 *  Useful in dropdown menues.
+	 *  
+	 *  Example (uint32_t):
+     *      constexpr std::array<UI::TPropertyMapping<uint32_t>, 3> Options = {
+	 *          std::pair("White", RGBA32::White),
+     *          std::pair("Black", RGBA32::Black),
+	 *      };
+	 */
+	template<typename T>
+	using TPropertyMapping = std::pair<const char*, T>;
+
+	/** Slider configuration values. */
+	static constexpr float SLIDER_MIN_UNLIMITED_POS = 0.0f;
+	static constexpr float SLIDER_MAX_UNLIMITED = 0.0f;
+
+	enum class EStyle : uint32_t
+	{
+		AlignHorizontal,
+		COUNT
+	};
+	LK_ENUM_CLASS_FLAGS(EStyle);
+
+	namespace Internal 
 	{
 		int GetContextID();
+
+		struct FAlignData
+		{
+			float Dist = 0.0f;
+			uint16_t PassedElements = 0;
+		};
+
+		struct FTableEntry
+		{
+			const char* ID = nullptr;
+		};
 	}
+
+	struct FMessageBox
+	{
+		std::string Title = "";
+		std::string Body = "";
+		uint32_t Flags = 0;
+		uint32_t Width = 0;
+		uint32_t Height = 0;
+		uint32_t MinWidth = 0;
+		uint32_t MinHeight = 0;
+		uint32_t MaxWidth = -1;
+		uint32_t MaxHeight = -1;
+		std::function<void()> UserRenderFunction;
+		bool bShouldOpen = true;
+		bool bIsOpen = false;
+	};
+
+	enum class EDataType : uint32_t
+	{
+		None,
+		S32,      /* int32_t  */
+		U32,      /* uint32_t */
+		Float,    /* float    */
+		Double,   /* double   */
+		Bool,     /* bool     */
+		COUNT
+	};
+
+	struct FVariableInfo
+	{
+		EDataType Type = EDataType::None;
+		uint32_t Count = 0; 
+		uint32_t Offset = 0;
+
+		FORCEINLINE void* GetVariablePtr(void* Parent) const 
+		{ 
+			return (void*)((unsigned char*)Parent + Offset); 
+		}
+	};
 	
+	struct LStyle
+	{
+		float AlignHorizontal = -1.0f; /* Disabled when -1.0 */
+	};
+
+	namespace Internal 		
+	{
+		static const FVariableInfo StyleVarInfo[] =
+		{
+			{ EDataType::Float, 1, (uint32_t)offsetof(LStyle, AlignHorizontal) },
+		};
+	}
+
+	struct FStyleMod
+	{
+	private:
+		using T = std::underlying_type_t<EStyle>;
+	public:
+		T VarIdx;
+		union 
+		{ 
+			int ArrInt[2]; 
+			float ArrFloat[2]; 
+		};
+
+		FStyleMod(const EStyle Style, const int Value)     
+			: VarIdx((T)Style)
+		{ 
+			ArrInt[0] = Value; 
+		}
+
+		FStyleMod(const EStyle Style, const float Value)
+			: VarIdx((T)Style)
+		{ 
+			ArrFloat[0] = Value; 
+		}
+
+		FStyleMod(const EStyle Style, const LVector2& Value)
+			: VarIdx((T)Style)
+		{ 
+			ArrFloat[0] = Value.X; 
+			ArrFloat[1] = Value.Y; 
+		}
+	};
+
+	struct LUIContext
+	{
+		std::vector<FStyleMod> StyleStack{};
+		std::deque<Internal::FTableEntry> TableStack{};
+		std::deque<Internal::FAlignData> AlignedStack{};
+		std::unordered_map<std::string, FMessageBox> MessageBoxes{};
+
+		LStyle Style;
+	};
+	static LUIContext UIContext;
+
+	FORCEINLINE bool InTable()
+	{
+		return !UIContext.TableStack.empty();
+	}
+
+	FORCEINLINE const FVariableInfo* GetVariableInfo(const EStyle Idx)
+	{
+		using T = std::underlying_type_t<std::decay_t<decltype(Idx)>>;
+		LK_CORE_ASSERT(((T)Idx >= 0) && (Idx < (T)(EStyle::COUNT)));
+		static_assert(LK_ARRAYSIZE(Internal::StyleVarInfo) == (std::underlying_type_t<EStyle>)EStyle::COUNT);
+		return &Internal::StyleVarInfo[(T)Idx];
+	}
+
+	FORCEINLINE void PushStyle(const EStyle Style, const float Value)
+	{
+		const FVariableInfo* VarInfo = GetVariableInfo(Style);
+		if (VarInfo->Type != EDataType::Float)
+		{
+		}
+
+		float* VarPtr = (float*)VarInfo->GetVariablePtr(&UIContext.Style);
+		UIContext.StyleStack.push_back(FStyleMod(Style, *VarPtr));
+		*VarPtr = Value;
+	}
+
+	FORCEINLINE void PopStyle(const int StylesToPop = 1)
+	{
+		LK_CORE_ASSERT(false, "TODO");
+	}
+
 	class FScopedStyle
 	{
 	public:

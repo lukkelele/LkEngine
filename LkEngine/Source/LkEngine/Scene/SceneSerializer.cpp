@@ -18,7 +18,7 @@
 namespace LkEngine {
 
 	std::string LSceneSerializer::FILE_FILTER = std::format(
-		"LkEngine Scene (*{})\0*{}\0", LScene::FILE_EXTENSION, LScene::FILE_EXTENSION
+		"LkEngine Scene (*.{})\0*.{}\0", LScene::FILE_EXTENSION, LScene::FILE_EXTENSION
 	);
 
 	LSceneSerializer::LSceneSerializer(LScene* InScene)
@@ -35,6 +35,7 @@ namespace LkEngine {
 
 	void LSceneSerializer::Serialize(const std::filesystem::path& Filepath)
 	{
+		LK_CORE_DEBUG_TAG("SceneSerializer", "Serializing: {}", Filepath.string());
 		YAML::Emitter Out;
 		SerializeToYaml(Out);
 
@@ -57,27 +58,6 @@ namespace LkEngine {
 		{
 			SerializeEditorCamera(Out, *Editor.GetEditorCamera());
 		}
-
-		#if 0 /// DISABLED
-		/* 2D Physics. */
-		Out << YAML::Key << "Physics2D";
-		Out << YAML::Value << YAML::BeginMap;
-		{
-			Box2DWorldComponent& World2DComponent = Scene->GetBox2DWorld();
-			if (&World2DComponent != nullptr)
-			{
-				Out << YAML::Key << "Paused"		<< YAML::Value << World2DComponent.IsPaused();
-				Out << YAML::Key << "Gravity"		<< YAML::Value << World2DComponent.GetGravity();
-				Out << YAML::Key << "DebugDrawer"	<< YAML::Value << World2DComponent.HasDebugDrawerAttached();
-				Out << YAML::Key << "BodyCount"		<< YAML::Value << World2DComponent.GetBodyCount();
-				Out << YAML::Key << "ContactCount"	<< YAML::Value << World2DComponent.GetContactCount();
-			}
-			else
-			{
-			}
-		}
-		Out << YAML::Value << YAML::EndMap;
-		#endif
 
 		/* Entities. */
 		Out << YAML::Key << "Entities";
@@ -105,10 +85,16 @@ namespace LkEngine {
 	bool LSceneSerializer::Deserialize(const std::filesystem::path& Filepath)
 	{
 		LK_CORE_VERIFY(Scene);
-		LK_CORE_VERIFY(!Filepath.empty() && LFileSystem::Exists(Filepath), "Deserialization failed, invalid filepath: '{}'", Filepath.string());
-		LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing: {}", Filepath.filename().string());
+		LK_CORE_VERIFY(!Filepath.empty(), "Deserialization failed, invalid filepath: '{}'", Filepath.string());
 		Scene->Clear();
 
+		if (!LFileSystem::Exists(Filepath))
+		{
+			LK_CORE_WARN_TAG("SceneSerializer", "File does not exist: {}", Filepath.string());
+			return false;
+		}
+
+		LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing: {}", Filepath.filename().string());
 		bool bOperationSuccess = false;
 
 		std::ifstream InputStream(Filepath);

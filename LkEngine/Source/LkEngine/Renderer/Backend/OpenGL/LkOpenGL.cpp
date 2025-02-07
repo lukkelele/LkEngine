@@ -364,12 +364,12 @@ namespace LkEngine {
 
 			FTextureSpecification SkyboxSpec;
 			static const std::vector<std::filesystem::path> SkyboxFacePaths = {
-				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Right.jpg",
-				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Left.jpg",
-				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Top.jpg",
-				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Bottom.jpg",
-				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Front.jpg",
-				LFileSystem::GetAssetsDir() / "Textures/Debug/Skybox-WaterIsland/Back.jpg",
+				LFileSystem::GetResourcesDir() / "Textures/Debug/Skybox-WaterIsland/Right.jpg",
+				LFileSystem::GetResourcesDir() / "Textures/Debug/Skybox-WaterIsland/Left.jpg",
+				LFileSystem::GetResourcesDir() / "Textures/Debug/Skybox-WaterIsland/Top.jpg",
+				LFileSystem::GetResourcesDir() / "Textures/Debug/Skybox-WaterIsland/Bottom.jpg",
+				LFileSystem::GetResourcesDir() / "Textures/Debug/Skybox-WaterIsland/Front.jpg",
+				LFileSystem::GetResourcesDir() / "Textures/Debug/Skybox-WaterIsland/Back.jpg",
 			};
 			SkyboxTexture = LTextureCube::Create(SkyboxSpec, SkyboxFacePaths);
 			SkyboxTexture->Bind(0);

@@ -46,11 +46,16 @@ namespace LkEngine {
 		FORCEINLINE ECameraType GetType() const { return Type; }
 		FORCEINLINE ECameraProjection GetProjectionType() const { return ProjectionType; }
 
+		FORCEINLINE glm::vec3 GetPosition() const { return Position; }
+		FORCEINLINE const glm::vec3& GetPosition() { return Position; }
+
+		/* TODO: Remove as virtual. */
 		virtual void SetPosition(const glm::vec3& InPosition)
 		{
 			Position = InPosition;
 		}
 
+		/* TODO: Remove as virtual. */
 		virtual void SetProjection(const glm::mat4& InProjection)
 		{
 			if (ProjectionMatrix != InProjection)
@@ -124,7 +129,6 @@ namespace LkEngine {
 			return TVector(glm::rotate(GetOrientation(), glm::vec3(0.0f, 0.0f, -1.0f)));
 		}
 
-		FORCEINLINE const glm::vec3& GetPosition() const { return Position; }
 		FORCEINLINE const glm::vec3& GetOrigin() const { return Origin; }
 
 		FORCEINLINE float GetPerspectiveNearClip() const { return PerspectiveNear; }
@@ -257,9 +261,10 @@ namespace LkEngine {
 		glm::mat4 ViewMatrix = glm::mat4(1.0f);
 		glm::mat4 ProjectionMatrix = glm::mat4(1.0f);
 
+	private:
+		friend class LEditorLayer;
 		friend class LSceneSerializer;
 
-	private:
 		LCLASS(LCamera);
 	};
 

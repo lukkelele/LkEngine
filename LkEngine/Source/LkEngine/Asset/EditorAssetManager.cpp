@@ -33,13 +33,13 @@ namespace LkEngine {
 
 	void LEditorAssetManager::Initialize()
 	{
-		LK_CORE_TRACE_TAG("EditorAssetManager", "Initializing");
+		LK_CORE_DEBUG_TAG("EditorAssetManager", "Initializing");
 		LObject::Initialize();
 
 		LAssetImporter::Initialize();
 
-		const fs::path AssetsDir = LFileSystem::GetAssetsDir();
-		static const fs::path DebugTexturesDir = AssetsDir / "Textures/Debug";
+		const fs::path ResourcesDir = LFileSystem::GetResourcesDir();
+		static const fs::path DebugTexturesDir = ResourcesDir / "Textures/Debug";
 
 		/* Declare the lambda first so it can be used recursively. */
 		std::function<void(const fs::path&)> AddTexturesInDirectory;
@@ -207,8 +207,19 @@ namespace LkEngine {
 			}
 		}
 
-		std::ifstream InputStream(LProject::GetAssetDirectory() / InFilePath);
-		LK_CORE_VERIFY(InputStream.good(), "Invalid input stream for: '{}'", InFilePath.string());
+		std::filesystem::path MeshPath = LProject::GetMeshDirectory() / InFilePath;
+		if (!LFileSystem::Exists(MeshPath))
+		{
+			LK_CORE_WARN_TAG("EditorAssetManager", "Project mesh directory does not exist: {}", MeshPath.string());
+			MeshPath = LFileSystem::GetResourcesDir() / InFilePath;
+		}
+
+		std::ifstream InputStream(MeshPath);
+		if (!InputStream.good())
+		{
+			LK_CORE_ERROR_TAG("EditorAssetManager", "Failed to load mesh with: {}", MeshPath.string());
+		}
+		LK_CORE_VERIFY(InputStream.good(), "Failed to load mesh: '{}'", MeshPath.string());
 		std::stringstream StringStream;
 		StringStream << InputStream.rdbuf();
 
@@ -259,8 +270,19 @@ namespace LkEngine {
 			}
 		}
 
-		std::ifstream InputStream(LProject::GetAssetDirectory() / InFilePath);
-		LK_CORE_VERIFY(InputStream.good(), "Invalid input stream for: '{}'", InFilePath.string());
+		std::filesystem::path MeshPath = LProject::GetMeshDirectory() / InFilePath;
+		if (!LFileSystem::Exists(MeshPath))
+		{
+			LK_CORE_WARN_TAG("EditorAssetManager", "Project mesh directory does not exist: {}", MeshPath.string());
+			MeshPath = LFileSystem::GetResourcesDir() / InFilePath;
+		}
+
+		std::ifstream InputStream(MeshPath);
+		if (!InputStream.good())
+		{
+			LK_CORE_ERROR_TAG("EditorAssetManager", "Failed to load mesh with: {}", MeshPath.string());
+		}
+		LK_CORE_VERIFY(InputStream.good(), "Failed to load static mesh: '{}'", MeshPath.string());
 		std::stringstream StringStream;
 		StringStream << InputStream.rdbuf();
 
@@ -393,13 +415,18 @@ namespace LkEngine {
 	bool LEditorAssetManager::LoadAssetRegistry()
 	{
 		const std::filesystem::path& AssetRegistryPath = LProject::GetAssetRegistryPath();
-		LK_CORE_INFO_TAG("EditorAssetManager", "Loading asset registry ({})", AssetRegistryPath.filename().string());
+		if (AssetRegistryPath.empty())
+		{
+			LK_CORE_WARN_TAG("EditorAssetManager", "Asset registry path is empty");
+			return false;
+		}
 		if (!LFileSystem::Exists(AssetRegistryPath))
 		{
 			LK_CORE_ERROR_TAG("EditorAssetManager", "Asset registry file does not exist at: '{}'", AssetRegistryPath.string());
 			return false;
 		}
 
+		LK_CORE_INFO_TAG("EditorAssetManager", "Loading asset registry ({})", AssetRegistryPath.filename().string());
 		std::ifstream InputStream(AssetRegistryPath);
 		LK_CORE_VERIFY(InputStream.is_open(), "Inputstream is not OK");
 		std::stringstream StringStream;

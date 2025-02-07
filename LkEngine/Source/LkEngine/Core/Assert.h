@@ -42,7 +42,7 @@
 				}                                                 \
 				else                                              \
 				{                                                 \
-					LK_CORE_ASSERT_MESSAGE_INTERNAL("Assertion Failed: {}", LK_FUNCSIG); \
+					LK_CORE_ASSERT_MESSAGE_INTERNAL("{}", LK_FUNCSIG); \
 				}                                                 \
 				LK_DEBUG_BREAK;                                   \
 			}                                                     \
@@ -57,7 +57,7 @@
 				}                                            \
 				else                                         \
 				{                                            \
-					LK_ASSERT_MESSAGE_INTERNAL("Assertion Failed: {}", LK_FUNCSIG); \
+					LK_ASSERT_MESSAGE_INTERNAL("{}", LK_FUNCSIG); \
 				}                                            \
 				LK_DEBUG_BREAK;                              \
 			}                                                \

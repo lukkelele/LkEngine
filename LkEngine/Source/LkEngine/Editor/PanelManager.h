@@ -9,6 +9,8 @@
 
 namespace LkEngine {
 
+	class LProject;
+
 	enum class EPanelInitState : uint8_t
 	{
 		Closed = 0,
@@ -136,6 +138,8 @@ namespace LkEngine {
 
 		void Serialize();
 		void Deserialize();
+
+		void OnProjectChanged(const TObjectPtr<LProject> InProject);
 
 	private:
 		std::array<std::unordered_map<uint32_t, FPanelData>, (std::size_t)EPanelCategory::COUNT> Panels;

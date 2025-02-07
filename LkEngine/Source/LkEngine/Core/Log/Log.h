@@ -22,7 +22,8 @@
 #	include <iterator>
 #endif
 
-#define LK_ASSERT_MESSAGE_BOX 1
+#define LK_ASSERT_MESSAGE_BOX      1
+#define LK_ENGINE_CONSOLE_ENABLED  1
 
 /**
  * Set loglevel names to UPPERCASE.
@@ -355,6 +356,9 @@ namespace LkEngine {
 			PrintLn("{2}{0}: {1}{3}", Prefix, FormattedString, LK_ANSI_COLOR_BG_BRIGHT_RED, LK_ANSI_COLOR_RESET);
 		}
 
+	#if LK_ENGINE_CONSOLE_ENABLED
+		LK_CONSOLE_FATAL("{}", FormattedString);
+	#endif
 	#if LK_ASSERT_MESSAGE_BOX
 		MessageBoxA(nullptr, FormattedString.c_str(), "LkEngine Error", (MB_OK | MB_ICONERROR));
 	#endif
@@ -371,6 +375,9 @@ namespace LkEngine {
 			PrintLn("{1}{0}{2}", Message, LK_ANSI_COLOR_BG_BRIGHT_RED, LK_ANSI_COLOR_RESET);
 		}
 		
+	#if LK_ENGINE_CONSOLE_ENABLED
+		LK_CONSOLE_FATAL("{}", Message);
+	#endif
 	#if LK_ASSERT_MESSAGE_BOX
 		MessageBoxA(nullptr, Message.data(), "LkEngine Error", (MB_OK | MB_ICONERROR));
 	#endif

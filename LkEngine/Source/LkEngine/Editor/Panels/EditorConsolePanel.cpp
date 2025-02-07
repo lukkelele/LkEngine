@@ -5,6 +5,9 @@
 #include "LkEngine/Core/Time/Time.h"
 
 #include "LkEngine/Renderer/UI/FontAwesome.h"
+#include "LkEngine/Project/Project.h"
+
+#include "ThemeManagerPanel.h"
 
 
 namespace LkEngine {
@@ -44,6 +47,13 @@ namespace LkEngine {
 		ImGui::End();
 	}
 
+	void LEditorConsolePanel::OnProjectChanged(const TObjectPtr<LProject>& InProject)
+	{
+		LK_CORE_DEBUG_TAG("EditorConsole", "OnProjectChanged: {}", InProject ? InProject->GetConfiguration().Name : "None");
+		std::scoped_lock<std::mutex> ScopedLock(MessageBufferMutex);
+		MessageBuffer.clear();
+	}
+
 	void LEditorConsolePanel::RenderMenu(const ImVec2& InSize)
 	{
 		UI::FScopedStyleStack Frame(ImGuiStyleVar_FrameBorderSize, 0.0f, 
@@ -52,7 +62,7 @@ namespace LkEngine {
 
 		if (ImGui::Button("Clear", { 75.0f, 28.0f }))
 		{
-			std::scoped_lock<std::mutex> lock(MessageBufferMutex);
+			std::scoped_lock<std::mutex> ScopedLock(MessageBufferMutex);
 			MessageBuffer.clear();
 		}
 
@@ -61,7 +71,6 @@ namespace LkEngine {
 		const ImGuiStyle &Style = ImGui::GetStyle();
 
 		const std::string ClearOnPlayText = std::format("{} Clear on Play", (bClearOnPlay ? LK_ICON_CHECK : LK_ICON_TIMES));
-
 		ImVec4 TextColor = bClearOnPlay ? Style.Colors[ImGuiCol_Text] : Style.Colors[ImGuiCol_TextDisabled];
 		if (UI::ColoredButton(ClearOnPlayText.c_str(), GetToolbarButtonColor(bClearOnPlay), TextColor, ImVec2(144.0f, 28.0f)))
 		{
@@ -128,6 +137,9 @@ namespace LkEngine {
 			static constexpr float OffsetDistY = 6.0f; /* Distance to separate loglevel colors in 'Type' column. */
 			static constexpr float TextPadX = 6.0f;
 
+			/* TODO: Get theme and set the table row colors accordingly. */
+			const ETheme CurrentTheme = LThemeManagerPanel::GetTheme();
+
 			for (uint32_t Idx = 0; Idx < MessageBuffer.size(); Idx++)
 			{
 				const FConsoleMessage& Message = MessageBuffer[Idx];
@@ -137,7 +149,42 @@ namespace LkEngine {
 				}
 
 				ImGui::PushID(&Message);
-				const bool RowClicked = UI::TableRowClickable(Message.ShortMessage.c_str(), RowHeight);
+				bool RowClicked = false;
+
+				{
+					uint8_t PushedColors = 0;
+					switch (CurrentTheme)
+					{
+						case ETheme::Dark:
+						Fallback:
+						{
+							ImGui::PushStyleColor(ImGuiCol_TableRowBg, RGBA32::Background);
+							PushedColors++;
+							//ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, RGBA32::BackgroundDark);
+							//PushedColors++;
+							break;
+						}
+
+						case ETheme::Light:
+						{
+							ImGui::PushStyleColor(ImGuiCol_TableRowBg, RGBA32::Gray);
+							PushedColors++;
+							ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, RGBA32::LightGray);
+							PushedColors++;
+							break;
+						}
+
+						default:
+						{
+							LK_CORE_ASSERT(false, "Unsupported theme: {}", static_cast<int>(CurrentTheme));
+							/* Use dark theme as fallback when running in release. */
+							goto Fallback;
+						}
+					}
+
+					RowClicked = UI::TableRowClickable(Message.ShortMessage.c_str(), RowHeight);
+					ImGui::PopStyleColor(PushedColors);
+				}
 
 				if (RowClicked)
 				{

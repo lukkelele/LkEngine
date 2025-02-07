@@ -4,6 +4,8 @@
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/Core/Globals.h"
 
+#include "LkEngine/Project/Project.h"
+
 
 namespace LkEngine {
 
@@ -132,6 +134,17 @@ namespace LkEngine {
 
 			PanelData->bIsOpen = PanelNode["IsOpen"].as<bool>(PanelData->bIsOpen);
 			PanelData->Panel->DeserializeFromYaml(PanelNode);
+		}
+	}
+
+	void LPanelManager::OnProjectChanged(const TObjectPtr<LProject> InProject)
+	{
+		for (auto& PanelMap : Panels)
+		{
+			for (auto& [PanelID, PanelData] : PanelMap)
+			{
+				PanelData.Panel->OnProjectChanged(InProject);
+			}
 		}
 	}
 

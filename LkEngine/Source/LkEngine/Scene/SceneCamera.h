@@ -48,79 +48,12 @@ namespace LkEngine {
 		void UpdateProjection();
 		void UpdateViewProjection();
 
-	#if 0
-		FORCEINLINE float GetPerspectiveNearClip() const { return PerspectiveNear; }
-		FORCEINLINE float GetPerspectiveFarClip() const { return PerspectiveFar; }
-		FORCEINLINE float GetDegPerspectiveVerticalFOV() const { return DegPerspectiveFOV; }
-		FORCEINLINE float GetRadPerspectiveVerticalFOV() const { return glm::radians(DegPerspectiveFOV); }
-
-		/** */
-		FORCEINLINE void SetDegPerspectiveVerticalFOV(const float InVerticalFovDeg) 
-		{ 
-			if (DegPerspectiveFOV != InVerticalFovDeg)
-			{
-				DegPerspectiveFOV = InVerticalFovDeg; 
-			}
-		}
-
-		/** */
-		FORCEINLINE void SetRadPerspectiveVerticalFOV(const float InVerticalFovRad) 
-		{ 
-			if (const float InVerticalFovDeg = glm::degrees(InVerticalFovRad); DegPerspectiveFOV != InVerticalFovDeg)
-			{
-				DegPerspectiveFOV = InVerticalFovDeg;
-			}
-		}
-
-		/** */
-		FORCEINLINE void SetPerspectiveNearClip(const float InNearClip) 
-		{ 
-			if (PerspectiveNear != InNearClip)
-			{
-				PerspectiveNear = InNearClip; 
-			}
-		}
-
-		/** */
-		FORCEINLINE void SetPerspectiveFarClip(const float InFarClip) 
-		{ 
-			if (PerspectiveFar != InFarClip)
-			{
-				PerspectiveFar = InFarClip;
-			}
-		}
-
-		FORCEINLINE float GetOrthographicSize() const { return OrthographicSize; }
-		FORCEINLINE float GetOrthographicNearClip() const { return OrthographicNear; }
-		FORCEINLINE float GetOrthographicFarClip() const { return OrthographicFar; }
-
-		FORCEINLINE void SetOrthographicSize(const float InSize) 
-		{ 
-			if (OrthographicSize != InSize)
-			{
-				OrthographicSize = InSize; 
-			}
-		}
-
-		FORCEINLINE void SetOrthographicNearClip(const float InNearClip) 
-		{ 
-			if (OrthographicNear != InNearClip)
-			{
-				OrthographicNear = InNearClip; 
-			}
-		}
-
-		FORCEINLINE void SetOrthographicFarClip(const float InFarClip) 
-		{ 
-			if (OrthographicFar != InFarClip)
-			{
-				OrthographicFar = InFarClip; 
-			}
-		}
-	#endif
-
-		FORCEINLINE glm::vec3& GetPosition() { return Position; }
-		FORCEINLINE glm::vec3 GetPosition() const { return Position; }
+		FORCEINLINE float GetDistance() const { return Distance; }
+		FORCEINLINE float GetNormalSpeed() const { return NormalSpeed; }
+		FORCEINLINE float GetTravelSpeed() const { return TravelSpeed; }
+		FORCEINLINE void SetDistance(const float InDistance) { Distance = InDistance; }
+		FORCEINLINE void SetNormalSpeed(const float InSpeed) { NormalSpeed = InSpeed; }
+		FORCEINLINE void SetTravelSpeed(const float InSpeed) { TravelSpeed = InSpeed; }
 
 	protected:
 		/** @brief Camera offset. */
@@ -137,6 +70,9 @@ namespace LkEngine {
 		float OrthographicSize = 10.0f;
 		float OrthographicNear = -1.0f;
 		float OrthographicFar = 1.0f;
+
+	private:
+		friend class LEditorLayer;
 	};
 
 }

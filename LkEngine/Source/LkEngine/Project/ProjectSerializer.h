@@ -23,10 +23,8 @@ namespace LkEngine {
 		bool Deserialize(const std::filesystem::path& InFile);
 
 	private:
-        // Yaml
         void SerializeToYaml(YAML::Emitter& Out);
         bool DeserializeFromYaml(const std::string& YamlString, FProjectConfiguration& ProjectConfig);
-        // ~Yaml
 
 	private:
 		TObjectPtr<LProject> Project{};

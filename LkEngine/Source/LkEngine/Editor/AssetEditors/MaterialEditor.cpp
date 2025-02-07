@@ -261,7 +261,7 @@ namespace LkEngine {
 			Idx++;
 		}
 
-		if (UI::PropertyDropdown("Shaders", ShaderNames.data(), ShaderMap.size(), &SelectedIdx))
+		if (UI::PropertyDropdown("Shaders", ShaderNames, &SelectedIdx))
 		{
 			LK_CORE_INFO("PropertyDropdown->Shaders: {}", (int)(SelectedIdx));
 			bRefreshUniformContainer = true;

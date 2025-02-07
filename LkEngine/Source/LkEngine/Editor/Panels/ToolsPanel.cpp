@@ -448,7 +448,7 @@ namespace LkEngine {
 		{
 			static constexpr float TitleWidth = 148.0f;
 
-			ImGui::Text("Message Boxes: %d", UI::Internal::MessageBoxes.size());
+			ImGui::Text("Message Boxes: %d", UI::UIContext.MessageBoxes.size());
 
 			/* Message Box. */
 			{
@@ -651,7 +651,7 @@ namespace LkEngine {
 		{
 			const auto& Selection = LSelectionContext::GetSelected(ESelectionContext::ContentBrowser);
 
-			LContentBrowser& ContentBrowser = LContentBrowser::Get();
+			LContentBrowserPanel& ContentBrowser = LContentBrowserPanel::Get();
 			FContentBrowserItemList& CurrentBrowserItems = ContentBrowser.GetCurrentItems();
 
 			ImGui::TableSetupColumn("Content Browser", ImGuiTableColumnFlags_WidthStretch, 120.0f);
@@ -699,7 +699,7 @@ namespace LkEngine {
 		static std::array<const char*, 3> Options = { "Payload1", "Payload2", "Payload3" };
 		static int32_t Selected = 0;
 
-		if (UI::PropertyDropdown("Payload", Options.data(), Options.size(), &Selected, "Type of payload"))
+		if (UI::PropertyDropdown("Payload", Options, &Selected, "Type of payload"))
 		{
 			LK_CORE_INFO("Dropdown->Payload: {}", (int)Selected);
 		}
@@ -713,11 +713,13 @@ namespace LkEngine {
 			ImGui::SetNextItemWidth(90.0f);
 			UI::Draw::DragFloat("##ButtonSizeX", &ButtonSizeX, 1.0f, 10.0f, 300.0f);
 
+			ImGui::SameLine();
 			ImGui::Text("Button Size Y");
 			ImGui::SameLine(0, 10.0f);
 			ImGui::SetNextItemWidth(90.0f);
 			UI::Draw::DragFloat("##ButtonSizeY", &ButtonSizeY, 1.0f, 10.0f, 300.0f);
 
+			ImGui::SameLine();
 			ImGui::Text("Button Offset Y");
 			ImGui::SameLine(0, 10.0f);
 			ImGui::SetNextItemWidth(90.0f);
@@ -802,13 +804,21 @@ namespace LkEngine {
 		}
 
 		{
-			static bool bRadioButton = false;
 			static constexpr float SpacingX = 5.0f;
 
-			if (ImGui::RadioButton("Radio Button", bRadioButton))
+			static std::array<const char*, 2> Events = { "Event1", "Event2" };
+			static int32_t SelectedEvent = 0;
+
+			ImGui::Text("Event Creator");
+			/* TODO: Need to fix so PushAligned counts the performed alignments. */
+			if (UI::PropertyDropdown("##Events", Events.data(), Events.size(), &SelectedEvent, "", 160))
 			{
-				bRadioButton = !bRadioButton;
+				LK_CORE_INFO("Dropdown->Events: {}", SelectedEvent);
 			}
+		}
+
+		{
+			static constexpr float SpacingX = 5.0f;
 
 			static std::array<const char*, 5> Types = { "Type1", "Type2", "Type3", "Type4", "Type5" };
 			static int32_t SelectedType = 0;
@@ -816,7 +826,7 @@ namespace LkEngine {
 
 			ImGui::Text("Creator");
 			/* TODO: Need to fix so PushAligned counts the performed alignments. */
-			ImGui::Dummy(ImVec2(0, 0));
+			//ImGui::Dummy(ImVec2(0, 0));
 			UI::PushAligned(SpacingX);
 			if (UI::PropertyDropdown("##Types", Types.data(), Types.size(), &SelectedType, "", 160))
 			{

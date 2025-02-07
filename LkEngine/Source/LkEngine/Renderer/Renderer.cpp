@@ -87,7 +87,7 @@ namespace LkEngine {
 			TextureSpec.Height = 2048;
 			TextureSpec.SamplerFilter = ETextureFilter::None;
 			TextureSpec.SamplerWrap = ETextureWrap::None;
-			const std::filesystem::path TexturePath = LFileSystem::GetAssetsDir() / "Textures" / "White.png";
+			const std::filesystem::path TexturePath = LFileSystem::GetResourcesDir() / "Textures" / "White.png";
 			TextureSpec.Path = TexturePath.string();
 			TextureSpec.Name = "White";
 			TextureSpec.DebugName = "White";

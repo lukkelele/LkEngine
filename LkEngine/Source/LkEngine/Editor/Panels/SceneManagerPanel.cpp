@@ -52,7 +52,7 @@ namespace LkEngine {
 			}
 
 			ImGui::Begin(LK_UI_SCENEMANAGER, &IsOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavFocus);
-			ImGui::Text("Window Focused: %s", UI::IsWindowFocused(LK_UI_SCENEMANAGER) ? "Yes" : "No");
+			//ImGui::Text("Window Focused: %s", UI::IsWindowFocused(LK_UI_SCENEMANAGER) ? "Yes" : "No");
 		}
 
 		if (Scene)
@@ -496,6 +496,11 @@ namespace LkEngine {
 	void LSceneManagerPanel::OnSceneSelectionUpdated(const std::vector<FSceneSelectionData>& InSelectionData) 
 	{
 		SceneSelectionData = InSelectionData;
+	}
+
+	void LSceneManagerPanel::OnProjectChanged(const TObjectPtr<LProject>& InProject)
+	{
+		LK_CORE_WARN_TAG("SceneManager", "OnProjectChanged");
 	}
 
 	void LSceneManagerPanel::DrawEntityCreateMenu(LEntity Parent)

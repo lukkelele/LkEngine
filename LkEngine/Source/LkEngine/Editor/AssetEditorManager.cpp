@@ -49,6 +49,12 @@ namespace LkEngine {
 		Editor->SetOpen(true);
 	}
 
+	void LAssetEditorManager::SetSceneContext(const TObjectPtr<LScene>& InScene)
+	{
+		LK_CORE_INFO_TAG("AssetEditorManager", "Changing scene context");
+		SceneContext = InScene;
+	}
+
 	void LAssetEditorManager::SetEditorOpen(const EAssetType AssetType, const bool Open)
 	{
 		if (!AssetEditorMap.contains(AssetType))

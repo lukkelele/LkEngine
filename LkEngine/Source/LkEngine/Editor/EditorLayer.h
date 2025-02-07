@@ -28,6 +28,8 @@
 #include "LkEngine/Renderer/UI/UICore.h"
 #include "LkEngine/Renderer/UI/UILayer.h"
 
+#include "LkEngine/Project/Project.h"
+
 
 namespace LkEngine {
 
@@ -38,7 +40,6 @@ namespace LkEngine {
 	class LSceneManagerPanel;
 	class LSubmesh;
 	class LRenderer2D;
-	class LProject;
 	class LViewport;
 
 	/**
@@ -67,12 +68,14 @@ namespace LkEngine {
 		void Render2D();
 		void DrawObjectGizmo(LEntity Entity);
 
+		void OpenProject();
 		void OpenProject(const std::filesystem::path& ProjectPath);
+		void CloseProject(const EProjectLoadAction LoadAction = EProjectLoadAction::Unload);
+		void SaveProject();
+		void CreateProject(const std::filesystem::path& ProjectPath);
+		void OnProjectChanged(const TObjectPtr<LProject>& InProject);
 		void EmptyProject();
 		void StarterProject();
-		void CreateProject(const std::filesystem::path& ProjectPath);
-		void SaveProjectAs();
-		void OnProjectChanged(TObjectPtr<LProject> InProject);
 
 		bool OpenScene();
 		bool OpenScene(const std::filesystem::path& Filepath, const bool CheckForAutosaves);
@@ -116,6 +119,7 @@ namespace LkEngine {
 		void UI_AboutPopup();
 		void UI_LoadAutoSavePopup();
 		void UI_NewProjectPopup();
+		void UI_NewScenePopup();
 
 		void UI_ShowViewportAndWindowDetails();
 		void UI_ClearColorModificationMenu();

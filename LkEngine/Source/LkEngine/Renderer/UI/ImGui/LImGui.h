@@ -63,49 +63,14 @@ namespace LkEngine::UI {
 
 	extern FOnMessageBoxCancelled OnMessageBoxCancelled;
 
-	/** Unlimited positive value. */
-	static constexpr float SLIDER_MIN_UNLIMITED_POS = 0.0f;
-	static constexpr float SLIDER_MAX_UNLIMITED = 0.0f;
-
-	namespace Internal 
-	{
-		extern std::vector<ImGuiID> GridIdStack;
-	}
-
-	/** 
-	 * FMessageBox
-	 */
-	struct FMessageBox
-	{
-		std::string Title = "";
-		std::string Body = "";
-		uint32_t Flags = 0;
-		uint32_t Width = 0;
-		uint32_t Height = 0;
-		uint32_t MinWidth = 0;
-		uint32_t MinHeight = 0;
-		uint32_t MaxWidth = -1;
-		uint32_t MaxHeight = -1;
-		std::function<void()> UserRenderFunction;
-		bool bShouldOpen = true;
-		bool bIsOpen = false;
-	};
-	
-	namespace Internal 
-	{
-		static std::unordered_map<std::string, FMessageBox> MessageBoxes;
-
-		static std::deque<float> AlignedStack{};
-	}
-
 	FORCEINLINE void PushAligned(const float Spacing = 0.0f)
 	{
-		Internal::AlignedStack.push_front(Spacing);
+		UI::UIContext.AlignedStack.emplace_front(Spacing, UIContext.AlignedStack.size());
 	}
 
 	FORCEINLINE void PopAligned()
 	{
-		Internal::AlignedStack.pop_front();
+		UI::UIContext.AlignedStack.pop_front();
 	}
 
 	void Separator(const ImVec2& Size, const ImVec4& Color);
@@ -392,6 +357,169 @@ namespace LkEngine::UI {
 		 */
 		FORCEINLINE bool Vec3Control(const std::string& Label, 
 									 glm::vec3& Values, 
+									 const float ValueSpeed = 0.10f,
+									 const float ResetValue = 0.0f, 
+									 const float ValueMin = 0.0f,
+									 const float ValueMax = 0.0f,
+									 const float ColumnWidth = 100.0f, 
+									 const char* Format = "%.2f",
+									 uint32_t RenderMultiSelectAxes = 0)
+		{
+			bool Modified = false;
+			bool ManuallyEdited = false;
+
+		#if 0
+			ImGui::TableSetColumnIndex(0);
+			UI::ShiftCursor(17.0f, 7.0f);
+
+			ImGui::Text(Label.c_str());
+			UI::Draw::Underline(false, 0.0f, 2.0f);
+
+			ImGui::TableSetColumnIndex(1);
+			UI::ShiftCursor(7.0f, 0.0f);
+		#else
+			if (InTable())
+			{
+				ImGui::TableSetColumnIndex(0);
+				UI::ShiftCursor(17.0f, 7.0f);
+
+				ImGui::Text(Label.c_str());
+				UI::Draw::Underline(false, 0.0f, 2.0f);
+
+				ImGui::TableSetColumnIndex(1);
+				UI::ShiftCursor(7.0f, 0.0f);
+			}
+			else
+			{
+				if (!Label.empty() && Label.at(0) != '#')
+				{
+					ImGui::Text(Label.c_str());
+					/* TODO: Do PushStyle here instead. */
+					ImGui::SameLine();
+				}
+			}
+		#endif
+
+			{
+				static constexpr float SpacingX = 8.0f;
+				UI::FScopedStyle ItemSpacing(ImGuiStyleVar_ItemSpacing, ImVec2(SpacingX, 0.0f));
+				UI::FScopedStyle Padding(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 2.0f));
+				{
+					UI::FScopedColor Padding(ImGuiCol_Border, IM_COL32(0, 0, 0, 0));
+					UI::FScopedColor Frame(ImGuiCol_FrameBg, IM_COL32(0, 0, 0, 0));
+
+					ImGui::BeginChild(
+						ImGui::GetID((Label + "Subwindow").c_str()),
+						ImVec2((ImGui::GetContentRegionAvail().x - SpacingX), ImGui::GetFrameHeightWithSpacing() + 8.0f),
+						ImGuiChildFlags_None,
+						ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse /* Window Flags. */
+					);
+				}
+
+				static constexpr float FramePadding = 3.0f;
+				static constexpr float OutlineSpacing = 1.0f;
+				const float LineHeight = GImGui->Font->FontSize + FramePadding * 2.0f;
+				const ImVec2 ButtonSize = { LineHeight + 2.0f, LineHeight };
+				const float InputItemWidth = (ImGui::GetContentRegionAvail().x - SpacingX) / 3.0f - ButtonSize.x;
+
+				UI::ShiftCursor(0.0f, FramePadding);
+
+				auto DrawControl = [&](const std::string& InLabel, 
+									   float& InValue, 
+									   const ImVec4& InColorNormal,
+									   const ImVec4& InColorHover, 
+									   const ImVec4& InColorPressed, 
+									   bool RenderMultiSelect)
+				{
+					{
+						UI::FScopedStyle ButtonFrame(ImGuiStyleVar_FramePadding, ImVec2(FramePadding, 0.0f));
+						UI::FScopedStyle ButtonRounding(ImGuiStyleVar_FrameRounding, 1.0f);
+						UI::FScopedColorStack ButtonColours(
+							ImGuiCol_Button, InColorNormal, 
+							ImGuiCol_ButtonHovered, InColorHover,
+							ImGuiCol_ButtonActive, InColorPressed
+						);
+
+						if (ImGui::Button(InLabel.c_str(), ButtonSize))
+						{
+							InValue = ResetValue;
+							Modified = true;
+							LK_CORE_DEBUG("Pressed Button: {}", InLabel.c_str());
+						}
+					}
+
+					ImGui::SameLine(0.0f, OutlineSpacing);
+					ImGui::SetNextItemWidth(InputItemWidth);
+
+					ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, RenderMultiSelect);
+					const ImGuiID InputID = ImGui::GetID(("##" + InLabel).c_str());
+					const bool WasTempInputActive = ImGui::TempInputIsActive(InputID);
+					Modified |= ImGui::DragFloat(("##" + InLabel).c_str(), &InValue, ValueSpeed, ValueMin, ValueMax, Format, 0);
+
+					if (ImGui::TempInputIsActive(InputID))
+					{
+						Modified = false;
+					}
+
+					ImGui::PopItemFlag();
+
+					if (WasTempInputActive)
+					{
+						ManuallyEdited |= ImGui::IsItemDeactivatedAfterEdit();
+					}
+				};
+
+				/* Draw X. */
+				DrawControl(
+					"X", 
+					Values.x, 
+					ImVec4(0.80f, 0.10f, 0.15f, 1.0f), /* Normal  */
+					ImVec4(0.90f, 0.20f, 0.20f, 1.0f), /* Hover   */
+					ImVec4(0.80f, 0.10f, 0.15f, 1.0f), /* Pressed */
+					(RenderMultiSelectAxes & EVectorAxis::X)
+				); 
+
+				/* Draw Y. */
+				ImGui::SameLine(0.0f, OutlineSpacing);
+				DrawControl(
+					"Y", 
+					Values.y, 
+					ImVec4(0.20f, 0.70f, 0.20f, 1.0f), 
+					ImVec4(0.30f, 0.80f, 0.30f, 1.0f), 
+					ImVec4(0.20f, 0.70f, 0.20f, 1.0f), 
+					(RenderMultiSelectAxes & EVectorAxis::Y)
+				);
+
+				/* Draw Z. */
+				ImGui::SameLine(0.0f, OutlineSpacing);
+				DrawControl(
+					"Z", 
+					Values.z, 
+					ImVec4(0.10f, 0.25f, 0.80f, 1.0f), 
+					ImVec4(0.20f, 0.35f, 0.90f, 1.0f), 
+					ImVec4(0.10f, 0.25f, 0.80f, 1.0f), 
+					(RenderMultiSelectAxes & EVectorAxis::Z)
+				);
+
+				ImGui::EndChild();
+			}
+
+			/* TODO: Check if we are in a table before calling this. */
+			if (InTable())
+			{
+				ImGui::TableNextRow();
+			}
+
+			return Modified || ManuallyEdited;
+		}
+
+		/**
+		 * Vec3Control
+		 * 
+		 *  To be used in already existing tables.
+		 */
+		FORCEINLINE bool Vec3Control(const std::string& Label, 
+									 glm::vec3& Values, 
 									 bool& ManuallyEdited, 
 									 const float ResetValue = 0.0f, 
 									 const float ValueSpeed = 0.10f,
@@ -518,6 +646,12 @@ namespace LkEngine::UI {
 				ImGui::EndChild();
 			}
 
+			/* TODO: Check if we are in a table before calling this. */
+			if (InTable())
+			{
+				ImGui::TableNextRow();
+			}
+
 			return Modified || ManuallyEdited;
 		}
 	}
@@ -528,7 +662,7 @@ namespace LkEngine::UI {
 									   const bool UseHeaderLabels = false)
 	{
 		UI::PushID();
-		Internal::GridIdStack.push_back(Internal::GetContextID());
+		UIContext.TableStack.push_back({ Label });
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
@@ -540,7 +674,14 @@ namespace LkEngine::UI {
 		static constexpr ImGuiTableColumnFlags ColumnFlags = ImGuiTableColumnFlags_None;
 		for (uint32_t ColumnIdx = 0; ColumnIdx < 2; ColumnIdx++)
 		{
-			ImGui::TableSetupColumn(std::format("##Column-{}", ColumnIdx).c_str(), ColumnFlags);
+			if (UseHeaderLabels)
+			{
+				ImGui::TableSetupColumn(std::format("Column-{}", ColumnIdx).c_str(), ColumnFlags);
+			}
+			else
+			{
+				ImGui::TableSetupColumn(std::format("##Column-{}", ColumnIdx).c_str(), ColumnFlags);
+			}
 		}
 
 		if (UseHeaderLabels)
@@ -556,14 +697,19 @@ namespace LkEngine::UI {
 		ImGui::PopStyleVar(2); /* ItemSpacing, FramePadding */
 
 		UI::PopID();
-		Internal::GridIdStack.pop_back();
+		UIContext.TableStack.pop_back();
 	}
 
 	FORCEINLINE bool Property(const char* Label, bool& Value, const char* HelpText = "")
 	{
 		bool Modified = false;
 
-		ImGui::TableSetColumnIndex(0);
+		const bool IsCurrentlyInTable = InTable();
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableSetColumnIndex(0);
+		}
+
 		ShiftCursor(10.0f, 9.0f);
 		ImGui::Text(Label);
 
@@ -573,21 +719,33 @@ namespace LkEngine::UI {
 			HelpMarker(HelpText);
 		}
 
-		ImGui::TableSetColumnIndex(1);
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableSetColumnIndex(1);
+		}
+
 		ShiftCursorY(4.0f);
 
 		ImGui::PushItemWidth(-1);
 		Modified = ImGui::Checkbox(std::format("##{0}", Label).c_str(), &Value);
 		ImGui::PopItemWidth();
 
-		ImGui::TableNextRow();
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableNextRow();
+		}
 
 		return Modified;
 	}
 
 	static bool Property(const char* Label, float& Value, float Delta = 0.10f, float Min = 0.0f, float Max = 0.0f, const char* HelpText = "", const char* HelpSymbol = "(?)")
 	{
-		ImGui::TableSetColumnIndex(0);
+		const bool IsCurrentlyInTable = InTable();
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableSetColumnIndex(0);
+		}
+
 		ShiftCursor(10.0f, 9.0f);
 		ImGui::Text(Label);
 
@@ -597,14 +755,20 @@ namespace LkEngine::UI {
 			HelpMarker(HelpText, HelpSymbol);
 		}
 
-		ImGui::TableSetColumnIndex(1);
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableSetColumnIndex(1);
+		}
 		ShiftCursorY(4.0f);
 
 		ImGui::PushItemWidth(-1);
 		const bool Modified = UI::Draw::DragFloat(std::format("##{}", Label).c_str(), &Value, Delta, Min, Max);
 		ImGui::PopItemWidth();
 
-		ImGui::TableNextRow();
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableNextRow();
+		}
 
 		return Modified;
 	}
@@ -788,7 +952,7 @@ namespace LkEngine::UI {
 	template<typename TEnum>
 	FORCEINLINE bool PropertyDropdown(const char* Label, 
 									  const char** Options, 
-									  const uint16_t OptionCount, 
+									  const uint16_t ArrSize, 
 									  TEnum& Selected, 
 									  const char* HelpText = "")
 	{
@@ -814,13 +978,12 @@ namespace LkEngine::UI {
 		const std::string ID = std::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption))
 		{
-			for (uint16_t Idx = 0; Idx < OptionCount; Idx++)
+			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
 			{
 				const bool IsSelected = (CurrentOption == Options[Idx]);
 				if (ImGui::Selectable(Options[Idx], IsSelected))
 				{
 					CurrentOption = Options[Idx];
-					//Selected = (TEnum)Idx;
 					Selected = static_cast<TEnum>(Idx);
 					Modified = true;
 				}
@@ -841,24 +1004,117 @@ namespace LkEngine::UI {
 		return Modified;
 	}
 
+	template<std::size_t ArrSize, typename T, typename TEnum>
 	FORCEINLINE bool PropertyDropdown(const char* Label, 
-									  const char** Options, 
-									  const uint16_t OptionCount, 
+									  const std::array<T, ArrSize>& Options,
+									  TEnum& Selected, 
+									  const char* HelpText = "",
+									  const int ComboWidth = -1)
+	{
+		using ValueType = std::remove_cvref_t<T>;
+		static_assert((std::is_same_v<ValueType, const char*> || Core::IsPair<ValueType>), "Unsupported type");
+
+		using PrimitiveType = std::underlying_type_t<TEnum>;
+		const PrimitiveType SelectedIndex = static_cast<PrimitiveType>(Selected);
+
+		const char* CurrentOption = nullptr;
+		if constexpr (std::is_same_v<ValueType, const char*>)
+		{
+			CurrentOption = Options.at(SelectedIndex);
+		}
+		else if constexpr (Core::IsPair<ValueType>)
+		{
+			static_assert(Core::IsPairWithFirstArgConstChar<ValueType>, "The first pair argument (the label) is not const char*, which is required");
+			/* Select the label from the std::pair (first argument). */
+			CurrentOption = Options.at(SelectedIndex).first;
+		}
+		else
+		{
+			LK_CORE_VERIFY(false);
+		}
+
+		ShiftCursor(10.0f, 9.0f);
+		ImGui::Text(Label);
+
+		if (std::strlen(HelpText) != 0)
+		{
+			ImGui::SameLine();
+			HelpMarker(HelpText);
+		}
+
+		ImGui::NextColumn();
+		ShiftCursorY(4.0f);
+		ImGui::PushItemWidth(-1);
+
+		bool Modified = false;
+
+		const std::string ID = std::format("##{}", Label);
+		if (UI::BeginCombo(ID.c_str(), CurrentOption))
+		{
+			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
+			{
+				const char* Option = nullptr;
+				if constexpr (std::is_same_v<ValueType, const char*>)
+				{
+					Option = Options[Idx];
+				}
+				else if constexpr (Core::IsPair<ValueType>)
+				{
+					Option = Options.at(Idx).first;
+				}
+				else
+				{
+					LK_CORE_VERIFY(false);
+				}
+
+				const bool IsSelected = (Option == CurrentOption);
+				if (ImGui::Selectable(Option, IsSelected))
+				{
+					CurrentOption = Options[Idx];
+					Selected = static_cast<TEnum>(Idx);
+					Modified = true;
+				}
+
+				if (IsSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			UI::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
+		Draw::Underline();
+
+		return Modified;
+	}
+
+
+	FORCEINLINE bool PropertyDropdown(const char* Label, 
+									  const char* const* Options, 
+									  const uint16_t ArrSize, 
 									  int32_t* Selected, 
 									  const char* HelpText = "",
 									  const int ComboWidth = -1)
 	{
-		const bool IsInGrid = !Internal::GridIdStack.empty();
-		const bool ShouldAlign = !Internal::AlignedStack.empty();
+		const bool IsCurrentlyInTable = !UIContext.TableStack.empty();
+		const bool ShouldAlign = !UIContext.AlignedStack.empty();
 
-		if (IsInGrid)
+		if (IsCurrentlyInTable)
 		{
 			ImGui::TableSetColumnIndex(0);
 		}
 
 		if (ShouldAlign)
 		{
-			ImGui::SameLine(0.0f, Internal::AlignedStack.front());
+			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
+			if (AlignData.PassedElements > 0)
+			{
+				ImGui::SameLine(0.0f, AlignData.Dist);
+			}
+			AlignData.PassedElements++;
 		}
 		else
 		{
@@ -878,7 +1134,7 @@ namespace LkEngine::UI {
 			}
 		}
 
-		if (IsInGrid)
+		if (IsCurrentlyInTable)
 		{
 			ImGui::TableSetColumnIndex(1);
 		}
@@ -889,7 +1145,9 @@ namespace LkEngine::UI {
 
 		if (ShouldAlign)
 		{
-			ImGui::SameLine(0.0f, Internal::AlignedStack.front());
+			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
+			ImGui::SameLine(0.0f, AlignData.Dist);
+			AlignData.PassedElements++;
 		}
 		else
 		{
@@ -902,7 +1160,7 @@ namespace LkEngine::UI {
 		const std::string ID = std::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption))
 		{
-			for (uint16_t Idx = 0; Idx < OptionCount; Idx++)
+			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
 			{
 				const bool IsSelected = (CurrentOption == Options[Idx]);
 				if (ImGui::Selectable(Options[Idx], IsSelected))
@@ -923,7 +1181,7 @@ namespace LkEngine::UI {
 
 		ImGui::PopItemWidth();
 
-		if (IsInGrid)
+		if (IsCurrentlyInTable)
 		{
 			ImGui::TableNextRow();
 		}
@@ -935,6 +1193,240 @@ namespace LkEngine::UI {
 
 		return Modified;
 	}
+
+#if 0
+	template<std::size_t ArrSize>
+	FORCEINLINE bool PropertyDropdown(const char* Label, 
+									  const char* const* Options, 
+									  int32_t* Selected, 
+									  const char* HelpText = "",
+									  const int ComboWidth = -1)
+	{
+		const bool IsCurrentlyInTable = !UIContext.TableStack.empty();
+		const bool ShouldAlign = !UIContext.AlignedStack.empty();
+
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableSetColumnIndex(0);
+		}
+
+		if (ShouldAlign)
+		{
+			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
+			if (AlignData.PassedElements > 0)
+			{
+				ImGui::SameLine(0.0f, AlignData.Dist);
+			}
+			AlignData.PassedElements++;
+		}
+		else
+		{
+			ShiftCursor(10.0f, 9.0f);
+		}
+
+		const char* CurrentOption = Options[*Selected];
+
+		/* Skip rendering text for '#' and '##' identifier labels. */
+		if (Label && Label[0] != '#')
+		{
+			ImGui::Text(Label);
+			if (std::strlen(HelpText) != 0)
+			{
+				ImGui::SameLine();
+				HelpMarker(HelpText);
+			}
+		}
+
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableSetColumnIndex(1);
+		}
+		else
+		{
+			ImGui::NextColumn();
+		}
+
+		if (ShouldAlign)
+		{
+			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
+			ImGui::SameLine(0.0f, AlignData.Dist);
+			AlignData.PassedElements++;
+		}
+		else
+		{
+			ShiftCursorY(4.0f);
+		}
+		ImGui::PushItemWidth(ComboWidth);
+
+		bool Modified = false;
+
+		const std::string ID = std::format("##{}", Label);
+		if (UI::BeginCombo(ID.c_str(), CurrentOption))
+		{
+			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
+			{
+				const bool IsSelected = (CurrentOption == Options[Idx]);
+				if (ImGui::Selectable(Options[Idx], IsSelected))
+				{
+					CurrentOption = Options[Idx];
+					*Selected = Idx;
+					Modified = true;
+				}
+
+				if (IsSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			UI::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableNextRow();
+		}
+		else
+		{
+			ImGui::NextColumn();
+			Draw::Underline();
+		}
+
+		return Modified;
+	}
+#endif
+
+	template<std::size_t ArrSize, typename T>
+	FORCEINLINE bool PropertyDropdown(const char* Label, 
+									  const std::array<T, ArrSize>& Options,
+									  int32_t* Selected, 
+									  const char* HelpText = "",
+									  const int ComboWidth = -1)
+	{
+		using ValueType = std::remove_cvref_t<T>;
+		static_assert((std::is_same_v<ValueType, const char*> || Core::IsPair<ValueType>), "Unsupported type");
+
+		const bool ShouldAlign = !UIContext.AlignedStack.empty();
+		const bool IsCurrentlyInTable = InTable();
+
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableSetColumnIndex(0);
+		}
+
+		if (ShouldAlign)
+		{
+			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
+			if (AlignData.PassedElements > 0)
+			{
+				ImGui::SameLine(0.0f, AlignData.Dist);
+			}
+			AlignData.PassedElements++;
+		}
+		else
+		{
+			ShiftCursor(10.0f, 9.0f);
+		}
+
+		const char* CurrentOption = nullptr;
+		if constexpr (std::is_same_v<ValueType, const char*>)
+		{
+			CurrentOption = Options.at(*Selected);
+		}
+		else if constexpr (Core::IsPair<ValueType>)
+		{
+			static_assert(Core::IsPairWithFirstArgConstChar<ValueType>, "The first pair argument (the label) is not const char*, which is required");
+			/* Select the label from the std::pair (first argument). */
+			CurrentOption = Options.at(*Selected).first;
+		}
+
+		/* Skip rendering text for '#' and '##' identifier labels. */
+		if (Label && Label[0] != '#')
+		{
+			ImGui::Text(Label);
+			if (std::strlen(HelpText) != 0)
+			{
+				ImGui::SameLine();
+				HelpMarker(HelpText);
+			}
+		}
+
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableSetColumnIndex(1);
+		}
+		else
+		{
+			ImGui::NextColumn();
+		}
+
+		if (ShouldAlign)
+		{
+			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
+			ImGui::SameLine(0.0f, AlignData.Dist);
+			AlignData.PassedElements++;
+		}
+		else
+		{
+			ShiftCursorY(4.0f);
+		}
+		ImGui::PushItemWidth(ComboWidth);
+
+		bool Modified = false;
+
+		const std::string ID = std::format("##{}", Label);
+		if (UI::BeginCombo(ID.c_str(), CurrentOption))
+		{
+			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
+			{
+				const char* Option = nullptr;
+				if constexpr (std::is_same_v<ValueType, const char*>)
+				{
+					Option = Options[Idx];
+				}
+				else if constexpr (Core::IsPair<ValueType>)
+				{
+					Option = Options.at(Idx).first;
+				}
+				else
+				{
+					LK_CORE_VERIFY(false);
+				}
+
+				const bool IsSelected = (Option == CurrentOption);
+				if (ImGui::Selectable(Option, IsSelected))
+				{
+					CurrentOption = Option;
+					*Selected = Idx;
+					Modified = true;
+				}
+
+				if (IsSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			UI::EndCombo();
+		}
+
+		ImGui::PopItemWidth();
+
+		if (IsCurrentlyInTable)
+		{
+			ImGui::TableNextRow();
+		}
+		else
+		{
+			ImGui::NextColumn();
+			Draw::Underline();
+		}
+
+		return Modified;
+	}
+
 
 }
 

@@ -160,7 +160,7 @@ namespace LkEngine {
 		/* Default font. */
 		FFontConfiguration SourceSansPro_Semibold;
 		SourceSansPro_Semibold.FontName = "Default";
-		SourceSansPro_Semibold.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Semibold.ttf";
+		SourceSansPro_Semibold.FilePath = LFileSystem::GetResourcesDir() / "Fonts/SourceCodePro/SourceSansPro-Semibold.ttf";
 		SourceSansPro_Semibold.Size = DefaultFontSize;
 		UI::Font::Add(SourceSansPro_Semibold, true);
 
@@ -168,7 +168,7 @@ namespace LkEngine {
 		static const ImWchar FontAwesomeRanges[] = { LK_ICON_MIN, LK_ICON_MAX, 0 };
 		FFontConfiguration FontAwesome;
 		FontAwesome.FontName = "FontAwesome";
-		FontAwesome.FilePath = "Assets/Fonts/FontAwesome/fontawesome-webfont.ttf";
+		FontAwesome.FilePath = LFileSystem::GetResourcesDir() / "Fonts/FontAwesome/fontawesome-webfont.ttf";
 		FontAwesome.Size = 16.0f;
 		FontAwesome.GlyphRanges = FontAwesomeRanges;
 		FontAwesome.MergeWithLast = true;
@@ -176,55 +176,55 @@ namespace LkEngine {
 
 		FFontConfiguration SourceSansPro_Bold;
 		SourceSansPro_Bold.FontName = "Bold";
-		SourceSansPro_Bold.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
+		SourceSansPro_Bold.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
 		SourceSansPro_Bold.Size = DefaultFontSize;
 		UI::Font::Add(SourceSansPro_Bold);
 
 		FFontConfiguration SourceSansPro_Large;
 		SourceSansPro_Large.FontName = "Large";
-		SourceSansPro_Large.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Semibold.ttf";
+		SourceSansPro_Large.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-Semibold.ttf";
 		SourceSansPro_Large.Size = LargeFontSize;
 		UI::Font::Add(SourceSansPro_Large);
 
 		FFontConfiguration SourceSansPro_LargeBold;
 		SourceSansPro_LargeBold.FontName = "LargeBold";
-		SourceSansPro_LargeBold.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
+		SourceSansPro_LargeBold.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
 		SourceSansPro_LargeBold.Size = LargeFontSize;
 		UI::Font::Add(SourceSansPro_LargeBold);
 
 		FFontConfiguration SourceSansPro_LargeBoldItalic;
 		SourceSansPro_LargeBoldItalic.FontName = "LargeBoldItalic";
-		SourceSansPro_LargeBoldItalic.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-BoldItalic.ttf";
+		SourceSansPro_LargeBoldItalic.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-BoldItalic.ttf";
 		SourceSansPro_LargeBoldItalic.Size = LargeFontSize;
 		UI::Font::Add(SourceSansPro_LargeBoldItalic);
 
 		FFontConfiguration SourceSansPro_Italic;
 		SourceSansPro_Italic.FontName = "Italic";
-		SourceSansPro_Italic.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Italic.ttf";
+		SourceSansPro_Italic.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-Italic.ttf";
 		SourceSansPro_Italic.Size = DefaultFontSize;
 		UI::Font::Add(SourceSansPro_Italic);
 
 		FFontConfiguration SourceSansPro_LargeItalic;
 		SourceSansPro_LargeItalic.FontName = "LargeItalic";
-		SourceSansPro_LargeItalic.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Italic.ttf";
+		SourceSansPro_LargeItalic.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-Italic.ttf";
 		SourceSansPro_LargeItalic.Size = LargeFontSize;
 		UI::Font::Add(SourceSansPro_LargeItalic);
 
 		FFontConfiguration SourceSansPro_Title;
 		SourceSansPro_Title.FontName = "Title";
-		SourceSansPro_Title.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Semibold.ttf";
+		SourceSansPro_Title.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-Semibold.ttf";
 		SourceSansPro_Title.Size = TitleFontSize;
 		UI::Font::Add(SourceSansPro_Title);
 
 		FFontConfiguration SourceSansPro_TitleBold;
 		SourceSansPro_TitleBold.FontName = "TitleBold";
-		SourceSansPro_TitleBold.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
+		SourceSansPro_TitleBold.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
 		SourceSansPro_TitleBold.Size = TitleFontSize;
 		UI::Font::Add(SourceSansPro_TitleBold);
 
 		FFontConfiguration SourceSansPro_TitleBoldItalic;
 		SourceSansPro_TitleBoldItalic.FontName = "TitleBoldItalic";
-		SourceSansPro_TitleBoldItalic.FilePath = "Assets/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
+		SourceSansPro_TitleBoldItalic.FilePath = "Resources/Fonts/SourceCodePro/SourceSansPro-Bold.ttf";
 		SourceSansPro_TitleBoldItalic.Size = TitleFontSize;
 		UI::Font::Add(SourceSansPro_TitleBoldItalic);
 
@@ -233,19 +233,19 @@ namespace LkEngine {
 		-----------------------------------------------------*/
 		FFontConfiguration Roboto_Bold;
 		Roboto_Bold.FontName = "Roboto_Bold";
-		Roboto_Bold.FilePath = "Assets/Fonts/Roboto/Roboto-Bold.ttf";
+		Roboto_Bold.FilePath = "Resources/Fonts/Roboto/Roboto-Bold.ttf";
 		Roboto_Bold.Size = DefaultFontSize;
 		UI::Font::Add(Roboto_Bold);
 
 		FFontConfiguration Roboto_Large;
 		Roboto_Large.FontName = "Roboto_Large";
-		Roboto_Large.FilePath = "Assets/Fonts/Roboto/Roboto-Regular.ttf";
+		Roboto_Large.FilePath = "Resources/Fonts/Roboto/Roboto-Regular.ttf";
 		Roboto_Large.Size = LargeFontSize;
 		UI::Font::Add(Roboto_Large);
 
 		FFontConfiguration Roboto_SemiMedium;
 		Roboto_SemiMedium.FontName = "Roboto_SemiMedium";
-		Roboto_SemiMedium.FilePath = "Assets/Fonts/Roboto/Roboto-SemiMedium.ttf";
+		Roboto_SemiMedium.FilePath = "Resources/Fonts/Roboto/Roboto-SemiMedium.ttf";
 		Roboto_SemiMedium.Size = DefaultFontSize;
 		UI::Font::Add(Roboto_SemiMedium);
 	}

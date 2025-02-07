@@ -24,6 +24,7 @@ namespace LkEngine {
 		static void RenderUI();
 		static void OpenEditor(const TObjectPtr<LAsset>& Asset);
 
+		static void SetSceneContext(const TObjectPtr<LScene>& InScene);
 		static void SetEditorOpen(const EAssetType AssetType, const bool Open);
 
 		template<typename T>

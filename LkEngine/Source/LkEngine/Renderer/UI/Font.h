@@ -35,7 +35,7 @@ namespace LkEngine {
 	struct FFontConfiguration
 	{
 		std::string FontName{};
-		std::string FilePath{};
+		std::filesystem::path FilePath{};
 		float Size = 18.0f;
 
 		bool MergeWithLast = false;

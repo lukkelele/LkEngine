@@ -152,7 +152,7 @@ namespace LkEngine {
 		static uint8_t GetSceneCount() { return SceneCounter; }
 
 	public:
-		static constexpr const char* FILE_EXTENSION = ".lkscene";
+		static constexpr const char* FILE_EXTENSION = "lkscene";
 	private:
 		inline static TObjectPtr<LScene> ActiveScene = nullptr; /* TO REMOVE */
 		inline static uint8_t SceneCounter = 0;

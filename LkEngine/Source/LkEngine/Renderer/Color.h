@@ -390,6 +390,15 @@ namespace LkEngine::Color {
  */
 namespace LkEngine::RGBA32 
 {
+	static constexpr uint32_t White          = IM_COL32(255, 255, 255, 255);
+	static constexpr uint32_t Black          = IM_COL32(0, 0, 0, 255);
+	static constexpr uint32_t Gray           = IM_COL32(128, 128, 128, 255);
+	static constexpr uint32_t LightGray      = IM_COL32(165, 165, 165, 255);
+	static constexpr uint32_t LighterGray    = IM_COL32(190, 190, 190, 255);
+	static constexpr uint32_t Red            = IM_COL32(255, 0, 0, 255);
+	static constexpr uint32_t Green          = IM_COL32(0, 255, 0, 255);
+	static constexpr uint32_t Blue           = IM_COL32(0, 0, 255, 255);
+
 	static constexpr uint32_t BrightGreen    = IM_COL32(18, 140, 40, 255);
 	static constexpr uint32_t NiceBlue       = IM_COL32(83, 232, 254, 255);
 

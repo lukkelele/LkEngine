@@ -22,6 +22,7 @@ namespace LkEngine {
 		/* Create the project directory if it does not exist. */
 		if (!fs::exists(OutFile.parent_path()))
 		{
+			LK_CORE_CONSOLE_DEBUG("Creating parent directories for project: {}", OutFile.parent_path());
 			fs::create_directories(OutFile.parent_path());
 		}
 
@@ -29,7 +30,8 @@ namespace LkEngine {
 		SerializeToYaml(Out);
 
 		/* Add file extension to the saved file. */
-		const std::string ProjectSave = std::format("{}{}", OutFile.string(), LProject::FILE_EXTENSION);
+		const std::string ProjectSave = std::format("{}/{}.{}", OutFile.string(), Project->GetName(), LProject::FILE_EXTENSION);
+		LK_CORE_TRACE("Project Save: {}", ProjectSave);
 
 		std::ofstream FileOut(ProjectSave);
 		if (FileOut.is_open() && FileOut.good())
@@ -84,15 +86,21 @@ namespace LkEngine {
 	{
 		LK_CORE_VERIFY(Project);
 
-		/* TODO: Add Scene name here. */
-
 		Out << YAML::BeginMap;
 		Out << YAML::Key << "Project" << YAML::Value;
 		{
 			const FProjectConfiguration& Config = Project->GetConfiguration();
+			const std::filesystem::path AssetDirectory = std::filesystem::relative(Config.AssetDirectory, LFileSystem::GetRuntimeDir());
+			const std::filesystem::path AssetRegistryPath = std::filesystem::relative(Config.AssetRegistryPath, LFileSystem::GetRuntimeDir());
+
 			Out << YAML::BeginMap;
 			Out << YAML::Key << "Name" << YAML::Value << Project->GetName();
+			Out << YAML::Key << "AssetDirectory" << YAML::Value << LFileSystem::ConvertToUnixPath(AssetDirectory);
+			Out << YAML::Key << "AssetRegistryPath" << YAML::Value << LFileSystem::ConvertToUnixPath(AssetRegistryPath);
+			Out << YAML::Key << "MeshDirectory" << YAML::Value << Config.MeshDirectory;
+			Out << YAML::Key << "StartScene" << YAML::Value << Config.StartScene;
 			Out << YAML::Key << "AutoSave" << YAML::Value << Config.bAutoSave;
+			Out << YAML::Key << "AutoSaveInterval" << YAML::Value << Config.AutoSaveInterval.count();
 			Out << YAML::EndMap;
 		}
 		Out << YAML::EndMap;
@@ -104,12 +112,19 @@ namespace LkEngine {
 		YAML::Node RootNode = YAML::Load(YamlString)["Project"];
 		if (!RootNode.IsDefined())
 		{
-			LK_CORE_ERROR_TAG("ProjectSerializer", "Yaml node is missing 'Project' node");
+			LK_CORE_ERROR_TAG("ProjectSerializer", "Yaml node is missing 'Project' node\n\n{}", YamlString);
 			return false;
 		}
 
+		LK_CORE_WARN("\n{}", YamlString);
+
 		LK_DESERIALIZE_PROPERTY(Name, ProjectConfig.Name, RootNode, "Unknown");
+		LK_DESERIALIZE_PROPERTY(AssetDirectory, ProjectConfig.AssetDirectory, RootNode, "");
+		LK_DESERIALIZE_PROPERTY(AssetRegistryPath, ProjectConfig.AssetRegistryPath, RootNode, "");
+		LK_DESERIALIZE_PROPERTY(MeshDirectory, ProjectConfig.MeshDirectory, RootNode, "");
+		LK_DESERIALIZE_PROPERTY(StartScene, ProjectConfig.StartScene, RootNode, "");
 		LK_DESERIALIZE_PROPERTY(AutoSave, ProjectConfig.bAutoSave, RootNode, true);
+		LK_DESERIALIZE_PROPERTY(AutoSaveInterval, ProjectConfig.AutoSaveInterval, RootNode, 150s);
 
 		return true;
 	}

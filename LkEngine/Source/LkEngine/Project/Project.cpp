@@ -27,6 +27,7 @@ namespace LkEngine {
 
 	void LProject::Load(const std::string& ProjectPath)
 	{
+		LK_CORE_DEBUG_TAG("Project", "Loading: {}", ProjectPath);
 		if (ProjectPath.empty())
 		{
 			LK_CORE_ERROR_TAG("Project", "Could not load project, the path is empty");
@@ -43,10 +44,11 @@ namespace LkEngine {
 		/* Add the name of the project directory with the project suffix to get the project name. */
 		if (LFileSystem::IsDirectory(Filepath))
 		{
-			Filepath = (Filepath / fs::path(Filepath.filename().string() + LProject::FILE_EXTENSION));
+			Filepath = (Filepath / fs::path(Filepath.filename().string() + "." + LProject::FILE_EXTENSION));
 		}
 
 		/* Load serialized data into the project instance. */
+		LK_CORE_DEBUG("Deserializing project: {}", ProjectPath);
 		FProjectSerializer ProjectSerializer(this);
 		if (!ProjectSerializer.Deserialize(Filepath))
 		{
@@ -59,8 +61,7 @@ namespace LkEngine {
 
 	bool LProject::Save()
 	{
-		LK_CORE_INFO_TAG("Project", "Saving: {}", Configuration.Name);
-
+		LK_CORE_CONSOLE_INFO("Saving project: {}", Configuration.Name);
 		if (AssetManager)
 		{
 			AssetManager->WriteRegistryToDisk();
@@ -73,7 +74,9 @@ namespace LkEngine {
 		/* Serialize to disk. */
 		FProjectSerializer ProjectSerializer(this);
 
-		const fs::path ProjectPath = std::format("Projects/{}/{}", Configuration.Name, Configuration.Name);
+		//const std::filesystem::path ProjectPath = std::format("Projects/{}", Configuration.Name);
+		const std::filesystem::path ProjectPath = Configuration.ProjectDirectory;
+		LK_CORE_TRACE("Project path: {}", ProjectPath.string());
 		if (ProjectPath.empty())
 		{
 			LK_CORE_ERROR_TAG("Project", "Could not save project: '{}'", ProjectPath.string());
@@ -82,18 +85,13 @@ namespace LkEngine {
 
 		ProjectSerializer.Serialize(ProjectPath);
 
-		/* Serialize the active scene. */
-		if (!LFileSystem::Exists("Scenes"))
-		{
-			LK_INFO("Creating 'Scenes' directory");
-			LFileSystem::CreateDirectory("Scenes");
-		}
-
 		/* Save the scene. */
-		if (TObjectPtr<LScene> Scene = LScene::GetActiveScene())
+		if (TObjectPtr<LScene> Scene = LScene::GetActiveScene(); Scene != nullptr)
 		{
+			LK_CORE_CONSOLE_DEBUG("Saving project scene: {}", Scene->GetName());
 			LSceneSerializer SceneSerializer(Scene);
-			const std::string SceneFilepath = std::format("Scenes/{}{}", Scene->GetName(), LScene::FILE_EXTENSION);
+			const std::string SceneFilepath = std::format("{}/Scenes/{}.{}", Configuration.ProjectDirectory, Scene->GetName(), LScene::FILE_EXTENSION);
+			LK_CORE_DEBUG("Scene filepath: {}", SceneFilepath);
 			SceneSerializer.Serialize(SceneFilepath);
 		}
 
@@ -133,18 +131,20 @@ namespace LkEngine {
 
 	std::filesystem::path LProject::GetAssetDirectory()
 	{
-		return LFileSystem::GetAssetsDir();
+		LK_CORE_VERIFY(ActiveProject);
+		return ActiveProject->Configuration.AssetDirectory;
 	}
 
 	std::filesystem::path LProject::GetAssetRegistryPath()
 	{
-		/* TODO: This should be unique for every project and not some global path hardcoded like now. */
-		return LFileSystem::GetAssetsDir() / "AssetRegistry.lkr";
+		LK_CORE_VERIFY(ActiveProject);
+		return std::filesystem::path(ActiveProject->Configuration.AssetRegistryPath);
 	}
 
-	uint64_t LProject::GetSize() const
+	std::filesystem::path LProject::GetMeshDirectory()
 	{
-		return 0;
+		LK_CORE_VERIFY(ActiveProject);
+		return std::filesystem::path(ActiveProject->Configuration.MeshDirectory);
 	}
 
 }

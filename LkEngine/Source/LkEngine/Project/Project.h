@@ -20,9 +20,9 @@ namespace LkEngine {
 	{
 		std::string Name{};
 
-		std::string AssetDirectory{};
+		std::string AssetDirectory = "Assets";
 		std::string AssetRegistryPath{};
-		std::string MeshPath{};
+		std::string MeshDirectory{};
 
 		std::string StartScene{};
 
@@ -34,10 +34,16 @@ namespace LkEngine {
 		std::string ProjectDirectory{};
 	};
 
+	enum class EProjectLoadAction : uint8_t
+	{
+		Unload,
+		Load
+	};
+
 	class LProject : public LObject
 	{
 	public:
-		LK_DECLARE_MULTICAST_DELEGATE(FOnProjectChanged, TObjectPtr<LProject>);
+		LK_DECLARE_MULTICAST_DELEGATE(FOnProjectChanged, const TObjectPtr<LProject>&);
 	public:
 		LProject();
 		~LProject() = default;
@@ -49,9 +55,9 @@ namespace LkEngine {
 
 		static std::filesystem::path GetAssetDirectory();
 		static std::filesystem::path GetAssetRegistryPath();
+		static std::filesystem::path GetMeshDirectory();
 
 		bool Save();
-		uint64_t GetSize() const;
 
 		FProjectConfiguration& GetConfiguration() { return Configuration; }
 		const FProjectConfiguration& GetConfiguration() const { return Configuration; }
@@ -74,9 +80,21 @@ namespace LkEngine {
 			return AssetManager.As<LRuntimeAssetManager>(); 
 		}
 
+		static const std::string& GetProjectName()
+		{
+			LK_CORE_VERIFY(ActiveProject, "No active project");
+			return ActiveProject->GetConfiguration().Name;
+		}
+
+		static std::filesystem::path GetProjectDirectory()
+		{
+			LK_CORE_VERIFY(ActiveProject, "No active project");
+			return ActiveProject->GetConfiguration().ProjectDirectory;
+		}
+
 		static void SetActive(TObjectPtr<LProject> Project);
 
-		FORCEINLINE static bool IsActiveProject(const TObjectPtr<LProject>& Project) 
+		static bool IsActiveProject(const TObjectPtr<LProject>& Project) 
 		{ 
 			return (ActiveProject == Project);
 		}
@@ -85,7 +103,7 @@ namespace LkEngine {
 		const std::string& GetName() const { return Configuration.Name; }
 
 	public:
-		inline static constexpr const char* FILE_EXTENSION = ".lkproject";
+		inline static constexpr const char* FILE_EXTENSION = "lkproject";
 		static FOnProjectChanged OnProjectChanged;
 	private:
 		FProjectConfiguration Configuration{};

@@ -6,7 +6,7 @@
 
 
 namespace LkEngine {
-
+	
 	class LEditorConsolePanel : public IPanel
 	{
 	public:
@@ -15,6 +15,8 @@ namespace LkEngine {
 
 		virtual void Render() override {}
 		virtual void RenderUI(bool& IsOpen) override;
+
+		virtual void OnProjectChanged(const TObjectPtr<LProject>& InProject) override;
 
 		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
 		virtual void DeserializeFromYaml(const YAML::Node& Data) override;

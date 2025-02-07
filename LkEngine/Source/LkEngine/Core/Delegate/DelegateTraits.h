@@ -3,7 +3,7 @@
 #include "LkEngine/Core/Delegate/Delegate.h"
 
 
-namespace LkEngine::Meta {
+namespace LkEngine::Core {
 
 	/**
 	 * @brief Helper for checking if a delegate is a multicast delegate.

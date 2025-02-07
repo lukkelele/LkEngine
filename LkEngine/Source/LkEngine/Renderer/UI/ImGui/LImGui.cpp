@@ -6,11 +6,6 @@
 
 namespace LkEngine::UI {
 
-	namespace Internal 
-	{
-		std::vector<ImGuiID> GridIdStack{};
-	}
-
 	FOnMessageBoxCancelled OnMessageBoxCancelled;
 
 	void Separator(const ImVec2& Size, const ImVec4& Color)
@@ -31,8 +26,8 @@ namespace LkEngine::UI {
 						const uint32_t MaxWidth,
 						const uint32_t MaxHeight)
 	{
-		FMessageBox& MessageBoxRef = Internal::MessageBoxes[Title];
-		MessageBoxRef.Title = std::format("{0}##MessageBoxRef{1}", Title, Internal::MessageBoxes.size() + 1);
+		FMessageBox& MessageBoxRef = UIContext.MessageBoxes[Title];
+		MessageBoxRef.Title = std::format("{0}##MessageBoxRef{1}", Title, UIContext.MessageBoxes.size() + 1);
 		MessageBoxRef.UserRenderFunction = RenderFunction;
 		MessageBoxRef.Flags = Flags | EMessageBoxFlag::UserFunction;
 		MessageBoxRef.Width = Width;
@@ -48,7 +43,7 @@ namespace LkEngine::UI {
 	void RenderMessageBoxes()
 	{
 		/* Cannot use 'MessageBox' as a variable name since WinUser.h occupies it as a macro. */
-		for (auto& [Key, MessageBoxRef] : Internal::MessageBoxes)
+		for (auto& [Key, MessageBoxRef] : UIContext.MessageBoxes)
 		{
 			if (MessageBoxRef.bShouldOpen && !ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId))
 			{

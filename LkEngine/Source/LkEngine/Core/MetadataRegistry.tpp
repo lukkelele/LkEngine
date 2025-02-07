@@ -8,7 +8,7 @@ namespace LkEngine {
 	template<typename T>
 	void LMetadataRegistry::RegisterObject(std::string_view ObjectVariableName, const T& ObjectToRegister)
 	{
-		static_assert(Meta::IsBaseOf_v<LObject, T>, "Cannot register an object that isn't derived from LObject");
+		static_assert(Core::IsBaseOf_v<LObject, T>, "Cannot register an object that isn't derived from LObject");
 		//static_assert(HasCoreObjectFunctionality<T>, "Object does not implement all required functionality");
 
 		// TODO: Use custom logging.

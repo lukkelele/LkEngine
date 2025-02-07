@@ -36,12 +36,12 @@ namespace LkEngine {
 		operator const std::type_index&() const { return ID(); }
 	};
 
-	namespace Meta {
-
+	namespace Core 
+	{
 		/**
 		 * TStringLiteral
 		 * 
-		 *  String literal applicable for templates.
+		 *  Constexpr string literal.
 		 */
 		template<std::size_t N>
 		struct TStringLiteral
@@ -53,6 +53,7 @@ namespace LkEngine {
 
 			operator std::string_view() const { return std::string_view(value); }
 
+		public:
 			char value[N];
 		};
 
@@ -83,22 +84,13 @@ namespace LkEngine {
 		struct IsSmartPointer<std::shared_ptr<T>> : std::true_type {};
 
 		template<typename T>
-		struct RemovePointerReferenceSmart 
-		{
-			using type = std::remove_pointer_t<std::remove_reference_t<std::remove_const_t<T>>>;
-		};
+		struct RemovePointerReferenceSmart { using type = std::remove_pointer_t<std::remove_reference_t<std::remove_const_t<T>>>; };
 
 		template<typename T>
-		struct RemovePointerReferenceSmart<std::unique_ptr<T>> 
-		{
-			using type = T;
-		};
+		struct RemovePointerReferenceSmart<std::unique_ptr<T>> { using type = T; };
 
 		template<typename T>
-		struct RemovePointerReferenceSmart<std::shared_ptr<T>> 
-		{
-			using type = T;
-		};
+		struct RemovePointerReferenceSmart<std::shared_ptr<T>> { using type = T; };
 
 		template<typename T>
 		using RemovePointerReferenceSmart_t = typename RemovePointerReferenceSmart<T>::type;
@@ -106,12 +98,12 @@ namespace LkEngine {
 		/** 
 		 * IsBaseOf 
 		 * 
-		 *  Determine if type T is a derivation of TBase.
+		 *  Determine if type Target is a derivation of Base.
 		 */
-		template<typename TBase, typename T>
+		template<typename Base, typename Target>
 		struct IsBaseOf 
 		{
-			static constexpr bool value = std::is_base_of<TBase, RemovePointerReferenceSmart_t<T>>::value;
+			static constexpr bool value = std::is_base_of<Base, RemovePointerReferenceSmart_t<Target>>::value;
 		};
 
 		template<typename TBase, typename T>
@@ -135,7 +127,6 @@ namespace LkEngine {
 			using Type = TReturnValue(TObject::*)(TArgs...);
 		};
 
-
 		template<typename T>
 		struct MemberData;
 
@@ -157,17 +148,15 @@ namespace LkEngine {
 			std::vector<FMemberData> Members;
 
 			/** */
-			void AddMember(std::string_view InName, std::string_view InType)
+			FORCEINLINE void AddMember(std::string_view InName, std::string_view InType)
 			{
 				Members.push_back({ InName, InType });
 			}
 
-			/** */
-			const std::vector<FMemberData>& GetMembers() const
+			FORCEINLINE const std::vector<FMemberData>& GetMembers() const
 			{
 				return Members;
 			}
-
 		};
 
 		/** 
@@ -197,12 +186,36 @@ namespace LkEngine {
 		}
 
 		/** @brief Deduce argument type of a function argument. */
-		template <typename TClass, typename ReturnType, typename Argument>
-		Argument DeduceArgumentType(ReturnType(TClass::*Function)(Argument))
+		template <typename TClass, typename ReturnType, typename ArgumentType>
+		ArgumentType DeduceArgumentType(ReturnType(TClass::*Function)(ArgumentType))
 		{
-			return Argument{};
+			return ArgumentType{};
 		}
 
+		/**
+		 * Check if T is a std::pair.
+		 */
+		template<typename T>
+		constexpr bool IsPair = false;
+
+		template<typename T1, typename T2>
+		constexpr bool IsPair<std::pair<T1, T2>> = true;
+
+		template<typename T>
+		struct TPairTraits;
+
+		template<typename T1, typename T2>
+		struct TPairTraits<std::pair<T1, T2>>
+		{
+			using FirstType  = T1;
+			using SecondType = T2;
+		};
+
+		template<typename T>
+		constexpr bool IsPairWithFirstArgConstChar = false;
+
+		template<typename T1, typename T2>
+		constexpr bool IsPairWithFirstArgConstChar<std::pair<T1, T2>> = std::is_same_v<T1, const char*>;
 	}
 
 }

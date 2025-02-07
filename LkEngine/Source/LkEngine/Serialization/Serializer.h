@@ -52,13 +52,13 @@ static constexpr auto ToStringIfNeeded(T Value)
 			}                                                                  \
 			catch (const std::exception& Exception)                            \
 			{                                                                  \
-				LK_CORE_ERROR("LK_DESERIALIZE_PROPERTY: {}", Exception.what());\
+				LK_CORE_FATAL("LK_DESERIALIZE_PROPERTY: {}", Exception.what());\
 				Destination = DefaultValue;                                    \
 			}                                                                  \
 		}                                                                      \
 		else                                                                   \
 		{                                                                      \
-			LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY", "Failed to find node: '{}'", #PropertyName); \
+			LK_CORE_WARN_TAG("LK_DESERIALIZE_PROPERTY", "Failed to find property: '{}'", #PropertyName); \
 			Destination = DefaultValue;                                        \
 		}                                                                      \
 	}                                                                          \

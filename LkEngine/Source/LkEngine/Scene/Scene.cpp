@@ -30,19 +30,8 @@ namespace LkEngine {
 		SceneEntity = Registry.create();
 		LK_CORE_TRACE_TAG("Scene", "Created {} with handle: {}", Name, SceneEntity);
 
-		/* TODO: Relative pathing here, use LFileSystem. */
-		const std::filesystem::path SceneFile = std::format("Scenes/{}{}", Name, LScene::FILE_EXTENSION);
-
-		/* Attempt to load scene data, if any exist. */
-		LSceneSerializer Serializer(this);
-		if (!Serializer.Deserialize(SceneFile))
-		{
-			LK_CORE_WARN_TAG("Scene", "Failed to deserialize, loading default values for: {}", Name);
-			Registry.emplace<LSceneComponent>(SceneEntity, SceneID);
-
-			ViewportWidth = LWindow::Get().GetViewportWidth();
-			ViewportHeight = LWindow::Get().GetViewportHeight();
-		}
+		ViewportWidth = LWindow::Get().GetViewportWidth();
+		ViewportHeight = LWindow::Get().GetViewportHeight();
 	}
 
 	LEntity LScene::CreateEntity(const std::string& EntityName)

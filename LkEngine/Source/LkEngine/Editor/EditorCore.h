@@ -122,7 +122,7 @@ namespace LkEngine {
 												  FTextureSpecification Specification)
 		{
 			Specification.DebugName = Name;
-			std::filesystem::path Path = std::filesystem::path("Assets") / "Editor" / RelativePath;
+			const std::filesystem::path Path = LFileSystem::GetResourcesDir() / "Editor" / RelativePath;
 			Specification.Path = Path.string();
 			
 			if (!LFileSystem::Exists(Path))

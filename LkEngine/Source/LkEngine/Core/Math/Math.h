@@ -230,7 +230,7 @@ namespace LkEngine::Math {
 					        std::is_same<TVec2, LVector2> 
 						>>, "TVector and TVec2 must valid vector types");
         LK_CORE_ASSERT((Depth >= 0.0f && Depth <= 1.0f), "Depth not in range of 0.0 to 1.0");
-		LK_CORE_DEBUG_TAG("MathLibrary" "ConvertScreenToWorldCoordinates  Type='{}'", Meta::TypeName<TVector>());
+		LK_CORE_DEBUG_TAG("MathLibrary" "ConvertScreenToWorldCoordinates  Type='{}'", Core::TypeName<TVector>());
 
 		glm::vec3 ScreenCoordinatesWithDepth{};
 

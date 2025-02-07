@@ -50,6 +50,8 @@ namespace LkEngine {
 		void OnSceneRendererDrawListFlush(const FSceneRendererFlushData& InData);
 		void OnSceneSelectionUpdated(const std::vector<FSceneSelectionData>& InSelectionData);
 
+		virtual void OnProjectChanged(const TObjectPtr<LProject>& InProject);
+
 	private:
 		void DrawEntityCreateMenu(LEntity Parent);
 

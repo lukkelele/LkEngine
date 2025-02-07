@@ -11,6 +11,8 @@
 
 namespace LkEngine {
 
+	class LProject;
+
 	class IPanel : public LObject
 	{
 	public:
@@ -21,6 +23,8 @@ namespace LkEngine {
 		virtual void Render() = 0;
 		virtual void RenderUI(bool& IsOpen) = 0;
 
+		virtual void OnProjectChanged(const TObjectPtr<LProject>& InProject) {};
+
 		virtual void SerializeToYaml(YAML::Emitter& Out) const = 0;
 		virtual void DeserializeFromYaml(const YAML::Node& Data) = 0;
 
@@ -28,8 +32,7 @@ namespace LkEngine {
 		/**
 		 * FWindow
 		 * 
-		 *  Data container for serializing data for subwindows 
-		 *  to restore on startup.
+		 *  Data container for serialization for subwindows.
 		 */
 		struct FWindow
 		{

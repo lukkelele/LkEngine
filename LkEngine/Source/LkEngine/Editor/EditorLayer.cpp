@@ -8,7 +8,7 @@
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
 
-#include "LkEngine/Project/Project.h"
+#include "LkEngine/Project/ProjectSerializer.h"
 #include "LkEngine/Asset/AssetTypes.h"
 
 #include "LkEngine/Renderer/Renderer.h"
@@ -28,6 +28,7 @@
 #include "LkEngine/Editor/Panels/ContentBrowserPanel.h"
 #include "LkEngine/Editor/Panels/SceneManagerPanel.h"
 #include "LkEngine/Editor/Panels/ToolsPanel.h"
+#include "LkEngine/Editor/Panels/ThemeManagerPanel.h"
 
 #if defined(LK_ENGINE_OPENGL)
 #	include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
@@ -74,6 +75,7 @@ namespace LkEngine {
 		constexpr int PROJECT_NAME_LENGTH_MIN = 4;
 		constexpr int PROJECT_NAME_LENGTH_MAX = 255;
 		constexpr int PROJECT_FILEPATH_LENGTH_MAX = 512;
+		std::filesystem::path ProjectSolution{};
 
 		/** Input buffers used in UI contexts. */
 		namespace InputBuffer 
@@ -147,14 +149,8 @@ namespace LkEngine {
 		/* TODO: Load last open project, else load an empty 'default' project. */
 		if (LProject::Current() == nullptr)
 		{
-			if (true /* == HasStarterProject */)
-			{
-				StarterProject();
-			}
-			else
-			{
-				EmptyProject();
-			}
+			OpenProject(LFileSystem::GetRuntimeDir() / "Projects" / "Starter-2025");
+			//EmptyProject();
 		}
 
 		/* Force editor viewport to sync data. */
@@ -270,7 +266,6 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("Editor", "Creating editor panels");
 		PanelManager = TObjectPtr<LPanelManager>::Create();
 
-		/* Panel: Editor Console */
 		auto EditorConsole = PanelManager->AddPanel<LEditorConsolePanel>(
 			EPanelCategory::View,
 			PanelID::EditorConsole,
@@ -278,7 +273,6 @@ namespace LkEngine {
 			EPanelInitState::Open
 		);
 
-		/* Panel: Editor Settings */
 		PanelManager->AddPanel<LEditorSettingsPanel>(
 			EPanelCategory::View, 
 			PanelID::EditorSettings,
@@ -286,15 +280,13 @@ namespace LkEngine {
 		);
 
 		/* TODO: Add callbacks/delegates to content browser instance. */
-		/* Panel: Content Browser */
-		auto ContentBrowser = PanelManager->AddPanel<LContentBrowser>(
+		auto ContentBrowser = PanelManager->AddPanel<LContentBrowserPanel>(
 			EPanelCategory::View,
 			PanelID::ContentBrowser,
 			"Content Browser",
 			EPanelInitState::Open
 		);
 
-		/* Panel: Scene Manager */
 		auto SceneManager = PanelManager->AddPanel<LSceneManagerPanel>(
 			EPanelCategory::View, 
 			PanelID::SceneManager, 
@@ -305,7 +297,7 @@ namespace LkEngine {
 		OnSceneSelectionUpdated.Add(SceneManager.Get(), &LSceneManagerPanel::OnSceneSelectionUpdated);
 
 		PanelManager->AddPanel<LToolsPanel>(EPanelCategory::View, PanelID::Tools, EPanelInitState::Closed);
-		//PanelManager->AddPanel<LMaterialEditorPanel>(EPanelCategory::Edit, PanelID::MaterialEditor, EPanelInitState::Closed);
+		PanelManager->AddPanel<LThemeManagerPanel>(EPanelCategory::Edit, PanelID::ThemeManager, EPanelInitState::Closed);
 
 		PanelManager->Deserialize();
 		PanelManager->Initialize();
@@ -434,18 +426,22 @@ namespace LkEngine {
 			}
 
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-			if (ImGui::TreeNode("Shader Sandbox"))
+			if (ImGui::TreeNode("Project Info"))
 			{
-				ImGui::Text("Material: WoodContainer");
-				ImGui::SameLine();
-				if (ImGui::Button("Toggle: u_TestBool"))
+				if (Project)
 				{
-					static bool UniformValue = true;
-					LShader& Shader = *LEditorAssetManager::Material_WoodContainer->GetMaterial()->GetShader();
-					Shader.Set("u_TestBool", UniformValue);
-					LK_CORE_CONSOLE_INFO("Toggled u_TestBool -> {}", (int)UniformValue);
-
-					UniformValue = !UniformValue;
+					const auto& ProjConfig = Project->GetConfiguration();
+					ImGui::Text("Name: %s", ProjConfig.Name.c_str());
+					ImGui::Text("Filename: %s", ProjConfig.ProjectFileName.c_str());
+					ImGui::Text("Asset Directory: %s", ProjConfig.AssetDirectory.c_str());
+					ImGui::Text("AssetRegistry Path: %s", ProjConfig.AssetRegistryPath.c_str());
+				}
+				else
+				{
+					ImGui::Text("Name: ");
+					ImGui::Text("Filename: ");
+					ImGui::Text("Asset Directory: ");
+					ImGui::Text("AssetRegistry Path: ");
 				}
 
 				ImGui::TreePop();
@@ -580,6 +576,21 @@ namespace LkEngine {
 		{
 			LK_UI_DEBUG_DOCKNODE(LK_UI_SIDEBAR_2);
 
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			if (ImGui::TreeNode("Scene Information"))
+			{
+				if (EditorScene)
+				{
+					ImGui::Text("Name: %s", EditorScene->GetName().c_str());
+				}
+				else
+				{
+					ImGui::Text("Empty");
+				}
+
+				ImGui::TreePop();
+			}
+
 			/* Window Information. */
 			if (ImGui::TreeNode("Window Information"))
 			{
@@ -597,6 +608,40 @@ namespace LkEngine {
 			if (ImGui::Checkbox("Render Skybox", &bRenderSkybox)) 
 			{
 			}
+
+			UI::BeginPropertyGrid();
+			{
+				
+				TObjectPtr<LSceneCamera> Camera = GetEditorCamera();
+				glm::vec3 Position = Camera->GetPosition();
+				static bool CameraEdited = false;
+				if (UI::Draw::Vec3Control("Position", Position))
+				{
+					Camera->SetPosition(Position);
+				}
+
+				if (UI::Draw::Vec3Control("Position Delta", Camera->PositionDelta))
+				{
+				}
+
+				if (UI::Draw::Vec3Control("Focal point", Camera->FocalPoint))
+				{
+				}
+
+				if (UI::Draw::DragFloat("Distance", &Camera->Distance, 1.0f, 0.0f, 100.0f, "%1.f"))
+				{
+				}
+
+				if (UI::Draw::DragFloat("Speed", &Camera->NormalSpeed, 1.0f, 0.0f, 100.0f, "%1.f"))
+				{
+				}
+
+				if (UI::Draw::DragFloat("Travel Speed", &Camera->TravelSpeed, 1.0f, 0.0f, 100.0f, "%1.f"))
+				{
+				}
+
+			}
+			UI::EndPropertyGrid();
 
 			if (ImGui::TreeNode("Config Directories"))
 			{
@@ -655,6 +700,12 @@ namespace LkEngine {
 		UI_RenderExternalWindows();
 
 		LAssetEditorManager::RenderUI();
+
+		/* Open the project. */
+		if (std::strlen(InputBuffer::OpenProjectFilePath) > 0)
+		{
+			OpenProject(InputBuffer::OpenProjectFilePath);
+		}
 
 		ImGui::End(); /* Core Viewport. */
 	}
@@ -812,10 +863,165 @@ namespace LkEngine {
 		}
 	}
 
-	void LEditorLayer::OpenProject(const std::filesystem::path& ProjectPath)
+	void LEditorLayer::OpenProject()
 	{
-		LK_CORE_ASSERT(!ProjectPath.empty());
-		LK_CORE_INFO_TAG("Editor", "Opening project: {}", ProjectPath);
+		const std::filesystem::path FilePath = LFileSystem::OpenFileDialog({{ "LkEngine Project File", LProject::FILE_EXTENSION }});
+		if (FilePath.empty())
+		{
+			LK_CORE_CONSOLE_INFO("Cancelling project opening");
+			return;
+		}
+
+		/**
+		 * Cache the filepath of the project in the char buffer and
+		 * open the project during next tick.
+		 */
+		LK_CORE_DEBUG_TAG("Editor", "Storing filepath: {}", FilePath.string());
+		std::strcpy(InputBuffer::OpenProjectFilePath, FilePath.string().data());
+	}
+
+	void LEditorLayer::OpenProject(const std::filesystem::path& InProjectPath)
+	{
+		if (!LFileSystem::Exists(InProjectPath))
+		{
+			LK_CORE_CONSOLE_ERROR("Invalid project: {}", InProjectPath.string());
+			LK_CORE_ASSERT(false, "Invalid project: {}", InProjectPath.string());
+			return;
+		}
+
+		std::filesystem::path ProjectPath = LFileSystem::ConvertToUnixPath(InProjectPath);
+		LK_CORE_CONSOLE_INFO("Opening project: {}", ProjectPath.string());
+		if (LProject::Current() != nullptr)
+		{
+			CloseProject();
+		}
+
+		/* Attempt to find the project file inside the project directory with the same name. */
+		if (std::filesystem::is_directory(ProjectPath))
+		{
+			ProjectPath = InProjectPath / std::filesystem::path(ProjectPath.filename().string() + "." + LProject::FILE_EXTENSION);
+			if (std::filesystem::exists(ProjectPath))
+			{
+				LK_CORE_CONSOLE_INFO("Found project file in project directory: {}", ProjectPath.filename().string());
+			}
+			else
+			{
+				LK_CORE_VERIFY(false, "Failed to open project: {}", ProjectPath.string());
+			}
+		}
+
+		TObjectPtr<LProject> Project = TObjectPtr<LProject>::Create();
+		FProjectSerializer Serializer(Project);
+		Serializer.Deserialize(ProjectPath);
+
+		FProjectConfiguration& ProjectConfig = Project->GetConfiguration();
+		ProjectConfig.ProjectFileName = ProjectPath.filename().string();
+		ProjectConfig.ProjectDirectory = LFileSystem::ConvertToUnixPath(ProjectPath.parent_path());
+
+		if (ProjectConfig.AssetDirectory.empty())
+		{
+			LK_CORE_WARN_TAG("Editor", "Project configuration is missing a valid asset directory entry");
+			ProjectConfig.AssetDirectory = LFileSystem::GetAssetsDir().string();
+		}
+		if (ProjectConfig.AssetRegistryPath.empty())
+		{
+			LK_CORE_WARN_TAG("Editor", "Project configuration is missing a valid asset registry entry");
+			ProjectConfig.AssetRegistryPath = std::filesystem::path(ProjectPath.parent_path() / "AssetRegistry.lkr").string();
+			if (!LFileSystem::Exists(ProjectConfig.AssetRegistryPath))
+			{
+				LK_CORE_WARN_TAG("Editor", "Asset registry is still missing");
+			}
+			/* TODO: Invoke project save here so the asset registry is created. */
+		}
+
+		/** The delegate 'OnProjectChanged' will broadcast once the project is set as active. */
+		LProject::SetActive(Project);
+
+		/* Recreate the camera for the new scene. */
+		LK_CORE_DEBUG_TAG("Editor", "Recreating the editor camera");
+		EditorCamera = TObjectPtr<LEditorCamera>::Create(
+			60.0f,               /* FOV    */ 
+			Window->GetWidth(),  /* Width  */
+			Window->GetHeight(), /* Height */
+			0.10f,				 /* ZNear  */
+			2400.0f              /* ZFar   */
+		);			  
+
+		std::string StartScene = Project->GetConfiguration().StartScene;
+		/* Add the scene extension if it is missing. */
+		if (StartScene.find(LScene::FILE_EXTENSION) == std::string::npos)
+		{
+			StartScene += std::format(".{}",LScene::FILE_EXTENSION);
+		}
+
+		bool ProjectHasScene = !StartScene.empty();
+		if (ProjectHasScene)
+		{
+			constexpr bool CheckForAutosaves = true;
+			const std::filesystem::path StartScenePath = std::filesystem::path(ProjectConfig.ProjectDirectory) / "Scenes" / StartScene;
+			LK_CORE_TRACE_TAG("Editor", "Start scene path: {}", StartScenePath.string());
+			ProjectHasScene = OpenScene(StartScenePath.string(), CheckForAutosaves);
+		}
+
+		if (!ProjectHasScene)
+		{
+			LK_CORE_CONSOLE_INFO("Project does not have a starter scene, creating new");
+			NewScene();
+		}
+
+		LSelectionContext::DeselectAll();
+
+		LK_CORE_CONSOLE_DEBUG("Clearing input buffers because of project opening");
+		std::memset(InputBuffer::ProjectName, 0, PROJECT_NAME_LENGTH_MAX);
+		std::memset(InputBuffer::NewProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
+		std::memset(InputBuffer::OpenProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
+
+	#if defined(LK_PLATFORM_WINDOWS)
+		ProjectSolution = LProject::GetProjectDirectory() / std::filesystem::path(LProject::GetProjectName() + ".sln");
+	#elif defined(LK_PLATFORM_LINUX)
+		LK_CORE_VERIFY(false, "TODO");
+	#else
+		LK_CORE_VERIFY(false, "TODO");
+	#endif
+	}
+
+	void LEditorLayer::CloseProject(const EProjectLoadAction LoadAction)
+	{
+		LK_CORE_CONSOLE_INFO("Closing current project");
+		SaveProject();
+
+		LAssetEditorManager::SetSceneContext(nullptr);
+
+		/* Release scene resources. */
+		RuntimeScene = nullptr;
+		CurrentScene = nullptr;
+		LK_CORE_ASSERT(EditorScene->GetReferenceCount() == 1, "Editor scene is still referenced");
+		EditorScene = nullptr;
+
+		if (LoadAction == EProjectLoadAction::Unload)
+		{
+			LProject::SetActive(nullptr);
+		}
+	}
+
+	void LEditorLayer::SaveProject()
+	{
+		if (TObjectPtr<LProject> CurrentProject = LProject::Current(); CurrentProject != nullptr)
+		{
+			FProjectSerializer Serializer(CurrentProject);
+			const FProjectConfiguration& Config = CurrentProject->GetConfiguration();
+			if (Config.ProjectDirectory.empty() || Config.ProjectFileName.empty())
+			{
+				LK_CORE_CONSOLE_ERROR("Failed to save project, project name and/or directory are empty");
+			}
+			LK_CORE_DEBUG_TAG("Editor", "Saving project: {}/{}", Config.ProjectDirectory, Config.ProjectFileName);
+			Serializer.Deserialize(Config.ProjectDirectory + "/" + Config.ProjectFileName);
+			PanelManager->Serialize();
+		}
+		else
+		{
+			LK_CORE_WARN_TAG("Editor", "Failed to save project as none is active");
+		}
 	}
 
 	void LEditorLayer::EmptyProject()
@@ -961,16 +1167,18 @@ namespace LkEngine {
 		OpenProject(NewProjectPath);
 	}
 
-	void LEditorLayer::SaveProjectAs()
+	void LEditorLayer::OnProjectChanged(const TObjectPtr<LProject>& InProject)
 	{
-	}
-
-	void LEditorLayer::OnProjectChanged(TObjectPtr<LProject> InProject)
-	{
-		LK_CORE_DEBUG_TAG("Editor", "OnProjectChanged -> {}", InProject->GetName());
+		LK_CORE_DEBUG_TAG("Editor", "OnProjectChanged: {}", InProject ? InProject->GetName() : "None");
 		std::memset(InputBuffer::ProjectName, 0, PROJECT_NAME_LENGTH_MAX);
 		std::memset(InputBuffer::NewProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
 		std::memset(InputBuffer::OpenProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
+
+		Project = InProject;
+		if (Project)
+		{
+
+		}
 	}
 
 	void LEditorLayer::OnViewportSizeUpdated(const uint16_t NewWidth, const uint16_t NewHeight)
@@ -1208,7 +1416,7 @@ namespace LkEngine {
 
 		if (!Filepath.has_extension())
 		{
-			Filepath += LScene::FILE_EXTENSION;
+			Filepath += "." + std::string(LScene::FILE_EXTENSION);
 		}
 
 		LK_CORE_DEBUG("Scene filepath: {}", Filepath.string());
@@ -1413,7 +1621,7 @@ namespace LkEngine {
 		UI::ShowMessageBox("About", []()
 		{
 			/* Section: Title. */
-			UI::Font::Push("Large");
+			UI::Font::Push("Title");
 			ImGui::Text("LkEngine %s", EngineVersion.c_str());
 			UI::Font::Pop();
 
@@ -1534,17 +1742,29 @@ namespace LkEngine {
 		}, (uint32_t)EMessageBoxFlag::AutoSize, PopupWidth);
 	}
 
+	void LEditorLayer::UI_NewScenePopup()
+	{
+		static std::array<char, 256> NewSceneNameBuf;
+		UI::ShowMessageBox("New Scene", [this]()
+		{
+			ImGui::InputTextWithHint("##Input-SceneName", "Name", NewSceneNameBuf.data(), NewSceneNameBuf.size());
+
+			if (ImGui::Button("Create"))
+			{
+				NewScene(NewSceneNameBuf.data());
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine(0, 10.0f);
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+
+		}, 540);
+	}
+
 	void LEditorLayer::UI_SyncEditorWindowSizes(const LVector2& InViewportSize)
 	{
-		//EditorViewport->SetSizeY(InViewportSize.Y - BottomBarSize.Y + TopBarSize.Y);
-
-		/**
-		 * Calculate the bottombar size by using the viewport size 
-		 * and subtracting the editor viewport from it.
-		 */
-		//BottomBarSize.Y = InViewportSize.Y - EditorViewport->GetSize().Y;
-		//LK_CORE_ASSERT(BottomBarSize.Y >= 0.0f, "BottomBarSize.Y is negative: {} ({} - {})", BottomBarSize.Y, InViewportSize.Y, EditorViewport->GetSize().Y);
-
 		LeftSidebarSize.Y = InViewportSize.Y;
 		RightSidebarSize.Y = InViewportSize.Y;
 	}
@@ -1584,7 +1804,7 @@ namespace LkEngine {
 
 	bool LEditorLayer::OpenScene(const std::filesystem::path& Filepath, const bool CheckForAutosaves)
 	{
-		LK_CORE_DEBUG_TAG("Editor", "Opening scene '{}'", Filepath.filename().string());
+		LK_CORE_INFO_TAG("Editor", "Opening scene '{}'", Filepath.filename().string());
 		if (!LFileSystem::Exists(Filepath))
 		{
 			LK_CORE_ERROR_TAG("Editor", "Tried loading a non-existing scene: {}", Filepath.string());
@@ -1687,19 +1907,40 @@ namespace LkEngine {
 
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("Create project"))
+				if (ImGui::MenuItem("Create Project"))
 				{
-					LK_CORE_INFO_TAG("Editor", "Menu -> Create new project");
 					UI_NewProjectPopup();
 				}
 
-				if (ImGui::MenuItem("Open project")) 
+				if (ImGui::MenuItem("Open Project")) 
 				{
-					LK_CORE_INFO_TAG("Editor", "Menu -> Open project");
-					LK_CORE_WARN("TODO");
+					OpenProject();
 				}
 
-				ImGui::EndMenu(); /* File. */
+				if (ImGui::MenuItem("Save Project"))
+				{
+					if (Project)
+					{
+						LK_CORE_DEBUG_TAG("Editor", "File -> Save Project ({})", Project->GetName());
+						Project->Save();
+					}
+				}
+
+				if (ImGui::MenuItem("New Scene"))
+				{
+					UI_NewScenePopup();
+				}
+
+				if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+				{
+					SaveScene();
+				}
+				if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S"))
+				{
+					SaveSceneAs();
+				}
+
+				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Edit"))
@@ -1715,33 +1956,7 @@ namespace LkEngine {
 					}
 				}
 
-				ImGui::EndMenu(); /* Edit. */
-			}
-
-			if (ImGui::BeginMenu("Project"))
-			{
-				/* New project. */
-				if (ImGui::MenuItem("New"))
-				{
-				}
-
-				/* Save project. */
-				if (ImGui::MenuItem("Save"))
-				{
-					if (Project)
-					{
-						LK_CORE_DEBUG_TAG("Editor", "Saving project");
-						Project->Save();
-					}
-				}
-
-				/* Load existing project. */
-				if (ImGui::MenuItem("Load"))
-				{
-					const fs::path Filepath = LFileSystem::OpenFileDialog({ { "LkEngine Project", "lkproj" } });
-				}
-
-				ImGui::EndMenu(); /* Project. */
+				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("View"))
@@ -1797,49 +2012,6 @@ namespace LkEngine {
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Scene"))
-			{
-				if (ImGui::MenuItem("New"))
-				{
-					LK_CORE_DEBUG("Creating new scene");
-					fs::path Filepath = LFileSystem::SaveFileDialog({ { "LkEngine Scene", "lkscene" } });
-					if (Filepath.empty())
-					{
-						return;
-					}
-
-					if (!Filepath.has_extension())
-					{
-						Filepath += LScene::FILE_EXTENSION;
-					}
-
-					LK_CORE_DEBUG("New scene location: {}", Filepath.string());
-
-				}
-				if (ImGui::MenuItem("Load"))
-				{
-					static constexpr bool IsEditorScene = true;
-
-					LK_CORE_DEBUG_TAG("Editor", "Loading scene");
-					const fs::path Filepath = LFileSystem::OpenFileDialog({ { "LkEngine Scene", "lkscene" } });
-
-					/* Prompt file dialog. */
-					LK_CORE_ASSERT(false, "FIX LOADING OF SCENE");
-					TObjectPtr<LScene> NewScene = TObjectPtr<LScene>::Create("", IsEditorScene);
-					LSceneSerializer SceneSerializer(NewScene);
-					SceneSerializer.Deserialize("scene.lukkelele");
-
-					NewScene->CopyTo(EditorScene);
-				}
-				if (ImGui::MenuItem("Save"))
-				{
-					LSceneSerializer Serializer(EditorScene);
-					Serializer.Serialize("scene.lukkelele");
-				}
-
-				ImGui::EndMenu(); // Scene.
-			}
-
 			if (ImGui::BeginMenu("Tools"))
 			{
 				if (ImGui::MenuItem("Metric Tool"))
@@ -1855,6 +2027,14 @@ namespace LkEngine {
 				if (ImGui::MenuItem("Style Editor"))
 				{
 					bWindow_StyleEditor = true;
+				}
+
+				if (ImGui::MenuItem("Themes"))
+				{
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ThemeManager); PanelData != nullptr)
+					{
+						PanelData->bIsOpen = true;
+					}
 				}
 
 				if (ImGui::MenuItem("ImGui Logging"))
@@ -1948,18 +2128,23 @@ namespace LkEngine {
 				ImGui::EndMenu(); // Engine Debug.
 			}
 
-
 			if (ImGui::MenuItem("About"))
 			{
 				UI_AboutPopup();
 			}
 
-			// Horizontal space.
 			ImGui::Dummy(ImVec2(240, 0));
 
-			if (ImGui::BeginMenu(std::string("Project: " + Project->GetName()).c_str()))
+			if (Project)
 			{
-				ImGui::EndMenu(); // Project + Name.
+				if (ImGui::BeginMenu(std::string("Project: " + Project->GetName()).c_str()))
+				{
+					ImGui::EndMenu();
+				}
+			}
+			else
+			{
+				ImGui::Text("Project: Untitled");
 			}
 		}
 		ImGui::EndMainMenuBar();

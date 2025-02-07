@@ -1,8 +1,6 @@
 #include "LKpch.h"
 #include "Object.h"
 
-#include "LkEngine/Core/Template/LkTemplate.h"
-
 
 namespace LkEngine {
 
@@ -14,7 +12,7 @@ namespace LkEngine {
 
 	void LObject::Initialize()
 	{
-		LK_CORE_ASSERT(ObjectHandle != 0, "Object initialization failed, handle is 0");
+		LK_CORE_ASSERT(ObjectHandle != 0, "Object initialization failed, object handle is 0");
 
 		ObjectFlags = EObjectFlag::None;
 		bObjectInitialized = true;

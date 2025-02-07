@@ -21,7 +21,7 @@
 
 namespace LkEngine {
 
-	using namespace Meta;
+	using namespace Core;
 
 	static constexpr std::size_t BUFSIZE_DELEGATE_NAME = 100;
 
@@ -171,7 +171,7 @@ namespace LkEngine {
 	class LRawDelegate<bIsConst, T, TReturnValue(TArgs...), Args2...> : public IDelegate<TReturnValue, TArgs...>
 	{
 	public:
-		using DelegateFunction = typename Meta::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::Type;
+		using DelegateFunction = typename Core::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::Type;
 
 		LRawDelegate(T* InObjectRef, DelegateFunction InFunction, Args2&&... InPayload)
 			: ObjectRef(InObjectRef)
@@ -280,7 +280,7 @@ namespace LkEngine {
 	class LSharedPtrDelegate<bIsConst, T, TReturnValue(TArgs...), Args2...> : public IDelegate<TReturnValue, TArgs...>
 	{
 	public:
-		using DelegateFunction = typename Meta::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::Type;
+		using DelegateFunction = typename Core::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::Type;
 
 		LSharedPtrDelegate(std::shared_ptr<T> InObjectRef, 
 						   const DelegateFunction InFunction, 
@@ -706,10 +706,10 @@ namespace LkEngine {
 
 	private:
 		template<typename T, typename... Args2>
-		using ConstMemberFunction = typename Meta::MemberFunction<true, T, TReturnValue, TArgs..., Args2...>::Type;
+		using ConstMemberFunction = typename Core::MemberFunction<true, T, TReturnValue, TArgs..., Args2...>::Type;
 
 		template<typename T, typename... Args2>
-		using NonConstMemberFunction = typename Meta::MemberFunction<false, T, TReturnValue, TArgs..., Args2...>::Type;
+		using NonConstMemberFunction = typename Core::MemberFunction<false, T, TReturnValue, TArgs..., Args2...>::Type;
 
 		using TDelegateInterface = IDelegate<TReturnValue, TArgs...>;
 
@@ -877,10 +877,10 @@ namespace LkEngine {
 	{
 	private:
 		template<typename T, typename... TArgs2>
-		using ConstMemberFunction = typename Meta::MemberFunction<true, T, void, TArgs..., TArgs2...>::Type;
+		using ConstMemberFunction = typename Core::MemberFunction<true, T, void, TArgs..., TArgs2...>::Type;
 
 		template<typename T, typename... TArgs2>
-		using NonConstMemberFunction = typename Meta::MemberFunction<false, T, void, TArgs..., TArgs2...>::Type;
+		using NonConstMemberFunction = typename Core::MemberFunction<false, T, void, TArgs..., TArgs2...>::Type;
 
 	public:
 		using TDelegate = LDelegate<"MulticastComponent", void, TArgs...>;

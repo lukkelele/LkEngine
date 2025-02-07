@@ -16,21 +16,23 @@ namespace YAML
 	template<>
 	struct convert<glm::vec2>
 	{
-		static Node encode(const glm::vec2& RHS)
+		static Node encode(const glm::vec2& Rhs)
 		{
-			Node node;
-			node.push_back(RHS.x);
-			node.push_back(RHS.y);
-			return node;
+			Node YamlNode;
+			YamlNode.push_back(Rhs.x);
+			YamlNode.push_back(Rhs.y);
+			return YamlNode;
 		}
 
-		static bool decode(const Node& node, glm::vec2& RHS)
+		static bool decode(const Node& YamlNode, glm::vec2& Rhs)
 		{
-			if (!node.IsSequence() || node.size() != 2)
+			if (!YamlNode.IsSequence() || YamlNode.size() != 2)
+			{
 				return false;
+			}
 
-			RHS.x = node[0].as<float>();
-			RHS.y = node[1].as<float>();
+			Rhs.x = YamlNode[0].as<float>();
+			Rhs.y = YamlNode[1].as<float>();
 			return true;
 		}
 	};
@@ -38,23 +40,25 @@ namespace YAML
 	template<>
 	struct convert<glm::vec3>
 	{
-		static Node encode(const glm::vec3& RHS)
+		static Node encode(const glm::vec3& Rhs)
 		{
-			Node node;
-			node.push_back(RHS.x);
-			node.push_back(RHS.y);
-			node.push_back(RHS.z);
-			return node;
+			Node YamlNode;
+			YamlNode.push_back(Rhs.x);
+			YamlNode.push_back(Rhs.y);
+			YamlNode.push_back(Rhs.z);
+			return YamlNode;
 		}
 
-		static bool decode(const Node& node, glm::vec3& RHS)
+		static bool decode(const Node& YamlNode, glm::vec3& Rhs)
 		{
-			if (!node.IsSequence() || node.size() != 3)
+			if (!YamlNode.IsSequence() || YamlNode.size() != 3)
+			{
 				return false;
+			}
 
-			RHS.x = node[0].as<float>();
-			RHS.y = node[1].as<float>();
-			RHS.z = node[2].as<float>();
+			Rhs.x = YamlNode[0].as<float>();
+			Rhs.y = YamlNode[1].as<float>();
+			Rhs.z = YamlNode[2].as<float>();
 			return true;
 		}
 	};
@@ -62,25 +66,27 @@ namespace YAML
 	template<>
 	struct convert<glm::vec4>
 	{
-		static Node encode(const glm::vec4& RHS)
+		static Node encode(const glm::vec4& Rhs)
 		{
-			Node node;
-			node.push_back(RHS.x);
-			node.push_back(RHS.y);
-			node.push_back(RHS.z);
-			node.push_back(RHS.w);
-			return node;
+			Node YamlNode;
+			YamlNode.push_back(Rhs.x);
+			YamlNode.push_back(Rhs.y);
+			YamlNode.push_back(Rhs.z);
+			YamlNode.push_back(Rhs.w);
+			return YamlNode;
 		}
 
-		static bool decode(const Node& node, glm::vec4& RHS)
+		static bool decode(const Node& YamlNode, glm::vec4& Rhs)
 		{
-			if (!node.IsSequence() || node.size() != 4)
+			if (!YamlNode.IsSequence() || YamlNode.size() != 4)
+			{
 				return false;
+			}
 
-			RHS.x = node[0].as<float>();
-			RHS.y = node[1].as<float>();
-			RHS.z = node[2].as<float>();
-			RHS.w = node[3].as<float>();
+			Rhs.x = YamlNode[0].as<float>();
+			Rhs.y = YamlNode[1].as<float>();
+			Rhs.z = YamlNode[2].as<float>();
+			Rhs.w = YamlNode[3].as<float>();
 			return true;
 		}
 	};
@@ -88,25 +94,27 @@ namespace YAML
 	template<>
 	struct convert<glm::quat>
 	{
-		static Node encode(const glm::quat& RHS)
+		static Node encode(const glm::quat& Rhs)
 		{
-			Node node;
-			node.push_back(RHS.w);
-			node.push_back(RHS.x);
-			node.push_back(RHS.y);
-			node.push_back(RHS.z);
-			return node;
+			Node YamlNode;
+			YamlNode.push_back(Rhs.w);
+			YamlNode.push_back(Rhs.x);
+			YamlNode.push_back(Rhs.y);
+			YamlNode.push_back(Rhs.z);
+			return YamlNode;
 		}
 
-		static bool decode(const Node& node, glm::quat& RHS)
+		static bool decode(const Node& YamlNode, glm::quat& Rhs)
 		{
-			if (!node.IsSequence() || node.size() != 4)
+			if (!YamlNode.IsSequence() || YamlNode.size() != 4)
+			{
 				return false;
+			}
 
-			RHS.w = node[0].as<float>();
-			RHS.x = node[1].as<float>();
-			RHS.y = node[2].as<float>();
-			RHS.z = node[3].as<float>();
+			Rhs.w = YamlNode[0].as<float>();
+			Rhs.x = YamlNode[1].as<float>();
+			Rhs.y = YamlNode[2].as<float>();
+			Rhs.z = YamlNode[3].as<float>();
 			return true;
 		}
 	};
@@ -114,17 +122,16 @@ namespace YAML
 	template<>
 	struct convert<LkEngine::LUUID>
 	{
-		static Node encode(const LkEngine::LUUID& RHS)
+		static Node encode(const LkEngine::LUUID& Rhs)
 		{
-			Node node;
-			//node.push_back((uint64_t)RHS);
-			node.push_back(static_cast<uint64_t>(RHS));
-			return node;
+			Node YamlNode;
+			YamlNode.push_back(static_cast<uint64_t>(Rhs));
+			return YamlNode;
 		}
 
-		static bool decode(const Node& node, LkEngine::LUUID& RHS)
+		static bool decode(const Node& YamlNode, LkEngine::LUUID& Rhs)
 		{
-			RHS = node.as<uint64_t>();
+			Rhs = YamlNode.as<uint64_t>();
 			return true;
 		}
 	};
@@ -160,6 +167,29 @@ namespace YAML
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<std::chrono::seconds>
+	{
+		static Node encode(const std::chrono::seconds& Rhs)
+		{
+			Node YamlNode;
+			YamlNode.push_back(Rhs.count());
+			return YamlNode;
+		}
+
+		static bool decode(const Node& InNode, std::chrono::seconds& Rhs)
+		{
+			if (!InNode.IsScalar())
+			{
+				return false;
+			}
+
+			Rhs = std::chrono::seconds(InNode.as<int>());
+			return true;
+		}
+	};
+
 
 }
 

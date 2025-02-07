@@ -5,8 +5,6 @@
 #include "LkEngine/Core/Globals.h"
 #include "LkEngine/Core/IO/File.h"
 
-#define LK_ENGINE_CONSOLE_ENABLED 1
-
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #if LK_ENGINE_CONSOLE_ENABLED
