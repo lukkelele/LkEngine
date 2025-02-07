@@ -52,9 +52,10 @@ workspace "LkEngine"
         }
 
         disablewarnings { 
-            "4068", -- Disable: 'Unknown #pragma mark'
-            "4267", -- Disable: 'Size conversion, possible loss of data'
-            "4244", -- Disable: 'Size conversion, possible loss of data'
+            "4068",  -- 'Unknown #pragma mark'
+            "4267",  -- 'Size conversion, possible loss of data'
+            "4244",  -- 'Size conversion, possible loss of data'
+            "28020", -- Warning for infinite loops: 'The expression is not true at this call'
         } 
 
     filter "system:windows"
