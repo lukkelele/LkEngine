@@ -1,0 +1,23 @@
+Scene: Untitled
+Active: true
+EditorScene: true
+SceneHandle: 0
+EditorCamera:
+  Position: [-9.350084, -10.097412, 44.48605]
+  Origin: [0, 0, 0]
+  Distance: 1.0000272
+  FocalPoint: [-9.719925, -10.250809, 45.402424]
+  Perspective:
+    DegPerspectiveFOV: 45
+    PerspectiveNear: 0.1
+    PerspectiveFar: 2400
+  Orthographic:
+    OrthographicSize: 10
+    OrthographicNear: -1
+    OrthographicFar: 1
+  Pitch: 0.1540002
+  Yaw: 3.525191
+  ProjectionType: 1
+  CameraMode: 2
+Entities:
+  []
