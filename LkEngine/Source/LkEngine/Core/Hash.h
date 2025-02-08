@@ -45,12 +45,11 @@ namespace LkEngine {
 			return TableCrc32;
 		}
 		inline static constexpr auto TableCrc32 = GenerateTableCrc32<256>();
-		static_assert(
+		static_assert((
 			TableCrc32.size() == 256 &&
 			TableCrc32[1]     == 0x77073096 &&
-			TableCrc32[255]   == 0x2D02EF8D,
-			"GenerateTableCrc32 generated unexpected result."
-		);
+			TableCrc32[255]   == 0x2D02EF8D), 
+			"LHash::GenerateTableCrc32 generated an unexpected result");
 
 	public:
 		template<EHash Type>
