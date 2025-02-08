@@ -13,6 +13,15 @@
 
 namespace LkEngine {
 
+	enum class EVectorAxis : uint32_t
+	{
+		X = LK_BIT(0),
+		Y = LK_BIT(1),
+		Z = LK_BIT(2),
+		W = LK_BIT(3)
+	};
+	LK_ENUM_CLASS_FLAGS(EVectorAxis);
+
 	/* Typedefs. */
 	using LVector2 = TVector2<float>;
 	using LVector3 = TVector3<float>;

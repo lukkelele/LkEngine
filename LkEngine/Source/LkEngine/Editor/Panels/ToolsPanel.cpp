@@ -440,10 +440,10 @@ namespace LkEngine {
 
 	void LToolsPanel::UI_UserInterfaceTools()
 	{
+		ImGui::SetNextWindowPos(ImVec2(800, 540), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(410, 540), ImGuiCond_FirstUseEver);
 		ImGui::Begin("UI Tools", &Window_UserInterfaceTools.bOpen);
 
-		/* TODO: Serialize the 'Open-by-default'-logic to load the editor in the same state 
-		 *       it was closed in. */
 		if (UI::BeginTreeNode("Message Boxes", Window_UserInterfaceTools.bTreeNode_MessageBoxes))
 		{
 			static constexpr float TitleWidth = 148.0f;

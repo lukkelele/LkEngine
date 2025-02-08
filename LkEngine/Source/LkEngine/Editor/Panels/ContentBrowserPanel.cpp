@@ -52,7 +52,7 @@ namespace LkEngine {
 	void LContentBrowserPanel::RenderUI(bool& IsOpen)
 	{
 		/* Handle dock window. */
-		if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(LK_UI_CONTENTBROWSER); ThisWindow != nullptr)
+		if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(PanelID::ContentBrowser); ThisWindow != nullptr)
 		{
 			if (ThisWindow->DockNode)
 			{
@@ -64,7 +64,7 @@ namespace LkEngine {
 			| ImGuiWindowFlags_NoScrollWithMouse
 			| ImGuiWindowFlags_NoNavFocus;
 
-		ImGui::Begin(LK_UI_CONTENTBROWSER, &IsOpen, WindowFlags);
+		ImGui::Begin(PanelID::ContentBrowser, &IsOpen, WindowFlags);
 		bIsContentBrowserHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
@@ -159,8 +159,8 @@ namespace LkEngine {
 		UI::VSeparator(3.0f);
 		ImGui::PopStyleVar(3); // ItemSpacing, FramePadding, CellPadding.
 
-		//UI::End(); // LK_UI_CONTENTBROWSER
-		ImGui::End(); // LK_UI_CONTENTBROWSER
+		//UI::End(); // PanelID::ContentBrowser
+		ImGui::End(); // PanelID::ContentBrowser
 	}
 
 	void LContentBrowserPanel::SetSceneContext(const TObjectPtr<LScene> InSceneContext)

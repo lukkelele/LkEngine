@@ -60,7 +60,7 @@ namespace LkEngine {
 
 	void LPanelManager::RemovePanel(const char* PanelID)
 	{
-		const uint32_t ID = LHash::GenerateFNVHash(PanelID);
+		const uint32_t ID = LHash::Generate<EHash::FNV>(PanelID);
 		for (auto& PanelMap : Panels)
 		{
 			if (PanelMap.find(ID) != PanelMap.end())

@@ -20,7 +20,7 @@ namespace LkEngine {
 	struct FPanelData
 	{
 		const char* ID = "";
-		const char* Name = "";
+		const char* Name = ""; /* Display name. */
 		TObjectPtr<IPanel> Panel{};
 		bool bIsOpen = false;
 	};
@@ -64,7 +64,7 @@ namespace LkEngine {
 
 		FORCEINLINE FPanelData* GetPanelData(const char* PanelName)
 		{
-			const uint32_t PanelID = LHash::GenerateFNVHash(PanelName);
+			const uint32_t PanelID = LHash::Generate<EHash::FNV>(PanelName);
 			for (auto& PanelMap : Panels)
 			{
 				if (PanelMap.find(PanelID) != PanelMap.end())
@@ -91,16 +91,17 @@ namespace LkEngine {
 		{
 			static_assert(std::is_base_of_v<IPanel, TPanel>, "Panel needs to implement the IPanel interface");
 
-			const uint32_t ID = LHash::GenerateFNVHash(PanelData.ID);
+			const uint32_t ID = LHash::Generate<EHash::FNV>(PanelData.ID);
 			auto& PanelMap = Panels[(std::size_t)Category];
 			if (PanelMap.find(ID) != PanelMap.end())
 			{
 				LK_CORE_ERROR_TAG("PanelManager", "A panel with ID '{}' already exists", PanelData.ID);
+				LK_CORE_ASSERT(false, "A panel with ID '{}' already exists", PanelData.ID);
 				return nullptr;
 			}
 
 			PanelMap[ID] = PanelData;
-			LK_CORE_TRACE_TAG("PanelManager", "Add panel {} ({})", PanelData.Name, PanelData.ID);
+			LK_CORE_DEBUG_TAG("PanelManager", "Adding panel {} ({})", PanelData.Name, PanelData.ID);
 
 			return PanelData.Panel.As<TPanel>();
 		}
@@ -123,7 +124,7 @@ namespace LkEngine {
 		TObjectPtr<TPanel> GetPanel(const char* StringID)
 		{
 			static_assert(std::is_base_of_v<IPanel, TPanel>, "Panel needs to implement the IPanel interface");
-			const uint32_t ID = LHash::GenerateFNVHash(StringID);
+			const uint32_t ID = LHash::Generate<EHash::FNV>(StringID);
 			for (const auto& PanelMap : Panels)
 			{
 				if (PanelMap.find(ID) != PanelMap.end())

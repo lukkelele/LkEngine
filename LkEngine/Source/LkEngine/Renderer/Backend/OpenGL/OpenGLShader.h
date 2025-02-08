@@ -49,7 +49,7 @@ namespace LkEngine {
 		
 		virtual std::size_t GetHash() const override
 		{
-			return LHash::GenerateFNVHash(FilePath.string());
+			return LHash::Generate<EHash::FNV>(FilePath.string());
 		}
 
 		virtual std::string GetName() const override

@@ -43,7 +43,7 @@ namespace LkEngine {
 	{
 		if (bIsWindow)
 		{
-			if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(LK_UI_SCENEMANAGER))
+			if (ImGuiWindow* ThisWindow = ImGui::FindWindowByName(PanelID::SceneManager))
 			{
 				if (ThisWindow->DockNode)
 				{
@@ -51,8 +51,10 @@ namespace LkEngine {
 				}
 			}
 
-			ImGui::Begin(LK_UI_SCENEMANAGER, &IsOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavFocus);
-			//ImGui::Text("Window Focused: %s", UI::IsWindowFocused(LK_UI_SCENEMANAGER) ? "Yes" : "No");
+			static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoCollapse 
+				| ImGuiWindowFlags_NoNavFocus;
+			ImGui::Begin(PanelID::SceneManager, &IsOpen, WindowFlags);
+			//ImGui::Text("Window Focused: %s", UI::IsWindowFocused(PanelID::SceneManager) ? "Yes" : "No");
 		}
 
 		if (Scene)
@@ -292,8 +294,8 @@ namespace LkEngine {
 						TranslationModified, 
 						0.10f, /* Reset Value. */
 						EditorSettings.TranslationSnapValue, 
-						UI::SLIDER_MIN_UNLIMITED_POS,
-						UI::SLIDER_MAX_UNLIMITED,
+						UI::Slider::MIN_UNLIMITED,
+						UI::Slider::MAX_UNLIMITED,
 						100.0f,         /* Column Width. */
 						TranslationAxes /* Axes. */
 					);
@@ -306,8 +308,8 @@ namespace LkEngine {
 						RotationModified, 
 						0.0f, /* Reset Value. */
 						EditorSettings.RotationSnapValue, 
-						UI::SLIDER_MIN_UNLIMITED_POS,
-						UI::SLIDER_MAX_UNLIMITED,
+						UI::Slider::MIN_UNLIMITED,
+						UI::Slider::MAX_UNLIMITED,
 						100.0f,       /* Column Width. */
 						RotationAxes  /* Axes. */
 					);
@@ -320,8 +322,8 @@ namespace LkEngine {
 						ScaleModified, 
 						0.010f, 
 						EditorSettings.ScaleSnapValue, 
-						UI::SLIDER_MIN_UNLIMITED_POS,
-						UI::SLIDER_MAX_UNLIMITED,
+						UI::Slider::MIN_UNLIMITED,
+						UI::Slider::MAX_UNLIMITED,
 						100.0f,    /* Column Width. */
 						ScaleAxes  /* Axes. */
 					);

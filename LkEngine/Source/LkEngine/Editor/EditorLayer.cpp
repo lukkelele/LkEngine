@@ -269,7 +269,7 @@ namespace LkEngine {
 		auto EditorConsole = PanelManager->AddPanel<LEditorConsolePanel>(
 			EPanelCategory::View,
 			PanelID::EditorConsole,
-			"Console Log",
+			"Log",
 			EPanelInitState::Open
 		);
 
@@ -302,7 +302,6 @@ namespace LkEngine {
 		PanelManager->Deserialize();
 		PanelManager->Initialize();
 	}
-
 
 	void LEditorLayer::Tick(const float InDeltaTime)
 	{
@@ -378,9 +377,9 @@ namespace LkEngine {
 			                              Top Bar
 		 ----------------------------------------------------------------------------*/
 		UI_PrepareTopBar();
-		UI::Begin(LK_UI_TOPBAR, nullptr, UI::SidebarFlags | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+		UI::Begin(PanelID::TopBar, nullptr, UI::SidebarFlags | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 		{
-			LK_UI_DEBUG_DOCKNODE(LK_UI_TOPBAR);
+			LK_UI_DEBUG_DOCKNODE(PanelID::TopBar);
 			UI_ToolBar();
 		}
 		UI::End();
@@ -389,9 +388,9 @@ namespace LkEngine {
 			                             Sidebar 1
 		 ----------------------------------------------------------------------------*/
 		UI_PrepareLeftSidebar();
-		UI::Begin(LK_UI_SIDEBAR_1, nullptr, UI::SidebarFlags);
+		UI::Begin(PanelID::Sidebar1, nullptr, UI::SidebarFlags);
 		{
-			LK_UI_DEBUG_DOCKNODE(LK_UI_SIDEBAR_1);
+			LK_UI_DEBUG_DOCKNODE(PanelID::Sidebar1);
 			
 			TObjectPtr<LRenderContext> RenderContext = LWindow::Get().GetRenderContext();
 
@@ -462,7 +461,7 @@ namespace LkEngine {
 				ImGui::Dummy(ImVec2(0, 8));
 				ImGui::Text("TopBar: %s", TopBar.Size.ToString<const char*>());
 
-				if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(LK_UI_EDITOR_VIEWPORT))
+				if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(PanelID::EditorViewport))
 				{
 					ImGui::Dummy(ImVec2(0, 8));
 					ImGui::Text("Editor Window Size: %s", LVector2(EditorViewportWindow->Size).ToString<const char*>());
@@ -556,8 +555,8 @@ namespace LkEngine {
 			}
 			ImGui::EndGroup();
 
-			ImGui::Text("Editor Viewport Focused: %s", UI::IsWindowFocused(LK_UI_EDITOR_VIEWPORT) ? "Yes" : "No");
-			if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(LK_UI_EDITOR_VIEWPORT); EditorViewportWindow != nullptr)
+			ImGui::Text("Editor Viewport Focused: %s", UI::IsWindowFocused(PanelID::EditorViewport) ? "Yes" : "No");
+			if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(PanelID::EditorViewport); EditorViewportWindow != nullptr)
 			{
 				ImGui::Text("Editor Viewport ID: %lld", EditorViewportWindow->ID);
 			}
@@ -566,15 +565,15 @@ namespace LkEngine {
 				ImGui::Text("Editor Viewport ID: Unknown");
 			}
 		}
-		UI::End(); /* LK_UI_SIDEBAR_1 */
+		UI::End(); /* PanelID::Sidebar1 */
 
 		/*----------------------------------------------------------------------------
 			                             Sidebar 2
 		 ----------------------------------------------------------------------------*/
 		UI_PrepareRightSidebar();
-		UI::Begin(LK_UI_SIDEBAR_2, nullptr, UI::SidebarFlags);
+		UI::Begin(PanelID::Sidebar2, nullptr, UI::SidebarFlags);
 		{
-			LK_UI_DEBUG_DOCKNODE(LK_UI_SIDEBAR_2);
+			LK_UI_DEBUG_DOCKNODE(PanelID::Sidebar2);
 
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			if (ImGui::TreeNode("Scene Information"))
@@ -654,20 +653,20 @@ namespace LkEngine {
 				ImGui::TreePop();
 			}
 		}
-		UI::End(); /* LK_UI_SIDEBAR_2 */
+		UI::End(); /* PanelID::Sidebar2 */
 
 		/*----------------------------------------------------------------------------
 									  Editor Viewport
 		-----------------------------------------------------------------------------*/
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		UI::Begin(LK_UI_CORE_VIEWPORT, nullptr, UI::CoreViewportFlags);
+		UI::Begin(PanelID::CoreViewport, nullptr, UI::CoreViewportFlags);
 		{
 			bViewportHovered = ImGui::IsWindowHovered();
 			bViewportFocused = ImGui::IsWindowFocused();
 
 			UI_PrepareEditorViewport();
-			UI::Begin(LK_UI_EDITOR_VIEWPORT, nullptr, UI::EditorViewportFlags);
+			UI::Begin(PanelID::EditorViewport, nullptr, UI::EditorViewportFlags);
 			{
 				bEditorViewportHovered = ImGui::IsWindowHovered();
 				bEditorViewportFocused = ImGui::IsWindowFocused();
@@ -688,7 +687,7 @@ namespace LkEngine {
 				UI_WindowStatistics();
 				UI_HandleDragAndDrop();
 			}
-			UI::End(); /* LK_UI_EDITOR_VIEWPORT */
+			UI::End(); /* PanelID::EditorViewport */
 		}
 		UI::End();
 		ImGui::PopStyleVar(2); /* FramePadding, WindowPadding. */
@@ -781,11 +780,11 @@ namespace LkEngine {
 		const float PosX = EditorViewportBounds[0].X;
 		const float PosY = EditorViewportBounds[0].Y;
 
-		if (ImGuiWindow* Window = ImGui::FindWindowByName(LK_UI_EDITOR_VIEWPORT))
+		if (ImGuiWindow* Window = ImGui::FindWindowByName(PanelID::EditorViewport))
 		{
 			const LVector2 EditorWindowSize = EditorViewport->GetSize();
 			ImGui::Begin(Window->Name, nullptr, UI::CoreViewportFlags | ImGuiWindowFlags_NoScrollbar);
-		#if 1
+
 			ImGuizmo::SetOrthographic(static_cast<int>(EditorCamera->GetProjectionType()));
 			ImGuizmo::SetDrawlist();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
@@ -815,7 +814,6 @@ namespace LkEngine {
 				TransformComponent.Scale = Scale;
 				TransformComponent.SetRotation(Rotation);
 			}
-		#endif
 
 			ImGui::End();
 		}
@@ -902,7 +900,7 @@ namespace LkEngine {
 			ProjectPath = InProjectPath / std::filesystem::path(ProjectPath.filename().string() + "." + LProject::FILE_EXTENSION);
 			if (std::filesystem::exists(ProjectPath))
 			{
-				LK_CORE_CONSOLE_INFO("Found project file in project directory: {}", ProjectPath.filename().string());
+				LK_CORE_CONSOLE_INFO("Found project file in directory: {}", ProjectPath.filename().string());
 			}
 			else
 			{
@@ -971,7 +969,7 @@ namespace LkEngine {
 
 		LSelectionContext::DeselectAll();
 
-		LK_CORE_CONSOLE_DEBUG("Clearing input buffers because of project opening");
+		LK_CORE_CONSOLE_DEBUG("Clearing editor input buffers");
 		std::memset(InputBuffer::ProjectName, 0, PROJECT_NAME_LENGTH_MAX);
 		std::memset(InputBuffer::NewProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
 		std::memset(InputBuffer::OpenProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
@@ -1211,7 +1209,7 @@ namespace LkEngine {
 	{
 		LK_CORE_TRACE_TAG("Editor", "OnKeyPressed: {}", Enum::ToString(KeyData.Key));
 
-		if (UI::IsWindowFocused(LK_UI_EDITOR_VIEWPORT) || UI::IsWindowFocused(LK_UI_SCENEMANAGER))
+		if (UI::IsWindowFocused(PanelID::EditorViewport) || UI::IsWindowFocused(PanelID::SceneManager))
 		{
 			if ((bViewportHovered || bEditorViewportHovered) && !LInput::IsMouseButtonDown(EMouseButton::Right))
 			{
@@ -1358,7 +1356,7 @@ namespace LkEngine {
 
 		if (EditorCamera)
 		{
-			if (UI::IsWindowHovered(LK_UI_EDITOR_VIEWPORT))
+			if (UI::IsWindowHovered(PanelID::EditorViewport))
 			{
 				if (ScrollDir == EMouseScrollDirection::Up)
 				{
@@ -1443,7 +1441,7 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_PrepareTopBar()
 	{
-		if (ImGuiWindow* TopBarWindow = ImGui::FindWindowByName(LK_UI_TOPBAR); TopBarWindow != nullptr)
+		if (ImGuiWindow* TopBarWindow = ImGui::FindWindowByName(PanelID::TopBar); TopBarWindow != nullptr)
 		{
 			TopBarWindow->Flags |= ImGuiWindowFlags_NoTitleBar;
 			if (ImGuiDockNode* DockNode = TopBarWindow->DockNode; DockNode != nullptr)
@@ -1470,7 +1468,7 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_PrepareLeftSidebar() const
 	{
-		if (ImGuiWindow* SidebarWindow = ImGui::FindWindowByName(LK_UI_SIDEBAR_1); SidebarWindow != nullptr)
+		if (ImGuiWindow* SidebarWindow = ImGui::FindWindowByName(PanelID::Sidebar1); SidebarWindow != nullptr)
 		{
 			if (ImGuiDockNode* DockNode = SidebarWindow->DockNode; DockNode != nullptr)
 			{
@@ -1515,7 +1513,7 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_PrepareRightSidebar() const
 	{
-		if (ImGuiWindow* SidebarWindow = ImGui::FindWindowByName(LK_UI_SIDEBAR_2); SidebarWindow != nullptr)
+		if (ImGuiWindow* SidebarWindow = ImGui::FindWindowByName(PanelID::Sidebar2); SidebarWindow != nullptr)
 		{
 			if (ImGuiDockNode* DockNode = SidebarWindow->DockNode; DockNode != nullptr)
 			{
@@ -1561,7 +1559,7 @@ namespace LkEngine {
 
 	void LEditorLayer::UI_PrepareEditorViewport()
 	{
-		if (ImGuiWindow* Window = ImGui::FindWindowByName(LK_UI_EDITOR_VIEWPORT); Window != nullptr)
+		if (ImGuiWindow* Window = ImGui::FindWindowByName(PanelID::EditorViewport); Window != nullptr)
 		{
 			if (ImGuiDockNode* DockNode = Window->DockNode; DockNode != nullptr)
 			{
@@ -2076,7 +2074,6 @@ namespace LkEngine {
 
 				if (ImGui::MenuItem("UI Tools"))
 				{
-					LK_CORE_DEBUG_TAG("Editor", "Open -> Tools");
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools); PanelData != nullptr)
 					{
 						PanelData->bIsOpen = true;
@@ -2084,7 +2081,7 @@ namespace LkEngine {
 					}
 				}
 
-				if (ImGui::MenuItem("Registered Fonts"))
+				if (ImGui::MenuItem("Fonts"))
 				{
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools); PanelData != nullptr)
 					{
@@ -2118,7 +2115,7 @@ namespace LkEngine {
 					if (ImGui::BeginMenu("Content Browser"))
 					{
 						ImGui::Checkbox("Outliner Borders", &Debug::UI::ContentBrowser::bDrawOutlinerBorders);
-						/// TODO: Dropdown menu for the color of the outliner border color.
+						/* TODO: Dropdown menu for the color of the outliner border color. */
 						ImGui::EndMenu(); // Content Browser.
 					}
 

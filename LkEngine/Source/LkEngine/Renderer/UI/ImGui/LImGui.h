@@ -848,7 +848,11 @@ namespace LkEngine::UI {
 	}
 
 	template<typename T>
-	static void Table(const char* TableName, const char** Columns, const uint32_t ColumnCount, const ImVec2& Size, T RenderFunc)
+	static void Table(const char* TableName, 
+					  const char** Columns, 
+					  const uint32_t ColumnCount, 
+					  const ImVec2& Size, 
+					  T RenderFunc)
 	{
 		if ((Size.x <= 0.0f) || (Size.y <= 0.0f))
 		{
@@ -891,7 +895,6 @@ namespace LkEngine::UI {
 										ImGuiCol_HeaderActive, ActiveColor);
 
 			ImGui::TableSetupScrollFreeze(ImGui::TableGetColumnCount(), 1);
-			//ImGui::TableNextRow(ImGuiTableRowFlags_Headers, 22.0f);
 			ImGui::TableNextRow(ImGuiTableRowFlags_Headers, 24.0f);
 
 			for (uint32_t Idx = 0; Idx < ColumnCount; Idx++)

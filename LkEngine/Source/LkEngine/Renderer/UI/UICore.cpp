@@ -14,37 +14,6 @@ namespace LkEngine::UI {
 
 	static bool bDockspaceInitialized = false;
 
-	ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
-		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
-		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs
-		| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNavFocus;
-
-	ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar
-		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus
-		| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
-
-	ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode
-		| ImGuiDockNodeFlags_NoDockingInCentralNode;
-
-    ImGuiWindowFlags MenuBarFlags = ImGuiWindowFlags_MenuBar
-        | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
-
-    ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus
-		| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoMove;
-
-    ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
-        | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus 
-        | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
-
-	ImGuiWindowFlags EditorViewportFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
-		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
-		| ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
-
     static uint32_t Counter = 0;
     static int UIContextID = 0;
     static char IDBuffer[16 + 2 + 1] = "##";
@@ -109,6 +78,16 @@ namespace LkEngine::UI {
     {
         UI::PushID();
         ImGui::Begin(WindowTitle, Open, WindowFlags);
+
+		if (ImGuiWindow* ThisWindow = ImGui::GetCurrentWindow(); ThisWindow != nullptr)
+		{
+			//if ((ThisWindow->Flags & ImGuiWindowFlags_NoCollapse) && ThisWindow->SkipItems)
+			if (ThisWindow->SkipItems)
+			{
+				UI::End();
+				return;
+			}
+		}
     }
 
     void End()
@@ -121,6 +100,7 @@ namespace LkEngine::UI {
     {
 		if (UI::DockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
 		{
+			/* TODO: Evaluate if both needed. */
 		    UI::CoreViewportFlags |= ImGuiWindowFlags_NoBackground;
 			UI::HostWindowFlags |= ImGuiWindowFlags_NoBackground;
 		}
@@ -134,8 +114,8 @@ namespace LkEngine::UI {
         ImGui::SetNextWindowPos(Viewport->Pos);
         ImGui::SetNextWindowSize(Viewport->Size);
         ImGui::SetNextWindowViewport(Viewport->ID);
-        ImGui::Begin(LK_UI_CORE_VIEWPORT, nullptr, HostWindowFlags);
-		ImGuiID DockspaceID = ImGui::GetID(LK_UI_DOCKSPACE);
+        ImGui::Begin(PanelID::CoreViewport, nullptr, HostWindowFlags);
+		ImGuiID DockspaceID = ImGui::GetID(PanelID::Dockspace);
 
 		/**
 		 * The sidebar nodes do not get the same sizes even though the size ratios
@@ -151,35 +131,39 @@ namespace LkEngine::UI {
 			ImGui::DockBuilderRemoveNode(DockspaceID);
 
 			/* Add empty node. */
-			ImGuiDockNodeFlags DockFlags = ImGuiDockNodeFlags_DockSpace;
+			ImGuiDockNodeFlags DockFlags = ImGuiDockNodeFlags_DockSpace 
+				| ImGuiDockNodeFlags_NoWindowMenuButton;
 			ImGui::DockBuilderAddNode(DockspaceID, DockFlags);
 			ImGui::DockBuilderSetNodeSize(DockspaceID, Viewport->Size);
 
 			ImGuiID DockID_Main = DockspaceID;
 			ImGuiID DockID_Left = ImGui::DockBuilderSplitNode(DockID_Main, ImGuiDir_Left, 0.18f, nullptr, &DockID_Main);
+
 			ImGuiID DockID_Right = ImGui::DockBuilderSplitNode(DockID_Main, ImGuiDir_Right, 0.22f, nullptr, &DockID_Main);
 			ImGuiID DockID_Right_Top = ImGui::DockBuilderSplitNode(DockID_Right, ImGuiDir_Up, 0.52f, nullptr, &DockID_Right);
+
 			ImGuiID DockID_Bottom = ImGui::DockBuilderSplitNode(DockID_Main, ImGuiDir_Down, 0.32f, nullptr, &DockID_Main);
+			ImGuiID DockID_Bottom_Right = ImGui::DockBuilderSplitNode(DockID_Bottom, ImGuiDir_Right, 0.42f, nullptr, &DockID_Bottom);
+
 			ImGuiID DockID_Top = ImGui::DockBuilderSplitNode(DockID_Main, ImGuiDir_Up, 0.04f, nullptr, &DockID_Main);
 
-			ImGui::DockBuilderDockWindow(LK_UI_SIDEBAR_1,       DockID_Left);
-			ImGui::DockBuilderDockWindow(LK_UI_EDITOR_VIEWPORT, DockID_Main);
-			ImGui::DockBuilderDockWindow(LK_UI_SIDEBAR_2,       DockID_Right_Top);
-			ImGui::DockBuilderDockWindow(LK_UI_CONTENTBROWSER,  DockID_Bottom);
-			ImGui::DockBuilderDockWindow(LK_UI_TOPBAR,          DockID_Top);
+			ImGui::DockBuilderDockWindow(PanelID::Sidebar1,       DockID_Left);
+			ImGui::DockBuilderDockWindow(PanelID::EditorViewport, DockID_Main);
+			ImGui::DockBuilderDockWindow(PanelID::Sidebar2,       DockID_Right_Top);
+			ImGui::DockBuilderDockWindow(PanelID::ContentBrowser, DockID_Bottom);
+			ImGui::DockBuilderDockWindow(PanelID::TopBar,         DockID_Top);
 
 			/* Dock the scene manager to the right sidebar. */
-			ImGui::DockBuilderDockWindow(LK_UI_SCENEMANAGER,    DockID_Right);
+			ImGui::DockBuilderDockWindow(PanelID::SceneManager,   DockID_Right);
 
-			/* Dock the editor console to the bottom bar, together with the content browser. */
-			ImGui::DockBuilderDockWindow(LK_UI_EDITORCONSOLE,   DockID_Bottom);
-			ImGui::DockBuilderDockWindow(LK_UI_CONTENTBROWSER,  DockID_Bottom);
+			/* Bottom bar. */
+			ImGui::DockBuilderDockWindow(PanelID::EditorConsole,  DockID_Bottom_Right);
 
 			/* Finish the dockspace. */
 			ImGui::DockBuilderFinish(DockspaceID);
 
 			/* Disable splitting over entire viewport. */
-			if (ImGuiDockNode* DockNode = ImGui::DockBuilderGetNode(ImGui::GetID(LK_UI_DOCKSPACE)))
+			if (ImGuiDockNode* DockNode = ImGui::DockBuilderGetNode(ImGui::GetID(PanelID::Dockspace)))
 			{
 				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoDockingOverMe;
 				DockNode->LocalFlags |= ImGuiDockNodeFlags_NoDockingSplit;
@@ -202,7 +186,7 @@ namespace LkEngine::UI {
 			DockspaceNode->LocalFlags |= ImGuiDockNodeFlags_NoDockingSplit;
 
 			/* Disable docking in the central node. */
-			ImGuiDockNode* CentralNode = FindCentralNode(ImGui::GetID(LK_UI_DOCKSPACE));
+			ImGuiDockNode* CentralNode = FindCentralNode(ImGui::GetID(PanelID::Dockspace));
 			LK_CORE_VERIFY(CentralNode, "Cannot find central node");
 			CentralNode->LocalFlags |= ImGuiDockNodeFlags_NoDocking;
 
@@ -211,12 +195,12 @@ namespace LkEngine::UI {
 
 		/* Submit the dockspace. */
 		ImGui::DockSpace(DockspaceID, ImVec2(0, 0), UI::DockspaceFlags);
-		ImGui::End(); /* LK_UI_CORE_VIEWPORT */
+		ImGui::End(); /* PanelID::CoreViewport */
 
 		ImGui::SetNextWindowPos(Viewport->Pos);
 		ImGui::SetNextWindowSize(Viewport->Size);
 		ImGui::SetNextWindowViewport(Viewport->ID);
-		ImGui::Begin(LK_UI_CORE_VIEWPORT, nullptr, UI::CoreViewportFlags);
+		ImGui::Begin(PanelID::CoreViewport, nullptr, UI::CoreViewportFlags);
     }
 
 	ImGuiDockNode* FindCentralNode(const ImGuiID DockspaceID)

@@ -36,7 +36,7 @@ namespace LkEngine {
 
 	void LEditorConsolePanel::RenderUI(bool& IsOpen)
 	{
-		if (ImGui::Begin("Log", &IsOpen))
+		if (ImGui::Begin(PanelID::EditorConsole, &IsOpen))
 		{
 			ImVec2 ConsoleSize = ImGui::GetContentRegionAvail();
 			ConsoleSize.y -= 32.0f;
@@ -116,6 +116,8 @@ namespace LkEngine {
 	{
 		static const char* ConsoleColumns[] = { "Type", "Timestamp", "Message" };
 
+		/* TODO: The call to UI::Table should support std::array (same as UI::BeginPropertyGrid)
+		 *       and table flags, see LThemeManagerPanel. */
 		UI::Table("Console", ConsoleColumns, 3, InSize, [&]()
 		{
 			std::scoped_lock<std::mutex> ScopedLock(MessageBufferMutex);
@@ -160,8 +162,10 @@ namespace LkEngine {
 						{
 							ImGui::PushStyleColor(ImGuiCol_TableRowBg, RGBA32::Background);
 							PushedColors++;
-							//ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, RGBA32::BackgroundDark);
-							//PushedColors++;
+						#if 0
+							ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, RGBA32::BackgroundDark);
+							PushedColors++;
+						#endif
 							break;
 						}
 

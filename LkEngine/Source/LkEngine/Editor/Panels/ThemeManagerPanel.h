@@ -101,7 +101,6 @@ namespace LkEngine {
 
 			ImGui::StyleColorsLight();
 			auto& Colors = ImGui::GetStyle().Colors;
-
 		#if 0
 			/* Window background. */
 			Colors[ImGuiCol_WindowBg]		= ImVec4(0.10f, 0.105f, 0.110f, 1.0f);

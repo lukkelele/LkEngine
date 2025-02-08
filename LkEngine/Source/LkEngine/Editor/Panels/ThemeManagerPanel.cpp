@@ -14,65 +14,64 @@ namespace LkEngine {
 	void LThemeManagerPanel::RenderUI(bool& IsOpen)
 	{
 		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
-		ImGui::SetNextWindowSize(ImVec2(440, 600), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(180, 120), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(540, 780), ImGuiCond_FirstUseEver);
 		UI::Begin(PanelID::ThemeManager, &IsOpen, WindowFlags);
 
 		static ImGuiTableFlags GridFlags = ImGuiTableFlags_SizingFixedSame;
 		static bool bGridTable_UseHeaderLabels = false;
 
-		UI::BeginPropertyGrid("GridFlags", ImVec2(0, 0));
+		if (ImGui::TreeNode("Table Settings"))
 		{
-			UI::Font::Push("Large");
-			ImGui::Text("Grid Settings");
-			UI::Font::Pop();
-
+			UI::BeginPropertyGrid("GridFlags", ImVec2(0, 0));
 			{
-				static bool bPropertyValue = false;
-				if (UI::Property("Resizeable", bPropertyValue))
-				{
-					if (bPropertyValue) GridFlags|= ImGuiTableFlags_Resizable;
-					else GridFlags &= ~ImGuiTableFlags_Resizable;
-				}
-			}
+				UI::Font::Push("Large");
+				ImGui::Text("Settings");
+				UI::Font::Pop();
 
-			{
-				static bool bPropertyValue = false;
-				if (UI::Property("Row Background", bPropertyValue))
 				{
-					if (bPropertyValue) GridFlags|= ImGuiTableFlags_RowBg;
-					else GridFlags &= ~ImGuiTableFlags_RowBg;
+					static bool bPropertyValue = false;
+					if (UI::Property("Resizeable", bPropertyValue))
+					{
+						if (bPropertyValue) GridFlags|= ImGuiTableFlags_Resizable;
+						else GridFlags &= ~ImGuiTableFlags_Resizable;
+					}
 				}
-			}
 
-			{
-				static bool bPropertyValue = false;
-				if (UI::Property("Precise Widths", bPropertyValue))
 				{
-					if (bPropertyValue) GridFlags|= ImGuiTableFlags_PreciseWidths;
-					else GridFlags &= ~ImGuiTableFlags_PreciseWidths;
+					static bool bPropertyValue = false;
+					if (UI::Property("Row Background", bPropertyValue))
+					{
+						if (bPropertyValue) GridFlags|= ImGuiTableFlags_RowBg;
+						else GridFlags &= ~ImGuiTableFlags_RowBg;
+					}
 				}
-			}
 
-			{
-				static bool bPropertyValue = false;
-				if (UI::Property("Borders", bPropertyValue))
 				{
-					if (bPropertyValue) GridFlags|= ImGuiTableFlags_Borders;
-					else GridFlags &= ~ImGuiTableFlags_Borders;
+					static bool bPropertyValue = false;
+					if (UI::Property("Precise Widths", bPropertyValue))
+					{
+						if (bPropertyValue) GridFlags|= ImGuiTableFlags_PreciseWidths;
+						else GridFlags &= ~ImGuiTableFlags_PreciseWidths;
+					}
 				}
-			}
 
-			{
-				//static bool bPropertyValue = false;
-				//if (UI::Property("Header Labels", bPropertyValue))
-				if (UI::Property("Header Labels", bGridTable_UseHeaderLabels))
 				{
-					//bGridTable_UseHeaderLabels = bPropertyValue;
+					static bool bPropertyValue = false;
+					if (UI::Property("Borders", bPropertyValue))
+					{
+						if (bPropertyValue) GridFlags|= ImGuiTableFlags_Borders;
+						else GridFlags &= ~ImGuiTableFlags_Borders;
+					}
 				}
+
+				UI::Property("Header Labels", bGridTable_UseHeaderLabels);
+
 			}
+			UI::EndPropertyGrid();
+
+			ImGui::TreePop();
 		}
-		UI::EndPropertyGrid();
-
 
 		/* Populate themes array for the dropdown. */
 		static std::array<const char*, (uint16_t)ETheme::COUNT> Themes;

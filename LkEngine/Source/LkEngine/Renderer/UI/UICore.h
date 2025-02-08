@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 
 #include "Font.h"
+#include "LkEngine/Core/Math/Vector.h"
 #include "LkEngine/Scene/Components.h"
 
 #if defined(LK_ENGINE_OPENGL)
@@ -15,50 +16,7 @@
 
 #define LK_UI_DEBUG_DOCKNODES         0
 #define LK_UI_DEBUG_WINDOWS_ON_HOVER  0
-
-/* UI Identifiers. */
-#define LK_UI_CORE_VIEWPORT          ::LkEngine::UI::ID::CoreViewport
-#define LK_UI_EDITOR_VIEWPORT        ::LkEngine::UI::ID::ViewportTexture
-#define LK_UI_DOCKSPACE              ::LkEngine::UI::ID::Dockspace
-#define LK_UI_TOPBAR                 ::LkEngine::UI::ID::TopBar
-#define LK_UI_SIDEBAR_1              ::LkEngine::UI::ID::Sidebar1
-#define LK_UI_SIDEBAR_2              ::LkEngine::UI::ID::Sidebar2
-#define LK_UI_BOTTOMBAR              ::LkEngine::UI::ID::BottomBar
-#define LK_UI_EDITORCONSOLE          ::LkEngine::PanelID::EditorConsole
-#define LK_UI_CONTENTBROWSER         ::LkEngine::PanelID::ContentBrowser
-#define LK_UI_SCENEMANAGER           ::LkEngine::PanelID::SceneManager
-
-/* TODO: Move debug macros elsewhere. */
-#if LK_UI_DEBUG_DOCKNODES 
-#	define LK_UI_DEBUG_DOCKNODE(Name) \
-			if (ImGuiDockNode* DockNode = ImGui::DockBuilderGetNode(ImGui::GetWindowDockID())) \
-			{ \
-				ImGui::Text("Dock ID: %lld", DockNode->ID); \
-				if (DockNode->ParentNode) ImGui::Text("Parent Node: %lld", DockNode->ParentNode->ID); \
-				else ImGui::Text("Parent Node: None"); \
-				ImGui::Text("Windows: %d", DockNode->Windows.Size); \
-				ImGui::Text("Dock Size: (%.2f, %.2f)", DockNode->Size.x, DockNode->Size.y); \
-				ImGui::Text("Dock Pos: (%.2f, %.2f)", DockNode->Pos.x, DockNode->Pos.y); \
-				ImGui::Separator(); \
-			} 
-#else
-#	define LK_UI_DEBUG_DOCKNODE(Name) 
-#endif
-
-#if LK_UI_DEBUG_WINDOWS_ON_HOVER
-#	define LK_UI_DEBUG_WINDOW_ON_HOVER(...)                                         \
-		if (Debug::UI::bDisplayWindowSizeOnHover)                                   \
-		{                                                                           \
-			if (ImGui::IsWindowHovered())                                           \
-			{                                                                       \
-				const ImVec2 WindowSize = ImGui::GetWindowSize();                   \
-				ImGui::SetTooltip("Size (%.2f, %.2f)", WindowSize.x, WindowSize.y); \
-			}                                                                       \
-		}                                                                           
-#else
-#	define LK_UI_DEBUG_WINDOW_ON_HOVER(...) 
-#endif
-
+#include "UIDebug.h"
 
 namespace LkEngine 
 {
@@ -67,9 +25,16 @@ namespace LkEngine
 
 	namespace PanelID 
 	{
+		static constexpr const char* CoreViewport        = "##LkEngine-CoreViewport";
+		static constexpr const char* Dockspace           = "##LkEngine-DockSpace";    
+		static constexpr const char* EditorViewport      = "##LkEngine-EditorViewport";
+		static constexpr const char* TopBar              = "##LkEngine-TopBar";
+		static constexpr const char* BottomBar           = "##LkEngine-BottomBar";
+		static constexpr const char* Sidebar1            = "Sidebar##1";
+		static constexpr const char* Sidebar2            = "Sidebar##2";
 		static constexpr const char* ApplicationSettings = "Application Settings";
 		static constexpr const char* EditorSettings      = "Editor Settings";
-		static constexpr const char* EditorConsole       = "Editor Console";
+		static constexpr const char* EditorConsole       = "Log##EditorConsole";
 		static constexpr const char* ContentBrowser      = "Content Browser";
 		static constexpr const char* SceneManager        = "Scene Manager";
 		static constexpr const char* ComponentEditor     = "Component Editor";
@@ -78,43 +43,19 @@ namespace LkEngine
 		static constexpr const char* ThemeManager        = "Theme Manager";
 	}
 
-	/**
-	 * EVectorAxis
-	 * TODO: Move elsewhere
-	 */
-	enum class EVectorAxis : uint32_t
-	{
-		X = LK_BIT(0),
-		Y = LK_BIT(1),
-		Z = LK_BIT(2),
-		W = LK_BIT(3)
-	};
-	LK_ENUM_CLASS_FLAGS(EVectorAxis);
-
 }
 
 namespace LkEngine::UI {
-
-	namespace ID 
-	{
-		static constexpr const char* CoreViewport       = "##LkEngine-CoreViewport";
-		static constexpr const char* Dockspace          = "##LkEngine-DockSpace";    
-		static constexpr const char* RenderWindow       = "##LkEngine-RenderWindow";
-		static constexpr const char* ViewportTexture    = "##LkEngine-ViewportTexture";
-		static constexpr const char* TopBar             = "##LkEngine-TopBar";
-		static constexpr const char* Sidebar1           = "Sidebar##1";
-		static constexpr const char* Sidebar2           = "Sidebar##2";
-		static constexpr const char* BottomBar          = "##LkEngine-BottomBar";
-		static constexpr const char* SelectedEntityInfo = "##LkEngine-Selected-Entity-Info"; /* REMOVE */
-	}
 
 	/**
 	 * Map a property to a type T.
 	 * 
 	 *  Useful in dropdown menues.
 	 *  
-	 *  Example (uint32_t):
-     *      constexpr std::array<UI::TPropertyMapping<uint32_t>, 3> Options = {
+	 *  ----------------------
+	 *   Example (uint32_t):
+	 *  ----------------------
+     *      constexpr std::array<UI::TPropertyMapping<uint32_t>, 2> Options = {
 	 *          std::pair("White", RGBA32::White),
      *          std::pair("Black", RGBA32::Black),
 	 *      };
@@ -122,10 +63,18 @@ namespace LkEngine::UI {
 	template<typename T>
 	using TPropertyMapping = std::pair<const char*, T>;
 
-	/** Slider configuration values. */
-	static constexpr float SLIDER_MIN_UNLIMITED_POS = 0.0f;
-	static constexpr float SLIDER_MAX_UNLIMITED = 0.0f;
+	/** Slider configuration. */
+	namespace Slider
+	{
+		static constexpr float MIN_UNLIMITED = 0.0f;
+		static constexpr float MAX_UNLIMITED = 0.0f;
+	}
 
+	/**
+	 * EStyle
+	 *
+	 *  Styles that can be added to UI elements.
+	 */
 	enum class EStyle : uint32_t
 	{
 		AlignHorizontal,
@@ -254,6 +203,7 @@ namespace LkEngine::UI {
 		using T = std::underlying_type_t<std::decay_t<decltype(Idx)>>;
 		LK_CORE_ASSERT(((T)Idx >= 0) && (Idx < (T)(EStyle::COUNT)));
 		static_assert(LK_ARRAYSIZE(Internal::StyleVarInfo) == (std::underlying_type_t<EStyle>)EStyle::COUNT);
+		/* TODO: Disable warning C33011. */
 		return &Internal::StyleVarInfo[(T)Idx];
 	}
 
@@ -580,15 +530,39 @@ namespace LkEngine::UI {
                const glm::vec4& BorderColor = glm::vec4(0, 0, 0, 0));
 
 
-	/* TODO: Reevaluate this. */
-    /* UI Flags. */
-    extern ImGuiWindowFlags		CoreViewportFlags;
-    extern ImGuiWindowFlags		HostWindowFlags;
-    extern ImGuiWindowFlags		SidebarFlags;
-    extern ImGuiWindowFlags		MenuBarFlags;
-    extern ImGuiWindowFlags		TabBarFlags;
-    extern ImGuiWindowFlags		EditorViewportFlags;
-    extern ImGuiDockNodeFlags	DockspaceFlags; 
+	/****************************
+	 *          Flags           *
+	 ****************************/
+	inline static constexpr ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode
+		| ImGuiDockNodeFlags_NoDockingInCentralNode;
+
+	inline static ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
+		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs
+		| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNavFocus;
+
+	inline static ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoTitleBar 
+		| ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus
+		| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
+
+    inline static constexpr ImGuiWindowFlags MenuBarFlags = ImGuiWindowFlags_MenuBar
+        | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar 
+		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
+
+    inline static constexpr ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus
+		| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoMove;
+
+    inline static constexpr ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar 
+		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking 
+		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+
+	inline static constexpr ImGuiWindowFlags EditorViewportFlags = ImGuiWindowFlags_NoTitleBar 
+		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar 
+		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize;
 
 }
 
