@@ -116,7 +116,7 @@ namespace LkEngine {
 			return false;
 		}
 
-		LK_CORE_WARN("\n{}", YamlString);
+		LK_CORE_TRACE("\n{}", YamlString);
 
 		LK_DESERIALIZE_PROPERTY(Name, ProjectConfig.Name, RootNode, "Unknown");
 		LK_DESERIALIZE_PROPERTY(AssetDirectory, ProjectConfig.AssetDirectory, RootNode, "");
