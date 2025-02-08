@@ -24,7 +24,7 @@ namespace LkEngine {
 		inline static constexpr uint32_t FNV_OFFSET_BASIS = 2166136261u;
 
 		template<std::size_t N = 256>
-		static constexpr auto GenerateTableCrc32()
+		static constexpr std::array<uint32_t, N> GenerateTableCrc32()
 		{
 			constexpr int NumIterations = 8;
 			constexpr uint32_t Polynomial = 0xEDB88320;
