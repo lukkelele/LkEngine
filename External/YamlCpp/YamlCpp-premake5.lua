@@ -21,6 +21,12 @@ project "YamlCpp"
 		"YAML_CPP_STATIC_DEFINE",
 		"YAMLCPP_USE_STATIC_LIBS"
 	}
+
+    --flags { "ExcludeFromBuild" } 
+
+    prebuildcommands {
+        "{ECHO} Building: %{prj.name}",
+    }
 	
 	filter "system:windows"
 		systemversion "latest"

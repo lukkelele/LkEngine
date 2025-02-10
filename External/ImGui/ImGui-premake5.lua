@@ -43,6 +43,12 @@ project "ImGui"
         "%{Dependency.ImGuizmo.IncludeDir}",
     }
 
+    --flags { "ExcludeFromBuild" } 
+
+    prebuildcommands {
+        "{ECHO} Building: %{prj.name}"
+    }
+
 	filter "system:windows"
 		systemversion "latest"
 		staticruntime "On"

@@ -23,6 +23,12 @@ project "ImGuiNodeEditor"
 		"%{Dependency.ImGui.IncludeDir}/imgui", -- Allow 'imgui.h' as well as 'imgui/imgui.h' as an include.
     }
 
+    --flags { "ExcludeFromBuild" }
+
+    prebuildcommands {
+        "{ECHO} Building: %{prj.name}"
+    }
+
 	filter "system:windows"
 		systemversion "latest"
 

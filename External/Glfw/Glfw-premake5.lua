@@ -29,6 +29,12 @@ project "Glfw"
 		"glfw/src/null_joystick.c",
 	}
 
+    --flags { "ExcludeFromBuild" }
+
+    prebuildcommands {
+        "{ECHO} Building: %{prj.name}"
+    }
+
 	filter "system:windows"
 		systemversion "latest"
 
