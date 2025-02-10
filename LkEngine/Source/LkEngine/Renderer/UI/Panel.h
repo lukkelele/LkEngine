@@ -4,7 +4,9 @@
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Renderer/UI/UICore.h"
-#include "LkEngine/Renderer/UI/ImGui/LImGui.h"
+#include "LkEngine/Renderer/UI/Property.h"
+#include "LkEngine/Renderer/UI/TreeNode.h"
+#include "LkEngine/Renderer/UI/Table.h"
 
 #include "LkEngine/Serialization/YamlSerialization.h"
 
@@ -32,7 +34,7 @@ namespace LkEngine {
 		/**
 		 * FWindow
 		 * 
-		 *  Data container for serialization for subwindows.
+		 *  Data container for windows.
 		 */
 		struct FWindow
 		{

@@ -34,3 +34,13 @@
 #	define LK_UI_DEBUG_WINDOW_ON_HOVER(...) 
 #endif
 
+/** Draw bounding box around an item. */
+#define LK_UI_DEBUG_BOUNDING_BOX(Color) \
+			if (Debug::UI::bBoundingBoxesOnHover && ImGui::IsItemHovered()) \
+			{                                                          \
+				const ImVec2 RectMin = ImGui::GetItemRectMin();        \
+				const ImVec2 RectMax = ImGui::GetItemRectMax();        \
+				ImDrawList* DrawList = ImGui::GetWindowDrawList();     \
+				DrawList->AddRect(RectMin, RectMax, Color);            \
+			}
+

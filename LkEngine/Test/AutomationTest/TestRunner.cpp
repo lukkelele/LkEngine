@@ -19,9 +19,9 @@ namespace LkEngine {
 
 		/* Register test logger. */
 		std::vector<LogLevelColorConfig> LevelConfigs = {
-			{ ELogLevel::Debug, Color::Cyan  },
-			{ ELogLevel::Info,  Color::White },
-			{ ELogLevel::Error,	Color::Red   }
+			{ ELogLevel::Debug, Color::Log::Cyan  },
+			{ ELogLevel::Info,  Color::Log::White },
+			{ ELogLevel::Error,	Color::Log::Red   }
 		};
 	
 		LLog& Logger = LLog::Get();

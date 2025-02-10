@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LkEngine/Core/CoreMacros.h"
+
 #include <string>
 #include <string_view>
 
@@ -8,7 +10,6 @@
 
 /* Use newer font registration system with changes to sizes. */
 //#define LK_UI_FONT_REWORKED 
-
 
 namespace LkEngine {
 

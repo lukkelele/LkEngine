@@ -4,13 +4,13 @@
 #include "LkEngine/Editor/EditorLayer.h"
 
 #include "LkEngine/Core/Window.h"
-#include "LkEngine/Core/Input/Input.h" /// FIXME: Remove the 'Input' directory and just place the files under 'Core'
+#include "LkEngine/Core/Input/Input.h"
 #include "LkEngine/Core/IO/FileSystem.h"
 
 #include "LkEngine/Renderer/Image.h"
 #include "LkEngine/Renderer/Texture.h"
 #include "LkEngine/Renderer/UI/UICore.h"
-#include "LkEngine/Renderer/UI/ImGui/ImGuiWidgets.h"
+#include "LkEngine/Renderer/UI/Widgets.h"
 
 #include "LkEngine/Asset/AssetImporter.h"
 #include "LkEngine/Asset/AssetManager.h"

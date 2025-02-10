@@ -5,7 +5,9 @@
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 #include "LkEngine/Core/Layer.h"
 
-#include "LkEngine/Renderer/UI/ImGui/LImGui.h"
+#include "LkEngine/Renderer/UI/Property.h"
+#include "LkEngine/Renderer/UI/TreeNode.h"
+#include "LkEngine/Renderer/UI/Table.h"
 
 #include "LkEngine/Editor/EditorCore.h"
 
@@ -13,12 +15,6 @@
 namespace LkEngine {
 
     class LWindow;
-
-    enum class EUserInterfaceAPI : uint8_t
-    {
-        Unknown = 0,
-        ImGui
-    };
 
     /**
      * LUILayer

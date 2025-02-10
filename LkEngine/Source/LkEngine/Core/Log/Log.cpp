@@ -109,17 +109,17 @@ namespace LkEngine {
 		CoreSinks[1]->set_pattern("%^[%T] [%l] [%n] %v%$");
 		if (auto ColorSink = std::static_pointer_cast<spdlog::sinks::stdout_color_sink_mt>(CoreSinks[1]))
 		{
-			ColorSink->set_color(spdlog::level::trace, Color::Green);
-			ColorSink->set_color(spdlog::level::debug, Color::Cyan);
-			ColorSink->set_color(spdlog::level::info, Color::White);
+			ColorSink->set_color(spdlog::level::trace, Color::Log::Green);
+			ColorSink->set_color(spdlog::level::debug, Color::Log::Cyan);
+			ColorSink->set_color(spdlog::level::info, Color::Log::White);
 		}
 
 		AppSinks[1]->set_pattern("%^[%T] [%n] %v%$");
 		if (auto ColorSink = std::static_pointer_cast<spdlog::sinks::stdout_color_sink_mt>(AppSinks[1]))
 		{
-			ColorSink->set_color(spdlog::level::trace, Color::Green);
-			ColorSink->set_color(spdlog::level::debug, Color::Cyan);
-			ColorSink->set_color(spdlog::level::info, Color::White);
+			ColorSink->set_color(spdlog::level::trace, Color::Log::Green);
+			ColorSink->set_color(spdlog::level::debug, Color::Log::Cyan);
+			ColorSink->set_color(spdlog::level::info, Color::Log::White);
 		}
 
 		EditorConsoleSinks[0]->set_pattern("[%T] [%l] [%n] %v");
@@ -166,9 +166,9 @@ namespace LkEngine {
 		auto ColorSinkLogger = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 
 		/* Default level color configuration. */
-		ColorSinkLogger->set_color(spdlog::level::trace, Color::Green);
-		ColorSinkLogger->set_color(spdlog::level::debug, Color::Cyan);
-		ColorSinkLogger->set_color(spdlog::level::info, Color::White);
+		ColorSinkLogger->set_color(spdlog::level::trace, Color::Log::Green);
+		ColorSinkLogger->set_color(spdlog::level::debug, Color::Log::Cyan);
+		ColorSinkLogger->set_color(spdlog::level::info, Color::Log::White);
 
 		for (const auto& [Level, Color] : LevelConfigs)
 		{

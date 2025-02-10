@@ -54,98 +54,61 @@ namespace LkEngine::Color {
 
 	/* clang-format off */
 
-	/**
-	 * TODO: Move this to a 'Core' subfolder as this is not entirely 
-	 * tied to the Renderer. 
-	 */
-	/*---------------------------------------------------
-	                      Colors
-	----------------------------------------------------*/
-
-	static constexpr uint16_t Black   = 0x0000;
-	static constexpr uint16_t Blue    = 0x0001;
-	static constexpr uint16_t Green   = 0x0002;
-	static constexpr uint16_t Cyan    = 0x0003;
-	static constexpr uint16_t Red     = 0x0004;
-	static constexpr uint16_t Magenta = 0x0005;
-	static constexpr uint16_t Yellow  = 0x0006;
-	static constexpr uint16_t White   = 0x0007;
-
-	namespace Formatter 
-	{
-		static constexpr uint16_t Reset     = 0x0000;
-		static constexpr uint16_t Bold      = 0x0100; 
-		static constexpr uint16_t Dark      = 0x0200;
-		static constexpr uint16_t Underline = 0x0400;
-		static constexpr uint16_t Blink     = 0x0800;
-		static constexpr uint16_t Reverse   = 0x1000;
-		static constexpr uint16_t Concealed = 0x2000;
-		static constexpr uint16_t ClearLine = 0x4000;
-	}
-
-	namespace Background 
+	namespace Log
 	{
 		static constexpr uint16_t Black   = 0x0000;
-		static constexpr uint16_t Red     = 0x0010;
-		static constexpr uint16_t Green   = 0x0020;
-		static constexpr uint16_t Yellow  = 0x0030;
-		static constexpr uint16_t Blue    = 0x0040;
-		static constexpr uint16_t Magenta = 0x0050;
-		static constexpr uint16_t Cyan    = 0x0060;
-		static constexpr uint16_t White   = 0x0070;
-	}
-
-	namespace Bold 
-	{
-		static constexpr uint16_t Black   = 0xFF00;
-		static constexpr uint16_t Blue    = 0xFF01;
-		static constexpr uint16_t Green   = 0xFF02;
-		static constexpr uint16_t Cyan    = 0xFF03;
-		static constexpr uint16_t Red     = 0xFF04;
-		static constexpr uint16_t Magenta = 0xFF05;
-		static constexpr uint16_t Yellow  = 0xFF06;
-		static constexpr uint16_t White   = 0xFF07;
+		static constexpr uint16_t Blue    = 0x0001;
+		static constexpr uint16_t Green   = 0x0002;
+		static constexpr uint16_t Cyan    = 0x0003;
+		static constexpr uint16_t Red     = 0x0004;
+		static constexpr uint16_t Magenta = 0x0005;
+		static constexpr uint16_t Yellow  = 0x0006;
+		static constexpr uint16_t White   = 0x0007;
 	}
 
 	namespace ANSI
 	{
 		/* Formatting codes. */
-		constexpr std::string_view Reset          = "\033[m";
-		constexpr std::string_view Bold           = "\033[1m";
-		constexpr std::string_view Dark           = "\033[2m";
-		constexpr std::string_view Underline      = "\033[4m";
-		constexpr std::string_view Blink          = "\033[5m";
-		constexpr std::string_view Reverse        = "\033[7m";
-		constexpr std::string_view Concealed      = "\033[8m";
-		constexpr std::string_view ClearLine      = "\033[K";
-
-		/* Foreground colors. */
-		constexpr std::string_view Black          = "\033[30m";
-		constexpr std::string_view Red            = "\033[31m";
-		constexpr std::string_view Green          = "\033[32m";
-		constexpr std::string_view Yellow         = "\033[33m";
-		constexpr std::string_view Blue           = "\033[34m";
-		constexpr std::string_view Magenta        = "\033[35m";
-		constexpr std::string_view Cyan           = "\033[36m";
-		constexpr std::string_view White          = "\033[37m";
-
-		/* Background colors. */
-		namespace Bg
+		namespace Format 
 		{
-			constexpr std::string_view Black        = "\033[40m";
-			constexpr std::string_view Red          = "\033[41m";
-			constexpr std::string_view Green        = "\033[42m";
-			constexpr std::string_view Yellow       = "\033[43m";
-			constexpr std::string_view Blue         = "\033[44m";
-			constexpr std::string_view Magenta      = "\033[45m";
-			constexpr std::string_view Cyan         = "\033[46m";
-			constexpr std::string_view White        = "\033[47m";
+			static constexpr std::string_view Reset      = "\033[m";
+			static constexpr std::string_view Bold       = "\033[1m";
+			static constexpr std::string_view Dark       = "\033[2m";
+			static constexpr std::string_view Underline  = "\033[4m";
+			static constexpr std::string_view Blink      = "\033[5m";
+			static constexpr std::string_view Reverse    = "\033[7m";
+			static constexpr std::string_view Concealed  = "\033[8m";
+			static constexpr std::string_view ClearLine  = "\033[K";
 		}
 
-		/* Bold colors. */
-		constexpr std::string_view YellowBold     = "\033[33m\033[1m";
-		constexpr std::string_view RedBold        = "\033[31m\033[1m";
-		constexpr std::string_view BoldOnRed      = "\033[1m\033[41m";
+		/* Foreground. */
+		static constexpr std::string_view Black          = "\033[30m";
+		static constexpr std::string_view Red            = "\033[31m";
+		static constexpr std::string_view Green          = "\033[32m";
+		static constexpr std::string_view Yellow         = "\033[33m";
+		static constexpr std::string_view Blue           = "\033[34m";
+		static constexpr std::string_view Magenta        = "\033[35m";
+		static constexpr std::string_view Cyan           = "\033[36m";
+		static constexpr std::string_view White          = "\033[37m";
+
+		namespace Bg
+		{
+			static constexpr std::string_view Black    = "\033[40m";
+			static constexpr std::string_view Red      = "\033[41m";
+			static constexpr std::string_view Green    = "\033[42m";
+			static constexpr std::string_view Yellow   = "\033[43m";
+			static constexpr std::string_view Blue     = "\033[44m";
+			static constexpr std::string_view Magenta  = "\033[45m";
+			static constexpr std::string_view Cyan     = "\033[46m";
+			static constexpr std::string_view White    = "\033[47m";
+		}
+
+		namespace Bold 
+		{
+			static constexpr std::string_view Yellow  = "\033[33m\033[1m";
+			static constexpr std::string_view Red     = "\033[31m\033[1m";
+			static constexpr std::string_view Bold    = "\033[1m\033[41m";
+		}
 	}
 
 	enum class RGB : uint32_t
@@ -333,57 +296,56 @@ namespace LkEngine::Color {
 		BgBrightCyan,
 		BgBrightWhite,
 
-		COUNT /* Keep last. */
+		COUNT
 	};
 
 	/* ANSI Escape Codes mapped to EColorCode. */
 	static constexpr std::array<const char*, static_cast<std::size_t>(EColorCode::COUNT)> ColorEscapeCodes = {
-		"\033[0m",    // Reset
+		"\033[0m",   // Reset
 
-		/* Foreground Colors. */
-		"\033[30m",   // Black
-		"\033[31m",   // Red
-		"\033[32m",   // Green
-		"\033[33m",   // Yellow
-		"\033[34m",   // Blue
-		"\033[35m",   // Magenta
-		"\033[36m",   // Cyan
-		"\033[37m",   // White
-		"\033[90m",   // Bright Black
-		"\033[91m",   // Bright Red
-		"\033[92m",   // Bright Green
-		"\033[93m",   // Bright Yellow
-		"\033[94m",   // Bright Blue
-		"\033[95m",   // Bright Magenta
-		"\033[96m",   // Bright Cyan
-		"\033[97m",   // Bright White
+		/* -- Foreground -- */
+		"\033[30m",  // Black
+		"\033[31m",  // Red
+		"\033[32m",  // Green
+		"\033[33m",  // Yellow
+		"\033[34m",  // Blue
+		"\033[35m",  // Magenta
+		"\033[36m",  // Cyan
+		"\033[37m",  // White
+		"\033[90m",  // Bright Black
+		"\033[91m",  // Bright Red
+		"\033[92m",  // Bright Green
+		"\033[93m",  // Bright Yellow
+		"\033[94m",  // Bright Blue
+		"\033[95m",  // Bright Magenta
+		"\033[96m",  // Bright Cyan
+		"\033[97m",  // Bright White
 
-		/* Background Colors. */
-		"\033[40m",   // BgBlack
-		"\033[41m",   // BgRed
-		"\033[42m",   // BgGreen
-		"\033[43m",   // BgYellow
-		"\033[44m",   // BgBlue
-		"\033[45m",   // BgMagenta
-		"\033[46m",   // BgCyan
-		"\033[47m",   // BgWhite
-		"\033[100m",  // BgBrightBlack
-		"\033[101m",  // BgBrightRed
-		"\033[102m",  // BgBrightGreen
-		"\033[103m",  // BgBrightYellow
-		"\033[104m",  // BgBrightBlue
-		"\033[105m",  // BgBrightMagenta
-		"\033[106m",  // BgBrightCyan
-		"\033[107m"   // BgBrightWhite
+		/* -- Background -- */
+		"\033[40m",  // BgBlack
+		"\033[41m",  // BgRed
+		"\033[42m",  // BgGreen
+		"\033[43m",  // BgYellow
+		"\033[44m",  // BgBlue
+		"\033[45m",  // BgMagenta
+		"\033[46m",  // BgCyan
+		"\033[47m",  // BgWhite
+		"\033[100m", // BgBrightBlack
+		"\033[101m", // BgBrightRed
+		"\033[102m", // BgBrightGreen
+		"\033[103m", // BgBrightYellow
+		"\033[104m", // BgBrightBlue
+		"\033[105m", // BgBrightMagenta
+		"\033[106m", // BgBrightCyan
+		"\033[107m"  // BgBrightWhite
 	};
 
-	static constexpr const char* GetEscapeCode(const EColorCode InColor)
+	FORCEINLINE constexpr const char* GetEscapeCode(const EColorCode InColor)
 	{
 		return ColorEscapeCodes[static_cast<std::size_t>(InColor)];
 	}
 
 }
-
 
 /**
  * RGBA32

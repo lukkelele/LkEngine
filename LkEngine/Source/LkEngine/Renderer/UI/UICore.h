@@ -18,6 +18,9 @@
 #define LK_UI_DEBUG_WINDOWS_ON_HOVER  0
 #include "UIDebug.h"
 
+#include "Style.h"
+
+
 namespace LkEngine 
 {
     class LWindow;
@@ -43,9 +46,38 @@ namespace LkEngine
 		static constexpr const char* ThemeManager        = "Theme Manager";
 	}
 
+	enum class EMessageBoxFlag : uint32_t
+	{
+		OkButton     = LK_BIT(0),
+		CancelButton = LK_BIT(1),
+		UserFunction = LK_BIT(2),
+		AutoSize     = LK_BIT(3),
+	};
+	LK_ENUM_CLASS_FLAGS(EMessageBoxFlag);
+	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EMessageBoxFlag, EMessageBoxFlag::OkButton, EMessageBoxFlag::AutoSize);
+
 }
 
 namespace LkEngine::UI {
+
+	LK_DECLARE_MULTICAST_DELEGATE(FOnMessageBoxCancelled, const char* /* UI Element Name */);
+	extern FOnMessageBoxCancelled OnMessageBoxCancelled;
+
+	struct FMessageBox
+	{
+		std::string Title = "";
+		std::string Body = "";
+		uint32_t Flags = 0;
+		uint32_t Width = 0;
+		uint32_t Height = 0;
+		uint32_t MinWidth = 0;
+		uint32_t MinHeight = 0;
+		uint32_t MaxWidth = -1;
+		uint32_t MaxHeight = -1;
+		std::function<void()> UserRenderFunction;
+		bool bShouldOpen = true;
+		bool bIsOpen = false;
+	};
 
 	/**
 	 * Map a property to a type T.
@@ -70,21 +102,35 @@ namespace LkEngine::UI {
 		static constexpr float MAX_UNLIMITED = 0.0f;
 	}
 
-	/**
-	 * EStyle
-	 *
-	 *  Styles that can be added to UI elements.
-	 */
-	enum class EStyle : uint32_t
-	{
-		AlignHorizontal,
-		COUNT
-	};
-	LK_ENUM_CLASS_FLAGS(EStyle);
-
 	namespace Internal 
 	{
-		int GetContextID();
+		enum class EDataType : uint32_t
+		{
+			None,
+			S32,     /* int32_t  */
+			U32,     /* uint32_t */
+			Float,   /* float    */
+			Double,  /* double   */
+			Bool,    /* bool     */
+			COUNT
+		};
+
+		struct FVariableInfo
+		{
+			EDataType Type = EDataType::None;
+			uint32_t Count = 0; 
+			uint32_t Offset = 0;
+
+			FORCEINLINE void* GetVariablePtr(void* Parent) const 
+			{ 
+				return (void*)((unsigned char*)Parent + Offset); 
+			}
+		};
+	
+		static const FVariableInfo StyleVarInfo[] =
+		{
+			{ EDataType::Float, 1, (uint32_t)offsetof(LStyle, AlignHorizontal) },
+		};
 
 		struct FAlignData
 		{
@@ -92,100 +138,20 @@ namespace LkEngine::UI {
 			uint16_t PassedElements = 0;
 		};
 
-		struct FTableEntry
+		FORCEINLINE const FVariableInfo* GetVariableInfo(const EStyle Idx)
 		{
-			const char* ID = nullptr;
-		};
+			using T = std::underlying_type_t<std::decay_t<decltype(Idx)>>;
+			LK_CORE_ASSERT(((T)Idx >= 0) && (Idx < (T)(EStyle::COUNT)));
+			static_assert(LK_ARRAYSIZE(Internal::StyleVarInfo) == (std::underlying_type_t<EStyle>)EStyle::COUNT);
+			return &Internal::StyleVarInfo[(T)Idx];
+		}
+
+		int GetContextID();
 	}
-
-	struct FMessageBox
-	{
-		std::string Title = "";
-		std::string Body = "";
-		uint32_t Flags = 0;
-		uint32_t Width = 0;
-		uint32_t Height = 0;
-		uint32_t MinWidth = 0;
-		uint32_t MinHeight = 0;
-		uint32_t MaxWidth = -1;
-		uint32_t MaxHeight = -1;
-		std::function<void()> UserRenderFunction;
-		bool bShouldOpen = true;
-		bool bIsOpen = false;
-	};
-
-	enum class EDataType : uint32_t
-	{
-		None,
-		S32,      /* int32_t  */
-		U32,      /* uint32_t */
-		Float,    /* float    */
-		Double,   /* double   */
-		Bool,     /* bool     */
-		COUNT
-	};
-
-	struct FVariableInfo
-	{
-		EDataType Type = EDataType::None;
-		uint32_t Count = 0; 
-		uint32_t Offset = 0;
-
-		FORCEINLINE void* GetVariablePtr(void* Parent) const 
-		{ 
-			return (void*)((unsigned char*)Parent + Offset); 
-		}
-	};
-	
-	struct LStyle
-	{
-		float AlignHorizontal = -1.0f; /* Disabled when -1.0 */
-	};
-
-	namespace Internal 		
-	{
-		static const FVariableInfo StyleVarInfo[] =
-		{
-			{ EDataType::Float, 1, (uint32_t)offsetof(LStyle, AlignHorizontal) },
-		};
-	}
-
-	struct FStyleMod
-	{
-	private:
-		using T = std::underlying_type_t<EStyle>;
-	public:
-		T VarIdx;
-		union 
-		{ 
-			int ArrInt[2]; 
-			float ArrFloat[2]; 
-		};
-
-		FStyleMod(const EStyle Style, const int Value)     
-			: VarIdx((T)Style)
-		{ 
-			ArrInt[0] = Value; 
-		}
-
-		FStyleMod(const EStyle Style, const float Value)
-			: VarIdx((T)Style)
-		{ 
-			ArrFloat[0] = Value; 
-		}
-
-		FStyleMod(const EStyle Style, const LVector2& Value)
-			: VarIdx((T)Style)
-		{ 
-			ArrFloat[0] = Value.X; 
-			ArrFloat[1] = Value.Y; 
-		}
-	};
 
 	struct LUIContext
 	{
 		std::vector<FStyleMod> StyleStack{};
-		std::deque<Internal::FTableEntry> TableStack{};
 		std::deque<Internal::FAlignData> AlignedStack{};
 		std::unordered_map<std::string, FMessageBox> MessageBoxes{};
 
@@ -193,24 +159,10 @@ namespace LkEngine::UI {
 	};
 	static LUIContext UIContext;
 
-	FORCEINLINE bool InTable()
-	{
-		return !UIContext.TableStack.empty();
-	}
-
-	FORCEINLINE const FVariableInfo* GetVariableInfo(const EStyle Idx)
-	{
-		using T = std::underlying_type_t<std::decay_t<decltype(Idx)>>;
-		LK_CORE_ASSERT(((T)Idx >= 0) && (Idx < (T)(EStyle::COUNT)));
-		static_assert(LK_ARRAYSIZE(Internal::StyleVarInfo) == (std::underlying_type_t<EStyle>)EStyle::COUNT);
-		/* TODO: Disable warning C33011. */
-		return &Internal::StyleVarInfo[(T)Idx];
-	}
-
 	FORCEINLINE void PushStyle(const EStyle Style, const float Value)
 	{
-		const FVariableInfo* VarInfo = GetVariableInfo(Style);
-		if (VarInfo->Type != EDataType::Float)
+		const Internal::FVariableInfo* VarInfo = Internal::GetVariableInfo(Style);
+		if (VarInfo->Type != Internal::EDataType::Float)
 		{
 		}
 
@@ -224,118 +176,39 @@ namespace LkEngine::UI {
 		LK_CORE_ASSERT(false, "TODO");
 	}
 
-	class FScopedStyle
+	FORCEINLINE bool InTable()
 	{
-	public:
-		template<typename T>
-		FScopedStyle(const ImGuiStyleVar StyleVar, T Value) { ImGui::PushStyleVar(StyleVar, Value); }
-		~FScopedStyle() { ImGui::PopStyleVar(); }
-		FScopedStyle(const FScopedStyle&) = delete;
-		FScopedStyle& operator=(const FScopedStyle&) = delete;
-	};
+		return (ImGui::GetCurrentTable() != nullptr);
+	}
 
-	class FScopedColor
-	{
-	public:
-		template<typename T>
-		FScopedColor(const ImGuiCol ColorID, T Color) { ImGui::PushStyleColor(ColorID, ImColor(Color).Value); }
-		~FScopedColor() { ImGui::PopStyleColor(); }
-		FScopedColor(const FScopedColor&) = delete;
-		FScopedColor& operator=(const FScopedColor&) = delete;
-	};
+	void ShowMessageBox(const char* Title,
+						const std::function<void()>& RenderFunction,
+						uint32_t Flags = (uint32_t)EMessageBoxFlag::AutoSize,
+						const uint32_t Width = 600,
+						const uint32_t Height = 0,
+						const uint32_t MinWidth = 140,
+						const uint32_t MinHeight = 60,
+						const uint32_t MaxWidth = -1,
+						const uint32_t MaxHeight = -1);
 
-	class FScopedID
-	{
-	public:
-		template<typename T>
-		FScopedID(const T ID) { ImGui::PushID(ID); }
-		~FScopedID() { ImGui::PopID(); }
-		FScopedID(const FScopedID&) = delete;
-		FScopedID& operator=(const FScopedID&) = delete;
-	};
-
-	class FScopedColorStack
-	{
-	public:
-		template <typename ColorType, typename... OtherColors>
-		FScopedColorStack(ImGuiCol FirstColorID, ColorType FirstColor, OtherColors&& ... OtherColorPairs)
-			: Count((sizeof... (OtherColorPairs) / 2) + 1)
-		{
-			static_assert((sizeof... (OtherColorPairs) & 1u) == 0, "FScopedColorStack expects a list of pairs of color IDs and colors");
-			PushColor(FirstColorID, FirstColor, std::forward<OtherColors>(OtherColorPairs)...);
-		}
-
-		~FScopedColorStack() { ImGui::PopStyleColor(Count); }
-
-		FScopedColorStack(const FScopedColorStack&) = delete;
-		FScopedColorStack& operator=(const FScopedColorStack&) = delete;
-
-	private:
-		int Count = 0;
-
-		template <typename ColorType, typename... OtherColors>
-		void PushColor(ImGuiCol ColorID, ColorType Color, OtherColors&& ... OtherColorPairs)
-		{
-			if constexpr (sizeof... (OtherColorPairs) == 0)
-			{
-				ImGui::PushStyleColor(ColorID, ImColor(Color).Value);
-			}
-			else
-			{
-				ImGui::PushStyleColor(ColorID, ImColor(Color).Value);
-				PushColor(std::forward<OtherColors>(OtherColorPairs)...);
-			}
-		}
-	};
-
-	class FScopedStyleStack
-	{
-	public:
-
-		template <typename ValueType, typename... OtherStylePairs>
-		FScopedStyleStack(const ImGuiStyleVar FirstStyleVar, const ValueType FirstValue, OtherStylePairs&& ... OtherPairs)
-			: StackCount((sizeof...(OtherPairs) / 2) + 1)
-		{
-			static_assert((sizeof...(OtherPairs) & 1u) == 0);
-			PushStyle(FirstStyleVar, FirstValue, std::forward<OtherStylePairs>(OtherPairs)...);
-		}
-
-		~FScopedStyleStack() { ImGui::PopStyleVar(StackCount); }
-
-		FScopedStyleStack(const FScopedStyleStack&) = delete;
-		FScopedStyleStack& operator=(const FScopedStyleStack&) = delete;
-
-	private:
-		int StackCount = 0;
-
-		template <typename ValueType, typename... OtherStylePairs>
-		FORCEINLINE void PushStyle(const ImGuiStyleVar StyleVar, const ValueType Value, OtherStylePairs&& ... OtherPairs)
-		{
-			if constexpr (sizeof...(OtherPairs) == 0)
-			{
-				ImGui::PushStyleVar(StyleVar, Value);
-			}
-			else
-			{
-				ImGui::PushStyleVar(StyleVar, Value);
-				PushStyle(std::forward<OtherStylePairs>(OtherPairs)...);
-			}
-		}
-	};
-
-	class FScopedFont
-	{
-	public:
-		FScopedFont(ImFont* Font) { ImGui::PushFont(Font); }
-		~FScopedFont() { ImGui::PopFont(); }
-		FScopedFont(const FScopedFont&) = delete;
-		FScopedFont& operator=(const FScopedFont&) = delete;
-	};
-
+	void RenderMessageBoxes();
 
     const char* GenerateID();
     void PushID();
     void PopID();
+
+	FORCEINLINE void PushAligned(const float Spacing = 0.0f)
+	{
+		UI::UIContext.AlignedStack.emplace_front(Spacing, UIContext.AlignedStack.size());
+	}
+
+	FORCEINLINE void PopAligned()
+	{
+		UI::UIContext.AlignedStack.pop_front();
+	}
+
+	void Separator(const ImVec2& Size, const ImVec4& Color);
+
     bool IsInputEnabled();
     bool IsMouseEnabled();
     bool IsKeyboardEnabled();
@@ -445,7 +318,7 @@ namespace LkEngine::UI {
 	FORCEINLINE static ImVec2 GetWindowSize(T Identifier)
 	{
 		LK_CORE_ASSERT(false);
-		return {};
+		return ImVec2();
 	}
 
 	template<>
@@ -456,7 +329,7 @@ namespace LkEngine::UI {
 			return Window->Size;
 		}
 
-		return {};
+		return ImVec2();
 	}
 
 	template<>
@@ -467,7 +340,7 @@ namespace LkEngine::UI {
 			return Window->Size;
 		}
 
-		return {};
+		return ImVec2();
 	}
 
 	template<EFindType FindType = EFindType::Name, typename T = const char*>
@@ -500,6 +373,122 @@ namespace LkEngine::UI {
 
 		return false;
     }
+
+	FORCEINLINE bool IsItemDisabled()
+	{
+		return ImGui::GetItemFlags() & ImGuiItemFlags_Disabled;
+	}
+
+	FORCEINLINE bool IsItemHovered(const float DelayInSeconds = 0.10f, ImGuiHoveredFlags Flags = ImGuiHoveredFlags_None)
+	{
+		return ImGui::IsItemHovered() && (GImGui->HoveredIdTimer > DelayInSeconds); /* HoveredIdNotActiveTimer. */
+	}
+
+	FORCEINLINE ImRect GetItemRect()
+	{
+		return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+	}
+
+	FORCEINLINE ImRect RectExpanded(const ImRect& Rect, const float x, const float y)
+	{
+		ImRect Result = Rect;
+		Result.Min.x -= x;
+		Result.Min.y -= y;
+		Result.Max.x += x;
+		Result.Max.y += y;
+		return Result;
+	}
+
+	FORCEINLINE ImRect RectOffset(const ImRect& Rect, const float x, const float y)
+	{
+		ImRect Result = Rect;
+		Result.Min.x += x;
+		Result.Min.y += y;
+		Result.Max.x += x;
+		Result.Max.y += y;
+		return Result;
+	}
+
+	FORCEINLINE void ShiftCursorX(const float Distance)
+	{
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + Distance);
+	}
+
+	FORCEINLINE void ShiftCursorY(const float Distance)
+	{
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + Distance);
+	}
+
+	FORCEINLINE void ShiftCursor(const float InX, const float InY)
+	{
+		const ImVec2 Cursor = ImGui::GetCursorPos();
+		ImGui::SetCursorPos(ImVec2(Cursor.x + InX, Cursor.y + InY));
+	}
+
+	FORCEINLINE void DrawItemActivityOutline()
+	{
+		/* TODO */
+	}
+
+	FORCEINLINE void HelpMarker(const char* HelpDesc, const char* HelpSymbol = "(?)")
+	{
+		static constexpr float WrapPosOffset = 35.0f;
+		ImGui::TextDisabled(HelpSymbol);
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * WrapPosOffset);
+			ImGui::TextUnformatted(HelpDesc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+
+	FORCEINLINE void SetTooltip(std::string_view Text, 
+								const float DelayInSeconds = 0.10f, 
+								const bool AllowWhenDisabled = true, 
+								const ImVec2 Padding = ImVec2(5, 5))
+	{
+		if (IsItemHovered(DelayInSeconds, AllowWhenDisabled ? ImGuiHoveredFlags_AllowWhenDisabled : ImGuiHoveredFlags_None))
+		{
+			UI::FScopedStyle WindowPadding(ImGuiStyleVar_WindowPadding, Padding);
+			UI::FScopedColor TextColor(ImGuiCol_Text, RGBA32::Text::Brighter);
+			ImGui::SetTooltip(Text.data());
+		}
+	}
+
+	FORCEINLINE void PopupMenuHeader(const std::string& Text, 
+									 const bool IndentAfter = true, 
+									 const bool UnindentBefore = false)
+	{
+		if (UnindentBefore)
+		{
+			ImGui::Unindent();
+		}
+
+		static constexpr ImColor TextColor = ImColor(170, 170, 170);
+		ImGui::TextColored(TextColor.Value, Text.c_str());
+		ImGui::Separator();
+		if (IndentAfter)
+		{
+			ImGui::Indent();
+		}
+	};
+
+	FORCEINLINE void Separator(const ImVec2& Size, const ImVec4& Color)
+	{
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, Color);
+		ImGui::BeginChild("##Separator", Size);
+		ImGui::EndChild();
+		ImGui::PopStyleColor();
+	}
+
+	FORCEINLINE void VSeparator(const float Height = 10.0f)
+	{
+		ImGui::Dummy(ImVec2(0, Height));
+		ImGui::Separator();
+		ImGui::Dummy(ImVec2(0, Height));
+	}
 
     void Image(const TObjectPtr<LTexture2D>& texture, 
                const ImVec2& Size, 
@@ -563,6 +552,108 @@ namespace LkEngine::UI {
 	inline static constexpr ImGuiWindowFlags EditorViewportFlags = ImGuiWindowFlags_NoTitleBar 
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar 
 		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize;
+
+	namespace Draw 
+	{
+		FORCEINLINE void Underline(bool FullWidth = false, const float OffsetX = 0.0f, const float OffsetY = -1.0f)
+		{
+			if (FullWidth)
+			{
+				if (ImGui::GetCurrentWindow()->DC.CurrentColumns != nullptr)
+				{
+					ImGui::PushColumnsBackground();
+				}
+				else if (ImGui::GetCurrentTable() != nullptr)
+				{
+					ImGui::TablePushBackgroundChannel();
+				}
+			}
+
+			const float Width = FullWidth ? ImGui::GetWindowWidth() : ImGui::GetContentRegionAvail().x;
+			const ImVec2 Cursor = ImGui::GetCursorScreenPos();
+			ImGui::GetWindowDrawList()->AddLine(
+				ImVec2(Cursor.x + OffsetX, Cursor.y + OffsetY),
+				ImVec2(Cursor.x + Width, Cursor.y + OffsetY),
+				RGBA32::BackgroundDark,
+				1.0f
+			);
+
+			if (FullWidth)
+			{
+				if (ImGui::GetCurrentWindow()->DC.CurrentColumns != nullptr)
+				{
+					ImGui::PopColumnsBackground();
+				}
+				else if (ImGui::GetCurrentTable() != nullptr)
+				{
+					ImGui::TablePopBackgroundChannel();
+				}
+			}
+		}
+	}
+
+	FORCEINLINE void Spring(const float Weight = 1.0f)
+	{
+		const ImVec2 AvailableSpace = ImGui::GetContentRegionAvail();
+		const float SpringSize = AvailableSpace.x * Weight;
+		ImGui::Dummy(ImVec2(SpringSize, 0.0f));
+	}
+
+	FORCEINLINE void AlignHorizontalCenter(const float ItemWidth)
+	{
+		const ImVec2 AvailableSpace = ImGui::GetContentRegionAvail();
+		const float Offset = (AvailableSpace.x - ItemWidth) / 2.0f;
+		if (Offset > 0.0f)
+		{
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + Offset);
+		}
+	}
+
+	FORCEINLINE bool ColoredButton(const char* Label, const ImVec4& BgColor, const ImVec2& ButtonSize)
+	{
+		FScopedColor ButtonCol(ImGuiCol_Button, BgColor);
+		return ImGui::Button(Label, ButtonSize);
+	}
+
+	FORCEINLINE bool ColoredButton(const char* Label, const ImVec4& BgColor, const ImVec4& FgColor, const ImVec2& ButtonSize)
+	{
+		FScopedColor TextColor(ImGuiCol_Text, FgColor);
+		FScopedColor ButtonColor(ImGuiCol_Button, BgColor);
+		return ImGui::Button(Label, ButtonSize);
+	}
+
+	FORCEINLINE void DrawButtonImage(const TObjectPtr<LTexture2D>& ImageNormal, 
+									 const TObjectPtr<LTexture2D>& ImageHovered, 
+									 const TObjectPtr<LTexture2D>& ImagePressed, 
+									 const ImU32 TintNormal, 
+									 const ImU32 TintHovered, 
+									 const ImU32 TintPressed, 
+									 const ImVec2& RectMin, 
+									 const ImVec2& RectMax)
+	{
+		ImDrawList* DrawList = ImGui::GetWindowDrawList();
+		if (ImGui::IsItemActive())
+		{
+			DrawList->AddImage(GetTextureID(ImagePressed), RectMin, RectMax, ImVec2(0, 0), ImVec2(1, 1), TintPressed);
+		}
+		else if (ImGui::IsItemHovered())
+		{
+			DrawList->AddImage(GetTextureID(ImageHovered), RectMin, RectMax, ImVec2(0, 0), ImVec2(1, 1), TintHovered);
+		}
+		else
+		{
+			DrawList->AddImage(GetTextureID(ImageNormal), RectMin, RectMax, ImVec2(0, 0), ImVec2(1, 1), TintNormal);
+		}
+	};
+
+	FORCEINLINE void DrawButtonImage(const TObjectPtr<LTexture2D>& Image, 
+									 const ImU32 TintNormal, 
+									 const ImU32 TintHovered, 
+									 const ImU32 TintPressed, 
+									 const ImRect& Rectangle)
+	{
+		DrawButtonImage(Image, Image, Image, TintNormal, TintHovered, TintPressed, Rectangle.Min, Rectangle.Max);
+	};
 
 }
 
