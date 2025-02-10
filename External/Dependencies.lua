@@ -130,9 +130,3 @@ include "External/Bullet3/Bullet3-premake5.lua"
 include "External/Tracy/Tracy-premake5.lua"
 include "External/NfdExtended/NfdExtended-premake5.lua"
 -- ~Configurations
-
-include "LkRuntime/LkRuntime.lua"
-
--- Test
-include "LkEngine/Test/LkEngineTest.lua"
--- ~Test

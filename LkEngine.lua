@@ -105,6 +105,13 @@ AssetsDirectory = "%{wks.location}/LkRuntime/Assets"
 
 include "External/Dependencies.lua"
 
+include "LkRuntime/LkRuntime.lua"
+--include "LkEditor/LkEditor.lua"
+
+-- Test
+include "LkEngine/Test/LkEngineTest.lua"
+-- ~Test
+
 --|---------------------------------------------
 --| LkEngine
 --|---------------------------------------------
