@@ -8,7 +8,6 @@
 
 #include "LkEngine/Editor/EditorLayer.h"
 
-#define LK_UI_USE_DOCKBUILDER 1
 
 namespace LkEngine::UI {
 

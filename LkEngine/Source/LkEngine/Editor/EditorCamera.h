@@ -32,6 +32,8 @@ namespace LkEngine {
 	public:
 		LEditorCamera(const float DegFov, const float Width, const float Height,
 					  const float NearP, const float FarP); 
+		LEditorCamera() = delete;
+		~LEditorCamera() = default;
 
 		void Initialize();
 

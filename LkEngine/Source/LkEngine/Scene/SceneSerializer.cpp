@@ -53,11 +53,8 @@ namespace LkEngine {
 
 		LEditorLayer& Editor = LEditorLayer::Get();
 
-		/* EditorCamera. */
-		if (Editor.GetEditorCamera())
-		{
-			SerializeEditorCamera(Out, *Editor.GetEditorCamera());
-		}
+		/* Editor camera. */
+		SerializeEditorCamera(Out, Editor.GetEditorCamera());
 
 		/* Entities. */
 		Out << YAML::Key << "Entities";
@@ -168,8 +165,8 @@ namespace LkEngine {
 		const YAML::Node& EditorCameraNode = Data["EditorCamera"];
 		if (EditorCameraNode)
 		{
-			TObjectPtr<LEditorCamera> EditorCamera = LEditorLayer::Get().GetEditorCamera();
-			DeserializeEditorCamera(EditorCameraNode, *EditorCamera);
+			LEditorCamera& EditorCamera = LEditorLayer::Get().GetEditorCamera();
+			DeserializeEditorCamera(EditorCameraNode, EditorCamera);
 		}
 
 		/* Scene entities. */

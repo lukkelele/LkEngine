@@ -87,7 +87,7 @@ namespace LkEngine {
 
 	public:
 		FORCEINLINE TObjectPtr<LScene> GetEditorScene() { return EditorScene; }
-		FORCEINLINE TObjectPtr<LEditorCamera> GetEditorCamera() { return EditorCamera; }
+		FORCEINLINE LEditorCamera& GetEditorCamera() { return EditorCamera; }
 
 		FORCEINLINE static LEditorLayer& Get() { return *Instance; }
 
@@ -177,7 +177,7 @@ namespace LkEngine {
 		TObjectPtr<LViewport> EditorViewport;
 		TObjectPtr<LFramebuffer> ViewportFramebuffer;
 		TObjectPtr<LSceneRenderer> ViewportRenderer{};
-		TObjectPtr<LEditorCamera> EditorCamera; /* TODO: Remove pointer, just make raw member. */
+		LEditorCamera EditorCamera;
 
 		int Gizmo = static_cast<int>(ImGuizmo::OPERATION::TRANSLATE);
 

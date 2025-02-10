@@ -360,7 +360,19 @@ namespace LkEngine::RGBA32
 	static constexpr uint32_t Red            = IM_COL32(255, 0, 0, 255);
 	static constexpr uint32_t Green          = IM_COL32(0, 255, 0, 255);
 	static constexpr uint32_t Blue           = IM_COL32(0, 0, 255, 255);
-
+	static constexpr uint32_t Cyan           = IM_COL32(0, 255, 255, 255);
+	static constexpr uint32_t Magenta        = IM_COL32(255, 0, 255, 255);
+	static constexpr uint32_t Yellow         = IM_COL32(255, 255, 0, 255);
+	static constexpr uint32_t Orange         = IM_COL32(255, 165, 0, 255);
+	static constexpr uint32_t Purple         = IM_COL32(128, 0, 128, 255);
+	static constexpr uint32_t Pink           = IM_COL32(255, 192, 203, 255);
+	static constexpr uint32_t Brown          = IM_COL32(165, 42, 42, 255);
+	static constexpr uint32_t DarkRed        = IM_COL32(139, 0, 0, 255);
+	static constexpr uint32_t DarkGreen      = IM_COL32(0, 100, 0, 255);
+	static constexpr uint32_t DarkBlue       = IM_COL32(0, 0, 139, 255);
+	static constexpr uint32_t DarkCyan       = IM_COL32(0, 139, 139, 255);
+	static constexpr uint32_t DarkMagenta    = IM_COL32(139, 0, 139, 255);
+	static constexpr uint32_t DarkYellow     = IM_COL32(204, 204, 0, 255);
 	static constexpr uint32_t BrightGreen    = IM_COL32(18, 140, 40, 255);
 	static constexpr uint32_t NiceBlue       = IM_COL32(83, 232, 254, 255);
 

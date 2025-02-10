@@ -48,6 +48,13 @@ namespace LkEngine {
 		bool bViewportFocused = false;
 		bool bEditorViewportHovered = false;
 		bool bEditorViewportFocused = false;
+		bool bRenderSkybox = true;
+
+		bool bWindow_MetricTool = false;
+		bool bWindow_IdStackTool = false;
+		bool bWindow_StyleEditor = false;
+		bool bWindow_ImGuiLogWindow = false;
+		bool bWindow_RenderSettingsWindow = false;
 
 		LVector2 MenuBarSize = { 0.0f, 30.0f };
 		LVector2 LeftSidebarSize = { 340.0f, 0.0f };
@@ -59,14 +66,6 @@ namespace LkEngine {
 			ImVec2 FramePadding{};
 			ImVec2 WindowPadding{};
 		} TopBar{};
-
-		/* Windows. */
-		bool bWindow_MetricTool = false;
-		bool bWindow_IdStackTool = false;
-		bool bWindow_StyleEditor = false;
-		bool bWindow_ImGuiLogWindow = false;
-		bool bWindow_RenderSettingsWindow = false; /* TODO: REMOVE */
-		bool bRenderSkybox = true;
 
 		float TimeSinceLastSave = 0.0f;
 
@@ -94,6 +93,7 @@ namespace LkEngine {
 	LEditorLayer::LEditorLayer()
 		: LLayer("EditorLayer")
 		, EditorSettings(FEditorSettings::Get())
+		, EditorCamera(60, 800, 600, 0.10f, 2400.0f)
 	{
 		LOBJECT_REGISTER();
 		Instance = this;
@@ -123,21 +123,22 @@ namespace LkEngine {
 
 		/* Editor Camera. */
 		LK_CORE_DEBUG_TAG("Editor", "Creating editor camera");
-		EditorCamera = TObjectPtr<LEditorCamera>::Create(
+		//EditorCamera = TObjectPtr<LEditorCamera>::Create(
+		EditorCamera = LEditorCamera(
 			60.0f,               /* FOV    */ 
 			Window->GetWidth(),  /* Width  */
 			Window->GetHeight(), /* Height */
 			0.10f,				 /* ZNear  */
 			2400.0f              /* ZFar   */
 		);			  
-		EditorCamera->Initialize();
-		EditorCamera->SetPosition({ -10, 4, -10 });
+		EditorCamera.Initialize();
+		EditorCamera.SetPosition({ -10, 4, -10 });
 
 		/* Attach editor viewport delegates to the editor camera. */
 		LK_CORE_ASSERT(EditorViewport);
 		EditorViewport->OnSizeUpdated.Add([&](const uint16_t NewWidth, const uint16_t NewHeight)
 		{
-			EditorCamera->SetViewportSize(NewWidth, NewHeight);
+			EditorCamera.SetViewportSize(NewWidth, NewHeight);
 
 			/* Set scalers for the editor viewport. */
 			LVector2 EditorWindowScalers;
@@ -314,9 +315,9 @@ namespace LkEngine {
 		{
 			case ESceneState::Edit:
 			{
-				EditorCamera->SetActive(true);
+				EditorCamera.SetActive(true);
 				EditorScene->OnUpdateEditor(DeltaTime);
-				EditorScene->OnRenderEditor(SceneRenderer, *EditorCamera, DeltaTime);
+				EditorScene->OnRenderEditor(SceneRenderer, EditorCamera, DeltaTime);
 
 				if (bRenderSkybox)
 				{
@@ -339,8 +340,8 @@ namespace LkEngine {
 
 			case ESceneState::Pause:
 			{
-				EditorCamera->SetActive(true);
-				EditorCamera->Tick(DeltaTime);
+				EditorCamera.SetActive(true);
+				EditorCamera.Tick(DeltaTime);
 
 				RuntimeScene->OnRenderRuntime(ViewportRenderer, DeltaTime);
 				break;
@@ -737,7 +738,7 @@ namespace LkEngine {
 		LRenderer::Submit([&]()
 		{
 			LRenderer::GetViewportFramebuffer()->Bind();
-			LOpenGL_Debug::RenderFloor(EditorCamera->GetViewMatrix(), EditorCamera->GetProjectionMatrix());
+			LOpenGL_Debug::RenderFloor(EditorCamera.GetViewMatrix(), EditorCamera.GetProjectionMatrix());
 			LFramebuffer::TargetSwapChain();
 		});
 
@@ -756,7 +757,7 @@ namespace LkEngine {
 
 	void LEditorLayer::Render2D()
 	{
-		Renderer2D->BeginScene(*EditorCamera);
+		Renderer2D->BeginScene(EditorCamera);
 		{
 			/**
 			 * TODO:
@@ -771,9 +772,9 @@ namespace LkEngine {
 	{
 		LTransformComponent& TransformComponent = Entity.Transform();
 		glm::mat4 TransformMatrix = TransformComponent.GetTransform();
-		const glm::vec3& CameraPos = EditorCamera->GetPosition();
-		const glm::mat4& ViewMatrix = EditorCamera->GetViewMatrix();
-		const glm::mat4& ProjectionMatrix = EditorCamera->GetProjectionMatrix();
+		const glm::vec3& CameraPos = EditorCamera.GetPosition();
+		const glm::mat4& ViewMatrix = EditorCamera.GetViewMatrix();
+		const glm::mat4& ProjectionMatrix = EditorCamera.GetProjectionMatrix();
 
 		/* Viewport bounds can be indexed from 0 to 1. */
 		const LVector2* EditorViewportBounds = EditorViewport->GetViewportBounds();
@@ -785,7 +786,7 @@ namespace LkEngine {
 			const LVector2 EditorWindowSize = EditorViewport->GetSize();
 			ImGui::Begin(Window->Name, nullptr, UI::CoreViewportFlags | ImGuiWindowFlags_NoScrollbar);
 
-			ImGuizmo::SetOrthographic(static_cast<int>(EditorCamera->GetProjectionType()));
+			ImGuizmo::SetOrthographic(static_cast<int>(EditorCamera.GetProjectionType()));
 			ImGuizmo::SetDrawlist();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
@@ -937,7 +938,7 @@ namespace LkEngine {
 
 		/* Recreate the camera for the new scene. */
 		LK_CORE_DEBUG_TAG("Editor", "Recreating the editor camera");
-		EditorCamera = TObjectPtr<LEditorCamera>::Create(
+		EditorCamera = LEditorCamera(
 			60.0f,               /* FOV    */ 
 			Window->GetWidth(),  /* Width  */
 			Window->GetHeight(), /* Height */
@@ -1354,18 +1355,15 @@ namespace LkEngine {
 	{
 		LK_CORE_TRACE_TAG("Editor", "MouseScrolled: {}", Enum::ToString(ScrollDir));
 
-		if (EditorCamera)
+		if (UI::IsWindowHovered(PanelID::EditorViewport))
 		{
-			if (UI::IsWindowHovered(PanelID::EditorViewport))
+			if (ScrollDir == EMouseScrollDirection::Up)
 			{
-				if (ScrollDir == EMouseScrollDirection::Up)
-				{
-					EditorCamera->MouseZoom(-0.010f);
-				}
-				else if (ScrollDir == EMouseScrollDirection::Down)
-				{
-					EditorCamera->MouseZoom(0.010f);
-				}
+				EditorCamera.MouseZoom(-0.010f);
+			}
+			else if (ScrollDir == EMouseScrollDirection::Down)
+			{
+				EditorCamera.MouseZoom(0.010f);
 			}
 		}
 	}
@@ -1604,9 +1602,9 @@ namespace LkEngine {
 			ImGui::SameLine(0, 20);
 			ImGui::Text("Scaled Res (%.1f, %.1f)", (WindowSize.X / WindowScalers.X), (WindowSize.Y / WindowScalers.X));
 
-			if (EditorCamera->bIsActive)
+			if (EditorCamera.bIsActive)
 			{
-				const glm::vec2 CameraPos = EditorCamera->GetPosition();
+				const glm::vec2 CameraPos = EditorCamera.GetPosition();
 				ImGui::Text("EditorCamera Position: (%.1f, %.1f)", CameraPos.x, CameraPos.y);
 			}
 		}
@@ -1992,7 +1990,7 @@ namespace LkEngine {
 					ImGui::EndMenu();
 				}
 
-				if (ImGui::MenuItem("Renderer Settings"))
+				if (ImGui::MenuItem("Render Settings"))
 				{
 					bWindow_RenderSettingsWindow = !bWindow_RenderSettingsWindow;
 				}
@@ -2045,7 +2043,6 @@ namespace LkEngine {
 					LK_CORE_DEBUG_TAG("Editor", "Clicked -> Tools/Live Objects");
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
 					{
-						/* TODO: Assert the panel class type before invoking TObjectPtr::As */
 						PanelData->bIsOpen = true;
 						PanelData->Panel.As<LToolsPanel>()->Window_ObjectReferences.bOpen = true;
 					}
@@ -2056,7 +2053,6 @@ namespace LkEngine {
 					LK_CORE_DEBUG_TAG("Editor", "Open -> Asset Registry");
 					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools))
 					{
-						/* TODO: Assert the panel class type before invoking TObjectPtr::As */
 						PanelData->bIsOpen = true;
 						PanelData->Panel.As<LToolsPanel>()->Window_AssetRegistry.bOpen = true;
 					}
@@ -2115,14 +2111,30 @@ namespace LkEngine {
 					if (ImGui::BeginMenu("Content Browser"))
 					{
 						ImGui::Checkbox("Outliner Borders", &Debug::UI::ContentBrowser::bDrawOutlinerBorders);
-						/* TODO: Dropdown menu for the color of the outliner border color. */
-						ImGui::EndMenu(); // Content Browser.
+
+						static constexpr std::array<UI::TPropertyMapping<uint32_t>, 6> Colors = {
+							std::pair("Green",   RGBA32::BrightGreen),
+							std::pair("Cyan",    RGBA32::Cyan),
+							std::pair("Yellow",  RGBA32::Yellow),
+							std::pair("White",   RGBA32::White),
+							std::pair("Black",   RGBA32::Black),
+							std::pair("Magenta", RGBA32::Magenta),
+						};
+
+						static int32_t SelectedOutlinerColor = 0;
+						if (UI::PropertyDropdown("Outliner Color", Colors, &SelectedOutlinerColor, "Color of the debug outliner"))
+						{
+							LK_CONSOLE_INFO("Selected outliner color: {}", Colors.at(SelectedOutlinerColor).first);
+							Debug::UI::ContentBrowser::OutlinerBorderColor = ImGui::ColorConvertU32ToFloat4(Colors.at(SelectedOutlinerColor).second);
+						}
+
+						ImGui::EndMenu();
 					}
 
 					ImGui::EndMenu();
 				}
 
-				ImGui::EndMenu(); // Engine Debug.
+				ImGui::EndMenu(); /* Engine Debug. */
 			}
 
 			if (ImGui::MenuItem("About"))
@@ -2395,7 +2407,7 @@ namespace LkEngine {
 		auto [MouseX, MouseY] = GetMouseViewportSpace(bEditorViewportHovered);
 		if ((MouseX > -1.0f) && (MouseX < 1.0f) && (MouseY > -1.0f) && (MouseY < 1.0f))
 		{
-			const LEditorCamera& Camera = *EditorCamera;
+			const LEditorCamera& Camera = EditorCamera;
 			CastRay(RayData, Camera, MouseX, MouseY);
 
 			/* Meshes. */
@@ -2493,21 +2505,21 @@ namespace LkEngine {
 			const float FPS = 1000.0f / LApplication::Get().GetDeltaTime();
 			ImGui::Text("FPS: %1.f", FPS);
 
-			if (EditorCamera->bIsActive)
+			if (EditorCamera.bIsActive)
 			{
-				ImGui::Text("FOV: %1.f", EditorCamera->DegPerspectiveFOV);
-				const glm::vec3& CamPos = EditorCamera->GetPosition();
+				ImGui::Text("FOV: %1.f", EditorCamera.DegPerspectiveFOV);
+				const glm::vec3& CamPos = EditorCamera.GetPosition();
 
 				ImGui::Text("Camera");
 				ImGui::Indent();
 				ImGui::Text("Pos (%.2f, %.2f, %.2f)", CamPos.x, CamPos.y, CamPos.z);
-				ImGui::Text("Zoom: %.3f", EditorCamera->GetZoomSpeed());
-				ImGui::Text("Speed: %.3f", EditorCamera->GetCameraSpeed());
+				ImGui::Text("Zoom: %.3f", EditorCamera.GetZoomSpeed());
+				ImGui::Text("Speed: %.3f", EditorCamera.GetCameraSpeed());
 				ImGui::Unindent();
 
-				ImGui::Text("Distance: %.2f", EditorCamera->GetDistance());
-				ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", EditorCamera->GetFocalPoint().x,
-							EditorCamera->GetFocalPoint().y, EditorCamera->GetFocalPoint().z);
+				ImGui::Text("Distance: %.2f", EditorCamera.GetDistance());
+				ImGui::Text("Focalpoint: (%.2f, %.2f, %.2f)", EditorCamera.GetFocalPoint().x,
+							EditorCamera.GetFocalPoint().y, EditorCamera.GetFocalPoint().z);
 
 				ImGui::Text("Mouse Button: %s", Enum::ToString(LInput::GetLastMouseButton()));
 
