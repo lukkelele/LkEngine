@@ -56,6 +56,7 @@ workspace "LkEngine"
             "4267",  -- 'Size conversion, possible loss of data'
             "4244",  -- 'Size conversion, possible loss of data'
             "28020", -- Warning for infinite loops: 'The expression is not true at this call'
+            "33011", -- 'Unchecked upper bound'
         } 
 
     filter "system:windows"
