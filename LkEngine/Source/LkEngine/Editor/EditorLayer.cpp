@@ -1,7 +1,6 @@
 #include "LKpch.h"
 #include "EditorLayer.h"
 
-#include "EditorTabManager.h"
 #include "ComponentEditor.h"
 #include "NodeEditor/NodeEditor.h"
 

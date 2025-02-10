@@ -2,8 +2,6 @@
 #include "ComponentEditor.h"
 
 #include "EditorLayer.h"
-#include "LkEngine/Editor/EditorTab.h"
-#include "LkEngine/Editor/EditorTabManager.h"
 #include "LkEngine/Editor/NodeEditor/NodeEditor.h"
 
 #include "LkEngine/Renderer/Renderer.h"
