@@ -3,6 +3,7 @@
 #include "LkEngine/Core/CoreMacros.h"
 
 #include <algorithm>
+#include <bitset>
 #include <cctype>
 #include <codecvt>
 #include <locale>
@@ -169,6 +170,16 @@ namespace LkEngine::StringUtils {
 			String.replace(Pos, strlen(Token), Value);
 			Pos += strlen(Token);
 		}
+	}
+
+	template<typename T>
+	static std::string ConvertFlags(const T Flags)
+	{
+		//static_assert(std::is_integral_v<T>, "Cannot convert non-integral types, only flags are allowed");
+		static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot convert non-integral types, only flags are allowed");
+		constexpr uint32_t Bits = static_cast<uint32_t>(sizeof(decltype(Flags)) * 8);
+		std::bitset<Bits> FlagBitset(Flags);
+		return FlagBitset.to_string();
 	}
 
 }

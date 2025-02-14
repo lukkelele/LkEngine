@@ -43,8 +43,7 @@ namespace LkEngine::UI {
     bool IsInputEnabled()
     {
         const ImGuiIO& IO = ImGui::GetIO();
-        return (((IO.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0) 
-				&& (IO.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0);
+        return (((IO.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0) && IO.ConfigNavCaptureKeyboard);
     }
 
     bool IsMouseEnabled()
@@ -56,39 +55,61 @@ namespace LkEngine::UI {
     bool IsKeyboardEnabled()
     {
         const ImGuiIO& IO = ImGui::GetIO();
-        return (IO.ConfigFlags & ImGuiConfigFlags_NavNoCaptureKeyboard) == 0;
+		return (IO.ConfigNavCaptureKeyboard);
     }
 
     void SetInputEnabled(const bool Enabled)
     {
         ImGuiIO& IO = ImGui::GetIO();
 
+		const bool PrevNoMouseFlag = (IO.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0;
+		//const bool PrevNavCaptureKeyboard = IO.ConfigNavCaptureKeyboard;
+
+		IO.ConfigNavCaptureKeyboard = Enabled;
         if (Enabled)
         {
             IO.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-            IO.ConfigFlags &= ~ImGuiConfigFlags_NavNoCaptureKeyboard;
         }
         else
         {
             IO.ConfigFlags |= ImGuiConfigFlags_NoMouse;
-            IO.ConfigFlags |= ImGuiConfigFlags_NavNoCaptureKeyboard;
+        }
+
+		if (Enabled != PrevNoMouseFlag)
+		{
+			LMouse::OnMouseEnabled.Broadcast(Enabled);
+		}
+	}
+
+	void SetMouseEnabled(const bool Enabled)
+	{
+		LK_CORE_DEBUG_TAG("UI", "SetMouseEnabled: {}", Enabled ? "Enabled" : "Disabled");
+        ImGuiIO& IO = ImGui::GetIO();
+        if (Enabled)
+        {
+            IO.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+        }
+        else
+        {
+            IO.ConfigFlags |= ImGuiConfigFlags_NoMouse;
         }
 	}
 
-    void Begin(const char* WindowTitle, bool* Open, ImGuiWindowFlags WindowFlags)
+    bool Begin(const char* WindowTitle, bool* Open, ImGuiWindowFlags WindowFlags)
     {
         UI::PushID();
         ImGui::Begin(WindowTitle, Open, WindowFlags);
 
 		if (ImGuiWindow* ThisWindow = ImGui::GetCurrentWindow(); ThisWindow != nullptr)
 		{
-			//if ((ThisWindow->Flags & ImGuiWindowFlags_NoCollapse) && ThisWindow->SkipItems)
 			if (ThisWindow->SkipItems)
 			{
 				UI::End();
-				return;
+				return false;
 			}
 		}
+
+		return true;
     }
 
     void End()

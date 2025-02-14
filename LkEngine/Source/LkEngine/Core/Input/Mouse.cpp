@@ -67,31 +67,34 @@ namespace LkEngine {
 
 	void LMouse::Enable()
 	{
+		//if (!UI::IsMouseEnabled())
 		if (!UI::IsInputEnabled())
 		{
+			//LK_CORE_DEBUG_TAG("Mouse", "Enabling");
 			LInput::SetCursorMode(ECursorMode::Normal);
 			OnCursorModeChanged.Broadcast(ECursorMode::Normal);
 
-			UI::SetInputEnabled(true);
-			OnMouseEnabled.Broadcast(true);
+			/* The cursor mode call will enable the input. */
+			//UI::SetInputEnabled(true);
+			//UI::SetMouseEnabled(true);
+			//OnMouseEnabled.Broadcast(true);
 		}
 	}
 
 	void LMouse::Disable()
 	{
+		//if (UI::IsMouseEnabled())
 		if (UI::IsInputEnabled())
 		{
+			//LK_CORE_DEBUG_TAG("Mouse", "Disabling");
 			LInput::SetCursorMode(ECursorMode::Locked);
 			OnCursorModeChanged.Broadcast(ECursorMode::Locked);
 
-			UI::SetInputEnabled(false);
-			OnMouseEnabled.Broadcast(false);
+			/* The cursor mode call will disable the input. */
+			//UI::SetInputEnabled(false);
+			//UI::SetMouseEnabled(false);
+			//OnMouseEnabled.Broadcast(false);
 		}
-	}
-
-	bool LMouse::IsEnabled()
-	{
-		return UI::IsMouseEnabled();
 	}
 
 }

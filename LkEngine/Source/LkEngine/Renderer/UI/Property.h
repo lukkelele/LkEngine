@@ -29,6 +29,10 @@ namespace LkEngine::UI {
 		{
 			ImGui::TableSetColumnIndex(1);
 		}
+		else
+		{
+			ImGui::SameLine();
+		}
 
 		ShiftCursorY(4.0f);
 

@@ -1,9 +1,8 @@
 #include "LKpch.h"
-#include "NodeEditor.h"
+#include "NodeEditorPanel.h"
 #include "NodeEditorUtils.h"
 
 #include <imgui/imgui_internal.h>
-
 #include <imgui-node-editor/imgui_node_editor_internal.h>
 
 
@@ -15,108 +14,135 @@ namespace LkEngine {
 
     namespace NodeEd = ed;
 
-    LNodeEditor::LNodeEditor(std::string_view InName)
+    LNodeEditorPanel::LNodeEditorPanel(std::string_view InName)
         : Name(InName)
     {
-        /// FIXME
-        EditorContext = new LNodeEditorContext();
-        EditorContext->Initialize();
+		LPANEL_REGISTER();
+
+        EditorContext = TObjectPtr<LNodeEditorContext>::Create();
     }
 
-    void LNodeEditor::Render()
+	void LNodeEditorPanel::Initialize()
+	{
+		LK_CORE_ERROR_TAG("LNodeEditorPanel", "Initialize");
+
+		LNode* Node = nullptr;
+		if (Node = SpawnInputActionNode(); Node != nullptr)
+		{
+			NodeEd::SetNodePosition(Node->ID, ImVec2(4, 4));
+		}
+		if (Node = SpawnBranchNode(); Node != nullptr)
+		{
+			NodeEd::SetNodePosition(Node->ID, ImVec2(10, 25));
+		}
+	}
+
+	void LNodeEditorPanel::RenderUI(bool& IsOpen)
+    {
+        static constexpr int NodePin = 0;
+        static constexpr int InputPin = 1;
+        static constexpr int OutputPin = 2;
+
+		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
+		if (!UI::Begin("Node Editor", &IsOpen, WindowFlags))
+		{
+			return;
+		}
+
+		if (ImGui::Button("Spawn Branch Node"))
+		{
+			SpawnBranchNode();
+		}
+
+		NE::Begin(Name.c_str());
+		NE::BeginNode(NodePin);
+
+		NE::BeginPin(InputPin, NE::PinKind::Input);
+		ImGui::Text("In -->");
+		NE::EndPin();
+
+		NE::BeginPin(OutputPin, NE::PinKind::Output);
+		ImGui::Text("Out -->");
+		NE::EndPin();
+
+		NE::EndNode();
+		NE::End();
+
+		//ImGui::End();
+		UI::End();
+    }
+
+	void LNodeEditorPanel::SerializeToYaml(YAML::Emitter& Out) const
+	{
+		/* TODO */
+		LK_UNUSED(Out);
+	}
+
+	void LNodeEditorPanel::DeserializeFromYaml(const YAML::Node& Data)
+	{
+		/* TODO */
+		LK_UNUSED(Data);
+	}
+
+    void LNodeEditorPanel::Save()
     {
     }
 
-    void LNodeEditor::OnImGuiRender(const ImVec2& InWindowSize)
+    ImColor LNodeEditorPanel::GetIconColor(const EPinType InPinType)
     {
-        static const int NodePin = 1;
-        static const int InputPin = 1;
-        static const int OutputPin = 2;
-
-        NE::Begin(Name.c_str(), InWindowSize);
+        switch (InPinType)
         {
-            NE::BeginNode(NodePin);
-
-            ImGui::Text("Node Editor content");
-
-            NE::BeginPin(InputPin, NE::PinKind::Input);
-            ImGui::Text("In -->");
-            NE::EndPin();
-
-            NE::BeginPin(OutputPin, NE::PinKind::Output);
-            ImGui::Text("Out -->");
-            NE::EndPin();
-
-            NE::EndNode();
-        }
-        NE::End();
-    }
-
-    void LNodeEditor::Destroy()
-    {
-        Save(); // Save before deletion begins
-    }
-
-    // Serialize
-    void LNodeEditor::Save()
-    {
-    }
-
-    ImColor LNodeEditor::GetIconColor(const PinType type)
-    {
-        switch (type)
-        {
-			case PinType::Flow:       return ImColor(255, 255, 255);
-			case PinType::Bool:       return ImColor(220, 48, 48);
-			case PinType::Int:        return ImColor(68, 201, 156);
-			case PinType::Float:      return ImColor(147, 226, 74);
-			case PinType::String:     return ImColor(124, 21, 153);
-			case PinType::Object:     return ImColor(51, 150, 215);
-			case PinType::Function:   return ImColor(218, 0, 183);
-			case PinType::Delegate:   return ImColor(255, 48, 48);
+			case EPinType::Flow:       return ImColor(255, 255, 255);
+			case EPinType::Bool:       return ImColor(220, 48, 48);
+			case EPinType::Int:        return ImColor(68, 201, 156);
+			case EPinType::Float:      return ImColor(147, 226, 74);
+			case EPinType::String:     return ImColor(124, 21, 153);
+			case EPinType::Object:     return ImColor(51, 150, 215);
+			case EPinType::Function:   return ImColor(218, 0, 183);
+			case EPinType::Delegate:   return ImColor(255, 48, 48);
 			default:
 				break;
         }
 
-        return {};
+        return ImColor();
     };
 
-    void LNodeEditor::DrawPinIcon(const Pin& pin, bool connected, int alpha)
+    void LNodeEditorPanel::DrawPinIcon(const LPin& pin, bool connected, int alpha)
     {
         IconType iconType;
         ImColor  color = GetIconColor(pin.Type);
         color.Value.w = alpha / 255.0f;
         switch (pin.Type)
         {
-			case PinType::Flow:        
+			case EPinType::Flow:        
                 iconType = IconType::Flow;
                 break;
 
-			case PinType::Bool:        
+			case EPinType::Bool:        
                 iconType = IconType::Circle; 
                 break;
 
-			case PinType::Int:         
+			case EPinType::Int:         
                 iconType = IconType::Circle; 
                 break;
 
-			case PinType::Float:       
+			case EPinType::Float:       
                 iconType = IconType::Circle; 
                 break;
 
-			case PinType::String:      
+			case EPinType::String:      
                 iconType = IconType::Circle; 
                 break;
 
-			case PinType::Object:      
+			case EPinType::Object:      
                 iconType = IconType::Circle; 
                 break;
 
-			case PinType::Function:    
+			case EPinType::Function:    
                 iconType = IconType::Circle; 
                 break;
 
-			case PinType::Delegate:    
+			case EPinType::Delegate:    
                 iconType = IconType::Square; 
                 break;
 
@@ -125,7 +151,7 @@ namespace LkEngine {
         }
 
         // FIXME: 
-        Icon(ImVec2(static_cast<float>(m_PinIconSize), static_cast<float>(m_PinIconSize)), 
+        Icon(ImVec2(static_cast<float>(PinIconSize), static_cast<float>(PinIconSize)), 
              iconType, 
              connected, 
              color, 
@@ -134,109 +160,118 @@ namespace LkEngine {
     };
 
 
-    void LNodeEditor::BuildNode(Node* node)
+    void LNodeEditorPanel::BuildNode(LNode* node)
     {
-        for (auto& input : node->Inputs)
+        for (LPin& InputPin : node->Inputs)
         {
-            input.Node = node;
-            input.Kind = PinKind::Input;
+            InputPin.Node = node;
+            InputPin.Kind = EPinKind::Input;
         }
 
-        for (auto& output : node->Outputs)
+        for (LPin& OutputPin : node->Outputs)
         {
-            output.Node = node;
-            output.Kind = PinKind::Output;
+            OutputPin.Node = node;
+            OutputPin.Kind = EPinKind::Output;
         }
     }
 
-    Node* LNodeEditor::SpawnInputActionNode()
+    LNode* LNodeEditorPanel::SpawnInputActionNode()
     {
-        m_Nodes.emplace_back(GetNextID(), "InputAction Fire", ImColor(255, 128, 128));
-        m_Nodes.back().Outputs.emplace_back(GetNextID(), "", PinType::Delegate);
-        m_Nodes.back().Outputs.emplace_back(GetNextID(), "Pressed", PinType::Flow);
-        m_Nodes.back().Outputs.emplace_back(GetNextID(), "Released", PinType::Flow);
+        Nodes.emplace_back(GetNextID(), "InputAction Fire", ImColor(255, 128, 128));
+        Nodes.back().Outputs.emplace_back(GetNextID(), "", EPinType::Delegate);
+        Nodes.back().Outputs.emplace_back(GetNextID(), "Pressed", EPinType::Flow);
+        Nodes.back().Outputs.emplace_back(GetNextID(), "Released", EPinType::Flow);
 
-        BuildNode(&m_Nodes.back());
+        BuildNode(&Nodes.back());
 
-        return &m_Nodes.back();
+        return &Nodes.back();
     }
 
-    Node* LNodeEditor::SpawnBranchNode()
+    LNode* LNodeEditorPanel::SpawnBranchNode()
     {
-        m_Nodes.emplace_back(GetNextID(), "Branch");
-        m_Nodes.back().Inputs.emplace_back(GetNextID(), "", PinType::Flow);
-        m_Nodes.back().Inputs.emplace_back(GetNextID(), "Condition", PinType::Bool);
-        m_Nodes.back().Outputs.emplace_back(GetNextID(), "True", PinType::Flow);
-        m_Nodes.back().Outputs.emplace_back(GetNextID(), "False", PinType::Flow);
+        Nodes.emplace_back(GetNextID(), "Branch");
+        Nodes.back().Inputs.emplace_back(GetNextID(), "", EPinType::Flow);
+        Nodes.back().Inputs.emplace_back(GetNextID(), "Condition", EPinType::Bool);
+        Nodes.back().Outputs.emplace_back(GetNextID(), "True", EPinType::Flow);
+        Nodes.back().Outputs.emplace_back(GetNextID(), "False", EPinType::Flow);
 
-        BuildNode(&m_Nodes.back());
+        BuildNode(&Nodes.back());
 
-        return &m_Nodes.back();
+        return &Nodes.back();
     }
 
-    int LNodeEditor::GetNextID()
+    int LNodeEditorPanel::GetNextID()
     {
-        return m_NextID++;
+        return NextID++;
     }
 
-    //NE::NodeId GetNextNodeId()
-    //{
-    //    return NE::NodeId(GetNextID());
-    //}
-
-    NE::LinkId LNodeEditor::GetNextLinkID()
+    NE::LinkId LNodeEditorPanel::GetNextLinkID()
     {
         return NE::LinkId(GetNextID());
     }
 
-    void LNodeEditor::TouchNode(NE::NodeId id)
+    void LNodeEditorPanel::TouchNode(NE::NodeId id)
     {
-        m_NodeTouchTime[id] = m_TouchTime;
+        NodeTouchTime[id] = TouchTime;
     }
 
-    float LNodeEditor::GetTouchProgress(NE::NodeId id)
+    float LNodeEditorPanel::GetTouchProgress(NE::NodeId id)
     {
-        auto it = m_NodeTouchTime.find(id);
-        if (it != m_NodeTouchTime.end() && it->second > 0.0f)
-            return (m_TouchTime - it->second) / m_TouchTime;
+        auto it = NodeTouchTime.find(id);
+        if (it != NodeTouchTime.end() && it->second > 0.0f)
+            return (TouchTime - it->second) / TouchTime;
         else
             return 0.0f;
     }
 
-    void LNodeEditor::UpdateTouch()
+    void LNodeEditorPanel::UpdateTouch()
     {
         const auto deltaTime = ImGui::GetIO().DeltaTime;
-        for (auto& entry : m_NodeTouchTime)
+        for (auto& entry : NodeTouchTime)
         {
             if (entry.second > 0.0f)
                 entry.second -= deltaTime;
         }
     }
 
-    Node* LNodeEditor::FindNode(NE::NodeId id)
+    LNode* LNodeEditorPanel::FindNode(NE::NodeId InNodeID)
     {
-        for (auto& node : m_Nodes)
-            if (node.ID == id)
-                return &node;
+		auto FindNode = [InNodeID](const LNode& Node) -> bool
+		{
+			return (InNodeID == Node.ID);
+		};
+		if (auto Iter = std::find_if(Nodes.begin(), Nodes.end(), FindNode); Iter != Nodes.end())
+		{
+			return &(*Iter);
+		}
+	#if 0
+		for (LNode& Node : Nodes)
+		{
+			if (Node.ID == InNodeID)
+			{
+                return &Node;
+			}
+		}
+	#endif
 
         return nullptr;
     }
 
-    Link* LNodeEditor::FindLink(NE::LinkId id)
+    LPinLink* LNodeEditorPanel::FindLink(NE::LinkId id)
     {
-        for (auto& link : m_Links)
+        for (auto& link : Links)
             if (link.ID == id)
                 return &link;
 
         return nullptr;
     }
 
-    Pin* LNodeEditor::FindPin(NE::PinId id)
+    LPin* LNodeEditorPanel::FindPin(NE::PinId id)
     {
         if (!id)
             return nullptr;
 
-        for (auto& node : m_Nodes)
+        for (auto& node : Nodes)
         {
             for (auto& pin : node.Inputs)
                 if (pin.ID == id)
@@ -250,19 +285,19 @@ namespace LkEngine {
         return nullptr;
     }
 
-    bool LNodeEditor::IsPinLinked(NE::PinId id)
+    bool LNodeEditorPanel::IsPinLinked(NE::PinId id)
     {
         if (!id)
             return false;
 
-        for (auto& link : m_Links)
+        for (auto& link : Links)
             if (link.StartPinID == id || link.EndPinID == id)
                 return true;
 
         return false;
     }
 
-    bool LNodeEditor::CanCreateLink(Pin* a, Pin* b)
+    bool LNodeEditorPanel::CanCreateLink(LPin* a, LPin* b)
     {
         if (!a || !b || a == b || a->Kind == b->Kind || a->Type != b->Type || a->Node == b->Node)
             return false;
@@ -270,11 +305,11 @@ namespace LkEngine {
         return true;
     }
 
-    void LNodeEditor::IterateNodes()
+    void LNodeEditorPanel::IterateNodes()
     {
-        for (Node& node : m_Nodes)
+        for (LNode& node : Nodes)
         {
-            if (node.Type != NodeType::Comment)
+            if (node.Type != ENodeType::Comment)
             {
                 continue;
             }
@@ -335,10 +370,12 @@ namespace LkEngine {
             ed::EndGroupHint();
         }
 
-        for (auto& link : m_Links)
-            ed::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0f);
+		for (LPinLink& Link : Links)
+		{
+            ed::Link(Link.ID, Link.StartPinID, Link.EndPinID, Link.Color, 2.0f);
+		}
 
-        if (CreateNewNode == false)
+        if (bCreateNewNode == false)
         {
             if (ed::BeginCreate(ImColor(255, 255, 255), 2.0f))
             {
@@ -368,7 +405,7 @@ namespace LkEngine {
 
                     NewLinkPin = startPin ? startPin : endPin;
 
-                    if (startPin->Kind == PinKind::Input)
+                    if (startPin->Kind == EPinKind::Input)
                     {
                         std::swap(startPin, endPin);
                         std::swap(startPinId, endPinId);
@@ -400,8 +437,8 @@ namespace LkEngine {
                             showLabel("+ Create Link", ImColor(32, 45, 32, 180));
                             if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
                             {
-                                m_Links.emplace_back(Link(GetNextID(), startPinId, endPinId));
-                                m_Links.back().Color = GetIconColor(startPin->Type);
+                                Links.emplace_back(LPinLink(GetNextID(), startPinId, endPinId));
+                                Links.back().Color = GetIconColor(startPin->Type);
                             }
                         }
                     }
@@ -418,7 +455,7 @@ namespace LkEngine {
 
                     if (ed::AcceptNewItem())
                     {
-                        CreateNewNode = true;
+                        bCreateNewNode = true;
                         NewNodeLinkPin = FindPin(pinId);
                         NewLinkPin = nullptr;
 
@@ -440,13 +477,13 @@ namespace LkEngine {
                 {
                     if (ed::AcceptDeletedItem())
                     {
-                        auto id = std::find_if(m_Nodes.begin(), m_Nodes.end(), [nodeId](auto& node) 
+                        auto id = std::find_if(Nodes.begin(), Nodes.end(), [nodeId](auto& node) 
                         { 
                             return node.ID == nodeId; 
                         });
-                        if (id != m_Nodes.end())
+                        if (id != Nodes.end())
                         {
-                            m_Nodes.erase(id);
+                            Nodes.erase(id);
                         }
                     }
                 }
@@ -456,13 +493,13 @@ namespace LkEngine {
                 {
                     if (ed::AcceptDeletedItem())
                     {
-                        auto id = std::find_if(m_Links.begin(), m_Links.end(), [linkId](auto& link) 
+                        auto id = std::find_if(Links.begin(), Links.end(), [linkId](auto& link) 
                         { 
                             return link.ID == linkId; 
                         });
-                        if (id != m_Links.end())
+                        if (id != Links.end())
                         {
-                            m_Links.erase(id);
+                            Links.erase(id);
                         }
                     }
                 }
@@ -474,7 +511,7 @@ namespace LkEngine {
         //ImGui::SetCursorScreenPos(cursorTopLeft);
     }
 
-    void LNodeEditor::ActivateContext()
+    void LNodeEditorPanel::ActivateContext()
     {
         EditorContext->SetAsCurrentEditorContext();
     }

@@ -6,20 +6,14 @@ namespace LkEngine {
 
     LNodeEditorContext::LNodeEditorContext()
     {
-    }
+		LOBJECT_REGISTER();
 
-    LNodeEditorContext::~LNodeEditorContext()
-    {
-    }
-
-    void LNodeEditorContext::Initialize()
-    {
-        // FIXME:
+		LK_CORE_INFO_TAG("NodeEditorContext", "Creating new context");
         EditorContext = NE::CreateEditor();
         NE::SetCurrentEditor(EditorContext);
     }
 
-    void LNodeEditorContext::Destroy()
+    LNodeEditorContext::~LNodeEditorContext()
     {
     }
 

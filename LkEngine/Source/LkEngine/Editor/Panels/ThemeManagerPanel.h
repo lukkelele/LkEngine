@@ -1,9 +1,6 @@
 #pragma once
 
 #include "LkEngine/Renderer/UI/Panel.h"
-//#include "LkEngine/Core/LObject/Object.h"
-//#include "LkEngine/Core/LObject/ObjectPtr.h"
-//#include <imgui/imgui.h> /* REMOVE (?) */
 
 
 namespace LkEngine {
@@ -30,10 +27,12 @@ namespace LkEngine {
 
 		virtual void RenderUI(bool& IsOpen) override;
 		virtual void Render() override {}
-		
-		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
-		virtual void DeserializeFromYaml(const YAML::Node& Data) override;
 
+		static void SetSelectorEnabled(const bool InEnabled);
+		FORCEINLINE static bool IsSelectorEnabled() { return bSelectorEnabled; }
+
+		static void OnMouseButtonPressed(const FMouseButtonData& ButtonData);
+			
 		static ETheme GetTheme() { return CurrentTheme; }
 
 		template<ETheme Theme>
@@ -147,8 +146,12 @@ namespace LkEngine {
 		#endif
 		}
 
+		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
+		virtual void DeserializeFromYaml(const YAML::Node& Data) override;
+
 	private:
 		inline static ETheme CurrentTheme = ETheme::Dark;
+		inline static bool bSelectorEnabled = false;
 
 		LPANEL(LThemeManagerPanel);
 	};

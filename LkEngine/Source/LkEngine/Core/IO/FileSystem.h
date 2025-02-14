@@ -4,6 +4,7 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/Log/Log.h"
 
+#include <bitset>
 #include <filesystem>
 
 /* Remove microsoft's filesystem macros. */

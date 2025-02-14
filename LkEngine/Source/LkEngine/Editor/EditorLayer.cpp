@@ -2,7 +2,6 @@
 #include "EditorLayer.h"
 
 #include "ComponentEditor.h"
-#include "NodeEditor/NodeEditor.h"
 
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Components.h"
@@ -28,6 +27,7 @@
 #include "LkEngine/Editor/Panels/SceneManagerPanel.h"
 #include "LkEngine/Editor/Panels/ToolsPanel.h"
 #include "LkEngine/Editor/Panels/ThemeManagerPanel.h"
+#include "LkEngine/Editor/NodeEditor/NodeEditorPanel.h"
 
 #if defined(LK_ENGINE_OPENGL)
 #	include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
@@ -82,11 +82,27 @@ namespace LkEngine {
 			char* OpenProjectFilePath = new char[PROJECT_FILEPATH_LENGTH_MAX];
 			char* NewProjectFilePath  = new char[PROJECT_FILEPATH_LENGTH_MAX];
 		}
-	}
 
-	namespace Cache 
-	{
 		ImGuiID FocusedWindowID = 0;
+		const char* FocusedWindowName = "";
+
+		struct DebugFunc
+		{
+			static const char* GetInputSourceName(const ImGuiInputSource Source)
+			{
+				static const char* InputSourceNames[] = { "None", "Mouse", "Keyboard", "Gamepad" };
+				LK_CORE_ASSERT((LK_ARRAYSIZE(InputSourceNames) == ImGuiInputSource_COUNT) && (Source >= 0) && (Source < ImGuiInputSource_COUNT));
+				return InputSourceNames[Source];
+			}
+
+			static const char* GetMouseSourceName(ImGuiMouseSource Source)
+			{
+				static const char* MouseSourceNames[] = { "Mouse", "TouchScreen", "Pen" };
+				LK_CORE_ASSERT((LK_ARRAYSIZE(MouseSourceNames) == ImGuiMouseSource_COUNT) && (Source >= 0) && (Source < ImGuiMouseSource_COUNT));
+				return MouseSourceNames[Source];
+			}
+		};
+
 	}
 
 	LEditorLayer::LEditorLayer()
@@ -122,7 +138,6 @@ namespace LkEngine {
 
 		/* Editor Camera. */
 		LK_CORE_DEBUG_TAG("Editor", "Creating editor camera");
-		//EditorCamera = TObjectPtr<LEditorCamera>::Create(
 		EditorCamera = LEditorCamera(
 			60.0f,               /* FOV    */ 
 			Window->GetWidth(),  /* Width  */
@@ -130,8 +145,11 @@ namespace LkEngine {
 			0.10f,				 /* ZNear  */
 			2400.0f              /* ZFar   */
 		);			  
+		EditorCamera.OnCameraActivityChanged.Add(this, &LEditorLayer::OnCameraActivityChanged);
 		EditorCamera.Initialize();
 		EditorCamera.SetPosition({ -10, 4, -10 });
+		EditorCamera.SetActive(true);
+		EditorCamera.Tick();
 
 		/* Attach editor viewport delegates to the editor camera. */
 		LK_CORE_ASSERT(EditorViewport);
@@ -150,7 +168,6 @@ namespace LkEngine {
 		if (LProject::Current() == nullptr)
 		{
 			OpenProject(LFileSystem::GetRuntimeDir() / "Projects" / "Starter-2025");
-			//EmptyProject();
 		}
 
 		/* Force editor viewport to sync data. */
@@ -165,15 +182,14 @@ namespace LkEngine {
 		/* FIXME: Temporarily here. */
 		LOpenGL_Debug::SetupSkybox();
 
-		/** Bind input callbacks. */
+		/** Input callbacks. */
+		LKeyboard::OnKeyPressed.Add(this, &LEditorLayer::OnKeyPressed);
+		LKeyboard::OnKeyReleased.Add(this, &LEditorLayer::OnKeyReleased);
 		LMouse::OnMouseEnabled.Add(this, &LEditorLayer::OnMouseEnabled);
 		LMouse::OnMouseButtonPressed.Add(this, &LEditorLayer::OnMouseButtonPressed);
 		LMouse::OnMouseButtonReleased.Add(this, &LEditorLayer::OnMouseButtonReleased);
 		LMouse::OnMouseScrolled.Add(this, &LEditorLayer::OnMouseScrolled);
 		LMouse::OnCursorModeChanged.Add(this, &LEditorLayer::OnMouseCursorModeChanged);
-
-		LKeyboard::OnKeyPressed.Add(this, &LEditorLayer::OnKeyPressed);
-		LKeyboard::OnKeyReleased.Add(this, &LEditorLayer::OnKeyReleased);
 
 		UI::OnMessageBoxCancelled.Add([&](const char* WindowName)
 		{
@@ -273,11 +289,7 @@ namespace LkEngine {
 			EPanelInitState::Open
 		);
 
-		PanelManager->AddPanel<LEditorSettingsPanel>(
-			EPanelCategory::View, 
-			PanelID::EditorSettings,
-			EPanelInitState::Closed
-		);
+		PanelManager->AddPanel<LEditorSettingsPanel>(EPanelCategory::View, PanelID::EditorSettings, EPanelInitState::Closed);
 
 		/* TODO: Add callbacks/delegates to content browser instance. */
 		auto ContentBrowser = PanelManager->AddPanel<LContentBrowserPanel>(
@@ -299,6 +311,8 @@ namespace LkEngine {
 		PanelManager->AddPanel<LToolsPanel>(EPanelCategory::View, PanelID::Tools, EPanelInitState::Closed);
 		PanelManager->AddPanel<LThemeManagerPanel>(EPanelCategory::Edit, PanelID::ThemeManager, EPanelInitState::Closed);
 
+		PanelManager->AddPanel<LNodeEditorPanel>(EPanelCategory::Edit, PanelID::NodeEditor, EPanelInitState::Open);
+
 		PanelManager->Deserialize();
 		PanelManager->Initialize();
 	}
@@ -314,7 +328,11 @@ namespace LkEngine {
 		{
 			case ESceneState::Edit:
 			{
+				/* TODO: Need to fix the hovered loss focus on input enabled/disabled. */
+				/* TODO: Cache the editor states so the camera can evaluate it during Tick */
+				///EditorCamera.SetActive(bEditorViewportHovered || bEditorViewportFocused);
 				EditorCamera.SetActive(true);
+				EditorCamera.Tick(InDeltaTime);
 				EditorScene->OnUpdateEditor(DeltaTime);
 				EditorScene->OnRenderEditor(SceneRenderer, EditorCamera, DeltaTime);
 
@@ -339,7 +357,7 @@ namespace LkEngine {
 
 			case ESceneState::Pause:
 			{
-				EditorCamera.SetActive(true);
+				EditorCamera.SetActive(bEditorViewportHovered);
 				EditorCamera.Tick(DeltaTime);
 
 				RuntimeScene->OnRenderRuntime(ViewportRenderer, DeltaTime);
@@ -359,6 +377,7 @@ namespace LkEngine {
 	void LEditorLayer::RenderUI()
 	{
 		ImGuiViewportP* Viewport = (ImGuiViewportP*)ImGui::GetMainViewport();
+		ImGuiContext& G = *GImGui;
 		ImGuiIO& IO = ImGui::GetIO();
 		ImGuiStyle& Style = ImGui::GetStyle();
 
@@ -394,7 +413,23 @@ namespace LkEngine {
 			
 			TObjectPtr<LRenderContext> RenderContext = LWindow::Get().GetRenderContext();
 
-			/* Blending. */
+			{
+				ImGuiContext& Ctx = *GImGui;
+				if (Ctx.HoveredWindow)
+				{
+					ImGui::PushStyleColor(ImGuiCol_Text, RGBA32::BrightGreen);
+					ImGui::Text("Hovered Window: %s", Ctx.HoveredWindow->Name);
+					ImGui::PopStyleColor();
+				}
+				else
+				{
+					ImGui::PushStyleColor(ImGuiCol_Text, RGBA32::Red);
+					ImGui::Text("No window hovered");
+					ImGui::PopStyleColor();
+				}
+			}
+
+			/* BlendinG. */
 			static bool bBlending = false;
 			bBlending = RenderContext->GetBlendingEnabled();
 			if (ImGui::Checkbox("Blending", &bBlending))
@@ -402,7 +437,7 @@ namespace LkEngine {
 				Window->SetBlendingEnabled(bBlending);
 			}
 
-			/* Depth testing. */
+			/* Depth testinG. */
 			static bool bDepthTesting = false;
 			bDepthTesting = RenderContext->GetDepthEnabled();
 			if (ImGui::Checkbox("Depth Testing", &bDepthTesting))
@@ -424,117 +459,16 @@ namespace LkEngine {
 				}
 			}
 
-			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-			if (ImGui::TreeNode("Project Info"))
-			{
-				if (Project)
-				{
-					const auto& ProjConfig = Project->GetConfiguration();
-					ImGui::Text("Name: %s", ProjConfig.Name.c_str());
-					ImGui::Text("Filename: %s", ProjConfig.ProjectFileName.c_str());
-					ImGui::Text("Asset Directory: %s", ProjConfig.AssetDirectory.c_str());
-					ImGui::Text("AssetRegistry Path: %s", ProjConfig.AssetRegistryPath.c_str());
-				}
-				else
-				{
-					ImGui::Text("Name: ");
-					ImGui::Text("Filename: ");
-					ImGui::Text("Asset Directory: ");
-					ImGui::Text("AssetRegistry Path: ");
-				}
-
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Editor Viewport Info"))
-			{
-				ImGui::Text("Editor Viewport Bounds 0: %s", EditorViewport->GetViewportBounds(0).ToString<const char*>());
-				ImGui::Text("Editor Viewport Bounds 1: %s", EditorViewport->GetViewportBounds(1).ToString<const char*>());
-				ImGui::Dummy(ImVec2(0, 8));
-				if (ImGuiViewport* MainViewport = ImGui::GetMainViewport(); MainViewport != nullptr)
-				{
-					ImGui::Text("Viewport Size: (%.2f, %.2f)", MainViewport->Size.x, MainViewport->Size.y);
-					ImGui::Text("Viewport WorkSize: (%.2f, %.2f)", MainViewport->WorkSize.x, MainViewport->WorkSize.y);
-					ImGui::Text("Viewport Pos: (%.2f, %.2f)", MainViewport->Pos.x, MainViewport->Pos.y);
-				}
-
-				ImGui::Dummy(ImVec2(0, 8));
-				ImGui::Text("TopBar: %s", TopBar.Size.ToString<const char*>());
-
-				if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(PanelID::EditorViewport))
-				{
-					ImGui::Dummy(ImVec2(0, 8));
-					ImGui::Text("Editor Window Size: %s", LVector2(EditorViewportWindow->Size).ToString<const char*>());
-					ImGui::Text("Editor Window Pos: %s", LVector2(EditorViewportWindow->Pos).ToString<const char*>());
-					ImGui::Text("Editor Window ViewportPos: %s", LVector2(EditorViewportWindow->ViewportPos).ToString<const char*>());
-
-					if (ImGuiDockNode* EditorWindowNode = EditorViewportWindow->DockNode)
-					{
-						ImGui::Dummy(ImVec2(0, 8));
-						ImGui::Text("Editor Dock Window Size: %s", LVector2(EditorWindowNode->Size).ToString<const char*>());
-						ImGui::Text("Editor Dock Window Pos: %s", LVector2(EditorWindowNode->Pos).ToString<const char*>());
-
-						if (ImGuiDockNode* ParentNode = EditorViewportWindow->DockNode->ParentNode)
-						{
-							ImGui::Dummy(ImVec2(0, 8));
-							if (ParentNode->VisibleWindow)
-							{
-								ImGui::Text("Parent Dock Window: %s", ParentNode->VisibleWindow->Name);
-							}
-							else
-							{
-								ImGui::Text("Parent Dock Window: NULL");
-							}
-							ImGui::Text("Parent Dock Window Size: %s", LVector2(ParentNode->Size).ToString().c_str());
-							ImGui::Text("Parent Dock Window Pos: %s", LVector2(ParentNode->Pos).ToString().c_str());
-						}
-					}
-				}
-
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Editor Console Testing"))
-			{
-				if (ImGui::Button("Console Log: Spam"))
-				{
-					LK_CONSOLE_DEBUG("Editor panels initialized");
-					LK_CONSOLE_INFO("Info message 1");
-					LK_CONSOLE_INFO("Info message 2");
-					LK_CONSOLE_ERROR("Error message");
-					LK_CONSOLE_WARN("Warn message");
-				}
-
-				if (ImGui::Button("Console Log: DEBUG"))
-				{
-					LK_CONSOLE_DEBUG("Test log DEBUG message");
-				}
-
-				if (ImGui::Button("Console Log: INFO"))
-				{
-					LK_CONSOLE_INFO("Test log INFO message");
-				}
-
-				if (ImGui::Button("Console Log: WARN"))
-				{
-					LK_CONSOLE_WARN("Test log WARN message");
-				}
-
-				if (ImGui::Button("Console Log: ERROR"))
-				{
-					LK_CONSOLE_ERROR("Test log ERROR message");
-				}
-
-				ImGui::TreePop();
-			}
+			UI_ProjectInfo();
+			UI_Debug_EditorViewportInfo();
 
 			/* Color modification. */
-			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			//ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 			if (ImGui::TreeNode("Colors"))
 			{
 				UI_ClearColorModificationMenu();
 
-				ImGui::TreePop(); /* Colors. */
+				ImGui::TreePop();
 			}
 
 			ImGui::Separator();
@@ -555,7 +489,24 @@ namespace LkEngine {
 			}
 			ImGui::EndGroup();
 
-			ImGui::Text("Editor Viewport Focused: %s", UI::IsWindowFocused(PanelID::EditorViewport) ? "Yes" : "No");
+			ImGui::Separator();
+			{
+				ImGui::Text("Editor Camera Active: %s", (EditorCamera.bIsActive ? "Yes" : "No"));
+				ImGui::Text("Camera Mode: %s", Enum::ToString(EditorCamera.CameraMode));
+				ImGui::Text("Cursor Mode: %s", Enum::ToString(LInput::GetCursorMode()));
+			#if 0
+				static constexpr auto FlagBitCount = sizeof(LK_Enum_Type_ECameraActionFlag) * 8;
+				std::bitset<FlagBitCount> CameraActionFlags((LK_Enum_Type_ECameraActionFlag)EditorCamera.CameraActionFlags);
+				ImGui::Text("Camera Action Flags: %s", CameraActionFlags.to_string().c_str());
+			#else
+				//ImGui::Text("Camera Action Flags: %s", StringUtils::ConvertFlags((LK_Enum_Type_ECameraActionFlag)CameraActionFlags).c_str());
+				ImGui::Text("Camera Action Flags: %s", StringUtils::ConvertFlags((LK_Enum_Type_ECameraActionFlag)EditorCamera.CameraActionFlags).c_str());
+			#endif
+			}
+	
+			ImGui::Separator();
+			ImGui::Text("Editor Viewport Focused: %s", bEditorViewportFocused ? "Yes" : "No");
+			ImGui::Text("Editor Viewport Hovered: %s", bEditorViewportHovered ? "Yes" : "No");
 			if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(PanelID::EditorViewport); EditorViewportWindow != nullptr)
 			{
 				ImGui::Text("Editor Viewport ID: %lld", EditorViewportWindow->ID);
@@ -564,6 +515,100 @@ namespace LkEngine {
 			{
 				ImGui::Text("Editor Viewport ID: Unknown");
 			}
+
+			ImGui::Text("Focused Window: %s", FocusedWindowName);
+			ImGui::Text("Focused Window ID: %lld", FocusedWindowID);
+
+			{
+				UI::Font::Push("Large");
+				ImGui::Text("Editor Context");
+				UI::Font::Pop();
+
+				ImGui::Indent();
+				UI::FScopedColor TextColorThisFrame(ImGuiCol_Text, RGBA32::NiceBlue);
+				ImGui::Text("Hovered Window Name: %s", EditorContext.HoveredWindowName);
+				ImGui::Text("Hovered Window ID: %lld", EditorContext.HoveredWindowID);
+
+				UI::FScopedColor TextColorLastFrame(ImGuiCol_Text, RGBA32::Brown);
+				ImGui::Text("Last Frame Hovered Window Name: %s", EditorContext.LastFrameHoveredWindowName);
+				ImGui::Text("Last Frame Hovered Window ID: %lld", EditorContext.LastFrameHoveredWindowID);
+				ImGui::Unindent();
+			}
+
+		#if 0
+			static constexpr uint32_t FlagBits = sizeof(decltype(IO.ConfigFlags)) * 8;
+			std::bitset<FlagBits> ConfigFlagBits(IO.ConfigFlags);
+			//UI::Font::Push("Larger");
+			ImGui::Text("IO Flags: %s", ConfigFlagBits.to_string().c_str());
+			//UI::Font::Pop();
+		#else
+			ImGui::Text("IO Flags: %s", StringUtils::ConvertFlags(IO.ConfigFlags).c_str());
+		#endif
+
+			ImGui::Text("Mouse: %s", (IO.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0 ? "Enabled" : "Disabled");
+			ImGui::Text("Keyboard: %s", (IO.ConfigFlags & ImGuiConfigFlags_NoKeyboard) == 0 ? "Enabled" : "Disabled");
+			ImGui::Text("Keyboard Nav: %s", IO.ConfigNavCaptureKeyboard ? "Enabled" : "Disabled");
+
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			if (ImGui::TreeNode("Window States"))
+			{
+				ImGui::Indent();
+				ImGui::Text("HoveredWindow: '%s'", G.HoveredWindow ? G.HoveredWindow->Name : "NULL");
+				ImGui::Text("HoveredWindow->Root: '%s'", G.HoveredWindow ? G.HoveredWindow->RootWindowDockTree->Name : "NULL");
+				ImGui::Text("HoveredWindowUnderMovingWindow: '%s'", G.HoveredWindowUnderMovingWindow ? G.HoveredWindowUnderMovingWindow->Name : "NULL");
+				ImGui::Text("HoveredDockNode: 0x%08X", G.DebugHoveredDockNode ? G.DebugHoveredDockNode->ID : 0);
+				ImGui::Text("MovingWindow: '%s'", G.MovingWindow ? G.MovingWindow->Name : "NULL");
+				ImGui::Text("MouseViewport: 0x%08X (UserHovered 0x%08X, LastHovered 0x%08X)", G.MouseViewport->ID, G.IO.MouseHoveredViewport, G.MouseLastHoveredViewport ? G.MouseLastHoveredViewport->ID : 0);
+				ImGui::Unindent();
+
+				ImGui::TreePop();
+			}
+
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			if (ImGui::TreeNode("Item States"))
+			{
+				ImGui::Indent();
+				ImGui::Text("ActiveId: 0x%08X/0x%08X (%.2f sec), AllowOverlap: %d, Source: %s", G.ActiveId, G.ActiveIdPreviousFrame, G.ActiveIdTimer, G.ActiveIdAllowOverlap, DebugFunc::GetInputSourceName(G.ActiveIdSource));
+				ImGui::DebugLocateItemOnHover(G.ActiveId);
+				ImGui::Text("ActiveIdWindow: '%s'", G.ActiveIdWindow ? G.ActiveIdWindow->Name : "NULL");
+				ImGui::Text("ActiveIdUsing: AllKeyboardKeys: %d, NavDirMask: %X", G.ActiveIdUsingAllKeyboardKeys, G.ActiveIdUsingNavDirMask);
+				ImGui::Text("HoveredId: 0x%08X (%.2f sec), AllowOverlap: %d", G.HoveredIdPreviousFrame, G.HoveredIdTimer, G.HoveredIdAllowOverlap); // Not displaying G.HoveredId as it is update mid-frame
+				ImGui::Text("HoverItemDelayId: 0x%08X, Timer: %.2f, ClearTimer: %.2f", G.HoverItemDelayId, G.HoverItemDelayTimer, G.HoverItemDelayClearTimer);
+				ImGui::Text("DragDrop: %d, SourceId = 0x%08X, Payload \"%s\" (%d bytes)", G.DragDropActive, G.DragDropPayload.SourceId, G.DragDropPayload.DataType, G.DragDropPayload.DataSize);
+				ImGui::DebugLocateItemOnHover(G.DragDropPayload.SourceId);
+				ImGui::Unindent();
+
+				ImGui::TreePop();
+			}
+
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			if (ImGui::TreeNode("Focus and Navigation"))
+			{
+				ImGui::Indent();
+				ImGui::Text("NavWindow: '%s'", G.NavWindow ? G.NavWindow->Name : "NULL");
+				ImGui::Text("NavId: 0x%08X, NavLayer: %d", G.NavId, G.NavLayer);
+				ImGui::DebugLocateItemOnHover(G.NavId);
+				ImGui::Text("NavInputSource: %s", DebugFunc::GetInputSourceName(G.NavInputSource));
+				ImGui::Text("NavLastValidSelectionUserData = %" IM_PRId64 " (0x%" IM_PRIX64 ")", G.NavLastValidSelectionUserData, G.NavLastValidSelectionUserData);
+				ImGui::Text("NavActive: %d, NavVisible: %d", G.IO.NavActive, G.IO.NavVisible);
+				ImGui::Text("NavActivateId/DownId/PressedId: %08X/%08X/%08X", G.NavActivateId, G.NavActivateDownId, G.NavActivatePressedId);
+				ImGui::Text("NavActivateFlags: %04X", G.NavActivateFlags);
+				ImGui::Text("NavCursorVisible: %d, NavHighlightItemUnderNav: %d", G.NavCursorVisible, G.NavHighlightItemUnderNav);
+				ImGui::Text("NavFocusScopeId = 0x%08X", G.NavFocusScopeId);
+				ImGui::Text("NavFocusRoute[] = ");
+				for (int PathN = G.NavFocusRoute.Size - 1; PathN >= 0; PathN--)
+				{
+					const ImGuiFocusScopeData& FocusScope = G.NavFocusRoute[PathN];
+					ImGui::SameLine(0.0f, 0.0f);
+					ImGui::Text("0x%08X/", FocusScope.ID);
+					ImGui::SetItemTooltip("In window \"%s\"", ImGui::FindWindowByID(FocusScope.WindowID)->Name);
+				}
+				ImGui::Text("NavWindowingTarget: '%s'", G.NavWindowingTarget ? G.NavWindowingTarget->Name : "NULL");
+				ImGui::Unindent();
+
+				ImGui::TreePop();
+			}
+
 		}
 		UI::End(); /* PanelID::Sidebar1 */
 
@@ -597,50 +642,26 @@ namespace LkEngine {
 				ImGui::TreePop();
 			}
 
-			/* Mouse Information. */
-			if (ImGui::TreeNode("Mouse Information"))
-			{
-				ImGui::Text("-- Empty for now --");
-				ImGui::TreePop();
-			}
-
 			if (ImGui::Checkbox("Render Skybox", &bRenderSkybox)) 
 			{
 			}
 
-			UI::BeginPropertyGrid();
 			{
-				
-				TObjectPtr<LSceneCamera> Camera = GetEditorCamera();
-				glm::vec3 Position = Camera->GetPosition();
-				static bool CameraEdited = false;
-				if (UI::Draw::Vec3Control("Position", Position))
-				{
-					Camera->SetPosition(Position);
-				}
+				LEditorCamera& Camera = GetEditorCamera();
+				ImGui::Text("Active: %s", (Camera.IsActive() ? "Yes" : "No"));
+				ImGui::Text("Panning: %s", (Camera.bPanning ? "Yes" : "No"));
+				ImGui::Text("Mode: %s", Enum::ToString(Camera.CameraMode));
+				ImGui::Text("Editor Viewport Focused: %s", UI::IsWindowFocused(PanelID::EditorViewport) ? "Yes" : "No");
 
-				if (UI::Draw::Vec3Control("Position Delta", Camera->PositionDelta))
-				{
-				}
-
-				if (UI::Draw::Vec3Control("Focal point", Camera->FocalPoint))
-				{
-				}
-
-				if (UI::Draw::DragFloat("Distance", &Camera->Distance, 1.0f, 0.0f, 100.0f, "%1.f"))
-				{
-				}
-
-				if (UI::Draw::DragFloat("Speed", &Camera->NormalSpeed, 1.0f, 0.0f, 100.0f, "%1.f"))
-				{
-				}
-
-				if (UI::Draw::DragFloat("Travel Speed", &Camera->TravelSpeed, 1.0f, 0.0f, 100.0f, "%1.f"))
-				{
-				}
-
+				UI::BeginPropertyGrid();
+				UI::Draw::Vec3Control("Position", Camera.Position);
+				UI::Draw::Vec3Control("Position Delta", Camera.PositionDelta);
+				UI::Draw::Vec3Control("Focal point", Camera.FocalPoint);
+				UI::Draw::DragFloat("Distance", &Camera.Distance, 1.0f, 0.0f, 100.0f, "%1.f");
+				UI::Draw::DragFloat("Speed", &Camera.NormalSpeed, 1.0f, 0.0f, 100.0f, "%1.f");
+				UI::Draw::DragFloat("Travel Speed", &Camera.TravelSpeed, 1.0f, 0.0f, 100.0f, "%1.f");
+				UI::EndPropertyGrid();
 			}
-			UI::EndPropertyGrid();
 
 			if (ImGui::TreeNode("Config Directories"))
 			{
@@ -668,8 +689,21 @@ namespace LkEngine {
 			UI_PrepareEditorViewport();
 			UI::Begin(PanelID::EditorViewport, nullptr, UI::EditorViewportFlags);
 			{
+			#if 0
 				bEditorViewportHovered = ImGui::IsWindowHovered();
 				bEditorViewportFocused = ImGui::IsWindowFocused();
+			#else
+				if (ImGuiWindow* ThisWindow = ImGui::GetCurrentWindow(); ThisWindow != nullptr)
+				{
+					bEditorViewportFocused = ImGui::IsWindowFocused();
+					bEditorViewportHovered = ImGui::IsWindowHovered() && (G.HoveredWindow == ThisWindow);
+				}
+				else
+				{
+					bEditorViewportHovered = ImGui::IsWindowHovered();
+					bEditorViewportFocused = ImGui::IsWindowFocused();
+				}
+			#endif
 
 				/* Render viewport image. */
 				UI_ViewportTexture();
@@ -687,7 +721,7 @@ namespace LkEngine {
 				UI_WindowStatistics();
 				UI_HandleDragAndDrop();
 			}
-			UI::End(); /* PanelID::EditorViewport */
+			UI::End(); /* Editor Viewport */
 		}
 		UI::End();
 		ImGui::PopStyleVar(2); /* FramePadding, WindowPadding. */
@@ -705,6 +739,13 @@ namespace LkEngine {
 		{
 			OpenProject(InputBuffer::OpenProjectFilePath);
 		}
+
+		EditorContext.LastFrameHoveredWindowID = EditorContext.HoveredWindowID;
+		EditorContext.LastFrameHoveredWindowName = EditorContext.HoveredWindowName;
+		EditorContext.bLastFrameEditorViewportHovered = (EditorContext.LastFrameHoveredWindowID > 0) 
+			&& (EditorContext.LastFrameHoveredWindowID == UI::GetWindowID(PanelID::EditorViewport));
+		EditorContext.HoveredWindowID = G.HoveredWindow ? G.HoveredWindow->ID : 0;
+		EditorContext.HoveredWindowName = G.HoveredWindow ? G.HoveredWindow->Name : "NULL";
 
 		ImGui::End(); /* Core Viewport. */
 	}
@@ -855,7 +896,7 @@ namespace LkEngine {
 		{
 			if (CurrentScene)
 			{
-				/* TODO: Save current scene before re-assigning. */
+				/* TODO: Save current scene before re-assigninG. */
 			}
 			CurrentScene = EditorScene;
 		}
@@ -946,7 +987,7 @@ namespace LkEngine {
 		);			  
 
 		std::string StartScene = Project->GetConfiguration().StartScene;
-		/* Add the scene extension if it is missing. */
+		/* Add the scene extension if it is missinG. */
 		if (StartScene.find(LScene::FILE_EXTENSION) == std::string::npos)
 		{
 			StartScene += std::format(".{}",LScene::FILE_EXTENSION);
@@ -1175,7 +1216,7 @@ namespace LkEngine {
 		Project = InProject;
 		if (Project)
 		{
-
+			/* ... */
 		}
 	}
 
@@ -1207,8 +1248,17 @@ namespace LkEngine {
 
 	void LEditorLayer::OnKeyPressed(const FKeyData& KeyData)
 	{
-		LK_CORE_TRACE_TAG("Editor", "OnKeyPressed: {}", Enum::ToString(KeyData.Key));
+	#if 0
+		if (LInput::IsKeyDown(EKey::LeftAlt))
+		{
+			if (GImGui->HoveredWindow)
+			{
+				FocusedWindowID = GImGui->HoveredWindow->ID;
+			}
+		}
+	#endif
 
+		LK_CORE_TRACE_TAG("Editor", "OnKeyPressed: {}", Enum::ToString(KeyData.Key));
 		if (UI::IsWindowFocused(PanelID::EditorViewport) || UI::IsWindowFocused(PanelID::SceneManager))
 		{
 			if ((bViewportHovered || bEditorViewportHovered) && !LInput::IsMouseButtonDown(EMouseButton::Right))
@@ -1256,6 +1306,31 @@ namespace LkEngine {
 				}
 			}
 		}
+
+		if (LInput::IsKeyDown(EKey::LeftControl) && LInput::IsKeyDown(EKey::LeftAlt))
+		{
+			switch (KeyData.Key)
+			{
+				case EKey::T:
+				{
+					if (LInput::GetCursorMode() == ECursorMode::Normal)
+					{
+						LK_CORE_CONSOLE_INFO("Changing cursor mode to hidden");
+						LInput::SetCursorMode(ECursorMode::Hidden);
+					}
+					else if (LInput::GetCursorMode() == ECursorMode::Hidden)
+					{
+						LK_CORE_CONSOLE_INFO("Changing cursor mode to locked");
+						LInput::SetCursorMode(ECursorMode::Locked);
+					}
+					else if (LInput::GetCursorMode() == ECursorMode::Locked)
+					{
+						LK_CORE_CONSOLE_INFO("Changing cursor mode to normal");
+						LInput::SetCursorMode(ECursorMode::Normal);
+					}
+				}
+			}
+		}
 	}
 
 	void LEditorLayer::OnKeyReleased(const FKeyData& KeyData)
@@ -1266,19 +1341,37 @@ namespace LkEngine {
 	void LEditorLayer::OnMouseEnabled(const bool Enabled)
 	{
 		LK_CORE_TRACE_TAG("Editor", "OnMouseEnabled: {}", Enabled);
+	#if 1
+		UI_SetWindowFocus(FocusedWindowID);
+	#else
 		if (Enabled)
 		{
-			UI_SetWindowFocus(Cache::FocusedWindowID);
+			UI_SetWindowFocus(FocusedWindowID);
 		}
 		else
 		{
 			UI_CacheWindowFocus();
 		}
+	#endif
 	}
 
 	void LEditorLayer::OnMouseButtonPressed(const FMouseButtonData& ButtonData)
 	{
 		LK_CORE_TRACE_TAG("Editor", "MouseButtonPressed: {}", Enum::ToString(ButtonData.Button));
+
+		//if (LInput::IsKeyDown(EKey::LeftAlt))
+		{
+			if (GImGui->HoveredWindow)
+			{
+				FocusedWindowID = GImGui->HoveredWindow->ID;
+				FocusedWindowName = GImGui->HoveredWindow->Name;
+			}
+		}
+
+		if (LThemeManagerPanel::IsSelectorEnabled())
+		{
+			LThemeManagerPanel::OnMouseButtonPressed(ButtonData);
+		}
 
 		if (ButtonData.Button != EMouseButton::Left)
 		{
@@ -1340,7 +1433,6 @@ namespace LkEngine {
 				LSelectionContext::Select(ESelectionContext::Scene, Entity.GetUUID());
 			}
 
-
 			OnSceneSelectionUpdated.Broadcast(SceneSelectionData);
 		}
 	}
@@ -1354,7 +1446,7 @@ namespace LkEngine {
 	{
 		LK_CORE_TRACE_TAG("Editor", "MouseScrolled: {}", Enum::ToString(ScrollDir));
 
-		if (UI::IsWindowHovered(PanelID::EditorViewport))
+		if (bEditorViewportHovered)
 		{
 			if (ScrollDir == EMouseScrollDirection::Up)
 			{
@@ -2094,6 +2186,14 @@ namespace LkEngine {
 					}
 				}
 
+				if (ImGui::MenuItem("Console Debug"))
+				{
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::Tools); PanelData != nullptr)
+					{
+						PanelData->bIsOpen = true;
+						PanelData->Panel.As<LToolsPanel>()->Window_Console.bOpen = true;
+					}
+				}
 
 			#if defined(LK_ENGINE_DEBUG) && defined(LK_ENGINE_OPENGL)
 				if (ImGui::MenuItem("OpenGL Extensions"))
@@ -2133,7 +2233,7 @@ namespace LkEngine {
 					ImGui::EndMenu();
 				}
 
-				ImGui::EndMenu(); /* Engine Debug. */
+				ImGui::EndMenu(); /* Engine DebuG. */
 			}
 
 			if (ImGui::MenuItem("About"))
@@ -2199,7 +2299,7 @@ namespace LkEngine {
 		if (ToolbarButton(ButtonImage, Color))
 		{
 			ButtonClicked = !ButtonClicked;
-			LK_CORE_INFO("Clicked Button: {}", ButtonClicked ? "1" : "0");
+			LK_CORE_INFO("Clicked button: {}", ButtonClicked ? "1" : "0");
 		}
 	}
 
@@ -2215,7 +2315,7 @@ namespace LkEngine {
 		RayCast.Dir = InverseView * glm::vec3(Ray);
 	}
 
-	/// REMOVE?
+#if 0
 	LEntity LEditorLayer::CreateCube()
 	{
 		FAssetHandle CubeHandle = LAssetManager::GetAssetHandleFromFilePath("Assets/Meshes/Source/Cube.gltf");
@@ -2256,37 +2356,65 @@ namespace LkEngine {
 
 		return NewCubeEntity;
 	}
+#endif
 
 	std::pair<float, float> LEditorLayer::GetMouseViewportSpace(const bool IsEditorViewport)
 	{
 		LK_CORE_ASSERT(EditorViewport);
 		auto [MouseX, MouseY] = ImGui::GetMousePos();
 
-		//const auto& ViewportBoundsRef = IsEditorViewport ? EditorViewport->GetViewportBounds() : PrimaryViewportBounds;
 		const auto& ViewportBoundsRef = IsEditorViewport ? EditorViewport->GetViewportBounds() : PrimaryViewportBounds.data();
 		MouseX -= ViewportBoundsRef[0].X;
 		MouseY -= ViewportBoundsRef[0].Y;
 
 		const float ViewportWidth = ViewportBoundsRef[1].X - ViewportBoundsRef[0].X;
 		const float ViewportHeight = ViewportBoundsRef[1].Y - ViewportBoundsRef[0].Y;
-	#if 0
-		LK_CORE_TRACE("Mouse: ({}, {}) -> ({}, {})  Size: ({}, {})",
-					 MouseX, MouseY, ((MouseX / ViewportWidth) * 2.0f - 1.0f), ((MouseY / ViewportHeight) * 2.0f - 1.0f),
-					 ViewportWidth, ViewportHeight);
-	#endif
 
 		return { (MouseX / ViewportWidth) * 2.0f - 1.0f, ((MouseY / ViewportHeight) * 2.0f - 1.0f) * -1.0f };
 	}
 
+	void LEditorLayer::OnCameraActivityChanged(LCamera* CameraRef, const bool CameraActive)
+	{
+		ImGui::SetNextFrameWantCaptureMouse(true);
+	#if 0
+		if (!UI::IsInputEnabled())
+		{
+			UI::SetInputEnabled(true);
+		}
+		if (!CameraActive)
+		{
+			ImGui::SetNextFrameWantCaptureMouse(true);
+		}
+	#endif
+	#if 0
+		LK_CORE_DEBUG_TAG("Editor", "{} camera: {}", Enum::ToString(CameraRef->GetType()), (CameraActive ? "Enabled" : "Disabled"));
+		if (!CameraActive && !bEditorViewportFocused)
+		{
+			ImGui::SetNextFrameWantCaptureMouse(true);
+
+			/* Check if any cameras are active. */
+			if (const ECursorMode CursorMode = LInput::GetCursorMode(); CursorMode != ECursorMode::Normal)
+			{
+				LInput::SetCursorMode(ECursorMode::Normal);
+				UI::SetMouseEnabled(true);
+				//UI::SetInputEnabled(true);
+			}
+		}
+	#endif
+	}
+
 	void LEditorLayer::UI_SetWindowFocus(const ImGuiID WindowID)
 	{
-		if (WindowID > 0)
+		if (WindowID <= 0)
 		{
-			if (ImGuiWindow* FocusedWindow = ImGui::FindWindowByID(WindowID); FocusedWindow != nullptr)
-			{
-				LK_CORE_TRACE_TAG("Editor", "Focusing: {}", FocusedWindow->ID);
-				ImGui::FocusWindow(FocusedWindow);
-			}
+			LK_CORE_WARN("Window ID is 0, skipping window focus");
+			return;
+		}
+
+		if (ImGuiWindow* FocusedWindow = ImGui::FindWindowByID(WindowID); FocusedWindow != nullptr)
+		{
+			LK_CORE_TRACE("Setting window focus: {} ({})", FocusedWindow->ID, FocusedWindow->Name);
+			ImGui::FocusWindow(FocusedWindow, ImGuiFocusRequestFlags_UnlessBelowModal);
 		}
 	}
 
@@ -2294,12 +2422,12 @@ namespace LkEngine {
 	{
 		if (ImGuiWindow* CurrentNavWindow = GImGui->NavWindow; CurrentNavWindow != nullptr)
 		{
-			LK_CORE_TRACE_TAG("Editor", "Caching focused window ID: {}", CurrentNavWindow->ID);
-			Cache::FocusedWindowID = CurrentNavWindow->ID;
+			LK_CORE_TRACE("Caching focused window: {} ({})", CurrentNavWindow->ID, CurrentNavWindow->Name);
+			FocusedWindowID = CurrentNavWindow->ID;
 		}
 		else
 		{
-			Cache::FocusedWindowID = 0;
+			FocusedWindowID = 0;
 		}
 	}
 
@@ -2393,6 +2521,82 @@ namespace LkEngine {
 			}
 
 			ImGui::End();
+		}
+	}
+
+	void LEditorLayer::UI_ProjectInfo()
+	{
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("Project Info"))
+		{
+			if (Project)
+			{
+				const auto& ProjConfig = Project->GetConfiguration();
+				ImGui::Text("Name: %s", ProjConfig.Name.c_str());
+				ImGui::Text("Filename: %s", ProjConfig.ProjectFileName.c_str());
+				ImGui::Text("Asset Directory: %s", ProjConfig.AssetDirectory.c_str());
+				ImGui::Text("AssetRegistry Path: %s", ProjConfig.AssetRegistryPath.c_str());
+			}
+			else
+			{
+				ImGui::Text("Name: ");
+				ImGui::Text("Filename: ");
+				ImGui::Text("Asset Directory: ");
+				ImGui::Text("AssetRegistry Path: ");
+			}
+
+			ImGui::TreePop();
+		}
+	}
+
+	void LEditorLayer::UI_Debug_EditorViewportInfo()
+	{
+		if (ImGui::TreeNode("Editor Viewport Info"))
+		{
+			ImGui::Text("Editor Viewport Bounds 0: %s", EditorViewport->GetViewportBounds(0).ToString<const char*>());
+			ImGui::Text("Editor Viewport Bounds 1: %s", EditorViewport->GetViewportBounds(1).ToString<const char*>());
+			ImGui::Dummy(ImVec2(0, 8));
+			if (ImGuiViewport* MainViewport = ImGui::GetMainViewport(); MainViewport != nullptr)
+			{
+				ImGui::Text("Viewport Size: (%.2f, %.2f)", MainViewport->Size.x, MainViewport->Size.y);
+				ImGui::Text("Viewport WorkSize: (%.2f, %.2f)", MainViewport->WorkSize.x, MainViewport->WorkSize.y);
+				ImGui::Text("Viewport Pos: (%.2f, %.2f)", MainViewport->Pos.x, MainViewport->Pos.y);
+			}
+
+			ImGui::Dummy(ImVec2(0, 8));
+			ImGui::Text("TopBar: %s", TopBar.Size.ToString<const char*>());
+
+			if (ImGuiWindow* EditorViewportWindow = ImGui::FindWindowByName(PanelID::EditorViewport))
+			{
+				ImGui::Dummy(ImVec2(0, 8));
+				ImGui::Text("Editor Window Size: %s", LVector2(EditorViewportWindow->Size).ToString<const char*>());
+				ImGui::Text("Editor Window Pos: %s", LVector2(EditorViewportWindow->Pos).ToString<const char*>());
+				ImGui::Text("Editor Window ViewportPos: %s", LVector2(EditorViewportWindow->ViewportPos).ToString<const char*>());
+
+				if (ImGuiDockNode* EditorWindowNode = EditorViewportWindow->DockNode)
+				{
+					ImGui::Dummy(ImVec2(0, 8));
+					ImGui::Text("Editor Dock Window Size: %s", LVector2(EditorWindowNode->Size).ToString<const char*>());
+					ImGui::Text("Editor Dock Window Pos: %s", LVector2(EditorWindowNode->Pos).ToString<const char*>());
+
+					if (ImGuiDockNode* ParentNode = EditorViewportWindow->DockNode->ParentNode)
+					{
+						ImGui::Dummy(ImVec2(0, 8));
+						if (ParentNode->VisibleWindow)
+						{
+							ImGui::Text("Parent Dock Window: %s", ParentNode->VisibleWindow->Name);
+						}
+						else
+						{
+							ImGui::Text("Parent Dock Window: NULL");
+						}
+						ImGui::Text("Parent Dock Window Size: %s", LVector2(ParentNode->Size).ToString().c_str());
+						ImGui::Text("Parent Dock Window Pos: %s", LVector2(ParentNode->Pos).ToString().c_str());
+					}
+				}
+			}
+
+			ImGui::TreePop();
 		}
 	}
 

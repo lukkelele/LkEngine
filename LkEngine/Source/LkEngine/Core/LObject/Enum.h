@@ -144,9 +144,9 @@ namespace LkEngine {
         } \
     };
 
-	#define LK_ENUM_RANGE_TYPE_CONTIGIOUS   0
-	#define LK_ENUM_RANGE_TYPE_VALUEARRAY   1
-	#define LK_ENUM_RANGE_TYPE_FLAG         2
+	#define LK_INTERNAL_ENUM_RANGE_TYPE_CONTIGIOUS   0
+	#define LK_INTERNAL_ENUM_RANGE_TYPE_VALUEARRAY   1
+	#define LK_INTERNAL_ENUM_RANGE_TYPE_FLAG         2
 
 	namespace Enum::Internal::Range
 	{
@@ -284,7 +284,7 @@ namespace LkEngine {
 		 * Enum range implementation, continous values.
 		 */
 		template<typename EnumType>
-		struct Impl<EnumType, LK_ENUM_RANGE_TYPE_CONTIGIOUS>
+		struct Impl<EnumType, LK_INTERNAL_ENUM_RANGE_TYPE_CONTIGIOUS>
 		{
 			TContiguousIterator<EnumType> begin() const { return TContiguousIterator<EnumType>(Type<EnumType>::Begin); }
 			TContiguousIterator<EnumType> end()   const { return TContiguousIterator<EnumType>(Type<EnumType>::End); }
@@ -294,7 +294,7 @@ namespace LkEngine {
 		 * Enum range implementation, value based.
 		 */
 		template<typename EnumType>
-		struct Impl<EnumType, LK_ENUM_RANGE_TYPE_VALUEARRAY>
+		struct Impl<EnumType, LK_INTERNAL_ENUM_RANGE_TYPE_VALUEARRAY>
 		{
 			TValueArrayIterator<EnumType> begin() const { return TValueArrayIterator<EnumType>(Type<EnumType>::template GetPointer<void>(false)); }
 			TValueArrayIterator<EnumType> end()   const { return TValueArrayIterator<EnumType>(Type<EnumType>::template GetPointer<void>(true)); }
@@ -305,7 +305,7 @@ namespace LkEngine {
 		 * Enum range implementation, flag values.
 		 */
         template<typename EnumType>
-		struct Impl<EnumType, LK_ENUM_RANGE_TYPE_FLAG>
+		struct Impl<EnumType, LK_INTERNAL_ENUM_RANGE_TYPE_FLAG>
         {
 			TFlagIterator<EnumType> begin() const { return TFlagIterator<EnumType>(Type<EnumType>::ValidFlags()); }
 			TFlagIterator<EnumType> end()   const { return TFlagIterator<EnumType>(0); }

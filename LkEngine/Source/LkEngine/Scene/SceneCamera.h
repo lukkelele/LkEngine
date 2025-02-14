@@ -11,6 +11,10 @@ namespace LkEngine {
 	class LSceneCamera : public LCamera
 	{
 	public:
+		virtual ~LSceneCamera() = default;
+
+		virtual void Tick(const float InDeltaTime = 0.0f);
+
 		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
@@ -43,7 +47,6 @@ namespace LkEngine {
 
 		void SetViewportSize(const uint32_t InWidth, const uint32_t InHeight);
 
-		void Update(float ts);
 		void UpdateView();
 		void UpdateProjection();
 		void UpdateViewProjection();
@@ -56,7 +59,6 @@ namespace LkEngine {
 		FORCEINLINE void SetTravelSpeed(const float InSpeed) { TravelSpeed = InSpeed; }
 
 	protected:
-		/** @brief Camera offset. */
 		glm::vec3 CameraBoom{};
 
 		glm::vec2 MouseDelta = { 0.0f, 0.0f };

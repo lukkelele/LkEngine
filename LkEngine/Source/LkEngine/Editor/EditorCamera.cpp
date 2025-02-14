@@ -12,6 +12,7 @@ namespace LkEngine {
 	LEditorCamera::LEditorCamera(const float InFovDeg, const float InWidth, const float InHeight, 
 								 const float InNearP, const float InFarP)
 	{
+		Type = ECameraType::Editor;
 		PerspectiveNear = InNearP;
 		PerspectiveFar = InFarP;
 
@@ -21,12 +22,12 @@ namespace LkEngine {
 		Pitch = 0.0f;
 		Yaw = glm::pi<float>();
 
-		/* Calculate projection matrix. */
 		ProjectionMatrix = glm::perspectiveFov(glm::radians(InFovDeg), InWidth, InHeight, InNearP, InFarP);
 	}
 
 	void LEditorCamera::Initialize()
 	{
+		Type = ECameraType::Editor;
 		Distance = glm::distance(Position, FocalPoint);
 
 		Yaw = 3.0f * glm::pi<float>() / 4.0f;
@@ -38,31 +39,26 @@ namespace LkEngine {
 		Direction = glm::eulerAngles(Orientation) * (180.0f / glm::pi<float>());
 		ViewMatrix = glm::translate(glm::mat4(1.0f), Position) * glm::toMat4(Orientation);
 		ViewMatrix = glm::inverse(ViewMatrix);
-
-		LK_CORE_TRACE_TAG("EditorCamera", "Position = ({}, {}, {})", Position.x, Position.y, Position.z);
-
-		bIsActive = true;
 	}
 
 	void LEditorCamera::Tick(const float DeltaTime)
 	{
+		if (!bIsActive)
+		{
+			if (!UI::IsInputEnabled())
+			{
+				UI::SetInputEnabled(true);
+			}
+
+			return;
+		}
+
 		const glm::vec2 MousePos{ LMouse::GetMouseX(), LMouse::GetMouseY() };
 		const glm::vec2 MouseDelta = (MousePos - InitialMousePosition) * 0.002f;
 
 		/* TODO: I don't like this approach of continously checking if active or not
 		         and then handling UI input. This should get taken care of somewhere else.
 		*/
-	#if 0
-		if (!bIsActive)
-		{
-			LK_CORE_DEBUG_TAG("EditorCamera", "Camera is not active, enabling UI input");
-			if (!UI::IsInputEnabled())
-			{
-				UI::SetInputEnabled(true);
-			}
-			return;
-		}
-	#endif
 
 		if (LInput::IsMouseButtonDown(EMouseButton::Right) && !LInput::IsKeyDown(EKey::LeftAlt))
 		{
@@ -127,18 +123,30 @@ namespace LkEngine {
 			if (LInput::IsMouseButtonDown(EMouseButton::Middle))
 			{
 				LMouse::Disable();
+				bPanning = true;
+				bRotating = false;
+				bZooming = false;
+				CameraActionFlags = ECameraActionFlag::Pan;
 				MousePan(MouseDelta);
 			}
 			/* Camera Mode: Rotate */
 			else if (LInput::IsMouseButtonDown(EMouseButton::Left))
 			{
 				LMouse::Disable();
+				bPanning = false;
+				bRotating = true;
+				bZooming = false;
+				CameraActionFlags = ECameraActionFlag::Rotate;
 				MouseRotate(MouseDelta);
 			}
 			/* Camera Mode: Zoom */
 			else if (LInput::IsMouseButtonDown(EMouseButton::Right))
 			{
 				LMouse::Disable();
+				bPanning = false;
+				bRotating = false;
+				bZooming = true;
+				CameraActionFlags = ECameraActionFlag::Zoom;
 				MouseZoom((MouseDelta.x + MouseDelta.y) * 0.10f);
 			}
 			else
@@ -148,10 +156,8 @@ namespace LkEngine {
 		}
 		else
 		{
-			if (!LMouse::IsEnabled())
-			{
-				LMouse::Enable();
-			}
+			LMouse::Enable();
+			CameraActionFlags = ECameraActionFlag::None;
 		}
 
 		/**
@@ -302,6 +308,7 @@ namespace LkEngine {
 			MouseZoom(Event.GetYOffset() * 0.10f);
 			UpdateCameraView();
 		}
+
 		return true;
 	}
 
@@ -346,6 +353,7 @@ namespace LkEngine {
 	float LEditorCamera::GetCameraSpeed() const
 	{
 		static constexpr float BaseMultiplier = 2.0f;
+
 		float Speed = NormalSpeed;
 		if (LInput::IsKeyDown(EKey::LeftControl))
 		{

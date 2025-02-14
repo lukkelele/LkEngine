@@ -30,35 +30,13 @@ namespace LkEngine {
 
 	void LToolsPanel::RenderUI(bool& IsOpen)
 	{
-		if (Window_ObjectReferences.bOpen)
-		{
-			UI_ObjectReferences();
-		}
-
-		if (Window_AssetRegistry.bOpen)
-		{ 
-			UI_AssetRegistry();
-		}
-
-		if (Window_InputInfo.bOpen)
-		{
-			UI_InputInfo();
-		}
-
-		if (Window_UserInterfaceTools.bOpen)
-		{
-			UI_UserInterfaceTools();
-		}
-
-		if (Window_Fonts.bOpen)
-		{ 
-			UI_Fonts();
-		}
-
-		if (Window_Sandbox.bOpen)
-		{
-			UI_Sandbox();
-		}
+		if (Window_ObjectReferences.bOpen) UI_ObjectReferences();
+		if (Window_AssetRegistry.bOpen) UI_AssetRegistry();
+		if (Window_InputInfo.bOpen) UI_InputInfo();
+		if (Window_UserInterfaceTools.bOpen) UI_UserInterfaceTools();
+		if (Window_Fonts.bOpen) UI_Fonts();
+		if (Window_Sandbox.bOpen) UI_Sandbox();
+		if (Window_Console.bOpen) UI_Console();
 
 		IsOpen = (Window_ObjectReferences.bOpen
 			|| Window_AssetRegistry.bOpen
@@ -66,6 +44,7 @@ namespace LkEngine {
 			|| Window_UserInterfaceTools.bOpen
 			|| Window_Fonts.bOpen
 			|| Window_Sandbox.bOpen
+			|| Window_Console.bOpen
 		);
 	}
 
@@ -76,15 +55,13 @@ namespace LkEngine {
 		{
 			LK_SERIALIZE_PROPERTY(ObjectReferences, Window_ObjectReferences.bOpen, Out);
 			LK_SERIALIZE_PROPERTY(AssetRegistry, Window_AssetRegistry.bOpen, Out);
-
-			/* Window: InputInfo */
 			LK_SERIALIZE_PROPERTY(InputInfo, Window_InputInfo.bOpen, Out);
 			LK_SERIALIZE_PROPERTY(InputInfo_TreeNode_KeyInfo, Window_InputInfo.bTreeNode_KeyInfo, Out);
 			LK_SERIALIZE_PROPERTY(InputInfo_TreeNode_Selection, Window_InputInfo.bTreeNode_Selection, Out);
-
 			LK_SERIALIZE_PROPERTY(UserInterfaceTools, Window_UserInterfaceTools.bOpen, Out);
 			LK_SERIALIZE_PROPERTY(Fonts, Window_Fonts.bOpen, Out);
 			LK_SERIALIZE_PROPERTY(Sandbox, Window_Sandbox.bOpen, Out);
+			LK_SERIALIZE_PROPERTY(Console, Window_Console.bOpen, Out);
 		}
 		Out << YAML::EndMap;
 	}
@@ -100,14 +77,13 @@ namespace LkEngine {
 		
 		LK_DESERIALIZE_PROPERTY(ObjectReferences, Window_ObjectReferences.bOpen, WindowsNode, false);
 		LK_DESERIALIZE_PROPERTY(AssetRegistry, Window_AssetRegistry.bOpen, WindowsNode, false);
-
 		LK_DESERIALIZE_PROPERTY(InputInfo, Window_InputInfo.bOpen, WindowsNode, false);
 		LK_DESERIALIZE_PROPERTY(InputInfo_TreeNode_KeyInfo, Window_InputInfo.bTreeNode_KeyInfo, WindowsNode, false);
 		LK_DESERIALIZE_PROPERTY(InputInfo_TreeNode_Selection, Window_InputInfo.bTreeNode_Selection, WindowsNode, false);
-
 		LK_DESERIALIZE_PROPERTY(UserInterfaceTools, Window_UserInterfaceTools.bOpen, WindowsNode, false);
 		LK_DESERIALIZE_PROPERTY(Fonts, Window_Fonts.bOpen, WindowsNode, false);
 		LK_DESERIALIZE_PROPERTY(Sandbox, Window_Sandbox.bOpen, WindowsNode, false);
+		LK_DESERIALIZE_PROPERTY(Console, Window_Console.bOpen, WindowsNode, false);
 	}
 
 	void LToolsPanel::UI_ObjectReferences()
@@ -232,7 +208,7 @@ namespace LkEngine {
 				 */
 				TObjectPtr<LObject> SelectedObject = LiveObjects.at(SelectedIndex);
 
-				ImGui::BeginChild("Object Information", ImVec2(0, 0), true, ImGuiWindowFlags_NoNavInputs);
+				ImGui::BeginChild("Object Information", ImVec2(0, 0), true, ImGuiWindowFlags_None);
 				{
 					static constexpr ImGuiTableFlags ObjectInfoTableFlags = ImGuiTableFlags_Borders
 						| ImGuiTableFlags_RowBg
@@ -877,6 +853,44 @@ namespace LkEngine {
 		}
 
 		ImGui::End();
+	}
+
+	void LToolsPanel::UI_Console()
+	{
+		if (ImGui::TreeNode("Testing"))
+		{
+			/* FIXME: Randomize the logs. */
+			if (ImGui::Button("Console Log: Spam"))
+			{
+				LK_CONSOLE_DEBUG("Editor panels initialized");
+				LK_CONSOLE_INFO("Info message 1");
+				LK_CONSOLE_INFO("Info message 2");
+				LK_CONSOLE_ERROR("Error message");
+				LK_CONSOLE_WARN("Warn message");
+			}
+
+			if (ImGui::Button("Console Log: DEBUG"))
+			{
+				LK_CONSOLE_DEBUG("Test log DEBUG message");
+			}
+
+			if (ImGui::Button("Console Log: INFO"))
+			{
+				LK_CONSOLE_INFO("Test log INFO message");
+			}
+
+			if (ImGui::Button("Console Log: WARN"))
+			{
+				LK_CONSOLE_WARN("Test log WARN message");
+			}
+
+			if (ImGui::Button("Console Log: ERROR"))
+			{
+				LK_CONSOLE_ERROR("Test log ERROR message");
+			}
+
+			ImGui::TreePop();
+		}
 	}
 
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LkEngine/Core/CoreMacros.h"
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui-node-editor/imgui_node_editor.h>
@@ -9,7 +11,7 @@ namespace LkEngine {
     
     namespace ed = ax::NodeEditor;
 
-    enum class PinType
+    enum class EPinType
     {
         Flow,
         Bool,
@@ -20,14 +22,16 @@ namespace LkEngine {
         Function,
         Delegate,
     };
+	LK_ENUM_CLASS_FLAGS(EPinType);
 
-    enum class PinKind
+    enum class EPinKind
     {
         Output,
         Input
     };
+	LK_ENUM_CLASS_FLAGS(EPinKind);
 
-    enum class NodeType
+    enum class ENodeType
     {
         Blueprint,
         Simple,
@@ -35,47 +39,53 @@ namespace LkEngine {
         Comment,
         Houdini
     };
+	LK_ENUM_CLASS_FLAGS(ENodeType);
 
-    struct Node;
+    struct LNode;
 
-    /// Patch this.
-    struct Pin
+    struct LPin
     {
         ed::PinId ID;
-        Node* Node;
+		LNode* Node{};
         std::string Name;
-        PinType Type;
-        PinKind Kind;
+        EPinType Type;
+        EPinKind Kind;
 
-        Pin(int id, const char* name, PinType type) :
-            ID(id), Node(nullptr), Name(name), Type(type), Kind(PinKind::Input)
+        LPin(const int InID, const char* InName, const EPinType InType) 
+			: ID(InID)
+			, Node(nullptr)
+			, Name(InName)
+			, Type(InType)
+			, Kind(EPinKind::Input)
         {
         }
     };
     
-    /// Patch this.
-    struct Node
+    struct LNode
     {
-        ed::NodeId ID;
-        std::string Name;
+		ed::NodeId ID{};
+		std::string Name{};
         ImColor Color;
-        NodeType Type;
-        ImVec2 Size;
+        ENodeType Type;
+		ImVec2 Size{};
 
-        std::vector<Pin> Inputs;
-        std::vector<Pin> Outputs;
+		std::vector<LPin> Inputs{};
+		std::vector<LPin> Outputs{};
 
         std::string State;
         std::string SavedState;
 
-        Node(int id, const char* name, ImColor color = ImColor(255, 255, 255)) :
-            ID(id), Name(name), Color(color), Type(NodeType::Blueprint), Size(0, 0)
+        LNode(const int InID, const char* InName, const ImColor InColor = ImColor(255, 255, 255)) 
+			: ID(InID)
+			, Name(InName)
+			, Color(InColor)
+			, Type(ENodeType::Blueprint)
+			, Size(0, 0)
         {
         }
     };
 
-    /// Patch this.
-    struct Link
+    struct LPinLink
     {
         ed::LinkId ID;
 
@@ -84,8 +94,11 @@ namespace LkEngine {
 
         ImColor Color;
 
-        Link(ed::LinkId id, ed::PinId startPinId, ed::PinId endPinId) :
-            ID(id), StartPinID(startPinId), EndPinID(endPinId), Color(255, 255, 255)
+        LPinLink(const ed::LinkId InID, ed::PinId InStartPinId, ed::PinId InEndPinId) 
+			: ID(InID)
+			, StartPinID(InStartPinId)
+			, EndPinID(InEndPinId)
+			, Color(255, 255, 255)
         {
         }
     };

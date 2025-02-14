@@ -17,6 +17,7 @@
 #include "LkEngine/Core/Math/Ray.h"
 
 #include "LkEngine/Editor/EditorGlobals.h"
+#include "LkEngine/Editor/EditorContext.h"
 #include "LkEngine/Editor/EditorSettings.h"
 #include "LkEngine/Editor/PanelManager.h"
 
@@ -34,8 +35,7 @@
 namespace LkEngine {
 
 	class LComponentEditor;
-	class LEditorTabManager;
-	class LNodeEditor;
+	class LNodeEditorPanel;
 	class LScene;
 	class LSceneManagerPanel;
 	class LSubmesh;
@@ -128,6 +128,8 @@ namespace LkEngine {
 	
 		void UI_OpenGLExtensions();
 		void UI_RenderSettingsWindow(); /* TODO: Re-evaluate, might move this to LToolsPanel. */
+		void UI_ProjectInfo();
+		void UI_Debug_EditorViewportInfo();
 
 		/**
 		 * Perform raycast on scene, returns the number of hit entities.
@@ -141,9 +143,9 @@ namespace LkEngine {
 
 		TObjectPtr<LFramebuffer>& GetViewportFramebuffer() { return ViewportFramebuffer; }
 
-		LEntity CreateCube(); /* TODO: REMOVE */
-
 		std::pair<float, float> GetMouseViewportSpace(const bool IsEditorViewport);
+
+		void OnCameraActivityChanged(LCamera* CameraRef, const bool CameraActive);
 
 		/**
 		 * Set window focus.

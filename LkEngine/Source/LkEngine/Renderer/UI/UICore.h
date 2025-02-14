@@ -44,6 +44,7 @@ namespace LkEngine
 		static constexpr const char* Tools               = "Tools";
 		static constexpr const char* MaterialEditor      = "Material Editor";
 		static constexpr const char* ThemeManager        = "Theme Manager";
+		static constexpr const char* NodeEditor          = "Node Editor";
 	}
 
 	enum class EMessageBoxFlag : uint32_t
@@ -212,9 +213,10 @@ namespace LkEngine::UI {
     bool IsInputEnabled();
     bool IsMouseEnabled();
     bool IsKeyboardEnabled();
-    void SetInputEnabled(bool Enabled);
+    void SetInputEnabled(const bool Enabled);
+	void SetMouseEnabled(const bool Enabled);
 
-    void Begin(const char* WindowTitle, bool* Open = nullptr, const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None);
+    bool Begin(const char* WindowTitle, bool* Open = nullptr, const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None);
     void End();
 
 	void BeginViewport(TObjectPtr<LWindow> Window);
@@ -311,6 +313,212 @@ namespace LkEngine::UI {
 		return false;
 	}
 
+	template<EFindType FindType = EFindType::Name, typename T = const char*>
+	FORCEINLINE static bool IsWindowHovered(T Identifier)
+	{
+		LK_CORE_ASSERT(false);
+		return false;
+	}
+
+	template<>
+	FORCEINLINE static bool IsWindowHovered<EFindType::Name>(const char* WindowName)
+	{
+		if (ImGuiWindow* Window = ImGui::FindWindowByName(WindowName); Window != nullptr)
+		{
+			ImGuiContext& G = *ImGui::GetCurrentContext();
+			return Window == G.HoveredWindow;
+		}
+
+		return false;
+    }
+
+	template<>
+	FORCEINLINE static bool IsWindowHovered<EFindType::ID>(const ImGuiID ID)
+	{
+		if (ImGuiWindow* Window = ImGui::FindWindowByID(ID); Window != nullptr)
+		{
+			ImGuiContext& G = *ImGui::GetCurrentContext();
+			return Window == G.HoveredWindow;
+		}
+
+		return false;
+    }
+
+	template<EFindType FindType = EFindType::Name, typename T = const char*>
+	FORCEINLINE static bool IsWindowAbove(T Window1, T Window2)
+	{
+		LK_CORE_ASSERT(false);
+		return false;
+	}
+
+	template<>
+	FORCEINLINE static bool IsWindowAbove<EFindType::Name>(const char* Window1Name, const char* Window2Name)
+	{
+		ImGuiWindow* Window1 = ImGui::FindWindowByName(Window1Name);
+		ImGuiWindow* Window2 = ImGui::FindWindowByName(Window2Name);
+		if (Window1 && !Window2)
+		{
+			return true;
+		}
+		if (!Window1 && Window2)
+		{
+			return false;
+		}
+
+		ImGuiWindow* CurrentWindow = nullptr;
+		ImGuiContext& G = *ImGui::GetCurrentContext();
+		for (int Idx = G.Windows.Size - 1; Idx >= 0; Idx)
+		{
+			CurrentWindow = G.Windows[Idx];
+			if (CurrentWindow == Window1)
+			{
+				return true;
+			}
+			if (CurrentWindow == Window2)
+			{
+				return false;
+			}
+		}
+
+		return false;
+    }
+
+	template<>
+	FORCEINLINE static bool IsWindowAbove<EFindType::ID>(const ImGuiID Window1ID, const ImGuiID Window2ID)
+	{
+		ImGuiWindow* Window1 = ImGui::FindWindowByID(Window1ID);
+		ImGuiWindow* Window2 = ImGui::FindWindowByID(Window2ID);
+		if (Window1 && !Window2)
+		{
+			return true;
+		}
+		if (!Window1 && Window2)
+		{
+			return false;
+		}
+
+		ImGuiWindow* CurrentWindow = nullptr;
+		ImGuiContext& G = *ImGui::GetCurrentContext();
+		for (int Idx = G.Windows.Size - 1; Idx >= 0; Idx)
+		{
+			CurrentWindow = G.Windows[Idx];
+			if (CurrentWindow == Window1)
+			{
+				return true;
+			}
+			if (CurrentWindow == Window2)
+			{
+				return false;
+			}
+		}
+
+		return false;
+    }
+
+	template<EFindType FindType = EFindType::Name, typename T = const char*>
+	FORCEINLINE static bool IsAnyWindowAbove(T Window)
+	{
+		LK_CORE_ASSERT(false);
+		return false;
+	}
+
+	template<>
+	FORCEINLINE static bool IsAnyWindowAbove<EFindType::Name>(const char* WindowName)
+	{
+		ImGuiWindow* Window = ImGui::FindWindowByName(WindowName);
+		if (!Window)
+		{
+			return false;
+		}
+
+		ImGuiContext& G = *ImGui::GetCurrentContext();
+		return ((G.WindowsFocusOrder.Size > 0) && (G.WindowsFocusOrder[G.WindowsFocusOrder.Size - 1]));
+    }
+
+	template<>
+	FORCEINLINE static bool IsAnyWindowAbove<EFindType::ID>(const ImGuiID WindowID)
+	{
+		ImGuiWindow* Window = ImGui::FindWindowByID(WindowID);
+		if (!Window)
+		{
+			return false;
+		}
+
+		ImGuiContext& G = *ImGui::GetCurrentContext();
+		return ((G.WindowsFocusOrder.Size > 0) && (G.WindowsFocusOrder[G.WindowsFocusOrder.Size - 1]));
+    }
+
+	template<EFindType FindType = EFindType::Name, typename T = const char*>
+	FORCEINLINE static ImGuiWindow* GetWindowAbove(T Window1, T Window2)
+	{
+		LK_CORE_ASSERT(false);
+		return nullptr;
+	}
+
+	template<>
+	FORCEINLINE static ImGuiWindow* GetWindowAbove<EFindType::Name>(const char* Window1Name, const char* Window2Name)
+	{
+		ImGuiWindow* Window1 = ImGui::FindWindowByName(Window1Name);
+		ImGuiWindow* Window2 = ImGui::FindWindowByName(Window2Name);
+		if (Window1 && !Window2)
+		{
+			return Window1;
+		}
+		if (!Window1 && Window2)
+		{
+			return Window2;
+		}
+
+		ImGuiWindow* CurrentWindow = nullptr;
+		ImGuiContext& G = *ImGui::GetCurrentContext();
+		for (int Idx = G.Windows.Size - 1; Idx >= 0; Idx)
+		{
+			CurrentWindow = G.Windows[Idx];
+			if (CurrentWindow == Window1)
+			{
+				return Window1;
+			}
+			if (CurrentWindow == Window2)
+			{
+				return Window2;
+			}
+		}
+
+		return nullptr;
+    }
+
+	template<>
+	FORCEINLINE static ImGuiWindow* GetWindowAbove<EFindType::ID>(const ImGuiID Window1ID, const ImGuiID Window2ID)
+	{
+		ImGuiWindow* Window1 = ImGui::FindWindowByID(Window1ID);
+		ImGuiWindow* Window2 = ImGui::FindWindowByID(Window2ID);
+		if (Window1 && !Window2)
+		{
+			return Window1;
+		}
+		if (!Window1 && Window2)
+		{
+			return Window2;
+		}
+
+		ImGuiWindow* CurrentWindow = nullptr;
+		ImGuiContext& G = *ImGui::GetCurrentContext();
+		for (int Idx = G.Windows.Size - 1; Idx >= 0; Idx)
+		{
+			CurrentWindow = G.Windows[Idx];
+			if (CurrentWindow == Window1)
+			{
+				return Window1;
+			}
+			if (CurrentWindow == Window2)
+			{
+				return Window2;
+			}
+		}
+
+		return nullptr;
+    }
+
     /**
      * @brief Check if a window is docked, defaults to use the window name.
      */
@@ -343,36 +551,25 @@ namespace LkEngine::UI {
 		return ImVec2();
 	}
 
-	template<EFindType FindType = EFindType::Name, typename T = const char*>
-	FORCEINLINE static bool IsWindowHovered(T Identifier)
-	{
-		LK_CORE_ASSERT(false);
-		return false;
-	}
-
-	template<>
-	FORCEINLINE static bool IsWindowHovered<EFindType::Name>(const char* WindowName)
+	FORCEINLINE static ImGuiID GetWindowID(const char* WindowName)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByName(WindowName); Window != nullptr)
 		{
-			ImGuiContext& G = *ImGui::GetCurrentContext();
-			return Window == G.HoveredWindow;
+			return Window->ID;
 		}
 
-		return false;
-    }
+		return 0;
+	}
 
-	template<>
-	FORCEINLINE static bool IsWindowHovered<EFindType::ID>(const ImGuiID ID)
+	FORCEINLINE static const char* GetWindowName(const ImGuiID ID)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByID(ID); Window != nullptr)
 		{
-			ImGuiContext& G = *ImGui::GetCurrentContext();
-			return Window == G.HoveredWindow;
+			return Window->Name;
 		}
 
-		return false;
-    }
+		return "NULL";
+	}
 
 	FORCEINLINE bool IsItemDisabled()
 	{
@@ -530,7 +727,7 @@ namespace LkEngine::UI {
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
 		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
 		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs
-		| ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNavFocus;
+		| ImGuiWindowFlags_NoDocking;
 
 	inline static ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoTitleBar 
 		| ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize

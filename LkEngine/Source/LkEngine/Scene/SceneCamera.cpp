@@ -6,6 +6,47 @@
 
 namespace LkEngine
 {
+	void LSceneCamera::Tick(const float InDeltaTime)
+	{
+		if (bKeyboardEnabled)
+		{
+			if (LKeyboard::IsKeyPressed(EKey::W))
+			{
+				Position += glm::vec3(0, 1, 0) * InDeltaTime * TravelSpeed;
+			}
+			if (LKeyboard::IsKeyPressed(EKey::A))
+			{
+				Position -= glm::vec3(1, 0, 0) * InDeltaTime * TravelSpeed;
+			}
+			if (LKeyboard::IsKeyPressed(EKey::S))
+			{
+				Position -= glm::vec3(0, 1, 0) * InDeltaTime * TravelSpeed;
+			}
+			if (LKeyboard::IsKeyPressed(EKey::D))
+			{
+				Position += glm::vec3(1, 0, 0) * InDeltaTime * TravelSpeed;
+			}
+
+			if (LKeyboard::IsKeyPressed(EKey::Q))
+			{
+				//m_Zoom += 0.010f;
+			}
+			if (LKeyboard::IsKeyPressed(EKey::R))
+			{
+				//m_Zoom -= 0.010f;
+			}
+		}
+
+		if (bMouseEnabled)
+		{
+			/* EMPTY */
+		}
+
+		/// FIXME: Use delegate here
+        LWindow& Window = LWindow::Get();
+		SetViewportSize(Window.GetViewportWidth(), Window.GetViewportHeight());
+	}
+
 	void LSceneCamera::SetViewportSize(uint32_t Width, uint32_t Height)
 	{
 		UpdateView();
@@ -31,47 +72,6 @@ namespace LkEngine
 	{
 		UpdateView(); 
 		UpdateProjection();
-	}
-
-	void LSceneCamera::Update(float ts)
-	{
-		if (bKeyboardEnabled)
-		{
-			/* WASD */
-			if (LKeyboard::IsKeyPressed(EKey::W))
-			{
-				Position += glm::vec3(0, 1, 0) * ts * TravelSpeed;
-			}
-			if (LKeyboard::IsKeyPressed(EKey::A))
-			{
-				Position -= glm::vec3(1, 0, 0) * ts * TravelSpeed;
-			}
-			if (LKeyboard::IsKeyPressed(EKey::S))
-			{
-				Position -= glm::vec3(0, 1, 0) * ts * TravelSpeed;
-			}
-			if (LKeyboard::IsKeyPressed(EKey::D))
-			{
-				Position += glm::vec3(1, 0, 0) * ts * TravelSpeed;
-			}
-
-			if (LKeyboard::IsKeyPressed(EKey::Q))
-			{
-				//m_Zoom += 0.010f;
-			}
-			if (LKeyboard::IsKeyPressed(EKey::R))
-			{
-				//m_Zoom -= 0.010f;
-			}
-		}
-
-		if (bMouseEnabled)
-		{
-		}
-
-		/// FIXME: Use delegate here
-        LWindow& Window = LWindow::Get();
-		SetViewportSize(Window.GetViewportWidth(), Window.GetViewportHeight());
 	}
 
 	void LSceneCamera::UpdateProjection()

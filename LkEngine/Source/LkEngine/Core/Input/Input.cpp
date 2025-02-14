@@ -92,12 +92,15 @@ namespace LkEngine {
 
 	void LInput::SetCursorMode(const ECursorMode CursorMode)
 	{
+		LK_CORE_TRACE_TAG("Input", "SetCursorMode: {}", Enum::ToString(CursorMode));
 		LWindow& Window = LApplication::Get().GetWindow();
 		glfwSetInputMode(
 			LApplication::Get().GetWindow().GetGlfwWindow(),
 			GLFW_CURSOR, 
 			GLFW_CURSOR_NORMAL + static_cast<int>(CursorMode)
 		);
+
+		UI::SetInputEnabled(CursorMode == ECursorMode::Normal);
 	}
 
 	ECursorMode LInput::GetCursorMode()

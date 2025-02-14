@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LkEngine/Core/Core.h" /* PATCH OUT */
+#include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/Time/Timer.h"
 #include "LkEngine/Core/Event/KeyEvent.h"
 #include "LkEngine/Core/Event/MouseEvent.h"
@@ -17,12 +17,23 @@
 
 namespace LkEngine {
 
+	enum class ECameraActionFlag : uint16_t
+	{
+		None   = 0,
+		Pan    = LK_BIT(0),
+		Rotate = LK_BIT(1),
+		Zoom   = LK_BIT(2),
+	};
+	LK_ENUM_CLASS_FLAGS(ECameraActionFlag);
+	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(ECameraActionFlag, ECameraActionFlag::None, ECameraActionFlag::Zoom);
+
 	enum class EEditorCameraMode
 	{
 		None = 0,
 		Flycam,
 		Arcball
 	};
+	LK_ENUM_CLASS_FLAGS(EEditorCameraMode);
 
 	/**
 	 * LEditorCamera
@@ -37,7 +48,7 @@ namespace LkEngine {
 
 		void Initialize();
 
-		void Tick(const float DeltaTime);
+		virtual void Tick(const float DeltaTime = 0.0f) override;
 		void UpdateCameraView();
 
 		FORCEINLINE float GetDistance() const { return Distance; }
@@ -51,9 +62,7 @@ namespace LkEngine {
 			}
 		}
 
-		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, 
-										const float InNearClip = 0.1f, 
-										const float InFarClip = 1000.0f)
+		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
 				|| (DegPerspectiveFOV != InVerticalFovDeg)
@@ -69,7 +78,7 @@ namespace LkEngine {
 			}
 		}
 
-		void SetOrthographic(const float InWidth, const float InHeight, const float InNearClip = -1.0f, const float InFarClip = 1.0f)
+		FORCEINLINE void SetOrthographic(const float InWidth, const float InHeight, const float InNearClip = -1.0f, const float InFarClip = 1.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
 				|| (OrthographicNear != InNearClip)
@@ -110,11 +119,14 @@ namespace LkEngine {
 		bool OnMouseScroll(MouseScrolledEvent& e);
 
 	private:
-		static constexpr float MIN_SPEED = 0.0005f;
+		static constexpr float MIN_SPEED = 0.00050f;
 		static constexpr float MAX_SPEED = 2.0f;
 	private:
 		bool bPanning = false;
 		bool bRotating = false;
+		bool bZooming = false;
+		//uint16_t CameraActionFlags = 0;
+		ECameraActionFlag CameraActionFlags = ECameraActionFlag::None;
 
 		float Distance = 0.0f;
 		float NormalSpeed = 0.0020f;
@@ -137,5 +149,21 @@ namespace LkEngine {
 		friend class LSceneManagerPanel;
 		friend class LSceneSerializer; /* Access to populate members when deserializing a scene. */
 	};
+
+	namespace Enum 		
+	{
+		FORCEINLINE static constexpr const char* ToString(const EEditorCameraMode CameraMode)
+		{
+			switch (CameraMode)
+			{
+				case EEditorCameraMode::None:    return "None";
+				case EEditorCameraMode::Flycam:  return "Flycam";
+				case EEditorCameraMode::Arcball: return "Arcball";
+			}
+
+			LK_CORE_VERIFY(false, "Enum::ToString(const EEditorCameraMode) failed for: {}", static_cast<int>(CameraMode));
+			return nullptr;
+		}
+	}
 
 }

@@ -32,6 +32,7 @@ namespace LkEngine {
 	class LCamera : public LObject
 	{
 		LK_DECLARE_MULTICAST_DELEGATE(FCameraProjectionChanged, const ECameraProjection);
+		LK_DECLARE_MULTICAST_DELEGATE(FCameraActivityChanged, LCamera*, const bool);
 
 		/** FCameraInputModified, called on input modifications. */
 		LK_DECLARE_MULTICAST_DELEGATE(FCameraInputModified);
@@ -48,6 +49,8 @@ namespace LkEngine {
 
 		FORCEINLINE glm::vec3 GetPosition() const { return Position; }
 		FORCEINLINE const glm::vec3& GetPosition() { return Position; }
+
+		FORCEINLINE bool IsActive() const { return bIsActive; }
 
 		/* TODO: Remove as virtual. */
 		virtual void SetPosition(const glm::vec3& InPosition)
@@ -94,11 +97,12 @@ namespace LkEngine {
 			}
 		}
 
-		virtual void SetActive(const bool InActive) 
+		FORCEINLINE void SetActive(const bool InActive) 
 		{ 
 			if (bIsActive != InActive)
 			{
 				bIsActive = InActive; 
+				OnCameraActivityChanged.Broadcast(this, bIsActive);
 			}
 		}
 
@@ -180,13 +184,13 @@ namespace LkEngine {
 
 		void SetPerspectiveProjectionMatrix(const float InRadFov, const float InWidth, const float InHeight, const float InNearP, const float InFarP)
 		{
-			LK_VERIFY((InWidth > 0) && (InHeight > 0), "Cannot set projection matrix with invalid arguments");
+			LK_CORE_ASSERT((InWidth > 0) && (InHeight > 0), "Cannot set projection matrix with invalid arguments");
 			ProjectionMatrix = glm::perspectiveFov(InRadFov, InWidth, InHeight, InNearP, InFarP);
 		}
 
 		void SetOrthoProjectionMatrix(const float InWidth, const float InHeight, const float InNearP, const float InFarP)
 		{
-			LK_VERIFY((InWidth > 0) && (InHeight > 0));
+			LK_CORE_ASSERT((InWidth > 0) && (InHeight > 0));
 			ProjectionMatrix = glm::ortho(
 				-(InWidth * 0.50f), (InWidth * 0.50f),
 				-(InHeight * 0.50f), (InHeight * 0.50f),
@@ -219,9 +223,15 @@ namespace LkEngine {
 		FORCEINLINE const float GetPerspectiveDegFov() const { return DegPerspectiveFOV; }
 
 	public:
+		/**
+		 * Important to note that delegates have trouble being inherited for multiple
+		 * derivations. The inheritence for LEditorCamera looks like this:
+		 *  [ LEditorCamera --> LSceneCamera --> LCamera ]
+		 * This can be troublesome so it is best to declare camera delegates static.
+		 */
+		inline static FCameraActivityChanged OnCameraActivityChanged;
 		FCameraProjectionChanged OnCameraProjectionChanged;
 		FCameraInputModified OnCameraInputModified;
-
 	protected:
 		bool bIsActive = false;
 		ECameraProjection ProjectionType = ECameraProjection::Perspective;

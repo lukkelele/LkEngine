@@ -28,7 +28,6 @@ namespace LkEngine {
 
 		static void Enable();
 		static void Disable();
-		static bool IsEnabled();
 
 	public:
 		inline static FOnMouseEnabled OnMouseEnabled;

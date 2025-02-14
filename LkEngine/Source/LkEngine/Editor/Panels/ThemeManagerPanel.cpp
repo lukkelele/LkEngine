@@ -13,10 +13,14 @@ namespace LkEngine {
 
 	void LThemeManagerPanel::RenderUI(bool& IsOpen)
 	{
-		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
 		ImGui::SetNextWindowPos(ImVec2(180, 120), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(540, 780), ImGuiCond_FirstUseEver);
-		UI::Begin(PanelID::ThemeManager, &IsOpen, WindowFlags);
+
+		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
+		if (!UI::Begin(PanelID::ThemeManager, &IsOpen, WindowFlags))
+		{
+			return;
+		}
 
 		static ImGuiTableFlags GridFlags = ImGuiTableFlags_SizingFixedSame;
 		static bool bGridTable_UseHeaderLabels = false;
@@ -73,6 +77,8 @@ namespace LkEngine {
 			ImGui::TreePop();
 		}
 
+		UI::Property("Theme Selector", bSelectorEnabled);
+
 		/* Populate themes array for the dropdown. */
 		static std::array<const char*, (uint16_t)ETheme::COUNT> Themes;
 		if (Themes.at(0) == nullptr)
@@ -87,7 +93,6 @@ namespace LkEngine {
 		}
 
 		static ETheme SelectedTheme = ETheme::Dark;
-
 		if (UI::PropertyDropdown("Theme", Themes, SelectedTheme))
 		{
 			LK_CORE_CONSOLE_INFO("Selected theme: {}", Enum::ToString(SelectedTheme));
@@ -214,6 +219,25 @@ namespace LkEngine {
 		ImGui::Separator();
 
 		UI::End();
+	}
+
+	void LThemeManagerPanel::SetSelectorEnabled(const bool InEnabled)
+	{
+		bSelectorEnabled = InEnabled;
+	}
+
+	void LThemeManagerPanel::OnMouseButtonPressed(const FMouseButtonData& ButtonData)
+	{
+		LK_CORE_DEBUG_TAG("ThemeManager", "OnMouseButtonPressed: {}", Enum::ToString(ButtonData.Button));
+
+		ImGuiContext& Ctx = *GImGui;
+		LK_CORE_CONSOLE_DEBUG("Hovered ID: {}", Ctx.HoveredId);
+		LK_CORE_CONSOLE_DEBUG("Active ID: {}", Ctx.ActiveId);
+
+		if (ImGuiWindow* Window = ImGui::FindWindowByID(Ctx.ActiveId); Window != nullptr)
+		{
+			LK_CORE_CONSOLE_INFO("ID {} is a window", Ctx.ActiveId);
+		}
 	}
 
 	void LThemeManagerPanel::SerializeToYaml(YAML::Emitter& Out) const

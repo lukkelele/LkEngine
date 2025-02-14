@@ -451,7 +451,6 @@ namespace LkEngine {
 		LK_CORE_ASSERT(SceneRenderer);
 		LK_CORE_ASSERT((ViewportWidth > 0) && (ViewportHeight > 0), "Invalid viewport size");
 		EditorCamera.SetViewportSize(ViewportWidth, ViewportHeight);
-		EditorCamera.Tick(DeltaTime);
 
 		SceneRenderer->SetScene(this);
 		SceneRenderer->BeginScene(EditorCamera);
