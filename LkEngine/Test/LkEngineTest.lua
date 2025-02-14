@@ -47,11 +47,6 @@ project "LkEngine_AutomationTests"
         "%{Dependency.Tracy.IncludeDir}",
 	}
 
-    filter "configurations:not AutomationTest"
-        flags {
-            "ExcludeFromBuild"
-        }
-
     prebuildcommands {
         "{ECHO} Building: %{prj.name}"
     }
