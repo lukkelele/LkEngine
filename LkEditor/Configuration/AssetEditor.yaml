@@ -1,0 +1,8 @@
+AssetEditorManager:
+  - Title: Material Editor
+    ID: Material Editor
+    Type: Material
+    IsOpen: false
+    Data:
+      MaterialAsset: 0
+      ShaderSelection: false

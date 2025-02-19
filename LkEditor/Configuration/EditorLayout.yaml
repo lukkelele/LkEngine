@@ -1,0 +1,31 @@
+PanelManager:
+  - ID: 2792665263
+    Name: Theme Manager
+    IsOpen: false
+  - ID: 3435657678
+    Name: Content Browser
+    IsOpen: true
+  - ID: 3683667489
+    Name: Log
+    IsOpen: true
+  - ID: 2374020788
+    Name: Tools
+    IsOpen: false
+    Windows:
+      ObjectReferences: false
+      AssetRegistry: false
+      InputInfo: false
+      InputInfo_TreeNode_KeyInfo: false
+      InputInfo_TreeNode_Selection: true
+      UserInterfaceTools: false
+      Fonts: false
+      Sandbox: false
+      Console: false
+  - ID: 2562280783
+    Name: Editor Settings
+    IsOpen: false
+    Windows:
+      CoreSettings: false
+  - ID: 875217496
+    Name: Scene Manager
+    IsOpen: true

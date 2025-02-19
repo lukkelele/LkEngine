@@ -1,0 +1,8 @@
+Project:
+  Name: Starter-2025
+  AssetDirectory: Assets
+  AssetRegistryPath: Projects/Starter-2025/AssetRegistry.lkr
+  MeshDirectory: ""
+  StartScene: Starter-2025
+  AutoSave: true
+  AutoSaveInterval: 150
