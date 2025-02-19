@@ -11,7 +11,7 @@ LK_ENGINE_VERSION = EncodeVersion(LK_ENGINE_MAJOR, LK_ENGINE_MINOR, LK_ENGINE_PA
 
 workspace "LkEngine"
     architecture "x86_64"
-    startproject "LkRuntime"
+    startproject "LkEditor"
 
     configurations { 
         "Debug", 
@@ -105,8 +105,8 @@ AssetsDirectory = "%{wks.location}/LkRuntime/Assets"
 
 include "External/Dependencies.lua"
 
-include "LkRuntime/LkRuntime.lua"
---include "LkEditor/LkEditor.lua"
+include "LkEditor/LkEditor.lua"
+--include "LkRuntime/LkRuntime.lua"
 
 -- Test
 include "LkEngine/Test/LkEngineTest.lua"
@@ -129,9 +129,47 @@ project "LkEngine"
     pchsource "LkEngine/Source/LKpch.cpp"
 
     files { 
-        "%{wks.location}/LkEngine/Source/**.h",
-        "%{wks.location}/LkEngine/Source/**.cpp",
-        "%{wks.location}/LkEngine/Source/**.tpp",
+        "%{wks.location}/LkEngine/Source/LKpch.h",
+        "%{wks.location}/LkEngine/Source/LKpch.cpp",
+        "%{wks.location}/LkEngine/Source/LkEngine/**.h",
+        "%{wks.location}/LkEngine/Source/LkEngine/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Core/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Core/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Core/**.tpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Asset/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Asset/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Platform/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Platform/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Project/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Project/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Physics/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Physics/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Renderer/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Renderer/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Scene/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Scene/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Script/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Script/**.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Serialization/**.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Serialization/**.cpp",
+
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorCore.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorCore.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorContext.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorContext.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorGlobals.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorConsole/ConsoleMessage.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorConsole/ConsoleSink.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorConsolePanel.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorConsolePanel.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorCamera.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorCamera.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/AssetEditorManager.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/AssetEditorManager.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/PanelManager.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/PanelManager.cpp",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/ThemeManagerPanel.h",
+        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/ThemeManagerPanel.cpp",
 
         "%{Dependency.StbImage.IncludeDir}/**.h",
         "%{Dependency.StbImage.IncludeDir}/**.cpp",
