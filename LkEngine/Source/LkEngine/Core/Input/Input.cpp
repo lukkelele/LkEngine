@@ -5,8 +5,6 @@
 #include "LkEngine/Scene/Scene.h"
 
 
-#include "LkEngine/Editor/EditorLayer.h"
-
 namespace LkEngine {
 
 	void LInput::Initialize()

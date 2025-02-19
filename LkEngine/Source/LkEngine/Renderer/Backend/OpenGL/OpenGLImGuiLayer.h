@@ -5,7 +5,7 @@
 #include "LkEngine/Core/Math/Vector.h"
 
 /** 
- * @brief Define LVector2 conversion for ImVec2.
+ * @brief LVector2 conversion for ImVec2.
  */
 #define IM_VEC2_CLASS_EXTRA \
 	ImVec2(const ::LkEngine::LVector2& InVector) { x = InVector.X; y = InVector.Y; } \

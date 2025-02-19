@@ -5,11 +5,11 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/Renderer2D.h"
 
+#include "LkEngine/Scene/Scene.h"
+#include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Asset/AssetManager.h"
 
 #include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
-
-#include "LkEngine/Editor/EditorLayer.h" /// TODO: Remove this, just here for flushing of drawlists.
 
 
 namespace LkEngine {
@@ -37,6 +37,7 @@ namespace LkEngine {
 	void LSceneRenderer::BeginScene(const LSceneCamera& Camera)
 	{
 		LK_PROFILE_FUNC();
+		Data.ViewProjectionMatrix = Camera.GetViewProjection();
 	}
 
 	void LSceneRenderer::EndScene()
@@ -182,10 +183,7 @@ namespace LkEngine {
 		LK_PROFILE_FUNC();
 		LK_CORE_ASSERT(Scene);
 
-		/* FIXME: Use 'GetMainCamera' here. */
-		//TObjectPtr<LSceneCamera> SceneCamera = Scene->GetMainCamera();
-		TObjectPtr<LSceneCamera> SceneCamera = LEditorLayer::Get().GetEditorCamera();
-		LK_CORE_ASSERT(SceneCamera);
+		const glm::mat4 ViewProjection = Data.ViewProjectionMatrix;
 
 		FSceneRendererFlushData FlushData{};
 		FlushData.StaticMeshDrawListSize = (int)(StaticMeshDrawList.size());
@@ -243,14 +241,15 @@ namespace LkEngine {
 					glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
 				));
 
-				LRenderer::Submit([SceneCamera, Shader, Texture, MeshSource, Material, ModelMatrix]() mutable
+				LRenderer::Submit([ViewProjection, Shader, Texture, MeshSource, Material, ModelMatrix]() mutable
 				{
 					LRenderer::GetViewportFramebuffer()->Bind();
 					LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
 
 					/* Bind shader and set uniforms. */
 					Shader->Bind();
-					Shader->Set("u_ViewProjection", SceneCamera->GetViewProjection());
+					//Shader->Set("u_ViewProjection", SceneCamera.GetViewProjection());
+					Shader->Set("u_ViewProjection", ViewProjection);
 					Shader->Set("u_Model", ModelMatrix);
 					uint32_t Slot = 0;
 					Shader->Get("u_Texture", Slot);
@@ -304,14 +303,14 @@ namespace LkEngine {
 					glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
 				));
 
-				LRenderer::Submit([SceneCamera, Shader, Texture, MeshSource, Material, ModelMatrix]() mutable
+				LRenderer::Submit([ViewProjection, Shader, Texture, MeshSource, Material, ModelMatrix]() mutable
 				{
 					LRenderer::GetViewportFramebuffer()->Bind();
 					LRenderer::SetDepthFunction(EDepthFunction::LessOrEqual);
 
 					/* Bind shader and set uniforms. */
 					Shader->Bind();
-					Shader->Set("u_ViewProjection", SceneCamera->GetViewProjection());
+					Shader->Set("u_ViewProjection", ViewProjection);
 					Shader->Set("u_Model", ModelMatrix);
 
 					uint32_t Slot = 0;

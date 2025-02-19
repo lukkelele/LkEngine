@@ -8,7 +8,7 @@
  * This is done to provide better context to potential errors that might occur
  * when running the tests in the github action runner.
  */
-#if defined(LK_ENGINE_AUTOMATION_TEST)
+#if defined(LK_ENGINE_AUTOMATION_TEST) || defined(LK_GLOBALS_PRINTING_ENABLED)
 #	define LK_GLOBALS_PRINT(...)     LK_PRINT(__VA_ARGS__)
 #	define LK_GLOBALS_PRINTLN(...)   LK_PRINTLN(__VA_ARGS__)
 #else
@@ -54,7 +54,6 @@ namespace LkEngine {
 
 		bool bFoundEngineConfig = false;
 		LK_CORE_VERIFY(Path.filename() == "LkEngine", "Path is not LkEngine");
-		/* The engine config is placed in the 'LkEngine/LkRuntime' directory. */
 
 		/**
 		 * TODO: Evaluate how to best solve this.
@@ -69,16 +68,18 @@ namespace LkEngine {
 			LK_CORE_VERIFY(Traversed <= 4, "Traversal to find LkEngine root directory failed");
 		}
 
-		//LFileSystem::EngineDir = Path;
-		//LFileSystem::EngineDir += PathSeparator + std::string("LkRuntime");
+	#if defined(LK_ENGINE_EDITOR)
+		LFileSystem::EngineDir = Path / "LkEditor";
+	#else
+		/* FIXME */
 		LFileSystem::EngineDir = Path / "LkRuntime";
+	#endif
 		LFileSystem::RuntimeDir = LFileSystem::EngineDir;
 		LK_GLOBALS_PRINTLN("WorkingDir: {}", LFileSystem::WorkingDir.string());
 		LK_GLOBALS_PRINTLN("EngineDir:  {}", LFileSystem::EngineDir.string());
 		LK_GLOBALS_PRINTLN("RuntimeDir: {}", LFileSystem::RuntimeDir.string());
 		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid: '{}'", LFileSystem::EngineDir.string());
 
-		//LFileSystem::ConfigDir = LFileSystem::WorkingDir;
 		LFileSystem::ConfigDir = LFileSystem::EngineDir / "Configuration";
 
 		if (!LFileSystem::Exists(LFileSystem::ConfigDir))

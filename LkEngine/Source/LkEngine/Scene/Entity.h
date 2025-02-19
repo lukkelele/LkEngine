@@ -98,12 +98,7 @@ namespace LkEngine {
 		FORCEINLINE const std::string& Name() const { return GetComponent<LTagComponent>().Tag; }
 		FORCEINLINE LTagComponent& Tag() { return GetComponent<LTagComponent>(); }
 		FORCEINLINE LTransformComponent& Transform() { return GetComponent<LTransformComponent>(); }
-
-		/** GetMesh, throws error if entity doesn't have the component.*/
-		FORCEINLINE LMeshComponent& GetMesh() 
-		{ 
-			return GetComponent<LMeshComponent>(); 
-		}
+		FORCEINLINE LMeshComponent& GetMesh() { return GetComponent<LMeshComponent>(); }
 
 		operator uint32_t() const { return static_cast<uint32_t>(Handle); }
 		operator entt::entity() const { return Handle; }

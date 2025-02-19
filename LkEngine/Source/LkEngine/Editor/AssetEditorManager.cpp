@@ -77,6 +77,7 @@ namespace LkEngine {
 
 	void LAssetEditorManager::UnregisterEditors()
 	{
+		LK_CORE_DEBUG_TAG("AssetEditorManager", "Unregistering editors");
 		Serialize();
 	}
 
@@ -119,11 +120,16 @@ namespace LkEngine {
 		}
 		catch (YAML::BadFile& Exception)
 		{
-			LK_CORE_VERIFY(false, "Failed to load file: {}\nError: {}", ConfigFilePath.string(), Exception.what());
+			LK_CORE_WARN_TAG("AssetEditorManager", "Failed to load file: {}", ConfigFilePath.string());
+
+			/* Create the configuration file as it does not exist. */
+			LK_CORE_INFO_TAG("AssetEditorManager", "Creating configuration file: {}", ConfigFilePath.string());
+			std::ofstream FileOut(ConfigFilePath);
+			FileOut.close();
 		}
 		catch (YAML::EmitterException& Exception)
 		{
-			LK_CORE_VERIFY(false, "Failed to load file: {}\nError: {}", ConfigFilePath.string(), Exception.what());
+			LK_CORE_VERIFY(false, "Failed to read file: {}\nError: {}", ConfigFilePath.string(), Exception.what());
 		}
 
 		for (auto EditorNode : Data["AssetEditorManager"])

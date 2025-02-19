@@ -51,8 +51,7 @@ namespace LkEngine {
 
 	LEntity::operator bool() const 
 	{ 
-		return ((Handle != entt::null) 
-				&& Scene && (Scene->Registry.valid(Handle)));
+		return ((Handle != entt::null) && Scene && (Scene->Registry.valid(Handle)));
 	}
 
 }

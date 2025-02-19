@@ -86,18 +86,19 @@ namespace LkEngine {
 		{
 		}
 
-		glm::vec3 GetTranslation() const { return Translation; }
-		glm::vec3 GetScale() const { return Scale; }
-		float GetRotation2D() const { return Rotation2D; }
+		FORCEINLINE glm::vec3 GetTranslation() const { return Translation; }
+		FORCEINLINE glm::vec3 GetScale() const { return Scale; }
 
-		glm::mat4 GetTransform() const
+		FORCEINLINE float GetRotation2D() const { return Rotation2D; }
+
+		FORCEINLINE glm::mat4 GetTransform() const
 		{
 			return glm::translate(glm::mat4(1.0f), Translation)
 				* glm::toMat4(Rotation)
 				* glm::scale(glm::mat4(1.0f), Scale);
 		}
 
-		glm::mat4 GetInvTransform() const
+		FORCEINLINE glm::mat4 GetInvTransform() const
 		{
 			glm::mat4 inv_translation = glm::translate(glm::mat4(1.0f), -Translation);
 			glm::quat inv_rotation = glm::conjugate(Rotation);
@@ -105,35 +106,29 @@ namespace LkEngine {
 			return inv_scale * glm::toMat4(inv_rotation) * inv_translation;
 		}
 
-		glm::vec3 GetRotationEuler() const
-		{
-			return RotationEuler;
-		}
+		FORCEINLINE glm::quat GetRotation() const { return Rotation; }
+		FORCEINLINE glm::vec3 GetRotationEuler() const { return RotationEuler; }
 
-		void SetRotationEuler(const glm::vec3& euler)
+		FORCEINLINE void SetRotationEuler(const glm::vec3& euler)
 		{
 			RotationEuler = euler;
 			Rotation = glm::quat(RotationEuler);
 		}
 
-		glm::quat GetRotation() const
+		FORCEINLINE void SetRotation(const glm::quat& InQuat)
 		{
-			return Rotation;
-		}
+			Rotation = InQuat;
 
-		void SetRotation(const glm::quat& quat)
-		{
-			auto originalEuler = RotationEuler;
-			Rotation = quat;
+			const glm::vec3 OriginalEulerer = RotationEuler;
 			RotationEuler = glm::eulerAngles(Rotation);
 
 			/* Attempt to avoid 180deg flips in the Euler angles when using SetRotation(quat). */
-			if ((fabs(RotationEuler.x - originalEuler.x) == glm::pi<float>())
-				&& (fabs(RotationEuler.z - originalEuler.z) == glm::pi<float>()))
+			if ((fabs(RotationEuler.x - OriginalEulerer.x) == glm::pi<float>())
+				&& (fabs(RotationEuler.z - OriginalEulerer.z) == glm::pi<float>()))
 			{
-				RotationEuler.x = originalEuler.x;
+				RotationEuler.x = OriginalEulerer.x;
 				RotationEuler.y = glm::pi<float>() - RotationEuler.y;
-				RotationEuler.z = originalEuler.z;
+				RotationEuler.z = OriginalEulerer.z;
 			}
 		}
 
@@ -141,7 +136,7 @@ namespace LkEngine {
 
 		virtual std::string ToString() const override
 		{
-			return std::string("LTransformComponent::ToString() | TODO");
+			return std::format("[TransformComponent] Translation={} Scale={} RotEuler={}", Translation, Scale, RotationEuler);
 		}
 	};
 
@@ -186,10 +181,9 @@ namespace LkEngine {
 
 	struct LCameraComponent
 	{
-		TObjectPtr<LSceneCamera> Camera{};
+		LSceneCamera Camera;
 		ECameraProjection ProjectionType = ECameraProjection::None;
-
-		bool Primary = false; /// REMOVE, should be handled by the CameraManager
+		bool bPrimary = true;
 
 		LCameraComponent() = default;
 		LCameraComponent(const LCameraComponent& Other)
@@ -198,8 +192,19 @@ namespace LkEngine {
 		{
 		}
 
-		operator LSceneCamera&() { return *Camera; }
-		operator const LSceneCamera&() const { return *Camera; }
+		operator LSceneCamera&() { return Camera; }
+		operator const LSceneCamera&() const { return Camera; }
+
+		std::string ToString() const 
+		{
+			return std::format("[CameraComponent] Primary={} "
+							   "CameraType={} ProjectionType={} Pitch={:.2f} Yaw={:.2f}", 
+							   (bPrimary ? "True" : "False"), 
+							   Enum::ToString(Camera.GetType()), Enum::ToString(ProjectionType),
+							   Camera.GetPitch(), Camera.GetYaw()
+			);
+		}
+
 	};
 
 	/** ERigidBodyType */

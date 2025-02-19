@@ -11,6 +11,7 @@
 #include <locale>
 #include <string>
 
+#include <glm/glm.hpp>
 
 /**
  * Formatter: std::wstring
@@ -76,3 +77,59 @@ struct std::formatter<std::filesystem::path>
     }
 };
 
+/**
+ * Formatter: glm::vec2
+ */
+template<>
+struct std::formatter<glm::vec2>
+{
+	template<typename ParseContext>
+    constexpr auto parse(ParseContext& Context)
+    {
+        return Context.begin();
+    }
+	
+	template<typename FormatContext>
+    auto format(const glm::vec2& Input, FormatContext& Context) const
+    {
+        return std::format_to(Context.out(), "({:.2f}, {:.2f})", Input.x, Input.y);
+    }
+};
+
+/**
+ * Formatter: glm::vec3
+ */
+template<>
+struct std::formatter<glm::vec3>
+{
+	template<typename ParseContext>
+    constexpr auto parse(ParseContext& Context)
+    {
+        return Context.begin();
+    }
+	
+	template<typename FormatContext>
+    auto format(const glm::vec3& Input, FormatContext& Context) const
+    {
+        return std::format_to(Context.out(), "({:.2f}, {:.2f}, {:.2f})", Input.x, Input.y, Input.z);
+    }
+};
+
+/**
+ * Formatter: glm::vec4
+ */
+template<>
+struct std::formatter<glm::vec4>
+{
+	template<typename ParseContext>
+    constexpr auto parse(ParseContext& Context)
+    {
+        return Context.begin();
+    }
+	
+	template<typename FormatContext>
+    auto format(const glm::vec4& Input, FormatContext& Context) const
+    {
+        return std::format_to(Context.out(), "({:.2f}, {:.2f}, {:.2f}, {:.2f})", Input.x, Input.y, Input.z, Input.z);
+    }
+};

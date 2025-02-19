@@ -12,11 +12,10 @@ namespace LkEngine {
 	LEditorCamera::LEditorCamera(const float InFovDeg, const float InWidth, const float InHeight, 
 								 const float InNearP, const float InFarP)
 	{
-		Type = ECameraType::Editor;
 		PerspectiveNear = InNearP;
 		PerspectiveFar = InFarP;
 
-		static constexpr glm::vec3 BasePosition = { -5, 5, 5 }; 
+		static constexpr glm::vec3 BasePosition = { -5.0f, 5.0f, 5.0f }; 
 		Position = BasePosition;
 
 		Pitch = 0.0f;
@@ -27,7 +26,7 @@ namespace LkEngine {
 
 	void LEditorCamera::Initialize()
 	{
-		Type = ECameraType::Editor;
+		LK_CORE_DEBUG_TAG("EditorCamera", "Initializing");
 		Distance = glm::distance(Position, FocalPoint);
 
 		Yaw = 3.0f * glm::pi<float>() / 4.0f;
@@ -53,12 +52,10 @@ namespace LkEngine {
 			return;
 		}
 
-		const glm::vec2 MousePos{ LMouse::GetMouseX(), LMouse::GetMouseY() };
-		const glm::vec2 MouseDelta = (MousePos - InitialMousePosition) * 0.002f;
+		const glm::vec2 MousePos(LMouse::GetMouseX(), LMouse::GetMouseY());
+		const glm::vec2 MouseDelta = (MousePos - InitialMousePosition) * 0.0020f;
 
-		/* TODO: I don't like this approach of continously checking if active or not
-		         and then handling UI input. This should get taken care of somewhere else.
-		*/
+		glm::vec3 RightDirection = GetRightDirection();
 
 		if (LInput::IsMouseButtonDown(EMouseButton::Right) && !LInput::IsKeyDown(EKey::LeftAlt))
 		{
@@ -97,7 +94,7 @@ namespace LkEngine {
 			YawDelta += glm::clamp(YawSign * MouseDelta.x * GetRotationSpeed(), -MaxRate, MaxRate);
 			PitchDelta += glm::clamp(MouseDelta.y * GetRotationSpeed(), -MaxRate, MaxRate);
 
-			RightDirection = glm::cross(Direction, glm::vec3{ 0.0f, YawSign, 0.0f });
+			RightDirection = glm::cross(Direction, glm::vec3(0.0f, YawSign, 0.0f));
 
 			Direction = glm::rotate(
 				glm::normalize( 
@@ -123,30 +120,21 @@ namespace LkEngine {
 			if (LInput::IsMouseButtonDown(EMouseButton::Middle))
 			{
 				LMouse::Disable();
-				bPanning = true;
-				bRotating = false;
-				bZooming = false;
-				CameraActionFlags = ECameraActionFlag::Pan;
+				CameraActionFlags = (uint16_t)ECameraAction::Pan;
 				MousePan(MouseDelta);
 			}
 			/* Camera Mode: Rotate */
 			else if (LInput::IsMouseButtonDown(EMouseButton::Left))
 			{
 				LMouse::Disable();
-				bPanning = false;
-				bRotating = true;
-				bZooming = false;
-				CameraActionFlags = ECameraActionFlag::Rotate;
+				CameraActionFlags = (uint16_t)ECameraAction::Rotate;
 				MouseRotate(MouseDelta);
 			}
 			/* Camera Mode: Zoom */
 			else if (LInput::IsMouseButtonDown(EMouseButton::Right))
 			{
 				LMouse::Disable();
-				bPanning = false;
-				bRotating = false;
-				bZooming = true;
-				CameraActionFlags = ECameraActionFlag::Zoom;
+				CameraActionFlags = (uint16_t)ECameraAction::Zoom;
 				MouseZoom((MouseDelta.x + MouseDelta.y) * 0.10f);
 			}
 			else
@@ -157,7 +145,7 @@ namespace LkEngine {
 		else
 		{
 			LMouse::Enable();
-			CameraActionFlags = ECameraActionFlag::None;
+			CameraActionFlags = (uint16_t)ECameraAction::None;
 		}
 
 		/**
@@ -283,6 +271,40 @@ namespace LkEngine {
 		return ZoomSpeed;
 	}
 
+	void LEditorCamera::SetPitchLocked(const bool Locked)
+	{
+		if (Locked)
+		{
+			ModifierFlags |= ECameraModifier::PitchLocked;
+		}
+		else
+		{
+			ModifierFlags &= ~ECameraModifier::PitchLocked;
+		}
+	}
+
+	bool LEditorCamera::IsPitchLocked() const
+	{
+		return ModifierFlags & ECameraModifier::PitchLocked;
+	}
+
+	void LEditorCamera::SetYawLocked(const bool Locked)
+	{
+		if (Locked)
+		{
+			ModifierFlags |= ECameraModifier::YawLocked;
+		}
+		else
+		{
+			ModifierFlags &= ~ECameraModifier::YawLocked;
+		}
+	}
+
+	bool LEditorCamera::IsYawLocked() const
+	{
+		return ModifierFlags & ECameraModifier::YawLocked;
+	}
+
 	std::pair<float, float> LEditorCamera::GetPanSpeed() const
 	{
 		/* Maximum: 2.40f */
@@ -316,6 +338,7 @@ namespace LkEngine {
 	{
 		const glm::vec2 MousePosition = { LMouse::GetMouseX(), LMouse::GetMouseY() };
 		const glm::vec2 MouseDelta = (MousePosition - InitialMousePosition) * 0.0020f;
+		const glm::vec3 RightDirection = GetRightDirection();
 
 		const float YawSign = (GetUpDirection().y >= 0) ? 1.0f : -1.0f;
 		const float CameraSpeed = GetCameraSpeed();

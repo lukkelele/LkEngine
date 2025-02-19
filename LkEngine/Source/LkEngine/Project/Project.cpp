@@ -9,7 +9,6 @@
 #include "LkEngine/Core/IO/FileSystem.h"
 
 #include "LkEngine/Renderer/UI/UILayer.h"
-#include "LkEngine/Editor/EditorLayer.h"
 
 #include "LkEngine/Asset/AssetManager.h"
 
@@ -74,7 +73,6 @@ namespace LkEngine {
 		/* Serialize to disk. */
 		FProjectSerializer ProjectSerializer(this);
 
-		//const std::filesystem::path ProjectPath = std::format("Projects/{}", Configuration.Name);
 		const std::filesystem::path ProjectPath = Configuration.ProjectDirectory;
 		LK_CORE_TRACE("Project path: {}", ProjectPath.string());
 		if (ProjectPath.empty())
@@ -88,10 +86,10 @@ namespace LkEngine {
 		/* Save the scene. */
 		if (TObjectPtr<LScene> Scene = LScene::GetActiveScene(); Scene != nullptr)
 		{
-			LK_CORE_CONSOLE_DEBUG("Saving project scene: {}", Scene->GetName());
+			LK_CORE_INFO_TAG("Project", "Saving project scene: {}", Scene->GetName());
 			LSceneSerializer SceneSerializer(Scene);
 			const std::string SceneFilepath = std::format("{}/Scenes/{}.{}", Configuration.ProjectDirectory, Scene->GetName(), LScene::FILE_EXTENSION);
-			LK_CORE_DEBUG("Scene filepath: {}", SceneFilepath);
+			LK_CORE_DEBUG_TAG("Project", "Scene filepath: {}", SceneFilepath);
 			SceneSerializer.Serialize(SceneFilepath);
 		}
 

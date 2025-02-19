@@ -651,7 +651,7 @@ namespace LkEngine {
 	#elif defined(LK_OPENGL3)
 		using LOpenGL = LOpenGL3; 
 	#else
-	#	error "Invalid OpenGL version"
+		using LOpenGL = LOpenGL4; 
 	#endif
 
 	//-----------------------------------------------------------
@@ -964,6 +964,7 @@ namespace LkEngine {
 		void RenderCubes(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
 		void RenderFloor(const glm::mat4& view = glm::mat4(1.0f), const glm::mat4& proj = glm::mat4(1.0f));
 		void RenderSkybox(const TObjectPtr<LSceneCamera> Camera);
+		void RenderSkybox(const glm::mat4& ViewMatrix, const glm::mat4& ProjectionMatrix);
 
 		TObjectPtr<LShader> GetDebugShader();
 		TObjectPtr<LShader> GetScreenShader();

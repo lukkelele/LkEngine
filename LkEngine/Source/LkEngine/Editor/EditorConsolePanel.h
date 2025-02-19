@@ -2,7 +2,7 @@
 
 #include "LkEngine/Renderer/UI/Panel.h"
 
-#include "EditorConsole/ConsoleMessage.h"
+#include "LkEngine/Editor/EditorConsole/ConsoleMessage.h"
 
 
 namespace LkEngine {

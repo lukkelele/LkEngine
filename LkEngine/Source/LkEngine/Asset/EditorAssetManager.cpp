@@ -85,7 +85,14 @@ namespace LkEngine {
 		LoadBaseMaterials();
 		bAssetRegistryValid = LoadAssetRegistry();
 
-		LoadPrimitiveShapes();
+		if (bAssetRegistryValid)
+		{
+			LoadPrimitiveShapes();
+		}
+		else
+		{
+			LK_CORE_WARN_TAG("EditorAssetManager", "The asset registry failed to load, skipping loading of shapes");
+		}
 
 		LK_CORE_ASSERT(BaseMaterial && BaseMaterial->GetMaterial() && BaseMaterial->GetMaterial()->GetShader());
 		LK_CORE_ASSERT(BaseMaterial2 && BaseMaterial2->GetMaterial() && BaseMaterial2->GetMaterial()->GetShader());

@@ -58,6 +58,7 @@ namespace LkEngine {
 
 		void EndScene(); /// FIXME
 		
+		FORCEINLINE LUUID GetUUID() const { return SceneID; }
 		LEntity GetMainCameraEntity();
 
 		template<typename T = LEntity>
@@ -92,12 +93,6 @@ namespace LkEngine {
 
 		void Clear();
 		void Pause(const bool IsPaused);
-
-		void SetCamera(TObjectPtr<LSceneCamera> InSceneCamera);
-		void SwitchCamera();
-
-		FORCEINLINE LUUID GetUUID() const { return SceneID; }
-		FORCEINLINE TObjectPtr<LSceneCamera> GetMainCamera() { return Camera; } 
 
 		void CopyTo(TObjectPtr<LScene>& TargetScene);
 
@@ -143,12 +138,9 @@ namespace LkEngine {
 			return Registry.view<Components...>();
 		}
 
-		static void SetActiveScene(TObjectPtr<LScene> InScene);
-
-		static TObjectPtr<LScene> GetActiveScene() { return ActiveScene; }
-
 		std::unordered_set<LUUID> GetAssetList();
 
+		static TObjectPtr<LScene> GetActiveScene() { return ActiveScene; }
 		static uint8_t GetSceneCount() { return SceneCounter; }
 
 	public:
@@ -159,20 +151,18 @@ namespace LkEngine {
 	private:
 		LUUID SceneID = 0;
 		std::string Name = "";
-
 		entt::entity SceneEntity;
 
 		bool bPaused = false;
 		bool bEditorScene = false;
-		int Frames = 0;
 
-		std::unordered_map<LUUID, LEntity> EntityMap{};
 		entt::registry Registry{};
+		std::unordered_map<LUUID, LEntity> EntityMap{};
 
 		uint16_t ViewportWidth = 0;
 		uint16_t ViewportHeight = 0;
+		int Frames = 0;
 
-		TObjectPtr<LSceneCamera> Camera = nullptr;
 		TObjectPtr<LSceneRenderer> Renderer = nullptr;
 
 		friend class LEntity;

@@ -4,8 +4,9 @@
 
 #include <spdlog/sinks/base_sink.h>
 
-#include "LkEngine/Core/String.h"
-#include "LkEngine/Editor/Panels/EditorConsolePanel.h"
+#include <LkEngine/Core/Assert.h>
+
+#include "LkEngine/Editor/EditorConsolePanel.h"
 
 
 namespace LkEngine {

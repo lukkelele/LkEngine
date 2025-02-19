@@ -156,6 +156,7 @@ namespace LkEngine {
 
 		struct FSceneData
 		{
+			glm::mat4 ViewProjectionMatrix;
 		};
 		FSceneData Data{};
 

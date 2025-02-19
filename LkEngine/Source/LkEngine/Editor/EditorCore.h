@@ -13,34 +13,6 @@
 
 namespace LkEngine {
 
-	/** 
-     * EGizmo 
-	 * 
-	 *  TODO: Rework this.
-     */
-	enum class EGizmo
-	{ 
-		Translate = ImGuizmo::TRANSLATE,
-		Rotate	  = ImGuizmo::ROTATE,
-		Scale	  = ImGuizmo::SCALE
-	};
-
-	/* TODO: Move to other file. */
-	namespace Debug 
-	{
-		namespace UI 
-		{
-			extern bool bDisplayWindowSizeOnHover;
-			extern bool bBoundingBoxesOnHover;
-
-			namespace ContentBrowser 
-			{
-				extern bool bDrawOutlinerBorders;
-				extern ImVec4 OutlinerBorderColor;
-			}
-		}
-	}
-
 	/**
 	 * FEditorResources
 	 * 

@@ -6,8 +6,6 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Scene/Entity.h"
 
-#include "LkEngine/Editor/EditorLayer.h"
-
 
 namespace LkEngine::UI {
 
@@ -63,7 +61,10 @@ namespace LkEngine::UI {
         ImGuiIO& IO = ImGui::GetIO();
 
 		const bool PrevNoMouseFlag = (IO.ConfigFlags & ImGuiConfigFlags_NoMouse) == 0;
-		//const bool PrevNavCaptureKeyboard = IO.ConfigNavCaptureKeyboard;
+		if (Enabled != PrevNoMouseFlag)
+		{
+			LMouse::OnMouseEnabled.Broadcast(Enabled);
+		}
 
 		IO.ConfigNavCaptureKeyboard = Enabled;
         if (Enabled)
@@ -74,11 +75,6 @@ namespace LkEngine::UI {
         {
             IO.ConfigFlags |= ImGuiConfigFlags_NoMouse;
         }
-
-		if (Enabled != PrevNoMouseFlag)
-		{
-			LMouse::OnMouseEnabled.Broadcast(Enabled);
-		}
 	}
 
 	void SetMouseEnabled(const bool Enabled)

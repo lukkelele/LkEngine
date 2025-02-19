@@ -9,7 +9,7 @@
 #include "LkEngine/Core/Application.h"
 
 #if defined(LK_ENGINE_EDITOR)
-#	include "LkEngine/Editor/EditorLayer.h"
+//#	include "LkEngine/Editor/EditorLayer.h"
 #endif
 
 
@@ -22,11 +22,11 @@ namespace LkEngine {
 			std::vector<TObjectPtr<LPipeline>> Pipelines{};
 			std::vector<TObjectPtr<LMaterial>> Materials{};
 		};
-		
 		std::unordered_map<std::size_t, FShaderDependency> ShaderDependencies;
 
 		struct FRendererData
 		{
+			TObjectPtr<LFramebuffer> ViewportFramebuffer{};
 			TObjectPtr<LShaderLibrary> ShaderLibrary{};
 
 			TObjectPtr<LTexture2D> WhiteTexture{};
@@ -38,10 +38,7 @@ namespace LkEngine {
 		std::array<LRenderCommandQueue*, RenderCommandQueueCount> CommandQueue;
 		std::array<LRenderCommandQueue, 3> ResourceFreeQueue;
 		std::atomic<uint32_t> RenderCommandQueueSubmissionIndex = 0;
-		//LRenderCommandQueue* CommandQueue[RenderCommandQueueCount];
-		//static LRenderCommandQueue ResourceFreeQueue[3];
 	}
-
 
 	void LRendererAPI::SetAPI(ERendererAPI InRendererAPI)
 	{
@@ -95,6 +92,20 @@ namespace LkEngine {
 		}
 		LK_CORE_VERIFY(RendererData->WhiteTexture && RendererData->WhiteTexture->IsValid());
 
+		/* Create the main viewport framebuffer. */
+		{
+			LK_CORE_DEBUG_TAG("Renderer", "Creating viewport framebuffer");
+			FFramebufferSpecification FramebufferSpec;
+			FramebufferSpec.Attachments = { EImageFormat::RGBA32F, EImageFormat::DEPTH24STENCIL8 };
+			FramebufferSpec.Samples = 1;
+			FramebufferSpec.ClearColorOnLoad = false;
+			FramebufferSpec.ClearColor = { 0.10f, 0.50f, 0.50f, 1.0f };
+			FramebufferSpec.DebugName = "EditorViewport-FB";
+			FramebufferSpec.Width = LWindow::Get().GetWidth();
+			FramebufferSpec.Height = LWindow::Get().GetHeight();
+			RendererData->ViewportFramebuffer = LFramebuffer::Create(FramebufferSpec);
+		}
+
 		RendererAPI = LRendererAPI::Create();
 		RendererAPI->Initialize();
 
@@ -120,7 +131,7 @@ namespace LkEngine {
 		LFramebuffer::TargetSwapChain();
 		RendererAPI->Clear();
 
-		if (TObjectPtr<LFramebuffer> ViewportFramebuffer = GetViewportFramebuffer())
+		if (TObjectPtr<LFramebuffer> ViewportFramebuffer = GetViewportFramebuffer(); ViewportFramebuffer != nullptr)
 		{
 			ViewportFramebuffer->Bind();
 			ViewportFramebuffer->Clear();
@@ -161,12 +172,7 @@ namespace LkEngine {
 
 	TObjectPtr<LFramebuffer> LRenderer::GetViewportFramebuffer()
 	{
-	#if LK_ENGINE_EDITOR
-		return LEditorLayer::Get().ViewportFramebuffer;
-	#endif
-
-		LK_CORE_ASSERT(false, "Not implemented");
-		return nullptr;
+		return RendererData->ViewportFramebuffer;
 	}
 
 	TObjectPtr<LShaderLibrary> LRenderer::GetShaderLibrary()

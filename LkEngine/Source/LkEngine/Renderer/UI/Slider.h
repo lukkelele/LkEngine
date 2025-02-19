@@ -12,9 +12,44 @@ namespace LkEngine::UI {
 
 	namespace Draw 
 	{
+		inline static constexpr int LABEL_BUFSIZE = 72;
+
 		FORCEINLINE bool DragFloat(const char* Label, float* Value, float ValueSpeed = 1.0f, float ValueMin = 0.0f, float ValueMax = 0.0f, const char* Format = "%.3f", ImGuiSliderFlags Flags = 0)
 		{
-			return ImGui::DragScalar(Label, ImGuiDataType_Float, Value, ValueSpeed, &ValueMin, &ValueMax, Format, Flags);
+			const int LabelSize = std::strlen(Label);
+
+			std::array<char, LABEL_BUFSIZE> LabelBuf{};
+			std::snprintf(LabelBuf.data(), LabelBuf.size(), "##%s", Label);
+
+			if (InTable())
+			{
+				ImGui::TableSetColumnIndex(0);
+				UI::ShiftCursor(17.0f, 7.0f);
+
+				ImGui::Text(Label);
+				UI::Draw::Underline(false, 0.0f, 2.0f);
+
+				ImGui::TableSetColumnIndex(1);
+				UI::ShiftCursor(7.0f, 0.0f);
+			}
+			else
+			{
+				if ((LabelSize > 0) && (Label[0] != '#'))
+				{
+					ImGui::Text(Label);
+					/* TODO: Do PushStyle here instead. */
+					ImGui::SameLine();
+				}
+			}
+
+			const bool Dragged = ImGui::DragScalar(LabelBuf.data(), ImGuiDataType_Float, Value, ValueSpeed, &ValueMin, &ValueMax, Format, Flags);
+
+			if (InTable())
+			{
+				ImGui::TableNextRow();
+			}
+
+			return Dragged;
 		}
 
 		FORCEINLINE bool DragFloat3(const char* Label, float Vec[3], float VecSpeed = 1.0f, float VecMin = 0.0f, float VecMax = 0.0f, const char* Format = "%.3f", ImGuiSliderFlags Flags = 0)
@@ -49,16 +84,6 @@ namespace LkEngine::UI {
 			bool Modified = false;
 			bool ManuallyEdited = false;
 
-		#if 0
-			ImGui::TableSetColumnIndex(0);
-			UI::ShiftCursor(17.0f, 7.0f);
-
-			ImGui::Text(Label.c_str());
-			UI::Draw::Underline(false, 0.0f, 2.0f);
-
-			ImGui::TableSetColumnIndex(1);
-			UI::ShiftCursor(7.0f, 0.0f);
-		#else
 			if (InTable())
 			{
 				ImGui::TableSetColumnIndex(0);
@@ -79,7 +104,6 @@ namespace LkEngine::UI {
 					ImGui::SameLine();
 				}
 			}
-		#endif
 
 			{
 				static constexpr float SpacingX = 8.0f;
@@ -97,9 +121,11 @@ namespace LkEngine::UI {
 					);
 				}
 
-				static constexpr float FramePadding = 3.0f;
+				//static constexpr float FramePadding = 3.0f;
+				static constexpr float FramePadding = 4.0f;
 				static constexpr float OutlineSpacing = 1.0f;
 				const float LineHeight = GImGui->Font->FontSize + FramePadding * 2.0f;
+				//const float LineHeight = GImGui->Font->FontSize + FramePadding * 2.0f + 2.0f;
 				const ImVec2 ButtonSize = { LineHeight + 2.0f, LineHeight };
 				const float InputItemWidth = (ImGui::GetContentRegionAvail().x - SpacingX) / 3.0f - ButtonSize.x;
 
@@ -185,7 +211,6 @@ namespace LkEngine::UI {
 				ImGui::EndChild();
 			}
 
-			/* TODO: Check if we are in a table before calling this. */
 			if (InTable())
 			{
 				ImGui::TableNextRow();

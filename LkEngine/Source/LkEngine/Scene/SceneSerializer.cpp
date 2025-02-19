@@ -1,19 +1,16 @@
 #include "LKpch.h"
 #include "SceneSerializer.h"
 
-#include "LkEngine/Serialization/YAMLSerialization.h"
-
 #include "LkEngine/Core/Application.h"
 #include "LkEngine/Core/Window.h"
 
 #include "SceneCamera.h"
-
 #include "LkEngine/Renderer/Camera.h"
-
 #include "LkEngine/Scene/Entity.h"
+#include "LkEngine/Scene/SceneCamera.h"
 
-#include "LkEngine/Editor/EditorLayer.h"
-
+#include "LkEngine/Serialization/Serializer.h"
+#include "LkEngine/Serialization/YamlSerialization.h"
 
 namespace LkEngine {
 
@@ -35,7 +32,7 @@ namespace LkEngine {
 
 	void LSceneSerializer::Serialize(const std::filesystem::path& Filepath)
 	{
-		LK_CORE_DEBUG_TAG("SceneSerializer", "Serializing: {}", Filepath.string());
+		LK_CORE_WARN_TAG("SceneSerializer", "Serializing: {}", Filepath.string());
 		YAML::Emitter Out;
 		SerializeToYaml(Out);
 
@@ -51,10 +48,12 @@ namespace LkEngine {
 		Out << YAML::Key << "EditorScene" << YAML::Value << Scene->bEditorScene;
 		Out << YAML::Key << "SceneHandle" << YAML::Value << static_cast<uint32_t>(Scene->SceneEntity);
 
-		LEditorLayer& Editor = LEditorLayer::Get();
-
+		/* FIXME: Pass the camera to the function as an argument. */
+	#if 0
 		/* Editor camera. */
+		LEditorLayer& Editor = LEditorLayer::Get();
 		SerializeEditorCamera(Out, Editor.GetEditorCamera());
+	#endif
 
 		/* Entities. */
 		Out << YAML::Key << "Entities";
@@ -83,6 +82,7 @@ namespace LkEngine {
 	{
 		LK_CORE_VERIFY(Scene);
 		LK_CORE_VERIFY(!Filepath.empty(), "Deserialization failed, invalid filepath: '{}'", Filepath.string());
+		LK_CORE_WARN_TAG("SceneSerializer", "Deserializing: {}", Filepath.filename().string());
 		Scene->Clear();
 
 		if (!LFileSystem::Exists(Filepath))
@@ -91,7 +91,6 @@ namespace LkEngine {
 			return false;
 		}
 
-		LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing: {}", Filepath.filename().string());
 		bool bOperationSuccess = false;
 
 		std::ifstream InputStream(Filepath);
@@ -103,7 +102,7 @@ namespace LkEngine {
 		}
 		catch (const YAML::Exception& Exception)
 		{
-			LK_CORE_ASSERT(false, "Failed to deserialize '{}', error: {}", Filepath.string(), Exception.what());
+			LK_CORE_ASSERT(false, "Failed to deserialize '{}', error: '{}'", Filepath.string(), Exception.what());
 			bOperationSuccess = false;
 		}
 
@@ -161,13 +160,27 @@ namespace LkEngine {
 		Scene->ViewportWidth = LWindow::Get().GetViewportWidth();
 		Scene->ViewportHeight = LWindow::Get().GetViewportHeight();
 
-		/* EditorCamera. */
-		const YAML::Node& EditorCameraNode = Data["EditorCamera"];
-		if (EditorCameraNode)
+		//LK_CORE_DEBUG("Deserialized Yaml:\n{}\n", YamlString);
+	#if 0
+		/* Editor camera. */
+		if (TObjectPtr<LSceneCamera> SceneCamera = Scene->GetMainCamera(); SceneCamera != nullptr)
 		{
-			LEditorCamera& EditorCamera = LEditorLayer::Get().GetEditorCamera();
-			DeserializeEditorCamera(EditorCameraNode, EditorCamera);
+			const YAML::Node& EditorCameraNode = Data["EditorCamera"];
+			if (EditorCameraNode && (SceneCamera->GetType() == ECameraType::Editor))
+			{
+				//LEditorCamera& EditorCamera = LEditorLayer::Get().GetEditorCamera();
+				if (TObjectPtr<LEditorCamera> EditorCamera = SceneCamera.As<LEditorCamera>(); EditorCamera != nullptr)
+				{
+					LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing editor camera");
+					DeserializeEditorCamera(EditorCameraNode, *EditorCamera);
+				}
+				else
+				{
+					LK_CORE_ERROR_TAG("SceneSerializer", "Failed to cast LSceneCamera to LEditorCamera");
+				}
+			}
 		}
+	#endif
 
 		/* Scene entities. */
 		YAML::Node EntitiesNode = Data["Entities"];
@@ -202,10 +215,11 @@ namespace LkEngine {
 			return;
 		}
 
-		/* REMOVE ME */
+		/* FIXME: REMOVE ME */
 		if (Entity.GetComponent<LTagComponent>().Tag == "DebugCube")
 		{
-			LK_CORE_WARN("Skipping serialization of entity: DebugCube");
+			LK_MARK_FUNC_FOR_REMOVAL();
+			LK_CORE_FATAL("Skipping serialization of entity: DebugCube");
 			return;
 		}
 
@@ -307,21 +321,49 @@ namespace LkEngine {
 			Out << YAML::EndMap; /* MeshComponent */
 		}
 
-
 		if (Entity.HasComponent<LCameraComponent>())
 		{
+			LK_CORE_DEBUG_TAG("SceneSerializer", "Serializing camera component from entity '{}'", Entity.Name());
 			Out << YAML::Key << "CameraComponent";
 			Out << YAML::BeginMap; /* LCameraComponent */
 
 			const LCameraComponent& CameraComponent = Entity.GetComponent<LCameraComponent>();
-			const LCamera& Camera = *CameraComponent.Camera;
+			const LSceneCamera& Camera = CameraComponent.Camera;
 
 			Out << YAML::Key << "Camera" << YAML::Value;
 			Out << YAML::BeginMap; 
 			{
+				//Out << YAML::Key << "Position"       << YAML::Value << Camera.GetPosition();
+				Out << YAML::Key << "CameraType"     << YAML::Value << (int)Camera.GetType();
 				Out << YAML::Key << "ProjectionType" << YAML::Value << static_cast<int>(Camera.GetProjectionType());
-				Out << YAML::Key << "OrthographicNear" << YAML::Value << Camera.GetOrthographicNearClip();
-				Out << YAML::Key << "OrthographicFar" << YAML::Value << Camera.GetOrthographicFarClip();
+				Out << YAML::Key << "Origin"         << YAML::Value << Camera.Origin;
+				//Out << YAML::Key << "Distance"   << YAML::Value << Camera.GetDistance();
+				Out << YAML::Key << "FocalPoint"     << YAML::Value << Camera.FocalPoint;
+				Out << YAML::Key << "Direction"      << YAML::Value << Camera.Direction;
+				Out << YAML::Key << "Pitch"          << YAML::Value << Camera.Pitch;
+				Out << YAML::Key << "Yaw"            << YAML::Value << Camera.Yaw;
+
+				/* Perspective */
+				Out << YAML::Key << "Perspective" << YAML::Value;
+				Out << YAML::Value << YAML::BeginMap;
+				{
+					Out << YAML::Key << "DegPerspectiveFOV" << YAML::Value << Camera.GetPerspectiveDegFov();
+					Out << YAML::Key << "PerspectiveNear"   << YAML::Value << Camera.GetPerspectiveNearClip();
+					Out << YAML::Key << "PerspectiveFar"    << YAML::Value << Camera.GetPerspectiveFarClip();
+				}
+				Out << YAML::Value << YAML::EndMap;
+				/* ~Perspective */
+
+				/* Orthographic */
+				Out << YAML::Key << "Orthographic" << YAML::Value;
+				Out << YAML::Value << YAML::BeginMap;
+				{
+					Out << YAML::Key << "OrthographicSize" << YAML::Value << Camera.GetOrthographicSize();
+					Out << YAML::Key << "OrthographicNear" << YAML::Value << Camera.GetOrthographicNearClip();
+					Out << YAML::Key << "OrthographicFar"  << YAML::Value << Camera.GetOrthographicFarClip();
+				}
+				Out << YAML::Value << YAML::EndMap;
+				/* ~Orthographic */
 			}
 			Out << YAML::EndMap;
 			Out << YAML::EndMap; /* LCameraComponent */
@@ -354,7 +396,7 @@ namespace LkEngine {
 
 	void LSceneSerializer::DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> SceneRef)
 	{
-		LK_VERIFY(SceneRef, "Deserialization of entities failed, scene reference is not valid");
+		LK_CORE_VERIFY(SceneRef, "Deserialization of entities failed, scene reference is not valid");
 		for (const YAML::Node& EntityNode : EntitiesNode)
 		{
 			const uint64_t EntityID = EntityNode["Entity"].as<uint64_t>();
@@ -366,10 +408,10 @@ namespace LkEngine {
 				EntityName = TagComponentNode["Tag"].as<std::string>();
 			}
 
-			LK_CORE_TRACE_TAG("SceneSerializer", "Creating entity: {} ({})", EntityName, EntityID);
+			LK_CORE_DEBUG_TAG("SceneSerializer", "Creating entity: {} ({})", EntityName, EntityID);
 			LEntity DeserializedEntity = SceneRef->CreateEntityWithID(EntityID, EntityName);
 
-			const YAML::Node& TransformComponentNode = EntityNode["TransformComponent"];
+			const YAML::Node TransformComponentNode = EntityNode["TransformComponent"];
 			if (TransformComponentNode)
 			{
 				/* Entities always have transforms. */
@@ -389,7 +431,7 @@ namespace LkEngine {
 				TransformComponent.Scale = TransformComponentNode["Scale"].as<glm::vec3>();
 			}
 
-			const YAML::Node& SpriteComponentNode = EntityNode["SpriteComponent"];
+			const YAML::Node SpriteComponentNode = EntityNode["SpriteComponent"];
 			if (SpriteComponentNode)
 			{
 				auto& SpriteComponent = DeserializedEntity.AddComponent<LSpriteComponent>();
@@ -399,7 +441,7 @@ namespace LkEngine {
 
 			/* Static Mesh. */
 			{
-				const YAML::Node& StaticMeshCompNode = EntityNode["StaticMeshComponent"];
+				const YAML::Node StaticMeshCompNode = EntityNode["StaticMeshComponent"];
 				if (StaticMeshCompNode)
 				{
 					static_assert(std::is_same_v<FAssetHandle::SizeType, uint64_t>);
@@ -427,7 +469,7 @@ namespace LkEngine {
 
 			/* Mesh. */
 			{
-				const YAML::Node& MeshCompNode = EntityNode["MeshComponent"];
+				const YAML::Node MeshCompNode = EntityNode["MeshComponent"];
 				if (MeshCompNode)
 				{
 					static_assert(std::is_same_v<FAssetHandle::SizeType, uint64_t>);
@@ -442,7 +484,6 @@ namespace LkEngine {
 							const uint32_t Index = MaterialEntry.first.as<uint32_t>();
 							const FAssetHandle Handle = MaterialEntry.second.as<FAssetHandle>();
 
-							//if (Handle > 0)
 							if (LAssetManager::IsAssetHandleValid(Handle))
 							{
 								MeshComp.MaterialTable->SetMaterial(Index, Handle);
@@ -461,28 +502,72 @@ namespace LkEngine {
 				}
 			}
 
-			const YAML::Node& CameraComponentNode = EntityNode["CameraComponent"];
+			const YAML::Node CameraComponentNode = EntityNode["CameraComponent"];
 			if (CameraComponentNode)
 			{
+				LK_CORE_INFO_TAG("SceneSerializer", "Loading data for CameraComponent on '{}'", DeserializedEntity.Name());
 				LCameraComponent& CameraComponent = DeserializedEntity.AddComponent<LCameraComponent>();
-				CameraComponent.Camera = TObjectPtr<LSceneCamera>::Create();
+				CameraComponent.Camera = LSceneCamera();
+				LSceneCamera& Camera = CameraComponent.Camera;
 
-				const YAML::Node& CameraNode = CameraComponentNode["Camera"];
-				if (CameraNode.IsMap())
+				const YAML::Node CameraNode = CameraComponentNode["Camera"];
+				if (CameraNode && CameraNode.IsMap())
 				{
+					LK_DESERIALIZE_PROPERTY(Origin, Camera.Origin, CameraNode, glm::vec3(0.0f, 0.0f, 0.0f));
+					LK_DESERIALIZE_PROPERTY(FocalPoint, Camera.FocalPoint, CameraNode, glm::vec3(0.0f, 0.0f, 0.0f));
+					LK_DESERIALIZE_PROPERTY(Direction, Camera.Direction, CameraNode, glm::vec3(0.0f, 0.0f, 0.0f));
+					LK_DESERIALIZE_PROPERTY(Pitch, Camera.Pitch, CameraNode, 0.0f);
+					LK_DESERIALIZE_PROPERTY(Yaw, Camera.Yaw, CameraNode, 0.0f);
+
 					if (CameraNode["ProjectionType"])
 					{
-						CameraComponent.Camera->SetProjectionType(static_cast<ECameraProjection>(CameraNode["ProjectionType"].as<int>()));
+						Camera.SetProjectionType(static_cast<ECameraProjection>(CameraNode["ProjectionType"].as<int>()));
 					}
 
-					if (CameraNode["OrthographicNear"])
+					/* Perspective data. */
+					const YAML::Node PerspectiveNode = CameraNode["Perspective"];
+					if (PerspectiveNode && PerspectiveNode.IsMap())
 					{
-						CameraComponent.Camera->SetOrthographicNearClip(CameraNode["OrthographicNear"].as<float>());
+						LK_DESERIALIZE_PROPERTY(DegPerspectiveFOV, Camera.DegPerspectiveFOV, PerspectiveNode, 45.0f);
+						LK_DESERIALIZE_PROPERTY(PerspectiveNear, Camera.PerspectiveNear, PerspectiveNode, 0.10f);
+						LK_DESERIALIZE_PROPERTY(PerspectiveFar, Camera.PerspectiveFar, PerspectiveNode, 1000.0f);
+						Camera.SetPerspectiveProjectionMatrix(
+							glm::radians(Camera.DegPerspectiveFOV), 
+							Scene->ViewportWidth,
+							Scene->ViewportHeight,
+							Camera.PerspectiveNear,
+							Camera.PerspectiveFar
+						);
+
+						Camera.SetPerspective(Camera.DegPerspectiveFOV, Camera.PerspectiveNear, Camera.PerspectiveFar);
+					}
+					else
+					{
+						LK_CORE_WARN_TAG("SceneSerializer", "The YAML node 'Camera' is missing the 'Perspective' node");
 					}
 
-					if (CameraNode["OrthographicFar"])
+				#if 0
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.Origin: {}", Camera.Origin);
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.FocalPoint: {}", Camera.FocalPoint);
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.Direction: {}", Camera.Direction);
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.Pitch: {}", Camera.Pitch);
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.Yaw: {}", Camera.Yaw);
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.DegPerspectiveFOV: {}", Camera.DegPerspectiveFOV);
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.PerspectiveNear: {}", Camera.PerspectiveNear);
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.PerspectiveFar: {}", Camera.PerspectiveFar);
+				#endif
+
+					/* Orthographic data. */
+					const YAML::Node OrthographicNode = CameraNode["Orthographic"];
+					if (OrthographicNode && OrthographicNode.IsMap())
 					{
-						CameraComponent.Camera->SetOrthographicFarClip(CameraNode["OrthographicFar"].as<float>());
+						LK_DESERIALIZE_PROPERTY(OrthographicSize, Camera.OrthographicSize, OrthographicNode, 0.0f);
+						LK_DESERIALIZE_PROPERTY(OrthographicNear, Camera.OrthographicNear, OrthographicNode, -1.0f);
+						LK_DESERIALIZE_PROPERTY(OrthographicFar, Camera.OrthographicFar, OrthographicNode, 1.0f);
+					}
+					else
+					{
+						LK_CORE_WARN_TAG("SceneSerializer", "The YAML node 'Camera' is missing the 'Orthographic' node");
 					}
 				}
 			}
@@ -514,7 +599,7 @@ namespace LkEngine {
 		Out << YAML::Key << "EditorCamera" << YAML::Value;
 		Out << YAML::BeginMap;
 		{
-			Out << YAML::Key << "Position"   << YAML::Value << EditorCamera.GetPosition();
+			Out << YAML::Key << "Position"   << YAML::Value << EditorCamera.Position;
 			Out << YAML::Key << "Origin"     << YAML::Value << EditorCamera.GetOrigin();
 			Out << YAML::Key << "Distance"   << YAML::Value << EditorCamera.GetDistance();
 			Out << YAML::Key << "FocalPoint" << YAML::Value << EditorCamera.GetFocalPoint();

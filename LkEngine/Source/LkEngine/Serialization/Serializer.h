@@ -2,7 +2,7 @@
 
 #include "LkEngine/Core/LObject/Object.h"
 
-#include "YAMLSerialization.h"
+#include "YamlSerialization.h"
 
 /**
  * Helper for being able to pass C-strings and implicitly convert them
@@ -58,7 +58,7 @@ static constexpr auto ToStringIfNeeded(T Value)
 		}                                                                      \
 		else                                                                   \
 		{                                                                      \
-			LK_CORE_WARN_TAG("LK_DESERIALIZE_PROPERTY", "Failed to find property: '{}'", #PropertyName); \
+			LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY", "Failed to find property: '{}'", #PropertyName); \
 			Destination = DefaultValue;                                        \
 		}                                                                      \
 	}                                                                          \

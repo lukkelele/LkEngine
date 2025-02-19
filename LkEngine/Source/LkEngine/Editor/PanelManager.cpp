@@ -75,6 +75,7 @@ namespace LkEngine {
 
 	void LPanelManager::Serialize()
 	{
+		LK_CORE_DEBUG_TAG("PanelManager", "Serializing");
 		YAML::Emitter Out;
 		Out << YAML::BeginMap;
 

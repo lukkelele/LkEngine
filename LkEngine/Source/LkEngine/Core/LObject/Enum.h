@@ -23,33 +23,33 @@ namespace LkEngine {
 	 *        be used as a regular enum.
 	 */
 	#define LK_ENUM_CLASS_FLAGS(EnumClass) \
-		using LK_Enum_Type_##EnumClass = std::underlying_type_t<EnumClass>; \
-		inline           EnumClass& operator|=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) | static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline           EnumClass& operator&=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline           EnumClass& operator^=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) ^ static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr EnumClass  operator| (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) | static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr LK_Enum_Type_##EnumClass operator& (EnumClass Lhs, EnumClass Rhs) { return (LK_Enum_Type_##EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr EnumClass  operator^ (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) ^ static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr bool       operator! (EnumClass  E)                  { return !static_cast<LK_Enum_Type_##EnumClass>(E); } \
-		inline constexpr EnumClass  operator~ (EnumClass  E)                  { return (EnumClass)~static_cast<LK_Enum_Type_##EnumClass>(E); } \
-		inline constexpr LK_Enum_Type_##EnumClass operator&(LK_Enum_Type_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(Lhs & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr LK_Enum_Type_##EnumClass operator&(EnumClass Lhs, LK_Enum_Type_##EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & Rhs); } \
-		inline constexpr LK_Enum_Type_##EnumClass operator|(LK_Enum_Type_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(Lhs | static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr LK_Enum_Type_##EnumClass operator|(EnumClass Lhs, LK_Enum_Type_##EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(static_cast<LK_Enum_Type_##EnumClass>(Lhs) | Rhs); } \
-		inline constexpr LK_Enum_Type_##EnumClass operator^(LK_Enum_Type_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(Lhs ^ static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr LK_Enum_Type_##EnumClass operator^(EnumClass Lhs, LK_Enum_Type_##EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(static_cast<LK_Enum_Type_##EnumClass>(Lhs) ^ Rhs); } \
-		inline constexpr bool operator<(EnumClass Lhs, LK_Enum_Type_##EnumClass Rhs)  { return static_cast<LK_Enum_Type_##EnumClass>(static_cast<LK_Enum_Type_##EnumClass>(Lhs) < Rhs); }  \
-		inline constexpr bool operator<(LK_Enum_Type_##EnumClass Lhs, EnumClass Rhs)  { return static_cast<LK_Enum_Type_##EnumClass>(Lhs < static_cast<LK_Enum_Type_##EnumClass>(Rhs)); }  \
-		inline constexpr bool operator>(EnumClass Lhs, LK_Enum_Type_##EnumClass Rhs)  { return static_cast<LK_Enum_Type_##EnumClass>(static_cast<LK_Enum_Type_##EnumClass>(Lhs) > Rhs); }  \
-		inline constexpr bool operator>(LK_Enum_Type_##EnumClass Lhs, EnumClass Rhs)  { return static_cast<LK_Enum_Type_##EnumClass>(Lhs > static_cast<LK_Enum_Type_##EnumClass>(Rhs)); }  \
-		inline constexpr bool operator<=(EnumClass Lhs, LK_Enum_Type_##EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(static_cast<LK_Enum_Type_##EnumClass>(Lhs) <= Rhs); } \
-		inline constexpr bool operator<=(LK_Enum_Type_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(Lhs <= static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline constexpr bool operator>=(EnumClass Lhs, LK_Enum_Type_##EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(static_cast<LK_Enum_Type_##EnumClass>(Lhs) >= Rhs); } \
-		inline constexpr bool operator>=(LK_Enum_Type_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_Type_##EnumClass>(Lhs >= static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline LK_Enum_Type_##EnumClass& operator|=(LK_Enum_Type_##EnumClass& Lhs, EnumClass Rhs) { return Lhs = (LK_Enum_Type_##EnumClass)(Lhs | static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline LK_Enum_Type_##EnumClass& operator&=(LK_Enum_Type_##EnumClass& Lhs, EnumClass Rhs) { return Lhs = (LK_Enum_Type_##EnumClass)(Lhs & static_cast<LK_Enum_Type_##EnumClass>(Rhs)); } \
-		inline EnumClass& operator&=(EnumClass& Lhs, LK_Enum_Type_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) & Rhs); } \
-		inline EnumClass& operator|=(EnumClass& Lhs, LK_Enum_Type_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_Type_##EnumClass>(Lhs) | Rhs); } 
+		using LK_Enum_##EnumClass = std::underlying_type_t<EnumClass>; \
+		inline           EnumClass& operator|=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) | static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline           EnumClass& operator&=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) & static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline           EnumClass& operator^=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) ^ static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline constexpr EnumClass  operator| (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) | static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline constexpr LK_Enum_##EnumClass operator& (EnumClass Lhs, EnumClass Rhs) { return (LK_Enum_##EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) & static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline constexpr EnumClass  operator^ (EnumClass  Lhs, EnumClass Rhs) { return (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) ^ static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline constexpr bool       operator! (EnumClass  E)                  { return !static_cast<LK_Enum_##EnumClass>(E); } \
+		inline constexpr EnumClass  operator~ (EnumClass  E)                  { return (EnumClass)~static_cast<LK_Enum_##EnumClass>(E); } \
+		inline constexpr LK_Enum_##EnumClass operator&(LK_Enum_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(Lhs & static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline constexpr LK_Enum_##EnumClass operator&(EnumClass Lhs, LK_Enum_##EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(static_cast<LK_Enum_##EnumClass>(Lhs) & Rhs); } \
+		inline constexpr LK_Enum_##EnumClass operator|(LK_Enum_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(Lhs | static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline constexpr LK_Enum_##EnumClass operator|(EnumClass Lhs, LK_Enum_##EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(static_cast<LK_Enum_##EnumClass>(Lhs) | Rhs); } \
+		inline constexpr LK_Enum_##EnumClass operator^(LK_Enum_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(Lhs ^ static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline constexpr LK_Enum_##EnumClass operator^(EnumClass Lhs, LK_Enum_##EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(static_cast<LK_Enum_##EnumClass>(Lhs) ^ Rhs); } \
+		inline constexpr bool operator<(EnumClass Lhs, LK_Enum_##EnumClass Rhs)  { return static_cast<LK_Enum_##EnumClass>(static_cast<LK_Enum_##EnumClass>(Lhs) < Rhs); }  \
+		inline constexpr bool operator<(LK_Enum_##EnumClass Lhs, EnumClass Rhs)  { return static_cast<LK_Enum_##EnumClass>(Lhs < static_cast<LK_Enum_##EnumClass>(Rhs)); }  \
+		inline constexpr bool operator>(EnumClass Lhs, LK_Enum_##EnumClass Rhs)  { return static_cast<LK_Enum_##EnumClass>(static_cast<LK_Enum_##EnumClass>(Lhs) > Rhs); }  \
+		inline constexpr bool operator>(LK_Enum_##EnumClass Lhs, EnumClass Rhs)  { return static_cast<LK_Enum_##EnumClass>(Lhs > static_cast<LK_Enum_##EnumClass>(Rhs)); }  \
+		inline constexpr bool operator<=(EnumClass Lhs, LK_Enum_##EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(static_cast<LK_Enum_##EnumClass>(Lhs) <= Rhs); } \
+		inline constexpr bool operator<=(LK_Enum_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(Lhs <= static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline constexpr bool operator>=(EnumClass Lhs, LK_Enum_##EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(static_cast<LK_Enum_##EnumClass>(Lhs) >= Rhs); } \
+		inline constexpr bool operator>=(LK_Enum_##EnumClass Lhs, EnumClass Rhs) { return static_cast<LK_Enum_##EnumClass>(Lhs >= static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline LK_Enum_##EnumClass& operator|=(LK_Enum_##EnumClass& Lhs, EnumClass Rhs) { return Lhs = (LK_Enum_##EnumClass)(Lhs | static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline LK_Enum_##EnumClass& operator&=(LK_Enum_##EnumClass& Lhs, EnumClass Rhs) { return Lhs = (LK_Enum_##EnumClass)(Lhs & static_cast<LK_Enum_##EnumClass>(Rhs)); } \
+		inline EnumClass& operator&=(EnumClass& Lhs, LK_Enum_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) & Rhs); } \
+		inline EnumClass& operator|=(EnumClass& Lhs, LK_Enum_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) | Rhs); } 
 
 	/**
 	 * @brief Friends all bitwise operators for enum classes so the 

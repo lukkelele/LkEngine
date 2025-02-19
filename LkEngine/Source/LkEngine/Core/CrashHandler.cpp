@@ -46,7 +46,7 @@ namespace LkEngine {
 			LK_CORE_DEBUG_TAG("CrashHandler", "Handling: {} ({})", SignalToStringMap[Signal], Signal);
 
 			const std::string InfoDump = CrashHandler->GenerateApplicationCrashDump();
-			//CrashHandler->LogCrashInformation(InfoDump);
+			CrashHandler->LogCrashInformation(InfoDump);
 
 			CrashHandler.release();
 		}

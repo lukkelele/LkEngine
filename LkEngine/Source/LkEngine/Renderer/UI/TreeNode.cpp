@@ -1,9 +1,8 @@
 #include "LKpch.h"
 #include "TreeNode.h"
 
+#include "LkEngine/Editor/EditorGlobals.h"
 #include "LkEngine/Renderer/Color.h"
-
-#include "LkEngine/Editor/Panels/ContentBrowserPanel.h"
 
 
 /**************************************

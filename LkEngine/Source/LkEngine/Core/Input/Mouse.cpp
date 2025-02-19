@@ -6,8 +6,6 @@
 
 #include "LkEngine/Renderer/RenderContext.h"
 
-#include "LkEngine/Editor/EditorLayer.h"
-
 
 namespace LkEngine {
 

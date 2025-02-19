@@ -47,7 +47,7 @@ namespace LkEngine::Enum
 	}
 }
 
-static_assert(std::is_same_v<LK_Enum_Type_ETestEnum, std::underlying_type_t<ETestEnum>>);
+static_assert(std::is_same_v<LK_Enum_ETestEnum, std::underlying_type_t<ETestEnum>>);
 
 /* TODO: Cannot subtract 1, need to shift value because bitmask. */
 static_assert(ETestEnum::COUNT <= std::numeric_limits<std::underlying_type_t<ETestEnum>>::max());
@@ -59,7 +59,7 @@ static constexpr int TestIterations = 25;
 
 LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Bitwise_AND)
 {
-	using SizeType = LK_Enum_Type_ETestEnum;
+	using SizeType = LK_Enum_ETestEnum;
 
 	bool Test1 = false;
 	{

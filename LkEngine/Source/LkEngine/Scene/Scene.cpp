@@ -7,8 +7,6 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
 
-#include "LkEngine/Editor/EditorLayer.h"
-
 #include "LkEngine/Core/Application.h"
 
 
@@ -95,7 +93,6 @@ namespace LkEngine {
 
 	LEntity LScene::FindEntity(std::string_view Name)
 	{
-		/* TODO: Use predicate instead of for-loop like this. */
 		auto View = Registry.view<LTagComponent>();
 		for (auto Entity : View)
 		{
@@ -180,14 +177,10 @@ namespace LkEngine {
 			/* TODO: Notify change. */
 		}
 	#if 0
-		m_World->Pause(IsPaused);
+		World->Pause(IsPaused);
 	#endif
 
 		bPaused = IsPaused;
-	}
-
-	void LScene::SwitchCamera()
-	{
 	}
 
 	template<typename T>
@@ -441,7 +434,7 @@ namespace LkEngine {
 		}
 
 		LCameraComponent& CameraComp = CameraEntity.GetComponent<LCameraComponent>();
-		const LSceneCamera& SceneCamera = *CameraComp.Camera;
+		const LSceneCamera& SceneCamera = CameraComp.Camera;
 
 		SceneRenderer->BeginScene(SceneCamera);
 	}
@@ -539,21 +532,6 @@ namespace LkEngine {
 	{
 	}
 
-	void LScene::SetCamera(TObjectPtr<LSceneCamera> InCamera)
-	{ 
-		LK_VERIFY(InCamera);
-		Camera = InCamera;
-	}
-
-	/// REMOVE
-	void LScene::SetActiveScene(TObjectPtr<LScene> InScene)
-	{
-		LK_MARK_FUNC_FOR_REMOVAL();
-		LK_VERIFY(InScene, "Invalid scene");
-		LK_DEBUG("Set active scene to: '{}'", InScene->GetName());
-		ActiveScene = InScene;
-	}
-
 	void LScene::SetActive(const bool Active)
 	{
 		if (Active && (this != ActiveScene.Get()))
@@ -578,13 +556,15 @@ namespace LkEngine {
 		for (auto Entity : EntityView)
 		{
 			LCameraComponent& CameraComponent = EntityView.get<LCameraComponent>(Entity);
-			if (CameraComponent.Primary)
+			if (CameraComponent.bPrimary)
 			{
-				LK_VERIFY(CameraComponent.Camera->GetOrthographicSize() || CameraComponent.Camera->GetDegPerspectiveVerticalFOV(), "Camera is not fully initialized");
+				LK_CORE_VERIFY((CameraComponent.Camera.GetOrthographicSize() > 0) 
+							   || (CameraComponent.Camera.GetDegPerspectiveVerticalFOV() > 0), "Camera is not fully initialized");
 				return { Entity, this };
 			}
 		}
-
+		
+		LK_CORE_DEBUG_TAG("Scene", "GetMainCameraEntity failed");
 		return {};
 	}
 

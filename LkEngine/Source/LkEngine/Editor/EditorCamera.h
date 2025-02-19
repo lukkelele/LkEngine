@@ -17,15 +17,24 @@
 
 namespace LkEngine {
 
-	enum class ECameraActionFlag : uint16_t
+	enum class ECameraAction : uint16_t
 	{
 		None   = 0,
 		Pan    = LK_BIT(0),
 		Rotate = LK_BIT(1),
 		Zoom   = LK_BIT(2),
 	};
-	LK_ENUM_CLASS_FLAGS(ECameraActionFlag);
-	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(ECameraActionFlag, ECameraActionFlag::None, ECameraActionFlag::Zoom);
+	LK_ENUM_CLASS_FLAGS(ECameraAction);
+	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(ECameraAction, ECameraAction::None, ECameraAction::Zoom);
+
+	enum class ECameraModifier : int32_t
+	{
+		None = 0,
+		PitchLocked = LK_BIT(0),
+		YawLocked   = LK_BIT(1),
+		Damping     = LK_BIT(2),
+	};
+	LK_ENUM_CLASS_FLAGS(ECameraModifier);
 
 	enum class EEditorCameraMode
 	{
@@ -46,21 +55,25 @@ namespace LkEngine {
 		LEditorCamera() = delete;
 		~LEditorCamera() = default;
 
-		void Initialize();
+		LEditorCamera& operator=(const LSceneCamera& Other)
+		{
+			Origin = Other.GetOrigin();
+			FocalPoint = Other.GetFocalPoint();
+			Direction = Other.GetDirection();
 
-		virtual void Tick(const float DeltaTime = 0.0f) override;
+			Pitch = Other.GetPitch();
+			Yaw = Other.GetYaw();
+
+			Distance = 8.0f;
+			NormalSpeed = 0.0020f;
+			TravelSpeed = 1.0f;
+		}
+
+		void Initialize();
+		void Tick(const float DeltaTime = 0.0f);
 		void UpdateCameraView();
 
-		FORCEINLINE float GetDistance() const { return Distance; }
-		FORCEINLINE const glm::vec3& GetFocalPoint() const { return FocalPoint; }
-
-		FORCEINLINE void SetDistance(const float InDistance) 
-		{ 
-			if (Distance != InDistance)
-			{
-				Distance = InDistance; 
-			}
-		}
+		virtual ECameraType GetType() const override { return ECameraType::Editor; }
 
 		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
 		{
@@ -94,18 +107,15 @@ namespace LkEngine {
 
 		void SetViewportSize(const uint16_t InWidth, const uint16_t InHeight);
 
-		FORCEINLINE glm::vec3 CalculatePosition() const
-		{
-			return (FocalPoint - (GetForwardDirection() * Distance + PositionDelta));
-		}
-
 		float GetCameraSpeed() const;
 
-		virtual void SetPosition(const glm::vec3& InPosition) override
+	#if 1
+		void SetPosition(const glm::vec3& InPosition)
 		{
 			Position = InPosition;
 			UpdateCameraView();
 		}
+	#endif
 
 		void MousePan(const glm::vec2& Delta);
 		void MouseRotate(const glm::vec2& Delta);
@@ -114,32 +124,44 @@ namespace LkEngine {
 		std::pair<float, float> GetPanSpeed() const;
 		float GetZoomSpeed() const;
 
+		void SetPitchLocked(const bool Locked);
+		bool IsPitchLocked() const;
+		void SetYawLocked(const bool Locked);
+		bool IsYawLocked() const;
+
+		FORCEINLINE float GetDistance() const { return Distance; }
+		FORCEINLINE float GetNormalSpeed() const { return NormalSpeed; }
+		FORCEINLINE float GetTravelSpeed() const { return TravelSpeed; }
+		FORCEINLINE void SetDistance(const float InDistance) { Distance = InDistance; }
+		FORCEINLINE void SetNormalSpeed(const float InSpeed) { NormalSpeed = InSpeed; }
+		FORCEINLINE void SetTravelSpeed(const float InSpeed) { TravelSpeed = InSpeed; }
+
+		FORCEINLINE glm::vec3 CalculatePosition() const
+		{
+			return (FocalPoint - (GetForwardDirection() * Distance + PositionDelta));
+		}
+
 	private:
-		bool OnKeyPress(LKeyPressedEvent& e);
-		bool OnMouseScroll(MouseScrolledEvent& e);
+		bool OnKeyPress(LKeyPressedEvent& Event);
+		bool OnMouseScroll(MouseScrolledEvent& Event);
 
 	private:
 		static constexpr float MIN_SPEED = 0.00050f;
 		static constexpr float MAX_SPEED = 2.0f;
 	private:
-		bool bPanning = false;
-		bool bRotating = false;
-		bool bZooming = false;
-		//uint16_t CameraActionFlags = 0;
-		ECameraActionFlag CameraActionFlags = ECameraActionFlag::None;
+		EEditorCameraMode CameraMode = EEditorCameraMode::Arcball;
+		uint16_t CameraActionFlags = (uint16_t)ECameraAction::None;
 
-		float Distance = 0.0f;
+		float Distance = 8.0f;
 		float NormalSpeed = 0.0020f;
 		float TravelSpeed = 1.0f;
 
+		glm::vec3 Position{};
 		glm::vec2 InitialMousePosition{};
 		glm::vec3 InitialFocalPoint{};
 		glm::vec3 InitialRotation{};
 
-		EEditorCameraMode CameraMode = EEditorCameraMode::Arcball;
-
-		bool bPitchLocked = false; /// EVALUATE
-		bool bYawLocked = false;   /// EVALUATE
+		int32_t ModifierFlags = 0;
 		bool bEnableCameraDamping = true;
 
 		uint32_t ViewportWidth = 1280;
@@ -148,9 +170,12 @@ namespace LkEngine {
 		friend class LEditorLayer;
 		friend class LSceneManagerPanel;
 		friend class LSceneSerializer; /* Access to populate members when deserializing a scene. */
+
+		LCLASS(LEditorCamera);
 	};
 
-	namespace Enum 		
+
+	namespace Enum
 	{
 		FORCEINLINE static constexpr const char* ToString(const EEditorCameraMode CameraMode)
 		{

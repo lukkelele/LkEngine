@@ -8,7 +8,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #if LK_ENGINE_CONSOLE_ENABLED
-#	include "LkEngine/Editor/Panels/EditorConsole/ConsoleSink.h"
+#	include "LkEngine/Editor/EditorConsole/ConsoleSink.h"
 #endif
 
 

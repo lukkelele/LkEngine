@@ -15,4 +15,20 @@ namespace LkEngine {
 	 */
 	static FEditorOnSelectionChanged GEditorOnSelectionChanged;
 
+
+	namespace Debug 
+	{
+		namespace UI 
+		{
+			extern bool bDisplayWindowSizeOnHover;
+			extern bool bBoundingBoxesOnHover;
+
+			namespace ContentBrowser 
+			{
+				extern bool bDrawOutlinerBorders;
+				extern ImVec4 OutlinerBorderColor;
+			}
+		}
+	}
+
 }

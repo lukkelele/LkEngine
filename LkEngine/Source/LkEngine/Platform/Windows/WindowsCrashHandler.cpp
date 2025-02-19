@@ -8,6 +8,7 @@
 #include <Windows.h>
 #include <DbgHelp.h>
 
+#define LK_CRASH_INCLUDE_STACKBACKTRACE 0
 
 namespace LkEngine {
 
@@ -21,32 +22,31 @@ namespace LkEngine {
 
         static auto WindowsCrashFunc = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
         {
-            LK_CORE_WARN_TAG("WindowsCrashHandler", "ENTERED EXCEPTION HANDLER");
+            LK_CORE_WARN_TAG("WindowsCrashHandler", "EXCEPTION HANDLER");
 
-            std::ostringstream oss;
-            oss << "Exception Code: " << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << "\n";
-            oss << "Exception Address: " << ExceptionInfo->ExceptionRecord->ExceptionAddress << "\n";
+            std::ostringstream OStringStream;
+            OStringStream << "Exception Code: " << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << "\n";
+            OStringStream << "Exception Address: " << ExceptionInfo->ExceptionRecord->ExceptionAddress << "\n";
 
-            // Capture stack trace
             const int MaxFrames = 128;
             void* Callstack[MaxFrames];
-            USHORT frames = CaptureStackBackTrace(0, MaxFrames, Callstack, nullptr);
-            oss << "Stack trace:\n";
-            for (USHORT i = 0; i < frames; ++i)
+            USHORT Frames = CaptureStackBackTrace(0, MaxFrames, Callstack, nullptr);
+            OStringStream << "Stack BackTrace:\n";
+            for (USHORT i = 0; i < Frames; ++i)
             {
-                oss << Callstack[i] << "\n";
+                OStringStream << Callstack[i] << "\n";
             }
 
-            oss << "\nApplication State:\n";
-            LK_CORE_DEBUG_TAG("WindowsCrashHandler", "{}", oss.str());
-            //oss << *LApplication::Get()->GenerateCrashDump();
+            OStringStream << "\nApplication State:\n";
+            LK_CORE_INFO_TAG("WindowsCrashHandler", "{}", OStringStream.str());
+            OStringStream << LApplication::Get().GenerateCrashDump();
 
-            std::string CrashInfo = oss.str();
-            std::string base64CrashInfo = LEncoder::Encode<EEncodingFormat::Base64>(
+            std::string CrashInfo = OStringStream.str();
+            const std::string CrashInfoBase64 = LEncoder::Encode<EEncodingFormat::Base64>(
                 reinterpret_cast<const unsigned char*>(CrashInfo.c_str()), CrashInfo.length()
             );
 
-            WindowsExceptionStringBuffer += base64CrashInfo;
+            WindowsExceptionStringBuffer += CrashInfoBase64;
 
             return EXCEPTION_EXECUTE_HANDLER;
         };
@@ -61,55 +61,52 @@ namespace LkEngine {
 
     std::string LWindowsCrashHandler::GenerateApplicationCrashDump()
     {
-        /* Disabled for now. */
-#if 0
-        std::string DumpInfo = "APPLICATION_CRASH";
+		std::string DumpInfo = WindowsExceptionStringBuffer;
         if (!WindowsExceptionStringBuffer.empty())
         {
-            DumpInfo += std::string::Format("\n{}", WindowsExceptionStringBuffer);
+            DumpInfo += std::format("\n{}", WindowsExceptionStringBuffer);
         }
-        // Include stack backtrace.
         else
         {
-            DumpInfo += std::string::Format("\n{}", *CaptureBackTraceOnStack());
+			/* Include stack backtrace. */
+            DumpInfo += std::format("\n{}", CaptureBackTraceOnStack());
         }
-        //LK_CORE_DEBUG_TAG("WindowsCrashHandler", "Generated application crashdump, returning:\n\"\"\"\n{}\n\"\"\"", *DumpInfo);
+
+		DumpInfo += std::format("\n{}", LApplication::Get().GenerateCrashDump());
 
         return DumpInfo;
-#endif
-        return "";
     }
 
     void LWindowsCrashHandler::LogCrashInformation(std::string_view CrashInformation)
     {
-        LK_CORE_WARN("\n\n ***** Crash Information *****\n    {}\n *****************************\n\n", CrashInformation);
+        LK_CORE_WARN("\n\n--- LkEngine Crash Report ---\n\t{}\n---------------------------\n", CrashInformation);
     }
 
     std::string LWindowsCrashHandler::CaptureBackTraceOnStack()
     {
-		std::ostringstream oss;
+		std::ostringstream OStringStream;
 
+    #if LK_CRASH_INCLUDE_STACKBACKTRACE
         /* Disabled for now. */
-    #if 0
 		/* Capture stack trace. */
 		const int MaxFrames = 128;
 		void* Callstack[MaxFrames];
 		USHORT frames = CaptureStackBackTrace(0, MaxFrames, Callstack, nullptr);
-		oss << "\n[SECTION] Stack Trace:\n";
+		OStringStream << "\n[SECTION] Stack Trace:\n";
 		for (USHORT i = 0; i < frames; ++i)
 		{
             if (i < 10)
             {
-			    oss << *std::string::Format(" {}.  ", i) << Callstack[i] << "\n";
+			    OStringStream << std::format(" {}.  ", i) << Callstack[i] << "\n";
             }
             else if (i >= 10)
             {
-			    oss << *std::string::Format(" {}. ", i) << Callstack[i] << "\n";
+			    OStringStream << std::format(" {}. ", i) << Callstack[i] << "\n";
             }
 		}
     #endif
 
-        return oss.str();
+        return OStringStream.str();
     }
 
 }

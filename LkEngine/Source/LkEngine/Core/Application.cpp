@@ -2,23 +2,29 @@
 #include "Application.h"
 
 #include "LkEngine/Core/ApplicationSerializer.h"
-
-#include "LkEngine/Editor/EditorLayer.h"
+#include "LkEngine/Core/SelectionContext.h"
+//#include "LkEngine/Editor/EditorLayer.h"
 
 #include <nfd.hpp>
 
 
 namespace LkEngine {
 
-	void Core::Setup(const int Argc, char* Argv[])
+	namespace Core
 	{
-		Global::SetRuntimeArguments(Argc, Argv);
+		FOnEngineShutdown OnEngineShutdown;
 
-		LLog& Logger = LLog::Get();
-		Logger.Initialize();
+		void Setup(const int Argc, char* Argv[])
+		{
+			Global::SetRuntimeArguments(Argc, Argv);
 
-		LK_CORE_INFO("Starting LkEngine ({})", LVersion::ToString(LK_ENGINE_VERSION));
+			LLog& Logger = LLog::Get();
+			Logger.Initialize();
+
+			LK_CORE_INFO("Starting LkEngine ({})", LVersion::ToString(LK_ENGINE_VERSION));
+		}	
 	}
+
 
 	LApplication::LApplication(const FApplicationSpecification& InSpecification)
 		: Specification(InSpecification)
@@ -50,19 +56,17 @@ namespace LkEngine {
 
 		Window = TObjectPtr<LWindow>::Create(Specification);
 
-		SetupDirectories();
-
-		LK_CORE_VERIFY(NFD::Init());
+		const nfdresult_t NfdInit = NFD::Init();
+		LK_CORE_VERIFY(NfdInit);
 
 		Window->Initialize();
-		/* TODO: The event system is to be updated. */
 		Window->SetEventCallback([this](LEvent& Event)
 		{
 			OnEvent(Event);
 		});
 
 		LInput::Initialize();
-		LSelectionContext::Get(); /* TODO: REMOVE */
+		LSelectionContext::Get(); /* TODO: Instantiate elsewhere */
 
 		/* Initialize the renderer. */
 		Renderer = TObjectPtr<LRenderer>::Create();
@@ -72,11 +76,6 @@ namespace LkEngine {
 		UILayer = LUILayer::Create();
 		UILayer->Initialize();
 		UILayer->SetDarkTheme();
-
-	#if LK_ENGINE_EDITOR
-		TObjectPtr<LEditorLayer> Editor = TObjectPtr<LEditorLayer>::Create();
-		LayerStack.PushOverlay(Editor);
-	#endif
 
 		LK_CORE_DEBUG_TAG("Application", "Creating performance profiler");
 		PerformanceProfiler = new LPerformanceProfiler();
@@ -135,6 +134,9 @@ namespace LkEngine {
 	{
 		if (bRunning)
 		{
+			LK_CORE_INFO("Shutting down");
+			Core::OnEngineShutdown.Broadcast();
+
 			/* Serialize application configuration. */
 			LApplicationSerializer Serializer(this);
 			Serializer.Serialize(LFileSystem::GetEngineConfig());
@@ -173,22 +175,17 @@ namespace LkEngine {
 		return Serializer.Deserialize(LFileSystem::GetEngineConfig(), InSpecification);
 	}
 
-	void LApplication::SetupDirectories()
-	{
-		// TODO: Check the pathing here before creating any directories.
-		// Should be placed in the assets directory.
-
-		/* Create 'Scenes' directory if it does not exist. */
-		if (!std::filesystem::exists("Scenes"))
-		{
-			LK_INFO("Creating 'Scenes' directory");
-			std::filesystem::create_directories("Scenes");
-		}
-	}
-
 	std::string LApplication::GenerateCrashDump()
 	{
-		return "NULL";
+		std::string Dump;
+		Dump += "\n";
+		Dump += std::format("ResourcesDir: {}\n", LFileSystem::GetResourcesDir().c_str());
+		Dump += std::format("AssetsDir: {}\n", LFileSystem::GetAssetsDir().c_str());
+		Dump += std::format("EngineDir: {}\n", LFileSystem::GetEngineDir().c_str());
+		Dump += std::format("ConfigDir: {}\n", LFileSystem::GetConfigDir().c_str());
+		Dump += std::format("EngineDir: {}\n", LFileSystem::GetEngineConfig().c_str());
+
+		return Dump;
 	}
 
 	void LApplication::RenderUI()

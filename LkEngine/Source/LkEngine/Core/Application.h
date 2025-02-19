@@ -48,8 +48,12 @@
 
 namespace LkEngine {
 
+	LK_DECLARE_MULTICAST_DELEGATE(FOnEngineShutdown);
+
 	namespace Core 
 	{
+		extern FOnEngineShutdown OnEngineShutdown;
+
 		/**
 		 * Setup necessary engine components (logging, global config).
 		 */
@@ -69,7 +73,6 @@ namespace LkEngine {
 		FORCEINLINE static LApplication& Get() { return *Instance; }
 
 		bool ReadConfigurationFile(FApplicationSpecification& InSpecification);
-		void SetupDirectories();
 
 		void OnEvent(LEvent& Event);
 
