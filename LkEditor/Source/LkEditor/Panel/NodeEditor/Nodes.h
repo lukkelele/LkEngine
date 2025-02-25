@@ -9,7 +9,7 @@
 
 namespace LkEngine {
     
-    namespace ed = ax::NodeEditor;
+    namespace NodeEd = ax::NodeEditor;
 
     enum class EPinType
     {
@@ -26,8 +26,8 @@ namespace LkEngine {
 
     enum class EPinKind
     {
+        Input,
         Output,
-        Input
     };
 	LK_ENUM_CLASS_FLAGS(EPinKind);
 
@@ -45,7 +45,7 @@ namespace LkEngine {
 
     struct LPin
     {
-        ed::PinId ID;
+        NodeEd::PinId ID;
 		LNode* Node{};
         std::string Name;
         EPinType Type;
@@ -73,7 +73,7 @@ namespace LkEngine {
     
     struct LNode
     {
-		ed::NodeId ID{};
+		NodeEd::NodeId ID{};
 		std::string Name{};
         ImColor Color;
         ENodeType Type;
@@ -97,14 +97,14 @@ namespace LkEngine {
 
     struct LPinLink
     {
-        ed::LinkId ID;
+        NodeEd::LinkId ID;
 
-        ed::PinId StartPinID;
-        ed::PinId EndPinID;
+        NodeEd::PinId StartPinID;
+        NodeEd::PinId EndPinID;
 
         ImColor Color;
 
-        LPinLink(const ed::LinkId InID, ed::PinId InStartPinId, ed::PinId InEndPinId) 
+        LPinLink(const NodeEd::LinkId InID, NodeEd::PinId InStartPinId, NodeEd::PinId InEndPinId) 
 			: ID(InID)
 			, StartPinID(InStartPinId)
 			, EndPinID(InEndPinId)
@@ -115,12 +115,35 @@ namespace LkEngine {
 
     struct NodeIdLess
     {
-        bool operator()(const ed::NodeId& lhs, const ed::NodeId& rhs) const
+        bool operator()(const NodeEd::NodeId& lhs, const NodeEd::NodeId& rhs) const
         {
             return lhs.AsPointer() < rhs.AsPointer();
         }
     };
 
+	static NodeEd::PinKind GetPinKind(const EPinKind Kind)
+	{
+		switch (Kind)
+		{
+			case EPinKind::Input:  return NodeEd::PinKind::Input;
+			case EPinKind::Output: return NodeEd::PinKind::Output;
+		}
+
+		LK_CORE_VERIFY(false, "GetPinKind failed for value: {}", static_cast<int>(Kind));
+		return NodeEd::PinKind::Input;
+	}
+
+	static NodeEd::PinKind GetPinKind(const LPin& Pin)
+	{
+		switch (Pin.Kind)
+		{
+			case EPinKind::Input:  return NodeEd::PinKind::Input;
+			case EPinKind::Output: return NodeEd::PinKind::Output;
+		}
+
+		LK_CORE_VERIFY(false, "GetPinKind failed for value: {}", static_cast<int>(Pin.Kind));
+		return NodeEd::PinKind::Input;
+	}
 
 
 #if 0
@@ -245,22 +268,22 @@ namespace LkEngine {
             return m_NextId++;
         }
 
-        //ed::NodeId GetNextNodeId()
+        //NodeEd::NodeId GetNextNodeId()
         //{
-        //    return ed::NodeId(GetNextId());
+        //    return NodeEd::NodeId(GetNextId());
         //}
 
-        ed::LinkId GetNextLinkId()
+        NodeEd::LinkId GetNextLinkId()
         {
-            return ed::LinkId(GetNextId());
+            return NodeEd::LinkId(GetNextId());
         }
 
-        void TouchNode(ed::NodeId id)
+        void TouchNode(NodeEd::NodeId id)
         {
             m_NodeTouchTime[id] = m_TouchTime;
         }
 
-        float GetTouchProgress(ed::NodeId id)
+        float GetTouchProgress(NodeEd::NodeId id)
         {
             auto it = m_NodeTouchTime.find(id);
             if (it != m_NodeTouchTime.end() && it->second > 0.0f)
@@ -279,7 +302,7 @@ namespace LkEngine {
             }
         }
 
-        Node* FindNode(ed::NodeId id)
+        Node* FindNode(NodeEd::NodeId id)
         {
             for (auto& node : m_Nodes)
                 if (node.ID == id)
@@ -288,7 +311,7 @@ namespace LkEngine {
             return nullptr;
         }
 
-        Link* FindLink(ed::LinkId id)
+        Link* FindLink(NodeEd::LinkId id)
         {
             for (auto& link : m_Links)
                 if (link.ID == id)
@@ -297,7 +320,7 @@ namespace LkEngine {
             return nullptr;
         }
 
-        Pin* FindPin(ed::PinId id)
+        Pin* FindPin(NodeEd::PinId id)
         {
             if (!id)
                 return nullptr;
@@ -316,7 +339,7 @@ namespace LkEngine {
             return nullptr;
         }
 
-        bool IsPinLinked(ed::PinId id)
+        bool IsPinLinked(NodeEd::PinId id)
         {
             if (!id)
                 return false;
@@ -578,13 +601,13 @@ namespace LkEngine {
 
         void OnStart() override
         {
-            ed::Config config;
+            NodeEd::Config config;
 
             config.SettingsFile = "Blueprints.json";
 
             config.UserPointer = this;
 
-            config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void* userPointer) -> size_t
+            config.LoadNodeSettings = [](NodeEd::NodeId nodeId, char* data, void* userPointer) -> size_t
                 {
                     auto self = static_cast<Example*>(userPointer);
 
@@ -597,7 +620,7 @@ namespace LkEngine {
                     return node->State.size();
                 };
 
-            config.SaveNodeSettings = [](ed::NodeId nodeId, const char* data, size_t size, ed::SaveReasonFlags reason, void* userPointer) -> bool
+            config.SaveNodeSettings = [](NodeEd::NodeId nodeId, const char* data, size_t size, NodeEd::SaveReasonFlags reason, void* userPointer) -> bool
                 {
                     auto self = static_cast<Example*>(userPointer);
 
@@ -612,32 +635,32 @@ namespace LkEngine {
                     return true;
                 };
 
-            m_Editor = ed::CreateEditor(&config);
-            ed::SetCurrentEditor(m_Editor);
+            m_Editor = NodeEd::CreateEditor(&config);
+            NodeEd::SetCurrentEditor(m_Editor);
 
             Node* node;
-            node = SpawnInputActionNode();      ed::SetNodePosition(node->ID, ImVec2(-252, 220));
-            node = SpawnBranchNode();           ed::SetNodePosition(node->ID, ImVec2(-300, 351));
-            node = SpawnDoNNode();              ed::SetNodePosition(node->ID, ImVec2(-238, 504));
-            node = SpawnOutputActionNode();     ed::SetNodePosition(node->ID, ImVec2(71, 80));
-            node = SpawnSetTimerNode();         ed::SetNodePosition(node->ID, ImVec2(168, 316));
+            node = SpawnInputActionNode();      NodeEd::SetNodePosition(node->ID, ImVec2(-252, 220));
+            node = SpawnBranchNode();           NodeEd::SetNodePosition(node->ID, ImVec2(-300, 351));
+            node = SpawnDoNNode();              NodeEd::SetNodePosition(node->ID, ImVec2(-238, 504));
+            node = SpawnOutputActionNode();     NodeEd::SetNodePosition(node->ID, ImVec2(71, 80));
+            node = SpawnSetTimerNode();         NodeEd::SetNodePosition(node->ID, ImVec2(168, 316));
 
-            node = SpawnTreeSequenceNode();     ed::SetNodePosition(node->ID, ImVec2(1028, 329));
-            node = SpawnTreeTaskNode();         ed::SetNodePosition(node->ID, ImVec2(1204, 458));
-            node = SpawnTreeTask2Node();        ed::SetNodePosition(node->ID, ImVec2(868, 538));
+            node = SpawnTreeSequenceNode();     NodeEd::SetNodePosition(node->ID, ImVec2(1028, 329));
+            node = SpawnTreeTaskNode();         NodeEd::SetNodePosition(node->ID, ImVec2(1204, 458));
+            node = SpawnTreeTask2Node();        NodeEd::SetNodePosition(node->ID, ImVec2(868, 538));
 
-            node = SpawnComment();              ed::SetNodePosition(node->ID, ImVec2(112, 576)); ed::SetGroupSize(node->ID, ImVec2(384, 154));
-            node = SpawnComment();              ed::SetNodePosition(node->ID, ImVec2(800, 224)); ed::SetGroupSize(node->ID, ImVec2(640, 400));
+            node = SpawnComment();              NodeEd::SetNodePosition(node->ID, ImVec2(112, 576)); NodeEd::SetGroupSize(node->ID, ImVec2(384, 154));
+            node = SpawnComment();              NodeEd::SetNodePosition(node->ID, ImVec2(800, 224)); NodeEd::SetGroupSize(node->ID, ImVec2(640, 400));
 
-            node = SpawnLessNode();             ed::SetNodePosition(node->ID, ImVec2(366, 652));
-            node = SpawnWeirdNode();            ed::SetNodePosition(node->ID, ImVec2(144, 652));
-            node = SpawnMessageNode();          ed::SetNodePosition(node->ID, ImVec2(-348, 698));
-            node = SpawnPrintStringNode();      ed::SetNodePosition(node->ID, ImVec2(-69, 652));
+            node = SpawnLessNode();             NodeEd::SetNodePosition(node->ID, ImVec2(366, 652));
+            node = SpawnWeirdNode();            NodeEd::SetNodePosition(node->ID, ImVec2(144, 652));
+            node = SpawnMessageNode();          NodeEd::SetNodePosition(node->ID, ImVec2(-348, 698));
+            node = SpawnPrintStringNode();      NodeEd::SetNodePosition(node->ID, ImVec2(-69, 652));
 
-            node = SpawnHoudiniTransformNode(); ed::SetNodePosition(node->ID, ImVec2(500, -70));
-            node = SpawnHoudiniGroupNode();     ed::SetNodePosition(node->ID, ImVec2(500, 42));
+            node = SpawnHoudiniTransformNode(); NodeEd::SetNodePosition(node->ID, ImVec2(500, -70));
+            node = SpawnHoudiniGroupNode();     NodeEd::SetNodePosition(node->ID, ImVec2(500, 42));
 
-            ed::NavigateToContent();
+            NodeEd::NavigateToContent();
 
             BuildNodes();
 
@@ -671,7 +694,7 @@ namespace LkEngine {
 
             if (m_Editor)
             {
-                ed::DestroyEditor(m_Editor);
+                NodeEd::DestroyEditor(m_Editor);
                 m_Editor = nullptr;
             }
         }
@@ -724,12 +747,12 @@ namespace LkEngine {
 
             auto paneWidth = ImGui::GetContentRegionAvail().x;
 
-            auto& editorStyle = ed::GetStyle();
+            auto& editorStyle = NodeEd::GetStyle();
             ImGui::BeginHorizontal("Style buttons", ImVec2(paneWidth, 0), 1.0f);
             ImGui::TextUnformatted("Values");
             ImGui::Spring();
             if (ImGui::Button("Reset to defaults"))
-                editorStyle = ed::Style();
+                editorStyle = NodeEd::Style();
             ImGui::EndHorizontal();
             ImGui::Spacing();
             ImGui::DragFloat4("Node Padding", &editorStyle.NodePadding.x, 0.1f, 0.0f, 40.0f);
@@ -777,9 +800,9 @@ namespace LkEngine {
             ImGui::Spacing();
 
             ImGui::PushItemWidth(-160);
-            for (int i = 0; i < ed::StyleColor_Count; ++i)
+            for (int i = 0; i < NodeEd::StyleColor_Count; ++i)
             {
-                auto name = ed::GetStyleColorName((ed::StyleColor)i);
+                auto name = NodeEd::GetStyleColorName((NodeEd::StyleColor)i);
                 if (!filter.PassFilter(name))
                     continue;
 
@@ -802,12 +825,12 @@ namespace LkEngine {
             ImGui::BeginHorizontal("Style Editor", ImVec2(paneWidth, 0));
             ImGui::Spring(0.0f, 0.0f);
             if (ImGui::Button("Zoom to Content"))
-                ed::NavigateToContent();
+                NodeEd::NavigateToContent();
             ImGui::Spring(0.0f);
             if (ImGui::Button("Show Flow"))
             {
                 for (auto& link : m_Links)
-                    ed::Flow(link.ID);
+                    NodeEd::Flow(link.ID);
             }
             ImGui::Spring();
             if (ImGui::Button("Edit Style"))
@@ -818,13 +841,13 @@ namespace LkEngine {
             if (showStyleEditor)
                 ShowStyleEditor(&showStyleEditor);
 
-            std::vector<ed::NodeId> selectedNodes;
-            std::vector<ed::LinkId> selectedLinks;
-            selectedNodes.resize(ed::GetSelectedObjectCount());
-            selectedLinks.resize(ed::GetSelectedObjectCount());
+            std::vector<NodeEd::NodeId> selectedNodes;
+            std::vector<NodeEd::LinkId> selectedLinks;
+            selectedNodes.resize(NodeEd::GetSelectedObjectCount());
+            selectedLinks.resize(NodeEd::GetSelectedObjectCount());
 
-            int nodeCount = ed::GetSelectedNodes(selectedNodes.data(), static_cast<int>(selectedNodes.size()));
-            int linkCount = ed::GetSelectedLinks(selectedLinks.data(), static_cast<int>(selectedLinks.size()));
+            int nodeCount = NodeEd::GetSelectedNodes(selectedNodes.data(), static_cast<int>(selectedNodes.size()));
+            int linkCount = NodeEd::GetSelectedLinks(selectedLinks.data(), static_cast<int>(selectedLinks.size()));
 
             selectedNodes.resize(nodeCount);
             selectedLinks.resize(linkCount);
@@ -863,14 +886,14 @@ namespace LkEngine {
                     if (io.KeyCtrl)
                     {
                         if (isSelected)
-                            ed::SelectNode(node.ID, true);
+                            NodeEd::SelectNode(node.ID, true);
                         else
-                            ed::DeselectNode(node.ID);
+                            NodeEd::DeselectNode(node.ID);
                     }
                     else
-                        ed::SelectNode(node.ID, false);
+                        NodeEd::SelectNode(node.ID, false);
 
-                    ed::NavigateToSelection();
+                    NodeEd::NavigateToSelection();
                 }
                 if (ImGui::IsItemHovered() && !node.State.empty())
                     ImGui::SetTooltip("State: %s", node.State.c_str());
@@ -920,7 +943,7 @@ namespace LkEngine {
                     if (ImGui::InvisibleButton("restore", ImVec2((float)restoreIconWidth, (float)restoreIconHeight)))
                     {
                         node.State = node.SavedState;
-                        ed::RestoreNodeState(node.ID);
+                        NodeEd::RestoreNodeState(node.ID);
                         node.SavedState.clear();
                     }
 
@@ -960,7 +983,7 @@ namespace LkEngine {
             ImGui::Text("Changed %d time%s", changeCount, changeCount > 1 ? "s" : "");
             ImGui::Spring();
             if (ImGui::Button("Deselect All"))
-                ed::ClearSelection();
+                NodeEd::ClearSelection();
             ImGui::EndHorizontal();
             ImGui::Indent();
             for (int i = 0; i < nodeCount; ++i) ImGui::Text("Node (%p)", selectedNodes[i].AsPointer());
@@ -969,9 +992,9 @@ namespace LkEngine {
 
             if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Z)))
                 for (auto& link : m_Links)
-                    ed::Flow(link.ID);
+                    NodeEd::Flow(link.ID);
 
-            if (ed::HasSelectionChanged())
+            if (NodeEd::HasSelectionChanged())
                 ++changeCount;
 
             ImGui::EndChild();
@@ -985,7 +1008,7 @@ namespace LkEngine {
 
             ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
 
-            ed::SetCurrentEditor(m_Editor);
+            NodeEd::SetCurrentEditor(m_Editor);
 
             //auto& style = ImGui::GetStyle();
 
@@ -999,9 +1022,9 @@ namespace LkEngine {
             }
 # endif
 
-            static ed::NodeId contextNodeId = 0;
-            static ed::LinkId contextLinkId = 0;
-            static ed::PinId  contextPinId = 0;
+            static NodeEd::NodeId contextNodeId = 0;
+            static NodeEd::LinkId contextLinkId = 0;
+            static NodeEd::PinId  contextPinId = 0;
             static bool createNewNode = false;
             static Pin* newNodeLinkPin = nullptr;
             static Pin* newLinkPin = nullptr;
@@ -1014,7 +1037,7 @@ namespace LkEngine {
 
             ImGui::SameLine(0.0f, 12.0f);
 
-            ed::Begin("Node editor");
+            NodeEd::Begin("Node editor");
             {
                 auto cursorTopLeft = ImGui::GetCursorScreenPos();
 
@@ -1053,9 +1076,9 @@ namespace LkEngine {
                                 if (newLinkPin && !CanCreateLink(newLinkPin, &output) && &output != newLinkPin)
                                     alpha = alpha * (48.0f / 255.0f);
 
-                                ed::BeginPin(output.ID, ed::PinKind::Output);
-                                ed::PinPivotAlignment(ImVec2(1.0f, 0.5f));
-                                ed::PinPivotSize(ImVec2(0, 0));
+                                NodeEd::BeginPin(output.ID, NodeEd::PinKind::Output);
+                                NodeEd::PinPivotAlignment(ImVec2(1.0f, 0.5f));
+                                NodeEd::PinPivotSize(ImVec2(0, 0));
                                 ImGui::BeginHorizontal(output.ID.AsPointer());
                                 ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
                                 if (!output.Name.empty())
@@ -1067,7 +1090,7 @@ namespace LkEngine {
                                 ImGui::Spring(0, ImGui::GetStyle().ItemSpacing.x / 2);
                                 ImGui::EndHorizontal();
                                 ImGui::PopStyleVar();
-                                ed::EndPin();
+                                NodeEd::EndPin();
 
                                 //DrawItemRect(ImColor(255, 0, 0));
                             }
@@ -1134,12 +1157,12 @@ namespace LkEngine {
                             ImGui::PopItemWidth();
                             if (ImGui::IsItemActive() && !wasActive)
                             {
-                                ed::EnableShortcuts(false);
+                                NodeEd::EnableShortcuts(false);
                                 wasActive = true;
                             }
                             else if (!ImGui::IsItemActive() && wasActive)
                             {
-                                ed::EnableShortcuts(true);
+                                NodeEd::EnableShortcuts(true);
                                 wasActive = false;
                             }
                             ImGui::Spring(0);
@@ -1166,21 +1189,21 @@ namespace LkEngine {
                     const float rounding = 5.0f;
                     const float padding = 12.0f;
 
-                    const auto pinBackground = ed::GetStyle().Colors[ed::StyleColor_NodeBg];
+                    const auto pinBackground = NodeEd::GetStyle().Colors[NodeEd::StyleColor_NodeBg];
 
-                    ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(128, 128, 128, 200));
-                    ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(32, 32, 32, 200));
-                    ed::PushStyleColor(ed::StyleColor_PinRect, ImColor(60, 180, 255, 150));
-                    ed::PushStyleColor(ed::StyleColor_PinRectBorder, ImColor(60, 180, 255, 150));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBg, ImColor(128, 128, 128, 200));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBorder, ImColor(32, 32, 32, 200));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_PinRect, ImColor(60, 180, 255, 150));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_PinRectBorder, ImColor(60, 180, 255, 150));
 
-                    ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec4(0, 0, 0, 0));
-                    ed::PushStyleVar(ed::StyleVar_NodeRounding, rounding);
-                    ed::PushStyleVar(ed::StyleVar_SourceDirection, ImVec2(0.0f, 1.0f));
-                    ed::PushStyleVar(ed::StyleVar_TargetDirection, ImVec2(0.0f, -1.0f));
-                    ed::PushStyleVar(ed::StyleVar_LinkStrength, 0.0f);
-                    ed::PushStyleVar(ed::StyleVar_PinBorderWidth, 1.0f);
-                    ed::PushStyleVar(ed::StyleVar_PinRadius, 5.0f);
-                    ed::BeginNode(node.ID);
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_NodePadding, ImVec4(0, 0, 0, 0));
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_NodeRounding, rounding);
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_SourceDirection, ImVec2(0.0f, 1.0f));
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_TargetDirection, ImVec2(0.0f, -1.0f));
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_LinkStrength, 0.0f);
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_PinBorderWidth, 1.0f);
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_PinRadius, 5.0f);
+                    NodeEd::BeginNode(node.ID);
 
                     ImGui::BeginVertical(node.ID.AsPointer());
                     ImGui::BeginHorizontal("inputs");
@@ -1195,18 +1218,18 @@ namespace LkEngine {
                         ImGui::Spring(1, 0);
                         inputsRect = ImGui_GetItemRect();
 
-                        ed::PushStyleVar(ed::StyleVar_PinArrowSize, 10.0f);
-                        ed::PushStyleVar(ed::StyleVar_PinArrowWidth, 10.0f);
+                        NodeEd::PushStyleVar(NodeEd::StyleVar_PinArrowSize, 10.0f);
+                        NodeEd::PushStyleVar(NodeEd::StyleVar_PinArrowWidth, 10.0f);
 #if IMGUI_VERSION_NUM > 18101
-                        ed::PushStyleVar(ed::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom);
+                        NodeEd::PushStyleVar(NodeEd::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom);
 #else
-                        ed::PushStyleVar(ed::StyleVar_PinCorners, 12);
+                        NodeEd::PushStyleVar(NodeEd::StyleVar_PinCorners, 12);
 #endif
-                        ed::BeginPin(pin.ID, ed::PinKind::Input);
-                        ed::PinPivotRect(inputsRect.GetTL(), inputsRect.GetBR());
-                        ed::PinRect(inputsRect.GetTL(), inputsRect.GetBR());
-                        ed::EndPin();
-                        ed::PopStyleVar(3);
+                        NodeEd::BeginPin(pin.ID, NodeEd::PinKind::Input);
+                        NodeEd::PinPivotRect(inputsRect.GetTL(), inputsRect.GetBR());
+                        NodeEd::PinRect(inputsRect.GetTL(), inputsRect.GetBR());
+                        NodeEd::EndPin();
+                        NodeEd::PopStyleVar(3);
 
                         if (newLinkPin && !CanCreateLink(newLinkPin, &pin) && &pin != newLinkPin)
                             inputAlpha = (int)(255 * ImGui::GetStyle().Alpha * (48.0f / 255.0f));
@@ -1244,15 +1267,15 @@ namespace LkEngine {
                         outputsRect = ImGui_GetItemRect();
 
 #if IMGUI_VERSION_NUM > 18101
-                        ed::PushStyleVar(ed::StyleVar_PinCorners, ImDrawFlags_RoundCornersTop);
+                        NodeEd::PushStyleVar(NodeEd::StyleVar_PinCorners, ImDrawFlags_RoundCornersTop);
 #else
-                        ed::PushStyleVar(ed::StyleVar_PinCorners, 3);
+                        NodeEd::PushStyleVar(NodeEd::StyleVar_PinCorners, 3);
 #endif
-                        ed::BeginPin(pin.ID, ed::PinKind::Output);
-                        ed::PinPivotRect(outputsRect.GetTL(), outputsRect.GetBR());
-                        ed::PinRect(outputsRect.GetTL(), outputsRect.GetBR());
-                        ed::EndPin();
-                        ed::PopStyleVar();
+                        NodeEd::BeginPin(pin.ID, NodeEd::PinKind::Output);
+                        NodeEd::PinPivotRect(outputsRect.GetTL(), outputsRect.GetBR());
+                        NodeEd::PinRect(outputsRect.GetTL(), outputsRect.GetBR());
+                        NodeEd::EndPin();
+                        NodeEd::PopStyleVar();
 
                         if (newLinkPin && !CanCreateLink(newLinkPin, &pin) && &pin != newLinkPin)
                             outputAlpha = (int)(255 * ImGui::GetStyle().Alpha * (48.0f / 255.0f));
@@ -1265,11 +1288,11 @@ namespace LkEngine {
 
                     ImGui::EndVertical();
 
-                    ed::EndNode();
-                    ed::PopStyleVar(7);
-                    ed::PopStyleColor(4);
+                    NodeEd::EndNode();
+                    NodeEd::PopStyleVar(7);
+                    NodeEd::PopStyleColor(4);
 
-                    auto drawList = ed::GetNodeBackgroundDrawList(node.ID);
+                    auto drawList = NodeEd::GetNodeBackgroundDrawList(node.ID);
 
                     //const auto fringeScale = ImGui::GetStyle().AntiAliasFringeScale;
                     //const auto unitSize    = 1.0f / fringeScale;
@@ -1320,21 +1343,21 @@ namespace LkEngine {
                     const float padding = 12.0f;
 
 
-                    ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(229, 229, 229, 200));
-                    ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(125, 125, 125, 200));
-                    ed::PushStyleColor(ed::StyleColor_PinRect, ImColor(229, 229, 229, 60));
-                    ed::PushStyleColor(ed::StyleColor_PinRectBorder, ImColor(125, 125, 125, 60));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBg, ImColor(229, 229, 229, 200));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBorder, ImColor(125, 125, 125, 200));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_PinRect, ImColor(229, 229, 229, 60));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_PinRectBorder, ImColor(125, 125, 125, 60));
 
-                    const auto pinBackground = ed::GetStyle().Colors[ed::StyleColor_NodeBg];
+                    const auto pinBackground = NodeEd::GetStyle().Colors[NodeEd::StyleColor_NodeBg];
 
-                    ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec4(0, 0, 0, 0));
-                    ed::PushStyleVar(ed::StyleVar_NodeRounding, rounding);
-                    ed::PushStyleVar(ed::StyleVar_SourceDirection, ImVec2(0.0f, 1.0f));
-                    ed::PushStyleVar(ed::StyleVar_TargetDirection, ImVec2(0.0f, -1.0f));
-                    ed::PushStyleVar(ed::StyleVar_LinkStrength, 0.0f);
-                    ed::PushStyleVar(ed::StyleVar_PinBorderWidth, 1.0f);
-                    ed::PushStyleVar(ed::StyleVar_PinRadius, 6.0f);
-                    ed::BeginNode(node.ID);
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_NodePadding, ImVec4(0, 0, 0, 0));
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_NodeRounding, rounding);
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_SourceDirection, ImVec2(0.0f, 1.0f));
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_TargetDirection, ImVec2(0.0f, -1.0f));
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_LinkStrength, 0.0f);
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_PinBorderWidth, 1.0f);
+                    NodeEd::PushStyleVar(NodeEd::StyleVar_PinRadius, 6.0f);
+                    NodeEd::BeginNode(node.ID);
 
                     ImGui::BeginVertical(node.ID.AsPointer());
                     if (!node.Inputs.empty())
@@ -1357,16 +1380,16 @@ namespace LkEngine {
 #else
                             const auto allRoundCornersFlags = 15;
 #endif
-                            //ed::PushStyleVar(ed::StyleVar_PinArrowSize, 10.0f);
-                            //ed::PushStyleVar(ed::StyleVar_PinArrowWidth, 10.0f);
-                            ed::PushStyleVar(ed::StyleVar_PinCorners, allRoundCornersFlags);
+                            //NodeEd::PushStyleVar(NodeEd::StyleVar_PinArrowSize, 10.0f);
+                            //NodeEd::PushStyleVar(NodeEd::StyleVar_PinArrowWidth, 10.0f);
+                            NodeEd::PushStyleVar(NodeEd::StyleVar_PinCorners, allRoundCornersFlags);
 
-                            ed::BeginPin(pin.ID, ed::PinKind::Input);
-                            ed::PinPivotRect(inputsRect.GetCenter(), inputsRect.GetCenter());
-                            ed::PinRect(inputsRect.GetTL(), inputsRect.GetBR());
-                            ed::EndPin();
-                            //ed::PopStyleVar(3);
-                            ed::PopStyleVar(1);
+                            NodeEd::BeginPin(pin.ID, NodeEd::PinKind::Input);
+                            NodeEd::PinPivotRect(inputsRect.GetCenter(), inputsRect.GetCenter());
+                            NodeEd::PinRect(inputsRect.GetTL(), inputsRect.GetBR());
+                            NodeEd::EndPin();
+                            //NodeEd::PopStyleVar(3);
+                            NodeEd::PopStyleVar(1);
 
                             auto drawList = ImGui::GetWindowDrawList();
                             drawList->AddRectFilled(inputsRect.GetTL(), inputsRect.GetBR(),
@@ -1421,12 +1444,12 @@ namespace LkEngine {
                             const auto topRoundCornersFlags = 3;
 #endif
 
-                            ed::PushStyleVar(ed::StyleVar_PinCorners, topRoundCornersFlags);
-                            ed::BeginPin(pin.ID, ed::PinKind::Output);
-                            ed::PinPivotRect(outputsRect.GetCenter(), outputsRect.GetCenter());
-                            ed::PinRect(outputsRect.GetTL(), outputsRect.GetBR());
-                            ed::EndPin();
-                            ed::PopStyleVar();
+                            NodeEd::PushStyleVar(NodeEd::StyleVar_PinCorners, topRoundCornersFlags);
+                            NodeEd::BeginPin(pin.ID, NodeEd::PinKind::Output);
+                            NodeEd::PinPivotRect(outputsRect.GetCenter(), outputsRect.GetCenter());
+                            NodeEd::PinRect(outputsRect.GetTL(), outputsRect.GetBR());
+                            NodeEd::EndPin();
+                            NodeEd::PopStyleVar();
 
 
                             auto drawList = ImGui::GetWindowDrawList();
@@ -1445,11 +1468,11 @@ namespace LkEngine {
 
                     ImGui::EndVertical();
 
-                    ed::EndNode();
-                    ed::PopStyleVar(7);
-                    ed::PopStyleColor(4);
+                    NodeEd::EndNode();
+                    NodeEd::PopStyleVar(7);
+                    NodeEd::PopStyleColor(4);
 
-                    // auto drawList = ed::GetNodeBackgroundDrawList(node.ID);
+                    // auto drawList = NodeEd::GetNodeBackgroundDrawList(node.ID);
 
                     //const auto fringeScale = ImGui::GetStyle().AntiAliasFringeScale;
                     //const auto unitSize    = 1.0f / fringeScale;
@@ -1491,9 +1514,9 @@ namespace LkEngine {
                     const float commentAlpha = 0.75f;
 
                     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha);
-                    ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
-                    ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
-                    ed::BeginNode(node.ID);
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
+                    NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
+                    NodeEd::BeginNode(node.ID);
                     ImGui::PushID(node.ID.AsPointer());
                     ImGui::BeginVertical("content");
                     ImGui::BeginHorizontal("horizontal");
@@ -1501,29 +1524,29 @@ namespace LkEngine {
                     ImGui::TextUnformatted(node.Name.c_str());
                     ImGui::Spring(1);
                     ImGui::EndHorizontal();
-                    ed::Group(node.Size);
+                    NodeEd::Group(node.Size);
                     ImGui::EndVertical();
                     ImGui::PopID();
-                    ed::EndNode();
-                    ed::PopStyleColor(2);
+                    NodeEd::EndNode();
+                    NodeEd::PopStyleColor(2);
                     ImGui::PopStyleVar();
 
-                    if (ed::BeginGroupHint(node.ID))
+                    if (NodeEd::BeginGroupHint(node.ID))
                     {
                         //auto alpha   = static_cast<int>(commentAlpha * ImGui::GetStyle().Alpha * 255);
                         auto bgAlpha = static_cast<int>(ImGui::GetStyle().Alpha * 255);
 
                         //ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha * ImGui::GetStyle().Alpha);
 
-                        auto min = ed::GetGroupMin();
-                        //auto max = ed::GetGroupMax();
+                        auto min = NodeEd::GetGroupMin();
+                        //auto max = NodeEd::GetGroupMax();
 
                         ImGui::SetCursorScreenPos(min - ImVec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4));
                         ImGui::BeginGroup();
                         ImGui::TextUnformatted(node.Name.c_str());
                         ImGui::EndGroup();
 
-                        auto drawList = ed::GetHintBackgroundDrawList();
+                        auto drawList = NodeEd::GetHintBackgroundDrawList();
 
                         auto hintBounds = ImGui_GetItemRect();
                         auto hintFrameBounds = ImRect_Expanded(hintBounds, 8, 4);
@@ -1540,15 +1563,15 @@ namespace LkEngine {
 
                         //ImGui::PopStyleVar();
                     }
-                    ed::EndGroupHint();
+                    NodeEd::EndGroupHint();
                 }
 
                 for (auto& link : m_Links)
-                    ed::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0f);
+                    NodeEd::Link(link.ID, link.StartPinID, link.EndPinID, link.Color, 2.0f);
 
                 if (!createNewNode)
                 {
-                    if (ed::BeginCreate(ImColor(255, 255, 255), 2.0f))
+                    if (NodeEd::BeginCreate(ImColor(255, 255, 255), 2.0f))
                     {
                         auto showLabel = [](const char* label, ImColor color)
                             {
@@ -1568,8 +1591,8 @@ namespace LkEngine {
                                 ImGui::TextUnformatted(label);
                             };
 
-                        ed::PinId startPinId = 0, endPinId = 0;
-                        if (ed::QueryNewLink(&startPinId, &endPinId))
+                        NodeEd::PinId startPinId = 0, endPinId = 0;
+                        if (NodeEd::QueryNewLink(&startPinId, &endPinId))
                         {
                             auto startPin = FindPin(startPinId);
                             auto endPin = FindPin(endPinId);
@@ -1586,27 +1609,27 @@ namespace LkEngine {
                             {
                                 if (endPin == startPin)
                                 {
-                                    ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
+                                    NodeEd::RejectNewItem(ImColor(255, 0, 0), 2.0f);
                                 }
                                 else if (endPin->Kind == startPin->Kind)
                                 {
                                     showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
-                                    ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
+                                    NodeEd::RejectNewItem(ImColor(255, 0, 0), 2.0f);
                                 }
                                 //else if (endPin->Node == startPin->Node)
                                 //{
                                 //    showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
-                                //    ed::RejectNewItem(ImColor(255, 0, 0), 1.0f);
+                                //    NodeEd::RejectNewItem(ImColor(255, 0, 0), 1.0f);
                                 //}
                                 else if (endPin->Type != startPin->Type)
                                 {
                                     showLabel("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
-                                    ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
+                                    NodeEd::RejectNewItem(ImColor(255, 128, 128), 1.0f);
                                 }
                                 else
                                 {
                                     showLabel("+ Create Link", ImColor(32, 45, 32, 180));
-                                    if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
+                                    if (NodeEd::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
                                     {
                                         m_Links.emplace_back(Link(GetNextId(), startPinId, endPinId));
                                         m_Links.back().Color = GetIconColor(startPin->Type);
@@ -1615,35 +1638,35 @@ namespace LkEngine {
                             }
                         }
 
-                        ed::PinId pinId = 0;
-                        if (ed::QueryNewNode(&pinId))
+                        NodeEd::PinId pinId = 0;
+                        if (NodeEd::QueryNewNode(&pinId))
                         {
                             newLinkPin = FindPin(pinId);
                             if (newLinkPin)
                                 showLabel("+ Create Node", ImColor(32, 45, 32, 180));
 
-                            if (ed::AcceptNewItem())
+                            if (NodeEd::AcceptNewItem())
                             {
                                 createNewNode = true;
                                 newNodeLinkPin = FindPin(pinId);
                                 newLinkPin = nullptr;
-                                ed::Suspend();
+                                NodeEd::Suspend();
                                 ImGui::OpenPopup("Create New Node");
-                                ed::Resume();
+                                NodeEd::Resume();
                             }
                         }
                     }
                     else
                         newLinkPin = nullptr;
 
-                    ed::EndCreate();
+                    NodeEd::EndCreate();
 
-                    if (ed::BeginDelete())
+                    if (NodeEd::BeginDelete())
                     {
-                        ed::NodeId nodeId = 0;
-                        while (ed::QueryDeletedNode(&nodeId))
+                        NodeEd::NodeId nodeId = 0;
+                        while (NodeEd::QueryDeletedNode(&nodeId))
                         {
-                            if (ed::AcceptDeletedItem())
+                            if (NodeEd::AcceptDeletedItem())
                             {
                                 auto id = std::find_if(m_Nodes.begin(), m_Nodes.end(), [nodeId](auto& node) { return node.ID == nodeId; });
                                 if (id != m_Nodes.end())
@@ -1651,10 +1674,10 @@ namespace LkEngine {
                             }
                         }
 
-                        ed::LinkId linkId = 0;
-                        while (ed::QueryDeletedLink(&linkId))
+                        NodeEd::LinkId linkId = 0;
+                        while (NodeEd::QueryDeletedLink(&linkId))
                         {
-                            if (ed::AcceptDeletedItem())
+                            if (NodeEd::AcceptDeletedItem())
                             {
                                 auto id = std::find_if(m_Links.begin(), m_Links.end(), [linkId](auto& link) { return link.ID == linkId; });
                                 if (id != m_Links.end())
@@ -1662,7 +1685,7 @@ namespace LkEngine {
                             }
                         }
                     }
-                    ed::EndDelete();
+                    NodeEd::EndDelete();
                 }
 
                 ImGui::SetCursorScreenPos(cursorTopLeft);
@@ -1670,21 +1693,21 @@ namespace LkEngine {
 
 # if 1
             auto openPopupPosition = ImGui::GetMousePos();
-            ed::Suspend();
-            if (ed::ShowNodeContextMenu(&contextNodeId))
+            NodeEd::Suspend();
+            if (NodeEd::ShowNodeContextMenu(&contextNodeId))
                 ImGui::OpenPopup("Node Context Menu");
-            else if (ed::ShowPinContextMenu(&contextPinId))
+            else if (NodeEd::ShowPinContextMenu(&contextPinId))
                 ImGui::OpenPopup("Pin Context Menu");
-            else if (ed::ShowLinkContextMenu(&contextLinkId))
+            else if (NodeEd::ShowLinkContextMenu(&contextLinkId))
                 ImGui::OpenPopup("Link Context Menu");
-            else if (ed::ShowBackgroundContextMenu())
+            else if (NodeEd::ShowBackgroundContextMenu())
             {
                 ImGui::OpenPopup("Create New Node");
                 newNodeLinkPin = nullptr;
             }
-            ed::Resume();
+            NodeEd::Resume();
 
-            ed::Suspend();
+            NodeEd::Suspend();
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
             if (ImGui::BeginPopup("Node Context Menu"))
             {
@@ -1703,7 +1726,7 @@ namespace LkEngine {
                     ImGui::Text("Unknown node: %p", contextNodeId.AsPointer());
                 ImGui::Separator();
                 if (ImGui::MenuItem("Delete"))
-                    ed::DeleteNode(contextNodeId);
+                    NodeEd::DeleteNode(contextNodeId);
                 ImGui::EndPopup();
             }
 
@@ -1743,7 +1766,7 @@ namespace LkEngine {
                     ImGui::Text("Unknown link: %p", contextLinkId.AsPointer());
                 ImGui::Separator();
                 if (ImGui::MenuItem("Delete"))
-                    ed::DeleteLink(contextLinkId);
+                    NodeEd::DeleteLink(contextLinkId);
                 ImGui::EndPopup();
             }
 
@@ -1799,7 +1822,7 @@ namespace LkEngine {
 
                     createNewNode = false;
 
-                    ed::SetNodePosition(node->ID, newNodePostion);
+                    NodeEd::SetNodePosition(node->ID, newNodePostion);
 
                     if (auto startPin = newNodeLinkPin)
                     {
@@ -1827,7 +1850,7 @@ namespace LkEngine {
             else
                 createNewNode = false;
             ImGui::PopStyleVar();
-            ed::Resume();
+            NodeEd::Resume();
 # endif
 
 
@@ -1854,17 +1877,17 @@ namespace LkEngine {
                 cubic_bezier_subdivide(acceptPoint, c);
             */
 
-            ed::End();
+            NodeEd::End();
 
             auto editorMin = ImGui::GetItemRectMin();
             auto editorMax = ImGui::GetItemRectMax();
 
             if (m_ShowOrdinals)
             {
-                int nodeCount = ed::GetNodeCount();
-                std::vector<ed::NodeId> orderedNodeIds;
+                int nodeCount = NodeEd::GetNodeCount();
+                std::vector<NodeEd::NodeId> orderedNodeIds;
                 orderedNodeIds.resize(static_cast<size_t>(nodeCount));
-                ed::GetOrderedNodeIds(orderedNodeIds.data(), nodeCount);
+                NodeEd::GetOrderedNodeIds(orderedNodeIds.data(), nodeCount);
 
 
                 auto drawList = ImGui::GetWindowDrawList();
@@ -1873,10 +1896,10 @@ namespace LkEngine {
                 int ordinal = 0;
                 for (auto& nodeId : orderedNodeIds)
                 {
-                    auto p0 = ed::GetNodePosition(nodeId);
-                    auto p1 = p0 + ed::GetNodeSize(nodeId);
-                    p0 = ed::CanvasToScreen(p0);
-                    p1 = ed::CanvasToScreen(p1);
+                    auto p0 = NodeEd::GetNodePosition(nodeId);
+                    auto p1 = p0 + NodeEd::GetNodeSize(nodeId);
+                    p0 = NodeEd::CanvasToScreen(p0);
+                    p1 = NodeEd::CanvasToScreen(p1);
 
 
                     ImGuiTextBuffer builder;
@@ -1909,7 +1932,7 @@ namespace LkEngine {
         ImTextureID          m_SaveIcon = nullptr;
         ImTextureID          m_RestoreIcon = nullptr;
         const float          m_TouchTime = 1.0f;
-        std::map<ed::NodeId, float, NodeIdLess> m_NodeTouchTime;
+        std::map<NodeEd::NodeId, float, NodeIdLess> m_NodeTouchTime;
         bool                 m_ShowOrdinals = false;
     };
 

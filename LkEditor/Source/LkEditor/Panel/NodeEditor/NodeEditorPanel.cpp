@@ -4,6 +4,8 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
+
+#include <imgui-node-editor/imgui_node_editor.h>
 #include <imgui-node-editor/imgui_node_editor_internal.h>
 
 
@@ -12,7 +14,9 @@ namespace LkEngine {
     using namespace ax::NodeEditor::Detail;
     using namespace ax::NodeEditor::Details;
 
-    namespace NodeEd = ed;
+	namespace {
+		bool bNodeStyleEditor = false;
+	}
 
     LNodeEditorPanel::LNodeEditorPanel(std::string_view InName)
         : Name(InName)
@@ -24,51 +28,177 @@ namespace LkEngine {
 
 	void LNodeEditorPanel::Initialize()
 	{
-		LK_CORE_ERROR_TAG("LNodeEditorPanel", "Initialize");
+		LK_CORE_DEBUG_TAG("NodeEditor", "Initializing");
 
-		LNode* Node = nullptr;
-		if (Node = SpawnInputActionNode(); Node != nullptr)
+		if (LNode* Node = SpawnInputActionNode(); Node != nullptr)
 		{
-			NodeEd::SetNodePosition(Node->ID, ImVec2(4, 4));
-		}
-		if (Node = SpawnBranchNode(); Node != nullptr)
-		{
+			LK_CORE_DEBUG_TAG("NodeEditor", "Setting position of branch node {} ({})", Node->Name, Node->ID.Get());
 			NodeEd::SetNodePosition(Node->ID, ImVec2(10, 25));
 		}
+		else
+		{
+			LK_CORE_WARN_TAG("NodeEditor", "Failed to spawn branch node");
+		}
+
+		LK_CORE_INFO_TAG("NodeEditor", "Navigating to content");
+		NodeEd::NavigateToContent();
+
+		LK_CORE_ASSERT(EditorContext);
 	}
 
 	void LNodeEditorPanel::RenderUI(bool& IsOpen)
     {
-        static constexpr int NodePin = 0;
-        static constexpr int InputPin = 1;
-        static constexpr int OutputPin = 2;
+		if (bNodeStyleEditor)
+		{
+			ax::NodeEditor::Style& EditorStyle = NodeEd::GetStyle();
+			if (ImGui::Begin("Node Editor Style", &bNodeStyleEditor, ImGuiWindowFlags_None))
+			{
+				ImGui::DragFloat4("Node Padding", &EditorStyle.NodePadding.x, 0.1f, 0.0f, 40.0f);
+				ImGui::DragFloat("Node Rounding", &EditorStyle.NodeRounding, 0.1f, 0.0f, 40.0f);
+				ImGui::DragFloat("Node Border Width", &EditorStyle.NodeBorderWidth, 0.1f, 0.0f, 15.0f);
+				ImGui::DragFloat("Hovered Node Border Width", &EditorStyle.HoveredNodeBorderWidth, 0.1f, 0.0f, 15.0f);
+				ImGui::DragFloat("Hovered Node Border Offset", &EditorStyle.HoverNodeBorderOffset, 0.1f, -40.0f, 40.0f);
+				ImGui::DragFloat("Selected Node Border Width", &EditorStyle.SelectedNodeBorderWidth, 0.1f, 0.0f, 15.0f);
+				ImGui::DragFloat("Selected Node Border Offset", &EditorStyle.SelectedNodeBorderOffset, 0.1f, -40.0f, 40.0f);
+				ImGui::DragFloat("Pin Rounding", &EditorStyle.PinRounding, 0.1f, 0.0f, 40.0f);
+				ImGui::DragFloat("Pin Border Width", &EditorStyle.PinBorderWidth, 0.1f, 0.0f, 15.0f);
+				UI::Draw::DragFloat("Pin Rounding", &EditorStyle.PinRounding, 0.1f, 0.0f, 40.0f);
+				UI::Draw::DragFloat("Pin Border Width", &EditorStyle.PinBorderWidth, 0.1f, 0.0f, 15.0f);
+				ImGui::DragFloat("Link Strength", &EditorStyle.LinkStrength, 1.0f, 0.0f, 500.0f);
+				UI::Draw::DragFloat("Link Strength", &EditorStyle.LinkStrength, 1.0f, 0.0f, 500.0f);
+			}
+
+			ImGui::End();
+		}
 
 		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
-		if (!UI::Begin("Node Editor", &IsOpen, WindowFlags))
+		if (!UI::Begin(std::format("##{}-Window", Name).c_str(), &IsOpen, WindowFlags))
 		{
 			return;
 		}
+
+		if (ImGui::Button("Style Editor"))
+		{
+			LK_CORE_DEBUG("Toggling node style editor");
+			bNodeStyleEditor = !bNodeStyleEditor;
+		}
+		ImGui::SameLine(0, 12.0f);
 
 		if (ImGui::Button("Spawn Branch Node"))
 		{
 			SpawnBranchNode();
 		}
+		ImGui::SameLine(0, 4.0f);
+		if (ImGui::Button("Spawn Input Action Node"))
+		{
+			SpawnInputActionNode();
+		}
 
-		NE::Begin(Name.c_str());
-		NE::BeginNode(NodePin);
+		if (ImGui::Button("Create Link"))
+		{
+			//Links.emplace_back(LPinLink(GetNextID(), ))
+		}
 
-		NE::BeginPin(InputPin, NE::PinKind::Input);
-		ImGui::Text("In -->");
-		NE::EndPin();
+		UI::ShiftCursor(10.0f, 60.0f);
+		{
+			ImGui::Text("Editor Name: %s", Name.c_str());
+			UI::ShiftCursorX(10.0f);
+			ImGui::Text("Nodes: %d", NodeEd::GetNodeCount());
+		}
+		UI::ShiftCursor(-10.0f, -60.0f);
 
-		NE::BeginPin(OutputPin, NE::PinKind::Output);
-		ImGui::Text("Out -->");
-		NE::EndPin();
+		EditorContext->SetAsCurrentEditorContext();
 
-		NE::EndNode();
-		NE::End();
+		static constexpr float Padding = 12.0f;
+		static constexpr float Rounding = 12.0f;
 
-		//ImGui::End();
+		NodeEd::Begin(Name.c_str());
+		{
+			for (LNode& Node : Nodes)
+			{
+				if ((Node.Type != ENodeType::Blueprint) && (Node.Type != ENodeType::Simple))
+				{
+					continue;
+				}
+
+				const bool IsSimple = (Node.Type == ENodeType::Simple);
+
+				std::vector<LPin>& Outputs = Node.Outputs;
+				auto FindOutputOfDelegateType = [](const LPin& Output) -> bool
+				{ 
+					return (Output.Type == EPinType::Delegate); 
+				};
+				auto OutputIter = std::find_if(Outputs.begin(), Outputs.end(), FindOutputOfDelegateType);
+				const bool HasOutputDelegates = (OutputIter != Outputs.end());
+
+				NodeEd::BeginNode(Node.ID);
+				{
+					ImGui::PushID(Node.ID.AsPointer());
+
+					/* Inputs. */
+					if (!Node.Inputs.empty())
+					{
+						ImRect InputRect;
+						for (LPin& Input : Node.Inputs)
+						{
+							InputRect = UI::GetItemRect();
+							ImGui::Dummy(ImVec2(Padding, Padding));
+							NodeEd::BeginPin(Input.ID, GetPinKind(Input));
+							{
+								NodeEd::PinPivotRect(InputRect.GetCenter(), InputRect.GetCenter());
+								NodeEd::PinRect(InputRect.GetTL(), InputRect.GetBR());
+							}
+							NodeEd::EndPin();
+						}
+					} 
+
+					//ImGui::Text("Node %d", Node.ID.AsPointer());
+					ImGui::Text("%s (%d)", Node.Name.c_str(), Node.ID.AsPointer());
+
+					if (!Node.Outputs.empty())
+					{
+						ImRect OutputRect;
+						for (LPin& Output : Node.Outputs)
+						{
+							OutputRect = UI::GetItemRect();
+							ImGui::Dummy(ImVec2(Padding, Padding));
+							NodeEd::BeginPin(Output.ID, GetPinKind(Output));
+							{
+								NodeEd::PinPivotRect(OutputRect.GetCenter(), OutputRect.GetCenter());
+								NodeEd::PinRect(OutputRect.GetTL(), OutputRect.GetBR());
+							}
+							NodeEd::EndPin();
+						}
+					}
+
+				#if 0
+					uint32_t Idx = 0;
+					NodeEd::BeginPin(Idx++, NodeEd::PinKind::Input);
+					{
+						ImGui::Text("-> Input");
+					}
+					NodeEd::EndPin();
+					ImGui::SameLine();
+					NodeEd::BeginPin(Idx++, NodeEd::PinKind::Output);
+					{
+						ImGui::Text("Output ->");
+					}
+					NodeEd::EndPin();
+				#endif
+
+					ImGui::PopID();
+				}
+				NodeEd::EndNode();
+			}
+		}
+
+		for (LPinLink& Link : Links)
+		{
+			NodeEd::Link(Link.ID, Link.StartPinID, Link.EndPinID, Link.Color, 2.0f);
+		}
+
+		NodeEd::End();
+
 		UI::End();
     }
 
@@ -162,17 +292,18 @@ namespace LkEngine {
     };
 
 
-    void LNodeEditorPanel::BuildNode(LNode* node)
+    void LNodeEditorPanel::BuildNode(LNode* Node)
     {
-        for (LPin& InputPin : node->Inputs)
+		LK_CORE_ASSERT(Node, "Cannot build node, invalid node reference");
+        for (LPin& InputPin : Node->Inputs)
         {
-            InputPin.Node = node;
+            InputPin.Node = Node;
             InputPin.Kind = EPinKind::Input;
         }
 
-        for (LPin& OutputPin : node->Outputs)
+        for (LPin& OutputPin : Node->Outputs)
         {
-            OutputPin.Node = node;
+            OutputPin.Node = Node;
             OutputPin.Kind = EPinKind::Output;
         }
     }
@@ -207,17 +338,17 @@ namespace LkEngine {
         return NextID++;
     }
 
-    NE::LinkId LNodeEditorPanel::GetNextLinkID()
+    NodeEd::LinkId LNodeEditorPanel::GetNextLinkID()
     {
-        return NE::LinkId(GetNextID());
+        return NodeEd::LinkId(GetNextID());
     }
 
-    void LNodeEditorPanel::TouchNode(NE::NodeId id)
+    void LNodeEditorPanel::TouchNode(NodeEd::NodeId id)
     {
         NodeTouchTime[id] = TouchTime;
     }
 
-    float LNodeEditorPanel::GetTouchProgress(NE::NodeId id)
+    float LNodeEditorPanel::GetTouchProgress(NodeEd::NodeId id)
     {
         auto it = NodeTouchTime.find(id);
         if (it != NodeTouchTime.end() && it->second > 0.0f)
@@ -236,7 +367,7 @@ namespace LkEngine {
         }
     }
 
-    LNode* LNodeEditorPanel::FindNode(NE::NodeId InNodeID)
+    LNode* LNodeEditorPanel::FindNode(NodeEd::NodeId InNodeID)
     {
 		auto FindNode = [InNodeID](const LNode& Node) -> bool
 		{
@@ -259,7 +390,7 @@ namespace LkEngine {
         return nullptr;
     }
 
-    LPinLink* LNodeEditorPanel::FindLink(NE::LinkId id)
+    LPinLink* LNodeEditorPanel::FindLink(NodeEd::LinkId id)
     {
         for (auto& link : Links)
             if (link.ID == id)
@@ -268,7 +399,7 @@ namespace LkEngine {
         return nullptr;
     }
 
-    LPin* LNodeEditorPanel::FindPin(NE::PinId id)
+    LPin* LNodeEditorPanel::FindPin(NodeEd::PinId id)
     {
         if (!id)
             return nullptr;
@@ -287,7 +418,7 @@ namespace LkEngine {
         return nullptr;
     }
 
-    bool LNodeEditorPanel::IsPinLinked(NE::PinId id)
+    bool LNodeEditorPanel::IsPinLinked(NodeEd::PinId id)
     {
         if (!id)
             return false;
@@ -320,9 +451,9 @@ namespace LkEngine {
 
             // TODO: BeginVertical/BeginHorizontal
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha);
-            ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
-            ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
-            ed::BeginNode(node.ID);
+            NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
+            NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
+            NodeEd::BeginNode(node.ID);
             ImGui::PushID(node.ID.AsPointer());
             //ImGui::BeginVertical("content");
             //ImGui::BeginHorizontal("horizontal");
@@ -330,22 +461,22 @@ namespace LkEngine {
             ImGui::TextUnformatted(node.Name.c_str());
             //ImGui::Spring(1);
             //ImGui::EndHorizontal();
-            ed::Group(node.Size);
+            NodeEd::Group(node.Size);
             //ImGui::EndVertical();
             ImGui::PopID();
-            ed::EndNode();
-            ed::PopStyleColor(2);
+            NodeEd::EndNode();
+            NodeEd::PopStyleColor(2);
             ImGui::PopStyleVar();
 
-            if (ed::BeginGroupHint(node.ID))
+            if (NodeEd::BeginGroupHint(node.ID))
             {
                 //auto alpha   = static_cast<int>(commentAlpha * ImGui::GetStyle().Alpha * 255);
                 auto bgAlpha = static_cast<int>(ImGui::GetStyle().Alpha * 255);
 
                 //ImGui::PushStyleVar(ImGuiStyleVar_Alpha, commentAlpha * ImGui::GetStyle().Alpha);
 
-                auto min = ed::GetGroupMin();
-                //auto max = ed::GetGroupMax();
+                auto min = NodeEd::GetGroupMin();
+                //auto max = NodeEd::GetGroupMax();
 
 			#if 0
                 ImGui::SetCursorScreenPos(min - ImVec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4));
@@ -354,7 +485,7 @@ namespace LkEngine {
                 ImGui::EndGroup();
 			#endif
 
-                auto drawList = ed::GetHintBackgroundDrawList();
+                auto drawList = NodeEd::GetHintBackgroundDrawList();
 
                 auto hintBounds = ImGui_GetItemRect();
                 //auto hintFrameBounds = ImRect_Expanded(hintBounds, 8, 4);
@@ -371,18 +502,18 @@ namespace LkEngine {
 
                 //ImGui::PopStyleVar();
             }
-            ed::EndGroupHint();
+            NodeEd::EndGroupHint();
         }
 
 		for (LPinLink& Link : Links)
 		{
-            ed::Link(Link.ID, Link.StartPinID, Link.EndPinID, Link.Color, 2.0f);
+            NodeEd::Link(Link.ID, Link.StartPinID, Link.EndPinID, Link.Color, 2.0f);
 		}
 
 		#if 0
         if (bCreateNewNode == false)
         {
-            if (ed::BeginCreate(ImColor(255, 255, 255), 2.0f))
+            if (NodeEd::BeginCreate(ImColor(255, 255, 255), 2.0f))
             {
                 auto showLabel = [](const char* label, ImColor color)
                     {
@@ -402,8 +533,8 @@ namespace LkEngine {
                         ImGui::TextUnformatted(label);
                     };
 
-                ed::PinId startPinId = 0, endPinId = 0;
-                if (ed::QueryNewLink(&startPinId, &endPinId))
+                NodeEd::PinId startPinId = 0, endPinId = 0;
+                if (NodeEd::QueryNewLink(&startPinId, &endPinId))
                 {
                     auto startPin = FindPin(startPinId);
                     auto endPin = FindPin(endPinId);
@@ -420,27 +551,27 @@ namespace LkEngine {
                     {
                         if (endPin == startPin)
                         {
-                            ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
+                            NodeEd::RejectNewItem(ImColor(255, 0, 0), 2.0f);
                         }
                         else if (endPin->Kind == startPin->Kind)
                         {
                             showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
-                            ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
+                            NodeEd::RejectNewItem(ImColor(255, 0, 0), 2.0f);
                         }
                         //else if (endPin->Node == startPin->Node)
                         //{
                         //    showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
-                        //    ed::RejectNewItem(ImColor(255, 0, 0), 1.0f);
+                        //    NodeEd::RejectNewItem(ImColor(255, 0, 0), 1.0f);
                         //}
                         else if (endPin->Type != startPin->Type)
                         {
                             showLabel("x Incompatible Pin Type", ImColor(45, 32, 32, 180));
-                            ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
+                            NodeEd::RejectNewItem(ImColor(255, 128, 128), 1.0f);
                         }
                         else
                         {
                             showLabel("+ Create Link", ImColor(32, 45, 32, 180));
-                            if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
+                            if (NodeEd::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
                             {
                                 Links.emplace_back(LPinLink(GetNextID(), startPinId, endPinId));
                                 Links.back().Color = GetIconColor(startPin->Type);
@@ -449,8 +580,8 @@ namespace LkEngine {
                     }
                 }
 
-                ed::PinId pinId = 0;
-                if (ed::QueryNewNode(&pinId))
+                NodeEd::PinId pinId = 0;
+                if (NodeEd::QueryNewNode(&pinId))
                 {
                     NewLinkPin = FindPin(pinId);
                     if (NewLinkPin)
@@ -458,7 +589,7 @@ namespace LkEngine {
                         showLabel("+ Create Node", ImColor(32, 45, 32, 180));
                     }
 
-                    if (ed::AcceptNewItem())
+                    if (NodeEd::AcceptNewItem())
                     {
                         bCreateNewNode = true;
                         NewNodeLinkPin = FindPin(pinId);
@@ -475,14 +606,14 @@ namespace LkEngine {
                 NewLinkPin = nullptr;
 			}
 
-            ed::EndCreate();
+            NodeEd::EndCreate();
 
-            if (ed::BeginDelete())
+            if (NodeEd::BeginDelete())
             {
                 NodeEd::NodeId nodeId = 0;
-                while (ed::QueryDeletedNode(&nodeId))
+                while (NodeEd::QueryDeletedNode(&nodeId))
                 {
-                    if (ed::AcceptDeletedItem())
+                    if (NodeEd::AcceptDeletedItem())
                     {
                         auto id = std::find_if(Nodes.begin(), Nodes.end(), [nodeId](auto& node) 
                         { 
@@ -495,10 +626,10 @@ namespace LkEngine {
                     }
                 }
 
-                ed::LinkId linkId = 0;
-                while (ed::QueryDeletedLink(&linkId))
+                NodeEd::LinkId linkId = 0;
+                while (NodeEd::QueryDeletedLink(&linkId))
                 {
-                    if (ed::AcceptDeletedItem())
+                    if (NodeEd::AcceptDeletedItem())
                     {
                         auto id = std::find_if(Links.begin(), Links.end(), [linkId](auto& link) 
                         { 

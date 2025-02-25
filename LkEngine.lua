@@ -30,8 +30,9 @@ workspace "LkEngine"
         "LK_ENGINE_MINOR=" .. LK_ENGINE_MINOR,
         "LK_ENGINE_PATCH=" .. LK_ENGINE_PATCH,
         "LK_ENGINE_VERSION=" .. LK_ENGINE_VERSION,
-
         "LK_ENGINE_STATIC_LIB",
+        "LK_ENGINE_EDITOR",
+
         "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
 		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
 		"SPDLOG_USE_STD_FORMAT",
@@ -46,8 +47,8 @@ workspace "LkEngine"
 
     filter "action:vs*"
 		linkoptions { 
-            "/ignore:4006", -- Ignore: 'Already defined' warning for object files.
-            "/ignore:4099", -- Ignore: 'PDB not found, linking as if no debug info'.
+            "/ignore:4006", -- 'Already defined' warning for object files.
+            "/ignore:4099", -- 'PDB not found, linking as if no debug info'.
 			"/NODEFAULTLIB:MSVCRT",
         }
 
@@ -55,6 +56,7 @@ workspace "LkEngine"
             "4068",  -- 'Unknown #pragma mark'
             "4267",  -- 'Size conversion, possible loss of data'
             "4244",  -- 'Size conversion, possible loss of data'
+            "4312",  -- Conversion of greater size
             "28020", -- Warning for infinite loops: 'The expression is not true at this call'
             "33011", -- 'Unchecked upper bound'
         } 
@@ -133,43 +135,7 @@ project "LkEngine"
         "%{wks.location}/LkEngine/Source/LKpch.cpp",
         "%{wks.location}/LkEngine/Source/LkEngine/**.h",
         "%{wks.location}/LkEngine/Source/LkEngine/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Core/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Core/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Core/**.tpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Asset/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Asset/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Platform/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Platform/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Project/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Project/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Physics/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Physics/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Renderer/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Renderer/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Scene/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Scene/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Script/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Script/**.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Serialization/**.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Serialization/**.cpp",
-
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorCore.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorCore.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorContext.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorContext.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorGlobals.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorConsole/ConsoleMessage.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorConsole/ConsoleSink.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorConsolePanel.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorConsolePanel.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorCamera.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/EditorCamera.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/AssetEditorManager.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/AssetEditorManager.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/PanelManager.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/PanelManager.cpp",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/ThemeManagerPanel.h",
-        --"%{wks.location}/LkEngine/Source/LkEngine/Editor/ThemeManagerPanel.cpp",
+        "%{wks.location}/LkEngine/Source/LkEngine/**.tpp",
 
         "%{Dependency.StbImage.IncludeDir}/**.h",
         "%{Dependency.StbImage.IncludeDir}/**.cpp",
@@ -179,9 +145,7 @@ project "LkEngine"
     defines {
         "LK_CHAR_UTF8", --"LK_CHAR_UNICODE",
         "LK_ENGINE_OPENGL",
-        "LK_OPENGL4",   -- OpenGL 4
-
-        "LK_ENGINE_EDITOR=1",
+        "LK_OPENGL4", -- OpenGL 4
 
         "LK_PHYSICS_API_BULLET3",
         "LK_PHYSICS_API_BOX2D",

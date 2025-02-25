@@ -8,7 +8,6 @@ project "LkEditor"
 	objdir (IntermediateDirectory)
 
     defines {
-        "LK_ENGINE_EDITOR",
         "LK_ENGINE_OPENGL",
 
         "IMGUI_DEFINE_MATH_OPERATORS",
@@ -37,11 +36,12 @@ project "LkEditor"
         "%{Dependency.Assimp.IncludeDir}",
         "%{Dependency.Entt.IncludeDir}",
         "%{Dependency.Glm.IncludeDir}",
-        "%{Dependency.Box2D.IncludeDir}",
         "%{Dependency.YamlCpp.IncludeDir}",
         "%{Dependency.Assimp.IncludeDir}",
         "%{Dependency.Tracy.IncludeDir}",
         "%{Dependency.NfdExtended.IncludeDir}",
+        "%{Dependency.Box2D.IncludeDir}",
+        "%{Dependency.Bullet3.IncludeDir}",
 	}
 
 	links { "LkEngine" }

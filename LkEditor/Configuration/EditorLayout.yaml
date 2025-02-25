@@ -1,7 +1,10 @@
 PanelManager:
+  - ID: 4233934174
+    Name: Node Editor
+    IsOpen: false
   - ID: 2792665263
     Name: Theme Manager
-    IsOpen: false
+    IsOpen: true
   - ID: 3435657678
     Name: Content Browser
     IsOpen: true

@@ -1,4 +1,3 @@
-//#include "LKpch.h"
 #include "ContentBrowserItem.h"
 
 #include "LkEngine/Core/SelectionContext.h"
@@ -6,7 +5,7 @@
 #include "LkEngine/Core/Input/Input.h"
 
 #include "LkEngine/Editor/EditorSettings.h"
-#include "LkEditor/Panels/ContentBrowserPanel.h"
+#include "LkEditor/Panel/ContentBrowserPanel.h"
 
 #include "LkEngine/Renderer/Color.h"
 #include "LkEngine/Renderer/UI/UILayer.h"

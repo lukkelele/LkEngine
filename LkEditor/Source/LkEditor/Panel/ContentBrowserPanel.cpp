@@ -1,4 +1,3 @@
-//#include "LKpch.h"
 #include "ContentBrowserPanel.h"
 
 #include "LkEditor/EditorLayer.h"
@@ -15,7 +14,7 @@
 #include "LkEngine/Asset/AssetImporter.h"
 #include "LkEngine/Asset/AssetManager.h"
 
-#include "LkEngine/Editor/AssetEditorManager.h"
+#include "LkEditor/AssetEditor/AssetEditorManager.h"
 
 #include "LkEngine/Project/Project.h"
 #include "LkEngine/Serialization/Serializer.h"

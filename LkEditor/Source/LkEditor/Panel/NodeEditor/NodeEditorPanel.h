@@ -34,9 +34,9 @@ namespace LkEngine {
         LNode* SpawnInputActionNode();
         LNode* SpawnBranchNode();
         int GetNextID();
-        ed::LinkId GetNextLinkID();
+        NodeEd::LinkId GetNextLinkID();
 
-        float GetTouchProgress(ed::NodeId id);
+        float GetTouchProgress(NodeEd::NodeId id);
         void UpdateTouch();
         void TouchNode(NE::NodeId id);
 

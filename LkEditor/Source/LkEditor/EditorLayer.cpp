@@ -1,4 +1,3 @@
-//#include "LKpch.h"
 #include "EditorLayer.h"
 
 #include "LkEngine/Scene/Scene.h"
@@ -19,13 +18,14 @@
 #include "LkEngine/Core/Input/Mouse.h"
 
 #include "LkEngine/Editor/EditorConsolePanel.h"
-#include "LkEngine/Editor/AssetEditorManager.h"
 #include "LkEngine/Editor/ThemeManagerPanel.h"
-#include "LkEditor/Panels/EditorSettingsPanel.h"
-#include "LkEditor/Panels/ContentBrowserPanel.h"
-#include "LkEditor/Panels/SceneManagerPanel.h"
-#include "LkEditor/Panels/ToolsPanel.h"
-//#include "LkEditor/Panels/NodeEditor/NodeEditorPanel.h"
+
+#include "LkEditor/Panel/EditorSettingsPanel.h"
+#include "LkEditor/Panel/ContentBrowserPanel.h"
+#include "LkEditor/Panel/SceneManagerPanel.h"
+#include "LkEditor/Panel/ToolsPanel.h"
+#include "LkEditor/Panel/NodeEditor/NodeEditorPanel.h"
+#include "LkEditor/AssetEditor/AssetEditorManager.h"
 
 #if defined(LK_ENGINE_OPENGL)
 #	include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
@@ -34,12 +34,11 @@
 
 #include <nfd.hpp>
 
-
 namespace LkEngine {
 
 	namespace 
 	{
-		float DeltaTime = 0.0f; /* TODO: Make this a global variable. */
+		float DeltaTime = 0.0f;
 		
 		bool bViewportHovered = false;
 		bool bViewportFocused = false;
@@ -88,14 +87,14 @@ namespace LkEngine {
 		{
 			static const char* GetInputSourceName(const ImGuiInputSource Source)
 			{
-				static const char* InputSourceNames[] = { "None", "Mouse", "Keyboard", "Gamepad" };
+				static constexpr const char* InputSourceNames[] = { "None", "Mouse", "Keyboard", "Gamepad" };
 				LK_CORE_ASSERT((LK_ARRAYSIZE(InputSourceNames) == ImGuiInputSource_COUNT) && (Source >= 0) && (Source < ImGuiInputSource_COUNT));
 				return InputSourceNames[Source];
 			}
 
 			static const char* GetMouseSourceName(ImGuiMouseSource Source)
 			{
-				static const char* MouseSourceNames[] = { "Mouse", "TouchScreen", "Pen" };
+				static constexpr const char* MouseSourceNames[] = { "Mouse", "TouchScreen", "Pen" };
 				LK_CORE_ASSERT((LK_ARRAYSIZE(MouseSourceNames) == ImGuiMouseSource_COUNT) && (Source >= 0) && (Source < ImGuiMouseSource_COUNT));
 				return MouseSourceNames[Source];
 			}
@@ -116,7 +115,7 @@ namespace LkEngine {
 		Window = &LApplication::Get().GetWindow();
 		LK_CORE_VERIFY(Window);
 
-		/* Editor Camera. */
+		/* Editor camera. */
 		LK_CORE_DEBUG_TAG("Editor", "Creating editor camera");
 		EditorCamera = LEditorCamera(60.0f, Window->GetWidth(), Window->GetHeight(), 0.10f, 2400.0f);			  
 		EditorCamera.Initialize();
@@ -162,6 +161,8 @@ namespace LkEngine {
 			EditorViewport->SetScalers(EditorWindowScalers);
 		});
 
+		LProject::OnProjectChanged.Add(this, &LEditorLayer::OnProjectChanged);
+
 		/* TODO: Load last open project, else load an empty 'default' project. */
 		if (LProject::Current() == nullptr)
 		{
@@ -193,8 +194,6 @@ namespace LkEngine {
 		{
 			LK_CORE_DEBUG_TAG("Editor", "Message Box Cancelled: {}", WindowName);
 		});
-
-		LProject::OnProjectChanged.Add(this, &LEditorLayer::OnProjectChanged);
 
 		LAssetEditorManager::RegisterEditors();
 
@@ -313,7 +312,7 @@ namespace LkEngine {
 
 		PanelManager->AddPanel<LToolsPanel>(EPanelCategory::View, PanelID::Tools, EPanelInitState::Closed);
 		PanelManager->AddPanel<LThemeManagerPanel>(EPanelCategory::Edit, PanelID::ThemeManager, EPanelInitState::Closed);
-		//PanelManager->AddPanel<LNodeEditorPanel>(EPanelCategory::Edit, PanelID::NodeEditor, EPanelInitState::Open);
+		PanelManager->AddPanel<LNodeEditorPanel>(EPanelCategory::Edit, PanelID::NodeEditor, EPanelInitState::Open);
 
 		PanelManager->Deserialize();
 		PanelManager->Initialize();
@@ -525,36 +524,50 @@ namespace LkEngine {
 				ImGui::Text("Editor Camera");
 				UI::Font::Pop();
 
-				ImGui::Indent();
-				ImGui::Text("Active: %s", (EditorCamera.bIsActive ? "Yes" : "No"));
-				ImGui::Text("Mode: %s", Enum::ToString(EditorCamera.CameraMode));
-				//ImGui::Text("Mode: %d", (int)EditorCamera.CameraMode);
-				ImGui::Text("FOV: %1.f (Deg)", EditorCamera.DegPerspectiveFOV);
-				ImGui::Text("Pitch: %.2f", EditorCamera.Pitch);
-				ImGui::Text("Yaw: %.2f", EditorCamera.Yaw);
-				ImGui::Text("Direction: %s", std::format("{}", EditorCamera.Direction).c_str());
-				ImGui::Text("Speed: %.2f", EditorCamera.GetCameraSpeed());
-				ImGui::Text("Normal Speed: %.2f", EditorCamera.NormalSpeed);
-				ImGui::Text("Travel Speed: %.2f", EditorCamera.TravelSpeed);
-				ImGui::Text("Panning: %s", (EditorCamera.CameraActionFlags & ECameraAction::Pan ? "Yes" : "No"));
-				ImGui::Text("Zooming: %s", (EditorCamera.CameraActionFlags & ECameraAction::Zoom ? "Yes" : "No"));
-				ImGui::Text("Action Flags: %s", StringUtils::ConvertFlags((LK_Enum_ECameraAction)EditorCamera.CameraActionFlags).c_str());
-				ImGui::Text("Modifier Flags: %s", StringUtils::ConvertFlags(EditorCamera.ModifierFlags).c_str());
-				ImGui::Text("Cursor Mode: %s", Enum::ToString(LInput::GetCursorMode()));
-				ImGui::Unindent();
-
-				UI::BeginPropertyGrid();
+				UI::BeginPropertyGrid(nullptr, ImVec2(0.0f, 0.0f), ImGuiTableFlags_SizingStretchProp);
 				{
-					UI::Draw::Vec3Control("Focal point", EditorCamera.FocalPoint);
+					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+					UI::PropertyLabel("Active", (EditorCamera.bIsActive ? "Yes" : "No"));
+					UI::PropertyLabel("Mode", Enum::ToString(EditorCamera.CameraMode));
+					UI::PropertyLabel("FOV", std::format("{:1.0f} (Deg)", EditorCamera.DegPerspectiveFov));
+					UI::PropertyLabel("Pitch", std::format("{:.2f}", EditorCamera.Pitch));
+					UI::PropertyLabel("Yaw", std::format("{:.2f}", EditorCamera.Yaw));
+					UI::PropertyLabel("Panning", (EditorCamera.CameraActionFlags & ECameraAction::Pan ? "Yes" : "No"));
+					UI::PropertyLabel("Zooming", (EditorCamera.CameraActionFlags & ECameraAction::Zoom ? "Yes" : "No"));
+					UI::PropertyLabel("Cursor", Enum::ToString(LInput::GetCursorMode()));
+					ImGui::PopStyleVar(1);
+
+					UI::Draw::Vec3Control("Focal Point", EditorCamera.FocalPoint);
 					UI::Draw::Vec3Control("Position", EditorCamera.Position);
 					UI::Draw::Vec3Control("Position Delta", EditorCamera.PositionDelta);
 					
-					UI::FScopedStyle FrameRounding(ImGuiStyleVar_FrameRounding, 6.0f);
-					UI::FScopedColor SliderColor(ImGuiCol_FrameBg, RGBA32::Compliment);
-					UI::Draw::DragFloat("FOV (Deg)", &EditorCamera.DegPerspectiveFOV, 1.0f, 30.0f, 135.0f, "%1.f");
+					ImGui::PushStyleColor(ImGuiCol_FrameBg, RGBA32::Compliment);
+					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+					UI::Draw::DragFloat("FOV (Deg)", &EditorCamera.DegPerspectiveFov, 1.0f, 30.0f, 135.0f, "%1.f");
 					UI::Draw::DragFloat("Distance", &EditorCamera.Distance, 1.0f, 0.0f, 100.0f, "%1.f");
 					UI::Draw::DragFloat("Speed", &EditorCamera.NormalSpeed, 1.0f, 0.0f, 100.0f, "%1.f");
 					UI::Draw::DragFloat("Travel Speed", &EditorCamera.TravelSpeed, 1.0f, 0.0f, 100.0f, "%1.f");
+					ImGui::PopStyleVar(1);
+					ImGui::PopStyleColor(1);
+
+					/* Camera Projection Dropdown. */
+					{
+						static int ProjIdx = static_cast<int>(EditorCamera.GetProjectionType());
+						static constexpr std::array<UI::TPropertyMapping<ECameraProjection>, 2> ProjectionTypes = {
+							std::pair("Perspective", ECameraProjection::Perspective), 
+							std::pair("Orthographic", ECameraProjection::Orthographic), 
+						};
+
+						UI::FScopedStyle FramePadding(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 3.0f));
+						UI::FScopedStyle WindowPadding(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 4.0f));
+						ImGui::SetNextItemWidth(180.0f);
+						if (UI::PropertyDropdown("Projection", ProjectionTypes, &ProjIdx))
+						{
+							LK_CORE_WARN("Selected: {} ({})", Enum::ToString(ProjectionTypes.at(ProjIdx).second), (int)ProjectionTypes.at(ProjIdx).second);
+							EditorCamera.SetProjectionType(ProjectionTypes.at(ProjIdx).second);
+						}
+					}
+
 				}
 				UI::EndPropertyGrid();
 			}
@@ -562,10 +575,11 @@ namespace LkEngine {
 			if (ImGui::TreeNode("Config directories"))
 			{
 				ImGui::Text("Resources: %S", LFileSystem::GetResourcesDir().c_str());
+				ImGui::Text("Config: %S", LFileSystem::GetConfigDir().c_str());
 				ImGui::Text("Assets: %S", LFileSystem::GetAssetsDir().c_str());
 				ImGui::Text("Engine: %S", LFileSystem::GetEngineDir().c_str());
-				ImGui::Text("Config: %S", LFileSystem::GetConfigDir().c_str());
-				ImGui::Text("Engine: %S", LFileSystem::GetEngineConfig().c_str());
+				ImGui::Text("Engine Config: %S", LFileSystem::GetEngineConfig().c_str());
+				ImGui::Text("Work directory: %S", LFileSystem::GetWorkingDir().c_str());
 
 				ImGui::TreePop();
 			}
@@ -1148,10 +1162,14 @@ namespace LkEngine {
 	void LEditorLayer::UpdateWindowTitle(const std::string& SceneName)
 	{
 		const std::string Title = std::format(
-			"{} ({}) - LkEditor - {} ({}) (OpenGL)",
-			SceneName, LProject::Current()->GetConfiguration().Name, LApplication::GetPlatformName(), LApplication::GetConfigurationName()
+			"{} ({}) - LkEditor - {} ({}) ({})",
+			SceneName, 
+			LProject::Current()->GetConfiguration().Name, 
+			LApplication::GetPlatformName(), 
+			LApplication::GetConfigurationName(),
+			LRenderer::GetCurrentRenderApiName()
 		);
-
+		LK_CORE_DEBUG_TAG("Editor", "Updating window title: {}", Title);
 		LApplication::Get().GetWindow().SetTitle(Title);
 	}
 
@@ -1396,7 +1414,10 @@ namespace LkEngine {
 			}
 
 			LSceneSerializer Serializer(EditorScene);
-			Serializer.Serialize(SceneFilePath);
+			if (!Serializer.Serialize(SceneFilePath))
+			{
+				LK_CORE_CONSOLE_ERROR("Failed to save scene: {}", SceneFilePath);
+			}
 
 			TimeSinceLastSave = 0.0f;
 		}
@@ -1438,7 +1459,10 @@ namespace LkEngine {
 		if (!SceneFilePath.empty())
 		{
 			LSceneSerializer Serializer(EditorScene);
-			Serializer.Serialize(SceneFilePath + ".auto");
+			if (!Serializer.Serialize(SceneFilePath + ".auto"))
+			{
+				LK_CORE_CONSOLE_ERROR("Failed to autosave scene: {}", SceneFilePath);
+			}
 
 			TimeSinceLastSave = 0.0f;
 		}
@@ -1577,7 +1601,8 @@ namespace LkEngine {
 				ImGuiStyle& Style = ImGui::GetStyle();
 
 				/* Modify the size on the y-axis to account for the docking separators. */
-				DockNode->Size = ImVec2(DockNode->Size.x, (DockNode->Size.y - 2 * Style.DockingSeparatorSize + TopBar.FramePadding.y));
+				//DockNode->Size = ImVec2(DockNode->Size.x, (DockNode->Size.y - 2 * Style.DockingSeparatorSize + TopBar.FramePadding.y));
+				DockNode->Size = ImVec2(DockNode->Size.x, (DockNode->Size.y - Style.DockingSeparatorSize + TopBar.FramePadding.y));
 
 				EditorViewport->SetSize(DockNode->Size.x, DockNode->Size.y);
 
@@ -1653,6 +1678,8 @@ namespace LkEngine {
 				ImGui::BulletText("ENTT: %s", ENTT_VERSION);
 				ImGui::BulletText("nativefiledialog: %s", "1.2.1"); /* TODO: Get version from library, currently no way to do that(?). */
 				ImGui::BulletText("yaml-cpp: %s", "0.6.0");         /* TODO: Get version from library, currently no way to do that(?). */
+				ImGui::BulletText("box2d: %s", "TODO");   /// TODO
+				ImGui::BulletText("bullet3: %s", "TODO"); /// TODO
 			}
 
 			ImGui::Separator();
@@ -1997,37 +2024,41 @@ namespace LkEngine {
 
 			if (ImGui::BeginMenu("View"))
 			{
-				if (ImGui::BeginMenu("Windows"))
+				if (ImGui::MenuItem("Content Browser"))
 				{
-					if (ImGui::MenuItem("Content Browser"))
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser); PanelData != nullptr)
 					{
-						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser))
-						{
-							PanelData->bIsOpen = true;
-						}
+						PanelData->bIsOpen = true;
 					}
-					if (ImGui::MenuItem("Scene Manager"))
-					{
-						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::SceneManager))
-						{
-							PanelData->bIsOpen = true;
-						}
-					}
-				
-					/* Re-open all essential editor windows. */
-					if (ImGui::MenuItem("Restore default windows"))
-					{
-						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser))
-						{
-							PanelData->bIsOpen = true;
-						}
-						if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::SceneManager))
-						{
-							PanelData->bIsOpen = true;
-						}
-					}
+				}
 
-					ImGui::EndMenu();
+				if (ImGui::MenuItem("Scene Manager"))
+				{
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::SceneManager); PanelData != nullptr)
+					{
+						PanelData->bIsOpen = true;
+					}
+				}
+
+				if (ImGui::MenuItem("Node Editor"))
+				{
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::NodeEditor); PanelData != nullptr)
+					{
+						PanelData->bIsOpen = true;
+					}
+				}
+			
+				/* Re-open all essential editor windows. */
+				if (ImGui::MenuItem("Restore default windows"))
+				{
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser))
+					{
+						PanelData->bIsOpen = true;
+					}
+					if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::SceneManager))
+					{
+						PanelData->bIsOpen = true;
+					}
 				}
 
 				if (ImGui::MenuItem("Render Settings"))
@@ -2153,12 +2184,30 @@ namespace LkEngine {
 
 				if (ImGui::BeginMenu("Engine Debug"))
 				{
-					ImGui::Checkbox("Show window sizes on hover", &Debug::UI::bDisplayWindowSizeOnHover);
-					ImGui::Checkbox("Bounding boxes on hover", &Debug::UI::bBoundingBoxesOnHover);
+					ImGui::Checkbox("Show window sizes on hover", &UI::Debug::bDisplayWindowSizeOnHover);
+					ImGui::Checkbox("Bounding boxes on hover", &UI::Debug::bBoundingBoxesOnHover);
+
+					{
+						static constexpr std::array<UI::TPropertyMapping<UI::EBorder>, 4> GridBorders = {
+							std::pair("None",       UI::EBorder::None),
+							std::pair("Horizontal", UI::EBorder::Horizontal),
+							std::pair("Vertical",   UI::EBorder::Vertical),
+							std::pair("All",        UI::EBorder::All),
+						};
+
+						static int SelectedGridBorder = 0;
+						if (UI::PropertyDropdown("Grid Borders", GridBorders, &SelectedGridBorder))
+						{
+							LK_CORE_DEBUG_TAG("Editor", "Selected grid border: {}", GridBorders.at(SelectedGridBorder).first);
+							UI::Debug::GridBorders = (int)GridBorders.at(SelectedGridBorder).second;
+						}
+
+						ImGui::Dummy(ImVec2(0, 4.0f));
+					}
 
 					if (ImGui::BeginMenu("Content Browser"))
 					{
-						ImGui::Checkbox("Outliner Borders", &Debug::UI::ContentBrowser::bDrawOutlinerBorders);
+						ImGui::Checkbox("Outliner Borders", &UI::Debug::ContentBrowser::bDrawOutlinerBorders);
 
 						static constexpr std::array<UI::TPropertyMapping<uint32_t>, 6> Colors = {
 							std::pair("Green",   RGBA32::BrightGreen),
@@ -2173,7 +2222,7 @@ namespace LkEngine {
 						if (UI::PropertyDropdown("Outliner Color", Colors, &SelectedOutlinerColor, "Color of the debug outliner"))
 						{
 							LK_CONSOLE_INFO("Selected outliner color: {}", Colors.at(SelectedOutlinerColor).first);
-							Debug::UI::ContentBrowser::OutlinerBorderColor = ImGui::ColorConvertU32ToFloat4(Colors.at(SelectedOutlinerColor).second);
+							UI::Debug::ContentBrowser::OutlinerBorderColor = ImGui::ColorConvertU32ToFloat4(Colors.at(SelectedOutlinerColor).second);
 						}
 
 						ImGui::EndMenu();
@@ -2202,6 +2251,8 @@ namespace LkEngine {
 			else
 			{
 				ImGui::Text("Project: Untitled");
+				ImGui::SameLine();
+				UI::HelpMarker("No active project");
 			}
 		}
 		ImGui::EndMainMenuBar();
@@ -2750,7 +2801,7 @@ namespace LkEngine {
 
 			if (EditorCamera.bIsActive)
 			{
-				ImGui::Text("FOV: %1.f", EditorCamera.DegPerspectiveFOV);
+				ImGui::Text("FOV: %1.f", EditorCamera.DegPerspectiveFov);
 				const glm::vec3& CamPos = EditorCamera.Position;
 
 				ImGui::Text("Camera");

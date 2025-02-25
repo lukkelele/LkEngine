@@ -3,7 +3,7 @@
 #include "LkEngine/Renderer/UI/Panel.h"
 #include "LkEngine/Renderer/UI/UILayer.h"
 
-#include "LkEditor/Panels/ContentBrowserItem.h"
+#include "LkEditor/Panel/ContentBrowserItem.h"
 
 
 namespace LkEngine {

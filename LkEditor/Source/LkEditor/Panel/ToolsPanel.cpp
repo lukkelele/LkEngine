@@ -10,7 +10,7 @@
 
 #include "LkEngine/Serialization/Serializer.h"
 
-#include "LkEditor/Panels/ContentBrowserPanel.h"
+#include "LkEditor/Panel/ContentBrowserPanel.h"
 
 
 namespace LkEngine {
@@ -802,7 +802,7 @@ namespace LkEngine {
 			ImGui::Text("Creator");
 			/* TODO: Need to fix so PushAligned counts the performed alignments. */
 			//ImGui::Dummy(ImVec2(0, 0));
-			UI::PushAligned(SpacingX);
+			//UI::PushAligned(SpacingX);
 			if (UI::PropertyDropdown("##Types", Types.data(), Types.size(), &SelectedType, "", 160))
 			{
 				LK_CORE_INFO("Dropdown->Types: {}", SelectedType);
@@ -811,7 +811,7 @@ namespace LkEngine {
 			{
 				LK_CORE_INFO("Dropdown->Types2: {}", SelectedType2);
 			}
-			UI::PopAligned();
+			//UI::PopAligned();
 		}
 
 		{
