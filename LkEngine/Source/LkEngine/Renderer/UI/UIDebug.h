@@ -22,7 +22,7 @@
 
 #if LK_UI_DEBUG_WINDOWS_ON_HOVER
 #	define LK_UI_DEBUG_WINDOW_ON_HOVER(...)                                         \
-		if (Debug::UI::bDisplayWindowSizeOnHover)                                   \
+		if (UI::Debug::bDisplayWindowSizeOnHover)                                   \
 		{                                                                           \
 			if (ImGui::IsWindowHovered())                                           \
 			{                                                                       \
@@ -36,7 +36,7 @@
 
 /** Draw bounding box around an item. */
 #define LK_UI_DEBUG_BOUNDING_BOX(Color) \
-			if (Debug::UI::bBoundingBoxesOnHover && ImGui::IsItemHovered()) \
+			if (UI::Debug::bBoundingBoxesOnHover && ImGui::IsItemHovered()) \
 			{                                                          \
 				const ImVec2 RectMin = ImGui::GetItemRectMin();        \
 				const ImVec2 RectMax = ImGui::GetItemRectMax();        \

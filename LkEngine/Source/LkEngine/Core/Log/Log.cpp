@@ -14,8 +14,6 @@
 
 namespace LkEngine {
 
-    std::filesystem::path LogDirectory{ "Logs/" };
-
 	namespace fs = std::filesystem;
 
 	namespace 
@@ -28,15 +26,10 @@ namespace LkEngine {
 		constexpr const char* FileName = "LkEngine";
 	#endif
 
-		/* Terminal sink. */
-		constexpr const char* ColorSinkPattern = "%^[%H:%M:%S] [%t] [%n] %v%$";
-		constexpr const char* UISinkPattern    = "%^[%H:%M:%S] [%t] [%n] %v%$";
-
-		/* Logfile sink. */
-		constexpr const char* FileSinkPattern = "[%H:%M:%S] [%l] [%t] [%n] %v";
-
 		/* Color and file sink. */
 		std::string Logfile;
+
+		std::filesystem::path LogDirectory{ "Logs/" };
 	}
 
 	LLog::LLog()
@@ -50,7 +43,7 @@ namespace LkEngine {
 
 	LLog::~LLog()
 	{
-		// TODO: Release resources.
+		spdlog::shutdown();
 	}
 
 	LLog& LLog::Get()
@@ -124,13 +117,9 @@ namespace LkEngine {
 
 		EditorConsoleSinks[0]->set_pattern("[%T] [%l] [%n] %v");
 		EditorConsoleSinks[1]->set_pattern("%^%v%$");
-		//for (spdlog::sink_ptr& Sink : EditorConsoleSinks)
-		//{
-		//	Sink->set_pattern("%^%v%$");
-		//}
 	#endif
 
-		/* Logger: Core/LkEngine */
+		/* Logger: Core/Engine */
 		{
 			Logger_Core = std::make_shared<spdlog::logger>("CORE", CoreSinks.begin(), CoreSinks.end());
 			Logger_Core->set_level(spdlog::level::trace);
@@ -144,11 +133,13 @@ namespace LkEngine {
 			Logger_Client->flush_on(spdlog::level::trace);
 		}
 
+	#if LK_ENGINE_CONSOLE_ENABLED
 		/* Logger: EditorConsole */
 		{
 			Logger_EditorConsole = std::make_shared<spdlog::logger>("Console", EditorConsoleSinks.begin(), EditorConsoleSinks.end());
 			Logger_EditorConsole->set_level(spdlog::level::trace);
 		}
+	#endif
 
 	}
 
@@ -176,9 +167,9 @@ namespace LkEngine {
 		}
 
 		const std::string AnsiColorReset = "\033[0m";
-
+		constexpr const char* SinkPattern = "%^[%H:%M:%S] [%t] [%n] %v%$";
 		Sinks.push_back(ColorSinkLogger);
-		Sinks[0]->set_pattern(Color::GetEscapeCode(MainColor) + std::string(ColorSinkPattern) + AnsiColorReset);
+		Sinks[0]->set_pattern(Color::GetEscapeCode(MainColor) + std::string(SinkPattern) + AnsiColorReset);
 
 		auto& Logger = GetLogger(Type);
 		Logger = std::make_shared<spdlog::logger>(Name, Sinks.begin(), Sinks.end());

@@ -14,9 +14,9 @@ namespace LkEngine::UI {
 		if (IsCurrentlyInTable)
 		{
 			ImGui::TableSetColumnIndex(0);
+			ShiftCursor(10.0f, 9.0f);
 		}
 
-		ShiftCursor(10.0f, 9.0f);
 		ImGui::Text(Label);
 
 		if (std::strlen(HelpText) > 0)
@@ -60,9 +60,9 @@ namespace LkEngine::UI {
 		if (IsCurrentlyInTable)
 		{
 			ImGui::TableSetColumnIndex(0);
+			ShiftCursor(10.0f, 9.0f);
 		}
 
-		ShiftCursor(10.0f, 9.0f);
 		ImGui::Text(Label);
 
 		if (std::strlen(HelpText) != 0)
@@ -74,8 +74,8 @@ namespace LkEngine::UI {
 		if (IsCurrentlyInTable)
 		{
 			ImGui::TableSetColumnIndex(1);
+			ShiftCursorY(4.0f);
 		}
-		ShiftCursorY(4.0f);
 
 		ImGui::PushItemWidth(-1);
 		const bool Modified = UI::Draw::DragFloat(std::format("##{}", Label).c_str(), &Value, Delta, Min, Max);
@@ -120,6 +120,76 @@ namespace LkEngine::UI {
 		ImGui::TableNextRow();
 
 		return Modified;
+	}
+
+	/**
+	 * Property without any value (property label).
+	 */
+	template<typename T>
+	FORCEINLINE bool PropertyLabel(const char* Label, const T Value, const char* HelpText = "")
+	{
+		if (!Label)
+		{
+			return false;
+		}
+
+		const ImVec2 LabelSize = ImGui::CalcTextSize(Label);
+		const ImVec2 ValueSize = ImGui::CalcTextSize(std::format("{}", Value).c_str());
+
+		ImGuiContext& G = *GImGui;
+		ImGuiTable* CurrentTable = ImGui::GetCurrentTable();
+		const bool IsInTable = (CurrentTable != nullptr);
+
+		if (IsInTable)
+		{
+			ImGui::TableSetColumnIndex(0);
+
+			const float CenterPosX = (ImGui::GetContentRegionAvail().x * 0.50f);
+			ShiftCursorX(CenterPosX - (LabelSize.x * 0.50f));
+			ImGui::Text(Label);
+		}
+		else
+		{
+			ShiftCursor(10.0f, 0.0f);
+			ImGui::Text(Label);
+		}
+
+		if (std::strlen(HelpText) != 0)
+		{
+			ImGui::SameLine();
+			HelpMarker(HelpText);
+		}
+
+		if (IsInTable)
+		{
+			ImGui::TableSetColumnIndex(1);
+
+			/* Left align for StretchProp weights. */
+			if (CurrentTable->Flags & ImGuiTableFlags_SizingStretchProp)
+			{
+				ShiftCursorX(G.Style.FramePadding.x * 2.0f);
+			}
+			else
+			{
+				const float CenterPosX = (ImGui::GetContentRegionAvail().x * 0.50f);
+				ShiftCursorX(CenterPosX - (ValueSize.x * 0.50f));
+			}
+
+			ImGui::PushItemWidth(-1);
+			ImGui::Text("%s", std::format("{}", Value).c_str());
+			ImGui::PopItemWidth();
+
+			ImGui::TableNextRow();
+		}
+		else
+		{
+			ShiftCursor(10.0f, 0.0f);
+			ImGui::PushItemWidth(-1);
+			ImGui::Text("%s", std::format("{}", Value).c_str());
+			ImGui::PopItemWidth();
+		}
+
+		return false; /* Modified */
 	}
 
 	FORCEINLINE bool BeginCombo(const char* Label, const char* PreviewValue, ImGuiComboFlags Flags = ImGuiComboFlags_None)
@@ -219,7 +289,23 @@ namespace LkEngine::UI {
 			LK_CORE_VERIFY(false);
 		}
 
-		ShiftCursor(10.0f, 9.0f);
+		ImGuiContext& G = *GImGui;
+		const float NextItemWidth = G.NextItemData.Width;
+
+		ImGuiTable* CurrentTable = ImGui::GetCurrentTable();
+		const bool IsInTable = (CurrentTable != nullptr);
+
+		if (UIContext.bInGrid)
+		{
+			ImGui::TableSetColumnIndex(0);
+		}
+		else if (IsInTable)
+		{
+		}
+		else
+		{
+			ShiftCursorX(10.0f);
+		}
 		ImGui::Text(Label);
 
 		if (std::strlen(HelpText) != 0)
@@ -228,14 +314,37 @@ namespace LkEngine::UI {
 			HelpMarker(HelpText);
 		}
 
-		ImGui::NextColumn();
-		ShiftCursorY(4.0f);
-		ImGui::PushItemWidth(-1);
+		if (UIContext.bInGrid)
+		{
+			ImGui::TableSetColumnIndex(1);
+		}
+		else if (IsInTable)
+		{
+		}
+		else
+		{
+			ImGui::SameLine();
+		}
+
+		if (NextItemWidth > 0.0f)
+		{
+			ImGui::PushItemWidth(NextItemWidth);
+		}
+		else
+		{
+			ImGui::PushItemWidth(ComboWidth);
+		}
+
+		ImGuiComboFlags ComboFlags = ImGuiComboFlags_None;
+		if (Options.size() > 30)
+		{
+			ComboFlags |= ImGuiComboFlags_HeightLarge;
+		}
 
 		bool Modified = false;
 
 		const std::string ID = std::format("##{}", Label);
-		if (UI::BeginCombo(ID.c_str(), CurrentOption))
+		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
 		{
 			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
 			{
@@ -271,7 +380,6 @@ namespace LkEngine::UI {
 		}
 
 		ImGui::PopItemWidth();
-		ImGui::NextColumn();
 		Draw::Underline();
 
 		return Modified;
@@ -284,26 +392,23 @@ namespace LkEngine::UI {
 									  const char* HelpText = "",
 									  const int ComboWidth = -1)
 	{
-		const bool IsCurrentlyInTable = InTable();
-		const bool ShouldAlign = !UIContext.AlignedStack.empty();
+		ImGuiContext& G = *GImGui;
+		const float NextItemWidth = G.NextItemData.Width;
 
-		if (IsCurrentlyInTable)
+		ImGuiTable* CurrentTable = ImGui::GetCurrentTable();
+		const bool IsInTable = (CurrentTable != nullptr);
+
+		if (UIContext.bInGrid)
 		{
 			ImGui::TableSetColumnIndex(0);
 		}
-
-		if (ShouldAlign)
+		else if (IsInTable)
 		{
-			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
-			if (AlignData.PassedElements > 0)
-			{
-				ImGui::SameLine(0.0f, AlignData.Dist);
-			}
-			AlignData.PassedElements++;
 		}
 		else
 		{
-			ShiftCursor(10.0f, 9.0f);
+			ImGui::SameLine();
+			//ShiftCursor(10.0f, 9.0f);
 		}
 
 		const char* CurrentOption = Options[*Selected];
@@ -319,31 +424,36 @@ namespace LkEngine::UI {
 			}
 		}
 
-		if (IsCurrentlyInTable)
+		if (UIContext.bInGrid)
 		{
 			ImGui::TableSetColumnIndex(1);
 		}
-		else
+		else if (IsInTable)
 		{
-			ImGui::NextColumn();
-		}
-
-		if (ShouldAlign)
-		{
-			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
-			ImGui::SameLine(0.0f, AlignData.Dist);
-			AlignData.PassedElements++;
 		}
 		else
 		{
-			ShiftCursorY(4.0f);
+			ImGui::SameLine(0.0f, 4.0f);
 		}
-		ImGui::PushItemWidth(ComboWidth);
 
+		if (NextItemWidth > 0.0f)
+		{
+			ImGui::PushItemWidth(NextItemWidth);
+		}
+		else
+		{
+			ImGui::PushItemWidth(ComboWidth);
+		}
+
+		ImGuiComboFlags ComboFlags = ImGuiComboFlags_None;
+		if (ArrSize > 30)
+		{
+			ComboFlags |= ImGuiComboFlags_HeightLarge;
+		}
 		bool Modified = false;
 
 		const std::string ID = std::format("##{}", Label);
-		if (UI::BeginCombo(ID.c_str(), CurrentOption))
+		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
 		{
 			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
 			{
@@ -366,13 +476,15 @@ namespace LkEngine::UI {
 
 		ImGui::PopItemWidth();
 
-		if (IsCurrentlyInTable)
+		if (UIContext.bInGrid)
 		{
 			ImGui::TableNextRow();
 		}
+		if (IsInTable)
+		{
+		}
 		else
 		{
-			ImGui::NextColumn();
 			Draw::Underline();
 		}
 
@@ -389,26 +501,23 @@ namespace LkEngine::UI {
 		using ValueType = std::remove_cvref_t<T>;
 		static_assert((std::is_same_v<ValueType, const char*> || Core::IsPair<ValueType>), "Unsupported type");
 
-		const bool ShouldAlign = !UIContext.AlignedStack.empty();
-		const bool IsCurrentlyInTable = InTable();
+		ImGuiContext& G = *GImGui;
+		const float NextItemWidth = G.NextItemData.Width;
 
-		if (IsCurrentlyInTable)
+		ImGuiTable* CurrentTable = ImGui::GetCurrentTable();
+		const bool IsInTable = (CurrentTable != nullptr);
+
+		if (UIContext.bInGrid)
 		{
 			ImGui::TableSetColumnIndex(0);
+			UI::ShiftCursorX(Slider::TablePaddingX);
 		}
-
-		if (ShouldAlign)
+		else if (IsInTable)
 		{
-			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
-			if (AlignData.PassedElements > 0)
-			{
-				ImGui::SameLine(0.0f, AlignData.Dist);
-			}
-			AlignData.PassedElements++;
 		}
 		else
 		{
-			ShiftCursor(10.0f, 9.0f);
+			ImGui::SameLine();
 		}
 
 		const char* CurrentOption = nullptr;
@@ -422,6 +531,10 @@ namespace LkEngine::UI {
 			/* Select the label from the std::pair (first argument). */
 			CurrentOption = Options.at(*Selected).first;
 		}
+		else
+		{
+			LK_CORE_VERIFY(false);
+		}
 
 		/* Skip rendering text for '#' and '##' identifier labels. */
 		if (Label && Label[0] != '#')
@@ -434,31 +547,36 @@ namespace LkEngine::UI {
 			}
 		}
 
-		if (IsCurrentlyInTable)
+		if (UIContext.bInGrid)
 		{
 			ImGui::TableSetColumnIndex(1);
 		}
-		else
+		else if (IsInTable)
 		{
-			ImGui::NextColumn();
-		}
-
-		if (ShouldAlign)
-		{
-			Internal::FAlignData& AlignData = UIContext.AlignedStack.front();
-			ImGui::SameLine(0.0f, AlignData.Dist);
-			AlignData.PassedElements++;
 		}
 		else
 		{
-			ShiftCursorY(4.0f);
+			ImGui::SameLine(0.0f, 4.0f);
 		}
-		ImGui::PushItemWidth(ComboWidth);
 
+		if (NextItemWidth > 0.0f)
+		{
+			ImGui::PushItemWidth(NextItemWidth);
+		}
+		else
+		{
+			ImGui::PushItemWidth(ComboWidth);
+		}
+
+		ImGuiComboFlags ComboFlags = ImGuiComboFlags_None;
+		if (Options.size() > 30)
+		{
+			ComboFlags |= ImGuiComboFlags_HeightLarge;
+		}
 		bool Modified = false;
 
 		const std::string ID = std::format("##{}", Label);
-		if (UI::BeginCombo(ID.c_str(), CurrentOption))
+		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
 		{
 			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
 			{
@@ -471,13 +589,11 @@ namespace LkEngine::UI {
 				{
 					Option = Options.at(Idx).first;
 				}
-				else
-				{
-					LK_CORE_VERIFY(false);
-				}
+
+				const ImVec2 LabelSize = ImGui::CalcTextSize(Option);
 
 				const bool IsSelected = (Option == CurrentOption);
-				if (ImGui::Selectable(Option, IsSelected))
+				if (ImGui::Selectable(Option, IsSelected, ImGuiSelectableFlags_None, ImVec2(0.0f, LabelSize.y + G.Style.FramePadding.y * 1.50f)))
 				{
 					CurrentOption = Option;
 					*Selected = Idx;
@@ -495,13 +611,16 @@ namespace LkEngine::UI {
 
 		ImGui::PopItemWidth();
 
-		if (IsCurrentlyInTable)
+		if (UIContext.bInGrid)
 		{
 			ImGui::TableNextRow();
 		}
+		else if (IsInTable)
+		{
+		}
 		else
 		{
-			ImGui::NextColumn();
+			//ImGui::SameLine(0.0f, 4.0f);
 			Draw::Underline();
 		}
 

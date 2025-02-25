@@ -11,8 +11,8 @@ namespace LkEngine
 		switch (ProjectionType)
 		{
 			case ECameraProjection::Perspective:
-				SetPerspectiveProjectionMatrix(glm::radians(
-					DegPerspectiveFOV), 
+				SetPerspectiveProjectionMatrix(
+					glm::radians(DegPerspectiveFov), 
 					(float)Width, 
 					(float)Height, 
 					PerspectiveNear, 
@@ -21,7 +21,7 @@ namespace LkEngine
 				break;
 
 			case ECameraProjection::Orthographic:
-				SetOrthoProjectionMatrix(Width, Height, OrthographicNear, OrthographicFar);
+				SetOrthoProjectionMatrix((float)Width, (float)Height, OrthographicNear, OrthographicFar);
 				break;
 		}
 	}

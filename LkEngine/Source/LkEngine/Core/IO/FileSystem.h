@@ -38,6 +38,10 @@ namespace LkEngine {
 		static bool ShowFileInExplorer(const std::filesystem::path& Path);
 		static bool OpenDirectoryInExplorer(const std::filesystem::path& DirectoryPath);
 
+		static bool FindSimilarFiles(const std::string& FilePattern, 
+									 const std::filesystem::path& Directory, 
+									 std::vector<std::filesystem::path>& Found);
+
 		static bool MoveFile(const std::filesystem::path& Filepath, const std::filesystem::path& Destination)
 		{
 			return Move(Filepath, Destination / Filepath.filename());

@@ -4,15 +4,23 @@
 
 #include "Property.h"
 
+#include "LkEngine/Editor/EditorGlobals.h" /* For UI::Debug namespace, should be changed in the future. */
+
 
 namespace LkEngine::UI {
 
 	FORCEINLINE void BeginPropertyGrid(const char* Label = nullptr,
 									   const ImVec2& Size = ImVec2(0.0f, 0.0f), 
-									   const ImGuiTableFlags Flags = ImGuiTableFlags_SizingStretchProp,
+									   ImGuiTableFlags Flags = ImGuiTableFlags_SizingStretchProp,
 									   const bool UseHeaderLabels = false)
 	{
 		UI::PushID();
+
+		UIContext.bInGrid = true;
+
+		if (UI::Debug::GridBorders & EBorder::Horizontal) Flags |= ImGuiTableFlags_BordersH;
+		if (UI::Debug::GridBorders & EBorder::Vertical)   Flags |= ImGuiTableFlags_BordersV;
+		if (UI::Debug::GridBorders & EBorder::All)        Flags |= ImGuiTableFlags_Borders;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
@@ -45,6 +53,8 @@ namespace LkEngine::UI {
 	{
 		ImGui::EndTable();
 		ImGui::PopStyleVar(2); /* ItemSpacing, FramePadding */
+
+		UIContext.bInGrid = false;
 
 		UI::PopID();
 	}
@@ -79,7 +89,6 @@ namespace LkEngine::UI {
 		ImGui::TreePop();
 	}
 
-	/* TODO: std::array arg */
 	template<typename T>
 	static void Table(const char* TableName, 
 					  const char** Columns, 
@@ -144,7 +153,6 @@ namespace LkEngine::UI {
 				UI::ShiftCursor(EdgeOffset * 3.0f, EdgeOffset * 1.0f);
 				ImGui::TableHeader(ColumnName);
 				UI::ShiftCursor(-EdgeOffset * 3.0f, -EdgeOffset * 1.0f);
-				//UI::ShiftCursor(-EdgeOffset * 3.0f, -EdgeOffset * 2.0f);
 
 				ImGui::PopID();
 			}
@@ -156,6 +164,84 @@ namespace LkEngine::UI {
 
 		ImGui::EndTable();
 	}
+
+	template<typename T, std::size_t N>
+	static void Table(const char* TableName, 
+					  const std::array<const char*, N>& Columns, 
+					  const ImVec2& Size, 
+					  T RenderFunc)
+	{
+		if ((Size.x <= 0.0f) || (Size.y <= 0.0f))
+		{
+			return;
+		}
+
+		static constexpr float EdgeOffset = 4.0f;
+
+		FScopedStyle CellPadding(ImGuiStyleVar_CellPadding, ImVec2(4.0f, 0.0f));
+		const ImColor BgColor = ImColor(RGBA32::Background);
+		const ImColor ColRowAlt = ColorWithMultipliedValue(BgColor, 1.29f);
+
+		FScopedColor TableColor(ImGuiCol_ChildBg, BgColor);
+		FScopedColor RowColor(ImGuiCol_TableRowBg, BgColor);
+		FScopedColor RowAltColor(ImGuiCol_TableRowBgAlt, ColRowAlt);
+
+		static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_NoPadInnerX
+			| ImGuiTableFlags_Resizable
+			| ImGuiTableFlags_Reorderable
+			| ImGuiTableFlags_ScrollY
+			| ImGuiTableFlags_RowBg;
+
+		if (!ImGui::BeginTable(TableName, N, TableFlags, Size))
+		{
+			return;
+		}
+
+		/* Cache the cursor position on the X-axis. */
+		const float CursorX = ImGui::GetCursorScreenPos().x;
+
+		for (uint32_t Idx = 0; Idx < N; Idx++)
+		{
+			ImGui::TableSetupColumn(Columns[Idx]);
+		}
+
+		/* Setup table headers. */
+		{
+			const ImColor ActiveColor = ColorWithMultipliedValue(BgColor, 1.35f);
+			FScopedColorStack HeaderCol(
+				ImGuiCol_HeaderHovered, ActiveColor, 
+				ImGuiCol_HeaderActive, ActiveColor
+			);
+
+			ImGui::TableSetupScrollFreeze(ImGui::TableGetColumnCount(), 1);
+			ImGui::TableNextRow(ImGuiTableRowFlags_Headers, 24.0f);
+
+			for (uint32_t Idx = 0; Idx < N; Idx++)
+			{
+				ImGui::TableSetColumnIndex(Idx);
+				const char* ColumnName = ImGui::TableGetColumnName(Idx);
+				ImGui::PushID(ColumnName);
+
+				/**
+				 * Not sure about the edge offset on the Y-axis.
+				 * A factor of 1.0f or 2.0f works.
+				 */
+				//UI::ShiftCursor(EdgeOffset * 3.0f, EdgeOffset * 2.0f);
+				UI::ShiftCursor(EdgeOffset * 3.0f, EdgeOffset * 1.0f);
+				ImGui::TableHeader(ColumnName);
+				UI::ShiftCursor(-EdgeOffset * 3.0f, -EdgeOffset * 1.0f);
+
+				ImGui::PopID();
+			}
+
+			ImGui::SetCursorScreenPos(ImVec2(CursorX, ImGui::GetCursorScreenPos().y));
+		}
+
+		RenderFunc();
+
+		ImGui::EndTable();
+	}
+
 
 	bool TableRowClickable(const char* RowID, const float RowHeight);
 

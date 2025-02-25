@@ -77,7 +77,7 @@ namespace LkEngine {
     void LOpenGLImGuiLayer::Destroy()
     {
 		LK_CORE_DEBUG_TAG("OpenGLImGuiLayer", "Saving UI configuration: {}", 
-						  std::filesystem::relative(LayoutConfig, LFileSystem::GetEngineDir()).string());
+						  LFileSystem::ConvertToUnixPath(std::filesystem::relative(LayoutConfig, LFileSystem::GetEngineDir()).string()));
 		ImGui::SaveIniSettingsToDisk(LayoutConfig.string().c_str());
 
 		ImGui_ImplGlfw_Shutdown();

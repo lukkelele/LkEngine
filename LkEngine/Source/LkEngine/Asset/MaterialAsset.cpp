@@ -1,11 +1,8 @@
 #include "LKpch.h"
 #include "MaterialAsset.h"
 
-#if defined(LK_ENGINE_EDITOR)
-#	include "LkEngine/Asset/EditorAssetManager.h"
-#endif
-
 #include "LkEngine/Renderer/Material.h"
+#include "LkEngine/Asset/EditorAssetManager.h"
 
 
 namespace LkEngine {

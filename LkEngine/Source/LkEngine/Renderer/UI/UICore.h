@@ -14,6 +14,8 @@
 #	include "LkEngine/Renderer/Backend/OpenGL/OpenGLTexture.h"
 #endif
 
+#include "ImGuiFwd.h"
+
 #define LK_UI_DEBUG_DOCKNODES         0
 #define LK_UI_DEBUG_WINDOWS_ON_HOVER  0
 #include "UIDebug.h"
@@ -80,6 +82,17 @@ namespace LkEngine::UI {
 		bool bIsOpen = false;
 	};
 
+	enum class EBorder
+	{
+		None       = 0,
+		Horizontal = LK_BIT(1),
+		Vertical   = LK_BIT(2),
+		All        = LK_BIT(3),
+	};
+	LK_ENUM_CLASS_FLAGS(EBorder);
+	/* FIXME: Need to fix the namespace nesting issue for LK_ENUM_RANGE_FLAGS */
+	//LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EBorder, EBorder::None, EBorder::Horizontal)
+
 	/**
 	 * Map a property to a type T.
 	 * 
@@ -102,6 +115,20 @@ namespace LkEngine::UI {
 		static constexpr float MIN_UNLIMITED = 0.0f;
 		static constexpr float MAX_UNLIMITED = 0.0f;
 	}
+
+	template<typename T>
+	struct SizeConstraint
+	{
+		static constexpr T Min;
+		static constexpr T Max;
+	};
+	
+	template<>
+	struct SizeConstraint<ImVec2>
+	{
+		static constexpr ImVec2 Min{ 0.0f, 0.0f };
+		static constexpr ImVec2 Max{ 9999.0f, 9999.0f };
+	};
 
 	namespace Internal 
 	{
@@ -153,8 +180,8 @@ namespace LkEngine::UI {
 	struct LUIContext
 	{
 		std::vector<FStyleMod> StyleStack{};
-		std::deque<Internal::FAlignData> AlignedStack{};
 		std::unordered_map<std::string, FMessageBox> MessageBoxes{};
+		bool bInGrid = false;
 
 		LStyle Style;
 	};
@@ -197,16 +224,6 @@ namespace LkEngine::UI {
     const char* GenerateID();
     void PushID();
     void PopID();
-
-	FORCEINLINE void PushAligned(const float Spacing = 0.0f)
-	{
-		UI::UIContext.AlignedStack.emplace_front(Spacing, UIContext.AlignedStack.size());
-	}
-
-	FORCEINLINE void PopAligned()
-	{
-		UI::UIContext.AlignedStack.pop_front();
-	}
 
 	void Separator(const ImVec2& Size, const ImVec4& Color);
 

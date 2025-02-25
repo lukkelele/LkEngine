@@ -17,6 +17,7 @@ namespace LkEngine::UI {
 	};
 	LK_ENUM_CLASS_FLAGS(EStyle);
 
+
 	class FScopedStyle
 	{
 	public:

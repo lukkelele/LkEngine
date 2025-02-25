@@ -16,8 +16,11 @@ namespace LkEngine {
 		LOBJECT_REGISTER();
 	}
 
-	LCamera::LCamera(const float InDegFov, const float InWidth, const float InHeight, 
-					 const float InNearP, const float InFarP)
+	LCamera::LCamera(const float InDegFov, 
+					 const float InWidth, 
+					 const float InHeight, 
+					 const float InNearP, 
+					 const float InFarP)
 		: LCamera(glm::perspectiveFov(glm::radians(InDegFov), InWidth, InHeight, InFarP, InNearP))
 	{
 	}

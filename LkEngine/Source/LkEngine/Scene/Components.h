@@ -182,7 +182,7 @@ namespace LkEngine {
 	struct LCameraComponent
 	{
 		LSceneCamera Camera;
-		ECameraProjection ProjectionType = ECameraProjection::None;
+		ECameraProjection ProjectionType = ECameraProjection::Perspective;
 		bool bPrimary = true;
 
 		LCameraComponent() = default;

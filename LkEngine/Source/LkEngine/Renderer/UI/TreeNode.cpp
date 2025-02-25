@@ -263,7 +263,7 @@ namespace ImGui {
 					ImVec2(0, 0),
 					ImVec2(1, 1), 
 					IconTint,
-					Debug::UI::ContentBrowser::bDrawOutlinerBorders ? Debug::UI::ContentBrowser::OutlinerBorderColor : ImVec4(0.0f, 0.0f, 0.0f, 0.0f)
+					UI::Debug::ContentBrowser::bDrawOutlinerBorders ? UI::Debug::ContentBrowser::OutlinerBorderColor : ImVec4(0.0f, 0.0f, 0.0f, 0.0f)
 				);
 
 				/* Restore item data. */
@@ -317,7 +317,7 @@ namespace ImGui {
 					ImVec2(0, 0),
 					ImVec2(1, 1),
 					IconTint,
-					Debug::UI::ContentBrowser::bDrawOutlinerBorders ? Debug::UI::ContentBrowser::OutlinerBorderColor : ImVec4(0.0f, 0.0f, 0.0f, 0.0f)
+					UI::Debug::ContentBrowser::bDrawOutlinerBorders ? UI::Debug::ContentBrowser::OutlinerBorderColor : ImVec4(0.0f, 0.0f, 0.0f, 0.0f)
 				);
 
 				/* Restore item data. */

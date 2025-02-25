@@ -30,30 +30,36 @@ namespace LkEngine {
 	{
 	}
 
-	void LSceneSerializer::Serialize(const std::filesystem::path& Filepath)
+	bool LSceneSerializer::Serialize(const std::filesystem::path& Filepath)
 	{
-		LK_CORE_WARN_TAG("SceneSerializer", "Serializing: {}", Filepath.string());
+		LK_CORE_DEBUG_TAG("SceneSerializer", "Serializing: {}", Filepath.string());
+
+		if (!Scene)
+		{
+			LK_CORE_ERROR_TAG("SceneSerializer", "Serialization failed, invalid scene reference");
+			return false;
+		}
+
 		YAML::Emitter Out;
-		SerializeToYaml(Out);
+		if (!SerializeToYaml(Out))
+		{
+			LK_CORE_ERROR_TAG("SceneSerializer", "Yaml serialization failed");
+			return false;
+		}
 
 		std::ofstream FileOut(Filepath);
 		FileOut << Out.c_str();
+
+		return true;
 	}
 
-	void LSceneSerializer::SerializeToYaml(YAML::Emitter& Out)
+	bool LSceneSerializer::SerializeToYaml(YAML::Emitter& Out)
 	{
 		Out << YAML::BeginMap;
 		Out << YAML::Key << "Scene"       << YAML::Value << Scene->GetName();
 		Out << YAML::Key << "Active"      << YAML::Value << Scene->IsActive();
 		Out << YAML::Key << "EditorScene" << YAML::Value << Scene->bEditorScene;
 		Out << YAML::Key << "SceneHandle" << YAML::Value << static_cast<uint32_t>(Scene->SceneEntity);
-
-		/* FIXME: Pass the camera to the function as an argument. */
-	#if 0
-		/* Editor camera. */
-		LEditorLayer& Editor = LEditorLayer::Get();
-		SerializeEditorCamera(Out, Editor.GetEditorCamera());
-	#endif
 
 		/* Entities. */
 		Out << YAML::Key << "Entities";
@@ -76,13 +82,15 @@ namespace LkEngine {
 		Out << YAML::EndSeq;
 
 		Out << YAML::EndMap;
+
+		return true;
 	}
 
 	bool LSceneSerializer::Deserialize(const std::filesystem::path& Filepath)
 	{
 		LK_CORE_VERIFY(Scene);
 		LK_CORE_VERIFY(!Filepath.empty(), "Deserialization failed, invalid filepath: '{}'", Filepath.string());
-		LK_CORE_WARN_TAG("SceneSerializer", "Deserializing: {}", Filepath.filename().string());
+		LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing: {}", Filepath.filename().string());
 		Scene->Clear();
 
 		if (!LFileSystem::Exists(Filepath))
@@ -160,7 +168,6 @@ namespace LkEngine {
 		Scene->ViewportWidth = LWindow::Get().GetViewportWidth();
 		Scene->ViewportHeight = LWindow::Get().GetViewportHeight();
 
-		//LK_CORE_DEBUG("Deserialized Yaml:\n{}\n", YamlString);
 	#if 0
 		/* Editor camera. */
 		if (TObjectPtr<LSceneCamera> SceneCamera = Scene->GetMainCamera(); SceneCamera != nullptr)
@@ -333,11 +340,9 @@ namespace LkEngine {
 			Out << YAML::Key << "Camera" << YAML::Value;
 			Out << YAML::BeginMap; 
 			{
-				//Out << YAML::Key << "Position"       << YAML::Value << Camera.GetPosition();
 				Out << YAML::Key << "CameraType"     << YAML::Value << (int)Camera.GetType();
 				Out << YAML::Key << "ProjectionType" << YAML::Value << static_cast<int>(Camera.GetProjectionType());
 				Out << YAML::Key << "Origin"         << YAML::Value << Camera.Origin;
-				//Out << YAML::Key << "Distance"   << YAML::Value << Camera.GetDistance();
 				Out << YAML::Key << "FocalPoint"     << YAML::Value << Camera.FocalPoint;
 				Out << YAML::Key << "Direction"      << YAML::Value << Camera.Direction;
 				Out << YAML::Key << "Pitch"          << YAML::Value << Camera.Pitch;
@@ -347,9 +352,9 @@ namespace LkEngine {
 				Out << YAML::Key << "Perspective" << YAML::Value;
 				Out << YAML::Value << YAML::BeginMap;
 				{
-					Out << YAML::Key << "DegPerspectiveFOV" << YAML::Value << Camera.GetPerspectiveDegFov();
-					Out << YAML::Key << "PerspectiveNear"   << YAML::Value << Camera.GetPerspectiveNearClip();
-					Out << YAML::Key << "PerspectiveFar"    << YAML::Value << Camera.GetPerspectiveFarClip();
+					Out << YAML::Key << "PerspectiveFov"  << YAML::Value << Camera.GetPerspectiveFov();
+					Out << YAML::Key << "PerspectiveNear" << YAML::Value << Camera.GetPerspectiveNearClip();
+					Out << YAML::Key << "PerspectiveFar"  << YAML::Value << Camera.GetPerspectiveFarClip();
 				}
 				Out << YAML::Value << YAML::EndMap;
 				/* ~Perspective */
@@ -528,18 +533,18 @@ namespace LkEngine {
 					const YAML::Node PerspectiveNode = CameraNode["Perspective"];
 					if (PerspectiveNode && PerspectiveNode.IsMap())
 					{
-						LK_DESERIALIZE_PROPERTY(DegPerspectiveFOV, Camera.DegPerspectiveFOV, PerspectiveNode, 45.0f);
+						LK_DESERIALIZE_PROPERTY(PerspectiveFov, Camera.DegPerspectiveFov, PerspectiveNode, 45.0f);
 						LK_DESERIALIZE_PROPERTY(PerspectiveNear, Camera.PerspectiveNear, PerspectiveNode, 0.10f);
 						LK_DESERIALIZE_PROPERTY(PerspectiveFar, Camera.PerspectiveFar, PerspectiveNode, 1000.0f);
 						Camera.SetPerspectiveProjectionMatrix(
-							glm::radians(Camera.DegPerspectiveFOV), 
+							glm::radians(Camera.DegPerspectiveFov), 
 							Scene->ViewportWidth,
 							Scene->ViewportHeight,
 							Camera.PerspectiveNear,
 							Camera.PerspectiveFar
 						);
 
-						Camera.SetPerspective(Camera.DegPerspectiveFOV, Camera.PerspectiveNear, Camera.PerspectiveFar);
+						Camera.SetPerspective(Camera.DegPerspectiveFov, Camera.PerspectiveNear, Camera.PerspectiveFar);
 					}
 					else
 					{
@@ -552,7 +557,7 @@ namespace LkEngine {
 					LK_CORE_WARN_TAG("SceneSerializer", "Camera.Direction: {}", Camera.Direction);
 					LK_CORE_WARN_TAG("SceneSerializer", "Camera.Pitch: {}", Camera.Pitch);
 					LK_CORE_WARN_TAG("SceneSerializer", "Camera.Yaw: {}", Camera.Yaw);
-					LK_CORE_WARN_TAG("SceneSerializer", "Camera.DegPerspectiveFOV: {}", Camera.DegPerspectiveFOV);
+					LK_CORE_WARN_TAG("SceneSerializer", "Camera.PerspectiveFov: {}", Camera.DegPerspectiveFov);
 					LK_CORE_WARN_TAG("SceneSerializer", "Camera.PerspectiveNear: {}", Camera.PerspectiveNear);
 					LK_CORE_WARN_TAG("SceneSerializer", "Camera.PerspectiveFar: {}", Camera.PerspectiveFar);
 				#endif
@@ -608,7 +613,7 @@ namespace LkEngine {
 			Out << YAML::Key << "Perspective" << YAML::Value;
 			Out << YAML::Value << YAML::BeginMap;
 			{
-				Out << YAML::Key << "DegPerspectiveFOV" << YAML::Value << EditorCamera.GetPerspectiveDegFov();
+				Out << YAML::Key << "PerspectiveFov" << YAML::Value << EditorCamera.GetPerspectiveFov();
 				Out << YAML::Key << "PerspectiveNear"   << YAML::Value << EditorCamera.GetPerspectiveNearClip();
 				Out << YAML::Key << "PerspectiveFar"    << YAML::Value << EditorCamera.GetPerspectiveFarClip();
 			}
@@ -648,7 +653,7 @@ namespace LkEngine {
 			const YAML::Node& PerspectiveCameraNode = EditorCameraNode["Perspective"];
 			if (PerspectiveCameraNode.IsMap())
 			{
-				EditorCamera.DegPerspectiveFOV = PerspectiveCameraNode["DegPerspectiveFOV"].as<float>();
+				EditorCamera.DegPerspectiveFov = PerspectiveCameraNode["PerspectiveFov"].as<float>();
 				EditorCamera.PerspectiveNear = PerspectiveCameraNode["PerspectiveNear"].as<float>();
 				EditorCamera.PerspectiveFar = PerspectiveCameraNode["PerspectiveFar"].as<float>();
 
@@ -659,14 +664,14 @@ namespace LkEngine {
 				EditorCamera.ViewportHeight = Scene->ViewportHeight;
 
 				EditorCamera.SetPerspectiveProjectionMatrix(
-					glm::radians(EditorCamera.DegPerspectiveFOV), 
+					glm::radians(EditorCamera.DegPerspectiveFov), 
 					EditorCamera.ViewportWidth,
 					EditorCamera.ViewportHeight,
 					EditorCamera.PerspectiveNear,
 					EditorCamera.PerspectiveFar
 				);
 
-				EditorCamera.SetPerspective(EditorCamera.DegPerspectiveFOV, 
+				EditorCamera.SetPerspective(EditorCamera.DegPerspectiveFov, 
 											EditorCamera.PerspectiveNear, 
 											EditorCamera.PerspectiveFar);
 			}

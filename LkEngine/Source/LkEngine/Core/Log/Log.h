@@ -49,10 +49,7 @@
 
 namespace LkEngine {
 
-    extern std::filesystem::path LogDirectory;
-
-    /** ELogLevel */
-    enum class ELogLevel : int
+    enum class ELogLevel
     {
         Trace,
         Debug,
@@ -62,19 +59,12 @@ namespace LkEngine {
         Fatal
     };
 
-    enum class ELoggerType : int
+    enum class ELoggerType
     {
         Core = 0,
         Client,
         EditorConsole,
 		TestRunner,
-    };
-
-    struct FLoggerInitArguments
-    {
-        std::string LogFilename = "LkEngine.log";
-        std::string CoreLoggerName = "CORE";
-        std::string ClientLoggerName = "CLIENT";
     };
 
 	/**
@@ -106,11 +96,6 @@ namespace LkEngine {
 								   const ELogLevel LogLevel = ELogLevel::Info,
 								   const std::vector<LogLevelColorConfig>& LevelConfigs = {},
 								   const Color::EColorCode MainColor = Color::EColorCode::Reset);
-
-        FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_Core() { return Logger_Core; }
-        FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_Client() { return Logger_Client; }
-        FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_EditorConsole() { return Logger_EditorConsole; }
-        FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger_TestRunner() { return Logger_TestRunner; }
 
         FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger(const ELoggerType LoggerType)
         {

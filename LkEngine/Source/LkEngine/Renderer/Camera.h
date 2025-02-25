@@ -12,6 +12,27 @@
 
 namespace LkEngine {
 
+	enum class ECameraAction : uint16_t
+	{
+		None   = 0,
+		Pan    = LK_BIT(0),
+		Rotate = LK_BIT(1),
+		Zoom   = LK_BIT(2),
+	};
+	LK_ENUM_CLASS_FLAGS(ECameraAction);
+	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(ECameraAction, ECameraAction::None, ECameraAction::Zoom);
+
+	enum class ECameraModifier : int32_t
+	{
+		None = 0,
+		MouseEnabled    = LK_BIT(1),
+		KeyboardEnabled = LK_BIT(2),
+		PitchLocked     = LK_BIT(3),
+		YawLocked       = LK_BIT(4),
+		Damping         = LK_BIT(5),
+	};
+	LK_ENUM_CLASS_FLAGS(ECameraModifier);
+
 	/**
 	 * LCamera
 	 *
@@ -36,6 +57,36 @@ namespace LkEngine {
 		FORCEINLINE ECameraProjection GetProjectionType() const { return ProjectionType; }
 
 		FORCEINLINE bool IsActive() const { return bIsActive; }
+
+		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
+		{
+			if ((ProjectionType != ECameraProjection::Perspective)
+				|| (DegPerspectiveFov != InVerticalFovDeg)
+				|| (PerspectiveNear != InNearClip)
+				|| (PerspectiveFar != InFarClip))
+			{
+				ProjectionType = ECameraProjection::Perspective;
+				DegPerspectiveFov = InVerticalFovDeg;
+				PerspectiveNear = InNearClip;
+				PerspectiveFar = InFarClip;
+
+				OnCameraProjectionChanged.Broadcast(ECameraProjection::Perspective);
+			}
+		}
+
+		FORCEINLINE void SetOrthographic(const float InWidth, const float InHeight, const float InNearClip = -1.0f, const float InFarClip = 1.0f)
+		{
+			if ((ProjectionType != ECameraProjection::Perspective)
+				|| (OrthographicNear != InNearClip)
+				|| (OrthographicFar != InFarClip))
+			{
+				ProjectionType = ECameraProjection::Orthographic;
+				OrthographicNear = InNearClip;
+				OrthographicFar = InFarClip;
+
+				OnCameraProjectionChanged.Broadcast(ECameraProjection::Orthographic);
+			}
+		}
 
 		FORCEINLINE void SetProjectionType(ECameraProjection InProjection)
 		{
@@ -104,10 +155,44 @@ namespace LkEngine {
 				InNearP, InFarP);
 		}
 
-		FORCEINLINE float GetPerspectiveDegFov() const { return DegPerspectiveFOV; }
-		FORCEINLINE float GetDegPerspectiveVerticalFOV() const { return DegPerspectiveFOV; }
-		FORCEINLINE float GetRadPerspectiveVerticalFOV() const { return glm::radians(DegPerspectiveFOV); }
-		
+		template<enum EAngleUnit = EAngleUnit::Degree> 
+		float GetPerspectiveFov() const 
+		{ 
+			LK_CORE_VERIFY(false);
+			return -1.0f; 
+		}
+
+		template<> 
+		float GetPerspectiveFov<EAngleUnit::Degree>() const 
+		{ 
+			return DegPerspectiveFov; 
+		}
+
+		template<> 
+		float GetPerspectiveFov<EAngleUnit::Radian>() const 
+		{ 
+			return glm::radians(DegPerspectiveFov); 
+		}
+
+		template<enum EAngleUnit = EAngleUnit::Degree> 	
+		float GetPerspectiveVerticalFov() const 
+		{ 
+			LK_CORE_VERIFY(false);
+			return -1.0f; 
+		}
+
+		template<> 
+		float GetPerspectiveVerticalFov<EAngleUnit::Degree>() const 
+		{ 
+			return DegPerspectiveFov; 
+		}
+
+		template<> 
+		float GetPerspectiveVerticalFov<EAngleUnit::Radian>() const 
+		{ 
+			return glm::radians(DegPerspectiveFov); 
+		}
+
 		FORCEINLINE glm::quat GetOrientation() const
 		{
 			return glm::quat(glm::vec3(-Pitch - PitchDelta, -Yaw - YawDelta, 0.0f));
@@ -131,18 +216,36 @@ namespace LkEngine {
 
 		void SetMouseEnabled(const bool InEnabled)
 		{
-			if (bMouseEnabled != InEnabled)
+			const bool MouseEnabled = (ModifierFlags & ECameraModifier::MouseEnabled);
+			if (MouseEnabled != InEnabled)
 			{
-				bMouseEnabled = InEnabled;
+				if (MouseEnabled)
+				{
+					ModifierFlags &= ~ECameraModifier::MouseEnabled;
+				}
+				else
+				{
+					ModifierFlags |= ECameraModifier::MouseEnabled;
+				}
+
 				OnCameraInputModified.Broadcast();
 			}
 		}
 
 		void SetKeyboardEnabled(const bool InEnabled)
 		{
-			if (bKeyboardEnabled != InEnabled)
+			const bool KeyboardEnabled = ModifierFlags & ECameraModifier::KeyboardEnabled;
+			if (KeyboardEnabled != InEnabled)
 			{
-				bKeyboardEnabled = InEnabled;
+				if (KeyboardEnabled)
+				{
+					ModifierFlags &= ~ECameraModifier::KeyboardEnabled;
+				}
+				else
+				{
+					ModifierFlags |= ECameraModifier::KeyboardEnabled;
+				}
+
 				OnCameraInputModified.Broadcast();
 			}
 		}
@@ -161,6 +264,9 @@ namespace LkEngine {
 		bool bIsActive = false;
 		ECameraProjection ProjectionType = ECameraProjection::Perspective;
 
+		int32_t ModifierFlags = 0;
+		static_assert(std::is_same_v<decltype(ModifierFlags), std::underlying_type_t<ECameraModifier>>);
+
 		glm::vec3 Origin = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Direction{};
 		glm::vec3 FocalPoint{};
@@ -171,12 +277,9 @@ namespace LkEngine {
 		float Yaw = 0.0f;
 		float YawDelta = 0.0f;
 
-		float VerticalFOV = 90.0f;
 		float AspectRatio = (16.0f / 9.0f);
-		float NearClip = 0.0f;
-		float FarClip = 2000.0f;
 
-		float DegPerspectiveFOV = 45.0f;
+		float DegPerspectiveFov = 45.0f;
 		float PerspectiveNear = 0.1f;
 		float PerspectiveFar = 1000.0f;
 
@@ -186,9 +289,6 @@ namespace LkEngine {
 
 		float Rotation = 0.0f;
 		float RotationSpeed = 0.280f;
-		float MouseSpeed = 1.0f;
-		bool bMouseEnabled = true;
-		bool bKeyboardEnabled = true;
 
 		glm::mat4 ViewMatrix = glm::mat4(1.0f);
 		glm::mat4 ProjectionMatrix = glm::mat4(1.0f);

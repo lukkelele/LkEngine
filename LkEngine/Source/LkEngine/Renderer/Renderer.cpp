@@ -8,10 +8,6 @@
 
 #include "LkEngine/Core/Application.h"
 
-#if defined(LK_ENGINE_EDITOR)
-//#	include "LkEngine/Editor/EditorLayer.h"
-#endif
-
 
 namespace LkEngine {
 
@@ -38,12 +34,6 @@ namespace LkEngine {
 		std::array<LRenderCommandQueue*, RenderCommandQueueCount> CommandQueue;
 		std::array<LRenderCommandQueue, 3> ResourceFreeQueue;
 		std::atomic<uint32_t> RenderCommandQueueSubmissionIndex = 0;
-	}
-
-	void LRendererAPI::SetAPI(ERendererAPI InRendererAPI)
-	{
-		LK_MARK_FUNC_FOR_REMOVAL();
-		LRendererAPI::RendererAPI = InRendererAPI;
 	}
 
 	LRenderer::LRenderer()
@@ -245,6 +235,19 @@ namespace LkEngine {
 	void LRenderer::SetDepthFunction(const EDepthFunction InDepthFunction)
 	{
 		RendererAPI->SetDepthFunction(InDepthFunction);
+	}
+
+	const char* LRenderer::GetCurrentRenderApiName()
+	{
+		switch (LRendererAPI::Get())
+		{
+			case ERendererAPI::OpenGL: return "OpenGL";
+			case ERendererAPI::Vulkan: return "Vulkan";
+			case ERendererAPI::None: break;
+		}
+
+		LK_CORE_VERIFY(false);
+		return nullptr;
 	}
 
 }

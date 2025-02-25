@@ -8,7 +8,6 @@ namespace LkEngine {
 
 	enum class ECameraProjection : uint8_t
 	{ 
-		None = 0, 
 		Perspective, 
 		Orthographic 
 	};
@@ -28,10 +27,9 @@ namespace LkEngine {
 			{
 				case ECameraProjection::Perspective:  return "Perspective";
 				case ECameraProjection::Orthographic: return "Orthographic";
-				case ECameraProjection::None:         return "None";
 			}
 
-			LK_CORE_ASSERT(false);
+			LK_CORE_VERIFY(false);
 			return nullptr;
 		}
 
@@ -44,7 +42,7 @@ namespace LkEngine {
 				case ECameraType::None:   return "None";
 			}
 
-			LK_CORE_ASSERT(false);
+			LK_CORE_VERIFY(false);
 			return nullptr;
 		}
 		

@@ -78,6 +78,8 @@ namespace LkEngine {
 		static void RegisterShader(TObjectPtr<LShader> InShader, TObjectPtr<LMaterial> InMaterial);
 		static void SetDepthFunction(const EDepthFunction InDepthFunction);
 
+		static const char* GetCurrentRenderApiName();
+
 	private:
 		static LRenderCommandQueue& GetRenderCommandQueue();
 

@@ -78,6 +78,25 @@ struct std::formatter<std::filesystem::path>
 };
 
 /**
+ * Formatter: std::array<char, N>
+ */
+template<std::size_t N>
+struct std::formatter<std::array<char, N>>
+{
+	template<typename ParseContext>
+    constexpr auto parse(ParseContext& Context)
+    {
+        return Context.begin();
+    }
+	
+	template<typename FormatContext>
+    auto format(const std::array<char, N>& Input, FormatContext& Context) const
+    {
+        return std::format_to(Context.out(), "{}", Input.data());
+    }
+};
+
+/**
  * Formatter: glm::vec2
  */
 template<>

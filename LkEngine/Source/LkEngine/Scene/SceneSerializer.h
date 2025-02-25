@@ -22,11 +22,8 @@ namespace LkEngine {
 		LSceneSerializer(const TObjectPtr<LScene>& InScene);
 		LSceneSerializer() = delete;
 
-		void Serialize(const std::filesystem::path& Filepath);
+		bool Serialize(const std::filesystem::path& Filepath);
 		bool Deserialize(const std::filesystem::path& Filepath);
-
-		void SerializeToYaml(YAML::Emitter& out);
-		bool DeserializeFromYaml(const std::string& YamlString);
 
 		/** FIXME: Move this to LProject, should not exist in here. */
 		TObjectPtr<LScene> LoadScene();
@@ -35,6 +32,9 @@ namespace LkEngine {
 		bool DeserializeRuntime(const LUUID InSceneHandle);
 
 	private:
+		bool SerializeToYaml(YAML::Emitter& out);
+		bool DeserializeFromYaml(const std::string& YamlString);
+
 		void SerializeEntity(YAML::Emitter& Out, LEntity Entity);
 		void DeserializeEntities(YAML::Node& EntitiesNode, TObjectPtr<LScene> SceneRef);
 

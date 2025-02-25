@@ -78,12 +78,11 @@ namespace LkEngine::Math {
 			return false;
 		}
 
-		// Next take care of translation (easy).
 		Translation = glm::vec3(LocalMatrix[3]);
 		LocalMatrix[3] = glm::vec4(0, 0, 0, LocalMatrix[3].w);
 
 		glm::vec3 Row[3] = {};
-		// Now get scale and shear.
+		/* Scale and shear. */
 		for (glm::length_t i = 0; i < 3; ++i)
 		{
 			for (glm::length_t j = 0; j < 3; ++j)
@@ -92,19 +91,19 @@ namespace LkEngine::Math {
 			}
 		}
 
-		// Compute X scale factor and normalize first row.
+		/* Compute the X-scale and normalize the first row. */
 		Scale.x = glm::length(Row[0]);
 		Row[0] = LkEngine::Math::Scale(Row[0], static_cast<T>(1));
 
-		// Now, compute Y scale and normalize 2nd row.
+		/* Compute the Y-scale and normalize the second row. */
 		Scale.y = glm::length(Row[1]);
 		Row[1] = LkEngine::Math::Scale(Row[1], static_cast<T>(1));
 
-		// Next, get Z scale and normalize 3rd row.
+		/* Get the Z-scale and normalize the third row. */
 		Scale.z = glm::length(Row[2]);
 		Row[2] = LkEngine::Math::Scale(Row[2], static_cast<T>(1));
 
-		// Rotation as quaternion.
+		/* Get the rotation as a quaternion. */
 		int i, j, k = 0;
 		T SquareRoot, Trace = Row[0].x + Row[1].y + Row[2].z;
 		if (Trace > static_cast<T>(0))
@@ -116,7 +115,7 @@ namespace LkEngine::Math {
 			Rotation.x = SquareRoot * (Row[1].z - Row[2].y);
 			Rotation.y = SquareRoot * (Row[2].x - Row[0].z);
 			Rotation.z = SquareRoot * (Row[0].y - Row[1].x);
-		} // End if > 0
+		}
 		else
 		{
 			static int Next[3] = { 1, 2, 0 };
@@ -140,7 +139,7 @@ namespace LkEngine::Math {
 			Rotation[j] = SquareRoot * (Row[i][j] + Row[j][i]);
 			Rotation[k] = SquareRoot * (Row[i][k] + Row[k][i]);
 			Rotation.w = SquareRoot * (Row[j][k] - Row[k][j]);
-		} // End if <= 0
+		}
 
 		return true;
 	}
@@ -196,15 +195,13 @@ namespace LkEngine::Math {
 			1.0f
 		);
 
-		// Multiply by inverse projection matrix.
+		/* Multiply by the inverse projection. */
 		glm::vec4 EyeCoordinates = InverseProjectionMatrix * ClipCoordinates;
 		EyeCoordinates.z = -1.0f; // Point into the scene.
 		EyeCoordinates.w = 0.0f;
 
-		// Convert to World Coordinates.
 		glm::vec4 WorldCoordinates = InverseViewMatrix * EyeCoordinates;
 
-		//return TVector(glm::vec2(WorldCoordinates.x, WorldCoordinates.y));
 		return TVector(WorldCoordinates.x, WorldCoordinates.y);
     }
 
@@ -249,21 +246,6 @@ namespace LkEngine::Math {
 
 		return TVector(glm::unProject(ScreenCoordinatesWithDepth, ViewMatrix, ProjectionMatrix, Viewport));
     }
-
-#if 0
-    template<>
-    FORCEINLINE static LVector ConvertScreenToWorldCoordinates(const glm::vec2& ScreenCoordinates, 
-                                                               const float Depth, 
-                                                               const glm::mat4& ViewMatrix, 
-                                                               const glm::mat4& ProjectionMatrix, 
-                                                               const glm::vec4& Viewport)
-    {
-        LK_CORE_ASSERT((Depth >= 0.0f && Depth <= 1.0f), "Depth invalid");
-        const glm::vec3 ScreenCoordinatesWithDepth = { ScreenCoordinates, Depth };
-
-        return LVector(glm::unProject(ScreenCoordinatesWithDepth, ViewMatrix, ProjectionMatrix, Viewport));
-    }
-#endif
 
     glm::vec2 ScreenToWorld2D(const glm::vec2& ndc, const glm::mat4& inv_proj, const LTransformComponent& Transform);
     float Get2DRotationFromQuaternion(const glm::quat& quat);

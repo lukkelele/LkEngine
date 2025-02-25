@@ -559,12 +559,12 @@ namespace LkEngine {
 			if (CameraComponent.bPrimary)
 			{
 				LK_CORE_VERIFY((CameraComponent.Camera.GetOrthographicSize() > 0) 
-							   || (CameraComponent.Camera.GetDegPerspectiveVerticalFOV() > 0), "Camera is not fully initialized");
+							   || (CameraComponent.Camera.GetPerspectiveVerticalFov() > 0), "Camera is not fully initialized");
 				return { Entity, this };
 			}
 		}
 		
-		LK_CORE_DEBUG_TAG("Scene", "GetMainCameraEntity failed");
+		LK_CORE_FATAL_TAG("Scene", "GetMainCameraEntity failed");
 		return {};
 	}
 
