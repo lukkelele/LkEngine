@@ -180,8 +180,8 @@ namespace LkEngine {
 
 						default:
 						{
-							LK_CORE_ASSERT(false, "Unsupported theme: {}", static_cast<int>(CurrentTheme));
-							/* Use dark theme as fallback when running in release. */
+							//LK_CORE_ASSERT(false, "Unsupported theme: {}", static_cast<int>(CurrentTheme));
+							/* Use dark theme as fallback. */
 							goto Fallback;
 						}
 					}

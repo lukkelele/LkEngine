@@ -16,12 +16,14 @@ namespace LkEngine {
 	static FEditorOnSelectionChanged GEditorOnSelectionChanged;
 
 
-	namespace Debug 
+	namespace UI
 	{
-		namespace UI 
+		namespace Debug
 		{
 			extern bool bDisplayWindowSizeOnHover;
 			extern bool bBoundingBoxesOnHover;
+			extern bool bGridBorders;
+			extern int  GridBorders;
 
 			namespace ContentBrowser 
 			{

@@ -17,25 +17,6 @@
 
 namespace LkEngine {
 
-	enum class ECameraAction : uint16_t
-	{
-		None   = 0,
-		Pan    = LK_BIT(0),
-		Rotate = LK_BIT(1),
-		Zoom   = LK_BIT(2),
-	};
-	LK_ENUM_CLASS_FLAGS(ECameraAction);
-	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(ECameraAction, ECameraAction::None, ECameraAction::Zoom);
-
-	enum class ECameraModifier : int32_t
-	{
-		None = 0,
-		PitchLocked = LK_BIT(0),
-		YawLocked   = LK_BIT(1),
-		Damping     = LK_BIT(2),
-	};
-	LK_ENUM_CLASS_FLAGS(ECameraModifier);
-
 	enum class EEditorCameraMode
 	{
 		None = 0,
@@ -78,12 +59,12 @@ namespace LkEngine {
 		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
-				|| (DegPerspectiveFOV != InVerticalFovDeg)
+				|| (DegPerspectiveFov != InVerticalFovDeg)
 				|| (PerspectiveNear != InNearClip)
 				|| (PerspectiveFar != InFarClip))
 			{
 				ProjectionType = ECameraProjection::Perspective;
-				DegPerspectiveFOV = InVerticalFovDeg;
+				DegPerspectiveFov = InVerticalFovDeg;
 				PerspectiveNear = InNearClip;
 				PerspectiveFar = InFarClip;
 
@@ -105,22 +86,19 @@ namespace LkEngine {
 			}
 		}
 
-		void SetViewportSize(const uint16_t InWidth, const uint16_t InHeight);
-
-		float GetCameraSpeed() const;
-
-	#if 1
-		void SetPosition(const glm::vec3& InPosition)
+		FORCEINLINE void SetPosition(const glm::vec3& InPosition)
 		{
 			Position = InPosition;
 			UpdateCameraView();
 		}
-	#endif
+
+		void SetViewportSize(const uint16_t InWidth, const uint16_t InHeight);
 
 		void MousePan(const glm::vec2& Delta);
 		void MouseRotate(const glm::vec2& Delta);
 		void MouseZoom(const float Delta);
 
+		float GetCameraSpeed() const;
 		std::pair<float, float> GetPanSpeed() const;
 		float GetZoomSpeed() const;
 
@@ -161,15 +139,12 @@ namespace LkEngine {
 		glm::vec3 InitialFocalPoint{};
 		glm::vec3 InitialRotation{};
 
-		int32_t ModifierFlags = 0;
-		bool bEnableCameraDamping = true;
-
 		uint32_t ViewportWidth = 1280;
 		uint32_t ViewportHeight = 720;
 
 		friend class LEditorLayer;
 		friend class LSceneManagerPanel;
-		friend class LSceneSerializer; /* Access to populate members when deserializing a scene. */
+		friend class LSceneSerializer;
 
 		LCLASS(LEditorCamera);
 	};

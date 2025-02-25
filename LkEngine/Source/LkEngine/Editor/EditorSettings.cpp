@@ -101,7 +101,7 @@ namespace LkEngine {
 
 				LK_SERIALIZE_BEGIN_GROUP(Debug);
 				{
-					LK_SERIALIZE_VALUE(DrawOutlinerBorders, Debug::UI::ContentBrowser::bDrawOutlinerBorders);
+					LK_SERIALIZE_VALUE(DrawOutlinerBorders, UI::Debug::ContentBrowser::bDrawOutlinerBorders);
 				}
 				LK_SERIALIZE_END_GROUP();
 			}
@@ -146,7 +146,7 @@ namespace LkEngine {
 
 			if (YAML::Node DebugNode = ContentBrowserNode["Debug"])
 			{
-				LK_DESERIALIZE_PROPERTY(DrawOutlinerBorders, Debug::UI::ContentBrowser::bDrawOutlinerBorders, DebugNode, false);
+				LK_DESERIALIZE_PROPERTY(DrawOutlinerBorders, UI::Debug::ContentBrowser::bDrawOutlinerBorders, DebugNode, false);
 			}
 		}
 		else

@@ -187,7 +187,7 @@ namespace LkEngine {
 		{
 			case ECameraProjection::Perspective:
 			{
-				SetPerspectiveProjectionMatrix(glm::radians(DegPerspectiveFOV), 
+				SetPerspectiveProjectionMatrix(glm::radians(DegPerspectiveFov), 
 											   static_cast<float>(InWidth),
 											   static_cast<float>(InHeight), 
 											   PerspectiveNear, 
@@ -203,11 +203,9 @@ namespace LkEngine {
 										 OrthographicFar);
 				return;
 			}
-
-			default: break;
 		}
 
-		LK_CORE_ASSERT(false, "Invalid projection type");
+		LK_CORE_VERIFY(false);
 	}
 
 	void LEditorCamera::UpdateCameraView()
@@ -224,7 +222,7 @@ namespace LkEngine {
 		const glm::vec3 LookAt = Position + GetForwardDirection();
 		Direction = glm::normalize(LookAt - Position);
 		Distance = glm::distance(Position, FocalPoint);
-		ViewMatrix = glm::lookAt(Position, LookAt, glm::vec3{ 0.0f, YawSign, 0.0f });
+		ViewMatrix = glm::lookAt(Position, LookAt, glm::vec3(0.0f, YawSign, 0.0f));
 
 		YawDelta *= 0.60f;
 		PitchDelta *= 0.60f;
@@ -308,21 +306,21 @@ namespace LkEngine {
 	std::pair<float, float> LEditorCamera::GetPanSpeed() const
 	{
 		/* Maximum: 2.40f */
-		const float x = glm::min(float(ViewportWidth) / 1000.0f, 2.4f);
-		const float xFactor = 0.0366f * (x * x) - 0.1778f * x + 0.3021f;
+		const float x = glm::min(float(ViewportWidth) / 1000.0f, 2.40f);
+		const float FactorX = 0.0366f * (x * x) - 0.1778f * x + 0.3021f;
 
 		/* Maximum: 2.40f */
-		const float y = glm::min(float(ViewportHeight) / 1000.0f, 2.4f);
-		const float yFactor = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
+		const float y = glm::min(float(ViewportHeight) / 1000.0f, 2.40f);
+		const float FactorY = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
 
-		return { xFactor, yFactor };
+		return { FactorX, FactorY };
 	}
 
 	bool LEditorCamera::OnMouseScroll(MouseScrolledEvent& Event)
 	{
 		if (LInput::IsMouseButtonDown(EMouseButton::Right))
 		{
-			NormalSpeed += Event.GetYOffset() * 0.3f * NormalSpeed;
+			NormalSpeed += Event.GetYOffset() * 0.30f * NormalSpeed;
 			NormalSpeed = std::clamp(NormalSpeed, MIN_SPEED, MAX_SPEED);
 		}
 		else

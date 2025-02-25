@@ -1,13 +1,17 @@
 #include "LKpch.h"
 #include "EditorCore.h"
 
+#include "LkEngine/Renderer/UI/UICore.h"
+
 
 namespace LkEngine {
 
-	namespace Debug::UI 
+	namespace UI::Debug 
 	{
 		bool bDisplayWindowSizeOnHover = false;
 		bool bBoundingBoxesOnHover = false;
+		bool bGridBorders = false;
+		int  GridBorders = (int)UI::EBorder::None;
 
 		namespace ContentBrowser 
 		{
