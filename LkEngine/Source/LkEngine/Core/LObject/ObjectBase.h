@@ -18,8 +18,8 @@ namespace LkEngine {
 
 	enum class EInitFlag
 	{
-		NoInit = 0,  /* Do not initialize object. */
-		True,        /* Initialize object. */
+		NoInit = 0,  /* Do not initialize the object. */
+		True,        /* Initialize the object. */
 	};
 
 	/**
@@ -39,7 +39,7 @@ namespace LkEngine {
 	LK_ENUM_CLASS(EObjectFlag);
 
 
-	/// TODO: Implement this
+	/* TODO: Implement this. */
 	template<typename TObject>
 	concept LObjectCore = requires(TObject Object)
 	{
@@ -53,9 +53,9 @@ namespace LkEngine {
 	{
 	public:
 		/** 
-		 * Returns true if this object is of the specified type. 
+		 * Check if the object is the same type as the passed object's.
 		 */
-		template <typename OtherClassType>
+		template<typename OtherClassType>
 		FORCEINLINE bool IsA(OtherClassType OtherObject) const
 		{
 			const LClass* OtherClass = OtherObject;
@@ -70,7 +70,12 @@ namespace LkEngine {
 			return IsChildOf(ThisClass, OtherClass);
 		}
 
-		template <typename ClassType>
+		/**
+		 * Check if the object is a child of another class.
+		 *
+		 *  Nullchecked.
+		 */
+		template<typename ClassType>
 		static FORCEINLINE bool IsChildOf(const ClassType* InObjectClass, const ClassType* InOtherClass)
 		{
 			LK_CORE_ASSERT(InObjectClass);
@@ -81,7 +86,8 @@ namespace LkEngine {
 		/**
 		 * Set the class.
 		 *
-		 *  Run once in the LCLASS declaration for an LClass object.
+		 *  Invoked once in the LCLASS declaration for an LClass object.
+		 *  Throws error otherwise.
 		 */
 		void SetClass(LClass* InClass);
 
@@ -106,19 +112,19 @@ namespace LkEngine {
 		LClass* ClassPrivate = nullptr;
 	};
 
-
-	/* TODO: Clean this up. */
-
 	/** 
 	 * Helper to detect a member function. 
 	 */
-	template <typename, typename = void>
+	template<typename, typename = void>
 	struct HasGetClass : std::false_type {};
 
-	template <typename T>
+	template<typename T>
 	struct HasGetClass<T, std::void_t<decltype(std::declval<T>().GetClass())>> : std::true_type {};
 
-	template <typename T>
+	/**
+	 * Concept: HasLClassMacro
+	 */
+	template<typename T>
 	concept HasLClassMacro = requires 
 	{
 		{ T::StaticClassName() } -> std::convertible_to<std::string_view>;
