@@ -14,17 +14,17 @@
 #	define CORE_API
 #else
 #	if defined(LK_ENGINE_CORE)
-#		define CORE_API  __declspec(dllexport)
+#		define CORE_API __declspec(dllexport)
 #	else
-#		define CORE_API  __declspec(dllimport)
+#		define CORE_API __declspec(dllimport)
 #	endif
 #endif
 
-#define LK_UNUSED(_VAR)         ((void)(_VAR))
-#define LK_ARRAYSIZE(_ARR)      (static_cast<int>((sizeof(_ARR) / sizeof(*(_ARR))))) 
-#define LK_BIT(x)				(1 << x)
-#define LK_STRINGIFY(x)         #x
-#define LK_TEXT(_TEXT)			L##_TEXT /* Wide string. */
+#define LK_UNUSED(Arg)       ((void)(Arg))
+#define LK_ARRAYSIZE(Array)  (static_cast<int>((sizeof(Array) / sizeof(*(Array))))) 
+#define LK_BIT(x)            (1 << x)
+#define LK_STRINGIFY(x)      #x
+#define LK_TEXT(Text)        L##Text /* Wide string. */
 
 /** Function Signature. */
 #if defined(_MSC_VER)
@@ -37,10 +37,22 @@
 #	error "Unsupported compiler, LkEngine supports MSVC, Clang and GCC"
 #endif
 
-/// @TODO: Do Platform implementations in separate headers for Windows/Linux
-#ifdef FORCEINLINE
-#undef FORCEINLINE
+#if defined(STDCALL)
+#	undef STDCALL
 #endif
+
+#if defined(VARARGS)
+#	undef VARARGS
+#endif
+
+#if defined(FORCEINLINE)
+#	undef FORCEINLINE
+#endif
+
+/**
+ * TODO: Platform specific implementations in separate headers
+ *       rather than checking the platform here.
+ */
 
 /** 
  * Platform: Windows
@@ -60,16 +72,6 @@
 #	define VARARGS		__cdecl
 #	define FORCEINLINE	__forceinline
 #	define LK_ITOA(c, buf, size, p)  void() // FIXME
-#endif
-
-/**
- * Assert that does not utilize LLog.
- * Used at places where the use of the regular asserts cause cyclic inclusion.
- */
-#if defined(LK_ENGINE_DEBUG)
-#	define LK_RAW_ASSERT(Condition, ...)  assert(Condition && __VA_ARGS__)
-#else
-#	define LK_RAW_ASSERT(Condition, ...)  
 #endif
 
 #if defined(SPDLOG_USE_STD_FORMAT)
@@ -123,7 +125,7 @@ namespace LkEngine
 		None       = LK_BIT(0),
 		Abstract   = LK_BIT(1),
 	};
-	LK_ENUM_CLASS_FLAGS(EClassFlag);
+	LK_ENUM_CLASS(EClassFlag);
 
 	enum class EClassType : uint64_t
 	{
@@ -133,7 +135,7 @@ namespace LkEngine
 		LClass    = LK_BIT(3),
 		LObject   = LK_BIT(4),
 	};
-	LK_ENUM_CLASS_FLAGS(EClassType);
+	LK_ENUM_CLASS(EClassType);
 
 	enum class ELogFormat : uint8_t
 	{
@@ -177,11 +179,13 @@ namespace LkEngine
 
 }
 
-/* TODO: Should do a required/static_assert on the LClass registration to make sure 
+/**
+ * TODO: Should do a required/static_assert on the LClass registration to make sure 
  *       a class that inherits LObject in fact do implement the LCLASS macro.
  *       Otherwise there is risk of undefined behaviour because the LClass registration
  *       won't take place.
  */
+
 /**
  * LCLASS
  *
@@ -270,11 +274,11 @@ namespace LkEngine
 		} \
 
 
-/// FIXME: LASSET macro is not done/implemented yet.
 /**
  * LASSET
  *
  *  LAsset derives from LObject.
+ *
  *  FIXME: In progress
  */
 #define LASSET(Class) \
@@ -287,6 +291,8 @@ namespace LkEngine
 
 /** 
  * LASSET_REGISTER
+ *
+ *  @LK_MARK_FOR_REMOVAL
  */
 #define LASSET_REGISTER(...) \
 		LClass* ClassObject = const_cast<LClass*>(LClass::Get(typeid(this))); \

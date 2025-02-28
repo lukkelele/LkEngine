@@ -18,7 +18,7 @@ namespace LkEngine {
 
 		All = Debug | Info | Warning | Error
 	};
-	LK_ENUM_CLASS_FLAGS(EConsoleVerbosity);
+	LK_ENUM_CLASS(EConsoleVerbosity);
 
 	/**
 	 * FConsoleMessage

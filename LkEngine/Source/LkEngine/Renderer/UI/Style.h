@@ -15,7 +15,7 @@ namespace LkEngine::UI {
 		AlignHorizontal,
 		COUNT
 	};
-	LK_ENUM_CLASS_FLAGS(EStyle);
+	LK_ENUM_CLASS(EStyle);
 
 
 	class FScopedStyle
@@ -54,7 +54,7 @@ namespace LkEngine::UI {
 		template <typename ColorType, typename... OtherColors>
 		FORCEINLINE FScopedColorStack(const ImGuiCol FirstColorID, 
 									  const ColorType FirstColor, 
-									  OtherColors&& ... OtherColorPairs)
+									  OtherColors&&... OtherColorPairs)
 			: Count((sizeof... (OtherColorPairs) / 2) + 1)
 		{
 			static_assert((sizeof... (OtherColorPairs) & 1u) == 0, "FScopedColorStack expects a list of pairs of color IDs and colors");

@@ -2,7 +2,6 @@
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
-//#include <imgui-node-editor/imgui_node_editor.h>
 
 #include <glm/glm.hpp>
 
@@ -56,7 +55,7 @@ namespace LkEngine
 		UserFunction = LK_BIT(2),
 		AutoSize     = LK_BIT(3),
 	};
-	LK_ENUM_CLASS_FLAGS(EMessageBoxFlag);
+	LK_ENUM_CLASS(EMessageBoxFlag);
 	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EMessageBoxFlag, EMessageBoxFlag::OkButton, EMessageBoxFlag::AutoSize);
 
 }
@@ -89,7 +88,7 @@ namespace LkEngine::UI {
 		Vertical   = LK_BIT(2),
 		All        = LK_BIT(3),
 	};
-	LK_ENUM_CLASS_FLAGS(EBorder);
+	LK_ENUM_CLASS(EBorder);
 	/* FIXME: Need to fix the namespace nesting issue for LK_ENUM_RANGE_FLAGS */
 	//LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EBorder, EBorder::None, EBorder::Horizontal)
 

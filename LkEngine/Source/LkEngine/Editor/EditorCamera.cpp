@@ -316,7 +316,7 @@ namespace LkEngine {
 		return { FactorX, FactorY };
 	}
 
-	bool LEditorCamera::OnMouseScroll(MouseScrolledEvent& Event)
+	bool LEditorCamera::OnMouseScrolled(LMouseScrolledEvent& Event)
 	{
 		if (LInput::IsMouseButtonDown(EMouseButton::Right))
 		{
@@ -332,7 +332,7 @@ namespace LkEngine {
 		return true;
 	}
 
-	bool LEditorCamera::OnKeyPress(LKeyPressedEvent& Event)
+	bool LEditorCamera::OnKeyPressed(LKeyPressedEvent& Event)
 	{
 		const glm::vec2 MousePosition = { LMouse::GetMouseX(), LMouse::GetMouseY() };
 		const glm::vec2 MouseDelta = (MousePosition - InitialMousePosition) * 0.0020f;

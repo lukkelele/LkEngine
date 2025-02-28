@@ -42,7 +42,7 @@ namespace LkEngine {
 		OpenGL,
 		Vulkan
 	};
-	LK_ENUM_CLASS_FLAGS(ERendererAPI);
+	LK_ENUM_CLASS(ERendererAPI);
 	LK_ENUM_RANGE_BY_FIRST_AND_LAST(ERendererAPI, ERendererAPI::None, ERendererAPI::Vulkan);
 
 }

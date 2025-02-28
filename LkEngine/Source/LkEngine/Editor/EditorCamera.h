@@ -23,7 +23,7 @@ namespace LkEngine {
 		Flycam,
 		Arcball
 	};
-	LK_ENUM_CLASS_FLAGS(EEditorCameraMode);
+	LK_ENUM_CLASS(EEditorCameraMode);
 
 	/**
 	 * LEditorCamera
@@ -120,8 +120,8 @@ namespace LkEngine {
 		}
 
 	private:
-		bool OnKeyPress(LKeyPressedEvent& Event);
-		bool OnMouseScroll(MouseScrolledEvent& Event);
+		bool OnKeyPressed(LKeyPressedEvent& Event);
+		bool OnMouseScrolled(LMouseScrolledEvent& Event);
 
 	private:
 		static constexpr float MIN_SPEED = 0.00050f;

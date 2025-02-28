@@ -37,7 +37,6 @@ namespace LkEngine {
 		FORCEINLINE static bool IsSelectorEnabled() { return bSelectorEnabled; }
 
 		static bool SaveCurrentTheme();
-		static bool SaveCurrentThemeAs(const std::string& ThemeName);
 
 		static void OnMouseButtonPressed(const FMouseButtonData& ButtonData);
 

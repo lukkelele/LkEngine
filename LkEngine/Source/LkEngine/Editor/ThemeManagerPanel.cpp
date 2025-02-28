@@ -3,6 +3,8 @@
 
 #include "LkEngine/Core/IO/FileSystem.h"
 
+#include "LkEngine/Serialization/Serializer.h"
+
 
 namespace LkEngine {
 
@@ -404,14 +406,21 @@ namespace LkEngine {
 		}
 		else
 		{
-
 		}
 
-		return true;
-	}
+		const std::string ThemeNameStr(ThemeName.data());
+		YAML::Emitter Out;
+		//Out << YAML::Key << "Theme" << YAML::Value << ThemeNameStr;
+		LK_SERIALIZE_PROPERTY(Theme, ThemeNameStr, Out);
 
-	bool LThemeManagerPanel::SaveCurrentThemeAs(const std::string& ThemeName)
-	{
+		auto& Colors = ImGui::GetStyle().Colors;
+		for (const ImGuiCol_ ImGuiColor : TEnumRange<ImGuiCol_>())
+		{
+			LK_SERIALIZE_PROPERTY_VALUE(Enum::ToString(ImGuiColor), Colors[ImGuiColor], Out);
+		}
+
+		LK_CORE_WARN("Serialized theme: {}\n\n{}", ThemeNameStr, Out.c_str());
+
 		return true;
 	}
 
@@ -419,10 +428,13 @@ namespace LkEngine {
 	{
 		LK_CORE_DEBUG_TAG("ThemeManager", "OnMouseButtonPressed: {}", Enum::ToString(ButtonData.Button));
 
+		/* TODO: Queue mouse event to be executed in the ImGui Begin/End */
 		ImGuiContext& G = *GImGui;
-		LK_CORE_CONSOLE_INFO("Hovered ID: {}", G.HoveredId);
+		//LK_CORE_CONSOLE_INFO("Hovered ID: {}", G.HoveredId);
+		//LK_CORE_CONSOLE_INFO("ActiveId: {}   ActiveIdWindow: {}", G.ActiveId, (G.ActiveIdWindow ? G.ActiveIdWindow->Name : "NULL"));
+		//LK_CORE_CONSOLE_WARN("Current Window: {}", (G.CurrentWindow ? G.CurrentWindow->Name : "NULL"));
 
-		ImGui::DebugLocateItemOnHover(G.HoveredId);
+		//ImGui::DebugLocateItemOnHover(G.ActiveId);
 
 		if (ImGuiWindow* Window = ImGui::FindWindowByID(G.ActiveId); Window != nullptr)
 		{
@@ -439,31 +451,31 @@ namespace LkEngine {
 			ImGui::StyleColorsDark();
 			auto& Colors = ImGui::GetStyle().Colors;
 
-			Colors[ImGuiCol_WindowBg]		= ImVec4(0.10f, 0.105f, 0.110f, 1.0f);
-			Colors[ImGuiCol_Header]			= ImVec4(0.20f, 0.205f,  0.210f, 1.0f);
-			Colors[ImGuiCol_HeaderHovered]	= ImVec4(0.30f, 0.305f,  0.310f, 1.0f);
-			Colors[ImGuiCol_HeaderActive]	= ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
-			Colors[ImGuiCol_Button]			= ImVec4(0.20f, 0.205f, 0.210f, 1.0f);
-			Colors[ImGuiCol_ButtonHovered]	= ImVec4(0.30f, 0.305f, 0.310f, 1.0f);
-			Colors[ImGuiCol_ButtonActive]	= ImVec4(0.15f, 0.150f, 0.151f, 1.0f);
-			Colors[ImGuiCol_FrameBg]		= ImVec4(0.20f, 0.2050f, 0.210f, 1.0f);
-			Colors[ImGuiCol_FrameBgHovered]	= ImVec4(0.30f, 0.3050f, 0.310f, 1.0f);
-			Colors[ImGuiCol_FrameBgActive]	= ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
-			Colors[ImGuiCol_Tab]				= ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
-			Colors[ImGuiCol_TabHovered]			= ImVec4(0.38f, 0.3805f, 0.381f, 1.0f);
-			Colors[ImGuiCol_TabActive]			= ImVec4(0.28f, 0.2805f, 0.281f, 1.0f);
-			Colors[ImGuiCol_TabUnfocused]		= ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
-			Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.20f, 0.2050f, 0.210f, 1.0f);
-			Colors[ImGuiCol_TitleBg]		  = ImVec4(0.150f, 0.1505f, 0.151f, 1.0f);
-			Colors[ImGuiCol_TitleBgActive]	  = ImVec4(0.150f, 0.1505f, 0.151f, 1.0f);
-			Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.150f, 0.1505f, 0.151f, 1.0f);
+			Colors[ImGuiCol_WindowBg]		      = ImVec4(0.10f, 0.105f, 0.110f, 1.0f);
+			Colors[ImGuiCol_Header]			      = ImVec4(0.20f, 0.205f,  0.210f, 1.0f);
+			Colors[ImGuiCol_HeaderHovered]	      = ImVec4(0.30f, 0.305f,  0.310f, 1.0f);
+			Colors[ImGuiCol_HeaderActive]	      = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+			Colors[ImGuiCol_Button]			      = ImVec4(0.20f, 0.205f, 0.210f, 1.0f);
+			Colors[ImGuiCol_ButtonHovered]	      = ImVec4(0.30f, 0.305f, 0.310f, 1.0f);
+			Colors[ImGuiCol_ButtonActive]	      = ImVec4(0.15f, 0.150f, 0.151f, 1.0f);
+			Colors[ImGuiCol_FrameBg]		      = ImVec4(0.20f, 0.2050f, 0.210f, 1.0f);
+			Colors[ImGuiCol_FrameBgHovered]	      = ImVec4(0.30f, 0.3050f, 0.310f, 1.0f);
+			Colors[ImGuiCol_FrameBgActive]	      = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+			Colors[ImGuiCol_Tab]				  = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+			Colors[ImGuiCol_TabHovered]			  = ImVec4(0.38f, 0.3805f, 0.381f, 1.0f);
+			Colors[ImGuiCol_TabActive]			  = ImVec4(0.28f, 0.2805f, 0.281f, 1.0f);
+			Colors[ImGuiCol_TabUnfocused]		  = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+			Colors[ImGuiCol_TabUnfocusedActive]   = ImVec4(0.20f, 0.2050f, 0.210f, 1.0f);
+			Colors[ImGuiCol_TitleBg]		      = ImVec4(0.150f, 0.1505f, 0.151f, 1.0f);
+			Colors[ImGuiCol_TitleBgActive]	      = ImVec4(0.150f, 0.1505f, 0.151f, 1.0f);
+			Colors[ImGuiCol_TitleBgCollapsed]     = ImVec4(0.150f, 0.1505f, 0.151f, 1.0f);
 			Colors[ImGuiCol_ScrollbarBg]		  = ImVec4(0.020f, 0.020f, 0.020f, 0.53f);
 			Colors[ImGuiCol_ScrollbarGrab]		  = ImVec4(0.310f, 0.310f, 0.310f, 1.0f);
 			Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.410f, 0.410f, 0.410f, 1.0f);
 			Colors[ImGuiCol_ScrollbarGrabActive]  = ImVec4(0.510f, 0.510f, 0.510f, 1.0f);
-			Colors[ImGuiCol_CheckMark] = ImVec4(0.94f, 0.94f, 0.94f, 1.0f);
-			Colors[ImGuiCol_SliderGrab]		  = ImVec4(0.51f, 0.51f, 0.51f, 0.70f);
-			Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.66f, 0.66f, 0.66f, 1.0f);
+			Colors[ImGuiCol_CheckMark]            = ImVec4(0.94f, 0.94f, 0.94f, 1.0f);
+			Colors[ImGuiCol_SliderGrab]		      = ImVec4(0.51f, 0.51f, 0.51f, 0.70f);
+			Colors[ImGuiCol_SliderGrabActive]     = ImVec4(0.66f, 0.66f, 0.66f, 1.0f);
 		}
 		else if (Theme == ETheme::Light)
 		{

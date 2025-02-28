@@ -168,27 +168,6 @@ namespace LkEngine {
 		Scene->ViewportWidth = LWindow::Get().GetViewportWidth();
 		Scene->ViewportHeight = LWindow::Get().GetViewportHeight();
 
-	#if 0
-		/* Editor camera. */
-		if (TObjectPtr<LSceneCamera> SceneCamera = Scene->GetMainCamera(); SceneCamera != nullptr)
-		{
-			const YAML::Node& EditorCameraNode = Data["EditorCamera"];
-			if (EditorCameraNode && (SceneCamera->GetType() == ECameraType::Editor))
-			{
-				//LEditorCamera& EditorCamera = LEditorLayer::Get().GetEditorCamera();
-				if (TObjectPtr<LEditorCamera> EditorCamera = SceneCamera.As<LEditorCamera>(); EditorCamera != nullptr)
-				{
-					LK_CORE_DEBUG_TAG("SceneSerializer", "Deserializing editor camera");
-					DeserializeEditorCamera(EditorCameraNode, *EditorCamera);
-				}
-				else
-				{
-					LK_CORE_ERROR_TAG("SceneSerializer", "Failed to cast LSceneCamera to LEditorCamera");
-				}
-			}
-		}
-	#endif
-
 		/* Scene entities. */
 		YAML::Node EntitiesNode = Data["Entities"];
 		if (EntitiesNode)

@@ -4,6 +4,8 @@
 #include "LkEngine/Core/Log/Log.h"
 #include "LkEngine/Core/LObject/Enum.h"
 
+#include "LkEngine/Serialization/YamlSerialization.h"
+
 #include <imgui/imgui.h>
 
 
@@ -84,7 +86,7 @@ namespace LkEngine::Enum
 }
 
 /**
- * Formatter: ImVec2
+ * Log Formatter: ImVec2
  */
 template<>
 struct std::formatter<ImVec2>
@@ -103,7 +105,7 @@ struct std::formatter<ImVec2>
 };
 
 /**
- * Formatter: ImVec4
+ * Log Formatter: ImVec4
  */
 template<>
 struct std::formatter<ImVec4>
@@ -122,7 +124,7 @@ struct std::formatter<ImVec4>
 };
 
 /**
- * Formatter: ImGuiCol_
+ * Log Formatter: ImGuiCol_
  */
 template<>
 struct std::formatter<ImGuiCol_>
@@ -140,3 +142,80 @@ struct std::formatter<ImGuiCol_>
     }
 };
 
+
+namespace YAML
+{
+	/* Yaml Formatter: ImVec2 */
+	template<>
+	struct convert<ImVec2>
+	{
+		static Node encode(const ImVec2& Rhs)
+		{
+			Node YamlNode;
+			YamlNode.push_back(Rhs.x);
+			YamlNode.push_back(Rhs.y);
+			return YamlNode;
+		}
+
+		static bool decode(const Node& YamlNode, ImVec2& Rhs)
+		{
+			if (!YamlNode.IsSequence() || (YamlNode.size() != 2))
+			{
+				return false;
+			}
+
+			Rhs.x = YamlNode[0].as<float>();
+			Rhs.y = YamlNode[1].as<float>();
+			return true;
+		}
+	};
+
+	/* Yaml Formatter: ImVec4 */
+	template<>
+	struct convert<ImVec4>
+	{
+		static Node encode(const ImVec4& Rhs)
+		{
+			Node YamlNode;
+			YamlNode.push_back(Rhs.x);
+			YamlNode.push_back(Rhs.y);
+			YamlNode.push_back(Rhs.z);
+			YamlNode.push_back(Rhs.w);
+			return YamlNode;
+		}
+
+		static bool decode(const Node& YamlNode, ImVec4& Rhs)
+		{
+			if (!YamlNode.IsSequence() || (YamlNode.size() != 4))
+			{
+				return false;
+			}
+
+			Rhs.x = YamlNode[0].as<float>();
+			Rhs.y = YamlNode[1].as<float>();
+			Rhs.z = YamlNode[2].as<float>();
+			Rhs.w = YamlNode[3].as<float>();
+			return true;
+		}
+	};
+
+}
+
+namespace LkEngine 
+{
+	/* Yaml bitwise operator: ImVec2 */
+	inline YAML::Emitter& operator<<(YAML::Emitter& Out, const ImVec2& InVec2)
+	{
+		Out << YAML::Flow;
+		Out << YAML::BeginSeq << InVec2.x << InVec2.y << YAML::EndSeq;
+		return Out;
+	}
+
+	/* Yaml bitwise operator: ImVec4 */
+	inline YAML::Emitter& operator<<(YAML::Emitter& Out, const ImVec4& InVec4)
+	{
+		Out << YAML::Flow;
+		Out << YAML::BeginSeq << InVec4.x << InVec4.y << InVec4.z << InVec4.w << YAML::EndSeq;
+		return Out;
+	}
+}

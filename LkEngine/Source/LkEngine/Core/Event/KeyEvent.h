@@ -7,68 +7,51 @@
 namespace LkEngine {
 
 	/**
-	 * LKeyEvent
-	 * 
-	 *  Base key event.
+	 * LKeyPressedEvent
 	 */
-	class LKeyEvent : public LEvent
-	{
-	protected:
-		LKeyEvent(const EKey InKey) 
-			: Key(InKey) 
-		{
-		}
-
-	public:
-		FORCEINLINE EKey GetKey() const { return Key; }
-
-		FORCEINLINE EEventType GetType() const { return EEventType::Key; }
-		FORCEINLINE const char* GetName() const override { return "Key"; }
-
-	protected:
-		EKey Key = EKey::None;
-	};
-
-
-	class LKeyPressedEvent : public LKeyEvent
+	class LKeyPressedEvent : public LEvent
 	{
 	public:
+		LKeyPressedEvent() = delete;
 		LKeyPressedEvent(const EKey InKey, const int InRepeatCount)
-			: LKeyEvent(InKey)
+			: Key(InKey)
 			, RepeatCount(InRepeatCount) 
 		{
 		}
 
-		FORCEINLINE const char* GetName() const override { return "KeyPressed"; }
-		FORCEINLINE EEventType GetType() const { return EEventType::KeyPressed; }
-
+		FORCEINLINE EKey GetKey() const { return Key; }
 		FORCEINLINE int GetRepeatCount() const { return RepeatCount; }
 
 		FORCEINLINE std::string ToString() const override
 		{
-			return std::format("{}: {} (repeated: {})", GetName(), Enum::ToString(Key), RepeatCount);
+			return std::format("{}: {} (repeat: {})", GetName(), Enum::ToString(Key), RepeatCount);
 		}
 
 	private:
+		EKey Key = EKey::None;
 		int RepeatCount = 0;
+
+		LEVENT(KeyPressed);
 	};
 
-
-	class LKeyReleasedEvent : public LKeyEvent
+	/**
+	 * LKeyReleasedEvent
+	 */
+	class LKeyReleasedEvent : public LEvent
 	{
 	public:
-		LKeyReleasedEvent(const EKey InKey) 
-			: LKeyEvent(InKey) 
-		{
-		}
-
-		FORCEINLINE const char* GetName() const override { return "KeyReleased"; }
-		FORCEINLINE EEventType GetType() const { return EEventType::KeyReleased; }
+		LKeyReleasedEvent() = delete;
+		LKeyReleasedEvent(const EKey InKey) : Key(InKey) {}
 
 		FORCEINLINE std::string ToString() const override
 		{
 			return std::format("{}: {}", GetName(), Enum::ToString(Key));
 		}
+
+	private:
+		EKey Key = EKey::None;
+
+		LEVENT(KeyReleased);
 	};
 
 }

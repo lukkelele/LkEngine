@@ -195,26 +195,25 @@ namespace YAML
 
 namespace LkEngine {
 
-	/* Overloaded bitwise operators. */
-	inline YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
+	inline YAML::Emitter& operator<<(YAML::Emitter& Out, const glm::vec2& InVec2)
 	{
-		out << YAML::Flow;
-		out << YAML::BeginSeq << v.x << v.y << YAML::EndSeq;
-		return out;
+		Out << YAML::Flow;
+		Out << YAML::BeginSeq << InVec2.x << InVec2.y << YAML::EndSeq;
+		return Out;
 	}
 
-	inline YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& v)
+	inline YAML::Emitter& operator<<(YAML::Emitter& Out, const glm::vec3& InVec3)
 	{
-		out << YAML::Flow;
-		out << YAML::BeginSeq << v.x << v.y << v.z << YAML::EndSeq;
-		return out;
+		Out << YAML::Flow;
+		Out << YAML::BeginSeq << InVec3.x << InVec3.y << InVec3.z << YAML::EndSeq;
+		return Out;
 	}
 
-	inline YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec4& v)
+	inline YAML::Emitter& operator<<(YAML::Emitter& Out, const glm::vec4& InVec4)
 	{
-		out << YAML::Flow;
-		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
-		return out;
+		Out << YAML::Flow;
+		Out << YAML::BeginSeq << InVec4.x << InVec4.y << InVec4.z << InVec4.w << YAML::EndSeq;
+		return Out;
 	}
 
 	/* LMesh / LMeshSource / LStaticMesh */

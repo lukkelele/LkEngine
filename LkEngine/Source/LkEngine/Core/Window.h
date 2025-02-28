@@ -62,7 +62,6 @@ namespace LkEngine {
 		bool bMaximized = false;
 		bool bFullscreen = false;
 
-		FEventCallback EventCallback;
 		FOnWindowMaximized OnWindowMaximized;
 	};
 
@@ -201,12 +200,6 @@ namespace LkEngine {
 			ViewportScalers.X = InX;
 			ViewportScalers.Y = InY;
 		}
-
-        /* TODO: Event category and event queuing. */
-        FORCEINLINE void SetEventCallback(const FEventCallback& Callback)
-        {
-            Data.EventCallback = Callback;
-        }
 
         FORCEINLINE FWindowData& GetData() { return Data; }
         FORCEINLINE const FWindowData& GetData() const { return Data; }

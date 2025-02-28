@@ -19,7 +19,7 @@ namespace LkEngine {
 		Rotate = LK_BIT(1),
 		Zoom   = LK_BIT(2),
 	};
-	LK_ENUM_CLASS_FLAGS(ECameraAction);
+	LK_ENUM_CLASS(ECameraAction);
 	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(ECameraAction, ECameraAction::None, ECameraAction::Zoom);
 
 	enum class ECameraModifier : int32_t
@@ -31,7 +31,7 @@ namespace LkEngine {
 		YawLocked       = LK_BIT(4),
 		Damping         = LK_BIT(5),
 	};
-	LK_ENUM_CLASS_FLAGS(ECameraModifier);
+	LK_ENUM_CLASS(ECameraModifier);
 
 	/**
 	 * LCamera

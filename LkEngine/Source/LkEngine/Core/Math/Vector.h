@@ -20,7 +20,7 @@ namespace LkEngine {
 		Z = LK_BIT(2),
 		W = LK_BIT(3)
 	};
-	LK_ENUM_CLASS_FLAGS(EVectorAxis);
+	LK_ENUM_CLASS(EVectorAxis);
 
 	/* Typedefs. */
 	using LVector2 = TVector2<float>;

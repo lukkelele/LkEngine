@@ -4,25 +4,35 @@
  *******************************************************************/
 #pragma once
 
-#include <type_traits>
-#include <typeinfo>
-
 /**  
- * TODO: Need to fix so macros like FORCEINLINE are allowed to be included from anywhere. 
- * Currently causes errors because 'Enum.h' is included in 'CoreMacros.h'.
+ * TODO: 
+ *  1) Need to make it possible to use macros like FORCEINLINE from anywhere. 
+ *     Currently causes errors because 'Enum.h' is included in 'CoreMacros.h'.
+ *  2) Tests for enum ranges, need to verify that flag values don't get stuck
+ *     in infinite loops because of left shifts for unsigned integers. 
+ *  3) Namespace nesting for enum range declarations.
+ *  4) Use __VA_OPT__ to use the enum's COUNT value if no count value 
+ *     is passed in LK_ENUM_RANGE_BY_COUNT.
  */
 #ifndef FORCEINLINE
 #define FORCEINLINE	__forceinline
 #endif
 
+#include <typeinfo>
+#include <type_traits>
+
+#define LK_INTERNAL_ENUM_RANGE_TYPE_CONTIGIOUS 0
+#define LK_INTERNAL_ENUM_RANGE_TYPE_VALUEARRAY 1
+#define LK_INTERNAL_ENUM_RANGE_TYPE_FLAG       2
 
 namespace LkEngine {
 
 	/** 
-	 * @brief Defines all bitwise operators for an enum class so it can 
-	 *        be used as a regular enum.
+	 * LK_ENUM_CLASS
+	 *
+	 *  Adds operators to an enum class so it can be used as a regular enum.
 	 */
-	#define LK_ENUM_CLASS_FLAGS(EnumClass) \
+	#define LK_ENUM_CLASS(EnumClass) \
 		using LK_Enum_##EnumClass = std::underlying_type_t<EnumClass>; \
 		inline           EnumClass& operator|=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) | static_cast<LK_Enum_##EnumClass>(Rhs)); } \
 		inline           EnumClass& operator&=(EnumClass& Lhs, EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) & static_cast<LK_Enum_##EnumClass>(Rhs)); } \
@@ -51,19 +61,6 @@ namespace LkEngine {
 		inline EnumClass& operator&=(EnumClass& Lhs, LK_Enum_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) & Rhs); } \
 		inline EnumClass& operator|=(EnumClass& Lhs, LK_Enum_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) | Rhs); } 
 
-	/**
-	 * @brief Friends all bitwise operators for enum classes so the 
-	 *        definition can be kept private/protected.
-	 */
-	#define LK_FRIEND_ENUM_CLASS_FLAGS(EnumClass) \
-		friend           EnumClass& operator|=(EnumClass& Lhs, EnumClass Rhs); \
-		friend           EnumClass& operator&=(EnumClass& Lhs, EnumClass Rhs); \
-		friend           EnumClass& operator^=(EnumClass& Lhs, EnumClass Rhs); \
-		friend constexpr EnumClass  operator| (EnumClass  Lhs, EnumClass Rhs); \
-		friend constexpr EnumClass  operator& (EnumClass  Lhs, EnumClass Rhs); \
-		friend constexpr EnumClass  operator^ (EnumClass  Lhs, EnumClass Rhs); \
-		friend constexpr bool       operator! (EnumClass  E); \
-		friend constexpr EnumClass  operator~ (EnumClass  E);
 
 	/**
 	 * LK_ENUM_RANGE_BY_FIRST_AND_LAST
@@ -95,14 +92,11 @@ namespace LkEngine {
 
 	/**
 	 * LK_ENUM_RANGE_BY_COUNT
+	 * 
+	 *  Requires the passed EnumType's initial value to be 0.
 	 */
 	#define LK_ENUM_RANGE_BY_COUNT(EnumType, Count) \
-				LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, 0, (std::underlying_type_t<EnumType>)(Count) - 1)
-
-	/**
-	 * TODO: The ENUM_RANGE_FLAGS macros need to be able to 
-	 *       support the enum value 'None' that is equal to -1.
-	 */
+		LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, 0, (std::underlying_type_t<EnumType>)Count - 1)
 
 	/**
 	 * LK_ENUM_RANGE_FLAGS_BY_COUNT
@@ -143,10 +137,6 @@ namespace LkEngine {
             return Flags; \
         } \
     };
-
-	#define LK_INTERNAL_ENUM_RANGE_TYPE_CONTIGIOUS   0
-	#define LK_INTERNAL_ENUM_RANGE_TYPE_VALUEARRAY   1
-	#define LK_INTERNAL_ENUM_RANGE_TYPE_FLAG         2
 
 	namespace Enum::Internal::Range
 	{

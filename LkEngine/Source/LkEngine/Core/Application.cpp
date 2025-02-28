@@ -31,6 +31,7 @@ namespace LkEngine {
 		, MetadataRegistry(LMetadataRegistry::Get())
 		, GarbageCollector(LGarbageCollector::Get())
 		, ThreadManager(LThreadManager::Get())
+		, CoreEventQueue("Core")
 	{
 		LOBJECT_REGISTER(LApplication);
 		Instance = this;
@@ -60,10 +61,7 @@ namespace LkEngine {
 		LK_CORE_VERIFY(NfdInit);
 
 		Window->Initialize();
-		Window->SetEventCallback([this](LEvent& Event)
-		{
-			OnEvent(Event);
-		});
+		//Window->SetEventCallback([this](LEvent& Event) { OnEvent(Event); });
 
 		LInput::Initialize();
 		LSelectionContext::Get(); /* TODO: Instantiate elsewhere */
@@ -166,7 +164,7 @@ namespace LkEngine {
 			bRunning = false;
 		}
 
-		LK_CORE_INFO("Exiting LkEngine");
+		LK_CORE_INFO("Shutting down LkEngine");
 	}
 
 	bool LApplication::ReadConfigurationFile(FApplicationSpecification& InSpecification)
@@ -190,9 +188,8 @@ namespace LkEngine {
 
 	void LApplication::RenderUI()
 	{
-		/* Bind to default framebuffer before any UI rendering takes place. 
-		 * TODO: This should not be done here but rather as an initial render submission.
-		 */
+		/* Bind to default framebuffer before any UI rendering takes place. */
+		/* TODO: This should not be done here but rather as an initial render submission. */
 		LFramebuffer::TargetSwapChain();
 
 		UILayer->BeginFrame();
@@ -212,27 +209,13 @@ namespace LkEngine {
 		for (TObjectPtr<LLayer>& Layer : LayerStack)
 		{
 			Layer->OnEvent(Event);
-			if (Event.bHandled)
+			if (Event.IsHandled())
 			{
-				break;
+				return;
 			}
 		}
 
-		if (Event.bHandled)
-		{
-			return;
-		}
-
-		for (FEventCallback& EventCallback : EventCallbacks)
-		{
-			EventCallback(Event);
-			if (Event.bHandled)
-			{
-				break;
-			}
-		}
-
-		LK_CORE_ERROR("Event '{}' was not handled", Event.GetName());
+		LK_CORE_ERROR_TAG("Application", "Event '{}' was not handled", Event.GetName());
 	}
 
 	void LApplication::ProcessEvents()
@@ -241,13 +224,7 @@ namespace LkEngine {
 		LInput::TransitionPressedButtons();
 		Window->ProcessEvents();
 
-		std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
-		while (EventQueue.size() > 0)
-		{
-			/* Invoke event from the queue and remove it after. */
-			EventQueue.front()();
-			EventQueue.pop();
-		}
+		CoreEventQueue.Process();
 	}
 
 	const char* LApplication::GetPlatformName()

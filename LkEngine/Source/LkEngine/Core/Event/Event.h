@@ -2,23 +2,69 @@
 
 #include "LkEngine/Core/Core.h"
 
-#include <sstream>
-
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
 namespace LkEngine {
 
-	enum class EEventType
+	/**
+	 * LEVENT
+	 * 
+	 *  Implements required event functionality.
+	 */
+	#define LEVENT(EventType, ...) \
+		public: \
+		static EEventType GetStaticType() { return EEventType::EventType; } \
+		virtual EEventType GetType() const override { return GetStaticType(); } \
+		virtual const char* GetName() const override { return #EventType; } \
+
+	/**
+	 * EEventType
+	 * 
+	 *  Type of event.
+	 */
+	enum class EEventType : uint32_t
 	{
-		Null = 0,
-		Key, KeyPressed, KeyReleased,
-		MouseButtonPressed, MouseButtonReleased, MouseButtonDown, MouseMoved, MouseScrolled,
-		WindowFocus, WindowLostFocus, WindowMoved, WindowResize, WindowClose,
-
-		ConstraintAdded, ConstraintRemoved, ConstraintAltered,
-		RigidbodyAdded, RigidbodyRemoved, RigidbodyAltered,
-		Collision, Separation
+		None = 0,
+		WindowFocus, 
+		WindowLostFocus, 
+		WindowMoved, 
+		WindowResize, 
+		WindowClose,
+		KeyPressed, 
+		KeyReleased,
+		MouseButtonPressed, 
+		MouseButtonReleased, 
+		MouseButtonHeld, 
+		MouseMoved, 
+		MouseScrolled,
+		COUNT
 	};
+	LK_ENUM_CLASS(EEventType);
+	LK_ENUM_RANGE_BY_COUNT(EEventType, EEventType::COUNT);
 
+	/**
+	 * EEventCategory
+	 * 
+	 *  Category for different type of events.
+	 */
+	enum class EEventCategory : uint32_t
+	{
+		None = 0,
+		Input,
+		COUNT
+	};
+	LK_ENUM_CLASS(EEventCategory);
+	LK_ENUM_RANGE_BY_COUNT(EEventCategory, EEventCategory::COUNT);
+
+	/**
+	 * LEvent
+	 * 
+	 *  Base event class.
+	 *
+	 *  TODO: Derive from LObject and replace all 
+	 *        std::shared_ptr occurences with TObjectPtr.
+	 */
 	class LEvent
 	{
 	public:
@@ -26,17 +72,29 @@ namespace LkEngine {
 
 		virtual EEventType GetType() const = 0;
 		virtual const char* GetName() const = 0;
-
 		virtual std::string ToString() const { return GetName(); }
+
+		FORCEINLINE bool IsHandled() const { return bHandled; }
 
 	public:
 		bool bHandled = false;
 	};
 
+	inline std::ostream& operator<<(std::ostream& OStream, const LEvent& InEvent)
+	{
+		return OStream << InEvent.ToString();
+	}
+
+	using FEventCallback = std::function<void(LEvent&)>;
+	using FEventHandler = std::function<void(LEvent&)>;
+
+	/**
+	 * LEventDispatcher
+	 */
 	class LEventDispatcher
 	{
-		template<typename T>
-		using TEventFn = std::function<bool(T&)>;
+		template<typename EventType>
+		using EventFn = std::function<bool(EventType&)>;
 	public:
 		LEventDispatcher(LEvent& InEvent) 
 			: EventRef(InEvent) 
@@ -44,11 +102,11 @@ namespace LkEngine {
 		}
 
 		template<typename T>
-		bool Dispatch(TEventFn<T> InFunc)
+		FORCEINLINE bool Dispatch(EventFn<T> InEventFunc)
 		{
 			if (!EventRef.bHandled)
 			{
-				EventRef.bHandled = InFunc(*(T*)&EventRef);
+				EventRef.bHandled = InEventFunc(*(T*)&EventRef);
 				LK_CORE_TRACE_TAG("EventDispatcher", "Executing: '{}'", EventRef.GetName());
 				return true;
 			}
@@ -58,12 +116,5 @@ namespace LkEngine {
 	private:
 		LEvent& EventRef;
 	};
-
-	inline std::ostream& operator<<(std::ostream& OStream, const LEvent& InEvent)
-	{
-		return OStream << InEvent.ToString();
-	}
-
-	using FEventCallback = std::function<void(LEvent&)>;
 
 }

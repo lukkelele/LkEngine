@@ -1,7 +1,6 @@
 /******************************************************************
  * LApplication
  *
- *
  *******************************************************************/
 #pragma once
 
@@ -25,6 +24,7 @@
 #include "LkEngine/Core/Memory/GarbageCollector.h"
 #include "LkEngine/Core/Event/KeyEvent.h"
 #include "LkEngine/Core/Event/MouseEvent.h"
+#include "LkEngine/Core/Event/EventQueue.h"
 #include "LkEngine/Core/Input/Input.h"
 #include "LkEngine/Core/Input/Mouse.h"
 #include "LkEngine/Core/Input/Keyboard.h"
@@ -74,8 +74,6 @@ namespace LkEngine {
 
 		bool ReadConfigurationFile(FApplicationSpecification& InSpecification);
 
-		void OnEvent(LEvent& Event);
-
 		void RenderUI();
 		void ProcessEvents();
 
@@ -87,17 +85,7 @@ namespace LkEngine {
 			LayerStack.PushLayer(InLayer);
 		}
 
-		void AddEventCallback(const FEventCallback& EventCallback)
-		{
-			/* TODO: Some solution to add something like an event category to bundle the callback with. */
-			EventCallbacks.push_back(EventCallback);
-		}
-
-		template<typename EventFunction>
-		void QueueEvent(EventFunction&& Event)
-		{
-			EventQueue.push(Event);
-		}
+		void OnEvent(LEvent& Event);
 
 		template<typename TEvent, bool DispatchImmediately = false, typename... TEventArgs>
 		void DispatchEvent(TEventArgs&&... Args)
@@ -110,8 +98,9 @@ namespace LkEngine {
 			else
 			{
 				/* Queue the event. */
-				std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
-				EventQueue.push([Event]() { LApplication::Get()->OnEvent(*Event); });
+				//std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
+				//EventQueue.push([Event]() { LApplication::Get()->OnEvent(*Event); });
+				CoreEventQueue.Add([Event]() { LApplication::Get()->OnEvent(*Event); });
 			}
 		}
 
@@ -135,6 +124,7 @@ namespace LkEngine {
 		LMetadataRegistry& MetadataRegistry;
 		LGarbageCollector& GarbageCollector;
 		LThreadManager& ThreadManager;
+		LEventQueue CoreEventQueue;
 
 		TObjectPtr<LWindow> Window{};
 		LLayerStack LayerStack;
@@ -143,10 +133,6 @@ namespace LkEngine {
 		uint32_t CurrentFrameIndex = 0;
 
 		TObjectPtr<LUILayer> UILayer{};
-
-		std::mutex EventQueueMutex;
-		std::queue<std::function<void()>> EventQueue{};
-		std::vector<FEventCallback> EventCallbacks{};
 
 		LPerformanceProfiler* PerformanceProfiler{};
 		std::unordered_map<const char*, LPerformanceProfiler::FFrameData> ProfilerPreviousFrameData;

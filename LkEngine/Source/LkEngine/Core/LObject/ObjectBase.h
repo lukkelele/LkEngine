@@ -36,7 +36,7 @@ namespace LkEngine {
 		FinishDestroy,         /* Object destroyed. */
 		Garbage,               /* Object deemed garbage and should get deleted. */
 	};
-	LK_ENUM_CLASS_FLAGS(EObjectFlag);
+	LK_ENUM_CLASS(EObjectFlag);
 
 
 	/// TODO: Implement this

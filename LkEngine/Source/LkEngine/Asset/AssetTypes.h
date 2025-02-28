@@ -15,7 +15,7 @@ namespace LkEngine {
 		Missing  = LK_BIT(1),
 		Invalid  = LK_BIT(2),
 	};
-	LK_ENUM_CLASS_FLAGS(EAssetFlag);
+	LK_ENUM_CLASS(EAssetFlag);
 
 	/**
 	 * EAssetType
