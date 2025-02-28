@@ -22,14 +22,14 @@ namespace LkEngine {
         Function,
         Delegate,
     };
-	LK_ENUM_CLASS_FLAGS(EPinType);
+	LK_ENUM_CLASS(EPinType);
 
     enum class EPinKind
     {
         Input,
         Output,
     };
-	LK_ENUM_CLASS_FLAGS(EPinKind);
+	LK_ENUM_CLASS(EPinKind);
 
     enum class ENodeType
     {
@@ -39,7 +39,7 @@ namespace LkEngine {
         Comment,
         Houdini
     };
-	LK_ENUM_CLASS_FLAGS(ENodeType);
+	LK_ENUM_CLASS(ENodeType);
 
     struct LNode;
 

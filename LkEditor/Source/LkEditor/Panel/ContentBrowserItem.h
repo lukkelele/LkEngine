@@ -41,7 +41,7 @@ namespace LkEngine {
 		StartRenaming		= LK_BIT(14),
 		Activated			= LK_BIT(15),
 	};
-	LK_ENUM_CLASS_FLAGS(EContentBrowserAction);
+	LK_ENUM_CLASS(EContentBrowserAction);
 	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EContentBrowserAction, 
 										  EContentBrowserAction::Refresh, 
 										  EContentBrowserAction::Activated);

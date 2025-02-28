@@ -8,18 +8,19 @@
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
-#include "LkEngine/Core/Thread.h"
-#include "LkEngine/Core/Layer.h"
-#include "LkEngine/Core/Delegate/Delegate.h"
-#include "LkEngine/Core/Viewport.h"
-#include "LkEngine/Core/SelectionContext.h"
-#include "LkEngine/Core/Math/Math.h"
-#include "LkEngine/Core/Math/Ray.h"
+#include <LkEngine/Core/Thread.h>
+#include <LkEngine/Core/Layer.h>
+#include <LkEngine/Core/Delegate/Delegate.h>
+#include <LkEngine/Core/Viewport.h>
+#include <LkEngine/Core/SelectionContext.h>
+#include <LkEngine/Core/Math/Math.h>
+#include <LkEngine/Core/Math/Ray.h>
+#include <LkEngine/Core/Event/EventQueue.h>
 
-#include "LkEngine/Editor/EditorGlobals.h"
-#include "LkEngine/Editor/EditorContext.h"
-#include "LkEngine/Editor/EditorSettings.h"
-#include "LkEngine/Editor/PanelManager.h"
+#include <LkEngine/Editor/EditorGlobals.h>
+#include <LkEngine/Editor/EditorContext.h>
+#include <LkEngine/Editor/EditorSettings.h>
+#include <LkEngine/Editor/PanelManager.h>
 
 #include "LkEngine/Scene/Entity.h"
 #include "LkEngine/Scene/Components.h"
@@ -59,6 +60,8 @@ namespace LkEngine {
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
+
+		virtual void OnEvent(LEvent& Event) override;
 
 	private:
 		void InitializePanelManager();
@@ -161,6 +164,7 @@ namespace LkEngine {
 	private:
 		FEditorSettings& EditorSettings;
 		TObjectPtr<LPanelManager> PanelManager;
+		LEventQueue EventQueue;
 
 		TObjectPtr<LProject> Project{};
 		TObjectPtr<LScene> EditorScene{};
@@ -178,8 +182,6 @@ namespace LkEngine {
 		LEditorCamera EditorCamera;
 
 		int Gizmo = static_cast<int>(ImGuizmo::OPERATION::TRANSLATE);
-
-		FEventCallback EventCallback;
 
 		ESceneState SceneState = ESceneState::Edit;
 

@@ -106,10 +106,12 @@ namespace LkEngine {
 		: LLayer("EditorLayer")
 		, EditorSettings(FEditorSettings::Get())
 		, EditorCamera(60, 800, 600, 0.10f, 2400.0f)
+		, EventQueue("EditorQueue")
 	{
 		LOBJECT_REGISTER();
 		Instance = this;
 
+		EventQueue.AttachHandler([&](LEvent& Event) { OnEvent(Event); });
 		SceneSelectionData.clear();
 
 		Window = &LApplication::Get().GetWindow();
@@ -277,6 +279,16 @@ namespace LkEngine {
 		EditorSettings.Save();
 
 		SceneRenderer->SetScene(nullptr);
+	}
+
+	void LEditorLayer::OnEvent(LEvent& Event)
+	{
+		LK_CORE_WARN_TAG("Editor", "OnEvent: {}", Event.GetName());
+
+		if (Event.GetType() == EEventType::MouseButtonPressed)
+		{
+			LK_CORE_INFO("Current Window: {}", UI::GetWindowName(ImGui::GetID(PanelID::EditorViewport)));
+		}
 	}
 
 	void LEditorLayer::InitializePanelManager()
@@ -482,6 +494,38 @@ namespace LkEngine {
 				ImGui::TreePop();
 			}
 
+			ImGui::Text("%s: %d", EventQueue.GetName(), EventQueue.GetCount());
+			if (ImGui::Button("Execute event queue"))
+			{
+				EventQueue.Process();
+			}
+
+			ImGui::SameLine(0, 4.0f);
+			if (ImGui::Button("Execute filtered event queue: MousePressedEvent"))
+			{
+				EventQueue.ProcessFiltered<LMouseButtonPressedEvent>();
+			}
+			if (ImGui::Button("Execute filtered event queue: MouseReleasedEvent"))
+			{
+				EventQueue.ProcessFiltered<LMouseButtonReleasedEvent>();
+			}
+
+			if (ImGui::Button("Add empty event to queue"))
+			{
+				static uint32_t Added = 0;
+				LK_CORE_FATAL("DISABLED");
+			}
+
+			ImGui::SameLine(0, 4.0f);
+			if (ImGui::Button("Log events in queue"))
+			{
+				int Idx = 0;
+				for (const auto& Event : EventQueue)
+				{
+					LK_CORE_INFO("Event {}: {}", Idx++, Event.Name);
+				}
+			}
+
 		}
 		UI::End(); /* PanelID::Sidebar1 */
 
@@ -595,6 +639,9 @@ namespace LkEngine {
 		{
 			bViewportHovered = ImGui::IsWindowHovered();
 			bViewportFocused = ImGui::IsWindowFocused();
+
+			/* Process editor events. */
+			EventQueue.ProcessFiltered<LMouseButtonPressedEvent>();
 
 			UI_PrepareEditorViewport();
 			UI::Begin(PanelID::EditorViewport, nullptr, UI::EditorViewportFlags);
@@ -1283,16 +1330,8 @@ namespace LkEngine {
 	{
 		LK_CORE_TRACE_TAG("Editor", "MouseButtonPressed: {}", Enum::ToString(ButtonData.Button));
 
-		#if 0
-		//if (LInput::IsKeyDown(EKey::LeftAlt))
-		{
-			if (GImGui->HoveredWindow)
-			{
-				FocusedWindowID = GImGui->HoveredWindow->ID;
-				FocusedWindowName = GImGui->HoveredWindow->Name;
-			}
-		}
-		#endif
+		EventQueue.Add<LMouseButtonPressedEvent>(ButtonData.Button);
+		/* TODO: Queue mouse event to be executed in the ImGui Begin/End */
 
 		if (LThemeManagerPanel::IsSelectorEnabled())
 		{
@@ -1366,6 +1405,8 @@ namespace LkEngine {
 	void LEditorLayer::OnMouseButtonReleased(const FMouseButtonData& ButtonData)
 	{
 		LK_CORE_TRACE_TAG("Editor", "MouseButtonReleased: {}", Enum::ToString(ButtonData.Button));
+
+		EventQueue.Add<LMouseButtonReleasedEvent>(ButtonData.Button);
 	}
 
 	void LEditorLayer::OnMouseScrolled(const EMouseScrollDirection ScrollDir)
@@ -2601,6 +2642,7 @@ namespace LkEngine {
 		if (ImGui::TreeNode("Item States"))
 		{
 			ImGui::Indent();
+			ImGui::Text("Current Window: %s", G.CurrentWindow ? G.CurrentWindow->Name : "NULL");
 			ImGui::Text("ActiveId: 0x%08X/0x%08X (%.2f sec), AllowOverlap: %d, Source: %s", G.ActiveId, G.ActiveIdPreviousFrame, G.ActiveIdTimer, G.ActiveIdAllowOverlap, DebugFunc::GetInputSourceName(G.ActiveIdSource));
 			ImGui::DebugLocateItemOnHover(G.ActiveId);
 			ImGui::Text("ActiveIdWindow: '%s'", G.ActiveIdWindow ? G.ActiveIdWindow->Name : "NULL");
