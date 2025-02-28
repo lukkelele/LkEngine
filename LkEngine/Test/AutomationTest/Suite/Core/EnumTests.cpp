@@ -20,7 +20,7 @@ enum class ETestEnum : uint32_t
 	COUNT  = LK_BIT(5)
 };
 
-LK_ENUM_CLASS_FLAGS(ETestEnum);
+LK_ENUM_CLASS(ETestEnum);
 
 LK_ENUM_RANGE_BY_VALUES(ETestEnum, 
 	ETestEnum::Value1, 
