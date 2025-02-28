@@ -13,9 +13,9 @@
 2. [Setup and Installation](#Setup-and-Installation)
     - [Windows](#Platform-Windows)
 	- [Linux](#Platform-Linux)
-	- [Dependencies](#Engine-Dependencies)
 3. [Engine](#Engine)
 	- [Features](#Engine-Features)
+	- [Dependencies](#Engine-Dependencies)
 4. [Development](#Engine-Development)
 	- [Showcase](#Engine-Development-Showcase)
 
@@ -36,15 +36,16 @@ I have lots of ideas that I want to see if they could work and this project is g
 <br>
 The goal is to have a rendering application with an API that is good for performance and easy to use.<br>
 With features such as:
-- Multiple platform support.
-- Static reflection.
-- Serialization and persistance.
-- Crash and error handling.
-- Development tools (e.g debugging and profiling).
-- Application launcher.
+- Static reflection
+- Support for multiple platforms
+- Crash and error handling
+- Automated testing
+- Serialization and persistance
+- Application launcher
+- Development tools (e.g profiling, renderer debugging)
 
 ## Setup and Installation <a id="Setup-and-Installation"></a>
-For development I've been using Visual Studio Community 22 (64-bit).<br>
+For development I've been using Visual Studio Community 22 (64-bit) on Windows.<br>
 
 ### Windows <a id="Platform-Windows"></a>
 Make sure the following are installed:
@@ -75,22 +76,6 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 ### Linux <a id="Platform-Linux"></a>
 :warning: **TODO**
 
-### Dependencies <a id="Engine-Dependencies"></a>
-- [glfw3](https://github.com/glfw/glfw)
-- [glad](https://github.com/Dav1dde/glad)
-- [spdlog](https://github.com/gabime/spdlog)
-- [ImGui](https://github.com/ocornut/imgui)
-- [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
-- [imgui-node-editor](https://github.com/thedmd/imgui-node-editor)
-- [nativefiledialog-extended](https://github.com/btzy/nativefiledialog-extended)
-- [yaml-cpp](https://github.com/jbeder/yaml-cpp)
-- [glm](https://github.com/g-truc/glm)
-- [entt](https://github.com/skypjack/entt)
-- [Tracy](https://github.com/wolfpld/tracy)
-- [assimp](https://github.com/assimp/assimp)
-- [box2d](https://github.com/erincatto/box2d)
-- [python3](https://www.python.org/downloads/)
-
 ---
 
 # Engine <a id="Engine"></a>
@@ -111,7 +96,7 @@ The documentation for the LkEngine API can be found in [Engine.md](./Docs/Engine
 :white_check_mark: Serialization and Persistence<br>
 
 #### In Progress
-:large_orange_diamond: Editor Development (LkEditor)<br>
+:large_orange_diamond: Editor (LkEditor)<br>
 :large_orange_diamond: Test Framework (LTesto)<br>
 
 #### Todo
@@ -121,6 +106,22 @@ The documentation for the LkEngine API can be found in [Engine.md](./Docs/Engine
 :black_square_button: Vulkan support<br>
 
 <!------------------------------------------------------------>
+
+### Dependencies <a id="Engine-Dependencies"></a>
+- [glfw3](https://github.com/glfw/glfw)
+- [glad](https://github.com/Dav1dde/glad)
+- [spdlog](https://github.com/gabime/spdlog)
+- [ImGui](https://github.com/ocornut/imgui)
+- [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
+- [imgui-node-editor](https://github.com/thedmd/imgui-node-editor)
+- [nativefiledialog-extended](https://github.com/btzy/nativefiledialog-extended)
+- [yaml-cpp](https://github.com/jbeder/yaml-cpp)
+- [glm](https://github.com/g-truc/glm)
+- [entt](https://github.com/skypjack/entt)
+- [Tracy](https://github.com/wolfpld/tracy)
+- [assimp](https://github.com/assimp/assimp)
+- [box2d](https://github.com/erincatto/box2d)
+- [python3](https://www.python.org/downloads/)
 
 ---
 
