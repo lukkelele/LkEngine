@@ -14,7 +14,8 @@
     - [Windows](#Platform-Windows)
 	- [Linux](#Platform-Linux)
 	- [Dependencies](#Engine-Dependencies)
-3. [Engine Features](#Engine-Features)
+3. [Engine](#Engine)
+	- [Features](#Engine-Features)
 4. [Development](#Engine-Development)
 	- [Showcase](#Engine-Development-Showcase)
 
