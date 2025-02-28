@@ -8,10 +8,6 @@
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
 <img height="20" alt="Endpoint Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCore%2FBadge.json&style=plastic&label=Core-Tests">
 
-## Platform Support
-#### :white_check_mark: Windows<br>
-#### :black_square_button: Linux <br>
-
 ## Content
 1. [Project](#Project)
 2. [Setup and Installation](#Setup-and-Installation)
@@ -21,6 +17,11 @@
 3. [Engine Features](#Engine-Features)
 4. [Development](#Engine-Development)
 	- [Showcase](#Engine-Development-Showcase)
+
+---
+
+* [github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/) <br>
+* [github.io.lukkelele/LkEngine/Development](https://github.com/lukkelele/LkEngine/blob/gh-pages/Development.md)
 
 ---
 
@@ -91,27 +92,32 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 
 ---
 
-## Engine Features <a id="Engine-Features"></a>
+# Engine <a id="Engine"></a>
 
-### Available
-:white_check_mark: OpenGL Renderer<br>
-:white_check_mark: Render Submission System<br>
+| **Platform** | **Support** |
+| :-------- | :-------: |
+| Windows  | :white_check_mark: |
+| Linux | :x: |
+
+The documentation for the LkEngine API can be found in [Engine.md](./Docs/Engine.md) in the [documentation](./Docs) folder.
+
+## Features <a id="Engine-Features"></a>
+#### Available
+:white_check_mark: OpenGL Support<br>
 :white_check_mark: Camera System<br>
-:white_check_mark: Asset Manager<br>
+:white_check_mark: Asset Loading<br>
 :white_check_mark: Profiling and Instrumentation<br>
-:white_check_mark: Serialization<br>
+:white_check_mark: Serialization and Persistence<br>
 
-### In Progress
-:black_square_button: Editor Development (LkEditor)<br>
+#### In Progress
+:large_orange_diamond: Editor Development (LkEditor)<br>
+:large_orange_diamond: Test Framework (LTesto)<br>
+
+#### Todo
 :black_square_button: Static Reflection<br>
-:black_square_button: Physics and Raycasting<br>
-
----
-
-### Todo
-:small_blue_diamond: **Vulkan Support.**<br>
-:small_blue_diamond: **Renderer Debugging tools (e.g drawing lines in world space).**<br>
-:small_blue_diamond: **3D Physics and Raycasting.**<br>
+:black_square_button: Physics (2D/3D) <br>
+:black_square_button: Debugging tools (e.g drawing lines in world space)<br>
+:black_square_button: Vulkan support<br>
 
 <!------------------------------------------------------------>
 
