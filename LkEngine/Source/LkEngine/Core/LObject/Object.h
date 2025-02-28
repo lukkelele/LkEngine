@@ -20,18 +20,18 @@
 
 namespace LkEngine {
 
-	class LMetadataRegistry;
-
 	using FObjectHandle = LUUID;
+
+	class LMetadataRegistry;
 
 	template<typename T>
 	class TObjectPtr;
 
-	template<typename FunctionType>
-	class TFunction;
-
 	/**
 	 * LObject
+	 * 
+	 *  The base object class used in LkEngine.
+	 *  Uses TObjectPtr as a smart pointer implementation.
 	 */
 	class LObject : public LObjectBase
 	{
@@ -59,7 +59,7 @@ namespace LkEngine {
 		virtual void Destroy() {};
 
 		/**
-		 * @brief Check if object is initialized.
+		 * Check if object is initialized.
 		 */
 		FORCEINLINE virtual bool IsInitialized() const { return bObjectInitialized; }
 
@@ -177,7 +177,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Check if object is or is a derivation of T.
+		 * Check if the object is or is a derivation of type T.
 		 */
 		template<typename T>
 		bool IsA() const
@@ -187,7 +187,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Check if object is considered an asset.
+		 * Check if object is an asset.
 		 */
 		FORCEINLINE virtual bool IsAsset() const { return false; }
 
@@ -256,6 +256,11 @@ namespace LkEngine {
 		friend struct FInternalLObjectValidator;
 	};
 
+	/**
+	 * FInternalObjectValidator
+	 *
+	 *  Helper for validating a LObject based on the object's flags.
+	 */
 	struct FInternalLObjectValidator
 	{
 		FORCEINLINE static bool CheckObjectValidBasedOnFlags(const LObject* Object)
@@ -275,26 +280,14 @@ namespace LkEngine {
 	}
 
 	template<typename TObject>
-	TObject* GetValid(TObject* Object)
-	{
-		static_assert(std::is_base_of<LObject, Object>::value, "GetValid only works with LObject-derived classes");
-		return (IsValid(Object) ? Object : nullptr);
-	}
-
-	template<typename TObject>
-	const TObject* GetValid(const TObject* Object)
-	{
-		static_assert(std::is_base_of<LObject, Object>::value, "GetValid only works with LObject-derived classes");
-		return (IsValid(Object) ? Object : nullptr);
-	}
-
-	template<typename TObject>
 	inline constexpr bool IsBaseOfObject = std::is_base_of<LObject, std::decay_t<TObject>>::value;
 
 }
 
 
-/** Allow usage of LObject's in maps and sets. */
+/** 
+ * Make LObject a usable type in maps and sets.
+ */
 namespace std 
 {
 	template<>
