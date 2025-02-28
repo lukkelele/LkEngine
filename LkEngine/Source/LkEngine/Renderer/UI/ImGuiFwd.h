@@ -16,7 +16,7 @@ LK_ENUM_RANGE_BY_COUNT(ImGuiCol_, ImGuiCol_COUNT);
 
 namespace LkEngine::Enum
 {
-	static constexpr const char* ToString(const ImGuiCol_ ImGuiColor)
+	static const char* ToString(const ImGuiCol_ ImGuiColor)
 	{
 		switch (ImGuiColor)
 		{
@@ -78,7 +78,7 @@ namespace LkEngine::Enum
 			case ImGuiCol_NavWindowingHighlight:     return "NavWindowingHighlight";
 			case ImGuiCol_NavWindowingDimBg:         return "NavWindowingDimBg";
 			case ImGuiCol_ModalWindowDimBg:          return "ModalWindowDimBg";
-			default:                                 LK_CORE_ASSERT(false, "Unsupported ImGuiCol: {}", ImGuiColor);
+			default:                                 LK_CORE_ASSERT(false, "Unsupported ImGuiCol: {}", std::underlying_type_t<ImGuiCol_>(ImGuiColor));
 		}
 
 		return "";
@@ -120,25 +120,6 @@ struct std::formatter<ImVec4>
     auto format(const ImVec4& Input, FormatContext& Context) const
     {
         return std::format_to(Context.out(), "({:.2f}, {:.2f}, {:.2f}, {:.2f})", Input.x, Input.y, Input.z, Input.z);
-    }
-};
-
-/**
- * Log Formatter: ImGuiCol_
- */
-template<>
-struct std::formatter<ImGuiCol_>
-{
-	template<typename ParseContext>
-    constexpr auto parse(ParseContext& Context)
-    {
-        return Context.begin();
-    }
-	
-	template<typename FormatContext>
-    auto format(const ImGuiCol_& Input, FormatContext& Context) const
-    {
-		return std::format_to(Context.out(), "{}", static_cast<std::underlying_type_t<ImGuiCol_>>(Input));
     }
 };
 
