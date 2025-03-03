@@ -9,64 +9,46 @@
  *  - LK_DECLARE_DELEGATE_RET
  *  - LK_DECLARE_EVENT
  *
- *   TODO:
- *    * Set static names for LMulticastDelegate on declaration.
+ * TODO:
+ *  - Set static names for LMulticastDelegate on declaration.
  *
  *******************************************************************/
 #pragma once
 
+#include "DelegateFwd.h"
+
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/Template/TypeTrait.h"
 
+#include "LkEngine/Core/LObject/ObjectPtr.h"
 
-namespace LkEngine {
 
-	using namespace Core;
-
-	static constexpr std::size_t BUFSIZE_DELEGATE_NAME = 100;
-
-	#define LK_DECLARE_DELEGATE(DelegateName, ...) \
-		using DelegateName = LDelegate<#DelegateName, void __VA_OPT__(,__VA_ARGS__)>
-
-	#define LK_DECLARE_DELEGATE_RET(DelegateName, ReturnValue, ...) \
-		using DelegateName = LDelegate<#DelegateName, ReturnValue __VA_OPT__(,__VA_ARGS__)>
-
-	#define LK_DECLARE_MULTICAST_DELEGATE(DelegateName, ...) \
-		using DelegateName = LMulticastDelegate<__VA_ARGS__>; \
-		using DelegateName ## _DelegateType = LMulticastDelegate<__VA_ARGS__>::TDelegate
-
-	#define LK_DECLARE_EVENT(EventName, TOwner, ...) \
-		class EventName : public LMulticastDelegate<__VA_ARGS__> \
-		{ \
-		private: \
-			friend class TOwner; \
-			using LMulticastDelegate::Broadcast; \
-			using LMulticastDelegate::RemoveAll; \
-			using LMulticastDelegate::Remove; \
-		};
+namespace LkEngine::Core {
 
 	namespace DelegateCore
 	{
+		static constexpr std::size_t BUFSIZE_NAME = 100;
+
 		/**
 		 * Allocation size for the max bound objects on the stack.
 		 * Larger sizes will result in heap allocation instead.
 		 */
-		static constexpr int InlineAllocationSize = 48;
+		static constexpr int INLINE_ALLOCATION_SIZE = 48;
 
-		static void* (*Alloc)(size_t Size) = [](size_t Size) 
+		static void* (*Alloc)(std::size_t Size) = [](std::size_t Size) 
 		{ 
-			return malloc(Size); 
+			return std::malloc(Size); 
 		};
 
 		static void(*Free)(void* InHeapPointer) = [](void* InHeapPointer) 
 		{ 
-			free(InHeapPointer); 
+			std::free(InHeapPointer); 
 		};
 	}
 
 	namespace DelegateMemory
 	{
-		using FAllocateCallback = void* (*)(size_t size);
+		using FAllocateCallback = void*(*)(std::size_t Size);
 		using FFreeCallback = void(*)(void* HeapPointer);
 
 		inline void SetAllocationCallbacks(const FAllocateCallback AllocateCallback, 
@@ -171,7 +153,7 @@ namespace LkEngine {
 	class LRawDelegate<bIsConst, T, TReturnValue(TArgs...), Args2...> : public IDelegate<TReturnValue, TArgs...>
 	{
 	public:
-		using DelegateFunction = typename Core::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::Type;
+		using DelegateFunction = typename Core::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::type;
 
 		LRawDelegate(T* InObjectRef, DelegateFunction InFunction, Args2&&... InPayload)
 			: ObjectRef(InObjectRef)
@@ -280,7 +262,7 @@ namespace LkEngine {
 	class LSharedPtrDelegate<bIsConst, T, TReturnValue(TArgs...), Args2...> : public IDelegate<TReturnValue, TArgs...>
 	{
 	public:
-		using DelegateFunction = typename Core::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::Type;
+		using DelegateFunction = typename Core::MemberFunction<bIsConst, T, TReturnValue, TArgs..., Args2...>::type;
 
 		LSharedPtrDelegate(std::shared_ptr<T> InObjectRef, 
 						   const DelegateFunction InFunction, 
@@ -687,7 +669,7 @@ namespace LkEngine {
 			return static_cast<IDelegateBase*>(Allocator.GetAllocation());
 		}
 
-		LInlineAllocator<DelegateCore::InlineAllocationSize> Allocator;
+		LInlineAllocator<DelegateCore::INLINE_ALLOCATION_SIZE> Allocator;
 	};
 
 
@@ -706,10 +688,10 @@ namespace LkEngine {
 
 	private:
 		template<typename T, typename... Args2>
-		using ConstMemberFunction = typename Core::MemberFunction<true, T, TReturnValue, TArgs..., Args2...>::Type;
+		using ConstMemberFunction = typename Core::MemberFunction<true, T, TReturnValue, TArgs..., Args2...>::type;
 
 		template<typename T, typename... Args2>
-		using NonConstMemberFunction = typename Core::MemberFunction<false, T, TReturnValue, TArgs..., Args2...>::Type;
+		using NonConstMemberFunction = typename Core::MemberFunction<false, T, TReturnValue, TArgs..., Args2...>::type;
 
 		using TDelegateInterface = IDelegate<TReturnValue, TArgs...>;
 
@@ -747,9 +729,11 @@ namespace LkEngine {
 		[[nodiscard]] static LDelegate CreateRaw(T* InObject, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2... Args)
 		{
 			LDelegate Handler;
-			Handler.Bind<LRawDelegate<false, T, TReturnValue(TArgs...), TArgs2...>>(InObject, 
-																					InFunction, 
-																					std::forward<TArgs2>(Args)...);
+			Handler.Bind<LRawDelegate<false, T, TReturnValue(TArgs...), TArgs2...>>(
+				InObject, 
+				InFunction, 
+				std::forward<TArgs2>(Args)...
+			);
 			
 			return Handler;
 		}
@@ -773,27 +757,31 @@ namespace LkEngine {
 		}
 
 		template<typename T, typename... TArgs2>
-		[[nodiscard]] static LDelegate CreatedShared(const std::shared_ptr<T>& ObjectRef, 
+		[[nodiscard]] static LDelegate CreateShared(const std::shared_ptr<T>& ObjectRef, 
 													 NonConstMemberFunction<T, TArgs2...> InFunction, 
 													 TArgs2... Args)
 		{
 			LDelegate Handler;
-			Handler.Bind<LSharedPtrDelegate<false, T, TReturnValue(TArgs...), TArgs2...>>(ObjectRef, 
-																						  InFunction, 
-																						  std::forward<TArgs2>(Args)...);
+			Handler.Bind<LSharedPtrDelegate<false, T, TReturnValue(TArgs...), TArgs2...>>(
+				ObjectRef, 
+				InFunction, 
+				std::forward<TArgs2>(Args)...
+			);
 
 			return Handler;
 		}
 
 		template<typename T, typename... TArgs2>
-		[[nodiscard]] static LDelegate CreatedShared(const std::shared_ptr<T>& ObjectRef, 
+		[[nodiscard]] static LDelegate CreateShared(const std::shared_ptr<T>& ObjectRef, 
 													 ConstMemberFunction<T, TArgs2...> InFunction, 
 													 TArgs2... Args)
 		{
 			LDelegate Handler;
-			Handler.Bind<LSharedPtrDelegate<true, T, TReturnValue(TArgs...), TArgs2...>>(ObjectRef, 
-																						 InFunction, 
-																						 std::forward<TArgs2>(Args)...);
+			Handler.Bind<LSharedPtrDelegate<true, T, TReturnValue(TArgs...), TArgs2...>>(
+				ObjectRef, 
+				InFunction, 
+				std::forward<TArgs2>(Args)...
+			);
 
 			return Handler;
 		}
@@ -803,8 +791,10 @@ namespace LkEngine {
 		{
 			using LambdaType = std::decay_t<TLambda>;
 			LDelegate Handler;
-			Handler.Bind<LLambdaDelegate<LambdaType, TReturnValue(TArgs...), TArgs2...>>(std::forward<LambdaType>(InLambda), 
-																						 std::forward<TArgs2>(Args)...);
+			Handler.Bind<LLambdaDelegate<LambdaType, TReturnValue(TArgs...), TArgs2...>>(
+				std::forward<LambdaType>(InLambda), 
+				std::forward<TArgs2>(Args)...
+			);
 
 			return Handler;
 		}
@@ -838,13 +828,13 @@ namespace LkEngine {
 		void BindShared(std::shared_ptr<T> ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
 		{
 			static_assert(!std::is_const_v<T>, "Attempted to bind a non-const member function on a const object reference");
-			*this = CreatedShared<T, Args2... >(ObjectRef, InFunction, std::forward<Args2>(args)...);
+			*this = CreateShared<T, Args2... >(ObjectRef, InFunction, std::forward<Args2>(args)...);
 		}
 
 		template<typename T, typename... Args2>
 		void BindShared(std::shared_ptr<T> ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
 		{
-			*this = CreatedShared<T, Args2...>(ObjectRef, InFunction, std::forward<Args2>(args)...);
+			*this = CreateShared<T, Args2...>(ObjectRef, InFunction, std::forward<Args2>(args)...);
 		}
 
 		template<typename T, typename... TBindArgs>
@@ -877,10 +867,10 @@ namespace LkEngine {
 	{
 	private:
 		template<typename T, typename... TArgs2>
-		using ConstMemberFunction = typename Core::MemberFunction<true, T, void, TArgs..., TArgs2...>::Type;
+		using ConstMemberFunction = typename Core::MemberFunction<true, T, void, TArgs..., TArgs2...>::type;
 
 		template<typename T, typename... TArgs2>
-		using NonConstMemberFunction = typename Core::MemberFunction<false, T, void, TArgs..., TArgs2...>::Type;
+		using NonConstMemberFunction = typename Core::MemberFunction<false, T, void, TArgs..., TArgs2...>::type;
 
 	public:
 		using TDelegate = LDelegate<"MulticastComponent", void, TArgs...>;
@@ -1025,40 +1015,29 @@ namespace LkEngine {
 		template<typename T, typename... TArgs2>
 		FDelegateHandle Add(std::shared_ptr<T> ObjectRef, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			return AddHandler(TDelegate::CreatedShared(ObjectRef, InFunction, std::forward<TArgs2>(Args)...));
+			return AddHandler(TDelegate::CreateShared(ObjectRef, InFunction, std::forward<TArgs2>(Args)...));
 		}
 
 		/** Shared Pointer, const function. */
 		template<typename T, typename... TArgs2>
 		FDelegateHandle Add(std::shared_ptr<T> ObjectRef, ConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			return AddHandler(TDelegate::CreatedShared(ObjectRef, InFunction, std::forward<TArgs2>(Args)...));
+			return AddHandler(TDelegate::CreateShared(ObjectRef, InFunction, std::forward<TArgs2>(Args)...));
 		}
 
-		/**
-		/* -- EXPERIMENTAL --
-		 *
-		 * Not enabled for now because of cyclic inclusion (LObject.h includes this file).
-		 * Should be able to implictly convert the TObjectPtr to a raw pointer (using Get)
-		 * and skip the need to use LObject in this file entirely.
-		 */
-	#if 0
 		/** TObjectPtr, non-const function. */
 		template<typename T, typename... TArgs2>
 		FDelegateHandle Add(TObjectPtr<T> ObjectRef, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			static_assert(std::is_base_of_v<T, LObject>, "LMulticastDelegate<T>::Add error (non-const), type T is not derived from LObject");
-			return AddHandler(TDelegate::CreatedShared(ObjectRef.Get(), InFunction, std::forward<TArgs2>(Args)...));
+			return AddHandler(TDelegate::CreateRaw(ObjectRef.Get(), InFunction, std::forward<TArgs2>(Args)...));
 		}
 
 		/** TObjectPtr, const function. */
 		template<typename T, typename... TArgs2>
 		FDelegateHandle Add(TObjectPtr<T> ObjectRef, ConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
-			static_assert(std::is_base_of_v<T, LObject>, "LMulticastDelegate<T>::Add error (const), type T is not derived from LObject");
-			return AddHandler(TDelegate::CreatedShared(ObjectRef.Get(), InFunction, std::forward<TArgs2>(Args)...));
+			return AddHandler(TDelegate::CreateRaw(ObjectRef.Get(), InFunction, std::forward<TArgs2>(Args)...));
 		}
-	#endif
 
 		/** Static Function. */
 		template<typename... TArgs2>

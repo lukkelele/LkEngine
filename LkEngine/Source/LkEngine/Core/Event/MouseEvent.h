@@ -24,7 +24,7 @@ namespace LkEngine {
 	private:
 		EMouseButton Button = EMouseButton::None;
 
-		LEVENT(MouseButtonPressed);
+		LEVENT(LMouseButtonPressedEvent, MouseButtonPressed);
 	};
 
 	class LMouseButtonReleasedEvent : public LEvent
@@ -43,7 +43,7 @@ namespace LkEngine {
 	private:
 		EMouseButton Button = EMouseButton::None;
 
-		LEVENT(MouseButtonReleased);
+		LEVENT(LMouseButtonReleasedEvent, MouseButtonReleased);
 	};
 
 	class LMouseMovedEvent : public LEvent
@@ -68,7 +68,7 @@ namespace LkEngine {
 		uint16_t PosX = 0.0f;
 		uint16_t PosY = 0.0f;
 
-		LEVENT(MouseMoved);
+		LEVENT(LMouseMovedEvent, MouseMoved);
 	};
 
 	class LMouseScrolledEvent : public LEvent
@@ -93,7 +93,7 @@ namespace LkEngine {
 		float OffsetX = 0.0f;
 		float OffsetY = 0.0f;
 
-		LEVENT(MouseScrolled);
+		LEVENT(LMouseScrolledEvent, MouseScrolled);
 	};
 
 }

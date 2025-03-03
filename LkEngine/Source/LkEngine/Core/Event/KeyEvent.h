@@ -31,7 +31,7 @@ namespace LkEngine {
 		EKey Key = EKey::None;
 		int RepeatCount = 0;
 
-		LEVENT(KeyPressed);
+		LEVENT(LKeyPressedEvent, KeyPressed);
 	};
 
 	/**
@@ -51,7 +51,7 @@ namespace LkEngine {
 	private:
 		EKey Key = EKey::None;
 
-		LEVENT(KeyReleased);
+		LEVENT(LKeyReleasedEvent, KeyReleased);
 	};
 
 }

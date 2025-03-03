@@ -128,60 +128,47 @@ namespace LkEngine {
 		 *  Handles events up to the passed threshold or until empty 
 		 *  if the threshold is set to 0.
 		 */
-		template<typename... EventFilter>
+		template<typename FirstFilter, typename... RemainingFilters>
 		FORCEINLINE void ProcessFiltered(const uint16_t MaxThreshold = 0)
 		{
-			std::scoped_lock<std::mutex> ScopedLock(Mutex);
-			constexpr int FilterCount = (sizeof...(EventFilter));
-			static_assert(FilterCount > 0, "At least 1 event type is required");
+			std::unique_lock<std::mutex> ScopedLock(Mutex);
+			static_assert(!std::is_enum_v<FirstFilter>, "Enum implementation not supported yet");
 
-			/* Filter for one single event type. */
-			if constexpr (FilterCount == 1)
+			auto IsEntryCorrectType = [](const EventElement& Entry) -> bool
 			{
-				using TupleElementType = std::tuple_element_t<0, std::tuple<EventFilter...>>;
-				constexpr bool IsArgEnum = std::is_enum_v<TupleElementType>;
+				return (Entry.TypeHash == typeid(FirstFilter).hash_code());
+			};
 
-				auto IsEntryCorrectType = [](const EventElement& Entry) -> bool
-				{
-					if constexpr (IsArgEnum)
-					{
-						LK_CORE_ASSERT(false, "Enum implementation not supported yet");
-						return false;
-					}
-					else
-					{
-						return (Entry.TypeHash == typeid(TupleElementType).hash_code());
-					}
-				};
+			EventContainer FilteredQueue;
+			std::ranges::move(
+				EventQueue | std::views::filter(IsEntryCorrectType), 
+				std::back_inserter(FilteredQueue)
+			);
+			if (FilteredQueue.empty())
+			{
+				return;
+			}
 
-				EventContainer FilteredQueue;
-				std::ranges::move(
-					EventQueue | std::views::filter(IsEntryCorrectType), 
-					std::back_inserter(FilteredQueue)
-				);
-				if (FilteredQueue.empty())
+			const std::size_t MovedEvents = std::erase_if(EventQueue, IsEntryCorrectType);
+			if (MovedEvents > 0)
+			{
+				const std::size_t EventsToProcess = (MaxThreshold == 0) ? FilteredQueue.size() : MaxThreshold;
+				for (int Idx = 0; Idx < EventsToProcess; Idx++)
 				{
-					return;
-				}
-
-				const std::size_t MovedEvents = std::erase_if(EventQueue, IsEntryCorrectType);
-				if (MovedEvents > 0)
-				{
-					const std::size_t EventsToProcess = (MaxThreshold == 0) ? FilteredQueue.size() : MaxThreshold;
-					for (int Idx = 0; Idx < EventsToProcess; Idx++)
-					{
-						auto Iter = FilteredQueue.begin();
-						LK_CORE_ASSERT(Iter->Name != nullptr, "Event indexed {} is invalid", Idx);
-						LK_CORE_CONSOLE_DEBUG("[{}] Executing{}: {}", QueueName, Iter->Idx, (Iter->Name ? Iter->Name : "NULL"));
-						Iter->Event();
-						FilteredQueue.erase(Iter);
-					}
+					auto Iter = FilteredQueue.begin();
+					LK_CORE_ASSERT(Iter->Name != nullptr, "Event indexed {} is invalid in queue {}", Idx, (QueueName ? QueueName : "NULL"));
+				#if defined(LK_ENGINE_EVENTQUEUE_DEBUG)
+					LK_CORE_CONSOLE_DEBUG("[{}] Executing {}: {}", QueueName, Iter->Idx, (Iter->Name ? Iter->Name : "NULL"));
+				#endif
+					Iter->Event();
+					FilteredQueue.erase(Iter);
 				}
 			}
-			else
+
+			if constexpr (sizeof...(RemainingFilters) > 0)
 			{
-				LK_MARK_FUNC_NOT_IMPLEMENTED();
-				/* TODO: Invoke recursively. */
+				ScopedLock.unlock();
+				ProcessFiltered<RemainingFilters...>(MaxThreshold);
 			}
 		}
 
@@ -196,18 +183,21 @@ namespace LkEngine {
 		{
 			std::scoped_lock<std::mutex> ScopedLock(Mutex);
 			std::shared_ptr<EventType> Event = std::make_shared<EventType>(std::forward<EventArgs>(Args)...);
+		#if defined(LK_ENGINE_EVENTQUEUE_DEBUG)
+			LK_CORE_DEBUG_TAG(std::format("{}", QueueName), "Queuing: {}", Event->GetName());
+		#endif
 			EventQueue.emplace_back(Event->GetName(), Event->GetType(), typeid(*Event), EventQueue.size(), [&, Event]()
 			{ 
 				LK_CORE_ASSERT(Handler, "No event handler registered");
 				if (Handler)
 				{
-					LK_CORE_TRACE_TAG("EventQueue", "Executing: {}", Event->ToString());
+					LK_CORE_TRACE_TAG("EventQueue", "Handling: {}", Event->ToString());
 					/* The handler sets the event result in LEvent::bHandled. */
 					Handler(*Event);
 
 					if (!Event->IsHandled())
 					{
-						LK_CORE_ERROR("{}: Failed", Event->GetName());
+						LK_CORE_ERROR_TAG(std::format("{}", QueueName), "{}: Failed", Event->GetName());
 					}
 				}
 			});

@@ -8,17 +8,6 @@
 namespace LkEngine {
 
 	/**
-	 * LEVENT
-	 * 
-	 *  Implements required event functionality.
-	 */
-	#define LEVENT(EventType, ...) \
-		public: \
-		static EEventType GetStaticType() { return EEventType::EventType; } \
-		virtual EEventType GetType() const override { return GetStaticType(); } \
-		virtual const char* GetName() const override { return #EventType; } \
-
-	/**
 	 * EEventType
 	 * 
 	 *  Type of event.
@@ -56,6 +45,19 @@ namespace LkEngine {
 	};
 	LK_ENUM_CLASS(EEventCategory);
 	LK_ENUM_RANGE_BY_COUNT(EEventCategory, EEventCategory::COUNT);
+
+
+	/**
+	 * LEVENT
+	 * 
+	 *  Implements required event functionality.
+	 */
+	#define LEVENT(EventName, EventType, ...) \
+		public: \
+		using StaticEventClass = EventName; \
+		static ::LkEngine::EEventType GetStaticType() { return EEventType::EventType; } \
+		virtual ::LkEngine::EEventType GetType() const override { return GetStaticType(); } \
+		virtual const char* GetName() const override { return #EventType; } \
 
 	/**
 	 * LEvent
