@@ -19,6 +19,8 @@ namespace LkEngine {
 		uint16_t ContentBrowserThumbnailSize = 128;
 		bool bContentBrowserShowAssetTypes = false;
 
+		std::string Theme{};
+
 		static FEditorSettings& Get();
 
 		void Save();

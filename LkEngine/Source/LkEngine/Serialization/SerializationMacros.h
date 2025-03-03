@@ -87,6 +87,40 @@ namespace LkEngine
 		Destination = DefaultValue;                                            \
 	}
 
+/**
+ * LK_DESERIALIZE_PROPERTY_VALUE
+ * 
+ *  Deserialize a property using the property value from a YAML node.
+ *  The property value should NOT be passed with quotes.
+ */
+#define LK_DESERIALIZE_PROPERTY_VALUE(PropertyValue, Destination, Node, DefaultValue) \
+	if (Node.IsMap())                                                                 \
+	{                                                                                 \
+		if (auto FoundNode = Node[PropertyValue])                                     \
+		{                                                                             \
+			try                                                                       \
+			{                                                                         \
+				Destination = FoundNode.as<decltype(::LkEngine::Serialization::Internal::ToStringIfNeeded(DefaultValue))>(); \
+			}                                                                         \
+			catch (const std::exception& Exception)                                   \
+			{                                                                         \
+				LK_CORE_FATAL("LK_DESERIALIZE_PROPERTY_VALUE: {}", Exception.what()); \
+				Destination = DefaultValue;                                           \
+			}                                                                         \
+		}                                                                             \
+		else                                                                          \
+		{                                                                             \
+			LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY_VALUE", "Failed to find property: '{}'", PropertyValue); \
+			Destination = DefaultValue;                                               \
+		}                                                                             \
+	}                                                                                 \
+	else                                                                              \
+	{                                                                                 \
+		LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY_VALUE", "Root node used with property '{}' is not a YAML::Map", PropertyValue); \
+		Destination = DefaultValue;                                                   \
+	}
+
+
 #define LK_SERIALIZE_BEGIN_GROUP(Name)    Out << YAML::Key << #Name << YAML::Value << YAML::BeginMap;
 #define LK_SERIALIZE_END_GROUP()          Out << YAML::EndMap;
 #define LK_SERIALIZE_VALUE(Name, InValue) Out << YAML::Key << #Name << YAML::Value << InValue;

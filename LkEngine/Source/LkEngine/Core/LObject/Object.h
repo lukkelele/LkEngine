@@ -13,7 +13,6 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/LObject/Class.h"
 #include "LkEngine/Core/LObject/ObjectBase.h"
-#include "LkEngine/Core/Delegate/Delegate.h"
 
 #include "LkEngine/Core/MetadataRegistry.h"
 

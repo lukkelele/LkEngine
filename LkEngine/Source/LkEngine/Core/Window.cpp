@@ -107,7 +107,6 @@ namespace LkEngine {
 				case GLFW_PRESS:
 				{
 					const FKeyData& KeyData = LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Pressed);
-					//LK_CORE_DEBUG_TAG("Window", "Key Pressed: {}", Enum::ToString((EKey)Key));
 					LKeyboard::OnKeyPressed.Broadcast(KeyData);
 					break;
 				}
@@ -115,7 +114,6 @@ namespace LkEngine {
 				case GLFW_RELEASE:
 				{
 					const FKeyData& KeyData = LInput::UpdateKeyState(static_cast<EKey>(Key), EKeyState::Released);
-					//LK_CORE_DEBUG_TAG("Window", "Key Released: {}", Enum::ToString((EKey)Key));
 					LKeyboard::OnKeyReleased.Broadcast(KeyData);
 					break;
 				}

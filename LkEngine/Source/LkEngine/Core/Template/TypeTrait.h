@@ -109,22 +109,25 @@ namespace LkEngine {
 		template<typename TBase, typename T>
 		inline constexpr bool IsBaseOf_v = IsBaseOf<TBase, T>::value;
 		
-		/**
-		 * MemberFunction
-		 */
-		template<bool bIsConst, typename TObject, typename TReturnValue, typename ...Args>
+		template<bool bIsConst, typename TObject, typename TReturnValue, typename... TArgs>
 		struct MemberFunction;
 
+		/**
+		 * Const member function.
+		 */
 		template<typename TObject, typename TReturnValue, typename... TArgs>
 		struct MemberFunction<true, TObject, TReturnValue, TArgs...>
 		{
-			using Type = TReturnValue(TObject::*)(TArgs...) const;
+			using type = TReturnValue(TObject::*)(TArgs...) const;
 		};
 
+		/**
+		 * Member function.
+		 */
 		template<typename TObject, typename TReturnValue, typename... TArgs>
 		struct MemberFunction<false, TObject, TReturnValue, TArgs...>
 		{
-			using Type = TReturnValue(TObject::*)(TArgs...);
+			using type = TReturnValue(TObject::*)(TArgs...);
 		};
 
 		template<typename T>
@@ -147,13 +150,12 @@ namespace LkEngine {
 		{
 			std::vector<FMemberData> Members;
 
-			/** */
-			FORCEINLINE void AddMember(std::string_view InName, std::string_view InType)
+			void AddMember(std::string_view InName, std::string_view InType)
 			{
 				Members.push_back({ InName, InType });
 			}
 
-			FORCEINLINE const std::vector<FMemberData>& GetMembers() const
+			const std::vector<FMemberData>& GetMembers() const
 			{
 				return Members;
 			}

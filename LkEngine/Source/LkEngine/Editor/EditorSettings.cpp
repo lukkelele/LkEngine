@@ -39,7 +39,8 @@ namespace LkEngine {
 	void FEditorSettings::Load()
 	{
 		const fs::path EditorConfig = LFileSystem::GetEditorConfig();
-		LK_CORE_TRACE_TAG("EditorSettings", "Loading: {}", EditorConfig.string());
+		LK_CORE_DEBUG_TAG("EditorSettings", "Loading: {}", 
+						  LFileSystem::ConvertToUnixPath(fs::relative(EditorConfig.string(), LFileSystem::GetEngineDir())));
 		if (!LFileSystem::Exists(EditorConfig))
 		{
 			bNewEditorConfigFile = true;
@@ -92,6 +93,7 @@ namespace LkEngine {
 				LK_SERIALIZE_VALUE(TranslationSnapValue, Settings.TranslationSnapValue);
 				LK_SERIALIZE_VALUE(RotationSnapValue, Settings.RotationSnapValue);
 				LK_SERIALIZE_VALUE(ScaleSnapValue, Settings.ScaleSnapValue);
+				LK_SERIALIZE_VALUE(Theme, Settings.Theme);
 			}
 			LK_SERIALIZE_END_GROUP();
 
@@ -133,6 +135,7 @@ namespace LkEngine {
 			LK_DESERIALIZE_PROPERTY(TranslationSnapValue, Settings.TranslationSnapValue, EditorNode, 0.50f);
 			LK_DESERIALIZE_PROPERTY(RotationSnapValue, Settings.RotationSnapValue, EditorNode, 45.0f);
 			LK_DESERIALIZE_PROPERTY(ScaleSnapValue, Settings.ScaleSnapValue, EditorNode, 0.50f);
+			LK_DESERIALIZE_PROPERTY(Theme, Settings.Theme, EditorNode, "");
 		}
 		else
 		{

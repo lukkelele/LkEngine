@@ -8,6 +8,8 @@
 
 namespace LkEngine {
 
+	inline static LThemeManagerPanel* Instance{};
+
 	static constexpr std::array<UI::TPropertyMapping<uint32_t>, 7> ColorReferences = {
 		std::pair("White",     RGBA32::White),
 		std::pair("Black",     RGBA32::Black),
@@ -20,9 +22,17 @@ namespace LkEngine {
 
 	LThemeManagerPanel::LThemeManagerPanel()
 	{
+		LK_CORE_VERIFY(Instance == nullptr);
+		Instance = this;
 		LPANEL_REGISTER();
 
 		std::memset(ThemeName.data(), 0, ThemeName.max_size());
+
+		ThemesDirectory = LFileSystem::GetResourcesDir() / "Themes";
+		if (!LFileSystem::Exists(ThemesDirectory))
+		{
+			LFileSystem::CreateDirectory(ThemesDirectory);
+		}
 	}
 
 	void LThemeManagerPanel::RenderUI(bool& IsOpen)
@@ -54,6 +64,8 @@ namespace LkEngine {
 
 		ImGui::SetNextItemWidth(280.0f);
 		ImGui::InputTextWithHint("##ThemeManager-ThemeName", "Theme Name", ThemeName.data(), ThemeName.size());
+
+		ImGui::Text("Current Theme: %s", Enum::ToString(CurrentTheme));
 
 		/**
 		 * Themes array for the dropdown. 
@@ -382,15 +394,18 @@ namespace LkEngine {
 	bool LThemeManagerPanel::SaveCurrentTheme()
 	{
 		LK_CORE_ASSERT(CurrentTheme != ETheme::COUNT);
+		std::filesystem::path ThemePath;
+
+		/* FIXME: Finish this. */
 		//if (CurrentTheme == ETheme::Custom)
 		if (true)
 		{
-			LK_CORE_DEBUG("std::strlen(ThemeName.data()) == 0: {}", std::strlen(ThemeName.data()) == 0 ? "True" : "False");
 			const std::size_t ThemeNameLen = std::strlen(ThemeName.data());
 			if (ThemeNameLen <= 0)
 			{
+				/* Check if the file exists. */
 				std::vector<std::filesystem::path> SimilarFiles;
-				if (LFileSystem::FindSimilarFiles("Custom", LFileSystem::GetWorkingDir(), SimilarFiles))
+				if (LFileSystem::FindSimilarFiles("Custom", ThemesDirectory, SimilarFiles))
 				{
 					LK_CORE_DEBUG_TAG("ThemeManager", "Found {} files in directory: '{}'", SimilarFiles.size(), LFileSystem::GetWorkingDir());
 					std::snprintf(ThemeName.data(), ThemeName.max_size(), "Custom-%lld", SimilarFiles.size());;
@@ -401,45 +416,101 @@ namespace LkEngine {
 					std::snprintf(ThemeName.data(), ThemeName.max_size(), "Custom-1");
 				}
 			}
+			else
+			{
+				if (LFileSystem::Exists(ThemePath))
+				{
+				}
+			}
 
-			LK_CORE_INFO_TAG("ThemeManager", "Saving current theme: {}", ThemeName.data());
+			LK_CORE_ASSERT(!ThemeName.empty(), "Theme name is empty");
+			ThemePath = ThemesDirectory / std::format("{}.{}", ThemeName.data(), THEME_FILE_EXTENSION);
+			LK_CORE_INFO_TAG("ThemeManager", "Saving current theme: {} ({})", ThemeName.data(), ThemePath);
 		}
 		else
 		{
 		}
 
+		if (ThemePath.empty())
+		{
+			LK_CORE_ERROR_TAG("ThemeManager", "Theme path is empty, cannot save current theme");
+			return false;
+		}
+
 		const std::string ThemeNameStr(ThemeName.data());
 		YAML::Emitter Out;
-		//Out << YAML::Key << "Theme" << YAML::Value << ThemeNameStr;
+		Out << YAML::BeginMap;
 		LK_SERIALIZE_PROPERTY(Theme, ThemeNameStr, Out);
 
+		Out << YAML::Key << "Colors" << YAML::BeginMap << YAML::Value;
 		auto& Colors = ImGui::GetStyle().Colors;
 		for (const ImGuiCol_ ImGuiColor : TEnumRange<ImGuiCol_>())
 		{
 			LK_SERIALIZE_PROPERTY_VALUE(Enum::ToString(ImGuiColor), Colors[ImGuiColor], Out);
 		}
 
-		LK_CORE_WARN("Serialized theme: {}\n\n{}", ThemeNameStr, Out.c_str());
+		Out << YAML::EndMap;
+		Out << YAML::EndMap;
+
+		std::ofstream FileOut(ThemePath);
+		FileOut << Out.c_str();
+
+		return true;
+	}
+
+	bool LThemeManagerPanel::LoadSavedTheme(std::string_view ThemeName)
+	{
+		if (ThemeName.empty())
+		{
+			LK_CORE_ERROR_TAG("ThemeManager", "Cannot load theme, passed name is empty");
+			return false;
+		}
+
+		for (const ETheme Theme : TEnumRange<ETheme>())
+		{
+			if (Theme == ETheme::Custom)
+			{
+				continue;
+			}
+
+			if (ThemeName == Enum::ToString(Theme))
+			{
+				LK_CORE_INFO_TAG("ThemeManager", "The theme '{}' is a default theme, loading it", Enum::ToString(Theme));
+				SetTheme(Theme);
+				return true;
+			}
+		}
+
+		std::string ThemeNameStr(ThemeName);
+		if (ThemeNameStr.find(THEME_FILE_EXTENSION) == std::string::npos)
+		{
+			ThemeNameStr += std::format(".{}", THEME_FILE_EXTENSION);
+		}
+
+		const std::filesystem::path ThemePath(ThemesDirectory / ThemeNameStr);
+		if (!LFileSystem::Exists(ThemePath))
+		{
+			LK_CORE_ERROR_TAG("ThemeManager", "Cannot load theme {}, the file doesn't exist ({})", ThemeName, ThemePath);
+			return false;
+		}
+
+		std::ifstream InputStream(ThemePath);
+		LK_CORE_VERIFY(InputStream, "Invalid filestream: {}", ThemePath);
+		std::stringstream StringStream;
+		StringStream << InputStream.rdbuf();
+		InputStream.close();
+
+		const YAML::Node Data = YAML::Load(StringStream.str());
+		Instance->DeserializeFromYaml(Data);
+		
+		CurrentTheme = ETheme::Custom;
 
 		return true;
 	}
 
 	void LThemeManagerPanel::OnMouseButtonPressed(const FMouseButtonData& ButtonData)
 	{
-		LK_CORE_DEBUG_TAG("ThemeManager", "OnMouseButtonPressed: {}", Enum::ToString(ButtonData.Button));
-
-		/* TODO: Queue mouse event to be executed in the ImGui Begin/End */
-		ImGuiContext& G = *GImGui;
-		//LK_CORE_CONSOLE_INFO("Hovered ID: {}", G.HoveredId);
-		//LK_CORE_CONSOLE_INFO("ActiveId: {}   ActiveIdWindow: {}", G.ActiveId, (G.ActiveIdWindow ? G.ActiveIdWindow->Name : "NULL"));
-		//LK_CORE_CONSOLE_WARN("Current Window: {}", (G.CurrentWindow ? G.CurrentWindow->Name : "NULL"));
-
-		//ImGui::DebugLocateItemOnHover(G.ActiveId);
-
-		if (ImGuiWindow* Window = ImGui::FindWindowByID(G.ActiveId); Window != nullptr)
-		{
-			LK_CORE_CONSOLE_INFO("ID {} is a window", G.ActiveId);
-		}
+		LK_CORE_TRACE_TAG("ThemeManager", "OnMouseButtonPressed: {}", Enum::ToString(ButtonData.Button));
 	}
 
 	void LThemeManagerPanel::SetTheme(const ETheme Theme)
@@ -543,16 +614,74 @@ namespace LkEngine {
 		}
 	}
 
+	void LThemeManagerPanel::LoadDefaultTheme()
+	{
+		SetTheme(ETheme::Dark);
+	}
+
+	std::string LThemeManagerPanel::GetCurrentThemeName()
+	{
+		LK_CORE_ASSERT(CurrentTheme != ETheme::COUNT);
+		if (CurrentTheme != ETheme::Custom)
+		{
+			return Enum::ToString(CurrentTheme);
+		}
+
+		const std::string ThemeNameStr(ThemeName.data());
+		return ThemeNameStr;
+	}
+
 	void LThemeManagerPanel::SerializeToYaml(YAML::Emitter& Out) const
 	{
-		/* TODO: */
-		/* Save last used theme. */
+		//return;
+
+		const std::string ThemeNameStr(ThemeName.data());
+		if (ThemeNameStr.empty())
+		{
+			LK_CORE_DEBUG_TAG("ThemeManager", "Theme name is empty, skipping serialization");
+			return;
+		}
+
+		const std::filesystem::path ThemePath(ThemesDirectory / ThemeNameStr);
+		if (!std::filesystem::exists(ThemePath))
+		{
+			LK_CORE_WARN_TAG("ThemeManager", "Theme path is empty, skipping serialization");
+			return;
+		}
+
+		LK_CORE_INFO_TAG("ThemeManager", "Saving current theme to: {}", ThemePath.string());
+		YAML::Emitter ThemeOut;
+		LK_SERIALIZE_PROPERTY(Theme, ThemeNameStr, ThemeOut);
+
+		auto& Colors = ImGui::GetStyle().Colors;
+		for (const ImGuiCol_ ImGuiColor : TEnumRange<ImGuiCol_>())
+		{
+			LK_SERIALIZE_PROPERTY_VALUE(Enum::ToString(ImGuiColor), Colors[ImGuiColor], ThemeOut);
+		}
+
+		std::ofstream FileOut(ThemePath);
+		FileOut << Out.c_str();
 	}
 
 	void LThemeManagerPanel::DeserializeFromYaml(const YAML::Node& Data)
 	{
-		/* TODO: */
-		/* Load last theme. */
+		if (!Data["Theme"])
+		{
+			LK_CORE_TRACE_TAG("ThemeManager", "Skipping loading of serialized theme, the node 'Theme' is missing");
+			return;
+		}
+		if (!Data["Colors"])
+		{
+			LK_CORE_DEBUG_TAG("ThemeManager", "Skipping loading of serialized theme, the node 'Colors' is missing");
+			return;
+		}
+
+		const YAML::Node& ColorsNode = Data["Colors"];
+		auto& Colors = ImGui::GetStyle().Colors;
+		for (const ImGuiCol_ ImGuiColor : TEnumRange<ImGuiCol_>())
+		{
+			LK_DESERIALIZE_PROPERTY_VALUE(Enum::ToString(ImGuiColor), Colors[ImGuiColor], ColorsNode, Colors[ImGuiColor]);
+		}
 	}
 
 }

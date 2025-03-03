@@ -1,6 +1,8 @@
 #include "LKpch.h"
 #include "Object.h"
 
+#include "LkEngine/Core/Delegate/Delegate.h"
+
 
 namespace LkEngine {
 

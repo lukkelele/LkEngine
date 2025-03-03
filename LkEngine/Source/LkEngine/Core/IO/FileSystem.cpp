@@ -156,14 +156,14 @@ namespace LkEngine {
 
 		for (const auto& FileEntry : std::filesystem::directory_iterator(Directory))
 		{
-			if (FileEntry.exists() && FileEntry.is_character_file() && FileEntry.path().has_filename())
+			if (FileEntry.exists() && FileEntry.path().has_filename())
 			{
 				if (const std::filesystem::path File = FileEntry.path(); File.has_filename())
 				{
 					const std::string FileNameLower = StringUtils::ToLower(File.string());
 					if (FileNameLower.find(StringUtils::ToLower(FilePattern)) != std::string::npos)
 					{
-						LK_CORE_DEBUG_TAG("FileSystem", "Found similar file to '{}': {}", FilePattern, File);
+						LK_CORE_INFO_TAG("FileSystem", "Found similar file to '{}': {}", FilePattern, File);
 						Found.push_back(FileEntry);
 					}
 				}

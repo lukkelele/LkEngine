@@ -128,11 +128,11 @@ namespace LkEngine {
 			return { EUniformVarType::None, "" };
 		}
 
-		static constexpr TStringLiteral Bool = Core::TStringLiteral("bool");
-		static constexpr TStringLiteral Float = Core::TStringLiteral("float");
-		static constexpr TStringLiteral Vec3 = Core::TStringLiteral("vec3");
-		static constexpr TStringLiteral Sampler2d = Core::TStringLiteral("sampler2D");
-		static constexpr TStringLiteral Sampler2dArray = Core::TStringLiteral("sampler2DArray");
+		static constexpr Core::TStringLiteral Bool = Core::TStringLiteral("bool");
+		static constexpr Core::TStringLiteral Float = Core::TStringLiteral("float");
+		static constexpr Core::TStringLiteral Vec3 = Core::TStringLiteral("vec3");
+		static constexpr Core::TStringLiteral Sampler2d = Core::TStringLiteral("sampler2D");
+		static constexpr Core::TStringLiteral Sampler2dArray = Core::TStringLiteral("sampler2DArray");
 
 		/* Uniform: Bool */
 		if (const std::size_t Pos = InString.find(Bool.View()); Pos != std::string::npos)

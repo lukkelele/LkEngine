@@ -4,13 +4,13 @@
 #include "LkEngine/Core/IO/FileSystem.h"
 
 /**
- * Allow logging when running tests. 
+ * Allow logging when running automated tests. 
  * This is done to provide better context to potential errors that might occur
  * when running the tests in the github action runner.
  */
-#if defined(LK_ENGINE_AUTOMATION_TEST) || defined(LK_GLOBALS_PRINTING_ENABLED)
-#	define LK_GLOBALS_PRINT(...)     LK_PRINT(__VA_ARGS__)
-#	define LK_GLOBALS_PRINTLN(...)   LK_PRINTLN(__VA_ARGS__)
+#if defined(LK_GLOBALS_PRINTING_ENABLED) || defined(LK_ENGINE_AUTOMATION_TEST)
+#	define LK_GLOBALS_PRINT(...)   LK_PRINT(__VA_ARGS__)
+#	define LK_GLOBALS_PRINTLN(...) LK_PRINTLN(__VA_ARGS__)
 #else
 #	define LK_GLOBALS_PRINT(...)
 #	define LK_GLOBALS_PRINTLN(...)
@@ -90,9 +90,12 @@ namespace LkEngine {
 
 		LFileSystem::EngineConfig = LFileSystem::ConfigDir / "LkEngine.lkconf";
 		LFileSystem::EditorConfig = LFileSystem::ConfigDir / "EditorSettings.yaml";
-
 		LFileSystem::ResourcesDir = std::filesystem::absolute(LFileSystem::EngineDir / "Resources");
 		LFileSystem::AssetsDir    = std::filesystem::absolute(LFileSystem::EngineDir / "Assets");
+		LK_GLOBALS_PRINTLN("EngineConfig: {}", LFileSystem::EngineConfig.string());
+		LK_GLOBALS_PRINTLN("EditorConfig: {}", LFileSystem::EditorConfig.string());
+		LK_GLOBALS_PRINTLN("ResourcesDir:  {}", LFileSystem::ResourcesDir.string());
+		LK_GLOBALS_PRINTLN("AssetsDir: {}", LFileSystem::AssetsDir.string());
 
 		bArgumentsSet = true;
 	}

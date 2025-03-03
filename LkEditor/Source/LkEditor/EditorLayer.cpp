@@ -105,8 +105,8 @@ namespace LkEngine {
 	LEditorLayer::LEditorLayer()
 		: LLayer("EditorLayer")
 		, EditorSettings(FEditorSettings::Get())
-		, EditorCamera(60, 800, 600, 0.10f, 2400.0f)
 		, EventQueue("EditorQueue")
+		, EditorCamera(60.0f, 800, 600, 0.10f, 2400.0f)
 	{
 		LOBJECT_REGISTER();
 		Instance = this;
@@ -117,38 +117,18 @@ namespace LkEngine {
 		Window = &LApplication::Get().GetWindow();
 		LK_CORE_VERIFY(Window);
 
-		/* Editor camera. */
+		Core::OnEngineShutdown.Add(this, &LEditorLayer::OnEngineShutdown);
+	}
+
+	/* TODO: Move lots of the initialization code to OnAttach instead. */
+	void LEditorLayer::Initialize()
+	{
 		LK_CORE_DEBUG_TAG("Editor", "Creating editor camera");
 		EditorCamera = LEditorCamera(60.0f, Window->GetWidth(), Window->GetHeight(), 0.10f, 2400.0f);			  
 		EditorCamera.Initialize();
 		EditorCamera.SetPosition({ -10, 4, -10 });
 		EditorCamera.SetActive(true);
 		EditorCamera.Tick();
-	}
-
-	/* TODO: Move lots of the initialization code to OnAttach instead. */
-	void LEditorLayer::Initialize()
-	{
-		Core::OnEngineShutdown.Add([&]()
-		{
-			if (EditorScene)
-			{
-				/* Store the editor camera data in the 'EditorCamera' scene entity. */
-				LK_CORE_DEBUG_TAG("Editor", "Shutting down, current scene: {}", EditorScene->GetName());
-				if (LEntity EditorCameraEntity = EditorScene->FindEntity("EditorCamera"))
-				{
-					LK_CORE_ASSERT(EditorCameraEntity.HasComponent<LTransformComponent>());
-					LK_CORE_ASSERT(EditorCameraEntity.HasComponent<LCameraComponent>());
-
-					/* The scene camera does not hold its own position as the editor camera does. 
-					 * therefore it is needed to manually store the position in the transform component. */
-					LTransformComponent& TransformComp = EditorCameraEntity.GetComponent<LTransformComponent>();
-					LCameraComponent& CameraComp = EditorCameraEntity.GetComponent<LCameraComponent>();
-					CameraComp.Camera = EditorCamera;
-					TransformComp.Translation = EditorCamera.Position;
-				}
-			}
-		});
 
 		/* Attach editor viewport delegates to the editor camera. */
 		LK_CORE_ASSERT(EditorViewport);
@@ -229,7 +209,7 @@ namespace LkEngine {
 		EditorViewport->SetViewportBounds(1, Window->GetSize());
 
 		EditorViewport->SetSize(
-			(Window->GetWidth() - LeftSidebarSize.X, RightSidebarSize.X), 
+			(Window->GetWidth() - LeftSidebarSize.X, RightSidebarSize.X),
 			(float)(Window->GetHeight())
 		);
 
@@ -247,6 +227,15 @@ namespace LkEngine {
 
 		/* Load editor settings. */
 		EditorSettings.Load();
+		if (!EditorSettings.Theme.empty())
+		{
+			LK_CORE_INFO_TAG("Editor", "Loading theme: {}", EditorSettings.Theme);
+			if (!LThemeManagerPanel::LoadSavedTheme(EditorSettings.Theme))
+			{
+				LK_CORE_WARN_TAG("Editor", "Failed to load saved theme, loading default instead");
+				LThemeManagerPanel::LoadDefaultTheme();
+			}
+		}
 
 		LK_CORE_DEBUG_TAG("Editor", "Creating scene renderer");
 		FSceneRendererSpecification RendererSpec{};
@@ -276,6 +265,27 @@ namespace LkEngine {
 		LAssetEditorManager::UnregisterEditors();
 
 		LK_CORE_DEBUG_TAG("Editor", "Saving editor settings");
+		if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ThemeManager); (PanelData != nullptr) && PanelData->Panel)
+		{
+			if (LThemeManagerPanel::GetTheme() == ETheme::Custom)
+			{
+				LK_CORE_INFO_TAG("Editor", "Current theme name: {}", LThemeManagerPanel::GetCurrentThemeName());
+				const std::string CurrentThemeName = LThemeManagerPanel::GetCurrentThemeName();
+				if (!CurrentThemeName.empty())
+				{
+					EditorSettings.Theme = CurrentThemeName;
+					LK_CORE_DEBUG_TAG("Editor", "Saved last active theme: {}", EditorSettings.Theme);
+				}
+				else
+				{
+					LK_CORE_INFO_TAG("Editor", "Cannot save current theme as the theme name is empty");
+				}
+			}
+			else
+			{
+				EditorSettings.Theme = Enum::ToString(LThemeManagerPanel::GetTheme());
+			}
+		}
 		EditorSettings.Save();
 
 		SceneRenderer->SetScene(nullptr);
@@ -283,11 +293,20 @@ namespace LkEngine {
 
 	void LEditorLayer::OnEvent(LEvent& Event)
 	{
-		LK_CORE_WARN_TAG("Editor", "OnEvent: {}", Event.GetName());
+		LK_CORE_TRACE_TAG("Editor", "OnEvent: {}", Event.GetName());
 
-		if (Event.GetType() == EEventType::MouseButtonPressed)
+		switch (Event.GetType())
 		{
-			LK_CORE_INFO("Current Window: {}", UI::GetWindowName(ImGui::GetID(PanelID::EditorViewport)));
+			case EEventType::MouseButtonPressed:
+			{
+				Event.bHandled = true;
+				break;
+			}
+			case EEventType::MouseButtonReleased:
+			{
+				Event.bHandled = true;
+				break;
+			}
 		}
 	}
 
@@ -320,7 +339,7 @@ namespace LkEngine {
 			EPanelInitState::Open, 
 			EditorScene
 		);
-		OnSceneSelectionUpdated.Add(SceneManager.Get(), &LSceneManagerPanel::OnSceneSelectionUpdated);
+		OnSceneSelectionUpdated.Add(SceneManager, &LSceneManagerPanel::OnSceneSelectionUpdated);
 
 		PanelManager->AddPanel<LToolsPanel>(EPanelCategory::View, PanelID::Tools, EPanelInitState::Closed);
 		PanelManager->AddPanel<LThemeManagerPanel>(EPanelCategory::Edit, PanelID::ThemeManager, EPanelInitState::Closed);
@@ -641,7 +660,10 @@ namespace LkEngine {
 			bViewportFocused = ImGui::IsWindowFocused();
 
 			/* Process editor events. */
-			EventQueue.ProcessFiltered<LMouseButtonPressedEvent>();
+			if (!LInput::IsMouseButtonDown(EMouseButton::Left))
+			{
+				EventQueue.ProcessFiltered<LMouseButtonPressedEvent, LMouseButtonReleasedEvent>();
+			}
 
 			UI_PrepareEditorViewport();
 			UI::Begin(PanelID::EditorViewport, nullptr, UI::EditorViewportFlags);
@@ -1405,7 +1427,6 @@ namespace LkEngine {
 	void LEditorLayer::OnMouseButtonReleased(const FMouseButtonData& ButtonData)
 	{
 		LK_CORE_TRACE_TAG("Editor", "MouseButtonReleased: {}", Enum::ToString(ButtonData.Button));
-
 		EventQueue.Add<LMouseButtonReleasedEvent>(ButtonData.Button);
 	}
 
@@ -1429,6 +1450,30 @@ namespace LkEngine {
 	void LEditorLayer::OnMouseCursorModeChanged(const ECursorMode CursorMode)
 	{
 		LK_CORE_TRACE_TAG("Editor", "Cursor Mode: {}", Enum::ToString(CursorMode));
+	}
+
+	void LEditorLayer::OnEngineShutdown()
+	{
+		/**
+		 * Save editor camera data from the current editor scene.
+		 */
+		if (EditorScene)
+		{
+			/* Store the editor camera data in the 'EditorCamera' scene entity. */
+			LK_CORE_DEBUG_TAG("Editor", "Shutting down, current scene: {}", EditorScene->GetName());
+			if (LEntity EditorCameraEntity = EditorScene->FindEntity("EditorCamera"))
+			{
+				LK_CORE_ASSERT(EditorCameraEntity.HasComponent<LTransformComponent>());
+				LK_CORE_ASSERT(EditorCameraEntity.HasComponent<LCameraComponent>());
+
+				/* The scene camera does not hold its own position as the editor camera does. 
+				 * therefore it is needed to manually store the position in the transform component. */
+				LTransformComponent& TransformComp = EditorCameraEntity.GetComponent<LTransformComponent>();
+				LCameraComponent& CameraComp = EditorCameraEntity.GetComponent<LCameraComponent>();
+				CameraComp.Camera = EditorCamera;
+				TransformComp.Translation = EditorCamera.Position;
+			}
+		}
 	}
 
 	void LEditorLayer::OnScenePlay()

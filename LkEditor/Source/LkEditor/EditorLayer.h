@@ -88,10 +88,9 @@ namespace LkEngine {
 		void AutoSaveScene();
 
 	public:
+		FORCEINLINE static LEditorLayer& Get() { return *Instance; }
 		FORCEINLINE TObjectPtr<LScene> GetEditorScene() { return EditorScene; }
 		FORCEINLINE LEditorCamera& GetEditorCamera() { return EditorCamera; }
-
-		FORCEINLINE static LEditorLayer& Get() { return *Instance; }
 
 		void OnViewportSizeUpdated(const uint16_t NewWidth, const uint16_t NewHeight);
 		void UpdateWindowTitle(const std::string& SceneName);
@@ -104,6 +103,7 @@ namespace LkEngine {
 		void OnMouseButtonReleased(const FMouseButtonData& ButtonData);
 		void OnMouseScrolled(const EMouseScrollDirection ScrollDir);
 		void OnMouseCursorModeChanged(const ECursorMode CursorMode);
+		void OnEngineShutdown();
 
 		void OnScenePlay();
 		void OnSceneStop();
@@ -133,14 +133,10 @@ namespace LkEngine {
 		void UI_ProjectInfo();
 		void UI_Debug_EditorViewportInfo();
 
-		/**
-		 * Perform raycast on scene, returns the number of hit entities.
-		 */
+		/** Perform raycast on scene, returns the number of hit entities. */
 		uint16_t RaycastScene(TObjectPtr<LScene>& TargetScene, std::vector<FSceneSelectionData>& SceneSelectionData);
 
-		/**
-		 * Cast ray from camera.
-		 */
+		/** Cast ray from camera. */
 		void CastRay(FRayCast& RayCast, const LEditorCamera& Camera, const float MousePosX, const float MousePosY);
 
 		std::pair<float, float> GetMouseViewportSpace(const bool IsEditorViewport);
@@ -149,13 +145,12 @@ namespace LkEngine {
 
 		/**
 		 * Set window focus.
-		 * Used after switching between mouse modes (Pan/Rotate/Zoom) that can remove the focus.
+		 * Used after switching between mouse modes (Pan/Rotate/Zoom) or 
+		 * any other activities that can modify the focus.
 		 */
 		void UI_SetWindowFocus(const ImGuiID WindowID);
 
-		/**
-		 * Cache the ID of the currently focused window.
-		 */
+		/** Cache the ID of the currently focused window. */
 		void UI_CacheWindowFocus();
 
 	public:
@@ -163,8 +158,8 @@ namespace LkEngine {
 		FOnSceneSelectionUpdated OnSceneSelectionUpdated;
 	private:
 		FEditorSettings& EditorSettings;
-		TObjectPtr<LPanelManager> PanelManager;
 		LEventQueue EventQueue;
+		TObjectPtr<LPanelManager> PanelManager;
 
 		TObjectPtr<LProject> Project{};
 		TObjectPtr<LScene> EditorScene{};
