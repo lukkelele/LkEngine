@@ -395,6 +395,7 @@ namespace LkEngine::RGBA32
 		static constexpr uint32_t Brighter = IM_COL32(204, 204, 204, 255);
 		static constexpr uint32_t Darker   = IM_COL32(128, 128, 128, 255);
 		static constexpr uint32_t Error    = IM_COL32(232, 55, 55, 255);
+		static constexpr uint32_t Disabled = IM_COL32(237, 201, 142, 95);
 	}
 
 	namespace Titlebar 		

@@ -227,9 +227,9 @@ namespace LkEngine {
 
 		/* Load editor settings. */
 		EditorSettings.Load();
+		LK_CORE_FATAL_TAG("Editor", "Loading theme: {}", EditorSettings.Theme);
 		if (!EditorSettings.Theme.empty())
 		{
-			LK_CORE_INFO_TAG("Editor", "Loading theme: {}", EditorSettings.Theme);
 			if (!LThemeManagerPanel::LoadSavedTheme(EditorSettings.Theme))
 			{
 				LK_CORE_WARN_TAG("Editor", "Failed to load saved theme, loading default instead");
@@ -267,6 +267,8 @@ namespace LkEngine {
 		LK_CORE_DEBUG_TAG("Editor", "Saving editor settings");
 		if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ThemeManager); (PanelData != nullptr) && PanelData->Panel)
 		{
+			EditorSettings.Theme = LThemeManagerPanel::GetCurrentThemeName();
+		#if 0
 			if (LThemeManagerPanel::GetTheme() == ETheme::Custom)
 			{
 				LK_CORE_INFO_TAG("Editor", "Current theme name: {}", LThemeManagerPanel::GetCurrentThemeName());
@@ -274,17 +276,13 @@ namespace LkEngine {
 				if (!CurrentThemeName.empty())
 				{
 					EditorSettings.Theme = CurrentThemeName;
-					LK_CORE_DEBUG_TAG("Editor", "Saved last active theme: {}", EditorSettings.Theme);
-				}
-				else
-				{
-					LK_CORE_INFO_TAG("Editor", "Cannot save current theme as the theme name is empty");
 				}
 			}
 			else
 			{
 				EditorSettings.Theme = Enum::ToString(LThemeManagerPanel::GetTheme());
 			}
+		#endif
 		}
 		EditorSettings.Save();
 

@@ -140,7 +140,7 @@ namespace LkEngine {
 			static constexpr float TextPadX = 6.0f;
 
 			/* TODO: Get theme and set the table row colors accordingly. */
-			const ETheme CurrentTheme = LThemeManagerPanel::GetTheme();
+			//const ETheme CurrentTheme = LThemeManagerPanel::GetTheme();
 
 			for (uint32_t Idx = 0; Idx < MessageBuffer.size(); Idx++)
 			{
@@ -155,6 +155,7 @@ namespace LkEngine {
 
 				{
 					uint8_t PushedColors = 0;
+				#if 0
 					switch (CurrentTheme)
 					{
 						case ETheme::Dark:
@@ -185,6 +186,10 @@ namespace LkEngine {
 							goto Fallback;
 						}
 					}
+				#else
+					ImGui::PushStyleColor(ImGuiCol_TableRowBg, RGBA32::Background);
+					PushedColors++;
+				#endif
 
 					RowClicked = UI::TableRowClickable(Message.ShortMessage.c_str(), RowHeight);
 					ImGui::PopStyleColor(PushedColors);
