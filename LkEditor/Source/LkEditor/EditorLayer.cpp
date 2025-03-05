@@ -970,14 +970,6 @@ namespace LkEngine {
 				LTransformComponent& TransformComp = CameraEntity.GetComponent<LTransformComponent>();
 				LCameraComponent& CameraComp = CameraEntity.GetComponent<LCameraComponent>();
 				LSceneCamera& CameraRef = CameraComp.Camera;
-			#if 0
-				LK_CORE_WARN_TAG("Editor", "Loading editor camera:\n{}", CameraComp.ToString());
-				LK_CORE_WARN_TAG("Editor", "CameraRef: Pitch={} Yaw={}", CameraRef.Pitch, CameraRef.Yaw);
-				LK_CORE_WARN_TAG("Editor", "CameraRef: Direction={}", CameraRef.Direction);
-				LK_CORE_WARN_TAG("Editor", "CameraRef: DegPerspectiveFOV={}", CameraRef.DegPerspectiveFOV);
-				LK_CORE_WARN_TAG("Editor", "CameraRef: PerspectiveNear={}", CameraRef.PerspectiveNear);
-				LK_CORE_WARN_TAG("Editor", "CameraRef: PerspectiveFar={}", CameraRef.PerspectiveFar);
-			#endif
 				EditorCamera.Position = TransformComp.GetTranslation();
 				EditorCamera.Direction = CameraRef.Direction;
 				EditorCamera.Origin = CameraRef.Origin;

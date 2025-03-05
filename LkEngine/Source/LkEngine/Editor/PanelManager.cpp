@@ -9,6 +9,9 @@
 
 namespace LkEngine {
 
+	FOnSetPanelOpen OnSetPanelOpen;
+	FIsPanelOpen IsPanelOpen;
+
 	LPanelManager::LPanelManager()
 	{
 		LOBJECT_REGISTER();
@@ -24,6 +27,9 @@ namespace LkEngine {
 
 	void LPanelManager::Initialize()
 	{
+		OnSetPanelOpen.Add(this, &LPanelManager::OnSetPanelOpenHandler);
+		IsPanelOpen.Bind(this, &LPanelManager::IsPanelOpenHandler);
+
 		for (auto& PanelMap : Panels)
 		{
 			for (auto& [ID, PanelData] : PanelMap)

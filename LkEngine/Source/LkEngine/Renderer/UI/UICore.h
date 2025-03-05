@@ -58,6 +58,20 @@ namespace LkEngine
 	LK_ENUM_CLASS(EMessageBoxFlag);
 	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EMessageBoxFlag, EMessageBoxFlag::OkButton, EMessageBoxFlag::AutoSize);
 
+	/**
+	 * Delegate: OnSetPanelOpen
+	 * Defined in LPanelManager.
+	 */
+	LK_DECLARE_MULTICAST_DELEGATE(FOnSetPanelOpen, const char*, const bool);
+	extern FOnSetPanelOpen OnSetPanelOpen;
+
+	/**
+	 * Delegate: IsPanelOpen
+	 * Defined in LPanelManager.
+	 */
+	LK_DECLARE_DELEGATE_RET(FIsPanelOpen, bool, const char*);
+	extern FIsPanelOpen IsPanelOpen;
+
 }
 
 namespace LkEngine::UI {
@@ -182,8 +196,14 @@ namespace LkEngine::UI {
 		std::unordered_map<std::string, FMessageBox> MessageBoxes{};
 		bool bInGrid = false;
 
+		struct FNextItemData
+		{
+			ImGuiComboFlags ComboFlags = ImGuiComboFlags_None;
+		} NextItemData{};
+
 		LStyle Style;
 	};
+
 	static LUIContext UIContext;
 
 	FORCEINLINE void PushStyle(const EStyle Style, const float Value)
@@ -201,6 +221,11 @@ namespace LkEngine::UI {
 	FORCEINLINE void PopStyle(const int StylesToPop = 1)
 	{
 		LK_CORE_ASSERT(false, "TODO");
+	}
+
+	FORCEINLINE void SetNextComboFlags(const ImGuiComboFlags Flags)
+	{
+		UIContext.NextItemData.ComboFlags = Flags;
 	}
 
 	FORCEINLINE bool InTable()

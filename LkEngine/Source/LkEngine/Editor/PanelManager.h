@@ -39,7 +39,6 @@ namespace LkEngine {
 		~LPanelManager();
 
 		void Initialize();
-
 		void RenderUI();
 
 		void RemovePanel(const char* PanelID);
@@ -141,6 +140,31 @@ namespace LkEngine {
 		void Deserialize();
 
 		void OnProjectChanged(const TObjectPtr<LProject> InProject);
+
+		/**
+		 * Handler for the OnSetPanelOpen delegate.
+		 */
+		void OnSetPanelOpenHandler(const char* PanelID, const bool Open)
+		{
+			LK_CORE_ASSERT(PanelID);
+			LK_CORE_TRACE_TAG("PanelManager", "Invoked OnSetPanelOpenHandler: ({}, {})", PanelID, (Open ? "Opened" : "Closed"));
+			if (FPanelData* PanelData = GetPanelData(PanelID); PanelData != nullptr)
+			{
+				PanelData->bIsOpen = Open;
+			}
+		}
+
+		bool IsPanelOpenHandler(const char* PanelID)
+		{
+			LK_CORE_ASSERT(PanelID);
+			LK_CORE_TRACE_TAG("PanelManager", "Invoked IsPanelOpenHandler: {}", PanelID);
+			if (FPanelData* PanelData = GetPanelData(PanelID); PanelData != nullptr)
+			{
+				return PanelData->bIsOpen;
+			}
+
+			return false;
+		}
 
 	private:
 		std::array<std::unordered_map<uint32_t, FPanelData>, (std::size_t)EPanelCategory::COUNT> Panels;

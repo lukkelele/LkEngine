@@ -16,6 +16,12 @@ namespace LkEngine {
 		constexpr int THEME_NAME_LENGTH_MAX = 120;
 		constexpr int THEME_FILEPATH_LENGTH_MAX = 512;
 
+		/**
+		 * Themes array for the dropdown. 
+		 * Subtract one for the removal of the 'Custom' entry.
+		 */
+		std::array<const char*, (uint16_t)ETheme::COUNT> Themes;
+
 		/* ImGuiColors. */
 		std::array<const char*, (int)ImGuiCol_COUNT> ImGuiColors;
 
@@ -52,61 +58,7 @@ namespace LkEngine {
 		Instance = this;
 		LPANEL_REGISTER();
 
-		ThemesDirectory = LFileSystem::GetResourcesDir() / "Themes";
-		if (!LFileSystem::Exists(ThemesDirectory))
-		{
-			LFileSystem::CreateDirectory(ThemesDirectory);
-			/* Store the default themes in the directory. */
-			/* TODO: Serialize the default themes here. */
-		}
-
-		std::memset(InputBuffer::ThemeName, 0, THEME_NAME_LENGTH_MAX);
-		std::sprintf(
-			InputBuffer::ThemeFilePath, 
-			"%s", 
-			LFileSystem::ConvertToUnixPath(std::filesystem::relative(ThemesDirectory, LFileSystem::GetEngineDir())).c_str()
-		);
-	}
-
-	void LThemeManagerPanel::RenderUI(bool& IsOpen)
-	{
-		ImGuiContext& G = *GImGui;
-
-		ImGui::SetNextWindowPos(ImVec2(180, 120), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(540, 780), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(440, 200), UI::SizeConstraint<ImVec2>::Max);
-
-		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
-		if (!UI::Begin(PanelID::ThemeManager, &IsOpen, WindowFlags))
-		{
-			return;
-		}
-
-		UI::Property("Theme Selector", bSelectorEnabled);
-
-		if (ImGui::Button("Popup: Save Theme"))
-		{
-			UI_SaveThemePopup();
-		}
-		ImGui::SameLine(0, 8.0f);
-		if (ImGui::Button("Popup: Select Theme"))
-		{
-			UI_SelectSavedThemePopup();
-		}
-
-		if (ImGui::Button("Save Current Theme"))
-		{
-			LK_CORE_INFO("Saving current theme");
-			SaveCurrentTheme();
-		}
-
-		ImGui::Text("Theme Name: %s", CurrentThemeName.c_str());
-
-		/**
-		 * Themes array for the dropdown. 
-		 * Subtract one for the removal of the 'Custom' entry.
-		 */
-		static std::array<const char*, (uint16_t)ETheme::COUNT> Themes;
+		/* Initialize enum arrays. */
 		if (Themes.at(0) == nullptr)
 		{
 			int Idx = 0;
@@ -129,32 +81,74 @@ namespace LkEngine {
 			}
 		}
 
-		static ETheme SelectedTheme = ETheme::Dark;
-		ImGui::SetNextItemWidth(280.0f);
-		if (UI::PropertyDropdown("Default Theme", Themes, SelectedTheme))
+		ThemesDirectory = LFileSystem::GetResourcesDir() / "Themes";
+		if (!LFileSystem::Exists(ThemesDirectory))
 		{
-			LK_CORE_CONSOLE_INFO("Selected theme: {}", Enum::ToString(SelectedTheme));
-			SetTheme(SelectedTheme);
+			LFileSystem::CreateDirectory(ThemesDirectory);
+			/* Store the default themes in the directory. */
+			/* TODO: Serialize the default themes here. */
 		}
 
+		std::memset(InputBuffer::ThemeName, 0, THEME_NAME_LENGTH_MAX);
+		std::sprintf(
+			InputBuffer::ThemeFilePath, 
+			"%s", 
+			LFileSystem::ConvertToUnixPath(std::filesystem::relative(ThemesDirectory, LFileSystem::GetEngineDir())).c_str()
+		);
+	}
+
+	void LThemeManagerPanel::RenderUI(bool& IsOpen)
+	{
+		ImGuiContext& G = *GImGui;
 		auto& Colors = ImGui::GetStyle().Colors;
 
-		const ImVec2 ModifierTableSize = ImMin(ImVec2(640, 0.0f), ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
-		UI::BeginPropertyGrid("##ThemeModifier", ModifierTableSize, ImGuiTableFlags_SizingStretchProp);
+		ImGui::SetNextWindowPos(ImVec2(180, 120), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(540, 780), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(440, 200), UI::SizeConstraint<ImVec2>::Max);
+
+		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
+		if (!UI::Begin(PanelID::ThemeManager, &IsOpen, WindowFlags))
 		{
+			return;
+		}
+
+		UI::Property("Item Selector", bSelectorEnabled);
+
+		if (ImGui::Button("Popup: Save Theme"))
+		{
+			UI_SaveThemePopup();
+		}
+		ImGui::SameLine(0, 8.0f);
+		if (ImGui::Button("Popup: Select Theme"))
+		{
+			UI_SelectThemePopup();
+		}
+
+		if (ImGui::Button("Save Current Theme"))
+		{
+			LK_CORE_INFO("Saving current theme");
+			SaveCurrentTheme();
+		}
+
+		ImGui::Text("Theme Name: %s", CurrentThemeName.c_str());
+
+		const ImVec2 ModifierTableSize = ImMin(ImVec2(640, 0.0f), ImVec2(ImGui::GetContentRegionAvail().x, 0.0f));
+
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("ImGui Colors"))
+		{
+			static constexpr float ColumnWidth = 100.0f;
 			UI::FScopedStyle CellPadding(ImGuiStyleVar_CellPadding, ImVec2(G.Style.CellPadding.x, 0.0f));
 
-			UI::Draw::Vec4Control("WindowBg",           Colors[ImGuiCol_WindowBg], 0.010f, 1.0f, 0.0f, 1.0f);
-			UI::Draw::Vec4Control("ChildBg",            Colors[ImGuiCol_ChildBg], 0.010f, 1.0f, 0.0f, 1.0f);
-			UI::Draw::Vec4Control("Text",               Colors[ImGuiCol_Text], 0.010f, 1.0f, 0.0f, 1.0f);
-			UI::Draw::Vec4Control("TextDisabled",       Colors[ImGuiCol_TextDisabled], 0.010f, 1.0f, 0.0f, 1.0f);
-			UI::Draw::Vec4Control("Border",             Colors[ImGuiCol_Border], 0.010f, 1.0f, 0.0f, 1.0f);
-			UI::Draw::Vec4Control("BorderShadow",       Colors[ImGuiCol_BorderShadow], 0.010f, 1.0f, 0.0f, 1.0f);
-			UI::Draw::Vec4Control("TitleBg",            Colors[ImGuiCol_TitleBg], 0.010f, 1.0f, 0.0f, 1.0f);
-			UI::Draw::Vec4Control("TitleBgActive",      Colors[ImGuiCol_TitleBgActive], 0.010f, 1.0f, 0.0f, 1.0f);
-			UI::Draw::Vec4Control("TitleBgCollapsed",   Colors[ImGuiCol_TitleBgCollapsed], 0.010f, 1.0f, 0.0f, 1.0f);
+			UI::BeginPropertyGrid("##ImGuiColors", ModifierTableSize, ImGuiTableFlags_SizingStretchProp);
+			for (const ImGuiCol_ ImGuiColor : TEnumRange<ImGuiCol_>())
+			{
+				UI::Draw::Vec4Control<UI::EVectorSemantic::XYZW>(Enum::ToString(ImGuiColor), Colors[ImGuiColor], 0.010f, 1.0f, 0.0f, 1.0f);
+			}
+			UI::EndPropertyGrid();
+
+			ImGui::TreePop();
 		}
-		UI::EndPropertyGrid();
 
 		UI_ColorPicker();
 
@@ -519,30 +513,79 @@ namespace LkEngine {
 		}, (uint32_t)EMessageBoxFlag::AutoSize, PopupWidth);
 	}
 
-	void LThemeManagerPanel::UI_SelectSavedThemePopup()
+	void LThemeManagerPanel::UI_SelectThemePopup()
 	{
-		static constexpr uint16_t PopupWidth = 480;
-		UI::ShowMessageBox("Select Theme", [&]()
+		static constexpr uint16_t PopupWidth = 540;
+		UI::ShowMessageBox("Theme Selection", [&]()
 		{
+			ImGuiContext& G = *GImGui;
+			bool ShouldClosePopup = false;
+
 			UI::FScopedStyle FramePadding(ImGuiStyleVar_FramePadding, ImVec2(10, 8));
 			UI::FScopedStyle FrameRounding(ImGuiStyleVar_FrameRounding, 3.0f);
 
-			if (ImGui::Button("Theme"))
+			{
+				const ImVec2 CursorPos = ImGui::GetCursorPos();
+				const ImVec2 AvailContent = ImGui::GetContentRegionAvail();
+				static const char* DebugMarker = "[DEBUG]";
+				UI::ShiftCursorX(AvailContent.x - ImGui::CalcTextSize(DebugMarker).x - (G.Style.FramePadding.x * 0.50f));
+				ImGui::TextDisabled(DebugMarker);
+				if (ImGui::IsItemHovered())
+				{
+					static constexpr float WrapPosOffset = 35.0f;
+					ImGui::BeginTooltip();
+					ImGui::PushTextWrapPos(ImGui::GetFontSize() * WrapPosOffset);
+					ImGui::Text("Frame Padding: (%.2f, %.2f)", G.Style.FramePadding.x, G.Style.FramePadding.y);
+					ImGui::Text("Frame Rounding: %.2f", G.Style.FrameRounding);
+					ImGui::Text("In Grid: %s", (UI::UIContext.bInGrid ? "Yes" : "No"));
+					ImGui::Text("In Table: %s", (ImGui::GetCurrentTable() != nullptr) ? "Yes" : "No");
+					ImGui::PopTextWrapPos();
+					ImGui::EndTooltip();
+				}
+				/* Restore the cursor. */
+				ImGui::SetCursorPos(CursorPos);
+			}
+
+			static ETheme SelectedTheme = ETheme::Dark;
+			ImGui::SetNextItemWidth(160.0f);
+			UI::SetNextComboFlags(ImGuiComboFlags_NoArrowButton);
+			if (UI::PropertyDropdown("Default Theme", Themes, SelectedTheme))
+			{
+				LK_CORE_CONSOLE_INFO("Selected theme: {}", Enum::ToString(SelectedTheme));
+				SetTheme(SelectedTheme);
+			}
+			/* TODO: Should be able to align the button position entirely based on the dropdown/combo position. */
+			//const ImRect DropdownRect = UI::GetItemRect();
+
+			ImGui::SameLine(0, 8.0f);
+			static constexpr float DistY = -4.0f;
+			UI::ShiftCursorY(DistY);
+
+			if (ImGui::Button("Load Custom Theme"))
 			{
 				const std::filesystem::path ThemePath = LFileSystem::OpenFileDialog(
 					{{ "LkEngine Theme File", THEME_FILE_EXTENSION.data() }}
 				);
 				LK_CORE_WARN_TAG("ThemeManager", "Selected theme: {} (Filename: {})", ThemePath, ThemePath.filename());
 
-				const std::string SelectedTheme = ThemePath.filename().string();
-				if (SelectedTheme != CurrentThemeName)
+				if (!ThemePath.empty())
 				{
-					LoadSavedTheme(SelectedTheme);
+					const std::string SelectedTheme = ThemePath.filename().string();
+					if (SelectedTheme != CurrentThemeName)
+					{
+						LoadSavedTheme(SelectedTheme);
+					}
+
+					ShouldClosePopup = true;
 				}
+			}
+
+			if (ShouldClosePopup)
+			{
 				ImGui::CloseCurrentPopup();
 			}
 
-		}, (uint32_t)EMessageBoxFlag::UserFunction, PopupWidth);
+		}, (uint32_t)EMessageBoxFlag::OkButton, PopupWidth, 0, PopupWidth, 100);
 	}
 
 	void LThemeManagerPanel::UI_ColorPicker()

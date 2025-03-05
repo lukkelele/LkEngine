@@ -336,8 +336,8 @@ namespace LkEngine::UI {
 
 			const bool HasOkButton = (MessageBoxRef.Flags & EMessageBoxFlag::OkButton);
 			const bool HasCancelButton = (MessageBoxRef.Flags & EMessageBoxFlag::CancelButton);
-			static const ImVec2 OkButtonSize = ImVec2(34, 30);
-			static const ImVec2 CancelButtonSize = ImVec2(54, OkButtonSize.y);
+			static constexpr ImVec2 OkButtonSize = ImVec2(40, 32);
+			static constexpr ImVec2 CancelButtonSize = ImVec2(54, OkButtonSize.y);
 
 			ImGuiStyle& Style = ImGui::GetStyle();
 			ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoSavedSettings;
@@ -380,6 +380,8 @@ namespace LkEngine::UI {
 			{
 				const ImVec2 WindowSize = ImGui::GetContentRegionAvail();
 
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 4.0f));
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 				if (MessageBoxRef.Flags & EMessageBoxFlag::UserFunction)
 				{
 					LK_CORE_VERIFY(MessageBoxRef.UserRenderFunction, "Message box is missing a render function");
@@ -390,8 +392,8 @@ namespace LkEngine::UI {
 						if (!HasCancelButton)
 						{
 							UI::ShiftCursor(
-								(WindowSize.x - (OkButtonSize.x + Style.FramePadding.x + Style.WindowPadding.x)), 
-								(WindowSize.y - (OkButtonSize.y + 2.0f * (Style.FramePadding.y + Style.WindowPadding.y + Style.ItemSpacing.y)))
+								(WindowSize.x - (OkButtonSize.x + 1.0f * (Style.FramePadding.x + Style.WindowPadding.x))),
+								(WindowSize.y - 2.0f * (OkButtonSize.y + 1.0f * (Style.FramePadding.y + Style.WindowPadding.y)))
 							);
 						}
 						else
@@ -435,6 +437,7 @@ namespace LkEngine::UI {
 					}
 				}
 
+				ImGui::PopStyleVar(2); /* FramePadding, FrameRounding */
 				ImGui::EndPopup();
 			}
 		}

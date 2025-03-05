@@ -72,6 +72,8 @@ namespace LkEngine {
 			ImGuiIO& IO = ImGui::GetIO();
 			IO.DisplaySize = ImVec2(NewWidth, NewHeight);
 		});
+
+		Style.FrameRounding = 8.0f;
     }
 
     void LOpenGLImGuiLayer::Destroy()

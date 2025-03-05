@@ -4,11 +4,27 @@
 #include "LkEngine/Core/Delegate/Delegate.h"
 #include "LkEngine/Renderer/UI/UICore.h"
 
+#include "LkEngine/Editor/EditorCore.h" /* UI::Debug */
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
 
 namespace LkEngine::UI {
+
+	/**
+	 * EVectorSemantic
+	 *
+	 *  Type of annotation used on vectors.
+	 */
+	enum class EVectorSemantic
+	{
+		XYZ,
+		RGB,
+		XYZW,
+		RGBA,
+	};
+	LK_ENUM_CLASS(EVectorSemantic);
 
 	namespace Slider {
 		inline static constexpr float TablePaddingX = 17.0f; /* DragFloat X-padding. */
@@ -33,11 +49,15 @@ namespace LkEngine::UI {
 
 			if (InTable())
 			{
-				ImGui::TableSetColumnIndex(0);
-				UI::ShiftCursor(Slider::TablePaddingX, 7.0f);
+				if ((LabelSize > 0) && (Label[0] != '#'))
+				{
+					ImGui::TableSetColumnIndex(0);
+					UI::ShiftCursor(Slider::TablePaddingX, 7.0f);
 
-				ImGui::Text(Label);
-				UI::Draw::Underline(false, 0.0f, 2.0f);
+					ImGui::Text(Label);
+					UI::Draw::Underline(false, 0.0f, 2.0f);
+
+				}
 
 				ImGui::TableSetColumnIndex(1);
 				UI::ShiftCursor(7.0f, 0.0f);
@@ -271,12 +291,10 @@ namespace LkEngine::UI {
 
 		/**
 		 * Vec3Control
-		 * 
-		 *  To be used in already existing tables.
 		 */
-		/// TODO: Templated argument for selecting XYZ/RGB on the drawn buttons.
+		template<EVectorSemantic VecSemantic = EVectorSemantic::XYZW, typename VectorType = glm::vec3>
 		FORCEINLINE bool Vec3Control(const std::string& Label, 
-									 glm::vec3& Values, 
+									 VectorType& Values, 
 									 bool& ManuallyEdited, 
 									 const float ResetValue = 0.0f, 
 									 const float ValueSpeed = 0.10f,
@@ -286,6 +304,10 @@ namespace LkEngine::UI {
 									 uint32_t RenderMultiSelectAxes = 0,
 									 const char* Format = "%.2f")
 		{
+			static constexpr const char* V1 = (VecSemantic == EVectorSemantic::XYZW) ? "X" : "R";
+			static constexpr const char* V2 = (VecSemantic == EVectorSemantic::XYZW) ? "Y" : "G";
+			static constexpr const char* V3 = (VecSemantic == EVectorSemantic::XYZW) ? "Z" : "B";
+
 			bool Modified = false;
 
 			ImGui::TableSetColumnIndex(0);
@@ -312,7 +334,6 @@ namespace LkEngine::UI {
 					);
 				}
 
-				//static constexpr float FramePadding = 2.0f;
 				static constexpr float FramePadding = 3.0f;
 				static constexpr float OutlineSpacing = 1.0f;
 				const float LineHeight = GImGui->Font->FontSize + FramePadding * 2.0f;
@@ -337,7 +358,6 @@ namespace LkEngine::UI {
 							ImGuiCol_ButtonActive, InColorPressed
 						);
 
-						//UI::ShiftCursorY(FramePadding);
 						if (ImGui::Button(InLabel.c_str(), ButtonSize))
 						{
 							InValue = ResetValue;
@@ -348,7 +368,6 @@ namespace LkEngine::UI {
 
 					ImGui::SameLine(0.0f, OutlineSpacing);
 					ImGui::SetNextItemWidth(InputItemWidth);
-					//UI::ShiftCursorY(-FramePadding);
 
 					ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, RenderMultiSelect);
 					const ImGuiID InputID = ImGui::GetID(("##" + InLabel).c_str());
@@ -368,9 +387,11 @@ namespace LkEngine::UI {
 					}
 				};
 
-				/* Draw X. */
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+
+				/* Draw: V1 (First Vector Component). */
 				DrawControl(
-					"X", 
+					V1, 
 					Values.x, 
 					ImVec4(0.80f, 0.10f, 0.15f, 1.0f), /* Normal  */
 					ImVec4(0.90f, 0.20f, 0.20f, 1.0f), /* Hover   */
@@ -378,10 +399,10 @@ namespace LkEngine::UI {
 					(RenderMultiSelectAxes & EVectorAxis::X)
 				); 
 
-				/* Draw Y. */
+				/* Draw: V2 (Second Vector Component). */
 				ImGui::SameLine(0.0f, OutlineSpacing);
 				DrawControl(
-					"Y", 
+					V2, 
 					Values.y, 
 					ImVec4(0.20f, 0.70f, 0.20f, 1.0f), 
 					ImVec4(0.30f, 0.80f, 0.30f, 1.0f), 
@@ -389,16 +410,18 @@ namespace LkEngine::UI {
 					(RenderMultiSelectAxes & EVectorAxis::Y)
 				);
 
-				/* Draw Z. */
+				/* Draw: V3 (Third Vector Component). */
 				ImGui::SameLine(0.0f, OutlineSpacing);
 				DrawControl(
-					"Z", 
+					V3, 
 					Values.z, 
 					ImVec4(0.10f, 0.25f, 0.80f, 1.0f), 
 					ImVec4(0.20f, 0.35f, 0.90f, 1.0f), 
 					ImVec4(0.10f, 0.25f, 0.80f, 1.0f), 
 					(RenderMultiSelectAxes & EVectorAxis::Z)
 				);
+
+				ImGui::PopStyleVar(1); /* FrameRounding */
 
 				ImGui::EndChild();
 			}
@@ -415,11 +438,11 @@ namespace LkEngine::UI {
 		/**
 		 * Vec4Control
 		 * 
-		 *  To be used in already existing tables.
+		 *  Slider for 4 different values.
 		 */
-		/// TODO: Templated argument for selecting XYZW/RGBA on the drawn buttons.
+		template<EVectorSemantic VecSemantic = EVectorSemantic::XYZW, typename VectorType = ImVec4>
 		FORCEINLINE bool Vec4Control(const std::string& Label, 
-									 glm::vec4& Values, 
+									 VectorType& Values, 
 									 const float ValueSpeed = 0.10f,
 									 const float ResetValue = 0.0f, 
 									 const float ValueMin = 0.0f,
@@ -428,13 +451,34 @@ namespace LkEngine::UI {
 									 const char* Format = "%.2f",
 									 uint32_t RenderMultiSelectAxes = 0)
 		{
+			static_assert((VecSemantic == EVectorSemantic::XYZW) || (VecSemantic == EVectorSemantic::RGBA),
+						  "Invalid type of vector semantic, only vectors with 4 elements are allowed");
+			static_assert(std::disjunction_v<
+							std::is_same<VectorType, ImVec4>, 
+							std::is_same<VectorType, glm::vec4>>, 
+						  "Invalid vector type");
+
+			static constexpr const char* V1 = (VecSemantic == EVectorSemantic::XYZW) ? "X" : "R";
+			static constexpr const char* V2 = (VecSemantic == EVectorSemantic::XYZW) ? "Y" : "G";
+			static constexpr const char* V3 = (VecSemantic == EVectorSemantic::XYZW) ? "Z" : "B";
+			static constexpr const char* V4 = (VecSemantic == EVectorSemantic::XYZW) ? "W" : "A";
+
 			bool Modified = false;
 			bool ManuallyEdited = false;
 
 			ImGuiTable* CurrentTable = ImGui::GetCurrentTable();
 			const bool IsInTable = (CurrentTable != nullptr);
 
-			if (IsInTable)
+			if (UIContext.bInGrid)
+			{
+				ImGui::TableSetColumnIndex(0);
+				if (!Label.empty() && Label.at(0) != '#')
+				{
+					ImGui::Text(Label.c_str());
+					/* TODO: Do PushStyle here instead. */
+				}
+			}
+			else if (IsInTable)
 			{
 				ImGui::TableSetColumnIndex(0);
 				UI::ShiftCursor(Slider::TablePaddingX, 7.0f);
@@ -458,36 +502,42 @@ namespace LkEngine::UI {
 			{
 				static constexpr float SpacingX = 8.0f;
 				UI::FScopedStyle ItemSpacing(ImGuiStyleVar_ItemSpacing, ImVec2(SpacingX, 0.0f));
-				UI::FScopedStyle Padding(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 2.0f));
+				UI::FScopedStyle WindowPadding(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 2.0f));
 				{
-					UI::FScopedColor Padding(ImGuiCol_Border, IM_COL32(0, 0, 0, 0));
-					UI::FScopedColor Frame(ImGuiCol_FrameBg, IM_COL32(0, 0, 0, 0));
+					UI::FScopedColor BorderColor(ImGuiCol_Border, IM_COL32(0, 0, 0, 0));
+					UI::FScopedColor FrameBg(ImGuiCol_FrameBg, IM_COL32(0, 0, 0, 0));
+
+					static constexpr float FrameHeightPadding = 4.0f;
 
 					ImGui::BeginChild(
 						ImGui::GetID((Label + "Subwindow").c_str()),
-						ImVec2((ImGui::GetContentRegionAvail().x - SpacingX), ImGui::GetFrameHeightWithSpacing() + 8.0f),
-						ImGuiChildFlags_None,
+						ImVec2((ImGui::GetContentRegionAvail().x - SpacingX), ImGui::GetFrameHeightWithSpacing() + FrameHeightPadding),
+						(UI::Debug::GridBorders == (int)EBorder::None) ? ImGuiChildFlags_None : ImGuiChildFlags_Border,
 						ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse /* Window Flags. */
 					);
 				}
 
 				static constexpr float FramePadding = 4.0f;
 				static constexpr float OutlineSpacing = 1.0f;
+
 				const float LineHeight = GImGui->Font->FontSize + FramePadding * 2.0f;
 				const ImVec2 ButtonSize = { LineHeight + 2.0f, LineHeight };
-				const float InputItemWidth = (ImGui::GetContentRegionAvail().x - SpacingX) / 3.0f - ButtonSize.x;
+				const float InputItemWidth = (ImGui::GetContentRegionAvail().x - SpacingX) / 4.0f - ButtonSize.x;
 
 				UI::ShiftCursor(0.0f, FramePadding);
 
-				auto DrawControl = [&](const std::string& InLabel, 
+				auto DrawControl = [&](const char* InLabel, 
 									   float& InValue, 
-									   const ImVec4& InColorNormal,
-									   const ImVec4& InColorHover, 
-									   const ImVec4& InColorPressed, 
+									   const VectorType& InColorNormal,
+									   const VectorType& InColorHover, 
+									   const VectorType& InColorPressed, 
 									   bool RenderMultiSelect)
 				{
+					const std::string LabelStr = std::format("##{}", InLabel);
 					{
-						UI::FScopedStyle ButtonFrame(ImGuiStyleVar_FramePadding, ImVec2(FramePadding, 0.0f));
+						static constexpr ImVec2 ButtonFrameSize(2.0f * FramePadding, 0.0f);
+						//UI::FScopedStyle ButtonFramePadding(ImGuiStyleVar_FramePadding, ImVec2(FramePadding * 2.0f, 0.0f));
+						UI::FScopedStyle ButtonFramePadding(ImGuiStyleVar_FramePadding, ButtonFrameSize);
 						UI::FScopedStyle ButtonRounding(ImGuiStyleVar_FrameRounding, 1.0f);
 						UI::FScopedColorStack ButtonColours(
 							ImGuiCol_Button, InColorNormal, 
@@ -495,11 +545,11 @@ namespace LkEngine::UI {
 							ImGuiCol_ButtonActive, InColorPressed
 						);
 
-						if (ImGui::Button(InLabel.c_str(), ButtonSize))
+						if (ImGui::Button(InLabel, ButtonSize))
 						{
 							InValue = ResetValue;
 							Modified = true;
-							LK_CORE_DEBUG("Pressed Button: {}", InLabel.c_str());
+							LK_CORE_DEBUG("Pressed slider button: {}", InLabel);
 						}
 					}
 
@@ -507,9 +557,9 @@ namespace LkEngine::UI {
 					ImGui::SetNextItemWidth(InputItemWidth);
 
 					ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, RenderMultiSelect);
-					const ImGuiID InputID = ImGui::GetID(("##" + InLabel).c_str());
+					const ImGuiID InputID = ImGui::GetID(LabelStr.c_str());
 					const bool WasTempInputActive = ImGui::TempInputIsActive(InputID);
-					Modified |= ImGui::DragFloat(("##" + InLabel).c_str(), &InValue, ValueSpeed, ValueMin, ValueMax, Format, 0);
+					Modified |= ImGui::DragFloat(LabelStr.c_str(), &InValue, ValueSpeed, ValueMin, ValueMax, Format, 0);
 
 					if (ImGui::TempInputIsActive(InputID))
 					{
@@ -524,9 +574,16 @@ namespace LkEngine::UI {
 					}
 				};
 
-				/* Draw R. */
+				if (UIContext.bInGrid || IsInTable)
+				{
+					ImGui::TableSetColumnIndex(1);
+				}
+
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+
+				/* Draw: V1 (First Vector Component). */
 				DrawControl(
-					"R", 
+					V1, 
 					Values.x, 
 					ImVec4(0.80f, 0.10f, 0.15f, 1.0f), /* Normal  */
 					ImVec4(0.90f, 0.20f, 0.20f, 1.0f), /* Hover   */
@@ -534,10 +591,10 @@ namespace LkEngine::UI {
 					(RenderMultiSelectAxes & EVectorAxis::X)
 				); 
 
-				/* Draw G. */
+				/* Draw: V2 (Second Vector Component). */
 				ImGui::SameLine(0.0f, OutlineSpacing);
 				DrawControl(
-					"G", 
+					V2, 
 					Values.y, 
 					ImVec4(0.20f, 0.70f, 0.20f, 1.0f), 
 					ImVec4(0.30f, 0.80f, 0.30f, 1.0f), 
@@ -545,10 +602,10 @@ namespace LkEngine::UI {
 					(RenderMultiSelectAxes & EVectorAxis::Y)
 				);
 
-				/* Draw B. */
+				/* Draw: V3 (Third Vector Component). */
 				ImGui::SameLine(0.0f, OutlineSpacing);
 				DrawControl(
-					"B", 
+					V3, 
 					Values.z, 
 					ImVec4(0.10f, 0.25f, 0.80f, 1.0f), 
 					ImVec4(0.20f, 0.35f, 0.90f, 1.0f), 
@@ -556,21 +613,26 @@ namespace LkEngine::UI {
 					(RenderMultiSelectAxes & EVectorAxis::Z)
 				);
 
-				/* Draw A. */
+				/* Draw: V4 (Fourth Vector Component). */
 				ImGui::SameLine(0.0f, OutlineSpacing);
 				DrawControl(
-					"A", 
+					V4, 
 					Values.w, 
-					ImVec4(0.10f, 0.25f, 0.80f, 1.0f), 
-					ImVec4(0.20f, 0.35f, 0.90f, 1.0f), 
-					ImVec4(0.10f, 0.25f, 0.80f, 1.0f), 
+					VectorType(0.50f, 0.40f, 0.70f, 1.0f),
+					VectorType(0.55f, 0.40f, 0.60f, 1.0f),
+					VectorType(0.50f, 0.40f, 0.70f, 1.0f),
 					(RenderMultiSelectAxes & EVectorAxis::Z)
 				);
 
+				ImGui::PopStyleVar(1); /* FrameRounding */
 				ImGui::EndChild();
 			}
 
-			if (IsInTable)
+			if (UIContext.bInGrid)
+			{
+				ImGui::TableNextRow();
+			}
+			else if (IsInTable)
 			{
 				ImGui::TableNextRow();
 			}
@@ -578,7 +640,7 @@ namespace LkEngine::UI {
 			return (Modified || ManuallyEdited);
 		}
 
-		/// TODO: Templated argument for selecting XYZW/RGBA on the drawn buttons.
+	#if 0
 		/**
 		 * Vec4Control
 		 * 
@@ -600,7 +662,16 @@ namespace LkEngine::UI {
 			ImGuiTable* CurrentTable = ImGui::GetCurrentTable();
 			const bool IsInTable = (CurrentTable != nullptr);
 
-			if (IsInTable)
+			if (UIContext.bInGrid)
+			{
+				ImGui::TableSetColumnIndex(0);
+				if (!Label.empty() && Label.at(0) != '#')
+				{
+					ImGui::Text(Label.c_str());
+					/* TODO: Do PushStyle here instead. */
+				}
+			}
+			else if (IsInTable)
 			{
 				ImGui::TableSetColumnIndex(0);
 				UI::ShiftCursor(Slider::TablePaddingX, 7.0f);
@@ -742,15 +813,18 @@ namespace LkEngine::UI {
 				ImGui::EndChild();
 			}
 
-			if (IsInTable)
+			if (UIContext.bInGrid)
+			{
+				ImGui::TableNextRow();
+			}
+			else if (IsInTable)
 			{
 				ImGui::TableNextRow();
 			}
 
 			return (Modified || ManuallyEdited);
 		}
-
-
+	#endif
 	}
 
 }

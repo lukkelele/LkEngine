@@ -18,7 +18,13 @@ namespace LkEngine {
 		X = LK_BIT(0),
 		Y = LK_BIT(1),
 		Z = LK_BIT(2),
-		W = LK_BIT(3)
+		W = LK_BIT(3),
+
+		/* Aliases. */
+		R = X,
+		G = Y,
+		B = Z,
+		A = W,
 	};
 	LK_ENUM_CLASS(EVectorAxis);
 

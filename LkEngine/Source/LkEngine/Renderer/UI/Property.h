@@ -17,12 +17,15 @@ namespace LkEngine::UI {
 			ShiftCursor(10.0f, 9.0f);
 		}
 
-		ImGui::Text(Label);
-
-		if (std::strlen(HelpText) > 0)
+		/* Skip rendering text for '#' and '##' identifier labels. */
+		if (Label && Label[0] != '#')
 		{
-			ImGui::SameLine();
-			HelpMarker(HelpText);
+			ImGui::Text(Label);
+			if (std::strlen(HelpText) != 0)
+			{
+				ImGui::SameLine();
+				HelpMarker(HelpText);
+			}
 		}
 
 		if (IsCurrentlyInTable)
@@ -63,12 +66,15 @@ namespace LkEngine::UI {
 			ShiftCursor(10.0f, 9.0f);
 		}
 
-		ImGui::Text(Label);
-
-		if (std::strlen(HelpText) != 0)
+		/* Skip rendering text for '#' and '##' identifier labels. */
+		if (Label && Label[0] != '#')
 		{
-			ImGui::SameLine();
-			HelpMarker(HelpText, HelpSymbol);
+			ImGui::Text(Label);
+			if (std::strlen(HelpText) != 0)
+			{
+				ImGui::SameLine();
+				HelpMarker(HelpText, HelpSymbol);
+			}
 		}
 
 		if (IsCurrentlyInTable)
@@ -203,6 +209,7 @@ namespace LkEngine::UI {
 	FORCEINLINE void EndCombo()
 	{
 		ImGui::EndCombo();
+		UIContext.NextItemData.ComboFlags = ImGuiComboFlags_None;
 	}
 
 	template<typename TEnum>
@@ -284,10 +291,6 @@ namespace LkEngine::UI {
 			/* Select the label from the std::pair (first argument). */
 			CurrentOption = Options.at(SelectedIndex).first;
 		}
-		else
-		{
-			LK_CORE_VERIFY(false);
-		}
 
 		ImGuiContext& G = *GImGui;
 		const float NextItemWidth = G.NextItemData.Width;
@@ -298,20 +301,31 @@ namespace LkEngine::UI {
 		if (UIContext.bInGrid)
 		{
 			ImGui::TableSetColumnIndex(0);
+			ImGui::Text(Label);
+			if (std::strlen(HelpText) != 0)
+			{
+				ImGui::SameLine();
+				HelpMarker(HelpText);
+			}
 		}
 		else if (IsInTable)
 		{
+			ImGui::Text(Label);
+			if (std::strlen(HelpText) != 0)
+			{
+				ImGui::SameLine();
+				HelpMarker(HelpText);
+			}
 		}
 		else
 		{
-			ShiftCursorX(10.0f);
-		}
-		ImGui::Text(Label);
-
-		if (std::strlen(HelpText) != 0)
-		{
-			ImGui::SameLine();
-			HelpMarker(HelpText);
+			ShiftCursor((2.0f + G.Style.FramePadding.x), (G.Style.FramePadding.y * 1.0f));
+			ImGui::Text(Label);
+			if (std::strlen(HelpText) != 0)
+			{
+				ImGui::SameLine();
+				HelpMarker(HelpText);
+			}
 		}
 
 		if (UIContext.bInGrid)
@@ -324,6 +338,7 @@ namespace LkEngine::UI {
 		else
 		{
 			ImGui::SameLine();
+			ShiftCursorY(-G.Style.FramePadding.y * 0.50f);
 		}
 
 		if (NextItemWidth > 0.0f)
@@ -335,13 +350,15 @@ namespace LkEngine::UI {
 			ImGui::PushItemWidth(ComboWidth);
 		}
 
+		/* Dropdown modification flag. */
+		bool Modified = false;
+
 		ImGuiComboFlags ComboFlags = ImGuiComboFlags_None;
 		if (Options.size() > 30)
 		{
 			ComboFlags |= ImGuiComboFlags_HeightLarge;
 		}
-
-		bool Modified = false;
+		ComboFlags |= UIContext.NextItemData.ComboFlags;
 
 		const std::string ID = std::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
@@ -356,10 +373,6 @@ namespace LkEngine::UI {
 				else if constexpr (Core::IsPair<ValueType>)
 				{
 					Option = Options.at(Idx).first;
-				}
-				else
-				{
-					LK_CORE_VERIFY(false);
 				}
 
 				const bool IsSelected = (Option == CurrentOption);
@@ -380,7 +393,6 @@ namespace LkEngine::UI {
 		}
 
 		ImGui::PopItemWidth();
-		Draw::Underline();
 
 		return Modified;
 	}
@@ -408,7 +420,6 @@ namespace LkEngine::UI {
 		else
 		{
 			ImGui::SameLine();
-			//ShiftCursor(10.0f, 9.0f);
 		}
 
 		const char* CurrentOption = Options[*Selected];
@@ -445,12 +456,14 @@ namespace LkEngine::UI {
 			ImGui::PushItemWidth(ComboWidth);
 		}
 
+		bool Modified = false;
+
 		ImGuiComboFlags ComboFlags = ImGuiComboFlags_None;
 		if (ArrSize > 30)
 		{
 			ComboFlags |= ImGuiComboFlags_HeightLarge;
 		}
-		bool Modified = false;
+		ComboFlags |= UIContext.NextItemData.ComboFlags;
 
 		const std::string ID = std::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
@@ -499,7 +512,7 @@ namespace LkEngine::UI {
 									  const int ComboWidth = -1)
 	{
 		using ValueType = std::remove_cvref_t<T>;
-		static_assert((std::is_same_v<ValueType, const char*> || Core::IsPair<ValueType>), "Unsupported type");
+		static_assert((std::is_same_v<ValueType, const char*> || Core::IsPair<ValueType>), "The type used in the array is not supported");
 
 		ImGuiContext& G = *GImGui;
 		const float NextItemWidth = G.NextItemData.Width;
@@ -517,7 +530,6 @@ namespace LkEngine::UI {
 		}
 		else
 		{
-			ImGui::SameLine();
 		}
 
 		const char* CurrentOption = nullptr;
@@ -530,10 +542,6 @@ namespace LkEngine::UI {
 			static_assert(Core::IsPairWithFirstArgConstChar<ValueType>, "The first pair argument (the label) is not const char*, which is required");
 			/* Select the label from the std::pair (first argument). */
 			CurrentOption = Options.at(*Selected).first;
-		}
-		else
-		{
-			LK_CORE_VERIFY(false);
 		}
 
 		/* Skip rendering text for '#' and '##' identifier labels. */
@@ -568,12 +576,14 @@ namespace LkEngine::UI {
 			ImGui::PushItemWidth(ComboWidth);
 		}
 
+		bool Modified = false;
+
 		ImGuiComboFlags ComboFlags = ImGuiComboFlags_None;
 		if (Options.size() > 30)
 		{
 			ComboFlags |= ImGuiComboFlags_HeightLarge;
 		}
-		bool Modified = false;
+		ComboFlags |= UIContext.NextItemData.ComboFlags;
 
 		const std::string ID = std::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
@@ -620,8 +630,6 @@ namespace LkEngine::UI {
 		}
 		else
 		{
-			//ImGui::SameLine(0.0f, 4.0f);
-			Draw::Underline();
 		}
 
 		return Modified;

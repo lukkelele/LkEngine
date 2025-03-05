@@ -78,7 +78,9 @@ namespace LkEngine::UI {
 		UI::FScopedStyle HeaderPaddingAndHeight(ImGuiStyleVar_FramePadding, ImVec2(FramePaddingX, FramePaddingY));
 
 		ImGui::PushID(Name.c_str());
+		UI::Font::Push("Bold");
 		const bool IsOpen = ImGui::TreeNodeEx("##DummyID", TreeNodeFlags, Name.c_str());
+		UI::Font::Pop();
 		ImGui::PopID();
 
 		return IsOpen;

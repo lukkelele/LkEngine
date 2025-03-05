@@ -56,7 +56,7 @@ namespace LkEngine {
 		void LoadThemeFromYaml(const YAML::Node& Data);
 
 		void UI_SaveThemePopup();
-		void UI_SelectSavedThemePopup();
+		void UI_SelectThemePopup();
 
 		void UI_ColorPicker();
 
