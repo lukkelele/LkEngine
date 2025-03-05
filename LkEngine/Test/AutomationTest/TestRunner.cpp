@@ -40,11 +40,12 @@ namespace LkEngine {
 int main(int Argc, char* Argv[])
 {
 	using namespace LkEngine;
-	//LkEngine::Core::Setup(Argc, Argv); /* Does not work with the Github Action Runner for some reason. */
+	LkEngine::Core::Setup(Argc, Argv);
 
     LTestRunner TestRunner;
 	TestRunner.Run();
 	LK_PRINTLN("Test results are placed in: {}", (std::filesystem::current_path() / "Results").string());
 
+	LK_PRINTLN("Exiting test runner");
     return 0;
 }

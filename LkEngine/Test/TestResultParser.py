@@ -110,8 +110,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     TestSuite = Match.group(1)
-    #SummaryFileName = f"{TestSuite}-Summary.json"
-    #BadgeFileName = f"{TestSuite}-Badge.json"
     SummaryFileName = f"Summary.json"
     BadgeFileName = f"Badge.json"
     print(f"TestSuite: {TestSuite}", flush=True)
