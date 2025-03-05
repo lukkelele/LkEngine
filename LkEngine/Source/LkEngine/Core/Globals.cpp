@@ -70,9 +70,9 @@ namespace LkEngine {
 
 	#if defined(LK_ENGINE_EDITOR)
 		LFileSystem::EngineDir = Path / "LkEditor";
-	#else
-		/* FIXME */
-		LFileSystem::EngineDir = Path / "LkRuntime";
+	#elif defined(LK_ENGINE_AUTOMATION_TEST)
+		/* TODO: Needs to be fixed so the github action runner doesn't crash here. */
+		LFileSystem::EngineDir = Path / "LkEngine"/ "LkEditor";
 	#endif
 		LFileSystem::RuntimeDir = LFileSystem::EngineDir;
 		LK_GLOBALS_PRINTLN("WorkingDir: {}", LFileSystem::WorkingDir.string());
