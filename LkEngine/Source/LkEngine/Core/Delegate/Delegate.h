@@ -116,7 +116,7 @@ namespace LkEngine::Core {
 		{
 		}
 
-		virtual TReturnValue Execute(TArgs&&... Args) override
+		FORCEINLINE virtual TReturnValue Execute(TArgs&&... Args) override
 		{
 			return Execute_Internal(std::forward<TArgs>(Args)..., std::index_sequence_for<Args2...>());
 		}
@@ -128,7 +128,7 @@ namespace LkEngine::Core {
 
 	private:
 		template<std::size_t... Is>
-		TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
+		FORCEINLINE TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
 		{
 			return Function(std::forward<TArgs>(Args)..., std::get<Is>(Payload)...);
 		}
@@ -173,12 +173,12 @@ namespace LkEngine::Core {
 			LK_CORE_ASSERT(InFunction, "Passed function is invalid");
 		}
 
-		virtual TReturnValue Execute(TArgs&&... Args) override
+		FORCEINLINE virtual TReturnValue Execute(TArgs&&... Args) override
 		{
 			return Execute_Internal(std::forward<TArgs>(Args)..., std::index_sequence_for<Args2...>());
 		}
 
-		virtual const void* GetOwner() const override
+		FORCEINLINE virtual const void* GetOwner() const override
 		{
 			return ObjectRef;
 		}
@@ -190,7 +190,7 @@ namespace LkEngine::Core {
 
 	private:
 		template<std::size_t... Is>
-		TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
+		FORCEINLINE TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
 		{
 			return (ObjectRef->*Function)(std::forward<TArgs>(Args)..., std::get<Is>(Payload)...);
 		}
@@ -228,19 +228,19 @@ namespace LkEngine::Core {
 		{
 		}
 
-		TReturnValue Execute(TArgs&&... Args) override
+		FORCEINLINE TReturnValue Execute(TArgs&&... Args) override
 		{
 			return Execute_Internal(std::forward<TArgs>(Args)..., std::index_sequence_for<Args2...>());
 		}
 
-		virtual void Clone(void* Destination) override
+		FORCEINLINE virtual void Clone(void* Destination) override
 		{
 			new (Destination) LLambdaDelegate(Lambda, Payload);
 		}
 
 	private:
 		template<std::size_t... Is>
-		TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
+		FORCEINLINE TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
 		{
 			return (TReturnValue)((Lambda)(std::forward<TArgs>(Args)..., std::get<Is>(Payload)...));
 		}
@@ -282,17 +282,17 @@ namespace LkEngine::Core {
 		{
 		}
 
-		virtual TReturnValue Execute(TArgs&&... Args) override
+		FORCEINLINE virtual TReturnValue Execute(TArgs&&... Args) override
 		{
 			return Execute_Internal(std::forward<TArgs>(Args)..., std::index_sequence_for<Args2...>());
 		}
 
-		virtual const void* GetOwner() const override
+		FORCEINLINE virtual const void* GetOwner() const override
 		{
 			return (ObjectRef.expired() ? nullptr : ObjectRef.lock().get());
 		}
 
-		virtual void Clone(void* Destination) override
+		FORCEINLINE virtual void Clone(void* Destination) override
 		{
 			new (Destination) LSharedPtrDelegate(ObjectRef, Function, Payload);
 		}
@@ -356,17 +356,17 @@ namespace LkEngine::Core {
 			return *this;
 		}
 
-		operator bool() const noexcept
+		FORCEINLINE operator bool() const noexcept
 		{
 			return IsValid();
 		}
 
-		bool operator==(const FDelegateHandle& Other) const noexcept
+		FORCEINLINE bool operator==(const FDelegateHandle& Other) const noexcept
 		{
 			return (ID == Other.ID);
 		}
 
-		bool operator<(const FDelegateHandle& Other) const noexcept
+		FORCEINLINE bool operator<(const FDelegateHandle& Other) const noexcept
 		{
 			return (ID < Other.ID);
 		}
@@ -406,7 +406,7 @@ namespace LkEngine::Core {
 	 * 
 	 *  Memory allocator that makes use of small memory allocations by 
 	 *  using a fixed-size stack buffer whenever the requested memory is
-	 *  small and utilizes heap memory for larger allocations.
+	 *  small. Utilizes heap memory for larger allocations.
 	 */
 	template<size_t MaxStackSize>
 	class LInlineAllocator
@@ -488,7 +488,7 @@ namespace LkEngine::Core {
 		 *  Allocate memory of given size, will create on the heap if the size
 		 *  is larger than the max allowed stack size.
 		 */
-		void* Allocate(const size_t InSize)
+		FORCEINLINE void* Allocate(const size_t InSize)
 		{
 			if (Size != InSize)
 			{
@@ -676,8 +676,7 @@ namespace LkEngine::Core {
 	/**
 	 * LDelegate
 	 *
-	 *  Delegate implementation that supports multiple ways
-	 *  of binding functions.
+	 *  Supports binding to all types of functions.
 	 */
 	template<TStringLiteral DelegateName, typename TReturnValue, typename... TArgs>
 	class LDelegate : public LDelegateBase
@@ -701,9 +700,9 @@ namespace LkEngine::Core {
 		 *
 		 *  Direct execution of the delegate, will cause crash if not properly bound.
 		 */
-		TReturnValue Execute(TArgs... Args) const
+		[[nodiscard]] FORCEINLINE TReturnValue Execute(TArgs... Args) const
 		{
-			LK_CORE_ASSERT(Allocator.HasAllocation(), "Delegate \"{}\" is not bound", typeid(this).name());
+			LK_CORE_VERIFY(Allocator.HasAllocation(), "Delegate '{}' is not bound", typeid(this).name());
 			return ((TDelegateInterface*)GetDelegate())->Execute(std::forward<TArgs>(Args)...);
 		}
 
@@ -713,13 +712,12 @@ namespace LkEngine::Core {
 		 *  Attempt to execute the delegate if it bound, otherwise ignore.
 		 *  A safe way to execute.
 		 */
-		TReturnValue ExecuteIfBound(TArgs... Args) const
+		[[nodiscard]] FORCEINLINE TReturnValue ExecuteIfBound(TArgs... Args) const
 		{
 			if (IsBound())
 			{
 				return ((TDelegateInterface*)GetDelegate())->Execute(std::forward<TArgs>(Args)...);
 			}
-			LK_CORE_DEBUG_TAG("Delegate", "Failed to execute unbound delegate \"{}\"", typeid(*this).name());
 
 			return TReturnValue();
 		}
@@ -729,7 +727,7 @@ namespace LkEngine::Core {
 		[[nodiscard]] static LDelegate CreateRaw(T* InObject, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2... Args)
 		{
 			LDelegate Handler;
-			Handler.Bind<LRawDelegate<false, T, TReturnValue(TArgs...), TArgs2...>>(
+			Handler.Bind_Internal<LRawDelegate<false, T, TReturnValue(TArgs...), TArgs2...>>(
 				InObject, 
 				InFunction, 
 				std::forward<TArgs2>(Args)...
@@ -742,8 +740,7 @@ namespace LkEngine::Core {
 		[[nodiscard]] static LDelegate CreateRaw(T* InObject, ConstMemberFunction<T, TArgs2...> InFunction, TArgs2... Args)
 		{
 			LDelegate Handler;
-			Handler.Bind<LRawDelegate<true, T, TReturnValue(TArgs...), TArgs2...>>(InObject, InFunction, std::forward<TArgs2>(Args)...);
-
+			Handler.Bind_Internal<LRawDelegate<true, T, TReturnValue(TArgs...), TArgs2...>>(InObject, InFunction, std::forward<TArgs2>(Args)...);
 			return Handler;
 		}
 
@@ -751,8 +748,7 @@ namespace LkEngine::Core {
 		[[nodiscard]] static LDelegate CreateStatic(TReturnValue(*InFunction)(TArgs..., TArgs2...), TArgs2... Args)
 		{
 			LDelegate Handler;
-			Handler.Bind<LStaticDelegate<TReturnValue(TArgs...), TArgs2...>>(InFunction, std::forward<TArgs2>(Args)...);
-
+			Handler.Bind_Internal<LStaticDelegate<TReturnValue(TArgs...), TArgs2...>>(InFunction, std::forward<TArgs2>(Args)...);
 			return Handler;
 		}
 
@@ -762,7 +758,7 @@ namespace LkEngine::Core {
 													 TArgs2... Args)
 		{
 			LDelegate Handler;
-			Handler.Bind<LSharedPtrDelegate<false, T, TReturnValue(TArgs...), TArgs2...>>(
+			Handler.Bind_Internal<LSharedPtrDelegate<false, T, TReturnValue(TArgs...), TArgs2...>>(
 				ObjectRef, 
 				InFunction, 
 				std::forward<TArgs2>(Args)...
@@ -777,7 +773,7 @@ namespace LkEngine::Core {
 													 TArgs2... Args)
 		{
 			LDelegate Handler;
-			Handler.Bind<LSharedPtrDelegate<true, T, TReturnValue(TArgs...), TArgs2...>>(
+			Handler.Bind_Internal<LSharedPtrDelegate<true, T, TReturnValue(TArgs...), TArgs2...>>(
 				ObjectRef, 
 				InFunction, 
 				std::forward<TArgs2>(Args)...
@@ -791,7 +787,7 @@ namespace LkEngine::Core {
 		{
 			using LambdaType = std::decay_t<TLambda>;
 			LDelegate Handler;
-			Handler.Bind<LLambdaDelegate<LambdaType, TReturnValue(TArgs...), TArgs2...>>(
+			Handler.Bind_Internal<LLambdaDelegate<LambdaType, TReturnValue(TArgs...), TArgs2...>>(
 				std::forward<LambdaType>(InLambda), 
 				std::forward<TArgs2>(Args)...
 			);
@@ -799,54 +795,61 @@ namespace LkEngine::Core {
 			return Handler;
 		}
 
+	public:
+		/* Bind: Raw, non-const member function. */
 		template<typename T, typename... TArgs2>
-		void BindRaw(T* ObjectRef, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
+		void Bind(T* ObjectRef, NonConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
 			static_assert(!std::is_const_v<T>, "Non-const function cannot be bound on a const object");
 			*this = CreateRaw<T, TArgs2...>(ObjectRef, InFunction, std::forward<TArgs2>(Args)...);
 		}
 
+		/* Bind: Raw, const member function. */
 		template<typename T, typename... TArgs2>
-		void BindRaw(T* ObjectRef, ConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
+		void Bind(T* ObjectRef, ConstMemberFunction<T, TArgs2...> InFunction, TArgs2&&... Args)
 		{
 			*this = CreateRaw<T, TArgs2...>(ObjectRef, InFunction, std::forward<TArgs2>(Args)...);
 		}
 
+		/* Bind: Static. */
 		template<typename... TArgs2>
-		void BindStatic(TReturnValue(*InFunction)(TArgs..., TArgs2...), TArgs2&&... Args)
+		void Bind(TReturnValue(*InFunction)(TArgs..., TArgs2...), TArgs2&&... Args)
 		{
 			*this = CreateStatic<TArgs2...>(InFunction, std::forward<TArgs2>(Args)...);
 		}
 
+		/* Bind: Lambda. */
 		template<typename LambdaType, typename... Args2>
-		void BindLambda(LambdaType&& InLambda, Args2&&... args)
+		void Bind(LambdaType&& InLambda, Args2&&... args)
 		{
 			*this = CreateLambda<LambdaType, Args2...>(std::forward<LambdaType>(InLambda), std::forward<Args2>(args)...);
 		}
 
+		/* Bind: Shared Pointer, non-const member function. */
 		template<typename T, typename... Args2>
-		void BindShared(std::shared_ptr<T> ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
+		void Bind(std::shared_ptr<T> ObjectRef, NonConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
 		{
 			static_assert(!std::is_const_v<T>, "Attempted to bind a non-const member function on a const object reference");
-			*this = CreateShared<T, Args2... >(ObjectRef, InFunction, std::forward<Args2>(args)...);
+			*this = CreateShared<T, Args2...>(ObjectRef, InFunction, std::forward<Args2>(args)...);
 		}
 
+		/* Bind: Shared Pointer, const member function. */
 		template<typename T, typename... Args2>
-		void BindShared(std::shared_ptr<T> ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
+		void Bind(std::shared_ptr<T> ObjectRef, ConstMemberFunction<T, Args2...> InFunction, Args2&&... args)
 		{
 			*this = CreateShared<T, Args2...>(ObjectRef, InFunction, std::forward<Args2>(args)...);
 		}
 
+	private:
 		template<typename T, typename... TBindArgs>
-		FORCEINLINE void Bind(TBindArgs&&... Args)
+		FORCEINLINE void Bind_Internal(TBindArgs&&... Args)
 		{
 			Release();
 			void* AllocPointer = Allocator.Allocate(sizeof(T));
-
 			new (AllocPointer) T(std::forward<TBindArgs>(Args)...);
 		}
 
-		FORCEINLINE static std::string_view GetStaticName() { return StaticName; }
+		static std::string_view GetStaticName() { return StaticName; }
 
 	private:
 		/** Allow access to the Create<TFunction> functions. */
@@ -891,7 +894,6 @@ namespace LkEngine::Core {
 		{
 			Dispatchers = std::move(Other.Dispatchers);
 			Locks = std::move(Other.Locks);
-
 			return *this;
 		}
 
@@ -983,12 +985,6 @@ namespace LkEngine::Core {
 							   " - Raw Name: {}\n", 
 							   TypeName, typeid(*this).raw_name());
 		}
-
-		/***************************************************
-		 * Function registration. 
-		 * 
-		 * The multicast delegate API.
-		 ***************************************************/
 
 		/** Raw Pointer, non-const function. */
 		template<typename T, typename... TArgs2>
