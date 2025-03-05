@@ -43,7 +43,9 @@ namespace LkEngine {
 
 	LLog::~LLog()
 	{
-		spdlog::shutdown();
+		/* FIXME: The call to spdlog::shutdown causes errors in the test runner for some odd reason.
+		 *        Seems to be something with the release of the registry. */
+		//spdlog::shutdown();
 	}
 
 	LLog& LLog::Get()
