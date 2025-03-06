@@ -31,7 +31,6 @@ workspace "LkEngine"
         "LK_ENGINE_PATCH=" .. LK_ENGINE_PATCH,
         "LK_ENGINE_VERSION=" .. LK_ENGINE_VERSION,
         "LK_ENGINE_STATIC_LIB",
-        "LK_ENGINE_EDITOR",
 
         "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
 		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
@@ -225,6 +224,11 @@ project "LkEngine"
 		runtime "Debug"
 		symbols "On"
         links { "Tracy" }
+
+    filter { "configurations:*", "configurations:not AutomationTest" }
+        defines {
+            "LK_ENGINE_EDITOR",
+        }
 
 	filter "configurations:AutomationTest"
         includedirs {

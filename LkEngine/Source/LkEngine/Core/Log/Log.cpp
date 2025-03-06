@@ -29,13 +29,16 @@ namespace LkEngine {
 		/* Color and file sink. */
 		std::string Logfile;
 
-		std::filesystem::path LogDirectory{ "Logs/" };
+		std::filesystem::path LogDirectory;
 	}
 
 	LLog::LLog()
 	{
 		/* Use binary workdir as directory for logs. */
-		LogDirectory = fs::path(std::format("{}/Logs/", fs::current_path().string()).c_str());
+		LogDirectory = std::filesystem::path(std::format("{}/Logs/", LFileSystem::GetRuntimeDir()));
+	#if defined(LK_ENGINE_AUTOMATION_TEST)
+		LK_PRINTLN("Log directory: {}", LogDirectory);
+	#endif
 
 		/* Keep a maximum of 10 logfiles present. */
 		LogUtility::CleanLogDirectory(LogDirectory, 10);

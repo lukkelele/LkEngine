@@ -3,10 +3,14 @@
 
 #include "LkEngine/Core/IO/FileSystem.h"
 
+#if defined(LK_ENGINE_AUTOMATION_TEST) && defined(LK_ENGINE_EDITOR)
+#error "LK_ENGINE_EDITOR is not allowed to be defined when running tests"
+#endif
+
 /**
- * Allow logging when running automated tests. 
+ * Allow logging in certain scenarios.
  * This is done to provide better context to potential errors that might occur
- * when running the tests in the github action runner.
+ * during engine startup or when running the github action runner.
  */
 #if defined(LK_GLOBALS_PRINTING_ENABLED) || defined(LK_ENGINE_AUTOMATION_TEST)
 #	define LK_GLOBALS_PRINT(...)   LK_PRINT(__VA_ARGS__)
@@ -16,13 +20,9 @@
 #	define LK_GLOBALS_PRINTLN(...)
 #endif
 
-
 namespace LkEngine {
 
-	static FRuntimeArguments RuntimeArguments;
-
-	int Global::Argc;
-	std::vector<std::string> Global::Argv;
+	static FRuntimeArguments RuntimeArgs;
 
 	void Global::SetRuntimeArguments(const int Argc, char* Argv[])
 	{
@@ -30,11 +30,14 @@ namespace LkEngine {
 		static bool bArgumentsSet = false;
 		LK_CORE_VERIFY(bArgumentsSet == false && "SetRuntimeArguments incorrectly called more than once");
 
-		RuntimeArguments.Argc = Argc;
-		RuntimeArguments.Argv = Argv;
-		if (RuntimeArguments.Argc >= 1)
+		RuntimeArgs.Args.clear();
+		RuntimeArgs.Args.reserve(Argc);
+
+		RuntimeArgs.Argc = Argc;
+		RuntimeArgs.Argv = Argv;
+		if (RuntimeArgs.Argc >= 1)
 		{
-			LFileSystem::BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]).parent_path();
+			LFileSystem::BinaryDir = std::filesystem::path(RuntimeArgs.Argv[0]).parent_path();
 		}
 
 		LFileSystem::WorkingDir = std::filesystem::current_path();
@@ -45,6 +48,7 @@ namespace LkEngine {
 		LK_GLOBALS_PRINTLN("Working Directory: {}", LFileSystem::WorkingDir.string());
 	#endif
 
+		/* Find the engine root. */
 		std::filesystem::path Path = LFileSystem::BinaryDir;
 		{
 			int Traversed = 0;
@@ -61,8 +65,10 @@ namespace LkEngine {
 		LFileSystem::EngineDir = Path;
 
 	#if defined(LK_ENGINE_EDITOR)
-		LFileSystem::EditorDir = Path / "LkEditor";
+		LFileSystem::EditorDir = LFileSystem::EngineDir / "LkEditor";
 		LFileSystem::RuntimeDir = LFileSystem::EditorDir;
+	#elif defined(LK_ENGINE_AUTOMATION_TEST)
+		LFileSystem::RuntimeDir = LFileSystem::BinaryDir;
 	#else
 		LFileSystem::RuntimeDir = LFileSystem::EngineDir;
 	#endif
@@ -73,9 +79,9 @@ namespace LkEngine {
 		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid: '{}'", LFileSystem::EngineDir.string());
 
 		LFileSystem::ConfigDir = LFileSystem::RuntimeDir / "Configuration";
-
 		if (!LFileSystem::Exists(LFileSystem::ConfigDir))
 		{
+			LK_GLOBALS_PRINTLN("Creating configuration directory: {}", LFileSystem::ConfigDir);
 			LFileSystem::CreateDirectory(LFileSystem::ConfigDir);
 		}
 
@@ -93,7 +99,7 @@ namespace LkEngine {
 
 	const FRuntimeArguments& Global::GetRuntimeArguments()
 	{
-		return RuntimeArguments;
+		return RuntimeArgs;
 	}
 
 }

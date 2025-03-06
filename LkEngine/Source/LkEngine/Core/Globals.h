@@ -8,7 +8,6 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 
-
 namespace LkEngine {
 
 	struct FRuntimeArguments
@@ -26,10 +25,6 @@ namespace LkEngine {
 		 */
 		static void SetRuntimeArguments(const int Argc, char* Argv[]);
 		static const FRuntimeArguments& GetRuntimeArguments();
-
-	private:
-		static int Argc;
-		static std::vector<std::string> Argv;
 	};
 
 }
