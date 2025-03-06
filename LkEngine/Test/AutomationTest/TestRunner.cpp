@@ -10,11 +10,12 @@
 namespace LkEngine {
 
 	LTestRunner::LTestRunner()
+		: ResultsDir(LFileSystem::ConvertToUnixPath(LFileSystem::GetRuntimeDir() / "Results"))
 	{
 		/* Create 'Results' directory to store test results in if it does not already exist. */
-		if (!LFileSystem::Exists(std::filesystem::current_path() / "Results"))
+		if (!LFileSystem::Exists(ResultsDir))
 		{
-			LFileSystem::CreateDirectory(std::filesystem::current_path() / "Results");
+			LFileSystem::CreateDirectory(ResultsDir);
 		}
 
 		/* Register test logger. */
@@ -43,9 +44,9 @@ int main(int Argc, char* Argv[])
 	LkEngine::Core::Setup(Argc, Argv);
 
     LTestRunner TestRunner;
+	LK_TEST_INFO("Test results are placed in: {}", LFileSystem::ConvertToUnixPath(TestRunner.ResultsDir));
 	TestRunner.Run();
-	LK_PRINTLN("Test results are placed in: {}", (std::filesystem::current_path() / "Results").string());
 
-	LK_PRINTLN("Exiting test runner");
+	LK_TEST_INFO_TAG("TestRunner", "Exiting");
     return 0;
 }

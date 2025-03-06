@@ -16,6 +16,9 @@ namespace LkEngine {
 		virtual ~LTestRunner() = default;
 
 		void Run();
+
+	public:
+		std::filesystem::path ResultsDir{};
 	};
 
 }
