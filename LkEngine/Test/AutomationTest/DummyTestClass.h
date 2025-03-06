@@ -77,7 +77,5 @@ namespace LkEngine::Test {
 		LCLASS(LDummerTestClassExpanded);
 	};
 
-
-
 }
 

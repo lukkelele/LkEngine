@@ -86,9 +86,6 @@ namespace LkEngine {
 		 */
 		std::unordered_map<std::string, Test::LAutomationTestBase*> TestInstanceMap{};
 
-		/* TODO: REMOVE */
-		std::unordered_map<Test::ETestSuite, std::vector<Test::LAutomationTestBase*>> TestSuiteMap{};
-
 		/**
 		 * Test creator functions mapped to their corresponding test suites.
 		 */
