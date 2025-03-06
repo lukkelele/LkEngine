@@ -57,6 +57,11 @@ project "LkEditor"
 		runtime "Debug"
 		symbols "On"
 
+    filter "configurations:AutomationTest"
+		runtime "Debug"
+		symbols "On"
+        kind "None"
+
 	filter "configurations:Release"
 		runtime "Release"
 		optimize "On"
