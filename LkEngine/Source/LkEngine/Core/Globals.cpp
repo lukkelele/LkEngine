@@ -34,13 +34,18 @@ namespace LkEngine {
 		RuntimeArguments.Argv = Argv;
 		if (RuntimeArguments.Argc >= 1)
 		{
-			LFileSystem::BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]).parent_path().string() + PathSeparator;
+			LFileSystem::BinaryDir = std::filesystem::path(RuntimeArguments.Argv[0]).parent_path();
 		}
 
 		LFileSystem::WorkingDir = std::filesystem::current_path();
-		LK_GLOBALS_PRINTLN("Working Directory: {}", LFileSystem::WorkingDir.string());
 
-		std::filesystem::path Path = LFileSystem::WorkingDir;
+	#if defined(LK_ENGINE_AUTOMATION_TEST)
+		/* Print for the hosted action runner. */
+		LK_GLOBALS_PRINTLN("Binary Directory:  {}", LFileSystem::BinaryDir.string());
+		LK_GLOBALS_PRINTLN("Working Directory: {}", LFileSystem::WorkingDir.string());
+	#endif
+
+		std::filesystem::path Path = LFileSystem::BinaryDir;
 		{
 			int Traversed = 0;
 			while (Path.filename() != "LkEngine")
@@ -48,55 +53,36 @@ namespace LkEngine {
 				Path = Path.parent_path();
 				Traversed++;
 				LK_GLOBALS_PRINTLN("Path: {}   Traversed: {}", Path.string(), Traversed);
-				LK_CORE_VERIFY(Traversed <= 4, "Cannot find LkEngine root directory");
+				LK_CORE_VERIFY(Traversed <= 5, "Cannot find LkEngine root directory");
 			}
 		}
 
-		bool bFoundEngineConfig = false;
-		LK_CORE_VERIFY(Path.filename() == "LkEngine", "Path is not LkEngine");
-
-		/**
-		 * TODO: Evaluate how to best solve this.
-		 *       Should just find the root engine directory for all build configurations.
-		 */
-		int Traversed = 0;
-		while (Path.parent_path().filename() == "LkEngine")
-		{
-			Path = Path.parent_path();
-			Traversed++;
-			LK_GLOBALS_PRINTLN("Path: {}   Traversed: {}", Path.string(), Traversed);
-			LK_CORE_VERIFY(Traversed <= 4, "Traversal to find LkEngine root directory failed");
-		}
+		LK_GLOBALS_PRINTLN("Path: {}", Path);
+		LFileSystem::EngineDir = Path;
 
 	#if defined(LK_ENGINE_EDITOR)
-		LFileSystem::EngineDir = Path / "LkEditor";
-	#endif
-
-	#if defined(LK_ENGINE_AUTOMATION_TEST)
-		/* TODO: Needs to be fixed so the github action runner doesn't crash here. */
-		/* Prepend the path with 'LkEngine' since the action runner use that pathing. */
-		LFileSystem::EngineDir = "LkEngine" / LFileSystem::EngineDir;
-		//LFileSystem::EngineDir = Path / "LkEngine"/ "LkEditor";
-	#endif
-
+		LFileSystem::EditorDir = Path / "LkEditor";
+		LFileSystem::RuntimeDir = LFileSystem::EditorDir;
+	#else
 		LFileSystem::RuntimeDir = LFileSystem::EngineDir;
-		LK_GLOBALS_PRINTLN("WorkingDir: {}", LFileSystem::WorkingDir.string());
+	#endif
+
 		LK_GLOBALS_PRINTLN("EngineDir:  {}", LFileSystem::EngineDir.string());
+		LK_GLOBALS_PRINTLN("EditorDir:  {}", LFileSystem::EditorDir.string());
 		LK_GLOBALS_PRINTLN("RuntimeDir: {}", LFileSystem::RuntimeDir.string());
 		LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::EngineDir), "Engine directory is not valid: '{}'", LFileSystem::EngineDir.string());
 
-		LFileSystem::ConfigDir = LFileSystem::EngineDir / "Configuration";
+		LFileSystem::ConfigDir = LFileSystem::RuntimeDir / "Configuration";
 
 		if (!LFileSystem::Exists(LFileSystem::ConfigDir))
 		{
 			LFileSystem::CreateDirectory(LFileSystem::ConfigDir);
-			LK_CORE_VERIFY(LFileSystem::IsDirectory(LFileSystem::ConfigDir), "Configuration directory is not valid");
 		}
 
 		LFileSystem::EngineConfig = LFileSystem::ConfigDir / "LkEngine.lkconf";
 		LFileSystem::EditorConfig = LFileSystem::ConfigDir / "EditorSettings.yaml";
-		LFileSystem::ResourcesDir = std::filesystem::absolute(LFileSystem::EngineDir / "Resources");
-		LFileSystem::AssetsDir    = std::filesystem::absolute(LFileSystem::EngineDir / "Assets");
+		LFileSystem::ResourcesDir = std::filesystem::absolute(LFileSystem::RuntimeDir / "Resources");
+		LFileSystem::AssetsDir    = std::filesystem::absolute(LFileSystem::RuntimeDir / "Assets");
 		LK_GLOBALS_PRINTLN("EngineConfig: {}", LFileSystem::EngineConfig.string());
 		LK_GLOBALS_PRINTLN("EditorConfig: {}", LFileSystem::EditorConfig.string());
 		LK_GLOBALS_PRINTLN("ResourcesDir:  {}", LFileSystem::ResourcesDir.string());
