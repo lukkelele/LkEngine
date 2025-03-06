@@ -50,20 +50,20 @@ jobs:
       shell: pwsh
       run: |
         & "${env:TEST_DIR}\LkEngine_AutomationTests.exe" ${env:TEST_RESULT_FILE} "Core"
-      timeout-minutes: 2
+      timeout-minutes: 5
 
     - name: Evaluate Test Results
       run: |
         echo "Files in TEST_DIR:" 
         Get-ChildItem -Path "${{env.TEST_DIR}}"
-        python LkEngine/Test/TestResultParser.py Results/${env:TEST_RESULT_FILE} "Core"
+        python LkEngine/Test/TestResultParser.py ${env:TEST_DIR}/Results/${env:TEST_RESULT_FILE} "Core"
       timeout-minutes: 2
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: TestResults
-        path: ./Results
+        path: ${{ env.TEST_DIR }}/Results
       timeout-minutes: 20
 
 
