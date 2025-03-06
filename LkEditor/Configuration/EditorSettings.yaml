@@ -1,9 +1,0 @@
-EditorSettings:
-  Editor:
-    TranslationSnapValue: 0.1
-    RotationSnapValue: 5
-    ScaleSnapValue: 0.1
-  ContentBrowser:
-    ThumbnailSize: 128
-    Debug:
-      DrawOutlinerBorders: false
