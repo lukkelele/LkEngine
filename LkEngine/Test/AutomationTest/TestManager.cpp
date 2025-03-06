@@ -98,7 +98,7 @@ namespace LkEngine {
 		Out << YAML::EndSeq;
 		Out << YAML::EndMap;
 
-		const std::string ResultDir = LFileSystem::GetBinaryDir().string() + "Results";
+		const std::string ResultDir = LFileSystem::GetBinaryDir().string() + "/Results";
 		LK_TEST_INFO_TAG("TestManager", "Test results directory: {}", ResultDir);
 		if (!LFileSystem::Exists(ResultDir))
 		{
