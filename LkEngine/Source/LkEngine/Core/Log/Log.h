@@ -186,7 +186,7 @@ namespace LkEngine {
         /**
          * Convert a ELogLevel to spdlog::level.
          */
-        FORCEINLINE static constexpr spdlog::level::level_enum ToSpdlogLevel(const ELogLevel Level)
+        FORCEINLINE static spdlog::level::level_enum ToSpdlogLevel(const ELogLevel Level)
         {
             switch (Level)
             {
@@ -202,17 +202,31 @@ namespace LkEngine {
             return spdlog::level::info;
         }
 
+		template<bool Safe = false>
         FORCEINLINE static std::string_view GetLoggerName(const ELoggerType LoggerType)
         {
-            switch (LoggerType)
-            {
-                case ELoggerType::Core:          return Logger_Core->name();
-                case ELoggerType::Client:	     return Logger_Client->name();
-				case ELoggerType::EditorConsole: return Logger_EditorConsole->name();
-                case ELoggerType::TestRunner:    return Logger_TestRunner->name();
-            }
+			if constexpr (Safe)
+			{
+				switch (LoggerType)
+				{
+					case ELoggerType::Core:          return (Logger_Core ? Logger_Core->name() : "");
+					case ELoggerType::Client:        return (Logger_Client ? Logger_Client->name() : "");
+					case ELoggerType::EditorConsole: return (Logger_EditorConsole ? Logger_EditorConsole->name() : "");
+					case ELoggerType::TestRunner:    return (Logger_TestRunner ? Logger_TestRunner->name() : "");
+				}
+			}
+			else
+			{
+				switch (LoggerType)
+				{
+					case ELoggerType::Core:          return Logger_Core->name();
+					case ELoggerType::Client:	     return Logger_Client->name();
+					case ELoggerType::EditorConsole: return Logger_EditorConsole->name();
+					case ELoggerType::TestRunner:    return Logger_TestRunner->name();
+				}
+				LK_CORE_ASSERT(false, "Unknown logger type: {}", static_cast<int>(LoggerType));
+			}
 
-            LK_CORE_ASSERT(false, "Unknown logger type");
             return "";
         }
 
