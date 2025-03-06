@@ -91,11 +91,27 @@ EventQueue.ProcessFiltered<LMousePressedEvent>();
 
 The delegate implementation is found in [Delegate.h](../LkEngine/Source/LkEngine/Core/Delegate/Delegate.h).
 
-| Macro Declaration | Type | Returns |
+| Delegate Macro Declaration | Type | Returns |
 | :-------- | :------- | :---: |
 | **LK_DECLARE_DELEGATE**(*Args...*) | Single | Nothing |
 | **LK_DECLARE_DELEGATE_RET**(Name, ReturnType, *Args...*) | Single | ReturnType |
 | **LK_DECLARE_MULTICAST_DELEGATE**(*Args...*) | Multicast | Nothing |
+
+
+### Math Library
+LkEngine makes use of templates to support mathematical operations for containers from different libraries (i.e glm::vec, ImVec).  
+The header that includes **LVector2**, **LVector3** and **LVector4** can be found in [Vector.h](../LkEngine/Source/LkEngine/Core/Math/Vector.h).
+
+#### LVector2 (TVector2\<float\>)
+> [Core/Math/Vector2.h](../LkEngine/Source/LkEngine/Core/Math/Vector2.h)
+
+#### LVector3 (TVector3\<float\>)
+> [Core/Math/Vector3.h](../LkEngine/Source/LkEngine/Core/Math/Vector3.h)
+
+Aliased to LVector because the three component vector is the most used type of vector in 3D contexts, using either works.
+
+#### LVector4 (TVector4\<float\>)
+> [Core/Math/Vector4.h](../LkEngine/Source/LkEngine/Core/Math/Vector4.h)
 
 <br>
 
