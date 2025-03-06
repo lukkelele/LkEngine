@@ -67,8 +67,8 @@ LkEngine/Test/Logs
 **/*.lkr
 **/*/NodeEditor.json
 **/*.lktheme
-**/*/EditorLayout.yaml
-**/*/EditorSettings.yaml
+**/Lk*/Configuration/*.yaml
+**/Lk*/Configuration/*.json
 
 # LkEngine Starter Scene. Disable ignore when wanting to update the scene(s).
 **/*/Starter-*.lkscene
