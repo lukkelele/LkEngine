@@ -60,12 +60,12 @@ namespace LkEngine {
 
 		if (!UI::IsWindowDocked<UI::EFindType::Name>(WindowName))
 		{
-			/* Only constraint the window size when the window undocked. */
-			ImGui::SetNextWindowSizeConstraints(ImVec2(460, 520), ImVec2(6000, 6000));
+			/* Only constraint the window size when the window is undocked. */
+			ImGui::SetNextWindowSizeConstraints(ImVec2(460, 520), UI::SizeConstraint<ImVec2>::Max);
 		}
+
 		if (!UI::Begin(WindowName, &bWindow_CoreSettings, WindowFlags))
 		{
-			UI::End();
 			return;
 		}
 
@@ -105,6 +105,8 @@ namespace LkEngine {
 			}
 
 			ImGui::PopStyleVar(2); /* FramePadding, FrameRounding */
+
+			UI::EndPropertyGridHeader();
 		}
 
 		if (UI::PropertyGridHeader("Gizmo Settings"))
