@@ -1,21 +1,18 @@
 # LkEngine Development
 > Development progress.
 
-TODO: This should be in reverse order per year, i.e December -> January and not January -> December.
-
 ---
 
 * [2025](#Year-2025)
 * [2024](#Year-2024)
-  - [January](#2024-January)
   - [February](#2024-February)
+  - [January](#2024-January)
 * [2023](#2023)
-  - [March](#2023-March)
-  - [October](#2023-October)
-  - [November](#2023-November)
   - [December](#2023-December)
+  - [November](#2023-November)
+  - [October](#2023-October)
+  - [March](#2023-March)
 
-<br>
 
 ---
 
@@ -59,32 +56,9 @@ Early view of the content browser and content outliner.
 
 <br>
 
+<!-- 2025 <-> 2024 -->
+
 # 2024 <a id="Year-2024"></a>
-## January (2024)<a id="2024-January"></a>
-
-### January 28
-Some 3D rendering. The *Translate* and *Rotate* gizmo modes can be seen as well.
-
-![2024-January-28-1](Images/2024/LkEngine-2024-01-28_1.png)
-
-![2024-January-28-2](Images/2024/LkEngine-2024-01-28_2.png)
-
-<br>
-
-### January 1
-The current look of the engine, lots to polish.
-
-![2024-January-1](Images/2024/LkEngine-2024-01-01.png)
-
-Once again thanks to my best friend **Atilla** for his handsome face. I need to add new images for the *Create Menu* (what I call it for now) 
-but Atilla's beauty will do for now.
-
-<br>
-
----
-<!----------------------------------------------------------->
-<!--| FEBRUARY |-->
-<!----------------------------------------------------------->
 
 ## February (2024)<a id="2024-February"></a>
 ### February 15
@@ -105,6 +79,27 @@ Some nice improvements can be seen though, especially with the new environment c
 Faulty renderered mesh because of a misaligned vertexbuffer and shader layout.
 
 ![2024-February-3](Images/2024/LkEngine-2024-02-04.png)
+
+<br>
+
+## January (2024)<a id="2024-January"></a>
+
+### January 28
+Some 3D rendering. The *Translate* and *Rotate* gizmo modes can be seen as well.
+
+![2024-January-28-1](Images/2024/LkEngine-2024-01-28_1.png)
+
+![2024-January-28-2](Images/2024/LkEngine-2024-01-28_2.png)
+
+<br>
+
+### January 1
+The current look of the engine, lots to polish.
+
+![2024-January-1](Images/2024/LkEngine-2024-01-01.png)
+
+Once again thanks to my best friend **Atilla** for his handsome face. I need to add new images for the *Create Menu* (what I call it for now) 
+but Atilla's beauty will do for now.
 
 <br>
 
@@ -185,11 +180,11 @@ The entity entries can be seen on the right sidebar.
 <br>
 
 <!----------------------------------------------------------->
-<!--| LukkelEngine OLD |-->
+<!--| LukkelEngine (OLD) |-->
 <!----------------------------------------------------------->
 
-# LukkelEngine  (Old) <a id="LukkelEngine-Old"></a>
-## March 2023
+# LukkelEngine (Old) <a id="LukkelEngine-Old"></a>
+## March 2023 <a id="2023-March"></a>
 ### March 19
 Improved the UI, added constraints and updated the event handling.<br>
 Not happy with the physics implementation, will redo it in the future.
