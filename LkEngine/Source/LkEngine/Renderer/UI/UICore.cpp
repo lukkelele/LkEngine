@@ -100,8 +100,8 @@ namespace LkEngine::UI {
 		{
 			if (ThisWindow->SkipItems)
 			{
-				UI::PopID();
 				ImGui::End();
+				UI::PopID();
 				return false;
 			}
 		}
