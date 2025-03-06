@@ -1,23 +1,19 @@
 # LkEngine :shaved_ice: 
-> Game Engine written in C++20
 
----
-
-<img height="22" alt="VersionBadge" src="https://img.shields.io/badge/LkEngine-v0.1.2--alpha-blue">
-
+<!-- Badges -->
+<img height="20" alt="VersionBadge" src="https://img.shields.io/badge/Version-0.1.2--alpha-blue"></img>
 ![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
-<img height="20" alt="Endpoint Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCore%2FBadge.json&style=plastic&label=Core-Tests">
+<img height="20" alt="Endpoint Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCore%2FBadge.json&style=plastic&label=Core-Tests"></img>
 
 ## Content
 1. [Project](#Project)
 2. [Engine](#Engine)
-	- [Features](#Engine-Features)
 3. [Setup and Installation](#Setup-and-Installation)
     - [Windows](#Platform-Windows)
 	- [Linux](#Platform-Linux)
-	- [Dependencies](#Engine-Dependencies)
 4. [Development](#Engine-Development)
 	- [Showcase](#Engine-Development-Showcase)
+5. [Dependencies](#Engine-Dependencies)
 
 ---
 
@@ -29,41 +25,32 @@
 # Project <a id="Project"></a> <a href="https://lukkelele.github.io/LkEngine" target="_blank"> <img height="23" alt="github.io.LkEngine" src="https://img.shields.io/badge/github.io-LkEngine-darkgray">
 </a>
 
-**LkEngine** (pronounced *Lukkel-Engine*) is a game engine written in C\++20. <br>
-This project is for fun and to learn more. I really enjoy coding so I have a blast doing it.<br>
+**LkEngine** (pronounced *Lukkel-Engine*) is a game and rendering engine written in C\++20. <br>
+This project is for fun and to learn more, I just love to code.<br>
 I have lots of ideas that I want to see if they could work and this project is good environment for me to try stuff out.
-<br>
-<br>
-The goal is to have a rendering application with an API that is good for performance and easy to use.<br>
-With features such as:
-- Static reflection
-- Support for multiple platforms
-- Crash and error handling
-- Automated testing
-- Serialization and persistance
-- Application launcher
-- Development tools (e.g profiling, renderer debugging)
 
-## Engine Features <a id="Engine-Features"></a>
-#### Available
-:white_check_mark: OpenGL Support<br>
-:white_check_mark: Camera System<br>
-:white_check_mark: Asset Loading<br>
-:white_check_mark: Profiling and Instrumentation<br>
-:white_check_mark: Serialization and Persistence<br>
-:white_check_mark: Themes and custom theme creation<br>
+## Engine <a id="Engine"></a>
+For a detailed view of the engine and the API, check out the [Engine](./Docs/Engine.md) document.
+
+#### Implemented
+:white_check_mark: OpenGL support<br>
+:white_check_mark: Asset loading<br>
+:white_check_mark: Profiling and instrumentation<br>
+:white_check_mark: Serialization and persistence<br>
+:white_check_mark: Automated tests<br>
+:white_check_mark: Camera system<br>
+:white_check_mark: Raycasting<br>
+:white_check_mark: Custom themes<br>
 
 #### In Progress
 :large_orange_diamond: Editor (LkEditor)<br>
 :large_orange_diamond: Test Framework (LTesto)<br>
+:large_orange_diamond: Rendering debug tools (e.g drawing lines in world space)<br>
 
 #### Todo
-:black_square_button: Static Reflection<br>
+:black_square_button: Static reflection<br>
 :black_square_button: Physics (2D/3D) <br>
-:black_square_button: Debugging tools (e.g drawing lines in world space)<br>
 :black_square_button: Vulkan support<br>
-
-<!------------------------------------------------------------>
 
 ---
 
@@ -86,7 +73,6 @@ Make sure the following are installed:
 
 Most dependencies are sorted by scripts available in `Tools/` that help setting up the engine.
 
-
 1. Clone the repo and with all submodules.<br>
     ```shell
 	git clone --recursive https://github.com/lukkelele/LkEngine.git
@@ -101,7 +87,7 @@ Most dependencies are sorted by scripts available in `Tools/` that help setting 
 5. Done! :white_check_mark:
 
 ### Linux <a id="Platform-Linux"></a>
-:warning: **TODO**
+> :warning: Linux support is coming in the future.
 
 ---
 
@@ -113,7 +99,6 @@ See more images and screenshots in the [documentation](Docs/Development.md).
 
 * [github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/) <br>
 * [github.io.lukkelele/LkEngine/Development](https://github.com/lukkelele/LkEngine/blob/gh-pages/Development.md)
-
 
 ### Showcase <a id="Engine-Development-Showcase"></a>
 
@@ -128,7 +113,7 @@ See more images and screenshots in the [documentation](Docs/Development.md).
 
 ---
 
-### Dependencies <a id="Engine-Dependencies"></a>
+## Dependencies <a id="Engine-Dependencies"></a>
 - [glfw3](https://github.com/glfw/glfw)
 - [glad](https://github.com/Dav1dde/glad)
 - [spdlog](https://github.com/gabime/spdlog)
