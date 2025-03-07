@@ -1,7 +1,7 @@
 {
-    "Total": 50,
+    "Total": 44,
     "Passed": {
-        "Count": 50,
+        "Count": 44,
         "Tests": [
             "Enum_EnumClass_Operator_Bitwise_AND",
             "Enum_EnumClass_Operator_Bitwise_OR",
@@ -46,13 +46,7 @@
             "Math_Vector2_Float_Compability_ImGui_Copy",
             "Math_Vector2_Float_Compability_ImGui_CopyConstructor",
             "Math_Vector4_Float_Compability_ImGui_Copy",
-            "Math_Vector4_Float_Compability_ImGui_CopyConstructor",
-            "Enum_EnumClass_Operator_Bitwise_AND",
-            "Enum_EnumClass_Operator_Bitwise_OR",
-            "Enum_EnumClass_Operator_Comparison_LessThan",
-            "Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo",
-            "Enum_EnumClass_Operator_Comparison_GreaterThan",
-            "Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo"
+            "Math_Vector4_Float_Compability_ImGui_CopyConstructor"
         ]
     },
     "Failed": {
