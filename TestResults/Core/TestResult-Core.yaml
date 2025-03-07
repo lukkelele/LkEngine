@@ -43,3 +43,9 @@ Core:
   - Math_Vector2_Float_Compability_ImGui_CopyConstructor: 1
   - Math_Vector4_Float_Compability_ImGui_Copy: 1
   - Math_Vector4_Float_Compability_ImGui_CopyConstructor: 1
+  - Enum_EnumClass_Operator_Bitwise_AND: 1
+  - Enum_EnumClass_Operator_Bitwise_OR: 1
+  - Enum_EnumClass_Operator_Comparison_LessThan: 1
+  - Enum_EnumClass_Operator_Comparison_LessThanOrEqualTo: 1
+  - Enum_EnumClass_Operator_Comparison_GreaterThan: 1
+  - Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualTo: 1
