@@ -1,7 +1,7 @@
 #include "VectorTests.h"
 
-#include "AutomationTest/TestManager.h"
-#include "AutomationTest/DummyTestClass.h"
+#include "LTesto/Runtime/TestManager.h"
+#include "LTesto/Core/DummyTestClass.h"
 
 #include <LkEngine/Core/Log/Log.h>
 #include <LkEngine/Core/Utility/StringUtils.h>

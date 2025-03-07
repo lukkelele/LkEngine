@@ -40,3 +40,6 @@
 [submodule "External/Bullet3/bullet3"]
 	path = External/Bullet3/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
+[submodule "LkEngine/Test/LTesto"]
+	path = LkEngine/Test/LTesto
+	url = https://github.com/lukkelele/LTesto.git

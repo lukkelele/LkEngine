@@ -1,4 +1,4 @@
--- Version --
+--- LkEngine Version ---
 LK_ENGINE_MAJOR = 0
 LK_ENGINE_MINOR = 2
 LK_ENGINE_PATCH = 1
@@ -33,8 +33,8 @@ workspace "LkEngine"
         "LK_ENGINE_STATIC_LIB",
 
         "_SILENCE_CXX20_U8PATH_DEPRECATION_WARNING",
-		"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
-		"SPDLOG_USE_STD_FORMAT",
+	"_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
+	"SPDLOG_USE_STD_FORMAT",
 		"YAML_CPP_STATIC_DEFINE",
 		"YAMLCPP_USE_STATIC_LIBS",
 		"NOMINMAX",
@@ -110,7 +110,7 @@ include "LkEditor/LkEditor.lua"
 --include "LkRuntime/LkRuntime.lua"
 
 -- Test
-include "LkEngine/Test/LkEngineTest.lua"
+include "LkEngine/Test/LTesto/LTesto.lua"
 -- ~Test
 
 --|---------------------------------------------
@@ -232,7 +232,9 @@ project "LkEngine"
 
 	filter "configurations:AutomationTest"
         includedirs {
+            --"%{wks.location}/LkEngine/Test",
             "%{wks.location}/LkEngine/Test",
+            "%{wks.location}/LkEngine/LTesto",
         }
 
     filter "kind:StaticLib"
