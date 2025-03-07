@@ -1,0 +1,85 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+**/*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+**/*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+**/*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+**/.vs
+**/*.vcxproj*
+**/CMakeFiles
+**/*.sln
+**/*.ini
+**/*.log
+**/.idea
+**/*.swp
+**/*.tlog
+
+**/*/*pycache*
+
+# -- LkEngine --
+Binaries
+Binaries-Int
+Intermediate
+Docs/Doxygen
+**/External/bin
+**/External/*bin-int*
+**/External/**/build*
+**/External/*build*
+External/**/*.vcx*
+External/**/*.vcxproj
+External/Glm/**/test
+External/Glad/include
+External/Glad/src
+External/**/examples
+External/**/tests
+LkEngine/Test/Logs
+**/*.lkconf
+**/*.lkr
+**/*/NodeEditor.json
+**/*.lktheme
+**/Lk*/Configuration/*.yaml
+**/Lk*/Configuration/*.json
+
+# LkEngine Starter Scene. Disable ignore when wanting to update the scene(s).
+**/*/Starter-*.lkscene
+
+# Runtime directories.
+LkRuntime/Projects
+LkRuntime/Configuration
+LkEngine/Test/Results
+
+**/docs/*.css
+**/docs/*.scss
+**/docs/*.html
+**/docs/*.dox
+**/docs/*.dox
