@@ -57,15 +57,15 @@ All derivations of LObject must declare the **LCLASS** macro somewhere in the cl
 [TObjectPtr](../LkEngine/Source/LkEngine/Core/LObject/ObjectPtr.h) 
 -->
 
-#### Smart Pointer Implementation
-The [LObject](../LkEngine/Source/LkEngine/Core/LObject/Object.h) class uses [TObjectPtr](../LkEngine/Source/LkEngine/Core/LObject/ObjectPtr.h) for reference counting.
+#### TObjectPtr <a id="Engine-Core-TObjectPtr"></a>
+The [LObject](../LkEngine/Source/LkEngine/Core/LObject/Object.h) class uses [TObjectPtr](../LkEngine/Source/LkEngine/Core/LObject/ObjectPtr.h) for its smart pointer implementation.  
+The TObjectPtr class requires an object to be derived from LObject to work, this is because the counted references is stored in the LObject instance.
 <br>
 
 
 ### Events <a id="Engine-Events"></a>
-Input events are reported from the active [GLFW](https://www.glfw.org/) context.
-
 All events derive from the base event class [LEvent](../LkEngine/Source/LkEngine/Core/Event/Event.h).  
+Input events are reported from the active [GLFW](https://www.glfw.org/) context that is managed by [LWindow](../LkEngine/Source/LkEngine/Core/Window.h).  
 
 | Event | Category | Description |
 | :---- | :----: | :---- |
@@ -99,19 +99,17 @@ The delegate implementation is found in [Delegate.h](../LkEngine/Source/LkEngine
 
 
 ### Math Library
-LkEngine makes use of templates to support mathematical operations for containers from different libraries (i.e glm::vec, ImVec).  
+LkEngine makes use of templates to support seamless mathematical operations for containers from [glm](https://github.com/g-truc/glm) and [ImGui](https://github.com/ocornut/imgui).
+
+#### Vectors
 The header that includes **LVector2**, **LVector3** and **LVector4** can be found in [Vector.h](../LkEngine/Source/LkEngine/Core/Math/Vector.h).
 
-#### LVector2 (TVector2\<float\>)
-> [Core/Math/Vector2.h](../LkEngine/Source/LkEngine/Core/Math/Vector2.h)
+* [LVector2](../LkEngine/Source/LkEngine/Core/Math/Vector2.h) (TVector2\<float\>)
+* [LVector3](../LkEngine/Source/LkEngine/Core/Math/Vector3.h) (TVector3\<float\>)
+* [LVector4](../LkEngine/Source/LkEngine/Core/Math/Vector4.h) (TVector4\<float\>)
 
-#### LVector3 (TVector3\<float\>)
-> [Core/Math/Vector3.h](../LkEngine/Source/LkEngine/Core/Math/Vector3.h)
+LVector3 is also aliased to **LVector** because the three component vector is the most used vector type in 3D contexts.
 
-Aliased to LVector because the three component vector is the most used type of vector in 3D contexts, using either works.
-
-#### LVector4 (TVector4\<float\>)
-> [Core/Math/Vector4.h](../LkEngine/Source/LkEngine/Core/Math/Vector4.h)
 
 <br>
 
