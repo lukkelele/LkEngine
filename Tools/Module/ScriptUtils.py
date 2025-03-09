@@ -5,7 +5,6 @@
 import sys
 import subprocess
 import os
-import winreg # TODO: Patch out
 
 import requests
 import time
@@ -48,22 +47,6 @@ class ScriptLogger:
 
     def error(self, message):
         print(self._format_message("ERROR", message, Colors.FAIL))
-
-
-def GetSystemEnvironmentVariable(EnvName):
-    Key = winreg.CreateKey(winreg.HKEY_LOCAL_MACHINE, r"System\CurrentControlSet\Control\Session Manager\Environment")
-    try:
-        return winreg.QueryValueEx(Key, EnvName)[0]
-    except:
-        return None
-
-
-def GetUserEnvironmentVariable(EnvName):
-    Key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Environment")
-    try:
-        return winreg.QueryValueEx(Key, EnvName)[0]
-    except:
-        return None
 
 
 def ChangeDirectory(directory_path):
