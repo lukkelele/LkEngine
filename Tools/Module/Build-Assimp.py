@@ -26,11 +26,10 @@ OutputDir = os.path.join("..", "..", "External", "Libraries")
 # Ensure output directory exists.
 os.makedirs(OutputDir, exist_ok=True)
 
-IsPlatformWindows = platform.system() == "Windows"
-if not IsPlatformWindows:
-    print(f"[Build-Assimp] Platform is not Windows, undefined behaviour can be expected")
+SystemPlatform = platform.system()
+IsPlatformWindows = SystemPlatform == "Windows"
 
-Architecture = "x64" # TODO: Automatic assignment
+Architecture = "x64" # TODO: Automatic assignment?
 try:
     Architecture = "x64" if platform.architecture()[0] == "64bit" else "x86"
 except Exception as e:
@@ -41,8 +40,15 @@ if Architecture != "x64":
     print(f"[Build-Assimp] Warning: System architecture is not 64-bit")
 
 LibraryExtension = ".lib" if IsPlatformWindows else ".a"
-LibraryFileRelease = "assimp-vc143-mt" + LibraryExtension
-LibraryFileDebug = "assimp-vc143-mtd" + LibraryExtension
+if SystemPlatform == "Windows":
+    LibraryFileDebug = "assimp-vc143-mtd" + LibraryExtension
+    LibraryFileRelease = "assimp-vc143-mt" + LibraryExtension
+elif SystemPlatform == "Linux":
+    LibraryFileDebug = "libassimp.a"
+    LibraryFileRelease = "libassimp.a" # FIXME
+else:
+    print(f"[Build-Assimp] Unsupported platform")
+    exit(1)
 
 # TODO: Automatic selection of Debug/Release.
 BuildAsDebug = True
@@ -64,36 +70,54 @@ CMakeFlags = [
     "-DASSIMP_BUILD_GLTF_EXPORTER=ON",
 ]
 
-# Platform-specific options.
-IsPlatformWindows = platform.system() == "Windows"
 
 def _RunCMakeConfiguration():
     """Run CMake configure command."""
     # TODO: Automatic assignment of architecture.
-    result = subprocess.check_call(["cmake", "..", f"-A {Architecture}"] + CMakeFlags, cwd=BuildDir)
+    result = None
+    if IsPlatformWindows:
+        result = subprocess.check_call(["cmake", "..", f"-A {Architecture}"] + CMakeFlags, cwd=BuildDir)
+    else:
+        result = subprocess.check_call(["cmake", ".."] + CMakeFlags, cwd=BuildDir)
     return result
 
 def _BuildAssimp():
     """Run CMake build command."""
-    build_command = ["cmake", "--build", ".", "--config", BuildConfig] if IsPlatformWindows else ["make", "-j"]
+    build_command = ["cmake", "--build", ".", "--config", BuildConfig]
     result = subprocess.check_call(build_command, cwd=BuildDir)
     return result
 
 def _CopyGeneratedFiles():
     """Copy the generated files to the desired locations."""
-    SourceFile = os.path.join(BuildDir, "lib", BuildConfig, LibraryFile)
-    DestinationFile = os.path.join(OutputDir, LibraryFile)
+    if SystemPlatform == "Windows":
+        SourceFile = os.path.join(BuildDir, "lib", BuildConfig, LibraryFile)
+        DestinationFile = os.path.join(OutputDir, LibraryFile)
+    elif SystemPlatform == "Linux":
+        SourceFile = os.path.join(BuildDir, "lib", LibraryFile)
+        DestinationFile = os.path.join(OutputDir, LibraryFile)
+    else:
+        print(f"[Build-Assimp] Unsupported platform")
+        exit(1)
     shutil.copy2(SourceFile, DestinationFile)
 
     # Copy config.h and revision.h headers to Assimp's include directory.
     ConfigHeader = os.path.join(BuildDir, "include", "assimp", "config.h")
     RevisionHeader = os.path.join(BuildDir, "include", "assimp", "revision.h")
+
     shutil.copy2(ConfigHeader, os.path.join(AssimpDir, "include", "assimp", "config.h"))
     shutil.copy2(RevisionHeader, os.path.join(AssimpDir, "include", "assimp", "revision.h"))
 
     # Copy generated ZLib library.
-    ZLibFileName = "zlibstaticd" if BuildAsDebug else "zlibstatic"
-    ZLibFile = os.path.join(BuildDir, "contrib", "zlib", "Debug" if BuildAsDebug else "Release", ZLibFileName + LibraryExtension)
+    if SystemPlatform == "Windows":
+        ZLibFileName = "zlibstaticd" if BuildAsDebug else "zlibstatic"
+        ZLibFile = os.path.join(BuildDir, "contrib", "zlib", "Debug" if BuildAsDebug else "Release", ZLibFileName + LibraryExtension)
+    elif SystemPlatform == "Linux":
+        ZLibFileName = "libzlibstatic" if BuildAsDebug else "libzlibstatic"
+        ZLibFile = os.path.join(BuildDir, "contrib", "zlib", ZLibFileName + LibraryExtension)
+    else:
+        print(f"[Build-Assimp] Unsupported platform")
+        exit(1)
+
     shutil.copy2(ZLibFile, os.path.join(OutputDir, ZLibFileName + LibraryExtension))
 
 def _CleanUpAfterBuild():
