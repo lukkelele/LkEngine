@@ -57,7 +57,7 @@ def IsGladModuleInstalled():
 def InstallGladModule():
     """Install the Glad module."""
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "glad"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "glad", '--break-system-packages'])
         Logger.success("Glad module installed successfully")
     except subprocess.CalledProcessError as e:
         Logger.error(f"Failed to install GLAD module, error: {e}")
