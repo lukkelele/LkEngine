@@ -14,7 +14,7 @@
 
 namespace LkEngine {
 
-	std::string LSceneSerializer::FILE_FILTER = std::format(
+	std::string LSceneSerializer::FILE_FILTER = LK_FMT_LIB::format(
 		"LkEngine Scene (*.{})\0*.{}\0", LScene::FILE_EXTENSION, LScene::FILE_EXTENSION
 	);
 

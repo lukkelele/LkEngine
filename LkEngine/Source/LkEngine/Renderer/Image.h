@@ -1,7 +1,9 @@
 #pragma once
 
 #include <filesystem>
-#include <stb_image/stb_image.h>
+
+//#include <stb/stb_image.h>
+//#include <stb/stb_image_resize2.h>
 
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
@@ -12,7 +14,6 @@
 #include "TextureEnum.h"
 
 #include "LkEngine/Core/Event/AssetEvent.h"
-
 
 namespace LkEngine {
 
@@ -60,9 +61,9 @@ namespace LkEngine {
 
 	namespace ImageUtils 
 	{
-		static uint32_t GetMemorySize(const EImageFormat ImageFormat, const uint32_t Width, const uint32_t Height);
-		static uint32_t CalculateMipCount(const uint32_t Width, const uint32_t Height);
-		static uint32_t BytesPerPixel(const EImageFormat ImageFormat);
+		FORCEINLINE uint32_t GetMemorySize(const EImageFormat ImageFormat, const uint32_t Width, const uint32_t Height);
+		FORCEINLINE uint32_t CalculateMipCount(const uint32_t Width, const uint32_t Height);
+		FORCEINLINE uint32_t BytesPerPixel(const EImageFormat ImageFormat);
 	}
 
 	struct FImageSpecification
@@ -158,7 +159,7 @@ namespace LkEngine {
 
 	namespace ImageUtils 
 	{
-		FORCEINLINE static int64_t GetImageFormat(const EImageFormat ImageFormat)
+		FORCEINLINE int64_t GetImageFormat(const EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{
@@ -170,7 +171,7 @@ namespace LkEngine {
 			return 0;
 		}
 
-		FORCEINLINE static uint32_t GetFormatBPP(const EImageFormat ImageFormat)
+		FORCEINLINE uint32_t GetFormatBPP(const EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{
@@ -185,12 +186,12 @@ namespace LkEngine {
 			return 0;
 		}
 
-		FORCEINLINE static uint32_t GetMemorySize(const EImageFormat ImageFormat, const uint32_t Width, const uint32_t Height)
+		FORCEINLINE uint32_t GetMemorySize(const EImageFormat ImageFormat, const uint32_t Width, const uint32_t Height)
 		{
 			return (Width * Height * GetFormatBPP(ImageFormat));
 		}
 
-		static uint32_t BytesPerPixel(const EImageFormat ImageFormat)
+		FORCEINLINE uint32_t BytesPerPixel(const EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{
@@ -202,12 +203,12 @@ namespace LkEngine {
 			return 0;
 		}
 
-		FORCEINLINE static uint32_t CalculateMipCount(const uint32_t Width, const uint32_t Height)
+		FORCEINLINE uint32_t CalculateMipCount(const uint32_t Width, const uint32_t Height)
 		{
 			return static_cast<uint32_t>(std::floor(std::log2(glm::min(Width, Height))) + 1);
 		}
 
-		FORCEINLINE static bool IsDepthFormat(const EImageFormat ImageFormat)
+		FORCEINLINE bool IsDepthFormat(const EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{
@@ -221,7 +222,7 @@ namespace LkEngine {
 
 	namespace Enum
 	{
-		FORCEINLINE static constexpr const char* ToString(const EImageFormat ImageFormat)
+		static const char* ToString(const EImageFormat ImageFormat)
 		{
 			switch (ImageFormat)
 			{

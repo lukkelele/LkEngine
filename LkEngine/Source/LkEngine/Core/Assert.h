@@ -6,7 +6,6 @@
 
 #include "PlatformDetection.h"
 
-
 /**
  * Variadic argument support.
  */
@@ -25,12 +24,13 @@
  * Asserts.
  */
 #if LK_ENABLE_ASSERTS
-#	if LK_VARIADIC_ARGS
+//#	if LK_VARIADIC_ARGS
+#	if 0
 #		define LK_CORE_ASSERT_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Core,   "Assertion Failed", ##__VA_ARGS__)
 #		define LK_ASSERT_MESSAGE_INTERNAL(...)	    ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Client, "Assertion Failed", ##__VA_ARGS__)
 #	else
-#		define LK_CORE_ASSERT_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Core,   "Assertion Failed" __VA_OPT__(, ) __VA_ARGS__)
-#		define LK_ASSERT_MESSAGE_INTERNAL(...)		::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Client, "Assertion Failed" __VA_OPT__(, ) __VA_ARGS__)
+#		define LK_CORE_ASSERT_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Core,   "Assertion Failed" __VA_OPT__(, ) __VA_ARGS__)
+#		define LK_ASSERT_MESSAGE_INTERNAL(...)		::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Client, "Assertion Failed" __VA_OPT__(, ) __VA_ARGS__)
 #	endif
 #	define LK_CORE_ASSERT(Condition, ...)                         \
 		{												          \
@@ -71,12 +71,13 @@
  * Verify.
  */
 #if LK_ENABLE_VERIFY
-#	if LK_VARIADIC_ARGS
+//#	if LK_VARIADIC_ARGS
+#	if 0
 #		define LK_CORE_VERIFY_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Core,   "Verify Failed", ##__VA_ARGS__)
 #		define LK_VERIFY_MESSAGE_INTERNAL(...)      ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Client, "Verify Failed", ##__VA_ARGS__)
 #	else
-#		define LK_CORE_VERIFY_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Core,   "Verify Failed" __VA_OPT__(, ) __VA_ARGS__)
-#		define LK_VERIFY_MESSAGE_INTERNAL(...)		::LkEngine::LLog::PrintAssertMessage(::LkEngine::LLog::Type::Client, "Verify Failed" __VA_OPT__(, ) __VA_ARGS__)
+#		define LK_CORE_VERIFY_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Core,   "Verify Failed" __VA_OPT__(, ) __VA_ARGS__)
+#		define LK_VERIFY_MESSAGE_INTERNAL(...)		::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Client, "Verify Failed" __VA_OPT__(, ) __VA_ARGS__)
 #	endif
 #	define LK_CORE_VERIFY(Condition, ...)                              \
 		{                                                              \

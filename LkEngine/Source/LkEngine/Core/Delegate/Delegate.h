@@ -853,7 +853,11 @@ namespace LkEngine::Core {
 
 	private:
 		/** Allow access to the Create<TFunction> functions. */
+	#if defined(LK_ENGINE_MSVC)
 		template<typename... TArgs>
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+		template<typename... TArgs2>
+	#endif
 		friend class LMulticastDelegate;
 
 		inline static constexpr TStringLiteral StaticName = DelegateName;
@@ -980,10 +984,13 @@ namespace LkEngine::Core {
 
 		FORCEINLINE std::string ToString() const
 		{
-			return std::format("\n[Multicast Delegate]\n" 
+			#if 0
+			return LK_FMT_LIB::format("\n[Multicast Delegate]\n" 
 							   " - Name:     {}\n"
 							   " - Raw Name: {}\n", 
 							   TypeName, typeid(*this).raw_name());
+			#endif
+			return "MulticastDelegate::FIXME";
 		}
 
 		/** Raw Pointer, non-const function. */

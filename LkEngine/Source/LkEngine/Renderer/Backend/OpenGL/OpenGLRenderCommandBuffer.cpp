@@ -43,7 +43,7 @@ namespace LkEngine {
 	{
 	}
 	
-	const PipelineStatistics& LOpenGLRenderCommandBuffer::GetPipelineStatistics(const uint32_t FrameIndex) const
+	const FPipelineStatistics& LOpenGLRenderCommandBuffer::GetPipelineStatistics(const uint32_t FrameIndex) const
 	{
 		/* Unused for now. */
 		LK_UNUSED(FrameIndex);

@@ -178,7 +178,7 @@ namespace LkEngine {
 			if (LFileSystem::FindSimilarFiles("Custom", ThemesDirectory, SimilarFiles))
 			{
 				LK_CORE_DEBUG_TAG("ThemeManager", "Found {} files in directory: '{}'", SimilarFiles.size(), LFileSystem::GetWorkingDir());
-				ThemeFileName = std::format("Custom-%{}", SimilarFiles.size());
+				ThemeFileName = LK_FMT_LIB::format("Custom-%{}", SimilarFiles.size());
 			}
 			else
 			{
@@ -201,11 +201,11 @@ namespace LkEngine {
 			if (IsDefaultTheme)
 			{
 				int Num = 1;
-				std::string ThemeFile = std::format("{}-{}.{}", CurrentThemeName, Num, THEME_FILE_EXTENSION);
+				std::string ThemeFile = LK_FMT_LIB::format("{}-{}.{}", CurrentThemeName, Num, THEME_FILE_EXTENSION);
 				while (LFileSystem::Exists(ThemeFile))
 				{
 					Num++;
-					ThemeFile = std::format("{}-{}.{}", CurrentThemeName, Num, THEME_FILE_EXTENSION);
+					ThemeFile = LK_FMT_LIB::format("{}-{}.{}", CurrentThemeName, Num, THEME_FILE_EXTENSION);
 					LK_CORE_TRACE("-> Theme file: {}", ThemeFile);
 				}
 
@@ -216,7 +216,7 @@ namespace LkEngine {
 		}
 
 		LK_CORE_ASSERT(!ThemeFileName.empty(), "Theme filename is empty");
-		ThemePath = ThemesDirectory / std::format("{}.{}", ThemeFileName, THEME_FILE_EXTENSION);
+		ThemePath = ThemesDirectory / LK_FMT_LIB::format("{}.{}", ThemeFileName, THEME_FILE_EXTENSION);
 		LK_CORE_INFO_TAG("ThemeManager", "Saving current theme: {} ({})", CurrentThemeName, ThemePath);
 		if (ThemePath.empty())
 		{
@@ -279,7 +279,7 @@ namespace LkEngine {
 		}
 		if (ThemeNameStr.find(THEME_FILE_EXTENSION) == std::string::npos)
 		{
-			ThemeNameStr += std::format(".{}", THEME_FILE_EXTENSION);
+			ThemeNameStr += LK_FMT_LIB::format(".{}", THEME_FILE_EXTENSION);
 		}
 
 		const std::filesystem::path ThemePath(ThemesDirectory / ThemeNameStr);

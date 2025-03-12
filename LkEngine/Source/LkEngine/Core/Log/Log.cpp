@@ -35,7 +35,7 @@ namespace LkEngine {
 	LLog::LLog()
 	{
 		/* Use binary workdir as directory for logs. */
-		LogDirectory = std::filesystem::path(std::format("{}/Logs/", LFileSystem::GetRuntimeDir()));
+		LogDirectory = std::filesystem::path(LK_FMT_LIB::format("{}/Logs/", LFileSystem::GetRuntimeDir()));
 	#if defined(LK_ENGINE_AUTOMATION_TEST)
 		LK_PRINTLN("Log directory: {}", LogDirectory);
 	#endif
@@ -65,10 +65,10 @@ namespace LkEngine {
 		}
 		else
 		{
-			Logfile = std::format("{}-{}.log", FileName, Time::CurrentTimestamp());
+			Logfile = LK_FMT_LIB::format("{}-{}.log", FileName, Time::CurrentTimestamp());
 		}
 
-		const std::string AppLogFilename = std::format("App-{}.log", Time::CurrentTimestamp());
+		const std::string AppLogFilename = LK_FMT_LIB::format("App-{}.log", Time::CurrentTimestamp());
 
 	#if defined(LK_ENGINE_STDOUT_FLUSH_ALWAYS)
 		setvbuf(stdout, nullptr, _IONBF, 0);
@@ -107,17 +107,21 @@ namespace LkEngine {
 		CoreSinks[1]->set_pattern("%^[%T] [%l] [%n] %v%$");
 		if (auto ColorSink = std::static_pointer_cast<spdlog::sinks::stdout_color_sink_mt>(CoreSinks[1]))
 		{
+		#if defined(LK_ENGINE_MSVC)
 			ColorSink->set_color(spdlog::level::trace, Color::Log::Green);
 			ColorSink->set_color(spdlog::level::debug, Color::Log::Cyan);
 			ColorSink->set_color(spdlog::level::info, Color::Log::White);
+		#endif
 		}
 
 		AppSinks[1]->set_pattern("%^[%T] [%n] %v%$");
 		if (auto ColorSink = std::static_pointer_cast<spdlog::sinks::stdout_color_sink_mt>(AppSinks[1]))
 		{
+		#if defined(LK_ENGINE_MSVC)
 			ColorSink->set_color(spdlog::level::trace, Color::Log::Green);
 			ColorSink->set_color(spdlog::level::debug, Color::Log::Cyan);
 			ColorSink->set_color(spdlog::level::info, Color::Log::White);
+		#endif
 		}
 
 		EditorConsoleSinks[0]->set_pattern("[%T] [%l] [%n] %v");
@@ -162,13 +166,17 @@ namespace LkEngine {
 		auto ColorSinkLogger = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 
 		/* Default level color configuration. */
+	#if defined(LK_ENGINE_MSVC)
 		ColorSinkLogger->set_color(spdlog::level::trace, Color::Log::Green);
 		ColorSinkLogger->set_color(spdlog::level::debug, Color::Log::Cyan);
 		ColorSinkLogger->set_color(spdlog::level::info, Color::Log::White);
+	#endif
 
 		for (const auto& [Level, Color] : LevelConfigs)
 		{
+		#if defined(LK_ENGINE_MSVC)
 			ColorSinkLogger->set_color(ToSpdlogLevel(Level), Color);
+		#endif
 		}
 
 		const std::string AnsiColorReset = "\033[0m";

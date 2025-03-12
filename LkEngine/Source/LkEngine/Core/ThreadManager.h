@@ -4,16 +4,18 @@
  ******************************************************************/
 #pragma once
 
-#include "LkEngine/Core/Thread.h"
 
+/** @fixme: FIXME */
+#if 0
+
+#include "LkEngine/Core/Thread.h"
 
 /* Windows Platform */
 #if defined(LK_PLATFORM_WINDOWS)
-#  include "LkEngine/Platform/Windows/WindowsThread.h"
-namespace LkEngine 
-{
-	using TThread = LThread<LWindowsThread>;
-}
+#	include "LkEngine/Platform/Windows/WindowsThread.h"
+namespace LkEngine { using TThread = LThread<LWindowsThread>; }
+#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+#error
 #endif
 
 namespace LkEngine {
@@ -33,17 +35,17 @@ namespace LkEngine {
 
 		void UpdateThreads();
 
-		FORCEINLINE int GetThreadPoolSize() const
+		int GetThreadPoolSize() const
 		{
 			return static_cast<int>(ThreadPool.size());
 		}
 
-		FORCEINLINE void StartThread(const uint8_t ThreadIndex)
+		void StartThread(const uint8_t ThreadIndex)
 		{
 			ThreadPool.at(ThreadIndex)->Run();
 		}
 
-		FORCEINLINE static void SubmitFunctionToThread(FThreadData& ThreadData, const std::function<void()> Function)
+		static void SubmitFunctionToThread(FThreadData& ThreadData, const std::function<void()> Function)
 		{
 			LK_CORE_DEBUG_TAG("ThreadManager", "Adding function to queue, new queue size: {}", ThreadData.CommandQueue.size() + 1);
 			ThreadData.CommandQueue.push(Function);
@@ -54,7 +56,6 @@ namespace LkEngine {
 	private:
 		std::vector<std::shared_ptr<TThread>> ThreadPool{};
 	};
-
 
 	template<typename TCallable, typename... TArgs>
 	inline void LThreadManager::CreateThread(const FThreadStartArgs& ThreadStartArgs, TCallable&& Function, TArgs&&... Args)
@@ -69,7 +70,6 @@ namespace LkEngine {
 			Thread->Run();
 		}
 	}
-
 
 	static void Thread_SubmitCommand(FThreadData& ThreadData, const std::function<void()> Function)
 	{
@@ -95,3 +95,5 @@ namespace LkEngine {
 	}
 
 }
+
+#endif

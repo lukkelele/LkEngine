@@ -6,14 +6,13 @@
 #include "LkEngine/Core/Input/Keyboard.h"
 #include "LkEngine/Renderer/Renderer.h"
 
-
 namespace LkEngine {
 
 	LWindow::LWindow(const FWindowSpecification& WindowSpecification)
 		: Specification(WindowSpecification)
 		, Title(WindowSpecification.Title)
-		, Size({ WindowSpecification.Width, WindowSpecification.Height })
-		, ViewportSize({ WindowSpecification.Width, WindowSpecification.Height })
+		, Size(WindowSpecification.Width, WindowSpecification.Height)
+		, ViewportSize(WindowSpecification.Width, WindowSpecification.Height)
 	{
 		LOBJECT_REGISTER();
 		Instance = this;

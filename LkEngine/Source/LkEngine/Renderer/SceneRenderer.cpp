@@ -11,7 +11,6 @@
 
 #include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
 
-
 namespace LkEngine {
 
 	LSceneRenderer::LSceneRenderer(TObjectPtr<LScene> InScene, const FSceneRendererSpecification& InSpecification)

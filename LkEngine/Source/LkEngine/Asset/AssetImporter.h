@@ -4,7 +4,6 @@
 #include "LkEngine/Asset/AssetRegistry.h"
 #include "LkEngine/Asset/AssetSerializer.h"
 
-
 namespace LkEngine {
 
 	class LAssetImporter

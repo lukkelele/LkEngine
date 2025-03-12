@@ -19,7 +19,8 @@
 #include "LkEngine/Core/IO/File.h"
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/Core/Math/Math.h"
-#include "LkEngine/Core/ThreadManager.h"
+/** @fixme: FIXME */
+///#include "LkEngine/Core/ThreadManager.h"
 #include "LkEngine/Core/MetadataRegistry.h"
 #include "LkEngine/Core/Memory/GarbageCollector.h"
 #include "LkEngine/Core/Event/KeyEvent.h"
@@ -100,7 +101,7 @@ namespace LkEngine {
 				/* Queue the event. */
 				//std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
 				//EventQueue.push([Event]() { LApplication::Get()->OnEvent(*Event); });
-				CoreEventQueue.Add([Event]() { LApplication::Get()->OnEvent(*Event); });
+				CoreEventQueue.Add([Event]() { LApplication::Get().OnEvent(*Event); });
 			}
 		}
 
@@ -123,13 +124,15 @@ namespace LkEngine {
 
 		LMetadataRegistry& MetadataRegistry;
 		LGarbageCollector& GarbageCollector;
-		LThreadManager& ThreadManager;
+		/** @fixme: FIXME */
+		///LThreadManager& ThreadManager;
 		LEventQueue CoreEventQueue;
 
 		TObjectPtr<LWindow> Window{};
 		LLayerStack LayerStack;
 
-		TObjectPtr<LRenderer> Renderer{};
+		/** @fixme: FIXME */
+		//TObjectPtr<LRenderer> Renderer;
 		uint32_t CurrentFrameIndex = 0;
 
 		TObjectPtr<LUILayer> UILayer{};

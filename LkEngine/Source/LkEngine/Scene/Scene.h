@@ -16,7 +16,6 @@
 
 #include <entt/entt.hpp>
 
-
 namespace LkEngine {
 
 	class LEntity;
@@ -68,7 +67,7 @@ namespace LkEngine {
 		void SortEntities();
 
 		LEntity FindEntity(std::string_view EntityName);
-		LEntity GetEntityWithUUID(const LUUID UUID) const;
+		LEntity GetEntityWithUUID(const LUUID UUID);
 
 		FORCEINLINE entt::registry& GetRegistry() { return Registry; }
 		void DestroyEntity(const LEntity Entity);
@@ -78,7 +77,7 @@ namespace LkEngine {
 		LEntity CreateEntity(const std::string& InName = "");
 		LEntity CreateEntityWithID(const LUUID UUID, const std::string& InName = "");
 		LEntity CreateChildEntity(LEntity Parent, const std::string& InName = "");
-		LEntity TryGetEntityWithUUID(const LUUID ID) const;
+		LEntity TryGetEntityWithUUID(const LUUID ID);
 
 		void ParentEntity(LEntity Entity, LEntity Parent);
 		void UnparentEntity(LEntity Entity, bool bConvertToWorldSpace = true);
@@ -123,6 +122,8 @@ namespace LkEngine {
 			}
 		}
 
+	/** @fixme: Problems on Linux */
+	#if defined(LK_ENGINE_MSVC)
 		template<typename TComponent>
 		static void CopyComponentFromScene(LEntity Destination, 
 										   TObjectPtr<LScene> DestinationScene, 
@@ -131,6 +132,7 @@ namespace LkEngine {
 		{
 			SourceScene->CopyComponentIfExists<TComponent>((entt::entity)Destination, DestinationScene->Registry, (entt::entity)Source);
 		}
+	#endif
 
 		template<typename ...Components>
 		auto GetAllEntitiesWith()
@@ -157,13 +159,14 @@ namespace LkEngine {
 		bool bEditorScene = false;
 
 		entt::registry Registry{};
-		std::unordered_map<LUUID, LEntity> EntityMap{};
+		//std::unordered_map<LUUID, LEntity> EntityMap{};
+		std::unordered_map<LUUID, entt::entity> EntityMap{};
 
 		uint16_t ViewportWidth = 0;
 		uint16_t ViewportHeight = 0;
 		int Frames = 0;
 
-		TObjectPtr<LSceneRenderer> Renderer = nullptr;
+		TObjectPtr<LSceneRenderer> Renderer;
 
 		friend class LEntity;
 		friend class LEditorLayer;
@@ -172,7 +175,6 @@ namespace LkEngine {
 
 		LCLASS(LScene);
 	};
-
 
 	namespace Enum 
 	{

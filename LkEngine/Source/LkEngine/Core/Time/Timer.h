@@ -97,6 +97,7 @@ namespace LkEngine {
 			inline FFrameData& operator+=(const float InTime)
 			{
 				Time += InTime;
+				return *this;
 			}
 		};
 	public:

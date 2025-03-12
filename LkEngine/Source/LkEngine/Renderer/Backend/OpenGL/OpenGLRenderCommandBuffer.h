@@ -26,13 +26,13 @@ namespace LkEngine {
 			return ExecutionGpuTimes[FrameIndex][(QueryIndex / 2)];
 		}
 
-		virtual const PipelineStatistics& GetPipelineStatistics(const uint32_t FrameIndex) const override;
+		virtual const FPipelineStatistics& GetPipelineStatistics(const uint32_t FrameIndex) const override;
 
 		virtual uint32_t BeginTimestampQuery() override;
 		virtual void EndTimestampQuery(const uint32_t QueryID) override;
 
 	private:
-		PipelineStatistics PipelineStatistics;
+		FPipelineStatistics PipelineStatistics;
 		std::string DebugName{};
 
 		bool bOwnedBySwapChain = false;

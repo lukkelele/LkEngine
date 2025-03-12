@@ -30,18 +30,23 @@ project "ImGuizmo"
 		"%{Dependency.ImGui.IncludeDir}/imgui", -- Allow 'imgui.h' as well as 'imgui/imgui.h' as an include.
 	}
 
-	buildoptions {
-        "/wd4005", -- Disable: 'Macro redefinition'.
-	}
-
 	filter "system:windows"
 		systemversion "latest"
 		staticruntime "On"
+
+		buildoptions {
+			"/wd4005", -- 'Macro redefinition'.
+		}
 
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
 		staticruntime "On"
+
+		filter "system:clang"
+			buildoptions {
+				"-Wno-macro-redefined",
+			}
 
     filter "configurations:Debug or configurations:Debug-AddressSanitize"
 		staticruntime "On"

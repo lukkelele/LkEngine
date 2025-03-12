@@ -946,7 +946,7 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const
 		{
-			return std::format("({:.2f}, {:.2f}, {:.2f})", X, Y, Z);
+			return LK_FMT_LIB::format("({:.2f}, {:.2f}, {:.2f})", X, Y, Z);
 		}
 
 		FORCEINLINE friend std::ostream& operator<<(std::ostream& os, const TVector3& Vector) 
@@ -955,17 +955,19 @@ namespace LkEngine {
 			return os;
 		}
 
+	#if 0
 		template<typename VectorType>
-		FORCEINLINE VectorType As() const
+		VectorType As() const
 		{
 			return VectorType(X, Y, Z);
 		}
-
-		template<>
-		FORCEINLINE glm::vec3 As() const
+	#else
+		template<typename VectorType, typename = std::enable_if_t<std::is_same_v<VectorType, glm::vec3>>>
+		VectorType As() const
 		{
 			return glm::vec3(X, Y, Z);
 		}
+	#endif
 
 		static_assert(std::disjunction_v<
 			std::is_same<SizeType, int>, 
@@ -993,5 +995,14 @@ namespace LkEngine {
 		union { SizeType Z, B, P; };
 	#endif
 	};
+
+#if 0
+	template<typename SizeType>
+	template<>
+	inline glm::vec3 TVector3<SizeType>::As<glm::vec3>() const
+	{
+		return glm::vec3(X, Y, Z);
+	}
+#endif
 
 }

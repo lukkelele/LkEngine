@@ -4,12 +4,11 @@
 
 #include "PipelineSpecification.h"
 
-
 namespace LkEngine {
 
 	class LShader;
 
-	struct PipelineStatistics
+	struct FPipelineStatistics
 	{
 		uint64_t InputAssemblyVertices = 0;
 		uint64_t InputAssemblyPrimitives = 0;

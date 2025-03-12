@@ -88,7 +88,7 @@ namespace LkEngine {
 		{
 			LK_CORE_INFO_TAG("Project", "Saving project scene: {}", Scene->GetName());
 			LSceneSerializer SceneSerializer(Scene);
-			const std::string SceneFilepath = std::format("{}/Scenes/{}.{}", Configuration.ProjectDirectory, Scene->GetName(), LScene::FILE_EXTENSION);
+			const std::string SceneFilepath = LK_FMT_LIB::format("{}/Scenes/{}.{}", Configuration.ProjectDirectory, Scene->GetName(), LScene::FILE_EXTENSION);
 			LK_CORE_DEBUG_TAG("Project", "Scene filepath: {}", SceneFilepath);
 			SceneSerializer.Serialize(SceneFilepath);
 		}

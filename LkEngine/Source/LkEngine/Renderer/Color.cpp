@@ -4,8 +4,8 @@
 
 namespace LkEngine::Color {
 
-    std::mt19937 Color::RNG(std::time(0));
-    std::uniform_int_distribution<int> Color::Dist(0, 100);
+    std::mt19937 RNG(std::time(0));
+    std::uniform_int_distribution<int> Dist(0, 100);
 
     void Randomize(glm::vec4& color, float alpha)
     {

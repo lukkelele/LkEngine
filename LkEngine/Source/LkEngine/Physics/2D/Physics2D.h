@@ -2,6 +2,7 @@
 
 #include "LkEngine/Core/Core.h"
 
+#if 0
 #include "ContactListener2D.h"
 #include "LkEngine/Scene/Entity.h"
 
@@ -54,6 +55,6 @@ namespace LkEngine {
 	{
 	public:
 	};
-
-
 }
+
+#endif

@@ -2,11 +2,11 @@
 
 #define LK_DEBUG_ASSET_LOG 0
 
-#include "EditorAssetManager.h"
-#include "RuntimeAssetManager.h"
+//#include "EditorAssetManager.h"
+//#include "RuntimeAssetManager.h"
+#include "IAssetManager.h"
 
 #include "LkEngine/Project/Project.h"
-
 
 namespace LkEngine {
 

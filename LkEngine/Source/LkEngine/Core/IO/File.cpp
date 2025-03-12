@@ -1,6 +1,6 @@
 #include "LKpch.h"
+#if 0
 #include "LkEngine/Core/IO/File.h"
-
 
 namespace LkEngine {
 
@@ -27,5 +27,5 @@ namespace LkEngine {
         return Files.size();
     }
 
-
 }
+#endif

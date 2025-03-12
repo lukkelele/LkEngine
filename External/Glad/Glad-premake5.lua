@@ -20,6 +20,15 @@ project "Glad"
     
     filter "system:windows"
         systemversion "latest"
+        links {
+            "opengl32",
+        }
+
+    filter "system:linux"
+        links {
+            "GL",
+            "dl"
+        }
 
     filter "configurations:Debug or configurations:AutomationTest"
 		runtime "Debug"

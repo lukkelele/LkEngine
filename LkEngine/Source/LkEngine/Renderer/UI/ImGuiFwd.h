@@ -8,7 +8,6 @@
 
 #include <imgui/imgui.h>
 
-
 /**
  * Enum range: ImGuiCol
  */
@@ -89,7 +88,7 @@ namespace LkEngine::Enum
  * Log Formatter: ImVec2
  */
 template<>
-struct std::formatter<ImVec2>
+struct LK_FMT_LIB::formatter<ImVec2>
 {
 	template<typename ParseContext>
     constexpr auto parse(ParseContext& Context)
@@ -100,7 +99,7 @@ struct std::formatter<ImVec2>
 	template<typename FormatContext>
     auto format(const ImVec2& Input, FormatContext& Context) const
     {
-		return std::format_to(Context.out(), "({:.2f}, {:.2f})", Input.x, Input.y);
+		return LK_FMT_LIB::format_to(Context.out(), "({:.2f}, {:.2f})", Input.x, Input.y);
     }
 };
 
@@ -108,7 +107,7 @@ struct std::formatter<ImVec2>
  * Log Formatter: ImVec4
  */
 template<>
-struct std::formatter<ImVec4>
+struct LK_FMT_LIB::formatter<ImVec4>
 {
 	template<typename ParseContext>
     constexpr auto parse(ParseContext& Context)
@@ -119,7 +118,7 @@ struct std::formatter<ImVec4>
 	template<typename FormatContext>
     auto format(const ImVec4& Input, FormatContext& Context) const
     {
-        return std::format_to(Context.out(), "({:.2f}, {:.2f}, {:.2f}, {:.2f})", Input.x, Input.y, Input.z, Input.z);
+        return LK_FMT_LIB::format_to(Context.out(), "({:.2f}, {:.2f}, {:.2f}, {:.2f})", Input.x, Input.y, Input.z, Input.z);
     }
 };
 

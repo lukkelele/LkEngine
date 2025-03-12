@@ -31,7 +31,7 @@ namespace LkEngine {
 		SerializeToYaml(Out);
 
 		/* Add file extension to the saved file. */
-		const std::string ProjectSave = std::format("{}/{}.{}", OutFile.string(), Project->GetName(), LProject::FILE_EXTENSION);
+		const std::string ProjectSave = LK_FMT_LIB::format("{}/{}.{}", OutFile.string(), Project->GetName(), LProject::FILE_EXTENSION);
 		LK_CORE_TRACE("Project Save: {}", ProjectSave);
 
 		std::ofstream FileOut(ProjectSave);

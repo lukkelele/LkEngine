@@ -15,7 +15,6 @@
 #include "LkEngine/Renderer/ArrayTextureSpecification.h"
 #include "LkEngine/Renderer/GeometryPool.h"
 
-
 /**
  * LK_OpenGL_Verify
  *
@@ -88,7 +87,7 @@ namespace LkEngine {
 		 * @brief Load info about the GL backend. 
 		 * Load major/minor version, populate vector with supported extensions.
 		 */
-		FORCEINLINE static void LoadInfo()
+		static void LoadInfo()
 		{
 			int Major, Minor;
 			LK_OpenGL_Verify(glGetIntegerv(GL_MAJOR_VERSION, &Major));
@@ -105,7 +104,7 @@ namespace LkEngine {
 			}
 		}
 
-		FORCEINLINE static std::string GetVersion()
+		static std::string GetVersion()
 		{
 			char CharBuf[140];
 			std::sprintf(CharBuf, "%s", glGetString(GL_VERSION));
@@ -113,7 +112,7 @@ namespace LkEngine {
 			return std::string(CharBuf);
 		}
 
-		FORCEINLINE static bool IsExtensionSupported(const char* Extension)
+		static bool IsExtensionSupported(const char* Extension)
 		{
 			int Extensions;
 			LK_OpenGL_Verify(glGetIntegerv(GL_NUM_EXTENSIONS, &Extensions));
@@ -129,13 +128,13 @@ namespace LkEngine {
 			return false;
 		}
 
-		FORCEINLINE static const std::vector<std::string>& GetSupportedExtensions() 
+		static const std::vector<std::string>& GetSupportedExtensions() 
 		{ 
 			return SupportedExtensions; 
 		}
 
-		FORCEINLINE static int GetMajorVersion() { return Version.Major; }
-		FORCEINLINE static int GetMinorVersion() { return Version.Minor; }
+		static int GetMajorVersion() { return Version.Major; }
+		static int GetMinorVersion() { return Version.Minor; }
 
 	protected:
 		struct GLVersion
@@ -643,7 +642,6 @@ namespace LkEngine {
             LK_CORE_ASSERT(false, "Unknown topology, cannot convert to OpenGL format");
             return GL_INVALID_ENUM;
         }
-
 	};
 
 	#if defined(LK_OPENGL4)

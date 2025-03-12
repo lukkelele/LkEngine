@@ -73,8 +73,8 @@ namespace LkEngine {
 				ImageSpec.Width = m_Specification.Width;
 				ImageSpec.Height = m_Specification.Height;
 				ImageSpec.Format = m_ColorAttachmentSpecifications[i].ImageFormat;
-				ImageSpec.Name = std::format("Framebuffer_Image-{}", Enum::ToString(m_ColorAttachmentSpecifications[i].ImageFormat));
-				ImageSpec.DebugName = std::format("Framebuffer_Image-{}", Enum::ToString(m_ColorAttachmentSpecifications[i].ImageFormat));
+				ImageSpec.Name = LK_FMT_LIB::format("Framebuffer_Image-{}", Enum::ToString(m_ColorAttachmentSpecifications[i].ImageFormat));
+				ImageSpec.DebugName = LK_FMT_LIB::format("Framebuffer_Image-{}", Enum::ToString(m_ColorAttachmentSpecifications[i].ImageFormat));
 				ImageSpec.Format = EImageFormat::RGBA32F;
 				ImageSpec.Wrap = ETextureWrap::None;
 				ImageSpec.Filter = ETextureFilter::None;

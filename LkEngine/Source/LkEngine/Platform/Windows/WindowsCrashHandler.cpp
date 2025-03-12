@@ -1,4 +1,5 @@
 #include "LKpch.h"
+#if defined(LK_PLATFORM_WINDOWS)
 #include "WindowsCrashHandler.h"
 
 #include "LkEngine/Core/Application.h"
@@ -64,15 +65,15 @@ namespace LkEngine {
 		std::string DumpInfo = WindowsExceptionStringBuffer;
         if (!WindowsExceptionStringBuffer.empty())
         {
-            DumpInfo += std::format("\n{}", WindowsExceptionStringBuffer);
+            DumpInfo += LK_FMT_LIB::format("\n{}", WindowsExceptionStringBuffer);
         }
         else
         {
 			/* Include stack backtrace. */
-            DumpInfo += std::format("\n{}", CaptureBackTraceOnStack());
+            DumpInfo += LK_FMT_LIB::format("\n{}", CaptureBackTraceOnStack());
         }
 
-		DumpInfo += std::format("\n{}", LApplication::Get().GenerateCrashDump());
+		DumpInfo += LK_FMT_LIB::format("\n{}", LApplication::Get().GenerateCrashDump());
 
         return DumpInfo;
     }
@@ -97,16 +98,17 @@ namespace LkEngine {
 		{
             if (i < 10)
             {
-			    OStringStream << std::format(" {}.  ", i) << Callstack[i] << "\n";
+			    OStringStream << LK_FMT_LIB::format(" {}.  ", i) << Callstack[i] << "\n";
             }
             else if (i >= 10)
             {
-			    OStringStream << std::format(" {}. ", i) << Callstack[i] << "\n";
+			    OStringStream << LK_FMT_LIB::format(" {}. ", i) << Callstack[i] << "\n";
             }
 		}
     #endif
 
         return OStringStream.str();
     }
-
 }
+
+#endif

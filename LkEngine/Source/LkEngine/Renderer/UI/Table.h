@@ -1,11 +1,9 @@
 #pragma once
 
 #include "UICore.h"
-
 #include "Property.h"
 
 #include "LkEngine/Editor/EditorGlobals.h" /* For UI::Debug namespace, should be changed in the future. */
-
 
 namespace LkEngine::UI {
 
@@ -34,11 +32,11 @@ namespace LkEngine::UI {
 		{
 			if (UseHeaderLabels)
 			{
-				ImGui::TableSetupColumn(std::format("Column-{}", ColumnIdx).c_str(), ColumnFlags);
+				ImGui::TableSetupColumn(LK_FMT_LIB::format("Column-{}", ColumnIdx).c_str(), ColumnFlags);
 			}
 			else
 			{
-				ImGui::TableSetupColumn(std::format("##Column-{}", ColumnIdx).c_str(), ColumnFlags);
+				ImGui::TableSetupColumn(LK_FMT_LIB::format("##Column-{}", ColumnIdx).c_str(), ColumnFlags);
 			}
 		}
 

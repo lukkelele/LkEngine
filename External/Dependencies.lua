@@ -79,9 +79,9 @@ Dependency = {
 			LibDir = "%{wks.location}/External/Libraries" 
 		},
 		Linux = { 
-			LibName = "assimp-vc143-mt.so",
-			DebugLibName = "assimp-vc143-mtd.so", 
-			LibDir = "%{wks.location}/External/Assimp/assimp/bin/linux/" 
+			LibName = "assimp",
+			DebugLibName = "assimp",
+			LibDir = "%{wks.location}/External/Libraries" 
 		},
 		Configurations = "Debug,Release"
 	},
@@ -127,6 +127,6 @@ include "External/ImGuiNodeEditor/ImGuiNodeEditor-premake5.lua"
 include "External/YamlCpp/YamlCpp-premake5.lua"
 include "External/Box2D/Box2D-premake5.lua"
 include "External/Bullet3/Bullet3-premake5.lua"
-include "External/Tracy/Tracy-premake5.lua"
 include "External/NfdExtended/NfdExtended-premake5.lua"
+include "External/Tracy/Tracy-premake5.lua"
 -- ~Configurations

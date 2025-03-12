@@ -533,7 +533,7 @@ namespace LkEngine::UI {
 									   const VectorType& InColorPressed, 
 									   bool RenderMultiSelect)
 				{
-					const std::string LabelStr = std::format("##{}", InLabel);
+					const std::string LabelStr = LK_FMT_LIB::format("##{}", InLabel);
 					{
 						static constexpr ImVec2 ButtonFrameSize(2.0f * FramePadding, 0.0f);
 						//UI::FScopedStyle ButtonFramePadding(ImGuiStyleVar_FramePadding, ImVec2(FramePadding * 2.0f, 0.0f));

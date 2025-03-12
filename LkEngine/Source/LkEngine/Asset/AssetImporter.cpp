@@ -5,7 +5,6 @@
 
 #include "LkEngine/Project/Project.h"
 
-
 namespace LkEngine {
 
 	std::unordered_map<EAssetType, std::unique_ptr<IAssetSerializer>> LAssetImporter::SerializerMap;

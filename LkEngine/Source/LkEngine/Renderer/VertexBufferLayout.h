@@ -26,7 +26,7 @@ namespace LkEngine {
 
 	namespace Enum
 	{
-		inline static constexpr const char* ToString(const EShaderDataType ShaderDataType)
+		inline static const char* ToString(const EShaderDataType ShaderDataType)
 		{
 			switch (ShaderDataType)
 			{
@@ -44,7 +44,7 @@ namespace LkEngine {
 				case EShaderDataType::Mat4:		return "Mat4";
 			}
 
-			LK_CORE_ASSERT(false);
+			LK_CORE_ASSERT(false, "Enum::ToString(const EShaderDataType) failed with {}", static_cast<int>(ShaderDataType));
 			return nullptr;
 		}
 	}
@@ -75,8 +75,6 @@ namespace LkEngine {
 			case EShaderDataType::Mat3:     return 4 * 3 * 3;
 			case EShaderDataType::Mat4:     return 4 * 4 * 4;
 		}
-
-		LK_CORE_ASSERT(false, "Invalid EShaderDataType value: {}", Enum::ToString(DataType));
 		return 0;
 	}
 
@@ -154,7 +152,7 @@ namespace LkEngine {
 			std::string String{};
 			for (const FVertexBufferElement& Element : Elements)
 			{
-				String += std::format("{}: {}\n", Element.Name, Enum::ToString(Element.Type));
+				String += LK_FMT_LIB::format("{}: {}\n", Element.Name, Enum::ToString(Element.Type));
 			}
 
 			return String;

@@ -5,8 +5,7 @@
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
-#include <glfw/glfw3.h>
-
+#include <GLFW/glfw3.h>
 
 namespace LkEngine {
 

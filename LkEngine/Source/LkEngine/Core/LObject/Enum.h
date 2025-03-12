@@ -15,7 +15,13 @@
  *     is passed in LK_ENUM_RANGE_BY_COUNT.
  */
 #ifndef FORCEINLINE
-#define FORCEINLINE	__forceinline
+#	if defined(LK_ENGINE_MSVC)
+#		define FORCEINLINE	__forceinline
+#	elif defined(LK_ENGINE_GCC)
+#		define FORCEINLINE __attribute__((always_inline))
+#	elif defined(LK_ENGINE_CLANG)
+#		define FORCEINLINE __forceinline
+#	endif
 #endif
 
 #include <typeinfo>
@@ -62,82 +68,6 @@ namespace LkEngine {
 		inline EnumClass& operator|=(EnumClass& Lhs, LK_Enum_##EnumClass Rhs) { return Lhs = (EnumClass)(static_cast<LK_Enum_##EnumClass>(Lhs) | Rhs); } 
 
 
-	/**
-	 * LK_ENUM_RANGE_BY_FIRST_AND_LAST
-	 */
-	#define LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, First, Last) \
-		template<> \
-		struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
-		{ \
-			enum { RangeType = 0 }; \
-			static constexpr std::underlying_type_t<EnumType> Begin = (std::underlying_type_t<EnumType>)(First); \
-			static constexpr std::underlying_type_t<EnumType> End   = (std::underlying_type_t<EnumType>)(Last) + 1; \
-		};
-
-	/**
-	 * LK_ENUM_RANGE_BY_VALUES
-	 */
-	#define LK_ENUM_RANGE_BY_VALUES(EnumType, ...) \
-		template<> \
-		struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
-		{ \
-			enum { RangeType = 1 }; \
-			template<typename DummyType> \
-			static const EnumType* GetPointer(const bool IsLast) \
-			{ \
-				static constexpr EnumType Values[] = { __VA_ARGS__ }; \
-				return IsLast ? Values + sizeof(Values) / sizeof(EnumType) : Values; \
-			} \
-		};
-
-	/**
-	 * LK_ENUM_RANGE_BY_COUNT
-	 * 
-	 *  Requires the passed EnumType's initial value to be 0.
-	 */
-	#define LK_ENUM_RANGE_BY_COUNT(EnumType, Count) \
-		LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, 0, (std::underlying_type_t<EnumType>)Count - 1)
-
-	/**
-	 * LK_ENUM_RANGE_FLAGS_BY_COUNT
-	 */
-	#define LK_ENUM_RANGE_FLAGS_BY_COUNT(EnumType) \
-	template<> \
-    struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
-    { \
-        enum { RangeType = 2 }; \
-        static constexpr std::underlying_type_t<EnumType> ValidFlags() \
-        { \
-            using IntType = std::underlying_type_t<EnumType>; \
-            IntType Flags = 0; \
-            for (IntType Idx = 1; Idx < static_cast<IntType>(EnumType::COUNT); Idx <<= 1) \
-            { \
-                Flags |= Idx; \
-            } \
-            return Flags; \
-        } \
-    };
-
-	/**
-	 * LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST
-	 */
-	#define LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EnumType, First, Last) \
-	template<> \
-    struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
-    { \
-        enum { RangeType = 2 }; \
-        static constexpr std::underlying_type_t<EnumType> ValidFlags() \
-        { \
-            using IntType = std::underlying_type_t<EnumType>; \
-            IntType Flags = static_cast<IntType>(First); \
-            for (IntType Idx = Flags; Idx <= static_cast<IntType>(Last); Idx <<= 1) \
-            { \
-                Flags |= Idx; \
-            } \
-            return Flags; \
-        } \
-    };
-
 	namespace Enum::Internal::Range
 	{
 		/**
@@ -147,7 +77,10 @@ namespace LkEngine {
 		 *  2: Flag based.
 		 */
 		template<typename EnumType>
-		struct Type { enum { RangeType = -1 }; };
+		struct Type 
+		{ 
+			enum { RangeType = -1 }; 
+		};
 
 		template<typename EnumType>
 		struct TContiguousIterator
@@ -291,7 +224,6 @@ namespace LkEngine {
 		};
 
 		/**
-		 * TODO: NOT WORKING
 		 * Enum range implementation, flag values.
 		 */
         template<typename EnumType>
@@ -315,3 +247,161 @@ namespace LkEngine {
 	};
 
 }
+
+#if defined(LK_ENGINE_MSVC)
+
+/**
+ * LK_ENUM_RANGE_BY_FIRST_AND_LAST
+ */
+#define LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, First, Last) \
+	template<> \
+	struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
+	{ \
+		enum { RangeType = 0 }; \
+		static constexpr std::underlying_type_t<EnumType> Begin = (std::underlying_type_t<EnumType>)(First); \
+		static constexpr std::underlying_type_t<EnumType> End   = (std::underlying_type_t<EnumType>)(Last) + 1; \
+	};
+
+/**
+ * LK_ENUM_RANGE_BY_VALUES
+ */
+#define LK_ENUM_RANGE_BY_VALUES(EnumType, ...) \
+	template<> \
+	struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
+	{ \
+		enum { RangeType = 1 }; \
+		template<typename DummyType> \
+		static const EnumType* GetPointer(const bool IsLast) \
+		{ \
+			static constexpr EnumType Values[] = { __VA_ARGS__ }; \
+			return IsLast ? Values + sizeof(Values) / sizeof(EnumType) : Values; \
+		} \
+	};
+
+/**
+ * LK_ENUM_RANGE_BY_COUNT
+ * 
+ *  Requires the passed EnumType's initial value to be 0.
+ */
+#define LK_ENUM_RANGE_BY_COUNT(EnumType, Count) \
+	LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, 0, (std::underlying_type_t<EnumType>)Count - 1)
+
+/**
+ * LK_ENUM_RANGE_FLAGS_BY_COUNT
+ */
+#define LK_ENUM_RANGE_FLAGS_BY_COUNT(EnumType) \
+	template<> \
+	struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
+	{ \
+		enum { RangeType = 2 }; \
+		static constexpr std::underlying_type_t<EnumType> ValidFlags() \
+		{ \
+			using IntType = std::underlying_type_t<EnumType>; \
+			IntType Flags = 0; \
+			for (IntType Idx = 1; Idx < static_cast<IntType>(EnumType::COUNT); Idx <<= 1) \
+			{ \
+				Flags |= Idx; \
+			} \
+			return Flags; \
+		} \
+	};
+
+/**
+ * LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST
+ */
+#define LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EnumType, First, Last) \
+	template<> \
+	struct ::LkEngine::Enum::Internal::Range::Type<EnumType> \
+	{ \
+		enum { RangeType = 2 }; \
+		static constexpr std::underlying_type_t<EnumType> ValidFlags() \
+		{ \
+			using IntType = std::underlying_type_t<EnumType>; \
+			IntType Flags = static_cast<IntType>(First); \
+			for (IntType Idx = Flags; Idx <= static_cast<IntType>(Last); Idx <<= 1) \
+			{ \
+				Flags |= Idx; \
+			} \
+			return Flags; \
+		} \
+	};
+
+#elif defined(LK_ENGINE_GCC)
+
+/**
+ * LK_ENUM_RANGE_BY_FIRST_AND_LAST
+ */
+#define LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, First, Last) \
+	template<> \
+	struct LkEngine::Enum::Internal::Range::Type<EnumType> \
+	{ \
+		enum { RangeType = 0 }; \
+		static constexpr std::underlying_type_t<EnumType> Begin = (std::underlying_type_t<EnumType>)(First); \
+		static constexpr std::underlying_type_t<EnumType> End   = (std::underlying_type_t<EnumType>)(Last) + 1; \
+	};
+
+/**
+ * LK_ENUM_RANGE_BY_VALUES
+ */
+#define LK_ENUM_RANGE_BY_VALUES(EnumType, ...) \
+	template<> \
+	struct LkEngine::Enum::Internal::Range::Type<EnumType> \
+	{ \
+		enum { RangeType = 1 }; \
+		template<typename DummyType> \
+		static const EnumType* GetPointer(const bool IsLast) \
+		{ \
+			static constexpr EnumType Values[] = { __VA_ARGS__ }; \
+			return IsLast ? Values + sizeof(Values) / sizeof(EnumType) : Values; \
+		} \
+	};
+
+/**
+ * LK_ENUM_RANGE_BY_COUNT
+ * 
+ *  Requires the passed EnumType's initial value to be 0.
+ */
+#define LK_ENUM_RANGE_BY_COUNT(EnumType, Count) \
+	LK_ENUM_RANGE_BY_FIRST_AND_LAST(EnumType, 0, (std::underlying_type_t<EnumType>)Count - 1)
+
+/**
+ * LK_ENUM_RANGE_FLAGS_BY_COUNT
+ */
+#define LK_ENUM_RANGE_FLAGS_BY_COUNT(EnumType) \
+	template<> \
+	struct LkEngine::Enum::Internal::Range::Type<EnumType> \
+	{ \
+		enum { RangeType = 2 }; \
+		static constexpr std::underlying_type_t<EnumType> ValidFlags() \
+		{ \
+			using IntType = std::underlying_type_t<EnumType>; \
+			IntType Flags = 0; \
+			for (IntType Idx = 1; Idx < static_cast<IntType>(EnumType::COUNT); Idx <<= 1) \
+			{ \
+				Flags |= Idx; \
+			} \
+			return Flags; \
+		} \
+	};
+
+/**
+ * LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST
+ */
+#define LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(EnumType, First, Last) \
+	template<> \
+	struct LkEngine::Enum::Internal::Range::Type<EnumType> \
+	{ \
+		enum { RangeType = 2 }; \
+		static constexpr std::underlying_type_t<EnumType> ValidFlags() \
+		{ \
+			using IntType = std::underlying_type_t<EnumType>; \
+			IntType Flags = static_cast<IntType>(First); \
+			for (IntType Idx = Flags; Idx <= static_cast<IntType>(Last); Idx <<= 1) \
+			{ \
+				Flags |= Idx; \
+			} \
+			return Flags; \
+		} \
+	};
+
+#endif

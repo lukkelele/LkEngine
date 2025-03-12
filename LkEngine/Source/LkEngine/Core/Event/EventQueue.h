@@ -100,7 +100,7 @@ namespace LkEngine {
 
 		void AttachHandler(const FEventHandler InHandler)
 		{
-			LK_CORE_DEBUG_TAG(std::format("{}", QueueName), "Attaching event handler");
+			LK_CORE_DEBUG_TAG(LK_FMT_LIB::format("{}", QueueName), "Attaching event handler");
 			Handler = InHandler;
 		}
 
@@ -184,7 +184,7 @@ namespace LkEngine {
 			std::scoped_lock<std::mutex> ScopedLock(Mutex);
 			std::shared_ptr<EventType> Event = std::make_shared<EventType>(std::forward<EventArgs>(Args)...);
 		#if defined(LK_ENGINE_EVENTQUEUE_DEBUG)
-			LK_CORE_DEBUG_TAG(std::format("{}", QueueName), "Queuing: {}", Event->GetName());
+			LK_CORE_DEBUG_TAG(LK_FMT_LIB::format("{}", QueueName), "Queuing: {}", Event->GetName());
 		#endif
 			EventQueue.emplace_back(Event->GetName(), Event->GetType(), typeid(*Event), EventQueue.size(), [&, Event]()
 			{ 
@@ -197,7 +197,7 @@ namespace LkEngine {
 
 					if (!Event->IsHandled())
 					{
-						LK_CORE_ERROR_TAG(std::format("{}", QueueName), "{}: Failed", Event->GetName());
+						LK_CORE_ERROR_TAG(LK_FMT_LIB::format("{}", QueueName), "{}: Failed", Event->GetName());
 					}
 				}
 			});

@@ -1,19 +1,20 @@
 #pragma once
 
+#include "LkEngine/Core/LObject/Object.h"
+#include "LkEngine/Core/LObject/ObjectPtr.h"
+
+#include "LkEngine/Renderer/Pipeline.h"
+#include "LkEngine/Renderer/RenderPass.h"
 #include "LkEngine/Scene/Scene.h"
 
 #include "LkEngine/Renderer/UniformBufferSet.h"
-
 
 namespace LkEngine {
 
 	class LMaterial;
 	class LMesh;
 	class LStaticMesh;
-	class LScene;
-	class LPipeline;
 	class LRenderer;
-	class LRenderPass;
 	class LRenderer2D;
 	class LRenderCommandBuffer;
 	class LVertexBuffer;
@@ -149,10 +150,11 @@ namespace LkEngine {
 
 	private:
 		FSceneRendererSpecification Specification{};
-		TObjectPtr<LScene> Scene{};
+		TObjectPtr<LScene> Scene;
 
-		TObjectPtr<LRenderCommandBuffer> CommandBuffer{};
-		TObjectPtr<LRenderer2D> Renderer2D{};
+		/** @fixme: FIXME */
+		TObjectPtr<LRenderCommandBuffer> CommandBuffer;
+		TObjectPtr<LRenderer2D> Renderer2D;
 
 		struct FSceneData
 		{

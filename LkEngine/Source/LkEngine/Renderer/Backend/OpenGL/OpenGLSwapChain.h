@@ -2,9 +2,6 @@
 
 #include "LkEngine/Renderer/SwapChain.h"
 
-
-struct GLFWwindow;
-
 namespace LkEngine {
 
 	class OpenGLSwapChain : public LSwapChain

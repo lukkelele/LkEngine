@@ -40,7 +40,7 @@ namespace LkEngine::UI {
 		ShiftCursorY(4.0f);
 
 		ImGui::PushItemWidth(-1);
-		Modified = ImGui::Checkbox(std::format("##{0}", Label).c_str(), &Value);
+		Modified = ImGui::Checkbox(LK_FMT_LIB::format("##{0}", Label).c_str(), &Value);
 		ImGui::PopItemWidth();
 
 		if (IsCurrentlyInTable)
@@ -84,7 +84,7 @@ namespace LkEngine::UI {
 		}
 
 		ImGui::PushItemWidth(-1);
-		const bool Modified = UI::Draw::DragFloat(std::format("##{}", Label).c_str(), &Value, Delta, Min, Max);
+		const bool Modified = UI::Draw::DragFloat(LK_FMT_LIB::format("##{}", Label).c_str(), &Value, Delta, Min, Max);
 		ImGui::PopItemWidth();
 
 		if (IsCurrentlyInTable)
@@ -120,7 +120,7 @@ namespace LkEngine::UI {
 		ShiftCursorY(4.0f);
 
 		ImGui::PushItemWidth(-1);
-		const bool Modified = UI::Draw::DragFloat3(std::format("##{0}", Label).c_str(), glm::value_ptr(Value), Delta, Min, Max);
+		const bool Modified = UI::Draw::DragFloat3(LK_FMT_LIB::format("##{0}", Label).c_str(), glm::value_ptr(Value), Delta, Min, Max);
 		ImGui::PopItemWidth();
 
 		ImGui::TableNextRow();
@@ -140,7 +140,7 @@ namespace LkEngine::UI {
 		}
 
 		const ImVec2 LabelSize = ImGui::CalcTextSize(Label);
-		const ImVec2 ValueSize = ImGui::CalcTextSize(std::format("{}", Value).c_str());
+		const ImVec2 ValueSize = ImGui::CalcTextSize(LK_FMT_LIB::format("{}", Value).c_str());
 
 		ImGuiContext& G = *GImGui;
 		ImGuiTable* CurrentTable = ImGui::GetCurrentTable();
@@ -182,7 +182,7 @@ namespace LkEngine::UI {
 			}
 
 			ImGui::PushItemWidth(-1);
-			ImGui::Text("%s", std::format("{}", Value).c_str());
+			ImGui::Text("%s", LK_FMT_LIB::format("{}", Value).c_str());
 			ImGui::PopItemWidth();
 
 			ImGui::TableNextRow();
@@ -191,7 +191,7 @@ namespace LkEngine::UI {
 		{
 			ShiftCursor(10.0f, 0.0f);
 			ImGui::PushItemWidth(-1);
-			ImGui::Text("%s", std::format("{}", Value).c_str());
+			ImGui::Text("%s", LK_FMT_LIB::format("{}", Value).c_str());
 			ImGui::PopItemWidth();
 		}
 
@@ -238,7 +238,7 @@ namespace LkEngine::UI {
 
 		bool Modified = false;
 
-		const std::string ID = std::format("##{}", Label);
+		const std::string ID = LK_FMT_LIB::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption))
 		{
 			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
@@ -360,7 +360,7 @@ namespace LkEngine::UI {
 		}
 		ComboFlags |= UIContext.NextItemData.ComboFlags;
 
-		const std::string ID = std::format("##{}", Label);
+		const std::string ID = LK_FMT_LIB::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
 		{
 			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
@@ -465,7 +465,7 @@ namespace LkEngine::UI {
 		}
 		ComboFlags |= UIContext.NextItemData.ComboFlags;
 
-		const std::string ID = std::format("##{}", Label);
+		const std::string ID = LK_FMT_LIB::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
 		{
 			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)
@@ -585,7 +585,7 @@ namespace LkEngine::UI {
 		}
 		ComboFlags |= UIContext.NextItemData.ComboFlags;
 
-		const std::string ID = std::format("##{}", Label);
+		const std::string ID = LK_FMT_LIB::format("##{}", Label);
 		if (UI::BeginCombo(ID.c_str(), CurrentOption, ComboFlags))
 		{
 			for (uint16_t Idx = 0; Idx < ArrSize; Idx++)

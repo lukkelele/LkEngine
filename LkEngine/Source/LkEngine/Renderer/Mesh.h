@@ -19,7 +19,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-
 namespace LkEngine {
 
 	/**
@@ -221,8 +220,7 @@ namespace LkEngine {
 
 		std::string ToString() const
 		{
-			return std::format("[Submesh: {}] VertexCount={}  IndexCount={}  MaterialIndex={}", MeshName, VertexCount, IndexCount, MaterialIndex);
-			//return std::format("[Submesh]");
+			return LK_FMT_LIB::format("[Submesh: {}] VertexCount={}  IndexCount={}  MaterialIndex={}", MeshName, VertexCount, IndexCount, MaterialIndex);
 		}
 	};
 

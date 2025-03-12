@@ -3,7 +3,6 @@
 
 #include "LkOpenGL.h"
 
-
 namespace LkEngine {
 
 	OpenGLSwapChain::OpenGLSwapChain(uint32_t* InWidth, uint32_t* InHeight, const bool InVSync)

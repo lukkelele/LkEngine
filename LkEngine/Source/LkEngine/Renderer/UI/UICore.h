@@ -132,8 +132,8 @@ namespace LkEngine::UI {
 	template<typename T>
 	struct SizeConstraint
 	{
-		static constexpr T Min;
-		static constexpr T Max;
+		static constexpr T Min{};
+		static constexpr T Max{};
 	};
 	
 	template<>
@@ -280,14 +280,14 @@ namespace LkEngine::UI {
      * @brief Check if a window is focused, defaults to use the window name.
      */
 	template<EFindType FindType = EFindType::Name, typename T = const char*>
-    FORCEINLINE static bool IsWindowFocused(T Identifier, const bool CheckRootWindow = true)
+    FORCEINLINE bool IsWindowFocused(T Identifier, const bool CheckRootWindow = true)
 	{
 		LK_CORE_ASSERT(false);
 		return false;
 	}
 
 	template<>
-    FORCEINLINE static bool IsWindowFocused(const char* WindowName, const bool CheckRootWindow)
+    FORCEINLINE bool IsWindowFocused(const char* WindowName, const bool CheckRootWindow)
     {
         ImGuiWindow* CurrentNavWindow = GImGui->NavWindow;
         if (CheckRootWindow)
@@ -305,7 +305,7 @@ namespace LkEngine::UI {
     }
 
 	template<>
-    FORCEINLINE static bool IsWindowFocused(const ImGuiID ID, const bool CheckRootWindow)
+    FORCEINLINE bool IsWindowFocused(const ImGuiID ID, const bool CheckRootWindow)
     {
         ImGuiWindow* CurrentNavWindow = GImGui->NavWindow;
         if (CheckRootWindow)
@@ -326,14 +326,14 @@ namespace LkEngine::UI {
      * @brief Check if a window is docked, defaults to use the window name.
      */
 	template<EFindType FindType = EFindType::Name, typename T = const char*>
-	FORCEINLINE static bool IsWindowDocked(T Identifier)
+	FORCEINLINE bool IsWindowDocked(T Identifier)
 	{
 		LK_CORE_ASSERT(false);
 		return false;
 	}
 
 	template<>
-	FORCEINLINE static bool IsWindowDocked<EFindType::ID>(const ImGuiID ID)
+	FORCEINLINE bool IsWindowDocked<EFindType::ID>(const ImGuiID ID)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByID(ID); Window != nullptr)
 		{
@@ -344,7 +344,7 @@ namespace LkEngine::UI {
 	}
 
 	template<>
-	FORCEINLINE static bool IsWindowDocked<EFindType::Name>(const char* WindowName)
+	FORCEINLINE bool IsWindowDocked<EFindType::Name>(const char* WindowName)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByName(WindowName); Window != nullptr)
 		{
@@ -355,14 +355,14 @@ namespace LkEngine::UI {
 	}
 
 	template<EFindType FindType = EFindType::Name, typename T = const char*>
-	FORCEINLINE static bool IsWindowHovered(T Identifier)
+	FORCEINLINE bool IsWindowHovered(T Identifier)
 	{
 		LK_CORE_ASSERT(false);
 		return false;
 	}
 
 	template<>
-	FORCEINLINE static bool IsWindowHovered<EFindType::Name>(const char* WindowName)
+	FORCEINLINE bool IsWindowHovered<EFindType::Name>(const char* WindowName)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByName(WindowName); Window != nullptr)
 		{
@@ -374,7 +374,7 @@ namespace LkEngine::UI {
     }
 
 	template<>
-	FORCEINLINE static bool IsWindowHovered<EFindType::ID>(const ImGuiID ID)
+	FORCEINLINE bool IsWindowHovered<EFindType::ID>(const ImGuiID ID)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByID(ID); Window != nullptr)
 		{
@@ -386,14 +386,14 @@ namespace LkEngine::UI {
     }
 
 	template<EFindType FindType = EFindType::Name, typename T = const char*>
-	FORCEINLINE static bool IsWindowAbove(T Window1, T Window2)
+	FORCEINLINE bool IsWindowAbove(T Window1, T Window2)
 	{
 		LK_CORE_ASSERT(false);
 		return false;
 	}
 
 	template<>
-	FORCEINLINE static bool IsWindowAbove<EFindType::Name>(const char* Window1Name, const char* Window2Name)
+	FORCEINLINE bool IsWindowAbove<EFindType::Name>(const char* Window1Name, const char* Window2Name)
 	{
 		ImGuiWindow* Window1 = ImGui::FindWindowByName(Window1Name);
 		ImGuiWindow* Window2 = ImGui::FindWindowByName(Window2Name);
@@ -425,7 +425,7 @@ namespace LkEngine::UI {
     }
 
 	template<>
-	FORCEINLINE static bool IsWindowAbove<EFindType::ID>(const ImGuiID Window1ID, const ImGuiID Window2ID)
+	FORCEINLINE bool IsWindowAbove<EFindType::ID>(const ImGuiID Window1ID, const ImGuiID Window2ID)
 	{
 		ImGuiWindow* Window1 = ImGui::FindWindowByID(Window1ID);
 		ImGuiWindow* Window2 = ImGui::FindWindowByID(Window2ID);
@@ -457,14 +457,14 @@ namespace LkEngine::UI {
     }
 
 	template<EFindType FindType = EFindType::Name, typename T = const char*>
-	FORCEINLINE static bool IsAnyWindowAbove(T Window)
+	FORCEINLINE bool IsAnyWindowAbove(T Window)
 	{
 		LK_CORE_ASSERT(false);
 		return false;
 	}
 
 	template<>
-	FORCEINLINE static bool IsAnyWindowAbove<EFindType::Name>(const char* WindowName)
+	FORCEINLINE bool IsAnyWindowAbove<EFindType::Name>(const char* WindowName)
 	{
 		ImGuiWindow* Window = ImGui::FindWindowByName(WindowName);
 		if (!Window)
@@ -477,7 +477,7 @@ namespace LkEngine::UI {
     }
 
 	template<>
-	FORCEINLINE static bool IsAnyWindowAbove<EFindType::ID>(const ImGuiID WindowID)
+	FORCEINLINE bool IsAnyWindowAbove<EFindType::ID>(const ImGuiID WindowID)
 	{
 		ImGuiWindow* Window = ImGui::FindWindowByID(WindowID);
 		if (!Window)
@@ -490,14 +490,14 @@ namespace LkEngine::UI {
     }
 
 	template<EFindType FindType = EFindType::Name, typename T = const char*>
-	FORCEINLINE static ImGuiWindow* GetWindowAbove(T Window1, T Window2)
+	FORCEINLINE ImGuiWindow* GetWindowAbove(T Window1, T Window2)
 	{
 		LK_CORE_ASSERT(false);
 		return nullptr;
 	}
 
 	template<>
-	FORCEINLINE static ImGuiWindow* GetWindowAbove<EFindType::Name>(const char* Window1Name, const char* Window2Name)
+	FORCEINLINE ImGuiWindow* GetWindowAbove<EFindType::Name>(const char* Window1Name, const char* Window2Name)
 	{
 		ImGuiWindow* Window1 = ImGui::FindWindowByName(Window1Name);
 		ImGuiWindow* Window2 = ImGui::FindWindowByName(Window2Name);
@@ -529,7 +529,7 @@ namespace LkEngine::UI {
     }
 
 	template<>
-	FORCEINLINE static ImGuiWindow* GetWindowAbove<EFindType::ID>(const ImGuiID Window1ID, const ImGuiID Window2ID)
+	FORCEINLINE ImGuiWindow* GetWindowAbove<EFindType::ID>(const ImGuiID Window1ID, const ImGuiID Window2ID)
 	{
 		ImGuiWindow* Window1 = ImGui::FindWindowByID(Window1ID);
 		ImGuiWindow* Window2 = ImGui::FindWindowByID(Window2ID);
@@ -564,14 +564,14 @@ namespace LkEngine::UI {
      * @brief Check if a window is docked, defaults to use the window name.
      */
 	template<EFindType FindType = EFindType::Name, typename T = const char*>
-	FORCEINLINE static ImVec2 GetWindowSize(T Identifier)
+	FORCEINLINE ImVec2 GetWindowSize(T Identifier)
 	{
 		LK_CORE_ASSERT(false);
 		return ImVec2();
 	}
 
 	template<>
-	FORCEINLINE static ImVec2 GetWindowSize<EFindType::ID>(const ImGuiID ID)
+	FORCEINLINE ImVec2 GetWindowSize<EFindType::ID>(const ImGuiID ID)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByID(ID); Window != nullptr)
 		{
@@ -582,7 +582,7 @@ namespace LkEngine::UI {
 	}
 
 	template<>
-	FORCEINLINE static ImVec2 GetWindowSize<EFindType::Name>(const char* WindowName)
+	FORCEINLINE ImVec2 GetWindowSize<EFindType::Name>(const char* WindowName)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByName(WindowName); Window != nullptr)
 		{
@@ -592,7 +592,7 @@ namespace LkEngine::UI {
 		return ImVec2();
 	}
 
-	FORCEINLINE static ImGuiID GetWindowID(const char* WindowName)
+	FORCEINLINE ImGuiID GetWindowID(const char* WindowName)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByName(WindowName); Window != nullptr)
 		{
@@ -602,7 +602,7 @@ namespace LkEngine::UI {
 		return 0;
 	}
 
-	FORCEINLINE static const char* GetWindowName(const ImGuiID ID)
+	FORCEINLINE const char* GetWindowName(const ImGuiID ID)
 	{
 		if (ImGuiWindow* Window = ImGui::FindWindowByID(ID); Window != nullptr)
 		{

@@ -184,7 +184,11 @@ namespace LkEngine {
 			int Length;
 			LK_OpenGL_Verify(glGetShaderiv(ShaderID, GL_INFO_LOG_LENGTH, &Length));
 
+		#if defined(LK_ENGINE_MSVC)
 			char* ErrorMessage = (char*)_malloca(Length * sizeof(char));
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			char* ErrorMessage = (char*)alloca(Length * sizeof(char));
+		#endif
 			LK_OpenGL_Verify(glGetShaderInfoLog(ShaderID, Length, &Length, ErrorMessage));
 			LK_CORE_ERROR_TAG("OpenGLShader", "Failed to compile {} shader at {}, \"{}\"", 
 							  ((ShaderType == GL_VERTEX_SHADER) ? "vertex" : "fragment"), FilePath.string(), ErrorMessage);

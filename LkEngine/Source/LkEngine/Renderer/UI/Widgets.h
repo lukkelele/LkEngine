@@ -167,7 +167,7 @@ namespace LkEngine::UI {
 				if (ImGui::IsItemHovered())
 				{
 					ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
-					UI::SetTooltip(std::format("StartPos: ({}, {})  EndPos: ({}, {})  InputBarSize: ({}, {})", 
+					UI::SetTooltip(LK_FMT_LIB::format("StartPos: ({}, {})  EndPos: ({}, {})  InputBarSize: ({}, {})", 
 											   InputBarPosStart.x, InputBarPosStart.y, 
 											   InputBarPosEnd.x, InputBarPosEnd.y,
 											   InputBarSize.x, InputBarSize.y));

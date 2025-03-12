@@ -7,32 +7,30 @@ project "Tracy"
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
-	files
-	{
-		"tracy/public/client/**.h",
-		"tracy/public/client/**.hpp",
-		"tracy/public/client/**.cpp",
-
-		"tracy/public/common/**.h",
-		"tracy/public/common/**.hpp",
-		"tracy/public/common/**.cpp",
-
-		"tracy/public/tracy/**.h",
-		"tracy/public/tracy/**.hpp",
-		"tracy/public/tracy/**.cpp",
-
-		"tracy/public/libbacktrace/alloc.cpp",
-		"tracy/public/libbacktrace/sort.cpp",
-		"tracy/public/libbacktrace/state.cpp",
-	}
-
-	includedirs 
-	{ 
+	includedirs { 
 		"tracy/public/" 
 	}
 
 	filter "system:windows"
 		systemversion "latest"
+
+		files {
+			"tracy/public/client/**.h",
+			"tracy/public/client/**.hpp",
+			"tracy/public/client/**.cpp",
+
+			"tracy/public/common/**.h",
+			"tracy/public/common/**.hpp",
+			"tracy/public/common/**.cpp",
+
+			"tracy/public/tracy/**.h",
+			"tracy/public/tracy/**.hpp",
+			"tracy/public/tracy/**.cpp",
+
+			"tracy/public/libbacktrace/alloc.cpp",
+			"tracy/public/libbacktrace/sort.cpp",
+			"tracy/public/libbacktrace/state.cpp",
+		}
 
 		defines {
 			"_CRT_SECURE_NO_WARNINGS",
@@ -43,8 +41,11 @@ project "Tracy"
 		}
 
 	filter "system:linux"
-		files 
-		{
+		files {
+			"tracy/public/tracy/**.h",
+			"tracy/public/tracy/**.hpp",
+			"tracy/public/tracy/**.cpp",
+
 			"tracy/public/libbacktrace/posix.cpp",
 			"tracy/public/libbacktrace/mmapio.cpp",
 			"tracy/public/libbacktrace/macho.cpp",
