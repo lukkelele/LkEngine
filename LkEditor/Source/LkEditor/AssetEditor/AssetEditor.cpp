@@ -31,7 +31,7 @@ namespace LkEngine {
 
 	void LAssetEditor::SetOpen(const bool IsOpen)
 	{
-		LK_CORE_DEBUG_TAG(std::format("{}", StringUtils::RemovePrefix(GetClass()->GetName(), 'L')), "Set {}", IsOpen ? "open" : "closed");
+		LK_CORE_DEBUG_TAG(LK_FMT_LIB::format("{}", StringUtils::RemovePrefix(GetClass()->GetName(), 'L')), "Set {}", IsOpen ? "open" : "closed");
 		bIsOpen = IsOpen;
 		bIsOpen ? OnOpen() : OnClose();
 	}

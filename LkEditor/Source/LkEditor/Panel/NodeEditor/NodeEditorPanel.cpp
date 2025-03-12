@@ -72,7 +72,7 @@ namespace LkEngine {
 		}
 
 		static constexpr ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_None;
-		if (!UI::Begin(std::format("##{}-Window", Name).c_str(), &IsOpen, WindowFlags))
+		if (!UI::Begin(LK_FMT_LIB::format("##{}-Window", Name).c_str(), &IsOpen, WindowFlags))
 		{
 			return;
 		}

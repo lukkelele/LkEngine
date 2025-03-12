@@ -14,7 +14,6 @@
 
 #include "LkEngine/Serialization/YamlSerialization.h"
 
-
 namespace LkEngine {
 
 	class LToolsPanel : public IPanel
@@ -51,15 +50,26 @@ namespace LkEngine {
 		{
 			bool bTreeNode_Selection = true;
 			bool bTreeNode_KeyInfo = false;
+
+			FWindow_InputInfo() 
+				: bTreeNode_Selection(true)
+				, bTreeNode_KeyInfo(true)
+			{
+			}
 		};
 
 		struct FWindow_UserInterfaceTools : public FWindow
 		{
 			bool bTreeNode_MessageBoxes = true;
+			FWindow_UserInterfaceTools() 
+				: bTreeNode_MessageBoxes(true) 
+			{
+			}
 		};
 
 		struct FWindow_AssetRegistry : public FWindow
 		{
+			FWindow_AssetRegistry() = default;
 		};
 
 		struct FWindow_Fonts : public FWindow
@@ -74,13 +84,13 @@ namespace LkEngine {
 		{
 		};
 
-		inline static FWindow_ObjectReferences Window_ObjectReferences{};
-		inline static FWindow_AssetRegistry Window_AssetRegistry{};
-		inline static FWindow_InputInfo Window_InputInfo{};
-		inline static FWindow_UserInterfaceTools Window_UserInterfaceTools{};
-		inline static FWindow_Fonts Window_Fonts{};
-		inline static FWindow_Sandbox Window_Sandbox{};
-		inline static FWindow_Console Window_Console{};
+		inline static FWindow_ObjectReferences Window_ObjectReferences;
+		inline static FWindow_AssetRegistry Window_AssetRegistry;
+		inline static FWindow_InputInfo Window_InputInfo;
+		inline static FWindow_UserInterfaceTools Window_UserInterfaceTools;
+		inline static FWindow_Fonts Window_Fonts;
+		inline static FWindow_Sandbox Window_Sandbox;
+		inline static FWindow_Console Window_Console;
 
 	private:
 		LPANEL(LToolsPanel);

@@ -1,15 +1,13 @@
 #pragma once
 
-#include "LkEngine/Renderer/UI/Panel.h"
+#include <LkEngine/Renderer/UI/Panel.h>
 
-#include "LkEngine/Core/SelectionContext.h"
+#include <LkEngine/Renderer/SceneRenderer.h>
+#include <LkEngine/Core/SelectionContext.h>
 
-#include "LkEngine/Scene/Scene.h"
-#include "LkEngine/Scene/Entity.h"
-#include "LkEngine/Scene/SceneSelectionData.h"
-
-#include "LkEngine/Renderer/SceneRenderer.h"
-
+#include <LkEngine/Scene/Scene.h>
+#include <LkEngine/Scene/Entity.h>
+#include <LkEngine/Scene/SceneSelectionData.h>
 
 namespace LkEngine {
 

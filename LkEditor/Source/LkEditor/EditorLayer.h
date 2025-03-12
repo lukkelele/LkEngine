@@ -32,9 +32,9 @@
 
 #include "LkEngine/Project/Project.h"
 
-
 namespace LkEngine {
 
+	class LWindow;
 	class LNodeEditorPanel;
 	class LScene;
 	class LSceneManagerPanel;
@@ -168,8 +168,8 @@ namespace LkEngine {
 		TObjectPtr<LSceneRenderer> SceneRenderer{};
 		std::string SceneFilePath{};
 
-		TObjectPtr<LWindow> Window{};
-		TObjectPtr<LRenderer2D> Renderer2D{};
+		TObjectPtr<LWindow> Window;
+		TObjectPtr<LRenderer2D> Renderer2D;
 
 		std::array<LVector2, 2> PrimaryViewportBounds;
 		TObjectPtr<LViewport> EditorViewport;

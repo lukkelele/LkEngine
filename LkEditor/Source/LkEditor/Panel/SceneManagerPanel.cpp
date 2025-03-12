@@ -1,20 +1,18 @@
-//#include "LKpch.h"
 #include "SceneManagerPanel.h"
 
-#include "LkEngine/Core/SelectionContext.h"
+#include <LkEngine/Core/SelectionContext.h>
 
-#include "LkEngine/Renderer/FrameBuffer.h"
-#include "LkEngine/Renderer/Color.h"
+#include <LkEngine/Renderer/Framebuffer.h>
+#include <LkEngine/Renderer/Color.h>
 
-#include "LkEngine/Editor/EditorCore.h"
+#include <LkEngine/Editor/EditorCore.h>
+
+#include <LkEngine/Project/Project.h>
+
+#include <LkEngine/Renderer/UI/Property.h>
+#include <LkEngine/Renderer/UI/UILayer.h>
+
 #include "LkEditor/EditorLayer.h"
-
-#include "LkEngine/Project/Project.h"
-
-#include "LkEngine/Renderer/SceneRenderer.h"
-#include "LkEngine/Renderer/UI/Property.h"
-#include "LkEngine/Renderer/UI/UILayer.h"
-
 
 namespace LkEngine {
 
@@ -60,7 +58,7 @@ namespace LkEngine {
 		if (Scene)
 		{
 			LK_CORE_ASSERT(!Scene->Name.empty());
-			ImGui::SeparatorText(std::format("{}", Scene->Name).c_str());
+			ImGui::SeparatorText(LK_FMT_LIB::format("{}", Scene->Name).c_str());
 
 			/* Scene raycast info. */
 			{
@@ -214,7 +212,7 @@ namespace LkEngine {
 
 		if (NodeOpened)
 		{
-			const std::string UuidStr = std::format("{}", (uint64_t)Entity.GetUUID());
+			const std::string UuidStr = LK_FMT_LIB::format("{}", (uint64_t)Entity.GetUUID());
 			ImGui::Text("UUID: %s", UuidStr.c_str());
 
 			/**
@@ -226,7 +224,7 @@ namespace LkEngine {
 				DrawComponent<LMeshComponent>("Mesh", Entity, Entities, [&Entity, &AssetManager](LMeshComponent& Mesh)
 				{
 					const FAssetMetadata& Metadata = AssetManager->GetMetadata(Mesh.Mesh);
-					const std::string AssetHandleStr = std::format("{}", (uint64_t)Mesh.Mesh);
+					const std::string AssetHandleStr = LK_FMT_LIB::format("{}", (uint64_t)Mesh.Mesh);
 					ImGui::Text("Asset: %s", AssetHandleStr.c_str());
 					ImGui::Text("Loaded: %s", Metadata.bIsDataLoaded ? "Yes" : "No");
 					ImGui::Text("Memory Asset: %s", Metadata.bIsMemoryAsset ? "Yes" : "No");
@@ -243,7 +241,7 @@ namespace LkEngine {
 				DrawComponent<LStaticMeshComponent>("StaticMesh", Entity, Entities, [&Entity, &AssetManager](LStaticMeshComponent& Mesh)
 				{
 					const FAssetMetadata& Metadata = AssetManager->GetMetadata(Mesh.StaticMesh);
-					const std::string AssetHandleStr = std::format("{}", (uint64_t)Mesh.StaticMesh);
+					const std::string AssetHandleStr = LK_FMT_LIB::format("{}", (uint64_t)Mesh.StaticMesh);
 					ImGui::Text("Asset: %s", AssetHandleStr.c_str());
 					ImGui::Text("Loaded: %s", Metadata.bIsDataLoaded ? "Yes" : "No");
 					ImGui::Text("Memory Asset: %s", Metadata.bIsMemoryAsset ? "Yes" : "No");

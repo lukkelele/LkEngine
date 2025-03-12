@@ -1,30 +1,29 @@
 #include "ContentBrowserPanel.h"
 
-#include "LkEditor/EditorLayer.h"
-
-#include "LkEngine/Core/Window.h"
-#include "LkEngine/Core/Input/Input.h"
-#include "LkEngine/Core/IO/FileSystem.h"
-
-#include "LkEngine/Renderer/Image.h"
-#include "LkEngine/Renderer/Texture.h"
-#include "LkEngine/Renderer/UI/UICore.h"
-#include "LkEngine/Renderer/UI/Widgets.h"
-
-#include "LkEngine/Asset/AssetImporter.h"
-#include "LkEngine/Asset/AssetManager.h"
+#include <LkEngine/Core/Window.h>
+#include <LkEngine/Core/Input/Input.h>
+#include <LkEngine/Core/IO/FileSystem.h>
+#include <LkEngine/Renderer/Image.h>
+#include <LkEngine/Renderer/Texture.h>
+#include <LkEngine/Renderer/UI/UICore.h>
+#include <LkEngine/Renderer/UI/Widgets.h>
+#include <LkEngine/Asset/AssetImporter.h>
+#include <LkEngine/Asset/AssetManager.h>
 
 #include "LkEditor/AssetEditor/AssetEditorManager.h"
 
 #include "LkEngine/Project/Project.h"
 #include "LkEngine/Serialization/Serializer.h"
 
-#define LK_CONTENT_BROWSER_USE_HEIGHT_HACK 1
+#include "LkEditor/EditorLayer.h"
 
+#define LK_CONTENT_BROWSER_USE_HEIGHT_HACK 1
 
 namespace LkEngine {
 
 	namespace fs = std::filesystem;
+
+	static LContentBrowserPanel* Instance = nullptr;
 
 	static bool bActivateSearchWidget = false;
 
@@ -47,6 +46,11 @@ namespace LkEngine {
     {
 		LK_CORE_TRACE_TAG("ContentBrowser", "Initializing");
     }
+
+	LContentBrowserPanel& LContentBrowserPanel::Get()
+	{ 
+		return *Instance; 
+	}
 
 	void LContentBrowserPanel::RenderUI(bool& IsOpen)
 	{

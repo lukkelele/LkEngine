@@ -1,10 +1,12 @@
 #pragma once
 
-#include "LkEngine/Renderer/UI/Panel.h"
-#include "LkEngine/Renderer/UI/UILayer.h"
+#include <LkEngine/Core/LObject/Object.h>
+#include <LkEngine/Core/LObject/ObjectPtr.h>
+
+#include <LkEngine/Renderer/UI/Panel.h>
+#include <LkEngine/Renderer/UI/UILayer.h>
 
 #include "LkEditor/Panel/ContentBrowserItem.h"
-
 
 namespace LkEngine {
 
@@ -193,7 +195,7 @@ namespace LkEngine {
 		virtual void SerializeToYaml(YAML::Emitter& Out) const override;
 		virtual void DeserializeFromYaml(const YAML::Node& Data) override;
 
-		static LContentBrowserPanel& Get() { return *Instance; }
+		static LContentBrowserPanel& Get();
 
 	private:
 		void UpdateInput();
@@ -259,9 +261,7 @@ namespace LkEngine {
 
 		FSelectionStack CopiedAssets{};
 
-		inline static LContentBrowserPanel* Instance{};
-
-		LCLASS(LContentBrowserPanel);
+		LPANEL(LContentBrowserPanel);
 	};
 
 }
