@@ -140,6 +140,7 @@ def UnzipFile(filepath, DeleteZipFile=True):
 
     ZipFileContent = dict()
     ZipFileContentSize = 0
+    print(f"Unzipping: {ZipFilePath}")
     with ZipFile(ZipFilePath, 'r') as ZipFileFolder:
         for name in ZipFileFolder.namelist():
             ZipFileContent[name] = ZipFileFolder.getinfo(name).file_size

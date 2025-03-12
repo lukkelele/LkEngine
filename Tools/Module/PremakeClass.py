@@ -6,6 +6,7 @@
 import sys
 import os
 import glob
+import platform
 from pathlib import Path
 
 import ScriptUtils as Utils
@@ -13,11 +14,14 @@ import ScriptUtils as Utils
 from ScriptUtils import ScriptLogger
 Logger = ScriptLogger("LkEngine")
 
+Platform = ("windows" if platform.system() == "Windows" else "linux")
+ExecutableType = (".exe" if platform.system() == "Windows" else "")
+
 class PremakeConfiguration:
     PremakeVersion = "5.0.0-beta2"
-    PremakeZipUrls = f"https://github.com/premake/premake-core/releases/download/v{PremakeVersion}/premake-{PremakeVersion}-windows.zip"
+    PremakeZipUrls = f"https://github.com/premake/premake-core/releases/download/v{PremakeVersion}/premake-{PremakeVersion}-{Platform}.zip"
     PremakeLicenseUrl = "https://raw.githubusercontent.com/premake/premake-core/master/LICENSE.txt"
-    PremakeDirectory = "External/premake/bin"
+    PremakeDirectory = "External/Premake5/bin"
 
     @classmethod
     def Validate(cls):
@@ -29,14 +33,14 @@ class PremakeConfiguration:
 
     @classmethod
     def CheckIfPremakeInstalled(cls):
-        PremakeExe = Path(f"{cls.PremakeDirectory}/premake5.exe");
+        PremakeExe = Path(f"{cls.PremakeDirectory}/premake5{ExecutableType}");
         if (not PremakeExe.exists()):
             return cls.InstallPremake()
         return True
 
     @classmethod
     def InstallPremake(cls):
-        PremakePath = f"{cls.PremakeDirectory}/premake-{cls.PremakeVersion}-windows.zip"
+        PremakePath = f"{cls.PremakeDirectory}/premake-{cls.PremakeVersion}-{Platform}.zip"
         Logger.info("Downloading {0:s} to {1:s}".format(cls.PremakeZipUrls, PremakePath))
         Utils.DownloadFile(cls.PremakeZipUrls, PremakePath)
         Logger.info(f"Extracting: {PremakePath}")
@@ -54,12 +58,12 @@ class PremakeConfiguration:
 		# Check if the directory exists 
         if os.path.isdir(cls.PremakeDirectory):
             for FilePath in glob.glob(os.path.join(cls.PremakeDirectory, '*')): 
-            # Check if it's a file and if it does not have an allowed extension 
+                print(f"FILE: {FilePath}")
+                # Check if it's a file and if it does not have an allowed extension 
                 if os.path.isfile(FilePath) and os.path.splitext(FilePath)[1].lower() not in AllowedExtensions: 
                     try: 
                         os.remove(FilePath) 
                         #print(f"Deleted file: {FilePath}") 
                     except Exception as e: 
                         print(f"Error occured when deleting {FilePath}: {e}")
-
         return True
