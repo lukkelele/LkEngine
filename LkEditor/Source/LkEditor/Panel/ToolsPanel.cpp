@@ -1,5 +1,6 @@
 #include "ToolsPanel.h"
 
+#include <LkEngine/Core/Window.h>
 #include "LkEngine/Core/SelectionContext.h"
 #include "LkEngine/Core/Input/Input.h"
 
@@ -11,7 +12,6 @@
 #include "LkEngine/Serialization/Serializer.h"
 
 #include "LkEditor/Panel/ContentBrowserPanel.h"
-
 
 namespace LkEngine {
 
@@ -325,7 +325,7 @@ namespace LkEngine {
 					ImGui::TableNextRow();
 
 					ImGui::TableSetColumnIndex(0);
-					const std::string AssetHandleStr = std::format("{}", AssetHandle);
+					const std::string AssetHandleStr = LK_FMT_LIB::format("{}", AssetHandle);
 					ImGui::Text("%s", AssetHandleStr.c_str());
 
 					ImGui::TableSetColumnIndex(1);
@@ -374,7 +374,7 @@ namespace LkEngine {
 		{
 			static std::vector<EKey> PressedKeys;
 			const std::size_t PressedKeyCount = LInput::GetPressedKeys(PressedKeys);
-			const std::string Title = std::format("Pressed Keys: {}", PressedKeyCount);
+			const std::string Title = LK_FMT_LIB::format("Pressed Keys: {}", PressedKeyCount);
 			if (ImGui::BeginTable(Title.c_str(), 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
 			{
 				ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, ImGui::CalcTextSize("Key ------").x);
@@ -548,7 +548,7 @@ namespace LkEngine {
 		const auto LongestNameIt = std::max_element(RegisteredFonts.begin(), RegisteredFonts.end(), FontEntryComparitor);
 		const float NameColumnWidth = ImGui::CalcTextSize(LongestNameIt->Name.c_str()).x + NamePadding;
 
-		const std::string WindowName = std::format("Registered Fonts: {}", RegisteredFontsCount);
+		const std::string WindowName = LK_FMT_LIB::format("Registered Fonts: {}", RegisteredFontsCount);
 		ImGui::Begin(WindowName.c_str(), &Window_Fonts.bOpen);
 		if (ImGui::BeginTable("RegisteredFontsTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
 		{
@@ -600,7 +600,7 @@ namespace LkEngine {
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 
-					const std::string UuidString = std::format("{}", Selection.at(SelectionIdx));
+					const std::string UuidString = LK_FMT_LIB::format("{}", Selection.at(SelectionIdx));
 					ImGui::Text("%s", UuidString.c_str());
 				}
 			}

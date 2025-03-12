@@ -173,7 +173,7 @@ namespace LkEngine {
 
 						float FloatValue = Value;
 						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						ImGui::SliderFloat(std::format("##{}", UniformName).c_str(), &FloatValue, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_None);
+						ImGui::SliderFloat(LK_FMT_LIB::format("##{}", UniformName).c_str(), &FloatValue, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_None);
 						if (FloatValue != Value)
 						{
 							Shader->Set(UniformName, static_cast<decltype(Value)>(FloatValue));
@@ -186,7 +186,7 @@ namespace LkEngine {
 
 						glm::vec3 VecValue = Value;
 						ImGui::SetNextItemWidth(180.0f);
-						ImGui::SliderFloat3(std::format("##{}", UniformName).c_str(), &VecValue.x, -10.0f, 10.0f, "%.2f", ImGuiSliderFlags_None);
+						ImGui::SliderFloat3(LK_FMT_LIB::format("##{}", UniformName).c_str(), &VecValue.x, -10.0f, 10.0f, "%.2f", ImGuiSliderFlags_None);
 						if (VecValue != Value)
 						{
 							Shader->Set(UniformName, static_cast<decltype(Value)>(VecValue));
@@ -199,7 +199,7 @@ namespace LkEngine {
 
 						int IntValue = Value;
 						ImGui::SetNextItemWidth(130.0f);
-						ImGui::SliderInt(std::format("##{}", UniformName).c_str(), &IntValue, 0, 5, "%d", ImGuiSliderFlags_None);
+						ImGui::SliderInt(LK_FMT_LIB::format("##{}", UniformName).c_str(), &IntValue, 0, 5, "%d", ImGuiSliderFlags_None);
 						if (IntValue != Value)
 						{
 							Shader->Set(UniformName, static_cast<decltype(Value)>(IntValue));
@@ -351,8 +351,8 @@ namespace LkEngine {
 							float FloatValue = Value;
 							static constexpr ImGuiInputTextFlags InputFlags = ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CharsDecimal;
 							ImGui::SetNextItemWidth(130.0f);
-							//ImGui::InputFloat(std::format("##{}", UniformName).c_str(), &FloatValue, 0.010f, 0.0f, "%.3f", InputFlags);
-							ImGui::SliderFloat(std::format("##{}", UniformName).c_str(), &FloatValue, -10.0f, 10.0f, "%.2f", ImGuiSliderFlags_WrapAround);
+							//ImGui::InputFloat(LK_FMT_LIB::format("##{}", UniformName).c_str(), &FloatValue, 0.010f, 0.0f, "%.3f", InputFlags);
+							ImGui::SliderFloat(LK_FMT_LIB::format("##{}", UniformName).c_str(), &FloatValue, -10.0f, 10.0f, "%.2f", ImGuiSliderFlags_WrapAround);
 							if (FloatValue != Value)
 							{
 								Shader->Set(UniformName, static_cast<decltype(Value)>(FloatValue));
@@ -366,8 +366,8 @@ namespace LkEngine {
 							int IntValue = Value;
 							static constexpr ImGuiInputTextFlags InputFlags = ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CharsDecimal;
 							ImGui::SetNextItemWidth(130.0f);
-							//ImGui::InputInt(std::format("##{}", UniformName).c_str(), &IntValue, 1, 5, InputFlags);
-							ImGui::SliderInt(std::format("##{}", UniformName).c_str(), &IntValue, -10, 10, "%d", ImGuiSliderFlags_WrapAround);
+							//ImGui::InputInt(LK_FMT_LIB::format("##{}", UniformName).c_str(), &IntValue, 1, 5, InputFlags);
+							ImGui::SliderInt(LK_FMT_LIB::format("##{}", UniformName).c_str(), &IntValue, -10, 10, "%d", ImGuiSliderFlags_WrapAround);
 						#if 0
 							if (IntValue < 0)
 							{

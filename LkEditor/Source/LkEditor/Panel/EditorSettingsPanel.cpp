@@ -1,10 +1,10 @@
 #include "EditorSettingsPanel.h"
 
+#include <LkEngine/Core/Window.h>
 #include <LkEngine/Editor/EditorSettings.h>
 
 #include <LkEngine/Editor/PanelManager.h>
 #include <LkEngine/Editor/ThemeManagerPanel.h>
-
 
 namespace LkEngine {
 

@@ -590,9 +590,9 @@ namespace LkEngine {
 					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
 					UI::PropertyLabel("Active", (EditorCamera.bIsActive ? "Yes" : "No"));
 					UI::PropertyLabel("Mode", Enum::ToString(EditorCamera.CameraMode));
-					UI::PropertyLabel("FOV", std::format("{:1.0f} (Deg)", EditorCamera.DegPerspectiveFov));
-					UI::PropertyLabel("Pitch", std::format("{:.2f}", EditorCamera.Pitch));
-					UI::PropertyLabel("Yaw", std::format("{:.2f}", EditorCamera.Yaw));
+					UI::PropertyLabel("FOV", LK_FMT_LIB::format("{:1.0f} (Deg)", EditorCamera.DegPerspectiveFov));
+					UI::PropertyLabel("Pitch", LK_FMT_LIB::format("{:.2f}", EditorCamera.Pitch));
+					UI::PropertyLabel("Yaw", LK_FMT_LIB::format("{:.2f}", EditorCamera.Yaw));
 					UI::PropertyLabel("Panning", (EditorCamera.CameraActionFlags & ECameraAction::Pan ? "Yes" : "No"));
 					UI::PropertyLabel("Zooming", (EditorCamera.CameraActionFlags & ECameraAction::Zoom ? "Yes" : "No"));
 					UI::PropertyLabel("Cursor", Enum::ToString(LInput::GetCursorMode()));
@@ -942,7 +942,7 @@ namespace LkEngine {
 		/* Add the scene extension if it is missing. */
 		if (StartScene.find(LScene::FILE_EXTENSION) == std::string::npos)
 		{
-			StartScene += std::format(".{}",LScene::FILE_EXTENSION);
+			StartScene += LK_FMT_LIB::format(".{}",LScene::FILE_EXTENSION);
 		}
 
 		bool ProjectHasScene = !StartScene.empty();
@@ -1075,7 +1075,7 @@ namespace LkEngine {
 		NewScene(StarterProjectName);
 
 		Project = TObjectPtr<LProject>::Create();
-		Project->Load(std::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
+		Project->Load(LK_FMT_LIB::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
 		LProject::SetActive(Project);
 
 		/* FIXME: Until asset creation is supported from within the editor. */
@@ -1220,7 +1220,7 @@ namespace LkEngine {
 
 	void LEditorLayer::UpdateWindowTitle(const std::string& SceneName)
 	{
-		const std::string Title = std::format(
+		const std::string Title = LK_FMT_LIB::format(
 			"{} ({}) - LkEditor - {} ({}) ({})",
 			SceneName, 
 			LProject::Current()->GetConfiguration().Name, 
@@ -2516,7 +2516,7 @@ namespace LkEngine {
 
 			ImGui::SeparatorText("Blend Function");
 			if (ImGui::BeginCombo(
-					std::format("Source: {}", Enum::ToString(RenderContext->GetSourceBlendFunction())).c_str(), 
+					LK_FMT_LIB::format("Source: {}", Enum::ToString(RenderContext->GetSourceBlendFunction())).c_str(), 
 					nullptr, 
 					ImGuiComboFlags_NoPreview)
 				)
@@ -2546,7 +2546,7 @@ namespace LkEngine {
 
 			/* Destination Blend. */
 			if (ImGui::BeginCombo(
-					std::format("Destination: {}", Enum::ToString(RenderContext->GetDestinationBlendFunction())).c_str(), 
+					LK_FMT_LIB::format("Destination: {}", Enum::ToString(RenderContext->GetDestinationBlendFunction())).c_str(), 
 					nullptr, 
 					ImGuiComboFlags_NoPreview)
 				)

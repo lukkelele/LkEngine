@@ -7,13 +7,14 @@ project "LkEditor"
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
-    defines {
-        "LK_ENGINE_OPENGL",
-
-        "IMGUI_DEFINE_MATH_OPERATORS",
-    }
+	defines {
+		"LK_ENGINE_OPENGL",
+		"IMGUI_DEFINE_MATH_OPERATORS",
+	}
 
 	files {
+		"%{prj.location}/Source/LkEditor.cpp",
+
 		"%{prj.location}/Source/**.h",
 		"%{prj.location}/Source/**.cpp",
 	}
@@ -25,39 +26,86 @@ project "LkEditor"
 		"%{wks.location}/LkEngine",
 		"%{wks.location}/LkEngine/Source",
 
-        "%{Dependency.Glfw.IncludeDir}",
-        "%{Dependency.Glad.IncludeDir}",
-        "%{Dependency.StbImage.IncludeDir}",
-        "%{Dependency.Spdlog.IncludeDir}",
-        "%{Dependency.ImGui.IncludeDir}",
+		"%{Dependency.Glfw.IncludeDir}",
+		"%{Dependency.Glad.IncludeDir}",
+		"%{Dependency.StbImage.IncludeDir}",
+		"%{Dependency.Spdlog.IncludeDir}",
+		"%{Dependency.ImGui.IncludeDir}",
 		"%{Dependency.ImGui.IncludeDir}/imgui", -- Allow 'imgui.h' as well as 'imgui/imgui.h' as an include.
-        "%{Dependency.ImGuizmo.IncludeDir}",
-        "%{Dependency.ImGuiNodeEditor.IncludeDir}",
-        "%{Dependency.Assimp.IncludeDir}",
-        "%{Dependency.Entt.IncludeDir}",
-        "%{Dependency.Glm.IncludeDir}",
-        "%{Dependency.YamlCpp.IncludeDir}",
-        "%{Dependency.Assimp.IncludeDir}",
-        "%{Dependency.Tracy.IncludeDir}",
-        "%{Dependency.NfdExtended.IncludeDir}",
-        "%{Dependency.Box2D.IncludeDir}",
-        "%{Dependency.Bullet3.IncludeDir}",
+		"%{Dependency.ImGuizmo.IncludeDir}",
+		"%{Dependency.ImGuiNodeEditor.IncludeDir}",
+		"%{Dependency.Assimp.IncludeDir}",
+		"%{Dependency.Entt.IncludeDir}",
+		"%{Dependency.Glm.IncludeDir}",
+		"%{Dependency.YamlCpp.IncludeDir}",
+		"%{Dependency.Assimp.IncludeDir}",
+		"%{Dependency.Tracy.IncludeDir}",
+		"%{Dependency.NfdExtended.IncludeDir}",
+		"%{Dependency.Box2D.IncludeDir}",
+		"%{Dependency.Bullet3.IncludeDir}",
 	}
 
-	links { "LkEngine" }
+	links { "LkEngine:static" }
+	prelinkmessage "[%{prj.name}] Starting linkage"
+	prebuildmessage "[%{prj.name}] Starting build"
 
 	filter "system:windows"
 		systemversion "latest"
-		
+	
+	filter "system:linux"
+	defines {
+		"STBI_NO_SIMD",
+		"STBIR_NO_SIMD",
+	}
+
+	buildoptions {
+		"-Wno-attributes",
+		"-Wno-delete-incomplete",
+		"-Wno-int-to-pointer-cast",
+	}
+
+	links {
+		"gtk-3",
+		"gdk-3",
+		"glib-2.0",
+		"gobject-2.0",
+		"X11",
+		"GL",
+		"dl",
+
+		"Glfw", 
+		"Glad",
+		"ImGui",
+		"ImGuizmo",
+		"ImGuiNodeEditor",
+		"NfdExtended",
+		"YamlCpp",
+		"Box2D",
+		"Bullet3",
+		"Tracy",
+	}
+
+	filter "configurations:Debug or configurations:AutomationTest"
+		links {
+			"%{Dependency.Assimp.Linux.LibDir}/%{Dependency.Assimp.Linux.DebugLibName}",
+			"%{Dependency.Assimp.Linux.LibDir}/zlibstatic",
+		}
+
+	filter "configurations:Release or configurations:Dist"
+		links {
+			"%{Dependency.Assimp.Linux.LibDir}/%{Dependency.Assimp.Linux.DebugLibName}",
+			"%{Dependency.Assimp.Linux.LibDir}/zlibstatic",
+		}
+
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "On"
 
-    filter "configurations:Debug-AddressSanitize"
+	filter "configurations:Debug-AddressSanitize"
 		runtime "Debug"
 		symbols "On"
 
-    filter "configurations:AutomationTest"
+	filter "configurations:AutomationTest"
 		runtime "Debug"
 		symbols "On"
         kind "None"

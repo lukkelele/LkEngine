@@ -599,13 +599,13 @@ namespace LkEngine {
 	{
 		fs::path Filepath = LProject::GetRuntimeAssetManager()->GetFileSystemPath(AssetMetadata);
 		const std::string Extension = Filepath.extension().string();
-		const fs::path NewFilepath = std::format("{}\\{}{}", Filepath.parent_path().string(), NewName, Extension);
+		const fs::path NewFilepath = LK_FMT_LIB::format("{}\\{}{}", Filepath.parent_path().string(), NewName, Extension);
 
-		const std::string TargetName = std::format("{}{}", NewName, Extension);
+		const std::string TargetName = LK_FMT_LIB::format("{}{}", NewName, Extension);
 		if (StringUtils::ToLower(TargetName) == StringUtils::ToLower(Filepath.filename().string()))
 		{
 			LFileSystem::RenameFilename(Filepath, "Temp-Rename");
-			Filepath = std::format("{}\\Temp-Rename{}", Filepath.parent_path().string(), Extension);
+			Filepath = LK_FMT_LIB::format("{}\\Temp-Rename{}", Filepath.parent_path().string(), Extension);
 		}
 
 		if (LFileSystem::RenameFilename(Filepath, NewName))
