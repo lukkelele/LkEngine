@@ -39,14 +39,14 @@ from colorama import Fore, Back, Style
 colorama.init(strip=True if bPlatformActionRunner else False)
 
 # Add 'Tools/Module' to path.
-sys.path.append(os.path.join(os.path.dirname(__file__), "Module"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "Tools/Module"))
 
-import Module.ScriptUtils as Utils
-from Module.ScriptUtils import ScriptLogger
+import Tools.Module.ScriptUtils as Utils
+from Tools.Module.ScriptUtils import ScriptLogger
 Logger = ScriptLogger("LkEngine")
 
-from Module.PythonClass import PythonConfiguration
-from Module.PremakeClass import PremakeConfiguration
+from Tools.Module.PythonClass import PythonConfiguration
+from Tools.Module.PremakeClass import PremakeConfiguration
 
 ToolsDir = "Tools"
 ModuleDir = os.path.join(f"{ToolsDir}", "Module")
@@ -98,14 +98,19 @@ if (IsPremakeInstalled):
     # Engine modules built, continue on with generating project files.
     Logger.info("Built all engine modules")
 
-    if platform.system() == "Windows": 
+    # Generate projects.
+    try:
         print()
         Utils.RunScript("GenerateProjects.py")
-    elif platform.system() == "Linux":
-        print()
-        Utils.RunScript("GenerateProjects.py")
-    else:
-        Utils.PrintBanner("LkEngine Setup Failed", 60, Fore.RED, '=')
+    except Exception as e:
+        Logger.error(f"Project generation failed: {e}")
+        exit(1)
+
+    # Build the engine.
+    try:
+        Utils.RunScript("Build.py")
+    except Exception as e:
+        Logger.error(f"Error occured when building the engine: {e}")
         exit(1)
 
     print("\n")
