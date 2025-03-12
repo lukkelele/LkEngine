@@ -1,13 +1,13 @@
 #pragma once
 
+#if 0
 #include <string>
 #include <filesystem>
 
-#include <stb_image/stb_image.h>
-#include <stb_image/stb_image_resize2.h>
+#include <stb/stb_image.h>
+#include <stb/stb_image_resize2.h>
 
 #include "LkEngine/Core/Memory/MemoryUtils.h"
-
 
 namespace LkEngine {
 
@@ -108,5 +108,5 @@ namespace LkEngine {
         std::filesystem::path Path{};
         std::string Name{};
     };
-
 }
+#endif

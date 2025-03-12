@@ -3,7 +3,6 @@
 #include <box2d/box2d.h>
 #include <box2d/collision.h>
 
-
 namespace LkEngine {
 
     #if 0 /// FIXME

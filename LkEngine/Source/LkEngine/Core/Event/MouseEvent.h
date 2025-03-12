@@ -18,7 +18,7 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const override
 		{
-			return std::format("MouseButtonPressed: {} ({})", Enum::ToString(Button), static_cast<int>(Button));
+			return LK_FMT_LIB::format("MouseButtonPressed: {} ({})", Enum::ToString(Button), static_cast<int>(Button));
 		}
 
 	private:
@@ -37,7 +37,7 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const override
 		{
-			return std::format("MouseButtonReleased: {} ({})", Enum::ToString(Button), static_cast<int>(Button));
+			return LK_FMT_LIB::format("MouseButtonReleased: {} ({})", Enum::ToString(Button), static_cast<int>(Button));
 		}
 
 	private:
@@ -61,7 +61,7 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const override
 		{
-			return std::format("MouseMovedEvent: ({}, {})", PosX, PosY);
+			return LK_FMT_LIB::format("MouseMovedEvent: ({}, {})", PosX, PosY);
 		}
 
 	private:
@@ -86,7 +86,7 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const override
 		{
-			return std::format("MouseScrolledEvent: ({}, {})", OffsetX, OffsetY);
+			return LK_FMT_LIB::format("MouseScrolledEvent: ({}, {})", OffsetX, OffsetY);
 		}
 
 	private:

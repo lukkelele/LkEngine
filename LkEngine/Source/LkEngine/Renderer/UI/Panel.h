@@ -10,7 +10,6 @@
 
 #include "LkEngine/Serialization/YamlSerialization.h"
 
-
 namespace LkEngine {
 
 	class LProject;
@@ -39,6 +38,8 @@ namespace LkEngine {
 		struct FWindow
 		{
 			bool bOpen = false;
+
+			FWindow() : bOpen(false) {}
 		};
 
 	};

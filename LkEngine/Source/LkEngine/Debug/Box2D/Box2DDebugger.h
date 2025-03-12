@@ -3,7 +3,6 @@
 #if 0 /* Disabled for now. */
 #include <box2d/b2_draw.h>
 
-
 namespace LkEngine {
 
     class Box2DDebugger : public Debugger2D, public b2Draw
@@ -34,7 +33,6 @@ namespace LkEngine {
         }
 
     }
-
 }
 
 #endif

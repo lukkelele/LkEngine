@@ -3,6 +3,9 @@
 
 #include "nfd.hpp"
 
+#if defined(LK_PLATFORM_LINUX)
+#include <libgen.h>
+#endif
 
 namespace LkEngine {
 
@@ -119,9 +122,9 @@ namespace LkEngine {
 		}
 
 	#if defined(LK_PLATFORM_WINDOWS)
-		const std::string Command = std::format("explorer.exe /select,\"{0}\"", AbsolutePath.string());
+		const std::string Command = LK_FMT_LIB::format("explorer.exe /select,\"{0}\"", AbsolutePath.string());
 	#elif defined(LK_PLATFORM_LINUX)
-		const std::string Command = std::format("xdg-open \"{0}\"", dirname(AbsolutePath.string().data()));
+		const std::string Command = LK_FMT_LIB::format("xdg-open \"{0}\"", dirname(AbsolutePath.string().data()));
 	#endif
 		system(Command.c_str());
 
@@ -141,7 +144,16 @@ namespace LkEngine {
 		return true;
 
 	#elif defined(LK_PLATFORM_LINUX)
-		return ShowFileInExplorer(path);
+		const std::filesystem::path AbsolutePath = std::filesystem::canonical(DirectoryPath);
+		if (!Exists(AbsolutePath))
+		{
+			return false;
+		}
+
+		return ShowFileInExplorer(AbsolutePath);
+
+		//LK_CORE_MARK_FUNC_NOT_IMPLEMENTED();
+		//return false;
 	#endif	
 	}
 

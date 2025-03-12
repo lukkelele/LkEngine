@@ -4,10 +4,10 @@
 
 #include <spdlog/sinks/base_sink.h>
 
-#include <LkEngine/Core/Assert.h>
+#include "LkEngine/Core/Assert.h"
+#include "LkEngine/Core/Log/Log.h"
 
 #include "LkEngine/Editor/EditorConsolePanel.h"
-
 
 namespace LkEngine {
 
@@ -31,7 +31,11 @@ namespace LkEngine {
 			spdlog::memory_buf_t Formatted;
 			spdlog::sinks::base_sink<std::mutex>::formatter_->format(InLogMessage, Formatted);
 
-			const std::string LongMessage = std::format("{}", Formatted);
+		#if defined(LK_ENGINE_MSVC)
+			const std::string LongMessage = LK_FMT_LIB::format("{}", Formatted);
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			const std::string LongMessage = LK_FMT_LIB::to_string(Formatted);
+		#endif
 			std::string ShortMessage = LongMessage;
 
 			static constexpr int MAX_LENGTH_MESSAGE = 100;

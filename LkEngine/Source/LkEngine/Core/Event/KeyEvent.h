@@ -24,7 +24,7 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const override
 		{
-			return std::format("{}: {} (repeat: {})", GetName(), Enum::ToString(Key), RepeatCount);
+			return LK_FMT_LIB::format("{}: {} (repeat: {})", GetName(), Enum::ToString(Key), RepeatCount);
 		}
 
 	private:
@@ -45,7 +45,7 @@ namespace LkEngine {
 
 		FORCEINLINE std::string ToString() const override
 		{
-			return std::format("{}: {}", GetName(), Enum::ToString(Key));
+			return LK_FMT_LIB::format("{}: {}", GetName(), Enum::ToString(Key));
 		}
 
 	private:

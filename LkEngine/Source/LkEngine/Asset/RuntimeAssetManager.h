@@ -3,7 +3,6 @@
 #include "LkEngine/Asset/IAssetManager.h"
 #include "LkEngine/Asset/AssetImporter.h"
 
-
 namespace LkEngine {
 
     class LRuntimeAssetManager : public IAssetManager

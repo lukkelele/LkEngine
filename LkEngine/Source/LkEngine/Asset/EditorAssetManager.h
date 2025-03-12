@@ -5,7 +5,6 @@
 #include "LkEngine/Asset/IAssetManager.h"
 #include "LkEngine/Asset/AssetImporter.h"
 
-
 namespace LkEngine {
 
     static constexpr const char* BASE_MATERIAL  = "BaseMaterial";

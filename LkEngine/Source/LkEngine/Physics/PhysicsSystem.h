@@ -1,8 +1,6 @@
 #pragma once
+
 #include "PhysicsAPI.h"
-
-#include "LkEngine/Physics/2D/Physics2D.h"
-
 
 namespace LkEngine {
 

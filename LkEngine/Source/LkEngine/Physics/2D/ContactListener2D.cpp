@@ -1,10 +1,11 @@
 #include "LKpch.h"
 #include "ContactListener2D.h"
 
+#if 0
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Scene/Scene.h"
 #include "LkEngine/Scene/Entity.h"
-
+#endif
 
 namespace LkEngine {
 

@@ -15,8 +15,8 @@
 
 namespace LkEngine {
 
-	LOpenGL::GLVersion LOpenGL::Version;
-	std::vector<std::string> LOpenGL::SupportedExtensions;
+	LOpenGLBase::GLVersion LOpenGLBase::Version;
+	std::vector<std::string> LOpenGLBase::SupportedExtensions;
 
 	/**
 	 * LOpenGL::Debug

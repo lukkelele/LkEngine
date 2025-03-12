@@ -1,6 +1,6 @@
 #include "LKpch.h"
+#if 0
 #include "BulletScene.h"
-
 
 namespace LkEngine {
 
@@ -39,3 +39,5 @@ namespace LkEngine {
     }
 
 }
+
+#endif

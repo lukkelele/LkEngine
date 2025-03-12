@@ -24,12 +24,12 @@ namespace LkEngine {
 		}	
 	}
 
-
+	/** @fixme: FIXME */
 	LApplication::LApplication(const FApplicationSpecification& InSpecification)
 		: Specification(InSpecification)
 		, MetadataRegistry(LMetadataRegistry::Get())
 		, GarbageCollector(LGarbageCollector::Get())
-		, ThreadManager(LThreadManager::Get())
+		///, ThreadManager(LThreadManager::Get())
 		, CoreEventQueue("Core")
 	{
 		LOBJECT_REGISTER(LApplication);
@@ -66,8 +66,10 @@ namespace LkEngine {
 		LSelectionContext::Get(); /* TODO: Instantiate elsewhere */
 
 		/* Initialize the renderer. */
-		Renderer = TObjectPtr<LRenderer>::Create();
-		Renderer->Initialize();
+		/** @fixme: FIXME */
+		//Renderer = TObjectPtr<LRenderer>::Create();
+		//Renderer->Initialize();
+		LRenderer::Initialize();
 
 		/* UI layer. */
 		UILayer = LUILayer::Create();
@@ -152,7 +154,7 @@ namespace LkEngine {
 			LayerStack.Destroy();
 
 			LK_CORE_DEBUG_TAG("Application", "Destroying renderer");
-			LRenderer::Destroy();
+			LRenderer::Shutdown();
 			UILayer->Destroy();
 
 			LAssetManager::Destroy();
@@ -176,11 +178,11 @@ namespace LkEngine {
 	{
 		std::string Dump;
 		Dump += "\n";
-		Dump += std::format("ResourcesDir: {}\n", LFileSystem::GetResourcesDir().c_str());
-		Dump += std::format("AssetsDir: {}\n", LFileSystem::GetAssetsDir().c_str());
-		Dump += std::format("EngineDir: {}\n", LFileSystem::GetEngineDir().c_str());
-		Dump += std::format("ConfigDir: {}\n", LFileSystem::GetConfigDir().c_str());
-		Dump += std::format("EngineDir: {}\n", LFileSystem::GetEngineConfig().c_str());
+		Dump += LK_FMT_LIB::format("ResourcesDir: {}\n", LFileSystem::GetResourcesDir().c_str());
+		Dump += LK_FMT_LIB::format("AssetsDir: {}\n", LFileSystem::GetAssetsDir().c_str());
+		Dump += LK_FMT_LIB::format("EngineDir: {}\n", LFileSystem::GetEngineDir().c_str());
+		Dump += LK_FMT_LIB::format("ConfigDir: {}\n", LFileSystem::GetConfigDir().c_str());
+		Dump += LK_FMT_LIB::format("EngineDir: {}\n", LFileSystem::GetEngineConfig().c_str());
 
 		return Dump;
 	}

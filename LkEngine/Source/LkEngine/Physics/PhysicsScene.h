@@ -1,10 +1,13 @@
 #pragma once
 
+/** @fixme: FIXME */
+#if 0
 #include "PhysicsBody.h"
-
+#endif
 
 namespace LkEngine {
 
+#if 0
     class PhysicsScene
     {
     public:
@@ -23,5 +26,6 @@ namespace LkEngine {
 
         virtual float GetGravity() const = 0;
     };
+#endif
 
 }

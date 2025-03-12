@@ -75,17 +75,21 @@ namespace LkEngine {
 		return Entity;
 	}
 
-	LEntity LScene::GetEntityWithUUID(const LUUID ID) const
+	LEntity LScene::GetEntityWithUUID(const LUUID ID)
 	{
 		LK_CORE_ASSERT(EntityMap.find(ID) != EntityMap.end(), "Entity '{}' is not present in the scene", ID);
-		return EntityMap.at(ID);
+		/** @fixme: FIXME */
+		//return EntityMap.at(ID);
+		return LEntity((entt::entity)EntityMap.at(ID), this);
 	}
 
-	LEntity LScene::TryGetEntityWithUUID(LUUID ID) const
+	LEntity LScene::TryGetEntityWithUUID(LUUID ID)
 	{
 		if (const auto Iter = EntityMap.find(ID); Iter != EntityMap.end())
 		{
-			return Iter->second;
+			//return Iter->second;
+			/** @fixme: FIXME */
+			return LEntity(Iter->second, this);
 		}
 
 		return LEntity{};

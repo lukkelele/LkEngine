@@ -61,7 +61,11 @@ namespace LkEngine {
 			: ObjectPtr(Instance)
 		{
 			LK_DEBUG_PTR_LOG("Copy Constructor (T* Instance = nullptr)");
+		#if defined(LK_ENGINE_MSVC)
 			static_assert(std::is_base_of_v<LObject, T>, "TObject is only usable on objects that derive from LObject");
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			static_assert(std::is_base_of<LObject, T>::value, "TObject is only usable on objects that derive from LObject");
+		#endif
 			if (ObjectPtr)
 			{
 				TObjectPtr_IncrementReferenceCount();
@@ -278,15 +282,28 @@ namespace LkEngine {
 		FORCEINLINE void TObjectPtr_IncrementReferenceCount() const
 		{
 			LK_PTR_ASSERT(ObjectPtr, "IncrementReferenceCount failed, invalid ObjectPtr");
+		#if defined(LK_ENGINE_MSVC)
 			ObjectPtr->IncrementReferenceCount();
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			//static_cast<LObject*>(ObjectPtr)->IncrementReferenceCount();
+			((LObject*)ObjectPtr)->IncrementReferenceCount();
+		#endif
 			TObjectPtr_Internal::AddToLiveReferences((void*)ObjectPtr);
 		}
 
 		FORCEINLINE void TObjectPtr_DecrementReferenceCount() const
 		{
+		#if defined(LK_ENGINE_MSVC)
 			ObjectPtr->DecrementReferenceCount();
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			((LObject*)ObjectPtr)->DecrementReferenceCount();
+		#endif
 
+		#if defined(LK_ENGINE_MSVC)
 			if (ObjectPtr->GetReferenceCount() == 0)
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			if (((LObject*)ObjectPtr)->GetReferenceCount() == 0)
+		#endif
 			{
 				TObjectPtr_Internal::RemoveFromLiveReferences((void*)ObjectPtr);
 

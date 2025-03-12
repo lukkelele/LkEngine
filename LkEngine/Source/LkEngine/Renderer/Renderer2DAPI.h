@@ -18,7 +18,6 @@
 
 #include "RendererSpecification.h"
 
-
 namespace LkEngine {
 
     class LSceneCamera;

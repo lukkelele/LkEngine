@@ -40,7 +40,7 @@ namespace LkEngine
 
 	static std::string ToString(const glm::vec3& Vector, const uint8_t F = 2)
 	{
-		return std::format("({:.2f}, {:.2f}, {:.2f})", Vector.x, Vector.y, Vector.z);
+		return LK_FMT_LIB::format("({:.2f}, {:.2f}, {:.2f})", Vector.x, Vector.y, Vector.z);
 	}
 }
 
@@ -59,15 +59,12 @@ namespace LkEngine::Math {
         Hexagon,
     };
 
-	FORCEINLINE static glm::vec3 Scale(glm::vec3& Vector, float ScaleFactor)
+	FORCEINLINE glm::vec3 Scale(glm::vec3& Vector, float ScaleFactor)
 	{
 		return (Vector * ScaleFactor) / glm::length(Vector);
 	}
 
-	FORCEINLINE static bool DecomposeTransform(const glm::mat4& Transform, 
-											   glm::vec3& Translation, 
-											   glm::quat& Rotation, 
-											   glm::vec3& Scale)
+	FORCEINLINE bool DecomposeTransform(const glm::mat4& Transform, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale)
 	{
 		using T = float;
 
@@ -175,10 +172,10 @@ namespace LkEngine::Math {
 
     //FORCEINLINE static T ScreenToWorldCoordinates2D(const glm::vec2& ScreenCoordinates, 
 	template<typename TVector>
-    FORCEINLINE static TVector ScreenToWorldCoordinates2D(const TVector& ScreenCoordinates, 
-														  const glm::mat4& InverseProjectionMatrix, 
-														  const glm::mat4& InverseViewMatrix, 
-														  const glm::vec4& Viewport)
+    FORCEINLINE TVector ScreenToWorldCoordinates2D(const TVector& ScreenCoordinates, 
+		                                           const glm::mat4& InverseProjectionMatrix, 
+												   const glm::mat4& InverseViewMatrix, 
+												   const glm::vec4& Viewport)
     {
 		// Convert screen coordinates to normalized device coordinates.
         static_assert(std::disjunction_v<
@@ -211,7 +208,7 @@ namespace LkEngine::Math {
      *  Viewport, (x, y, Width, Height)
      */
     template<typename TVector = glm::vec3, typename TVec2>
-    FORCEINLINE static TVector ConvertScreenToWorldCoordinates(const TVec2& ScreenCoordinates, 
+    FORCEINLINE TVector ConvertScreenToWorldCoordinates(const TVec2& ScreenCoordinates, 
 															   const float Depth, 
 															   const glm::mat4& ViewMatrix, 
 															   const glm::mat4& ProjectionMatrix, 

@@ -1,7 +1,8 @@
 #include "LKpch.h"
+#if 0
 #include "Box2DDebugger.h"
 #include "LkEngine/Renderer/Renderer.h"
-
+#endif
 
 #if 0 /* Disabled for now. */
 namespace LkEngine {

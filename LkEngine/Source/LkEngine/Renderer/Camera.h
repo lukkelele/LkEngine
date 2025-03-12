@@ -97,12 +97,12 @@ namespace LkEngine {
 			}
 		}
 
-		FORCEINLINE float GetPitch() const { return Pitch; }
 		FORCEINLINE void SetPitch(const float InPitch) { Pitch = InPitch; }
+		FORCEINLINE float GetPitch() const { return Pitch; }
 		FORCEINLINE float GetPitchDelta() const { return PitchDelta; }
 
+		FORCEINLINE void SetYaw(const float InYaw) { Yaw = InYaw; }
 		FORCEINLINE float GetYaw() const { return Yaw; }
-		FORCEINLINE float SetYaw(const float InYaw) { Yaw = InYaw; }
 		FORCEINLINE float GetYawDelta() const { return YawDelta; }
 
 		FORCEINLINE void SetActive(const bool InActive) 
@@ -156,42 +156,10 @@ namespace LkEngine {
 		}
 
 		template<enum EAngleUnit = EAngleUnit::Degree> 
-		float GetPerspectiveFov() const 
-		{ 
-			LK_CORE_VERIFY(false);
-			return -1.0f; 
-		}
-
-		template<> 
-		float GetPerspectiveFov<EAngleUnit::Degree>() const 
-		{ 
-			return DegPerspectiveFov; 
-		}
-
-		template<> 
-		float GetPerspectiveFov<EAngleUnit::Radian>() const 
-		{ 
-			return glm::radians(DegPerspectiveFov); 
-		}
+		float GetPerspectiveFov() const;
 
 		template<enum EAngleUnit = EAngleUnit::Degree> 	
-		float GetPerspectiveVerticalFov() const 
-		{ 
-			LK_CORE_VERIFY(false);
-			return -1.0f; 
-		}
-
-		template<> 
-		float GetPerspectiveVerticalFov<EAngleUnit::Degree>() const 
-		{ 
-			return DegPerspectiveFov; 
-		}
-
-		template<> 
-		float GetPerspectiveVerticalFov<EAngleUnit::Radian>() const 
-		{ 
-			return glm::radians(DegPerspectiveFov); 
-		}
+		float GetPerspectiveVerticalFov() const;
 
 		FORCEINLINE glm::quat GetOrientation() const
 		{
@@ -299,5 +267,29 @@ namespace LkEngine {
 
 		LCLASS(LCamera);
 	};
+
+	template<> 
+	inline float LCamera::GetPerspectiveFov<EAngleUnit::Degree>() const 
+	{ 
+		return DegPerspectiveFov; 
+	}
+
+	template<> 
+	inline float LCamera::GetPerspectiveFov<EAngleUnit::Radian>() const 
+	{ 
+		return glm::radians(DegPerspectiveFov); 
+	}
+
+	template<> 
+	inline float LCamera::GetPerspectiveVerticalFov<EAngleUnit::Degree>() const 
+	{ 
+		return DegPerspectiveFov; 
+	}
+
+	template<> 
+	inline float LCamera::GetPerspectiveVerticalFov<EAngleUnit::Radian>() const 
+	{ 
+		return glm::radians(DegPerspectiveFov); 
+	}
 
 }

@@ -127,7 +127,7 @@ namespace LkEngine {
 
 		std::string ToString() const
 		{
-			return std::format("({:.2f}, {:.2f}, {:.2f}, {:.2f})", X, Y, Z, W);
+			return LK_FMT_LIB::format("({:.2f}, {:.2f}, {:.2f}, {:.2f})", X, Y, Z, W);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const TVector4& Vector) 

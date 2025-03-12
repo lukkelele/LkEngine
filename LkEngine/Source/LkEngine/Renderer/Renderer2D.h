@@ -6,7 +6,6 @@
 
 #include "Renderer2DAPI.h"
 
-
 namespace LkEngine {
 
     class LImage;

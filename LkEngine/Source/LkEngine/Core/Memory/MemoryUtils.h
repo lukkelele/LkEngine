@@ -1,8 +1,7 @@
 #pragma once
 
-#include <stb_image/stb_image.h>
-#include <stb_image/stb_image_resize2.h>
-
+#include <stb/stb_image.h>
+#include <stb/stb_image_resize2.h>
 
 namespace LkEngine::MemoryUtils {
 

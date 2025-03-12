@@ -3,12 +3,10 @@
 #include <filesystem>
 
 #include "LkEngine/Core/Core.h"
-
 #include "LkEngine/Core/LObject/Object.h"
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
 #include "LkEngine/Asset/AssetTypes.h"
-
 
 namespace LkEngine {
 
@@ -107,18 +105,18 @@ namespace LkEngine {
 		{
 			if (CompactFormat)
 			{
-				return std::format("Asset={:12} Type={} File={} Loaded={} MemoryOnly={}",
-								   Handle, Enum::ToString(Type), 
-								   FilePath.string(), 
-								   (bIsDataLoaded ? "Yes" : "No"), 
-								   (bIsMemoryAsset ? "Yes" : "No"));
+				return LK_FMT_LIB::format("Asset={:12} Type={} File={} Loaded={} MemoryOnly={}",
+								          (LUUID::SizeType)Handle, Enum::ToString(Type), 
+								          FilePath.string(), 
+								          (bIsDataLoaded ? "Yes" : "No"), 
+								          (bIsMemoryAsset ? "Yes" : "No"));
 			}
 
-			return std::format("[Asset: {}]\n * Type: {}\n * Filepath: {}\n * Loaded: {}\n * Memory Asset: {}",
-							   Handle, Enum::ToString(Type), 
-							   FilePath.string(), 
-							   (bIsDataLoaded ? "Yes" : "No"), 
-							   (bIsMemoryAsset ? "Yes" : "No"));
+			return LK_FMT_LIB::format("[Asset: {}]\n * Type: {}\n * Filepath: {}\n * Loaded: {}\n * Memory Asset: {}",
+							          (LUUID::SizeType)Handle, Enum::ToString(Type), 
+							          FilePath.string(), 
+							          (bIsDataLoaded ? "Yes" : "No"), 
+							          (bIsMemoryAsset ? "Yes" : "No"));
 		}
 	};
 

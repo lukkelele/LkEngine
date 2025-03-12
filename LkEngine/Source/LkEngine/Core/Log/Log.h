@@ -13,7 +13,11 @@
 #include <cstring>
 #include <codecvt>
 #include <filesystem>
-#include <format>
+#if defined(LK_PLATFORM_WINDOWS)
+#   include <format>
+#elif defined(LK_PLATFORM_LINUX)
+#   include <spdlog/fmt/fmt.h>
+#endif
 #include <locale>
 #include <map>
 
@@ -22,8 +26,13 @@
 #	include <iterator>
 #endif
 
-#define LK_ASSERT_MESSAGE_BOX      1
-#define LK_ENGINE_CONSOLE_ENABLED  1
+#if defined(LK_PLATFORM_WINDOWS)
+#	define LK_ASSERT_MESSAGE_BOX      1
+#	define LK_ENGINE_CONSOLE_ENABLED  1
+#else
+#	define LK_ASSERT_MESSAGE_BOX      0
+#	define LK_ENGINE_CONSOLE_ENABLED  1
+#endif
 
 /**
  * Set loglevel names to UPPERCASE.
@@ -32,11 +41,11 @@
 #define SPDLOG_LEVEL_NAMES \
 	{ "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF" }
 
-#pragma warning(push, 0)
+//#pragma warning(push, 0)
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 #include <spdlog/fmt/fmt.h>
-#pragma warning(pop)
+//#pragma warning(pop)
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -45,7 +54,6 @@
 #include "LkEngine/Core/Utility/StringUtils.h"
 
 #include "LkEngine/Renderer/Color.h"
-
 
 namespace LkEngine {
 
@@ -111,43 +119,75 @@ namespace LkEngine {
         }
 
         template<typename... TArgs>
+	#if defined(LK_ENGINE_MSVC)
         static void PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
                                  std::format_string<TArgs...> Format, TArgs&&... Args);
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+        static void PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
+                                 fmt::format_string<TArgs...> Format, TArgs&&... Args);
+	#endif
 
         template<typename... TArgs>
+	#if defined(LK_ENGINE_MSVC)
         static void PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag,
                                         std::format_string<TArgs...> Format, TArgs&&... Args);
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+        static void PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag,
+                                        fmt::format_string<TArgs...> Format, TArgs&&... Args);
+	#endif
 
         static void PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level,
                                         std::string_view Tag, std::string_view Message);
 
         template<typename... TArgs>
+	#if defined(LK_ENGINE_MSVC)
         static void PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix,
                                        std::format_string<TArgs...> Message, TArgs&&... Args);
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+        static void PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix,
+                                       fmt::format_string<TArgs...> Message, TArgs&&... Args);
+	#endif
         static void PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix);
 
 		template<typename... TArgs>
+	#if defined(LK_ENGINE_MSVC)
 		static void Print(std::format_string<TArgs...> Format, TArgs&&... Args)
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+		static void Print(fmt::format_string<TArgs...> Format, TArgs&&... Args)
+	#endif
 		{
 		#if LK_LOG_USE_IOSTREAM
 			std::ostream_iterator<char> Out(std::cout);
 			std::format_to(Out, Format, std::forward<TArgs>(Args)...);
 		#else
+		#if defined(LK_ENGINE_MSVC)
 			const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			const std::string FormattedString = fmt::format(Format, std::forward<TArgs>(Args)...);
+		#endif
+
 			printf("%s", FormattedString.c_str());
 			fflush(stdout);
 		#endif
 		}
 
 		template<typename... TArgs>
+	#if defined(LK_ENGINE_MSVC)
 		static void PrintLn(std::format_string<TArgs...> Format, TArgs&&... Args)
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+		static void PrintLn(fmt::format_string<TArgs...> Format, TArgs&&... Args)
+	#endif
 		{
 		#if LK_LOG_USE_IOSTREAM
 			std::ostream_iterator<char> Out(std::cout);
 			std::format_to(Out, Format, std::forward<TArgs>(Args)...);
 			*Out = '\n';
 		#else
+		#if defined(LK_ENGINE_MSVC)
 			const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			const std::string FormattedString = fmt::format(Format, std::forward<TArgs>(Args)...);
+		#endif
 			printf("%s\n", FormattedString.c_str());
 			fflush(stdout);
 		#endif
@@ -246,8 +286,13 @@ namespace LkEngine {
 namespace LkEngine {
 
 	template<typename... TArgs>
-	FORCEINLINE void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level, 
+	#if defined(LK_ENGINE_MSVC)
+	FORCEINLINE void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
 										std::format_string<TArgs...> Format, TArgs&&... Args)
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+	FORCEINLINE void LLog::PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
+										fmt::format_string<TArgs...> Format, TArgs&&... Args)
+	#endif
 	{
 		FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];
 		if (TagDetails.Enabled && TagDetails.Filter <= Level)
@@ -278,13 +323,22 @@ namespace LkEngine {
 	}
 
 	template<typename... TArgs>
+	#if defined(LK_ENGINE_MSVC)
 	FORCEINLINE void LLog::PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag, 
 											   std::format_string<TArgs...> Format, TArgs&&... Args)
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+	FORCEINLINE void LLog::PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag, 
+											   fmt::format_string<TArgs...> Format, TArgs&&... Args)
+	#endif
 	{
 		const FTagDetails& TagDetails = EnabledTags[GetLoggerName(LoggerType).data()];
 		if (TagDetails.Enabled && (TagDetails.Filter <= Level))
 		{
+		#if defined(LK_PLATFORM_WINDOWS)
 			const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			const std::string FormattedString = fmt::format(Format, std::forward<TArgs>(Args)...);
+		#endif
 			auto& Logger = LLog::GetLogger(LoggerType);
 			switch (Level)
 			{
@@ -341,11 +395,21 @@ namespace LkEngine {
 		}
 	}
 
+
 	template<typename... TArgs>
+	#if defined(LK_ENGINE_MSVC)
 	FORCEINLINE void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix, 
 											  std::format_string<TArgs...> Format, TArgs&&... Args)
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+	FORCEINLINE void LLog::PrintAssertMessage(const ELoggerType LoggerType, std::string_view Prefix, 
+											  fmt::format_string<TArgs...> Format, TArgs&&... Args)
+	#endif
 	{
-		const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+		#if defined(LK_PLATFORM_WINDOWS)
+			const std::string FormattedString = std::format(Format, std::forward<TArgs>(Args)...);
+		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+			const std::string FormattedString = fmt::format(Format, std::forward<TArgs>(Args)...);
+		#endif
 		if (auto Logger = GetLogger(LoggerType); Logger != nullptr)
 		{
 			Logger->error("{0}: {1}", Prefix, FormattedString);

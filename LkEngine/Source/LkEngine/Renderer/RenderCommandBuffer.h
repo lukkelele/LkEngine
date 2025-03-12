@@ -3,7 +3,6 @@
 #include "Pipeline.h"
 #include "RenderCommandQueue.h"
 
-
 namespace LkEngine {
 
 	/**
@@ -19,7 +18,7 @@ namespace LkEngine {
 		virtual void Submit() = 0;
 
 		virtual float GetExecutionGpuTime(const uint32_t FrameIndex, const uint32_t QueryIndex = 0) const = 0;
-		virtual const PipelineStatistics& GetPipelineStatistics(const uint32_t FrameIndex) const = 0;
+		virtual const FPipelineStatistics& GetPipelineStatistics(const uint32_t FrameIndex) const = 0;
 
 		virtual uint32_t BeginTimestampQuery() = 0;
 		virtual void EndTimestampQuery(const uint32_t QueryID) = 0;

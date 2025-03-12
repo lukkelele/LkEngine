@@ -26,15 +26,14 @@
 #define LK_STRINGIFY(x)      #x
 #define LK_TEXT(Text)        L##Text /* Wide string. */
 
-/** Function Signature. */
-#if defined(_MSC_VER)
-#	define LK_FUNCSIG	__FUNCSIG__
-#elif defined(__clang__)
-#	define LK_FUNC_SIG	__PRETTY_FUNCTION__
-#elif defined(__GNUC__)
-#	define LK_FUNC_SIG	__PRETTY_FUNCTION__
+#if defined(LK_ENGINE_MSVC)
+#	define LK_FUNCSIG __FUNCSIG__
+#   define LK_MALLOC  _malloca
+#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+#	define LK_FUNCSIG __PRETTY_FUNCTION__
+#   define LK_MALLOC  alloca
 #else
-#	error "Unsupported compiler, LkEngine supports MSVC, Clang and GCC"
+#	error "Unsupported compiler"
 #endif
 
 #if defined(STDCALL)
@@ -58,26 +57,29 @@
  * Platform: Windows
  */
 #if defined(LK_PLATFORM_WINDOWS)
-#	define STDCALL					__stdcall
-#	define VARARGS					__cdecl
-#	define FORCEINLINE				__forceinline
-#	define WARNINGS_DISABLE()		__pragma(warning(push, 0))
-#	define WARNINGS_ENABLE()		__pragma(warning(pop))
-#	define LK_ITOA(c, buf, size, p)	_itoa_s(c, buf, size, p)
+#	define FORCEINLINE __forceinline
+#	define VARARGS     __cdecl
+#	define STDCALL     __stdcall
 /** 
- * Platform: Linux
+ * Compiler: GCC
  */
-#elif defined(LK_PLATFORM_LINUX)
-#	define STDCALL		__stdcall
-#	define VARARGS		__cdecl
-#	define FORCEINLINE	__forceinline
-#	define LK_ITOA(c, buf, size, p)  void() // FIXME
+#elif defined(LK_ENGINE_GCC)
+#	define VARARGS		__attribute__((cdecl))
+#	define FORCEINLINE	inline __attribute__((always_inline))
+#	define STDCALL		__attribute__((stdcall))
+/** 
+ * Compiler: Clang
+ */
+#elif defined(LK_ENGINE_CLANG)
+#	define FORCEINLINE  __forceinline
+#	define VARARGS      __cdecl
+#	define STDCALL      __stdcall
 #endif
 
 #if defined(SPDLOG_USE_STD_FORMAT)
 #	define LK_FMT_LIB std
 #else
-#	define LK_FMT_LIB spdlog::fmt_lib
+#	define LK_FMT_LIB fmt
 #endif
 
 #define LK_MARK_FUNC_NOT_IMPLEMENTED(...) \

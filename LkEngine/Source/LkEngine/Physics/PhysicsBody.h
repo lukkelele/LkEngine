@@ -1,7 +1,8 @@
 #pragma once
 
+/** @todo: Use uint64_t instead of LEntity. */
+#if 0
 #include "LkEngine/Scene/Entity.h"
-
 
 namespace LkEngine {
 
@@ -32,3 +33,4 @@ namespace LkEngine {
     };
 
 }
+#endif

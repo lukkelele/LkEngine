@@ -1,10 +1,12 @@
 #pragma once
 
+#if 0
 #include "LkEngine/Physics/PhysicsScene.h"
-
+#endif
 
 namespace LkEngine {
 
+#if 0
     class BulletScene : public PhysicsScene
     {
     public:
@@ -20,5 +22,6 @@ namespace LkEngine {
         virtual float GetGravity() const override;
 
     };
+#endif
 
 }

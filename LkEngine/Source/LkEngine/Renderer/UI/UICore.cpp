@@ -288,7 +288,7 @@ namespace LkEngine::UI {
 						const uint32_t MaxHeight)
 	{
 		FMessageBox& MessageBoxRef = UIContext.MessageBoxes[Title];
-		MessageBoxRef.Title = std::format("{0}##MessageBoxRef{1}", Title, UIContext.MessageBoxes.size() + 1);
+		MessageBoxRef.Title = LK_FMT_LIB::format("{0}##MessageBoxRef{1}", Title, UIContext.MessageBoxes.size() + 1);
 		MessageBoxRef.UserRenderFunction = RenderFunction;
 		MessageBoxRef.Flags = Flags | EMessageBoxFlag::UserFunction;
 		MessageBoxRef.Width = Width;

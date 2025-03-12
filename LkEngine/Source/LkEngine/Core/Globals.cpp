@@ -7,6 +7,10 @@
 #error "LK_ENGINE_EDITOR is not allowed to be defined when running tests"
 #endif
 
+#if defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+#define LK_GLOBALS_PRINTING_ENABLED
+#endif
+
 /**
  * Allow logging in certain scenarios.
  * This is done to provide better context to potential errors that might occur
@@ -49,7 +53,11 @@ namespace LkEngine {
 	#endif
 
 		/* Find the engine root. */
+	#if defined(LK_PLATFORM_WINDOWS)
 		std::filesystem::path Path = LFileSystem::BinaryDir;
+	#elif defined(LK_PLATFORM_LINUX)
+		std::filesystem::path Path = std::filesystem::absolute(LFileSystem::BinaryDir);
+	#endif
 		{
 			int Traversed = 0;
 			while (Path.filename() != "LkEngine")

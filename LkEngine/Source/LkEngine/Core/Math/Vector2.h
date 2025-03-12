@@ -365,11 +365,11 @@ namespace LkEngine {
 			{
 				if constexpr (std::is_floating_point_v<SizeType>)
 				{
-					return std::format("({:.2f}, {:.2f})", X, Y);
+					return LK_FMT_LIB::format("({:.2f}, {:.2f})", X, Y);
 				}
 				else
 				{
-					return std::format("({}, {})", X, Y);
+					return LK_FMT_LIB::format("({}, {})", X, Y);
 				}
 			}
 			/* TODO: This does not work as it should, should be removed. */
@@ -397,23 +397,47 @@ namespace LkEngine {
 			return os;
 		}
 
+
+		/** @fixme: FIXME */
+	#if 0
 		template<typename VectorType>
-		FORCEINLINE VectorType As() const
+		VectorType As() const
 		{
 			return VectorType(X, Y);
 		}
 
-		template<>
-		FORCEINLINE glm::vec2 As() const
+		// Attempt 2
+		template<typename VectorType, typename = std::enable_if_t<std::is_same_v<VectorType, glm::vec2>>>
+		VectorType As() const
 		{
 			return glm::vec2(X, Y);
 		}
 
-		template<>
-		FORCEINLINE ImVec2 As() const
+		template<typename VectorType, typename = std::enable_if_t<std::is_same_v<VectorType, ImVec2>>>
+		VectorType As() const
 		{
 			return ImVec2(X, Y);
 		}
+	#else
+		template<typename VectorType>
+		VectorType As() const
+		{
+			if constexpr (std::is_same_v<VectorType, glm::vec2>)
+			{
+				return glm::vec2(X, Y);
+			}
+			else if constexpr (std::is_same_v<VectorType, ImVec2>)
+			{
+				return ImVec2(X, Y);
+			}
+			else
+			{
+				static_assert(!std::is_same_v<VectorType, VectorType>, "Unsupported VectorType in TVector2::As()");
+			}
+
+			return VectorType();
+		}
+	#endif
 
 		operator glm::vec2() { return glm::vec2(X, Y); }
 		operator ImVec2() { return ImVec2(X, Y); }
@@ -444,6 +468,20 @@ namespace LkEngine {
 	#endif
 	};
 
+	#if 0
+	template<typename SizeType>
+	template<>
+	inline glm::vec2 TVector2<SizeType>::As<glm::vec2>() const
+	{
+		return glm::vec2(X, Y);
+	}
 
+	template<typename SizeType>
+	template<>
+	inline ImVec2 TVector2<SizeType>::As<ImVec2>() const
+	{
+		return ImVec2(X, Y);
+	}
+	#endif
 
 }

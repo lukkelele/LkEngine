@@ -48,6 +48,8 @@ namespace LkEngine {
 			Distance = 8.0f;
 			NormalSpeed = 0.0020f;
 			TravelSpeed = 1.0f;
+
+			return *this;
 		}
 
 		void Initialize();

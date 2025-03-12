@@ -8,19 +8,20 @@
 
 #include "LkEngine/Scene/Components.h"
 
-
 namespace LkEngine {
 
 	class LShader;
 
-	class LRenderer : public LObject
+	/** @fixme: FIXME */
+	//class LRenderer : public LObject
+	class LRenderer
 	{
 	public:
 		LRenderer();
 		~LRenderer() = default;
 
 		static void Initialize();
-		static void Destroy();
+		static void Shutdown();
 
 		static void Clear();
 		static void BeginFrame();
@@ -96,7 +97,8 @@ namespace LkEngine {
 
 		friend class LEditorLayer;
 
-		LCLASS(LRenderer)
+		/** @fixme: FIXME */
+		//LCLASS(LRenderer)
 	};
 
 }

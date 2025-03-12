@@ -5,8 +5,10 @@
 
 #include "LkEngine/Core/IO/FileSystem.h"
 
-#include <stb_image/stb_image_resize2.h>
-
+//#ifndef STB_IMAGE_RESIZE2_IMPLEMENTATION
+//#define STB_IMAGE_RESIZE2_IMPLEMENTATION
+//#endif
+//#include <stb/stb_image_resize2.h>
 
 namespace LkEngine {
 

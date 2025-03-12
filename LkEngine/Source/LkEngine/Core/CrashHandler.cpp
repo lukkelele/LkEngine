@@ -7,7 +7,7 @@
 #ifdef LK_PLATFORM_WINDOWS
 #  include "LkEngine/Platform/Windows/WindowsCrashHandler.h"
 #elif defined(LK_PLATFORM_LINUX)
-#  include "LkEngine/Platform/Linux/LinuxCrashHandler.h"
+//#  include "LkEngine/Platform/Linux/LinuxCrashHandler.h"
 #endif
 
 static std::unordered_map<int, std::string> SignalToStringMap = {
@@ -27,8 +27,8 @@ namespace LkEngine {
 	#if defined(LK_PLATFORM_WINDOWS)
 		CrashHandler = std::make_unique<LWindowsCrashHandler>(ApplicationRef);
 	#elif defined(LK_PLATFORM_LINUX)
-		LK_CORE_ASSERT(false, "Linux not supported as of yet");
 		return;
+		LK_CORE_ASSERT(false, "Linux not supported as of yet");
 	#endif
 
 		/* Attach signals. */

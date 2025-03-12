@@ -146,6 +146,7 @@ namespace LkEngine {
 			std::string_view Type;
 		};
 
+	#if 0
 		struct FClassData
 		{
 			std::vector<FMemberData> Members;
@@ -193,6 +194,7 @@ namespace LkEngine {
 		{
 			return ArgumentType{};
 		}
+	#endif
 
 		/**
 		 * Check if T is a std::pair.

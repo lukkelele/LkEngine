@@ -12,7 +12,6 @@
 
 #include <entt/entt.hpp>
 
-
 namespace LkEngine {
 
 	class LEntity : public LObject
@@ -20,6 +19,7 @@ namespace LkEngine {
 	public:
 		LEntity();
 		LEntity(entt::entity InHandle, TObjectPtr<LScene> InScene);
+		LEntity(entt::entity InHandle, LScene* InScene);
 		~LEntity() = default;
 
 		LEntity(const LEntity& Other) = default;
@@ -113,7 +113,7 @@ namespace LkEngine {
 
 		bool operator!=(const LEntity& Other) const { return !(*this == Other); }
 
-		LEntity GetParent() const;
+		LEntity GetParent();
 
 		FORCEINLINE LUUID GetUUID() const 
 		{ 
@@ -184,7 +184,7 @@ namespace LkEngine {
 			return false;
 		}
 
-		bool IsAncestorOf(LEntity entity) const;
+		bool IsAncestorOf(LEntity InEntity);
 
 		FORCEINLINE bool IsDescendantOf(LEntity Entity) const 
 		{ 
@@ -198,7 +198,7 @@ namespace LkEngine {
 
 		friend class LEditorLayer;
 		friend class LScene;
-		friend class LSceneManagerPanel; /// REWORK THIS
+		friend class LSceneManagerPanel;
 
 		LCLASS(LEntity);
 	};
@@ -207,7 +207,7 @@ namespace LkEngine {
 
 /* Logging formatters. */
 template<>
-struct std::formatter<LkEngine::LEntity> : std::formatter<std::string>
+struct LK_FMT_LIB::formatter<LkEngine::LEntity> : LK_FMT_LIB::formatter<std::string>
 {
     template <typename FormatContext>
     auto format(const LkEngine::LEntity& Entity, FormatContext& Context) const
@@ -217,7 +217,7 @@ struct std::formatter<LkEngine::LEntity> : std::formatter<std::string>
 };
 
 template<>
-struct std::formatter<entt::entity> : std::formatter<std::string>
+struct LK_FMT_LIB::formatter<entt::entity> : LK_FMT_LIB::formatter<std::string>
 {
     template <typename FormatContext>
     auto format(const entt::entity& Entity, FormatContext& Context) const

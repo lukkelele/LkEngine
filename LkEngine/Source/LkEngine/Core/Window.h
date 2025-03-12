@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 #include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/LObject/Object.h"
@@ -13,7 +13,6 @@
 #include "LkEngine/Renderer/RenderContext.h"
 #include "LkEngine/Renderer/SwapChain.h"
 #include "LkEngine/Renderer/RenderPass.h"
-
 
 namespace LkEngine {
 

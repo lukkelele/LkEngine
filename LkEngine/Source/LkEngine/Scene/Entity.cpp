@@ -10,6 +10,13 @@ namespace LkEngine {
 		LOBJECT_REGISTER();
 	}
 
+	LEntity::LEntity(entt::entity InHandle, LScene* InScene)
+		: Handle(InHandle)
+		, Scene(InScene)
+	{
+		LOBJECT_REGISTER();
+	}
+
 	LEntity::LEntity(entt::entity InHandle, TObjectPtr<LScene> InScene)
 		: Handle(InHandle)
 		, Scene(InScene)
@@ -17,12 +24,12 @@ namespace LkEngine {
 		LOBJECT_REGISTER();
 	}
 
-	LEntity LEntity::GetParent() const
+	LEntity LEntity::GetParent()
 	{
 		return Scene->TryGetEntityWithUUID(GetParentUUID());
 	}
 
-	bool LEntity::IsAncestorOf(LEntity Entity) const
+	bool LEntity::IsAncestorOf(LEntity Entity)
 	{
 		const std::vector<LUUID>& Children = GetChildren();
 		if (Children.empty())

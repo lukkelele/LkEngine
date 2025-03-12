@@ -70,7 +70,7 @@ namespace LkEngine {
 
 		const ImGuiStyle &Style = ImGui::GetStyle();
 
-		const std::string ClearOnPlayText = std::format("{} Clear on Play", (bClearOnPlay ? LK_ICON_CHECK : LK_ICON_TIMES));
+		const std::string ClearOnPlayText = LK_FMT_LIB::format("{} Clear on Play", (bClearOnPlay ? LK_ICON_CHECK : LK_ICON_TIMES));
 		ImVec4 TextColor = bClearOnPlay ? Style.Colors[ImGuiCol_Text] : Style.Colors[ImGuiCol_TextDisabled];
 		if (UI::ColoredButton(ClearOnPlayText.c_str(), GetToolbarButtonColor(bClearOnPlay), TextColor, ImVec2(144.0f, 28.0f)))
 		{

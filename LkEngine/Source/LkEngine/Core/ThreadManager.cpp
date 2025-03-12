@@ -1,6 +1,8 @@
 #include "LKpch.h"
-#include "ThreadManager.h"
 
+/** @fixme: FIXME */
+#if 0
+#include "ThreadManager.h"
 
 namespace LkEngine {
 
@@ -19,3 +21,5 @@ namespace LkEngine {
 	}
 
 }
+
+#endif

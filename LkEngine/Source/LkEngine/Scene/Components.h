@@ -136,7 +136,7 @@ namespace LkEngine {
 
 		virtual std::string ToString() const override
 		{
-			return std::format("[TransformComponent] Translation={} Scale={} RotEuler={}", Translation, Scale, RotationEuler);
+			return LK_FMT_LIB::format("[TransformComponent] Translation={} Scale={} RotEuler={}", Translation, Scale, RotationEuler);
 		}
 	};
 
@@ -197,7 +197,7 @@ namespace LkEngine {
 
 		std::string ToString() const 
 		{
-			return std::format("[CameraComponent] Primary={} "
+			return LK_FMT_LIB::format("[CameraComponent] Primary={} "
 							   "CameraType={} ProjectionType={} Pitch={:.2f} Yaw={:.2f}", 
 							   (bPrimary ? "True" : "False"), 
 							   Enum::ToString(Camera.GetType()), Enum::ToString(ProjectionType),

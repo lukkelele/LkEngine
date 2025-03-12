@@ -44,12 +44,16 @@ namespace LkEngine {
 
 			return TableCrc32;
 		}
+	#if defined(LK_ENGINE_MSVC)
 		inline static constexpr auto TableCrc32 = GenerateTableCrc32<256>();
 		static_assert((
 			TableCrc32.size() == 256 &&
 			TableCrc32[1]     == 0x77073096 &&
 			TableCrc32[255]   == 0x2D02EF8D), 
 			"LHash::GenerateTableCrc32 generated an unexpected result");
+	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+		inline static auto TableCrc32 = GenerateTableCrc32<256>();
+	#endif
 
 	public:
 		template<EHash Type>
@@ -59,29 +63,6 @@ namespace LkEngine {
 			return 0;
 		}
 
-		/**
-		 * Algorithm: FNV
-		 * 
-		 *  Fast and efficient hash function.
-		 */
-		template<>
-		static constexpr uint32_t Generate<EHash::FNV>(std::string_view String)
-		{
-			const std::size_t Length = String.length();
-			const char* Data = String.data();
-
-			uint32_t Hash = FNV_OFFSET_BASIS;
-			for (std::size_t i = 0; i < Length; i++)
-			{
-				Hash ^= *Data++;
-				Hash *= FNV_PRIME;
-			}
-			Hash ^= '\0';
-			Hash *= FNV_PRIME;
-
-			return Hash;
-		}
-
 		template<EChecksum Type>
 		static constexpr uint32_t GenerateChecksum(std::string_view String)
 		{
@@ -89,19 +70,42 @@ namespace LkEngine {
 			return 0;
 		}
 
-		template<>
-		static constexpr uint32_t GenerateChecksum<EChecksum::Crc32>(std::string_view String)
-		{
-			uint32_t Crc = 0xFFFFFFFFu;
-			for (uint32_t Index = 0u; char Character = String[Index]; Index++)
-			{
-				static_assert(std::is_same_v<uint32_t, decltype(Index)>, "Invalid type for 'i'");
-				Crc = TableCrc32[(Crc ^ Character) & 0xFF] ^ (Crc >> 8);
-			}
+	};
 
-			return ~Crc;
+	/**
+	 * Algorithm: FNV
+	 * 
+	 *  Fast and efficient hash function.
+	 */
+	template<>
+	constexpr uint32_t LHash::Generate<EHash::FNV>(std::string_view String)
+	{
+		const std::size_t Length = String.length();
+		const char* Data = String.data();
+
+		uint32_t Hash = FNV_OFFSET_BASIS;
+		for (std::size_t i = 0; i < Length; i++)
+		{
+			Hash ^= *Data++;
+			Hash *= FNV_PRIME;
+		}
+		Hash ^= '\0';
+		Hash *= FNV_PRIME;
+
+		return Hash;
+	}
+
+	template<>
+	constexpr uint32_t LHash::GenerateChecksum<EChecksum::Crc32>(std::string_view String)
+	{
+		uint32_t Crc = 0xFFFFFFFFu;
+		for (uint32_t Index = 0u; char Character = String[Index]; Index++)
+		{
+			static_assert(std::is_same_v<uint32_t, decltype(Index)>, "Invalid type for 'i'");
+			Crc = TableCrc32[(Crc ^ Character) & 0xFF] ^ (Crc >> 8);
 		}
 
-	};
+		return ~Crc;
+	}
 
 }

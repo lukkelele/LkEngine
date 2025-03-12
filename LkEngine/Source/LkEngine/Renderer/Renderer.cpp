@@ -38,7 +38,8 @@ namespace LkEngine {
 
 	LRenderer::LRenderer()
 	{
-		LOBJECT_REGISTER(LRenderer);
+		/** @fixme: FIXME */
+		//LOBJECT_REGISTER(LRenderer);
 	}
 
 	void LRenderer::Initialize()
@@ -103,7 +104,7 @@ namespace LkEngine {
 		RendererAPI->SetPrimitiveTopology(ERenderTopology::Triangles);
 	}
 
-	void LRenderer::Destroy()
+	void LRenderer::Shutdown()
 	{
 		LK_CORE_VERIFY(RendererAPI);
 		RendererAPI->Destroy();
