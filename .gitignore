@@ -43,6 +43,7 @@
 **/.idea
 **/*.swp
 **/*.tlog
+**/Makefile
 
 **/*/*pycache*
 
