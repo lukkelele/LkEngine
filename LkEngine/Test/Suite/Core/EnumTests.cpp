@@ -472,7 +472,7 @@ LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualT
 			if (!Test1)
 			{
 				LK_TEST_ERROR("[{}] Test 1: {}", GetName(), (Test1 ? "OK" : "Failed"));
-				AddError(std::format("Test 1 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
+				AddError(LK_FMT_LIB::format("Test 1 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
 				Errors++;
 			}
 		}
@@ -484,7 +484,7 @@ LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualT
 			if (!Test2)
 			{
 				LK_TEST_ERROR("[{}] Test 2: {}", GetName(), (Test2 ? "OK" : "Failed"));
-				AddError(std::format("Test 2 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
+				AddError(LK_FMT_LIB::format("Test 2 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
 				Errors++;
 			}
 		}
@@ -496,7 +496,7 @@ LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualT
 			if (!Test3)
 			{
 				LK_TEST_ERROR("[{}] Test 3: {}", GetName(), (Test3 ? "OK" : "Failed"));
-				AddError(std::format("Test 3 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
+				AddError(LK_FMT_LIB::format("Test 3 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
 				Errors++;
 			}
 		}
@@ -508,7 +508,7 @@ LK_DEFINE_AUTOMATION_TEST(Enum_EnumClass_Operator_Comparison_GreaterThanOrEqualT
 			if (!Test4)
 			{
 				LK_TEST_ERROR("[{}] Test 4: {}", GetName(), (Test4 ? "OK" : "Failed"));
-				AddError(std::format("Test 4 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
+				AddError(LK_FMT_LIB::format("Test 4 failed (iteration: {}) for '{}' with enum: ETestEnum::{}", GetName(), i, Enum::ToString(ETestEnum::Value4)));
 				Errors++;
 			}
 		}
