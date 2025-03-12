@@ -266,7 +266,7 @@ LK_DEFINE_AUTOMATION_TEST(ObjectPtr_Function_PassedAsCopy)
 			}
 			else
 			{
-				Error = std::format("Reference count mismatch, object has {}", TestObject->GetReferenceCount());
+				Error = LK_FMT_LIB::format("Reference count mismatch, object has {}", TestObject->GetReferenceCount());
 			}
 
 			LK_TEST_ERROR_TAG(GetName(), "Test {} failed (Func2_DTC), error: {}", TestInfo.Num, Error);
@@ -419,7 +419,7 @@ LK_DEFINE_AUTOMATION_TEST(ObjectPtr_Function_PassedAsReference)
 			}
 			else
 			{
-				Error = std::format("Reference count mismatch, object has {}", TestObject->GetReferenceCount());
+				Error = LK_FMT_LIB::format("Reference count mismatch, object has {}", TestObject->GetReferenceCount());
 			}
 
 			LK_TEST_ERROR_TAG(GetName(), "Test {} failed (Func2_DTC), error: {}", TestInfo.Num, Error);
