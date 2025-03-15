@@ -1,8 +1,6 @@
 #pragma once 
 
-//#include "LkEngine/Core/Core.h"
 #include "LkEngine/Core/LObject/Enum.h"
-
 
 namespace LkEngine {
 
