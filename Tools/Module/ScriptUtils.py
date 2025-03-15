@@ -186,9 +186,8 @@ def UnzipFile(filepath, DeleteZipFile=True):
     if DeleteZipFile:
         os.remove(ZipFilePath)
 
-
 def PrintHeader(length, color, style=Style.BRIGHT):
-    print(f"{style}{color}{'=' * length}{Style.RESET_ALL}")
+    print(f"{style}{color}{'=' * length}{Style.RESET_ALL}", flush=True)
 
 def PrintBanner(text, width=50, color=Fore.CYAN, border_char='*'):
     # Center the text, padded to the specified width.
@@ -197,6 +196,6 @@ def PrintBanner(text, width=50, color=Fore.CYAN, border_char='*'):
 
     side_border = '|' if border_char in ['=', '-'] else border_char
 
-    print(f"{Style.BRIGHT}{color}{border}")
-    print(f"{side_border}{centered_text}{side_border}")
-    print(f"{border}{Style.RESET_ALL}")
+    print(f"{Style.BRIGHT}{color}{border}", flush=True)
+    print(f"{side_border}{centered_text}{side_border}", flush=True)
+    print(f"{border}{Style.RESET_ALL}", flush=True)
