@@ -6,12 +6,12 @@
 #include <assimp/postprocess.h>
 
 #include "AssimpLogStream.h"
-
 #include "AssetManager.h"
 
 #include "LkEngine/Renderer/Renderer.h"
-
+#if defined(LK_ENGINE_OPENGL)
 #include "LkEngine/Renderer/Backend/OpenGL/LkOpenGL.h"
+#endif
 
 namespace LkEngine {
 
