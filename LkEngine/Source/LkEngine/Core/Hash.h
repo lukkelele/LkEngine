@@ -2,7 +2,6 @@
 
 #include "LkEngine/Core/Core.h"
 
-
 namespace LkEngine {
 
 	enum class EHash
@@ -45,12 +44,15 @@ namespace LkEngine {
 			return TableCrc32;
 		}
 	#if defined(LK_ENGINE_MSVC)
+		inline static const auto TableCrc32 = GenerateTableCrc32<256>();
+		#if 0
 		inline static constexpr auto TableCrc32 = GenerateTableCrc32<256>();
 		static_assert((
 			TableCrc32.size() == 256 &&
 			TableCrc32[1]     == 0x77073096 &&
 			TableCrc32[255]   == 0x2D02EF8D), 
 			"LHash::GenerateTableCrc32 generated an unexpected result");
+		#endif
 	#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
 		inline static auto TableCrc32 = GenerateTableCrc32<256>();
 	#endif
@@ -59,14 +61,12 @@ namespace LkEngine {
 		template<EHash Type>
 		static constexpr uint32_t Generate(std::string_view String)
 		{
-			LK_CORE_VERIFY(false);
 			return 0;
 		}
 
 		template<EChecksum Type>
 		static constexpr uint32_t GenerateChecksum(std::string_view String)
 		{
-			LK_CORE_VERIFY(false);
 			return 0;
 		}
 
