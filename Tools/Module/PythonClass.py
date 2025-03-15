@@ -1,4 +1,7 @@
+import os
 import sys
+sys.path.append(os.path.dirname(__file__))
+
 import subprocess
 import importlib.util as importlib_util
 import pkg_resources # FIXME: Deprecated

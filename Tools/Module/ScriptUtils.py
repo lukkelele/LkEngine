@@ -57,7 +57,6 @@ def ChangeDirectory(directory_path):
     else:
         return False 
 
-
 def RunScript(script_name, script_dir="./"):
     """Run a script and capture its output."""
     try:
@@ -65,7 +64,6 @@ def RunScript(script_name, script_dir="./"):
         return result.returncode 
     except subprocess.CalledProcessError as e:
         return 1
-
 
 def DownloadFile(url, filepath):
     path = filepath
@@ -133,7 +131,6 @@ def DownloadFile(url, filepath):
 
     sys.stdout.write('\n')
 
-
 def UnzipFile(filepath, DeleteZipFile=True):
     ZipFilePath = os.path.abspath(filepath)
     ZipFileLocation = os.path.dirname(ZipFilePath)
@@ -180,7 +177,6 @@ def UnzipFile(filepath, DeleteZipFile=True):
                 sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('█' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
             else:
                 sys.stdout.write('\r[{}{}] {:.2f}% ({})     '.format('#' * Done, '.' * (50-Done), Percentage, AverageSpeedString))
-
     sys.stdout.write('\n')
 
     if DeleteZipFile:
@@ -191,11 +187,11 @@ def PrintHeader(length, color, style=Style.BRIGHT):
 
 def PrintBanner(text, width=50, color=Fore.CYAN, border_char='*'):
     # Center the text, padded to the specified width.
-    border = border_char * width
+    border = border_char * (width - 2)
     centered_text = text.center(width - 2)
 
     side_border = '|' if border_char in ['=', '-'] else border_char
 
-    print(f"{Style.BRIGHT}{color}{border}", flush=True)
+    print(f"{Style.BRIGHT}{color}{side_border}{border}{side_border}", flush=True)
     print(f"{side_border}{centered_text}{side_border}", flush=True)
-    print(f"{border}{Style.RESET_ALL}", flush=True)
+    print(f"{side_border}{border}{side_border}{Style.RESET_ALL}", flush=True)
