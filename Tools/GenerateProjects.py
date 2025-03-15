@@ -3,22 +3,29 @@
 #
 # Generate project files.
 #--------------------------------------------------------------------------
-import sys
-import os
-import subprocess
-from pathlib import Path
 from platform import system
-from colorama import Fore, Back, Style
-
-# Add 'Tools/Module' to path.
-#sys.path.append(os.path.join(os.path.dirname(__file__), "Tools"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "Tools/Module"))
-
 SystemPlatform = system()
 
-import Tools.Module.ScriptUtils as Utils
-from Tools.Module.PythonClass import PythonConfiguration
-from Tools.Module.PremakeClass import PremakeConfiguration
+import sys
+import os
+file_dirname = os.path.basename(os.path.dirname(__file__))
+if file_dirname == "LkEngine":
+    sys.path.append(os.path.join(os.path.dirname(__file__), "Tools/Module"))
+elif file_dirname == "Tools":
+    sys.path.append(os.path.dirname(__file__))
+
+import subprocess
+from pathlib import Path
+from colorama import Fore, Back, Style
+
+if file_dirname == "LkEngine":
+    import Tools.Module.ScriptUtils as Utils
+    from Tools.Module.PythonClass import PythonConfiguration
+    from Tools.Module.PremakeClass import PremakeConfiguration
+elif file_dirname == "Tools":
+    import Module.ScriptUtils as Utils
+    from Module.PythonClass import PythonConfiguration
+    from Module.PremakeClass import PremakeConfiguration
 
 PythonConfiguration.ValidatePackages()
 
