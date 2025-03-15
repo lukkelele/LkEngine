@@ -9,23 +9,17 @@
 /**
  * Variadic argument support.
  */
-#if defined(LK_COMPILER_MSC)
-#	define LK_VARIADIC_ARGS 1
-#	define LK_ENABLE_VERIFY 1
-#elif defined(LK_COMPILER_CLANG)
-#	define LK_VARIADIC_ARGS 1
-#	define LK_ENABLE_VERIFY 1
-#else
-#	define LK_VARIADIC_ARGS 1
-#	define LK_ENABLE_VERIFY 1
+#if defined(LK_ENGINE_MSVC) || defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
+#	define LK_VARIADIC_ARGS  0
+#	define LK_ENABLE_ASSERTS 1
+#	define LK_ENABLE_VERIFY  1
 #endif
 
 /**
  * Asserts.
  */
 #if LK_ENABLE_ASSERTS
-//#	if LK_VARIADIC_ARGS
-#	if 0
+#	if LK_VARIADIC_ARGS
 #		define LK_CORE_ASSERT_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Core,   "Assertion Failed", ##__VA_ARGS__)
 #		define LK_ASSERT_MESSAGE_INTERNAL(...)	    ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Client, "Assertion Failed", ##__VA_ARGS__)
 #	else
@@ -71,8 +65,7 @@
  * Verify.
  */
 #if LK_ENABLE_VERIFY
-//#	if LK_VARIADIC_ARGS
-#	if 0
+#	if LK_VARIADIC_ARGS
 #		define LK_CORE_VERIFY_MESSAGE_INTERNAL(...) ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Core,   "Verify Failed", ##__VA_ARGS__)
 #		define LK_VERIFY_MESSAGE_INTERNAL(...)      ::LkEngine::LLog::PrintAssertMessage(::LkEngine::ELoggerType::Client, "Verify Failed", ##__VA_ARGS__)
 #	else

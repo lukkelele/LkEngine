@@ -87,6 +87,7 @@ namespace ImGui {
 		const bool ShouldRenderArrow = (OpenDirection != ImGuiDir_None);
 		//const bool ShouldRenderArrow = true;
 
+		LK_CORE_ASSERT(ID != 0, "ID is 0");
 		bool IsOpen = TreeNodeBehaviorIsOpen(ID, ImGuiTreeNodeFlags_None);
 
 		const bool ItemAdded = ItemAdd(InteractBB, ID);

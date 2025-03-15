@@ -1,9 +1,11 @@
 #pragma once
 
+#if defined(LK_PLATFORM_WINDOWS)
 #define LK_DEBUG_ASSET_LOG 0
+#elif defined(LK_PLATFORM_LINUX)
+#define LK_DEBUG_ASSET_LOG 1
+#endif
 
-//#include "EditorAssetManager.h"
-//#include "RuntimeAssetManager.h"
 #include "IAssetManager.h"
 
 #include "LkEngine/Project/Project.h"

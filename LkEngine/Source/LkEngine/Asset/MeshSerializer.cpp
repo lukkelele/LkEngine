@@ -18,8 +18,12 @@ namespace LkEngine {
 
 	bool LMeshSourceSerializer::TryLoadData(const FAssetMetadata& Metadata, TObjectPtr<LAsset>& Asset) const
 	{
-		LK_CORE_TRACE_TAG("MeshSourceSerializer", "TryLoadData: {}", Metadata.FilePath.string());
+		LK_CORE_DEBUG_TAG("MeshSourceSerializer", "TryLoadData: {}", Metadata.FilePath.string());
+	#if defined(LK_PLATFORM_WINDOWS)
 		const std::filesystem::path FilePath = LProject::GetEditorAssetManager()->GetFileSystemPath(Metadata);
+	#elif defined(LK_PLATFORM_LINUX)
+		const std::filesystem::path FilePath = LProject::GetEditorAssetManager()->GetFileSystemPath(Metadata);
+	#endif
 		LAssimpMeshImporter Importer(FilePath.string());
 
 		TObjectPtr<LMeshSource> MeshSource = Importer.ImportToMeshSource();
@@ -59,7 +63,12 @@ namespace LkEngine {
 	bool LMeshSerializer::TryLoadData(const FAssetMetadata& Metadata, TObjectPtr<LAsset>& Asset) const
 	{
 		LK_CORE_TRACE_TAG("MeshSerializer", "TryLoadData: {}", Metadata.FilePath.string());
+	#if defined(LK_PLATFORM_WINDOWS)
 		const std::filesystem::path FilePath = LProject::GetAssetDirectory() / Metadata.FilePath;
+	#elif defined(LK_PLATFORM_LINUX)
+		const std::filesystem::path FilePath = LFileSystem::GetRuntimeDir() / LProject::GetAssetDirectory() / Metadata.FilePath;
+		LK_CORE_DEBUG_TAG("MeshSerializer", "TryLoadData  Filepath: {}", FilePath);
+	#endif
 		std::ifstream Stream(FilePath);
 		LK_CORE_ASSERT(Stream, "Inputstream failed for: {}", FilePath.string());
 		std::stringstream StringStream;
@@ -106,6 +115,7 @@ namespace LkEngine {
 
 	bool LMeshSerializer::DeserializeFromYaml(const std::string& YamlString, TObjectPtr<LMesh>& TargetMesh) const
 	{
+		LK_CORE_INFO("YAML:\n{}", YamlString);
 		YAML::Node Data = YAML::Load(YamlString);
 		if (!Data["Mesh"])
 		{
@@ -158,7 +168,12 @@ namespace LkEngine {
 	bool LStaticMeshSerializer::TryLoadData(const FAssetMetadata& Metadata, TObjectPtr<LAsset>& Asset) const
 	{
 		LK_CORE_TRACE_TAG("StaticMeshSerializer", "TryLoadData: {}", Metadata.FilePath.string());
+	#if defined(LK_PLATFORM_WINDOWS)
 		const std::filesystem::path FilePath = LProject::GetAssetDirectory() / Metadata.FilePath;
+	#elif defined(LK_PLATFORM_LINUX)
+		const std::filesystem::path FilePath = LFileSystem::GetRuntimeDir() / LProject::GetAssetDirectory() / Metadata.FilePath;
+		LK_CORE_DEBUG_TAG("StaticMeshSerializer", "TryLoadData  Filepath: {}", FilePath);
+	#endif
 		std::ifstream Stream(FilePath);
 		LK_CORE_ASSERT(Stream, "Inputstream failed for: {}", FilePath.string());
 		std::stringstream StringStream;
