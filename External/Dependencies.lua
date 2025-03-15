@@ -59,7 +59,7 @@ Dependency = {
 
 	Bullet3 = {
 		IncludeDir = "%{wks.location}/External/Bullet3/bullet3/include",
-		--LibDir = "%{wks.location}/External/Bullet3/bullet3/lib",
+		LibDir = "%{wks.location}/External/Bullet3/bullet3/lib",
 	},
 
 	YamlCpp = {
@@ -74,8 +74,8 @@ Dependency = {
 	Assimp = {
         IncludeDir = "%{wks.location}/External/Assimp/assimp/include",
 		Windows = { 
-			LibName = "assimp-vc143-mt.lib",
-			DebugLibName = "assimp-vc143-mtd.lib", 
+			LibName = "assimp-vc143-mt",
+			DebugLibName = "assimp-vc143-mtd", 
 			LibDir = "%{wks.location}/External/Libraries" 
 		},
 		Linux = { 

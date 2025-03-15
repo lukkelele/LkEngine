@@ -23,11 +23,7 @@ project "ImGuiNodeEditor"
 		"%{Dependency.ImGui.IncludeDir}/imgui", -- Allow 'imgui.h' as well as 'imgui/imgui.h' as an include.
     }
 
-    --flags { "ExcludeFromBuild" }
-
-    prebuildcommands {
-        "{ECHO} Building: %{prj.name}"
-    }
+    prebuildmessage "[%{prj.name}] Starting build"
 
 	filter "system:windows"
 		systemversion "latest"
@@ -40,7 +36,7 @@ project "ImGuiNodeEditor"
 		runtime "Debug"
 		symbols "On"
 
-    filter "configurations:Debug-AddressSanitize"
+    filter "configurations:Debug-AS"
 		runtime "Debug"
 		symbols "On"
 

@@ -90,7 +90,7 @@ project "Glfw"
 		runtime "Debug"
 		symbols "On"
 
-    filter "configurations:Debug-AddressSanitize"
+    filter "configurations:Debug-AS"
 		runtime "Debug"
 		symbols "On"
 

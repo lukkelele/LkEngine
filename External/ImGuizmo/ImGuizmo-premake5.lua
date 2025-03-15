@@ -43,12 +43,12 @@ project "ImGuizmo"
 		systemversion "latest"
 		staticruntime "On"
 
-		filter "system:clang"
-			buildoptions {
-				"-Wno-macro-redefined",
-			}
+    filter "toolset:clang"
+        buildoptions {
+            "-Wno-macro-redefined",
+        }
 
-    filter "configurations:Debug or configurations:Debug-AddressSanitize"
+    filter "configurations:Debug or configurations:Debug-AS"
 		staticruntime "On"
 		runtime "Debug"
 		symbols "On"

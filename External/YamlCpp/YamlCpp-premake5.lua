@@ -6,6 +6,11 @@ project "YamlCpp"
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
 
+	defines {
+		"YAML_CPP_STATIC_DEFINE",
+		"YAMLCPP_USE_STATIC_LIBS"
+	}
+
 	files { 
         "yaml-cpp/src/**.h", 
         "yaml-cpp/src/**.cpp", 
@@ -17,26 +22,19 @@ project "YamlCpp"
 		"yaml-cpp/include/yaml-cpp"
 	}
 
-	defines {
-		"YAML_CPP_STATIC_DEFINE",
-		"YAMLCPP_USE_STATIC_LIBS"
-	}
-
-    --flags { "ExcludeFromBuild" } 
-
-    prebuildcommands {
-        "{ECHO} Building: %{prj.name}",
-    }
+    prebuildmessage "[%{prj.name}] Starting build"
 	
 	filter "system:windows"
-		systemversion "latest"
+		staticruntime "On"
+
+	filter "system:linux"
 		staticruntime "On"
 	
     filter "configurations:Debug or configurations:AutomationTest"
 		runtime "Debug"
 		symbols "On"
 
-    filter "configurations:Debug-AddressSanitize"
+    filter "configurations:Debug-AS"
 		runtime "Debug"
 		symbols "On"
 	
