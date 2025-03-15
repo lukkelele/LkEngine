@@ -7,7 +7,6 @@
 #include "NodeEditorContext.h"
 #include "Nodes.h"
 
-
 namespace LkEngine {
 
     namespace NE = ax::NodeEditor; 

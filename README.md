@@ -1,4 +1,4 @@
-# LkEngine :shaved_ice: 
+# LkEngine
 
 <!-- Badges -->
 <img height="20" alt="VersionBadge" src="https://img.shields.io/badge/Version-0.1.2--alpha-blue"></img>
@@ -9,42 +9,37 @@
 	<img src="./Docs/Images/Banner/LkEngine.png" />
 </p>
 
+**LkEngine** (pronounced *Lukkel-Engine*) is a game and rendering engine written in C\++20. <br>
+This project is for fun and to learn more, I just love to code.<br>
+I have lots of ideas that I want to see if they could work and this project is good environment for me to try stuff out.
+
 ## Content
-1. [Project](#Project)
-2. [Engine](#Engine)
-3. [Setup and Installation](#Setup-and-Installation)
-    - [Windows](#Platform-Windows)
-	- [Linux](#Platform-Linux)
-4. [Development](#Engine-Development)
+1. [Engine](#Engine)
+2. [Setup and Build](#Setup-and-Build)
+3. [Development](#Engine-Development)
 	- [Showcase](#Engine-Development-Showcase)
-5. [Dependencies](#Engine-Dependencies)
+4. [Dependencies](#Engine-Dependencies)
 
 ---
 
 * [Engine API](./Docs/Engine.md) <br>
 * [Development Journal](./Docs/Development.md) <br>
 * [github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/) <br>
-* [github.io.lukkelele/LkEngine/Development](https://github.com/lukkelele/LkEngine/blob/gh-pages/Development.md)
 
 ---
-
-# Project <a id="Project"></a> 
-
-**LkEngine** (pronounced *Lukkel-Engine*) is a game and rendering engine written in C\++20. <br>
-This project is for fun and to learn more, I just love to code.<br>
-I have lots of ideas that I want to see if they could work and this project is good environment for me to try stuff out.
 
 ## Engine <a id="Engine"></a>
 For a detailed view of the engine and the API, check out the [Engine API](./Docs/Engine.md).
 
 #### Implemented
 :white_check_mark: OpenGL support<br>
-:white_check_mark: Asset loading<br>
 :white_check_mark: Profiling and instrumentation<br>
 :white_check_mark: Serialization and persistence<br>
 :white_check_mark: Automated tests<br>
+:white_check_mark: CI/CD<br>
 :white_check_mark: Camera system<br>
 :white_check_mark: Raycasting<br>
+:white_check_mark: Asset loading (gltf, fbx, obj)<br>
 :white_check_mark: Custom themes<br>
 
 #### In Progress
@@ -59,40 +54,15 @@ For a detailed view of the engine and the API, check out the [Engine API](./Docs
 
 ---
 
-## Setup and Installation <a id="Setup-and-Installation"></a>
+## Setup and Build <a id="Setup-and-Build"></a>
 
-| **Platform** | **Support** |
-| :-------- | :-------: |
-| Windows  | :white_check_mark: |
-| Linux | :x: |
+View [BUILD.md](./BUILD.md) for information on how to setup and build the engine.
 
-### Windows <a id="Platform-Windows"></a>
-Make sure the following are installed:
-
-| Package | Link                          |
-|----------------|--------------------------------------------|
-| CMake | [Download](https://cmake.org/download/) |
-| C/C++ Compiler | [Download](https://visualstudio.microsoft.com/vs/features/cplusplus/) |
-| Make | [Download](https://gnuwin32.sourceforge.net/packages/make.htm) |
-| Python3 | [Download](https://www.python.org/downloads/windows/) |
-
-Most dependencies are sorted by scripts available in `Tools/` that help setting up the engine.
-
-1. Clone the repo and with all submodules.<br>
-    ```shell
-	git clone --recursive https://github.com/lukkelele/LkEngine.git
-	```
-2. Enter the **Tools** directory.<br>
-3. Run the setup script **LkEngine-Setup.bat**.<br>
-   It is also possible to run the script directly in a shell which yields the same result as the bat script runs **LkEngine-Setup.py**.
-	```shell
-	python LkEngine-Setup.py
-    ```
-4. All dependencies are then handled by the script. The built static libraries are moved to their desired spot inside the _'External'_ directory. 
-5. Done! :white_check_mark:
-
-### Linux <a id="Platform-Linux"></a>
-> :warning: Linux support is coming in the future.
+| **Compiler** | **Version** | **Supported** |
+| :-------- | :-------: | :------: |
+| MSVC | 17.9.7 (1939)| :white_check_mark: |
+| GCC | 14.2.1 | :white_check_mark: |
+| Clang | - | :x: |
 
 ---
 

@@ -71,7 +71,7 @@ LkEngine/Test/Logs
 **/Lk*/Configuration/*.json
 
 # LkEngine scenes, disable when wanting to update the scene(s).
-**/*/Starter-*.lkscene
+**/*/*.lkscene
 **/*.lkr
 
 # Runtime directories.
