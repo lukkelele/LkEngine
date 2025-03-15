@@ -13,7 +13,6 @@
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/Texture.h"
 
-
 namespace LkEngine {
 
 	namespace fs = std::filesystem;
@@ -411,7 +410,11 @@ namespace LkEngine {
 
 	std::filesystem::path LEditorAssetManager::GetFileSystemPath(const FAssetMetadata& Metadata) const
 	{
+	#if defined(LK_PLATFORM_WINDOWS)
 		return std::filesystem::absolute(LProject::GetAssetDirectory() / Metadata.FilePath);
+	#elif defined(LK_PLATFORM_LINUX)
+		return (LFileSystem::GetRuntimeDir() / LProject::GetAssetDirectory() / Metadata.FilePath);
+	#endif
 	}
 
 	std::filesystem::path LEditorAssetManager::GetFileSystemPath(const FAssetHandle Handle) const
@@ -430,7 +433,9 @@ namespace LkEngine {
 		if (!LFileSystem::Exists(AssetRegistryPath))
 		{
 			LK_CORE_ERROR_TAG("EditorAssetManager", "Asset registry file does not exist at: '{}'", AssetRegistryPath.string());
+		#if defined(LK_ENGINE_MSVC)
 			return false;
+		#endif
 		}
 
 		LK_CORE_INFO_TAG("EditorAssetManager", "Loading asset registry ({})", AssetRegistryPath.filename().string());
@@ -447,6 +452,7 @@ namespace LkEngine {
 			return false;
 		}
 
+		LK_CORE_DEBUG_TAG("EditorAssetManager", "Iterating asset handles");
 		for (auto Entry : AssetHandles)
 		{
 			const std::string Filepath = Entry["FilePath"].as<std::string>();

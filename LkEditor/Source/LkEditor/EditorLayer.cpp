@@ -998,9 +998,8 @@ namespace LkEngine {
 	#if defined(LK_PLATFORM_WINDOWS)
 		ProjectSolution = LProject::GetProjectDirectory() / std::filesystem::path(LProject::GetProjectName() + ".sln");
 	#elif defined(LK_PLATFORM_LINUX)
-		LK_CORE_VERIFY(false, "TODO");
-	#else
-		LK_CORE_VERIFY(false, "TODO");
+		LK_CORE_WARN_TAG("Editor", "Using .sln for project solution on Linux");
+		ProjectSolution = LProject::GetProjectDirectory() / std::filesystem::path(LProject::GetProjectName() + ".sln");
 	#endif
 	}
 

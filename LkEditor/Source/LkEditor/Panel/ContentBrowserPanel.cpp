@@ -185,7 +185,14 @@ namespace LkEngine {
 
 		Project = InProject;
 
-		FAssetHandle BaseDirectoryHandle = ProcessDirectory(Project->GetAssetDirectory().string(), nullptr);
+		const std::filesystem::path AssetDir = Project->GetAssetDirectory();
+		if (!std::filesystem::exists(AssetDir))
+		{
+			LK_CORE_ERROR_TAG("ContentBrowser", "[OnProjectChanged] Asset directory does not exist: {}", AssetDir.string());
+			return;
+		}
+
+		FAssetHandle BaseDirectoryHandle = ProcessDirectory(AssetDir.string(), nullptr);
 		BaseDirectory = Directories[BaseDirectoryHandle];
 		ChangeDirectory(BaseDirectory);
 
@@ -588,6 +595,8 @@ namespace LkEngine {
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
 			}
 
+		/** @fixme: Linux support, need to fix the relative pathing issue. */
+		#if defined(LK_PLATFORM_WINDOWS)
 			/* Breadcrumbs. */
 			if (bUpdateNavigationPath)
 			{
@@ -612,8 +621,13 @@ namespace LkEngine {
 				ImGui::PushStyleColor(ImGuiCol_Text, RGBA32::Text::Darker);
 
 				LK_CORE_ASSERT(Project);
-				const std::string& AssetsDirectoryName = fs::relative(Project->GetConfiguration().AssetDirectory).string();
-				LK_CORE_ASSERT(!AssetsDirectoryName.empty(), "Project '{}' does not have an assigned assets directory in its configuration", Project->GetName());
+			#if defined(LK_PLATFORM_WINDOWS)
+				const std::string AssetsDirectoryName = std::filesystem::relative(Project->GetConfiguration().AssetDirectory).string();
+			#elif defined(LK_PLATFORM_WINDOWS)
+				const std::string AssetsDirectoryName = std::filesystem::relative(LFileSystem::GetRuntimeDir() / Project->GetConfiguration().AssetDirectory).string();
+				LK_CORE_WARN_TAG("ContentBrowserPanel", "AssetsDirectoryName: {}  (Empty: {})", AssetsDirectoryName, AssetsDirectoryName.empty() ? "Yes" : "No");
+			#endif
+				//LK_CORE_ASSERT(!AssetsDirectoryName.empty(), "Project '{}' does not have an assigned assets directory in its configuration", Project->GetName());
 				const ImVec2 TextSize = ImGui::CalcTextSize(AssetsDirectoryName.c_str());
 				const float TextPadding = ImGui::GetStyle().FramePadding.y;
 
@@ -674,6 +688,7 @@ namespace LkEngine {
 
 				ImGui::EndPopup();
 			}
+			#endif
 		}
 		ImGui::EndGroup();
 

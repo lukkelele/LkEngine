@@ -130,13 +130,21 @@ namespace LkEngine {
 	std::filesystem::path LProject::GetAssetDirectory()
 	{
 		LK_CORE_VERIFY(ActiveProject);
+	#if defined(LK_PLATFORM_WINDOWS)
 		return ActiveProject->Configuration.AssetDirectory;
+	#elif defined(LK_PLATFORM_LINUX)
+		return LFileSystem::GetRuntimeDir() / ActiveProject->Configuration.AssetDirectory;
+	#endif
 	}
 
 	std::filesystem::path LProject::GetAssetRegistryPath()
 	{
 		LK_CORE_VERIFY(ActiveProject);
+	#if defined(LK_PLATFORM_WINDOWS)
 		return std::filesystem::path(ActiveProject->Configuration.AssetRegistryPath);
+	#elif defined(LK_PLATFORM_LINUX)
+		return LFileSystem::GetRuntimeDir() / ActiveProject->Configuration.AssetRegistryPath;
+	#endif
 	}
 
 	std::filesystem::path LProject::GetMeshDirectory()

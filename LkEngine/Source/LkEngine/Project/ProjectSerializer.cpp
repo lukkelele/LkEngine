@@ -60,6 +60,7 @@ namespace LkEngine {
 		StrStream << InputStream.rdbuf();
 		try
 		{
+			LK_CORE_DEBUG_TAG("ProjectSerializer", "Deserializing: {}", InFile.string());
 			DeserializeFromYaml(StrStream.str(), Project->GetConfiguration());
 		}
 		catch (const YAML::Exception& Exception)
@@ -114,6 +115,15 @@ namespace LkEngine {
 		LK_DESERIALIZE_PROPERTY(StartScene, ProjectConfig.StartScene, RootNode, "");
 		LK_DESERIALIZE_PROPERTY(AutoSave, ProjectConfig.bAutoSave, RootNode, true);
 		LK_DESERIALIZE_PROPERTY(AutoSaveInterval, ProjectConfig.AutoSaveInterval, RootNode, 150s);
+
+	#if defined(LK_PLATFORM_LINUX)
+		LK_CORE_WARN("WorkingDir: {}", LFileSystem::GetWorkingDir());
+		LK_CORE_WARN("RuntimeDir: {}", LFileSystem::GetRuntimeDir());
+		LK_CORE_DEBUG("ProjectConfig.Name: {}", ProjectConfig.Name);
+		LK_CORE_DEBUG("ProjectConfig.AssetDirectory: {}", ProjectConfig.AssetDirectory);
+		LK_CORE_DEBUG("ProjectConfig.AssetRegistryPath: {}", ProjectConfig.AssetRegistryPath);
+		LK_CORE_DEBUG("ProjectConfig.MeshDirectory: {}", ProjectConfig.MeshDirectory);
+	#endif
 
 		return true;
 	}

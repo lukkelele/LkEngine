@@ -146,7 +146,7 @@ namespace LkEngine::UI {
 			LK_CORE_INFO("Creating dockspace layout");
 
 			/* Remove existing layout. */
-			LK_CORE_TRACE("Removing existing docking layout");
+			LK_CORE_DEBUG("Removing existing docking layout (ID: {})", DockspaceID);
 			ImGui::DockBuilderRemoveNode(DockspaceID);
 
 			/* Add empty node. */
