@@ -1,9 +1,8 @@
 #--------------------------------------------------------------------------
-# [LkEngine] GenerateProjects-Windows.py
+# [LkEngine] GenerateProjects.py
 #
 # Generate project files.
 #--------------------------------------------------------------------------
-
 import sys
 import os
 import subprocess
@@ -30,7 +29,7 @@ if not bInProjectRoot:
 	if not Path.is_dir(Path("LkEngine/Source")):
 		raise Exception("Failed to find LkEngine project root directory")
 
-Utils.PrintBanner("Generating Project: LkEngine", 60, Fore.WHITE, '=')
+Utils.PrintBanner("Generating Project: LkEngine", 60, Fore.LIGHTWHITE_EX, '=')
 if SystemPlatform == "Windows":
     subprocess.call(["External/Premake5/bin/premake5.exe", "vs2022", "--file=LkEngine.lua"])
 elif SystemPlatform == "Linux":
