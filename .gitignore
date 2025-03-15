@@ -65,14 +65,14 @@ External/**/examples
 External/**/tests
 LkEngine/Test/Logs
 **/*.lkconf
-**/*.lkr
 **/*/NodeEditor.json
 **/*.lktheme
 **/Lk*/Configuration/*.yaml
 **/Lk*/Configuration/*.json
 
-# LkEngine Starter Scene. Disable ignore when wanting to update the scene(s).
+# LkEngine scenes, disable when wanting to update the scene(s).
 **/*/Starter-*.lkscene
+**/*.lkr
 
 # Runtime directories.
 LkRuntime/Projects
