@@ -1,0 +1,79 @@
+Scene: Starter-2025
+Active: true
+EditorScene: true
+SceneHandle: 0
+Entities:
+  - Entity: 1735919407767406708
+    TagComponent:
+      Tag: Static-Cube-2
+    TransformComponent:
+      Position: [-0.8105869, 0.6111502, -3.863186]
+      Rotation: [0.0057360195, 0.17453292, 0]
+      Scale: [0.99999803, 1.0419236, 0.99999857]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true
+  - Entity: 7151618901541716901
+    TagComponent:
+      Tag: Static-Cube-3
+    TransformComponent:
+      Position: [3.2196443, 0.58546257, 2.6713316]
+      Rotation: [0, -0.4340478, 0]
+      Scale: [0.9999998, 1, 1.5893322]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true
+  - Entity: 9492541504980216719
+    TagComponent:
+      Tag: Static-Plane-1
+    TransformComponent:
+      Position: [-0.00019454956, -0.7490634, 0]
+      Rotation: [0, -0, 0]
+      Scale: [5.3885326, 0.31999075, 6.008588]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true
+  - Entity: 14523275309337277725
+    TagComponent:
+      Tag: EditorCamera
+    TransformComponent:
+      Position: [13.204914, 4.912037, 6.373582]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        CameraType: 1
+        ProjectionType: 0
+        Origin: [0, 0, 0]
+        FocalPoint: [-1.1761189, 1.2832685, 2.2596989]
+        Direction: [-0.9343337, -0.23576066, -0.26727816]
+        Pitch: 0.23800112
+        Yaw: 4.991011
+        Perspective:
+          PerspectiveFov: 45
+          PerspectiveNear: 0.1
+          PerspectiveFar: 2400
+        Orthographic:
+          OrthographicSize: 10
+          OrthographicNear: -1
+          OrthographicFar: 1
+  - Entity: 17688067403604816871
+    TagComponent:
+      Tag: Static-Ramp-1
+    TransformComponent:
+      Position: [0.040139526, 1.5754259, 10.652623]
+      Rotation: [-3.0710223, 0.00018434698, -3.1380339]
+      Scale: [6.246113, 4.594278, 4.7521276]
+    StaticMeshComponent:
+      AssetID: 16507767805386837171
+      Visible: true
+  - Entity: 18387559141236681850
+    TagComponent:
+      Tag: Static-Cube-1
+    TransformComponent:
+      Position: [-3.0882206, 0.7478807, 1.7588881]
+      Rotation: [3.1091318, -1.31551, -3.1222334]
+      Scale: [1.5891047, 1.1088821, 1.4340545]
+    StaticMeshComponent:
+      AssetID: 12699931545793190348
+      Visible: true
