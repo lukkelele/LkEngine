@@ -37,7 +37,7 @@ project "Box2D"
 			"box2d/src/box2d.natvis",
 		}
 
-		filter "configurations:Debug or configurations:Debug-AddressSanitize or configurations:AutomationTest"
+		filter "configurations:Debug or configurations:Debug-AS or configurations:AutomationTest"
 			runtime "Debug"
 			symbols "On"
 

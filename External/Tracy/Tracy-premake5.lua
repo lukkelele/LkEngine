@@ -54,7 +54,7 @@ project "Tracy"
 			"tracy/public/libbacktrace/dwarf.cpp",
 		}
 
-    filter "configurations:Debug or configurations:Debug-AddressSanitize or configurations:AutomationTest"
+    filter "configurations:Debug or configurations:Debug-AS or configurations:AutomationTest"
 		runtime "Debug"
 		symbols "On"
 		conformancemode "On"

@@ -2,9 +2,7 @@ project "ImGui"
 	kind "StaticLib"
 	language "C++"
     cppdialect "C++17" 
-
     staticruntime "On"
-    configurations { "Debug", "Release", "Dist" }
 
 	targetdir (TargetDirectory)
 	objdir (IntermediateDirectory)
@@ -43,11 +41,7 @@ project "ImGui"
         "%{Dependency.ImGuizmo.IncludeDir}",
     }
 
-    --flags { "ExcludeFromBuild" } 
-
-    prebuildcommands {
-        "{ECHO} Building: %{prj.name}"
-    }
+    prebuildmessage "[%{prj.name}] Starting build"
 
 	filter "system:windows"
 		systemversion "latest"
