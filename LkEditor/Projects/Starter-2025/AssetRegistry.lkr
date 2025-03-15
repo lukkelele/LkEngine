@@ -1,0 +1,316 @@
+Assets:
+  - Handle: 181009043674343146
+    Type: Material
+    FilePath: Materials/M_Base.lmaterial
+  - Handle: 923343503059059884
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/Move.png
+  - Handle: 1412387590319530725
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-LightItalic.ttf
+  - Handle: 1515040083926319424
+    Type: Texture
+    FilePath: Editor/ContentBrowser/JPG.png
+  - Handle: 1541813106069222526
+    Type: Texture
+    FilePath: Editor/ContentBrowser/File.png
+  - Handle: 1575692719286282722
+    Type: Texture
+    FilePath: Editor/ContentBrowser/GLTF.png
+  - Handle: 2004339748791028762
+    Type: Texture
+    FilePath: Editor/ContentBrowser/Skeleton.png
+  - Handle: 2033388578020932804
+    Type: Texture
+    FilePath: Textures/White.png
+  - Handle: 2159029222842301160
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/Stop.png
+  - Handle: 2174184005561453489
+    Type: MeshSource
+    FilePath: Meshes/Source/Ramp.gltf
+  - Handle: 2627547651794954860
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-Light.ttf
+  - Handle: 3050856918299067281
+    Type: MeshSource
+    FilePath: Meshes/Source/Capsule.gltf
+  - Handle: 3221858385511234619
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/Play.png
+  - Handle: 3338535120983395806
+    Type: MeshSource
+    FilePath: Meshes/Source/Cone.gltf
+  - Handle: 3439346146522898595
+    Type: Texture
+    FilePath: Textures/Debug/Metal.png
+  - Handle: 3864150297396492647
+    Type: Texture
+    FilePath: Editor/Icon/Gear.png
+  - Handle: 4116809077766160069
+    Type: MeshSource
+    FilePath: Meshes/Source/Cube.gltf
+  - Handle: 4208059618891852690
+    Type: Texture
+    FilePath: Editor/Icon/File-White.png
+  - Handle: 4268681220952065579
+    Type: Texture
+    FilePath: Editor/ContentBrowser/Prefab.png
+  - Handle: 4471601106284941336
+    Type: Texture
+    FilePath: Textures/Debug/Skybox-WaterIsland/Front.jpg
+  - Handle: 4543885366220824392
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-ThinItalic.ttf
+  - Handle: 4588203749213934810
+    Type: Font
+    FilePath: Fonts/FontAwesome/fontawesome-webfont.ttf
+  - Handle: 4827753853694083367
+    Type: Texture
+    FilePath: Editor/Icon/Refresh.png
+  - Handle: 4930424733471391839
+    Type: Texture
+    FilePath: Editor/ContentBrowser/Mesh.png
+  - Handle: 5416181160633568519
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-ExtraBoldItalic.ttf
+  - Handle: 5432748155078142009
+    Type: Texture
+    FilePath: Editor/ContentBrowser/Material.png
+  - Handle: 5445614004822614041
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-Light.ttf
+  - Handle: 5733047309107791739
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/ScaleTool.png
+  - Handle: 6208496413442263300
+    Type: Texture
+    FilePath: Editor/Icon/File.png
+  - Handle: 6286327820535314778
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-Medium.ttf
+  - Handle: 6316767550693654239
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-BoldItalic.ttf
+  - Handle: 6616372017300576694
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/RotateTool.png
+  - Handle: 6694057277622947969
+    Type: Texture
+    FilePath: Meshes/Template/Backpack/diffuse.jpg
+  - Handle: 6855867080889169445
+    Type: Texture
+    FilePath: Textures/Debug/Skybox-WaterIsland/Bottom.jpg
+  - Handle: 6885557070646771292
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/Rotate.png
+  - Handle: 6933774189664766332
+    Type: Texture
+    FilePath: Editor/Icon/Backward.png
+  - Handle: 6964879950397987112
+    Type: Texture
+    FilePath: Editor/ContentBrowser/MP3.png
+  - Handle: 7397750607332293275
+    Type: Texture
+    FilePath: Textures/Debug/Bricks.jpg
+  - Handle: 7810570917832529083
+    Type: MeshSource
+    FilePath: Meshes/Source/Plane.gltf
+  - Handle: 7995890286682572255
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/Pause.png
+  - Handle: 8043303391651641773
+    Type: Texture
+    FilePath: Editor/Icon/Plus.png
+  - Handle: 8067237146419036596
+    Type: Mesh
+    FilePath: Meshes/Default/Cube.lmesh
+  - Handle: 8604367968647730717
+    Type: Texture
+    FilePath: Textures/Debug/Wood.png
+  - Handle: 8676305415871944664
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-Semibold.ttf
+  - Handle: 8676997452219540347
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-RyPo.ttf
+  - Handle: 8848560219784281521
+    Type: Texture
+    FilePath: Textures/Debug/Skybox-WaterIsland/Right.jpg
+  - Handle: 9045019982810125154
+    Type: Texture
+    FilePath: Textures/Debug/Skybox-WaterIsland/Left.jpg
+  - Handle: 9055887407464870608
+    Type: Texture
+    FilePath: Editor/ContentBrowser/OBJ.png
+  - Handle: 9077634127284431692
+    Type: Texture
+    FilePath: Textures/Debug/Skybox-WaterIsland/Back.jpg
+  - Handle: 9111933457253888349
+    Type: Texture
+    FilePath: Editor/Icon/Clear.png
+  - Handle: 9350164068543551564
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-Regular.ttf
+  - Handle: 9425325841999774883
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-BlackItalic.ttf
+  - Handle: 9594158701742055190
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-Bold.ttf
+  - Handle: 9818431761696293136
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-Black.ttf
+  - Handle: 10363797586116202360
+    Type: Texture
+    FilePath: Editor/Icon/Reticle.png
+  - Handle: 10508396145573189622
+    Type: Texture
+    FilePath: Editor/ContentBrowser/MeshCollider.png
+  - Handle: 10765831392501792807
+    Type: StaticMesh
+    FilePath: Meshes/Default/Plane.lsmesh
+  - Handle: 10920008643719734046
+    Type: Texture
+    FilePath: Editor/Icon/Folder_Dark.png
+  - Handle: 11031451787071446197
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/Simulate.png
+  - Handle: 11350376245874001668
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-BoldItalic.ttf
+  - Handle: 11597665191371496987
+    Type: Texture
+    FilePath: Editor/ContentBrowser/GLB.png
+  - Handle: 12084301484130010083
+    Type: Texture
+    FilePath: Textures/Debug/WoodContainer.jpg
+  - Handle: 12093995371534831519
+    Type: Texture
+    FilePath: Editor/Icon/File-Outline.png
+  - Handle: 12699931545793190348
+    Type: StaticMesh
+    FilePath: Meshes/Default/Cube.lsmesh
+  - Handle: 12704795203792408829
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-Light.ttf
+  - Handle: 12816518240245523593
+    Type: Texture
+    FilePath: Editor/Icon/Search.png
+  - Handle: 12890255032868494979
+    Type: Texture
+    FilePath: Editor/Icon/Save.png
+  - Handle: 13026681529468508668
+    Type: Texture
+    FilePath: Textures/Debug/Skybox-WaterIsland/Top.jpg
+  - Handle: 13084490994311346062
+    Type: Texture
+    FilePath: Editor/Icon/Folder_OLD.png
+  - Handle: 13092810892024550211
+    Type: Texture
+    FilePath: Editor/Icon/Folder.png
+  - Handle: 13534769904223503985
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-LightItalic.ttf
+  - Handle: 13541220010909559236
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-ExtraBold.ttf
+  - Handle: 13577487342699165887
+    Type: Texture
+    FilePath: Editor/Icon/Pointer.png
+  - Handle: 13577548428035265056
+    Type: Texture
+    FilePath: Editor/Icon/Backward-Black.png
+  - Handle: 13679962210872248495
+    Type: Texture
+    FilePath: Editor/ContentBrowser/PNG.png
+  - Handle: 13867722678920932948
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-BlackItalic.ttf
+  - Handle: 13902249924914008975
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-Black.ttf
+  - Handle: 13916601798528318587
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-Italic.ttf
+  - Handle: 13922300978582324426
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-LightItalic.ttf
+  - Handle: 14041338925689946120
+    Type: Texture
+    FilePath: Editor/Icon/Forward.png
+  - Handle: 14159201148192359727
+    Type: Texture
+    FilePath: Editor/ContentBrowser/Folder.png
+  - Handle: 14254999072395166177
+    Type: Texture
+    FilePath: Editor/ContentBrowser/WAV.png
+  - Handle: 14267224617855375441
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-Thin.ttf
+  - Handle: 14510633849971501984
+    Type: Texture
+    FilePath: Editor/Icon/Viewport/MoveTool.png
+  - Handle: 14604645718449275762
+    Type: Texture
+    FilePath: Editor/ContentBrowser/StaticMesh.png
+  - Handle: 14701118057061729551
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-Italic.ttf
+  - Handle: 14854802702241184864
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-SemiBoldItalic.ttf
+  - Handle: 15706088560991168368
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-SemiMedium.ttf
+  - Handle: 15718015854148358290
+    Type: Texture
+    FilePath: Editor/Icon/Pencil.png
+  - Handle: 15727988973456699838
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-Regular.ttf
+  - Handle: 15837515963315673596
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-SemiboldItalic.ttf
+  - Handle: 16285578953625088078
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-BoldItalic-rmlp.ttf
+  - Handle: 16306509420722769388
+    Type: Texture
+    FilePath: Editor/Icon/Folder-Outline.png
+  - Handle: 16373616579731022819
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-SemiBold.ttf
+  - Handle: 16507767805386837171
+    Type: StaticMesh
+    FilePath: Meshes/Default/Ramp.lsmesh
+  - Handle: 16763301350417058557
+    Type: Texture
+    FilePath: Editor/ContentBrowser/FBX.png
+  - Handle: 16834850124690211311
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-Bold.ttf
+  - Handle: 17089625741833189280
+    Type: Font
+    FilePath: Fonts/msgothic.ttc
+  - Handle: 17126805400739565884
+    Type: Mesh
+    FilePath: Meshes/Default/Ramp.lmesh
+  - Handle: 17271818787863087115
+    Type: Texture
+    FilePath: Editor/ContentBrowser/Font.png
+  - Handle: 17444183256260288598
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-BoldItalic.ttf
+  - Handle: 17687083464320872571
+    Type: Mesh
+    FilePath: Meshes/Default/Plane.lmesh
+  - Handle: 17820672015110714960
+    Type: Font
+    FilePath: Fonts/OpenSans/OpenSans-Bold.ttf
+  - Handle: 18216610774114111140
+    Type: Font
+    FilePath: Fonts/SourceCodePro/SourceSansPro-Italic.ttf
+  - Handle: 18340777142023102365
+    Type: Font
+    FilePath: Fonts/Roboto/Roboto-MediumItalic.ttf
