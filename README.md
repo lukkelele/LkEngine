@@ -2,7 +2,8 @@
 
 <!-- Badges -->
 <img height="20" alt="VersionBadge" src="https://img.shields.io/badge/Version-0.1.2--alpha-blue"></img>
-![Build-Engine](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Engine.yml/badge.svg)
+![Build-Windows](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Windows.yml/badge.svg)
+![Build-Linux](https://github.com/lukkelele/LkEngine/actions/workflows/Build-Linux.yml/badge.svg)
 <img height="20" alt="Endpoint Badge" src="https://img.shields.io/endpoint?url=https%3A%2F%2Flukkelele.github.io%2FLkEngine%2FTestResults%2FCore%2FBadge.json&style=plastic&label=Core-Tests"></img>
 
 <p align="center">
