@@ -193,5 +193,5 @@ def PrintBanner(text, width=50, color=Fore.CYAN, border_char='*'):
     side_border = '|' if border_char in ['=', '-'] else border_char
 
     print(f"{Style.BRIGHT}{color}{side_border}{border}{side_border}", flush=True)
-    print(f"{side_border}{centered_text}{side_border}", flush=True)
-    print(f"{side_border}{border}{side_border}{Style.RESET_ALL}", flush=True)
+    print(f"{Style.BRIGHT}{color}{side_border}{centered_text}{side_border}", flush=True)
+    print(f"{Style.BRIGHT}{color}{side_border}{border}{side_border}{Style.RESET_ALL}", flush=True)
