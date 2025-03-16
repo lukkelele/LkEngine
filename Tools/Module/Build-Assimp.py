@@ -4,11 +4,17 @@
 # INTERNAL USE ONLY
 #
 # Build Assimp and move the created static library to 'External/Libraries'.
-#
-# TODO: Build Debug/Release and move both static libs directly.
 #--------------------------------------------------------------------------
+import sys
 import os
+file_dirname = os.path.basename(os.path.dirname(__file__))
+if file_dirname == "LkEngine":
+    sys.path.append(os.path.join(os.path.dirname(__file__), "Tools/Module"))
+elif file_dirname == "Tools":
+    sys.path.append(os.path.dirname(__file__))
+
 import platform
+
 import subprocess
 import shutil
 from sys import exit
@@ -21,32 +27,42 @@ IsPlatformActionRunner = (os.environ.get("CI") == "true")
 if IsPlatformActionRunner:
     verbose = True
 
-import ScriptUtils as Utils
+if file_dirname == "LkEngine":
+    import Tools.Module.ScriptUtils as Utils
+    from Tools.Module.ScriptUtils import ScriptLogger
+elif file_dirname == "Tools":
+    import Module.ScriptUtils as Utils
+    from Module.ScriptUtils import ScriptLogger
+elif file_dirname == "Module":
+    import ScriptUtils as Utils
+    from ScriptUtils import ScriptLogger
 
-from ScriptUtils import ScriptLogger
 Logger = ScriptLogger("LkEngine")
 
 # Paths to Assimp, build and output directories.
-if Path.is_dir(Path("../../LkEngine/External")):
-    AssimpDir = os.path.join("..", "..", "LkEngine", "External", "Assimp", "assimp")
+parent_dir = Path.cwd().parent
+if Path.is_dir(parent_dir) and parent_dir.name == "LkEngine":
+    AssimpDir = os.path.join("..", "External", "Assimp", "assimp")
     BuildDir = os.path.join(AssimpDir, "build")
-    OutputDir = os.path.join("..", "..", "LkEngine", "External", "Libraries")
-elif Path.is_dir(Path("../LkEngine/External")):
-    AssimpDir = os.path.join("..", "LkEngine", "External", "Assimp", "assimp")
+    OutputDir = os.path.join("..", "External", "Libraries")
+elif Path.is_dir(parent_dir.parent) and parent_dir.name == "Tools":
+    AssimpDir = os.path.join("..", "..", "External", "Assimp", "assimp")
     BuildDir = os.path.join(AssimpDir, "build")
-    OutputDir = os.path.join("..", "LkEngine", "External", "Libraries")
+    OutputDir = os.path.join("..", "..", "External", "Libraries")
 else:
-    print("Failed find assimp directory (LkEngine/External)");
-    exit(1)
+    print("[Build-Assimp] Failed find assimp directory (LkEngine/External)", flush=True);
+    print(f" * Current Dir: {Path().resolve()}", flush=True)
+    print(f" * Parent Dir: {Path.cwd().parent.resolve()}", flush=True)
+    sys.exit(1)
 
-# Ensure output directory exists.
 if verbose: print(f"[Build-Assimp] Output dir: {OutputDir}", flush=True)
+# Ensure the output directory exists.
 os.makedirs(OutputDir, exist_ok=True)
 
 SystemPlatform = platform.system()
 IsPlatformWindows = SystemPlatform == "Windows"
 
-Architecture = "x64" # TODO: Automatic assignment?
+Architecture = "x64"
 try:
     Architecture = "x64" if platform.architecture()[0] == "64bit" else "x86"
 except Exception as e:
@@ -65,7 +81,7 @@ elif SystemPlatform == "Linux":
     LibraryFileDebug = "libassimp" + LibraryExtension
     LibraryFileRelease = "libassimp" + LibraryExtension
 else:
-    print(f"[Build-Assimp] Unsupported platform")
+    print(f"[Build-Assimp] Unsupported platform", flush=True)
     exit(1)
 
 if verbose: print(f"[Build-Assimp] Build Dir: {Path(BuildDir).resolve()}", flush=True)
@@ -96,10 +112,9 @@ def _RunCMakeConfiguration():
     """Run CMake configure command."""
     # TODO: Automatic assignment of architecture.
     result = None
-    if verbose: print(f"[Build-Assimp] Current Directory: {Path(__file__).parent.resolve()}", flush=True)
+    if verbose: print(f"[Build-Assimp] Current File Parent Directory: {Path(__file__).parent.resolve()}", flush=True)
     if verbose: print(f"[Build-Assimp] Current Working Directory: {Path().resolve()}", flush=True)
     if IsPlatformWindows:
-        #result = subprocess.check_call(["cmake", "..", f"-A {Architecture}"] + CMakeFlags, cwd=BuildDir)
         result = subprocess.check_call(["cmake", "..", "-A", f"{Architecture}"] + CMakeFlags, cwd=BuildDir)
     else:
         result = subprocess.check_call(["cmake", ".."] + CMakeFlags, cwd=BuildDir)
@@ -165,10 +180,13 @@ def BuildAssimp():
     if os.path.exists(BuildDir):
         print(f"[Build-Assimp] Build directory already exists: {BuildDir}", flush=True)
     else: 
-        print(f"[Build-Assimp] Creating build directory: {BuildDir}", flush=True)
+        if verbose: print(f"[Build-Assimp] Creating build directory: {BuildDir}", flush=True)
     os.makedirs(BuildDir, exist_ok=True)
     try:
         CMakeConfigResult = _RunCMakeConfiguration()
+        if CMakeConfigResult != 0:
+            print(f"[Build-Assimp] Error occured during the CMake configuration", flush=True)
+            return 1 # Return non-zero to indicate error.
         BuildResult = _BuildAssimp()
         _CopyGeneratedFiles()
         if clean:

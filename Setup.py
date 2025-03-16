@@ -8,11 +8,20 @@
 #--------------------------------------------------------------------------
 import sys
 import os
+file_dirname = os.path.basename(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.join(os.path.dirname(__file__), "Tools"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "Tools/Module"))
+
 import subprocess
 import platform
 from pathlib import Path
 
+verbose = False
+
 bPlatformActionRunner = (os.environ.get("CI") == "true")
+if bPlatformActionRunner:
+    verbose = True
 
 def IsPythonPackageInstalled(PackageName):
     """Check if a Package is installed using pip."""
@@ -38,15 +47,19 @@ import colorama
 from colorama import Fore, Back, Style
 colorama.init(strip=True if bPlatformActionRunner else False)
 
-# Add 'Tools/Module' to path.
-sys.path.append(os.path.join(os.path.dirname(__file__), "Tools/Module"))
+if verbose: print(f"File Dirname: {file_dirname}", flush=True)
+if file_dirname == "LkEngine":
+    import Tools.Module.ScriptUtils as Utils
+    from Tools.Module.ScriptUtils import ScriptLogger
+    from Tools.Module.PythonClass import PythonConfiguration
+    from Tools.Module.PremakeClass import PremakeConfiguration
+elif file_dirname == "Tools":
+    import Module.ScriptUtils as Utils
+    from Module.ScriptUtils import ScriptLogger
+    from Module.PythonClass import PythonConfiguration
+    from Module.PremakeClass import PremakeConfiguration
 
-import Tools.Module.ScriptUtils as Utils
-from Tools.Module.ScriptUtils import ScriptLogger
 Logger = ScriptLogger("LkEngine")
-
-from Tools.Module.PythonClass import PythonConfiguration
-from Tools.Module.PremakeClass import PremakeConfiguration
 
 ToolsDir = "Tools"
 ModuleDir = os.path.join(f"{ToolsDir}", "Module")
