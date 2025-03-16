@@ -8,20 +8,17 @@ PATCH_VERSION=0
 
 import sys
 import os
+import platform
 sys.path.append(os.path.join(os.path.dirname(__file__), "Tools")) # Add 'Tools' to path.
 sys.path.append(os.path.join(os.path.dirname(__file__), "Tools/Module")) # Add 'Tools/Module' to path.
 
 import argparse
-import platform
 import subprocess
 import shutil
-
 from colorama import Fore, Back, Style
 
-tool_debug = False
-system_platform = platform.system()
-
-project_solution = "LkEngine.sln" if system_platform == "Windows" else "Makefile"
+import Tools.Module.ScriptUtils as Utils
+from Tools.Module.ScriptUtils import ScriptLogger
 
 def LOG_DEBUG(msg: str):
     """ Debug logging for the build script. """
@@ -31,8 +28,22 @@ def LOG_INFO(msg: str):
     """ Info logging for the build script. """
     print(f"[LkEngine-Build] {msg}", flush=True)
 
-import Tools.Module.ScriptUtils as Utils
-from Tools.Module.ScriptUtils import ScriptLogger
+def GetBuildArgs(args=None):
+    """ Get the argument passed after the '--' marker. """
+    if args is None:
+        # Exclude the script name by using sys.argv[1:].
+        args = sys.argv[1:]
+    try:
+        index = args.index("--")
+        return args[index + 1:]
+    except ValueError:
+        # The '--' marker was not found.
+        return []
+
+system_platform = platform.system()
+project_solution = "LkEngine.sln" if system_platform == "Windows" else "Makefile"
+
+tool_debug = False
 
 argparser = argparse.ArgumentParser(
     description=f"LkEngine Build Tool v{MAJOR_VERSION}.{MINOR_VERSION}.{PATCH_VERSION}",
@@ -47,6 +58,7 @@ argparser.add_argument('--tool-debug', action='store_true', default=False, requi
 argparser.add_argument('-j', type=int, default=-1, required=False, help='Number of cores to use for the build')
 argparser.add_argument('--build', action='store_true', default=None, required=False, help='Build the engine')
 argparser.add_argument('--build-assimp', action='store_true', default=False, required=False, help='Build the assimp library')
+argparser.add_argument('build_args', nargs=argparse.REMAINDER, help='Build arguments')
 
 # Parse arguments.
 args = argparser.parse_args()
@@ -55,9 +67,13 @@ verbose = args.verbose
 build_config = args.config
 generate_projects = args.generate_projects
 cores = os.cpu_count() if args.j <= 0 else args.j
-LOG_DEBUG(f"sys.argv: {sys.argv}")
-LOG_DEBUG(f"build arg: {args.build}")
+
+build_args = args.build_args
+if build_args and build_args[0] == "--":
+    build_args = build_args[1:]
+
 passed_build_config = args.build or (any(sys.argv) == "--config") 
+LOG_DEBUG(f"sys.argv: {sys.argv}")
 
 # Print banner.
 Utils.PrintBanner(f"LkEngine Build Tool ({system_platform})", 60, Fore.LIGHTBLUE_EX, '=')
@@ -139,9 +155,22 @@ elif system_platform == "Linux":
         result = subprocess.run([sys.executable, "Tools/Module/Build-Assimp.py"], check=True)
         exit(0)
 
+    # TODO: Should do some validation of the arguments to make sure no preprocessor directive 
+    #       is incorrectly passed to CFlags
+    CFlags = ""
+    use_cflags = False
+    if len(build_args) > 0:
+        CFlags = "CFLAGS+= " + " ".join(build_args)
+        use_cflags = True
+        LOG_DEBUG(f"CFlags: {CFlags}")
+
     Utils.PrintBanner(f"Running Make", 40, Fore.LIGHTCYAN_EX, '=')
-    subprocess.run(["make", f"-j{cores}", f"V={1 if verbose else 0}", "LkEngine"], check=True)
-    subprocess.run(["make", f"-j{os.cpu_count()}", f"V={1 if verbose else 0}", "LkEditor"], check=True)
+    if use_cflags:
+        subprocess.run(["make", f"-j{cores}", f"V={1 if verbose else 0}", CFlags, "LkEngine"], check=True)
+        subprocess.run(["make", f"-j{cores}", f"V={1 if verbose else 0}", CFlags, "LkEditor"], check=True)
+    else:
+        subprocess.run(["make", f"-j{cores}", f"V={1 if verbose else 0}", "LkEngine"], check=True)
+        subprocess.run(["make", f"-j{cores}", f"V={1 if verbose else 0}", "LkEditor"], check=True)
     print("", flush=True)
     Utils.PrintBanner(f"Build Complete", 40, Fore.LIGHTGREEN_EX, '=')
 
