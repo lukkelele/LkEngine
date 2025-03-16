@@ -1,16 +1,13 @@
-# LkEngine
+# LkEngine API
 
-1. [Structure](#Engine-Structure)
-    * [Core](#Engine-Core)
-        * [LObject](#Engine-Core-LObject)
+The engine is split up into several modules: **Core**, **LkEditor**, **LTesto.**  
+
+1. [Core](#Engine-Core)
+    * [LObject](#Engine-Core-LObject)
     * [LkEditor (Engine Editor)](#Engine-Editor)
     * [LTesto (Test Framework)](#Engine-TestFramework)
 
 ---
-
-# Structure <a id="Engine-Structure"></a>
-
-The engine is split up into several modules: **Core**, **LkEditor**, **LTesto.**
 
 ## Core <a id="Engine-Core"></a>
 
@@ -120,6 +117,6 @@ LVector3 is also aliased to **LVector** because the three component vector is th
 <br>
 
 ## LTesto<a id="Engine-TestFramework"></a>
-> Test Framework for LkEngine
+> Test Framework for LkEngine.
 
 

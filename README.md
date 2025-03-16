@@ -33,15 +33,15 @@ I have lots of ideas that I want to see if they could work and this project is g
 For a detailed view of the engine and the API, check out the [Engine API](./Docs/Engine.md).
 
 #### Implemented
-:white_check_mark: OpenGL support<br>
+:white_check_mark: OpenGL support (3.3, 4.5)<br>
 :white_check_mark: Profiling and instrumentation<br>
 :white_check_mark: Serialization and persistence<br>
-:white_check_mark: Automated tests<br>
-:white_check_mark: CI/CD<br>
 :white_check_mark: Camera system<br>
 :white_check_mark: Raycasting<br>
 :white_check_mark: Asset loading (gltf, fbx, obj)<br>
 :white_check_mark: Custom themes<br>
+:white_check_mark: Automated tests<br>
+:white_check_mark: CI/CD<br>
 
 #### In Progress
 :large_orange_diamond: Editor (LkEditor)<br>
