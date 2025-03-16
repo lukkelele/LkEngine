@@ -14,7 +14,6 @@ project "LkEditor"
 
 	files {
 		"%{prj.location}/Source/LkEditor.cpp",
-
 		"%{prj.location}/Source/**.h",
 		"%{prj.location}/Source/**.cpp",
 	}
@@ -45,57 +44,70 @@ project "LkEditor"
 		"%{Dependency.Bullet3.IncludeDir}",
 	}
 
-	links { "LkEngine:static" }
+	links { "LkEngine" }
 	prelinkmessage "[%{prj.name}] Starting linkage"
 	prebuildmessage "[%{prj.name}] Starting build"
 
 	filter "system:windows"
 		systemversion "latest"
-	
+
+		filter { "system:windows", "configurations:Debug or configurations:AutomationTest" }
+			links {
+				"%{Dependency.Assimp.Windows.LibDir}/%{Dependency.Assimp.Windows.DebugLibName}",
+				"%{Dependency.Assimp.Windows.LibDir}/zlibstaticd",
+			}
+
+		filter { "system:windows", "configurations:Release or configurations:Dist" }
+			links {
+				"%{Dependency.Assimp.Windows.LibDir}/%{Dependency.Assimp.Windows.LibName}",
+				"%{Dependency.Assimp.Windows.LibDir}/zlibstatic",
+			}
+
 	filter "system:linux"
-	defines {
-		"STBI_NO_SIMD",
-		"STBIR_NO_SIMD",
-	}
-
-	buildoptions {
-		"-Wno-attributes",
-		"-Wno-delete-incomplete",
-		"-Wno-int-to-pointer-cast",
-	}
-
-	links {
-		"gtk-3",
-		"gdk-3",
-		"glib-2.0",
-		"gobject-2.0",
-		"X11",
-		"GL",
-		"dl",
-
-		"Glfw", 
-		"Glad",
-		"ImGui",
-		"ImGuizmo",
-		"ImGuiNodeEditor",
-		"NfdExtended",
-		"YamlCpp",
-		"Box2D",
-		"Bullet3",
-		"Tracy",
-	}
-
-	filter "configurations:Debug or configurations:AutomationTest"
-		links {
-			"%{Dependency.Assimp.Linux.LibDir}/%{Dependency.Assimp.Linux.DebugLibName}",
-			"%{Dependency.Assimp.Linux.LibDir}/zlibstatic",
+		defines {
+			"STBI_NO_SIMD",
+			"STBIR_NO_SIMD",
 		}
 
-	filter "configurations:Release or configurations:Dist"
-		links {
-			"%{Dependency.Assimp.Linux.LibDir}/%{Dependency.Assimp.Linux.DebugLibName}",
-			"%{Dependency.Assimp.Linux.LibDir}/zlibstatic",
+		buildoptions {
+			"-Wno-attributes",
+			"-Wno-delete-incomplete",
+			"-Wno-int-to-pointer-cast",
+			"-Wno-format-security",
 		}
+
+		links {
+			"gtk-3",
+			"gdk-3",
+			"glib-2.0",
+			"gobject-2.0",
+			"X11",
+			"GL",
+			"dl",
+
+			"Glfw",
+			"Glad",
+			"ImGui",
+			"ImGuizmo",
+			"ImGuiNodeEditor",
+			"NfdExtended",
+			"YamlCpp",
+			"Box2D",
+			"Bullet3",
+			"Tracy",
+		}
+
+		filter { "system:linux", "configurations:Debug or configurations:AutomationTest" }
+			links {
+				"%{Dependency.Assimp.Linux.LibDir}/%{Dependency.Assimp.Linux.DebugLibName}",
+				"%{Dependency.Assimp.Linux.LibDir}/zlibstatic",
+			}
+
+		filter { "system:linux", "configurations:Release or configurations:Dist" }
+			links {
+				"%{Dependency.Assimp.Linux.LibDir}/%{Dependency.Assimp.Linux.DebugLibName}",
+				"%{Dependency.Assimp.Linux.LibDir}/zlibstatic",
+			}
 
 	filter "configurations:Debug"
 		runtime "Debug"
@@ -108,7 +120,7 @@ project "LkEditor"
 	filter "configurations:AutomationTest"
 		runtime "Debug"
 		symbols "On"
-        kind "None"
+		kind "None"
 
 	filter "configurations:Release"
 		runtime "Release"
@@ -116,4 +128,4 @@ project "LkEditor"
 
 	filter "configurations:Dist"
 		runtime "Release"
-		optimize "On"
+		optimize "Speed"
