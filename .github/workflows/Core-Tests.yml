@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - '*'
   pull_request:
     branches:
       - main
@@ -37,13 +38,14 @@ jobs:
         vs-version: '[17.0,'
         msbuild-architecture: x64
 
-    - name: Setup Engine 
+    - name: Run Engine Setup
       run: |
-        python Tools/LkEngine-Setup.py
+        python Setup.py
 
     - name: Build 
       run: |
-        MSBuild.exe LkEngine.sln -property:Configuration=AutomationTest
+        #MSBuild.exe LkEngine.sln -p:Configuration=AutomationTest
+        python Build.py --config AutomationTest
       timeout-minutes: 15
 
     - name: Run Tests (LTesto)
@@ -65,7 +67,6 @@ jobs:
         name: TestResults
         path: ${{ env.TEST_DIR }}/Results
       timeout-minutes: 20
-
 
   Deploy-Test-Results:
     concurrency: ci-${{ github.ref }}
