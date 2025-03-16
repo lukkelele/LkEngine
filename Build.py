@@ -140,8 +140,8 @@ elif system_platform == "Linux":
         exit(0)
 
     Utils.PrintBanner(f"Running Make", 40, Fore.LIGHTCYAN_EX, '=')
-    subprocess.run(["make", f"-j{cores}", f"V={verbose}", "LkEngine"], check=True)
-    subprocess.run(["make", f"-j{os.cpu_count()}", f"V={verbose}", "LkEditor"], check=True)
+    subprocess.run(["make", f"-j{cores}", f"V={1 if verbose else 0}", "LkEngine"], check=True)
+    subprocess.run(["make", f"-j{os.cpu_count()}", f"V={1 if verbose else 0}", "LkEditor"], check=True)
     print("", flush=True)
     Utils.PrintBanner(f"Build Complete", 40, Fore.LIGHTGREEN_EX, '=')
 
