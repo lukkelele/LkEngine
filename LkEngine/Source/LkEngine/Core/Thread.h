@@ -1,23 +1,17 @@
-///|//////////////////////////////////////////////////////
-/// LThread
-///
-///
-///|//////////////////////////////////////////////////////
 #pragma once
 
 #include <optional>
 
 #include "LkEngine/Core/Core.h"
 
-
 namespace LkEngine {
 
 	using FThreadHandle = uint64_t;
 
 	/**
-	 * IThread
+	 * @class IThread
 	 * 
-	 *  Thread Interface.
+	 *  Thread interface.
 	 */
 	class IThread
 	{
@@ -29,9 +23,10 @@ namespace LkEngine {
 		virtual bool IsRunning() const = 0;
 	};
 
-
 	/**
-	 * LThread
+	 * @class LThread
+	 *
+	 *  Thread implementation, platform-specific.
 	 */
 	template<typename TPlatformType>
 	class LThread : public IThread
@@ -50,7 +45,7 @@ namespace LkEngine {
 		virtual ~LThread() = default;
 
 		/**
-		 * Setup thread.
+		 * @brief Setup thread.
 		 * Used whenever the thread function hasn't been passed in the constructor.
 		 */
 		template<typename TCallable, typename ...TArgs>
@@ -87,16 +82,20 @@ namespace LkEngine {
 			}
 		}
 
-		FORCEINLINE FThreadHandle GetHandle() const
-		{
-			return Handle;
-		}
+		/**
+		 * @brief Get the thread handle.
+		 */
+		FORCEINLINE FThreadHandle GetHandle() const { return Handle; }
 
-		FORCEINLINE bool IsRunning() const
-		{
-			return bIsRunning;
-		}
+		/**
+		 * @brief Check if the thread is running.
+		 */
+		FORCEINLINE bool IsRunning() const { return bIsRunning; }
 
+		/**
+		 * @brief Sleep for a duration, inhibiting thread execution.
+		 * Uses std::chrono.
+		 */
 		template <typename TRep, typename TPeriod>
 		static void Sleep(const std::chrono::duration<TRep, TPeriod> Duration)
 		{

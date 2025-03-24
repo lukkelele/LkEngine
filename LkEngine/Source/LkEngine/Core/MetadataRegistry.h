@@ -2,10 +2,9 @@
 
 #include "LkEngine/Core/Core.h"
 
-
 namespace LkEngine {
 
-	/* TODO: Remove */
+	/* TODO: Refactor/Move. */
 	struct FClassMetadata
 	{
 		std::vector<std::string> Properties{};
@@ -13,6 +12,9 @@ namespace LkEngine {
 		FClassMetadata() = default;
 	};
 
+	/**
+	 * @class LMetadataRegistry
+	 */
 	class LMetadataRegistry
 	{
 	public:

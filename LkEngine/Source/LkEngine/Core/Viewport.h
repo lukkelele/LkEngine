@@ -6,9 +6,7 @@
 #include "LkEngine/Core/Delegate/Delegate.h"
 #include "LkEngine/Core/Math/Math.h"
 
-
 namespace LkEngine {
-
 
 	class LViewport : public LObject
 	{
@@ -187,13 +185,6 @@ namespace LkEngine {
 		TVector2<uint16_t> Size = { 0.0f, 0.0f };
 		TVector2<uint16_t> Position = { 0.0f, 0.0f };
 		TVector2<float> Scalers = { 1.0f, 1.0f };
-
-	#if 0
-		LVector2 ViewportBounds[2] = { 
-			{ 0.0f, 0.0f }, 
-			{ 0.0f, 0.0f } 
-		};
-	#endif
 
 		std::array<LVector2, 2> PrimaryViewportBounds = {
 			LVector2(0.0f, 0.0f), 

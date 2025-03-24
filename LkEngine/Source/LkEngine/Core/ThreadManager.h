@@ -4,8 +4,7 @@
  ******************************************************************/
 #pragma once
 
-
-/** @fixme: FIXME */
+/** @fixme: Linux support */
 #if 0
 
 #include "LkEngine/Core/Thread.h"

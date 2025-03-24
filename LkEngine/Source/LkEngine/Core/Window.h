@@ -18,7 +18,7 @@ namespace LkEngine {
 
     class LViewport;
 
-    /* @TODO: Don't use the application config here. */
+    /** TODO: Do not use the application config here, or?. */
 	struct FWindowSpecification
 	{
 		std::string Title = "LkEngine";

@@ -22,7 +22,6 @@
 
 #include "LkEngine/Core/LObject/ObjectPtr.h"
 
-
 namespace LkEngine::Core {
 
 	namespace DelegateCore

@@ -6,11 +6,10 @@
 
 #include "LkEngine/Core/Event/Event.h"
 
-
 namespace LkEngine {
 
 	/**
-	 * LLayer
+	 * @class LLayer
 	 *
 	 * Base layer implementation.
 	 */

@@ -11,7 +11,6 @@
 #include <string>
 #include <string_view>
 
-
 namespace LkEngine::StringUtils {
 
 	[[nodiscard]] static constexpr std::string_view RemovePrefix(std::string_view Str, char Prefix = 'L')
@@ -33,17 +32,6 @@ namespace LkEngine::StringUtils {
 		return Result;
 	}
 
-#if 0
-	template<typename TChar = char, typename StringType>
-	static void ToLower(StringType& Input)
-	{
-		std::transform(Input.begin(), Input.end(), Input.begin(), [](TChar Character)
-		{
-			return static_cast<TChar>(std::tolower(Character, std::locale{}));
-		});
-	}
-#endif
-
 	template<typename TChar = char, typename StringType>
 	[[nodiscard]] static std::basic_string<TChar> ToUpper(const StringType& Input)
 	{
@@ -57,17 +45,6 @@ namespace LkEngine::StringUtils {
 
 		return Result;
 	}
-
-#if 0
-	template<typename TChar = char, typename StringType>
-	static void ToUpper(StringType& Input)
-	{
-		std::transform(Input.begin(), Input.end(), Input.begin(), [](TChar Character)
-		{
-			return static_cast<TChar>(std::tolower(Character, std::locale{}));
-		});
-	}
-#endif
 
 	[[nodiscard]] static std::string ToLower(const char* String)
     {

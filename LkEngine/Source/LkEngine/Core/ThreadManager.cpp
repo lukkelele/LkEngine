@@ -1,6 +1,6 @@
 #include "LKpch.h"
 
-/** @fixme: FIXME */
+/** @fixme: Linux support */
 #if 0
 #include "ThreadManager.h"
 

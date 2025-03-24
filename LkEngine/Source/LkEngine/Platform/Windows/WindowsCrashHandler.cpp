@@ -1,10 +1,7 @@
 #include "LKpch.h"
 #if defined(LK_PLATFORM_WINDOWS)
 #include "WindowsCrashHandler.h"
-
 #include "LkEngine/Core/Application.h"
-
-#include "LkEngine/Core/Encoder.h"
 
 #include <Windows.h>
 #include <DbgHelp.h>
@@ -42,12 +39,8 @@ namespace LkEngine {
             LK_CORE_INFO_TAG("WindowsCrashHandler", "{}", OStringStream.str());
             OStringStream << LApplication::Get().GenerateCrashDump();
 
-            std::string CrashInfo = OStringStream.str();
-            const std::string CrashInfoBase64 = LEncoder::Encode<EEncodingFormat::Base64>(
-                reinterpret_cast<const unsigned char*>(CrashInfo.c_str()), CrashInfo.length()
-            );
-
-            WindowsExceptionStringBuffer += CrashInfoBase64;
+            const std::string CrashInfo = OStringStream.str();
+            WindowsExceptionStringBuffer += CrashInfo;
 
             return EXCEPTION_EXECUTE_HANDLER;
         };

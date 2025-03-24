@@ -6,12 +6,16 @@
 
 #include "LkEngine/Core/Core.h"
 
-
 namespace LkEngine {
 
 	class LCrashHandler;
 	class LApplication;
 
+	/**
+	 * @class ICrashHandler
+	 *
+	 *  Crash handler interface.
+	 */
 	class ICrashHandler
 	{
 	public:
@@ -25,6 +29,9 @@ namespace LkEngine {
 		friend class LCrashHandler;
 	};
 
+	/**
+	 * @class LCrashHandler
+	 */
 	class LCrashHandler
 	{
 	public:

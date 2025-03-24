@@ -143,7 +143,7 @@ namespace LkEngine {
 
 				LK_CORE_VERIFY(Mesh->HasPositions(), "Meshes require positions");
 				LK_CORE_VERIFY(Mesh->HasNormals(), "Meshes require normals");
-				// TODO: Add check for UV coordinates?
+				/* TODO: Add check for UV coordinates? */
 
 				/* Vertices. */
 				FAABB& BoundingBox = Submesh.BoundingBox;

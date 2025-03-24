@@ -1,9 +1,8 @@
 #pragma once
 
+#include <filesystem>
 #include <stdint.h>
-
-#include "LkEngine/Core/String.h"
-
+#include <string>
 
 namespace LkEngine {
 
