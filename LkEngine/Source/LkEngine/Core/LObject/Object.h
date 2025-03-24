@@ -13,9 +13,7 @@
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/LObject/Class.h"
 #include "LkEngine/Core/LObject/ObjectBase.h"
-
 #include "LkEngine/Core/MetadataRegistry.h"
-
 
 namespace LkEngine {
 
@@ -27,7 +25,7 @@ namespace LkEngine {
 	class TObjectPtr;
 
 	/**
-	 * LObject
+	 * @class LObject
 	 * 
 	 *  The base object class used in LkEngine.
 	 *  Uses TObjectPtr as a smart pointer implementation.
@@ -48,27 +46,27 @@ namespace LkEngine {
 		virtual ~LObject() = default;
 
 		/**
-		 * Initialize object.
+		 * @brief Initialize object.
 		 */
 		virtual void Initialize();
 
 		/**
-		 * Destroy object, releasing resources.
+		 * @brief Destroy object, releasing all resources.
 		 */
 		virtual void Destroy() {};
 
 		/**
-		 * Check if object is initialized.
+		 * @brief Check if object is initialized.
 		 */
 		FORCEINLINE virtual bool IsInitialized() const { return bObjectInitialized; }
 
 		/** 
-		 * Get the object handle. 
+		 * @brief Get the object handle. 
 		 */
 		FORCEINLINE FObjectHandle GetObjectHandle() const { return ObjectHandle; }
 
 		/**
-		 * Check if object is valid for use.
+		 * @brief Check if object is valid for use.
 		 */
 		FORCEINLINE virtual bool IsObjectValid() const
 		{
@@ -81,7 +79,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Get static class object. 
+		 * @brief Get static class object. 
 		 * 
 		 *  Implemented for every LClass.
 		 */
@@ -98,21 +96,21 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Register object class.
+		 * @brief Register object class.
 		 * 
 		 *  Implemented by the LOBJECT macro (LCLASS/LSTRUCT).
 		 */
 		virtual const LClass* ObjectRegistration() = 0;
 
 		/**
-		 * Static class name.
+		 * @brief Static class name.
 		 * 
-		 *  Implemented by LCLASS macro.
+		 *  Implemented by the LOBJECT macro (LCLASS/LSTRUCT).
 		 */
 		FORCEINLINE static std::string StaticClassName() { return "LObject"; }
 
 		/**
-		 * Get the class for this LObject.
+		 * @brief Get the class for this LObject.
 		 *
 		 *  No null-checks should be done inside this function since it is
 		 *  used to determine the class registration at places, i.e the return value
@@ -126,7 +124,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Get name of the LObject class.
+		 * @brief Get name of the LObject class.
 		 * 
 		 *  Implemented by the LCLASS macro.
 		 */
@@ -148,7 +146,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Mark object as garbage.
+		 * @brief Mark object as garbage.
 		 */
 		void MarkAsGarbage()
 		{
@@ -156,7 +154,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Cast object to type T.
+		 * @brief Cast object to type T.
 		 */
 		template<typename T>
 		T& As()
@@ -166,7 +164,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Cast object to type T.
+		 * @brief Cast object to type T.
 		 */
 		template<typename T>
 		const T& As() const
@@ -176,7 +174,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Check if the object is or is a derivation of type T.
+		 * @brief Check if the object is or is a derivation of type T.
 		 */
 		template<typename T>
 		bool IsA() const
@@ -186,15 +184,18 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Check if object is an asset.
+		 * @brief Check if object is an asset.
 		 */
 		FORCEINLINE virtual bool IsAsset() const { return false; }
 
 		/**
-		 * Return current reference count from all object pointers.
+		 * @brief Return current reference count from all object pointers.
 		 */
 		FORCEINLINE uint32_t GetReferenceCount() const { return Ptr_ReferenceCount.load(); }
 
+		/**
+		 * @brief Validate the implementation of a LObject.
+		 */
 		template <typename T>
 		static void ValidateLObjectImplementation()
 		{
@@ -203,7 +204,7 @@ namespace LkEngine {
 
 	private:
 		/**
-		 * Check if object has a specific flag.
+		 * @brief Check if object has a specific flag.
 		 */
 		FORCEINLINE bool HasFlag(const EObjectFlag InFlag) const
 		{
@@ -211,7 +212,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Check if object has any of the passed flags.
+		 * @brief Check if object has any of the passed flags.
 		 */
 		FORCEINLINE bool HasAnyFlags(const EObjectFlag InFlags) const
 		{
@@ -220,7 +221,7 @@ namespace LkEngine {
 
 	private:
 		/**
-		 * Increment reference count.
+		 * @brief Increment reference count.
 		 *
 		 *  Managed by TObjectPtr.
 		 */
@@ -230,7 +231,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Decrement reference count.
+		 * @brief Decrement reference count.
 		 *
 		 *  Managed by TObjectPtr.
 		 */
@@ -246,7 +247,7 @@ namespace LkEngine {
 		bool bObjectInitialized = false;
 		EObjectFlag ObjectFlags = EObjectFlag::None;
 
-		/** Reference count is managed by TObjectPtr. */
+		/** @variable Reference count is managed by TObjectPtr. */
 		mutable std::atomic<uint32_t> Ptr_ReferenceCount = 0;
 
 		template<typename T>
@@ -282,7 +283,6 @@ namespace LkEngine {
 	inline constexpr bool IsBaseOfObject = std::is_base_of<LObject, std::decay_t<TObject>>::value;
 
 }
-
 
 /** 
  * Make LObject a usable type in maps and sets.
