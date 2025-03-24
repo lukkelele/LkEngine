@@ -11,7 +11,7 @@ Other versions _might_ work as well.
 | Clang | - | :x: |
 
 ## Content
-1. [Prerequities](#Prerequities)
+1. [Prerequisites](#Prerequisites)
 2. [Setup](#Setup)
 3. [Build](#Build) 
     * [Build Configurations](#Build-Configurations)
@@ -20,7 +20,7 @@ Other versions _might_ work as well.
 
 ---
 
-## Prerequities <a id="Prerequities"></a>
+## Prerequisites <a id="Prerequisites"></a>
 
 The engine depends on Git and Python 3 for the initial setup steps.
 
@@ -73,12 +73,12 @@ The engine can be built with an IDE or by running the build script.
 
 ```shell
 python Build.py [-c|--config] 
-				[-g|--generate-projects] 
-				[--build] 
-				[--clean] 
-				[--purge] 
-				[--build-assimp] 
-				[--help] 
+		[-g|--generate-projects] 
+		[--build] 
+		[--clean] 
+		[--purge] 
+		[--build-assimp] 
+		[--help] 
 ```
 
 ### Build <a id="Build-Configurations"></a>
