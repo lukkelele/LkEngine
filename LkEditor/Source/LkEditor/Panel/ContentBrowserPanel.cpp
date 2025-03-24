@@ -206,7 +206,6 @@ namespace LkEngine {
 			return BaseDirectory;
 		}
 
-		/* TODO: Do not loop through like this. */
 		for (const auto& [Handle, Directory] : Directories)
 		{
 			if (Directory->FilePath == Filepath)

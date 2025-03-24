@@ -204,13 +204,11 @@ namespace LkEngine {
 
 	void LNodeEditorPanel::SerializeToYaml(YAML::Emitter& Out) const
 	{
-		/* TODO */
 		LK_UNUSED(Out);
 	}
 
 	void LNodeEditorPanel::DeserializeFromYaml(const YAML::Node& Data)
 	{
-		/* TODO */
 		LK_UNUSED(Data);
 	}
 

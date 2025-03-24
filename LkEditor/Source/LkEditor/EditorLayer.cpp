@@ -245,9 +245,8 @@ namespace LkEngine {
 		 * Attach delegates from LSceneRenderer to LSceneManagerPanel. 
 		 * Provides useful debugging information.
 		 */
-		/* TODO: Cannot pass TObjectPtr to LDelegate without TObjectPtr::Get() */
 		auto SceneManagerPanel = PanelManager->GetPanel<LSceneManagerPanel>(PanelID::SceneManager);
-		SceneRenderer->OnDrawListFlush.Add(SceneManagerPanel.Get(), &LSceneManagerPanel::OnSceneRendererDrawListFlush);
+		SceneRenderer->OnDrawListFlush.Add(SceneManagerPanel, &LSceneManagerPanel::OnSceneRendererDrawListFlush);
 
 		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
 		{
@@ -1062,7 +1061,6 @@ namespace LkEngine {
 
 	void LEditorLayer::StarterProject()
 	{
-		//static const std::string StarterProjectName = "Starter-2024";
 		static const std::string StarterProjectName = "Starter-2025";
 		LK_CORE_INFO_TAG("Editor", "Loading starter project: {}", StarterProjectName);
 
@@ -1074,7 +1072,8 @@ namespace LkEngine {
 		NewScene(StarterProjectName);
 
 		Project = TObjectPtr<LProject>::Create();
-		Project->Load(LK_FMT_LIB::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
+		//Project->Load(LK_FMT_LIB::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
+		Project->Load(LK_FMT::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
 		LProject::SetActive(Project);
 
 		/* FIXME: Until asset creation is supported from within the editor. */

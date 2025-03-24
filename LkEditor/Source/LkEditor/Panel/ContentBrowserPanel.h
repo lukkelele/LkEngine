@@ -178,7 +178,7 @@ namespace LkEngine {
 	class LContentBrowserPanel : public IPanel
 	{
 	public:
-		LContentBrowserPanel(); /// TODO: make private and grant access to LPanelManager
+		LContentBrowserPanel();
 		~LContentBrowserPanel() = default;
 
 		virtual void Initialize() override;

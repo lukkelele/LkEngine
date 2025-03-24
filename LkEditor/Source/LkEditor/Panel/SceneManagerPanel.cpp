@@ -22,10 +22,6 @@ namespace LkEngine {
 		std::vector<FSceneSelectionData> SceneSelectionData{};
 	}
 
-	/// TODO: Move this
-	/* Helper function. */
-	void DumpAttachedComponents(const LEntity Entity);
-
 	LSceneManagerPanel::LSceneManagerPanel(TObjectPtr<LScene> InScene)
 		: Scene(InScene)
 	{
@@ -175,7 +171,6 @@ namespace LkEngine {
 		if (bRemoveComponent)
 		{
 			/* Check if the component can be removed. */
-			/* TODO: Implement a static 'GetName' to the component structs. */
 			auto& Component = Entity.GetComponent<T>();
 			LK_CORE_DEBUG_TAG("SceneManagerPanel", "Removing component from: {}", Entity.Name());
 			Entity.RemoveComponent<T>();
@@ -588,21 +583,6 @@ namespace LkEngine {
 			ImGui::Separator();
 		}
 		ImGui::EndGroup();
-	}
-
-	/*-------------------------------------------------------------------------------*/
-
-	void DumpAttachedComponents(const LEntity Entity)
-	{
-		if (Entity.HasComponent<LIDComponent>() && (static_cast<uint32_t>(Entity.GetUUID()) != 0))
-		{
-			LK_CORE_INFO("IDComponent:  {}", Entity.HasComponent<LIDComponent>() ? Entity.GetComponent<LIDComponent>().ID : (LUUID)0);
-			LK_CORE_INFO("TagComponent: {}", Entity.HasComponent<LTagComponent>() ? Entity.Name() : "Unknown");
-		}
-		if (Entity.HasComponent<LTransformComponent>())
-		{
-			LK_CORE_INFO("LTransformComponent: {}", Entity.GetComponent<LTransformComponent>().ToString());
-		}
 	}
 
 }
