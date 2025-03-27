@@ -4,6 +4,13 @@
  *******************************************************************/ 
 #pragma once
 
+/**
+ * @ingroup Core
+ * @{
+ *
+ * @defgroup Time
+ */
+
 #include <fstream>
 #include <filesystem>
 #include <chrono>
@@ -12,7 +19,12 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 
-
+/**
+ * @brief Time utility.
+ *
+ * @ingroup Time
+ * @{
+ */
 namespace LkEngine::Time {
 
 	/**
@@ -31,3 +43,5 @@ namespace LkEngine::Time {
     }
 
 }
+
+/** @} */

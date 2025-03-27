@@ -1,7 +1,7 @@
-/****************************************************************
- * Log Formatters
- *
- ****************************************************************/
+/**
+ * @file
+ * @brief Log formatters.
+ */
 #pragma once
 
 #include <stdint.h>
@@ -19,16 +19,18 @@
 
 #include "LkEngine/Core/Hash/UUID.h"
 
-#ifndef LK_FMT_LIB
-#if defined(LK_PLATFORM_WINDOWS)
-#   define LK_FMT_LIB std
-#elif defined(LK_PLATFORM_LINUX)
-#   define LK_FMT_LIB fmt
-#endif
-#endif
+/**
+ * @ingroup Core
+ * @{
+ */
 
 /**
- * Formatter: std::wstring
+ * @ingroup Log
+ * @{
+ */
+
+/**
+ * @struct Formatter: std::wstring
  */
 template<> 
 struct LK_FMT_LIB::formatter<std::wstring>
@@ -48,7 +50,7 @@ struct LK_FMT_LIB::formatter<std::wstring>
 };
 
 /**
- * Formatter: const wchar_t*
+ * @struct Formatter: const wchar_t*
  */
 template<>
 struct LK_FMT_LIB::formatter<const wchar_t*> 
@@ -73,7 +75,7 @@ struct LK_FMT_LIB::formatter<const wchar_t*>
 };
 
 /**
- * Formatter: std::filesystem::path
+ * @struct Formatter: std::filesystem::path
  */
 template<>
 struct LK_FMT_LIB::formatter<std::filesystem::path>
@@ -92,7 +94,7 @@ struct LK_FMT_LIB::formatter<std::filesystem::path>
 };
 
 /**
- * Formatter: std::array<char, N>
+ * @struct Formatter: std::array<char, N>
  */
 template<std::size_t N>
 struct LK_FMT_LIB::formatter<std::array<char, N>>
@@ -111,7 +113,7 @@ struct LK_FMT_LIB::formatter<std::array<char, N>>
 };
 
 /**
- * Formatter: glm::vec2
+ * @struct Formatter: glm::vec2
  */
 template<>
 struct LK_FMT_LIB::formatter<glm::vec2>
@@ -130,7 +132,7 @@ struct LK_FMT_LIB::formatter<glm::vec2>
 };
 
 /**
- * Formatter: glm::vec3
+ * @struct Formatter: glm::vec3
  */
 template<>
 struct LK_FMT_LIB::formatter<glm::vec3>
@@ -149,7 +151,7 @@ struct LK_FMT_LIB::formatter<glm::vec3>
 };
 
 /**
- * Formatter: glm::vec4
+ * @struct Formatter: glm::vec4
  */
 template<>
 struct LK_FMT_LIB::formatter<glm::vec4>
@@ -168,7 +170,7 @@ struct LK_FMT_LIB::formatter<glm::vec4>
 };
 
 /**
- * Formatter: glm::vec4
+ * @struct Formatter: glm::vec4
  */
 template<> 
 struct LK_FMT_LIB::formatter<LkEngine::LUUID> : LK_FMT_LIB::formatter<std::string>
@@ -185,3 +187,6 @@ struct LK_FMT_LIB::formatter<LkEngine::LUUID> : LK_FMT_LIB::formatter<std::strin
 		return LK_FMT_LIB::format_to(Context.out(), "{}", static_cast<::LkEngine::LUUID::SizeType>(Uuid));
     }
 };
+/** @} */
+
+/** @} */

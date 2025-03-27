@@ -1,4 +1,14 @@
+/**
+ * @file
+ * @brief Mathematical vectors.
+ */
 #pragma once
+
+/**
+ * @ingroup Math
+ *
+ * @defgroup Vector
+ */
 
 #include <type_traits>
 #include <ostream>
@@ -10,9 +20,16 @@
 #include "Vector3.h"
 #include "Vector4.h"
 
-
 namespace LkEngine {
 
+	/**
+	 * @ingroup Vector
+	 * @{
+	 */
+
+	/**
+	 * @enum EVectorAxis
+	 */
 	enum class EVectorAxis : uint32_t
 	{
 		X = LK_BIT(0),
@@ -28,10 +45,32 @@ namespace LkEngine {
 	};
 	LK_ENUM_CLASS(EVectorAxis);
 
-	/* Typedefs. */
+	/**
+	 * @typedef LVector2
+	 * Alias for TVector2<float>.
+	 */
 	using LVector2 = TVector2<float>;
+
+	/**
+	 * @typedef LVector3
+	 * Alias for TVector3<float>.
+	 */
 	using LVector3 = TVector3<float>;
+
+	/**
+	 * @typedef LVector4
+	 * Alias for TVector4<float>.
+	 */
 	using LVector4 = TVector4<float>;
+
+	/**
+	 * @typedef LVector
+	 * Alias for TVector3<float>.
+	 *
+	 * @details The most commonly used vector in 3D contexts is the three-component vector.
+	 */
 	using LVector  = LVector3;
+
+	/** @} */
 
 }

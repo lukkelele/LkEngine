@@ -1,4 +1,15 @@
+/**
+ * @file
+ * @brief Profiling and instrumentation macros.
+ */
 #pragma once
+
+/**
+ * @ingroup Core
+ *
+ * @defgroup Profiling Profiling and Instrumentation
+ * @{
+ */
 
 /* Always enable profiling in non-dist builds. */
 /* FIXME: Re-enable this. */
@@ -27,3 +38,4 @@
 #	define LK_PROFILE_THREAD(...)
 #endif
 
+/** @} */

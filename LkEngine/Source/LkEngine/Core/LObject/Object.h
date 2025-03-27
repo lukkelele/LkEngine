@@ -1,9 +1,15 @@
-/******************************************************************
- * LObject
- *
- *
- *******************************************************************/
+/**
+ * @file
+ * @brief LObject implementation.
+ */
 #pragma once
+
+/**
+ * @ingroup Core
+ * @{
+ *
+ * @defgroup LObject
+ */
 
 #include <set>
 #include <typeindex>
@@ -17,6 +23,11 @@
 
 namespace LkEngine {
 
+	/**
+	 * @ingroup LObject
+	 * @{
+	 */
+
 	using FObjectHandle = LUUID;
 
 	class LMetadataRegistry;
@@ -26,9 +37,10 @@ namespace LkEngine {
 
 	/**
 	 * @class LObject
-	 * 
-	 *  The base object class used in LkEngine.
-	 *  Uses TObjectPtr as a smart pointer implementation.
+	 *
+	 * @details The base object class used in LkEngine.
+	 *
+	 * @ingroup LObject
 	 */
 	class LObject : public LObjectBase
 	{
@@ -282,7 +294,10 @@ namespace LkEngine {
 	template<typename TObject>
 	inline constexpr bool IsBaseOfObject = std::is_base_of<LObject, std::decay_t<TObject>>::value;
 
+	/** @} */
 }
+
+/** @} */
 
 /** 
  * Make LObject a usable type in maps and sets.

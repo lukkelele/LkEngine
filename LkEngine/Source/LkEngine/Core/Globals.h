@@ -1,7 +1,7 @@
-/******************************************************************
- * Globals
- *
- *******************************************************************/
+/**
+ * @file
+ * @brief Globals.
+ */
 #pragma once
 
 #include <filesystem>
@@ -10,6 +10,19 @@
 
 namespace LkEngine {
 
+	/**
+	 * @ingroup Core
+	 *
+	 * @defgroup Globals
+	 * @{
+	 */
+
+	/**
+	 * @struct FRuntimeArguments
+	 *
+	 * @details Runtime arguments.
+	 *          Contains a string vector of the passed char* Argv[] array.
+	 */
 	struct FRuntimeArguments
 	{
 		int Argc = 0;
@@ -18,13 +31,19 @@ namespace LkEngine {
 		std::vector<std::string> Args{};
 	};
 
+	/**
+	 * @struct Global
+	 */
 	struct Global
 	{
 		/**
 		 * @brief Runtime arguments passed to main.
 		 */
 		static void SetRuntimeArguments(const int Argc, char* Argv[]);
+
 		static const FRuntimeArguments& GetRuntimeArguments();
 	};
+
+	/** @} */
 
 }

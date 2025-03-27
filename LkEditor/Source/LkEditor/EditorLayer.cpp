@@ -1072,8 +1072,7 @@ namespace LkEngine {
 		NewScene(StarterProjectName);
 
 		Project = TObjectPtr<LProject>::Create();
-		//Project->Load(LK_FMT_LIB::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
-		Project->Load(LK_FMT::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
+		Project->Load(LK_FMT_LIB::format("Projects/{}", StarterProjectName)); /* TODO: Just use project name, don't pass the directory. */
 		LProject::SetActive(Project);
 
 		/* FIXME: Until asset creation is supported from within the editor. */

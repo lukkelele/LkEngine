@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Pipeline.
+ */
 #pragma once
 
 #include "LkEngine/Core/Core.h"
@@ -8,6 +12,11 @@ namespace LkEngine {
 
 	class LShader;
 
+	/**
+	 * @struct FPipelineStatistics
+	 *
+	 * @ingroup Renderer
+	 */
 	struct FPipelineStatistics
 	{
 		uint64_t InputAssemblyVertices = 0;
@@ -20,7 +29,9 @@ namespace LkEngine {
 	};
 
 	/**
-	 * LPipeline
+	 * @class LPipeline
+	 * 
+	 * @ingroup Renderer
 	 */
 	class LPipeline : public LObject
 	{
@@ -36,7 +47,9 @@ namespace LkEngine {
 
 		virtual void BindTextureArray(const LRendererID InRendererID) = 0;
 
-		/** Factory function. */
+		/** 
+		 * @brief Factory function. 
+		 */
 		static TObjectPtr<LPipeline> Create(const FPipelineSpecification& InSpecification);
 
 	private:

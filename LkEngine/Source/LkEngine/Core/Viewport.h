@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Viewport.
+ */
 #pragma once
 
 #include "LkEngine/Core/LObject/Object.h"
@@ -8,6 +12,11 @@
 
 namespace LkEngine {
 
+	/**
+	 * @class LViewport
+	 *
+	 * @ingroup Window
+	 */
 	class LViewport : public LObject
 	{
 		LK_DECLARE_MULTICAST_DELEGATE(FOnViewportSizeUpdated, const uint16_t, const uint16_t);
@@ -15,6 +24,11 @@ namespace LkEngine {
 		LViewport();
 		~LViewport() = default;
 
+		/**
+		 * @brief Update the viewport.
+		 *
+		 * @details Broadcast FOnViewportSizeUpdated on detected changes since last tick.
+		 */
 		void Update();
 
 		/**
@@ -117,7 +131,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Set viewport bounds on the X axis for top-left or bottom-right bound.
+		 * @brief Set viewport bounds on the X axis for top-left or bottom-right bound.
 		 */
 		FORCEINLINE void SetViewportBoundsX(const uint8_t Index, const float Bound)
 		{ 
@@ -131,7 +145,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Set viewport bounds on the Y axis for top-left or bottom-right bound.
+		 * @brief Set viewport bounds on the Y axis for top-left or bottom-right bound.
 		 */
 		FORCEINLINE void SetViewportBoundsY(const uint8_t Index, const float Bound)
 		{ 
@@ -172,6 +186,9 @@ namespace LkEngine {
 			}
 		}
 
+		/**
+		 * @brief Set the viewport as dirty.
+		 */
 		FORCEINLINE void SetDirty(const bool Dirty)
 		{
 			bDirty = Dirty;

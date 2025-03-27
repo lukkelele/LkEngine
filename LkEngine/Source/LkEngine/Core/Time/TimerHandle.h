@@ -1,13 +1,18 @@
+/**
+ * @file
+ * @brief Timer handle.
+ */
 #pragma once
 
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/CoreTypes.h"
 
-
 namespace LkEngine {
 
 	/**
-	 * FTimerHandle
+	 * @class FTimerHandle
+	 *
+	 * @ingroup Time
 	 */
 	class FTimerHandle
 	{
@@ -26,10 +31,14 @@ namespace LkEngine {
 		FORCEINLINE void Invalidate() { ID = 0; }
 
 	private:
-		/** Generates a unique ID for each timer. */
+		/** 
+		 * @brief Create a unique timer handle.
+		 */
 		static FTimerHandle CreateHandle() { return FTimerHandle{ ++Counter }; }
 
+	private:
 		uint64_t ID = 0;
+
 		inline static uint64_t Counter = 0;
 
 		friend class LTimerManager;

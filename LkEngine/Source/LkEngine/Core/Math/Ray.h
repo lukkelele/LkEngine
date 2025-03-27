@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Raycasting
+ */
 #pragma once
 
 #include <glm/glm.hpp>
@@ -5,10 +9,20 @@
 #include "LkEngine/Core/Math/Vector.h"
 #include "LkEngine/Core/Math/AABB.h"
 
-
 namespace LkEngine {
 
-	/* TODO: Patch out. */
+	/**
+	 * @brief Raycast physics
+	 *
+	 * @ingroup Physics
+	 * @defgroup Raycast
+	 * @{
+	 */
+
+	/**
+	 * @struct FRayCast
+	 * @deprecated To be removed soon.
+	 */
 	struct FRayCast
 	{
 		LVector Pos{};
@@ -23,9 +37,9 @@ namespace LkEngine {
 	};
 
 	/**
-	 * FRay
+	 * @struct FRay
 	 * 
-	 *  Individual ray with an origin and direction.
+	 * @details Individual ray with an origin and direction.
 	 */
 	struct FRay
     {
@@ -45,7 +59,7 @@ namespace LkEngine {
         }
 
         /**
-		 * Get a zero initialized ray.
+		 * @brief Get a zero-initialized ray.
          */
         static FRay Zero()
         {
@@ -53,10 +67,11 @@ namespace LkEngine {
         }
 
 		/**
-		 * Checks if a ray intersects an axis-aligned bounding box (AABB) in 3D space.
+		 * @brief Checks if a ray intersects an axis-aligned bounding box (AABB) in 3D space.
 		 * 
-		 * The distance from the ray's origin to the nearest intersection point is set in 't', 
-		 * if any intersection is found.
+		 * @details The distance from the ray's origin to the nearest intersection point is set in 't', 
+		 *          if any intersection is found.
+		 * @return true if an intersection occured, else false.
 		 */
         FORCEINLINE bool IntersectsAABB(const FAABB& AABB, float& t) const
         {
@@ -111,10 +126,11 @@ namespace LkEngine {
         }
 
 		/**
-		 * Checks if a ray intersects with a triangle in 3D space.
+		 * @brief Checks if a ray intersects with a triangle in 3D space.
 		 * 
-		 * The distance from the ray's origin to the intersection point 
-		 * is set in 't' if an intersection occurs.
+		 * @details The distance from the ray's origin to the intersection point 
+		 *          is set in 't' if an intersection occurs.
+		 * @return true if an intersection occured, else false.
 		 */
 		FORCEINLINE bool IntersectsTriangle(const glm::vec3& A, const glm::vec3& B, const glm::vec3& C, float& t) const
 		{
@@ -141,10 +157,11 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Checks if a ray intersects with a triangle in 3D space.
+		 * @brief Checks if a ray intersects with a triangle in 3D space.
 		 * 
-		 * The distance from the ray's origin to the intersection point 
-		 * is set in 't' if an intersection occurs.
+		 * @details The distance from the ray's origin to the intersection point 
+		 *          is set in 't' if an intersection occurs.
+		 * @return true if an intersection occured, else false.
 		 */
 		FORCEINLINE bool IntersectsTriangle(const LVector& A, const LVector& B, const LVector& C, float& t) const
 		{
@@ -171,5 +188,7 @@ namespace LkEngine {
 		}
 
     };
+
+	/** @} */
 
 }

@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief
+ */
 #pragma once
 
 #include <glad/glad.h>
@@ -18,7 +22,15 @@ namespace LkEngine {
 
     class LViewport;
 
-    /** TODO: Do not use the application config here, or?. */
+	/**
+	 * @defgroup Window
+	 * @{
+	 */
+
+    /** 
+	 * @struct FWindowSpecification
+	 * @note: Do not use the application config here, or?
+	 */
 	struct FWindowSpecification
 	{
 		std::string Title = "LkEngine";
@@ -43,13 +55,16 @@ namespace LkEngine {
         }
 	};
 
-	/** Window maximized callback. */
+	/** 
+	 * @var FOnWindowMaximized
+	 * Delegate for maximize events. 
+	 */
 	LK_DECLARE_MULTICAST_DELEGATE(FOnWindowMaximized, const bool);
 
 	/**
-	 * FWindowData
+	 * @struct FWindowData
      * 
-     *  Data container.
+     * Data container for a window.
 	 */
 	struct FWindowData
 	{
@@ -65,7 +80,9 @@ namespace LkEngine {
 	};
 
     /**
-     * LWindow
+     * @class LWindow
+	 * 
+	 * Manages the GLFW context.
      */
     class LWindow : public LObject
     {
@@ -84,6 +101,10 @@ namespace LkEngine {
         void SwapBuffers();
         void ProcessEvents();
 
+        /**
+         * @brief Get reference to the GLFW window.
+		 * @note Not nullchecked.
+         */
         FORCEINLINE GLFWwindow* GetGlfwWindow() const { return GlfwWindow; }
 
 		void Maximize();
@@ -237,9 +258,11 @@ namespace LkEngine {
         inline static LWindow* Instance = nullptr;
 
         friend class LEditorLayer;
+
     private:
         LCLASS(LWindow);
     };
 
+	/** @} */
 
 }

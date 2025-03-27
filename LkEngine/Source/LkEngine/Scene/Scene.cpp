@@ -2,13 +2,11 @@
 #include "Scene.h"
 
 #include "LkEngine/Scene/Entity.h"
-#include "LkEngine/Physics/2D/Physics2D.h"
 
 #include "LkEngine/Renderer/Renderer.h"
 #include "LkEngine/Renderer/SceneRenderer.h"
 
 #include "LkEngine/Core/Application.h"
-
 
 namespace LkEngine {
 

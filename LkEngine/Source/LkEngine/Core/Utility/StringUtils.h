@@ -1,4 +1,13 @@
+/**
+ * @file
+ * @brief String utilities.
+ */
 #pragma once
+
+/**
+ * @ingroup Core
+ * @defgroup StringUtility String Utility
+ */
 
 #include "LkEngine/Core/CoreMacros.h"
 
@@ -11,6 +20,13 @@
 #include <string>
 #include <string_view>
 
+/**
+ * @brief String utility.
+ * Contains various utility functions for strings.
+ *
+ * @ingroup StringUtility
+ * @{
+ */
 namespace LkEngine::StringUtils {
 
 	[[nodiscard]] static constexpr std::string_view RemovePrefix(std::string_view Str, char Prefix = 'L')
@@ -18,6 +34,15 @@ namespace LkEngine::StringUtils {
 		return (Str.starts_with(Prefix)) ? Str.substr(1) : Str;
 	}
 
+	/**
+	 * @brief Convert a string to lowercase.
+	 * @tparam TChar Character type.
+	 * @tparam StringType String type (std::string, std::wstring, ...)
+	 * @param Input String to convert to lowercase.
+	 * @return The input string in lowercase.
+	 *
+	 * @note Should add support for converting the existing string reference instead of creating a string copy.
+	 */
 	template<typename TChar = char, typename StringType>
 	[[nodiscard]] static std::basic_string<TChar> ToLower(const StringType& Input)
 	{
@@ -152,7 +177,6 @@ namespace LkEngine::StringUtils {
 	template<typename T>
 	static std::string ConvertFlags(const T Flags)
 	{
-		//static_assert(std::is_integral_v<T>, "Cannot convert non-integral types, only flags are allowed");
 		static_assert(std::is_integral_v<T> || std::is_enum_v<T>, "Cannot convert non-integral types, only flags are allowed");
 		constexpr uint32_t Bits = static_cast<uint32_t>(sizeof(decltype(Flags)) * 8);
 		std::bitset<Bits> FlagBitset(Flags);
@@ -160,3 +184,5 @@ namespace LkEngine::StringUtils {
 	}
 
 }
+
+/** @} */

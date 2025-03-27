@@ -1,4 +1,12 @@
+/**
+ * @file
+ * @brief Editor core.
+ */
 #pragma once
+
+/** 
+ * @defgroup Editor
+ */
 
 #include "LkEngine/Core/CoreMacros.h"
 #include "LkEngine/Core/IO/FileSystem.h"
@@ -10,13 +18,17 @@
 #include <imgui/imgui.h>
 #include <ImGuizmo/ImGuizmo.h>
 
-
 namespace LkEngine {
 
 	/**
-	 * FEditorResources
-	 * 
-	 *  Assets and resources used by the editor in a global setting.
+	 * @ingroup Editor
+	 * @{
+	 */
+
+	/**
+	 * @struct FEditorResources
+	 *
+	 * Assets and resources used by the editor in a global setting.
 	 */
 	struct FEditorResources
 	{
@@ -106,5 +118,7 @@ namespace LkEngine {
 			return LTexture2D::Create(Specification);
 		}
 	};
+
+	/** @} */
 
 }

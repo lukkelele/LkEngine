@@ -1,7 +1,7 @@
-/******************************************************************
- * LObjectBase
- * 
- *****************************************************************/
+/**
+ * @file 
+ * @brief LObject base implementation.
+ */
 #pragma once
 
 #include <concepts>
@@ -10,7 +10,6 @@
 #include "LkEngine/Core/Log/Log.h"
 
 #include "Enum.h"
-
 
 namespace LkEngine {
 	
@@ -23,9 +22,9 @@ namespace LkEngine {
 	};
 
 	/**
-	 * LObjectFlag 
-	 * 
-	 *  Used for object initialization, loading and garbage collection.
+	 * @enum LObjectFlag 
+	 *
+	 * @details Used for object initialization, loading and garbage collection.
 	 */
 	enum class EObjectFlag : uint32_t
 	{
@@ -39,7 +38,7 @@ namespace LkEngine {
 	LK_ENUM_CLASS(EObjectFlag);
 
 
-	/* TODO: Implement this. */
+	/** @todo: Implement this. */
 	template<typename TObject>
 	concept LObjectCore = requires(TObject Object)
 	{
@@ -47,13 +46,18 @@ namespace LkEngine {
 	};
 
 	/**
-	 * LObjectBase
+	 * @class LObjectBase
+	 *
+	 * @details Base class implemented by LObject.
+	 *          Holds a LClass reference.
+	 *
+	 * @ingroup LObject
 	 */
 	class LObjectBase
 	{
 	public:
 		/** 
-		 * Check if the object is the same type as the passed object's.
+		 * @brief Check if the object is the same type as the passed object's.
 		 */
 		template<typename OtherClassType>
 		FORCEINLINE bool IsA(OtherClassType OtherObject) const
@@ -71,9 +75,8 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Check if the object is a child of another class.
-		 *
-		 *  Nullchecked.
+		 * @brief Check if the object is a child of another class.
+		 * @note Nullchecked.
 		 */
 		template<typename ClassType>
 		static FORCEINLINE bool IsChildOf(const ClassType* InObjectClass, const ClassType* InOtherClass)
@@ -84,15 +87,14 @@ namespace LkEngine {
 
 	protected:
 		/**
-		 * Set the class.
-		 *
-		 *  Invoked once in the LCLASS declaration for an LClass object.
-		 *  Throws error otherwise.
+		 * @brief Set the class.
+		 * @details Invoked once in the LCLASS declaration for an LClass object. 
+		 *          Throws error otherwise.
 		 */
 		void SetClass(LClass* InClass);
 
 		/**
-		 * Get the private class member.
+		 * @brief Get the private class member.
 		 */
 		FORCEINLINE const LClass* GetClass() const
 		{
@@ -101,7 +103,7 @@ namespace LkEngine {
 
 		/**
 		 * @brief Check if LObjectBase has a valid LClass object.
-		 * To be used as a validity check during object construction.
+		 * @details Used as a validity check during object construction.
 		 */
 		FORCEINLINE bool IsClassValid() const
 		{
@@ -109,8 +111,12 @@ namespace LkEngine {
 		}
 
 	private:
+		/**
+		 * @variable LClass reference.
+		 */
 		LClass* ClassPrivate = nullptr;
 	};
+	/** @} */
 
 	/** 
 	 * Helper to detect a member function. 
@@ -122,7 +128,7 @@ namespace LkEngine {
 	struct HasGetClass<T, std::void_t<decltype(std::declval<T>().GetClass())>> : std::true_type {};
 
 	/**
-	 * Concept: HasLClassMacro
+	 * @concept HasLClassMacro
 	 */
 	template<typename T>
 	concept HasLClassMacro = requires 

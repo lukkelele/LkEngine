@@ -4,6 +4,11 @@
  *******************************************************************/
 #pragma once
 
+/**
+ * @ingroup Core
+ * @{
+ */
+
 #include <unordered_set>
 
 #include "LkEngine/Core/CoreMacros.h"
@@ -11,47 +16,86 @@
 
 #include "ObjectPtrHelpers.h"
 
-
 namespace LkEngine {
+
+	/** 
+	 * @ingroup LObject
+	 * @{
+	 *
+	 * @defgroup TObjectPtr
+	 * @{
+	 *
+	 * @defgroup TObjectPtr_Internal
+	 */
 
 	template<typename T>
 	class TObjectPtr;
 
-	/*----------------------------------------------------------------------------
-		Internal Memory Management.
-	 ----------------------------------------------------------------------------*/
 	/**
-	 * TObjectPtr_Internal
+	 * @brief Internal functions used by TObjectPtr for managing live LObject references.
+	 * @note For internal use by TObjectPtr.
 	 *
-	 *  Management of live references.
-	 *  For internal use by TObjectPtr.
+	 * @ingroup TObjectPtr_Internal
+	 * @{
 	 */
 	namespace TObjectPtr_Internal 
 	{
+		/**
+		 * @var LiveReferences 
+		 * Set of live references.
+		 *
+		 * @note Defined in ObjectPtr.tpp
+		 */
 		extern std::unordered_set<void*> LiveReferences;
+
+		/**
+		 * @var LiveReferenceMutex
+		 * Mutex used on modifications of the live object's set.
+		 *
+		 * @note Defined in ObjectPtr.tpp
+		 */
 		extern std::mutex LiveReferenceMutex;
 
+		/**
+		 * @brief Add a LObject instance to the live references.
+		 * @details Does nothing if the instance already has been added.
+		 */
 		void AddToLiveReferences(void* InObject);
+
+		/**
+		 * @brief Remove a LObject instance from the live references.
+		 * @details Does nothing if the instance does not exist in the live set.
+		 */
 		void RemoveFromLiveReferences(void* InObject);
+
+		/**
+		 * @brief Check if a LObject instance is alive.
+		 * @returns true if the reference count for the LObject instance is larger than 0, else false.
+		 */
 		bool IsLive(void* InObject);
 
+		/**
+		 * @brief Populate a set with all live references.
+		 * @return The count of live objects that was added onto the set.
+		 */
 		int GetLiveReferences(std::unordered_set<void*>& InSet);
 
 		/**
 		 * @brief Populare a vector with live objects.
-		 * @returns The count of live objects.
+		 * @return The count of live objects.
 		 */
 		int GetLiveObjects(std::vector<TObjectPtr<LObject>>& ObjectArray, const bool FilterByStaticClass = true);
 	}
+	/** @} */
 
 	/**
-	 * TObjectPtr
+	 * @class TObjectPtr
 	 *
-	 *  Smart pointer for managing LObject's with reference counting and tracking.
-	 *  Provides automatic reference counting, basic type safety and the ability 
-	 *  to track live object references for memory management.
-	 *  It supports initialization from raw pointers, other TObjectPtr instances 
-	 *  and conversion between compatible types.
+	 * @details Smart pointer for managing LObject's with reference counting and tracking.
+	 *          Provides automatic reference counting, basic type safety and the ability 
+	 *          to track live object references for memory management.
+	 *          Supports initialization from raw pointers, other TObjectPtr instances and 
+	 *          conversion between compatible types.
 	 */
 	template<typename T>
 	class TObjectPtr
@@ -61,11 +105,7 @@ namespace LkEngine {
 			: ObjectPtr(Instance)
 		{
 			LK_DEBUG_PTR_LOG("Copy Constructor (T* Instance = nullptr)");
-		#if defined(LK_ENGINE_MSVC)
-			static_assert(std::is_base_of_v<LObject, T>, "TObject is only usable on objects that derive from LObject");
-		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
 			static_assert(std::is_base_of<LObject, T>::value, "TObject is only usable on objects that derive from LObject");
-		#endif
 			if (ObjectPtr)
 			{
 				TObjectPtr_IncrementReferenceCount();
@@ -265,7 +305,11 @@ namespace LkEngine {
 			ObjectPtr = nullptr;
 		}
 
-		template<typename... TArgs>
+		/**
+		 * @brief Create new pointer instance of type T.
+		 * @return pointer to the new object.
+		 */
+		template<typename ...TArgs>
 		static TObjectPtr<T> Create(TArgs&&... Args);
 
 		FORCEINLINE bool IsEqual(const TObjectPtr<T>& Other) const
@@ -275,35 +319,28 @@ namespace LkEngine {
 				return false;
 			}
 
-			return *ObjectPtr == *Other.ObjectPtr;
+			return (*ObjectPtr == *Other.ObjectPtr);
 		}
 
 	private:
+		/**
+		 * @brief Increment the reference count by one.
+		 */
 		FORCEINLINE void TObjectPtr_IncrementReferenceCount() const
 		{
 			LK_PTR_ASSERT(ObjectPtr, "IncrementReferenceCount failed, invalid ObjectPtr");
-		#if defined(LK_ENGINE_MSVC)
-			ObjectPtr->IncrementReferenceCount();
-		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
-			//static_cast<LObject*>(ObjectPtr)->IncrementReferenceCount();
 			((LObject*)ObjectPtr)->IncrementReferenceCount();
-		#endif
 			TObjectPtr_Internal::AddToLiveReferences((void*)ObjectPtr);
 		}
 
+		/**
+		 * @brief Decrement the reference count by one.
+		 */
 		FORCEINLINE void TObjectPtr_DecrementReferenceCount() const
 		{
-		#if defined(LK_ENGINE_MSVC)
-			ObjectPtr->DecrementReferenceCount();
-		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
 			((LObject*)ObjectPtr)->DecrementReferenceCount();
-		#endif
 
-		#if defined(LK_ENGINE_MSVC)
-			if (ObjectPtr->GetReferenceCount() == 0)
-		#elif defined(LK_ENGINE_GCC) || defined(LK_ENGINE_CLANG)
 			if (((LObject*)ObjectPtr)->GetReferenceCount() == 0)
-		#endif
 			{
 				TObjectPtr_Internal::RemoveFromLiveReferences((void*)ObjectPtr);
 
@@ -319,11 +356,12 @@ namespace LkEngine {
 		friend class TObjectPtr;
 	};
 
-
 	/**
-	 * TWeakPtr
+	 * @class TWeakPtr
 	 *
-	 *  Weak pointer.
+	 * @details Weak pointer implementation.
+	 *
+	 * @note Not used as of now, needs to be fully implemented.
 	 */
 	template<typename T>
 	class TWeakPtr
@@ -345,6 +383,9 @@ namespace LkEngine {
 		FORCEINLINE T& operator*() { return *ObjectPtr; }
 		FORCEINLINE const T& operator*() const { return *ObjectPtr; }
 
+		/**
+		 * @brief Check if the pointer holds a valid reference.
+		 */
 		FORCEINLINE bool IsValid() const 
 		{ 
 			return ObjectPtr ? TObjectPtr_Internal::IsLive(ObjectPtr) : false;
@@ -362,7 +403,11 @@ namespace LkEngine {
 		T* ObjectPtr = nullptr;
 	};
 
+	/** @} */ /* TObjectPtr */
+	/** @} */ /* LObject */
+
 }
 
+/** @} */ /* Core */
 
 #include "ObjectPtr.tpp"

@@ -7,9 +7,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-
 namespace LkEngine {
 
+	/**
+	 * @class FTimestep
+	 * 
+	 * @ingroup Time
+	 * @deprecated To be removed soon.
+	 */
 	class FTimestep
 	{
 	public:

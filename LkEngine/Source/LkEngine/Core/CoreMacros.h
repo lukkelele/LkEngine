@@ -1,15 +1,14 @@
-/******************************************************************
- * CoreMacros
- * 
- *
- *******************************************************************/
+/**
+ * @file
+ * @brief Core macros used by the entire engine.
+ */
 #pragma once
 
 #include <cassert>
 #include <typeinfo>
 #include <regex>
 
-/* FIXME */
+/* Needs to be fixed. */
 #if defined(LK_ENGINE_STATIC_LIB)
 #	define CORE_API
 #else
@@ -54,21 +53,21 @@
  */
 
 /** 
- * Platform: Windows
+ * @brief Platform: Windows
  */
 #if defined(LK_PLATFORM_WINDOWS)
 #	define FORCEINLINE __forceinline
 #	define VARARGS     __cdecl
 #	define STDCALL     __stdcall
 /** 
- * Compiler: GCC
+ * @brief Compiler: GCC
  */
 #elif defined(LK_ENGINE_GCC)
 #	define VARARGS		__attribute__((cdecl))
 #	define FORCEINLINE	inline __attribute__((always_inline))
 #	define STDCALL		__attribute__((stdcall))
 /** 
- * Compiler: Clang
+ * @brief Compiler: Clang
  */
 #elif defined(LK_ENGINE_CLANG)
 #	define FORCEINLINE  __forceinline

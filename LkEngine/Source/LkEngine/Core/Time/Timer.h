@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Timer
+ */
 #pragma once
 
 #include <chrono>
@@ -7,13 +11,16 @@
 
 #include "LkEngine/Debug/Profiler.h"
 
-
 namespace LkEngine {
 
 	using namespace std::chrono_literals;
 
 	/**
-	 * LTimer
+	 * @class LTimer
+	 *
+	 * Basic timer.
+	 *
+	 * @ingroup Time
 	 */
 	class LTimer
 	{
@@ -58,9 +65,9 @@ namespace LkEngine {
 	};
 
 	/**
-	 * FScopedTimer
+	 * @class FScopedTimer
 	 * 
-	 *  Scoped timer used for profiling.
+	 * Scoped timer used for profiling.
 	 */
 	class FScopedTimer
 	{
@@ -81,6 +88,13 @@ namespace LkEngine {
 		LTimer Timer{};
 	};
 
+	/**
+	 * @class LPerformanceProfiler
+	 *
+	 * Performance profiler.
+	 *
+	 * @ingroup Profiling
+	 */
 	class LPerformanceProfiler
 	{
 	public:
@@ -131,7 +145,10 @@ namespace LkEngine {
 	};
 
 	/**
-	 * FScopedPerformanceTimer
+	 * @class FScopedPerformanceTimer
+	 *
+	 * Scoped performance profiler.
+	 * @ingroup Profiling
 	 */
 	class FScopedPerformanceTimer
 	{
@@ -155,4 +172,8 @@ namespace LkEngine {
 
 		LTimer Timer;
 	};
+
+	/** @} */
+
 }
+

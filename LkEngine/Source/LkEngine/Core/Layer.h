@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Base layer.
+ */
 #pragma once
 
 #include "LkEngine/Core/Core.h"
@@ -12,6 +16,8 @@ namespace LkEngine {
 	 * @class LLayer
 	 *
 	 * Base layer implementation.
+	 *
+	 * @ingroup Core
 	 */
 	class LLayer : public LObject
 	{

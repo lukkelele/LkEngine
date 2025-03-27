@@ -1,4 +1,12 @@
+/**
+ * @file
+ * @brief Mathematics used by the engine.
+ */
 #pragma once
+
+/**
+ * @defgroup Math
+ */
 
 #include <random>
 #include <time.h>
@@ -17,7 +25,6 @@
 #include "LkEngine/Core/Math/Vector.h"
 #include "LkEngine/Core/Math/Rotator.h"
 #include "LkEngine/Core/Math/Quaternion.h"
-
 
 namespace LkEngine 
 {
@@ -44,12 +51,22 @@ namespace LkEngine
 	}
 }
 
-/* Box2D. */
 struct b2Vec2;
 struct b2Vec3;
 
+/**
+ * @brief Engine Mathematics.
+ * @note Most mathematical functions with set vector types are to become templated in the future.
+ *
+ * @ingroup Math
+ * @{
+ */
 namespace LkEngine::Math {
 
+    /**
+     * @enum EShape
+	 * @details Geometrical shape.
+     */
     enum class Shape
     {
         None = 0,
@@ -59,11 +76,17 @@ namespace LkEngine::Math {
         Hexagon,
     };
 
-	FORCEINLINE glm::vec3 Scale(glm::vec3& Vector, float ScaleFactor)
+	/**
+	 * @brief Scale a vector.
+	 */
+	FORCEINLINE glm::vec3 Scale(glm::vec3& Vector, const float ScaleFactor)
 	{
 		return (Vector * ScaleFactor) / glm::length(Vector);
 	}
 
+	/**
+	 * @brief Decompose a transform.
+	 */
 	FORCEINLINE bool DecomposeTransform(const glm::mat4& Transform, glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale)
 	{
 		using T = float;
@@ -141,6 +164,9 @@ namespace LkEngine::Math {
 		return true;
 	}
 
+    /**
+     * @brief Calculate a transform matrix.
+     */
     FORCEINLINE glm::mat4 TransformMatrix(glm::vec3& Translation, glm::quat& Rotation, glm::vec3& Scale)
     {
 		return glm::translate(glm::mat4(1.0f), Translation) 
@@ -150,10 +176,9 @@ namespace LkEngine::Math {
 
     glm::mat4 TransformMatrix2D(const glm::vec3& translation, float rot, const glm::vec3& scale);
 
-    /// @TODO: documentation
-	// [0,  width] -> [-1,1]
-	// [0, height] -> [-1,1]
-	// The near plane maps to Z = -1.
+    /**
+     * @brief Calculate world coordinates.
+     */
     template<typename T = float>
     glm::vec2 ConvertToWorldCoordinates(glm::vec2 NdcCoordinates, T WindowWidth, T WindowHeight)
     {
@@ -170,7 +195,10 @@ namespace LkEngine::Math {
 		return glm::vec2(ConvertedCoordinates.x, ConvertedCoordinates.y);
     }
 
-    //FORCEINLINE static T ScreenToWorldCoordinates2D(const glm::vec2& ScreenCoordinates, 
+    /**
+     * @brief Convert screen coordinates to its world counterpart in 2D.
+	 * @deprecated No longer used.
+     */
 	template<typename TVector>
     FORCEINLINE TVector ScreenToWorldCoordinates2D(const TVector& ScreenCoordinates, 
 		                                           const glm::mat4& InverseProjectionMatrix, 
@@ -203,9 +231,7 @@ namespace LkEngine::Math {
     }
 
     /**
-     * ScreenToWorld
-     *
-     *  Viewport, (x, y, Width, Height)
+     * @brief Convert screen coordinates to its world counterpart.
      */
     template<typename TVector = glm::vec3, typename TVec2>
     FORCEINLINE TVector ConvertScreenToWorldCoordinates(const TVec2& ScreenCoordinates, 
@@ -247,6 +273,10 @@ namespace LkEngine::Math {
     glm::vec2 ScreenToWorld2D(const glm::vec2& ndc, const glm::mat4& inv_proj, const LTransformComponent& Transform);
     float Get2DRotationFromQuaternion(const glm::quat& quat);
 
+	/**
+	 * @brief Calculate the forward vector from a transform matrix.
+	 * @return The calculated forward vector of type TVector.
+	 */
 	template<typename TVector>
 	FORCEINLINE TVector GetForwardVector(const glm::mat4& TransformMatrix)
 	{
@@ -257,6 +287,10 @@ namespace LkEngine::Math {
 		return TVector(glm::normalize(glm::vec3(-TransformMatrix[2][0], -TransformMatrix[2][1], -TransformMatrix[2][2])));
 	}
 
+	/**
+	 * @brief Calculate the right vector from a transform matrix.
+	 * @return The calculated right vector of type TVector.
+	 */
 	template<typename TVector>
 	FORCEINLINE TVector GetRightVector(const glm::mat4& TransformMatrix)
 	{
@@ -280,3 +314,6 @@ namespace LkEngine::Math {
 	}
 
 }
+/** @} */
+
+/** @} */

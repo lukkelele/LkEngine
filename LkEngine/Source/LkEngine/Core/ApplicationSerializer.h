@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Application serializer.
+ */
 #pragma once
 
 #include "LkEngine/Core/LObject/Object.h"
@@ -7,11 +11,13 @@
 #include "LkEngine/Serialization/FileStream.h"
 #include "LkEngine/Serialization/Serializer.h"
 
-
 namespace LkEngine {
 
     class LApplication;
 
+    /**
+     * @class LApplicationSerializer
+     */
     class LApplicationSerializer
     {
     public:

@@ -1,8 +1,12 @@
-/******************************************************************
- * Core
- *
- *
- *******************************************************************/
+/**
+ * @file
+ * @brief Core header.
+ */
+
+/**
+ * @defgroup Core
+ */
+
 #pragma once
 
 #include "LkEngine/Core/PlatformDetection.h"
@@ -32,7 +36,6 @@
 #include "LkEngine/Core/Time/Timer.h"
 #include "LkEngine/Core/Memory/Buffer.h"
 #include "LkEngine/Core/Hash/UUID.h"
-
 
 namespace LkEngine {
 

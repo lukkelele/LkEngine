@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Base camera.
+ */
 #pragma once
 
 #include "LkEngine/Core/LObject/Object.h"
@@ -9,9 +13,17 @@
 #include "LkEngine/Core/Input/Keyboard.h"
 #include "LkEngine/Core/Input/Mouse.h"
 
-
 namespace LkEngine {
 
+	/**
+	 * @ingroup Renderer
+	 * @{
+	 */
+
+	/**
+	 * @enum ECameraAction
+	 * Type of camera action.
+	 */
 	enum class ECameraAction : uint16_t
 	{
 		None   = 0,
@@ -22,6 +34,10 @@ namespace LkEngine {
 	LK_ENUM_CLASS(ECameraAction);
 	LK_ENUM_RANGE_FLAGS_BY_FIRST_AND_LAST(ECameraAction, ECameraAction::None, ECameraAction::Zoom);
 
+	/**
+	 * @enum ECameraModifier
+	 * Camera modifier flags.
+	 */
 	enum class ECameraModifier : int32_t
 	{
 		None = 0,
@@ -34,9 +50,11 @@ namespace LkEngine {
 	LK_ENUM_CLASS(ECameraModifier);
 
 	/**
-	 * LCamera
+	 * @class LCamera
 	 *
-	 *  Base camera class.
+	 * Base camera class.
+	 *
+	 * @ingroup Renderer
 	 */
 	class LCamera : public LObject
 	{
@@ -291,5 +309,7 @@ namespace LkEngine {
 	{ 
 		return glm::radians(DegPerspectiveFov); 
 	}
+
+	/** @} */
 
 }

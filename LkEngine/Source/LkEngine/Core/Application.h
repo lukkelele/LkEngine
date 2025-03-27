@@ -1,7 +1,6 @@
-/******************************************************************
- * LApplication
- *
- *******************************************************************/
+/**
+ * @file
+ */
 #pragma once
 
 #include "LkEngine/Version.h"
@@ -19,8 +18,6 @@
 #include "LkEngine/Core/IO/File.h"
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/Core/Math/Math.h"
-/** @fixme: FIXME */
-///#include "LkEngine/Core/ThreadManager.h"
 #include "LkEngine/Core/MetadataRegistry.h"
 #include "LkEngine/Core/Memory/GarbageCollector.h"
 #include "LkEngine/Core/Event/KeyEvent.h"
@@ -46,21 +43,37 @@
 
 #include "LkEngine/Physics/PhysicsSystem.h"
 
-
 namespace LkEngine {
 
 	LK_DECLARE_MULTICAST_DELEGATE(FOnEngineShutdown);
 
+	/**
+	 * @namespace Core
+	 *
+	 * @ingroup Core
+	 * @{
+	 */
 	namespace Core 
 	{
+		/**
+		 * @brief Delegate signaling the beginning of engine shutdown.
+		 * @details Used as a way to make sure the engine has time to serialize all 
+		 *          components.
+		 */
 		extern FOnEngineShutdown OnEngineShutdown;
 
 		/**
-		 * Setup necessary engine components (logging, global config).
+		 * @brief Setup necessary engine components (logging, global config).
 		 */
 		void Setup(const int Argc, char* Argv[]);
 	}
+	/** @} */
 
+	/**
+	 * @class LApplication
+	 *
+	 * @details Application implementation 
+	 */
 	class LApplication : public LObject
 	{
 	public:
@@ -99,8 +112,6 @@ namespace LkEngine {
 			else
 			{
 				/* Queue the event. */
-				//std::scoped_lock<std::mutex> ScopedLock(EventQueueMutex);
-				//EventQueue.push([Event]() { LApplication::Get()->OnEvent(*Event); });
 				CoreEventQueue.Add([Event]() { LApplication::Get().OnEvent(*Event); });
 			}
 		}
@@ -124,15 +135,11 @@ namespace LkEngine {
 
 		LMetadataRegistry& MetadataRegistry;
 		LGarbageCollector& GarbageCollector;
-		/** @fixme: FIXME */
-		///LThreadManager& ThreadManager;
 		LEventQueue CoreEventQueue;
 
 		TObjectPtr<LWindow> Window{};
 		LLayerStack LayerStack;
 
-		/** @fixme: FIXME */
-		//TObjectPtr<LRenderer> Renderer;
 		uint32_t CurrentFrameIndex = 0;
 
 		TObjectPtr<LUILayer> UILayer{};

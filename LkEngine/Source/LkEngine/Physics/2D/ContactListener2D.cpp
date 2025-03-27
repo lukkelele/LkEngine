@@ -9,7 +9,7 @@
 
 namespace LkEngine {
 
-    #if 0 /// FIXME
+    #if 0
     ContactListener2D::ContactListener2D()
     {
     }

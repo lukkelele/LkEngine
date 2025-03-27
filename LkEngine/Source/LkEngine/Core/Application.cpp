@@ -24,12 +24,10 @@ namespace LkEngine {
 		}	
 	}
 
-	/** @fixme: FIXME */
 	LApplication::LApplication(const FApplicationSpecification& InSpecification)
 		: Specification(InSpecification)
 		, MetadataRegistry(LMetadataRegistry::Get())
 		, GarbageCollector(LGarbageCollector::Get())
-		///, ThreadManager(LThreadManager::Get())
 		, CoreEventQueue("Core")
 	{
 		LOBJECT_REGISTER(LApplication);
@@ -60,15 +58,11 @@ namespace LkEngine {
 		LK_CORE_VERIFY(NfdInit);
 
 		Window->Initialize();
-		//Window->SetEventCallback([this](LEvent& Event) { OnEvent(Event); });
 
 		LInput::Initialize();
 		LSelectionContext::Get(); /* TODO: Instantiate elsewhere */
 
 		/* Initialize the renderer. */
-		/** @fixme: FIXME */
-		//Renderer = TObjectPtr<LRenderer>::Create();
-		//Renderer->Initialize();
 		LRenderer::Initialize();
 
 		/* UI layer. */

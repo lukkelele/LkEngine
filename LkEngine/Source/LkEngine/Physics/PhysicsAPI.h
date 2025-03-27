@@ -1,12 +1,22 @@
+/**
+ * @file
+ * @brief Physics API Interface.
+ */
 #pragma once
 
-/** @fixme: FIXME */
-#if 0
-#include "LkEngine/Core/Core.h"
-#endif
+/**
+ * @defgroup Physics
+ */
 
 namespace LkEngine {
 
+    /**
+     * @interface IPhysicsAPI
+	 *
+	 * Interface for physics APIs.
+	 *
+	 * @note Supports: Bullet3, Box2D.
+     */
     class IPhysicsAPI
     {
     public:

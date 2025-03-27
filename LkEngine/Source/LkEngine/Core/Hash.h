@@ -4,18 +4,34 @@
 
 namespace LkEngine {
 
+	/**
+	 * @ingroup Core
+	 *
+	 * @defgroup Hash Hash Algorithms
+	 * @{
+	 */
+
+	/**
+	 * @enum EHash
+	 */
 	enum class EHash
 	{
 		None = 0,
 		FNV, /* Fowler-Noll-Vo */
 	};
 
+	/**
+	 * @enum EChecksum
+	 */
 	enum class EChecksum
 	{
 		None = 0,
 		Crc32,
 	};
 
+	/**
+	 * @class LHash
+	 */
 	class LHash
 	{
 	private:
@@ -73,9 +89,10 @@ namespace LkEngine {
 	};
 
 	/**
-	 * Algorithm: FNV
-	 * 
-	 *  Fast and efficient hash function.
+	 * @brief Generate hash.
+	 *
+	 * @details Algorithm: FNV.
+	 *          Fast and efficient hash function.
 	 */
 	template<>
 	constexpr uint32_t LHash::Generate<EHash::FNV>(std::string_view String)
@@ -95,6 +112,9 @@ namespace LkEngine {
 		return Hash;
 	}
 
+	/**
+	 * @brief Generate a checksum based on a string input.
+	 */
 	template<>
 	constexpr uint32_t LHash::GenerateChecksum<EChecksum::Crc32>(std::string_view String)
 	{
@@ -107,5 +127,7 @@ namespace LkEngine {
 
 		return ~Crc;
 	}
+
+	/** @} */
 
 }

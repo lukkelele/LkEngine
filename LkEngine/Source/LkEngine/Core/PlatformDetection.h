@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Platform detection
+ */
 #pragma once
 
 #if defined(LK_ENGINE_MSVC)

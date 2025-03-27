@@ -8,8 +8,14 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 
-
 namespace LkEngine {
+
+	/**
+	 * @ingroup Math
+	 * @{
+	 * @ingroup Vector
+	 * @{
+	 */
 
 	template<typename SizeType>
 	struct TVector2;
@@ -397,28 +403,6 @@ namespace LkEngine {
 			return os;
 		}
 
-
-		/** @fixme: FIXME */
-	#if 0
-		template<typename VectorType>
-		VectorType As() const
-		{
-			return VectorType(X, Y);
-		}
-
-		// Attempt 2
-		template<typename VectorType, typename = std::enable_if_t<std::is_same_v<VectorType, glm::vec2>>>
-		VectorType As() const
-		{
-			return glm::vec2(X, Y);
-		}
-
-		template<typename VectorType, typename = std::enable_if_t<std::is_same_v<VectorType, ImVec2>>>
-		VectorType As() const
-		{
-			return ImVec2(X, Y);
-		}
-	#else
 		template<typename VectorType>
 		VectorType As() const
 		{
@@ -437,7 +421,6 @@ namespace LkEngine {
 
 			return VectorType();
 		}
-	#endif
 
 		operator glm::vec2() { return glm::vec2(X, Y); }
 		operator ImVec2() { return ImVec2(X, Y); }
@@ -468,20 +451,8 @@ namespace LkEngine {
 	#endif
 	};
 
-	#if 0
-	template<typename SizeType>
-	template<>
-	inline glm::vec2 TVector2<SizeType>::As<glm::vec2>() const
-	{
-		return glm::vec2(X, Y);
-	}
+	/** @} */
 
-	template<typename SizeType>
-	template<>
-	inline ImVec2 TVector2<SizeType>::As<ImVec2>() const
-	{
-		return ImVec2(X, Y);
-	}
-	#endif
+	/** @} */
 
 }

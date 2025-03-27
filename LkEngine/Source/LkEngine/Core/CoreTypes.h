@@ -1,7 +1,7 @@
-/******************************************************************
- * CoreTypes
- * 
- *******************************************************************/
+/**
+ * @file
+ * @brief Core types.
+ */
 #pragma once
 
 #include <stddef.h>
@@ -10,15 +10,25 @@
 
 #include "PlatformDetection.h"
 
+namespace LkEngine {
 
-namespace LkEngine 
-{
+	/**
+	 * @ingroup Core
+	 *
+	 * @defgroup CoreTypes Core Types
+	 * Typedefs and other engine type definitions.
+	 * @{
+	 */
+
 	using byte = uint8_t;
 	using llong = long long;
 
+	/**
+	 * @typedef LRendererID
+	 * Identifier used in render contexts.
+	 */
 	using LRendererID = uint32_t;
 
-	/* Path separator. */
 	template<typename TChar>
 	constexpr TChar TPathSeparator = '/';
 
@@ -31,17 +41,12 @@ namespace LkEngine
 #endif
 
 	constexpr LK_TCHAR PathSeparator = TPathSeparator<LK_TCHAR>;
-#if 0
-#if (LK_CHAR_ENCODING == LK_CHAR_UTF8)
-	constexpr char PathSeparator = TPathSeparator<char>;
-#elif (LK_CHAR_ENCODING == LK_CHAR_UNICODE)
-	constexpr wchar_t PathSeparator = TPathSeparator<wchar_t>;
-#else
-#	error "No character encoding format is specified"
-#endif
-#endif
 
-	/** EShapeType */
+	/** 
+	 * @enum EShapeType 
+	 *
+	 * Shape type.
+	 */
 	enum class EShapeType
 	{
 		Null = 0,
@@ -51,7 +56,11 @@ namespace LkEngine
 	};
 
 	/**
-	 * @brief
+	 * @brief Static cast.
+	 * @tparam To The type to cast to the object to.
+	 * @tparam From The type of the source object.
+	 * @param Source Object to perform the cast on.
+	 * @return A pointer to the casted object.
 	 */
 	template <typename To, typename From>
 	To* Cast(From* Source)
@@ -64,5 +73,7 @@ namespace LkEngine
 
 		return nullptr;
 	}
+
+	/** @} */
 
 }

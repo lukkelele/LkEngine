@@ -1,8 +1,7 @@
-/******************************************************************
- * LTimerManager
- *
- *
- *******************************************************************/
+/**
+ * @file
+ * @brief Timer manager.
+ */
 #pragma once
 
 #include <array>
@@ -11,24 +10,39 @@
 #include "LkEngine/Core/CoreTypes.h"
 #include "LkEngine/Core/Assert.h"
 #include "LkEngine/Core/Log/Log.h"
-#include "LkEngine/Core/Time/TimerHandle.h"
 #include "LkEngine/Core/Delegate/Delegate.h"
 
 #include "LkEngine/Core/Time/Time.h"
 #include "LkEngine/Core/Time/Timer.h"
-
+#include "LkEngine/Core/Time/TimerHandle.h"
 
 namespace LkEngine {
 
+	/**
+	 * @ingroup Time
+	 * @{
+	 */
+
+	/**
+	 * @var FTimerDelegate
+	 * Timer delegate.
+	 *
+	 * @note Used internally by LTimer.
+	 */
 	LK_DECLARE_DELEGATE(FTimerDelegate);
 
 	/**
-	 * LTimerManager
+	 * @class LTimerManager
+	 *
+	 * @ingroup Time
 	 */
 	class LTimerManager
 	{
 	public:
-		/** @brief Set a timer with a delegate, delay and optional looping. */
+		/** 
+		 * @brief Set a timer with a delegate, delay and optional looping. 
+		 * @return the handle of the created timer.
+		 */
 		FTimerHandle SetTimer(const FTimerDelegate& TimerDelegate, 
 							  const float DelayInSeconds, 
 							  const bool Loop = false)
@@ -46,7 +60,11 @@ namespace LkEngine {
 			return Handle;
 		}
 
-		/* Clear a timer by its handle. */
+		/** 
+		 * @brief Clear a timer by its handle. 
+		 *
+		 * @details Does nothing if the handle doesn't belong to an active timer.
+		 */
 		FORCEINLINE void ClearTimer(const FTimerHandle Handle)
 		{
 			if (Timers.contains(Handle))
@@ -59,7 +77,10 @@ namespace LkEngine {
 			}
 		}
 
-		/** @brief Check if a timer is active. */
+		/** 
+		 * @brief Check if a timer is active. 
+		 * @return true if active, else false.
+		 */
 		FORCEINLINE bool IsTimerActive(const FTimerHandle Handle) const
 		{
 			return Timers.find(Handle) != Timers.end();
@@ -105,9 +126,9 @@ namespace LkEngine {
 
 	private:
 		/**
-		 * FTimer
-		 * 
-		 *  Internal delegate timer.
+		 * @struct Internal_FTimer
+		 *
+		 * Internal delegate timer.
 		 */
 		struct Internal_FTimer
 		{
@@ -118,11 +139,19 @@ namespace LkEngine {
 		};
 
 	private:
-		/** Collection of timers. */
+		/** 
+		 * @var Timers
+		 * Map collection of timers. 
+		 */
 		std::unordered_map<FTimerHandle, Internal_FTimer> Timers{};
 
-		/** @brief Max allowed count of expired timers on the stack. */
+		/** 
+		 * @var MaxExpiredTimerStackSize
+		 * Max allowed count of expired timers on the stack. 
+		 */
 		static constexpr uint8_t MaxExpiredTimerStackSize = 40;
 	};
+
+	/** @} */
 
 }

@@ -5,7 +5,7 @@
 
 namespace LkEngine {
 
-    #if 0 /// FIXME
+    #if 0
     class ContactListener2D : public b2ContactListener
     {
     public:

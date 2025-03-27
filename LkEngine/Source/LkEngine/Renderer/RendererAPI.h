@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Renderer API.
+ */
 #pragma once
 
 #include "Framebuffer.h"
@@ -20,22 +24,31 @@
 
 #include "LkEngine/Scene/Components.h"
 
-
 namespace LkEngine {
 
+	/**
+	 * @defgroup Renderer
+	 * @{
+	 */
+
+	/**
+	 * @enum ERenderTopology
+	 * Type of topology.
+	 */
 	enum class ERenderTopology
 	{ 
 		Lines, 
 		Triangles 
 	};
-	
+
     /**
-     * LRendererAPI
+     * @class LRendererAPI
 	 * 
-	 *  Renderer interface.
+	 * Interface for renderer APIs.
 	 *
-	 *  TODO: Might remove deriving from LObject here since the renderer API
-	 *        should only be of static use anyways.
+	 * @ingroup Renderer
+	 * @todo Might remove deriving from LObject here since the renderer API
+	 *       should only be of static use anyways.
      */
     class LRendererAPI : public LObject
     {
@@ -76,9 +89,6 @@ namespace LkEngine {
 		virtual void SetDepthFunction(const EDepthFunction InDepthFunction) = 0;
 		virtual void SetDepthEnabled(const bool Enabled) = 0;
 
-		//virtual void BindArrayTexture(const uint8_t Index) = 0;
-		//virtual void BindArrayTexture(const EArrayTextureDimension ArrayTextureDim) = 0;
-
 		virtual FRendererCapabilities& GetCapabilities() = 0;
 
 		FORCEINLINE static ERendererAPI Get() { return RendererAPI; }
@@ -109,6 +119,7 @@ namespace LkEngine {
 		LCLASS(LRendererAPI);
     };
 
+	/** @} */
 
 	namespace Enum
 	{

@@ -5,6 +5,13 @@
  ******************************************************************/
 #pragma once
 
+/**
+ * @ingroup Core
+ * @{
+ *
+ * @defgroup Log
+ */
+
 #include "LkEngine/Core/CoreMacros.h"
 #include "LogMacros.h"
 #include "LogFormatters.h"
@@ -41,11 +48,9 @@
 #define SPDLOG_LEVEL_NAMES \
 	{ "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF" }
 
-//#pragma warning(push, 0)
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 #include <spdlog/fmt/fmt.h>
-//#pragma warning(pop)
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -57,6 +62,15 @@
 
 namespace LkEngine {
 
+    /**
+     * @ingroup Log
+	 * @{
+     */
+
+    /**
+     * @enum ELogLevel
+	 * @details Log verbosity.
+     */
     enum class ELogLevel
     {
         Trace,
@@ -67,6 +81,10 @@ namespace LkEngine {
         Fatal
     };
 
+    /**
+     * @enum ELoggerType
+	 * @details Type of logger.
+     */
     enum class ELoggerType
     {
         Core = 0,
@@ -76,10 +94,15 @@ namespace LkEngine {
     };
 
 	/**
-	 * @brief Color configuration for a log level.
+	 * @typedef Color configuration for a log level.
 	 */
 	using LogLevelColorConfig = std::pair<ELogLevel, uint16_t>;
 
+    /**
+     * @class LLog
+	 * 
+	 * @details Engine logger.
+     */
     class LLog
     {
     public:
@@ -105,6 +128,9 @@ namespace LkEngine {
 								   const std::vector<LogLevelColorConfig>& LevelConfigs = {},
 								   const Color::EColorCode MainColor = Color::EColorCode::Reset);
 
+        /**
+         * @brief Get a logger instance with the help of a logger type.
+         */
         FORCEINLINE static std::shared_ptr<spdlog::logger>& GetLogger(const ELoggerType LoggerType)
         {
             switch (LoggerType)
@@ -118,6 +144,10 @@ namespace LkEngine {
 			return Logger_Core;
         }
 
+        /**
+         * @brief Print a formatted message.
+		 * @note Uses std::format_string on MSVC and fmt::format on GCC/Clang.
+         */
         template<typename... TArgs>
 	#if defined(LK_ENGINE_MSVC)
         static void PrintMessage(const ELoggerType LoggerType, const ELogLevel Level,
@@ -127,6 +157,10 @@ namespace LkEngine {
                                  fmt::format_string<TArgs...> Format, TArgs&&... Args);
 	#endif
 
+        /**
+         * @brief Print a formatted message with a tag.
+		 * @note Uses std::format_string on MSVC and fmt::format on GCC/Clang.
+         */
         template<typename... TArgs>
 	#if defined(LK_ENGINE_MSVC)
         static void PrintMessageWithTag(const ELoggerType LoggerType, const ELogLevel Level, std::string_view Tag,
@@ -445,9 +479,10 @@ namespace LkEngine {
 		MessageBoxA(nullptr, Message.data(), "LkEngine Error", (MB_OK | MB_ICONERROR));
 	#endif
 	}
-
+	/** @} */
 }
 
+/** @} */
 
 /********************************************************
 				 Log Utility Functions.
