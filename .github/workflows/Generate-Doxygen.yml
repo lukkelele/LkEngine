@@ -1,0 +1,26 @@
+name: Generate Doxygen
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Generate Documentation
+        uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          config_file: Doxyfile
+          folder: Docs/Doxygen/Generated
+          target_folder: Doxygen/Generated
+          doxygen_version: 1.12.0
