@@ -23,17 +23,19 @@ I have lots of ideas that I want to see if they could work and this project is g
 
 ---
 
-* [Engine API](./Docs/Engine.md) <br>
+* [Engine Design](./Docs/Engine.md) <br>
+* [Engine API](https://lukkelele.github.io/LkEngine/Doxygen/Generated/Html/index.html) <br>
 * [Development Journal](./Docs/Development.md) <br>
 * [github.io.lukkelele/LkEngine](https://lukkelele.github.io/LkEngine/) <br>
 
 ---
 
 ## Engine <a id="Engine"></a>
-For a detailed view of the engine and the API, check out the [Engine API](./Docs/Engine.md).
+For a detailed view of the engine, check out the [Engine Design](./Docs/Engine.md) 
+and the [Engine API](https://lukkelele.github.io/LkEngine/Doxygen/Generated/Html/index.html).
 
 #### Implemented
-:white_check_mark: OpenGL support (3.3, 4.5)<br>
+:white_check_mark: OpenGL support (4.5, 3.3)<br>
 :white_check_mark: Profiling and instrumentation<br>
 :white_check_mark: Serialization and persistence<br>
 :white_check_mark: Camera system<br>
