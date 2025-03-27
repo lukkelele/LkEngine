@@ -51,7 +51,6 @@
 Binaries
 Binaries-Int
 Intermediate
-Docs/Doxygen
 **/External/bin
 **/External/*bin-int*
 **/External/**/build*
@@ -79,6 +78,8 @@ LkRuntime/Projects
 LkRuntime/Configuration
 LkEngine/Test/Results
 
+# Documentation
+#Docs/Doxygen/Html # Unused for now since the doxygen is hosted on github.io
 **/docs/*.css
 **/docs/*.scss
 **/docs/*.html
