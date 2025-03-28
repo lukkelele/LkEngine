@@ -1,15 +1,16 @@
-# LkEngine API
+# LkEngine Design
 
 The engine is split up into several modules: **Core**, **LkEditor**, **LTesto.**  
 
-1. [Core](#Engine-Core)
-    * [LObject](#Engine-Core-LObject)
-    * [LkEditor (Engine Editor)](#Engine-Editor)
-    * [LTesto (Test Framework)](#Engine-TestFramework)
+1. [Core](#core)
+    * [Macros](#macros)
+    * [LObject](#lobject)
+    * [LkEditor (Engine Editor)](#lkeditor)
+    * [LTesto (Test Framework)](#ltesto)
 
 ---
 
-## Core <a id="Engine-Core"></a>
+# Core <a id="Engine-Core"></a>
 
 ### Macros
 > Controversial topic, I know :100:
@@ -43,7 +44,7 @@ The engine macros can be viewed in the table below.
 | LOBJECT_REGISTER | Constructor | :x: |
 
 
-### LObject <a id="Engine-Core-LObject"></a>
+## LObject <a id="Engine-Core-LObject"></a>
 > [LObject/Object.h](../LkEngine/Source/LkEngine/Core/LObject/Object.h)<br>
 > [LObject/Object.cpp](../LkEngine/Source/LkEngine/Core/LObject/Object.cpp)
 
@@ -54,13 +55,13 @@ All derivations of LObject must declare the **LCLASS** macro somewhere in the cl
 [TObjectPtr](../LkEngine/Source/LkEngine/Core/LObject/ObjectPtr.h) 
 -->
 
-#### TObjectPtr <a id="Engine-Core-TObjectPtr"></a>
+## TObjectPtr <a id="Engine-Core-TObjectPtr"></a>
 The [LObject](../LkEngine/Source/LkEngine/Core/LObject/Object.h) class uses [TObjectPtr](../LkEngine/Source/LkEngine/Core/LObject/ObjectPtr.h) for its smart pointer implementation.  
 The TObjectPtr class requires an object to be derived from LObject to work, this is because the counted references is stored in the LObject instance.
 <br>
 
 
-### Events <a id="Engine-Events"></a>
+## Events <a id="Engine-Events"></a>
 All events derive from the base event class [LEvent](../LkEngine/Source/LkEngine/Core/Event/Event.h).  
 Input events are reported from the active [GLFW](https://www.glfw.org/) context that is managed by [LWindow](../LkEngine/Source/LkEngine/Core/Window.h).  
 
@@ -70,7 +71,7 @@ Input events are reported from the active [GLFW](https://www.glfw.org/) context 
 | [LMouseButtonPressedEvent](../LkEngine/Source/LkEngine/Core/Event/MouseEvent.h) |  Input | Contains info about a pressed mouse button |
 
 
-#### Event Queue
+### Event Queue
 Events are placed in a [LEventQueue](../LkEngine/Source/LkEngine/Core/Event/EventQueue.h).
 
 ```cpp
@@ -84,7 +85,7 @@ EventQueue.Process();
 EventQueue.ProcessFiltered<LMousePressedEvent>();
 ```
 
-### Delegates <a id="Engine-Delegates"></a>
+## Delegates <a id="Engine-Delegates"></a>
 
 The delegate implementation is found in [Delegate.h](../LkEngine/Source/LkEngine/Core/Delegate/Delegate.h).
 
@@ -95,10 +96,10 @@ The delegate implementation is found in [Delegate.h](../LkEngine/Source/LkEngine
 | **LK_DECLARE_MULTICAST_DELEGATE**(*Args...*) | Multicast | Nothing |
 
 
-### Math Library
+## Math Library
 LkEngine makes use of templates to support seamless mathematical operations for containers from [glm](https://github.com/g-truc/glm) and [ImGui](https://github.com/ocornut/imgui).
 
-#### Vectors
+### Vectors
 The header that includes **LVector2**, **LVector3** and **LVector4** can be found in [Vector.h](../LkEngine/Source/LkEngine/Core/Math/Vector.h).
 
 * [LVector2](../LkEngine/Source/LkEngine/Core/Math/Vector2.h) (TVector2\<float\>)
@@ -110,13 +111,13 @@ LVector3 is also aliased to **LVector** because the three component vector is th
 
 <br>
 
-## LkEditor <a id="Engine-Editor"></a>
+# LkEditor <a id="Engine-Editor"></a>
 > The engine editor.
 
 
 <br>
 
-## LTesto<a id="Engine-TestFramework"></a>
+# LTesto<a id="Engine-TestFramework"></a>
 > Test Framework for LkEngine.
 
 
