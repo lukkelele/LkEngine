@@ -12,7 +12,6 @@
 
 **LkEngine** (pronounced *Lukkel-Engine*) is a game and rendering engine written in C\++20. <br>
 This project is for fun and to learn more, I just love to code.<br>
-I have lots of ideas that I want to see if they could work and this project is good environment for me to try stuff out.
 
 ## Content
 1. [Engine](#Engine)
