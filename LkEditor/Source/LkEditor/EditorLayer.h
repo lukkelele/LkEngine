@@ -1,13 +1,11 @@
-/******************************************************************
- * EditorLayer
- *
- * Main editor.
- *******************************************************************/
+/**
+ * @file 
+ * @brief LkEditor
+ */
 #pragma once
 
-#include "LkEngine/Core/LObject/Object.h"
-#include "LkEngine/Core/LObject/ObjectPtr.h"
-
+#include <LkEngine/Core/LObject/Object.h>
+#include <LkEngine/Core/LObject/ObjectPtr.h>
 #include <LkEngine/Core/Thread.h>
 #include <LkEngine/Core/Layer.h>
 #include <LkEngine/Core/Delegate/Delegate.h>
@@ -22,15 +20,15 @@
 #include <LkEngine/Editor/EditorSettings.h>
 #include <LkEngine/Editor/PanelManager.h>
 
-#include "LkEngine/Scene/Entity.h"
-#include "LkEngine/Scene/Components.h"
-#include "LkEngine/Scene/SceneSelectionData.h"
+#include <LkEngine/Scene/Entity.h>
+#include <LkEngine/Scene/Components.h>
+#include <LkEngine/Scene/SceneSelectionData.h>
 
-#include "LkEngine/Renderer/Framebuffer.h"
-#include "LkEngine/Renderer/UI/UICore.h"
-#include "LkEngine/Renderer/UI/UILayer.h"
+#include <LkEngine/Renderer/Framebuffer.h>
+#include <LkEngine/Renderer/UI/UICore.h>
+#include <LkEngine/Renderer/UI/UILayer.h>
 
-#include "LkEngine/Project/Project.h"
+#include <LkEngine/Project/Project.h>
 
 namespace LkEngine {
 
@@ -43,9 +41,14 @@ namespace LkEngine {
 	class LViewport;
 
 	/**
-	 * LEditorLayer
+	 * @ingroup Editor
+	 * @{
+	 */
+
+	/**
+	 * @class LEditorLayer
 	 *
-	 *  Editor layer.
+	 * The LkEngine editor layer (LkEditor).
 	 */
 	class LEditorLayer : public LLayer
 	{
@@ -133,10 +136,15 @@ namespace LkEngine {
 		void UI_ProjectInfo();
 		void UI_Debug_EditorViewportInfo();
 
-		/** Perform raycast on scene, returns the number of hit entities. */
+		/** 
+		 * @brief Perform raycast on a scene. 
+		 * @returns Number of entities hit by the ray.
+		 */
 		uint16_t RaycastScene(TObjectPtr<LScene>& TargetScene, std::vector<FSceneSelectionData>& SceneSelectionData);
 
-		/** Cast ray from camera. */
+		/**
+		 * @brief Cast ray from an editor camera. 
+		 */
 		void CastRay(FRayCast& RayCast, const LEditorCamera& Camera, const float MousePosX, const float MousePosY);
 
 		std::pair<float, float> GetMouseViewportSpace(const bool IsEditorViewport);
@@ -144,13 +152,15 @@ namespace LkEngine {
 		void OnCameraActivityChanged(LCamera* CameraRef, const bool CameraActive);
 
 		/**
-		 * Set window focus.
+		 * @brief Set window focus.
 		 * Used after switching between mouse modes (Pan/Rotate/Zoom) or 
 		 * any other activities that can modify the focus.
 		 */
 		void UI_SetWindowFocus(const ImGuiID WindowID);
 
-		/** Cache the ID of the currently focused window. */
+		/** 
+		 * @brief Cache the ID of the currently focused window. 
+		 */
 		void UI_CacheWindowFocus();
 
 	public:
@@ -188,5 +198,7 @@ namespace LkEngine {
 
 		inline static LEditorLayer* Instance = nullptr;
 	};
+
+	/** @} */
 
 }

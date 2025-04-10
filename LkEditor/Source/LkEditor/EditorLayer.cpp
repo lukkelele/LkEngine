@@ -1,24 +1,24 @@
 #include "EditorLayer.h"
 
-#include "LkEngine/Scene/Scene.h"
-#include "LkEngine/Scene/Components.h"
+#include <LkEngine/Core/Application.h>
+#include <LkEngine/Core/Window.h>
+#include <LkEngine/Core/IO/FileSystem.h>
+#include <LkEngine/Core/Input/Mouse.h>
 
-#include "LkEngine/Project/ProjectSerializer.h"
-#include "LkEngine/Asset/AssetTypes.h"
+#include <LkEngine/Scene/Scene.h>
+#include <LkEngine/Scene/Components.h>
 
-#include "LkEngine/Renderer/Renderer.h"
-#include "LkEngine/Renderer/Renderer2D.h"
-#include "LkEngine/Renderer/SceneRenderer.h"
-#include "LkEngine/Renderer/UI/UICore.h"
-#include "LkEngine/Renderer/UI/Property.h"
+#include <LkEngine/Project/ProjectSerializer.h>
+#include <LkEngine/Asset/AssetTypes.h>
 
-#include "LkEngine/Core/Application.h"
-#include "LkEngine/Core/Window.h"
-#include "LkEngine/Core/IO/FileSystem.h"
-#include "LkEngine/Core/Input/Mouse.h"
+#include <LkEngine/Renderer/Renderer.h>
+#include <LkEngine/Renderer/Renderer2D.h>
+#include <LkEngine/Renderer/SceneRenderer.h>
+#include <LkEngine/Renderer/UI/UICore.h>
+#include <LkEngine/Renderer/UI/Property.h>
 
-#include "LkEngine/Editor/EditorConsolePanel.h"
-#include "LkEngine/Editor/ThemeManagerPanel.h"
+#include <LkEngine/Editor/EditorConsolePanel.h>
+#include <LkEngine/Editor/ThemeManagerPanel.h>
 
 #include "LkEditor/Panel/EditorSettingsPanel.h"
 #include "LkEditor/Panel/ContentBrowserPanel.h"
@@ -28,8 +28,8 @@
 #include "LkEditor/AssetEditor/AssetEditorManager.h"
 
 #if defined(LK_ENGINE_OPENGL)
-#	include "LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h"
-#	include "LkEngine/Renderer/Backend/OpenGL/OpenGLImGuiLayer.h"
+#	include <LkEngine/Renderer/Backend/OpenGL/OpenGLRenderer.h>
+#	include <LkEngine/Renderer/Backend/OpenGL/OpenGLImGuiLayer.h>
 #endif
 
 #include <nfd.hpp>
@@ -120,7 +120,7 @@ namespace LkEngine {
 		Core::OnEngineShutdown.Add(this, &LEditorLayer::OnEngineShutdown);
 	}
 
-	/* TODO: Move lots of the initialization code to OnAttach instead. */
+	/* @todo: Move lots of the initialization code to OnAttach instead. */
 	void LEditorLayer::Initialize()
 	{
 		LK_CORE_DEBUG_TAG("Editor", "Creating editor camera");
@@ -145,7 +145,7 @@ namespace LkEngine {
 
 		LProject::OnProjectChanged.Add(this, &LEditorLayer::OnProjectChanged);
 
-		/* TODO: Load last open project, else load an empty 'default' project. */
+		/* @todo: Load last open project, else load an empty 'default' project. */
 		if (LProject::Current() == nullptr)
 		{
 			OpenProject(LFileSystem::GetRuntimeDir() / "Projects" / "Starter-2025");
@@ -160,7 +160,7 @@ namespace LkEngine {
 		Renderer2D = TObjectPtr<LRenderer2D>::Create(Renderer2DSpec);
 		Renderer2D->Initialize();
 
-		/* FIXME: Temporarily here. */
+		/* @fixme: Temporarily here. */
 		LOpenGL_Debug::SetupSkybox();
 
 		/** Input callbacks. */
