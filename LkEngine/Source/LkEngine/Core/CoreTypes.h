@@ -13,10 +13,10 @@
 namespace LkEngine {
 
 	/**
-	 * @ingroup Core
-	 *
 	 * @defgroup CoreTypes Core Types
 	 * Typedefs and other engine type definitions.
+	 *
+	 * @ingroup Core
 	 * @{
 	 */
 

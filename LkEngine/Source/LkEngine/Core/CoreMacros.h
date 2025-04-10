@@ -123,6 +123,9 @@
 
 namespace LkEngine 
 {
+	/**
+	 * @enum EClassFlag
+	 */
 	enum class EClassFlag : uint32_t
 	{
 		None       = LK_BIT(0),
@@ -130,6 +133,12 @@ namespace LkEngine
 	};
 	LK_ENUM_CLASS(EClassFlag);
 
+	/**
+	 * @enum EClassType
+	 * Bitflags for different object types.
+	 * 
+	 * @todo: Should be renamed to something else that doesn't contain the word 'Class'.
+	 */
 	enum class EClassType : uint64_t
 	{
 		LField    = LK_BIT(0),
@@ -140,6 +149,10 @@ namespace LkEngine
 	};
 	LK_ENUM_CLASS(EClassType);
 
+	/**
+	 * @enum ELogFormat
+	 * Format used on a log message.
+	 */
 	enum class ELogFormat : uint8_t
 	{
 		Compact = 0,
@@ -172,8 +185,12 @@ namespace LkEngine
 		}
 	}
 
-	namespace Core::Internal 		
+	namespace Core::Internal	
 	{
+		/**
+		 * @brief Remove a single character from the start of a string.
+		 * @returns The passed string without the prefix if the contained the prefix, else return the same string.
+		 */
 		FORCEINLINE constexpr const char* RemovePrefix(const char* Str, const char Prefix = 'L')
 		{
 			return (Str[0] == Prefix) ? Str + 1 : Str;
@@ -183,18 +200,28 @@ namespace LkEngine
 }
 
 /**
- * TODO: Should do a required/static_assert on the LClass registration to make sure 
- *       a class that inherits LObject in fact do implement the LCLASS macro.
- *       Otherwise there is risk of undefined behaviour because the LClass registration
- *       won't take place.
+ * @todo: Should do a required/static_assert on the LClass registration to make sure 
+ *        a class that inherits LObject in fact do implement the LCLASS macro.
+ *        Otherwise there is risk of undefined behaviour because the LClass registration
+ *        won't take place.
+ */
+
+
+/**
+ * @brief Core Macros
+ * @defgroup CoreMacros Core Macros
+ * @ingroup Core
+ * @{
  */
 
 /**
- * LCLASS
+ * @def LCLASS
  *
- *  Base classes that inherit from LObject are required to be declared as an LCLASS.
- *  Adds the static class type to the metadata registry and implements
- *  abstract functions and other base functionality from LObject.
+ * Base classes that inherit from LObject are required to be declared as an LCLASS.
+ * Adds the static class type to the metadata registry and implements
+ * abstract functions and other base functionality from LObject.
+ *
+ * @ingroup LObject
  */
 #define LCLASS(Class) \
 	public: \
@@ -224,11 +251,12 @@ namespace LkEngine
 
 
 /**
- * LSTRUCT
+ * @def LSTRUCT
  *
- *  TODO: - SFINAE on LCLASS/LSTRUCT implementations.
- *        - Change 'Class' to 'Struct' in functions.
- *        - Struct implementation similar to LClass.
+ * @todo: 
+ * - SFINAE on LCLASS/LSTRUCT implementations.
+ * - Change 'Class' to 'Struct' in functions.
+ * - Struct implementation similar to LClass.
  */
 #define LSTRUCT(Struct) \
 	public: \
@@ -258,12 +286,13 @@ namespace LkEngine
 
 
 /** 
- * LOBJECT_REGISTER
+ * @def LOBJECT_REGISTER
  * 
- *  TODO: 
- *     - Determine if to register class or struct (based on LCLASS or LSTRUCT).
- *     - The class registration should be re-evaluated, as the call to ObjectRegistration should not be needed.
- *       The initial call to LClass::Get should be enough.
+ * @todo: 
+ * - Determine if to register class or struct (based on LCLASS or LSTRUCT).
+ * - The class registration should be re-evaluated, as the call to ObjectRegistration should not be needed.
+ *   The initial call to LClass::Get should be enough.
+ * @note: Not done.
  */
 #define LOBJECT_REGISTER(...) \
 		::LkEngine::LClass* ClassObject = const_cast<::LkEngine::LClass*>(::LkEngine::LClass::Get(typeid(this))); \
@@ -278,11 +307,11 @@ namespace LkEngine
 
 
 /**
- * LASSET
+ * @def LASSET
  *
- *  LAsset derives from LObject.
+ * LAsset derives from LObject.
  *
- *  FIXME: In progress
+ * @note: Not done.
  */
 #define LASSET(Class) \
 	public: \
@@ -293,9 +322,9 @@ namespace LkEngine
 		FORCEINLINE GetAssetType() const { return GetStaticType(); } \
 
 /** 
- * LASSET_REGISTER
+ * @def LASSET_REGISTER
  *
- *  @LK_MARK_FOR_REMOVAL
+ * @note: Not done.
  */
 #define LASSET_REGISTER(...) \
 		LClass* ClassObject = const_cast<LClass*>(LClass::Get(typeid(this))); \
@@ -306,9 +335,25 @@ namespace LkEngine
 		} \
 
 
+/** 
+ * @def LPANEL
+ * 
+ * Declaration for UI panels that derive from LPanel.
+ * 
+ * @note: Mostly a placeholder for now.
+ */
 #define LPANEL(...) \
 			LCLASS(__VA_ARGS__);
 
+/** 
+ * @def LPANEL_REGISTER
+ * 
+ * Registration for UI panels that derive from LPanel.
+ * 
+ * @note: Mostly a placeholder for now.
+ */
 #define LPANEL_REGISTER(...) \
 			LOBJECT_REGISTER(__VA_ARGS__);
+
+/** @} */
 

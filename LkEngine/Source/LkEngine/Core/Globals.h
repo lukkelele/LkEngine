@@ -11,9 +11,8 @@
 namespace LkEngine {
 
 	/**
-	 * @ingroup Core
-	 *
 	 * @defgroup Globals
+	 * @ingroup Core
 	 * @{
 	 */
 
