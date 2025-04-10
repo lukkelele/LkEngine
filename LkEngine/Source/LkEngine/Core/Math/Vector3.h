@@ -7,8 +7,13 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 
-
 namespace LkEngine {
+	
+	/**
+	 * @defgroup Vector3
+	 * @ingroup Vector
+	 * @{
+	 */
 
 	template<typename SizeType>
 	struct TVector3;
@@ -16,7 +21,8 @@ namespace LkEngine {
 	namespace Math::Internal::Vector3Impl
 	{
 		/** 
-		 * Helper: Min
+		 * @struct Min
+		 * @brief Helper for calculating minimum values.
 		 */
 		template<typename SizeType, typename VectorTypeA, typename VectorTypeB, typename ReturnType>
 		struct Min
@@ -845,7 +851,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Calculate the dot product.
+		 * @brief Calculate the dot product of two vectors.
 		 */
 		template<typename VectorTypeA, typename VectorTypeB>
 		static SizeType Dot(const VectorTypeA& A, const VectorTypeB& B)
@@ -855,7 +861,7 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Calculate the distance between two vectors.
+		 * @brief Calculate the distance between two vectors.
 		 */
 		template<typename VectorTypeA, typename VectorTypeB>
 		static SizeType Distance(const VectorTypeA& A, const VectorTypeB& B)
@@ -865,9 +871,9 @@ namespace LkEngine {
 		}
 
 		/**
-		 * Calculate the squared distance between two vectors.
-		 *
-		 *  Prefer this over TVector3::Distance if possible (performance).
+		 * @brief Calculate the squared distance between two vectors.
+		 * @details Prefer this over TVector3::Distance if possible (performance).
+		 * @returns The squared distance between the vectors.
 		 */
 		template<typename VectorTypeA, typename VectorTypeB>
 		static SizeType DistanceSquared(const VectorTypeA& A, const VectorTypeB& B)
@@ -1004,5 +1010,7 @@ namespace LkEngine {
 		return glm::vec3(X, Y, Z);
 	}
 #endif
+
+	/** @} */
 
 }

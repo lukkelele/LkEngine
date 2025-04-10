@@ -54,14 +54,16 @@ namespace LkEngine
 struct b2Vec2;
 struct b2Vec3;
 
-/**
- * @brief Engine Mathematics.
- * @note Most mathematical functions with set vector types are to become templated in the future.
- *
- * @ingroup Math
- * @{
- */
 namespace LkEngine::Math {
+
+	/**
+	 * @brief Engine Mathematics.
+	 *
+	 * @note Most mathematical functions with set vector types are to become templated in the future.
+	 *
+	 * @ingroup Math
+	 * @{
+	 */
 
     /**
      * @enum EShape
@@ -197,6 +199,7 @@ namespace LkEngine::Math {
 
     /**
      * @brief Convert screen coordinates to its world counterpart in 2D.
+	 *
 	 * @deprecated No longer used.
      */
 	template<typename TVector>
@@ -205,7 +208,6 @@ namespace LkEngine::Math {
 												   const glm::mat4& InverseViewMatrix, 
 												   const glm::vec4& Viewport)
     {
-		// Convert screen coordinates to normalized device coordinates.
         static_assert(std::disjunction_v<
                         std::is_same<TVector, glm::vec2>, 
                         std::is_same<TVector, LVector2>>, "TVector must valid vector type");
@@ -313,7 +315,7 @@ namespace LkEngine::Math {
 		return TVector(glm::normalize(InVector));
 	}
 
-}
-/** @} */
+	/** @} */
 
-/** @} */
+}
+

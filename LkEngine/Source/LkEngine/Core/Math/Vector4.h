@@ -7,19 +7,25 @@
 
 #include "LkEngine/Core/CoreMacros.h"
 
-
 namespace LkEngine {
+
+	/**
+	 * @defgroup Vector4
+	 * @ingroup Vector
+	 * @{
+	 */
 
 	template<typename SizeType>
 	struct TVector4;
 
 	namespace Math::Internal::Vector4Impl 
 	{
-		
+		/* @todo */
 	}
 
 	/**
-	 * TVector4
+	 * @struct TVector4
+	 * @brief Templated four-component vector.
 	 */
 	template<typename SizeType>
 	struct TVector4

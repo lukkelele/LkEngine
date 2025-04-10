@@ -11,8 +11,7 @@
 namespace LkEngine {
 
 	/**
-	 * @ingroup Math
-	 * @{
+	 * @defgroup Vector2
 	 * @ingroup Vector
 	 * @{
 	 */
@@ -211,7 +210,8 @@ namespace LkEngine {
 	}
 
 	/**
-	 * TVector2
+	 * @struct TVector2
+	 * @brief Templated two-component vector.
 	 */
 	template<typename SizeType>
 	struct TVector2
@@ -450,8 +450,6 @@ namespace LkEngine {
 		union { SizeType Y, G, T; };
 	#endif
 	};
-
-	/** @} */
 
 	/** @} */
 

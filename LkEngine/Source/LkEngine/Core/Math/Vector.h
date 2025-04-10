@@ -4,12 +4,6 @@
  */
 #pragma once
 
-/**
- * @ingroup Math
- *
- * @defgroup Vector
- */
-
 #include <type_traits>
 #include <ostream>
 
@@ -23,12 +17,14 @@
 namespace LkEngine {
 
 	/**
-	 * @ingroup Vector
+	 * @defgroup Vector
+	 * @ingroup Math
 	 * @{
 	 */
 
 	/**
 	 * @enum EVectorAxis
+	 * Bitflag for coordinate axes.
 	 */
 	enum class EVectorAxis : uint32_t
 	{
