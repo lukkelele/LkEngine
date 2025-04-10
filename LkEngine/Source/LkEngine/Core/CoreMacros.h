@@ -209,7 +209,7 @@ namespace LkEngine
 
 /**
  * @brief Core Macros
- * @defgroup CoreMacros Core Macros
+ * @defgroup CoreMacros
  * @ingroup Core
  * @{
  */
@@ -220,8 +220,8 @@ namespace LkEngine
  * Base classes that inherit from LObject are required to be declared as an LCLASS.
  * Adds the static class type to the metadata registry and implements
  * abstract functions and other base functionality from LObject.
- *
- * @ingroup LObject
+ * 
+ * @ref LObject
  */
 #define LCLASS(Class) \
 	public: \
