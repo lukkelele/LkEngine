@@ -1,4 +1,12 @@
+/**
+ * @file 
+ * @brief Core UI.
+ */
 #pragma once
+
+/**
+ * @defgroup UI
+ */
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -21,11 +29,16 @@
 
 #include "Style.h"
 
-
 namespace LkEngine 
 {
     class LWindow;
     class LEntity;
+
+	/**
+	 * @defgroup UICore UI Core
+	 * @ingroup UI
+	 * @{
+	 */
 
 	namespace PanelID 
 	{
@@ -79,6 +92,10 @@ namespace LkEngine::UI {
 	LK_DECLARE_MULTICAST_DELEGATE(FOnMessageBoxCancelled, const char* /* UI Element Name */);
 	extern FOnMessageBoxCancelled OnMessageBoxCancelled;
 
+	/**
+	 * @struct FMessageBox
+	 * @brief Data container for a message box instance.
+	 */
 	struct FMessageBox
 	{
 		std::string Title = "";
@@ -266,9 +283,8 @@ namespace LkEngine::UI {
 	ImGuiDockNode* FindCentralNode(const ImGuiID DockspaceID);
 
 	/**
-	 * EFindType
-	 * 
-	 *  Identifier type to use when attempting to find an object.
+	 * @enum EFindType
+	 * Identifier type to use when attempting to find an object.
 	 */
 	enum class EFindType
 	{
@@ -893,6 +909,6 @@ namespace LkEngine::UI {
 		DrawButtonImage(Image, Image, Image, TintNormal, TintHovered, TintPressed, Rectangle.Min, Rectangle.Max);
 	};
 
+	/** @} */
+
 }
-
-
