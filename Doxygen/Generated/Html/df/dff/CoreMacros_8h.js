@@ -2,7 +2,7 @@ var CoreMacros_8h =
 [
     [ "LASSET", "da/da4/group__CoreMacros.html#ga5d693c8379d82ab5e6d6b6847472a293", null ],
     [ "LASSET_REGISTER", "da/da4/group__CoreMacros.html#gad644ad3e3152fb3d2fd9081091719202", null ],
-    [ "LCLASS", "db/db1/group__LObject.html#ga5dd6d58161d5078168e114ba189df091", null ],
+    [ "LCLASS", "da/da4/group__CoreMacros.html#ga5dd6d58161d5078168e114ba189df091", null ],
     [ "LK_FMT_LIB", "df/dff/CoreMacros_8h.html#a89aa976ec6f9a5a93eceeea35be11047", null ],
     [ "LOBJECT_REGISTER", "da/da4/group__CoreMacros.html#ga6423d4cb361f36e22ba16643922a1076", null ],
     [ "LPANEL", "da/da4/group__CoreMacros.html#ga52d5680ac7d09d3776cd558f7c9c20e4", null ],

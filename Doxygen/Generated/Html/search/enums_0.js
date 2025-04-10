@@ -26,6 +26,7 @@ var searchData=
   ['eshapetype_23',['EShapeType',['../de/d60/group__CoreTypes.html#ga77292d4c45a324a114d2c53d7482642c',1,'LkEngine']]],
   ['etheme_24',['ETheme',['../d1/d6e/namespaceLkEngine.html#ae4bd9fa57de466e4bc57319b11f6974a',1,'LkEngine']]],
   ['euniformvartype_25',['EUniformVarType',['../d1/d6e/namespaceLkEngine.html#a250747f2c3d3f61c88ba3516dea2a469',1,'LkEngine']]],
-  ['evectorsemantic_26',['EVectorSemantic',['../d9/d77/group__UI.html#ga73602348e3aa8700e668377f70c8aedb',1,'LkEngine::UI']]],
-  ['evertexbufferusage_27',['EVertexBufferUsage',['../d1/d6e/namespaceLkEngine.html#a12b24b6d4cbc7e8fbfb05eb441d8d54a',1,'LkEngine']]]
+  ['evectoraxis_26',['EVectorAxis',['../df/d71/group__Vector.html#ga156a8fc8ff2ddc48aceabb61c6b6e128',1,'LkEngine']]],
+  ['evectorsemantic_27',['EVectorSemantic',['../d9/d77/group__UI.html#ga73602348e3aa8700e668377f70c8aedb',1,'LkEngine::UI']]],
+  ['evertexbufferusage_28',['EVertexBufferUsage',['../d1/d6e/namespaceLkEngine.html#a12b24b6d4cbc7e8fbfb05eb441d8d54a',1,'LkEngine']]]
 ];

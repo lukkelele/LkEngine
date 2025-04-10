@@ -112,7 +112,7 @@ $(function(){initNavTree('d1/d6e/namespaceLkEngine.html','../../'); initResizabl
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
-  <div class="headertitle"><div class="title">LkEngine Namespace Reference<div class="ingroups"><a class="el" href="../../db/d80/group__Core.html">Core</a> &#124; <a class="el" href="../../df/d13/group__Math.html">Math</a> &#124; <a class="el" href="../../db/d80/group__Core.html">Core</a> &raquo; <a class="el" href="../../d0/dd5/group__Time.html">Time</a> &#124; <a class="el" href="../../db/d80/group__Core.html">Core</a> &raquo; <a class="el" href="../../d8/dc2/group__StringUtility.html">String Utility</a></div></div></div>
+  <div class="headertitle"><div class="title">LkEngine Namespace Reference<div class="ingroups"><a class="el" href="../../db/d80/group__Core.html">Core</a> &#124; <a class="el" href="../../db/d80/group__Core.html">Core</a> &raquo; <a class="el" href="../../d0/dd5/group__Time.html">Time</a> &#124; <a class="el" href="../../db/d80/group__Core.html">Core</a> &raquo; <a class="el" href="../../d8/dc2/group__StringUtility.html">String Utility</a></div></div></div>
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
@@ -121,9 +121,6 @@ Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d1c/namespaceLkEngine_1_1LOpenGL__Debug.html">LOpenGL_Debug</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d35/namespaceLkEngine_1_1LOpenGL__Internal.html">LOpenGL_Internal</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d18/namespaceLkEngine_1_1Math.html">Math</a></td></tr>
-<tr class="memdesc:d7/d18/namespaceLkEngine_1_1Math"><td class="mdescLeft">&#160;</td><td class="mdescRight">Engine Mathematics. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/dec/namespaceLkEngine_1_1RGBA32.html">RGBA32</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -600,10 +597,12 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d34/classLkEngine_1_1TSubclassOf.html">TSubclassOf</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/da8/structLkEngine_1_1TVector2.html">TVector2</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Templated two-component vector.  <a href="../../d6/da8/structLkEngine_1_1TVector2.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d95/structLkEngine_1_1TVector3.html">TVector3</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d31/structLkEngine_1_1TVector4.html">TVector4</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Templated four-component vector.  <a href="../../d4/d31/structLkEngine_1_1TVector4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d49/classLkEngine_1_1TWeakPtr.html">TWeakPtr</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -634,6 +633,14 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>FEventCallback</b> =
 <tr class="memitem:a2c495384da5ff2efff2582906d1a3539" id="r_a2c495384da5ff2efff2582906d1a3539"><td class="memItemLeft" align="right" valign="top"><a id="a2c495384da5ff2efff2582906d1a3539" name="a2c495384da5ff2efff2582906d1a3539"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>FEventHandler</b> = std::function&lt;void(<a class="el" href="../../d3/d0e/classLkEngine_1_1LEvent.html">LEvent</a>&amp;)&gt;</td></tr>
 <tr class="separator:a2c495384da5ff2efff2582906d1a3539"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga835d788f3aa1bd4cdd45edee2a70c4fe" id="r_ga835d788f3aa1bd4cdd45edee2a70c4fe"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga835d788f3aa1bd4cdd45edee2a70c4fe">LVector2</a> = <a class="el" href="../../d6/da8/structLkEngine_1_1TVector2.html">TVector2</a>&lt;float&gt;</td></tr>
+<tr class="separator:ga835d788f3aa1bd4cdd45edee2a70c4fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3d7b12ab452ef14a27decce27b306fab" id="r_ga3d7b12ab452ef14a27decce27b306fab"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga3d7b12ab452ef14a27decce27b306fab">LVector3</a> = <a class="el" href="../../d9/d95/structLkEngine_1_1TVector3.html">TVector3</a>&lt;float&gt;</td></tr>
+<tr class="separator:ga3d7b12ab452ef14a27decce27b306fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga22140ffd92e756db9481830dba04173b" id="r_ga22140ffd92e756db9481830dba04173b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga22140ffd92e756db9481830dba04173b">LVector4</a> = <a class="el" href="../../d4/d31/structLkEngine_1_1TVector4.html">TVector4</a>&lt;float&gt;</td></tr>
+<tr class="separator:ga22140ffd92e756db9481830dba04173b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga71fe6dfb111adff2c7dc7f151145ad28" id="r_ga71fe6dfb111adff2c7dc7f151145ad28"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga71fe6dfb111adff2c7dc7f151145ad28">LVector</a> = <a class="el" href="../../df/d71/group__Vector.html#ga3d7b12ab452ef14a27decce27b306fab">LVector3</a></td></tr>
+<tr class="separator:ga71fe6dfb111adff2c7dc7f151145ad28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4e5ba97bfd190774838bdcc0525f1a1" id="r_af4e5ba97bfd190774838bdcc0525f1a1"><td class="memItemLeft" align="right" valign="top"><a id="af4e5ba97bfd190774838bdcc0525f1a1" name="af4e5ba97bfd190774838bdcc0525f1a1"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>FThreadHandle</b> = uint64_t</td></tr>
 <tr class="separator:af4e5ba97bfd190774838bdcc0525f1a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -914,6 +921,19 @@ Enumerations</h2></td></tr>
 , <b>Radian</b>
  }</td></tr>
 <tr class="separator:a31097f95e825f2f8b83859b1d142629b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga156a8fc8ff2ddc48aceabb61c6b6e128" id="r_ga156a8fc8ff2ddc48aceabb61c6b6e128"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga156a8fc8ff2ddc48aceabb61c6b6e128">EVectorAxis</a> : uint32_t { <br />
+&#160;&#160;<b>X</b> = LK_BIT(0)
+, <b>Y</b> = LK_BIT(1)
+, <b>Z</b> = LK_BIT(2)
+, <b>W</b> = LK_BIT(3)
+, <br />
+&#160;&#160;<b>R</b> = X
+, <b>G</b> = Y
+, <b>B</b> = Z
+, <b>A</b> = W
+<br />
+ }</td></tr>
+<tr class="separator:ga156a8fc8ff2ddc48aceabb61c6b6e128"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a33bc98f8c39315a510e2c55e52237e63" id="r_a33bc98f8c39315a510e2c55e52237e63"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33bc98f8c39315a510e2c55e52237e63">ESelectionContext</a> { <b>Global</b> = 0
 , <b>Scene</b>
 , <b>ContentBrowser</b>
@@ -1336,6 +1356,9 @@ template&lt;typename... TArgs&gt; </td></tr>
 template&lt;typename... TArgs&gt; </td></tr>
 <tr class="memitem:a1dccaec24d86ceca266cf94fe53b8860"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>if</b> (TagDetails.Enabled &amp;&amp;(TagDetails.Filter&lt;=Level))</td></tr>
 <tr class="separator:a1dccaec24d86ceca266cf94fe53b8860"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf2afccce6f974b052e5771ca32279565" id="r_gaf2afccce6f974b052e5771ca32279565"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>LK_ENUM_CLASS</b> (<a class="el" href="../../df/d71/group__Vector.html#ga156a8fc8ff2ddc48aceabb61c6b6e128">EVectorAxis</a>)</td></tr>
+<tr class="separator:gaf2afccce6f974b052e5771ca32279565"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga30831cb143505d83587cf5bd01e36189" id="r_ga30831cb143505d83587cf5bd01e36189"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>LK_DECLARE_MULTICAST_DELEGATE</b> (FOnWindowMaximized, const bool)</td></tr>
 <tr class="separator:ga30831cb143505d83587cf5bd01e36189"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1440,30 +1463,6 @@ FOnSceneCreated&#160;</td><td class="memItemRight" valign="bottom"><b>GOnSceneCr
 <tr class="memitem:gaddf1df7db074ace1f3f21195009bf1a1" id="r_gaddf1df7db074ace1f3f21195009bf1a1"><td class="memItemLeft" align="right" valign="top">
 using&#160;</td><td class="memItemRight" valign="bottom"><b>LogLevelColorConfig</b> = std::pair&lt;<a class="el" href="../../de/d7a/group__Log.html#ga6cd544df8e22de2fa59996ff3d021b35">ELogLevel</a>, uint16_t&gt;</td></tr>
 <tr class="separator:gaddf1df7db074ace1f3f21195009bf1a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga156a8fc8ff2ddc48aceabb61c6b6e128" id="r_ga156a8fc8ff2ddc48aceabb61c6b6e128"><td class="memItemLeft" align="right" valign="top"><a id="ga156a8fc8ff2ddc48aceabb61c6b6e128" name="ga156a8fc8ff2ddc48aceabb61c6b6e128"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>EVectorAxis</b> : uint32_t { <br />
-&#160;&#160;<b>X</b> = LK_BIT(0)
-, <b>Y</b> = LK_BIT(1)
-, <b>Z</b> = LK_BIT(2)
-, <b>W</b> = LK_BIT(3)
-, <br />
-&#160;&#160;<b>R</b> = X
-, <b>G</b> = Y
-, <b>B</b> = Z
-, <b>A</b> = W
-<br />
- }</td></tr>
-<tr class="separator:ga156a8fc8ff2ddc48aceabb61c6b6e128"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga835d788f3aa1bd4cdd45edee2a70c4fe" id="r_ga835d788f3aa1bd4cdd45edee2a70c4fe"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga835d788f3aa1bd4cdd45edee2a70c4fe">LVector2</a> = <a class="el" href="../../d6/da8/structLkEngine_1_1TVector2.html">TVector2</a>&lt;float&gt;</td></tr>
-<tr class="separator:ga835d788f3aa1bd4cdd45edee2a70c4fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3d7b12ab452ef14a27decce27b306fab" id="r_ga3d7b12ab452ef14a27decce27b306fab"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga3d7b12ab452ef14a27decce27b306fab">LVector3</a> = <a class="el" href="../../d9/d95/structLkEngine_1_1TVector3.html">TVector3</a>&lt;float&gt;</td></tr>
-<tr class="separator:ga3d7b12ab452ef14a27decce27b306fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga22140ffd92e756db9481830dba04173b" id="r_ga22140ffd92e756db9481830dba04173b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga22140ffd92e756db9481830dba04173b">LVector4</a> = <a class="el" href="../../d4/d31/structLkEngine_1_1TVector4.html">TVector4</a>&lt;float&gt;</td></tr>
-<tr class="separator:ga22140ffd92e756db9481830dba04173b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga71fe6dfb111adff2c7dc7f151145ad28" id="r_ga71fe6dfb111adff2c7dc7f151145ad28"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga71fe6dfb111adff2c7dc7f151145ad28">LVector</a> = <a class="el" href="../../df/d71/group__Vector.html#ga3d7b12ab452ef14a27decce27b306fab">LVector3</a></td></tr>
-<tr class="separator:ga71fe6dfb111adff2c7dc7f151145ad28"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf2afccce6f974b052e5771ca32279565" id="r_gaf2afccce6f974b052e5771ca32279565"><td class="memItemLeft" align="right" valign="top">
-&#160;</td><td class="memItemRight" valign="bottom"><b>LK_ENUM_CLASS</b> (EVectorAxis)</td></tr>
-<tr class="separator:gaf2afccce6f974b052e5771ca32279565"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga58fd3a5607e6637e8616c78271dd2d30" id="r_ga58fd3a5607e6637e8616c78271dd2d30"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/da8/group__Renderer.html#ga58fd3a5607e6637e8616c78271dd2d30">ECameraAction</a> : uint16_t { <b>None</b> = 0
 , <b>Pan</b> = LK_BIT(0)
 , <b>Rotate</b> = LK_BIT(1)

@@ -66,7 +66,7 @@ var annotated_dup =
           ] ]
         ] ]
       ] ],
-      [ "Math", "d7/d18/namespaceLkEngine_1_1Math.html", [
+      [ "Math", null, [
         [ "Internal", null, [
           [ "Vector2Impl", null, [
             [ "Dot", "db/d73/structLkEngine_1_1Math_1_1Internal_1_1Vector2Impl_1_1Dot.html", null ],

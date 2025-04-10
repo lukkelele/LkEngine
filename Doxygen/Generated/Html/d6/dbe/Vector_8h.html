@@ -106,7 +106,10 @@ $(function(){initNavTree('d6/dbe/Vector_8h.html','../../'); initResizable(true);
 <div class="header">
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#define-members">Macros</a>  </div>
+<a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">Vector.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -134,7 +137,21 @@ Macros</h2></td></tr>
 <tr class="memitem:a06e189cd3131dbd45d5eb9f9549e68f6" id="r_a06e189cd3131dbd45d5eb9f9549e68f6"><td class="memItemLeft" align="right" valign="top"><a id="a06e189cd3131dbd45d5eb9f9549e68f6" name="a06e189cd3131dbd45d5eb9f9549e68f6"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>LK_MATH_VECTOR3_EXPLICIT_GLM_CONSTRUCTOR</b>&#160;&#160;&#160;0</td></tr>
 <tr class="separator:a06e189cd3131dbd45d5eb9f9549e68f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga156a8fc8ff2ddc48aceabb61c6b6e128" id="r_ga156a8fc8ff2ddc48aceabb61c6b6e128"><td class="memItemLeft" align="right" valign="top"><a id="ga156a8fc8ff2ddc48aceabb61c6b6e128" name="ga156a8fc8ff2ddc48aceabb61c6b6e128"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>EVectorAxis</b> : uint32_t { <br />
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:ga835d788f3aa1bd4cdd45edee2a70c4fe" id="r_ga835d788f3aa1bd4cdd45edee2a70c4fe"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga835d788f3aa1bd4cdd45edee2a70c4fe">LkEngine::LVector2</a> = <a class="el" href="../../d6/da8/structLkEngine_1_1TVector2.html">TVector2</a>&lt;float&gt;</td></tr>
+<tr class="separator:ga835d788f3aa1bd4cdd45edee2a70c4fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3d7b12ab452ef14a27decce27b306fab" id="r_ga3d7b12ab452ef14a27decce27b306fab"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga3d7b12ab452ef14a27decce27b306fab">LkEngine::LVector3</a> = <a class="el" href="../../d9/d95/structLkEngine_1_1TVector3.html">TVector3</a>&lt;float&gt;</td></tr>
+<tr class="separator:ga3d7b12ab452ef14a27decce27b306fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga22140ffd92e756db9481830dba04173b" id="r_ga22140ffd92e756db9481830dba04173b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga22140ffd92e756db9481830dba04173b">LkEngine::LVector4</a> = <a class="el" href="../../d4/d31/structLkEngine_1_1TVector4.html">TVector4</a>&lt;float&gt;</td></tr>
+<tr class="separator:ga22140ffd92e756db9481830dba04173b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga71fe6dfb111adff2c7dc7f151145ad28" id="r_ga71fe6dfb111adff2c7dc7f151145ad28"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga71fe6dfb111adff2c7dc7f151145ad28">LkEngine::LVector</a> = <a class="el" href="../../df/d71/group__Vector.html#ga3d7b12ab452ef14a27decce27b306fab">LVector3</a></td></tr>
+<tr class="separator:ga71fe6dfb111adff2c7dc7f151145ad28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ga156a8fc8ff2ddc48aceabb61c6b6e128" id="r_ga156a8fc8ff2ddc48aceabb61c6b6e128"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga156a8fc8ff2ddc48aceabb61c6b6e128">LkEngine::EVectorAxis</a> : uint32_t { <br />
 &#160;&#160;<b>X</b> = LK_BIT(0)
 , <b>Y</b> = LK_BIT(1)
 , <b>Z</b> = LK_BIT(2)
@@ -147,16 +164,11 @@ Macros</h2></td></tr>
 <br />
  }</td></tr>
 <tr class="separator:ga156a8fc8ff2ddc48aceabb61c6b6e128"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga835d788f3aa1bd4cdd45edee2a70c4fe" id="r_ga835d788f3aa1bd4cdd45edee2a70c4fe"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga835d788f3aa1bd4cdd45edee2a70c4fe">LkEngine::LVector2</a> = <a class="el" href="../../d6/da8/structLkEngine_1_1TVector2.html">TVector2</a>&lt;float&gt;</td></tr>
-<tr class="separator:ga835d788f3aa1bd4cdd45edee2a70c4fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3d7b12ab452ef14a27decce27b306fab" id="r_ga3d7b12ab452ef14a27decce27b306fab"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga3d7b12ab452ef14a27decce27b306fab">LkEngine::LVector3</a> = <a class="el" href="../../d9/d95/structLkEngine_1_1TVector3.html">TVector3</a>&lt;float&gt;</td></tr>
-<tr class="separator:ga3d7b12ab452ef14a27decce27b306fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga22140ffd92e756db9481830dba04173b" id="r_ga22140ffd92e756db9481830dba04173b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga22140ffd92e756db9481830dba04173b">LkEngine::LVector4</a> = <a class="el" href="../../d4/d31/structLkEngine_1_1TVector4.html">TVector4</a>&lt;float&gt;</td></tr>
-<tr class="separator:ga22140ffd92e756db9481830dba04173b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga71fe6dfb111adff2c7dc7f151145ad28" id="r_ga71fe6dfb111adff2c7dc7f151145ad28"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d71/group__Vector.html#ga71fe6dfb111adff2c7dc7f151145ad28">LkEngine::LVector</a> = <a class="el" href="../../df/d71/group__Vector.html#ga3d7b12ab452ef14a27decce27b306fab">LVector3</a></td></tr>
-<tr class="separator:ga71fe6dfb111adff2c7dc7f151145ad28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
 <tr class="memitem:gaf2afccce6f974b052e5771ca32279565" id="r_gaf2afccce6f974b052e5771ca32279565"><td class="memItemLeft" align="right" valign="top">
-&#160;</td><td class="memItemRight" valign="bottom"><b>LkEngine::LK_ENUM_CLASS</b> (EVectorAxis)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>LkEngine::LK_ENUM_CLASS</b> (<a class="el" href="../../df/d71/group__Vector.html#ga156a8fc8ff2ddc48aceabb61c6b6e128">EVectorAxis</a>)</td></tr>
 <tr class="separator:gaf2afccce6f974b052e5771ca32279565"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>

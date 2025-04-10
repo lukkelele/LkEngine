@@ -33,9 +33,10 @@ var searchData=
   ['eshapetype_30',['EShapeType',['../de/d60/group__CoreTypes.html#ga77292d4c45a324a114d2c53d7482642c',1,'LkEngine']]],
   ['etheme_31',['ETheme',['../d1/d6e/namespaceLkEngine.html#ae4bd9fa57de466e4bc57319b11f6974a',1,'LkEngine']]],
   ['euniformvartype_32',['EUniformVarType',['../d1/d6e/namespaceLkEngine.html#a250747f2c3d3f61c88ba3516dea2a469',1,'LkEngine']]],
-  ['evectorsemantic_33',['EVectorSemantic',['../d9/d77/group__UI.html#ga73602348e3aa8700e668377f70c8aedb',1,'LkEngine::UI']]],
-  ['evertexbufferusage_34',['EVertexBufferUsage',['../d1/d6e/namespaceLkEngine.html#a12b24b6d4cbc7e8fbfb05eb441d8d54a',1,'LkEngine']]],
-  ['example_20uint32_5ft_20_3a_35',['Example (uint32_t):',['../d3/d0c/group__UICore.html#autotoc_md16',1,'']]],
-  ['execute_36',['Execute',['../db/da8/classLkEngine_1_1Core_1_1LDelegate.html#a9dd259281fccb100df87837ed1f480a7',1,'LkEngine::Core::LDelegate']]],
-  ['executeifbound_37',['ExecuteIfBound',['../db/da8/classLkEngine_1_1Core_1_1LDelegate.html#a19ae5184e8aac993b7f0bc108aa4ad0b',1,'LkEngine::Core::LDelegate']]]
+  ['evectoraxis_33',['EVectorAxis',['../df/d71/group__Vector.html#ga156a8fc8ff2ddc48aceabb61c6b6e128',1,'LkEngine']]],
+  ['evectorsemantic_34',['EVectorSemantic',['../d9/d77/group__UI.html#ga73602348e3aa8700e668377f70c8aedb',1,'LkEngine::UI']]],
+  ['evertexbufferusage_35',['EVertexBufferUsage',['../d1/d6e/namespaceLkEngine.html#a12b24b6d4cbc7e8fbfb05eb441d8d54a',1,'LkEngine']]],
+  ['example_20uint32_5ft_20_3a_36',['Example (uint32_t):',['../d3/d0c/group__UICore.html#autotoc_md16',1,'']]],
+  ['execute_37',['Execute',['../db/da8/classLkEngine_1_1Core_1_1LDelegate.html#a9dd259281fccb100df87837ed1f480a7',1,'LkEngine::Core::LDelegate']]],
+  ['executeifbound_38',['ExecuteIfBound',['../db/da8/classLkEngine_1_1Core_1_1LDelegate.html#a19ae5184e8aac993b7f0bc108aa4ad0b',1,'LkEngine::Core::LDelegate']]]
 ];

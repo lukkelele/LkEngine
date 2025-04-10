@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>LkEngine: Core Macros</title>
+<title>LkEngine: CoreMacros</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -106,7 +106,7 @@ $(function(){initNavTree('da/da4/group__CoreMacros.html','../../'); initResizabl
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a>  </div>
-  <div class="headertitle"><div class="title">Core Macros<div class="ingroups"><a class="el" href="../../db/d80/group__Core.html">Core</a></div></div></div>
+  <div class="headertitle"><div class="title">CoreMacros<div class="ingroups"><a class="el" href="../../db/d80/group__Core.html">Core</a></div></div></div>
 </div><!--header-->
 <div class="contents">
 
@@ -115,6 +115,8 @@ $(function(){initNavTree('da/da4/group__CoreMacros.html','../../'); initResizabl
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
+<tr class="memitem:ga5dd6d58161d5078168e114ba189df091" id="r_ga5dd6d58161d5078168e114ba189df091"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga5dd6d58161d5078168e114ba189df091">LCLASS</a>(Class)</td></tr>
+<tr class="separator:ga5dd6d58161d5078168e114ba189df091"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadaeb3c1235416fb1433f98a4456c86ce" id="r_gadaeb3c1235416fb1433f98a4456c86ce"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadaeb3c1235416fb1433f98a4456c86ce">LSTRUCT</a>(Struct)</td></tr>
 <tr class="separator:gadaeb3c1235416fb1433f98a4456c86ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6423d4cb361f36e22ba16643922a1076" id="r_ga6423d4cb361f36e22ba16643922a1076"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga6423d4cb361f36e22ba16643922a1076">LOBJECT_REGISTER</a>(...)</td></tr>
@@ -181,6 +183,52 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a id="ga5dd6d58161d5078168e114ba189df091" name="ga5dd6d58161d5078168e114ba189df091"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5dd6d58161d5078168e114ba189df091">&#9670;&#160;</a></span>LCLASS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LCLASS</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>Class</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keyword">public</span>: \</div>
+<div class="line">        <span class="keyword">using </span>BaseClass = LObject; \</div>
+<div class="line">        <span class="keyword">using </span>ThisClass = Class; \</div>
+<div class="line">        <span class="keyword">virtual</span> std::string ClassName()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> #Class; } \</div>
+<div class="line">        <span class="keyword">static</span> std::string_view StaticClassName() { <span class="keywordflow">return</span> #Class; } \</div>
+<div class="line">        <span class="keyword">static</span> const ::LkEngine::LClass* StaticClass() \</div>
+<div class="line">        { \</div>
+<div class="line">            return ::LkEngine::LClass::Get(<a class="code hl_struct" href="../../d9/dcf/structLkEngine_1_1LType.html">::LkEngine::LType&lt;Class&gt;::ID</a>()); \</div>
+<div class="line">        } \</div>
+<div class="line">        <span class="keyword">virtual</span> const ::LkEngine::LClass* ObjectRegistration() override \</div>
+<div class="line">        { \</div>
+<div class="line">            if (!LObject_bRegistered) \</div>
+<div class="line">            { \</div>
+<div class="line">                <a class="code hl_class" href="../../dc/d16/classLkEngine_1_1LClass.html">::LkEngine::LClass</a>* ObjectClass = <a class="code hl_function" href="../../dc/d16/classLkEngine_1_1LClass.html#a08b8308f13a5d1bb0a907028ed7fd879">::LkEngine::LClass::Register&lt;Class&gt;</a>(#Class); \</div>
+<div class="line">                if (ObjectClass) \</div>
+<div class="line">                { \</div>
+<div class="line">                    LObject_bRegistered = <span class="keyword">true</span>; \</div>
+<div class="line">                } \</div>
+<div class="line">                <span class="keywordflow">return</span> ObjectClass; \</div>
+<div class="line">            } \</div>
+<div class="line">            return ::LkEngine::LClass::Get(<a class="code hl_struct" href="../../d9/dcf/structLkEngine_1_1LType.html">::LkEngine::LType&lt;Class&gt;::ID</a>()); \</div>
+<div class="line">        } \</div>
+<div class="line">        <span class="keyword">inline</span> <span class="keyword">static</span> <span class="keywordtype">bool</span> LObject_bRegistered = <span class="keyword">false</span>; \</div>
+<div class="line">        <span class="keyword">inline</span> static ::LkEngine::EClassType LObject_Type = ::LkEngine::EClassType::LClass;</div>
+<div class="ttc" id="aclassLkEngine_1_1LClass_html"><div class="ttname"><a href="../../dc/d16/classLkEngine_1_1LClass.html">LkEngine::LClass</a></div><div class="ttdef"><b>Definition</b> Class.h:17</div></div>
+<div class="ttc" id="aclassLkEngine_1_1LClass_html_a08b8308f13a5d1bb0a907028ed7fd879"><div class="ttname"><a href="../../dc/d16/classLkEngine_1_1LClass.html#a08b8308f13a5d1bb0a907028ed7fd879">LkEngine::LClass::Register</a></div><div class="ttdeci">static LClass * Register(std::string_view ClassName)</div><div class="ttdoc">Register metadata for a LClass.</div><div class="ttdef"><b>Definition</b> Class.h:67</div></div>
+<div class="ttc" id="astructLkEngine_1_1LType_html"><div class="ttname"><a href="../../d9/dcf/structLkEngine_1_1LType.html">LkEngine::LType</a></div><div class="ttdef"><b>Definition</b> TypeTrait.h:29</div></div>
+</div><!-- fragment --><p>Base classes that inherit from LObject are required to be declared as an LCLASS. Adds the static class type to the metadata registry and implements abstract functions and other base functionality from LObject.</p>
+<p><a class="el" href="../../db/db1/group__LObject.html">LObject</a> </p>
+
+</div>
+</div>
 <a id="ga6423d4cb361f36e22ba16643922a1076" name="ga6423d4cb361f36e22ba16643922a1076"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga6423d4cb361f36e22ba16643922a1076">&#9670;&#160;</a></span>LOBJECT_REGISTER</h2>
 
@@ -204,7 +252,6 @@ Macros</h2></td></tr>
 <div class="line">                ::LkEngine::LObjectBase::SetClass(<span class="keyword">const_cast&lt;</span>::<a class="code hl_class" href="../../dc/d16/classLkEngine_1_1LClass.html">LkEngine::LClass</a>*<span class="keyword">&gt;</span>(ClassObject)); \</div>
 <div class="line">            } \</div>
 <div class="line">        } \</div>
-<div class="ttc" id="aclassLkEngine_1_1LClass_html"><div class="ttname"><a href="../../dc/d16/classLkEngine_1_1LClass.html">LkEngine::LClass</a></div><div class="ttdef"><b>Definition</b> Class.h:17</div></div>
 <div class="ttc" id="aclassLkEngine_1_1LClass_html_aa3e7837bb94831ee19fbb84769eb5ad9"><div class="ttname"><a href="../../dc/d16/classLkEngine_1_1LClass.html#aa3e7837bb94831ee19fbb84769eb5ad9">LkEngine::LClass::Get</a></div><div class="ttdeci">static const LClass * Get(const std::type_index &amp;ClassType)</div><div class="ttdoc">Retrieve metadata for a LClass.</div><div class="ttdef"><b>Definition</b> Class.h:53</div></div>
 </div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000003">Todo</a></b></dt><dd>:<ul>
 <li>Determine if to register class or struct (based on LCLASS or LSTRUCT).</li>
@@ -229,8 +276,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">            <a class="code hl_define" href="../../db/db1/group__LObject.html#ga5dd6d58161d5078168e114ba189df091">LCLASS</a>(__VA_ARGS__);</div>
-<div class="ttc" id="agroup__LObject_html_ga5dd6d58161d5078168e114ba189df091"><div class="ttname"><a href="../../db/db1/group__LObject.html#ga5dd6d58161d5078168e114ba189df091">LCLASS</a></div><div class="ttdeci">#define LCLASS(Class)</div><div class="ttdef"><b>Definition</b> CoreMacros.h:226</div></div>
+<b>Value:</b><div class="fragment"><div class="line">            <a class="code hl_define" href="#ga5dd6d58161d5078168e114ba189df091">LCLASS</a>(__VA_ARGS__);</div>
+<div class="ttc" id="agroup__CoreMacros_html_ga5dd6d58161d5078168e114ba189df091"><div class="ttname"><a href="#ga5dd6d58161d5078168e114ba189df091">LCLASS</a></div><div class="ttdeci">#define LCLASS(Class)</div><div class="ttdef"><b>Definition</b> CoreMacros.h:226</div></div>
 </div><!-- fragment --><p>Declaration for UI panels that derive from LPanel.</p>
 <dl class="section note"><dt>Note</dt><dd>: Mostly a placeholder for now. </dd></dl>
 
@@ -295,8 +342,6 @@ Macros</h2></td></tr>
 <div class="line">        } \</div>
 <div class="line">        <span class="keyword">inline</span> <span class="keyword">static</span> <span class="keywordtype">bool</span> LObject_bRegistered = <span class="keyword">false</span>; \</div>
 <div class="line">        <span class="keyword">inline</span> static ::LkEngine::EClassType LObject_Type = ::LkEngine::EClassType::LStruct;</div>
-<div class="ttc" id="aclassLkEngine_1_1LClass_html_a08b8308f13a5d1bb0a907028ed7fd879"><div class="ttname"><a href="../../dc/d16/classLkEngine_1_1LClass.html#a08b8308f13a5d1bb0a907028ed7fd879">LkEngine::LClass::Register</a></div><div class="ttdeci">static LClass * Register(std::string_view ClassName)</div><div class="ttdoc">Register metadata for a LClass.</div><div class="ttdef"><b>Definition</b> Class.h:67</div></div>
-<div class="ttc" id="astructLkEngine_1_1LType_html"><div class="ttname"><a href="../../d9/dcf/structLkEngine_1_1LType.html">LkEngine::LType</a></div><div class="ttdef"><b>Definition</b> TypeTrait.h:29</div></div>
 </div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000002">Todo</a></b></dt><dd>:<ul>
 <li>SFINAE on LCLASS/LSTRUCT implementations.</li>
 <li>Change 'Class' to 'Struct' in functions.</li>

@@ -7,7 +7,6 @@ var namespaceLkEngine =
       [ "InitializeEnvironment", "d2/d1c/namespaceLkEngine_1_1LOpenGL__Debug.html#ab3de0174302412feac7b6482929ffd6b", null ]
     ] ],
     [ "LOpenGL_Internal", "de/d35/namespaceLkEngine_1_1LOpenGL__Internal.html", null ],
-    [ "Math", "d7/d18/namespaceLkEngine_1_1Math.html", "d7/d18/namespaceLkEngine_1_1Math" ],
     [ "RGBA32", "da/dec/namespaceLkEngine_1_1RGBA32.html", null ],
     [ "SerializationOp", "d4/d0f/namespaceLkEngine_1_1SerializationOp.html", null ],
     [ "StringUtils", "d8/d3e/namespaceLkEngine_1_1StringUtils.html", null ],
@@ -554,6 +553,16 @@ var namespaceLkEngine =
       [ "Vec3", "d1/d6e/namespaceLkEngine.html#a250747f2c3d3f61c88ba3516dea2a469a01b2dc1a2922d9be9e12ef0709600977", null ],
       [ "Sampler2D", "d1/d6e/namespaceLkEngine.html#a250747f2c3d3f61c88ba3516dea2a469a6f0987d6f82566fca538d8c3b8f07ee1", null ],
       [ "Sampler2DArray", "d1/d6e/namespaceLkEngine.html#a250747f2c3d3f61c88ba3516dea2a469a408aa61e1ffcd0ee0e537e2c62645de0", null ]
+    ] ],
+    [ "EVectorAxis", "df/d71/group__Vector.html#ga156a8fc8ff2ddc48aceabb61c6b6e128", [
+      [ "X", "df/d71/group__Vector.html#gga156a8fc8ff2ddc48aceabb61c6b6e128a02129bb861061d1a052c592e2dc6b383", null ],
+      [ "Y", "df/d71/group__Vector.html#gga156a8fc8ff2ddc48aceabb61c6b6e128a57cec4137b614c87cb4e24a3d003a3e0", null ],
+      [ "Z", "df/d71/group__Vector.html#gga156a8fc8ff2ddc48aceabb61c6b6e128a21c2e59531c8710156d34a3c30ac81d5", null ],
+      [ "W", "df/d71/group__Vector.html#gga156a8fc8ff2ddc48aceabb61c6b6e128a61e9c06ea9a85a5088a499df6458d276", null ],
+      [ "R", "df/d71/group__Vector.html#gga156a8fc8ff2ddc48aceabb61c6b6e128ae1e1d3d40573127e9ee0480caf1283d6", null ],
+      [ "G", "df/d71/group__Vector.html#gga156a8fc8ff2ddc48aceabb61c6b6e128adfcf28d0734569a6a693bc8194de62bf", null ],
+      [ "B", "df/d71/group__Vector.html#gga156a8fc8ff2ddc48aceabb61c6b6e128a9d5ed678fe57bcca610140957afab571", null ],
+      [ "A", "df/d71/group__Vector.html#gga156a8fc8ff2ddc48aceabb61c6b6e128a7fc56270e7a70fa81a5935b72eacbe29", null ]
     ] ],
     [ "EVertexBufferUsage", "d1/d6e/namespaceLkEngine.html#a12b24b6d4cbc7e8fbfb05eb441d8d54a", [
       [ "None", "d1/d6e/namespaceLkEngine.html#a12b24b6d4cbc7e8fbfb05eb441d8d54aa6adf97f83acf6453d4a6a4b1070f3754", null ],
