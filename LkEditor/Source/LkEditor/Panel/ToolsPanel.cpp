@@ -497,8 +497,6 @@ namespace LkEngine {
 			{
 				static constexpr float ResetValue = 0.0f;
 				static constexpr float ColumnWidth = 100.0f;
-				static bool bManuallyEdited1 = false;
-				static bool bManuallyEdited2 = false;
 
 				static glm::vec3 VectorData1;
 				static glm::vec3 VectorData2;
@@ -509,10 +507,10 @@ namespace LkEngine {
 					ImGui::TableSetupColumn("ValueColumn", ImGuiTableColumnFlags_IndentEnable | ImGuiTableColumnFlags_NoClip, ImGui::GetContentRegionAvail().x - 100.0f);
 
 					ImGui::TableNextRow();
-					UI::Draw::Vec3Control("Info 1", VectorData1, bManuallyEdited1, ResetValue, 0.10f, 0.0f, 0.0f, ColumnWidth, Axes);
+					UI::Draw::Vec3Control("Info 1", VectorData1, ResetValue, 0.10f, 0.0f, 0.0f, ColumnWidth, Axes);
 
 					ImGui::TableNextRow();
-					UI::Draw::Vec3Control("Info 2", VectorData2, bManuallyEdited2, ResetValue, 1.50f, 10.0f, 100.0f, ColumnWidth, Axes);
+					UI::Draw::Vec3Control("Info 2", VectorData2, ResetValue, 1.50f, 10.0f, 100.0f, ColumnWidth, Axes);
 
 					ImGui::EndTable();
 				}

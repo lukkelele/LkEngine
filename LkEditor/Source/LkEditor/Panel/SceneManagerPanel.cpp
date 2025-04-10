@@ -284,12 +284,11 @@ namespace LkEngine {
 					Changed = UI::Draw::Vec3Control(
 						"Transform", 
 						Translation, 
-						TranslationModified, 
-						0.10f, /* Reset Value. */
+						0.10f, /* Reset value. */
 						EditorSettings.TranslationSnapValue, 
 						UI::Slider::MIN_UNLIMITED,
 						UI::Slider::MAX_UNLIMITED,
-						100.0f,         /* Column Width. */
+						100.0f,         /* Column width. */
 						TranslationAxes /* Axes. */
 					);
 
@@ -298,12 +297,11 @@ namespace LkEngine {
 					Changed |= UI::Draw::Vec3Control(
 						"Rotation", 
 						Rotation, 
-						RotationModified, 
-						0.0f, /* Reset Value. */
+						0.0f, /* Reset value. */
 						EditorSettings.RotationSnapValue, 
 						UI::Slider::MIN_UNLIMITED,
 						UI::Slider::MAX_UNLIMITED,
-						100.0f,       /* Column Width. */
+						100.0f,       /* Column width. */
 						RotationAxes  /* Axes. */
 					);
 
@@ -312,19 +310,20 @@ namespace LkEngine {
 					Changed |= UI::Draw::Vec3Control(
 						"Scale", 
 						Scale, 
-						ScaleModified, 
-						0.010f, 
+						0.010f, /* Reset value. */
 						EditorSettings.ScaleSnapValue, 
 						UI::Slider::MIN_UNLIMITED,
 						UI::Slider::MAX_UNLIMITED,
-						100.0f,    /* Column Width. */
+						100.0f,    /* Column width. */
 						ScaleAxes  /* Axes. */
 					);
 
 					if (Changed)
 					{
+						/* Disabled until the manually edited flag works for the UI sliders. */
 						if (TranslationModified || RotationModified || ScaleModified)
 						{
+					#if 0
 							TranslationAxes = GetInconsistentVectorAxis(Translation, OldTranslation);
 							RotationAxes = GetInconsistentVectorAxis(Rotation, OldRotation);
 							ScaleAxes = GetInconsistentVectorAxis(Scale, OldScale);
@@ -372,6 +371,7 @@ namespace LkEngine {
 							{
 								TransformComp.Scale.z = Scale.z;
 							}
+						#endif
 						}
 						else
 						{
