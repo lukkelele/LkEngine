@@ -31,9 +31,10 @@ var searchData=
   ['getuniformvariable_28',['GetUniformVariable',['../df/d90/classLkEngine_1_1LShader.html#ac890677109c56c0638d52596f6075830',1,'LkEngine::LShader']]],
   ['getuuid_29',['GetUUID',['../de/d46/classLkEngine_1_1LScene.html#af4042320b565f64295cefcdd54f05865',1,'LkEngine::LScene']]],
   ['getviewportbounds_30',['GetViewportBounds',['../d9/d5c/classLkEngine_1_1LViewport.html#a02ea14ee3ec49ee5778cb0d0005c0f6f',1,'LkEngine::LViewport']]],
-  ['global_31',['Global',['../dd/dcd/structLkEngine_1_1Global.html',1,'LkEngine']]],
-  ['globals_32',['Globals',['../d1/dab/group__Globals.html',1,'']]],
-  ['globals_2eh_33',['Globals.h',['../d9/df1/Globals_8h.html',1,'']]],
-  ['glversion_34',['GLVersion',['../d8/d24/structLkEngine_1_1LOpenGLBase_1_1GLVersion.html',1,'LkEngine::LOpenGLBase']]],
-  ['gpumemorystats_35',['GPUMemoryStats',['../dd/d46/structLkEngine_1_1GPUMemoryStats.html',1,'LkEngine']]]
+  ['getwindowsize_31',['GetWindowSize',['../d3/d0c/group__UICore.html#gaf123f8dddf00a02fafa2c0923ff44ffd',1,'LkEngine::UI']]],
+  ['global_32',['Global',['../dd/dcd/structLkEngine_1_1Global.html',1,'LkEngine']]],
+  ['globals_33',['Globals',['../d1/dab/group__Globals.html',1,'']]],
+  ['globals_2eh_34',['Globals.h',['../d9/df1/Globals_8h.html',1,'']]],
+  ['glversion_35',['GLVersion',['../d8/d24/structLkEngine_1_1LOpenGLBase_1_1GLVersion.html',1,'LkEngine::LOpenGLBase']]],
+  ['gpumemorystats_36',['GPUMemoryStats',['../dd/d46/structLkEngine_1_1GPUMemoryStats.html',1,'LkEngine']]]
 ];

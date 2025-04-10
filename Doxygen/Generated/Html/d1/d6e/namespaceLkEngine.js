@@ -36,7 +36,22 @@ var namespaceLkEngine =
       [ "LUIContext", "d6/d71/structLkEngine_1_1UI_1_1LUIContext.html", "d6/d71/structLkEngine_1_1UI_1_1LUIContext" ],
       [ "SizeConstraint", "d5/d04/structLkEngine_1_1UI_1_1SizeConstraint.html", null ],
       [ "SizeConstraint< ImVec2 >", "df/df5/structLkEngine_1_1UI_1_1SizeConstraint_3_01ImVec2_01_4.html", null ],
-      [ "Widget", "d1/d75/classLkEngine_1_1UI_1_1Widget.html", null ]
+      [ "Widget", "d1/d75/classLkEngine_1_1UI_1_1Widget.html", null ],
+      [ "TPropertyMapping", "d3/d0c/group__UICore.html#gae79d3717f642d56688f32e73e005c59c", null ],
+      [ "EFindType", "d3/d0c/group__UICore.html#ga5cf48af55ae1c36ca9d8c92bb7a9ce64", [
+        [ "ID", "d3/d0c/group__UICore.html#gga5cf48af55ae1c36ca9d8c92bb7a9ce64ab718adec73e04ce3ec720dd11a06a308", null ],
+        [ "Name", "d3/d0c/group__UICore.html#gga5cf48af55ae1c36ca9d8c92bb7a9ce64a49ee3087348e8d44e1feda1917443987", null ]
+      ] ],
+      [ "EVectorSemantic", "d9/d77/group__UI.html#ga73602348e3aa8700e668377f70c8aedb", [
+        [ "XYZ", "d9/d77/group__UI.html#gga73602348e3aa8700e668377f70c8aedbae65075d550f9b5bf9992fa1d71a131be", null ],
+        [ "RGB", "d9/d77/group__UI.html#gga73602348e3aa8700e668377f70c8aedba889574aebacda6bfd3e534e2b49b8028", null ],
+        [ "XYZW", "d9/d77/group__UI.html#gga73602348e3aa8700e668377f70c8aedba5b9d516ed57aa77d585a3cc0ab5ffb55", null ],
+        [ "RGBA", "d9/d77/group__UI.html#gga73602348e3aa8700e668377f70c8aedbaea3495a278957dc58165e48a8945469f", null ]
+      ] ],
+      [ "BeginViewport", "d3/d0c/group__UICore.html#ga1b744493e22444657d8088fca6ca9924", null ],
+      [ "GetWindowSize", "d3/d0c/group__UICore.html#gaf123f8dddf00a02fafa2c0923ff44ffd", null ],
+      [ "IsWindowDocked", "d3/d0c/group__UICore.html#gab64d8ec8be6d460bf24357ef31810400", null ],
+      [ "IsWindowFocused", "d3/d0c/group__UICore.html#ga6b85c3c4a525d5aad28f11dc28d11bed", null ]
     ] ],
     [ "AssetEvent", "d5/db1/classLkEngine_1_1AssetEvent.html", null ],
     [ "AssimpLogStream", "d6/da9/structLkEngine_1_1AssimpLogStream.html", null ],
@@ -313,6 +328,13 @@ var namespaceLkEngine =
       [ "YawLocked", "d1/d6e/namespaceLkEngine.html#ga6fd12d38427dfe7f6a75efac935aabd2a2ef8baf5db502eedecc738d032275260", null ],
       [ "Damping", "d1/d6e/namespaceLkEngine.html#ga6fd12d38427dfe7f6a75efac935aabd2acccc1c20db2a516088fca99fc1fa701a", null ]
     ] ],
+    [ "EClassType", "d1/d6e/namespaceLkEngine.html#a4136d41a5a5a3ae7fd23b45f80676ac8", [
+      [ "LField", "d1/d6e/namespaceLkEngine.html#a4136d41a5a5a3ae7fd23b45f80676ac8ac2a4fed8a2204052c8eb00b30d013ed3", null ],
+      [ "LEnum", "d1/d6e/namespaceLkEngine.html#a4136d41a5a5a3ae7fd23b45f80676ac8ab22b7036309329d3d0c3d4d4da33f7e9", null ],
+      [ "LStruct", "d1/d6e/namespaceLkEngine.html#a4136d41a5a5a3ae7fd23b45f80676ac8ac0039f0bfd6793ae63240c70a4e597f7", null ],
+      [ "LClass", "d1/d6e/namespaceLkEngine.html#a4136d41a5a5a3ae7fd23b45f80676ac8afe2c0ec2a7e59e829db478758fd8fff7", null ],
+      [ "LObject", "d1/d6e/namespaceLkEngine.html#a4136d41a5a5a3ae7fd23b45f80676ac8a71915cb5f08282effe6b8e3b84ed4ce8", null ]
+    ] ],
     [ "ECursorMode", "d1/d6e/namespaceLkEngine.html#a18fef5533dc1d79b50eda52adf3c3dee", [
       [ "Normal", "d1/d6e/namespaceLkEngine.html#a18fef5533dc1d79b50eda52adf3c3deea960b44c579bc2f6818d2daaf9e4c16f0", null ],
       [ "Hidden", "d1/d6e/namespaceLkEngine.html#a18fef5533dc1d79b50eda52adf3c3deea7acdf85c69cc3c5305456a293524386e", null ],
@@ -433,6 +455,10 @@ var namespaceLkEngine =
       [ "Held", "d1/d6e/namespaceLkEngine.html#a0cde2d01f58b4c2a9deb8613226f7210aeffe06cc3bbfdd18fa0d95a403cd2d3f", null ],
       [ "Released", "d1/d6e/namespaceLkEngine.html#a0cde2d01f58b4c2a9deb8613226f7210aea1e34304a5d8ffa7c9b0ed8ede4ef1a", null ]
     ] ],
+    [ "ELogFormat", "d1/d6e/namespaceLkEngine.html#a4c1853c23d5b3e71703b1df7e0b4fe82", [
+      [ "Compact", "d1/d6e/namespaceLkEngine.html#a4c1853c23d5b3e71703b1df7e0b4fe82ab1fe2c2a59e883740e7ea87667e44a24", null ],
+      [ "Verbose", "d1/d6e/namespaceLkEngine.html#a4c1853c23d5b3e71703b1df7e0b4fe82ad4a9fa383ab700c5bdd6f31cf7df0faf", null ]
+    ] ],
     [ "ELoggerType", "de/d7a/group__Log.html#ga34215792a547b4593b4249a47992b787", [
       [ "Core", "d1/d6e/namespaceLkEngine.html#ga34215792a547b4593b4249a47992b787a83168e6cb289d732cc78427b51f93153", null ],
       [ "Client", "d1/d6e/namespaceLkEngine.html#ga34215792a547b4593b4249a47992b787a577d7068826de925ea2aec01dbadf5e4", null ],
@@ -537,6 +563,6 @@ var namespaceLkEngine =
     [ "Cast", "de/d60/group__CoreTypes.html#ga99c8f8d32904da326c64787e6f19935a", null ],
     [ "LHash::Generate< EHash::FNV >", "d0/d5d/group__Hash.html#gab7cbe5959dba6d260281c4796b85a138", null ],
     [ "LHash::GenerateChecksum< EChecksum::Crc32 >", "d0/d5d/group__Hash.html#gaee4faa94abeea454d2ee6849718eb910", null ],
-    [ "LK_DECLARE_DELEGATE_RET", "d1/d6e/namespaceLkEngine.html#add40d9e2bc3d37efed81e4ccfb6015fd", null ],
-    [ "LK_DECLARE_MULTICAST_DELEGATE", "d1/d6e/namespaceLkEngine.html#aae085fbacdd8df443b45161cd326611e", null ]
+    [ "LK_DECLARE_DELEGATE_RET", "d3/d0c/group__UICore.html#gadd40d9e2bc3d37efed81e4ccfb6015fd", null ],
+    [ "LK_DECLARE_MULTICAST_DELEGATE", "d3/d0c/group__UICore.html#gaae085fbacdd8df443b45161cd326611e", null ]
 ];

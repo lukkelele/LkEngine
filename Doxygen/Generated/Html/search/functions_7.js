@@ -15,5 +15,7 @@ var searchData=
   ['isregistered_12',['IsRegistered',['../dc/d16/classLkEngine_1_1LClass.html#a7ae51079f67dbd6c6831eb17b830be02',1,'LkEngine::LClass']]],
   ['isrunning_13',['IsRunning',['../d6/d89/classLkEngine_1_1LThread.html#a08f309ac91b295502185bd267f7b9a51',1,'LkEngine::LThread']]],
   ['istimeractive_14',['IsTimerActive',['../df/ddc/classLkEngine_1_1LTimerManager.html#a4fa3e63999ab857a8b48594b085bf0b1',1,'LkEngine::LTimerManager']]],
-  ['isvalid_15',['IsValid',['../d5/d49/classLkEngine_1_1TWeakPtr.html#abe903e46f558ab1689193557e1414fc0',1,'LkEngine::TWeakPtr']]]
+  ['isvalid_15',['IsValid',['../d5/d49/classLkEngine_1_1TWeakPtr.html#abe903e46f558ab1689193557e1414fc0',1,'LkEngine::TWeakPtr']]],
+  ['iswindowdocked_16',['IsWindowDocked',['../d3/d0c/group__UICore.html#gab64d8ec8be6d460bf24357ef31810400',1,'LkEngine::UI']]],
+  ['iswindowfocused_17',['IsWindowFocused',['../d3/d0c/group__UICore.html#ga6b85c3c4a525d5aad28f11dc28d11bed',1,'LkEngine::UI']]]
 ];

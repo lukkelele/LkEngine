@@ -12,10 +12,11 @@ var searchData=
   ['removepointerreferencesmart_9',['RemovePointerReferenceSmart',['../d5/d1d/structLkEngine_1_1Core_1_1RemovePointerReferenceSmart.html',1,'LkEngine::Core']]],
   ['removepointerreferencesmart_3c_20std_3a_3ashared_5fptr_3c_20t_20_3e_20_3e_10',['RemovePointerReferenceSmart&lt; std::shared_ptr&lt; T &gt; &gt;',['../d7/d56/structLkEngine_1_1Core_1_1RemovePointerReferenceSmart_3_01std_1_1shared__ptr_3_01T_01_4_01_4.html',1,'LkEngine::Core']]],
   ['removepointerreferencesmart_3c_20std_3a_3aunique_5fptr_3c_20t_20_3e_20_3e_11',['RemovePointerReferenceSmart&lt; std::unique_ptr&lt; T &gt; &gt;',['../df/db6/structLkEngine_1_1Core_1_1RemovePointerReferenceSmart_3_01std_1_1unique__ptr_3_01T_01_4_01_4.html',1,'LkEngine::Core']]],
-  ['renderer_12',['Renderer',['../dc/da8/group__Renderer.html',1,'']]],
-  ['rendererapi_2eh_13',['RendererAPI.h',['../d8/dfc/RendererAPI_8h.html',1,'']]],
-  ['rendererresource_14',['RendererResource',['../dc/de9/classLkEngine_1_1RendererResource.html',1,'LkEngine']]],
-  ['rendergeometry_15',['RenderGeometry',['../d6/d39/classLkEngine_1_1LOpenGLRenderer.html#a57d42e9306700d9e8ba5d27b43c193ab',1,'LkEngine::LOpenGLRenderer']]],
-  ['rt_5fsetdata_16',['RT_SetData',['../d4/d6c/classLkEngine_1_1LOpenGLUniformBuffer.html#a1405b0e375c456f209491a4c49b7be5d',1,'LkEngine::LOpenGLUniformBuffer::RT_SetData()'],['../df/dbb/classLkEngine_1_1LUniformBuffer.html#aea852ab38a8cd2a4aff72cbfbde4d68b',1,'LkEngine::LUniformBuffer::RT_SetData()']]],
-  ['runtest_17',['RunTest',['../d9/d18/classLkEngine_1_1Test_1_1LAutomationTest.html#ad38ec60067662f696efd88f915958175',1,'LkEngine::Test::LAutomationTest']]]
+  ['removeprefix_12',['RemovePrefix',['../df/dff/CoreMacros_8h.html#afbb2eb2c8abac300e77b569fabdfe217',1,'LkEngine::Core::Internal']]],
+  ['renderer_13',['Renderer',['../dc/da8/group__Renderer.html',1,'']]],
+  ['rendererapi_2eh_14',['RendererAPI.h',['../d8/dfc/RendererAPI_8h.html',1,'']]],
+  ['rendererresource_15',['RendererResource',['../dc/de9/classLkEngine_1_1RendererResource.html',1,'LkEngine']]],
+  ['rendergeometry_16',['RenderGeometry',['../d6/d39/classLkEngine_1_1LOpenGLRenderer.html#a57d42e9306700d9e8ba5d27b43c193ab',1,'LkEngine::LOpenGLRenderer']]],
+  ['rt_5fsetdata_17',['RT_SetData',['../d4/d6c/classLkEngine_1_1LOpenGLUniformBuffer.html#a1405b0e375c456f209491a4c49b7be5d',1,'LkEngine::LOpenGLUniformBuffer::RT_SetData()'],['../df/dbb/classLkEngine_1_1LUniformBuffer.html#aea852ab38a8cd2a4aff72cbfbde4d68b',1,'LkEngine::LUniformBuffer::RT_SetData()']]],
+  ['runtest_18',['RunTest',['../d9/d18/classLkEngine_1_1Test_1_1LAutomationTest.html#ad38ec60067662f696efd88f915958175',1,'LkEngine::Test::LAutomationTest']]]
 ];

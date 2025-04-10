@@ -30,5 +30,6 @@ var searchData=
   ['gettypeid_27',['GetTypeID',['../dc/d16/classLkEngine_1_1LClass.html#acf5cf11f09364ea582de3aa4e69d840f',1,'LkEngine::LClass']]],
   ['getuniformvariable_28',['GetUniformVariable',['../df/d90/classLkEngine_1_1LShader.html#ac890677109c56c0638d52596f6075830',1,'LkEngine::LShader']]],
   ['getuuid_29',['GetUUID',['../de/d46/classLkEngine_1_1LScene.html#af4042320b565f64295cefcdd54f05865',1,'LkEngine::LScene']]],
-  ['getviewportbounds_30',['GetViewportBounds',['../d9/d5c/classLkEngine_1_1LViewport.html#a02ea14ee3ec49ee5778cb0d0005c0f6f',1,'LkEngine::LViewport']]]
+  ['getviewportbounds_30',['GetViewportBounds',['../d9/d5c/classLkEngine_1_1LViewport.html#a02ea14ee3ec49ee5778cb0d0005c0f6f',1,'LkEngine::LViewport']]],
+  ['getwindowsize_31',['GetWindowSize',['../d3/d0c/group__UICore.html#gaf123f8dddf00a02fafa2c0923ff44ffd',1,'LkEngine::UI']]]
 ];

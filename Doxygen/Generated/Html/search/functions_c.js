@@ -5,7 +5,8 @@ var searchData=
   ['remove_2',['Remove',['../d2/d64/classLkEngine_1_1Core_1_1LMulticastDelegate.html#a372b5ea65c2259243677423526a5c82b',1,'LkEngine::Core::LMulticastDelegate']]],
   ['removeall_3',['RemoveAll',['../d2/d64/classLkEngine_1_1Core_1_1LMulticastDelegate.html#a836e75b9171284645e9df17e259b1851',1,'LkEngine::Core::LMulticastDelegate']]],
   ['removefromlivereferences_4',['RemoveFromLiveReferences',['../d3/df6/namespaceLkEngine_1_1TObjectPtr__Internal.html#a7b50e399db11c96de960dd4efe80f55e',1,'LkEngine::TObjectPtr_Internal']]],
-  ['rendergeometry_5',['RenderGeometry',['../d6/d39/classLkEngine_1_1LOpenGLRenderer.html#a57d42e9306700d9e8ba5d27b43c193ab',1,'LkEngine::LOpenGLRenderer']]],
-  ['rt_5fsetdata_6',['RT_SetData',['../d4/d6c/classLkEngine_1_1LOpenGLUniformBuffer.html#a1405b0e375c456f209491a4c49b7be5d',1,'LkEngine::LOpenGLUniformBuffer::RT_SetData()'],['../df/dbb/classLkEngine_1_1LUniformBuffer.html#aea852ab38a8cd2a4aff72cbfbde4d68b',1,'LkEngine::LUniformBuffer::RT_SetData()']]],
-  ['runtest_7',['RunTest',['../d9/d18/classLkEngine_1_1Test_1_1LAutomationTest.html#ad38ec60067662f696efd88f915958175',1,'LkEngine::Test::LAutomationTest']]]
+  ['removeprefix_5',['RemovePrefix',['../df/dff/CoreMacros_8h.html#afbb2eb2c8abac300e77b569fabdfe217',1,'LkEngine::Core::Internal']]],
+  ['rendergeometry_6',['RenderGeometry',['../d6/d39/classLkEngine_1_1LOpenGLRenderer.html#a57d42e9306700d9e8ba5d27b43c193ab',1,'LkEngine::LOpenGLRenderer']]],
+  ['rt_5fsetdata_7',['RT_SetData',['../d4/d6c/classLkEngine_1_1LOpenGLUniformBuffer.html#a1405b0e375c456f209491a4c49b7be5d',1,'LkEngine::LOpenGLUniformBuffer::RT_SetData()'],['../df/dbb/classLkEngine_1_1LUniformBuffer.html#aea852ab38a8cd2a4aff72cbfbde4d68b',1,'LkEngine::LUniformBuffer::RT_SetData()']]],
+  ['runtest_8',['RunTest',['../d9/d18/classLkEngine_1_1Test_1_1LAutomationTest.html#ad38ec60067662f696efd88f915958175',1,'LkEngine::Test::LAutomationTest']]]
 ];

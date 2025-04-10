@@ -1,5 +1,6 @@
 var group__Core =
 [
+    [ "Core Macros", "da/da4/group__CoreMacros.html", "da/da4/group__CoreMacros" ],
     [ "Core Types", "de/d60/group__CoreTypes.html", "de/d60/group__CoreTypes" ],
     [ "Globals", "d1/dab/group__Globals.html", "d1/dab/group__Globals" ],
     [ "Hash Algorithms", "d0/d5d/group__Hash.html", "d0/d5d/group__Hash" ],

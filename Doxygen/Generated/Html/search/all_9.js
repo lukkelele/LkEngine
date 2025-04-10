@@ -51,5 +51,7 @@ var searchData=
   ['issmartpointer_3c_20std_3a_3aunique_5fptr_3c_20t_20_3e_20_3e_48',['IsSmartPointer&lt; std::unique_ptr&lt; T &gt; &gt;',['../d0/da9/structLkEngine_1_1Core_1_1IsSmartPointer_3_01std_1_1unique__ptr_3_01T_01_4_01_4.html',1,'LkEngine::Core']]],
   ['istimeractive_49',['IsTimerActive',['../df/ddc/classLkEngine_1_1LTimerManager.html#a4fa3e63999ab857a8b48594b085bf0b1',1,'LkEngine::LTimerManager']]],
   ['isvalid_50',['IsValid',['../d5/d49/classLkEngine_1_1TWeakPtr.html#abe903e46f558ab1689193557e1414fc0',1,'LkEngine::TWeakPtr']]],
-  ['ithread_51',['IThread',['../d9/dd0/classLkEngine_1_1IThread.html',1,'LkEngine']]]
+  ['iswindowdocked_51',['IsWindowDocked',['../d3/d0c/group__UICore.html#gab64d8ec8be6d460bf24357ef31810400',1,'LkEngine::UI']]],
+  ['iswindowfocused_52',['IsWindowFocused',['../d3/d0c/group__UICore.html#ga6b85c3c4a525d5aad28f11dc28d11bed',1,'LkEngine::UI']]],
+  ['ithread_53',['IThread',['../d9/dd0/classLkEngine_1_1IThread.html',1,'LkEngine']]]
 ];

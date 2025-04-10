@@ -108,8 +108,27 @@ $(function(){initNavTree('dd/da0/todo.html','../../'); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><dl class="reflist">
+<dt>Module <a class="el" href="../../da/da4/group__CoreMacros.html">CoreMacros</a>  </dt>
+<dd><a class="anchor" id="_todo000001"></a>: Should do a required/static_assert on the LClass registration to make sure a class that inherits LObject in fact do implement the LCLASS macro. Otherwise there is risk of undefined behaviour because the LClass registration won't take place.  </dd>
+<dt>Member <a class="el" href="../../d1/d6e/namespaceLkEngine.html#a4136d41a5a5a3ae7fd23b45f80676ac8">LkEngine::EClassType</a>  </dt>
+<dd><a class="anchor" id="_todo000004"></a>: Should be renamed to something else that doesn't contain the word 'Class'.  </dd>
 <dt>Class <a class="el" href="../../df/d6a/classLkEngine_1_1LRendererAPI.html">LkEngine::LRendererAPI</a>  </dt>
-<dd><a class="anchor" id="_todo000003"></a>Might remove deriving from <a class="el" href="../../d0/df3/classLkEngine_1_1LObject.html">LObject</a> here since the renderer API should only be of static use anyways. </dd>
+<dd><a class="anchor" id="_todo000007"></a>Might remove deriving from <a class="el" href="../../d0/df3/classLkEngine_1_1LObject.html">LObject</a> here since the renderer API should only be of static use anyways.  </dd>
+<dt>Member <a class="el" href="../../db/dff/Slider_8h.html#a79866855dcc123e499dbce53ae8b594c">LkEngine::UI::Draw::Vec3Control</a>  (const std::string &amp;Label, VectorType &amp;Values, const float ResetValue=0.0f, const float ValueSpeed=0.10f, const float ValueMin=0.0f, const float ValueMax=0.0f, const float ColumnWidth=100.0f, uint32_t RenderMultiSelectAxes=0, const char *Format="%.2f")</dt>
+<dd><a class="anchor" id="_todo000008"></a>: Should ManuallyEdited be removed alltogether?  </dd>
+<dt>Member <a class="el" href="../../da/da4/group__CoreMacros.html#ga6423d4cb361f36e22ba16643922a1076">LOBJECT_REGISTER</a>  (...)</dt>
+<dd><a class="anchor" id="_todo000003"></a>:<ul>
+<li>Determine if to register class or struct (based on LCLASS or LSTRUCT).</li>
+<li>The class registration should be re-evaluated, as the call to ObjectRegistration should not be needed. The initial call to <a class="el" href="../../dc/d16/classLkEngine_1_1LClass.html#aa3e7837bb94831ee19fbb84769eb5ad9" title="Retrieve metadata for a LClass.">LClass::Get</a> should be enough. </li>
+</ul>
+</dd>
+<dt>Member <a class="el" href="../../da/da4/group__CoreMacros.html#gadaeb3c1235416fb1433f98a4456c86ce">LSTRUCT</a>  (Struct)</dt>
+<dd><a class="anchor" id="_todo000002"></a>:<ul>
+<li>SFINAE on LCLASS/LSTRUCT implementations.</li>
+<li>Change 'Class' to 'Struct' in functions.</li>
+<li>Struct implementation similar to <a class="el" href="../../dc/d16/classLkEngine_1_1LClass.html">LClass</a>. </li>
+</ul>
+</dd>
 </dl>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
