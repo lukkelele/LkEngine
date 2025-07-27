@@ -81,8 +81,7 @@ namespace LkEngine {
 
     /**
      * @class LWindow
-	 * 
-	 * Manages the GLFW context.
+	 * @brief Window that manages a GLFW context.
      */
     class LWindow : public LObject
     {
@@ -206,21 +205,6 @@ namespace LkEngine {
             }
         }
 
-        /// 
-        /// UPDATE ALL THIS 
-        /// 
-		FORCEINLINE float GetScalerX() const { return ViewportScalers.X; }
-		FORCEINLINE float GetScalerY() const { return ViewportScalers.Y; }
-		FORCEINLINE LVector2 GetScalers() const { return ViewportScalers; }
-
-		FORCEINLINE void SetScalerX(const float InX) { ViewportScalers.X = InX; }
-		FORCEINLINE void SetScalerY(const float InY) { ViewportScalers.Y = InY; }
-		FORCEINLINE void SetScalers(const float InX, const float InY)
-		{
-			ViewportScalers.X = InX;
-			ViewportScalers.Y = InY;
-		}
-
         FORCEINLINE FWindowData& GetData() { return Data; }
         FORCEINLINE const FWindowData& GetData() const { return Data; }
         FORCEINLINE const FWindowSpecification& GetSpecification() const { return Specification; }
@@ -241,11 +225,9 @@ namespace LkEngine {
 	    bool bGlfwInitialized = false;
 		GLFWwindow* GlfwWindow{};
 
+        LVector2 Pos = { 0.0f, 0.0f };
         LVector2 Size{};
         LVector2 ViewportSize{};
-
-        LVector2 Pos = { 0.0f, 0.0f };
-        LVector2 ViewportScalers = { 1.0f, 1.0f };
 
         TObjectPtr<LPipeline> m_Pipeline = nullptr;
         TObjectPtr<LSwapChain> m_SwapChain = nullptr;
