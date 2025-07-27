@@ -71,7 +71,6 @@ namespace LkEngine {
 
 	/**
 	 * @class LApplication
-	 *
 	 * @details Application implementation 
 	 */
 	class LApplication : public LObject
@@ -134,7 +133,6 @@ namespace LkEngine {
 		float LastDeltaTime = 0.0f;
 
 		LMetadataRegistry& MetadataRegistry;
-		LGarbageCollector& GarbageCollector;
 		LEventQueue CoreEventQueue;
 
 		TObjectPtr<LWindow> Window{};

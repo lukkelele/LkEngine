@@ -6,7 +6,6 @@
 
 #include <nfd.hpp>
 
-
 namespace LkEngine {
 
 	namespace Core
@@ -27,14 +26,12 @@ namespace LkEngine {
 	LApplication::LApplication(const FApplicationSpecification& InSpecification)
 		: Specification(InSpecification)
 		, MetadataRegistry(LMetadataRegistry::Get())
-		, GarbageCollector(LGarbageCollector::Get())
 		, CoreEventQueue("Core")
 	{
 		LOBJECT_REGISTER(LApplication);
 		Instance = this;
 
 		LCrashHandler::AttachInstance(this);
-		GarbageCollector.Initialize();
 	}
 
 	LApplication::~LApplication()

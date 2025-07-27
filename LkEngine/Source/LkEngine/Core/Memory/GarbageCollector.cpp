@@ -3,7 +3,6 @@
 
 #include "LkEngine/Core/Application.h"
 
-
 namespace LkEngine {
 
 	std::unordered_map<FObjectHandle, TObjectPtr<LObject>> GLiveObjectMap{};
