@@ -227,7 +227,6 @@ namespace LkEngine {
 
 		/* Load editor settings. */
 		EditorSettings.Load();
-		LK_CORE_FATAL_TAG("Editor", "Loading theme: {}", EditorSettings.Theme);
 		if (!EditorSettings.Theme.empty())
 		{
 			if (!LThemeManagerPanel::LoadSavedTheme(EditorSettings.Theme))
