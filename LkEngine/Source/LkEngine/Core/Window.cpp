@@ -21,13 +21,6 @@ namespace LkEngine {
 		Data.Width = static_cast<uint32_t>(Size.X);
 		Data.Height = static_cast<uint32_t>(Size.Y);
 		Data.bVSync = WindowSpecification.bVSync;
-
-	#if defined(LK_PLATFORM_WINDOWS)
-		//GlslVersion = "#version 450";
-		LK_CORE_WARN_TAG("Window", "Skipping glsl version");
-	#elif defined(LK_PLATFORM_LINUX)
-		GlslVersion = "#version 450";
-	#endif
 	}
 
 	LWindow::~LWindow()
