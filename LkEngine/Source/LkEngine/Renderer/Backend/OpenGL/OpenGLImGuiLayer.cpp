@@ -59,9 +59,8 @@ namespace LkEngine {
 
 		/* Initialize ImGui for GLFW and OpenGL. */
         LWindow& Window = LApplication::Get().GetWindow();
-		LK_CORE_FATAL("Initializing ImGui ({})", Window.GetShaderVersion());
 	    ImGui_ImplGlfw_InitForOpenGL(Window.GetGlfwWindow(), true);
-	    ImGui_ImplOpenGL3_Init(Window.GetShaderVersion().c_str());
+		ImGui_ImplOpenGL3_Init("#version 450");
 		LK_CORE_TRACE_TAG("OpenGLImGuiLayer", "ImGui Version: {}", ImGui::GetVersion());
 
 		/* Add fonts. */

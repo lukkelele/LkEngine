@@ -57,7 +57,7 @@ namespace LkEngine {
 		Window->Initialize();
 
 		LInput::Initialize();
-		LSelectionContext::Get(); /* TODO: Instantiate elsewhere */
+		LSelectionContext::Get();
 
 		/* Initialize the renderer. */
 		LRenderer::Initialize();

@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief
+ * @brief Desktop window.
  */
 #pragma once
 
@@ -29,7 +29,7 @@ namespace LkEngine {
 
     /** 
 	 * @struct FWindowSpecification
-	 * @note: Do not use the application config here, or?
+	 * @todo Do not use the application config here, or?
 	 */
 	struct FWindowSpecification
 	{
@@ -223,8 +223,6 @@ namespace LkEngine {
 
         FORCEINLINE FWindowData& GetData() { return Data; }
         FORCEINLINE const FWindowData& GetData() const { return Data; }
-
-        std::string GetShaderVersion() const { return GlslVersion; } /* REMOVE */
         FORCEINLINE const FWindowSpecification& GetSpecification() const { return Specification; }
 
         FORCEINLINE static LWindow& Get() { return *Instance; }
@@ -248,8 +246,6 @@ namespace LkEngine {
 
         LVector2 Pos = { 0.0f, 0.0f };
         LVector2 ViewportScalers = { 1.0f, 1.0f };
-
-		std::string GlslVersion{}; /// REMOVE
 
         TObjectPtr<LPipeline> m_Pipeline = nullptr;
         TObjectPtr<LSwapChain> m_SwapChain = nullptr;
