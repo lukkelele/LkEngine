@@ -48,7 +48,7 @@ namespace LkEngine {
 	public:
 		LScene(const std::string& SceneName, const bool IsEditorScene = false);
 		LScene() = delete;
-		~LScene() = default;
+		~LScene();
 
 		void OnRenderRuntime(TObjectPtr<LSceneRenderer> SceneRenderer, const float DeltaTime);
 		void OnUpdateRuntime(const float InDeltaTime);
@@ -70,9 +70,10 @@ namespace LkEngine {
 		LEntity GetEntityWithUUID(const LUUID UUID);
 
 		FORCEINLINE entt::registry& GetRegistry() { return Registry; }
-		void DestroyEntity(const LEntity Entity);
-		bool HasEntity(const LEntity Entity) const;
-		bool IsEntityInRegistry(const LEntity Entity) const;
+		void DestroyEntity(LEntity Entity);
+		void DestroyEntity(std::string_view EntityName);
+		bool HasEntity(LEntity Entity) const;
+		bool IsEntityInRegistry(LEntity Entity) const;
 
 		LEntity CreateEntity(const std::string& InName = "");
 		LEntity CreateEntityWithID(const LUUID UUID, const std::string& InName = "");
@@ -148,7 +149,11 @@ namespace LkEngine {
 	public:
 		static constexpr const char* FILE_EXTENSION = "lkscene";
 	private:
-		inline static TObjectPtr<LScene> ActiveScene = nullptr; /* TO REMOVE */
+		/**
+		 * @todo The active scene member should be looked at.
+		 * It is quite problematic when releasing scene resources.
+		 */
+		inline static TObjectPtr<LScene> ActiveScene = nullptr;
 		inline static uint8_t SceneCounter = 0;
 	private:
 		LUUID SceneID = 0;
@@ -159,7 +164,6 @@ namespace LkEngine {
 		bool bEditorScene = false;
 
 		entt::registry Registry{};
-		//std::unordered_map<LUUID, LEntity> EntityMap{};
 		std::unordered_map<LUUID, entt::entity> EntityMap{};
 
 		uint16_t ViewportWidth = 0;

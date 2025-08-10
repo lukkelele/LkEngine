@@ -250,6 +250,7 @@ namespace LkEngine {
 		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
 		{
 			LK_CORE_DEBUG_TAG("Editor", "[GOnSceneSetActive] Setting active scene: {}", NewActiveScene->GetName());
+			LK_CORE_FATAL_TAG("Editor", "[GOnSceneSetActive] Setting active scene: {}", NewActiveScene->GetName());
 			SetScene(NewActiveScene);
 		});
 
@@ -1008,14 +1009,45 @@ namespace LkEngine {
 
 		LAssetEditorManager::SetSceneContext(nullptr);
 
+		/**
+		 * @todo A delegate should be used here to cause all objects that hold
+		 * a reference to the current editor scene to remove it.
+		 *
+		 * .OnReleaseScene(EditorScene->GetName() OR EditorScene passed as ref);
+		 */
+
+		/* Clean up scene references. */
+		SceneRenderer->SetScene(nullptr);
+		if (ViewportRenderer)
+		{
+			ViewportRenderer->SetScene(nullptr);
+		}
+
+		/* SceneManager. */
+		FPanelData* PanelData = PanelManager->GetPanelData(PanelID::SceneManager);
+		LK_CORE_VERIFY(PanelData);
+		auto SceneManager = PanelData->Panel.As<LSceneManagerPanel>();
+		SceneManager->SetScene(nullptr);
+
+		/* ContentBrowser. */
+		PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser);
+		LK_CORE_VERIFY(PanelData);
+		auto ContentBrowser = PanelData->Panel.As<LContentBrowserPanel>();
+		ContentBrowser->SetSceneContext(nullptr);
+
+		LSelectionContext::SelectedHandle = 0; /** @fixme: */
+		LSelectionContext::DeselectAll();
+
 		/* Release scene resources. */
+		LScene::ActiveScene = nullptr;
 		RuntimeScene = nullptr;
 		CurrentScene = nullptr;
-		LK_CORE_ASSERT(EditorScene->GetReferenceCount() == 1, "Editor scene is still referenced");
+		LK_CORE_ASSERT(EditorScene->GetReferenceCount() == 1, "Editor scene is still referenced ({} times)", EditorScene->GetReferenceCount());
 		EditorScene = nullptr;
 
 		if (LoadAction == EProjectLoadAction::Unload)
 		{
+			LK_CORE_DEBUG_TAG("Editor", "Unloading project");
 			LProject::SetActive(nullptr);
 		}
 	}
@@ -1822,6 +1854,7 @@ namespace LkEngine {
 			{
 				std::string ProjLocation = LFileSystem::OpenFolderDialog().string();
 				LFileSystem::ConvertToPlatformPath(ProjLocation);
+				LK_CORE_DEBUG("ProjLocation: {}", ProjLocation);
 				std::memcpy(InputBuffer::NewProjectFilePath, ProjLocation.data(), ProjLocation.length());
 			}
 
@@ -1829,6 +1862,7 @@ namespace LkEngine {
 			if (ImGui::Button("Create"))
 			{
 				CreateProject(FullProjectPath);
+				LK_CORE_DEBUG("FullProjectPath: {}", FullProjectPath);
 				ImGui::CloseCurrentPopup();
 			}
 
@@ -1963,7 +1997,7 @@ namespace LkEngine {
 	void LEditorLayer::SetScene(TObjectPtr<LScene> InScene)
 	{
 		LK_CORE_VERIFY(InScene);
-		if (InScene && InScene->bEditorScene)
+		if (InScene->bEditorScene)
 		{
 			EditorScene = InScene;
 			CurrentScene = EditorScene;
@@ -2042,7 +2076,7 @@ namespace LkEngine {
 
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("Create Project"))
+				if (ImGui::MenuItem("New Project"))
 				{
 					UI_NewProjectPopup();
 				}

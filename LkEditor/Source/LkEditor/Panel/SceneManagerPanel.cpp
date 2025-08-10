@@ -479,7 +479,6 @@ namespace LkEngine {
 
 	void LSceneManagerPanel::SetScene(const TObjectPtr<LScene>& InScene)
 	{
-		LK_CORE_VERIFY(InScene, "Invalid scene reference");
 		Scene = InScene;
 	}
 
