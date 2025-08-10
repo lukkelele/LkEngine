@@ -30,20 +30,24 @@ namespace LkEngine {
 		YAML::Emitter Out;
 		SerializeToYaml(Out);
 
-		/* Add file extension to the saved file. */
-		const std::string ProjectSave = LK_FMT_LIB::format("{}/{}.{}", OutFile.string(), Project->GetName(), LProject::FILE_EXTENSION);
+		const std::string ProjectSave = OutFile.string();
 		LK_CORE_TRACE("Project Save: {}", ProjectSave);
+		if (!LFileSystem::Exists(ProjectSave))
+		{
+			LK_CORE_ERROR("Invalid path: {}", ProjectSave);
+			return;
+		}
 
 		std::ofstream FileOut(ProjectSave);
-		if (FileOut.is_open() && FileOut.good())
-		{
-			LK_CORE_INFO_TAG("ProjectSerializer", "Saving: {}", ProjectSave);
-			FileOut << Out.c_str();
-		}
-		else
+		if (!FileOut.is_open() || !FileOut.good())
 		{
 			LK_CORE_ERROR_TAG("ProjectSerializer", "Failed to serialize: '{}'", OutFile.string());
+			LK_CORE_WARN("File: {}", FileOut.is_open() ? "Opened" : "Not opened");
+			return;
 		}
+
+		LK_CORE_INFO_TAG("ProjectSerializer", "Saving: {}", ProjectSave);
+		FileOut << Out.c_str();
 	}
 
 	bool FProjectSerializer::Deserialize(const std::filesystem::path& InFile)

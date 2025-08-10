@@ -98,10 +98,8 @@ namespace LkEngine {
 
 	void LProject::SetActive(TObjectPtr<LProject> InProject)
 	{
-		LK_CORE_VERIFY(InProject, "Project is nullptr");
-
 		/* The currently active Project is not the same as the passed Project argument. */
-		if (ActiveProject && ActiveProject != InProject)
+		if (ActiveProject && (ActiveProject != InProject))
 		{
 			/* Release resources. */
 			AssetManager = nullptr;
@@ -123,8 +121,12 @@ namespace LkEngine {
 				AssetManager->Initialize();
 			}
 
-			OnProjectChanged.Broadcast(ActiveProject);
+			OnProjectChanged.Broadcast(ActiveProject); /** @todo Move to end of function. */
 		}
+		/**
+		 * @todo The broadcast should allow nullptr as value.
+		 */
+		//OnProjectChanged.Broadcast(ActiveProject);
 	}
 
 	std::filesystem::path LProject::GetAssetDirectory()

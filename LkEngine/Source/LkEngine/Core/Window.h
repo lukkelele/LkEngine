@@ -132,21 +132,9 @@ namespace LkEngine {
             return RenderContext; 
         }
 
-        void SetDepthEnabled(const bool InEnabled) 
-        { 
-            if (RenderContext)
-            {
-                RenderContext->SetDepthEnabled(InEnabled); 
-            }
-        }
+        void SetDepthEnabled(const bool InEnabled);
 
-        void SetBlendingEnabled(const bool InEnabled) 
-        { 
-            if (RenderContext)
-            {
-                RenderContext->SetBlendingEnabled(InEnabled); 
-            }
-        }
+        void SetBlendingEnabled(const bool InEnabled);
 
         FORCEINLINE void SetSize(const LVector2& InSize)
         {

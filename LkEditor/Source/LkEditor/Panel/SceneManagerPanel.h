@@ -43,7 +43,7 @@ namespace LkEngine {
 		/**
 		 * Set the scene context.
 		 */
-		void SetScene(const TObjectPtr<LScene>& scene);
+		void SetScene(const TObjectPtr<LScene>& InScene);
 
 		void OnSceneRendererDrawListFlush(const FSceneRendererFlushData& InData);
 		void OnSceneSelectionUpdated(const std::vector<FSceneSelectionData>& InSelectionData);

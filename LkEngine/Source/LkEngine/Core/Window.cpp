@@ -293,9 +293,29 @@ namespace LkEngine {
 		glfwSetWindowTitle(GlfwWindow, Data.Title.c_str());
 	}
 
+	void LWindow::SetDepthEnabled(const bool InEnabled)
+	{
+		if (!RenderContext)
+		{
+			LK_CORE_WARN("Missing render context");
+			return;
+		}
+		RenderContext->SetDepthEnabled(InEnabled);
+	}
+
+	void LWindow::SetBlendingEnabled(const bool InEnabled)
+	{
+		if (!RenderContext)
+		{
+			LK_CORE_WARN("Missing render context");
+			return;
+		}
+		RenderContext->SetBlendingEnabled(InEnabled);
+	}
+
 	void LWindow::Maximize()
 	{
-		LK_CORE_ASSERT(GlfwWindow);
+		LK_CORE_VERIFY(GlfwWindow);
 		if (glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED) == GLFW_FALSE)
 		{
 			glfwMaximizeWindow(GlfwWindow);
@@ -310,19 +330,19 @@ namespace LkEngine {
 
 	bool LWindow::IsMaximized() const
 	{
-		LK_CORE_ASSERT(GlfwWindow);
+		LK_CORE_VERIFY(GlfwWindow);
 		return (glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED) == GLFW_TRUE);
 	}
 
 	void LWindow::Minimize()
 	{
-		LK_CORE_ASSERT(GlfwWindow);
+		LK_CORE_VERIFY(GlfwWindow);
 		glfwIconifyWindow(GlfwWindow);
 	}
 
 	bool LWindow::IsMinimized() const
 	{
-		LK_CORE_ASSERT(GlfwWindow);
+		LK_CORE_VERIFY(GlfwWindow);
 		return (glfwGetWindowAttrib(GlfwWindow, GLFW_MAXIMIZED) == GLFW_FALSE);
 	}
 
