@@ -15,7 +15,7 @@ namespace LkEngine {
 	{
 	}
 
-	void FProjectSerializer::Serialize(const std::filesystem::path& OutFile)
+	ESerializeResult FProjectSerializer::Serialize(const std::filesystem::path& OutFile)
 	{
 		LK_CORE_VERIFY(!OutFile.empty(), "Cannot serialize an empty file");
 		LK_CORE_INFO_TAG("ProjectSerializer", "Serializing to file: {}", OutFile);
@@ -31,23 +31,23 @@ namespace LkEngine {
 		SerializeToYaml(Out);
 
 		const std::string ProjectSave = OutFile.string();
-		LK_CORE_TRACE("Project Save: {}", ProjectSave);
 		if (!LFileSystem::Exists(ProjectSave))
 		{
-			LK_CORE_ERROR("Invalid path: {}", ProjectSave);
-			return;
+			LK_CORE_ERROR_TAG("ProjectSerializer", "File doesn't exist: {}", ProjectSave);
+			return ESerializeResult::FileDoesNotExist;
 		}
 
 		std::ofstream FileOut(ProjectSave);
 		if (!FileOut.is_open() || !FileOut.good())
 		{
-			LK_CORE_ERROR_TAG("ProjectSerializer", "Failed to serialize: '{}'", OutFile.string());
-			LK_CORE_WARN("File: {}", FileOut.is_open() ? "Opened" : "Not opened");
-			return;
+			LK_CORE_ERROR_TAG("ProjectSerializer", "Serialization failed, file failed to open: '{}'", OutFile.string());
+			return ESerializeResult::FileInvalid;
 		}
 
 		LK_CORE_INFO_TAG("ProjectSerializer", "Saving: {}", ProjectSave);
 		FileOut << Out.c_str();
+
+		return ESerializeResult::Success;
 	}
 
 	bool FProjectSerializer::Deserialize(const std::filesystem::path& InFile)
@@ -64,12 +64,12 @@ namespace LkEngine {
 		StrStream << InputStream.rdbuf();
 		try
 		{
-			LK_CORE_DEBUG_TAG("ProjectSerializer", "Deserializing: {}", InFile.string());
+			LK_CORE_INFO_TAG("ProjectSerializer", "Deserializing: {}", InFile.string());
 			DeserializeFromYaml(StrStream.str(), Project->GetConfiguration());
 		}
 		catch (const YAML::Exception& Exception)
 		{
-			LK_CORE_ASSERT(false, "Deserialization failed for '{}', error: '{}'", InFile.string(), Exception.what());
+			LK_CORE_ASSERT(false, "Deserialization failed for '{}': \"{}\"", InFile.string(), Exception.what());
 			return false;
 		}
 

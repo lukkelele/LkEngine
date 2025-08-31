@@ -57,17 +57,17 @@
 /**
  * Editor Console bundled with the core logger, placing logs in both.
  */
-#define LK_CORE_CONSOLE_TRACE(...)   LK_CORE_TRACE(__VA_ARGS__); \
+#define LK_CORE_CONSOLE_TRACE(...)   LK_CORE_TRACE_TAG("Console", __VA_ARGS__); \
 									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Trace, __VA_ARGS__)
-#define LK_CORE_CONSOLE_DEBUG(...)   LK_CORE_DEBUG(__VA_ARGS__); \
+#define LK_CORE_CONSOLE_DEBUG(...)   LK_CORE_DEBUG_TAG("Console", __VA_ARGS__); \
 									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Debug, __VA_ARGS__)
-#define LK_CORE_CONSOLE_INFO(...)    LK_CORE_INFO(__VA_ARGS__); \
+#define LK_CORE_CONSOLE_INFO(...)    LK_CORE_INFO_TAG("Console", __VA_ARGS__); \
 									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Info, __VA_ARGS__)
-#define LK_CORE_CONSOLE_WARN(...)    LK_CORE_WARN(__VA_ARGS__); \
+#define LK_CORE_CONSOLE_WARN(...)    LK_CORE_WARN_TAG("Console", __VA_ARGS__); \
 									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Warning, __VA_ARGS__)
-#define LK_CORE_CONSOLE_ERROR(...)   LK_CORE_ERROR(__VA_ARGS__); \
+#define LK_CORE_CONSOLE_ERROR(...)   LK_CORE_ERROR_TAG("Console", __VA_ARGS__); \
 									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Error, __VA_ARGS__)
-#define LK_CORE_CONSOLE_FATAL(...)	 LK_CORE_FATAL(__VA_ARGS__); \
+#define LK_CORE_CONSOLE_FATAL(...)	 LK_CORE_FATAL_TAG("Console", __VA_ARGS__); \
 									 ::LkEngine::LLog::PrintMessage(::LkEngine::ELoggerType::EditorConsole, ::LkEngine::ELogLevel::Fatal, __VA_ARGS__)
 
 /** 

@@ -34,19 +34,18 @@ namespace LkEngine
 /* TODO: Possible to statically evaluate the 'PropertyName' argument and if it's an Lvalue or Rvalue? */
 
 /**
- * LK_SERIALIZE_PROPERTY
- * 
- *  Serialize a property to a YAML node.
- *  The property name should NOT be passed with quotes.
+ * @def LK_SERIALIZE_PROPERTY
+ * @brief Serialize a property to a YAML node.
+ * The property name should NOT be passed with quotes.
  */
 #define LK_SERIALIZE_PROPERTY(PropertyName, PropertyValue, OutputNode) \
 	OutputNode << YAML::Key << #PropertyName << YAML::Value << PropertyValue
 
 /**
- * LK_SERIALIZE_PROPERTY_VALUE
- * 
- *  Serialize a property to a YAML node.
- *  The property argument is a value itself (e.g a string from Enum::ToString).
+ * @def LK_SERIALIZE_PROPERTY_VALUE
+ * @brief Serialize a property to a YAML node.
+ * The property argument is a value itself (e.g a string from Enum::ToString)
+ * and should not be passed with quotes.
  */
 #define LK_SERIALIZE_PROPERTY_VALUE(Property, PropertyValue, OutputNode) \
 	OutputNode << YAML::Key << Property << YAML::Value << PropertyValue
@@ -55,10 +54,9 @@ namespace LkEngine
 	OutputData << YAML::Key << #PropertyName << YAML::Value << (PropertyValue ? static_cast<uint64_t>(PropertyValue->Handle) : 0);
 
 /**
- * LK_DESERIALIZE_PROPERTY
- * 
- *  Deserialize a property from a YAML node.
- *  The property name should NOT be passed with quotes.
+ * @def LK_DESERIALIZE_PROPERTY
+ * @brief Deserialize a property from its name in a YAML node.
+ * The property name should NOT be passed with quotes.
  */
 #define LK_DESERIALIZE_PROPERTY(PropertyName, Destination, Node, DefaultValue) \
 	if (Node.IsMap())                                                          \
@@ -77,7 +75,7 @@ namespace LkEngine
 		}                                                                      \
 		else                                                                   \
 		{                                                                      \
-			LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY", "Failed to find property: '{}'", #PropertyName); \
+			LK_CORE_WARN_TAG("LK_DESERIALIZE_PROPERTY", "Unknown property: '{}'", #PropertyName); \
 			Destination = DefaultValue;                                        \
 		}                                                                      \
 	}                                                                          \
@@ -88,10 +86,10 @@ namespace LkEngine
 	}
 
 /**
- * LK_DESERIALIZE_PROPERTY_VALUE
- * 
- *  Deserialize a property using the property value from a YAML node.
- *  The property value should NOT be passed with quotes.
+ * @def LK_DESERIALIZE_PROPERTY_VALUE
+ * @brief Deserialize a property using a passable value in a YAML node.
+ * The property value argument is a value itself (e.g a string from Enum::ToString)
+ * and should not be passed with quotes.
  */
 #define LK_DESERIALIZE_PROPERTY_VALUE(PropertyValue, Destination, Node, DefaultValue) \
 	if (Node.IsMap())                                                                 \
@@ -110,7 +108,7 @@ namespace LkEngine
 		}                                                                             \
 		else                                                                          \
 		{                                                                             \
-			LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY_VALUE", "Failed to find property: '{}'", PropertyValue); \
+			LK_CORE_ERROR_TAG("LK_DESERIALIZE_PROPERTY_VALUE", "Unknown property: '{}'", PropertyValue); \
 			Destination = DefaultValue;                                               \
 		}                                                                             \
 	}                                                                                 \

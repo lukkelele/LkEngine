@@ -12,6 +12,14 @@ namespace LkEngine {
 		Yaml,
 	};
 
+	enum class ESerializeResult
+	{
+		Success,
+		FileInvalid,
+		FileIsDirectory,
+		FileDoesNotExist,
+	};
+
 	namespace Enum 
 	{
 		FORCEINLINE static constexpr const char* ToString(const ESerializeFormat Format)
@@ -25,12 +33,10 @@ namespace LkEngine {
 			LK_CORE_VERIFY(false);
 			return nullptr;
 		}
-
 	}
 
-
 	/**
-	 * ISerializable
+	 * @class ISerializable
 	 */
 	class ISerializable
 	{

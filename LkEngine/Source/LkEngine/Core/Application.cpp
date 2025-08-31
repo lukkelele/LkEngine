@@ -124,7 +124,7 @@ namespace LkEngine {
 	{
 		if (bRunning)
 		{
-			LK_CORE_INFO("Shutting down");
+			LK_CORE_INFO("Shutting down engine");
 			Core::OnEngineShutdown.Broadcast();
 
 			/* Serialize application configuration. */
@@ -142,9 +142,10 @@ namespace LkEngine {
 				Project->Save();
 			}
 
+			LK_CORE_INFO_TAG("Application", "Releasing layer stack");
 			LayerStack.Destroy();
 
-			LK_CORE_DEBUG_TAG("Application", "Destroying renderer");
+			LK_CORE_INFO_TAG("Application", "Destroying renderer");
 			LRenderer::Shutdown();
 			UILayer->Destroy();
 
@@ -156,7 +157,7 @@ namespace LkEngine {
 			bRunning = false;
 		}
 
-		LK_CORE_INFO("Shutting down LkEngine");
+		LK_INFO("Exiting LkEngine");
 	}
 
 	bool LApplication::ReadConfigurationFile(FApplicationSpecification& InSpecification)

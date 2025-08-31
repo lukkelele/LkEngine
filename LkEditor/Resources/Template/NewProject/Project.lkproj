@@ -1,6 +1,8 @@
 Project:
   Name: $PROJECT_NAME$
   AssetDirectory: Assets
-  AssetRegistry: Assets/AssetRegistry.lkr
-  MeshPath: Assets/Meshes
-  MeshSourcePath: Assets/Meshes/Source
+  AssetRegistryPath: Assets/AssetRegistry.lkr
+  MeshDirectory: Assets/Meshes
+  StartScene:
+  AutoSave: true
+  AutoSaveInterval: 180

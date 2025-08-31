@@ -9,7 +9,6 @@
 #include "LkEngine/Serialization/FileStream.h"
 #include "LkEngine/Serialization/Serializer.h"
 
-
 namespace LkEngine {
 
 	class FProjectSerializer
@@ -19,7 +18,7 @@ namespace LkEngine {
 		FProjectSerializer() = delete;
 		~FProjectSerializer() = default;
 
-        void Serialize(const std::filesystem::path& OutFile);
+        ESerializeResult Serialize(const std::filesystem::path& OutFile);
 		bool Deserialize(const std::filesystem::path& InFile);
 
 	private:

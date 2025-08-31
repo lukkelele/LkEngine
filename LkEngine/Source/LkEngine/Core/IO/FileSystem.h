@@ -9,6 +9,7 @@
 
 /* Remove microsoft's filesystem macros. */
 #if defined(LK_PLATFORM_WINDOWS) && defined(CreateDirectory)
+#	undef CreateFile
 #	undef CreateDirectory
 #	undef MoveFile
 #	undef CopyFile
@@ -17,13 +18,14 @@
 #	undef SetEnvironmentVariable
 #endif
 
-
 namespace LkEngine {
 
 	class LFileSystem
 	{
 	public:
 		static bool Exists(const std::filesystem::path& Filepath);
+		static bool CreateFile(const std::filesystem::path& Filepath);
+		static bool CreateFile(const std::filesystem::path& Filepath, const std::string& Content);
 		static bool DeleteFile(const std::filesystem::path& Filepath);
 
 		static bool Move(const std::filesystem::path& OldFilepath, const std::filesystem::path& NewFilepath);

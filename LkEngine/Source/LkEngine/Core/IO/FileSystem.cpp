@@ -55,6 +55,28 @@ namespace LkEngine {
 		return std::filesystem::exists(Filepath);
 	}
 
+	bool LFileSystem::CreateFile(const std::filesystem::path& Filepath)
+	{
+		std::ofstream File(Filepath, std::ios::app);
+		return File.is_open();
+	}
+
+	bool LFileSystem::CreateFile(const std::filesystem::path& Filepath, const std::string& Content)
+	{
+		std::ofstream File(Filepath, std::ios::app);
+		if (!File.is_open())
+		{
+			return false;
+		}
+		if (!Content.empty())
+		{
+			File << Content << std::endl;
+		}
+
+		return true;
+	}
+
+
 	bool LFileSystem::DeleteFile(const std::filesystem::path& Filepath)
 	{
 		LK_CORE_ASSERT(!Filepath.empty(), "Cannot delete an empty file");
