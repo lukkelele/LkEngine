@@ -250,7 +250,6 @@ namespace LkEngine {
 		GOnSceneSetActive.Add([&](const TObjectPtr<LScene>& NewActiveScene)
 		{
 			LK_CORE_DEBUG_TAG("Editor", "[GOnSceneSetActive] Setting active scene: {}", NewActiveScene->GetName());
-			LK_CORE_FATAL_TAG("Editor", "[GOnSceneSetActive] Setting active scene: {}", NewActiveScene->GetName());
 			SetScene(NewActiveScene);
 		});
 
@@ -263,7 +262,7 @@ namespace LkEngine {
 		PanelManager->Serialize();
 		LAssetEditorManager::UnregisterEditors();
 
-		LK_CORE_DEBUG_TAG("Editor", "Saving editor settings");
+		LK_CORE_INFO_TAG("Editor", "Saving editor settings");
 		if (FPanelData* PanelData = PanelManager->GetPanelData(PanelID::ThemeManager); (PanelData != nullptr) && PanelData->Panel)
 		{
 			EditorSettings.Theme = LThemeManagerPanel::GetCurrentThemeName();
@@ -283,8 +282,8 @@ namespace LkEngine {
 			}
 		#endif
 		}
-		EditorSettings.Save();
 
+		EditorSettings.Save();
 		SceneRenderer->SetScene(nullptr);
 	}
 
@@ -911,45 +910,62 @@ namespace LkEngine {
 		if (!ProjectSerializer.Deserialize(ProjectPath))
 		{
 			LK_CORE_ERROR_TAG("Editor", "Failed to deserialize project: '{}'", ProjectPath);
-			/* Early exit here or? */
+			/** 
+			 * @todo Should handle this case based on a retval. 
+			 * For either invalid/missing project file and/or invalid YAML formatting.
+			 */
 		}
 
 		FProjectConfiguration& ProjectConfig = Project->GetConfiguration();
 		ProjectConfig.ProjectFileName = ProjectPath.filename().string();
 		ProjectConfig.ProjectDirectory = LFileSystem::ConvertToUnixPath(ProjectPath.parent_path());
 
+		/* Validate configuration. */
 		if (ProjectConfig.AssetDirectory.empty())
 		{
-			LK_CORE_WARN_TAG("Editor", "Project configuration is missing a valid asset directory entry");
 			ProjectConfig.AssetDirectory = LFileSystem::GetAssetsDir().string();
+			LK_CORE_WARN_TAG("Editor", "Project is missing a valid asset directory entry, set to default: {}", ProjectConfig.AssetDirectory);
 		}
 		if (ProjectConfig.AssetRegistryPath.empty())
 		{
-			LK_CORE_WARN_TAG("Editor", "Project configuration is missing a valid asset registry entry");
+			LK_CORE_WARN_TAG("Editor", "Project is missing a valid asset registry entry");
 			ProjectConfig.AssetRegistryPath = std::filesystem::path(ProjectPath.parent_path() / "AssetRegistry.lkr").string();
 			if (!LFileSystem::Exists(ProjectConfig.AssetRegistryPath))
 			{
-				LK_CORE_WARN_TAG("Editor", "Asset registry is still missing");
+				if (!LFileSystem::CreateFile(ProjectConfig.AssetRegistryPath))
+				{
+					LK_CORE_ERROR_TAG("Editor", "Asset registry still missing");
+					/** @fixme: Should crash if this happens, or? */
+				}
 			}
-			/* TODO: Invoke project save here so the asset registry is created. */
 		}
 
-		/** The delegate 'OnProjectChanged' will broadcast once the project is set as active. */
+		/** 
+		 * @todo The project activation should be done AFTER the scene is validated. 
+		 * Need to make sure it works before moving it though.
+		 */
+		/* The delegate 'OnProjectChanged' will broadcast once the project is set as active. */
 		LProject::SetActive(Project);
 
+		/* The start scene might be named 'null' if the deserializer encounters an empty 'StartScene' value. */
+		bool ProjectHasScene = false;
 		std::string StartScene = Project->GetConfiguration().StartScene;
-		/* Add the scene extension if it is missing. */
-		if (StartScene.find(LScene::FILE_EXTENSION) == std::string::npos)
+		if (!StartScene.empty() && (StartScene != "null"))
 		{
-			StartScene += LK_FMT_LIB::format(".{}",LScene::FILE_EXTENSION);
+			/* Add the scene extension if it is missing. */
+			if (StartScene.find(LScene::FILE_EXTENSION) == std::string::npos)
+			{
+				StartScene += LK_FMT_LIB::format(".{}",LScene::FILE_EXTENSION);
+				ProjectHasScene = true;
+			}
 		}
 
-		bool ProjectHasScene = !StartScene.empty();
+		LK_CORE_DEBUG_TAG("Editor", "ProjectHasScene={}", ProjectHasScene);
 		if (ProjectHasScene)
 		{
 			constexpr bool CheckForAutosaves = true;
 			const std::filesystem::path StartScenePath = std::filesystem::path(ProjectConfig.ProjectDirectory) / "Scenes" / StartScene;
-			LK_CORE_TRACE_TAG("Editor", "Start scene path: {}", StartScenePath.string());
+			LK_CORE_DEBUG_TAG("Editor", "StartScene: \"{}\"", StartScenePath.string());
 			ProjectHasScene = OpenScene(StartScenePath.string(), CheckForAutosaves);
 		}
 
@@ -961,7 +977,7 @@ namespace LkEngine {
 
 		if (EditorScene)
 		{
-			LK_CORE_DEBUG("Attempting to find editor camera entity");
+			LK_CORE_INFO_TAG("Editor", "Attempting to find editor camera entity in scene '{}'", EditorScene->GetName());
 			if (LEntity CameraEntity = EditorScene->FindEntity("EditorCamera"))
 			{
 				LK_CORE_VERIFY(CameraEntity.HasComponent<LTransformComponent>());
@@ -979,7 +995,7 @@ namespace LkEngine {
 			}
 			else
 			{
-				LK_CORE_INFO_TAG("Editor", "Adding editor camera to the scene '{}'", EditorScene->GetName());
+				LK_CORE_INFO_TAG("Editor", "Adding editor camera to scene");
 				CameraEntity = EditorScene->CreateEntity("EditorCamera");
 				auto& CameraComp = CameraEntity.AddComponent<LCameraComponent>();
 				CameraComp.Camera = EditorCamera;
@@ -989,7 +1005,8 @@ namespace LkEngine {
 
 		LSelectionContext::DeselectAll();
 
-		LK_CORE_CONSOLE_TRACE("Clearing editor input buffers");
+		//LK_CORE_DEBUG("Clearing editor input buffers");
+		LK_CORE_CONSOLE_DEBUG("Clearing editor input buffers");
 		std::memset(InputBuffer::ProjectName, 0, PROJECT_NAME_LENGTH_MAX);
 		std::memset(InputBuffer::NewProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
 		std::memset(InputBuffer::OpenProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
@@ -1056,6 +1073,7 @@ namespace LkEngine {
 	{
 		if (TObjectPtr<LProject> CurrentProject = LProject::Current(); CurrentProject != nullptr)
 		{
+			LK_CORE_INFO_TAG("Editor", "Saving: {}", CurrentProject->GetName());
 			FProjectSerializer ProjectSerializer(CurrentProject);
 			const FProjectConfiguration& Config = CurrentProject->GetConfiguration();
 			if (Config.ProjectDirectory.empty() || Config.ProjectFileName.empty())
@@ -1943,7 +1961,7 @@ namespace LkEngine {
 		LK_CORE_INFO_TAG("Editor", "Opening scene '{}'", Filepath.filename().string());
 		if (!LFileSystem::Exists(Filepath))
 		{
-			LK_CORE_ERROR_TAG("Editor", "Tried loading a non-existing scene: {}", Filepath.string());
+			LK_CORE_ERROR_TAG("Editor", "Tried opening a scene that does not exist: {}", Filepath.string());
 			return false;
 		}
 

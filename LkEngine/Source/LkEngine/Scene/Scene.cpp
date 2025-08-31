@@ -164,12 +164,8 @@ namespace LkEngine {
 		{
 			const LTagComponent& TagComp = View.get<LTagComponent>(Entity);
 			LK_CORE_INFO("Entity: {} ({})  NAME EQUAL: {}", TagComp.Tag, Entity, TagComp.Tag == EntityName ? "YES" : "No");
-			//if (strcmp(TagComp.Tag.c_str(), Name.c_str()) == 0)
-			//if (std::string_view(TagComp.Tag) == Name)
-			//if (TagComp.Tag == Name.c_str())
 			if (TagComp.Tag == EntityName)
 			{
-				//return LEntity{ Entity , this };
 				LEntity Temp{ Entity , this };
 				EntityMap.erase(Temp.GetUUID());
 				Registry.destroy(Entity);
@@ -179,7 +175,6 @@ namespace LkEngine {
 		}
 
 		LK_CORE_WARN_TAG("Scene", "Failed to destroy: {}", EntityName);
-		//Registry.destroy(Entity);
 	}
 
 	bool LScene::HasEntity(const LEntity Entity) const

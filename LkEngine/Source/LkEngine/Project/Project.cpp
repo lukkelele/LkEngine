@@ -60,6 +60,7 @@ namespace LkEngine {
 
 	bool LProject::Save()
 	{
+		LK_INFO_TAG("Project", "Saving: {}", Configuration.Name);
 		LK_CORE_CONSOLE_INFO("Saving project: {}", Configuration.Name);
 		if (AssetManager)
 		{
@@ -74,7 +75,7 @@ namespace LkEngine {
 		FProjectSerializer ProjectSerializer(this);
 
 		const std::filesystem::path ProjectPath = Configuration.ProjectDirectory;
-		LK_CORE_TRACE("Project path: {}", ProjectPath.string());
+		LK_CORE_DEBUG("Project path: {}", ProjectPath.string());
 		if (ProjectPath.empty())
 		{
 			LK_CORE_ERROR_TAG("Project", "Could not save project: '{}'", ProjectPath.string());

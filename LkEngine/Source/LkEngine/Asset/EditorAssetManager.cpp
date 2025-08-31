@@ -438,7 +438,7 @@ namespace LkEngine {
 		#endif
 		}
 
-		LK_CORE_INFO_TAG("EditorAssetManager", "Loading asset registry ({})", AssetRegistryPath.filename().string());
+		LK_CORE_INFO_TAG("EditorAssetManager", "Loading: {}", AssetRegistryPath);
 		std::ifstream InputStream(AssetRegistryPath);
 		LK_CORE_VERIFY(InputStream.is_open(), "Inputstream is not OK");
 		std::stringstream StringStream;

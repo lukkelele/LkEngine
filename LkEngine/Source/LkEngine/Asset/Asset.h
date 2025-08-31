@@ -105,7 +105,8 @@ namespace LkEngine {
 		{
 			if (CompactFormat)
 			{
-				return LK_FMT_LIB::format("Asset={:12} Type={} File={} Loaded={} MemoryOnly={}",
+				//return LK_FMT_LIB::format("Asset={:12} Type={} File=\"{}\" Loaded={} MemoryOnly={}",
+				return LK_FMT_LIB::format("Asset={} Type={} File=\"{}\" Loaded={} MemoryOnly={}",
 								          (LUUID::SizeType)Handle, Enum::ToString(Type), 
 								          FilePath.string(), 
 								          (bIsDataLoaded ? "Yes" : "No"), 
