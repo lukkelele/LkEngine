@@ -1,3 +1,3 @@
 @echo off
-python ../GenerateProjects.py
+python GenerateProjects.py
 PAUSE
