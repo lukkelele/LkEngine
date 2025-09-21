@@ -71,17 +71,16 @@ namespace LkEngine {
 			LK_CORE_ERROR_TAG("Project", "Failed to write asset registry to disk, no asset manager instance exists");
 		}
 
-		/* Serialize to disk. */
-		FProjectSerializer ProjectSerializer(this);
-
 		const std::filesystem::path ProjectPath = Configuration.ProjectDirectory;
-		LK_CORE_DEBUG("Project path: {}", ProjectPath.string());
+		LK_CORE_DEBUG_TAG("Project", "Project path: {}", ProjectPath.string());
 		if (ProjectPath.empty())
 		{
 			LK_CORE_ERROR_TAG("Project", "Could not save project: '{}'", ProjectPath.string());
 			return false;
 		}
 
+		/* Serialize to disk. */
+		FProjectSerializer ProjectSerializer(this);
 		ProjectSerializer.Serialize(ProjectPath);
 
 		/* Save the scene. */
