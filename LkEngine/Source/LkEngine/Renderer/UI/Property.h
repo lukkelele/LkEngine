@@ -130,6 +130,8 @@ namespace LkEngine::UI {
 
 	/**
 	 * Property without any value (property label).
+	 * 
+	 * @todo Labels should be able to be left-aligned easily instead of always centered.
 	 */
 	template<typename T>
 	FORCEINLINE bool PropertyLabel(const char* Label, const T Value, const char* HelpText = "")
