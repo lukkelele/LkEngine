@@ -81,7 +81,7 @@
 #	define LK_FMT_LIB fmt
 #endif
 
-#define LK_FMT LK_FMT_LIB
+#define LK_FMT LK_FMT_LIB::format
 
 #define LK_MARK_FUNC_NOT_IMPLEMENTED(...) \
 	LK_CORE_ASSERT(false, "[ FUNCTION NOT IMPLEMENTED ]\n{}" __VA_OPT__("\n{}"), LK_FUNCSIG __VA_OPT__(, __VA_ARGS__))

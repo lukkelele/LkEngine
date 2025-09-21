@@ -600,14 +600,12 @@ namespace LkEngine {
 					UI::Draw::Vec3Control("Position", EditorCamera.Position);
 					UI::Draw::Vec3Control("Position Delta", EditorCamera.PositionDelta);
 					
-					ImGui::PushStyleColor(ImGuiCol_FrameBg, RGBA32::Compliment);
 					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
 					UI::Draw::DragFloat("FOV (Deg)", &EditorCamera.DegPerspectiveFov, 1.0f, 30.0f, 135.0f, "%1.f");
 					UI::Draw::DragFloat("Distance", &EditorCamera.Distance, 1.0f, 0.0f, 100.0f, "%1.f");
 					UI::Draw::DragFloat("Speed", &EditorCamera.NormalSpeed, 1.0f, 0.0f, 100.0f, "%1.f");
 					UI::Draw::DragFloat("Travel Speed", &EditorCamera.TravelSpeed, 1.0f, 0.0f, 100.0f, "%1.f");
 					ImGui::PopStyleVar(1);
-					ImGui::PopStyleColor(1);
 
 					/* Camera Projection Dropdown. */
 					{
@@ -1005,7 +1003,6 @@ namespace LkEngine {
 
 		LSelectionContext::DeselectAll();
 
-		//LK_CORE_DEBUG("Clearing editor input buffers");
 		LK_CORE_CONSOLE_DEBUG("Clearing editor input buffers");
 		std::memset(InputBuffer::ProjectName, 0, PROJECT_NAME_LENGTH_MAX);
 		std::memset(InputBuffer::NewProjectFilePath, 0, PROJECT_NAME_LENGTH_MAX);
@@ -1042,13 +1039,13 @@ namespace LkEngine {
 
 		/* SceneManager. */
 		FPanelData* PanelData = PanelManager->GetPanelData(PanelID::SceneManager);
-		LK_CORE_VERIFY(PanelData);
+		LK_CORE_VERIFY(PanelData, "PanelID::SceneManager is invalid");
 		auto SceneManager = PanelData->Panel.As<LSceneManagerPanel>();
 		SceneManager->SetScene(nullptr);
 
 		/* ContentBrowser. */
 		PanelData = PanelManager->GetPanelData(PanelID::ContentBrowser);
-		LK_CORE_VERIFY(PanelData);
+		LK_CORE_VERIFY(PanelData, "PanelID::ContentBrowser is invalid");
 		auto ContentBrowser = PanelData->Panel.As<LContentBrowserPanel>();
 		ContentBrowser->SetSceneContext(nullptr);
 
@@ -1064,7 +1061,7 @@ namespace LkEngine {
 
 		if (LoadAction == EProjectLoadAction::Unload)
 		{
-			LK_CORE_DEBUG_TAG("Editor", "Unloading project");
+			LK_CORE_INFO_TAG("Editor", "Unloading project");
 			LProject::SetActive(nullptr);
 		}
 	}
@@ -2395,14 +2392,7 @@ namespace LkEngine {
 			const float Height = std::min(static_cast<float>(Icon->GetHeight()), ButtonSize) - PaddingY * 2.0f;
 			const float Width = ((float)Icon->GetWidth() / (float)Icon->GetHeight() * Height);
 			const bool Clicked = ImGui::InvisibleButton(UI::GenerateID(), ImVec2(Width, Height));
-			UI::DrawButtonImage(
-				Icon,
-				Tint,
-				Tint,
-				Tint,
-				UI::RectOffset(UI::GetItemRect(), 0.0f, PaddingY)
-			);
-
+			UI::DrawButtonImage(Icon, Tint, Tint, Tint, UI::RectOffset(UI::GetItemRect(), 0.0f, PaddingY));
 			return Clicked;
 		};
 
