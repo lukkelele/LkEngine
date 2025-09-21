@@ -112,10 +112,16 @@ $(function(){initNavTree('dd/da0/todo.html','../../'); initResizable(true); });
 <dd><a class="anchor" id="_todo000001"></a>: Should do a required/static_assert on the LClass registration to make sure a class that inherits LObject in fact do implement the LCLASS macro. Otherwise there is risk of undefined behaviour because the LClass registration won't take place.  </dd>
 <dt>Member <a class="el" href="../../d1/d6e/namespaceLkEngine.html#a4136d41a5a5a3ae7fd23b45f80676ac8">LkEngine::EClassType</a>  </dt>
 <dd><a class="anchor" id="_todo000004"></a>: Should be renamed to something else that doesn't contain the word 'Class'.  </dd>
+<dt>Struct <a class="el" href="../../dd/da9/structLkEngine_1_1FWindowSpecification.html">LkEngine::FWindowSpecification</a>  </dt>
+<dd><a class="anchor" id="_todo000006"></a>Do not use the application config here, or?  </dd>
+<dt>Member <a class="el" href="../../df/d99/classLkEngine_1_1LProject.html#a2dfce5363a599d2159878a223abb9ea3">LkEngine::LProject::SetActive</a>  (TObjectPtr&lt; LProject &gt; Project)</dt>
+<dd><p class="startdd"><a class="anchor" id="_todo000008"></a>Move to end of function. </p>
+<p class="enddd"><a class="anchor" id="_todo000009"></a>The broadcast should allow nullptr as value.  </p>
+</dd>
 <dt>Class <a class="el" href="../../df/d6a/classLkEngine_1_1LRendererAPI.html">LkEngine::LRendererAPI</a>  </dt>
-<dd><a class="anchor" id="_todo000007"></a>Might remove deriving from <a class="el" href="../../d0/df3/classLkEngine_1_1LObject.html">LObject</a> here since the renderer API should only be of static use anyways.  </dd>
+<dd><a class="anchor" id="_todo000010"></a>Might remove deriving from <a class="el" href="../../d0/df3/classLkEngine_1_1LObject.html">LObject</a> here since the renderer API should only be of static use anyways.  </dd>
 <dt>Member <a class="el" href="../../db/dff/Slider_8h.html#a79866855dcc123e499dbce53ae8b594c">LkEngine::UI::Draw::Vec3Control</a>  (const std::string &amp;Label, VectorType &amp;Values, const float ResetValue=0.0f, const float ValueSpeed=0.10f, const float ValueMin=0.0f, const float ValueMax=0.0f, const float ColumnWidth=100.0f, uint32_t RenderMultiSelectAxes=0, const char *Format="%.2f")</dt>
-<dd><a class="anchor" id="_todo000008"></a>: Should ManuallyEdited be removed alltogether?  </dd>
+<dd><a class="anchor" id="_todo000012"></a>: Should ManuallyEdited be removed alltogether?  </dd>
 <dt>Member <a class="el" href="../../da/da4/group__CoreMacros.html#ga6423d4cb361f36e22ba16643922a1076">LOBJECT_REGISTER</a>  (...)</dt>
 <dd><a class="anchor" id="_todo000003"></a>:<ul>
 <li>Determine if to register class or struct (based on LCLASS or LSTRUCT).</li>

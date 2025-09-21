@@ -118,31 +118,30 @@ $(function(){initNavTree('db/d69/ProjectSerializer_8h_source.html','../../'); in
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;LkEngine/Serialization/FileStream.h&quot;</span></div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;LkEngine/Serialization/Serializer.h&quot;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/d6e/namespaceLkEngine.html">LkEngine</a> {</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="foldopen" id="foldopen00015" data-start="{" data-end="};">
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">   15</a></span>    <span class="keyword">class </span><a class="code hl_class" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">FProjectSerializer</a></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    {</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <a class="code hl_class" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">FProjectSerializer</a>(<a class="code hl_class" href="../../d9/d62/classLkEngine_1_1TObjectPtr.html">TObjectPtr&lt;LProject&gt;</a> InProject);</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <a class="code hl_class" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">FProjectSerializer</a>() = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        <a class="code hl_class" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">~FProjectSerializer</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="keywordtype">void</span> Serialize(<span class="keyword">const</span> std::filesystem::path&amp; OutFile);</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="keywordtype">bool</span> Deserialize(<span class="keyword">const</span> std::filesystem::path&amp; InFile);</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="keywordtype">void</span> SerializeToYaml(YAML::Emitter&amp; Out);</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        <span class="keywordtype">bool</span> DeserializeFromYaml(<span class="keyword">const</span> std::string&amp; YamlString, <a class="code hl_struct" href="../../d8/de0/structLkEngine_1_1FProjectConfiguration.html">FProjectConfiguration</a>&amp; ProjectConfig);</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <a class="code hl_class" href="../../d9/d62/classLkEngine_1_1TObjectPtr.html">TObjectPtr&lt;LProject&gt;</a> Project{};</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    };</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/d6e/namespaceLkEngine.html">LkEngine</a> {</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="foldopen" id="foldopen00014" data-start="{" data-end="};">
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">   14</a></span>    <span class="keyword">class </span><a class="code hl_class" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">FProjectSerializer</a></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        <a class="code hl_class" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">FProjectSerializer</a>(<a class="code hl_class" href="../../d9/d62/classLkEngine_1_1TObjectPtr.html">TObjectPtr&lt;LProject&gt;</a> InProject);</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <a class="code hl_class" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">FProjectSerializer</a>() = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <a class="code hl_class" href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">~FProjectSerializer</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        ESerializeResult Serialize(<span class="keyword">const</span> std::filesystem::path&amp; OutFile);</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="keywordtype">bool</span> Deserialize(<span class="keyword">const</span> std::filesystem::path&amp; InFile);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="keywordtype">void</span> SerializeToYaml(YAML::Emitter&amp; Out);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="keywordtype">bool</span> DeserializeFromYaml(<span class="keyword">const</span> std::string&amp; YamlString, <a class="code hl_struct" href="../../d8/de0/structLkEngine_1_1FProjectConfiguration.html">FProjectConfiguration</a>&amp; ProjectConfig);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <a class="code hl_class" href="../../d9/d62/classLkEngine_1_1TObjectPtr.html">TObjectPtr&lt;LProject&gt;</a> Project{};</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    };</div>
 </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>}</div>
-<div class="ttc" id="aclassLkEngine_1_1FProjectSerializer_html"><div class="ttname"><a href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">LkEngine::FProjectSerializer</a></div><div class="ttdef"><b>Definition</b> ProjectSerializer.h:16</div></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>}</div>
+<div class="ttc" id="aclassLkEngine_1_1FProjectSerializer_html"><div class="ttname"><a href="../../dd/df1/classLkEngine_1_1FProjectSerializer.html">LkEngine::FProjectSerializer</a></div><div class="ttdef"><b>Definition</b> ProjectSerializer.h:15</div></div>
 <div class="ttc" id="aclassLkEngine_1_1TObjectPtr_html"><div class="ttname"><a href="../../d9/d62/classLkEngine_1_1TObjectPtr.html">LkEngine::TObjectPtr</a></div><div class="ttdef"><b>Definition</b> ObjectPtr.h:102</div></div>
 <div class="ttc" id="anamespaceLkEngine_html"><div class="ttname"><a href="../../d1/d6e/namespaceLkEngine.html">LkEngine</a></div><div class="ttdef"><b>Definition</b> Asset.h:11</div></div>
 <div class="ttc" id="astructLkEngine_1_1FProjectConfiguration_html"><div class="ttname"><a href="../../d8/de0/structLkEngine_1_1FProjectConfiguration.html">LkEngine::FProjectConfiguration</a></div><div class="ttdef"><b>Definition</b> Project.h:19</div></div>
