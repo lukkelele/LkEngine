@@ -30,11 +30,16 @@ namespace LkEngine {
 		YAML::Emitter Out;
 		SerializeToYaml(Out);
 
-		const std::string ProjectSave = OutFile.string();
+		std::string ProjectSave = OutFile.string();
 		if (!LFileSystem::Exists(ProjectSave))
 		{
 			LK_CORE_ERROR_TAG("ProjectSerializer", "File doesn't exist: {}", ProjectSave);
 			return ESerializeResult::FileDoesNotExist;
+		}
+		else if (LFileSystem::IsDirectory(ProjectSave))
+		{
+			/* Add project file to the outfile path. */
+			ProjectSave += LK_FMT("/{}.{}", OutFile.stem(), LProject::FILE_EXTENSION);
 		}
 
 		std::ofstream FileOut(ProjectSave);
