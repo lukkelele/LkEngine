@@ -74,8 +74,8 @@ Dependency = {
 	Assimp = {
         IncludeDir = "%{wks.location}/External/Assimp/assimp/include",
 		Windows = { 
-			LibName = "assimp-vc143-mt",
-			DebugLibName = "assimp-vc143-mtd", 
+			LibName = "assimp",
+			DebugLibName = "assimp",
 			LibDir = "%{wks.location}/External/Libraries" 
 		},
 		Linux = { 
