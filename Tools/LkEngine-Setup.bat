@@ -1,3 +1,3 @@
 @echo off
-python LkEngine-Setup.py
+python ..\Setup.py
 PAUSE
