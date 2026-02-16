@@ -6,7 +6,9 @@
 # Build Assimp and move the created static library to 'External/Libraries'.
 #--------------------------------------------------------------------------
 import sys
+import re
 import os
+
 file_dirname = os.path.basename(os.path.dirname(__file__))
 if file_dirname == "LkEngine":
     sys.path.append(os.path.join(os.path.dirname(__file__), "Tools/Module"))
@@ -39,21 +41,40 @@ elif file_dirname == "Module":
 
 Logger = ScriptLogger("LkEngine")
 
-# Paths to Assimp, build and output directories.
-parent_dir = Path.cwd().parent
-if Path.is_dir(parent_dir) and parent_dir.name == "LkEngine":
-    AssimpDir = os.path.join("..", "External", "Assimp", "assimp")
-    BuildDir = os.path.join(AssimpDir, "build")
-    OutputDir = os.path.join("..", "External", "Libraries")
-elif Path.is_dir(parent_dir.parent) and parent_dir.name == "Tools":
-    AssimpDir = os.path.join("..", "..", "External", "Assimp", "assimp")
-    BuildDir = os.path.join(AssimpDir, "build")
-    OutputDir = os.path.join("..", "..", "External", "Libraries")
-else:
-    print("[Build-Assimp] Failed find assimp directory (LkEngine/External)", flush=True);
-    print(f" * Current Dir: {Path().resolve()}", flush=True)
-    print(f" * Parent Dir: {Path.cwd().parent.resolve()}", flush=True)
+def FindLibrary(BuildDir, BuildConfig):
+    """Find the generated Assimp library."""
+    if SystemPlatform == "Windows":
+        SearchDir = Path(BuildDir) / "lib" / BuildConfig
+        Pattern = re.compile(r"assimp-vc\d+-mt(d?)\.lib$", re.IGNORECASE)
+    else:
+        SearchDir = Path(BuildDir) / "lib"
+        Pattern = re.compile(r"libassimp\.a$", re.IGNORECASE)
+
+    print(f"[Build-Assimp] SearchDir: {SearchDir}", flush=True)
+    if not SearchDir.exists():
+        print(f"[Build-Assimp] Library search directory does not exist: {SearchDir}", flush=True)
+        return None
+
+    for File in SearchDir.iterdir():
+        if File.is_file() and Pattern.match(File.name):
+            return File
+
+    print(f"[Build-Assimp] Failed to locate Assimp library in: {SearchDir}", flush=True)
+    return None
+
+CurrentDir = Path(__file__).resolve().parent
+ProjectRoot = CurrentDir
+
+while ProjectRoot.name != "LkEngine" and ProjectRoot != ProjectRoot.parent:
+    ProjectRoot = ProjectRoot.parent
+
+if ProjectRoot.name != "LkEngine":
+    print("[Build-Assimp] Failed to locate LkEngine root", flush=True)
     sys.exit(1)
+
+AssimpDir = ProjectRoot / "External" / "Assimp" / "assimp"
+BuildDir = AssimpDir / "build"
+OutputDir = ProjectRoot / "External" / "Libraries"
 
 if verbose: print(f"[Build-Assimp] Output dir: {OutputDir}", flush=True)
 # Ensure the output directory exists.
@@ -74,22 +95,11 @@ if Architecture != "x64":
     print(f"[Build-Assimp] Warning: System architecture is not 64-bit")
 
 LibraryExtension = ".lib" if IsPlatformWindows else ".a"
-if SystemPlatform == "Windows":
-    LibraryFileDebug = "assimp-vc143-mtd" + LibraryExtension
-    LibraryFileRelease = "assimp-vc143-mt" + LibraryExtension
-elif SystemPlatform == "Linux":
-    LibraryFileDebug = "libassimp" + LibraryExtension
-    LibraryFileRelease = "libassimp" + LibraryExtension
-else:
-    print(f"[Build-Assimp] Unsupported platform", flush=True)
-    exit(1)
-
 if verbose: print(f"[Build-Assimp] Build Dir: {Path(BuildDir).resolve()}", flush=True)
 
 # TODO: Automatic selection of Debug/Release.
 BuildAsDebug = True
 BuildConfig = "debug" if BuildAsDebug else "release"
-LibraryFile = LibraryFileDebug if BuildAsDebug else LibraryFileRelease
 
 # CMake flags.
 CMakeFlags = [
@@ -108,39 +118,37 @@ CMakeFlags = [
     "-DASSIMP_BUILD_OBJ_EXPORTER=ON",
 ]
 
-def _RunCMakeConfiguration():
+def RunCMakeConfiguration():
     """Run CMake configure command."""
     # TODO: Automatic assignment of architecture.
     result = None
     if verbose: print(f"[Build-Assimp] Current File Parent Directory: {Path(__file__).parent.resolve()}", flush=True)
     if verbose: print(f"[Build-Assimp] Current Working Directory: {Path().resolve()}", flush=True)
     if IsPlatformWindows:
-        result = subprocess.check_call(["cmake", "..", "-A", f"{Architecture}"] + CMakeFlags, cwd=BuildDir)
+        toolset = "v143"
+        result = subprocess.check_call(["cmake", "..", "-A", f"{Architecture}", "-T", toolset] + CMakeFlags, cwd=BuildDir)
     else:
         result = subprocess.check_call(["cmake", ".."] + CMakeFlags, cwd=BuildDir)
     return result
 
-def _BuildAssimp():
+def InvokeCMakeBuild():
     """Run CMake build command."""
     if verbose: print(f"[Build-Assimp] Running: 'cmake --build . --config {BuildConfig}'", flush=True)
     build_command = ["cmake", "--build", ".", "--config", BuildConfig]
     result = subprocess.check_call(build_command, cwd=BuildDir)
     return result
 
-def _CopyGeneratedFiles():
+def CopyGeneratedFiles():
     """Copy the generated files to the desired locations."""
-    if SystemPlatform == "Windows":
-        SourceFile = os.path.join(BuildDir, "lib", BuildConfig, LibraryFile)
-        DestinationFile = os.path.join(OutputDir, LibraryFile)
-    elif SystemPlatform == "Linux":
-        SourceFile = os.path.join(BuildDir, "lib", LibraryFile)
-        DestinationFile = os.path.join(OutputDir, LibraryFile)
-    else:
-        print(f"[Build-Assimp] Unsupported platform", flush=True)
-        exit(1)
 
-    if verbose: print(f"[Build-Assimp] Copying static library\n  Source: {Path(SourceFile).resolve()}\n  Destination: {Path(DestinationFile).resolve()}\n", flush=True)
-    shutil.copy2(SourceFile, DestinationFile)
+    LibraryFile = FindLibrary(BuildDir, BuildConfig)
+    if LibraryFile is None:
+        print(f"[Build-Assimp] LibraryFile is None, exiting", flush=True)
+        sys.exit(1)
+
+    DestinationFile = OutputDir / f"assimp{LibraryExtension}"
+    print(f"[Build-Assimp] Copying static library\n  Source: {Path(LibraryFile).resolve()}\n  Destination: {Path(DestinationFile).resolve()}", flush=True)
+    shutil.copy2(LibraryFile, DestinationFile)
 
     # Copy config.h and revision.h headers to Assimp's include directory.
     AssimpConfigHeader = Path(AssimpDir, "include/assimp/config.h")
@@ -168,7 +176,7 @@ def _CopyGeneratedFiles():
     if verbose: print(f"[Build-Assimp] Copying: {ZLibFileName}{LibraryExtension} -> {OutputDir}")
     shutil.copy2(ZLibFile, os.path.join(OutputDir, ZLibFileName + LibraryExtension))
 
-def _CleanUpAfterBuild():
+def CleanUpAfterBuild():
     """Clean up build files."""
     if os.path.exists(BuildDir):
         if verbose: print(f"[Build-Assimp] Cleaning up build files from '{Path(BuildDir).resolve()}'", flush=True)
@@ -182,15 +190,17 @@ def BuildAssimp():
     else: 
         if verbose: print(f"[Build-Assimp] Creating build directory: {BuildDir}", flush=True)
     os.makedirs(BuildDir, exist_ok=True)
+
     try:
-        CMakeConfigResult = _RunCMakeConfiguration()
+        CMakeConfigResult = RunCMakeConfiguration()
         if CMakeConfigResult != 0:
             print(f"[Build-Assimp] Error occured during the CMake configuration", flush=True)
             return 1 # Return non-zero to indicate error.
-        BuildResult = _BuildAssimp()
-        _CopyGeneratedFiles()
+
+        BuildResult = InvokeCMakeBuild()
+        CopyGeneratedFiles()
         if clean:
-            _CleanUpAfterBuild()
+            CleanUpAfterBuild()
         else:
             if verbose: print(f"[Build-Assimp] Skipping clean after build ({BuildDir})")
         return BuildResult 
