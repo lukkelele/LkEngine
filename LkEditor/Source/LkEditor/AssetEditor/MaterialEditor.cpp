@@ -134,89 +134,6 @@ namespace LkEngine {
 
 		UI::EndPropertyGrid();
 
-	#if 0
-		/* Uniform manipulation. */
-		{
-			static constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
-			if (ImGui::BeginTable("##MaterialEditor-Uniforms", 2, TableFlags))
-			{
-				ImGui::TableSetupColumn("Uniform", ImGuiTableColumnFlags_WidthFixed);
-				ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed, 180.0f);
-				ImGui::TableHeadersRow();
-
-				for (const auto& [UniformType, UniformName] : ShaderUniforms)
-				{
-					ImGui::TableNextRow();
-
-					ImGui::TableSetColumnIndex(0);
-					ImGui::Text("%s", UniformName.c_str());
-
-					ImGui::TableSetColumnIndex(1);
-					if (UniformType == EUniformVarType::Bool)
-					{
-						bool Value = 0;
-						Shader->Get(UniformName, Value);
-						ImGui::Text("%d", Value);
-
-						ImGui::SameLine(0, 5.0f);
-						ImGui::PushStyleColor(ImGuiCol_Button, (Value ? RGBA32::BrightGreen : RGBA32::BackgroundDark));
-						if (ImGui::Button("Toggle"))
-						{
-							Shader->Set(UniformName, !Value);
-						}
-						ImGui::PopStyleColor();
-					}
-					else if (UniformType == EUniformVarType::Float)
-					{
-						float Value = 0;
-						Shader->Get(UniformName, Value);
-
-						float FloatValue = Value;
-						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-						ImGui::SliderFloat(LK_FMT_LIB::format("##{}", UniformName).c_str(), &FloatValue, -1.0f, 1.0f, "%.2f", ImGuiSliderFlags_None);
-						if (FloatValue != Value)
-						{
-							Shader->Set(UniformName, static_cast<decltype(Value)>(FloatValue));
-						}
-					}
-					else if (UniformType == EUniformVarType::Vec3)
-					{
-						glm::vec3 Value{};
-						Shader->Get(UniformName, Value);
-
-						glm::vec3 VecValue = Value;
-						ImGui::SetNextItemWidth(180.0f);
-						ImGui::SliderFloat3(LK_FMT_LIB::format("##{}", UniformName).c_str(), &VecValue.x, -10.0f, 10.0f, "%.2f", ImGuiSliderFlags_None);
-						if (VecValue != Value)
-						{
-							Shader->Set(UniformName, static_cast<decltype(Value)>(VecValue));
-						}
-					}
-					else if (UniformType == EUniformVarType::Sampler2D)
-					{
-						uint32_t Value = 0;
-						Shader->Get(UniformName, Value);
-
-						int IntValue = Value;
-						ImGui::SetNextItemWidth(130.0f);
-						ImGui::SliderInt(LK_FMT_LIB::format("##{}", UniformName).c_str(), &IntValue, 0, 5, "%d", ImGuiSliderFlags_None);
-						if (IntValue != Value)
-						{
-							Shader->Set(UniformName, static_cast<decltype(Value)>(IntValue));
-						}
-					}
-					else if (UniformType == EUniformVarType::Sampler2DArray)
-					{
-						uint32_t Value = 0;
-						Shader->Get(UniformName, Value);
-						ImGui::Text("%d (TODO)", Value);
-					}
-				}
-				ImGui::EndTable();
-			}
-		}
-	#endif
-
 		if (bNeedsSerialize)
 		{
 			LAssetImporter::Serialize(MaterialAsset);
@@ -238,7 +155,6 @@ namespace LkEngine {
 	{
 		LK_CORE_DEBUG_TAG("MaterialEditor", "OnClose");
 		MaterialAsset = LEditorAssetManager::BaseMaterial;
-		//MaterialAsset = nullptr;
 	}
 
 	void LMaterialEditor::UI_ShaderSelection()

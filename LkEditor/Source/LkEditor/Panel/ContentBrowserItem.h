@@ -129,8 +129,8 @@ namespace LkEngine {
 		void OnContextMenuOpen(FContentBrowserItemAction& ActionResult);
 
 	public:
-		inline static constexpr int INPUT_BUFFER_SIZE = 128;
-		inline static constexpr int DISPLAY_NAME_MAX_LENGTH = 22;
+		static constexpr int INPUT_BUFFER_SIZE = 128;
+		static constexpr int DISPLAY_NAME_MAX_LENGTH = 22;
 	private:
 		EItemType ItemType = EItemType::None;
 		LUUID ID = 0;
