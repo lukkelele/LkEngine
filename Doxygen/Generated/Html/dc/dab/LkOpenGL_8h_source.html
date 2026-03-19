@@ -1118,9 +1118,9 @@ $(function(){initNavTree('dc/dab/LkOpenGL_8h_source.html','../../'); initResizab
 <div class="line"><a id="l01043" name="l01043"></a><span class="lineno"> 1043</span> </div>
 <div class="line"><a id="l01044" name="l01044"></a><span class="lineno"> 1044</span><span class="comment">    /*****************************************************************************/</span></div>
 <div class="line"><a id="l01045" name="l01045"></a><span class="lineno"> 1045</span> </div>
-<div class="line"><a id="l01046" name="l01046"></a><span class="lineno"> 1046</span>    <span class="keyword">namespace </span>Enum {</div>
-<div class="line"><a id="l01047" name="l01047"></a><span class="lineno"> 1047</span> </div>
-<div class="line"><a id="l01048" name="l01048"></a><span class="lineno"> 1048</span>        FORCEINLINE <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* ToString(<span class="keyword">const</span> EArrayTextureDimension TextureArrayDimension)</div>
+<div class="line"><a id="l01046" name="l01046"></a><span class="lineno"> 1046</span>    <span class="keyword">namespace </span>Enum</div>
+<div class="line"><a id="l01047" name="l01047"></a><span class="lineno"> 1047</span>    {</div>
+<div class="line"><a id="l01048" name="l01048"></a><span class="lineno"> 1048</span>        <span class="keyword">inline</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* ToString(<span class="keyword">const</span> EArrayTextureDimension TextureArrayDimension)</div>
 <div class="line"><a id="l01049" name="l01049"></a><span class="lineno"> 1049</span>        {</div>
 <div class="line"><a id="l01050" name="l01050"></a><span class="lineno"> 1050</span>            <span class="keywordflow">switch</span> (TextureArrayDimension)</div>
 <div class="line"><a id="l01051" name="l01051"></a><span class="lineno"> 1051</span>            {</div>
@@ -1129,20 +1129,17 @@ $(function(){initNavTree('dc/dab/LkOpenGL_8h_source.html','../../'); initResizab
 <div class="line"><a id="l01054" name="l01054"></a><span class="lineno"> 1054</span>                <span class="keywordflow">case</span> EArrayTextureDimension::Dim_2048x2048: <span class="keywordflow">return</span> <span class="stringliteral">&quot;2048x2048&quot;</span>;</div>
 <div class="line"><a id="l01055" name="l01055"></a><span class="lineno"> 1055</span>                <span class="keywordflow">case</span> EArrayTextureDimension::Dim_4096x4096: <span class="keywordflow">return</span> <span class="stringliteral">&quot;4096x4096&quot;</span>;</div>
 <div class="line"><a id="l01056" name="l01056"></a><span class="lineno"> 1056</span>            }</div>
-<div class="line"><a id="l01057" name="l01057"></a><span class="lineno"> 1057</span> </div>
-<div class="line"><a id="l01058" name="l01058"></a><span class="lineno"> 1058</span>            LK_CORE_ASSERT(<span class="keyword">false</span>, <span class="stringliteral">&quot;Unknown ETextureArrayDimension value: {}&quot;</span>, <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(TextureArrayDimension));</div>
-<div class="line"><a id="l01059" name="l01059"></a><span class="lineno"> 1059</span>            <span class="keywordflow">return</span> {};</div>
-<div class="line"><a id="l01060" name="l01060"></a><span class="lineno"> 1060</span>        }</div>
-<div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span> </div>
-<div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span>    }</div>
-<div class="line"><a id="l01063" name="l01063"></a><span class="lineno"> 1063</span> </div>
-<div class="line"><a id="l01064" name="l01064"></a><span class="lineno"> 1064</span>}</div>
-<div class="line"><a id="l01065" name="l01065"></a><span class="lineno"> 1065</span> </div>
+<div class="line"><a id="l01057" name="l01057"></a><span class="lineno"> 1057</span>            <span class="keywordflow">return</span> <span class="stringliteral">&quot;Unknown&quot;</span>;</div>
+<div class="line"><a id="l01058" name="l01058"></a><span class="lineno"> 1058</span>        }</div>
+<div class="line"><a id="l01059" name="l01059"></a><span class="lineno"> 1059</span>    }</div>
+<div class="line"><a id="l01060" name="l01060"></a><span class="lineno"> 1060</span> </div>
+<div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span>}</div>
+<div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span> </div>
 <div class="ttc" id="aObject_8h_html"><div class="ttname"><a href="../../db/dbf/Object_8h.html">Object.h</a></div><div class="ttdoc">LObject implementation.</div></div>
 <div class="ttc" id="agroup__CoreTypes_html_ga3792dbbeca2406a6a500b10fdd9fea58"><div class="ttname"><a href="../../de/d60/group__CoreTypes.html#ga3792dbbeca2406a6a500b10fdd9fea58">LkEngine::LRendererID</a></div><div class="ttdeci">uint32_t LRendererID</div><div class="ttdef"><b>Definition</b> CoreTypes.h:30</div></div>
 <div class="ttc" id="anamespaceLkEngine_1_1LOpenGL__Debug_html_ab3de0174302412feac7b6482929ffd6b"><div class="ttname"><a href="../../d2/d1c/namespaceLkEngine_1_1LOpenGL__Debug.html#ab3de0174302412feac7b6482929ffd6b">LkEngine::LOpenGL_Debug::InitializeEnvironment</a></div><div class="ttdeci">void InitializeEnvironment()</div><div class="ttdoc">Setup debug environment with a plane and two cubes.</div><div class="ttdef"><b>Definition</b> LkOpenGL.cpp:268</div></div>
 <div class="ttc" id="anamespaceLkEngine_html"><div class="ttname"><a href="../../d1/d6e/namespaceLkEngine.html">LkEngine</a></div><div class="ttdef"><b>Definition</b> Asset.h:11</div></div>
-<div class="ttc" id="anamespaceLkEngine_html_acd754ef986d5e2d9e9beb1086af3e440"><div class="ttname"><a href="../../d1/d6e/namespaceLkEngine.html#acd754ef986d5e2d9e9beb1086af3e440">LkEngine::EShaderDataType</a></div><div class="ttdeci">EShaderDataType</div><div class="ttdef"><b>Definition</b> VertexBufferLayout.h:12</div></div>
+<div class="ttc" id="anamespaceLkEngine_html_acd754ef986d5e2d9e9beb1086af3e440"><div class="ttname"><a href="../../d1/d6e/namespaceLkEngine.html#acd754ef986d5e2d9e9beb1086af3e440">LkEngine::EShaderDataType</a></div><div class="ttdeci">EShaderDataType</div><div class="ttdef"><b>Definition</b> VertexBufferLayout.h:11</div></div>
 <div class="ttc" id="astructLkEngine_1_1LOpenGL3_html"><div class="ttname"><a href="../../d1/d67/structLkEngine_1_1LOpenGL3.html">LkEngine::LOpenGL3</a></div><div class="ttdef"><b>Definition</b> LkOpenGL.h:156</div></div>
 <div class="ttc" id="astructLkEngine_1_1LOpenGL4_html"><div class="ttname"><a href="../../da/d22/structLkEngine_1_1LOpenGL4.html">LkEngine::LOpenGL4</a></div><div class="ttdef"><b>Definition</b> LkOpenGL.h:165</div></div>
 <div class="ttc" id="astructLkEngine_1_1LOpenGL4_html_a530c33798d7d7c03e9232387e350f05d"><div class="ttname"><a href="../../da/d22/structLkEngine_1_1LOpenGL4.html#a530c33798d7d7c03e9232387e350f05d">LkEngine::LOpenGL4::GetSourceBlendFunction</a></div><div class="ttdeci">static FORCEINLINE int GetSourceBlendFunction(const ESourceBlendFunction InBlendFunction)</div><div class="ttdoc">Convert ESourceBlendFunction to OpenGL source blend function.</div><div class="ttdef"><b>Definition</b> LkOpenGL.h:169</div></div>

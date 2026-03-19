@@ -165,7 +165,7 @@ $(function(){initNavTree('d0/dd1/EditorCamera_8h_source.html','../../'); initRes
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keyword">virtual</span> ECameraType GetType()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> ECameraType::Editor; }</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        FORCEINLINE <span class="keywordtype">void</span> SetPerspective(<span class="keyword">const</span> <span class="keywordtype">float</span> InVerticalFovDeg, <span class="keyword">const</span> <span class="keywordtype">float</span> InNearClip = 0.1f, <span class="keyword">const</span> <span class="keywordtype">float</span> InFarClip = 1000.0f)</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <span class="keywordtype">void</span> SetPerspective(<span class="keyword">const</span> <span class="keywordtype">float</span> InVerticalFovDeg, <span class="keyword">const</span> <span class="keywordtype">float</span> InNearClip = 0.1f, <span class="keyword">const</span> <span class="keywordtype">float</span> InFarClip = 1000.0f)</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        {</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            <span class="keywordflow">if</span> ((ProjectionType != ECameraProjection::Perspective)</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>                || (DegPerspectiveFov != InVerticalFovDeg)</div>
@@ -181,7 +181,7 @@ $(function(){initNavTree('d0/dd1/EditorCamera_8h_source.html','../../'); initRes
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            }</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        }</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        FORCEINLINE <span class="keywordtype">void</span> SetOrthographic(<span class="keyword">const</span> <span class="keywordtype">float</span> InWidth, <span class="keyword">const</span> <span class="keywordtype">float</span> InHeight, <span class="keyword">const</span> <span class="keywordtype">float</span> InNearClip = -1.0f, <span class="keyword">const</span> <span class="keywordtype">float</span> InFarClip = 1.0f)</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">void</span> SetOrthographic(<span class="keyword">const</span> <span class="keywordtype">float</span> InWidth, <span class="keyword">const</span> <span class="keywordtype">float</span> InHeight, <span class="keyword">const</span> <span class="keywordtype">float</span> InNearClip = -1.0f, <span class="keyword">const</span> <span class="keywordtype">float</span> InFarClip = 1.0f)</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        {</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>            <span class="keywordflow">if</span> ((ProjectionType != ECameraProjection::Perspective)</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                || (OrthographicNear != InNearClip)</div>
@@ -195,7 +195,7 @@ $(function(){initNavTree('d0/dd1/EditorCamera_8h_source.html','../../'); initRes
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>            }</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        }</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        FORCEINLINE <span class="keywordtype">void</span> SetPosition(<span class="keyword">const</span> glm::vec3&amp; InPosition)</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="keywordtype">void</span> SetPosition(<span class="keyword">const</span> glm::vec3&amp; InPosition)</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        {</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>            Position = InPosition;</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>            UpdateCameraView();</div>
@@ -216,14 +216,14 @@ $(function(){initNavTree('d0/dd1/EditorCamera_8h_source.html','../../'); initRes
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        <span class="keywordtype">void</span> SetYawLocked(<span class="keyword">const</span> <span class="keywordtype">bool</span> Locked);</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        <span class="keywordtype">bool</span> IsYawLocked() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        FORCEINLINE <span class="keywordtype">float</span> GetDistance()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> Distance; }</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        FORCEINLINE <span class="keywordtype">float</span> GetNormalSpeed()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> NormalSpeed; }</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        FORCEINLINE <span class="keywordtype">float</span> GetTravelSpeed()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> TravelSpeed; }</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        FORCEINLINE <span class="keywordtype">void</span> SetDistance(<span class="keyword">const</span> <span class="keywordtype">float</span> InDistance) { Distance = InDistance; }</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        FORCEINLINE <span class="keywordtype">void</span> SetNormalSpeed(<span class="keyword">const</span> <span class="keywordtype">float</span> InSpeed) { NormalSpeed = InSpeed; }</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        FORCEINLINE <span class="keywordtype">void</span> SetTravelSpeed(<span class="keyword">const</span> <span class="keywordtype">float</span> InSpeed) { TravelSpeed = InSpeed; }</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <span class="keywordtype">float</span> GetDistance()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> Distance; }</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        <span class="keywordtype">float</span> GetNormalSpeed()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> NormalSpeed; }</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        <span class="keywordtype">float</span> GetTravelSpeed()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> TravelSpeed; }</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keywordtype">void</span> SetDistance(<span class="keyword">const</span> <span class="keywordtype">float</span> InDistance) { Distance = InDistance; }</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keywordtype">void</span> SetNormalSpeed(<span class="keyword">const</span> <span class="keywordtype">float</span> InSpeed) { NormalSpeed = InSpeed; }</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <span class="keywordtype">void</span> SetTravelSpeed(<span class="keyword">const</span> <span class="keywordtype">float</span> InSpeed) { TravelSpeed = InSpeed; }</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        FORCEINLINE glm::vec3 CalculatePosition()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        glm::vec3 CalculatePosition()<span class="keyword"> const</span></div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="keyword">        </span>{</div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            <span class="keywordflow">return</span> (FocalPoint - (GetForwardDirection() * Distance + PositionDelta));</div>
 <div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        }</div>
@@ -262,7 +262,7 @@ $(function(){initNavTree('d0/dd1/EditorCamera_8h_source.html','../../'); initRes
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keyword">namespace </span>Enum</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    {</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        FORCEINLINE <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* ToString(<span class="keyword">const</span> EEditorCameraMode CameraMode)</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        <span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* ToString(<span class="keyword">const</span> EEditorCameraMode CameraMode)</div>
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        {</div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>            <span class="keywordflow">switch</span> (CameraMode)</div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>            {</div>
@@ -270,13 +270,11 @@ $(function(){initNavTree('d0/dd1/EditorCamera_8h_source.html','../../'); initRes
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>                <span class="keywordflow">case</span> EEditorCameraMode::Flycam:  <span class="keywordflow">return</span> <span class="stringliteral">&quot;Flycam&quot;</span>;</div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>                <span class="keywordflow">case</span> EEditorCameraMode::Arcball: <span class="keywordflow">return</span> <span class="stringliteral">&quot;Arcball&quot;</span>;</div>
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            }</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>            LK_CORE_VERIFY(<span class="keyword">false</span>, <span class="stringliteral">&quot;Enum::ToString(const EEditorCameraMode) failed for: {}&quot;</span>, <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(CameraMode));</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        }</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    }</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>}</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>            <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        }</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    }</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>}</div>
 <div class="ttc" id="aCamera_8h_html"><div class="ttname"><a href="../../dd/de4/Camera_8h.html">Camera.h</a></div><div class="ttdoc">Base camera.</div></div>
 <div class="ttc" id="aCore_8h_html"><div class="ttname"><a href="../../d6/dd7/Core_8h.html">Core.h</a></div><div class="ttdoc">Core header.</div></div>
 <div class="ttc" id="aEditorCore_8h_html"><div class="ttname"><a href="../../da/d6f/EditorCore_8h.html">EditorCore.h</a></div><div class="ttdoc">Editor core.</div></div>

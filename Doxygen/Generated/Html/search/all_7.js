@@ -2,7 +2,7 @@ var searchData=
 [
   ['get_0',['Get',['../dc/d16/classLkEngine_1_1LClass.html#aa3e7837bb94831ee19fbb84769eb5ad9',1,'LkEngine::LClass::Get()'],['../dd/d34/classLkEngine_1_1TSubclassOf.html#a872569c6394cfecc926b994fb72261a6',1,'LkEngine::TSubclassOf::Get()']]],
   ['getallentitieswith_1',['GetAllEntitiesWith',['../de/d46/classLkEngine_1_1LScene.html#ac91f9686f4120cbe37fe3748862686d6',1,'LkEngine::LScene']]],
-  ['getallocation_2',['GetAllocation',['../d4/dcd/classLkEngine_1_1Core_1_1LInlineAllocator.html#a8ff07fb1323e3bf336d3874bd54f2647',1,'LkEngine::Core::LInlineAllocator']]],
+  ['getallocation_2',['GetAllocation',['../d4/dcd/classLkEngine_1_1Core_1_1LInlineAllocator.html#acf80683aafbc9cd889c96694885fa135',1,'LkEngine::Core::LInlineAllocator']]],
   ['getclass_3',['GetClass',['../d0/df3/classLkEngine_1_1LObject.html#a29b735470b61ae48dd9a797c8cb45f3b',1,'LkEngine::LObject::GetClass()'],['../d3/d71/classLkEngine_1_1LObjectBase.html#aa0094761621acfe86aa3e1efd4b78c22',1,'LkEngine::LObjectBase::GetClass()']]],
   ['getcount_4',['GetCount',['../d3/d9c/classLkEngine_1_1LEventQueue.html#acecc06be58604c7298bdff52bff90a63',1,'LkEngine::LEventQueue']]],
   ['getcurrenttest_5',['GetCurrentTest',['../dc/d61/classLkEngine_1_1LTestManager.html#ad0ff0fb07d3c7b420422574cb3648a0f',1,'LkEngine::LTestManager']]],
@@ -23,7 +23,7 @@ var searchData=
   ['getsampledepth_20',['GetSampleDepth',['../da/d22/structLkEngine_1_1LOpenGL4.html#aaecef4894acf2b052bd6d684248512b5',1,'LkEngine::LOpenGL4']]],
   ['getscalers_21',['GetScalers',['../d9/d5c/classLkEngine_1_1LViewport.html#a5719b102c747daacdaa6fa3e310ae7e9',1,'LkEngine::LViewport']]],
   ['getselectioncount_22',['GetSelectionCount',['../db/d21/classLkEngine_1_1LSelectionContext.html#a63772d3ffe77eac7534bd7e413197154',1,'LkEngine::LSelectionContext']]],
-  ['getsize_23',['GetSize',['../d2/d64/classLkEngine_1_1Core_1_1LMulticastDelegate.html#af9dd1869f072809931a2537362f71a03',1,'LkEngine::Core::LMulticastDelegate::GetSize()'],['../d9/d5c/classLkEngine_1_1LViewport.html#a7dbc30bb79eed2a22a0c11deab40a46d',1,'LkEngine::LViewport::GetSize()']]],
+  ['getsize_23',['GetSize',['../d2/d64/classLkEngine_1_1Core_1_1LMulticastDelegate.html#aedf432f0aa551913f0e9c5a003fbac40',1,'LkEngine::Core::LMulticastDelegate::GetSize()'],['../d9/d5c/classLkEngine_1_1LViewport.html#a7dbc30bb79eed2a22a0c11deab40a46d',1,'LkEngine::LViewport::GetSize()']]],
   ['getsourceblendfunction_24',['GetSourceBlendFunction',['../da/d22/structLkEngine_1_1LOpenGL4.html#a530c33798d7d7c03e9232387e350f05d',1,'LkEngine::LOpenGL4']]],
   ['gettestsuite_25',['GetTestSuite',['../d9/d18/classLkEngine_1_1Test_1_1LAutomationTest.html#a3dcf836d3af96b9b5647c0e940145f04',1,'LkEngine::Test::LAutomationTest']]],
   ['gettypeid_26',['GetTypeID',['../dc/d16/classLkEngine_1_1LClass.html#acf5cf11f09364ea582de3aa4e69d840f',1,'LkEngine::LClass']]],
