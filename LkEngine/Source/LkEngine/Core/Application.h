@@ -15,7 +15,6 @@
 #include "LkEngine/Core/LayerStack.h"
 #include "LkEngine/Core/CrashHandler.h"
 #include "LkEngine/Core/Time/Timer.h"
-#include "LkEngine/Core/IO/File.h"
 #include "LkEngine/Core/IO/FileSystem.h"
 #include "LkEngine/Core/Math/Math.h"
 #include "LkEngine/Core/MetadataRegistry.h"
@@ -83,7 +82,7 @@ namespace LkEngine {
 		virtual void Run();
 		virtual void Shutdown();
 
-		FORCEINLINE static LApplication& Get() { return *Instance; }
+		static LApplication& Get() { return *Instance; }
 
 		bool ReadConfigurationFile(FApplicationSpecification& InSpecification);
 
@@ -93,7 +92,7 @@ namespace LkEngine {
 		static const char* GetPlatformName();
 		static const char* GetConfigurationName();
 
-		FORCEINLINE void PushLayer(TObjectPtr<LLayer> InLayer)
+		void PushLayer(TObjectPtr<LLayer> InLayer)
 		{
 			LayerStack.PushLayer(InLayer);
 		}
@@ -115,14 +114,14 @@ namespace LkEngine {
 			}
 		}
 
-		FORCEINLINE LWindow& GetWindow() { return *Window; }
+		LWindow& GetWindow() { return *Window; }
 		uint32_t GetCurrentFrameIndex() const { return CurrentFrameIndex; }
 
-		FORCEINLINE const FApplicationSpecification& GetSpecification() const { return Specification; }
+		const FApplicationSpecification& GetSpecification() const { return Specification; }
 
 		LPerformanceProfiler* GetPerformanceProfiler() { return PerformanceProfiler; }
 
-		FORCEINLINE float GetDeltaTime() const { return LastDeltaTime; }
+		float GetDeltaTime() const { return LastDeltaTime; }
 		std::string GenerateCrashDump();
 
 	private:

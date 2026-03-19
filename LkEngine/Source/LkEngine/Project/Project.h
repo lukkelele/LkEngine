@@ -50,7 +50,7 @@ namespace LkEngine {
 		void Load(const std::string& ProjectPath);
 
 		/** Get currently active project. */
-		FORCEINLINE static TObjectPtr<LProject> Current() { return ActiveProject; }
+		static TObjectPtr<LProject> Current() { return ActiveProject; }
 
 		static std::filesystem::path GetAssetDirectory();
 		static std::filesystem::path GetAssetRegistryPath();
@@ -61,19 +61,19 @@ namespace LkEngine {
 		FProjectConfiguration& GetConfiguration() { return Configuration; }
 		const FProjectConfiguration& GetConfiguration() const { return Configuration; }
 
-		FORCEINLINE static TObjectPtr<IAssetManager> GetAssetManager()
+		static TObjectPtr<IAssetManager> GetAssetManager()
 		{
 			LK_CORE_VERIFY(AssetManager);
 			return AssetManager;
 		}
 
-		FORCEINLINE static TObjectPtr<LEditorAssetManager> GetEditorAssetManager() 
+		static TObjectPtr<LEditorAssetManager> GetEditorAssetManager() 
 		{ 
 			LK_CORE_VERIFY(AssetManager);
 			return AssetManager.As<LEditorAssetManager>(); 
 		}
 
-		FORCEINLINE static TObjectPtr<LRuntimeAssetManager> GetRuntimeAssetManager() 
+		static TObjectPtr<LRuntimeAssetManager> GetRuntimeAssetManager() 
 		{ 
 			LK_CORE_VERIFY(AssetManager);
 			return AssetManager.As<LRuntimeAssetManager>(); 
@@ -102,7 +102,7 @@ namespace LkEngine {
 		const std::string& GetName() const { return Configuration.Name; }
 
 	public:
-		inline static constexpr const char* FILE_EXTENSION = "lkproject";
+		static constexpr const char* FILE_EXTENSION = "lkproject";
 		static FOnProjectChanged OnProjectChanged;
 	private:
 		FProjectConfiguration Configuration{};

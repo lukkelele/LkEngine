@@ -63,8 +63,7 @@ namespace LkEngine {
 			uint32_t GetTotalIndexCount() const { return QuadCount * 6; }
 		};
 
-        /* TODO: Change type to LVector2. */
-        inline static constexpr glm::vec2 TextureCoords[] = { 
+        static constexpr glm::vec2 TextureCoords[] = { 
             { 0.0f, 0.0f }, /*  Bottom Left.  */
             { 0.0f, 1.0f }, /*  Top Left.     */
             { 1.0f, 1.0f }, /*  Top Right.    */

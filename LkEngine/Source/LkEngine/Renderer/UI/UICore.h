@@ -776,34 +776,34 @@ namespace LkEngine::UI {
 	/****************************
 	 *          Flags           *
 	 ****************************/
-	inline static constexpr ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode
+	inline constexpr ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode
 		| ImGuiDockNodeFlags_NoDockingInCentralNode;
 
-	inline static ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_NoTitleBar
+	inline ImGuiWindowFlags CoreViewportFlags = ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
 		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
 		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs
 		| ImGuiWindowFlags_NoDocking;
 
-	inline static ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoTitleBar 
+	inline ImGuiWindowFlags HostWindowFlags = ImGuiWindowFlags_NoTitleBar 
 		| ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus
 		| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoInputs;
 
-    inline static constexpr ImGuiWindowFlags MenuBarFlags = ImGuiWindowFlags_MenuBar
+    inline constexpr ImGuiWindowFlags MenuBarFlags = ImGuiWindowFlags_MenuBar
         | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar 
 		| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
 
-    inline static constexpr ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
+    inline constexpr ImGuiWindowFlags SidebarFlags = ImGuiWindowFlags_NoTitleBar
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus
 		| ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoMove;
 
-    inline static constexpr ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar 
+    inline constexpr ImGuiWindowFlags TabBarFlags = ImGuiWindowFlags_NoTitleBar 
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking 
 		| ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
-	inline static constexpr ImGuiWindowFlags EditorViewportFlags = ImGuiWindowFlags_NoTitleBar 
+	inline constexpr ImGuiWindowFlags EditorViewportFlags = ImGuiWindowFlags_NoTitleBar 
 		| ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar 
 		| ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize;
 

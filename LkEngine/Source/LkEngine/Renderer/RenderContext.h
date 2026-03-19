@@ -66,7 +66,7 @@ namespace LkEngine {
 
     namespace Enum
     {
-		FORCEINLINE static constexpr const char* ToString(const ESourceBlendFunction InSourceFunction)
+		constexpr const char* ToString(const ESourceBlendFunction InSourceFunction)
 		{
 			switch (InSourceFunction)
 			{
@@ -76,12 +76,10 @@ namespace LkEngine {
 				case ESourceBlendFunction::Color: return "Color";
 				case ESourceBlendFunction::One_Minus_DestinationAlpha: return "One_Minus_DestinationAlpha";
 			}
-
-            LK_CORE_ASSERT(false, "Invalid source blendfunction name");
-			return "";
+			return "Unknown";
 		}
 
-		FORCEINLINE static constexpr const char* ToString(const EDestinationBlendFunction InDestinationFunction)
+		constexpr const char* ToString(const EDestinationBlendFunction InDestinationFunction)
 		{
 			switch (InDestinationFunction)
 			{
@@ -91,10 +89,7 @@ namespace LkEngine {
 				case EDestinationBlendFunction::Color: return "Color";
 				case EDestinationBlendFunction::One_Minus_SourceAlpha: return "One_Minus_SourceAlpha";
 			}
-
-            LK_CORE_ASSERT(false, "Invalid destination blendfunction name");
-			return "";
+			return "Unknown";
 		}
     }
-
 }

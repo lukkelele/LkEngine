@@ -1,10 +1,9 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "LkEngine/Core/Log/Log.h"
 #include "LkEngine/Core/Assert.h"
-
 
 namespace LkEngine {
 
@@ -13,7 +12,7 @@ namespace LkEngine {
 	 *
 	 *  Key code.
 	 */
-	enum class EKey : uint16_t
+	enum class EKey : std::uint16_t
 	{
 		None = 0,
 
@@ -120,7 +119,7 @@ namespace LkEngine {
 
 	namespace Enum 
 	{
-		FORCEINLINE static constexpr const char* ToString(const EKey Key)
+		constexpr const char* ToString(const EKey Key)
 		{
 			switch (Key)
 			{
@@ -211,12 +210,10 @@ namespace LkEngine {
 				case EKey::RightSuper:	 return "RightSuper";
 				case EKey::Menu:		 return "Menu";
 			}
-
-			LK_CORE_VERIFY(false, "Enum::ToString(EKey) failed with value: {}", static_cast<uint16_t>(Key));
 			return nullptr;
 		}
 
-		FORCEINLINE static constexpr const char* ToString(const EKeyState State)
+		constexpr const char* ToString(const EKeyState State)
 		{
 			switch (State)
 			{
@@ -225,12 +222,8 @@ namespace LkEngine {
 				case EKeyState::Held:	  return "Held";
 				case EKeyState::Released: return "Released";
 			}
-
-			LK_CORE_VERIFY(false, "Enum::ToString(EKeyState) failed with value: {}", static_cast<int>(State));
 			return nullptr;
 		}
-
 	}
-
 }
 

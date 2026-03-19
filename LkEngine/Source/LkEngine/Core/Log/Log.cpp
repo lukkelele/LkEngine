@@ -3,14 +3,12 @@
 
 #include "LkEngine/Core/Time/Time.h"
 #include "LkEngine/Core/Globals.h"
-#include "LkEngine/Core/IO/File.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #if LK_ENGINE_CONSOLE_ENABLED
 #	include "LkEngine/Editor/EditorConsole/ConsoleSink.h"
 #endif
-
 
 namespace LkEngine {
 

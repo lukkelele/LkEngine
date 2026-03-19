@@ -16,19 +16,16 @@ namespace LkEngine {
 
 	namespace Enum 
 	{
-		static constexpr const char* ToString(const EAngleUnit AngleUnit)
+		constexpr const char* ToString(const EAngleUnit AngleUnit)
 		{
 			switch (AngleUnit)
 			{
 				case EAngleUnit::Degree: return "Degree";
 				case EAngleUnit::Radian: return "Radian";
 			}
-
-			LK_CORE_VERIFY(false, "Enum::ToString(const EAngleUnit) failed with value: {}", static_cast<int>(AngleUnit));
 			return nullptr;
 		}
 	}
-
 }
 
 namespace LkEngine::Math {

@@ -58,7 +58,7 @@ namespace LkEngine {
 
 		virtual ECameraType GetType() const override { return ECameraType::Editor; }
 
-		FORCEINLINE void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
+		void SetPerspective(const float InVerticalFovDeg, const float InNearClip = 0.1f, const float InFarClip = 1000.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
 				|| (DegPerspectiveFov != InVerticalFovDeg)
@@ -74,7 +74,7 @@ namespace LkEngine {
 			}
 		}
 
-		FORCEINLINE void SetOrthographic(const float InWidth, const float InHeight, const float InNearClip = -1.0f, const float InFarClip = 1.0f)
+		void SetOrthographic(const float InWidth, const float InHeight, const float InNearClip = -1.0f, const float InFarClip = 1.0f)
 		{
 			if ((ProjectionType != ECameraProjection::Perspective)
 				|| (OrthographicNear != InNearClip)
@@ -88,7 +88,7 @@ namespace LkEngine {
 			}
 		}
 
-		FORCEINLINE void SetPosition(const glm::vec3& InPosition)
+		void SetPosition(const glm::vec3& InPosition)
 		{
 			Position = InPosition;
 			UpdateCameraView();
@@ -109,14 +109,14 @@ namespace LkEngine {
 		void SetYawLocked(const bool Locked);
 		bool IsYawLocked() const;
 
-		FORCEINLINE float GetDistance() const { return Distance; }
-		FORCEINLINE float GetNormalSpeed() const { return NormalSpeed; }
-		FORCEINLINE float GetTravelSpeed() const { return TravelSpeed; }
-		FORCEINLINE void SetDistance(const float InDistance) { Distance = InDistance; }
-		FORCEINLINE void SetNormalSpeed(const float InSpeed) { NormalSpeed = InSpeed; }
-		FORCEINLINE void SetTravelSpeed(const float InSpeed) { TravelSpeed = InSpeed; }
+		float GetDistance() const { return Distance; }
+		float GetNormalSpeed() const { return NormalSpeed; }
+		float GetTravelSpeed() const { return TravelSpeed; }
+		void SetDistance(const float InDistance) { Distance = InDistance; }
+		void SetNormalSpeed(const float InSpeed) { NormalSpeed = InSpeed; }
+		void SetTravelSpeed(const float InSpeed) { TravelSpeed = InSpeed; }
 
-		FORCEINLINE glm::vec3 CalculatePosition() const
+		glm::vec3 CalculatePosition() const
 		{
 			return (FocalPoint - (GetForwardDirection() * Distance + PositionDelta));
 		}
@@ -154,7 +154,7 @@ namespace LkEngine {
 
 	namespace Enum
 	{
-		FORCEINLINE static constexpr const char* ToString(const EEditorCameraMode CameraMode)
+		constexpr const char* ToString(const EEditorCameraMode CameraMode)
 		{
 			switch (CameraMode)
 			{
@@ -162,8 +162,6 @@ namespace LkEngine {
 				case EEditorCameraMode::Flycam:  return "Flycam";
 				case EEditorCameraMode::Arcball: return "Arcball";
 			}
-
-			LK_CORE_VERIFY(false, "Enum::ToString(const EEditorCameraMode) failed for: {}", static_cast<int>(CameraMode));
 			return nullptr;
 		}
 	}

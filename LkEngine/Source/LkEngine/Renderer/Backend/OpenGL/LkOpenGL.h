@@ -1043,9 +1043,9 @@ namespace LkEngine {
 
 	/*****************************************************************************/
 
-	namespace Enum {
-
-		FORCEINLINE static constexpr const char* ToString(const EArrayTextureDimension TextureArrayDimension)
+	namespace Enum
+	{
+		inline const char* ToString(const EArrayTextureDimension TextureArrayDimension)
 		{
 			switch (TextureArrayDimension)
 			{
@@ -1054,11 +1054,8 @@ namespace LkEngine {
 				case EArrayTextureDimension::Dim_2048x2048: return "2048x2048";
 				case EArrayTextureDimension::Dim_4096x4096: return "4096x4096";
 			}
-
-			LK_CORE_ASSERT(false, "Unknown ETextureArrayDimension value: {}", static_cast<int>(TextureArrayDimension));
-			return {};
+			return "Unknown";
 		}
-
 	}
 
 }

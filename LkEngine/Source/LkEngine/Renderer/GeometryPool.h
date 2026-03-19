@@ -4,7 +4,7 @@ namespace LkEngine::Geometry {
 
 	namespace Vertices 
 	{
-		inline static constexpr float Plane[] = {
+		inline constexpr float Plane[] = {
 		/*       Positions         Texture Coordinates   */
 			 5.0f, -0.5f,  5.0f,     2.0f, 0.0f,
 			-5.0f, -0.5f,  5.0f,     0.0f, 0.0f,
@@ -16,7 +16,7 @@ namespace LkEngine::Geometry {
 		};
 		static_assert(sizeof(Plane) > 0);
 
-		inline static constexpr float Skybox[] = {
+		inline constexpr float Skybox[] = {
 			-1.0f,  1.0f, -1.0f,
 			-1.0f, -1.0f, -1.0f,
 			 1.0f, -1.0f, -1.0f,
@@ -70,8 +70,8 @@ namespace LkEngine::Geometry {
 	 */
 	namespace ArraySize 
 	{
-		inline static constexpr int Plane  = sizeof(Vertices::Plane)  / sizeof(Vertices::Plane[0]);
-		inline static constexpr int Skybox = sizeof(Vertices::Skybox) / sizeof(Vertices::Skybox[0]);
+		inline constexpr int Plane  = sizeof(Vertices::Plane)  / sizeof(Vertices::Plane[0]);
+		inline constexpr int Skybox = sizeof(Vertices::Skybox) / sizeof(Vertices::Skybox[0]);
 	}
 
     static float CubeVertices[] = {

@@ -31,7 +31,7 @@ LK_ENUM_RANGE_BY_VALUES(ETestEnum,
 
 namespace LkEngine::Enum 
 {
-	inline static constexpr const char* ToString(const ETestEnum EnumValue)
+	inline constexpr const char* ToString(const ETestEnum EnumValue)
 	{
 		switch (EnumValue)
 		{

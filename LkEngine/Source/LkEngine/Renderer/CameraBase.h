@@ -21,19 +21,17 @@ namespace LkEngine {
 
 	namespace Enum {
 
-		FORCEINLINE static constexpr const char* ToString(const ECameraProjection CameraProjection)
+		constexpr const char* ToString(const ECameraProjection CameraProjection)
 		{
 			switch (CameraProjection)
 			{
 				case ECameraProjection::Perspective:  return "Perspective";
 				case ECameraProjection::Orthographic: return "Orthographic";
 			}
-
-			LK_CORE_VERIFY(false);
 			return nullptr;
 		}
 
-		FORCEINLINE static constexpr const char* ToString(const ECameraType CameraType)
+		constexpr const char* ToString(const ECameraType CameraType)
 		{
 			switch (CameraType)
 			{
@@ -41,11 +39,7 @@ namespace LkEngine {
 				case ECameraType::Editor: return "Editor";
 				case ECameraType::None:   return "None";
 			}
-
-			LK_CORE_VERIFY(false);
 			return nullptr;
 		}
-		
 	}
-
 }

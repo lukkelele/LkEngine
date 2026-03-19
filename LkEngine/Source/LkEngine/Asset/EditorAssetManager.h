@@ -7,8 +7,8 @@
 
 namespace LkEngine {
 
-    static constexpr const char* BASE_MATERIAL  = "BaseMaterial";
-    static constexpr const char* BASE_MATERIAL2 = "BaseMaterial2";
+    inline constexpr const char* BASE_MATERIAL  = "BaseMaterial";
+    inline constexpr const char* BASE_MATERIAL2 = "BaseMaterial2";
 
 	struct FTextureLoader
 	{
@@ -131,7 +131,7 @@ namespace LkEngine {
 		int GetTextures2D(std::vector<std::pair<std::string, TObjectPtr<LTexture2D>>>& TextureContainer);
 		const std::vector<std::pair<std::string, TObjectPtr<LTexture2D>>>& GetTextures2D() const;
 
-		FORCEINLINE const LAssetRegistry& GetAssetRegistry() const { return AssetRegistry; }
+		const LAssetRegistry& GetAssetRegistry() const { return AssetRegistry; }
 
 	private:
         virtual FAssetMetadata& GetMetadataInternal(const FAssetHandle Handle) override;

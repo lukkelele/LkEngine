@@ -35,12 +35,12 @@ namespace LkEngine::UI {
 	LK_ENUM_CLASS(EVectorSemantic);
 
 	namespace Slider {
-		inline static constexpr float TablePaddingX = 17.0f; /* DragFloat X-padding. */
+		inline constexpr float TablePaddingX = 17.0f; /* DragFloat X-padding. */
 	}
 
 	namespace Draw 
 	{
-		inline static constexpr int LABEL_BUFSIZE = 72;
+		inline constexpr int LABEL_BUFSIZE = 72;
 
 		FORCEINLINE bool DragFloat(const char* Label, 
 								   float* Value, 

@@ -145,7 +145,7 @@ namespace LkEngine {
 
 	namespace Enum
 	{
-		inline static constexpr const char* ToString(const EDepthCompareOperator CompareOperator)
+		constexpr const char* ToString(const EDepthCompareOperator CompareOperator)
 		{
 			switch (CompareOperator)
 			{
@@ -159,12 +159,10 @@ namespace LkEngine {
 				case EDepthCompareOperator::Equal:			return "Equal";
 				case EDepthCompareOperator::Always:			return "Always";
 			}
-
-			LK_CORE_ASSERT(false, "Invalid EDepthCompareOperator value");
 			return nullptr;
 		}
 
-		inline static constexpr const char* ToString(const EPrimitiveTopology Topology)
+		constexpr const char* ToString(const EPrimitiveTopology Topology)
 		{
 			switch (Topology)
 			{
@@ -176,11 +174,8 @@ namespace LkEngine {
 				case EPrimitiveTopology::TriangleStrip:	return "TriangleStrip";
 				case EPrimitiveTopology::TriangleFan:	return "TriangleFan";
 			}
-
-			LK_CORE_ASSERT(false, "Invalid EPrimitiveTopology value");
 			return nullptr;
 		}
 	}
-
-
 }
+

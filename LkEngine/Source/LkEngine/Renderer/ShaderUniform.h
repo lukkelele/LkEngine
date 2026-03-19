@@ -92,10 +92,4 @@ namespace LkEngine {
 		}
 	};
 
-	namespace VKUtils {
-
-		static constexpr std::string_view UniformTypeToString(ShaderUniformType type); // Defined in LkVulkan.cpp
-
-	}
-
 }

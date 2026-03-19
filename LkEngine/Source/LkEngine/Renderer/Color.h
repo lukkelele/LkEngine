@@ -1,13 +1,11 @@
 #pragma once
 
-#include <string_view>
-
 #include <random>
+#include <string_view>
 #include <time.h>
 
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
-
 
 /* ANSI Colors. */
 #define LK_ANSI_COLOR_RESET              "\033[0m"
@@ -56,14 +54,14 @@ namespace LkEngine::Color {
 
 	namespace Log
 	{
-		static constexpr uint16_t Black   = 0x0000;
-		static constexpr uint16_t Blue    = 0x0001;
-		static constexpr uint16_t Green   = 0x0002;
-		static constexpr uint16_t Cyan    = 0x0003;
-		static constexpr uint16_t Red     = 0x0004;
-		static constexpr uint16_t Magenta = 0x0005;
-		static constexpr uint16_t Yellow  = 0x0006;
-		static constexpr uint16_t White   = 0x0007;
+		inline constexpr std::uint16_t Black   = 0x0000;
+		inline constexpr std::uint16_t Blue    = 0x0001;
+		inline constexpr std::uint16_t Green   = 0x0002;
+		inline constexpr std::uint16_t Cyan    = 0x0003;
+		inline constexpr std::uint16_t Red     = 0x0004;
+		inline constexpr std::uint16_t Magenta = 0x0005;
+		inline constexpr std::uint16_t Yellow  = 0x0006;
+		inline constexpr std::uint16_t White   = 0x0007;
 	}
 
 	namespace ANSI
@@ -71,43 +69,43 @@ namespace LkEngine::Color {
 		/* Formatting codes. */
 		namespace Format 
 		{
-			static constexpr std::string_view Reset      = "\033[m";
-			static constexpr std::string_view Bold       = "\033[1m";
-			static constexpr std::string_view Dark       = "\033[2m";
-			static constexpr std::string_view Underline  = "\033[4m";
-			static constexpr std::string_view Blink      = "\033[5m";
-			static constexpr std::string_view Reverse    = "\033[7m";
-			static constexpr std::string_view Concealed  = "\033[8m";
-			static constexpr std::string_view ClearLine  = "\033[K";
+			inline constexpr std::string_view Reset      = "\033[m";
+			inline constexpr std::string_view Bold       = "\033[1m";
+			inline constexpr std::string_view Dark       = "\033[2m";
+			inline constexpr std::string_view Underline  = "\033[4m";
+			inline constexpr std::string_view Blink      = "\033[5m";
+			inline constexpr std::string_view Reverse    = "\033[7m";
+			inline constexpr std::string_view Concealed  = "\033[8m";
+			inline constexpr std::string_view ClearLine  = "\033[K";
 		}
 
 		/* Foreground. */
-		static constexpr std::string_view Black          = "\033[30m";
-		static constexpr std::string_view Red            = "\033[31m";
-		static constexpr std::string_view Green          = "\033[32m";
-		static constexpr std::string_view Yellow         = "\033[33m";
-		static constexpr std::string_view Blue           = "\033[34m";
-		static constexpr std::string_view Magenta        = "\033[35m";
-		static constexpr std::string_view Cyan           = "\033[36m";
-		static constexpr std::string_view White          = "\033[37m";
+		inline constexpr std::string_view Black          = "\033[30m";
+		inline constexpr std::string_view Red            = "\033[31m";
+		inline constexpr std::string_view Green          = "\033[32m";
+		inline constexpr std::string_view Yellow         = "\033[33m";
+		inline constexpr std::string_view Blue           = "\033[34m";
+		inline constexpr std::string_view Magenta        = "\033[35m";
+		inline constexpr std::string_view Cyan           = "\033[36m";
+		inline constexpr std::string_view White          = "\033[37m";
 
 		namespace Bg
 		{
-			static constexpr std::string_view Black    = "\033[40m";
-			static constexpr std::string_view Red      = "\033[41m";
-			static constexpr std::string_view Green    = "\033[42m";
-			static constexpr std::string_view Yellow   = "\033[43m";
-			static constexpr std::string_view Blue     = "\033[44m";
-			static constexpr std::string_view Magenta  = "\033[45m";
-			static constexpr std::string_view Cyan     = "\033[46m";
-			static constexpr std::string_view White    = "\033[47m";
+			inline constexpr std::string_view Black    = "\033[40m";
+			inline constexpr std::string_view Red      = "\033[41m";
+			inline constexpr std::string_view Green    = "\033[42m";
+			inline constexpr std::string_view Yellow   = "\033[43m";
+			inline constexpr std::string_view Blue     = "\033[44m";
+			inline constexpr std::string_view Magenta  = "\033[45m";
+			inline constexpr std::string_view Cyan     = "\033[46m";
+			inline constexpr std::string_view White    = "\033[47m";
 		}
 
 		namespace Bold 
 		{
-			static constexpr std::string_view Yellow  = "\033[33m\033[1m";
-			static constexpr std::string_view Red     = "\033[31m\033[1m";
-			static constexpr std::string_view Bold    = "\033[1m\033[41m";
+			inline constexpr std::string_view Yellow  = "\033[33m\033[1m";
+			inline constexpr std::string_view Red     = "\033[31m\033[1m";
+			inline constexpr std::string_view Bold    = "\033[1m\033[41m";
 		}
 	}
 
@@ -300,7 +298,7 @@ namespace LkEngine::Color {
 	};
 
 	/* ANSI Escape Codes mapped to EColorCode. */
-	static constexpr std::array<const char*, static_cast<std::size_t>(EColorCode::COUNT)> ColorEscapeCodes = {
+	inline constexpr std::array<const char*, static_cast<std::size_t>(EColorCode::COUNT)> ColorEscapeCodes = {
 		"\033[0m",   // Reset
 
 		/* -- Foreground -- */
@@ -340,7 +338,7 @@ namespace LkEngine::Color {
 		"\033[107m"  // BgBrightWhite
 	};
 
-	FORCEINLINE constexpr const char* GetEscapeCode(const EColorCode InColor)
+	constexpr const char* GetEscapeCode(const EColorCode InColor)
 	{
 		return ColorEscapeCodes[static_cast<std::size_t>(InColor)];
 	}
@@ -352,58 +350,58 @@ namespace LkEngine::Color {
  */
 namespace LkEngine::RGBA32 
 {
-	static constexpr uint32_t White          = IM_COL32(255, 255, 255, 255);
-	static constexpr uint32_t Black          = IM_COL32(0, 0, 0, 255);
-	static constexpr uint32_t Gray           = IM_COL32(128, 128, 128, 255);
-	static constexpr uint32_t LightGray      = IM_COL32(165, 165, 165, 255);
-	static constexpr uint32_t LighterGray    = IM_COL32(190, 190, 190, 255);
-	static constexpr uint32_t Red            = IM_COL32(255, 0, 0, 255);
-	static constexpr uint32_t Green          = IM_COL32(0, 255, 0, 255);
-	static constexpr uint32_t Blue           = IM_COL32(0, 0, 255, 255);
-	static constexpr uint32_t Cyan           = IM_COL32(0, 255, 255, 255);
-	static constexpr uint32_t Magenta        = IM_COL32(255, 0, 255, 255);
-	static constexpr uint32_t Yellow         = IM_COL32(255, 255, 0, 255);
-	static constexpr uint32_t Orange         = IM_COL32(255, 165, 0, 255);
-	static constexpr uint32_t Purple         = IM_COL32(128, 0, 128, 255);
-	static constexpr uint32_t Pink           = IM_COL32(255, 192, 203, 255);
-	static constexpr uint32_t Brown          = IM_COL32(165, 42, 42, 255);
-	static constexpr uint32_t DarkRed        = IM_COL32(139, 0, 0, 255);
-	static constexpr uint32_t DarkGreen      = IM_COL32(0, 100, 0, 255);
-	static constexpr uint32_t DarkBlue       = IM_COL32(0, 0, 139, 255);
-	static constexpr uint32_t DarkCyan       = IM_COL32(0, 139, 139, 255);
-	static constexpr uint32_t DarkMagenta    = IM_COL32(139, 0, 139, 255);
-	static constexpr uint32_t DarkYellow     = IM_COL32(204, 204, 0, 255);
-	static constexpr uint32_t BrightGreen    = IM_COL32(18, 140, 40, 255);
-	static constexpr uint32_t NiceBlue       = IM_COL32(83, 232, 254, 255);
+	inline constexpr std::uint32_t White          = IM_COL32(255, 255, 255, 255);
+	inline constexpr std::uint32_t Black          = IM_COL32(0, 0, 0, 255);
+	inline constexpr std::uint32_t Gray           = IM_COL32(128, 128, 128, 255);
+	inline constexpr std::uint32_t LightGray      = IM_COL32(165, 165, 165, 255);
+	inline constexpr std::uint32_t LighterGray    = IM_COL32(190, 190, 190, 255);
+	inline constexpr std::uint32_t Red            = IM_COL32(255, 0, 0, 255);
+	inline constexpr std::uint32_t Green          = IM_COL32(0, 255, 0, 255);
+	inline constexpr std::uint32_t Blue           = IM_COL32(0, 0, 255, 255);
+	inline constexpr std::uint32_t Cyan           = IM_COL32(0, 255, 255, 255);
+	inline constexpr std::uint32_t Magenta        = IM_COL32(255, 0, 255, 255);
+	inline constexpr std::uint32_t Yellow         = IM_COL32(255, 255, 0, 255);
+	inline constexpr std::uint32_t Orange         = IM_COL32(255, 165, 0, 255);
+	inline constexpr std::uint32_t Purple         = IM_COL32(128, 0, 128, 255);
+	inline constexpr std::uint32_t Pink           = IM_COL32(255, 192, 203, 255);
+	inline constexpr std::uint32_t Brown          = IM_COL32(165, 42, 42, 255);
+	inline constexpr std::uint32_t DarkRed        = IM_COL32(139, 0, 0, 255);
+	inline constexpr std::uint32_t DarkGreen      = IM_COL32(0, 100, 0, 255);
+	inline constexpr std::uint32_t DarkBlue       = IM_COL32(0, 0, 139, 255);
+	inline constexpr std::uint32_t DarkCyan       = IM_COL32(0, 139, 139, 255);
+	inline constexpr std::uint32_t DarkMagenta    = IM_COL32(139, 0, 139, 255);
+	inline constexpr std::uint32_t DarkYellow     = IM_COL32(204, 204, 0, 255);
+	inline constexpr std::uint32_t BrightGreen    = IM_COL32(18, 140, 40, 255);
+	inline constexpr std::uint32_t NiceBlue       = IM_COL32(83, 232, 254, 255);
 
-	static constexpr uint32_t Accent         = IM_COL32(236, 158, 36, 255);
-	static constexpr uint32_t Highlight      = IM_COL32(39, 185, 242, 255);
-	static constexpr uint32_t Compliment     = IM_COL32(78, 151, 166, 255);
-	static constexpr uint32_t PropertyField  = IM_COL32(15, 15, 15, 255);
-	static constexpr uint32_t Muted          = IM_COL32(77, 77, 77, 255);
+	inline constexpr std::uint32_t Accent         = IM_COL32(236, 158, 36, 255);
+	inline constexpr std::uint32_t Highlight      = IM_COL32(39, 185, 242, 255);
+	inline constexpr std::uint32_t Compliment     = IM_COL32(78, 151, 166, 255);
+	inline constexpr std::uint32_t PropertyField  = IM_COL32(15, 15, 15, 255);
+	inline constexpr std::uint32_t Muted          = IM_COL32(77, 77, 77, 255);
 
-	static constexpr uint32_t GroupHeader       = IM_COL32(43, 43, 43, 255);
-	static constexpr uint32_t Selection         = IM_COL32(190, 205, 119, 255);
-	static constexpr uint32_t SelectionMuted    = IM_COL32(237, 201, 142, 23);
-	static constexpr uint32_t Background        = IM_COL32(36, 36, 36, 255); 
-	static constexpr uint32_t BackgroundDark    = IM_COL32(26, 26, 26, 255);
-	static constexpr uint32_t BackgroundDarker  = IM_COL32(16, 16, 16, 255);
+	inline constexpr std::uint32_t GroupHeader       = IM_COL32(43, 43, 43, 255);
+	inline constexpr std::uint32_t Selection         = IM_COL32(190, 205, 119, 255);
+	inline constexpr std::uint32_t SelectionMuted    = IM_COL32(237, 201, 142, 23);
+	inline constexpr std::uint32_t Background        = IM_COL32(36, 36, 36, 255); 
+	inline constexpr std::uint32_t BackgroundDark    = IM_COL32(26, 26, 26, 255);
+	inline constexpr std::uint32_t BackgroundDarker  = IM_COL32(16, 16, 16, 255);
 
 	namespace Text 
 	{
-		static constexpr uint32_t Normal   = IM_COL32(190, 190, 190, 255);
-		static constexpr uint32_t Brighter = IM_COL32(204, 204, 204, 255);
-		static constexpr uint32_t Darker   = IM_COL32(128, 128, 128, 255);
-		static constexpr uint32_t Error    = IM_COL32(232, 55, 55, 255);
-		static constexpr uint32_t Disabled = IM_COL32(237, 201, 142, 95);
+		inline constexpr std::uint32_t Normal   = IM_COL32(190, 190, 190, 255);
+		inline constexpr std::uint32_t Brighter = IM_COL32(204, 204, 204, 255);
+		inline constexpr std::uint32_t Darker   = IM_COL32(128, 128, 128, 255);
+		inline constexpr std::uint32_t Error    = IM_COL32(232, 55, 55, 255);
+		inline constexpr std::uint32_t Disabled = IM_COL32(237, 201, 142, 95);
 	}
 
 	namespace Titlebar 		
 	{
-		static constexpr uint32_t Default = IM_COL32(30, 30, 30, 255);
-		static constexpr uint32_t Orange  = IM_COL32(186, 66, 30, 255);
-		static constexpr uint32_t Green   = IM_COL32(22, 84, 29, 255);
-		static constexpr uint32_t Red     = IM_COL32(190, 32, 30, 255);
+		inline constexpr std::uint32_t Default = IM_COL32(30, 30, 30, 255);
+		inline constexpr std::uint32_t Orange  = IM_COL32(186, 66, 30, 255);
+		inline constexpr std::uint32_t Green   = IM_COL32(22, 84, 29, 255);
+		inline constexpr std::uint32_t Red     = IM_COL32(190, 32, 30, 255);
 	}
 
 }

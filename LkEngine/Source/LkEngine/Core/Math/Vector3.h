@@ -27,7 +27,7 @@ namespace LkEngine {
 		template<typename SizeType, typename VectorTypeA, typename VectorTypeB, typename ReturnType>
 		struct Min
 		{
-			FORCEINLINE static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
+			static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
 			{
 				static_assert((sizeof(VectorTypeA) > 0) && (sizeof(VectorTypeB) > 0), "Unsupported vector type");
 				return ReturnType();
@@ -43,7 +43,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Min<SizeType, TVector3<SizeType> /*== A*/, TVector3<SizeType> /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
 			{
 				return TVector3<SizeType>(std::min(A.X, B.X), 
 										  std::min(A.Y, B.Y), 
@@ -60,7 +60,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Min<SizeType, TVector3<SizeType> /*== A*/, glm::vec3 /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
 			{
 				return TVector3<SizeType>(std::min(A.X, B.x), 
 										  std::min(A.Y, B.y), 
@@ -77,7 +77,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Min<SizeType, TVector3<SizeType> /*== A*/, glm::vec3 /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
+			static SizeType Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
 			{
 				return std::min({
 						A.X, A.Y, A.Z,
@@ -95,7 +95,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Min<SizeType, glm::vec3 /*== A*/, TVector3<SizeType> /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const glm::vec3& A, const TVector3<SizeType>& B) 
+			static TVector3<SizeType> Calculate(const glm::vec3& A, const TVector3<SizeType>& B) 
 			{
 				return TVector3<SizeType>(std::min(A.x, B.X), 
 										  std::min(A.y, B.Y), 
@@ -112,7 +112,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Min<SizeType, glm::vec3 /*== A*/, glm::vec3 /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const glm::vec3& A, const glm::vec3& B) 
+			static TVector3<SizeType> Calculate(const glm::vec3& A, const glm::vec3& B) 
 			{
 				return TVector3<SizeType>(std::min(A.x, B.x), 
 										  std::min(A.y, B.y), 
@@ -127,7 +127,7 @@ namespace LkEngine {
 		template<typename SizeType, typename VectorTypeA, typename VectorTypeB, typename ReturnType>
 		struct Max
 		{
-			FORCEINLINE static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
+			static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
 			{
 				static_assert((sizeof(VectorTypeA) > 0) && (sizeof(VectorTypeB) > 0), "Unsupported vector type");
 				return ReturnType();
@@ -143,7 +143,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Max<SizeType, TVector3<SizeType> /*== A*/, TVector3<SizeType> /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
 			{
 				return TVector3<SizeType>(std::max(A.X, B.X), 
 										  std::max(A.Y, B.Y), 
@@ -160,7 +160,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Max<SizeType, TVector3<SizeType> /*== A*/, glm::vec3 /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, glm::vec3& B)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, glm::vec3& B)
 			{
 				return TVector3<SizeType>(
 					std::max(A.X, B.x),
@@ -179,7 +179,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Max<SizeType, glm::vec3 /*== A*/, TVector3<SizeType> /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
+			static TVector3<SizeType> Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
 			{
 				return TVector3<SizeType>(std::max(A.x, B.X), 
 										  std::max(A.y, B.Y), 
@@ -196,7 +196,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Max<SizeType, glm::vec3 /*== A*/, glm::vec3 /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const glm::vec3& A, const glm::vec3& B)
+			static TVector3<SizeType> Calculate(const glm::vec3& A, const glm::vec3& B)
 			{
 				return TVector3<SizeType>(std::max(A.x, B.x), 
 										  std::max(A.y, B.y),
@@ -215,7 +215,7 @@ namespace LkEngine {
 							std::is_same<ReturnType, VectorTypeA>, 
 							std::is_same<ReturnType, VectorTypeB> 
 						  >, "Dot failed, invalid return type");
-			FORCEINLINE static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
+			static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
 			{
 				static_assert((sizeof(VectorTypeA) > 0) && (sizeof(VectorTypeB) > 0), "Unsupported vector type");
 				return ReturnType();
@@ -230,7 +230,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Dot<SizeType, TVector3<SizeType> /*== A*/, TVector3<SizeType> /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
+			static SizeType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
 			{
 				return (A.X * B.X) + (A.Y * B.Y) + (A.Z * B.Z);
 			}
@@ -244,7 +244,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Dot<SizeType, TVector3<SizeType> /*== A*/, glm::vec3 /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
+			static SizeType Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
 			{
 				return (A.X * B.x) + (A.Y * B.y) + (A.Z * B.z);
 			}
@@ -258,7 +258,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Dot<SizeType, glm::vec3 /*== A*/, TVector3<SizeType> /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
+			static SizeType Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
 			{
 				return (A.x * B.X) + (A.y * B.Y) + (A.z * B.Z);
 			}
@@ -272,7 +272,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Dot<SizeType, glm::vec3 /*== A*/, glm::vec3 /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const glm::vec3& A, const glm::vec3& B)
+			static SizeType Calculate(const glm::vec3& A, const glm::vec3& B)
 			{
 				return (A.x * B.x) + (A.y * B.y) + (A.z * B.z);
 			}
@@ -285,7 +285,7 @@ namespace LkEngine {
 		template<typename SizeType, typename VectorType, typename ReturnType, bool DivisionByZeroGuard>
 		struct Inverse
 		{
-			FORCEINLINE static ReturnType Calculate(const VectorType& Vector)
+			static ReturnType Calculate(const VectorType& Vector)
 			{
 				static_assert((sizeof(VectorType) > 0), "Unsupported vector type");
 				return ReturnType();
@@ -302,7 +302,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Inverse<SizeType, TVector3<SizeType> /*== Target*/, TVector3<SizeType> /*== ReturnType*/, true /*== Safe*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& Vector)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& Vector)
 			{
 				return TVector3<SizeType>(
 					(Vector.X != static_cast<SizeType>(0)) ? (static_cast<SizeType>(1) / Vector.X) : static_cast<SizeType>(0),
@@ -322,7 +322,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Inverse<SizeType, TVector3<SizeType> /*== Target*/, TVector3<SizeType> /*== ReturnType*/, false /*== Safe*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& Vector)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& Vector)
 			{
 				return TVector3<SizeType>(
 					(static_cast<SizeType>(1) / Vector.X),
@@ -338,7 +338,7 @@ namespace LkEngine {
 		template<typename SizeType, typename VectorType, typename ReturnType, bool Safe>
 		struct Normalize
 		{
-			FORCEINLINE static ReturnType Calculate(const VectorType& Vector)
+			static ReturnType Calculate(const VectorType& Vector)
 			{
 				static_assert((sizeof(VectorType) > 0), "Unsupported vector type");
 				return ReturnType();
@@ -354,7 +354,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Normalize<SizeType, TVector3<SizeType> /*== Target*/, TVector3<SizeType> /*== ReturnType*/, false /*== Safe*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& Vector)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& Vector)
 			{
 				const SizeType Magnitude = std::sqrt((Vector.X * Vector.X) + (Vector.Y * Vector.Y) + (Vector.Z * Vector.Z));
 				return TVector3<SizeType>(Vector / Magnitude);
@@ -370,7 +370,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Normalize<SizeType, glm::vec3 /*== Target*/, TVector3<SizeType> /*== ReturnType*/, false /*== Safe*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const glm::vec3& Vector)
+			static TVector3<SizeType> Calculate(const glm::vec3& Vector)
 			{
 				const SizeType Magnitude = std::sqrt((Vector.x * Vector.x) + (Vector.y * Vector.y) + (Vector.z * Vector.z));
 				return TVector3<SizeType>(Vector / Magnitude);
@@ -386,7 +386,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Normalize<SizeType, TVector3<SizeType> /*== Target*/, TVector3<SizeType> /*== ReturnType*/, true /*== Safe*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& Vector)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& Vector)
 			{
 				const SizeType Magnitude = std::sqrt((Vector.X * Vector.X) + (Vector.Y * Vector.Y) + (Vector.Z * Vector.Z));
 				if (Magnitude > static_cast<SizeType>(0))
@@ -407,7 +407,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Normalize<SizeType, glm::vec3 /*== Target*/, TVector3<SizeType> /*== ReturnType*/, true /*== Safe*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const glm::vec3& Vector)
+			static TVector3<SizeType> Calculate(const glm::vec3& Vector)
 			{
 				const SizeType Magnitude = std::sqrt((Vector.x * Vector.x) + (Vector.y * Vector.y) + (Vector.z * Vector.z));
 				if (Magnitude > static_cast<SizeType>(0))
@@ -426,7 +426,7 @@ namespace LkEngine {
 		template<typename SizeType, typename VectorTypeA, typename VectorTypeB, typename ReturnType = TVector3<SizeType>>
 		struct Cross
 		{
-			FORCEINLINE static ReturnType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
+			static ReturnType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
 			{
 				static_assert((sizeof(VectorTypeA) > 0) && (sizeof(VectorTypeB) > 0), "Unsupported vector type");
 				return ReturnType();
@@ -441,7 +441,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Cross<SizeType, TVector3<SizeType> /*== A*/, TVector3<SizeType> /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
 			{
 				return TVector3<SizeType>((A.Y * B.Z - A.Z * B.Y),  /* X */ 
 										  (A.Z * B.X - A.X * B.Z),  /* Y */ 
@@ -457,7 +457,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Cross<SizeType, TVector3<SizeType> /*== A*/, glm::vec3 /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
+			static TVector3<SizeType> Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
 			{
 				return TVector3<SizeType>(
 					(A.Y * B.z - A.Z * B.y), /* X */
@@ -475,7 +475,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Cross<SizeType, glm::vec3 /*== A*/, TVector3<SizeType> /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
+			static TVector3<SizeType> Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
 			{
 				return TVector3<SizeType>(
 					(A.y * B.Z - A.z * B.Y), /* X */
@@ -493,7 +493,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Cross<SizeType, glm::vec3 /*== A*/, glm::vec3 /*== B*/, TVector3<SizeType> /*== ReturnType*/>
 		{
-			FORCEINLINE static TVector3<SizeType> Calculate(const glm::vec3& A, const glm::vec3& B)
+			static TVector3<SizeType> Calculate(const glm::vec3& A, const glm::vec3& B)
 			{
 				return TVector3<SizeType>((A.y * B.z - A.z * B.y),  /* X */
 										  (A.z * B.x - A.x * B.z),  /* Y */
@@ -508,8 +508,7 @@ namespace LkEngine {
 		template<typename SizeType, typename VectorTypeA, typename VectorTypeB, typename ReturnType = SizeType>
 		struct Distance
 		{
-			//FORCEINLINE static ReturnType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
-			FORCEINLINE static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
+			static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
 			{
 				static_assert((sizeof(VectorTypeA) > 0) && (sizeof(VectorTypeB) > 0), "Unsupported vector type");
 				return ReturnType();
@@ -524,7 +523,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Distance<SizeType, TVector3<SizeType> /*== A*/, TVector3<SizeType> /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
+			static SizeType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
 			{
 				const float DX = B.X - A.X;
 				const float DY = B.Y - A.Y;
@@ -541,7 +540,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Distance<SizeType, TVector3<SizeType> /*== A*/, glm::vec3 /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
+			static SizeType Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
 			{
 				const float DX = B.x - A.X;
 				const float DY = B.y - A.Y;
@@ -558,7 +557,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Distance<SizeType, glm::vec3 /*== A*/, TVector3<SizeType> /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
+			static SizeType Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
 			{
 				const float DX = B.X - A.x;
 				const float DY = B.Y - A.y;
@@ -575,7 +574,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct Distance<SizeType, glm::vec3 /*== A*/, glm::vec3 /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const glm::vec3& A, const glm::vec3& B)
+			static SizeType Calculate(const glm::vec3& A, const glm::vec3& B)
 			{
 				const float DX = B.x - A.x;
 				const float DY = B.y - A.y;
@@ -591,7 +590,7 @@ namespace LkEngine {
 		template<typename SizeType, typename VectorTypeA, typename VectorTypeB, typename ReturnType = SizeType>
 		struct DistanceSquared
 		{
-			FORCEINLINE static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
+			static ReturnType Calculate(const VectorTypeA& A, const VectorTypeB& B)
 			{
 				static_assert((sizeof(VectorTypeA) > 0) && (sizeof(VectorTypeB) > 0), "Unsupported vector type");
 				return ReturnType();
@@ -606,7 +605,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct DistanceSquared<SizeType, TVector3<SizeType> /*== A*/, TVector3<SizeType> /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
+			static SizeType Calculate(const TVector3<SizeType>& A, const TVector3<SizeType>& B)
 			{
 				const float DX = B.X - A.X;
 				const float DY = B.Y - A.Y;
@@ -623,7 +622,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct DistanceSquared<SizeType, TVector3<SizeType> /*== A*/, glm::vec3 /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
+			static SizeType Calculate(const TVector3<SizeType>& A, const glm::vec3& B)
 			{
 				const float DX = B.x - A.X;
 				const float DY = B.y - A.Y;
@@ -640,7 +639,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct DistanceSquared<SizeType, glm::vec3 /*== A*/, TVector3<SizeType> /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
+			static SizeType Calculate(const glm::vec3& A, const TVector3<SizeType>& B)
 			{
 				const float DX = B.X - A.x;
 				const float DY = B.Y - A.y;
@@ -657,7 +656,7 @@ namespace LkEngine {
 		template<typename SizeType>
 		struct DistanceSquared<SizeType, glm::vec3 /*== A*/, glm::vec3 /*== B*/, SizeType /*== ReturnType*/>
 		{
-			FORCEINLINE static SizeType Calculate(const glm::vec3& A, const glm::vec3& B)
+			static SizeType Calculate(const glm::vec3& A, const glm::vec3& B)
 			{
 				const float DX = B.x - A.x;
 				const float DY = B.y - A.y;
@@ -889,7 +888,7 @@ namespace LkEngine {
 			return Math::Internal::Vector3Impl::Cross<SizeType, VectorTypeA, VectorTypeB, ReturnType>::Calculate(A, B);
 		}
 
-		FORCEINLINE void Normalize()
+		void Normalize()
 		{
 			const SizeType Magnitude = std::sqrt((X * X) + (Y * Y) + (Z * Z));
 			X /= Magnitude;
@@ -897,7 +896,7 @@ namespace LkEngine {
 			Z /= Magnitude;
 		}
 
-		FORCEINLINE void NormalizeSafe()
+		void NormalizeSafe()
 		{
 			const SizeType Magnitude = std::sqrt((X * X) + (Y * Y) + (Z * Z));
 			if (Magnitude > static_cast<SizeType>(0))
@@ -950,30 +949,22 @@ namespace LkEngine {
 			return Math::Internal::Vector3Impl::Inverse<SizeType, VectorType, VectorType, true>::Calculate(Vector);
 		}
 
-		FORCEINLINE std::string ToString() const
+		std::string ToString() const
 		{
 			return LK_FMT_LIB::format("({:.2f}, {:.2f}, {:.2f})", X, Y, Z);
 		}
 
-		FORCEINLINE friend std::ostream& operator<<(std::ostream& os, const TVector3& Vector) 
+		friend std::ostream& operator<<(std::ostream& os, const TVector3& Vector) 
 		{
 			os << *Vector.ToString();
 			return os;
 		}
 
-	#if 0
-		template<typename VectorType>
-		VectorType As() const
-		{
-			return VectorType(X, Y, Z);
-		}
-	#else
 		template<typename VectorType, typename = std::enable_if_t<std::is_same_v<VectorType, glm::vec3>>>
 		VectorType As() const
 		{
 			return glm::vec3(X, Y, Z);
 		}
-	#endif
 
 		static_assert(std::disjunction_v<
 			std::is_same<SizeType, int>, 
@@ -1001,15 +992,6 @@ namespace LkEngine {
 		union { SizeType Z, B, P; };
 	#endif
 	};
-
-#if 0
-	template<typename SizeType>
-	template<>
-	inline glm::vec3 TVector3<SizeType>::As<glm::vec3>() const
-	{
-		return glm::vec3(X, Y, Z);
-	}
-#endif
 
 	/** @} */
 

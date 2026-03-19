@@ -60,7 +60,7 @@ namespace LkEngine {
 
 	namespace Enum
 	{
-		FORCEINLINE static constexpr const char* ToString(const EMouseButton MouseButton)
+		FORCEINLINE constexpr const char* ToString(const EMouseButton MouseButton)
 		{
 			switch (MouseButton)
 			{
@@ -72,12 +72,10 @@ namespace LkEngine {
 				case EMouseButton::Button5: return "Button5";
 				case EMouseButton::None:    return "None";
 			}
-
-			assert(false);
 			return nullptr;
 		}
 
-		FORCEINLINE static constexpr const char* ToString(const ECursorMode CursorMode)
+		FORCEINLINE constexpr const char* ToString(const ECursorMode CursorMode)
 		{
 			switch (CursorMode)
 			{
@@ -85,12 +83,10 @@ namespace LkEngine {
 				case ECursorMode::Hidden: return "Hidden";
 				case ECursorMode::Locked: return "Locked";
 			}
-
-			assert(false);
 			return nullptr;
 		}
 
-		FORCEINLINE static constexpr const char* ToString(const EMouseScrollDirection ScrollDirection)
+		FORCEINLINE constexpr const char* ToString(const EMouseScrollDirection ScrollDirection)
 		{
 			switch (ScrollDirection)
 			{
@@ -98,8 +94,6 @@ namespace LkEngine {
 				case EMouseScrollDirection::Down: return "Down";
 				case EMouseScrollDirection::None: return "None";
 			}
-
-			assert(false);
 			return nullptr;
 		}
 	}

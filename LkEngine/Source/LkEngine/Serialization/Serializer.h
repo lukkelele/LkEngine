@@ -22,15 +22,13 @@ namespace LkEngine {
 
 	namespace Enum 
 	{
-		FORCEINLINE static constexpr const char* ToString(const ESerializeFormat Format)
+		constexpr const char* ToString(const ESerializeFormat Format)
 		{
 			switch (Format)
 			{
 				case ESerializeFormat::None: return "None";
 				case ESerializeFormat::Yaml: return "Yaml";
 			}
-
-			LK_CORE_VERIFY(false);
 			return nullptr;
 		}
 	}

@@ -91,10 +91,10 @@ namespace LkEngine {
 
 		virtual FRendererCapabilities& GetCapabilities() = 0;
 
-		FORCEINLINE static ERendererAPI Get() { return RendererAPI; }
+		static ERendererAPI Get() { return RendererAPI; }
 		static void SetAPI(ERendererAPI InRendererApiType);
 
-		FORCEINLINE static std::string GetName()
+		static std::string GetName()
 		{
 			switch (RendererAPI)
 			{
@@ -113,7 +113,7 @@ namespace LkEngine {
 		inline static ERendererAPI RendererAPI = ERendererAPI::OpenGL;
 
 		friend class LRenderer;
-		friend class LEditor; /// REMOVE
+		friend class LEditor;
 
 	private:
 		LCLASS(LRendererAPI);
@@ -123,15 +123,13 @@ namespace LkEngine {
 
 	namespace Enum
 	{
-		FORCEINLINE static constexpr const char* ToString(const ERenderTopology RenderTopology)
+		constexpr const char* ToString(const ERenderTopology RenderTopology)
 		{
 			switch (RenderTopology)
 			{
 				case ERenderTopology::Lines:     return "Lines";
 				case ERenderTopology::Triangles: return "Triangles";
 			}
-
-			LK_CORE_ASSERT(false);
 			return nullptr;
 		}
 	}

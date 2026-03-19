@@ -26,15 +26,15 @@ namespace LkEngine::Core {
 
 	namespace DelegateCore
 	{
-		static constexpr std::size_t BUFSIZE_NAME = 100;
+		inline constexpr std::size_t BUFSIZE_NAME = 100;
 
 		/**
 		 * Allocation size for the max bound objects on the stack.
 		 * Larger sizes will result in heap allocation instead.
 		 */
-		static constexpr int INLINE_ALLOCATION_SIZE = 48;
+		inline constexpr int INLINE_ALLOCATION_SIZE = 48;
 
-		static void* (*Alloc)(std::size_t Size) = [](std::size_t Size) 
+		static void* (*Alloc)(std::size_t Size) = [](std::size_t Size)
 		{ 
 			return std::malloc(Size); 
 		};
@@ -50,11 +50,10 @@ namespace LkEngine::Core {
 		using FAllocateCallback = void*(*)(std::size_t Size);
 		using FFreeCallback = void(*)(void* HeapPointer);
 
-		inline void SetAllocationCallbacks(const FAllocateCallback AllocateCallback, 
-										   const FFreeCallback FreeCallback)
+		inline void SetAllocationCallbacks(const FAllocateCallback Alloc, const FFreeCallback Free)
 		{
-			DelegateCore::Alloc = AllocateCallback;
-			DelegateCore::Free = FreeCallback;
+			DelegateCore::Alloc = Alloc;
+			DelegateCore::Free = Free;
 		}
 	}
 
@@ -115,7 +114,7 @@ namespace LkEngine::Core {
 		{
 		}
 
-		FORCEINLINE virtual TReturnValue Execute(TArgs&&... Args) override
+		virtual TReturnValue Execute(TArgs&&... Args) override
 		{
 			return Execute_Internal(std::forward<TArgs>(Args)..., std::index_sequence_for<Args2...>());
 		}
@@ -127,7 +126,7 @@ namespace LkEngine::Core {
 
 	private:
 		template<std::size_t... Is>
-		FORCEINLINE TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
+		TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
 		{
 			return Function(std::forward<TArgs>(Args)..., std::get<Is>(Payload)...);
 		}
@@ -172,12 +171,12 @@ namespace LkEngine::Core {
 			LK_CORE_ASSERT(InFunction, "Passed function is invalid");
 		}
 
-		FORCEINLINE virtual TReturnValue Execute(TArgs&&... Args) override
+		virtual TReturnValue Execute(TArgs&&... Args) override
 		{
 			return Execute_Internal(std::forward<TArgs>(Args)..., std::index_sequence_for<Args2...>());
 		}
 
-		FORCEINLINE virtual const void* GetOwner() const override
+		virtual const void* GetOwner() const override
 		{
 			return ObjectRef;
 		}
@@ -189,7 +188,7 @@ namespace LkEngine::Core {
 
 	private:
 		template<std::size_t... Is>
-		FORCEINLINE TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
+		TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
 		{
 			return (ObjectRef->*Function)(std::forward<TArgs>(Args)..., std::get<Is>(Payload)...);
 		}
@@ -227,19 +226,19 @@ namespace LkEngine::Core {
 		{
 		}
 
-		FORCEINLINE TReturnValue Execute(TArgs&&... Args) override
+		TReturnValue Execute(TArgs&&... Args) override
 		{
 			return Execute_Internal(std::forward<TArgs>(Args)..., std::index_sequence_for<Args2...>());
 		}
 
-		FORCEINLINE virtual void Clone(void* Destination) override
+		virtual void Clone(void* Destination) override
 		{
 			new (Destination) LLambdaDelegate(Lambda, Payload);
 		}
 
 	private:
 		template<std::size_t... Is>
-		FORCEINLINE TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
+		TReturnValue Execute_Internal(TArgs&&... Args, std::index_sequence<Is...>)
 		{
 			return (TReturnValue)((Lambda)(std::forward<TArgs>(Args)..., std::get<Is>(Payload)...));
 		}
@@ -281,17 +280,17 @@ namespace LkEngine::Core {
 		{
 		}
 
-		FORCEINLINE virtual TReturnValue Execute(TArgs&&... Args) override
+		virtual TReturnValue Execute(TArgs&&... Args) override
 		{
 			return Execute_Internal(std::forward<TArgs>(Args)..., std::index_sequence_for<Args2...>());
 		}
 
-		FORCEINLINE virtual const void* GetOwner() const override
+		virtual const void* GetOwner() const override
 		{
 			return (ObjectRef.expired() ? nullptr : ObjectRef.lock().get());
 		}
 
-		FORCEINLINE virtual void Clone(void* Destination) override
+		virtual void Clone(void* Destination) override
 		{
 			new (Destination) LSharedPtrDelegate(ObjectRef, Function, Payload);
 		}
@@ -355,42 +354,42 @@ namespace LkEngine::Core {
 			return *this;
 		}
 
-		FORCEINLINE operator bool() const noexcept
+		operator bool() const noexcept
 		{
 			return IsValid();
 		}
 
-		FORCEINLINE bool operator==(const FDelegateHandle& Other) const noexcept
+		bool operator==(const FDelegateHandle& Other) const noexcept
 		{
 			return (ID == Other.ID);
 		}
 
-		FORCEINLINE bool operator<(const FDelegateHandle& Other) const noexcept
+		bool operator<(const FDelegateHandle& Other) const noexcept
 		{
 			return (ID < Other.ID);
 		}
 
-		FORCEINLINE bool IsValid() const noexcept
+		bool IsValid() const noexcept
 		{
 			return (ID != NullID);
 		}
 
-		FORCEINLINE void Reset() noexcept
+		void Reset() noexcept
 		{
 			ID = NullID;
 		}
 
-		inline static constexpr unsigned int NullID = std::numeric_limits<unsigned int>::max();
+		static constexpr std::uint32_t NullID = std::numeric_limits<std::uint32_t>::max();
 
 	private:
-		unsigned int ID = 0;
+		std::uint32_t ID = 0;
 
 		/** Count of the created and assigned ID's. */
-		inline static unsigned int IDCounter = 0;
+		inline static std::uint32_t IDCounter = 0;
 
-		FORCEINLINE static int GetNewID()
+		static int GetNewID()
 		{
-			const unsigned int Output = FDelegateHandle::IDCounter++;
+			const std::uint32_t Output = FDelegateHandle::IDCounter++;
 			if (FDelegateHandle::IDCounter == NullID)
 			{
 				FDelegateHandle::IDCounter = 0;
@@ -487,7 +486,7 @@ namespace LkEngine::Core {
 		 *  Allocate memory of given size, will create on the heap if the size
 		 *  is larger than the max allowed stack size.
 		 */
-		FORCEINLINE void* Allocate(const size_t InSize)
+		void* Allocate(const size_t InSize)
 		{
 			if (Size != InSize)
 			{
@@ -509,7 +508,7 @@ namespace LkEngine::Core {
 		 *
 		 *  Release heap memory if any has been assigned.
 		 */
-		FORCEINLINE void Free()
+		void Free()
 		{
 			if (Size > MaxStackSize)
 			{
@@ -524,7 +523,7 @@ namespace LkEngine::Core {
 		 *
 		 *  Return the allocated memory, regardless if on the heap or not. 
 		 */
-		FORCEINLINE void* GetAllocation() const
+		void* GetAllocation() const
 		{
 			if (HasAllocation())
 			{
@@ -536,14 +535,14 @@ namespace LkEngine::Core {
 			}
 		}
 
-		FORCEINLINE size_t GetSize() const { return Size; }
+		size_t GetSize() const { return Size; }
 
-		FORCEINLINE bool HasAllocation() const
+		bool HasAllocation() const
 		{
 			return (Size > 0);
 		}
 
-		FORCEINLINE bool HasHeapAllocation() const
+		bool HasHeapAllocation() const
 		{
 			return (Size > MaxStackSize);
 		}
@@ -594,7 +593,7 @@ namespace LkEngine::Core {
 		/**
 		 * @brief Check if the delegate is bound.
 		 */
-		FORCEINLINE bool IsBound() const
+		bool IsBound() const
 		{
 			return Allocator.HasAllocation();
 		}
@@ -620,17 +619,17 @@ namespace LkEngine::Core {
 			return *this;
 		}
 
-		FORCEINLINE const void* GetOwner() const
+		const void* GetOwner() const
 		{
 			return (Allocator.HasAllocation() ? GetDelegate()->GetOwner() : nullptr);
 		}
 
-		FORCEINLINE size_t GetSize() const
+		size_t GetSize() const
 		{
 			return Allocator.GetSize();
 		}
 
-		FORCEINLINE void ClearIfBoundTo(void* InObject)
+		void ClearIfBoundTo(void* InObject)
 		{
 			if (InObject && IsBoundTo(InObject))
 			{
@@ -638,12 +637,12 @@ namespace LkEngine::Core {
 			}
 		}
 
-		FORCEINLINE void Clear()
+		void Clear()
 		{
 			Release();
 		}
 
-		FORCEINLINE bool IsBoundTo(void* InObject) const
+		bool IsBoundTo(void* InObject) const
 		{
 			if (!InObject || !Allocator.HasAllocation())
 			{
@@ -654,7 +653,7 @@ namespace LkEngine::Core {
 		}
 
 	protected:
-		FORCEINLINE void Release()
+		void Release()
 		{
 			if (Allocator.HasAllocation())
 			{
@@ -699,7 +698,7 @@ namespace LkEngine::Core {
 		 *
 		 *  Direct execution of the delegate, will cause crash if not properly bound.
 		 */
-		[[nodiscard]] FORCEINLINE TReturnValue Execute(TArgs... Args) const
+		[[nodiscard]] TReturnValue Execute(TArgs... Args) const
 		{
 			LK_CORE_VERIFY(Allocator.HasAllocation(), "Delegate '{}' is not bound", typeid(this).name());
 			return ((TDelegateInterface*)GetDelegate())->Execute(std::forward<TArgs>(Args)...);
@@ -711,7 +710,7 @@ namespace LkEngine::Core {
 		 *  Attempt to execute the delegate if it bound, otherwise ignore.
 		 *  A safe way to execute.
 		 */
-		[[nodiscard]] FORCEINLINE TReturnValue ExecuteIfBound(TArgs... Args) const
+		[[nodiscard]] TReturnValue ExecuteIfBound(TArgs... Args) const
 		{
 			if (IsBound())
 			{
@@ -841,7 +840,7 @@ namespace LkEngine::Core {
 
 	private:
 		template<typename T, typename... TBindArgs>
-		FORCEINLINE void Bind_Internal(TBindArgs&&... Args)
+		void Bind_Internal(TBindArgs&&... Args)
 		{
 			Release();
 			void* AllocPointer = Allocator.Allocate(sizeof(T));
@@ -859,7 +858,7 @@ namespace LkEngine::Core {
 	#endif
 		friend class LMulticastDelegate;
 
-		inline static constexpr TStringLiteral StaticName = DelegateName;
+		static constexpr TStringLiteral StaticName = DelegateName;
 	};
 
 
@@ -905,7 +904,7 @@ namespace LkEngine::Core {
 		 *
 		 *  Invoke all bound callbacks.
 		 */
-		FORCEINLINE void Broadcast(TArgs... Args)
+		void Broadcast(TArgs... Args)
 		{
 			Lock();
 			{
@@ -925,7 +924,7 @@ namespace LkEngine::Core {
 		 *
 		 *  Remove a bound delegate.
 		 */
-		FORCEINLINE bool Remove(FDelegateHandle& Handle)
+		bool Remove(FDelegateHandle& Handle)
 		{
 			if (Handle.IsValid())
 			{
@@ -957,7 +956,7 @@ namespace LkEngine::Core {
 		 *
 		 *  Clear all bound callbacks.
 		 */
-		FORCEINLINE void RemoveAll()
+		void RemoveAll()
 		{
 			if (IsLocked())
 			{
@@ -977,11 +976,11 @@ namespace LkEngine::Core {
 		 * 
 		 *  Return the count of bound callbacks.
 		 */
-		FORCEINLINE size_t GetSize() const { return Dispatchers.size(); }
+		size_t GetSize() const { return Dispatchers.size(); }
 
-		FORCEINLINE std::string_view GetName() const { return typeid(decltype(this)).name(); }
+		std::string_view GetName() const { return typeid(decltype(this)).name(); }
 
-		FORCEINLINE std::string ToString() const
+		std::string ToString() const
 		{
 			#if 0
 			return LK_FMT_LIB::format("\n[Multicast Delegate]\n" 
@@ -1065,7 +1064,7 @@ namespace LkEngine::Core {
 			return Remove(InHandle);
 		}
 
-		FORCEINLINE FDelegateHandle AddHandler(TDelegate&& Handler) noexcept
+		FDelegateHandle AddHandler(TDelegate&& Handler) noexcept
 		{
 			for (size_t i = 0; i < Dispatchers.size(); ++i)
 			{
@@ -1087,7 +1086,7 @@ namespace LkEngine::Core {
 		 *
 		 *  Removes all handles that are bound on an object
 		 */
-		FORCEINLINE void RemoveObject(void* InObjectRef)
+		void RemoveObject(void* InObjectRef)
 		{
 			if (InObjectRef)
 			{
@@ -1109,7 +1108,7 @@ namespace LkEngine::Core {
 			}
 		}
 
-		FORCEINLINE bool IsBoundTo(const FDelegateHandle& Handle) const
+		bool IsBoundTo(const FDelegateHandle& Handle) const
 		{
 			if (Handle.IsValid())
 			{
@@ -1125,7 +1124,7 @@ namespace LkEngine::Core {
 			return false;
 		}
 
-		FORCEINLINE void Compress(const size_t MaxSpace = 0)
+		void Compress(const size_t MaxSpace = 0)
 		{
 			if (IsLocked() == false)
 			{
@@ -1147,12 +1146,12 @@ namespace LkEngine::Core {
 		}
 
 	private:
-		FORCEINLINE void Lock()
+		void Lock()
 		{
 			Locks++;
 		}
 
-		FORCEINLINE void Unlock()
+		void Unlock()
 		{
 			LK_CORE_ASSERT(Locks > 0, "Cannot unlock, locks is {}", Locks);
 			Locks--;
@@ -1163,7 +1162,7 @@ namespace LkEngine::Core {
 		 *
 		 *  Is true whenever we are broadcasting.
 		 */
-		FORCEINLINE bool IsLocked() const { return (Locks > 0); }
+		bool IsLocked() const { return (Locks > 0); }
 
 		/**
 		 * FDelegateHandlerPair
@@ -1195,6 +1194,6 @@ namespace LkEngine::Core {
 
 	private:
 		std::vector<FDelegateHandlerPair> Dispatchers{};
-		uint32_t Locks = 0;
+		std::uint32_t Locks = 0;
 	};
 }

@@ -16,7 +16,7 @@ namespace LkEngine
 		 * Required for decltype to evaluate correctly.
 		 */
 		template <typename T>
-		static constexpr auto ToStringIfNeeded(T Value)
+		inline constexpr auto ToStringIfNeeded(T Value)
 		{
 			if constexpr (std::is_same_v<T, const char*> || std::is_array_v<T>)
 			{

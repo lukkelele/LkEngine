@@ -60,30 +60,6 @@ namespace LkEngine {
         virtual TObjectPtr<LShader> GetQuadShader() = 0;
         virtual TObjectPtr<LShader> GetLineShader() = 0;
 
-        #if 0
-        virtual FRenderer2DStatistics GetStatistics() = 0;
-        virtual void ResetStatistics() = 0;
-
-        struct Statistics
-        {
-            uint32_t DrawCalls = 0;
-            uint32_t QuadCount = 0;
-            uint32_t QuadVertexArray_RendererID = 0;
-            uint32_t QuadVertexBuffer_RendererID = 0;
-            uint32_t LineCount = 0;
-
-            uint32_t GetTotalVertexCount() const { return QuadCount * 4; }
-            uint32_t GetTotalIndexCount() const { return QuadCount * 6; }
-        };
-
-        inline static constexpr glm::vec2 TextureCoords[] = { 
-            { 0.0f, 0.0f }, // Bottom Left 
-            { 0.0f, 1.0f }, // Top Left
-            { 1.0f, 1.0f }, // Top Right
-            { 1.0f, 0.0f }  // Bottom Right
-        };
-        #endif
-        
     protected:
         virtual void StartBatch() = 0;
         virtual void NextBatch() = 0;

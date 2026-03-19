@@ -2,7 +2,6 @@
 
 #include "LkEngine/Core/Core.h"
 
-
 namespace LkEngine {
 
 	/**
@@ -26,7 +25,7 @@ namespace LkEngine {
 
 	namespace Enum
 	{
-		inline static const char* ToString(const EShaderDataType ShaderDataType)
+		inline const char* ToString(const EShaderDataType ShaderDataType)
 		{
 			switch (ShaderDataType)
 			{
@@ -43,7 +42,6 @@ namespace LkEngine {
 				case EShaderDataType::Mat3:		return "Mat3";
 				case EShaderDataType::Mat4:		return "Mat4";
 			}
-
 			LK_CORE_ASSERT(false, "Enum::ToString(const EShaderDataType) failed with {}", static_cast<int>(ShaderDataType));
 			return nullptr;
 		}
@@ -59,7 +57,7 @@ namespace LkEngine {
 		Color
 	};
 
-	inline static constexpr uint32_t GetShaderDataTypeSize(const EShaderDataType DataType)
+	inline constexpr uint32_t GetShaderDataTypeSize(const EShaderDataType DataType)
 	{
 		switch (DataType)
 		{
@@ -82,8 +80,8 @@ namespace LkEngine {
 	{
 		std::string Name{};
 		EShaderDataType Type;
-		uint32_t Size = 0;
-		size_t Offset = 0;
+		std::uint32_t Size = 0;
+		std::size_t Offset = 0;
 		unsigned char Normalized{};
 		unsigned int Count = 0;
 
@@ -98,7 +96,7 @@ namespace LkEngine {
 		{
 		}
 
-		FORCEINLINE uint32_t GetComponentCount() const
+		std::uint32_t GetComponentCount() const
 		{
 			switch (Type)
 			{
@@ -114,8 +112,7 @@ namespace LkEngine {
 				case EShaderDataType::Int4:    return 4;
 				case EShaderDataType::Bool:    return 1;
 			}
-
-			LK_CORE_ASSERT(false, "GetComponentCount failed");
+			LK_CORE_ASSERT(false, "GetComponentCount failed with type: {}", static_cast<int>(Type));
 			return 0;
 		}
 	};
@@ -130,14 +127,14 @@ namespace LkEngine {
 			CalculateOffsetsAndStride();
 		}
 
-		FORCEINLINE uint32_t GetStride() const { return Stride; }
+		std::uint32_t GetStride() const { return Stride; }
 
-		FORCEINLINE const std::vector<FVertexBufferElement>& GetElements() const 
+		const std::vector<FVertexBufferElement>& GetElements() const 
 		{ 
 			return Elements; 
 		}
 
-		FORCEINLINE uint32_t GetElementCount() const 
+		std::uint32_t GetElementCount() const 
 		{ 
 			return static_cast<uint32_t>(Elements.size()); 
 		}
@@ -147,22 +144,21 @@ namespace LkEngine {
 		[[nodiscard]] std::vector<FVertexBufferElement>::const_iterator begin() const { return Elements.begin(); }
 		[[nodiscard]] std::vector<FVertexBufferElement>::const_iterator end() const { return Elements.end(); }
 
-		FORCEINLINE std::string ToString() const
+		std::string ToString() const
 		{
-			std::string String{};
+			std::string String;
 			for (const FVertexBufferElement& Element : Elements)
 			{
 				String += LK_FMT_LIB::format("{}: {}\n", Element.Name, Enum::ToString(Element.Type));
 			}
-
 			return String;
 		}
 
 	private:
-		FORCEINLINE void CalculateOffsetsAndStride()
+		void CalculateOffsetsAndStride()
 		{
 			Stride = 0;
-			uint32_t Offset = 0;
+			std::uint32_t Offset = 0;
 			for (FVertexBufferElement& Element : Elements)
 			{
 				Element.Offset = Offset;
@@ -172,8 +168,7 @@ namespace LkEngine {
 		}
 
 		std::vector<FVertexBufferElement> Elements{};
-		uint32_t Stride = 0;
+		std::uint32_t Stride = 0;
 	};
-
-
 }
+
